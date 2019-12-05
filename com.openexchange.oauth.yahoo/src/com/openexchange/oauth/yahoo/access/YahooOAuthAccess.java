@@ -75,11 +75,6 @@ public class YahooOAuthAccess extends AbstractOAuthAccess {
         this.accountId = accountId;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.access.OAuthAccess#initialize()
-     */
     @Override
     public void initialize() throws OXException {
         synchronized (this) {
@@ -91,32 +86,17 @@ public class YahooOAuthAccess extends AbstractOAuthAccess {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.access.OAuthAccess#ensureNotExpired()
-     */
     @Override
     public OAuthAccess ensureNotExpired() throws OXException {
         return this;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.access.OAuthAccess#ping()
-     */
     @Override
     public boolean ping() throws OXException {
         YahooClient yc = (YahooClient) getOAuthClient().getClient();
         return yc.ping();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.access.OAuthAccess#getAccountId()
-     */
     @Override
     public int getAccountId() throws OXException {
         return accountId;

@@ -122,7 +122,7 @@ public final class OpenOfficeExtractor {
                     final Element rootElement = doc.getRootElement();
                     processElement(rootElement, textBuilder);
                     return textBuilder.toString();
-                } catch (final JDOMException e) {
+                } catch (JDOMException e) {
                     throw new IOException(e.getMessage(), e);
                 }
             }

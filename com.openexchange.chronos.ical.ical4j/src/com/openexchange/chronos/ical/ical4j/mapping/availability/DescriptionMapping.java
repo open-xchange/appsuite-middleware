@@ -69,31 +69,16 @@ public class DescriptionMapping extends ICalTextMapping<VAvailability, Availabil
         super(Property.DESCRIPTION);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalTextMapping#getValue(java.lang.Object)
-     */
     @Override
     protected String getValue(Availability object) {
         return object.getDescription();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalTextMapping#setValue(java.lang.Object, java.lang.String)
-     */
     @Override
     protected void setValue(Availability object, String value) {
         object.setDescription(value);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalTextMapping#createProperty()
-     */
     @Override
     protected Property createProperty() {
         return new Description();

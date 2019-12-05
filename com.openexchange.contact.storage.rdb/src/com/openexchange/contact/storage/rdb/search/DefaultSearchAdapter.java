@@ -138,7 +138,7 @@ public abstract class DefaultSearchAdapter implements SearchAdapter {
         if (withTable) {
             sb.append(Table.CONTACTS);
         }
-        if(includeObjectUseCount) {
+        if (includeObjectUseCount) {
             insertObjectUseCountClause(sb, forUser);
         }
         return sb.toString();

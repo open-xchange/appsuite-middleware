@@ -113,7 +113,7 @@ public final class Utility {
                 return s;
             }
             return P_MINUS.matcher(P_DOT.matcher(urlCodec.encode(s)).replaceAll("%2E")).replaceAll("%2D");
-        } catch (final EncoderException e) {
+        } catch (EncoderException e) {
             return s;
         }
     }
@@ -134,9 +134,9 @@ public final class Utility {
                 return s;
             }
             return urlCodec.decode(s, cs);
-        } catch (final DecoderException e) {
+        } catch (DecoderException e) {
             return s;
-        } catch (final UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             return s;
         }
     }

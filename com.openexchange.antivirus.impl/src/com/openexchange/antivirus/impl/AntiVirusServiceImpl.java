@@ -120,62 +120,32 @@ public class AntiVirusServiceImpl implements AntiVirusService {
         this.metricHandler = new MetricHandler(services);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.antivirus.AntiVirusService#scan(com.openexchange.ajax.fileholder.IFileHolder.InputStreamClosure, java.lang.String, long)
-     */
     @Override
     public AntiVirusResult scan(InputStreamClosure stream, String uniqueId, long contentLength) throws OXException {
         return performScan(stream, uniqueId, contentLength);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.antivirus.AntiVirusService#scan(com.openexchange.ajax.fileholder.IFileHolder)
-     */
     @Override
     public AntiVirusResult scan(IFileHolder fileHolder, String uniqueId) throws OXException {
         return performScan(() -> fileHolder.getStream(), uniqueId, fileHolder.getLength());
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.antivirus.AntiVirusService#scan(java.io.File)
-     */
     @Override
     public AntiVirusResult scan(File file, String uniqueId, long fileSize) throws OXException {
         return performScan(() -> new FileInputStream(file), uniqueId, fileSize);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.antivirus.AntiVirusService#scan(com.openexchange.antivirus.ManagedFile)
-     */
     @Override
     public AntiVirusResult scan(ManagedFile managedFile, String uniqueId) throws OXException {
         return performScan(() -> managedFile.getInputStream(), uniqueId, managedFile.getSize());
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.antivirus.AntiVirusService#canStream()
-     */
     @Override
     public boolean canStream() {
         LeanConfigurationService leanConfigurationService = services.getService(LeanConfigurationService.class);
         return OperationMode.parse(leanConfigurationService.getProperty(AntiVirusProperty.mode)).equals(OperationMode.STREAMING);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.antivirus.AntiVirusService#isEnabled(com.openexchange.session.Session)
-     */
     @Override
     public boolean isEnabled(Session session) throws OXException {
         ServerSession serverSession = ServerSessionAdapter.valueOf(session);

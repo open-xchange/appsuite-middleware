@@ -78,11 +78,11 @@ import com.openexchange.multifactor.impl.MultifactorAuthenticatorFactoryImpl;
 import com.openexchange.multifactor.impl.MultifactorConfigTreeItem;
 import com.openexchange.multifactor.impl.MultifactorLoginServiceImpl;
 import com.openexchange.multifactor.impl.MultifactorManagementServiceImpl;
+import com.openexchange.multifactor.listener.MultifactorDeleteDeviceListener;
+import com.openexchange.multifactor.listener.MultifactorDeleteListener;
 import com.openexchange.multifactor.listener.MultifactorDispatcherListener;
 import com.openexchange.multifactor.listener.MultifactorListener;
 import com.openexchange.multifactor.listener.MultifactorListenerChain;
-import com.openexchange.multifactor.listener.MultifactorDeleteDeviceListener;
-import com.openexchange.multifactor.listener.MultifactorDeleteListener;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.server.osgi.RegistryCustomizer;
@@ -127,7 +127,7 @@ public class MultifactorActivator extends HousekeepingActivator {
                 if (components[0] != null) {  // Module must not be null
                     String action = "";
                     if (components.length > 1) {  // Specifying action is optional
-                        action = components[1].contains("=") ? components[1].substring(components[1].indexOf("=") + 1) : components[1];
+                        action = components[1].contains("=") ? components[1].substring(components[1].indexOf('=') + 1) : components[1];
                     }
                     listeners.add(new MultifactorDispatcherListener(mfService, components[0].trim(), action.trim()));
                 }

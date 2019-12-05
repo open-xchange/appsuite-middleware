@@ -226,7 +226,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
             for (final ContextConsoleCommonInterface ctxconsole : this.subclasses) {
                 ctxconsole.setAndFillExtension(parser, ctx, auth);
             }
-        } catch (final OXConsolePluginException e) {
+        } catch (OXConsolePluginException e) {
             printError(null, null, "Error while parsing extension options: " + e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
             sysexit(1);
         }
@@ -260,7 +260,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
             for (final ContextConsoleCommonInterface ctxconsole : this.subclasses) {
                 ctxconsole.addExtensionOptions(parser);
             }
-        } catch (final OXConsolePluginException e) {
+        } catch (OXConsolePluginException e) {
             printError(null, null, "Error while adding extension options: " + e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
             sysexit(1);
         }
@@ -529,7 +529,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
             public void callMethod(String value) throws ParseException, InvalidDataException {
                 try {
                     context.setMaxQuota(Long.valueOf(value));
-                } catch (final NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     throw new InvalidDataException("Value in field " + ContextConstants.quota.getString() + " is no integer", e);
                 }
             }
@@ -540,7 +540,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
             public void callMethod(String value) throws ParseException, InvalidDataException {
                 try {
                     context.setWriteDatabase(new Database(Integer.parseInt(value)));
-                } catch (final NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     throw new InvalidDataException("Value in field " + ContextConstants.destination_database_id.getString() + " is no integer", e);
                 }
             }
@@ -551,7 +551,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
             public void callMethod(String value) throws ParseException, InvalidDataException {
                 try {
                     context.setFilestoreId(Integer.valueOf(value));
-                } catch (final NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     throw new InvalidDataException("Value in field " + ContextConstants.destination_store_id.getString() + " is no integer", e);
                 }
             }

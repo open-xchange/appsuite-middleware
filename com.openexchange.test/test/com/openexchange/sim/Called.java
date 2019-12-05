@@ -88,7 +88,7 @@ public class Called implements Expectation {
         String methodName = method.getName();
         assertEquals(getMethodName(), methodName);
 
-        if(args == null) {
+        if (args == null) {
             args = new Object[0];
         }
 
@@ -96,9 +96,9 @@ public class Called implements Expectation {
 
         int index = 0;
         for (Object object : args) {
-            if(int[].class.isInstance(this.args[index])) {
+            if (int[].class.isInstance(this.args[index])) {
                 // We only care for content;
-                if(!int[].class.isInstance(object)) {
+                if (!int[].class.isInstance(object)) {
                     fail("Argument mismatch at "+index);
                 }
                 int[] expected = (int[]) this.args[index++];

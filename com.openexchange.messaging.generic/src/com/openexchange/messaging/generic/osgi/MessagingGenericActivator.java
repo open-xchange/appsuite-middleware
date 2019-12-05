@@ -159,7 +159,7 @@ public class MessagingGenericActivator extends HousekeepingActivator {
                 registerService(SecretMigrator.class, secretHandling);
                 registerService(EncryptedItemCleanUpService.class, secretHandling);
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             org.slf4j.LoggerFactory.getLogger(MessagingGenericActivator.class).error("", e);
             throw e;
         }
@@ -182,7 +182,7 @@ public class MessagingGenericActivator extends HousekeepingActivator {
                 secretService.close();
                 this.secretService = null;
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             org.slf4j.LoggerFactory.getLogger(MessagingGenericActivator.class).error("", e);
             throw e;
         }

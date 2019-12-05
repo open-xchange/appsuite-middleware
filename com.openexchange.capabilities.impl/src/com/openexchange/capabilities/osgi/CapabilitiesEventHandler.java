@@ -41,14 +41,14 @@ public final class CapabilitiesEventHandler implements EventHandler {
                         try {
                             final Cache cache = cacheService.getCache("Capabilities");
                             cache.localRemoveFromGroup(userId, contextId.toString());
-                        } catch (final Exception x) {
+                        } catch (Exception x) {
                             // Ignore
                         }
 
                         try {
                             final Cache cache = cacheService.getCache("CapabilitiesUser");
                             cache.localRemoveFromGroup(userId, contextId.toString());
-                        } catch (final Exception x) {
+                        } catch (Exception x) {
                             // Ignore
                         }
                     }

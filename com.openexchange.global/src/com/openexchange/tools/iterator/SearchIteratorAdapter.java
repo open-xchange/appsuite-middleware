@@ -231,7 +231,7 @@ public class SearchIteratorAdapter<T> implements SearchIterator<T> {
             public boolean hasNext() {
                 try {
                     return iterator.hasNext();
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     LOG.error("", e);
                     return false;
                 }
@@ -241,7 +241,7 @@ public class SearchIteratorAdapter<T> implements SearchIterator<T> {
             public T next() {
                 try {
                     return iterator.next();
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     LOG.error("", e);
                 }
                 return null;

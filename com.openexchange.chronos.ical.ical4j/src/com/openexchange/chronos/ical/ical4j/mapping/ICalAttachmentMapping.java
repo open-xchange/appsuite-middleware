@@ -54,6 +54,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Iterator;
 import java.util.List;
 import com.openexchange.ajax.container.ThresholdFileHolder;
@@ -68,6 +69,7 @@ import net.fortuna.ical4j.model.Parameter;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.PropertyList;
 import net.fortuna.ical4j.model.component.CalendarComponent;
+import net.fortuna.ical4j.model.parameter.Encoding;
 import net.fortuna.ical4j.model.parameter.FmtType;
 import net.fortuna.ical4j.model.parameter.XParameter;
 import net.fortuna.ical4j.model.property.Attach;
@@ -134,7 +136,8 @@ public abstract class ICalAttachmentMapping<T extends CalendarComponent, U> exte
             InputStream inputStream = null;
             try {
                 inputStream = attachment.getData().getStream();
-                property.setBinary(Streams.stream2bytes(inputStream));
+                property.setBinary(Base64.getEncoder().encode(Streams.stream2bytes(inputStream)));
+                property.getParameters().add(Encoding.BASE64);
             } catch (IOException e) {
                 addConversionWarning(warnings, e, Property.ATTACH, e.getMessage());
             } finally {

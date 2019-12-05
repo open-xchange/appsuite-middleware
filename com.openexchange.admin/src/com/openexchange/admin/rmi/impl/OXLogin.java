@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.rmi.impl;
 
+import static com.openexchange.admin.rmi.exceptions.RemoteExceptionUtils.convertException;
 import java.rmi.RemoteException;
 import com.openexchange.admin.plugins.OXUserPluginInterface;
 import com.openexchange.admin.rmi.OXLoginInterface;
@@ -81,48 +82,63 @@ public class OXLogin extends OXCommonImpl implements OXLoginInterface {
 
     @Override
     public void login(final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
-        BasicAuthenticator.createNonPluginAwareAuthenticator().doUserAuthentication(auth, ctx);
-        triggerUpdateProcess(ctx);
+        try {
+            BasicAuthenticator.createNonPluginAwareAuthenticator().doUserAuthentication(auth, ctx);
+            triggerUpdateProcess(ctx);
+        } catch (RuntimeException e) {
+            LOGGER.error("", e);
+            throw convertException(e);
+        }
     }
 
     @Override
     public void login(final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
-        doNullCheck(auth);
-        BasicAuthenticator.createNonPluginAwareAuthenticator().doAuthentication(auth);
+        try {
+            doNullCheck(auth);
+            BasicAuthenticator.createNonPluginAwareAuthenticator().doAuthentication(auth);
+        } catch (RuntimeException e) {
+            LOGGER.error("", e);
+            throw convertException(e);
+        }
     }
 
     @Override
     public User login2User(final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
-        BasicAuthenticator.createNonPluginAwareAuthenticator().doUserAuthentication(auth, ctx);
-
-        triggerUpdateProcess(ctx);
-
-        int user_id;
         try {
-            user_id = tool.getUserIDByUsername(ctx, auth.getLogin());
-        } catch (NoSuchUserException e) {
-            throw new StorageException(e);
-        }
-        tool.isContextAdmin(ctx, user_id);
-        final User retval = new User(user_id);
-        retval.setName(auth.getLogin());
+            BasicAuthenticator.createNonPluginAwareAuthenticator().doUserAuthentication(auth, ctx);
 
-        final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
+            triggerUpdateProcess(ctx);
 
-        User[] retusers = oxu.getData(ctx, new User[] { retval });
+            int user_id;
+            try {
+                user_id = tool.getUserIDByUsername(ctx, auth.getLogin());
+            } catch (NoSuchUserException e) {
+                throw new StorageException(e);
+            }
+            tool.isContextAdmin(ctx, user_id);
+            final User retval = new User(user_id);
+            retval.setName(auth.getLogin());
 
-        // Trigger plugin extensions
-        {
-            final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
-            if (null != pluginInterfaces) {
-                for (final OXUserPluginInterface oxuserplugin : pluginInterfaces.getUserPlugins().getServiceList()) {
-                    LOGGER.debug("Calling getData for plugin: {}", oxuserplugin.getClass().getName());
-                    retusers = oxuserplugin.getData(ctx, retusers, auth);
+            final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
+
+            User[] retusers = oxu.getData(ctx, new User[] { retval });
+
+            // Trigger plugin extensions
+            {
+                final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+                if (null != pluginInterfaces) {
+                    for (final OXUserPluginInterface oxuserplugin : pluginInterfaces.getUserPlugins().getServiceList()) {
+                        LOGGER.debug("Calling getData for plugin: {}", oxuserplugin.getClass().getName());
+                        retusers = oxuserplugin.getData(ctx, retusers, auth);
+                    }
                 }
             }
-        }
 
-        return retusers[0];
+            return retusers[0];
+        } catch (RuntimeException e) {
+            LOGGER.error("", e);
+            throw convertException(e);
+        }
     }
 
     private void triggerUpdateProcess(Context ctx) throws DatabaseUpdateException {

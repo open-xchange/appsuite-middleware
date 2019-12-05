@@ -53,7 +53,6 @@ import static com.openexchange.java.Autoboxing.B;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
@@ -63,6 +62,7 @@ import com.openexchange.groupware.settings.impl.AbstractUserFuncs;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.user.User;
 
 /**
  * {@link BetaFeatures} - Configuration tree entry to enabled/disable beta features for a certain user.

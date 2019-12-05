@@ -104,7 +104,7 @@ public final class MimeDateMessagingHeader implements DateMessagingHeader {
             try {
                 final Date parsedDate = mdf.parse(formattedDate);
                 time = parsedDate.getTime();
-            } catch (final ParseException e) {
+            } catch (ParseException e) {
                 throw MessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
         }

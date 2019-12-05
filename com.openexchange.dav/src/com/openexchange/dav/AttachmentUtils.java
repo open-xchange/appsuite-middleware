@@ -49,12 +49,16 @@
 
 package com.openexchange.dav;
 
+import static com.openexchange.dav.DAVTools.getExternalPath;
+import static com.openexchange.dav.DAVTools.removePathPrefixFromPath;
+import static com.openexchange.dav.DAVTools.removePrefixFromPath;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.http.client.utils.URIBuilder;
 import com.google.common.io.BaseEncoding;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dav.resources.FolderCollection;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
@@ -83,7 +87,6 @@ import com.openexchange.webdav.protocol.WebdavProtocolException;
  * @since v7.8.1
  */
 public class AttachmentUtils {
-
     private static final AttachmentMetadataFactory FACTORY = new AttachmentMetadataFactory();
 
     /**
@@ -149,13 +152,18 @@ public class AttachmentUtils {
      *
      * @param hostData The host data to use for generating the link
      * @param metadata The attachment metadata to build the URI for
+     * @param configViewFactory The configuration view
      * @return The URI
+     * @throws URISyntaxException 
      */
-    public static URI buildURI(HostData hostData, AttachmentMetadata metadata) throws URISyntaxException {
+    public static URI buildURI(HostData hostData, AttachmentMetadata metadata, ConfigViewFactory configViewFactory) throws URISyntaxException {
         return new URI(new URIBuilder()
             .setScheme(hostData.isSecure() ? "https" : "http")
             .setHost(hostData.getHost())
-            .setPath(new StringBuilder("/attachments/").append(encodeName(metadata)).append('/').append(metadata.getFilename()).toString())
+            .setPath(new StringBuilder(getExternalPath(configViewFactory, "/attachments/"))
+                .append(encodeName(metadata))
+                .append('/')
+                .append(metadata.getFilename()).toString())
         .toString());
     }
 
@@ -163,23 +171,40 @@ public class AttachmentUtils {
      * Decodes attachment metadata from the given URI.
      *
      * @param uri The URI to decode
+     * @param configViewFactory The configuration view
      * @return The decoded attachment metadata
+     * @throws IllegalArgumentException If path isn't valid
      */
-    public static AttachmentMetadata decodeURI(URI uri) throws IllegalArgumentException {
-        String path = uri.getPath();
-        if (Strings.isEmpty(path)) {
+    public static AttachmentMetadata decodeURI(URI uri, ConfigViewFactory configViewFactory) throws IllegalArgumentException {
+        String name;
+        {
+            /*
+             * Get URI and remove servlet prefix
+             */
+            String path = null == uri ? null : uri.getPath();
+            if (Strings.isEmpty(path)) {
+                throw new IllegalArgumentException(String.valueOf(uri));
+            }
+            path = removePathPrefixFromPath(configViewFactory, path);
+            name = removePrefixFromPath("/attachments", path);
+            if (path.equals(name)) {
+                /*
+                 * URI does not contain "attachments" sub-path
+                 */
+                throw new IllegalArgumentException(String.valueOf(uri));
+            }
+        }
+        /*
+         * Extract encoded metadata part from path
+         */
+        int begin = name.startsWith("/") ? 1 : 0;
+        int end = name.indexOf('/', begin);
+        name = name.substring(begin, -1 == end ? name.length() : end);
+
+        if (Strings.isEmpty(name)) {
             throw new IllegalArgumentException(String.valueOf(uri));
         }
-        int index = path.indexOf("attachments/");
-        if (-1 == index) {
-            throw new IllegalArgumentException(String.valueOf(uri));
-        }
-        path = path.substring(13);
-        index = path.indexOf('/');
-        if (-1 != index) {
-            path = path.substring(0, index);
-        }
-        return AttachmentUtils.decodeName(path);
+        return AttachmentUtils.decodeName(name);
     }
 
     public static String encodeName(AttachmentMetadata metadata) {
@@ -226,8 +251,9 @@ public class AttachmentUtils {
      * @param attachments The attachment service instance to use for the operation
      * @param collection The parent folder collection
      * @param originalMetadata The metadata of the attachment to copy
-     * @param targetObject The target groupware object for adding the attachment
+     * @param targetObjectID The target groupware object for adding the attachment
      * @return The copied attachment metadata
+     * @throws OXException In case attachment can't be copied
      */
     public static AttachmentMetadata copyAttachment(AttachmentBase attachments, FolderCollection<?> collection, AttachmentMetadata originalMetadata, int targetObjectID) throws OXException {
         DAVFactory factory = collection.getFactory();
@@ -250,11 +276,13 @@ public class AttachmentUtils {
      * @param attachments The attachment service instance to use for the operation
      * @param collection The parent folder collection
      * @param inputStream The attachment data to store
-     * @param targetObject The target groupware object for adding the attachment
+     * @param folderID The folder identifier
+     * @param objectID The attachment identifier
      * @param contentType The content type of the attachment
      * @param fileName The filename of the attachment
      * @param size The indicated size in bytes of the attachment
      * @return The added attachment's metadata
+     * @throws OXException If max upload size is surpassed or adding to attachments fails
      */
     public static AttachmentMetadata addAttachment(AttachmentBase attachments, FolderCollection<?> collection, InputStream inputStream, int folderID, int objectID, String contentType, String fileName, long size) throws OXException {
         long maxSize = AttachmentConfig.getMaxUploadSize();

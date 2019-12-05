@@ -1,0 +1,28 @@
+/share/management?action=getLink:
+  put:
+    operationId: getShareLink
+    tags:
+      - Share/Management
+    summary: Creates or gets a share link.
+    parameters:
+      - $ref: '#/components/parameters/gblQueryParamSession'
+    responses:
+      '200':
+        description: >
+          A JSON object containing data of the (newly created) share link. In
+          case of errors the responsible fields in the response are
+
+          filled (see [Error handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ShareLinkResponse'
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ShareTargetData'
+      description: >-
+        A JSON object containing the share target where the link should be
+        generated for.
+      required: true

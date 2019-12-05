@@ -76,7 +76,7 @@ public class Activator extends HousekeepingActivator {
             track(UserCopyService.class, new RMIUserCopyRegisterer(context));
             openTrackers();
             log.info("Started bundle: com.openexchange.admin.user.copy");
-        } catch (final Exception e) {
+        } catch (Exception e) {
             log.error("Error starting bundle: com.openexchange.admin.user.copy", e);
             throw e;
         }
@@ -89,7 +89,7 @@ public class Activator extends HousekeepingActivator {
             closeTrackers();
             super.stopBundle();
             log.info("Stopped bundle: com.openexchange.admin.user.copy");
-        } catch (final Exception e) {
+        } catch (Exception e) {
             log.error("Error stopping bundle: com.openexchange.admin.user.copy", e);
             throw e;
         }

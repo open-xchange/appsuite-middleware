@@ -5,16 +5,21 @@
       - OAuth
     summary: Deletes an OAuth account.
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: id
-        type: integer
         description: The account identifier.
         required: true
-    responses:
-      200:
-        description: |
-          A JSON object indicating whether the deletion was successful. In case of errors the responsible fields in the response are
-          filled (see [Error handling](#error-handling)).
         schema:
-          $ref: "#/definitions/OAuthAccountDeletionResponse"
+          type: integer
+    responses:
+      '200':
+        description: >
+          A JSON object indicating whether the deletion was successful. In case
+          of errors the responsible fields in the response are
+
+          filled (see [Error handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OAuthAccountDeletionResponse'

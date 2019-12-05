@@ -86,21 +86,11 @@ public class ListSnippetRequest extends AbstractSnippetRequest<ListSnippetRespon
         this.array = array;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
-     */
     @Override
     public Method getMethod() {
         return Method.PUT;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
-     */
     @Override
     public Parameter[] getParameters() throws IOException, JSONException {
         List<Parameter> params = new LinkedList<Parameter>();
@@ -108,21 +98,11 @@ public class ListSnippetRequest extends AbstractSnippetRequest<ListSnippetRespon
         return params.toArray(new Parameter[] {});
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
-     */
     @Override
     public AbstractAJAXParser<? extends ListSnippetResponse> getParser() {
         return new ListSnippetParser(failOnError);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
-     */
     @Override
     public Object getBody() throws IOException, JSONException {
         return array;

@@ -74,6 +74,7 @@ onpointerup
 onpopstate
 onprogress
 onratechange
+onrejectionhandled
 onreset
 onresize
 onscroll
@@ -93,6 +94,7 @@ ontouchend
 ontouchmove
 ontouchstart
 ontransitioned
+onunhandledrejection
 onunload
 onvolumechange
 onwaiting

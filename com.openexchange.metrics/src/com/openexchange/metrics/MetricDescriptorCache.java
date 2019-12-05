@@ -51,6 +51,7 @@ package com.openexchange.metrics;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
 
 /**
  * {@link MetricDescriptorCache}
@@ -61,11 +62,14 @@ import java.util.concurrent.ConcurrentMap;
 public class MetricDescriptorCache {
 
     private final ConcurrentMap<String, MetricDescriptor> metricDescriptors;
-    private MetricService metricService;
+    private final MetricService metricService;
     private final String group;
 
     /**
      * Initialises a new {@link MetricDescriptorCache}.
+     *
+     * @param metricService The instance of the {@link MetricService}
+     * @param group The name of the group for with the metric descriptor cache shall be initialised.
      */
     public MetricDescriptorCache(MetricService metricService, String group) {
         super();
@@ -76,7 +80,7 @@ public class MetricDescriptorCache {
 
     /**
      * Retrieves the metric descriptor for the metric type
-     * 
+     *
      * @param metricType The {@link MetricType}
      * @param name the method name
      * @param description The metric's description
@@ -84,12 +88,26 @@ public class MetricDescriptorCache {
      * @return The {@link MetricDescriptor} for the specified metric
      */
     public MetricDescriptor getMetricDescriptor(MetricType metricType, String name, String description, String unit) {
+        return getMetricDescriptor(metricType, name, description, unit, TimeUnit.SECONDS);
+    }
+
+    /**
+     * Retrieves the metric descriptor for the metric type
+     *
+     * @param metricType The {@link MetricType}
+     * @param name the method name
+     * @param description The metric's description
+     * @param unit The metric's unit
+     * @param rate The rate unit
+     * @return The {@link MetricDescriptor} for the specified metric
+     */
+    public MetricDescriptor getMetricDescriptor(MetricType metricType, String name, String description, String unit, TimeUnit rate) {
         MetricDescriptor metricDescriptor = metricDescriptors.get(name);
         if (metricDescriptor != null) {
             return metricDescriptor;
         }
 
-        metricDescriptor = MetricDescriptor.newBuilder(group, name, metricType).withUnit(unit).withDescription(String.format(description, name)).build();
+        metricDescriptor = MetricDescriptor.newBuilder(group, name, metricType).withUnit(unit).withRate(rate).withDescription(String.format(description, name)).build();
         MetricDescriptor raced = metricDescriptors.putIfAbsent(name, metricDescriptor);
         if (raced == null) {
             return metricDescriptor;
@@ -101,9 +119,13 @@ public class MetricDescriptorCache {
      * Unregisters all metrics and clears the cache
      */
     public void clear() {
+        metricDescriptors.clear();
+        MetricService metricService = this.metricService;
+        if (metricService == null) {
+            return;
+        }
         for (MetricDescriptor metricDescriptor : metricDescriptors.values()) {
             metricService.removeMetric(metricDescriptor);
         }
-        metricDescriptors.clear();
     }
 }

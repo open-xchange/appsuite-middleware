@@ -1,0 +1,42 @@
+/resource?action=update:
+  put:
+    operationId: updateResource
+    tags:
+      - Resources
+    summary: Updates a resource.
+    parameters:
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - in: query
+        name: id
+        description: ID of the resource that shall be updated.
+        required: true
+        schema:
+          type: integer
+      - in: query
+        name: timestamp
+        description: >-
+          Timestamp of the last update of the resource to update. If the
+          resource was modified after the specified timestamp, then the update
+          must fail.
+        required: true
+        schema:
+          type: integer
+          format: int64
+    responses:
+      '200':
+        description: >
+          In case of errors the responsible fields in the response are filled
+          (see [Error handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommonResponse'
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ResourceData'
+      description: >-
+        A JSON object containing the resource data fields to change. Only
+        modified fields are present and the field id is omitted.
+      required: true

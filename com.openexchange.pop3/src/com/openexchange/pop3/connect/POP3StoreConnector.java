@@ -269,7 +269,7 @@ public final class POP3StoreConnector {
             String staticCapabilities;
             try {
                 staticCapabilities = POP3CapabilityCache.getCapability(InetAddress.getByName(IDNA.toASCII(server)), port, pop3Config.isSecure(), pop3ConfProps, pop3Config.getLogin());
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 LOG.warn("Couldn't detect capabilities from POP3 server \"{}\" with login \"{}\" (user={}, context={})", server, pop3Config.getLogin(), I(session.getUserId()), I(session.getContextId()), e);
                 staticCapabilities = POP3CapabilityCache.getDeaultCapabilities();
             }
@@ -427,7 +427,7 @@ public final class POP3StoreConnector {
                     result.setCapabilities(capabilities);
                     responseCodeAware = caps.containsKey("RESP-CODES");
                 }
-            } catch (final AuthenticationFailedException e) {
+            } catch (AuthenticationFailedException e) {
                 if (monitorFailedAuthentication) {
                     /*
                      * Remember failed authentication's credentials (for a short amount of time) to speed-up subsequent connect trials
@@ -467,7 +467,7 @@ public final class POP3StoreConnector {
                     ThreadPools.getThreadPool().submit(task);
                 }
                 throw e;
-            } catch (final MessagingException e) {
+            } catch (MessagingException e) {
                 if (MimeMailException.isSSLHandshakeException(e)) {
                     List<Object> displayArgs = new ArrayList<>(2);
                     displayArgs.add(SSLExceptionCode.extractArgument(e, "fingerprint"));
@@ -539,7 +539,7 @@ public final class POP3StoreConnector {
             result.setPop3Store(pop3Store);
             pop3Store = null;
             return result;
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e, pop3Config, session);
         } finally {
             Streams.close(pop3Store);
@@ -691,7 +691,7 @@ public final class POP3StoreConnector {
         if (tmp != null) {
             try {
                 tmp = new String(s.getBytes(Charsets.forName(charset)), Charsets.ISO_8859_1);
-            } catch (final UnsupportedCharsetException e) {
+            } catch (UnsupportedCharsetException e) {
                 LOG.error("Unsupported encoding in a message detected and monitored", e);
                 mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
             }

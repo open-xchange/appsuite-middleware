@@ -101,7 +101,7 @@ public class SelfProtectionFactory {
          */
         public SelfProtection(LeanConfigurationService leanConfigurationService) {
             super();
-            if(leanConfigurationService == null){
+            if (leanConfigurationService == null){
                 // Log warning and use defaults
                 LOG.warn("Missing LeanConfigurationService. Going to use default values for self protection.");
                 eventLimit = 1000;

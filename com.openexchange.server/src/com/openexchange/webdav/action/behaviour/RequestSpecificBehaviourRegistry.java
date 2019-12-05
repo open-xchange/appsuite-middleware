@@ -67,7 +67,7 @@ public class RequestSpecificBehaviourRegistry {
 	public void add(final Behaviour behaviour) {
 		for(final Class<? extends Object> clazz : behaviour.provides()) {
 			List<Behaviour> behaviours = registry.get(clazz);
-			if(behaviours == null) {
+			if (behaviours == null) {
 				behaviours = new ArrayList<Behaviour>();
 				registry.put(clazz, behaviours);
 			}
@@ -86,11 +86,11 @@ public class RequestSpecificBehaviourRegistry {
 
 	public <T> T get(final WebdavRequest request, final Class<T> clazz) {
 		final List<Behaviour> behaviours = registry.get(clazz);
-		if(behaviours == null) {
+		if (behaviours == null) {
 		    return null;
 		}
 		for(final Behaviour behaviour : behaviours) {
-			if(behaviour.matches(request)) {
+			if (behaviour.matches(request)) {
 				return behaviour.get(clazz);
 			}
 		}
@@ -106,7 +106,7 @@ public class RequestSpecificBehaviourRegistry {
             return Integer.toString(sum);
         }});
 
-		if(LOG.isDebugEnabled()) {
+		if (LOG.isDebugEnabled()) {
 			LOG.debug("Overrides for WebDAV:");
 			for(final Map.Entry<Class<? extends Object>, List<Behaviour>> entry : registry.entrySet()) {
 				for(final Behaviour behaviour : entry.getValue()) {

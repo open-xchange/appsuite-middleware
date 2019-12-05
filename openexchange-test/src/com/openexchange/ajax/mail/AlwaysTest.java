@@ -138,7 +138,7 @@ public class AlwaysTest extends AbstractAJAXSession {
         return retval;
     }
 
-    public FolderObject getIMAPRootFolder() throws OXException, IOException, JSONException, OXException {
+    public FolderObject getIMAPRootFolder() throws OXException, IOException, JSONException {
         final ListResponse listR = getClient().execute(new ListRequest(EnumAPI.OX_OLD, String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID)));
         FolderObject defaultIMAPFolder = null;
         final Iterator<FolderObject> iter = listR.getFolder();

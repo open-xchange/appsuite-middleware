@@ -90,7 +90,7 @@ public class LDAPHostnameProperties {
             } else if (Integer.class.equals(clazz)) {
                 try {
                     return (T) clazz.cast(Integer.valueOf(property));
-                } catch (final NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     throw new ConfigurationException("The value given in the property " + completePropertyName + " is no integer value");
                 }
             } else if (Boolean.class.equals(clazz)) {
@@ -99,7 +99,7 @@ public class LDAPHostnameProperties {
                 try {
                     final Enum valueOf = Enum.valueOf(clazz.asSubclass(Enum.class), property);
                     return (T) valueOf;
-                } catch (final IllegalArgumentException e) {
+                } catch (IllegalArgumentException e) {
                     return null;
                 }
             } else {
@@ -134,7 +134,7 @@ public class LDAPHostnameProperties {
         } else if (Integer.class.equals(clazz)) {
             try {
                 return (T) clazz.cast(Integer.valueOf(property));
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 throw new OXException().setLogMessage("The value given in the property " + completePropertyName + " is no integer value");
             }
         } else if (Boolean.class.equals(clazz)) {
@@ -143,7 +143,7 @@ public class LDAPHostnameProperties {
             try {
                 final Enum valueOf = Enum.valueOf(clazz.asSubclass(Enum.class), property);
                 return (T) valueOf;
-            } catch (final IllegalArgumentException e) {
+            } catch (IllegalArgumentException e) {
                 return null;
             }
         } else {

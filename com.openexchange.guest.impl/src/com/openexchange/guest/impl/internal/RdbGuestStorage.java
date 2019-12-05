@@ -186,7 +186,7 @@ public class RdbGuestStorage extends GuestStorage {
                     throw GuestExceptionCodes.SQL_ERROR.create("Creating guest with mail address '" + mailAddress + "' and group '" + groupId + "' failed, no ID obtained!");
                 }
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw GuestExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(statement);
@@ -220,7 +220,7 @@ public class RdbGuestStorage extends GuestStorage {
                 String sqlStmt = statement.toString(); // Call PreparedStatement.toString() here to avoid race condition with asynchronous logging behavior
                 LOG.error("There have been {} changes for adding guest assignment but there should only be 1. Executed SQL: {}", Long.valueOf(affectedRows), sqlStmt);
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw GuestExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(statement);
@@ -247,7 +247,7 @@ public class RdbGuestStorage extends GuestStorage {
             if (result.next()) {
                 guestId = result.getLong(1);
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw GuestExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(result, statement);
@@ -277,7 +277,7 @@ public class RdbGuestStorage extends GuestStorage {
                 long guestId = result.getLong(1);
                 guestIds.add(L(guestId));
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw GuestExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(result, statement);
@@ -307,7 +307,7 @@ public class RdbGuestStorage extends GuestStorage {
                 String sql = statement.toString(); // Invoke PreparedStatement.toString() to avoid race condition with asynchronous logging behavior
                 LOG.error("There have been {} changes for removing a guest assignment but there should only be 1. Executed SQL: {}", I(affectedRows), sql);
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw GuestExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(statement);
@@ -335,7 +335,7 @@ public class RdbGuestStorage extends GuestStorage {
                 LOG.error("There have been {} guests removed but there should max be 1. Executed SQL: {}", I(affectedRows), sql);
                 throw GuestExceptionCodes.TOO_MANY_GUESTS_REMOVED.create(Long.toString(affectedRows), statement.toString());
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw GuestExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(statement);
@@ -357,7 +357,7 @@ public class RdbGuestStorage extends GuestStorage {
             statement = connection.prepareStatement(DELETE_GUESTS);
             statement.setString(1, groupId);
             statement.executeUpdate();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw GuestExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(statement);
@@ -386,7 +386,7 @@ public class RdbGuestStorage extends GuestStorage {
                 long guestId = result.getLong(1);
                 guestIdsAssigmentsRemovedFor.add(L(guestId));
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw GuestExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(statement);
@@ -413,7 +413,7 @@ public class RdbGuestStorage extends GuestStorage {
             String groupIdsAsString = getIdsAsString(groupIds);
             statement = connection.prepareStatement(DELETE_GUEST_ASSIGNMENTS_FOR_GROUP.replace("?", groupIdsAsString));
             affectedRows = statement.executeUpdate();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw GuestExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(statement);
@@ -458,7 +458,7 @@ public class RdbGuestStorage extends GuestStorage {
             statement = connection.prepareStatement(DELETE_GUEST_ASSIGNMENTS);
             statement.setInt(1, contextId);
             affectedRows = statement.executeUpdate();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw GuestExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(statement);
@@ -486,7 +486,7 @@ public class RdbGuestStorage extends GuestStorage {
             if (result.next()) {
                 guestAssignments = result.getInt(1);
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw GuestExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(result, statement);
@@ -515,7 +515,7 @@ public class RdbGuestStorage extends GuestStorage {
             if (result.next()) {
                 return true;
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw GuestExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(result, statement);
@@ -548,7 +548,7 @@ public class RdbGuestStorage extends GuestStorage {
                 byte[] salt = result.getBytes(5);
                 guestAssignments.add(new GuestAssignment(guestId, cid, uid, password, passwordMech, salt));
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw GuestExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(result, statement);
@@ -580,7 +580,7 @@ public class RdbGuestStorage extends GuestStorage {
                 return new GuestAssignment(guestId, contextId, userId, password, passwordMech, salt);
             }
 
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw GuestExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(result, statement);
@@ -614,7 +614,7 @@ public class RdbGuestStorage extends GuestStorage {
                 LOG.error("There have been {} changes for updating the guest user. Executed SQL: {}", I(affectedRows), sql);
                 throw GuestExceptionCodes.SQL_ERROR.create("There have been " + affectedRows + " changes for updating the guest user. Executed SQL: " + statement.toString());
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw GuestExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(statement);

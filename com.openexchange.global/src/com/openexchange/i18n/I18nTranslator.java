@@ -49,6 +49,8 @@
 
 package com.openexchange.i18n;
 
+import java.util.Locale;
+
 /**
  * Implementation of a {@link Translator} backed with an {@link I18nService}.
  *
@@ -78,4 +80,10 @@ public class I18nTranslator implements Translator {
         }
         return service.getLocalized(toTranslate);
     }
+
+    @Override
+    public Locale getLocale() {
+        return service.getLocale();
+    }
+
 }

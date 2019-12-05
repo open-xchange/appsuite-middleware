@@ -295,6 +295,29 @@ public class AdminParser extends CLIParser {
         this.optinfolist.add(new OptionInfo(NeededQuadState.notneeded, retval, longForm, description));
         return retval;
     }
+    
+    /**
+     * Adds an option at the given position
+     * 
+     * @param pos The position to insert the option
+     * @param longForm The long form
+     * @param longFormParameterDescription The long form description
+     * @param description The description
+     * @param needed Whether the option is needed or not
+     * @param hasarg Whether the option has arguments or not
+     * @return The {@link CLIOption}
+     */
+    private final CLIOption addOption(int pos, final String longForm, final String longFormParameterDescription, final String description, final boolean needed, final boolean hasarg) {
+        if (hasarg) {
+            final CLIOption retval = this.addStringOption(longForm);
+            this.optinfolist.add(pos, new OptionInfo(convertBooleantoTriState(needed), retval, longForm, longFormParameterDescription, description));
+            return retval;
+        }
+
+        final CLIOption retval = this.addBooleanOption(longForm);
+        this.optinfolist.add(pos, new OptionInfo(NeededQuadState.notneeded, retval, longForm, description));
+        return retval;
+    }
 
     /**
      * @param longForm
@@ -457,7 +480,7 @@ public class AdminParser extends CLIParser {
     private String[] extractDynamic(String[] args) {
         List<String> staticArgs = new ArrayList<String>(args.length);
         for(String arg : args) {
-            if(isExtendedOption(arg) && isDynamicOption(arg)) {
+            if (isExtendedOption(arg) && isDynamicOption(arg)) {
                 parseDynamicOption(arg);
             } else {
                 staticArgs.add(arg);
@@ -475,17 +498,17 @@ public class AdminParser extends CLIParser {
         int slashPos = arg.indexOf('/');
 
 
-        if(arg.startsWith("--remove-")) {
+        if (arg.startsWith("--remove-")) {
             namespace = arg.substring(9, slashPos);
             name = arg.substring(slashPos+1);
         } else {
             int equalPos = arg.indexOf('=');
 
-            if(slashPos == -1) {
+            if (slashPos == -1) {
                 return;
             }
 
-            if(equalPos == -1) {
+            if (equalPos == -1) {
                 return;
             }
 
@@ -500,7 +523,7 @@ public class AdminParser extends CLIParser {
 
     private Map<String, String> getDynamicMap(String namespace) {
         Map<String, String> namespacedMap = dynamicMaps.get(namespace);
-        if(namespacedMap == null) {
+        if (namespacedMap == null) {
             namespacedMap = new HashMap<String, String>();
             dynamicMaps.put(namespace, namespacedMap);
         }
@@ -510,7 +533,7 @@ public class AdminParser extends CLIParser {
 
     private boolean isDynamicOption(String arg) {
         int slashPos = arg.indexOf('/');
-        if(slashPos == -1) {
+        if (slashPos == -1) {
             return false;
         }
         return slashPos < arg.indexOf('=') || arg.startsWith("--remove-");
@@ -526,7 +549,7 @@ public class AdminParser extends CLIParser {
     }
 
     public final void setExtendedOptions() {
-        this.extendedoption = addOption(OPT_EXTENDED_LONG, OPT_EXTENDED_LONG, "Set this if you want to see all options, use this instead of help option", false,false);
+        this.extendedoption = addOption(1, OPT_EXTENDED_LONG, OPT_EXTENDED_LONG, "Set this if you want to see all options, use this instead of help option", false,false);
     }
 
     public final void printEnvUsage() {
@@ -546,7 +569,7 @@ public class AdminParser extends CLIParser {
     public final void printUsage() {
         System.out.print("Usage: " + this.appname);
         System.out.println(" " + usage);
-        if(Strings.isNotEmpty(cltDescription)){
+        if (Strings.isNotEmpty(cltDescription)){
             System.out.println(cltDescription+"\n");
         }
 
@@ -569,7 +592,7 @@ public class AdminParser extends CLIParser {
     public final void printUsageExtended() {
         System.out.println("Usage: " + this.appname);
         System.out.println(" " + usage);
-        if(Strings.isNotEmpty(cltDescription)){
+        if (Strings.isNotEmpty(cltDescription)){
             System.out.println("Description: "+cltDescription);
         }
 

@@ -78,11 +78,6 @@ public class BeginMultifactorAuthenticationAction extends AbstractMultifactorAct
         super(serviceLookup);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.multifactor.json.actions.AbstractMultifactorAction#doPerform(com.openexchange.multifactor.json.actions.AJAXMultifactorRequest)
-     */
     @Override
     protected AJAXRequestResult doPerform(AJAXMultifactorRequest request) throws OXException {
         final MultifactorProvider provider = requireProvider(request.getProviderName());

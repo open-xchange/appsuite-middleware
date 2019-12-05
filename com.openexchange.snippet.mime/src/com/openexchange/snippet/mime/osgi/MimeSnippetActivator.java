@@ -49,9 +49,7 @@
 
 package com.openexchange.snippet.mime.osgi;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-import org.osgi.framework.Constants;
+import static com.openexchange.osgi.Tools.withRanking;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -134,16 +132,12 @@ public class MimeSnippetActivator extends HousekeepingActivator {
             MimeSnippetQuotaProvider quotaProvider = new MimeSnippetQuotaProvider();
             MimeSnippetService snippetService = new MimeSnippetService(quotaProvider);
 
-            Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
-            properties.put(Constants.SERVICE_RANKING, Integer.valueOf(10));
-            registerService(SnippetService.class, snippetService, properties);
+            registerService(SnippetService.class, snippetService, withRanking(10));
 
-            properties = new Hashtable<String, Object>(2);
-            properties.put(Constants.SERVICE_RANKING, Integer.valueOf(10));
-            registerService(QuotaAwareSnippetService.class, snippetService, properties);
+            registerService(QuotaAwareSnippetService.class, snippetService, withRanking(10));
 
             registerService(QuotaProvider.class, quotaProvider);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             logger.error("Error starting bundle: com.openexchange.snippet.mime", e);
             throw e;
         }

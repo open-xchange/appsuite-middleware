@@ -56,6 +56,7 @@ import org.apache.jackrabbit.webdav.MultiStatusResponse;
 import org.apache.jackrabbit.webdav.client.methods.PropFindMethod;
 import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
 import org.junit.Test;
+import com.openexchange.dav.Config;
 import com.openexchange.dav.PropertyNames;
 import com.openexchange.dav.carddav.CardDAVTest;
 
@@ -96,7 +97,7 @@ public class AddressbookPropertiesTest extends CardDAVTest {
         props.add(PropertyNames.RESOURCETYPE);
         props.add(PropertyNames.SUPPORTED_REPORT_SET);
         props.add(PropertyNames.SYNC_TOKEN);
-        final PropFindMethod propFind = new PropFindMethod(super.getWebDAVClient().getBaseURI() + "/carddav/", DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_1);
+        final PropFindMethod propFind = new PropFindMethod(super.getWebDAVClient().getBaseURI() + Config.getPathPrefix() + "/carddav/", DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_1);
         final MultiStatusResponse[] responses = super.getWebDAVClient().doPropFind(propFind);
         assertNotNull("got no response", responses);
         assertTrue("got no responses", 0 < responses.length);

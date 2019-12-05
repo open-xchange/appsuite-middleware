@@ -72,6 +72,7 @@ import com.openexchange.authentication.SessionEnhancement;
 import com.openexchange.exception.OXException;
 import com.openexchange.hazelcast.serialization.CustomPortable;
 import com.openexchange.osgi.ServiceRegistry;
+import com.openexchange.session.DefaultSessionAttributes;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionFilter;
 import com.openexchange.sessiond.impl.usertype.UserTypeSessiondConfigInterface;
@@ -146,11 +147,6 @@ public class SessionHandlerTest {
         };
         Mockito.when(registry.getConfigFor(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt())).thenReturn(sessiondConfigInterface);
         config = new SessiondConfigInterface() {
-
-            @Override
-            public boolean isAutoLogin() {
-                return false;
-            }
 
             @Override
             public boolean isAsyncPutToSessionStorage() {
@@ -287,7 +283,7 @@ public class SessionHandlerTest {
         String v1 = UUID.randomUUID().toString();
         SessionImpl s1 = addSession(v1);
         Assert.assertEquals(1, SessionHandler.getSessions().size());
-        SessionHandler.setLocalIp(s1, "172.16.33.66");
+        SessionHandler.setSessionAttributes(s1, DefaultSessionAttributes.builder().withLocalIp("172.16.33.66").build());
         List<String> sessions = SessionHandler.findRemoteSessions(SessionFilter.create("(" + PROP_NAMES[0] + "=" + v1 + ")"));
         Assert.assertEquals(1, sessions.size());
         Assert.assertEquals(s1.getSessionID(), sessions.get(0));
@@ -299,10 +295,10 @@ public class SessionHandlerTest {
 
     private static SessionImpl addSession(final String... props) throws OXException {
         if (props == null) {
-            return SessionHandler.addSession(1, "user", "secret", 1, "", "user", UUID.randomUUID().toString(), "5433", "TestClient", null, false, null, null, "default-user-agent");
+            return SessionHandler.addSession(1, "user", "secret", 1, "", "user", UUID.randomUUID().toString(), "5433", "TestClient", null, false, false, null, null, "default-user-agent");
         }
 
-        return SessionHandler.addSession(1, "user", "secret", 1, "", "user", UUID.randomUUID().toString(), "5433", "TestClient", null, false, null, Arrays.asList(new SessionEnhancement() {
+        return SessionHandler.addSession(1, "user", "secret", 1, "", "user", UUID.randomUUID().toString(), "5433", "TestClient", null, false, false, null, Arrays.asList(new SessionEnhancement() {
 
 
             @Override

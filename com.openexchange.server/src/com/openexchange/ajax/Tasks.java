@@ -83,7 +83,7 @@ public class Tasks extends DataServlet {
             final JSONObject jsonObj;
             try {
                  jsonObj = convertParameter2JSONObject(httpServletRequest);
-            } catch (final JSONException e) {
+            } catch (JSONException e) {
                 LOG.error("", e);
                 response.setException(OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e));
                 writeResponse(response, httpServletResponse, session);
@@ -93,14 +93,14 @@ public class Tasks extends DataServlet {
             final JSONValue responseObj = taskRequest.action(action, jsonObj);
             response.setTimestamp(taskRequest.getTimestamp());
             response.setData(responseObj);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (e.getCategory() == Category.CATEGORY_USER_INPUT) {
                 LOG.debug("", e);
             } else {
                 LOG.error("", e);
             }
             response.setException(e);
-         } catch (final JSONException e) {
+         } catch (JSONException e) {
             final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
             LOG.error("", oje);
             response.setException(oje);
@@ -122,7 +122,7 @@ public class Tasks extends DataServlet {
 
                 try {
                     jsonObj = convertParameter2JSONObject(httpServletRequest);
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     LOG.error("", e);
                     response.setException(OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e));
                     writeResponse(response, httpServletResponse, session);
@@ -149,11 +149,11 @@ public class Tasks extends DataServlet {
             } else {
                 httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "no data found");
             }
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
             LOG.error("", oje);
             response.setException(oje);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (e.getCategory() == Category.CATEGORY_USER_INPUT) {
                 LOG.debug("", e);
             } else {

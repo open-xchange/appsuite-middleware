@@ -114,7 +114,7 @@ public final class SmtpReloadable implements Reloadable {
                 smtpProperties.resetProperties();
                 smtpProperties.loadProperties();
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOGGER.warn("Failed to reload SMTP properties", e);
         }
 

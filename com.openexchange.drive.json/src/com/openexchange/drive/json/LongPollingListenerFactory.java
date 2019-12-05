@@ -52,6 +52,7 @@ package com.openexchange.drive.json;
 import java.util.Comparator;
 import java.util.List;
 import com.openexchange.drive.DriveSession;
+import com.openexchange.drive.events.subscribe.SubscriptionMode;
 import com.openexchange.exception.OXException;
 
 
@@ -68,9 +69,9 @@ public interface LongPollingListenerFactory {
      * @param session The drive session
      * @param rootFolderIDs The root folder IDs to listen for changes in
      * @return A new long polling listener instance
-     * @throws OXException
+     * @param mode The subscription mode
      */
-    LongPollingListener create(DriveSession session, List<String> rootFolderIDs) throws OXException;
+    LongPollingListener create(DriveSession session, List<String> rootFolderIDs, SubscriptionMode mode) throws OXException;
 
     /**
      * Gets the priority of the factory. With multiple factories being present, the factory with the highest priority is chosen when

@@ -83,8 +83,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.LdapExceptionCode;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
@@ -104,8 +102,8 @@ import com.openexchange.tools.servlet.http.Cookies;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.uadetector.UserAgentParser;
-import net.sf.uadetector.UserAgentFamily;
+import com.openexchange.user.User;
+import com.openexchange.user.UserExceptionCode;
 
 
 /**
@@ -300,7 +298,7 @@ public final class SessionUtility {
                     verifySession(req, sessiondService, publicSession.getSessionID(), publicSession);
                     rememberPublicSession(req, publicSession);
                     return true;
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     // Verification of public session failed
                     LOG.debug("Verification of public session failed", e);
                 }
@@ -346,7 +344,7 @@ public final class SessionUtility {
                 verifySession(req, sessiondService, publicSession.getSessionID(), publicSession);
                 rememberPublicSession(req, publicSession);
                 return true;
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 // Verification of public session failed
                 LOG.debug("Verification of public session failed", e);
             }
@@ -800,7 +798,7 @@ public final class SessionUtility {
     }
 
     private static boolean isChangeableUserAgent(String userAgent) {
-        return isMediaPlayerAgent(userAgent) || isMSIE11(userAgent);
+        return isMediaPlayerAgent(userAgent) || isMSIE11OrEdge(userAgent);
     }
 
     private static final Set<String> MEDIA_AGENTS = ImmutableSet.of("applecoremedia/", "stagefright/");
@@ -818,12 +816,16 @@ public final class SessionUtility {
         return false;
     }
 
-    private static boolean isMSIE11(String userAgent) {
+    private static boolean isMSIE11OrEdge(String userAgent) {
         if (null == userAgent) {
             return false;
         }
         BrowserDetector bd = BrowserDetector.detectorFor(userAgent);
-        return "Mozilla".equals(bd.getBrowserName()) && "Windows".equals(bd.getBrowserPlatform()) && 5.0f == bd.getBrowserVersion();
+        return
+            5.0F == bd.getBrowserVersion() &&
+            BrowserDetector.MOZILLA.equals(bd.getBrowserName()) &&
+            BrowserDetector.WINDOWS.equals(bd.getBrowserPlatform()) &&
+            ((bd.getUserAgentString().indexOf("Trident/7.0") > 0) || (bd.getUserAgentString().indexOf("Edge/") > 0));
     }
 
     // ----------------------------------------------------------------------------------------------------------------------------------
@@ -895,7 +897,7 @@ public final class SessionUtility {
      */
     public static void rememberSession(final HttpServletRequest req, final ServerSession session) {
         req.setAttribute(SESSION_KEY, session);
-        session.setParameter("JSESSIONID", req.getSession().getId());
+        session.setParameter(Tools.JSESSIONID_COOKIE, req.getSession().getId());
     }
 
     /**
@@ -906,7 +908,7 @@ public final class SessionUtility {
      */
     public static void rememberPublicSession(final HttpServletRequest req, final ServerSession session) {
         req.setAttribute(PUBLIC_SESSION_KEY, session);
-        session.setParameter("JSESSIONID", req.getSession().getId());
+        session.setParameter(Tools.JSESSIONID_COOKIE, req.getSession().getId());
     }
 
     /**

@@ -53,9 +53,9 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.impl.FolderLock;
 import com.openexchange.groupware.impl.FolderLockManager;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.session.SessionHolder;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.webdav.protocol.WebdavLock;
 import com.openexchange.webdav.protocol.WebdavPath;
 
@@ -99,7 +99,7 @@ public class FolderLockHelper extends LockHelper {
                     lock.getOwner(),
                     session.getContext(),
                     UserStorage.getInstance().getUser(session.getUserId(), session.getContext()));
-        } catch (final OXException x) {
+        } catch (OXException x) {
             throw x;
         }
 	}

@@ -56,6 +56,7 @@ import com.openexchange.chronos.alarm.sms.SMSNotificationService;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.regional.RegionalSettingsService;
 import com.openexchange.sms.SMSServiceSPI;
 import com.openexchange.user.UserService;
 
@@ -71,7 +72,7 @@ public class SMSAlarmActivator extends HousekeepingActivator{
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { UserService.class, TranslatorFactory.class, LeanConfigurationService.class };
+        return new Class[] { UserService.class, TranslatorFactory.class, LeanConfigurationService.class, RegionalSettingsService.class };
     }
 
     @Override

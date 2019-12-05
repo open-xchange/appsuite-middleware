@@ -74,41 +74,21 @@ public final class GoogleDriveServiceRegisterer extends AbstractCloudStorageServ
         super(context, services);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.file.storage.oauth.osgi.AbstractCloudStorageServiceRegisterer#getCloudFileStorageService(com.openexchange.server.ServiceLookup)
-     */
     @Override
     protected AbstractOAuthFileStorageService getCloudFileStorageService() {
         return new GoogleDriveFileStorageService(getServiceLookup());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.file.storage.oauth.osgi.AbstractCloudStorageServiceRegisterer#getCloudFileStorageService(com.openexchange.server.ServiceLookup, com.openexchange.file.storage.CompositeFileStorageAccountManagerProvider)
-     */
     @Override
     protected AbstractOAuthFileStorageService getCloudFileStorageService(CompositeFileStorageAccountManagerProvider compositeProvider) {
         return new GoogleDriveFileStorageService(getServiceLookup(), compositeProvider);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.file.storage.oauth.osgi.AbstractCloudStorageServiceRegisterer#getOAuthAccountAssociationProvider(com.openexchange.file.storage.oauth.AbstractOAuthFileStorageService)
-     */
     @Override
     protected OAuthAccountAssociationProvider getOAuthAccountAssociationProvider(AbstractOAuthFileStorageService storageService) {
         return new GoogleDriveOAuthAccountAssociationProvider((GoogleDriveFileStorageService) storageService);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.file.storage.oauth.osgi.AbstractCloudStorageServiceRegisterer#getProviderId()
-     */
     @Override
     protected String getProviderId() {
         return GoogleDriveConstants.ID;

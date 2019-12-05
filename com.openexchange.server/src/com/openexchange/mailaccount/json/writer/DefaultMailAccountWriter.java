@@ -638,7 +638,7 @@ public final class DefaultMailAccountWriter implements MailAccountFields {
                 sb.append(" <").append(MimeMessageUtility.prepareAddress(sAddress.substring(0, pos))).append('>');
             }
             return sb.toString();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             return primaryAddress;
         }
     }

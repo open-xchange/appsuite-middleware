@@ -80,9 +80,9 @@ class ReminderSearchIterator implements SearchIterator<ReminderObject> {
         this.preparedStatement = preparedStatement;
         try {
             next = ReminderHandler.result2Object(ctx, rs, preparedStatement, false);
-        } catch (final OXException exc) {
+        } catch (OXException exc) {
             next = null;
-        } catch (final SQLException exc) {
+        } catch (SQLException exc) {
             throw ReminderExceptionCode.SQL_ERROR.create(exc, exc.getMessage());
         }
     }
@@ -101,9 +101,9 @@ class ReminderSearchIterator implements SearchIterator<ReminderObject> {
             } else {
                 next = ReminderHandler.result2Object(ctx, rs, preparedStatement, false);
             }
-        } catch (final OXException exc) {
+        } catch (OXException exc) {
             next = null;
-        } catch (final SQLException exc) {
+        } catch (SQLException exc) {
             throw ReminderExceptionCode.SQL_ERROR.create(exc, exc.getMessage());
         }
         return reminderObj;

@@ -52,8 +52,8 @@ package com.openexchange.folderstorage.internal.performers;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.internal.StorageParametersImpl;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 
 /**

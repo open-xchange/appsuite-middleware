@@ -83,13 +83,13 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.data.Check;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tasks.TaskParticipant.Type;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.user.User;
 
 /**
  * This class contains logic methods for the tasks.
@@ -751,17 +751,17 @@ public final class TaskLogic {
                     Reminder.deleteReminder(ctx, con, task);
                     con.commit();
                     informDelete(session, t);
-                } catch (final SQLException e) {
+                } catch (SQLException e) {
                     rollback(con);
                     if (!condition.isFailedTransactionRollback(e)) {
                         throw TaskExceptionCode.DELETE_FAILED.create(e, e.getMessage());
                     }
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     rollback(con);
                     if (!condition.isFailedTransactionRollback(e)) {
                         throw e;
                     }
-                } catch (final RuntimeException e) {
+                } catch (RuntimeException e) {
                     rollback(con);
                     if (!condition.isFailedTransactionRollback(e)) {
                         throw TaskExceptionCode.DELETE_FAILED.create(e, e.getMessage());
@@ -771,7 +771,7 @@ public final class TaskLogic {
                     DBPool.closeWriterSilent(ctx, con);
                 }
             } while (condition.checkRetry());
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             if (isTransactionRollbackException(e)) {
                 throw TaskExceptionCode.DELETE_FAILED_RETRY.create(e, e.getMessage());
             }
@@ -827,7 +827,7 @@ public final class TaskLogic {
     static void informDelete(Session session, Task task) throws OXException {
         try {
             new EventClient(session).delete(task);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
         }
     }

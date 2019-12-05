@@ -104,7 +104,7 @@ public final class RdbPOP3StorageTrashContainer implements POP3StorageTrashConta
             stmt.setInt(pos++, user);
             stmt.setInt(pos++, accountId);
             stmt.executeUpdate();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
@@ -123,7 +123,7 @@ public final class RdbPOP3StorageTrashContainer implements POP3StorageTrashConta
             stmt.setInt(pos++, accountId);
             stmt.setString(pos++, uidl);
             stmt.executeUpdate();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
@@ -142,7 +142,7 @@ public final class RdbPOP3StorageTrashContainer implements POP3StorageTrashConta
             stmt.setInt(pos++, user);
             stmt.setInt(pos++, accountId);
             stmt.executeUpdate();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
@@ -167,7 +167,7 @@ public final class RdbPOP3StorageTrashContainer implements POP3StorageTrashConta
                 set.add(rs.getString(1));
             }
             return set;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
@@ -187,7 +187,7 @@ public final class RdbPOP3StorageTrashContainer implements POP3StorageTrashConta
             stmt.setInt(pos++, accountId);
             stmt.setString(pos++, uidl);
             stmt.executeUpdate();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
@@ -210,7 +210,7 @@ public final class RdbPOP3StorageTrashContainer implements POP3StorageTrashConta
                 stmt.addBatch();
             }
             stmt.executeBatch();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);

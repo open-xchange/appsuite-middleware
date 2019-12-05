@@ -77,7 +77,6 @@ import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.helpers.SpecialAlphanumSortContactComparator;
 import com.openexchange.groupware.contact.helpers.UseCountComparator;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.java.Autoboxing;
@@ -90,6 +89,7 @@ import com.openexchange.tools.collections.PropertizedList;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 /**
  * {@link ContactRequest}
@@ -140,7 +140,7 @@ public class ContactRequest {
         }
         try {
             return Integer.parseInt(parameter.trim());
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(name, parameter);
         }
     }
@@ -550,7 +550,7 @@ public class ContactRequest {
         String jsonField = request.getUploadEvent(-1L, maxSize > 0 ? maxSize : -1L).getFormField("json");
         try {
             return new JSONObject(jsonField);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, jsonField);
         }
     }
@@ -566,7 +566,7 @@ public class ContactRequest {
             try {
                 data[0] = json.getInt("id");
                 data[1] = json.getInt("folder");
-            } catch (final JSONException e) {
+            } catch (JSONException e) {
                 throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, json);
             }
             return data;
@@ -582,7 +582,7 @@ public class ContactRequest {
         for (int i = 0; i < userIdArray.length; i++) {
             try {
                 userIdArray[i] = json.getInt(i);
-            } catch (final JSONException e) {
+            } catch (JSONException e) {
                 throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, json);
             }
         }
@@ -594,7 +594,7 @@ public class ContactRequest {
         final JSONObject json = (JSONObject) request.requireData();
         try {
             return json.getInt("folder_id");
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, json);
         }
     }
@@ -642,7 +642,7 @@ public class ContactRequest {
 
     private static long sysconfMaxUpload() {
         final String sizeS = ServerConfig.getProperty(com.openexchange.configuration.ServerConfig.Property.MAX_UPLOAD_SIZE);
-        if(null == sizeS) {
+        if (null == sizeS) {
             return 0;
         }
         return Long.parseLong(sizeS);

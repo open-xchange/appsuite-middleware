@@ -82,11 +82,6 @@ public class SchedJoulesCalendarRESTResponseBodyParser implements RESTResponseBo
         this.contentTypes = Collections.singleton("text/calendar");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.rest.client.RESTResponseBodyParser#parse(com.openexchange.rest.client.RESTResponse)
-     */
     @Override
     public void parse(HttpResponse httpResponse, RESTResponse restResponse) throws OXException {
         ICalService iCalService = Services.getService(ICalService.class);
@@ -101,11 +96,6 @@ public class SchedJoulesCalendarRESTResponseBodyParser implements RESTResponseBo
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.rest.client.RESTResponseBodyParser#getContentTypes()
-     */
     @Override
     public Set<String> getContentTypes() {
         return contentTypes;

@@ -98,7 +98,7 @@ public class StorageInfo {
     }
 
     /**
-     * Gets the entity-specific location inside the file storage.
+     * Gets the entity-specific location inside the file storage; e.g. <code>"1_ctx_store"</code>.
      *
      * @return The entity-specific location inside the file storage.
      */

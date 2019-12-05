@@ -1,10 +1,8 @@
 ---
 title: Cookies
-icon: fa-circle
+icon: fas fa-cookie-bite
 tags: Cookies, Authentication, Session
 ---
-
-<!-- Upon upgrade to FontAwesome 5.x change to 'fa-cookie-bite' icon -->
 
 # Cookies in General
 

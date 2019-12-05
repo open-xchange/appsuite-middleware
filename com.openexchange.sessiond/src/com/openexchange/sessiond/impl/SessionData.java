@@ -85,7 +85,6 @@ final class SessionData {
 
     private final int maxSessions;
     private final long randomTokenTimeout;
-    private final boolean autoLogin;
     private final Map<String, String> randoms;
 
     /** Plain array+direct indexing is the fastest technique of iterating. So, use CopyOnWriteArrayList since 'sessionList' is seldom modified (see rotateShort()) */
@@ -118,15 +117,13 @@ final class SessionData {
      * @param maxSessions The max. number of total sessions
      * @param randomTokenTimeout The timeout for random tokens
      * @param longTermContainerCount The container count for long-term sessions
-     * @param autoLogin Whether auto-login is enabled or not
      */
-    SessionData(int containerCount, int maxSessions, long randomTokenTimeout, int longTermContainerCount, boolean autoLogin) {
+    SessionData(int containerCount, int maxSessions, long randomTokenTimeout, int longTermContainerCount) {
         super();
         threadPoolService = new AtomicReference<ThreadPoolService>();
         timerService = new AtomicReference<TimerService>();
         this.maxSessions = maxSessions;
         this.randomTokenTimeout = randomTokenTimeout;
-        this.autoLogin = autoLogin;
 
         randoms = new ConcurrentHashMap<String, String>(1024, 0.75f, 1);
 
@@ -142,7 +139,7 @@ final class SessionData {
         }
         longTermList = new RotatableCopyOnWriteArrayList<SessionMap>(longTermInit);
     }
-    
+
     void clear() {
         sessionList.clear();
         randoms.clear();
@@ -155,28 +152,41 @@ final class SessionData {
      *
      * @return The removed sessions
      */
-    List<SessionControl> rotateShort() {
+    RotateShortResult rotateShort() {
         // This is the only location which alters 'sessionList' during runtime
-        List<SessionControl> removedSessions = new ArrayList<SessionControl>(sessionList.rotate(new SessionContainer()).getSessionControls());
-        if (autoLogin && false == removedSessions.isEmpty()) {
+        List<SessionControl> movedToLongTerm = null;
+        List<SessionControl> removed = null;
+        Collection<SessionControl> droppedSessions = sessionList.rotate(new SessionContainer()).getSessionControls();
+        if (false == droppedSessions.isEmpty()) {
             List<SessionControl> transientSessions = null;
 
             try {
                 SessionMap first = longTermList.get(0);
-                for (Iterator<SessionControl> it = removedSessions.iterator(); it.hasNext();) {
-                    final SessionControl control = it.next();
-                    final SessionImpl session = control.getSession();
-                    if (false == session.isTransient()) {
-                        // A regular, non-transient session
-                        first.putBySessionId(session.getSessionID(), control);
-                        longTermUserGuardian.add(session.getUserId(), session.getContextId());
-                    } else {
+                for (SessionControl control : droppedSessions) {
+                    SessionImpl session = control.getSession();
+                    if (session.isTransient()) {
                         // A transient session -- do not move to long-term container
-                        it.remove();
                         if (null == transientSessions) {
-                            transientSessions = new LinkedList<SessionControl>();
+                            transientSessions = new ArrayList<SessionControl>();
                         }
                         transientSessions.add(control);
+                    } else {
+                        // A (non-transient) regular session
+                        if (session.isStaySignedIn()) {
+                            // Has "stay signed in" flag
+                            first.putBySessionId(session.getSessionID(), control);
+                            longTermUserGuardian.add(session.getUserId(), session.getContextId());
+                            if (movedToLongTerm == null) {
+                                movedToLongTerm = new ArrayList<SessionControl>();
+                            }
+                            movedToLongTerm.add(control);
+                        } else {
+                            // No "stay signed in" flag; let session time out
+                            if (removed == null) {
+                                removed = new ArrayList<SessionControl>();
+                            }
+                            removed.add(control);
+                        }
                     }
                 }
             } catch (IndexOutOfBoundsException e) {
@@ -189,7 +199,7 @@ final class SessionData {
             }
         }
 
-        return removedSessions;
+        return new RotateShortResult(movedToLongTerm, removed);
     }
 
     List<SessionControl> rotateLongTerm() {
@@ -205,8 +215,8 @@ final class SessionData {
     /**
      * Checks if given user in specified context has an active session kept in session container(s)
      *
-     * @param userId The user ID
-     * @param contextId The user's context ID
+     * @param userId The user identifier
+     * @param contextId The user's context identifier
      * @param includeLongTerm <code>true</code> to also lookup the long term sessions, <code>false</code>, otherwise
      * @return <code>true</code> if given user in specified context has an active session; otherwise <code>false</code>
      */
@@ -257,7 +267,7 @@ final class SessionData {
                 }
             }
         }
-        
+
         return retval.toArray(new SessionControl[retval.size()]);
     }
 
@@ -804,7 +814,7 @@ final class SessionData {
                     LOG.warn("Was not able to move the session into the most actual container.");
                 }
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
         } catch (IndexOutOfBoundsException e) {
             // About to shut-down
@@ -853,7 +863,7 @@ final class SessionData {
                 public void run() {
                     try {
                         tmp.call();
-                    } catch (final Exception e) {
+                    } catch (Exception e) {
                         LOG.error("Moving session to first container failed.", e);
                     }
                 }
@@ -944,7 +954,7 @@ final class SessionData {
             try {
                 removers.remove(randomToken);
                 removeRandomToken(randomToken);
-            } catch (final Throwable t) {
+            } catch (Throwable t) {
                 LOG.error("", t);
             }
         }
@@ -952,7 +962,7 @@ final class SessionData {
 
     /**
      * Gets the number of sessions in the short term container
-     * 
+     *
      * @return The number of sessions in the short term container
      */
     public int getNumShortTerm() {
@@ -962,10 +972,10 @@ final class SessionData {
         }
         return result;
     }
-    
+
     /**
      * Gets the number of sessions in the long term container
-     * 
+     *
      * @return the number of sessions in the long term container
      */
     public int getNumLongTerm() {

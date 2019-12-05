@@ -325,11 +325,6 @@ public class FileEventTest {
             this.verifier = verifier;
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see com.openexchange.file.storage.composition.IDBasedFileAccess#getDocumentAndMetadata(java.lang.String, java.lang.String)
-         */
         @Override
         public Document getDocumentAndMetadata(String id, String version) throws OXException {
             // TODO Auto-generated method stub

@@ -115,7 +115,7 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
                 }
                 String refSchemaName = null;
                 String refTableName = referencesMatcher.group(1);
-                if (refTableName.indexOf(".") > 0) {
+                if (refTableName.indexOf('.') > 0) {
                     refSchemaName = refTableName.split("\\.")[0];
                     refTableName = refTableName.split("\\.")[1];
                 }

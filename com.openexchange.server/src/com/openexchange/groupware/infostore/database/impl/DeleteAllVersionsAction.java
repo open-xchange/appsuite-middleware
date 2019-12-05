@@ -67,7 +67,7 @@ public class DeleteAllVersionsAction extends AbstractDocumentListAction {
 
     @Override
     protected void undoAction() throws OXException {
-        if(getDocuments().size()==0) {
+        if (getDocuments().size()==0) {
             return;
         }
         final UpdateBlock[] updates = new UpdateBlock[getDocuments().size()];
@@ -88,7 +88,7 @@ public class DeleteAllVersionsAction extends AbstractDocumentListAction {
 
     @Override
     public void perform() throws OXException {
-        if(getDocuments().size()==0) {
+        if (getDocuments().size()==0) {
             return;
         }
         final UpdateBlock[] updates = new UpdateBlock[1];

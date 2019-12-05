@@ -54,6 +54,7 @@ import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
 import com.openexchange.drive.events.subscribe.internal.SubscribeServiceLookup;
+import com.openexchange.drive.events.subscribe.rdb.DriveEventSubscriptionsAddModeColumnTask;
 import com.openexchange.drive.events.subscribe.rdb.DriveEventSubscriptionsAddUuidColumnTask;
 import com.openexchange.drive.events.subscribe.rdb.DriveEventSubscriptionsCreateTableService;
 import com.openexchange.drive.events.subscribe.rdb.DriveEventSubscriptionsCreateTableTask;
@@ -94,6 +95,7 @@ public class SubscribeActivator extends HousekeepingActivator {
         registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new DriveEventSubscriptionsCreateTableTask()));
         registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new DriveEventSubscriptionsAddUuidColumnTask()));
         registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new DriveEventSubscriptionsMakeUuidPrimaryTask()));
+        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new DriveEventSubscriptionsAddModeColumnTask()));
         registerService(DeleteListener.class, new DriveEventSubscriptionsDeleteListener());
         registerService(DriveSubscriptionStore.class, new RdbSubscriptionStore());
     }

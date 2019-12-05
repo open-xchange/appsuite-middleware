@@ -1,0 +1,19 @@
+/share/redeem/token:
+  get:
+    operationId: get
+    summary: Redeems a previously reserved token for extended parameters of the redirect location.  
+    parameters:
+      - in: query
+        name: token
+        description: The token as received when accessing the share link.  
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/gblQueryParamLanguage'
+    responses:
+      '200':
+        description: A JSON object containing the extended parameters of the redirect location.
+        content:
+          application/json:
+            schema:
+              type: string

@@ -270,6 +270,8 @@ public class BasicCachingCalendarAccessTest {
         JSONObject internalConfig = new JSONObject();
         internalConfig.putSafe(CachingCalendarAccessConstants.CACHING, lastUpdate);
         account = new DefaultCalendarAccount("providerId", 1, 1, internalConfig, internalConfig, new Date(System.currentTimeMillis()));
+        Mockito.when(B(parameters.contains(CalendarParameters.PARAMETER_UPDATE_CACHE))).thenReturn(Boolean.FALSE);
+        Mockito.when(parameters.get(CalendarParameters.PARAMETER_UPDATE_CACHE, Boolean.class, Boolean.FALSE)).thenReturn(Boolean.FALSE);
         cachingCalendarAccess = new TestCachingCalendarAccessImpl(session, account, parameters);
 
         cachingCalendarAccess.updateCacheIfNeeded();

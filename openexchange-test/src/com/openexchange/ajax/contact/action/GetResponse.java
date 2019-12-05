@@ -83,7 +83,7 @@ public class GetResponse extends AbstractAJAXResponse {
      * @return the contact
      * @throws OXException parsing the contact out of the response fails.
      */
-    public Contact getContact() throws OXException, OXException {
+    public Contact getContact() throws OXException {
         if (null == contactObj) {
             this.contactObj = new Contact();
             JSONObject json = (JSONObject) getResponse().getData();

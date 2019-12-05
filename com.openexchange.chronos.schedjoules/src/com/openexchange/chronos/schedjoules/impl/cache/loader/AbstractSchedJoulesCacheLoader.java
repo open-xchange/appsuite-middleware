@@ -81,11 +81,6 @@ abstract class AbstractSchedJoulesCacheLoader extends CacheLoader<SchedJoulesCac
         this.apiCache = apiCache;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.google.common.cache.CacheLoader#reload(java.lang.Object, java.lang.Object)
-     */
     @Override
     public ListenableFuture<SchedJoulesPage> reload(SchedJoulesCachedItemKey key, SchedJoulesPage oldValue) throws Exception {
         TimerService timerService = Services.getService(TimerService.class);

@@ -100,21 +100,11 @@ public final class TaskInfo implements Comparable<TaskInfo> {
         return 0 == res ? taskName.compareTo(o.taskName) : res;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#hashCode()
-     */
     @Override
     public int hashCode() {
         return hashCode;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {

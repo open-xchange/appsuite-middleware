@@ -93,17 +93,17 @@ public class WebdavLock {
 		this.scope = scope;
 	}
 	public long getTimeout() {
-		if(neverExpires) {
+		if (neverExpires) {
 			return NEVER;
 		}
 		final long timeout = expires-System.currentTimeMillis();
-		if(timeout < 0) {
+		if (timeout < 0) {
 			return 0;
 		}
 		return timeout;
 	}
 	public void setTimeout(final long timeout) {
-		if(timeout == NEVER) {
+		if (timeout == NEVER) {
 			neverExpires = true;
 			return;
 		}
@@ -145,16 +145,16 @@ public class WebdavLock {
 		final WebdavPath urlLocked = locked.getUrl();
 		final WebdavPath urlRes = resource.getUrl();
 
-		if(!urlRes.startsWith(urlLocked)) {
+		if (!urlRes.startsWith(urlLocked)) {
 			return false;
 		}
-		if(depth == WebdavCollection.INFINITY) {
+		if (depth == WebdavCollection.INFINITY) {
 			return true;
 		}
-		if(depth == 0) {
+		if (depth == 0) {
 			return urlLocked.equals(urlRes);
 		}
-		if(depth == 1) {
+		if (depth == 1) {
 			return urlLocked.equals(urlRes.parent());
 		}
 		return false;

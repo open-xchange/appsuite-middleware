@@ -86,7 +86,7 @@ public final class FolderAddIndex2LastModified extends UpdateTaskAdapter {
             createMyIndex(con, new String[] { "oxfolder_tree", "del_oxfolder_tree" }, "lastModifiedIndex");
             con.commit();
             rollback = 2;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw createSQLError(e);
         } finally {
             if (rollback > 0) {
@@ -128,7 +128,7 @@ public final class FolderAddIndex2LastModified extends UpdateTaskAdapter {
                         log.info(sb.toString());
                     }
                 }
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 log.error("Problem adding index {} on table {}.", name, table, e);
             }
         }

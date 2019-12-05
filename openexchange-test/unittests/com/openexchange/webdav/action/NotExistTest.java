@@ -32,7 +32,7 @@ public class NotExistTest extends ActionTestCase {
         try {
             action.perform(req, res);
             fail("Expected 404 Not Found");
-        } catch (final WebdavProtocolException x) {
+        } catch (WebdavProtocolException x) {
             assertEquals(HttpServletResponse.SC_NOT_FOUND, x.getStatus());
             assertFalse(mockAction.wasActivated());
         }
@@ -86,7 +86,7 @@ public class NotExistTest extends ActionTestCase {
         try {
             action.perform(req, res);
             fail("Expected 404 Not Found");
-        } catch (final WebdavProtocolException x) {
+        } catch (WebdavProtocolException x) {
             assertEquals(HttpServletResponse.SC_NOT_FOUND, x.getStatus());
             assertFalse(mockAction.wasActivated());
         }
@@ -108,7 +108,7 @@ public class NotExistTest extends ActionTestCase {
         try {
             action.perform(req, res);
             fail("Expected 404 Not Found");
-        } catch (final WebdavProtocolException x) {
+        } catch (WebdavProtocolException x) {
             assertNotNull(res.getResponseBytes());
             assertFalse(0 == res.getResponseBytes().length);
         }

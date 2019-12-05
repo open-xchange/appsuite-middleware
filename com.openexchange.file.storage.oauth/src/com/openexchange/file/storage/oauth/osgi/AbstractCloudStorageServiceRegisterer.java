@@ -91,11 +91,6 @@ public abstract class AbstractCloudStorageServiceRegisterer implements ServiceTr
         this.serviceLookup = serviceLookup;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
-     */
     @Override
     public FileStorageAccountManagerProvider addingService(ServiceReference<FileStorageAccountManagerProvider> reference) {
         FileStorageAccountManagerProvider provider = getContext().getService(reference);
@@ -164,21 +159,11 @@ public abstract class AbstractCloudStorageServiceRegisterer implements ServiceTr
      */
     protected abstract String getProviderId();
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#modifiedService(org.osgi.framework.ServiceReference, java.lang.Object)
-     */
     @Override
     public void modifiedService(ServiceReference<FileStorageAccountManagerProvider> reference, FileStorageAccountManagerProvider service) {
         //nothing
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(org.osgi.framework.ServiceReference, java.lang.Object)
-     */
     @Override
     public void removedService(ServiceReference<FileStorageAccountManagerProvider> reference, FileStorageAccountManagerProvider service) {
         synchronized (this) {

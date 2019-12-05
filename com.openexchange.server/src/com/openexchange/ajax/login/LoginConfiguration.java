@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.login;
 
-import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.configuration.CookieHashSource;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.Tools;
@@ -57,7 +56,7 @@ import com.openexchange.log.LogProperties;
 import com.openexchange.login.ConfigurationProperty;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
-import com.openexchange.sessiond.impl.ThreadLocalSessionHolder;
+import com.openexchange.session.ThreadLocalSessionHolder;
 
 /**
  * Object to store the configuration parameters for the different login process mechanisms.
@@ -66,10 +65,7 @@ import com.openexchange.sessiond.impl.ThreadLocalSessionHolder;
  */
 public final class LoginConfiguration {
 
-    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(LoginConfiguration.class);
-
     private final String uiWebPath;
-    private final boolean sessiondAutoLogin;
     private final CookieHashSource hashSource;
     private final String httpAuthAutoLogin;
     private final String defaultClient;
@@ -84,10 +80,9 @@ public final class LoginConfiguration {
     private final boolean isRandomTokenEnabled;
     private final boolean checkPunyCodeLoginString;
 
-    public LoginConfiguration(String uiWebPath, boolean sessiondAutoLogin, CookieHashSource hashSource, String httpAuthAutoLogin, String defaultClient, String clientVersion, String errorPageTemplate, int cookieExpiry, boolean cookieForceHTTPS, boolean insecure, boolean redirectIPChangeAllowed, boolean disableTrimLogin, boolean formLoginWithoutAuthId, boolean isRandomTokenEnabled, boolean checkPunyCodeLoginString) {
+    public LoginConfiguration(String uiWebPath, CookieHashSource hashSource, String httpAuthAutoLogin, String defaultClient, String clientVersion, String errorPageTemplate, int cookieExpiry, boolean cookieForceHTTPS, boolean insecure, boolean redirectIPChangeAllowed, boolean disableTrimLogin, boolean formLoginWithoutAuthId, boolean isRandomTokenEnabled, boolean checkPunyCodeLoginString) {
         super();
         this.uiWebPath = uiWebPath;
-        this.sessiondAutoLogin = sessiondAutoLogin;
         this.hashSource = hashSource;
         this.httpAuthAutoLogin = httpAuthAutoLogin;
         this.defaultClient = defaultClient;
@@ -105,69 +100,6 @@ public final class LoginConfiguration {
 
     public String getUiWebPath() {
         return uiWebPath;
-    }
-
-    /**
-     * Checks if auto-login is enabled.
-     * <p>
-     * This routine tries to determine the host name associated with calling thread in order to check reliably using {@link #isSessiondAutoLogin(String)} method.
-     * If host name cannot be determined, global auto-login property is considered.
-     *
-     * @return <code>true</code> if auto-login is enabled; otherwise <code>false</code>
-     */
-    public boolean isSessiondAutoLogin() {
-        String hostName = LogProperties.getHostName();
-        if (hostName != null) {
-            return isSessiondAutoLogin0(hostName, null);
-        }
-        return sessiondAutoLogin;
-    }
-
-    /**
-     * Checks if auto-login is enabled for given host name
-     *
-     * @param hostName The host name to check for
-     * @return <code>true</code> if auto-login is enabled; otherwise <code>false</code>
-     */
-    public boolean isSessiondAutoLogin(String hostName) {
-        return isSessiondAutoLogin(hostName, null);
-    }
-
-    /**
-     * Checks if auto-login is enabled for given host name
-     *
-     * @param hostName The host name to check for
-     * @param optSession The optional session to use
-     * @return <code>true</code> if auto-login is enabled; otherwise <code>false</code>
-     */
-    public boolean isSessiondAutoLogin(String hostName, Session optSession) {
-        if (null == hostName) {
-            return sessiondAutoLogin;
-        }
-
-        LogProperties.put(LogProperties.Name.HOSTNAME, hostName);
-        return isSessiondAutoLogin0(hostName, optSession);
-    }
-
-    private static final String CAPABILITY_AUTOLOGIN = "autologin";
-
-    private boolean isSessiondAutoLogin0(String hostName, Session optSession) {
-        try {
-            CapabilityService capabilityService = ServerServiceRegistry.getInstance().getService(CapabilityService.class);
-            if (null == capabilityService) {
-                LOGGER.warn("Missing capability service. Unable to reliably check auto-login capability for host {}. Using default '{}' as fall-back for auto-login (as configured through \"{}\" property", hostName, Boolean.valueOf(sessiondAutoLogin), ConfigurationProperty.SESSIOND_AUTOLOGIN.getPropertyName());
-            } else {
-                Session ses = null == optSession ? ThreadLocalSessionHolder.getInstance().getSessionObject() : optSession;
-                if (null == ses) {
-                    return capabilityService.getCapabilities(getUserId(), getContextId(), false, true).contains(CAPABILITY_AUTOLOGIN);
-                }
-                return capabilityService.getCapabilities(ses).contains(CAPABILITY_AUTOLOGIN);
-            }
-        } catch (OXException e) {
-            // fallback to default
-            LOGGER.warn("Failed to retrieve server configuration for host {}. Using default '{}' as fall-back for auto-login (as configured through \"{}\" property", hostName, Boolean.valueOf(sessiondAutoLogin), ConfigurationProperty.SESSIOND_AUTOLOGIN.getPropertyName(), e);
-        }
-        return sessiondAutoLogin;
     }
 
     public CookieHashSource getHashSource() {
@@ -221,35 +153,4 @@ public final class LoginConfiguration {
     public boolean isCheckPunyCodeLoginString() {
         return checkPunyCodeLoginString;
     }
-
-    // ----------------------------------------------------------------------------------------------------------------------------------------------------------
-
-    /**
-     * Retrieves the context identifier from the {@link LogProperties}
-     *
-     * @return the context identifier from the LogProperties
-     */
-    private int getContextId() {
-        return getLogPropertyValue(LogProperties.Name.SESSION_CONTEXT_ID);
-    }
-
-    /**
-     * Retrieves the user identifier from the {@link LogProperties}
-     *
-     * @return the user identifier from the {@link LogProperties}
-     */
-    private int getUserId() {
-        return getLogPropertyValue(LogProperties.Name.SESSION_USER_ID);
-    }
-
-    /**
-     * Retrieves value of the specified property from the {@link LogProperties}
-     *
-     * @param name The log property's name
-     * @return the property's value
-     */
-    private int getLogPropertyValue(LogProperties.Name name) {
-        return Tools.getUnsignedInteger(LogProperties.get(name));
-    }
-
 }

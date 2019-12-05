@@ -93,7 +93,7 @@ public final class SpamAssassinSpamHandlerActivator extends HousekeepingActivato
 
             trackService(SpamdService.class);
             openTrackers();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("Problem while starting bundle: SpamHandler Spamassassin", e);
             throw e;
         }

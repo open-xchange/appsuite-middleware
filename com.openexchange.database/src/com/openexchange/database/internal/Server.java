@@ -165,7 +165,7 @@ public final class Server {
             stmt.setString(1, name);
             result = stmt.executeQuery();
             return result.next() ? result.getInt(1) : -1;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);

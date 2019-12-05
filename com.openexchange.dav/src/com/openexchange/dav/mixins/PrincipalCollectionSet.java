@@ -49,6 +49,8 @@
 
 package com.openexchange.dav.mixins;
 
+import static com.openexchange.dav.DAVTools.getExternalPath;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
@@ -61,16 +63,20 @@ import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
  */
 public class PrincipalCollectionSet extends SingleXMLPropertyMixin {
 
+    private final ConfigViewFactory configViewFactory;
+
     /**
      * Initializes a new {@link PrincipalCollectionSet}.
+     * @param configViewFactory The configuration view
      */
-    public PrincipalCollectionSet() {
+    public PrincipalCollectionSet(ConfigViewFactory configViewFactory) {
         super(Protocol.DAV_NS.getURI(), "principal-collection-set");
+        this.configViewFactory = configViewFactory;
     }
 
     @Override
     protected String getValue() {
-        return "<D:href>/principals/</D:href>";
+        return "<D:href>" + getExternalPath(configViewFactory, "/principals/") + "</D:href>";
     }
 
 }

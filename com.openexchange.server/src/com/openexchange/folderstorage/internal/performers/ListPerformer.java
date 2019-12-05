@@ -66,6 +66,7 @@ import com.openexchange.concurrent.CallerRunsCompletionService;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.AbstractFolder;
+import com.openexchange.folderstorage.CalculatePermission;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderServiceDecorator;
@@ -77,10 +78,8 @@ import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.SubfolderListingFolderStorage;
 import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.folderstorage.mail.MailFolderType;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.utils.MailFolderUtility;
@@ -90,6 +89,7 @@ import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 
@@ -203,12 +203,12 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                 fs.commitTransaction(storageParameters);
             }
             return ret;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             for (final FolderStorage fs : openedStorages) {
                 fs.rollback(storageParameters);
             }
             throw e;
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             for (final FolderStorage fs : openedStorages) {
                 fs.rollback(storageParameters);
             }
@@ -581,12 +581,12 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
             for (final FolderStorage fs : openedStorages) {
                 fs.commitTransaction(newParameters);
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             for (final FolderStorage fs : openedStorages) {
                 fs.rollback(newParameters);
             }
             throw e;
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             for (final FolderStorage fs : openedStorages) {
                 fs.rollback(newParameters);
             }
@@ -606,7 +606,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
             if (!warnings.isEmpty()) {
                 addWarning(warnings.iterator().next());
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (DispatcherServlet.ignore(e)) {
                 LOG.debug("Batch loading of folders failed. Fall-back to one-by-one loading.", e);
             } else {
@@ -627,7 +627,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
             Folder subfolder = null;
             try {
                 subfolder = folderStorage.getFolder(treeId, id, newParameters);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 if (DispatcherServlet.ignore(e)) {
                     LOG.debug("The folder with ID \"{}\" in tree \"{}\" could not be fetched from storage \"{}\"", id, treeId, folderStorage.getClass().getSimpleName(), e);
                 } else {

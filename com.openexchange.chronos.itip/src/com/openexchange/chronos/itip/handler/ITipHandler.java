@@ -69,6 +69,7 @@ import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.SchedulingControl;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.mapping.DefaultEventUpdate;
 import com.openexchange.chronos.common.mapping.EventMapper;
@@ -93,6 +94,7 @@ import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.chronos.service.RecurrenceIterator;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.service.UpdateResult;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.State;
 
@@ -187,13 +189,14 @@ public class ITipHandler implements CalendarHandler {
             return false;
         }
 
-        if (event.getCalendarParameters() != null) {
+        ConfigurationService configurationService = Services.getService(ConfigurationService.class);
+        if (null == configurationService || false == configurationService.getBoolProperty("com.openexchange.calendar.useLegacyScheduling", false)) {
+            return false;
+        }
 
-            if (event.getCalendarParameters().contains(CalendarParameters.PARAMETER_SUPPRESS_ITIP)) {
-                Boolean suppress = event.getCalendarParameters().get(CalendarParameters.PARAMETER_SUPPRESS_ITIP, Boolean.class);
-                if (suppress != null && suppress.booleanValue()) {
-                    return false;
-                }
+        if (event.getCalendarParameters() != null) {
+            if (SchedulingControl.NONE.equals(event.getCalendarParameters().get(CalendarParameters.PARAMETER_SCHEDULING, SchedulingControl.class))) {
+                return false;
             }
         }
 
@@ -325,7 +328,7 @@ public class ITipHandler implements CalendarHandler {
      */
     private boolean isMove(UpdateResult update) {
         // @formatter:off
-        if(update.containsAnyChangeOf(NOT_MOVE_EVENT_FIELDS) ||
+        if (update.containsAnyChangeOf(NOT_MOVE_EVENT_FIELDS) ||
            update.getAttendeeUpdates() == null || 
            (update.getAttendeeUpdates().getAddedItems() != null && update.getAttendeeUpdates().getAddedItems().isEmpty() == false) ||
            (update.getAttendeeUpdates().getRemovedItems() != null && update.getAttendeeUpdates().getRemovedItems().isEmpty() == false) ||

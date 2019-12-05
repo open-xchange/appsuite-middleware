@@ -58,6 +58,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.CalculatePermission;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
@@ -68,15 +69,14 @@ import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.folderstorage.mail.contentType.MailContentType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 /**
  * {@link MovePerformer} - Serves the <code>UPDATE</code> request.
@@ -215,7 +215,7 @@ final class MovePerformer extends AbstractPerformer {
             if (perm.getType() == FolderPermissionType.INHERITED || perm.getType() == FolderPermissionType.LEGATOR) {
                 Permission cloned = (Permission) perm.clone();
                 cloned.setType(FolderPermissionType.INHERITED);
-                if(perm.getType() == FolderPermissionType.LEGATOR) {
+                if (perm.getType() == FolderPermissionType.LEGATOR) {
                     cloned.setPermissionLegator(folder.getParentID());
                 }
                 result.add(cloned);
@@ -275,12 +275,12 @@ final class MovePerformer extends AbstractPerformer {
                     if (started) {
                         realStorage.commitTransaction(storageParameters);
                     }
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     if (started) {
                         realStorage.rollback(storageParameters);
                     }
                     throw e;
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     if (started) {
                         realStorage.rollback(storageParameters);
                     }

@@ -240,7 +240,7 @@ public class Bug40627Test extends ShareTest {
                     if (Arrays.contains(visibleUserIDs, permissionEntity.getEntity())) {
                         GetRequest getRequest = new com.openexchange.ajax.user.actions.GetRequest(permissionEntity.getEntity(), TimeZones.UTC);
                         com.openexchange.ajax.user.actions.GetResponse getResponse = sharingClient.execute(getRequest);
-                        com.openexchange.groupware.ldap.User expectedUser = getResponse.getUser();
+                        com.openexchange.user.User expectedUser = getResponse.getUser();
                         assertEquals(expectedUser.getDisplayName(), permissionEntity.getDisplayName());
                         assertNotNull(permissionEntity.getContact());
                         assertEquals(expectedUser.getSurname(), permissionEntity.getContact().getSurName());

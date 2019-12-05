@@ -70,11 +70,6 @@ public class RdbCalendarAvailabilityStorageFactory implements CalendarAvailabili
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.chronos.storage.CalendarAvailabilityStorageFactory#create(com.openexchange.groupware.contexts.Context, com.openexchange.database.provider.DBProvider, com.openexchange.database.provider.DBTransactionPolicy)
-     */
     @Override
     public CalendarAvailabilityStorage create(Context context, DBProvider dbProvider, DBTransactionPolicy txPolicy) throws OXException {
         return new RdbCalendarAvailabilityStorage(context, dbProvider, txPolicy);

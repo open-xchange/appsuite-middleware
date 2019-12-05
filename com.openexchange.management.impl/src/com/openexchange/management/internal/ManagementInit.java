@@ -119,9 +119,6 @@ public final class ManagementInit implements Initialization {
                 }
                 agent.setJmxLogin(jmxLogin);
                 agent.setJmxPassword(jmxPassword);
-                String lHashAlgorithm = configurationService.getProperty("JMXPasswordHashAlgorithm", "SHA");
-                String hashAlgorithmSafe = Strings.isNotEmpty(lHashAlgorithm) ? lHashAlgorithm : "SHA"; // keep SHA as default for JMX
-                agent.setJmxPasswordHashAlgorithm(hashAlgorithmSafe);
             }
         }
         /*

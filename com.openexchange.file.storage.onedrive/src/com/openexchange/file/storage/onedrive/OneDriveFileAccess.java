@@ -111,31 +111,16 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
         this.userId = session.getUserId();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageAutoRenameFoldersAccess#createFolder(com.openexchange.file.storage.FileStorageFolder, boolean)
-     */
     @Override
     public String createFolder(FileStorageFolder toCreate, boolean autoRename) throws OXException {
         return folderAccess.createFolder(toCreate, autoRename);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageAutoRenameFoldersAccess#moveFolder(java.lang.String, java.lang.String, java.lang.String, boolean)
-     */
     @Override
     public String moveFolder(String folderId, String newParentId, String newName, boolean autoRename) throws OXException {
         return folderAccess.moveFolder(folderId, newParentId, newName, autoRename);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFileAccess#exists(java.lang.String, java.lang.String, java.lang.String)
-     */
     @Override
     public boolean exists(final String folderId, final String id, final String version) throws OXException {
         return perform(new OneDriveClosure<Boolean>() {
@@ -154,11 +139,6 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
         }).booleanValue();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFileAccess#getFileMetadata(java.lang.String, java.lang.String, java.lang.String)
-     */
     @Override
     public File getFileMetadata(final String folderId, final String id, final String version) throws OXException {
         if (CURRENT_VERSION != version) {
@@ -173,21 +153,11 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
         });
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFileAccess#saveFileMetadata(com.openexchange.file.storage.File, long)
-     */
     @Override
     public IDTuple saveFileMetadata(File file, long sequenceNumber) throws OXException {
         return saveFileMetadata(file, sequenceNumber, null);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFileAccess#saveFileMetadata(com.openexchange.file.storage.File, long, java.util.List)
-     */
     @Override
     public IDTuple saveFileMetadata(final File file, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
         if (FileStorageFileAccess.NEW == file.getId()) {
@@ -204,11 +174,6 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
         });
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFileAccess#copy(com.openexchange.file.storage.FileStorageFileAccess.IDTuple, java.lang.String, java.lang.String, com.openexchange.file.storage.File, java.io.InputStream, java.util.List)
-     */
     @Override
     public IDTuple copy(final IDTuple source, String version, final String destFolder, final File update, final InputStream newFile, final List<Field> modifiedFields) throws OXException {
         if (version != CURRENT_VERSION) {
@@ -227,11 +192,6 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
         });
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFileAccess#move(com.openexchange.file.storage.FileStorageFileAccess.IDTuple, java.lang.String, long, com.openexchange.file.storage.File, java.util.List)
-     */
     @Override
     public IDTuple move(final IDTuple source, final String destFolder, long sequenceNumber, final File update, final List<File.Field> modifiedFields) throws OXException {
         return perform(new OneDriveClosure<IDTuple>() {
@@ -248,11 +208,6 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
         });
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFileAccess#getDocument(java.lang.String, java.lang.String, java.lang.String)
-     */
     @Override
     public InputStream getDocument(final String folderId, final String id, final String version) throws OXException {
         return perform(new OneDriveClosure<InputStream>() {
@@ -264,11 +219,6 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
         });
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.ThumbnailAware#getThumbnailStream(java.lang.String, java.lang.String, java.lang.String)
-     */
     @Override
     public InputStream getThumbnailStream(String folderId, final String id, String version) throws OXException {
         return perform(new OneDriveClosure<InputStream>() {
@@ -280,21 +230,11 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
         });
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFileAccess#saveDocument(com.openexchange.file.storage.File, java.io.InputStream, long)
-     */
     @Override
     public IDTuple saveDocument(File file, InputStream data, long sequenceNumber) throws OXException {
         return saveDocument(file, data, sequenceNumber, null);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFileAccess#saveDocument(com.openexchange.file.storage.File, java.io.InputStream, long, java.util.List)
-     */
     @Override
     public IDTuple saveDocument(final File file, final InputStream data, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
         return perform(new OneDriveClosure<IDTuple>() {
@@ -306,11 +246,6 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
         });
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFileAccess#removeDocument(java.lang.String, long)
-     */
     @Override
     public void removeDocument(final String folderId, long sequenceNumber) throws OXException {
         perform(new OneDriveClosure<Void>() {
@@ -323,21 +258,11 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
         });
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFileAccess#removeDocument(java.util.List, long)
-     */
     @Override
     public List<IDTuple> removeDocument(List<IDTuple> ids, long sequenceNumber) throws OXException {
         return removeDocument(ids, sequenceNumber, false);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFileAccess#removeDocument(java.util.List, long, boolean)
-     */
     @Override
     public List<IDTuple> removeDocument(final List<IDTuple> ids, long sequenceNumber, final boolean hardDelete) throws OXException {
         return perform(new OneDriveClosure<List<IDTuple>>() {
@@ -352,21 +277,11 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
         });
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFileAccess#touch(java.lang.String, java.lang.String)
-     */
     @Override
     public void touch(String folderId, String id) throws OXException {
         exists(folderId, id, CURRENT_VERSION);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFileAccess#getDocuments(java.lang.String)
-     */
     @Override
     public TimedResult<File> getDocuments(final String folderId) throws OXException {
         return perform(new OneDriveClosure<TimedResult<File>>() {
@@ -378,21 +293,11 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
         });
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFileAccess#getDocuments(java.lang.String, java.util.List)
-     */
     @Override
     public TimedResult<File> getDocuments(final String folderId, final List<Field> fields) throws OXException {
         return getDocuments(folderId);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFileAccess#getDocuments(java.lang.String, java.util.List, com.openexchange.file.storage.File.Field, com.openexchange.file.storage.FileStorageFileAccess.SortDirection)
-     */
     @Override
     public TimedResult<File> getDocuments(final String folderId, List<Field> fields, final Field sort, final SortDirection order) throws OXException {
         return perform(new OneDriveClosure<TimedResult<File>>() {
@@ -404,11 +309,6 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
         });
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFileAccess#getDocuments(java.util.List, java.util.List)
-     */
     @Override
     public TimedResult<File> getDocuments(final List<IDTuple> ids, List<Field> fields) throws OXException {
         return perform(new OneDriveClosure<TimedResult<File>>() {
@@ -423,41 +323,21 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
 
     private static final SearchIterator<File> EMPTY_ITER = SearchIteratorAdapter.emptyIterator();
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFileAccess#getDelta(java.lang.String, long, java.util.List, boolean)
-     */
     @Override
     public Delta<File> getDelta(String folderId, long updateSince, List<Field> fields, boolean ignoreDeleted) throws OXException {
         return new FileDelta(EMPTY_ITER, EMPTY_ITER, EMPTY_ITER, 0L);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFileAccess#getDelta(java.lang.String, long, java.util.List, com.openexchange.file.storage.File.Field, com.openexchange.file.storage.FileStorageFileAccess.SortDirection, boolean)
-     */
     @Override
     public Delta<File> getDelta(String folderId, long updateSince, List<Field> fields, Field sort, SortDirection order, boolean ignoreDeleted) throws OXException {
         return new FileDelta(EMPTY_ITER, EMPTY_ITER, EMPTY_ITER, 0L);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFileAccess#search(java.lang.String, java.util.List, java.lang.String, com.openexchange.file.storage.File.Field, com.openexchange.file.storage.FileStorageFileAccess.SortDirection, int, int)
-     */
     @Override
     public SearchIterator<File> search(final String pattern, List<Field> fields, final String folderId, final Field sort, final SortDirection order, final int start, final int end) throws OXException {
         return search(pattern, fields, folderId, false, sort, order, start, end);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFileAccess#search(java.lang.String, java.util.List, java.lang.String, boolean, com.openexchange.file.storage.File.Field, com.openexchange.file.storage.FileStorageFileAccess.SortDirection, int, int)
-     */
     @Override
     public SearchIterator<File> search(final String pattern, List<Field> fields, final String folderId, final boolean includeSubfolders, final Field sort, final SortDirection order, final int start, final int end) throws OXException {
         return perform(new OneDriveClosure<SearchIterator<File>>() {
@@ -486,21 +366,11 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
         });
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFileAccess#getAccountAccess()
-     */
     @Override
     public FileStorageAccountAccess getAccountAccess() {
         return accountAccess;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageSequenceNumberProvider#getSequenceNumbers(java.util.List)
-     */
     @Override
     public Map<String, Long> getSequenceNumbers(List<String> folderIds) throws OXException {
         if (null == folderIds || 0 == folderIds.size()) {

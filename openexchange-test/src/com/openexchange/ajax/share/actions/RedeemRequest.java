@@ -70,16 +70,20 @@ public class RedeemRequest implements AJAXRequest<RedeemResponse> {
 
     private final String token;
     private final boolean failOnError;
+    private final String language;
 
     public RedeemRequest(String token) {
-        super();
-        this.token = token;
-        this.failOnError = false;
+        this(token, false);
     }
 
     public RedeemRequest(String token, boolean failOnError) {
+        this(token, null, failOnError);
+    }
+
+    public RedeemRequest(String token, String language, boolean failOnError) {
         super();
         this.token = token;
+        this.language = language;
         this.failOnError = failOnError;
     }
 
@@ -95,7 +99,11 @@ public class RedeemRequest implements AJAXRequest<RedeemResponse> {
 
     @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
-        return new Params("token", token).toArray();
+        Params params = new Params("token", token);
+        if (null != language) {
+            params.add("language", language);
+        }
+        return params.toArray();
     }
 
     @Override

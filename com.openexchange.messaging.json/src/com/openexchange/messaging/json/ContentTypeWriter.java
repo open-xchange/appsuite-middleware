@@ -119,7 +119,7 @@ public class ContentTypeWriter implements MessagingHeaderWriter {
     }
 
     private ContentType toCType(final MessagingHeader header) throws OXException {
-        if(ContentType.class.isInstance(header)) {
+        if (ContentType.class.isInstance(header)) {
             return (ContentType) header;
         }
         return new MimeContentType(header.getValue());

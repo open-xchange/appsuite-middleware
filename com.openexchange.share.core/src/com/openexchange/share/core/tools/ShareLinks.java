@@ -112,7 +112,7 @@ public class ShareLinks {
      */
     public static String generateInternal(HostData hostData, ShareTarget target) throws OXException {
         Module module = Module.getForFolderConstant(target.getModule());
-        if(null==module){
+        if (null==module){
             throw ShareCoreExceptionCodes.UNKOWN_MODULE.create(I(target.getModule()));
         }
         String moduleStr = module.getName();
@@ -130,11 +130,19 @@ public class ShareLinks {
      * @return The link
      */
     public static String generateConfirmPasswordReset(HostData hostData, String baseShareToken, String confirmToken) {
-            return prepare(hostData)
-                .setPath(serverPath(hostData, "/reset/password"))
-                .addParameter("share", baseShareToken)
-                .addParameter("confirm", confirmToken)
-                .toString();
+        URIBuilder builder = prepare(hostData);
+        String guestHostname = getGuestHostname(baseShareToken);
+        if (Strings.isNotEmpty(guestHostname)) {
+            builder.setHost(guestHostname);
+        } else {
+            getLogger(ShareLinks.class).warn("No hostname for guests is configured. Falling back to current host \"{}\" for share link " +
+                "generation. Please configure \"com.openexchange.share.guestHostname\" to make this warning disappear.", builder.getHost());
+        }
+        return builder
+            .setPath(serverPath(hostData, "/reset/password"))
+            .addParameter("share", baseShareToken)
+            .addParameter("confirm", confirmToken)
+        .toString();
     }
 
     private static URIBuilder prepare(HostData hostData) {

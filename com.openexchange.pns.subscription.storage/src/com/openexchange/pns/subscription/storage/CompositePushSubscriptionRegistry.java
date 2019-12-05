@@ -172,7 +172,7 @@ public class CompositePushSubscriptionRegistry implements PushSubscriptionRegist
         List<PushSubscriptionListener> listeners = this.listeners.getServiceList();
         for (PushSubscriptionListener listener : listeners) {
             try {
-                if(!listener.addingSubscription(subscription)) {
+                if (!listener.addingSubscription(subscription)) {
                     LOG.info("Listener {} denied registration of subscription with topics '{}' for user {} in context {}", listener.getClass().getSimpleName(), subscription.getTopics(), I(subscription.getUserId()), I(subscription.getContextId()));
                 }
             } catch (Exception e) {

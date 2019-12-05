@@ -60,6 +60,7 @@ import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import com.openexchange.dav.Config;
 import com.openexchange.dav.PropertyNames;
 import com.openexchange.dav.caldav.CalDAVTest;
 import com.openexchange.groupware.container.FolderObject;
@@ -127,7 +128,7 @@ public class Bug25160Test extends CalDAVTest {
         props.add(PropertyNames.CURRENT_USER_PRINCIPAL);
         props.add(PropertyNames.PRINCIPAL_URL);
         props.add(PropertyNames.RESOURCETYPE);
-        PropFindMethod propFind = new PropFindMethod(super.getWebDAVClient().getBaseURI() + "/", DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
+        PropFindMethod propFind = new PropFindMethod(super.getWebDAVClient().getBaseURI() + Config.getPathPrefix() + "/", DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
         MultiStatusResponse response = assertSingleResponse(super.getWebDAVClient().doPropFind(propFind));
         String currentUserPrincipal = super.extractHref(PropertyNames.CURRENT_USER_PRINCIPAL, response);
         assertNotNull(currentUserPrincipal);
@@ -139,7 +140,7 @@ public class Bug25160Test extends CalDAVTest {
          */
         props = new DavPropertyNameSet();
         props.add(PropertyNames.OWNER);
-        propFind = new PropFindMethod(getWebDAVClient().getBaseURI() + "/caldav/" + encodeFolderID(String.valueOf(subfolder.getObjectID())), DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
+        propFind = new PropFindMethod(getWebDAVClient().getBaseURI() + Config.getPathPrefix() + "/caldav/" + encodeFolderID(String.valueOf(subfolder.getObjectID())), DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
         response = assertSingleResponse(super.getWebDAVClient().doPropFind(propFind));
         assertTrue("owner found", response.getPropertyNames(HttpServletResponse.SC_NOT_FOUND).contains(PropertyNames.OWNER));
     }

@@ -211,7 +211,7 @@ public abstract class SQLTestCase {
             stmt = con.prepareStatement(sql);
             rs = stmt.executeQuery();
             final ResultSetMetaData metaData = rs.getMetaData();
-            while(rs.next()) {
+            while (rs.next()) {
                 final Map<String, Object> row = new HashMap<String, Object>();
                 for(int i = 1; i <= metaData.getColumnCount(); i++) {
                     final String key = metaData.getColumnName(i);
@@ -228,7 +228,7 @@ public abstract class SQLTestCase {
             if (con != null) {
                 getDBProvider().releaseReadConnection(null, con);
             }
-            if(rs != null) {
+            if (rs != null) {
                 rs.close();
             }
         }
@@ -254,7 +254,7 @@ public abstract class SQLTestCase {
         final List<Object> values = new ArrayList<Object>();
 
         for(final Object attr : attrs) {
-            if(key == null) {
+            if (key == null) {
                 key = (String) attr;
                 builder.append(key).append(", ");
             } else {
@@ -276,7 +276,7 @@ public abstract class SQLTestCase {
         final StringBuilder builder = new StringBuilder("SELECT 1 FROM ").append(tableName).append(" WHERE ");
         String key = null;
         for(final Object object : attrs) {
-            if(key == null) {
+            if (key == null) {
                 key = (String) object;
             } else {
                 builder.append(key).append(" = ").append(object);

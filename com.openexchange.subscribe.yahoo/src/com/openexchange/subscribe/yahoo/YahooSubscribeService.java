@@ -83,11 +83,6 @@ public class YahooSubscribeService extends AbstractOAuthSubscribeService {
         this.services = services;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.subscribe.SubscribeService#getContent(com.openexchange.subscribe.Subscription)
-     */
     @Override
     public Collection<?> getContent(final Subscription subscription) throws OXException {
         int oauthAccountId = ((Integer) subscription.getConfiguration().get("account")).intValue();
@@ -95,11 +90,6 @@ public class YahooSubscribeService extends AbstractOAuthSubscribeService {
         return yahooService.getContacts(subscription.getSession(), subscription.getUserId(), subscription.getContext().getContextId(), oauthAccountId);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.subscribe.oauth.AbstractOAuthSubscribeService#modifyOutgoing(com.openexchange.subscribe.Subscription)
-     */
     @Override
     public void modifyOutgoing(final Subscription subscription) throws OXException {
         if (Strings.isNotEmpty(subscription.getSecret())) {
@@ -111,11 +101,6 @@ public class YahooSubscribeService extends AbstractOAuthSubscribeService {
         super.modifyOutgoing(subscription);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.subscribe.oauth.AbstractOAuthSubscribeService#getKnownApi()
-     */
     @Override
     protected KnownApi getKnownApi() {
         return KnownApi.YAHOO;

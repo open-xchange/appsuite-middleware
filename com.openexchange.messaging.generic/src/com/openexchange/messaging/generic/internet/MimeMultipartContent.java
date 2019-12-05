@@ -159,7 +159,7 @@ public class MimeMultipartContent implements MultipartContent {
             bodyPart.setSectionId(sectionId == null ? Integer.toString(index + 1) : new StringBuilder(8).append(sectionId).append('.').append(
                 Integer.toString(index + 1)).toString());
             return bodyPart;
-        } catch (final javax.mail.MessagingException e) {
+        } catch (javax.mail.MessagingException e) {
             throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
         }
     }
@@ -168,7 +168,7 @@ public class MimeMultipartContent implements MultipartContent {
     public int getCount() throws OXException {
         try {
             return mimeMultipart.getCount();
-        } catch (final javax.mail.MessagingException e) {
+        } catch (javax.mail.MessagingException e) {
             throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
         }
     }
@@ -183,7 +183,7 @@ public class MimeMultipartContent implements MultipartContent {
         try {
             mimeMultipart.addBodyPart((BodyPart) part.part);
             part.setParent(this);
-        } catch (final javax.mail.MessagingException e) {
+        } catch (javax.mail.MessagingException e) {
             throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
         }
     }
@@ -200,7 +200,7 @@ public class MimeMultipartContent implements MultipartContent {
         try {
             mimeMultipart.addBodyPart((BodyPart) part.part, index);
             part.setParent(this);
-        } catch (final javax.mail.MessagingException e) {
+        } catch (javax.mail.MessagingException e) {
             throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
         }
     }
@@ -215,7 +215,7 @@ public class MimeMultipartContent implements MultipartContent {
     public boolean removeBodyPart(final MimeMessagingBodyPart part) throws OXException {
         try {
             return mimeMultipart.removeBodyPart((BodyPart) part.part);
-        } catch (final javax.mail.MessagingException e) {
+        } catch (javax.mail.MessagingException e) {
             throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
         }
     }
@@ -229,9 +229,9 @@ public class MimeMultipartContent implements MultipartContent {
     public void removeBodyPart(final int index) throws OXException {
         try {
             mimeMultipart.removeBodyPart(index);
-        } catch (final javax.mail.MessagingException e) {
+        } catch (javax.mail.MessagingException e) {
             throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
-        } catch (final IndexOutOfBoundsException e) {
+        } catch (IndexOutOfBoundsException e) {
             throw MessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }

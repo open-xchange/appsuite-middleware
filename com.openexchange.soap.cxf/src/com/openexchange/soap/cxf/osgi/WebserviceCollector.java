@@ -120,7 +120,7 @@ public class WebserviceCollector implements ServiceListener {
             for (final ServiceReference<?> serviceReference : context.getAllServiceReferences(null, null)) {
                 add(serviceReference);
             }
-        } catch (final InvalidSyntaxException e) {
+        } catch (InvalidSyntaxException e) {
             // Impossible, no filter specified.
         }
 
@@ -269,7 +269,7 @@ public class WebserviceCollector implements ServiceListener {
             }
             oldEndpoint = endpoints.replace(name, endpoint);
             LOG.info("Publishing endpoint succeeded. Published \"{}\" under address \"{}\".", name, address);
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             ExceptionUtils.handleThrowable(t);
             LOG.error("Publishing endpoint failed. Couldn't publish \"{}\" under address \"{}\".", name, address, t);
             oldEndpoint = null;
@@ -283,7 +283,7 @@ public class WebserviceCollector implements ServiceListener {
         try {
             final Class<? extends Object> clazz = service.getClass();
             return (null == clazz) ? false : (null != clazz.getAnnotation(WebService.class));
-        } catch (final Exception e) {
+        } catch (Exception e) {
             return false;
         }
     }

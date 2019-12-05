@@ -207,7 +207,7 @@ public class JCSCacheInformation extends StandardMBean implements CacheInformati
        ObjectOutputStream out= null;
         try {
             out = new ObjectOutputStream(counter);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             LOG.error("", e);
             Streams.close(out);
             return 0;
@@ -218,7 +218,7 @@ public class JCSCacheInformation extends StandardMBean implements CacheInformati
                 out.writeObject(ce.getVal());
             }
             out.flush();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.info("Problem getting byte count. Likely cause is a non serializable object.{}", e.getMessage());
         } finally {
             Streams.close(out);

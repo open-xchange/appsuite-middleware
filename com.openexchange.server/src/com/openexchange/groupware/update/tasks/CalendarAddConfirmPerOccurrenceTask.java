@@ -53,6 +53,7 @@ import static com.openexchange.database.Databases.autocommit;
 import static com.openexchange.database.Databases.rollback;
 import java.sql.Connection;
 import java.sql.SQLException;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
@@ -84,6 +85,9 @@ public class CalendarAddConfirmPerOccurrenceTask extends UpdateTaskAdapter {
         Connection connection = params.getConnection();
         int rollback = 0;
         try {
+            if (false == Databases.tablesExist(connection, "prg_dates_members", "del_dates_members", "dateExternal", "delDateExternal")) {
+                return;
+            }
             connection.setAutoCommit(false);
             rollback = 1;
 
@@ -97,7 +101,7 @@ public class CalendarAddConfirmPerOccurrenceTask extends UpdateTaskAdapter {
 
             connection.commit();
             rollback = 2;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             if (rollback > 0) {

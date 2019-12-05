@@ -111,7 +111,7 @@ public final class DBUtils {
         if (result != null) {
             try {
                 result.close();
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 LOG.error("", e);
             }
         }
@@ -128,7 +128,7 @@ public final class DBUtils {
         if (null != stmt) {
             try {
                 stmt.close();
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 LOG.error("", e);
             }
         }
@@ -180,7 +180,7 @@ public final class DBUtils {
         if (rs != null) {
             try {
                 rs.close();
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 LOG.error("", e);
             }
         }
@@ -190,7 +190,7 @@ public final class DBUtils {
         if (stmt != null) {
             try {
                 stmt.close();
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 LOG.error("", e);
             }
         }
@@ -212,7 +212,7 @@ public final class DBUtils {
         }
         try {
             return stmt.toString();
-        } catch (final Exception x) {
+        } catch (Exception x) {
             return query;
         }
     }
@@ -250,7 +250,7 @@ public final class DBUtils {
         }
         try {
             con.rollback();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             LOG.error("", e);
         }
     }
@@ -268,7 +268,7 @@ public final class DBUtils {
         }
         try {
             con.setAutoCommit(true);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             LOG.error("", e);
         }
     }
@@ -402,16 +402,40 @@ public final class DBUtils {
      * @throws SQLException If something goes wrong
      */
     public static boolean tableExists(final Connection con, final String table) throws SQLException {
-        final DatabaseMetaData metaData = con.getMetaData();
+        DatabaseMetaData metaData = con.getMetaData();
         ResultSet rs = null;
-        boolean retval = false;
         try {
             rs = metaData.getTables(null, null, table, new String[] { "TABLE" });
-            retval = (rs.next() && rs.getString("TABLE_NAME").equals(table));
+            if (false == rs.next()) {
+                return false;
+            }
+            String foundTable = rs.getString("TABLE_NAME");
+            closeSQLStuff(rs);
+            rs = null;
+            if (table.equals(foundTable)) {
+                return true;
+            }
+            if (table.equalsIgnoreCase(foundTable)) {
+                /*
+                 * assume table exists based on 'lower_case_table_names' configuration
+                 */
+                try (PreparedStatement stmt = con.prepareStatement("SHOW variables LIKE 'lower_case_table_names';"); ResultSet result = stmt.executeQuery()) {
+                    if (result.next()) {
+                        switch (result.getInt("Value")) {
+                            case 1: // table names are stored in lowercase, name comparisons are case-insensitive ("windows")
+                            case 2: // table names are stored in specified lettercase, but lowercased on lookup, name comparisons are case-insensitive ("mac os")
+                                return true;
+                            case 0: // table names are stored in specified lettercase, name comparisons are case-sensitive ("unix")
+                            default:
+                                return false;
+                        }
+                    }
+                }
+            }
+            return false;
         } finally {
             closeSQLStuff(rs);
         }
-        return retval;
     }
 
     /**

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Itip bundle
 Bundle-SymbolicName: com.openexchange.chronos.itip
-Bundle-Version: 7.10.2
+Bundle-Version: 7.10.3
 Bundle-Activator: com.openexchange.chronos.itip.osgi.Activator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
@@ -20,14 +20,16 @@ Import-Package: com.google.common.collect,
  com.openexchange.chronos.exception,
  com.openexchange.chronos.ical,
  com.openexchange.chronos.provider,
+ com.openexchange.chronos.scheduling.changes,
  com.openexchange.chronos.service,
  com.openexchange.chronos.storage,
- com.openexchange.chronos.storage.rdb,
  com.openexchange.config,
  com.openexchange.context,
  com.openexchange.conversion,
  com.openexchange.dispatcher,
  com.openexchange.exception,
+ com.openexchange.folderstorage,
+ com.openexchange.folderstorage.type,
  com.openexchange.group,
  com.openexchange.groupware,
  com.openexchange.groupware.attach,
@@ -56,6 +58,7 @@ Import-Package: com.google.common.collect,
  com.openexchange.mail.utils,
  com.openexchange.messaging,
  com.openexchange.osgi,
+ com.openexchange.regional,
  com.openexchange.resource,
  com.openexchange.search,
  com.openexchange.search.internal.operands,

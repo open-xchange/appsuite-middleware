@@ -61,30 +61,18 @@ public class FilestoreImpl implements Filestore {
 	private long size;
 	private long maxContext;
 
-	/* (non-Javadoc)
-	 * @see com.openexchange.groupware.filestore.Filestore#getId()
-	 */
 	@Override
     public int getId() {
 		return id;
 	}
-	/* (non-Javadoc)
-	 * @see com.openexchange.groupware.filestore.Filestore#getMaxContext()
-	 */
 	@Override
     public long getMaxContext() {
 		return maxContext;
 	}
-	/* (non-Javadoc)
-	 * @see com.openexchange.groupware.filestore.Filestore#getSize()
-	 */
 	@Override
     public long getSize() {
 		return size;
 	}
-	/* (non-Javadoc)
-	 * @see com.openexchange.groupware.filestore.Filestore#getUri()
-	 */
 	@Override
     public URI getUri() {
 		return uri;

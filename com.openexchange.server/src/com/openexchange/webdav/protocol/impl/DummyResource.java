@@ -100,7 +100,7 @@ public class DummyResource extends AbstractResource implements WebdavResource  {
 	public DummyResource(final DummyResourceManager manager, final WebdavPath url) {
 		this.mgr = manager;
 		this.url = url;
-		if(url.size() != 0) {
+		if (url.size() != 0) {
 			displayName = url.name();
 		} else {
 			displayName = "";
@@ -117,12 +117,12 @@ public class DummyResource extends AbstractResource implements WebdavResource  {
 
 	@Override
     public void create() throws WebdavProtocolException {
-		if(exists) {
+		if (exists) {
 		    throw WebdavProtocolException.Code.DIRECTORY_ALREADY_EXISTS.create(getUrl(), HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		}
 		try {
             checkPath();
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw new WebdavProtocolException(getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
         }
 		exists = true;
@@ -138,7 +138,7 @@ public class DummyResource extends AbstractResource implements WebdavResource  {
 
 	@Override
     public void delete() throws WebdavProtocolException {
-		if(!exists) {
+		if (!exists) {
 		    throw WebdavProtocolException.Code.FILE_NOT_FOUND.create(getUrl(), HttpServletResponse.SC_NOT_FOUND, getUrl());
 		}
 		exists = false;
@@ -276,18 +276,18 @@ public class DummyResource extends AbstractResource implements WebdavResource  {
 
 	@Override
     public void lock(final WebdavLock lock) throws WebdavProtocolException {
-		if(!exists()) {
+		if (!exists()) {
 			// Create Lock Null Resource
 			final WebdavResource res = this.mgr.addLockNullResource(this);
 			try {
                 res.lock(lock);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 throw new WebdavProtocolException(getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
             }
 			return;
 		}
-		if(null != lock.getToken() && (null != locks.get(lock.getToken()))) {
-			//if(null != locks.get(lock.getToken())) {
+		if (null != lock.getToken() && (null != locks.get(lock.getToken()))) {
+			//if (null != locks.get(lock.getToken())) {
 				locks.put(lock.getToken(),lock);
 				return;
 			//}
@@ -305,7 +305,7 @@ public class DummyResource extends AbstractResource implements WebdavResource  {
 		final List<WebdavLock> lockList =  getOwnLocks();
 		try {
             addParentLocks(lockList);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw new WebdavProtocolException(getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
         }
 		return lockList;
@@ -328,7 +328,7 @@ public class DummyResource extends AbstractResource implements WebdavResource  {
 
 			@Override
             public Map<String, WebdavLock> inject(final Map<String, WebdavLock> list, final WebdavLock element) {
-				if(!element.isActive(timeout)) {
+				if (!element.isActive(timeout)) {
 					list.remove(element.getToken());
 				}
 				return list;
@@ -341,12 +341,12 @@ public class DummyResource extends AbstractResource implements WebdavResource  {
 	@Override
     public WebdavLock getLock(final String token) throws WebdavProtocolException {
 		final WebdavLock lock =  locks.get(token);
-		if(lock != null) {
+		if (lock != null) {
 			return lock;
 		}
 		try {
             return findParentLock(token);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw new WebdavProtocolException(getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
         }
 	}
@@ -358,10 +358,10 @@ public class DummyResource extends AbstractResource implements WebdavResource  {
 
 		int b = 0;
 		try {
-			while((b = data.read()) != -1) {
+			while ((b = data.read()) != -1) {
 				bytes.add(I(b));
 			}
-		} catch (final IOException e) {
+		} catch (IOException e) {
 			throw WebdavProtocolException.Code.GENERAL_ERROR.create(getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 
@@ -372,14 +372,14 @@ public class DummyResource extends AbstractResource implements WebdavResource  {
 		}
 
 		this.body = body;
-		if(guessLength) {
+		if (guessLength) {
 			this.length = body.length;
 		}
 	}
 
 	@Override
     public InputStream getBody() throws WebdavProtocolException {
-		if(null == body) {
+		if (null == body) {
 			return null;
 		}
 		return new ByteArrayInputStream(body);

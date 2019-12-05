@@ -133,7 +133,7 @@ public final class ICalJSONDataHandler extends ICalDataHandler {
             long size;
             try {
                 size = Long.parseLong(data.getDataProperties().get(DataProperties.PROPERTY_SIZE));
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 size = 0;
             }
             inputStreamCopy = copyStream((InputStream) data.getData(), size);
@@ -170,7 +170,7 @@ public final class ICalJSONDataHandler extends ICalDataHandler {
              */
             tasks = parseTaskStream(ctx, iCalParser, inputStreamCopy, conversionErrors, conversionWarnings, timeZone);
             // TODO: Handle errors/warnings
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw DataExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
             safeClose(inputStreamCopy);

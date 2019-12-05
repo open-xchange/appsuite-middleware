@@ -70,11 +70,6 @@ public class CurrentDateWriterImpl extends AbstractWriterImpl<CurrentDateTestArg
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.mail.filter.api.conversion.writer.JSONWriter#write(java.lang.Object, org.json.JSONObject)
-     */
     @Override
     public JSONObject write(Test<? extends TestArgument> type, JSONObject jsonObject) throws JSONException {
         return super.write((Test<TestArgument>) type, EnumSet.allOf(CurrentDateTestArgument.class), jsonObject);

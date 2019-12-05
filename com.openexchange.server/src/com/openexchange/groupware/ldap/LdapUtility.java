@@ -237,7 +237,7 @@ public final class LdapUtility {
             } else if (temp.values != null && tag.endsWith("BaseDN")) {
                 try {
                     retval = LdapUtility.getSearchBaseDN(tag, temp.values);
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     retval = e.getMessage();
                 }
             } else {
@@ -248,7 +248,7 @@ public final class LdapUtility {
                         retval = LineParserUtility.parseLine(property, this,
                             data);
                     }
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     LOG.error("", e);
                     retval = tag;
                 }
@@ -329,7 +329,7 @@ public final class LdapUtility {
         final String className, final Class<U> clazz) throws OXException {
         try {
             return Class.forName(className).asSubclass(clazz);
-        } catch (final ClassNotFoundException e) {
+        } catch (ClassNotFoundException e) {
             throw LdapExceptionCode.CLASS_NOT_FOUND.create(e, className).setPrefix(EnumComponent.LDAP.getAbbreviation());
         }
     }
@@ -347,17 +347,17 @@ public final class LdapUtility {
         try {
             final Constructor< ? extends T> cons = clazz.getConstructor(new Class[0]);
             return cons.newInstance(new Object[0]);
-        } catch (final SecurityException e) {
+        } catch (SecurityException e) {
             throw LdapExceptionCode.INSTANTIATION_PROBLEM.create(e, clazz.getName()).setPrefix(EnumComponent.LDAP.getAbbreviation());
-        } catch (final NoSuchMethodException e) {
+        } catch (NoSuchMethodException e) {
             throw LdapExceptionCode.INSTANTIATION_PROBLEM.create(e, clazz.getName()).setPrefix(EnumComponent.LDAP.getAbbreviation());
-        } catch (final InstantiationException e) {
+        } catch (InstantiationException e) {
             throw LdapExceptionCode.INSTANTIATION_PROBLEM.create(e, clazz.getName()).setPrefix(EnumComponent.LDAP.getAbbreviation());
-        } catch (final IllegalAccessException e) {
+        } catch (IllegalAccessException e) {
             throw LdapExceptionCode.INSTANTIATION_PROBLEM.create(e, clazz.getName()).setPrefix(EnumComponent.LDAP.getAbbreviation());
-        } catch (final IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             throw LdapExceptionCode.INSTANTIATION_PROBLEM.create(e, clazz.getName()).setPrefix(EnumComponent.LDAP.getAbbreviation());
-        } catch (final InvocationTargetException e) {
+        } catch (InvocationTargetException e) {
             throw LdapExceptionCode.INSTANTIATION_PROBLEM.create(e, clazz.getName()).setPrefix(EnumComponent.LDAP.getAbbreviation());
         }
     }

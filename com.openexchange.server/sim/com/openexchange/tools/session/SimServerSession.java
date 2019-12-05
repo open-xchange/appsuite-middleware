@@ -56,11 +56,11 @@ import java.util.Set;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.SimContext;
 import com.openexchange.groupware.ldap.MockUser;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.session.Origin;
+import com.openexchange.user.User;
 
 /**
  * {@link SimServerSession}
@@ -238,9 +238,6 @@ public class SimServerSession implements ServerSession {
         // Nothing to do
     }
 
-	/* (non-Javadoc)
-	 * @see com.openexchange.tools.session.ServerSession#isAnonymous()
-	 */
 	@Override
 	public boolean isAnonymous() {
 		// Nothing to do
@@ -249,6 +246,11 @@ public class SimServerSession implements ServerSession {
 
     @Override
     public boolean isTransient() {
+        return false;
+    }
+
+    @Override
+    public boolean isStaySignedIn() {
         return false;
     }
 

@@ -1,0 +1,25 @@
+'/mail/compose/{id}/save':
+  post:
+    operationId: getSave
+    tags:
+      - MailCompose
+    summary: Save as draft. Space gets deleted.
+    parameters:
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - in: path
+        name: id
+        description: The ID of the composition space
+        required: true
+        schema:
+          type: string
+    responses:
+      '200':
+        description: The path to the mail.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MailComposeSendResponse'
+      '400':
+        description: 'Bad request, response contains error message.'
+      '401':
+        description: Not authorized

@@ -57,7 +57,6 @@ import com.openexchange.file.storage.mail.FullName.Type;
 import com.openexchange.file.storage.mail.MailDriveConstants;
 import com.openexchange.file.storage.mail.MailDriveFileStorageService;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.ReadOnlyValue;
@@ -65,6 +64,7 @@ import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.jslob.ConfigTreeEquivalent;
 import com.openexchange.session.Session;
+import com.openexchange.user.User;
 
 /**
  * {@link AbstractMailDriveSetting}

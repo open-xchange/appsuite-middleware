@@ -76,7 +76,7 @@ public class ApachePutRequestBuilder extends CommonApacheHTTPRequest<HTTPPutRequ
 		if (stringBody != null) {
 			try {
 				entity = new StringRequestEntity(stringBody, (cType != null) ? cType : "text/plain", "UTF-8");
-			} catch (final UnsupportedEncodingException e) {
+			} catch (UnsupportedEncodingException e) {
 			}
 		} else if (isBody != null) {
 			entity = new InputStreamRequestEntity(isBody, (cType != null) ? cType : "application/octet-stream");

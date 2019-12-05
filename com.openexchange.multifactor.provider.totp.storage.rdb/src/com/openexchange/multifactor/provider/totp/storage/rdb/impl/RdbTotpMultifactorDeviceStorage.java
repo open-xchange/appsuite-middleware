@@ -129,7 +129,7 @@ public class RdbTotpMultifactorDeviceStorage extends MultifactorStorageCommon im
      */
     private Collection<TotpMultifactorDevice> createDevicesFrom(ResultSet resultSet) throws SQLException {
         final Collection<TotpMultifactorDevice> ret = new ArrayList<TotpMultifactorDevice>();
-        while(resultSet.next()) {
+        while (resultSet.next()) {
             ret.add(createDeviceFrom(resultSet));
         }
         return ret;
@@ -151,7 +151,7 @@ public class RdbTotpMultifactorDeviceStorage extends MultifactorStorageCommon im
             statement.setBoolean(index++, device.isTrustedApplicationDevice().booleanValue());
             statement.setString(index++, device.getSharedSecret());
             statement.executeUpdate();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw MultifactorExceptionCodes.SQL_EXCEPTION.create(e.getMessage(), e);
         } finally {
             Databases.closeSQLStuff(statement);
@@ -175,7 +175,7 @@ public class RdbTotpMultifactorDeviceStorage extends MultifactorStorageCommon im
             statement.setString(index++, deviceId);
             rows = statement.executeUpdate();
             return rows > 0 ? true : false;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw MultifactorExceptionCodes.SQL_EXCEPTION.create(e.getMessage(), e);
         } finally {
             Databases.closeSQLStuff(statement);
@@ -200,7 +200,7 @@ public class RdbTotpMultifactorDeviceStorage extends MultifactorStorageCommon im
             statement.setInt(index++, contextId);
             statement.setInt(index++, userId);
             return createDevicesFrom(statement.executeQuery());
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw MultifactorExceptionCodes.SQL_EXCEPTION.create(e.getMessage(), e);
         } finally {
             Databases.closeSQLStuff(statement);
@@ -226,7 +226,7 @@ public class RdbTotpMultifactorDeviceStorage extends MultifactorStorageCommon im
                 return result.getInt(1);
             }
             throw MultifactorExceptionCodes.SQL_EXCEPTION.create("Error getting device count for TOTP devices");
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw MultifactorExceptionCodes.SQL_EXCEPTION.create(e.getMessage(), e);
         } finally {
             Databases.closeSQLStuff(result, statement);
@@ -254,7 +254,7 @@ public class RdbTotpMultifactorDeviceStorage extends MultifactorStorageCommon im
                 return Optional.of(createDeviceFrom(result));
             }
             return Optional.empty();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw MultifactorExceptionCodes.SQL_EXCEPTION.create(e.getMessage(), e);
         } finally {
             Databases.closeSQLStuff(result, statement);
@@ -279,7 +279,7 @@ public class RdbTotpMultifactorDeviceStorage extends MultifactorStorageCommon im
             statement.setString(index++, deviceId);
             rows = statement.executeUpdate();
             return rows > 0 ? true : false;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw MultifactorExceptionCodes.SQL_EXCEPTION.create(e.getMessage(), e);
         } finally {
             Databases.closeSQLStuff(statement);

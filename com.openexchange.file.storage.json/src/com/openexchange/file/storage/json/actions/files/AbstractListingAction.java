@@ -67,9 +67,9 @@ import com.openexchange.ajax.requesthandler.converters.preview.AbstractPreviewRe
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageUtility;
-import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.json.services.Services;
 import com.openexchange.groupware.results.Delta;
@@ -212,7 +212,7 @@ public abstract class AbstractListingAction extends AbstractFileAction {
                     while (results.hasNext()) {
                         // Call preview service for next file
                         File fileMetadata = results.next();
-                        if(timestamp == null || timestamp.longValue() < fileMetadata.getSequenceNumber()) {
+                        if (timestamp == null || timestamp.longValue() < fileMetadata.getSequenceNumber()) {
                             timestamp = Long.valueOf(fileMetadata.getSequenceNumber());
                         }
                         files.add(fileMetadata);
@@ -227,12 +227,12 @@ public abstract class AbstractListingAction extends AbstractFileAction {
         }
 
         // Calculate eventually missing time stamp
-        if(timestamp == null && results.hasNext()) {
+        if (timestamp == null && results.hasNext()) {
             List<File> files = new LinkedList<File>();
             while (results.hasNext()) {
                 // Call preview service for next file
                 File fileMetadata = results.next();
-                if(timestamp == null || timestamp.longValue() < fileMetadata.getSequenceNumber()) {
+                if (timestamp == null || timestamp.longValue() < fileMetadata.getSequenceNumber()) {
                     timestamp = Long.valueOf(fileMetadata.getSequenceNumber());
                 }
                 files.add(fileMetadata);

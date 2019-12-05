@@ -81,7 +81,7 @@ public final class UninstallBundle extends AbstractConsoleHandler {
                 showHelp();
                 exit();
             }
-        } catch (final Exception exc) {
+        } catch (Exception exc) {
             final Throwable cause = exc.getCause();
             if (cause != null) {
                 if (cause instanceof BundleNotFoundException) {
@@ -96,7 +96,7 @@ public final class UninstallBundle extends AbstractConsoleHandler {
         } finally {
             try {
                 close();
-            } catch (final Exception exc) {
+            } catch (Exception exc) {
                 System.out.println("closing all connections failed: " + exc);
                 exc.printStackTrace();
             }

@@ -88,7 +88,7 @@ public class Login extends AbstractLoginRequestHandler {
         // Look-up necessary credentials
         try {
             doLogin(req, resp);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LoginServlet.logAndSendException(resp, e);
         }
     }

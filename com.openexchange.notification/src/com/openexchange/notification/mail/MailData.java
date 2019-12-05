@@ -51,12 +51,13 @@ package com.openexchange.notification.mail;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.notification.service.CommonNotificationVariables;
 import com.openexchange.serverconfig.NotificationMailConfig;
 import com.openexchange.templating.TemplateService;
+import com.openexchange.user.User;
 
 /**
  * Encapsulates all data that is necessary to compose notification mails.
@@ -67,21 +68,6 @@ import com.openexchange.templating.TemplateService;
  * @since v7.8.0
  */
 public class MailData {
-
-    InternetAddress sender;
-    InternetAddress recipient;
-    String subject;
-    String templateName;
-    Map<String, Object> templateVars;
-    NotificationMailConfig mailConfig;
-    Context context;
-    String textContent;
-    User sendingUser;
-    final Map<String, String> mailHeaders = new LinkedHashMap<>();
-
-    MailData() {
-        super();
-    }
 
     /**
      * Instantiates a new mail data builder and returns it.
@@ -95,20 +81,45 @@ public class MailData {
      */
     public static final class Builder {
 
-        private final MailData data;
+        private InternetAddress sender;
+        private InternetAddress recipient;
+        private String subject;
+        private String templateName;
+        private Map<String, Object> templateVars;
+        private NotificationMailConfig mailConfig;
+        private Context context;
+        private String textContent;
+        private User sendingUser;
+        private String noReplyAddressPersonal;
+        private final Map<String, String> mailHeaders;
 
         Builder() {
             super();
-            this.data = new MailData();
+            mailHeaders = new LinkedHashMap<>();
+        }
+
+
+        /**
+         * Sets the personal part for the no-reply address in case the mail is supposed to be sent via no-reply transport.
+         * <p>
+         * Only considered if no-reply transport with configured no-reply address is used.
+         *
+         * @param noReplyAddressPersonal The personal part for the no-reply address
+         * @return This builder
+         */
+        public Builder setNoReplyAddressPersonal(String noReplyAddressPersonal) {
+            this.noReplyAddressPersonal = noReplyAddressPersonal;
+            return this;
         }
 
         /**
          * Mandatory. Sets the recipient.
          *
          * @param recipient The recipient
+         * @return This builder
          */
         public Builder setRecipient(InternetAddress recipient) {
-            data.recipient = recipient;
+            this.recipient = recipient;
             return this;
         }
 
@@ -116,9 +127,10 @@ public class MailData {
          * Mandatory. Sets the subject.
          *
          * @param subject The subject
+         * @return This builder
          */
         public Builder setSubject(String subject) {
-            data.subject = subject;
+            this.subject = subject;
             return this;
         }
 
@@ -127,9 +139,10 @@ public class MailData {
          * The according template will be loaded via {@link TemplateService#loadTemplate(String)}.
          *
          * @param templateName The templates file name
+         * @return This builder
          */
         public Builder setHtmlTemplate(String templateName) {
-            data.templateName = templateName;
+            this.templateName = templateName;
             return this;
         }
 
@@ -147,9 +160,10 @@ public class MailData {
          * </ul>
          *
          * @param templateVars The template root object
+         * @return This builder
          */
         public Builder setTemplateVars(Map<String, Object> templateVars) {
-            data.templateVars = templateVars;
+            this.templateVars = templateVars;
             return this;
         }
 
@@ -158,19 +172,21 @@ public class MailData {
          * basic layout.
          *
          * @param mailConfig The configuration
+         * @return This builder
          */
         public Builder setMailConfig(NotificationMailConfig mailConfig) {
-            data.mailConfig = mailConfig;
+            this.mailConfig = mailConfig;
             return this;
         }
 
         /**
          * Mandatory. Sets the context.
          *
-         * @param context The context;
+         * @param context The context
+         * @return This builder
          */
         public Builder setContext(Context context) {
-            data.context = context;
+            this.context = context;
             return this;
         }
 
@@ -181,9 +197,10 @@ public class MailData {
          * {@link #setSender(InternetAddress)}.
          *
          * @param sendingUser The user
+         * @return This builder
          */
         public Builder setSendingUser(User sendingUser) {
-            data.sendingUser = sendingUser;
+            this.sendingUser = sendingUser;
             return this;
         }
 
@@ -192,9 +209,10 @@ public class MailData {
          * The address will be set as <code>To</code> header on the composed mail object.
          *
          * @param sender The sender address
+         * @return This builder
          */
         public Builder setSender(InternetAddress sender) {
-            data.sender = sender;
+            this.sender = sender;
             return this;
         }
 
@@ -207,9 +225,10 @@ public class MailData {
          * method. If no text conten is set, it will be derived from the HTML content.
          *
          * @param textContent The plain text content
+         * @return This builder
          */
         public Builder setTextContent(String textContent) {
-            data.textContent = textContent;
+            this.textContent = textContent;
             return this;
         }
 
@@ -218,24 +237,26 @@ public class MailData {
          *
          * @param name The header value
          * @param value The header value
+         * @return This builder
          */
         public Builder addMailHeader(String name, String value) {
-            data.mailHeaders.put(name, value);
+            this.mailHeaders.put(name, value);
             return this;
         }
 
         /**
          * Validates the set data and returns a {@link MailData} instance if everything is valid.
          *
+         * @return The appropriate {@code MailData} instance from this builder's arguments
          * @throws IllegalArgumentException If a mandatory field has not been set
          */
         public MailData build() {
-            checkNotNull(data.recipient, "recipient");
-            checkNotNull(data.subject, "subject");
-            checkNotNull(data.templateName, "templateName");
-            checkNotNull(data.templateVars, "templateVars");
-            checkNotNull(data.context, "context");
-            return data;
+            checkNotNull(recipient, "recipient");
+            checkNotNull(subject, "subject");
+            checkNotNull(templateName, "templateName");
+            checkNotNull(templateVars, "templateVars");
+            checkNotNull(context, "context");
+            return new MailData(sender, recipient, subject, templateName, templateVars, mailConfig, context, textContent, sendingUser, mailHeaders, noReplyAddressPersonal);
         }
 
         private static final void checkNotNull(Object obj, String name) {
@@ -243,7 +264,48 @@ public class MailData {
                 throw new IllegalArgumentException("A value for field '" + name + "' has not been set!");
             }
         }
+    }
 
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    private final InternetAddress sender;
+    private final InternetAddress recipient;
+    private final String subject;
+    private final String templateName;
+    private final Map<String, Object> templateVars;
+    private final NotificationMailConfig mailConfig;
+    private final Context context;
+    private final String textContent;
+    private final User sendingUser;
+    private final Map<String, String> mailHeaders;
+    private final Optional<String> noReplyAddressPersonal;
+
+    /**
+     * Initializes a new {@link MailData}.
+     * @param noReplyAddressPersonal
+     */
+    MailData(InternetAddress sender, InternetAddress recipient, String subject, String templateName, Map<String, Object> templateVars, NotificationMailConfig mailConfig, Context context, String textContent, User sendingUser, Map<String, String> mailHeaders, String noReplyAddressPersonal) {
+        super();
+        this.sender = sender;
+        this.recipient = recipient;
+        this.subject = subject;
+        this.templateName = templateName;
+        this.templateVars = templateVars;
+        this.mailConfig = mailConfig;
+        this.context = context;
+        this.textContent = textContent;
+        this.sendingUser = sendingUser;
+        this.mailHeaders = mailHeaders;
+        this.noReplyAddressPersonal = Optional.ofNullable(noReplyAddressPersonal);
+    }
+
+    /**
+     * Gets the optional personal part for the no-reply address in case the mail is supposed to be sent via no-reply transport.
+     *
+     * @return The optional personal part for the no-reply address
+     */
+    public Optional<String> getNoReplyAddressPersonal() {
+        return noReplyAddressPersonal;
     }
 
     public InternetAddress getSender() {

@@ -256,9 +256,11 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
     @Override
     public void authenticateUser(HttpServletRequest request, HttpServletResponse response) throws OXException{
         LOG.trace("authenticateUser(HttpServletRequest request: {}, HttpServletResponse response)", request.getRequestURI());
+
+        String code = request.getParameter("code");
         AuthenticationRequestInfo storedRequestInformation = this.stateManagement.getAndRemoveAuthenticationInfo(request.getParameter("state"));
 
-        if (storedRequestInformation == null) {
+        if (storedRequestInformation == null && Strings.isEmpty(code)) {
             throw OIDCExceptionCode.INVALID_AUTHENTICATION_STATE_NO_USER.create();
         }
 
@@ -269,7 +271,12 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
             if (null == idToken) {
                 throw OXException.general("Missing IDToken");
             }
-            IDTokenClaimsSet validTokenResponse = this.backend.validateIdToken(idToken, storedRequestInformation.getNonce());
+
+            String nonce = null;
+            if (storedRequestInformation != null) {
+                nonce = storedRequestInformation.getNonce();
+            }
+            IDTokenClaimsSet validTokenResponse = this.backend.validateIdToken(idToken, nonce);
             if (validTokenResponse == null) {
                 throw OIDCExceptionCode.IDTOKEN_GATHERING_ERROR.create("IDToken validation failed, no claim set could be extracted");
             }
@@ -340,6 +347,8 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
             authInfo.setProperty(OIDCTools.ACCESS_TOKEN_EXPIRY, String.valueOf(expiryDate));
         }
 
+        String domainName = OIDCTools.getDomainName(request, services.getOptionalService(HostnameService.class));
+
         String sessionToken = sessionReservationService.reserveSessionFor(
             authInfo.getUserId(),
             authInfo.getContextId(),
@@ -350,19 +359,19 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         try {
             URIBuilder redirectLocation = new URIBuilder()
                 .setScheme(OIDCTools.getRedirectScheme(request))
-                .setHost(storedRequestInformation.getDomainName())
+                .setHost(storedRequestInformation != null ? storedRequestInformation.getDomainName() : domainName)
                 .setPath(OIDCTools.getRedirectPathPrefix() + "login")
                 .setParameter(OIDCTools.SESSION_TOKEN, sessionToken)
                 .setParameter(LoginServlet.PARAMETER_ACTION, OIDCTools.OIDC_LOGIN + OIDCTools.getPathString(this.backend.getPath()))
                 .setParameter(OIDCTools.PARAM_SHARD, SessionUtility.getShardCookieValue());
             Tools.disableCaching(response);
 
-            String deepLink = storedRequestInformation.getDeepLink();
+            String deepLink = storedRequestInformation != null ? storedRequestInformation.getDeepLink() : null;
             if (deepLink != null) {
                 redirectLocation.setParameter(OIDCTools.PARAM_DEEP_LINK, deepLink);
             }
 
-            String clientID = storedRequestInformation.getUiClientID();
+            String clientID = storedRequestInformation != null ? storedRequestInformation.getUiClientID() : null;
             if (clientID != null) {
                 redirectLocation.setParameter(LoginFields.CLIENT_PARAM, clientID);
             }

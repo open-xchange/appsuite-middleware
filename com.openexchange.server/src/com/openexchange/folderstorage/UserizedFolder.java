@@ -54,8 +54,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.session.Session;
+import com.openexchange.user.User;
 
 /**
  * {@link UserizedFolder} - Extends/overwrites {@link Folder} interface methods with user-sensitive methods.

@@ -183,7 +183,7 @@ public class DeferrerServlet extends HttpServlet {
                     }
                 }
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             final Logger logger = org.slf4j.LoggerFactory.getLogger(DeferrerServlet.class);
             logger.debug("", e);
         }
@@ -207,7 +207,7 @@ public class DeferrerServlet extends HttpServlet {
             if (null != query) {
                 return parseQueryString(query);
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             final Logger logger = org.slf4j.LoggerFactory.getLogger(DeferrerServlet.class);
             logger.debug("", e);
         }

@@ -101,7 +101,7 @@ public final class ResourceTools {
         try {
             new QuotedInternetAddress(emailAddress, true).validate();
             return true;
-        } catch (final AddressException e) {
+        } catch (AddressException e) {
             return false;
         }
     }

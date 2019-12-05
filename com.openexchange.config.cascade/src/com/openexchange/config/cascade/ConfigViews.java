@@ -155,7 +155,7 @@ public class ConfigViews {
         if (Strings.isNotEmpty(prop)) {
             try {
                 return Integer.parseInt(prop.trim());
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 LoggerHolder.LOG.trace("Failed to parse value of property {} to an integer: {}", propertyName, prop, e);
             }
         }
@@ -181,7 +181,7 @@ public class ConfigViews {
         if (Strings.isNotEmpty(prop)) {
             try {
                 return Long.parseLong(prop.trim());
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 LoggerHolder.LOG.trace("Failed to parse value of property {} to a long: {}", propertyName, prop, e);
             }
         }

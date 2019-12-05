@@ -106,7 +106,7 @@ public class TextXtractionActivator extends HousekeepingActivator {
             });
             openTrackers();
             registerService(TextXtractService.class, tikaTextXtractService);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             log.info("Starting bundle failed: {}", name, e);
             throw e;
         }
@@ -119,7 +119,7 @@ public class TextXtractionActivator extends HousekeepingActivator {
         log.info("Stopping bundle: {}", name);
         try {
             cleanUp();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             log.info("Stopping bundle failed: {}", name, e);
             throw e;
         }

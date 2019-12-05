@@ -75,21 +75,11 @@ public class SchedJoulesRESTResponseParser extends AbstractRESTResponseParser {
         responseBodyParsers.put(RESTMimeType.CALENDAR, new SchedJoulesCalendarRESTResponseBodyParser());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.rest.client.AbstractRESTResponseParser#getRemoveServiceName()
-     */
     @Override
     protected String getRemoveServiceName() {
         return REMOTE_SERVICE_NAME;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.rest.client.v2.parser.AbstractRESTResponseParser#assertStatusCode(org.apache.http.HttpResponse)
-     */
     @Override
     protected int assertStatusCode(HttpResponse httpResponse) throws OXException {
         int statusCode = httpResponse.getStatusLine().getStatusCode();
@@ -106,8 +96,6 @@ public class SchedJoulesRESTResponseParser extends AbstractRESTResponseParser {
 
         // Assert the 5xx codes
         switch (statusCode) {
-            case 500:
-                throw SchedJoulesAPIExceptionCodes.REMOTE_INTERNAL_SERVER_ERROR.create(httpResponse.getStatusLine().getReasonPhrase());
             case 503:
                 throw SchedJoulesAPIExceptionCodes.REMOTE_SERVICE_UNAVAILABLE.create(httpResponse.getStatusLine().getReasonPhrase());
         }

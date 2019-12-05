@@ -1,4 +1,0 @@
-type: object
-description: A set of additional event properties
-additionalProperties:
-  $ref: ExtendedProperty.yaml

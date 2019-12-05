@@ -64,6 +64,7 @@ import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -71,6 +72,7 @@ import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.common.DefaultCalendarObjectResource;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.impl.InternalCalendarResult;
@@ -205,10 +207,20 @@ public class ClearPerformer extends AbstractUpdatePerformer {
             storage.getAttachmentStorage().deleteAttachments(session.getSession(), Collections.singletonMap(folder.getId(), attachmentsByEventId));
         }
         /*
-         * track deletions in result
+         * track deletions in result & group corresponding calendar object resources
          */
+        Map<String, List<Event>> eventsByUID = new LinkedHashMap<String, List<Event>>();
         for (Event originalEvent : eventsToDelete) {
             resultTracker.trackDeletion(originalEvent);
+            if (null != originalEvent.getUid()) {
+                com.openexchange.tools.arrays.Collections.put(eventsByUID, originalEvent.getUid(), originalEvent);
+            }
+        }
+        /*
+         * track notifications and scheduling messages for deleted resources
+         */
+        for (List<Event> value : eventsByUID.values()) {
+            schedulingHelper.trackDeletion(new DefaultCalendarObjectResource(value));
         }
     }
 
@@ -242,13 +254,23 @@ public class ClearPerformer extends AbstractUpdatePerformer {
         storage.getEventStorage().insertEventTombstones(eventTombstones);
         storage.getAttendeeStorage().insertAttendeeTombstones(attendeeTombstonesByEventId);
         /*
-         * 'touch' modified events & track results
+         * 'touch' modified events, track updates in result & group corresponding calendar object resources
          */
+        Map<String, List<Event>> eventsByUID = new LinkedHashMap<String, List<Event>>();
         for (Entry<Event, Attendee> attendeeToDeleteByEvent : attendeesToDeleteByEvent) {
             Event originalEvent = attendeeToDeleteByEvent.getKey();
             touch(originalEvent.getId());
             Event updatedEvent = loadEventData(originalEvent.getId());
             resultTracker.trackUpdate(originalEvent, updatedEvent);
+            if (null != originalEvent.getUid()) {
+                com.openexchange.tools.arrays.Collections.put(eventsByUID, originalEvent.getUid(), originalEvent);
+            }
+        }
+        /*
+         * track notifications and scheduling messages for deleted resources
+         */
+        for (List<Event> value : eventsByUID.values()) {
+            schedulingHelper.trackDeletion(new DefaultCalendarObjectResource(value));
         }
     }
 

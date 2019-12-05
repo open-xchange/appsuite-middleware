@@ -167,7 +167,7 @@ public final class GetAction extends AbstractMailAction {
              * ... and fake a GET request
              */
             return performGet(new MailRequest(requestData, req.getSession()));
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
@@ -314,7 +314,7 @@ public final class GetAction extends AbstractMailAction {
                             if (memorizeAddresses) {
                                 triggerContactCollector(session, mail, true, false);
                             }
-                        } catch (final Exception e) {
+                        } catch (Exception e) {
                             LOG.warn("Contact collector could not be triggered.", e);
                         }
                     }
@@ -398,7 +398,7 @@ public final class GetAction extends AbstractMailAction {
                         if (memorizeAddresses) {
                             triggerContactCollector(session, mail, true, false);
                         }
-                    } catch (final Exception e) {
+                    } catch (Exception e) {
                         LOG.warn("Contact collector could not be triggered.", e);
                     }
                 }
@@ -451,7 +451,7 @@ public final class GetAction extends AbstractMailAction {
                             if (memorizeAddresses) {
                                 triggerContactCollector(session, mail, true, false);
                             }
-                        } catch (final Exception e) {
+                        } catch (Exception e) {
                             LOG.warn("Contact collector could not be triggered.", e);
                         }
                     }
@@ -480,7 +480,7 @@ public final class GetAction extends AbstractMailAction {
             }
             data.addWarnings(warnings);
             return data;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (MailExceptionCode.MAIL_NOT_FOUND.equals(e)) {
                 LOG.debug("Requested mail could not be found. Most likely this is caused by concurrent access of multiple clients while one performed a delete on affected mail.", e);
                 final String uid = getUidFromException(e);
@@ -491,14 +491,14 @@ public final class GetAction extends AbstractMailAction {
                 LOG.error("", e);
             }
             throw e;
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
@@ -508,7 +508,7 @@ public final class GetAction extends AbstractMailAction {
         try {
             try {
                 mail.writeTo(fileHolder.asOutputStream());
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 if (!MailExceptionCode.NO_CONTENT.equals(e)) {
                     throw e;
                 }

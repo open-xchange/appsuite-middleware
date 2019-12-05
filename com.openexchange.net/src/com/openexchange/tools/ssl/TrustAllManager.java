@@ -97,44 +97,24 @@ public final class TrustAllManager extends X509ExtendedTrustManager implements T
         log("");
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see javax.net.ssl.X509ExtendedTrustManager#checkClientTrusted(java.security.cert.X509Certificate[], java.lang.String, java.net.Socket)
-     */
     @Override
     public void checkClientTrusted(X509Certificate[] chain, String authType, Socket socket) throws CertificateException {
         // Nothing to do, cause we trust all
         log(socket.getInetAddress().getHostName());
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see javax.net.ssl.X509ExtendedTrustManager#checkServerTrusted(java.security.cert.X509Certificate[], java.lang.String, java.net.Socket)
-     */
     @Override
     public void checkServerTrusted(X509Certificate[] chain, String authType, Socket socket) throws CertificateException {
         // Nothing to do, cause we trust all
         log(socket.getInetAddress().getHostName());
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see javax.net.ssl.X509ExtendedTrustManager#checkClientTrusted(java.security.cert.X509Certificate[], java.lang.String, javax.net.ssl.SSLEngine)
-     */
     @Override
     public void checkClientTrusted(X509Certificate[] chain, String authType, SSLEngine engine) throws CertificateException {
         // Nothing to do, cause we trust all
         log(engine.getPeerHost());
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see javax.net.ssl.X509ExtendedTrustManager#checkServerTrusted(java.security.cert.X509Certificate[], java.lang.String, javax.net.ssl.SSLEngine)
-     */
     @Override
     public void checkServerTrusted(X509Certificate[] chain, String authType, SSLEngine engine) throws CertificateException {
         // Nothing to do, cause we trust all

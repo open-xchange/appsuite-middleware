@@ -155,7 +155,7 @@ public final class POP3Config extends MailConfig {
             if (pos > -1) {
                 try {
                     pop3Port = Integer.parseInt(pop3Server.substring(pos + 1));
-                } catch (final NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     LOG.error("POP3 port could not be parsed to an integer value. Using fallback value 110", e);
                     pop3Port = 110;
                 }
@@ -174,7 +174,7 @@ public final class POP3Config extends MailConfig {
         if (null == pop3ServerAddress) {
             try {
                 pop3ServerAddress = InetAddress.getByName(pop3Server);
-            } catch (final UnknownHostException e) {
+            } catch (UnknownHostException e) {
                 throw POP3ExceptionCode.IO_ERROR.create(e, e.getMessage());
             }
         }

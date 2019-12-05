@@ -78,14 +78,14 @@ public class ContactStringGetter implements ContactSwitcher {
 	 * @return an empty string if <code>obj == null</code>, otherwise the result of <code>obj.toString()</obj>;
 	 */
 	public static final String stringify(final Object obj){
-		if(obj == null){
+		if (obj == null){
 			return "";
 		}
 		return obj.toString();
 	}
 
 	public static final String stringifyDate(final Date date) {
-	    if(date == null) {
+	    if (date == null) {
 	        return "";
 	    }
 	    synchronized (DATE_FORMAT) {

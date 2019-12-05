@@ -1,5 +1,0 @@
-requests:
-  - ConfigNameRequest.yaml
-  - ConfigPackageRequest.yaml
-  - ConfigResellerRequest.yaml
-  - ConfigUserRequest.yaml

@@ -82,6 +82,9 @@ public class CalendarAddIndex2DatesMembers extends UpdateTaskAdapter {
         Connection con = params.getConnection();
         int rollback = 0;
         try {
+            if (false == Databases.tablesExist(con, "prg_dates_members", "del_dates_members")) {
+                return;
+            }
             con.setAutoCommit(false);
             rollback = 1;
 
@@ -89,9 +92,9 @@ public class CalendarAddIndex2DatesMembers extends UpdateTaskAdapter {
 
             con.commit();
             rollback = 2;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw createSQLError(e);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
             if (rollback > 0) {
@@ -115,7 +118,7 @@ public class CalendarAddIndex2DatesMembers extends UpdateTaskAdapter {
                 } else {
                     log.info("New index named \"{}\" with columns (cid,{}) already exists in table {}.", indexName, fieldName, table);
                 }
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 log.error("Problem adding index {} on table {}.", name, table, e);
             }
         }

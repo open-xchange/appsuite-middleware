@@ -4,27 +4,34 @@
     tags:
       - JSlob
     summary: Gets a list of JSlobs.
-    consumes:
-      - application/json
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: serviceId
-        type: string
-        description: The identifier for the JSlob service, default is "com.openexchange.jslob.config".
+        description: >-
+          The identifier for the JSlob service, default is
+          "com.openexchange.jslob.config".
         required: false
-      - in: body
-        name: body
-        description: A JSON array with the identifiers of the requested JSlobs.
-        required: true
         schema:
-          type: array
-          items:
-            type: string
+          type: string
     responses:
-      200:
-        description: |
-          A JSON object containing an array of JSON objects each representing a certain JSON configuration.
-          In case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).
-        schema:
-          $ref: "#/definitions/JSlobsResponse"
+      '200':
+        description: >
+          A JSON object containing an array of JSON objects each representing a
+          certain JSON configuration.
+
+          In case of errors the responsible fields in the response are filled
+          (see [Error handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JSlobsResponse'
+    requestBody:
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              type: string
+      description: A JSON array with the identifiers of the requested JSlobs.
+      required: true

@@ -71,11 +71,6 @@ public class TrustedMailIconFileFetcher extends AbstractTrustedMailIconFetcher i
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.mail.authenticity.impl.trusted.internal.fetcher.TrustedMailIconFetcher#exists(java.lang.String)
-     */
     @Override
     public boolean exists(String resourceUrl) {
         try {
@@ -87,11 +82,6 @@ public class TrustedMailIconFileFetcher extends AbstractTrustedMailIconFetcher i
         return false;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.mail.authenticity.impl.trusted.internal.fetcher.TrustedMailIconFetcher#fetch(java.lang.String, java.lang.String)
-     */
     @Override
     public byte[] fetch(String url) {
         try {

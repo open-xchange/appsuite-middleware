@@ -109,7 +109,6 @@ import com.openexchange.folderstorage.internal.performers.UpdatesPerformer;
 import com.openexchange.folderstorage.mail.MailFolderType;
 import com.openexchange.folderstorage.osgi.FolderStorageServices;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -127,6 +126,7 @@ import com.openexchange.threadpool.behavior.AbortBehavior;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.user.User;
 import com.openexchange.userconf.UserPermissionService;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
@@ -1724,7 +1724,7 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
         }
         boolean isMove = null != folder.getParentID();
         String oldParentId = storageVersion.getParentID();
-        if(oldParentId == null){
+        if (oldParentId == null){
             throw OXFolderExceptionCode.UNKNOWN_EXCEPTION.create("Missing old parent id");
         }
         {

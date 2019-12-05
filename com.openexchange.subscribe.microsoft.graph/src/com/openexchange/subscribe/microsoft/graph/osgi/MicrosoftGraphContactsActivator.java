@@ -69,11 +69,6 @@ import com.openexchange.subscribe.microsoft.graph.groupware.MigrateMSLiveSubscri
  */
 public class MicrosoftGraphContactsActivator extends HousekeepingActivator {
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
-     */
     @Override
     protected Class<?>[] getNeededServices() {
         //@formatter:off

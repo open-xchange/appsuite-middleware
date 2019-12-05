@@ -132,11 +132,11 @@ public class MultifactorToken<T> {
             return false;
         }
 
-        if(obj == this) {
+        if (obj == this) {
             return true;
         }
 
-        if(!(obj instanceof MultifactorToken)) {
+        if (!(obj instanceof MultifactorToken)) {
            return false;
         }
 

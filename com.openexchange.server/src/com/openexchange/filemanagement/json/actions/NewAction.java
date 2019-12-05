@@ -165,7 +165,7 @@ public final class NewAction implements AJAXActionService {
             managedFile.setSize(fileItem.getSize());
             managedFile.setAffiliation(session.getSessionID());
             return managedFile.getID();
-        } catch (final FileNotFoundException e) {
+        } catch (FileNotFoundException e) {
             throw ManagedFileExceptionErrorMessage.FILE_NOT_FOUND.create(e, e.getMessage());
         }
     }

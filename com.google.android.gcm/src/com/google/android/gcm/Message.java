@@ -61,6 +61,8 @@ import com.google.common.collect.ImmutableMap;
  */
 public final class Message implements Serializable {
 
+    private static final long serialVersionUID = -7545376606188175871L;
+
     private final String collapseKey;
     private final Boolean delayWhileIdle;
     private final Integer timeToLive;
@@ -77,17 +79,17 @@ public final class Message implements Serializable {
 
     public static final class Builder {
 
-        private final Map<String, String> data;
+        final Map<String, String> data;
 
         // optional parameters
-        private String collapseKey;
-        private Boolean delayWhileIdle;
-        private Integer timeToLive;
-        private Boolean dryRun;
-        private String restrictedPackageName;
-        private String priority;
-        private Boolean contentAvailable;
-        private Notification notification;
+        String collapseKey;
+        Boolean delayWhileIdle;
+        Integer timeToLive;
+        Boolean dryRun;
+        String restrictedPackageName;
+        String priority;
+        Boolean contentAvailable;
+        Notification notification;
 
         public Builder() {
             this.data = new LinkedHashMap<String, String>();
@@ -105,7 +107,7 @@ public final class Message implements Serializable {
          * Sets the delayWhileIdle property (default value is {@literal false}).
          */
         public Builder delayWhileIdle(boolean value) {
-            delayWhileIdle = value;
+            delayWhileIdle = Boolean.valueOf(value);
             return this;
         }
 
@@ -113,7 +115,7 @@ public final class Message implements Serializable {
          * Sets the time to live, in seconds.
          */
         public Builder timeToLive(int value) {
-            timeToLive = value;
+            timeToLive = Integer.valueOf(value);
             return this;
         }
 
@@ -129,7 +131,7 @@ public final class Message implements Serializable {
          * Sets the dryRun property (default value is {@literal false}).
          */
         public Builder dryRun(boolean value) {
-            dryRun = value;
+            dryRun = Boolean.valueOf(value);
             return this;
         }
 
@@ -178,7 +180,7 @@ public final class Message implements Serializable {
 
     }
 
-    private Message(Builder builder) {
+    Message(Builder builder) {
         collapseKey = builder.collapseKey;
         delayWhileIdle = builder.delayWhileIdle;
         data = ImmutableMap.copyOf(builder.data);

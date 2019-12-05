@@ -61,7 +61,6 @@ import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestHandler;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceService;
@@ -71,6 +70,7 @@ import com.openexchange.server.services.ServerRequestHandlerRegistry;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 /**
  * {@link ResourceRequest} - Executes a resource request.
@@ -139,15 +139,15 @@ public class ResourceRequest {
             final ResourceService resService = ServerServiceRegistry.getServize(ResourceService.class, true);
             updatedResources = resService .listModified(lastModified, session.getContext());
             deletedResources = resService.listDeleted(lastModified, session.getContext());
-        } catch (final OXException exc) {
+        } catch (OXException exc) {
             LOG.debug("Tried to find resources that were modified since {}", lastModified, exc);
         }
 
         final JSONArray modified = new JSONArray();
         long lm = 0;
-        if(updatedResources != null){
+        if (updatedResources != null){
             for(final Resource res: updatedResources){
-                if(res.getLastModified().getTime() > lm) {
+                if (res.getLastModified().getTime() > lm) {
                     lm = res.getLastModified().getTime();
                 }
                 modified.put(ResourceWriter.writeResource(res));
@@ -155,9 +155,9 @@ public class ResourceRequest {
         }
 
         final JSONArray deleted = new JSONArray();
-        if(deletedResources != null){
+        if (deletedResources != null){
             for(final Resource res: deletedResources){
-                if(res.getLastModified().getTime() > lm) {
+                if (res.getLastModified().getTime() > lm) {
                     lm = res.getLastModified().getTime();
                 }
 
@@ -190,7 +190,7 @@ public class ResourceRequest {
 
                 try {
                     r = ServerServiceRegistry.getServize(ResourceService.class, true).getResource(id, session.getContext());
-                } catch (final OXException exc) {
+                } catch (OXException exc) {
                     LOG.debug("resource not found try to find id in user table", exc);
                 }
 
@@ -226,7 +226,7 @@ public class ResourceRequest {
         com.openexchange.resource.Resource r = null;
         try {
             r = ServerServiceRegistry.getServize(ResourceService.class, true).getResource(id, session.getContext());
-        } catch (final OXException exc) {
+        } catch (OXException exc) {
             LOG.debug("resource not found try to find id in user table", exc);
         }
 

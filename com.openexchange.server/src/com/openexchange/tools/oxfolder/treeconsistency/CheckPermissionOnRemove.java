@@ -120,7 +120,7 @@ public final class CheckPermissionOnRemove extends CheckPermission {
             if (!toRemove.isEmpty()) {
                 removeSystemPermissions(lastModified, toRemove);
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
     }
@@ -143,12 +143,12 @@ public final class CheckPermissionOnRemove extends CheckPermission {
             if (!toRemove.isEmpty()) {
                 removeSystemPermissions(lastModified, toRemove);
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
     }
 
-    private void hasVisibleSibling(final int parent, final int exclude, final int origin, final int entity, final boolean isGroup, final TIntObjectMap<ToDoPermission> toRemove) throws OXException, OXException, SQLException {
+    private void hasVisibleSibling(final int parent, final int exclude, final int origin, final int entity, final boolean isGroup, final TIntObjectMap<ToDoPermission> toRemove) throws OXException, SQLException {
         if (parent < FolderObject.MIN_FOLDER_ID) {
             /*
              * Stop recursive check
@@ -257,7 +257,7 @@ public final class CheckPermissionOnRemove extends CheckPermission {
                 if (FolderQueryCacheManager.isInitialized()) {
                     FolderQueryCacheManager.getInstance().invalidateContextQueries(session);
                 }
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.error("", e);
             }
         }

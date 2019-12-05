@@ -181,7 +181,7 @@ public final class FolderStorageActivator implements BundleActivator {
                     return displayName;
                 }
                 displayName = UserStorage.getInstance().getUser(createdBy, context).getDisplayName();
-                if(displayName != null) {
+                if (displayName != null) {
                     cache.put(key, displayName);
                 }
                 return displayName;
@@ -294,7 +294,7 @@ public final class FolderStorageActivator implements BundleActivator {
                         }
                         return;
                     }
-                } catch (final IllegalStateException e) {
+                } catch (IllegalStateException e) {
                     if (null != activator) {
                         logFailedStartup(activator);
                     }
@@ -305,7 +305,7 @@ public final class FolderStorageActivator implements BundleActivator {
             }
 
             LOG.info("Bundle \"com.openexchange.folderstorage\" successfully started!");
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("", e);
             throw e;
         }
@@ -353,7 +353,7 @@ public final class FolderStorageActivator implements BundleActivator {
             // Unregister previously registered component
 
             LOG.info("Bundle \"com.openexchange.folderstorage\" successfully stopped!");
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("", e);
             throw e;
         }

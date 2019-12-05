@@ -100,11 +100,6 @@ public class UserTest extends AbstractRMITest {
 
     protected Context context;
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.admin.rmi.AbstractTest#setUp()
-     */
     @Override
     public void setUp() throws Exception {
         super.setUp();

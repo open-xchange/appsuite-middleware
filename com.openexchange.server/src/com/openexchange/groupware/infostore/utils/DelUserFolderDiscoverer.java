@@ -57,13 +57,13 @@ import com.openexchange.database.tx.DBService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.groupware.userconfiguration.CapabilityUserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationCodes;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
+import com.openexchange.user.User;
 
 public class DelUserFolderDiscoverer extends DBService {
 
@@ -81,7 +81,7 @@ public class DelUserFolderDiscoverer extends DBService {
         int[] accessibleModules;
         try {
             accessibleModules = CapabilityUserConfigurationStorage.loadUserConfiguration(userId, ctx).getAccessibleModules();
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (!UserConfigurationCodes.NOT_FOUND.equals(e)) {
                 throw e;
             }

@@ -54,6 +54,9 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link FileStorageProvider} - A provider for a file storage.
+ * <p>
+ * If the file storage provider needs to be reinitialized in case certain configuration properties are changed, the {@link InterestsAware}
+ * interface is supposed to be implemented.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -70,17 +73,6 @@ public interface FileStorageProvider {
      * @throws OXException If storage cannot be returned
      */
     FileStorage getFileStorage(URI uri) throws OXException;
-
-    /**
-     * Gets the internal (if any) file storage.
-     * <p>
-     * If there is no internal representation, this method does the same as {@link #getFileStorage(URI)}.
-     *
-     * @param uri The URI to create the file storage from
-     * @return The internal file storage
-     * @throws OXException If storage cannot be returned
-     */
-    FileStorage getInternalFileStorage(URI uri) throws OXException;
 
     /**
      * Signals whether specified URI is supported or not.

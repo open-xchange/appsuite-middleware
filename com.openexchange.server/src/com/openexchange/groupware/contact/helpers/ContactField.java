@@ -266,15 +266,15 @@ public enum ContactField{
 
     @Deprecated
     public static ContactField getByDBFieldName(final String dbFieldName){
-        if( null == dbFieldName) {
+        if ( null == dbFieldName) {
             return null;
         }
-        if( "".equals(dbFieldName)) {
+        if ( "".equals(dbFieldName)) {
             return null;
         }
 
         for(final ContactField field: values()){
-            if(dbFieldName.equals( field.getFieldName() )){
+            if (dbFieldName.equals( field.getFieldName() )){
                 return field;
             }
         }
@@ -283,15 +283,15 @@ public enum ContactField{
 
     @Deprecated
     public static ContactField getByDisplayName(final String displayName){
-        if( null == displayName) {
+        if ( null == displayName) {
             return null;
         }
-        if( "".equals(displayName)) {
+        if ( "".equals(displayName)) {
             return null;
         }
 
         for(final ContactField field : values()){
-            if(displayName.equals( field.getReadableName() ) ){
+            if (displayName.equals( field.getReadableName() ) ){
                 return field;
             }
         }
@@ -300,15 +300,15 @@ public enum ContactField{
 
     @Deprecated
     public static ContactField getByFieldName(final String fieldName){
-           if( null == fieldName) {
+           if ( null == fieldName) {
             return null;
         }
-            if( "".equals(fieldName)) {
+            if ( "".equals(fieldName)) {
                 return null;
             }
 
         for(final ContactField field : values()){
-            if(fieldName.equals( field.getDbName() ) ){
+            if (fieldName.equals( field.getDbName() ) ){
                 return field;
             }
         }
@@ -318,7 +318,7 @@ public enum ContactField{
     @Deprecated
     public static ContactField getByValue(final int value){
         for(final ContactField field: values()){
-            if(value == field.getNumber()){
+            if (value == field.getNumber()){
                 return field;
             }
         }
@@ -328,7 +328,7 @@ public enum ContactField{
     @Deprecated
     public static ContactField getByAjaxName(final String value){
         for(final ContactField field: values()){
-            if(value.equals(field.getAjaxName())){
+            if (value.equals(field.getAjaxName())){
                 return field;
             }
         }
@@ -344,7 +344,7 @@ public enum ContactField{
                 field.getReadableName().replaceAll("[_\\. ]", "").toLowerCase(),
                 field.getFieldName().replaceAll("[_\\. ]", "").toLowerCase()
             });
-            if(haystack.contains(needle)) {
+            if (haystack.contains(needle)) {
                 return field;
             }
         }
@@ -353,7 +353,7 @@ public enum ContactField{
 
     @Deprecated
     public Object doSwitch(final ContactSwitcher switcher, final Object... objects) throws OXException {
-        switch(this){
+        switch (this){
         case DISPLAY_NAME : return switcher.displayname(objects);
         case SUR_NAME : return switcher.surname(objects);
         case GIVEN_NAME : return switcher.givenname(objects);

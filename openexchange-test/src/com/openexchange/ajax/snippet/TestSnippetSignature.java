@@ -63,7 +63,6 @@ import org.json.JSONObject;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.managedfile.actions.GetPictureManagedFileRequest;
-import com.openexchange.ajax.managedfile.actions.GetPictureManagedFileResponse;
 import com.openexchange.ajax.managedfile.actions.NewManagedFileRequest;
 import com.openexchange.ajax.managedfile.actions.NewManagedFileResponse;
 import com.openexchange.ajax.snippet.actions.ListSnippetRequest;
@@ -82,7 +81,7 @@ public class TestSnippetSignature extends AbstractAJAXSession {
 
     /**
      * Initializes a new {@link TestSnippetSignature}.
-     * 
+     *
      * @param name
      */
     public TestSnippetSignature() {
@@ -125,20 +124,9 @@ public class TestSnippetSignature extends AbstractAJAXSession {
         data = listResp.getData();
         JSONArray json = (JSONArray) data;
         assertEquals(1, json.length());
-        JSONObject signature = json.getJSONObject(0);
-        String content = signature.getString("content");
-
-        /*
-         * final int sidx = content.indexOf("src=\\\"");
-         * final int eidx = content.indexOf("\\\">");
-         * final String url = content.substring(sidx, eidx);
-         */
 
         GetPictureManagedFileRequest getPicReq = new GetPictureManagedFileRequest(mfID1);
-        GetPictureManagedFileResponse getPicResp = getClient().execute(getPicReq);
-        Object o = getPicResp.getData();
-
-        //assertEquals("images not equal", file, o);
+        getClient().execute(getPicReq);
     }
 
     private String uploadFile(String filename) throws OXException, IOException, JSONException {

@@ -18,13 +18,13 @@ import com.openexchange.groupware.Init;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.filestore.FilestoreStorage;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
 import com.openexchange.setuptools.TestConfig;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
+import com.openexchange.user.User;
 
 public abstract class UpdateTest {
 
@@ -144,7 +144,7 @@ public abstract class UpdateTest {
         }
     }
 
-    protected final void assertNotInFilestorage(List<String> paths) throws OXException, OXException {
+    protected final void assertNotInFilestorage(List<String> paths) throws OXException {
 
         FileStorage fs = QuotaFileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx);
         SortedSet<String> existingPaths = fs.getFileList();

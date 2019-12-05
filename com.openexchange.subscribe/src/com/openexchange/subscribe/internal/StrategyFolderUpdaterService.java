@@ -101,7 +101,7 @@ public class StrategyFolderUpdaterService<T> implements FolderUpdaterServiceV2<T
                 T element = data.next();
                 if (null != element) {
                     final T bestMatch = findBestMatch(element, dataInFolder, session);
-                    if(bestMatch == null) {
+                    if (bestMatch == null) {
                         strategy.save(element, session, errors);
                     } else {
                         strategy.update(bestMatch, element, session);
@@ -109,7 +109,7 @@ public class StrategyFolderUpdaterService<T> implements FolderUpdaterServiceV2<T
                 }
                 element = null;
             }
-        } catch (final OXException x) {
+        } catch (OXException x) {
             if (null == errors) {
                 LOG.error("", x);
             } else {
@@ -128,12 +128,12 @@ public class StrategyFolderUpdaterService<T> implements FolderUpdaterServiceV2<T
         T maxElement = null;
         for(final T elementInFolder : dataInFolder) {
             final int currentScore = strategy.calculateSimilarityScore(elementInFolder, element, session);
-            if(currentScore > maxScore) {
+            if (currentScore > maxScore) {
                 maxElement = elementInFolder;
                 maxScore = currentScore;
             }
         }
-        if(maxScore > strategy.getThreshold(session)) {
+        if (maxScore > strategy.getThreshold(session)) {
             return maxElement;
         }
        return null;

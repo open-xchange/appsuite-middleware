@@ -56,6 +56,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.drive.DefaultDirectoryVersion;
 import com.openexchange.drive.DirectoryVersion;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.DriveVersion;
@@ -70,7 +71,6 @@ import com.openexchange.drive.impl.checksum.DirectoryChecksum;
 import com.openexchange.drive.impl.internal.SyncSession;
 import com.openexchange.drive.impl.storage.execute.DirectoryActionExecutor;
 import com.openexchange.drive.impl.sync.IntermediateSyncResult;
-import com.openexchange.drive.impl.sync.SimpleDirectoryVersion;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageFolder;
 
@@ -323,7 +323,7 @@ public class SyncTracker {
             if (null != folder) {
                 List<DirectoryChecksum> checksums = ChecksumProvider.getChecksums(session, Arrays.asList(new String[] { folder.getId() }));
                 if (null != checksums && 1 == checksums.size()) {
-                    return new SimpleDirectoryVersion(path, checksums.get(0).getChecksum());
+                    return new DefaultDirectoryVersion(path, checksums.get(0).getChecksum());
                 }
             }
         } catch (OXException e) {
@@ -332,7 +332,7 @@ public class SyncTracker {
         /*
          * use empty checksum as fallback
          */
-        return new SimpleDirectoryVersion(path, DriveConstants.EMPTY_MD5);
+        return new DefaultDirectoryVersion(path, DriveConstants.EMPTY_MD5);
     }
 
     private static void trace(SyncSession session, RepeatedSequence<HistoryEntry> cycle) {

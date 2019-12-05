@@ -88,9 +88,9 @@ import com.openexchange.folderstorage.internal.performers.VisibleFoldersPerforme
 import com.openexchange.folderstorage.outlook.OutlookFolderStorage;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.user.User;
 
 /**
  * {@link FolderServiceImpl} - The {@link FolderService} implementation.

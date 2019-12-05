@@ -79,7 +79,6 @@ import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.login.Interface;
 import com.openexchange.login.LoginResult;
@@ -91,6 +90,7 @@ import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.SessiondServiceExtended;
 import com.openexchange.tools.servlet.http.AuthCookie;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 /**

@@ -139,7 +139,7 @@ public abstract class DeferredRegistryRegistration<R, P> extends ServiceTracker 
                 if (priorityQueue == null) {
                     priorityQueue = new PriorityQueue<ServiceEntry>();
                     PriorityQueue<ServiceEntry> otherQueue = serviceMap.put(klass, priorityQueue);
-                    if(otherQueue != null) {
+                    if (otherQueue != null) {
                         priorityQueue = otherQueue;
                     }
                 }

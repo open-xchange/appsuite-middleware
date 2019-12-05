@@ -57,6 +57,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
+import java.net.URI;
 import java.util.HashSet;
 import java.util.Set;
 import javax.activation.MimetypesFileTypeMap;
@@ -81,14 +82,28 @@ public abstract class DefaultFileStorage implements FileStorage {
     /** The storage's root path */
     protected final File storage;
 
+    /** The URI that fully qualifies this file storage */
+    protected final URI uri;
+
     /**
      * Initializes a new {@link DefaultFileStorage}.
      *
      * @param storage A file pointing to parent directory of the storage
      */
-    public DefaultFileStorage(File storage) {
+    protected DefaultFileStorage(File storage) {
+        this(storage.toURI(), storage);
+    }
+
+    /**
+     * Initializes a new {@link DefaultFileStorage}.
+     *
+     * @param uri The URI that fully qualifies this file storage
+     * @param storage A file pointing to parent directory of the storage
+     */
+    protected DefaultFileStorage(URI uri, File storage) {
         super();
         this.storage = storage;
+        this.uri = uri;
     }
 
     /**
@@ -146,6 +161,11 @@ public abstract class DefaultFileStorage implements FileStorage {
         if (!storage.exists()) {
             throw FileStorageCodes.NO_SUCH_FILE_STORAGE.create(storage.getPath());
         }
+    }
+
+    @Override
+    public URI getUri() {
+        return uri;
     }
 
     @Override

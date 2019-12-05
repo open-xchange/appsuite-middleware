@@ -71,7 +71,7 @@ public final class ListServices extends AbstractConsoleHandler {
         try {
             init(args, true);
             listServices();
-        } catch (final Exception exc) {
+        } catch (Exception exc) {
             final Throwable cause = exc.getCause();
             if (cause != null) {
                 if (cause instanceof BundleNotFoundException) {
@@ -86,7 +86,7 @@ public final class ListServices extends AbstractConsoleHandler {
         } finally {
             try {
                 close();
-            } catch (final Exception exc) {
+            } catch (Exception exc) {
                 System.out.println("closing all connections failed: " + exc);
                 exc.printStackTrace();
             }

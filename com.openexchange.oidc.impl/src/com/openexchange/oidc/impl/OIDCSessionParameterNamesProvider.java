@@ -50,8 +50,8 @@
 package com.openexchange.oidc.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import com.google.common.collect.ImmutableList;
 import com.hazelcast.core.Hazelcast;
 import com.openexchange.exception.OXException;
 import com.openexchange.oidc.tools.OIDCTools;
@@ -67,22 +67,17 @@ import com.openexchange.sessionstorage.SessionStorageParameterNamesProvider;
  */
 public class OIDCSessionParameterNamesProvider implements SessionStorageParameterNamesProvider {
 
-    private final List<String> parameterNames;
-
-    /**
-     * Initializes a new {@link OIDCSessionParameterNamesProvider}.
-     */
-    public OIDCSessionParameterNamesProvider() {
-        super();
-        List<String> parameterNames = new ArrayList<String>(4);
-        parameterNames.add(OIDCTools.IDTOKEN);
-        parameterNames.add(OIDCTools.BACKEND_PATH);
-        this.parameterNames = ImmutableList.copyOf(parameterNames);
+    private static final List<String> PARAMS;
+    static {
+        List<String> tmp = new ArrayList<>(3);
+        tmp.add(OIDCTools.IDTOKEN);
+        tmp.add(OIDCTools.BACKEND_PATH);
+        PARAMS = Collections.unmodifiableList(tmp);
     }
 
     @Override
     public List<String> getParameterNames(int userId, int contextId) throws OXException {
-        return parameterNames;
+        return PARAMS;
     }
 
 }

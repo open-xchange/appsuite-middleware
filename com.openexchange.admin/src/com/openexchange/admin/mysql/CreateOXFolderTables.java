@@ -212,17 +212,11 @@ public class CreateOXFolderTables extends AbstractCreateTableImpl {
         super();
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.database.CreateTableService#requiredTables()
-     */
     @Override
     public String[] requiredTables() {
         return new String[] { "user" };
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.database.CreateTableService#tablesToCreate()
-     */
     @Override
     public String[] tablesToCreate() {
         return new String[] { oxfolderTreeTableName, oxfolderPermissionsTableName, oxfolderSpecialfoldersTableName,
@@ -230,9 +224,6 @@ public class CreateOXFolderTables extends AbstractCreateTableImpl {
             delOxfolderPermissionsTableName, oxfolderLockTableName, oxfolderPropertyTableName };
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.database.AbstractCreateTableImpl#getCreateStatements()
-     */
     @Override
     protected String[] getCreateStatements() {
         return new String[] { createOxfolderTreeTable, createOxfolderPermissionsTable, createOxfolderSpecialfoldersTable,

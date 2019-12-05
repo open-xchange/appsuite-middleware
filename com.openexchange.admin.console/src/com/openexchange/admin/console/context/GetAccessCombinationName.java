@@ -83,7 +83,7 @@ public class GetAccessCombinationName extends ContextAbstraction {
 
             // exit application
             sysexit(0);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             printErrors(successtext, null, e, parser);
         }
 

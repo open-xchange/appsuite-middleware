@@ -65,12 +65,12 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
+import com.openexchange.user.UserExceptionCode;
 import com.openexchange.user.UserService;
 import com.openexchange.user.json.UserContact;
 import gnu.trove.map.TIntObjectMap;
@@ -195,7 +195,7 @@ public final class ListAction extends AbstractUserAction {
             for (int i = 0; i < length; i++) {
                 userIDs[i] = jsonArray.isNull(i) ? fallbackUserID : jsonArray.getInt(i);
             }
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
         return userIDs;
@@ -205,7 +205,7 @@ public final class ListAction extends AbstractUserAction {
         final UserService userService = services.getService(UserService.class);
         try {
             return userService.getUser(session.getContext(), userIDs);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (!UserExceptionCode.USER_NOT_FOUND.equals(e)) {
                 throw e;
             }
@@ -215,14 +215,14 @@ public final class ListAction extends AbstractUserAction {
                 if (excArgs != null && excArgs.length >= 2) {
                     try {
                         userService.invalidateUser(context, ((Integer) excArgs[0]).intValue());
-                    } catch (final Exception ignore) {
+                    } catch (Exception ignore) {
                         // Ignore
                     }
                 } else {
                     for (final int userId : userIDs) {
                         try {
                             userService.invalidateUser(context, userId);
-                        } catch (final Exception ignore) {
+                        } catch (Exception ignore) {
                             // Ignore
                         }
                     }
@@ -234,7 +234,7 @@ public final class ListAction extends AbstractUserAction {
             for (int i = 0; i < length; i++) {
                 try {
                     list.add(userService.getUser(userIDs[i], context));
-                } catch (final OXException ue) {
+                } catch (OXException ue) {
                     if (!UserExceptionCode.USER_NOT_FOUND.equals(ue)) {
                         throw ue;
                     }

@@ -51,7 +51,6 @@ package com.openexchange.groupware.settings.tree.modules.mail;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.ReadOnlyValue;
@@ -61,6 +60,7 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.user.User;
 
 /**
  * Contains initialization for the modules configuration tree setting webmail.
@@ -110,7 +110,7 @@ public class Module implements PreferencesItemService {
                     mail = MailAccess.getInstance(session);
                     mail.connect();
                     setting.setSingleValue(Boolean.TRUE);
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     setting.setSingleValue(Boolean.FALSE);
                     LOG.error("", e);
                 } finally {

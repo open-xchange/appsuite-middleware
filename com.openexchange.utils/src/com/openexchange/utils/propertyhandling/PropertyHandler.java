@@ -93,13 +93,13 @@ public class PropertyHandler {
             } else if (Integer.class.equals(clazz)) {
                 try {
                     return (T) clazz.cast(Integer.valueOf(property));
-                } catch (final NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     throw ConfigurationExceptionCodes.NO_INTEGER_VALUE.create(completePropertyName);
                 }
             } else if (Long.class.equals(clazz)) {
                 try {
                     return (T) clazz.cast(Long.valueOf(property));
-                } catch (final NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     throw ConfigurationExceptionCodes.NO_INTEGER_VALUE.create(completePropertyName);
                 }
             } else if (Boolean.class.equals(clazz)) {
@@ -108,7 +108,7 @@ public class PropertyHandler {
                 try {
                     final Enum<?> valueOf = Enum.valueOf(clazz.asSubclass(Enum.class), property);
                     return (T) valueOf;
-                } catch (final IllegalArgumentException e) {
+                } catch (IllegalArgumentException e) {
                     return null;
                 }
             } else {
@@ -144,13 +144,13 @@ public class PropertyHandler {
             } else if (Integer.class.equals(clazz)) {
                 try {
                     return (T) clazz.cast(Integer.valueOf(property));
-                } catch (final NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     throw ConfigurationExceptionCodes.NO_INTEGER_VALUE.create(completePropertyName);
                 }
             } else if (Long.class.equals(clazz)) {
                 try {
                     return (T) clazz.cast(Long.valueOf(property));
-                } catch (final NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     throw ConfigurationExceptionCodes.NO_INTEGER_VALUE.create(completePropertyName);
                 }
             } else if (Boolean.class.equals(clazz)) {
@@ -159,7 +159,7 @@ public class PropertyHandler {
                 try {
                     final Enum<?> valueOf = Enum.valueOf(clazz.asSubclass(Enum.class), property);
                     return (T) valueOf;
-                } catch (final IllegalArgumentException e) {
+                } catch (IllegalArgumentException e) {
                     return null;
                 }
             } else {

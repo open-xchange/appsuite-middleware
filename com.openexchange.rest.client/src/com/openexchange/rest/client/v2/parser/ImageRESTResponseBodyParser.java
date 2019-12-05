@@ -81,11 +81,6 @@ public class ImageRESTResponseBodyParser implements RESTResponseBodyParser {
         this.contentTypes = Collections.unmodifiableSet(ct);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.rest.client.RESTResponseBodyParser#parse(com.openexchange.rest.client.RESTResponse)
-     */
     @Override
     public void parse(HttpResponse httpResponse, RESTResponse restResponse) throws OXException {
         try (ByteArrayOutputStream out = new ByteArrayOutputStream(); InputStream stream = httpResponse.getEntity().getContent()) {
@@ -103,11 +98,6 @@ public class ImageRESTResponseBodyParser implements RESTResponseBodyParser {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.rest.client.RESTResponseBodyParser#getContentTypes()
-     */
     @Override
     public Set<String> getContentTypes() {
         return contentTypes;

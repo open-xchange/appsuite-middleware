@@ -75,21 +75,11 @@ public enum VacationActionField implements ActionField {
         this.tagName = tagName;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.mailfilter.json.ajax.json.fields.ActionField#getFieldName()
-     */
     @Override
     public final String getFieldName() {
         return fieldName;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.mailfilter.json.ajax.json.fields.ActionField#getTagName()
-     */
     @Override
     public final String getTagName() {
         return tagName;

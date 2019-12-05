@@ -71,11 +71,6 @@ public class OneDriveFile extends DefaultFile {
         setIsCurrentVersion(true);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.file.storage.AbstractFile#toString()
-     */
     @Override
     public String toString() {
         final String url = getURL();

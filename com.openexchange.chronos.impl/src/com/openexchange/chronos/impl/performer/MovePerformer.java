@@ -83,7 +83,7 @@ import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
-import com.openexchange.chronos.impl.AttendeeHelper;
+import com.openexchange.chronos.impl.InternalAttendeeUpdates;
 import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.Consistency;
@@ -218,7 +218,7 @@ public class MovePerformer extends AbstractUpdatePerformer {
          * ensure to add default calendar user if not already present
          */
         if (false == contains(originalEvent.getAttendees(), targetCalendarUser)) {
-            Attendee defaultAttendee = AttendeeHelper.getDefaultAttendee(session, targetFolder, null);
+            Attendee defaultAttendee = InternalAttendeeUpdates.getDefaultAttendee(session, targetFolder, null);
             storage.getAttendeeStorage().insertAttendees(originalEvent.getId(), Collections.singletonList(defaultAttendee));
         }
         /*
@@ -287,7 +287,7 @@ public class MovePerformer extends AbstractUpdatePerformer {
             storage.getEventStorage().insertEventTombstone(storage.getUtilities().getTombstone(originalEvent, timestamp, calendarUser));
             storage.getAttendeeStorage().deleteAttendees(originalEvent.getId(), Collections.singletonList(originalAttendee));
             storage.getAlarmStorage().deleteAlarms(originalEvent.getId(), originalAttendee.getEntity());
-            Attendee newDefaultAttendee = AttendeeHelper.getDefaultAttendee(session, targetFolder, null);
+            Attendee newDefaultAttendee = InternalAttendeeUpdates.getDefaultAttendee(session, targetFolder, null);
             storage.getAttendeeStorage().insertAttendees(originalEvent.getId(), Collections.singletonList(newDefaultAttendee));
             updateOrganizer(originalEvent, targetFolder);
         } else {

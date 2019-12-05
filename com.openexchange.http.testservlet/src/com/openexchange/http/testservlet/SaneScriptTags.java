@@ -117,7 +117,7 @@ public final class SaneScriptTags {
     private static String urlDecode(final String html) {
         try {
             return URLDecoder.decode(html, "UTF-8");
-        } catch (final Exception e) {
+        } catch (Exception e) {
             final Matcher m = PAT_URLDECODE_ENTITIES.matcher(html);
             if (!m.find()) {
                 return html;

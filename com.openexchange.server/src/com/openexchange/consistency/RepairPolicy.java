@@ -80,5 +80,11 @@ public enum RepairPolicy {
     /**
      * It will handle any missing composition space attachments
      */
-    MISSING_ATTACHMENT_FILE_FOR_MAIL_COMPOSE;
+    MISSING_ATTACHMENT_FILE_FOR_MAIL_COMPOSE,
+    
+    /**
+     * It will handle any missing previews
+     */
+    MISSING_FILE_FOR_PREVIEW
+    ;
 }

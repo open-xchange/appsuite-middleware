@@ -183,6 +183,11 @@ final class FakeSession implements Session, Serializable {
     }
 
     @Override
+    public boolean isStaySignedIn() {
+        return false;
+    }
+
+    @Override
     public Set<String> getParameterNames() {
         return parameters.keySet();
     }

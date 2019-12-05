@@ -68,31 +68,16 @@ public class Redirect extends AbstractAction implements Action<RedirectActionArg
         addArgument(RedirectActionArgument.to, email);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.mail.filter.api.dao.action.Action#getActionCommand()
-     */
     @Override
     public ActionCommand getActionCommand() {
         return ActionCommand.redirect;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.mail.filter.api.dao.action.Action#setArgument(com.openexchange.ajax.mail.filter.api.dao.action.argument.ActionArgument, java.lang.Object)
-     */
     @Override
     public void setArgument(RedirectActionArgument argument, Object value) {
         addArgument(argument, value);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.mail.filter.api.dao.action.Action#getArgument(com.openexchange.ajax.mail.filter.api.dao.action.argument.ActionArgument)
-     */
     @Override
     public Object getArgument(RedirectActionArgument argument) {
         return getArguments().get(argument);

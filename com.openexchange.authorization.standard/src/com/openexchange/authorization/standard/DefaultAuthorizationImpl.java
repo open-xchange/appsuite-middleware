@@ -49,13 +49,14 @@
 
 package com.openexchange.authorization.standard;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.lang.reflect.UndeclaredThrowableException;
 import com.openexchange.authorization.AuthorizationExceptionCodes;
 import com.openexchange.authorization.AuthorizationService;
 import com.openexchange.context.ContextExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
+import com.openexchange.user.User;
 
 
 /**
@@ -94,13 +95,13 @@ public final class DefaultAuthorizationImpl implements AuthorizationService {
         try {
             if (!ctx.isEnabled()) {
                 LOG.debug("Context {} ({}) is disabled.", Integer.valueOf(ctx.getContextId()), ctx.getName());
-                throw AuthorizationExceptionCodes.USER_DISABLED.create(ContextExceptionCodes.CONTEXT_DISABLED.create(Integer.valueOf(ctx.getContextId()), ctx.getName()));
+                throw AuthorizationExceptionCodes.USER_DISABLED.create(ContextExceptionCodes.CONTEXT_DISABLED.create(I(ctx.getContextId()), ctx.getName()), I(user.getId()), I(ctx.getContextId()));
             }
-        } catch (final UndeclaredThrowableException e) {
+        } catch (UndeclaredThrowableException e) {
             throw AuthorizationExceptionCodes.UNKNOWN.create(e);
         }
         if (!user.isMailEnabled()) {
-            throw AuthorizationExceptionCodes.USER_DISABLED.create();
+            throw AuthorizationExceptionCodes.USER_DISABLED.create(I(user.getId()), I(ctx.getContextId()));
         }
         if (user.getShadowLastChange() == 0) {
             throw AuthorizationExceptionCodes.PASSWORD_EXPIRED.create();

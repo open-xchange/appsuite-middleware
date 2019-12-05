@@ -96,7 +96,7 @@ public class RestClientActivator extends HousekeepingActivator {
             // Clear service registry
             WrappedClientsRegistry.getInstance().setSSLServices(null, null);
             RestClientServices.setServices(null);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             org.slf4j.LoggerFactory.getLogger(RestClientActivator.class).error("", e);
             throw e;
         }

@@ -189,12 +189,12 @@ public final class OXFolderLoader {
             } finally {
                 closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw OXFolderExceptionCode.FOLDER_COULD_NOT_BE_LOADED.create(e, Integer.toString(folderId), Integer.toString(ctx.getContextId()));
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw OXFolderExceptionCode.FOLDER_COULD_NOT_BE_LOADED.create(e, Integer.toString(folderId), Integer.toString(ctx.getContextId()));
         }
-        //catch (final OXException e) {
+        //catch (OXException e) {
         //    throw OXFolderExceptionCode.FOLDER_COULD_NOT_BE_LOADED.create(e, String.valueOf(folderId), String.valueOf(ctx.getContextId()));
         //}
     }
@@ -428,7 +428,7 @@ public final class OXFolderLoader {
         }
         try {
             return Integer.parseInt(str);
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             if (str.equalsIgnoreCase("system")) {
                 return ctx.getMailadmin();
             }

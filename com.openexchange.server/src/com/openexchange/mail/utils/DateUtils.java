@@ -85,12 +85,12 @@ public final class DateUtils {
             synchronized (DATEFORMAT_RFC822) {
                 return DATEFORMAT_RFC822.parse(s);
             }
-        } catch (final ParseException e) {
+        } catch (ParseException e) {
             try {
                 synchronized (DATEFORMAT_RFC822_RETRY) {
                     return DATEFORMAT_RFC822_RETRY.parse(s);
                 }
-            } catch (final ParseException e1) {
+            } catch (ParseException e1) {
                 LOG.trace("", e1);
             }
             throw new IllegalArgumentException(e.getMessage());

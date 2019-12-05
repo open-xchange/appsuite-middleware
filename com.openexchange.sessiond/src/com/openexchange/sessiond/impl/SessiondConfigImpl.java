@@ -51,7 +51,6 @@ package com.openexchange.sessiond.impl;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
-import static com.openexchange.sessiond.SessiondProperty.SESSIOND_AUTOLOGIN;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.sessiond.impl.usertype.UserTypeSessiondConfigInterface;
@@ -74,7 +73,6 @@ public class SessiondConfigImpl implements SessiondConfigInterface {
     private final long sessionShortLifeTime;
     private final long randomTokenTimeout;
     private final long longLifeTime;
-    private final boolean autoLogin;
     private final boolean asyncPutToSessionStorage;
     private final String obfuscationKey;
 
@@ -111,9 +109,6 @@ public class SessiondConfigImpl implements SessiondConfigInterface {
         tmp = conf.getProperty("com.openexchange.sessiond.randomTokenTimeout", Integer.toString(30000));
         randomTokenTimeout = ConfigTools.parseTimespan(tmp);
         LOG.debug("Sessiond property: com.openexchange.sessiond.randomTokenTimeout={}", L(randomTokenTimeout));
-
-        tmp = conf.getProperty(SESSIOND_AUTOLOGIN.getPropertyName(), SESSIOND_AUTOLOGIN.getDefaultValue());
-        autoLogin = Boolean.parseBoolean(tmp.trim());
 
         tmp = conf.getProperty("com.openexchange.sessiond.asyncPutToSessionStorage", "true");
         asyncPutToSessionStorage = Boolean.parseBoolean(tmp.trim());
@@ -165,11 +160,6 @@ public class SessiondConfigImpl implements SessiondConfigInterface {
     public int getNumberOfLongTermSessionContainers() {
         long retval = (longLifeTime - sessionShortLifeTime) / LONG_CONTAINER_LIFE_TIME;
         return (int) ((retval < 1) ? 1 : retval);
-    }
-
-    @Override
-    public boolean isAutoLogin() {
-        return autoLogin;
     }
 
     @Override

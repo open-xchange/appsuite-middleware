@@ -127,18 +127,19 @@ public final class EventFactory {
     }
 
     /**
-     * Creates a simple two hour event with the specified amount of occurrences and recurring frequency
+     * Creates a simple two hour event with the specified frequency and the specified weekday limited by the until value
      *
      * @param userId The user identifier
      * @param summary The summary of the event
-     * @param occurences The number of occurrences
+     * @param until The until value for the recurrence rule
      * @param folderId The folder identifier
      * @param freq The recurring frequency
+     * @param weekday The weekday the event is occuring
      * @return The series {@link EventData}
      */
     public static EventData createSeriesEvent(int userId, String summary, DateTimeData until, String folderId, RecurringFrequency freq, Weekday weekday) {
         EventData seriesEvent = createSingleTwoHourEvent(userId, summary, folderId);
-        seriesEvent.setRrule("FREQ=" + freq.name() + ";BYDAY=" + weekday.name() + ";UNTIL=" + until.getValue());
+        seriesEvent.setRrule(RRuleFactory.getFrequencyWithUntilLimit(freq, until, weekday));
         return seriesEvent;
     }
 
@@ -154,7 +155,7 @@ public final class EventFactory {
      */
     public static EventData createSeriesEvent(int userId, String summary, int occurences, String folderId, RecurringFrequency freq) {
         EventData seriesEvent = createSingleTwoHourEvent(userId, summary, folderId);
-        seriesEvent.setRrule("FREQ=" + freq.name() + ";COUNT=" + occurences);
+        seriesEvent.setRrule(RRuleFactory.getFrequencyWithOccurenceLimit(freq, occurences));
         return seriesEvent;
     }
 
@@ -170,7 +171,7 @@ public final class EventFactory {
     }
 
     /**
-     * Creates a simple daily two hour event with the specified amount of occurrences
+     * Creates a simple daily event series with the specified amount of occurrences
      *
      * @param userId The user identifier
      * @param summary The summary of the event
@@ -184,7 +185,7 @@ public final class EventFactory {
     }
 
     /**
-     * Creates a simple daily two hour event with the specified amount of occurrences
+     * Creates a simple daily event series with the specified amount of occurrences
      *
      * @param userId The user identifier
      * @param summary The summary of the event
@@ -195,13 +196,26 @@ public final class EventFactory {
      */
     public static EventData createSeriesEvent(int userId, String summary, DateTimeData startDate, DateTimeData endDate, int occurences, String folderId) {
         EventData seriesEvent = createSingleEvent(userId, summary, startDate, endDate, folderId);
-        seriesEvent.setRrule("FREQ=DAILY;COUNT=" + occurences);
+        seriesEvent.setRrule(RRuleFactory.getFrequencyWithOccurenceLimit(RecurringFrequency.DAILY, occurences));
         return seriesEvent;
     }
-
+    
+    /**
+     * Creates a series event
+     *
+     * @param userId The calendar user
+     * @param summary The event summary
+     * @param startDate The event start date
+     * @param endDate The event end date
+     * @param until The until value for the recurrence rule
+     * @param freq The {@link RecurringFrequency} for the recurrence rule
+     * @param weekday The {@link Weekday} for the recurrence rule
+     * @param folderId The folde rid
+     * @return The series {@link EventData}
+     */
     public static EventData createSeriesEvent(int userId, String summary, DateTimeData startDate, DateTimeData endDate, DateTimeData until, RecurringFrequency freq, Weekday weekday, String folderId) {
         EventData seriesEvent = createSingleEvent(userId, summary, startDate, endDate, folderId);
-        seriesEvent.setRrule("FREQ=" + freq.name() + ";BYDAY=" + weekday.name() + ";UNTIL=" + until.getValue());
+        seriesEvent.setRrule(RRuleFactory.getFrequencyWithUntilLimit(freq, until, weekday));
         return seriesEvent;
     }
 

@@ -105,8 +105,8 @@ public class HeapDumper extends AbstractMBeanCLI<Void> {
     }
 
     @Override
-    protected boolean requiresAdministrativePermission() {
-        return false;
+    protected Boolean requiresAdministrativePermission() {
+        return Boolean.FALSE;
     }
 
     @Override

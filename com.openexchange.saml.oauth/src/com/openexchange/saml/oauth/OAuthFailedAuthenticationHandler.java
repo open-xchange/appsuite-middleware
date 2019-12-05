@@ -114,6 +114,10 @@ public class OAuthFailedAuthenticationHandler implements AuthenticationFailedHan
             return AuthenticationFailureHandlerResult.createContinueResult();
         }
 
+        if (!isSamlAuthenticated(session)) {
+            return AuthenticationFailureHandlerResult.createContinueResult();
+        }
+
         SessiondService sessiondService = services.getService(SessiondService.class);
         String oldRefreshToken = (String) session.getParameter(Session.PARAM_OAUTH_REFRESH_TOKEN);
         if (null != oldRefreshToken) {
@@ -140,6 +144,15 @@ public class OAuthFailedAuthenticationHandler implements AuthenticationFailedHan
         LOG.debug("Unable to refresh access token for user {} in context {}. Session contains no refresh token.", I(session.getUserId()), I(session.getContextId()));
         sessiondService.removeSession(session.getSessionID());
         return AuthenticationFailureHandlerResult.createErrorResult(SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID()));
+    }
+
+    /**
+     * See <code>com.openexchange.saml.SAMLSessionParameters.AUTHENTICATED</code>
+     */
+    private static final String AUTHENTICATED = "com.openexchange.saml.Authenticated";
+
+    private boolean isSamlAuthenticated(Session session) {
+        return "true".equals(session.getParameter(AUTHENTICATED));
     }
 
     private AuthenticationFailureHandlerResult doHandleAuthFailed(Session session, String oldRefreshToken, MailConfig mailConfig, SessiondService sessiondService) {

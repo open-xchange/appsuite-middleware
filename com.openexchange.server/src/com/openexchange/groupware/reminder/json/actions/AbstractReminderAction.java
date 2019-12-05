@@ -125,7 +125,7 @@ public abstract class AbstractReminderAction implements AJAXActionService {
                 reminderRequest.setTimeZone(getTimeZone(sTimeZone));
             }
             return perform(reminderRequest);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
     }
@@ -259,7 +259,7 @@ public abstract class AbstractReminderAction implements AJAXActionService {
         ReminderObject reminder = new ReminderObject();
         reminder.setDate(new Date(trigger.getTime().longValue()));
         EventID eventId = null;
-        if(trigger.containsRecurrenceId()){
+        if (trigger.containsRecurrenceId()){
             eventId = new EventID(trigger.getFolder(), trigger.getEventId(), trigger.getRecurrenceId());
         } else {
             eventId = new EventID(trigger.getFolder(), trigger.getEventId());

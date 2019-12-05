@@ -54,10 +54,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -83,18 +85,26 @@ public class SproxydFileStorage implements FileStorage {
 
     private final SproxydClient client;
     private final ChunkStorage chunkStorage;
+    private final URI uri;
 
     /**
      * Initializes a new {@link SproxydFileStorage}.
      *
+     * @param uri The URI that fully qualifies this file storage
      * @param services A service lookup reference
      * @param client The spoxyd client to use
      * @param chunkStorage The underlying chunk storage
      */
-    public SproxydFileStorage(SproxydClient client, ChunkStorage chunkStorage) {
+    public SproxydFileStorage(URI uri, SproxydClient client, ChunkStorage chunkStorage) {
         super();
+        this.uri = uri;
         this.client = client;
         this.chunkStorage = chunkStorage;
+    }
+
+    @Override
+    public URI getUri() {
+        return uri;
     }
 
     @Override
@@ -105,8 +115,9 @@ public class SproxydFileStorage implements FileStorage {
              * spool to file
              */
             if (!(file instanceof FileInputStream)) {
-                tmpFile = TempFileHelper.getInstance().newTempFile();
-                if (tmpFile != null) {
+                Optional<File> optionalTempFile = TempFileHelper.getInstance().newTempFile();
+                if (optionalTempFile.isPresent()) {
+                    tmpFile = optionalTempFile.get();
                     file = Streams.transferToFileAndCreateStream(file, tmpFile);
                 }
             }
@@ -114,11 +125,7 @@ public class SproxydFileStorage implements FileStorage {
              * proceed
              */
             UUID documentId = UUID.randomUUID();
-            long length = upload(documentId, file, 0);
-            if (length <= 0) {
-                // Received an empty input stream
-                throw SproxydExceptionCode.UNEXPECTED_ERROR.create("Sproxyd storage cannot save an empty file");
-            }
+            upload(documentId, file, 0);
             return UUIDs.getUnformattedString(documentId);
         } catch (IOException e) {
             throw FileStorageCodes.IOERROR.create(e, e.getMessage());
@@ -233,8 +240,9 @@ public class SproxydFileStorage implements FileStorage {
              * spool to file
              */
             if (!(file instanceof FileInputStream)) {
-                tmpFile = TempFileHelper.getInstance().newTempFile();
-                if (tmpFile != null) {
+                Optional<File> optionalTempFile = TempFileHelper.getInstance().newTempFile();
+                if (optionalTempFile.isPresent()) {
+                    tmpFile = optionalTempFile.get();
                     file = Streams.transferToFileAndCreateStream(file, tmpFile);
                 }
             }
@@ -335,50 +343,17 @@ public class SproxydFileStorage implements FileStorage {
         try {
             chunkedUpload = new DefaultChunkedUpload(data);
             long off = offset;
-            if (!chunkedUpload.hasNext()) {
-                success = true;
-                return off;
-            }
-
-            // Handle first chunk especially
-            {
+            while (chunkedUpload.hasNext()) {
                 UploadChunk chunk = chunkedUpload.next();
                 try {
-                    // ... and upload first chunk
-                    long chunkSize = chunk.getSize();
-                    UUID scalityId = client.put(chunk.getData(), chunkSize);
+                    UUID scalityId = client.put(chunk.getData(), chunk.getSize());
                     scalityIds.add(scalityId);
-                    chunkStorage.storeChunk(new Chunk(documentId, scalityId, off, chunkSize));
-
-                    if (chunkSize <= 0) {
-                        // Received an empty input stream
-                        success = true;
-                        return off;
-                    }
-
+                    chunkStorage.storeChunk(new Chunk(documentId, scalityId, off, chunk.getSize()));
                     off += chunk.getSize();
                 } finally {
                     Streams.close(chunk);
                 }
             }
-
-            // Handle remaining chunks
-            while (chunkedUpload.hasNext()) {
-                UploadChunk chunk = chunkedUpload.next();
-                try {
-                    long chunkSize = chunk.getSize();
-                    if (chunkSize > 0) {
-                        UUID scalityId = client.put(chunk.getData(), chunk.getSize());
-                        scalityIds.add(scalityId);
-                        chunkStorage.storeChunk(new Chunk(documentId, scalityId, off, chunk.getSize()));
-                        off += chunk.getSize();
-                    }
-                } finally {
-                    Streams.close(chunk);
-                }
-            }
-
-            // All fine, no error occurred
             success = true;
             return off;
         } finally {

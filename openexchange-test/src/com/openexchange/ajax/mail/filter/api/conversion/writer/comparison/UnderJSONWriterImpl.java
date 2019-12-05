@@ -71,11 +71,6 @@ public class UnderJSONWriterImpl extends AbstractComparisonJSONWriter<UnderCompa
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.mail.filter.api.conversion.writer.JSONWriter#write(java.lang.Object, org.json.JSONObject)
-     */
     @Override
     public JSONObject write(Comparison<ComparisonArgument> type, JSONObject jsonObject) throws JSONException {
         return write(type, EnumSet.allOf(UnderComparisonArgument.class), jsonObject);

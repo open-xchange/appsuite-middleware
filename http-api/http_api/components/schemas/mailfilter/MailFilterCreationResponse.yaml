@@ -1,0 +1,6 @@
+type: object
+properties:
+  $ref: ../common/CommonResponseData.yaml
+  data:
+    type: integer
+    description: The id of the newly created rule.

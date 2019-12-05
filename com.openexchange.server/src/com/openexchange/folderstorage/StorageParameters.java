@@ -54,8 +54,8 @@ import java.util.Set;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.session.Session;
+import com.openexchange.user.User;
 
 /**
  * {@link StorageParameters} - The storage parameters to perform a certain storage operation.

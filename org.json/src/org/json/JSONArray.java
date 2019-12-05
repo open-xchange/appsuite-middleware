@@ -193,7 +193,7 @@ public class JSONArray extends AbstractJSONValue implements Iterable<Object> {
                 } else if (value instanceof Map) {
                     myArrayList.add(new JSONObject((Map<String, Object>) value));
                 } else {
-                    myArrayList.add(value);
+                    myArrayList.add(value == null ? JSONObject.NULL : value);
                 }
             }
         }
@@ -267,7 +267,7 @@ public class JSONArray extends AbstractJSONValue implements Iterable<Object> {
                     retval.add(jsonValue.toObject().asMap());
                 }
             } else {
-                retval.add(value);
+                retval.add(JSONObject.NULL.equals(value) ? null : value);
             }
         }
         return retval;
@@ -334,7 +334,7 @@ public class JSONArray extends AbstractJSONValue implements Iterable<Object> {
         final Object o = get(index);
         try {
             return o instanceof Number ? ((Number) o).doubleValue() : Double.parseDouble((String) o);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw new JSONException("JSONArray[" + index + "] is not a number.", e);
         }
     }
@@ -482,7 +482,7 @@ public class JSONArray extends AbstractJSONValue implements Iterable<Object> {
     public boolean optBoolean(final int index, final boolean defaultValue) {
         try {
             return getBoolean(index);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             return defaultValue;
         }
     }
@@ -509,7 +509,7 @@ public class JSONArray extends AbstractJSONValue implements Iterable<Object> {
     public double optDouble(final int index, final double defaultValue) {
         try {
             return getDouble(index);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             return defaultValue;
         }
     }
@@ -536,7 +536,7 @@ public class JSONArray extends AbstractJSONValue implements Iterable<Object> {
     public int optInt(final int index, final int defaultValue) {
         try {
             return getInt(index);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             return defaultValue;
         }
     }
@@ -586,7 +586,7 @@ public class JSONArray extends AbstractJSONValue implements Iterable<Object> {
     public long optLong(final int index, final long defaultValue) {
         try {
             return getLong(index);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             return defaultValue;
         }
     }
@@ -848,7 +848,7 @@ public class JSONArray extends AbstractJSONValue implements Iterable<Object> {
         if (index < myArrayList.size()) {
             try {
                 this.myArrayList.remove(index);
-            } catch (final RuntimeException e) {
+            } catch (RuntimeException e) {
                 throw new JSONException("JSONArray[" + index + "] could not be removed.", e);
             }
         }
@@ -904,10 +904,16 @@ public class JSONArray extends AbstractJSONValue implements Iterable<Object> {
                 return EMPTY;
             }
 
-            final UnsynchronizedStringWriter writer = new UnsynchronizedStringWriter(n << 4);
-            write(writer, asciiOnly);
-            return writer.toString();
-        } catch (final Exception e) {
+            while (true) {
+                try {
+                    final UnsynchronizedStringWriter writer = new UnsynchronizedStringWriter(n << 4);
+                    write(writer, asciiOnly);
+                    return writer.toString();
+                } catch (java.util.ConcurrentModificationException e) {
+                    // JSON array modified while trying to generate string. Retry...
+                }
+            }
+        } catch (Exception e) {
             final Logger logger = JSONObject.LOGGER.get();
             if (null != logger) {
                 logger.logp(Level.SEVERE, JSONArray.class.getName(), "toString()", e.getMessage(), e);
@@ -950,7 +956,7 @@ public class JSONArray extends AbstractJSONValue implements Iterable<Object> {
             jGenerator.setPrettyPrinter(STANDARD_DEFAULT_PRETTY_PRINTER);
             write(this, jGenerator);
             return writer.toString();
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw new JSONException(e);
         } finally {
             close(jGenerator);
@@ -976,7 +982,7 @@ public class JSONArray extends AbstractJSONValue implements Iterable<Object> {
             jGenerator.setPrettyPrinter(STANDARD_MINIMAL_PRETTY_PRINTER);
             write(this, jGenerator);
             return writer;
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw new JSONException(e);
         } finally {
             close(jGenerator);
@@ -1032,7 +1038,7 @@ public class JSONArray extends AbstractJSONValue implements Iterable<Object> {
                 }
             }
             return parse(jParser, optArray);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw new JSONException(e);
         } finally {
             close(jParser);
@@ -1073,7 +1079,7 @@ public class JSONArray extends AbstractJSONValue implements Iterable<Object> {
                 case VALUE_NUMBER_INT:
                     try {
                         ja.put(jParser.getIntValue());
-                    } catch (final JsonParseException e) {
+                    } catch (JsonParseException e) {
                         // Outside of range of Java int
                         ja.put(jParser.getLongValue());
                     }
@@ -1113,7 +1119,7 @@ public class JSONArray extends AbstractJSONValue implements Iterable<Object> {
                 current = jParser.nextToken();
             }
             return ja;
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw new JSONException(e);
         }
     }

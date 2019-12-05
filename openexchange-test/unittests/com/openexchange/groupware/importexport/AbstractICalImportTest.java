@@ -54,7 +54,7 @@ import org.junit.BeforeClass;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.importexport.formats.Format;
+import com.openexchange.importexport.Format;
 import com.openexchange.importexport.importers.ICalImporter;
 import com.openexchange.test.AjaxInit;
 import com.openexchange.tools.session.ServerSessionFactory;

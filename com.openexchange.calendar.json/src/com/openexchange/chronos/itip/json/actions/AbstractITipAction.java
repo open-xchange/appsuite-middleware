@@ -117,7 +117,7 @@ public abstract class AbstractITipAction extends AppointmentAction {
             stream = getInputStreamAndFillMailHeader(request.getRequest(), session, mailHeader);
             List<ITipAnalysis> analysis = analyzer.analyze(stream, request.getParameter("descriptionFormat"), session, mailHeader);
             return new AJAXRequestResult(process(analysis, request.getRequest(), session, outputTimeZone), new Date());
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e);
         } finally {
             Streams.close(stream);
@@ -171,10 +171,10 @@ public abstract class AbstractITipAction extends AppointmentAction {
             final JSONObject body = (JSONObject) data;
             try {
                 return new ByteArrayInputStream(body.getString("ical").getBytes("UTF-8"));
-            } catch (final UnsupportedEncodingException e) {
+            } catch (UnsupportedEncodingException e) {
                 LOG.error("", e);
                 return null;
-            } catch (final JSONException x) {
+            } catch (JSONException x) {
                 throw AjaxExceptionCodes.JSON_ERROR.create(x);
             }
         }

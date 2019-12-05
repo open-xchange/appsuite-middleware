@@ -55,7 +55,7 @@ import java.util.Date;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.dav.AttachmentUtils;
-import com.openexchange.dav.internal.Tools;
+import com.openexchange.dav.Tools;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.AttachmentMetadata;
@@ -84,7 +84,7 @@ public abstract class DAVObjectResource<T> extends DAVResource {
      * @param object An existing groupware object represented by this resource, or <code>null</code> if a placeholder resource should be created
      * @param url The resource url
      */
-    protected DAVObjectResource(FolderCollection<T> parent, T object, WebdavPath url) throws OXException {
+    protected DAVObjectResource(FolderCollection<T> parent, T object, WebdavPath url) {
         super(parent.getFactory(), url);
         this.parent = parent;
         this.object = object;

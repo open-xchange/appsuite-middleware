@@ -63,12 +63,12 @@ import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.login.LoginResult;
 import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
+import com.openexchange.user.User;
 
 /**
  * Implements the tokenLogin action.
@@ -144,10 +144,12 @@ public final class TokenLogin implements LoginRequestHandler {
         // App Suite UI requires some additional values.
         // retval = LoginTools.addFragmentParameter(retval, PARAMETER_USER, session.getLogin()); <--- Removed because login string might exposing sensitive user data; e.g. E-Mail address
         retval = LoginTools.addFragmentParameter(retval, PARAMETER_USER_ID, Integer.toString(session.getUserId()));
-        retval = LoginTools.addFragmentParameter(retval, "language", language);
+        retval = LoginTools.addFragmentParameter(retval, LoginFields.LANGUAGE_PARAM, language);
+        retval = LoginTools.addFragmentParameter(retval, LoginFields.LOCALE_PARAM, language);
         // Pass through parameter
         if (shouldStore != null) {
             retval = LoginTools.addFragmentParameter(retval, "store", shouldStore);
+            retval = LoginTools.addFragmentParameter(retval, LoginFields.STORE_LOCALE, shouldStore);
         }
         // client side token should be added to the end by the client
         return retval;

@@ -61,7 +61,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.UUID;
-import javax.jms.IllegalStateException;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
@@ -420,7 +419,7 @@ public class AbstractContactTest extends AbstractAJAXSession {
         try {
             final DeleteRequest request = new DeleteRequest(inFolder, id, ignoreFailure ? new Date(Long.MAX_VALUE) : new Date(), !ignoreFailure);
             getClient().execute(request);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             if (!ignoreFailure) {
                 throw e;
             }

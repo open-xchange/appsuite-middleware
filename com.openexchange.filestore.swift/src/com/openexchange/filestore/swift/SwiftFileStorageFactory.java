@@ -59,12 +59,6 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.http.client.utils.URIBuilder;
@@ -73,16 +67,18 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
+import com.openexchange.config.Reloadables;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.DatabaseAccess;
 import com.openexchange.filestore.DatabaseAccessService;
-import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorageInfo;
 import com.openexchange.filestore.FileStorageInfoService;
 import com.openexchange.filestore.FileStorageProvider;
 import com.openexchange.filestore.FileStorages;
+import com.openexchange.filestore.InterestsAware;
 import com.openexchange.filestore.swift.chunkstorage.ChunkStorage;
 import com.openexchange.filestore.swift.chunkstorage.RdbChunkStorage;
 import com.openexchange.filestore.swift.impl.AuthInfo;
@@ -109,7 +105,7 @@ import com.openexchange.timer.TimerService;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public class SwiftFileStorageFactory implements FileStorageProvider {
+public class SwiftFileStorageFactory implements FileStorageProvider, InterestsAware {
 
     /** The logger constant */
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SwiftFileStorageFactory.class);
@@ -127,8 +123,6 @@ public class SwiftFileStorageFactory implements FileStorageProvider {
     // -------------------------------------------------------------------------------------------------------------------- //
 
     final ServiceLookup services;
-    private final ConcurrentMap<URI, Future<SwiftFileStorage>> storages;
-    private final ConcurrentMap<String, SwiftConfig> swiftConfigs;
     private final TokenStorage tokenStorage;
 
     /**
@@ -139,71 +133,44 @@ public class SwiftFileStorageFactory implements FileStorageProvider {
     public SwiftFileStorageFactory(ServiceLookup services) {
         super();
         this.services = services;
-        this.storages = new ConcurrentHashMap<URI, Future<SwiftFileStorage>>();
-        this.swiftConfigs = new ConcurrentHashMap<String, SwiftConfig>();
         tokenStorage = new TokenStorageImpl(services);
+    }
+
+    @Override
+    public Interests getInterests() {
+        return Reloadables.interestsForFiles("com.openexchange.filestore.swift.*");
     }
 
     @Override
     public SwiftFileStorage getFileStorage(final URI uri) throws OXException {
         // Expect something like "swift://myswift/57462_ctx_3_user_store"
-        Future<SwiftFileStorage> f = storages.get(uri);
-        if (null == f) {
-            FutureTask<SwiftFileStorage> ft = new FutureTask<SwiftFileStorage>(new Callable<SwiftFileStorage>() {
+        LOG.debug("Initializing Swift file storage for {}", uri);
 
-                @Override
-                public SwiftFileStorage call() throws OXException {
-                    LOG.debug("Initializing Swift file storage for {}", uri);
+        // Extract context and user from URI path
+        String filestoreID = extractFilestoreID(uri);
+        ExtractionResult extractionResult = extractFrom(uri);
 
-                    // Extract context and user from URI path
-                    String filestoreID = extractFilestoreID(uri);
-                    ExtractionResult extractionResult = extractFrom(uri);
-
-                    DatabaseAccess databaseAccess;
-                    int contextId;
-                    int userId;
-                    if (extractionResult.hasContextUserAssociation()) {
-                        contextId = extractionResult.getContextId();
-                        userId = extractionResult.getUserId();
-                        databaseAccess = new DefaultDatabaseAccess(userId, contextId, services.getService(DatabaseService.class));
-                        LOG.debug("Using \"{}\" as filestore ID, context ID of filestore is \"{}\", user ID is \"{}\".", filestoreID, I(contextId), I(userId));
-                    } else {
-                        contextId = 0;
-                        userId = 0;
-                        databaseAccess = lookUpDatabaseAccess(uri, extractionResult.getPrefix());
-                    }
-
-                    // Ensure required tables do exist
-                    databaseAccess.createIfAbsent(RdbChunkStorage.getRequiredTables());
-
-                    // Initialize file storage using dedicated client & chunk storage
-                    SwiftClient client = initClient(filestoreID, extractionResult.getPrefix());
-                    ChunkStorage chunkStorage = new RdbChunkStorage(databaseAccess, contextId, userId);
-                    return new SwiftFileStorage(client, chunkStorage);
-                }
-
-            });
-
-            f = storages.putIfAbsent(uri, ft);
-            if (null == f) {
-                ft.run();
-                f = ft;
-            }
+        DatabaseAccess databaseAccess;
+        int contextId;
+        int userId;
+        if (extractionResult.hasContextUserAssociation()) {
+            contextId = extractionResult.getContextId();
+            userId = extractionResult.getUserId();
+            databaseAccess = new DefaultDatabaseAccess(userId, contextId, services.getService(DatabaseService.class));
+            LOG.debug("Using \"{}\" as filestore ID, context ID of filestore is \"{}\", user ID is \"{}\".", filestoreID, I(contextId), I(userId));
+        } else {
+            contextId = 0;
+            userId = 0;
+            databaseAccess = lookUpDatabaseAccess(uri, extractionResult.getPrefix());
         }
 
-        try {
-            return f.get();
-        } catch (InterruptedException e) {
-            // Keep interrupted status
-            Thread.currentThread().interrupt();
-            throw SwiftExceptionCode.UNEXPECTED_ERROR.create(e, "Interrupted");
-        } catch (ExecutionException e) {
-            Throwable cause = e.getCause();
-            if (cause instanceof OXException) {
-                throw (OXException) cause;
-            }
-            throw SwiftExceptionCode.UNEXPECTED_ERROR.create(cause, cause.getMessage());
-        }
+        // Ensure required tables do exist
+        databaseAccess.createIfAbsent(RdbChunkStorage.getRequiredTables());
+
+        // Initialize file storage using dedicated client & chunk storage
+        SwiftClient client = initClient(filestoreID, extractionResult.getPrefix());
+        ChunkStorage chunkStorage = new RdbChunkStorage(databaseAccess, contextId, userId);
+        return new SwiftFileStorage(uri, client, chunkStorage);
     }
 
     static DatabaseAccess lookUpDatabaseAccess(URI uri, String prefix) throws OXException {
@@ -220,13 +187,8 @@ public class SwiftFileStorageFactory implements FileStorageProvider {
     }
 
     @Override
-    public FileStorage getInternalFileStorage(URI uri) throws OXException {
-        return getFileStorage(uri);
-    }
-
-    @Override
     public boolean supports(URI uri) {
-         return null != uri && SWIFT_SCHEME.equalsIgnoreCase(uri.getScheme());
+        return null != uri && SWIFT_SCHEME.equalsIgnoreCase(uri.getScheme());
     }
 
     @Override
@@ -318,24 +280,14 @@ public class SwiftFileStorageFactory implements FileStorageProvider {
      * @return The client
      */
     SwiftClient initClient(String filestoreID, String prefix) throws OXException {
-        SwiftConfig swiftConfig = swiftConfigs.get(filestoreID);
-        if (swiftConfig == null) {
-            SwiftConfig newSwiftConfig = initSwiftConfig(filestoreID);
-            swiftConfig = swiftConfigs.putIfAbsent(filestoreID, newSwiftConfig);
-            if (swiftConfig == null) {
-                swiftConfig = newSwiftConfig;
-            } else {
-                newSwiftConfig.getEndpointPool().close();
-            }
-        }
-
+        SwiftConfig swiftConfig = initSwiftConfig(filestoreID);
         return new SwiftClient(swiftConfig, prefix, tokenStorage);
     }
 
     /**
      * Initializes a new HTTP client and end-point pool for a configured Swift file storage.
      *
-     * @param filestoreID The  file storage ID
+     * @param filestoreID The file storage ID
      * @return The configured items
      * @throws OXException
      */
@@ -376,11 +328,7 @@ public class SwiftFileStorageFactory implements FileStorageProvider {
         int heartbeatInterval = optIntProperty(filestoreID, "heartbeatInterval", 60000, nameBuilder, config);
 
         // Create the HTTP client
-        CloseableHttpClient httpClient = HttpClients.getHttpClient(ClientConfig.newInstance()
-            .setMaxTotalConnections(maxConnections)
-            .setMaxConnectionsPerRoute(maxConnectionsPerHost)
-            .setConnectionTimeout(connectionTimeout)
-            .setSocketReadTimeout(socketReadTimeout));
+        CloseableHttpClient httpClient = HttpClients.getHttpClient(ClientConfig.newInstance().setMaxTotalConnections(maxConnections).setMaxConnectionsPerRoute(maxConnectionsPerHost).setConnectionTimeout(connectionTimeout).setSocketReadTimeout(socketReadTimeout));
         try {
             // Create the auth info
             AuthInfo authInfo = new AuthInfo(authValue, authType, tenantName, domain, identityUrl);

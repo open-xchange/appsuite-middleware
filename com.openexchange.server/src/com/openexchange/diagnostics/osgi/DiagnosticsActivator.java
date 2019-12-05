@@ -50,6 +50,8 @@
 package com.openexchange.diagnostics.osgi;
 
 import java.rmi.Remote;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.diagnostics.DiagnosticService;
@@ -82,7 +84,9 @@ public class DiagnosticsActivator extends HousekeepingActivator {
         logger.info("Registering DiagnosticService");
         DiagnosticServiceImpl diagnosticService = new DiagnosticServiceImpl();
         registerService(DiagnosticService.class, diagnosticService);
-        registerService(Remote.class, new RemoteDiagnosticServiceImpl(diagnosticService));
+        Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
+        serviceProperties.put("RMI_NAME", RemoteDiagnosticServiceImpl.RMI_NAME);
+        registerService(Remote.class, new RemoteDiagnosticServiceImpl(diagnosticService), serviceProperties);
     }
 
     @Override

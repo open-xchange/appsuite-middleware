@@ -86,7 +86,7 @@ public class SearchServiceImpl implements SearchService {
     public AutocompleteResult autocomplete(AutocompleteRequest autocompleteRequest, Module module, ServerSession session) throws OXException {
         try {
             return requireDriver(session, module, new LookUpInfo(autocompleteRequest, null)).autocomplete(autocompleteRequest, session);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw FindExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
@@ -95,7 +95,7 @@ public class SearchServiceImpl implements SearchService {
     public SearchResult search(SearchRequest searchRequest, Module module, ServerSession session) throws OXException {
         try {
             return requireDriver(session, module, new LookUpInfo(searchRequest, null)).search(searchRequest, session);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw FindExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }

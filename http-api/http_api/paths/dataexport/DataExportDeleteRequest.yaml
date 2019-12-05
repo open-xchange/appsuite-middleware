@@ -1,0 +1,26 @@
+'/gdpr/dataexport/delete':
+  delete:
+    operationId: deleteDataExportTask
+    tags:
+      - DataExport
+    summary: Deletes the result files and all resourcess of data export task for session-associated user
+    parameters:
+      - $ref: '#/components/parameters/gblQueryParamSession'
+    responses:
+      '200':
+        description: A JSON object containing the success status.
+        content:
+          application/json:
+            schema:
+              type: object
+              title: deleteDataExportTaskReponse
+              properties:
+                success:
+                  type: boolean
+                  description: >-
+                    True if such resources for data export task has been successfully
+                    deleted; false otherwise
+      '400':
+        description: 'Bad request, response contains error message.'
+      '401':
+        description: Not authorized

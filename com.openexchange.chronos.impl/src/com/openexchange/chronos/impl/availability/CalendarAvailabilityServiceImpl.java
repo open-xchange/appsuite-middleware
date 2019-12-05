@@ -81,11 +81,6 @@ public class CalendarAvailabilityServiceImpl implements CalendarAvailabilityServ
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.chronos.service.CalendarAvailabilityService#setAvailability(com.openexchange.chronos.service.CalendarSession, com.openexchange.chronos.Availability)
-     */
     @Override
     public void setAvailability(CalendarSession session, final Availability availability) throws OXException {
         new AbstractCalendarAvailabilityStorageOperation<Void>(session) {
@@ -98,11 +93,6 @@ public class CalendarAvailabilityServiceImpl implements CalendarAvailabilityServ
         }.executeUpdate();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.chronos.availability.CalendarAvailabilityService#getAvailability(com.openexchange.chronos.service.CalendarSession)
-     */
     @Override
     public Availability getAvailability(CalendarSession session) throws OXException {
         return new AbstractCalendarAvailabilityStorageOperation<Availability>(session) {
@@ -115,11 +105,6 @@ public class CalendarAvailabilityServiceImpl implements CalendarAvailabilityServ
         }.executeQuery();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.chronos.service.CalendarAvailabilityService#getCombinedAvailability(com.openexchange.chronos.service.CalendarSession, java.util.List, java.util.Date, java.util.Date)
-     */
     @Override
     public Map<Attendee, Availability> getCombinedAvailability(CalendarSession session, final List<Attendee> attendees, final Date from, final Date until) throws OXException {
         return new AbstractCalendarAvailabilityStorageOperation<Map<Attendee, Availability>>(session) {
@@ -132,11 +117,6 @@ public class CalendarAvailabilityServiceImpl implements CalendarAvailabilityServ
         }.executeQuery();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.chronos.service.CalendarAvailabilityService#getUserAvailability(com.openexchange.chronos.service.CalendarSession, java.util.List, java.util.Date, java.util.Date)
-     */
     @Override
     public Map<CalendarUser, Availability> getUserAvailability(CalendarSession session, final List<CalendarUser> users, final Date from, final Date until) throws OXException {
         return new AbstractCalendarAvailabilityStorageOperation<Map<CalendarUser, Availability>>(session) {
@@ -149,11 +129,6 @@ public class CalendarAvailabilityServiceImpl implements CalendarAvailabilityServ
         }.executeQuery();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.chronos.availability.CalendarAvailabilityService#getAvailability(com.openexchange.chronos.service.CalendarSession, java.util.List, java.util.Date, java.util.Date)
-     */
     @Override
     public Map<Attendee, Availability> getAttendeeAvailability(CalendarSession session, final List<Attendee> attendees, final Date from, final Date until) throws OXException {
         return new AbstractCalendarAvailabilityStorageOperation<Map<Attendee, Availability>>(session) {
@@ -166,21 +141,11 @@ public class CalendarAvailabilityServiceImpl implements CalendarAvailabilityServ
         }.executeQuery();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.chronos.availability.CalendarAvailabilityService#deleteAvailability(com.openexchange.chronos.service.CalendarSession, java.lang.String)
-     */
     @Override
     public void deleteAvailability(CalendarSession session) throws OXException {
         purgeAvailabilities(session);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.chronos.availability.CalendarAvailabilityService#deleteAvailabilities(com.openexchange.chronos.service.CalendarSession, java.util.List)
-     */
     @Override
     public void deleteAvailablesByUid(CalendarSession session, final List<String> availableUIds) throws OXException {
         new AbstractCalendarAvailabilityStorageOperation<Void>(session) {
@@ -194,11 +159,6 @@ public class CalendarAvailabilityServiceImpl implements CalendarAvailabilityServ
         }.executeUpdate();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.chronos.service.CalendarAvailabilityService#deleteAvailablesById(com.openexchange.chronos.service.CalendarSession, java.util.List)
-     */
     @Override
     public void deleteAvailablesById(CalendarSession session, final List<Integer> availableIds) throws OXException {
         new AbstractCalendarAvailabilityStorageOperation<Void>(session) {
@@ -212,11 +172,6 @@ public class CalendarAvailabilityServiceImpl implements CalendarAvailabilityServ
         }.executeUpdate();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.chronos.availability.CalendarAvailabilityService#purgeAvailabilities(com.openexchange.chronos.service.CalendarSession)
-     */
     @Override
     public void purgeAvailabilities(CalendarSession session) throws OXException {
         new AbstractCalendarAvailabilityStorageOperation<Void>(session) {

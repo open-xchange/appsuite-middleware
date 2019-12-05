@@ -196,7 +196,7 @@ public class RSSMessageAccess extends RSSCommon implements MessagingMessageAcces
     }
 
     private List<SyndMessage> sublist(final List<SyndMessage> messages, final IndexRange indexRange) {
-        if(indexRange == null) {
+        if (indexRange == null) {
             return messages;
         }
         int start = Math.min(indexRange.getStart(), messages.size()-1);
@@ -206,7 +206,7 @@ public class RSSMessageAccess extends RSSCommon implements MessagingMessageAcces
             start = 0;
         }
 
-        if(end < 0) {
+        if (end < 0) {
             end = 0;
         }
 
@@ -214,18 +214,18 @@ public class RSSMessageAccess extends RSSCommon implements MessagingMessageAcces
     }
 
     private void sort(final List<SyndMessage> messages, final MessagingField sortField, final OrderDirection order) throws OXException {
-        if(sortField == null) {
+        if (sortField == null) {
             return;
         }
         final MessagingComparator comparator = new MessagingComparator(sortField, null);
         try {
             Collections.sort(messages, comparator);
-            if(order == OrderDirection.DESC) {
+            if (order == OrderDirection.DESC) {
                 Collections.reverse(messages);
             }
-        } catch (final RuntimeException x) {
+        } catch (RuntimeException x) {
             final Throwable cause = x.getCause();
-            if(OXException.class.isInstance(cause)) {
+            if (OXException.class.isInstance(cause)) {
                 throw (OXException) cause;
             }
             throw new OXException(x);
@@ -252,14 +252,14 @@ public class RSSMessageAccess extends RSSCommon implements MessagingMessageAcces
     }
 
     private FeedAdapter loadFeed() throws OXException {
-        if(feed != null) {
+        if (feed != null) {
             return feed;
         }
         final String url = (String) accounts.getAccount(accountId, session).getConfiguration().get("url");
 
         try {
             return feed = new FeedAdapter(retrieveFeed(new URL(url)), "", session);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
         }
     }
@@ -298,7 +298,7 @@ public class RSSMessageAccess extends RSSCommon implements MessagingMessageAcces
     private SyndFeed retrieveFeed(final URL url) throws IOException, FeedException, FetcherException {
         try {
             return feedFetcher.retrieveFeed(url);
-        } catch (final com.sun.syndication.io.ParsingFeedException e) {
+        } catch (com.sun.syndication.io.ParsingFeedException e) {
             // Retry using InputSource class
             InputStream in = null;
             try {

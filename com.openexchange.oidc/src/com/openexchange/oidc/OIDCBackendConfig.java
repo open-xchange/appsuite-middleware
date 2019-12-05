@@ -53,6 +53,7 @@ import java.util.List;
 import java.util.Map;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.authentication.AuthenticationService;
+import com.openexchange.authentication.NamePart;
 
 /**
  * {@link OIDCBackendConfig}
@@ -123,14 +124,6 @@ public interface OIDCBackendConfig {
      * @return the client id.
      */
     String getClientID();
-
-    /**
-     * Get the redirect URI that should be used by the frontend to start the authentication
-     * process. Pointing to the init-Servlet. {@link InitService}
-     *
-     * @return the redirect URI
-     */
-    String getRpRedirectURIInit();
 
     /**
      * Get the redirect URI that the OP should redirect to after token generation. Pointing to
@@ -267,7 +260,7 @@ public interface OIDCBackendConfig {
      * @return
      */
     List<String> getHosts();
-    
+
     /**
      * Load the redirect URI that should be used if a server error occurs that can be ignored.
      * For example a redirect to the IDP for another login attempt.
@@ -275,4 +268,60 @@ public interface OIDCBackendConfig {
      * @return
      */
     String getFailureRedirect();
+
+    /**
+     * Gets the name of the ID token claim that will be used by the
+     * default backend to resolve a context.
+     */
+    String getContextLookupClaim();
+
+    /**
+     * Gets the {@link NamePart} of the ID token claim value used for
+     * determining the context of a user.
+     *
+     * @see #getContextLookupClaim()
+     */
+    NamePart getContextLookupNamePart();
+
+    /**
+     * Gets the name of the ID token claim that will be used by the
+     * default backend to resolve a user.
+     *
+     */
+    String getUserLookupClaim();
+
+    /**
+     * Gets the {@link NamePart} of the ID token claim value used for
+     * determining a user.
+     *
+     * @see #getUserLookupClaim()
+     */
+    NamePart getUserLookupNamePart();
+
+    /**
+     * Gets the {@link NamePart} to be used for an issued Resource
+     * Owner Password Credentials Grant ({@link https://tools.ietf.org/html/rfc6749#section-4.3}).
+     * The part is taken from the user-provided login name.
+     *
+     * @see OIDCProperty#enablePasswordGrant
+     */
+    NamePart getPasswordGrantUserNamePart();
+
+    /**
+     * Lock timeout before giving up trying to refresh an access token for
+     * a session. If multiple threads try to check or refresh the access token
+     * at the same time, only one gets a lock and blocks the others. In case
+     * of a timeout, this is logged as a temporary issue and the request continued
+     * as usual.
+     */
+    long getTokenLockTimeoutSeconds();
+
+    /**
+     * Gets whether token refresh should try to recover valid tokens from
+     * the session instance that is present in {@link SessionStorageService}.
+     * This is only tried as a fall-back, after token refresh failed with an
+     * {@code invalid_grant} error.
+     */
+    boolean tryRecoverStoredTokens();
+
 }

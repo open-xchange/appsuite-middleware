@@ -49,6 +49,7 @@
 
 package com.openexchange.webdav.action;
 
+import static com.openexchange.webdav.protocol.Protocol.DAV_NS;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.List;
@@ -58,6 +59,7 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.Namespace;
+import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.webdav.protocol.Protocol;
@@ -69,13 +71,11 @@ import com.openexchange.webdav.xml.resources.PropertiesMarshaller;
 
 public class WebdavProppatchAction extends AbstractAction {
 
-    private static final Namespace DAV_NS = Namespace.getNamespace("DAV:");
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(WebdavProppatchAction.class);
 
     private PropertyAction SET = null;
     private static final PropertyAction REMOVE = new RemoveAction();
 
-    private final XMLOutputter outputter = new XMLOutputter();
     private final Protocol protocol;
 
     public WebdavProppatchAction(final Protocol protocol) {
@@ -127,12 +127,12 @@ public class WebdavProppatchAction extends AbstractAction {
             resource.save();
             res.setStatus(Protocol.SC_MULTISTATUS);
             res.setContentType("text/xml");
-            outputter.output(responseDoc, res.getOutputStream());
+            new XMLOutputter(Format.getPrettyFormat()).output(responseDoc, res.getOutputStream());
 
-        } catch (final JDOMException e) {
+        } catch (JDOMException e) {
             LOG.error("JDOMException: ", e);
             throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             LOG.debug("Client gone?", e);
         }
     }
@@ -145,7 +145,6 @@ public class WebdavProppatchAction extends AbstractAction {
 
     private static final class SetAction implements PropertyAction {
 
-        private final XMLOutputter outputter = new XMLOutputter();
         private final Protocol protocol;
 
         public SetAction(final Protocol protocol) {
@@ -178,9 +177,9 @@ public class WebdavProppatchAction extends AbstractAction {
                     property.setXML(true);
                     try {
                         final Writer w = new AllocatingStringWriter();
-                        outputter.output(propertyElement.cloneContent(), w);
+                        new XMLOutputter().output(propertyElement.cloneContent(), w);
                         property.setValue(w.toString());
-                    } catch (final IOException e) {
+                    } catch (IOException e) {
                         status = 500;
                     }
 
@@ -198,7 +197,7 @@ public class WebdavProppatchAction extends AbstractAction {
 
                 try {
                     resource.putProperty(property);
-                } catch (final WebdavProtocolException e) {
+                } catch (WebdavProtocolException e) {
                     status = e.getStatus();
                 }
             }
@@ -223,6 +222,13 @@ public class WebdavProppatchAction extends AbstractAction {
 
     private static final class RemoveAction implements PropertyAction {
 
+        /**
+         * Initializes a new {@link RemoveAction}.
+         */
+        public RemoveAction() {
+            super();
+        }
+
         @Override
         public Element perform(final Element propElement, final WebdavResource resource) {
             int status = 200;
@@ -238,7 +244,7 @@ public class WebdavProppatchAction extends AbstractAction {
 
             try {
                 resource.removeProperty(propertyElement.getNamespaceURI(), propertyElement.getName());
-            } catch (final WebdavProtocolException e) {
+            } catch (WebdavProtocolException e) {
                 status = e.getStatus();
             }
 

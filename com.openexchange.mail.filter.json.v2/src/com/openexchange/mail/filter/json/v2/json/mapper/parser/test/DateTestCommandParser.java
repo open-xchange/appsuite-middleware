@@ -85,7 +85,7 @@ public class DateTestCommandParser extends AbstractDateTestCommandParser {
         parseHeader(argList, jsonObject, commandName);
         parseDatePart(argList, jsonObject, commandName);
 
-        if(isNotMatcher){
+        if (isNotMatcher){
             return NotTestCommandUtil.wrapTestCommand(new TestCommand(TestCommand.Commands.DATE, argList, new ArrayList<TestCommand>()));
         }
         return new TestCommand(TestCommand.Commands.DATE, argList, new ArrayList<TestCommand>());

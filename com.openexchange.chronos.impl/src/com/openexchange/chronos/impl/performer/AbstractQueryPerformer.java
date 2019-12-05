@@ -99,7 +99,7 @@ public abstract class AbstractQueryPerformer {
     }
 
     protected SelfProtection getSelfProtection() {
-        if(selfProtection==null){
+        if (selfProtection==null){
             LeanConfigurationService leanConfigurationService = Services.getService(LeanConfigurationService.class);
             selfProtection = SelfProtectionFactory.createSelfProtection(leanConfigurationService);
         }

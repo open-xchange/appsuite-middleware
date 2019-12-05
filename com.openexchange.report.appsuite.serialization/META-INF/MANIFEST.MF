@@ -2,13 +2,14 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Report Serialization for Report Generation Framework
 Bundle-SymbolicName: com.openexchange.report.appsuite.serialization
-Bundle-Version: 7.10.2
+Bundle-Version: 7.10.3
 Bundle-Activator: com.openexchange.report.appsuite.serialization.osgi.ReportSerializationActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.openexchange.ajax.tools,
  com.openexchange.config,
  com.openexchange.exception,
+ com.openexchange.java,
  com.openexchange.osgi,
  com.openexchange.server,
  com.openexchange.tools.strings,

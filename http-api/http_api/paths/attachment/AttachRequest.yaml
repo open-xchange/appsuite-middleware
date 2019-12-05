@@ -1,0 +1,46 @@
+/attachment?action=attach:
+  post:
+    operationId: createAttachment
+    tags:
+      - Attachments
+    summary: Creates an attachment.
+    description: >
+      #### Note
+
+      It is possible to create multiple attachments at once. Therefor add
+      additional form fields and replace "[index]" in `json_[index]`
+
+      and `file_[index]` with the appropriate index, like `json_1`, `file_1`.
+      The index always starts with 0 (mandatory attachment object).
+    parameters:
+      - $ref: '#/components/parameters/gblQueryParamSession'
+    responses:
+      '200':
+        description: >
+          A HTML page as described in [File uploads](#file-uploads) containing a
+          JSON array of object IDs of the newly created attachments or errors if
+          some occurred.
+        content:
+          text/html:
+            schema:
+              type: string
+    requestBody:
+      content:
+        multipart/form-data:
+          schema:
+            type: object
+            title: createAttachmentBody
+            properties:
+              json_0:
+                description: >-
+                  A JSON string representing an attachment object as described
+                  in [AttachmentData](#/definitions/AttachmentData) model with
+                  at least the fields `folder`, `attached` and `module`.
+                type: string
+              file_0:
+                description: The attachment file as per `<input type="file" />`.
+                type: string
+                format: binary
+            required:
+              - json_0
+              - file_0

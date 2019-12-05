@@ -49,11 +49,9 @@
 
 package com.openexchange.pns.transport.websocket.osgi;
 
+import static com.openexchange.osgi.Tools.withRanking;
 import java.util.ArrayList;
-import java.util.Dictionary;
-import java.util.Hashtable;
 import java.util.List;
-import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
@@ -122,9 +120,7 @@ public class WebSocketPushNotificationTransportActivator extends HousekeepingAct
         rememberTracker(resolverTracker);
         openTrackers();
 
-        Dictionary<String, Object> props = new Hashtable<>(2);
-        props.put(Constants.SERVICE_RANKING, Integer.valueOf(100));
-        registerService(PushClientChecker.class, new WebSocketClientPushClientChecker(resolverTracker), props);
+        registerService(PushClientChecker.class, new WebSocketClientPushClientChecker(resolverTracker), withRanking(100));
 
         reinit();
 

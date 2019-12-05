@@ -75,10 +75,12 @@ import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.google.common.collect.ImmutableSet;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPCommandsCollection;
+import com.openexchange.imap.util.ImapUtility;
 import com.openexchange.java.ConcurrentHashSet;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.utils.MailFolderUtility;
 import com.sun.mail.iap.Argument;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
@@ -86,7 +88,6 @@ import com.sun.mail.imap.ACL;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.imap.protocol.BASE64MailboxDecoder;
-import com.sun.mail.imap.protocol.BASE64MailboxEncoder;
 import com.sun.mail.imap.protocol.IMAPProtocol;
 import com.sun.mail.imap.protocol.IMAPResponse;
 import com.sun.mail.imap.protocol.Namespaces;
@@ -513,7 +514,7 @@ final class ListLsubCollection implements Serializable {
     private void init(boolean clearMaps, IMAPStore imapStore, boolean ignoreSubscriptions) throws OXException {
         try {
             init(clearMaps, (IMAPFolder) imapStore.getFolder("INBOX"), ignoreSubscriptions, imapStore);
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         }
     }
@@ -573,23 +574,38 @@ final class ListLsubCollection implements Serializable {
 
         // Debug logging
         if (debug) {
-            final StringBuilder sb = new StringBuilder(1024);
+            StringBuilder sb = new StringBuilder(256);
+            List<Object> args = new ArrayList<>();
             {
-                final TreeMap<String, ListLsubEntryImpl> tm = new TreeMap<String, ListLsubEntryImpl>(listMap);
-                sb.append("LIST cache contains after (re-)initialization:\n");
-                for (final Entry<String, ListLsubEntryImpl> entry : tm.entrySet()) {
-                    sb.append('"').append(entry.getKey()).append("\"=").append(entry.getValue()).append('\n');
+                TreeMap<String, ListLsubEntryImpl> tm = new TreeMap<String, ListLsubEntryImpl>(listMap);
+
+                sb.append("LIST cache contains after (re-)initialization:{}");
+                args.add(Strings.getLineSeparator());
+
+                for (Map.Entry<String, ListLsubEntryImpl> entry : tm.entrySet()) {
+                    sb.append("\"{}\"={}{}");
+                    args.add(entry.getKey());
+                    args.add(entry.getValue());
+                    args.add(Strings.getLineSeparator());
                 }
-                LOG.debug(sb.toString());
+                LOG.debug(sb.toString(), args.toArray(new Object[args.size()]));
             }
             {
-                final TreeMap<String, ListLsubEntryImpl> tm = new TreeMap<String, ListLsubEntryImpl>(lsubMap);
                 sb.setLength(0);
-                sb.append("LSUB cache contains after (re-)initialization:\n");
-                for (final Entry<String, ListLsubEntryImpl> entry : tm.entrySet()) {
-                    sb.append('"').append(entry.getKey()).append("\"=").append(entry.getValue()).append('\n');
+                args.clear();
+
+                TreeMap<String, ListLsubEntryImpl> tm = new TreeMap<String, ListLsubEntryImpl>(lsubMap);
+
+                sb.append("LSUB cache contains after (re-)initialization:{}");
+                args.add(Strings.getLineSeparator());
+
+                for (Map.Entry<String, ListLsubEntryImpl> entry : tm.entrySet()) {
+                    sb.append("\"{}\"={}{}");
+                    args.add(entry.getKey());
+                    args.add(entry.getValue());
+                    args.add(Strings.getLineSeparator());
                 }
-                LOG.debug(sb.toString());
+                LOG.debug(sb.toString(), args.toArray(new Object[args.size()]));
             }
         }
 
@@ -620,6 +636,7 @@ final class ListLsubCollection implements Serializable {
                 ListLsubEntryImpl rootEntry = lsubMap.get(ROOT_FULL_NAME);
                 if (null != rootEntry) {
                     rootEntry.removeChildByFullName(lsubEntry.getFullName());
+                    LOG2.debug("Dropped folder {} from root", lsubEntry.getFullName());
                 }
             }
         }
@@ -630,6 +647,7 @@ final class ListLsubCollection implements Serializable {
                 ListLsubEntryImpl rootEntry = lsubMap.get(ROOT_FULL_NAME);
                 if (null != rootEntry) {
                     rootEntry.removeChildByFullName(lsubEntry.getFullName());
+                    LOG2.debug("Dropped folder {} from root", lsubEntry.getFullName());
                 }
             }
         }
@@ -745,7 +763,7 @@ final class ListLsubCollection implements Serializable {
         }
         try {
             return imapStore.getFolder(fullName).exists();
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             // Swallow
             LOG.debug("Failed checking existence for {}", fullName, e);
         }
@@ -772,7 +790,7 @@ final class ListLsubCollection implements Serializable {
                 }
 
             });
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         }
     }
@@ -789,7 +807,7 @@ final class ListLsubCollection implements Serializable {
     public void update(String fullName, IMAPStore imapStore, boolean ignoreSubscriptions) throws OXException {
         try {
             update(fullName, (IMAPFolder) imapStore.getFolder("INBOX"), ignoreSubscriptions);
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         }
     }
@@ -837,7 +855,7 @@ final class ListLsubCollection implements Serializable {
             LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, command);
             protocol.notifyResponseHandlers(r);
             protocol.handleResult(response);
-        } catch (final ProtocolException e) {
+        } catch (ProtocolException e) {
             LOG.warn("Dummy >>LSUB \"\" \"\"<< command failed.", e);
         }
     }
@@ -915,6 +933,8 @@ final class ListLsubCollection implements Serializable {
             protocol.handleResult(response);
         }
     }
+
+    private static final org.slf4j.Logger LOG2 = org.slf4j.LoggerFactory.getLogger("com.openexchange.bug55625.logger");
 
     /**
      * Performs a LIST/LSUB command with specified IMAP protocol.
@@ -1031,6 +1051,20 @@ final class ListLsubCollection implements Serializable {
             if (null != protocol) {
                 protocol.notifyResponseHandlers(r);
             }
+
+            if (LOG2.isDebugEnabled()) {
+                ListLsubEntryImpl root = map.get(ROOT_FULL_NAME);
+                if (root == null) {
+                    // Missing root folder
+                    outputListResponses(listResponses, (lsub ? "LSUB" : "LIST") + ": Missing root folder");
+                } else {
+                    Set<ListLsubEntryImpl> children = root.getChildrenSet();
+                    if (children.isEmpty()) {
+                        // Missing child folders
+                        outputListResponses(listResponses, (lsub ? "LSUB" : "LIST") + ": Missing root child folders");
+                    }
+                }
+            }
         } else {
             // Dispatch remaining untagged responses
             LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, sCmd);
@@ -1039,6 +1073,26 @@ final class ListLsubCollection implements Serializable {
                 protocol.handleResult(response);
             }
         }
+    }
+
+    private void outputListResponses(List<ListLsubEntryImpl> listResponses, String reason) {
+        List<Object> args = new ArrayList<>();
+        StringBuilder messageBuilder = new StringBuilder(listResponses.size() << 2);
+
+        messageBuilder.append(reason).append("{}");
+        args.add(Strings.getLineSeparator());
+
+        for (ListLsubEntryImpl listResponse : listResponses) {
+            messageBuilder.append("{}{}");
+            args.add(listResponse.toString());
+            args.add(Strings.getLineSeparator());
+        }
+
+        messageBuilder.append("{}{}");
+        args.add(Strings.getLineSeparator());
+        args.add(Strings.getLineSeparator());
+
+        LOG2.debug(messageBuilder.toString(), args.toArray(new Object[args.size()]));
     }
 
     private void handleNamespaces(final ConcurrentMap<String, ListLsubEntryImpl> map, final ListLsubEntryImpl rootEntry, final char separator) {
@@ -1090,7 +1144,10 @@ final class ListLsubCollection implements Serializable {
             if (r[i] instanceof IMAPResponse) {
                 IMAPResponse ir = (IMAPResponse) r[i];
                 if (ir.keyEquals(command)) {
-                    list.add(parseListResponse(ir, lsub ? null : lsubMap));
+                    ListLsubEntryImpl listLsubEntry = parseListResponse(ir, lsub ? null : lsubMap);
+                    if (listLsubEntry != null) {
+                        list.add(listLsubEntry);
+                    }
                     r[i] = null;
                 }
             }
@@ -1256,9 +1313,7 @@ final class ListLsubCollection implements Serializable {
         /*
          * Perform command: LIST "" <full-name>
          */
-        final String mbox = BASE64MailboxEncoder.encode(fullName);
-        final Argument args = new Argument();
-        args.writeString(mbox);
+        final Argument args = ImapUtility.encodeFolderName(fullName, protocol);
         final Response[] r = performCommand(protocol, "LIST \"\"", args);
         final Response response = r[r.length - 1];
         if (response.isOK()) {
@@ -1281,7 +1336,7 @@ final class ListLsubCollection implements Serializable {
                 /*
                  * Check subscription status
                  */
-                listLsubEntry.setSubscribed(doSubscriptionCheck(protocol, mbox));
+                listLsubEntry.setSubscribed(doSubscriptionCheck(protocol, fullName));
             }
             return listLsubEntry;
         }
@@ -1298,16 +1353,15 @@ final class ListLsubCollection implements Serializable {
      * Performs a check if denoted folder is subscribed.
      *
      * @param protocol The IMAP protocol
-     * @param mbox The encoded full name
+     * @param fullName The encoded full name
      * @return <code>true</code> if subscribed; otherwise <code>false</code>
      * @throws ProtocolException If a protocol error occurs
      */
-    private boolean doSubscriptionCheck(final IMAPProtocol protocol, final String mbox) throws ProtocolException {
+    private boolean doSubscriptionCheck(final IMAPProtocol protocol, final String fullName) throws ProtocolException {
         /*
          * Perform command: LIST "" <full-name>
          */
-        final Argument args = new Argument();
-        args.writeString(mbox);
+        final Argument args = ImapUtility.encodeFolderName(fullName, protocol);
         final Response[] r = performCommand(protocol, "LSUB \"\"", args);
         final Response response = r[r.length - 1];
         if (response.isOK()) {
@@ -1318,7 +1372,7 @@ final class ListLsubCollection implements Serializable {
                 }
                 final IMAPResponse ir = (IMAPResponse) r[i];
                 if (ir.keyEquals("LSUB")) {
-                    ret |= mbox.equals(parseEncodedFullName(ir));
+                    ret |= fullName.equals(parseEncodedFullName(ir));
                     r[i] = null;
                 }
             }
@@ -1461,7 +1515,7 @@ final class ListLsubCollection implements Serializable {
     public void addSingle(final String fullName, final IMAPStore imapStore) throws OXException {
         try {
             addSingle(fullName, (IMAPFolder) imapStore.getFolder("INBOX"));
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         }
     }
@@ -1607,7 +1661,7 @@ final class ListLsubCollection implements Serializable {
                 }
 
             });
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         }
     }
@@ -1627,9 +1681,7 @@ final class ListLsubCollection implements Serializable {
          * Perform command: LIST "" "INBOX"
          */
         final String command = lsub ? "LSUB" : "LIST";
-        String mbox = BASE64MailboxEncoder.encode(fullName);
-        Argument args = new Argument();
-        args.writeString(mbox);
+        Argument args = ImapUtility.encodeFolderName(fullName, protocol);
         final Response[] r = performCommand(protocol, new StringBuilder(command).append(" \"\"").toString(), args);
         args = null;
         mbox = null;
@@ -2006,6 +2058,10 @@ final class ListLsubCollection implements Serializable {
         // Read full name; decode the name (using RFC2060's modified UTF7)
         listResponse.skipSpaces();
         String name = null == predefinedName ? BASE64MailboxDecoder.decode(listResponse.readAtomString()) : predefinedName;
+        if (MailFolderUtility.isInvalidFullName(name)) {
+            LOG.warn("Detected unsupported full name: {}. IMAP folder will be discarded.", name);
+            return null;
+        }
 
         // Return
         return new ListLsubEntryImpl(name, attributes, separator, changeState, hasInferiors, canOpen, hasChildren, lsubMap).setNamespace(isNamespace(name));
@@ -2352,10 +2408,7 @@ final class ListLsubCollection implements Serializable {
          * @param child The child LIST/LSUB entry
          */
         protected void removeChild(final ListLsubEntryImpl child) {
-            if (null == child) {
-                return;
-            }
-            if (null == children) {
+            if (null == child || null == children) {
                 return;
             }
             children.remove(child);
@@ -2367,10 +2420,7 @@ final class ListLsubCollection implements Serializable {
          * @param childFullName The child full-name
          */
         protected void removeChildByFullName(final String childFullName) {
-            if (null == childFullName) {
-                return;
-            }
-            if (null == children) {
+            if (null == childFullName || null == children) {
                 return;
             }
             for (Iterator<ListLsubEntryImpl> iter = children.iterator(); iter.hasNext(); ) {

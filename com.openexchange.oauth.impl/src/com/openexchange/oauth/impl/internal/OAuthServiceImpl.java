@@ -91,8 +91,6 @@ import com.openexchange.oauth.OAuthUtil;
 import com.openexchange.oauth.impl.services.Services;
 import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.session.Session;
-import com.openexchange.sessiond.SessiondService;
-import com.openexchange.tools.session.SessionHolder;
 
 /**
  * An {@link OAuthService} Implementation using the RDB for storage and Scribe OAuth library for the OAuth interaction.
@@ -126,41 +124,21 @@ public class OAuthServiceImpl implements OAuthService {
         this.callbackRegistry = cbRegistry;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.OAuthService#getMetaDataRegistry()
-     */
     @Override
     public OAuthServiceMetaDataRegistry getMetaDataRegistry() {
         return registry;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.OAuthService#getAccounts(com.openexchange.session.Session)
-     */
     @Override
     public List<OAuthAccount> getAccounts(final Session session) throws OXException {
         return oauthAccountStorage.getAccounts(session);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.OAuthService#getAccounts(java.lang.String, com.openexchange.session.Session, int, int)
-     */
     @Override
     public List<OAuthAccount> getAccounts(Session session, String serviceMetaData) throws OXException {
         return oauthAccountStorage.getAccounts(session, serviceMetaData);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.OAuthService#initOAuth(java.lang.String, java.lang.String, com.openexchange.oauth.HostInfo, com.openexchange.session.Session, java.util.Set)
-     */
     @Override
     public OAuthInteraction initOAuth(final Session session, final String serviceMetaData, final String callbackUrl, final HostInfo currentHost, Set<OAuthScope> scopes) throws OXException {
         try {
@@ -230,18 +208,13 @@ public class OAuthServiceImpl implements OAuthService {
             OAuthToken requestToken = scribeToken == null ? OAuthToken.EMPTY_TOKEN : new ScribeOAuthToken(scribeToken);
             OAuthInteractionType interactionType = cbUrl == null ? OAuthInteractionType.OUT_OF_BAND : OAuthInteractionType.CALLBACK;
             return new OAuthInteractionImpl(requestToken, authURL, interactionType);
-        } catch (final org.scribe.exceptions.OAuthException e) {
+        } catch (org.scribe.exceptions.OAuthException e) {
             throw handleScribeOAuthException(e);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw OAuthExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.OAuthService#createAccount(java.lang.String, java.util.Map, int, int, java.util.Set)
-     */
     @Override
     public OAuthAccount createAccount(Session session, final String serviceMetaData, Set<OAuthScope> scopes, final Map<String, Object> arguments) throws OXException {
         isNull(arguments, OAuthConstants.ARGUMENT_DISPLAY_NAME, OAuthConstants.ARGUMENT_SESSION, OAuthConstants.ARGUMENT_TOKEN, OAuthConstants.ARGUMENT_SECRET);
@@ -263,11 +236,6 @@ public class OAuthServiceImpl implements OAuthService {
         return account;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.OAuthService#upsertAccount(java.lang.String, java.util.Map, int, int, java.util.Set)
-     */
     @Override
     public OAuthAccount upsertAccount(Session session, String serviceMetaData, int accountId, OAuthInteractionType type, Map<String, Object> arguments, Set<OAuthScope> scopes) throws OXException {
         DefaultOAuthAccount account = new DefaultOAuthAccount();
@@ -321,11 +289,6 @@ public class OAuthServiceImpl implements OAuthService {
         return existingAccount;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.OAuthService#createAccount(java.lang.String, com.openexchange.oauth.OAuthInteractionType, java.util.Map, int, int, java.util.Set)
-     */
     @Override
     public OAuthAccount createAccount(Session session, final String serviceMetaData, Set<OAuthScope> scopes, final OAuthInteractionType type, final Map<String, Object> arguments) throws OXException {
         isNull(arguments, OAuthConstants.ARGUMENT_DISPLAY_NAME, OAuthConstants.ARGUMENT_SESSION);
@@ -355,7 +318,7 @@ public class OAuthServiceImpl implements OAuthService {
                 oauthAccountStorage.updateAccount(session, existingAccount);
             }
             return account;
-        } catch (final OXException x) {
+        } catch (OXException x) {
             if (ExceptionUtils.isEitherOf(x, SSLHandshakeException.class)) {
                 String url = (String) arguments.get(OAuthConstants.ARGUMENT_AUTH_URL);
                 if (Strings.isNotEmpty(url)) {
@@ -374,42 +337,22 @@ public class OAuthServiceImpl implements OAuthService {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.OAuthService#deleteAccount(int, int, int)
-     */
     @Override
     public void deleteAccount(Session session, final int accountId) throws OXException {
         oauthAccountStorage.deleteAccount(session, accountId);
-        postOAuthDeleteEvent(accountId, session.getUserId(), session.getContextId());
+        postOAuthDeleteEvent(accountId, session);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.OAuthService#updateAccount(int, java.util.Map, int, int)
-     */
     @Override
     public void updateAccount(Session session, final int accountId, final Map<String, Object> arguments) throws OXException {
         oauthAccountStorage.updateAccount(session, accountId, arguments);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.OAuthService#getAccount(int, com.openexchange.session.Session, int, int)
-     */
     @Override
     public OAuthAccount getAccount(final Session session, final int accountId) throws OXException {
         return oauthAccountStorage.getAccount(session, accountId);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.OAuthService#getDefaultAccount(com.openexchange.oauth.API, com.openexchange.session.Session)
-     */
     @Override
     public OAuthAccount getDefaultAccount(final API api, final Session session) throws OXException {
         final int contextId = session.getContextId();
@@ -432,11 +375,6 @@ public class OAuthServiceImpl implements OAuthService {
         throw OAuthExceptionCodes.ACCOUNT_NOT_FOUND.create("default:" + api.toString(), Integer.valueOf(userId), Integer.valueOf(contextId));
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.OAuthService#updateAccount(int, java.lang.String, com.openexchange.oauth.OAuthInteractionType, java.util.Map, int, int, java.util.Set)
-     */
     @Override
     public OAuthAccount updateAccount(Session session, final int accountId, final String serviceMetaData, final OAuthInteractionType type, final Map<String, Object> arguments, Set<OAuthScope> scopes) throws OXException {
         isNull(arguments, OAuthConstants.ARGUMENT_SESSION);
@@ -523,48 +461,20 @@ public class OAuthServiceImpl implements OAuthService {
      * Posts an OSGi delete {@link Event} for the specified account
      *
      * @param accountId The account identifier
-     * @param userId The user identifier
-     * @param contextId The context identifier
+     * @param session The session
      */
-    private void postOAuthDeleteEvent(final int accountId, final int userId, final int contextId) {
-        final Session session = getUserSession(userId, contextId);
-        if (null == session) {
-            return;
-        }
+    private void postOAuthDeleteEvent(final int accountId, final Session session) {
         final EventAdmin eventAdmin = Services.getService(EventAdmin.class);
         if (null == eventAdmin) {
             return;
         }
         final Dictionary<String, Object> props = new Hashtable<String, Object>(4);
         props.put(OAuthEventConstants.PROPERTY_SESSION, session);
-        props.put(OAuthEventConstants.PROPERTY_CONTEXT, Integer.valueOf(contextId));
-        props.put(OAuthEventConstants.PROPERTY_USER, Integer.valueOf(userId));
+        props.put(OAuthEventConstants.PROPERTY_CONTEXT, Integer.valueOf(session.getContextId()));
+        props.put(OAuthEventConstants.PROPERTY_USER, Integer.valueOf(session.getUserId()));
         props.put(OAuthEventConstants.PROPERTY_ID, Integer.valueOf(accountId));
         final Event event = new Event(OAuthEventConstants.TOPIC_DELETE, props);
         eventAdmin.sendEvent(event);
-    }
-
-    /**
-     * Retrieves a {@link Session} for the specified user in the specified context
-     *
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @return The {@link Session} or <code>null</code> if none exists
-     */
-    private Session getUserSession(final int userId, final int contextId) {
-        // Firstly let's see if the currently active session matches the one we need here and prefer that one.
-        final SessionHolder sessionHolder = Services.getService(SessionHolder.class);
-        if (sessionHolder != null) {
-            final Session session = sessionHolder.getSessionObject();
-            if (session != null && session.getUserId() == userId && session.getContextId() == contextId) {
-                return session;
-            }
-        }
-        final SessiondService service = Services.getService(SessiondService.class);
-        if (null == service) {
-            return null;
-        }
-        return service.getAnyActiveSessionForUser(userId, contextId);
     }
 
     /**
@@ -629,9 +539,9 @@ public class OAuthServiceImpl implements OAuthService {
                 account.setToken(oAuthToken.getToken());
                 account.setSecret(oAuthToken.getSecret());
             }
-        } catch (final org.scribe.exceptions.OAuthException e) {
+        } catch (org.scribe.exceptions.OAuthException e) {
             throw handleScribeOAuthException(e);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw OAuthExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }

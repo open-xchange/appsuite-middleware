@@ -84,8 +84,8 @@ public class ReloadConfigurationCLT extends AbstractRmiCLI<Void> {
     }
 
     @Override
-    protected boolean requiresAdministrativePermission() {
-        return false;
+    protected Boolean requiresAdministrativePermission() {
+        return Boolean.FALSE;
     }
 
     @Override

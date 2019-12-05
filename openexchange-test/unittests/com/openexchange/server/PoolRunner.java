@@ -49,7 +49,7 @@ public class PoolRunner implements Runnable {
                 final Connection con = DBPool.pickup(c);
                 try {
                     Thread.sleep(WAIT_TIME);
-                } catch (final java.lang.InterruptedException ie) {
+                } catch (java.lang.InterruptedException ie) {
                 }
                 if (close_connections) {
                     if (modrunner % 8 == 0) {
@@ -64,7 +64,7 @@ public class PoolRunner implements Runnable {
                 DBPool.push(c, con);
 
                 current_run++;
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }

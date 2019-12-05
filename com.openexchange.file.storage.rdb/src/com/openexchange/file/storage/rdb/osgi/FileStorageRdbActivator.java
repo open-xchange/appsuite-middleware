@@ -174,7 +174,7 @@ public class FileStorageRdbActivator extends HousekeepingActivator {
                 registerService(SecretMigrator.class, secretHandling);
                 registerService(EncryptedItemCleanUpService.class, secretHandling);
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             org.slf4j.LoggerFactory.getLogger(FileStorageRdbActivator.class).error("", e);
             throw e;
         }
@@ -194,7 +194,7 @@ public class FileStorageRdbActivator extends HousekeepingActivator {
                 this.secretService = null;
             }
             DeleteListenerRegistry.releaseInstance();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             org.slf4j.LoggerFactory.getLogger(FileStorageRdbActivator.class).error("", e);
             throw e;
         }

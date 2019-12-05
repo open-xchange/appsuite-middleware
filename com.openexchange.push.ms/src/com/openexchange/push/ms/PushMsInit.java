@@ -126,7 +126,7 @@ public class PushMsInit {
                         publishTopic.addMessageListener(listener);
                         this.publishTopic = publishTopic;
                         subscriber = listener;
-                    } catch (final RuntimeException e) {
+                    } catch (RuntimeException e) {
                         throw MsExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
                     }
                 }
@@ -168,7 +168,7 @@ public class PushMsInit {
         if (delayPushQueue != null) {
             synchronized (this) {
                 delayPushQueue = this.delayPushQueue;
-                if(delayPushQueue != null) {
+                if (delayPushQueue != null) {
                     delayPushQueue.close();
                     this.delayPushQueue=null;
                 }

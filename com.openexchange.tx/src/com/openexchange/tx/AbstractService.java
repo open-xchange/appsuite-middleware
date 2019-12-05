@@ -98,7 +98,7 @@ public abstract class AbstractService<T> implements TransactionAware {
     @Override
     public void finish() throws TransactionException{
         txIds.remove(Thread.currentThread().getId());
-        if(rememberStacks) {
+        if (rememberStacks) {
             startedTx.remove(Thread.currentThread().getId());
         }
     }

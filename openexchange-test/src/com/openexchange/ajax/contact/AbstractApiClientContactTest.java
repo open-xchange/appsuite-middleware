@@ -56,7 +56,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashSet;
@@ -79,6 +78,7 @@ import com.openexchange.testing.httpclient.models.ContactListElement;
 import com.openexchange.testing.httpclient.models.ContactResponse;
 import com.openexchange.testing.httpclient.models.ContactUpdateResponse;
 import com.openexchange.testing.httpclient.models.DistributionListMember;
+import com.openexchange.testing.httpclient.models.DistributionListMember.MailFieldEnum;
 import com.openexchange.testing.httpclient.models.FoldersVisibilityResponse;
 import com.openexchange.testing.httpclient.models.UserResponse;
 import com.openexchange.testing.httpclient.modules.ContactsApi;
@@ -155,7 +155,7 @@ public class AbstractApiClientContactTest extends AbstractConfigAwareAPIClientSe
         DistributionListMember result = new DistributionListMember();
         result.setDisplayName(displayName);
         result.setMail(mail);
-        result.setMailField(new BigDecimal(mailField));
+        result.setMailField(MailFieldEnum.values()[mailField]);
         return result;
     }
 
@@ -471,7 +471,7 @@ public class AbstractApiClientContactTest extends AbstractConfigAwareAPIClientSe
             element.setId(id);
             body.add(element);
         }
-        if(!body.isEmpty()) {
+        if (!body.isEmpty()) {
             try {
                 contactsApi.deleteContacts(getSessionId(), Long.valueOf(Long.MAX_VALUE), body);
             } catch(@SuppressWarnings("unused") Exception e) {

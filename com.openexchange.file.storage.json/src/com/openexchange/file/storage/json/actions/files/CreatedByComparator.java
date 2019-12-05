@@ -49,8 +49,6 @@
 
 package com.openexchange.file.storage.json.actions.files;
 
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import java.text.Collator;
 import java.util.Collections;
 import java.util.Comparator;
@@ -67,6 +65,8 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorDelegator;
 import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.session.ServerSession;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 /**
  * {@link CreatedByComparator} - Comparator for "created-by" field.

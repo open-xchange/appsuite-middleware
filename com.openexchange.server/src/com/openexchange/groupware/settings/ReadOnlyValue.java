@@ -51,8 +51,8 @@ package com.openexchange.groupware.settings;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.session.Session;
+import com.openexchange.user.User;
 
 /**
  * This class contains shared functions for all setting that are read only.

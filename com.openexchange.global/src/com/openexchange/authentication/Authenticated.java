@@ -61,6 +61,11 @@ package com.openexchange.authentication;
 public interface Authenticated {
 
     /**
+     * The default context info/login mapping: {@code defaultcontext}
+     */
+    static final String DEFAULT_CONTEXT_INFO = "defaultcontext";
+
+    /**
      * Gets the context information used to look-up the associated context.
      *
      * @return The context information

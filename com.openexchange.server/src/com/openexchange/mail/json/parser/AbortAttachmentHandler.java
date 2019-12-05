@@ -56,8 +56,8 @@ import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposedMailPart;
-import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailPart.ComposedPartType;
+import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
 import com.openexchange.session.Session;
 /**
  * {@link AbortAttachmentHandler} - An {@link IAttachmentHandler attachment handler} that throws a {@link OXException} on exceeded quota

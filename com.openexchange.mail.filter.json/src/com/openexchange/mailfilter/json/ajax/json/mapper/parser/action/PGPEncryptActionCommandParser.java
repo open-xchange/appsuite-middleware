@@ -79,11 +79,6 @@ public class PGPEncryptActionCommandParser implements CommandParser<ActionComman
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.ActionCommandParser#parse(org.json.JSONObject)
-     */
     @Override
     public ActionCommand parse(JSONObject jsonObject, ServerSession session) throws JSONException, SieveException, OXException {
         final ArrayList<Object> arrayList = new ArrayList<Object>();
@@ -99,11 +94,6 @@ public class PGPEncryptActionCommandParser implements CommandParser<ActionComman
         return new ActionCommand(ActionCommand.Commands.PGP_ENCRYPT, arrayList);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.ActionCommandParser#parse(org.json.JSONObject, com.openexchange.jsieve.commands.ActionCommand)
-     */
     @Override
     public void parse(JSONObject jsonObject, ActionCommand actionCommand) throws JSONException, OXException {
         jsonObject.put(GeneralField.id.name(), ActionCommand.Commands.PGP_ENCRYPT.getJsonName());

@@ -61,51 +61,33 @@ import com.openexchange.groupware.contexts.Context;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class SimContextService implements ContextService{
-    /* (non-Javadoc)
-     * @see com.openexchange.context.ContextService#getAllContextIds()
-     */
     @Override
     public List<Integer> getAllContextIds() throws OXException {
         // Nothing to do
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.context.ContextService#getDistinctContextsPerSchema()
-     */
     @Override
     public List<Integer> getDistinctContextsPerSchema() throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.context.ContextService#getSchemaAssociations()
-     */
     @Override
     public Map<PoolAndSchema, List<Integer>> getSchemaAssociations() throws OXException {
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.context.ContextService#getSchemaAssociationsFor(java.util.Collection)
-     */
     @Override
     public Map<PoolAndSchema, List<Integer>> getSchemaAssociationsFor(List<Integer> contextIds) throws OXException {
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.context.ContextService#setAttribute(java.lang.String, java.lang.String, int)
-     */
     @Override
     public void setAttribute(String name, String value, int contextId) throws OXException {
         // Nothing
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.context.ContextService#getContext(int)
-     */
     @Override
     public Context getContext(int contextId) throws OXException {
         // Nothing to do
@@ -118,18 +100,12 @@ public class SimContextService implements ContextService{
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.context.ContextService#getContextId(java.lang.String)
-     */
     @Override
     public int getContextId(String loginContextInfo) throws OXException {
         // Nothing to do
         return 0;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.context.ContextService#invalidateContext(int)
-     */
     @Override
     public void invalidateContext(int contextId) throws OXException {
         // Nothing to do
@@ -141,9 +117,6 @@ public class SimContextService implements ContextService{
         // Nothing to do
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.context.ContextService#invalidateLoginInfo(java.lang.String)
-     */
     @Override
     public void invalidateLoginInfo(String loginContextInfo) throws OXException {
         // Nothing to do

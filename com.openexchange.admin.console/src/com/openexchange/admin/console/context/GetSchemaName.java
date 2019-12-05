@@ -105,14 +105,14 @@ public class GetSchemaName extends ContextAbstraction {
 
                 successtext = nameOrIdSetInt(this.ctxid, this.contextname, "context");
 
-            } catch (final RuntimeException e) {
+            } catch (RuntimeException e) {
                 printError(null, null, e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
                 sysexit(1);
             }
             Context context = maincall(ctx, auth);
 
             System.out.println("Schema name for context " + context.getId() + (context.getWriteDatabase() == null ? "" : ": " + context.getWriteDatabase().getScheme()));
-        } catch (final Exception e) {
+        } catch (Exception e) {
             printErrors(successtext, null, e, parser);
             sysexit(SYSEXIT_COMMUNICATION_ERROR);
         }

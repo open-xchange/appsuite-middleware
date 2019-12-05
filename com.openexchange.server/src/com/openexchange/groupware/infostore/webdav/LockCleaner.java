@@ -82,7 +82,7 @@ public class LockCleaner implements FolderEventInterface, EventHandler {
     public void folderDeleted(final FolderObject folderObj, final Session session) {
 		try {
             folderLockManager.removeAll(folderObj.getObjectID(), session);
-		} catch (final OXException e) {
+		} catch (OXException e) {
 			LOG.error("Couldn't remove folder locks from folder {} in context {}. Run the consistency tool.", folderObj.getObjectID(), session.getContextId());
 		}
     }

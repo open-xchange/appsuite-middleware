@@ -62,7 +62,7 @@ import com.openexchange.metrics.types.Metric;
  */
 public class GaugeMetricRegisterer implements MetricRegisterer {
 
-    private MetricRegistry registry;
+    private final MetricRegistry registry;
 
     /**
      * Initialises a new {@link GaugeMetricRegisterer}.
@@ -72,25 +72,15 @@ public class GaugeMetricRegisterer implements MetricRegisterer {
         this.registry = registry;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.MetricRegisterer#register(com.openexchange.metrics.MetricDescriptor)
-     */
     @Override
     @SuppressWarnings("unchecked")
     public Metric register(MetricDescriptor descriptor) {
-        return new DropwizardGauge(registry.gauge(MetricRegistry.name(descriptor.getGroup(), descriptor.getName()), () -> () -> descriptor.getMetricSupplier().get()));
+        return new DropwizardGauge(registry.gauge(getNameFor(descriptor), () -> () -> descriptor.getMetricSupplier().get()));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.MetricRegisterer#unregister(com.openexchange.metrics.MetricDescriptor)
-     */
     @Override
     public void unregister(MetricDescriptor descriptor) {
-        registry.remove(MetricRegistry.name(descriptor.getGroup(), descriptor.getName()));
+        registry.remove(getNameFor(descriptor));
     }
 
 }

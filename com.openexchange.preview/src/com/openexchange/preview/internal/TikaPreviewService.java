@@ -116,9 +116,9 @@ public final class TikaPreviewService implements PreviewService {
             final TikaDocumentHandler documentHandler = newDefaultHandler(session);
             final InputStream input = TikaInputStream.get(url, documentHandler.getMetadata());
             return getPreviewFor(documentHandler, input, output);
-        } catch (final MalformedURLException e) {
+        } catch (MalformedURLException e) {
             throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw PreviewExceptionCodes.IO_ERROR.create(e, e.getMessage());
         }
     }

@@ -71,31 +71,16 @@ public class CreatedMapping extends ICalUtcMapping<Available, com.openexchange.c
         super(Property.CREATED);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalUtcMapping#getValue(java.lang.Object)
-     */
     @Override
     protected Date getValue(com.openexchange.chronos.Available object) {
         return object.getCreated();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalUtcMapping#setValue(java.lang.Object, java.util.Date)
-     */
     @Override
     protected void setValue(com.openexchange.chronos.Available object, Date value) {
         object.setCreated(value == null ? new Date() : value);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalUtcMapping#createProperty()
-     */
     @Override
     protected UtcProperty createProperty() {
         return new Created();

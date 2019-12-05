@@ -86,8 +86,8 @@ public abstract class AbstractUserFeedback extends AbstractRestCLI<Void> {
     }
 
     @Override
-    protected boolean requiresAdministrativePermission() {
-        return true;
+    protected Boolean requiresAdministrativePermission() {
+        return Boolean.TRUE;
     }
 
     /**

@@ -101,7 +101,7 @@ public abstract class AbstractGroupAction implements AJAXActionService {
                 reminderRequest.setTimeZone(getTimeZone(sTimeZone));
             }
             return perform(reminderRequest);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
     }

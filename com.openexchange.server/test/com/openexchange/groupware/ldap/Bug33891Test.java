@@ -69,6 +69,7 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.SimContext;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 /**

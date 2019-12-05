@@ -50,11 +50,6 @@
 package com.openexchange.chronos.json.action;
 
 import static com.openexchange.chronos.common.CalendarUtils.getMaximumTimestamp;
-import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_FIELDS;
-import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_LEFT_HAND_LIMIT;
-import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_ORDER;
-import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_ORDER_BY;
-import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_RIGHT_HAND_LIMIT;
 import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
 import java.util.List;
 import java.util.Set;
@@ -80,7 +75,7 @@ public class NeedsActionAction extends ChronosAction {
 
     private static final Set<String> REQUIRED_PARAMETERS = unmodifiableSet(PARAM_RANGE_START, PARAM_RANGE_END);
 
-    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(PARAMETER_ORDER_BY, PARAMETER_ORDER, PARAMETER_FIELDS, PARAMETER_LEFT_HAND_LIMIT, PARAMETER_RIGHT_HAND_LIMIT);
+    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(PARAM_ORDER_BY, PARAM_ORDER, PARAM_FIELDS, PARAM_LEFT_HAND_LIMIT, PARAM_RIGHT_HAND_LIMIT);
 
     /**
      * Initializes a new {@link NeedsActionAction}.

@@ -52,6 +52,7 @@ package com.openexchange.ajax.chronos;
 import static org.junit.Assert.assertTrue;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -60,7 +61,6 @@ import com.openexchange.ajax.chronos.factory.AlarmFactory;
 import com.openexchange.ajax.chronos.factory.EventFactory;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
 import com.openexchange.testing.httpclient.models.AlarmTrigger;
-import com.openexchange.testing.httpclient.models.AlarmTriggerData;
 import com.openexchange.testing.httpclient.models.DateTimeData;
 import com.openexchange.testing.httpclient.models.EventData;
 
@@ -108,7 +108,7 @@ public class LegacyStorageAlarmTriggerTest extends AbstractAlarmTriggerTest {
         event.setRecurrenceId(recurrence);
         eventManager.updateOccurenceEvent(event, recurrence, true);
 
-        AlarmTriggerData triggerData = getAndCheckAlarmTrigger(2);
+        List<AlarmTrigger> triggerData = getAndCheckAlarmTrigger(2);
 
         Date exceptionTriggerTime = DateTimeUtil.parseDateTime(DateTimeUtil.incrementDateTimeData(oldTriggerTime, TimeUnit.HOURS.toMillis(1)));
         Date expectedTriggerTime = DateTimeUtil.parseDateTime(DateTimeUtil.incrementDateTimeData(oldTriggerTime, TimeUnit.DAYS.toMillis(1)));

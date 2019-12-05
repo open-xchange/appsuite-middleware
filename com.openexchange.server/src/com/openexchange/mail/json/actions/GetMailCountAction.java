@@ -90,7 +90,7 @@ public final class GetMailCountAction extends AbstractMailAction {
             final MailServletInterface mailInterface = getMailInterface(req);
             final AJAXRequestResult data = new AJAXRequestResult(Integer.valueOf(mailInterface.getMessageCount(folderId)), "int");
             return data;
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }

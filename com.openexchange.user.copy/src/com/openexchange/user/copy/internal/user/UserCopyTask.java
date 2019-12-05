@@ -62,9 +62,9 @@ import com.openexchange.filestore.FileStorages;
 import com.openexchange.filestore.Info;
 import com.openexchange.filestore.unified.UnifiedQuotaService;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.RdbUserPermissionBitsStorage;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 import com.openexchange.user.copy.CopyUserTaskService;
 import com.openexchange.user.copy.ObjectMapping;
@@ -165,16 +165,16 @@ public class UserCopyTask implements CopyUserTaskService {
             try {
                 final UserPermissionBits[] srcConfiguration = RdbUserPermissionBitsStorage.loadUserPermissionBits(srcCtx, srcCon, new int[] {srcUser.getId()});
                 RdbUserPermissionBitsStorage.saveUserPermissionBits(srcConfiguration[0].getPermissionBits(), dstUser.getId(), true, dstCtx.getContextId(), dstCon);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 throw UserCopyExceptionCodes.DB_POOLING_PROBLEM.create(e);
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
             }
 
             mapping.addMapping(I(srcUser.getId()), srcUser, I(dstUsrId), dstUser);
             error = false;
             return mapping;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (UserCopyExceptionCodes.prefix().equals(e.getPrefix())) {
                 throw e;
             }
@@ -206,7 +206,7 @@ public class UserCopyTask implements CopyUserTaskService {
             stmt.setString(2, srcUserName);
             rs = stmt.executeQuery();
             return rs.next();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
             Databases.closeSQLStuff(rs, stmt);

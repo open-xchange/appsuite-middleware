@@ -13,9 +13,9 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -91,31 +91,31 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
                 retval.add(quota2Soap(quota));
             }
             return retval;
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             com.openexchange.admin.soap.context.soap.RemoteException faultDetail = new com.openexchange.admin.soap.context.soap.RemoteException();
             com.openexchange.admin.soap.context.rmi.RemoteException value = new com.openexchange.admin.soap.context.rmi.RemoteException();
             value.setMessage(e.getMessage());
             faultDetail.setRemoteException(value);
             throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             com.openexchange.admin.soap.context.soap.InvalidCredentialsException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidCredentialsException();
             faultDetail.setInvalidCredentialsException(new com.openexchange.admin.soap.context.exceptions.InvalidCredentialsException());
             throw new InvalidCredentialsException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final NoSuchContextException e) {
+        } catch (NoSuchContextException e) {
             com.openexchange.admin.soap.context.soap.NoSuchContextException faultDetail = new com.openexchange.admin.soap.context.soap.NoSuchContextException();
             faultDetail.setNoSuchContextException(new com.openexchange.admin.soap.context.exceptions.NoSuchContextException());
             throw new NoSuchContextException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             com.openexchange.admin.soap.context.soap.StorageException faultDetail = new com.openexchange.admin.soap.context.soap.StorageException();
             faultDetail.setStorageException(new com.openexchange.admin.soap.context.exceptions.StorageException());
             throw new StorageException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             com.openexchange.admin.soap.context.soap.InvalidDataException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidDataException();
             com.openexchange.admin.soap.context.exceptions.InvalidDataException value = new com.openexchange.admin.soap.context.exceptions.InvalidDataException();
             value.setObjectname(e.getObjectname());
             faultDetail.setInvalidDataException(value);
             throw new InvalidDataException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             throw new InvalidDataException_Exception("Invalid quota value.", e);
         }
     }
@@ -133,31 +133,31 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
                 throw new InvalidDataException("Missing quota module.");
             }
             contextInterface.changeQuota(soap2Context(parameters.ctx), module, Long.parseLong(sQuotaValue.trim()), soap2Credentials(parameters.auth));
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             com.openexchange.admin.soap.context.soap.RemoteException faultDetail = new com.openexchange.admin.soap.context.soap.RemoteException();
             com.openexchange.admin.soap.context.rmi.RemoteException value = new com.openexchange.admin.soap.context.rmi.RemoteException();
             value.setMessage(e.getMessage());
             faultDetail.setRemoteException(value);
             throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             com.openexchange.admin.soap.context.soap.InvalidCredentialsException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidCredentialsException();
             faultDetail.setInvalidCredentialsException(new com.openexchange.admin.soap.context.exceptions.InvalidCredentialsException());
             throw new InvalidCredentialsException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final NoSuchContextException e) {
+        } catch (NoSuchContextException e) {
             com.openexchange.admin.soap.context.soap.NoSuchContextException faultDetail = new com.openexchange.admin.soap.context.soap.NoSuchContextException();
             faultDetail.setNoSuchContextException(new com.openexchange.admin.soap.context.exceptions.NoSuchContextException());
             throw new NoSuchContextException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             com.openexchange.admin.soap.context.soap.StorageException faultDetail = new com.openexchange.admin.soap.context.soap.StorageException();
             faultDetail.setStorageException(new com.openexchange.admin.soap.context.exceptions.StorageException());
             throw new StorageException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             com.openexchange.admin.soap.context.soap.InvalidDataException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidDataException();
             com.openexchange.admin.soap.context.exceptions.InvalidDataException value = new com.openexchange.admin.soap.context.exceptions.InvalidDataException();
             value.setObjectname(e.getObjectname());
             faultDetail.setInvalidDataException(value);
             throw new InvalidDataException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             throw new InvalidDataException_Exception("Invalid quota value.", e);
         }
     }
@@ -178,25 +178,25 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
                 sb.append(", ").append(iterator.next());
             }
             return sb.toString();
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             com.openexchange.admin.soap.context.soap.RemoteException faultDetail = new com.openexchange.admin.soap.context.soap.RemoteException();
             com.openexchange.admin.soap.context.rmi.RemoteException value = new com.openexchange.admin.soap.context.rmi.RemoteException();
             value.setMessage(e.getMessage());
             faultDetail.setRemoteException(value);
             throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             com.openexchange.admin.soap.context.soap.InvalidCredentialsException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidCredentialsException();
             faultDetail.setInvalidCredentialsException(new com.openexchange.admin.soap.context.exceptions.InvalidCredentialsException());
             throw new InvalidCredentialsException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final NoSuchContextException e) {
+        } catch (NoSuchContextException e) {
             com.openexchange.admin.soap.context.soap.NoSuchContextException faultDetail = new com.openexchange.admin.soap.context.soap.NoSuchContextException();
             faultDetail.setNoSuchContextException(new com.openexchange.admin.soap.context.exceptions.NoSuchContextException());
             throw new NoSuchContextException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             com.openexchange.admin.soap.context.soap.StorageException faultDetail = new com.openexchange.admin.soap.context.soap.StorageException();
             faultDetail.setStorageException(new com.openexchange.admin.soap.context.exceptions.StorageException());
             throw new StorageException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             com.openexchange.admin.soap.context.soap.InvalidDataException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidDataException();
             com.openexchange.admin.soap.context.exceptions.InvalidDataException value = new com.openexchange.admin.soap.context.exceptions.InvalidDataException();
             value.setObjectname(e.getObjectname());
@@ -210,25 +210,25 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
         final OXContextInterface contextInterface = getContextInterface();
         try {
             contextInterface.changeCapabilities(soap2Context(parameters.ctx), parseToSet(parameters.capsToAdd), parseToSet(parameters.capsToRemove), parseToSet(parameters.capsToDrop), soap2Credentials(parameters.auth));
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             com.openexchange.admin.soap.context.soap.RemoteException faultDetail = new com.openexchange.admin.soap.context.soap.RemoteException();
             com.openexchange.admin.soap.context.rmi.RemoteException value = new com.openexchange.admin.soap.context.rmi.RemoteException();
             value.setMessage(e.getMessage());
             faultDetail.setRemoteException(value);
             throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             com.openexchange.admin.soap.context.soap.InvalidCredentialsException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidCredentialsException();
             faultDetail.setInvalidCredentialsException(new com.openexchange.admin.soap.context.exceptions.InvalidCredentialsException());
             throw new InvalidCredentialsException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final NoSuchContextException e) {
+        } catch (NoSuchContextException e) {
             com.openexchange.admin.soap.context.soap.NoSuchContextException faultDetail = new com.openexchange.admin.soap.context.soap.NoSuchContextException();
             faultDetail.setNoSuchContextException(new com.openexchange.admin.soap.context.exceptions.NoSuchContextException());
             throw new NoSuchContextException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             com.openexchange.admin.soap.context.soap.StorageException faultDetail = new com.openexchange.admin.soap.context.soap.StorageException();
             faultDetail.setStorageException(new com.openexchange.admin.soap.context.exceptions.StorageException());
             throw new StorageException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             com.openexchange.admin.soap.context.soap.InvalidDataException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidDataException();
             com.openexchange.admin.soap.context.exceptions.InvalidDataException value = new com.openexchange.admin.soap.context.exceptions.InvalidDataException();
             value.setObjectname(e.getObjectname());
@@ -278,25 +278,25 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
         final OXContextInterface contextInterface = getContextInterface();
         try {
             contextInterface.change(soap2Context(parameters.getCtx()), soap2Credentials(parameters.getAuth()));
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             com.openexchange.admin.soap.context.soap.RemoteException faultDetail = new com.openexchange.admin.soap.context.soap.RemoteException();
             com.openexchange.admin.soap.context.rmi.RemoteException value = new com.openexchange.admin.soap.context.rmi.RemoteException();
             value.setMessage(e.getMessage());
             faultDetail.setRemoteException(value);
             throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             com.openexchange.admin.soap.context.soap.InvalidCredentialsException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidCredentialsException();
             faultDetail.setInvalidCredentialsException(new com.openexchange.admin.soap.context.exceptions.InvalidCredentialsException());
             throw new InvalidCredentialsException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final NoSuchContextException e) {
+        } catch (NoSuchContextException e) {
             com.openexchange.admin.soap.context.soap.NoSuchContextException faultDetail = new com.openexchange.admin.soap.context.soap.NoSuchContextException();
             faultDetail.setNoSuchContextException(new com.openexchange.admin.soap.context.exceptions.NoSuchContextException());
             throw new NoSuchContextException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             com.openexchange.admin.soap.context.soap.StorageException faultDetail = new com.openexchange.admin.soap.context.soap.StorageException();
             faultDetail.setStorageException(new com.openexchange.admin.soap.context.exceptions.StorageException());
             throw new StorageException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             com.openexchange.admin.soap.context.soap.InvalidDataException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidDataException();
             com.openexchange.admin.soap.context.exceptions.InvalidDataException value = new com.openexchange.admin.soap.context.exceptions.InvalidDataException();
             value.setObjectname(e.getObjectname());
@@ -310,25 +310,25 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
         final OXContextInterface contextInterface = getContextInterface();
         try {
             return moduleAccess2Soap(contextInterface.getModuleAccess(soap2Context(ctx), soap2Credentials(auth)));
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             com.openexchange.admin.soap.context.soap.RemoteException faultDetail = new com.openexchange.admin.soap.context.soap.RemoteException();
             com.openexchange.admin.soap.context.rmi.RemoteException value = new com.openexchange.admin.soap.context.rmi.RemoteException();
             value.setMessage(e.getMessage());
             faultDetail.setRemoteException(value);
             throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             com.openexchange.admin.soap.context.soap.InvalidCredentialsException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidCredentialsException();
             faultDetail.setInvalidCredentialsException(new com.openexchange.admin.soap.context.exceptions.InvalidCredentialsException());
             throw new InvalidCredentialsException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final NoSuchContextException e) {
+        } catch (NoSuchContextException e) {
             com.openexchange.admin.soap.context.soap.NoSuchContextException faultDetail = new com.openexchange.admin.soap.context.soap.NoSuchContextException();
             faultDetail.setNoSuchContextException(new com.openexchange.admin.soap.context.exceptions.NoSuchContextException());
             throw new NoSuchContextException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             com.openexchange.admin.soap.context.soap.StorageException faultDetail = new com.openexchange.admin.soap.context.soap.StorageException();
             faultDetail.setStorageException(new com.openexchange.admin.soap.context.exceptions.StorageException());
             throw new StorageException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             com.openexchange.admin.soap.context.soap.InvalidDataException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidDataException();
             com.openexchange.admin.soap.context.exceptions.InvalidDataException value = new com.openexchange.admin.soap.context.exceptions.InvalidDataException();
             value.setObjectname(e.getObjectname());
@@ -342,25 +342,25 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
         final OXContextInterface contextInterface = getContextInterface();
         try {
             contextInterface.enable(soap2Context(parameters.getCtx()), soap2Credentials(parameters.getAuth()));
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             com.openexchange.admin.soap.context.soap.RemoteException faultDetail = new com.openexchange.admin.soap.context.soap.RemoteException();
             com.openexchange.admin.soap.context.rmi.RemoteException value = new com.openexchange.admin.soap.context.rmi.RemoteException();
             value.setMessage(e.getMessage());
             faultDetail.setRemoteException(value);
             throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             com.openexchange.admin.soap.context.soap.InvalidCredentialsException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidCredentialsException();
             faultDetail.setInvalidCredentialsException(new com.openexchange.admin.soap.context.exceptions.InvalidCredentialsException());
             throw new InvalidCredentialsException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final NoSuchContextException e) {
+        } catch (NoSuchContextException e) {
             com.openexchange.admin.soap.context.soap.NoSuchContextException faultDetail = new com.openexchange.admin.soap.context.soap.NoSuchContextException();
             faultDetail.setNoSuchContextException(new com.openexchange.admin.soap.context.exceptions.NoSuchContextException());
             throw new NoSuchContextException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             com.openexchange.admin.soap.context.soap.StorageException faultDetail = new com.openexchange.admin.soap.context.soap.StorageException();
             faultDetail.setStorageException(new com.openexchange.admin.soap.context.exceptions.StorageException());
             throw new StorageException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             com.openexchange.admin.soap.context.soap.InvalidDataException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidDataException();
             com.openexchange.admin.soap.context.exceptions.InvalidDataException value = new com.openexchange.admin.soap.context.exceptions.InvalidDataException();
             value.setObjectname(e.getObjectname());
@@ -374,27 +374,27 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
         final OXContextInterface contextInterface = getContextInterface();
         try {
             contextInterface.disableAll(soap2Credentials(parameters.getAuth()));
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             com.openexchange.admin.soap.context.soap.RemoteException faultDetail = new com.openexchange.admin.soap.context.soap.RemoteException();
             com.openexchange.admin.soap.context.rmi.RemoteException value = new com.openexchange.admin.soap.context.rmi.RemoteException();
             value.setMessage(e.getMessage());
             faultDetail.setRemoteException(value);
             throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             com.openexchange.admin.soap.context.soap.InvalidCredentialsException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidCredentialsException();
             faultDetail.setInvalidCredentialsException(new com.openexchange.admin.soap.context.exceptions.InvalidCredentialsException());
             throw new InvalidCredentialsException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             com.openexchange.admin.soap.context.soap.StorageException faultDetail = new com.openexchange.admin.soap.context.soap.StorageException();
             faultDetail.setStorageException(new com.openexchange.admin.soap.context.exceptions.StorageException());
             throw new StorageException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             com.openexchange.admin.soap.context.soap.InvalidDataException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidDataException();
             com.openexchange.admin.soap.context.exceptions.InvalidDataException value = new com.openexchange.admin.soap.context.exceptions.InvalidDataException();
             value.setObjectname(e.getObjectname());
             faultDetail.setInvalidDataException(value);
             throw new InvalidDataException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final NoSuchReasonException e) {
+        } catch (NoSuchReasonException e) {
             com.openexchange.admin.soap.context.soap.NoSuchReasonException faultDetail = new com.openexchange.admin.soap.context.soap.NoSuchReasonException();
             com.openexchange.admin.soap.context.exceptions.NoSuchReasonException value = new com.openexchange.admin.soap.context.exceptions.NoSuchReasonException();
             faultDetail.setNoSuchReasonException(value);
@@ -407,25 +407,25 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
         final OXContextInterface contextInterface = getContextInterface();
         try {
             contextInterface.changeModuleAccess(soap2Context(parameters.getCtx()), parameters.getAccessCombinationName(), soap2Credentials(parameters.getAuth()));
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             com.openexchange.admin.soap.context.soap.RemoteException faultDetail = new com.openexchange.admin.soap.context.soap.RemoteException();
             com.openexchange.admin.soap.context.rmi.RemoteException value = new com.openexchange.admin.soap.context.rmi.RemoteException();
             value.setMessage(e.getMessage());
             faultDetail.setRemoteException(value);
             throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             com.openexchange.admin.soap.context.soap.InvalidCredentialsException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidCredentialsException();
             faultDetail.setInvalidCredentialsException(new com.openexchange.admin.soap.context.exceptions.InvalidCredentialsException());
             throw new InvalidCredentialsException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final NoSuchContextException e) {
+        } catch (NoSuchContextException e) {
             com.openexchange.admin.soap.context.soap.NoSuchContextException faultDetail = new com.openexchange.admin.soap.context.soap.NoSuchContextException();
             faultDetail.setNoSuchContextException(new com.openexchange.admin.soap.context.exceptions.NoSuchContextException());
             throw new NoSuchContextException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             com.openexchange.admin.soap.context.soap.StorageException faultDetail = new com.openexchange.admin.soap.context.soap.StorageException();
             faultDetail.setStorageException(new com.openexchange.admin.soap.context.exceptions.StorageException());
             throw new StorageException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             com.openexchange.admin.soap.context.soap.InvalidDataException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidDataException();
             com.openexchange.admin.soap.context.exceptions.InvalidDataException value = new com.openexchange.admin.soap.context.exceptions.InvalidDataException();
             value.setObjectname(e.getObjectname());
@@ -447,21 +447,21 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
                 list.add(context2Soap(context));
             }
             return list;
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             com.openexchange.admin.soap.context.soap.RemoteException faultDetail = new com.openexchange.admin.soap.context.soap.RemoteException();
             com.openexchange.admin.soap.context.rmi.RemoteException value = new com.openexchange.admin.soap.context.rmi.RemoteException();
             value.setMessage(e.getMessage());
             faultDetail.setRemoteException(value);
             throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             com.openexchange.admin.soap.context.soap.InvalidCredentialsException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidCredentialsException();
             faultDetail.setInvalidCredentialsException(new com.openexchange.admin.soap.context.exceptions.InvalidCredentialsException());
             throw new InvalidCredentialsException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             com.openexchange.admin.soap.context.soap.StorageException faultDetail = new com.openexchange.admin.soap.context.soap.StorageException();
             faultDetail.setStorageException(new com.openexchange.admin.soap.context.exceptions.StorageException());
             throw new StorageException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             com.openexchange.admin.soap.context.soap.InvalidDataException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidDataException();
             com.openexchange.admin.soap.context.exceptions.InvalidDataException value = new com.openexchange.admin.soap.context.exceptions.InvalidDataException();
             value.setObjectname(e.getObjectname());
@@ -483,21 +483,21 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
                 list.add(context2Soap(context));
             }
             return list;
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             com.openexchange.admin.soap.context.soap.RemoteException faultDetail = new com.openexchange.admin.soap.context.soap.RemoteException();
             com.openexchange.admin.soap.context.rmi.RemoteException value = new com.openexchange.admin.soap.context.rmi.RemoteException();
             value.setMessage(e.getMessage());
             faultDetail.setRemoteException(value);
             throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             com.openexchange.admin.soap.context.soap.InvalidCredentialsException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidCredentialsException();
             faultDetail.setInvalidCredentialsException(new com.openexchange.admin.soap.context.exceptions.InvalidCredentialsException());
             throw new InvalidCredentialsException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             com.openexchange.admin.soap.context.soap.StorageException faultDetail = new com.openexchange.admin.soap.context.soap.StorageException();
             faultDetail.setStorageException(new com.openexchange.admin.soap.context.exceptions.StorageException());
             throw new StorageException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             com.openexchange.admin.soap.context.soap.InvalidDataException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidDataException();
             com.openexchange.admin.soap.context.exceptions.InvalidDataException value = new com.openexchange.admin.soap.context.exceptions.InvalidDataException();
             value.setObjectname(e.getObjectname());
@@ -511,36 +511,36 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
         final OXContextInterface contextInterface = getContextInterface();
         try {
             return Integer.valueOf(contextInterface.moveContextDatabase(soap2Context(ctx), soap2Database(dstDatabaseId), soap2Credentials(auth)));
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             com.openexchange.admin.soap.context.soap.RemoteException faultDetail = new com.openexchange.admin.soap.context.soap.RemoteException();
             com.openexchange.admin.soap.context.rmi.RemoteException value = new com.openexchange.admin.soap.context.rmi.RemoteException();
             value.setMessage(e.getMessage());
             faultDetail.setRemoteException(value);
             throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             com.openexchange.admin.soap.context.soap.InvalidCredentialsException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidCredentialsException();
             faultDetail.setInvalidCredentialsException(new com.openexchange.admin.soap.context.exceptions.InvalidCredentialsException());
             throw new InvalidCredentialsException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final NoSuchContextException e) {
+        } catch (NoSuchContextException e) {
             com.openexchange.admin.soap.context.soap.NoSuchContextException faultDetail = new com.openexchange.admin.soap.context.soap.NoSuchContextException();
             faultDetail.setNoSuchContextException(new com.openexchange.admin.soap.context.exceptions.NoSuchContextException());
             throw new NoSuchContextException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             com.openexchange.admin.soap.context.soap.StorageException faultDetail = new com.openexchange.admin.soap.context.soap.StorageException();
             faultDetail.setStorageException(new com.openexchange.admin.soap.context.exceptions.StorageException());
             throw new StorageException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             com.openexchange.admin.soap.context.soap.InvalidDataException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidDataException();
             com.openexchange.admin.soap.context.exceptions.InvalidDataException value = new com.openexchange.admin.soap.context.exceptions.InvalidDataException();
             value.setObjectname(e.getObjectname());
             faultDetail.setInvalidDataException(value);
             throw new InvalidDataException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final DatabaseUpdateException e) {
+        } catch (DatabaseUpdateException e) {
             com.openexchange.admin.soap.context.soap.DatabaseUpdateException faultDetail = new com.openexchange.admin.soap.context.soap.DatabaseUpdateException();
             com.openexchange.admin.soap.context.exceptions.DatabaseUpdateException value = new com.openexchange.admin.soap.context.exceptions.DatabaseUpdateException();
             faultDetail.setDatabaseUpdateException(value);
             throw new DatabaseUpdateException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final OXContextException e) {
+        } catch (OXContextException e) {
             throw OXContextException_Exception.getFaultFor(e);
         }
     }
@@ -550,27 +550,27 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
         final OXContextInterface contextInterface = getContextInterface();
         try {
             return context2Soap(contextInterface.create(soap2Context(ctx), soap2User(adminUser), soap2ModuleAccess(access), soap2Credentials(auth), soap2SchemaSelectStrategy(schemaSelectStrategy)));
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             com.openexchange.admin.soap.context.soap.RemoteException faultDetail = new com.openexchange.admin.soap.context.soap.RemoteException();
             com.openexchange.admin.soap.context.rmi.RemoteException value = new com.openexchange.admin.soap.context.rmi.RemoteException();
             value.setMessage(e.getMessage());
             faultDetail.setRemoteException(value);
             throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             com.openexchange.admin.soap.context.soap.InvalidCredentialsException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidCredentialsException();
             faultDetail.setInvalidCredentialsException(new com.openexchange.admin.soap.context.exceptions.InvalidCredentialsException());
             throw new InvalidCredentialsException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             com.openexchange.admin.soap.context.soap.StorageException faultDetail = new com.openexchange.admin.soap.context.soap.StorageException();
             faultDetail.setStorageException(new com.openexchange.admin.soap.context.exceptions.StorageException());
             throw new StorageException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             com.openexchange.admin.soap.context.soap.InvalidDataException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidDataException();
             com.openexchange.admin.soap.context.exceptions.InvalidDataException value = new com.openexchange.admin.soap.context.exceptions.InvalidDataException();
             value.setObjectname(e.getObjectname());
             faultDetail.setInvalidDataException(value);
             throw new InvalidDataException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final ContextExistsException e) {
+        } catch (ContextExistsException e) {
             throw ContextExistsException_Exception.faultFor(e);
         }
     }
@@ -580,25 +580,25 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
         final OXContextInterface contextInterface = getContextInterface();
         try {
             contextInterface.changeModuleAccess(soap2Context(parameters.ctx), soap2ModuleAccess(parameters.access), soap2Credentials(parameters.auth));
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             com.openexchange.admin.soap.context.soap.RemoteException faultDetail = new com.openexchange.admin.soap.context.soap.RemoteException();
             com.openexchange.admin.soap.context.rmi.RemoteException value = new com.openexchange.admin.soap.context.rmi.RemoteException();
             value.setMessage(e.getMessage());
             faultDetail.setRemoteException(value);
             throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             com.openexchange.admin.soap.context.soap.InvalidCredentialsException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidCredentialsException();
             faultDetail.setInvalidCredentialsException(new com.openexchange.admin.soap.context.exceptions.InvalidCredentialsException());
             throw new InvalidCredentialsException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final NoSuchContextException e) {
+        } catch (NoSuchContextException e) {
             com.openexchange.admin.soap.context.soap.NoSuchContextException faultDetail = new com.openexchange.admin.soap.context.soap.NoSuchContextException();
             faultDetail.setNoSuchContextException(new com.openexchange.admin.soap.context.exceptions.NoSuchContextException());
             throw new NoSuchContextException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             com.openexchange.admin.soap.context.soap.StorageException faultDetail = new com.openexchange.admin.soap.context.soap.StorageException();
             faultDetail.setStorageException(new com.openexchange.admin.soap.context.exceptions.StorageException());
             throw new StorageException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             com.openexchange.admin.soap.context.soap.InvalidDataException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidDataException();
             com.openexchange.admin.soap.context.exceptions.InvalidDataException value = new com.openexchange.admin.soap.context.exceptions.InvalidDataException();
             value.setObjectname(e.getObjectname());
@@ -612,27 +612,27 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
         final OXContextInterface contextInterface = getContextInterface();
         try {
             return context2Soap(contextInterface.create(soap2Context(ctx), soap2User(adminUser), accessCombinationName, soap2Credentials(auth), soap2SchemaSelectStrategy(schemaSelectStrategy)));
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             com.openexchange.admin.soap.context.soap.RemoteException faultDetail = new com.openexchange.admin.soap.context.soap.RemoteException();
             com.openexchange.admin.soap.context.rmi.RemoteException value = new com.openexchange.admin.soap.context.rmi.RemoteException();
             value.setMessage(e.getMessage());
             faultDetail.setRemoteException(value);
             throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             com.openexchange.admin.soap.context.soap.InvalidCredentialsException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidCredentialsException();
             faultDetail.setInvalidCredentialsException(new com.openexchange.admin.soap.context.exceptions.InvalidCredentialsException());
             throw new InvalidCredentialsException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             com.openexchange.admin.soap.context.soap.StorageException faultDetail = new com.openexchange.admin.soap.context.soap.StorageException();
             faultDetail.setStorageException(new com.openexchange.admin.soap.context.exceptions.StorageException());
             throw new StorageException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             com.openexchange.admin.soap.context.soap.InvalidDataException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidDataException();
             com.openexchange.admin.soap.context.exceptions.InvalidDataException value = new com.openexchange.admin.soap.context.exceptions.InvalidDataException();
             value.setObjectname(e.getObjectname());
             faultDetail.setInvalidDataException(value);
             throw new InvalidDataException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final ContextExistsException e) {
+        } catch (ContextExistsException e) {
             throw ContextExistsException_Exception.faultFor(e);
         }
     }
@@ -642,17 +642,17 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
         final OXContextInterface contextInterface = getContextInterface();
         try {
             contextInterface.enableAll(soap2Credentials(parameters.auth));
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             com.openexchange.admin.soap.context.soap.RemoteException faultDetail = new com.openexchange.admin.soap.context.soap.RemoteException();
             com.openexchange.admin.soap.context.rmi.RemoteException value = new com.openexchange.admin.soap.context.rmi.RemoteException();
             value.setMessage(e.getMessage());
             faultDetail.setRemoteException(value);
             throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             com.openexchange.admin.soap.context.soap.InvalidCredentialsException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidCredentialsException();
             faultDetail.setInvalidCredentialsException(new com.openexchange.admin.soap.context.exceptions.InvalidCredentialsException());
             throw new InvalidCredentialsException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             com.openexchange.admin.soap.context.soap.StorageException faultDetail = new com.openexchange.admin.soap.context.soap.StorageException();
             faultDetail.setStorageException(new com.openexchange.admin.soap.context.exceptions.StorageException());
             throw new StorageException_Exception(e.getMessage(), faultDetail, e);
@@ -664,17 +664,17 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
         final OXContextInterface contextInterface = getContextInterface();
         try {
             contextInterface.checkCountsConsistency(parameters.isCheckDatabaseCounts(), parameters.isCheckFilestoreCounts(), soap2Credentials(parameters.auth));
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             com.openexchange.admin.soap.context.soap.RemoteException faultDetail = new com.openexchange.admin.soap.context.soap.RemoteException();
             com.openexchange.admin.soap.context.rmi.RemoteException value = new com.openexchange.admin.soap.context.rmi.RemoteException();
             value.setMessage(e.getMessage());
             faultDetail.setRemoteException(value);
             throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             com.openexchange.admin.soap.context.soap.InvalidCredentialsException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidCredentialsException();
             faultDetail.setInvalidCredentialsException(new com.openexchange.admin.soap.context.exceptions.InvalidCredentialsException());
             throw new InvalidCredentialsException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             com.openexchange.admin.soap.context.soap.StorageException faultDetail = new com.openexchange.admin.soap.context.soap.StorageException();
             faultDetail.setStorageException(new com.openexchange.admin.soap.context.exceptions.StorageException());
             throw new StorageException_Exception(e.getMessage(), faultDetail, e);
@@ -694,27 +694,27 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
                 list.add(context2Soap(context));
             }
             return list;
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             com.openexchange.admin.soap.context.soap.RemoteException faultDetail = new com.openexchange.admin.soap.context.soap.RemoteException();
             com.openexchange.admin.soap.context.rmi.RemoteException value = new com.openexchange.admin.soap.context.rmi.RemoteException();
             value.setMessage(e.getMessage());
             faultDetail.setRemoteException(value);
             throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             com.openexchange.admin.soap.context.soap.InvalidCredentialsException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidCredentialsException();
             faultDetail.setInvalidCredentialsException(new com.openexchange.admin.soap.context.exceptions.InvalidCredentialsException());
             throw new InvalidCredentialsException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             com.openexchange.admin.soap.context.soap.StorageException faultDetail = new com.openexchange.admin.soap.context.soap.StorageException();
             faultDetail.setStorageException(new com.openexchange.admin.soap.context.exceptions.StorageException());
             throw new StorageException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             com.openexchange.admin.soap.context.soap.InvalidDataException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidDataException();
             com.openexchange.admin.soap.context.exceptions.InvalidDataException value = new com.openexchange.admin.soap.context.exceptions.InvalidDataException();
             value.setObjectname(e.getObjectname());
             faultDetail.setInvalidDataException(value);
             throw new InvalidDataException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final NoSuchFilestoreException e) {
+        } catch (NoSuchFilestoreException e) {
             com.openexchange.admin.soap.context.soap.NoSuchFilestoreException faultDetail = new com.openexchange.admin.soap.context.soap.NoSuchFilestoreException();
             com.openexchange.admin.soap.context.exceptions.NoSuchFilestoreException value = new com.openexchange.admin.soap.context.exceptions.NoSuchFilestoreException();
             faultDetail.setNoSuchFilestoreException(value);
@@ -735,27 +735,27 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
                 list.add(context2Soap(context));
             }
             return list;
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             com.openexchange.admin.soap.context.soap.RemoteException faultDetail = new com.openexchange.admin.soap.context.soap.RemoteException();
             com.openexchange.admin.soap.context.rmi.RemoteException value = new com.openexchange.admin.soap.context.rmi.RemoteException();
             value.setMessage(e.getMessage());
             faultDetail.setRemoteException(value);
             throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             com.openexchange.admin.soap.context.soap.InvalidCredentialsException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidCredentialsException();
             faultDetail.setInvalidCredentialsException(new com.openexchange.admin.soap.context.exceptions.InvalidCredentialsException());
             throw new InvalidCredentialsException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             com.openexchange.admin.soap.context.soap.StorageException faultDetail = new com.openexchange.admin.soap.context.soap.StorageException();
             faultDetail.setStorageException(new com.openexchange.admin.soap.context.exceptions.StorageException());
             throw new StorageException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             com.openexchange.admin.soap.context.soap.InvalidDataException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidDataException();
             com.openexchange.admin.soap.context.exceptions.InvalidDataException value = new com.openexchange.admin.soap.context.exceptions.InvalidDataException();
             value.setObjectname(e.getObjectname());
             faultDetail.setInvalidDataException(value);
             throw new InvalidDataException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final NoSuchFilestoreException e) {
+        } catch (NoSuchFilestoreException e) {
             com.openexchange.admin.soap.context.soap.NoSuchFilestoreException faultDetail = new com.openexchange.admin.soap.context.soap.NoSuchFilestoreException();
             com.openexchange.admin.soap.context.exceptions.NoSuchFilestoreException value = new com.openexchange.admin.soap.context.exceptions.NoSuchFilestoreException();
             faultDetail.setNoSuchFilestoreException(value);
@@ -768,21 +768,21 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
         final OXContextInterface contextInterface = getContextInterface();
         try {
             return Integer.valueOf(contextInterface.getAdminId(soap2Context(ctx), soap2Credentials(auth)));
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             com.openexchange.admin.soap.context.soap.RemoteException faultDetail = new com.openexchange.admin.soap.context.soap.RemoteException();
             com.openexchange.admin.soap.context.rmi.RemoteException value = new com.openexchange.admin.soap.context.rmi.RemoteException();
             value.setMessage(e.getMessage());
             faultDetail.setRemoteException(value);
             throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             com.openexchange.admin.soap.context.soap.InvalidCredentialsException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidCredentialsException();
             faultDetail.setInvalidCredentialsException(new com.openexchange.admin.soap.context.exceptions.InvalidCredentialsException());
             throw new InvalidCredentialsException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final NoSuchContextException e) {
+        } catch (NoSuchContextException e) {
             com.openexchange.admin.soap.context.soap.NoSuchContextException faultDetail = new com.openexchange.admin.soap.context.soap.NoSuchContextException();
             faultDetail.setNoSuchContextException(new com.openexchange.admin.soap.context.exceptions.NoSuchContextException());
             throw new NoSuchContextException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             com.openexchange.admin.soap.context.soap.StorageException faultDetail = new com.openexchange.admin.soap.context.soap.StorageException();
             faultDetail.setStorageException(new com.openexchange.admin.soap.context.exceptions.StorageException());
             throw new StorageException_Exception(e.getMessage(), faultDetail, e);
@@ -794,31 +794,31 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
         final OXContextInterface contextInterface = getContextInterface();
         try {
             contextInterface.delete(soap2Context(parameters.ctx), soap2Credentials(parameters.auth));
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             com.openexchange.admin.soap.context.soap.RemoteException faultDetail = new com.openexchange.admin.soap.context.soap.RemoteException();
             com.openexchange.admin.soap.context.rmi.RemoteException value = new com.openexchange.admin.soap.context.rmi.RemoteException();
             value.setMessage(e.getMessage());
             faultDetail.setRemoteException(value);
             throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             com.openexchange.admin.soap.context.soap.InvalidCredentialsException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidCredentialsException();
             faultDetail.setInvalidCredentialsException(new com.openexchange.admin.soap.context.exceptions.InvalidCredentialsException());
             throw new InvalidCredentialsException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final NoSuchContextException e) {
+        } catch (NoSuchContextException e) {
             com.openexchange.admin.soap.context.soap.NoSuchContextException faultDetail = new com.openexchange.admin.soap.context.soap.NoSuchContextException();
             faultDetail.setNoSuchContextException(new com.openexchange.admin.soap.context.exceptions.NoSuchContextException());
             throw new NoSuchContextException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             com.openexchange.admin.soap.context.soap.StorageException faultDetail = new com.openexchange.admin.soap.context.soap.StorageException();
             faultDetail.setStorageException(new com.openexchange.admin.soap.context.exceptions.StorageException());
             throw new StorageException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             com.openexchange.admin.soap.context.soap.InvalidDataException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidDataException();
             com.openexchange.admin.soap.context.exceptions.InvalidDataException value = new com.openexchange.admin.soap.context.exceptions.InvalidDataException();
             value.setObjectname(e.getObjectname());
             faultDetail.setInvalidDataException(value);
             throw new InvalidDataException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final DatabaseUpdateException e) {
+        } catch (DatabaseUpdateException e) {
             com.openexchange.admin.soap.context.soap.DatabaseUpdateException faultDetail = new com.openexchange.admin.soap.context.soap.DatabaseUpdateException();
             com.openexchange.admin.soap.context.exceptions.DatabaseUpdateException value = new com.openexchange.admin.soap.context.exceptions.DatabaseUpdateException();
             faultDetail.setDatabaseUpdateException(value);
@@ -831,36 +831,36 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
         final OXContextInterface contextInterface = getContextInterface();
         try {
             contextInterface.disable(soap2Context(parameters.ctx), soap2Credentials(parameters.auth));
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             com.openexchange.admin.soap.context.soap.RemoteException faultDetail = new com.openexchange.admin.soap.context.soap.RemoteException();
             com.openexchange.admin.soap.context.rmi.RemoteException value = new com.openexchange.admin.soap.context.rmi.RemoteException();
             value.setMessage(e.getMessage());
             faultDetail.setRemoteException(value);
             throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             com.openexchange.admin.soap.context.soap.InvalidCredentialsException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidCredentialsException();
             faultDetail.setInvalidCredentialsException(new com.openexchange.admin.soap.context.exceptions.InvalidCredentialsException());
             throw new InvalidCredentialsException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final NoSuchContextException e) {
+        } catch (NoSuchContextException e) {
             com.openexchange.admin.soap.context.soap.NoSuchContextException faultDetail = new com.openexchange.admin.soap.context.soap.NoSuchContextException();
             faultDetail.setNoSuchContextException(new com.openexchange.admin.soap.context.exceptions.NoSuchContextException());
             throw new NoSuchContextException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             com.openexchange.admin.soap.context.soap.StorageException faultDetail = new com.openexchange.admin.soap.context.soap.StorageException();
             faultDetail.setStorageException(new com.openexchange.admin.soap.context.exceptions.StorageException());
             throw new StorageException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             com.openexchange.admin.soap.context.soap.InvalidDataException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidDataException();
             com.openexchange.admin.soap.context.exceptions.InvalidDataException value = new com.openexchange.admin.soap.context.exceptions.InvalidDataException();
             value.setObjectname(e.getObjectname());
             faultDetail.setInvalidDataException(value);
             throw new InvalidDataException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final NoSuchReasonException e) {
+        } catch (NoSuchReasonException e) {
             com.openexchange.admin.soap.context.soap.NoSuchReasonException faultDetail = new com.openexchange.admin.soap.context.soap.NoSuchReasonException();
             com.openexchange.admin.soap.context.exceptions.NoSuchReasonException value = new com.openexchange.admin.soap.context.exceptions.NoSuchReasonException();
             faultDetail.setNoSuchReasonException(value);
             throw new NoSuchReasonException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final OXContextException e) {
+        } catch (OXContextException e) {
             throw OXContextException_Exception.getFaultFor(e);
         }
     }
@@ -870,25 +870,25 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
         final OXContextInterface contextInterface = getContextInterface();
         try {
             return contextInterface.getAccessCombinationName(soap2Context(ctx), soap2Credentials(auth));
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             com.openexchange.admin.soap.context.soap.RemoteException faultDetail = new com.openexchange.admin.soap.context.soap.RemoteException();
             com.openexchange.admin.soap.context.rmi.RemoteException value = new com.openexchange.admin.soap.context.rmi.RemoteException();
             value.setMessage(e.getMessage());
             faultDetail.setRemoteException(value);
             throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             com.openexchange.admin.soap.context.soap.InvalidCredentialsException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidCredentialsException();
             faultDetail.setInvalidCredentialsException(new com.openexchange.admin.soap.context.exceptions.InvalidCredentialsException());
             throw new InvalidCredentialsException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final NoSuchContextException e) {
+        } catch (NoSuchContextException e) {
             com.openexchange.admin.soap.context.soap.NoSuchContextException faultDetail = new com.openexchange.admin.soap.context.soap.NoSuchContextException();
             faultDetail.setNoSuchContextException(new com.openexchange.admin.soap.context.exceptions.NoSuchContextException());
             throw new NoSuchContextException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             com.openexchange.admin.soap.context.soap.StorageException faultDetail = new com.openexchange.admin.soap.context.soap.StorageException();
             faultDetail.setStorageException(new com.openexchange.admin.soap.context.exceptions.StorageException());
             throw new StorageException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             com.openexchange.admin.soap.context.soap.InvalidDataException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidDataException();
             com.openexchange.admin.soap.context.exceptions.InvalidDataException value = new com.openexchange.admin.soap.context.exceptions.InvalidDataException();
             value.setObjectname(e.getObjectname());
@@ -902,31 +902,31 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
         final OXContextInterface contextInterface = getContextInterface();
         try {
             contextInterface.downgrade(soap2Context(parameters.ctx), soap2Credentials(parameters.auth));
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             com.openexchange.admin.soap.context.soap.RemoteException faultDetail = new com.openexchange.admin.soap.context.soap.RemoteException();
             com.openexchange.admin.soap.context.rmi.RemoteException value = new com.openexchange.admin.soap.context.rmi.RemoteException();
             value.setMessage(e.getMessage());
             faultDetail.setRemoteException(value);
             throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             com.openexchange.admin.soap.context.soap.InvalidCredentialsException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidCredentialsException();
             faultDetail.setInvalidCredentialsException(new com.openexchange.admin.soap.context.exceptions.InvalidCredentialsException());
             throw new InvalidCredentialsException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final NoSuchContextException e) {
+        } catch (NoSuchContextException e) {
             com.openexchange.admin.soap.context.soap.NoSuchContextException faultDetail = new com.openexchange.admin.soap.context.soap.NoSuchContextException();
             faultDetail.setNoSuchContextException(new com.openexchange.admin.soap.context.exceptions.NoSuchContextException());
             throw new NoSuchContextException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             com.openexchange.admin.soap.context.soap.StorageException faultDetail = new com.openexchange.admin.soap.context.soap.StorageException();
             faultDetail.setStorageException(new com.openexchange.admin.soap.context.exceptions.StorageException());
             throw new StorageException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             com.openexchange.admin.soap.context.soap.InvalidDataException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidDataException();
             com.openexchange.admin.soap.context.exceptions.InvalidDataException value = new com.openexchange.admin.soap.context.exceptions.InvalidDataException();
             value.setObjectname(e.getObjectname());
             faultDetail.setInvalidDataException(value);
             throw new InvalidDataException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final DatabaseUpdateException e) {
+        } catch (DatabaseUpdateException e) {
             com.openexchange.admin.soap.context.soap.DatabaseUpdateException faultDetail = new com.openexchange.admin.soap.context.soap.DatabaseUpdateException();
             com.openexchange.admin.soap.context.exceptions.DatabaseUpdateException value = new com.openexchange.admin.soap.context.exceptions.DatabaseUpdateException();
             faultDetail.setDatabaseUpdateException(value);
@@ -939,27 +939,27 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
         final OXContextInterface contextInterface = getContextInterface();
         try {
             return context2Soap(contextInterface.create(soap2Context(ctx), soap2User(adminUser), soap2Credentials(auth), soap2SchemaSelectStrategy(schemaSelectStrategy)));
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             com.openexchange.admin.soap.context.soap.RemoteException faultDetail = new com.openexchange.admin.soap.context.soap.RemoteException();
             com.openexchange.admin.soap.context.rmi.RemoteException value = new com.openexchange.admin.soap.context.rmi.RemoteException();
             value.setMessage(e.getMessage());
             faultDetail.setRemoteException(value);
             throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             com.openexchange.admin.soap.context.soap.InvalidCredentialsException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidCredentialsException();
             faultDetail.setInvalidCredentialsException(new com.openexchange.admin.soap.context.exceptions.InvalidCredentialsException());
             throw new InvalidCredentialsException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             com.openexchange.admin.soap.context.soap.StorageException faultDetail = new com.openexchange.admin.soap.context.soap.StorageException();
             faultDetail.setStorageException(new com.openexchange.admin.soap.context.exceptions.StorageException());
             throw new StorageException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             com.openexchange.admin.soap.context.soap.InvalidDataException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidDataException();
             com.openexchange.admin.soap.context.exceptions.InvalidDataException value = new com.openexchange.admin.soap.context.exceptions.InvalidDataException();
             value.setObjectname(e.getObjectname());
             faultDetail.setInvalidDataException(value);
             throw new InvalidDataException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final ContextExistsException e) {
+        } catch (ContextExistsException e) {
             throw ContextExistsException_Exception.faultFor(e);
         }
     }
@@ -969,41 +969,41 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
         final OXContextInterface contextInterface = getContextInterface();
         try {
             return Integer.valueOf(contextInterface.moveContextFilestore(soap2Context(ctx), soap2Filestore(dstFilestoreId), soap2Credentials(auth)));
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             com.openexchange.admin.soap.context.soap.RemoteException faultDetail = new com.openexchange.admin.soap.context.soap.RemoteException();
             com.openexchange.admin.soap.context.rmi.RemoteException value = new com.openexchange.admin.soap.context.rmi.RemoteException();
             value.setMessage(e.getMessage());
             faultDetail.setRemoteException(value);
             throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             com.openexchange.admin.soap.context.soap.InvalidCredentialsException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidCredentialsException();
             faultDetail.setInvalidCredentialsException(new com.openexchange.admin.soap.context.exceptions.InvalidCredentialsException());
             throw new InvalidCredentialsException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final NoSuchContextException e) {
+        } catch (NoSuchContextException e) {
             com.openexchange.admin.soap.context.soap.NoSuchContextException faultDetail = new com.openexchange.admin.soap.context.soap.NoSuchContextException();
             faultDetail.setNoSuchContextException(new com.openexchange.admin.soap.context.exceptions.NoSuchContextException());
             throw new NoSuchContextException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             com.openexchange.admin.soap.context.soap.StorageException faultDetail = new com.openexchange.admin.soap.context.soap.StorageException();
             faultDetail.setStorageException(new com.openexchange.admin.soap.context.exceptions.StorageException());
             throw new StorageException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             com.openexchange.admin.soap.context.soap.InvalidDataException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidDataException();
             com.openexchange.admin.soap.context.exceptions.InvalidDataException value = new com.openexchange.admin.soap.context.exceptions.InvalidDataException();
             value.setObjectname(e.getObjectname());
             faultDetail.setInvalidDataException(value);
             throw new InvalidDataException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final NoSuchFilestoreException e) {
+        } catch (NoSuchFilestoreException e) {
             com.openexchange.admin.soap.context.soap.NoSuchReasonException faultDetail = new com.openexchange.admin.soap.context.soap.NoSuchReasonException();
             com.openexchange.admin.soap.context.exceptions.NoSuchReasonException value = new com.openexchange.admin.soap.context.exceptions.NoSuchReasonException();
             faultDetail.setNoSuchReasonException(value);
             throw new NoSuchReasonException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final NoSuchReasonException e) {
+        } catch (NoSuchReasonException e) {
             com.openexchange.admin.soap.context.soap.NoSuchReasonException faultDetail = new com.openexchange.admin.soap.context.soap.NoSuchReasonException();
             com.openexchange.admin.soap.context.exceptions.NoSuchReasonException value = new com.openexchange.admin.soap.context.exceptions.NoSuchReasonException();
             faultDetail.setNoSuchReasonException(value);
             throw new NoSuchReasonException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final OXContextException e) {
+        } catch (OXContextException e) {
             throw OXContextException_Exception.getFaultFor(e);
         }
     }
@@ -1021,21 +1021,21 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
                 list.add(context2Soap(context));
             }
             return list;
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             com.openexchange.admin.soap.context.soap.RemoteException faultDetail = new com.openexchange.admin.soap.context.soap.RemoteException();
             com.openexchange.admin.soap.context.rmi.RemoteException value = new com.openexchange.admin.soap.context.rmi.RemoteException();
             value.setMessage(e.getMessage());
             faultDetail.setRemoteException(value);
             throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             com.openexchange.admin.soap.context.soap.InvalidCredentialsException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidCredentialsException();
             faultDetail.setInvalidCredentialsException(new com.openexchange.admin.soap.context.exceptions.InvalidCredentialsException());
             throw new InvalidCredentialsException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             com.openexchange.admin.soap.context.soap.StorageException faultDetail = new com.openexchange.admin.soap.context.soap.StorageException();
             faultDetail.setStorageException(new com.openexchange.admin.soap.context.exceptions.StorageException());
             throw new StorageException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             com.openexchange.admin.soap.context.soap.InvalidDataException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidDataException();
             com.openexchange.admin.soap.context.exceptions.InvalidDataException value = new com.openexchange.admin.soap.context.exceptions.InvalidDataException();
             value.setObjectname(e.getObjectname());
@@ -1057,21 +1057,21 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
                 list.add(context2Soap(context));
             }
             return list;
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             com.openexchange.admin.soap.context.soap.RemoteException faultDetail = new com.openexchange.admin.soap.context.soap.RemoteException();
             com.openexchange.admin.soap.context.rmi.RemoteException value = new com.openexchange.admin.soap.context.rmi.RemoteException();
             value.setMessage(e.getMessage());
             faultDetail.setRemoteException(value);
             throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             com.openexchange.admin.soap.context.soap.InvalidCredentialsException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidCredentialsException();
             faultDetail.setInvalidCredentialsException(new com.openexchange.admin.soap.context.exceptions.InvalidCredentialsException());
             throw new InvalidCredentialsException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             com.openexchange.admin.soap.context.soap.StorageException faultDetail = new com.openexchange.admin.soap.context.soap.StorageException();
             faultDetail.setStorageException(new com.openexchange.admin.soap.context.exceptions.StorageException());
             throw new StorageException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             com.openexchange.admin.soap.context.soap.InvalidDataException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidDataException();
             com.openexchange.admin.soap.context.exceptions.InvalidDataException value = new com.openexchange.admin.soap.context.exceptions.InvalidDataException();
             value.setObjectname(e.getObjectname());
@@ -1085,21 +1085,21 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
         final OXContextInterface contextInterface = getContextInterface();
         try {
             return Boolean.valueOf(contextInterface.exists(soap2Context(ctx), soap2Credentials(auth)));
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             com.openexchange.admin.soap.context.soap.RemoteException faultDetail = new com.openexchange.admin.soap.context.soap.RemoteException();
             com.openexchange.admin.soap.context.rmi.RemoteException value = new com.openexchange.admin.soap.context.rmi.RemoteException();
             value.setMessage(e.getMessage());
             faultDetail.setRemoteException(value);
             throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             com.openexchange.admin.soap.context.soap.InvalidCredentialsException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidCredentialsException();
             faultDetail.setInvalidCredentialsException(new com.openexchange.admin.soap.context.exceptions.InvalidCredentialsException());
             throw new InvalidCredentialsException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             com.openexchange.admin.soap.context.soap.StorageException faultDetail = new com.openexchange.admin.soap.context.soap.StorageException();
             faultDetail.setStorageException(new com.openexchange.admin.soap.context.exceptions.StorageException());
             throw new StorageException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             com.openexchange.admin.soap.context.soap.InvalidDataException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidDataException();
             com.openexchange.admin.soap.context.exceptions.InvalidDataException value = new com.openexchange.admin.soap.context.exceptions.InvalidDataException();
             value.setObjectname(e.getObjectname());
@@ -1113,21 +1113,21 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
         final OXContextInterface contextInterface = getContextInterface();
         try {
             return Boolean.valueOf(contextInterface.existsInServer(soap2Context(ctx), soap2Credentials(auth)));
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             com.openexchange.admin.soap.context.soap.RemoteException faultDetail = new com.openexchange.admin.soap.context.soap.RemoteException();
             com.openexchange.admin.soap.context.rmi.RemoteException value = new com.openexchange.admin.soap.context.rmi.RemoteException();
             value.setMessage(e.getMessage());
             faultDetail.setRemoteException(value);
             throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             com.openexchange.admin.soap.context.soap.InvalidCredentialsException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidCredentialsException();
             faultDetail.setInvalidCredentialsException(new com.openexchange.admin.soap.context.exceptions.InvalidCredentialsException());
             throw new InvalidCredentialsException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             com.openexchange.admin.soap.context.soap.StorageException faultDetail = new com.openexchange.admin.soap.context.soap.StorageException();
             faultDetail.setStorageException(new com.openexchange.admin.soap.context.exceptions.StorageException());
             throw new StorageException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             com.openexchange.admin.soap.context.soap.InvalidDataException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidDataException();
             com.openexchange.admin.soap.context.exceptions.InvalidDataException value = new com.openexchange.admin.soap.context.exceptions.InvalidDataException();
             value.setObjectname(e.getObjectname());
@@ -1149,27 +1149,27 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
                 list.add(context2Soap(context));
             }
             return list;
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             com.openexchange.admin.soap.context.soap.RemoteException faultDetail = new com.openexchange.admin.soap.context.soap.RemoteException();
             com.openexchange.admin.soap.context.rmi.RemoteException value = new com.openexchange.admin.soap.context.rmi.RemoteException();
             value.setMessage(e.getMessage());
             faultDetail.setRemoteException(value);
             throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             com.openexchange.admin.soap.context.soap.InvalidCredentialsException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidCredentialsException();
             faultDetail.setInvalidCredentialsException(new com.openexchange.admin.soap.context.exceptions.InvalidCredentialsException());
             throw new InvalidCredentialsException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             com.openexchange.admin.soap.context.soap.StorageException faultDetail = new com.openexchange.admin.soap.context.soap.StorageException();
             faultDetail.setStorageException(new com.openexchange.admin.soap.context.exceptions.StorageException());
             throw new StorageException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             com.openexchange.admin.soap.context.soap.InvalidDataException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidDataException();
             com.openexchange.admin.soap.context.exceptions.InvalidDataException value = new com.openexchange.admin.soap.context.exceptions.InvalidDataException();
             value.setObjectname(e.getObjectname());
             faultDetail.setInvalidDataException(value);
             throw new InvalidDataException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final NoSuchDatabaseException e) {
+        } catch (NoSuchDatabaseException e) {
             com.openexchange.admin.soap.context.soap.NoSuchDatabaseException faultDetail = new com.openexchange.admin.soap.context.soap.NoSuchDatabaseException();
             com.openexchange.admin.soap.context.exceptions.NoSuchDatabaseException value = new com.openexchange.admin.soap.context.exceptions.NoSuchDatabaseException();
             faultDetail.setNoSuchDatabaseException(value);
@@ -1190,27 +1190,27 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
                 list.add(context2Soap(context));
             }
             return list;
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             com.openexchange.admin.soap.context.soap.RemoteException faultDetail = new com.openexchange.admin.soap.context.soap.RemoteException();
             com.openexchange.admin.soap.context.rmi.RemoteException value = new com.openexchange.admin.soap.context.rmi.RemoteException();
             value.setMessage(e.getMessage());
             faultDetail.setRemoteException(value);
             throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             com.openexchange.admin.soap.context.soap.InvalidCredentialsException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidCredentialsException();
             faultDetail.setInvalidCredentialsException(new com.openexchange.admin.soap.context.exceptions.InvalidCredentialsException());
             throw new InvalidCredentialsException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             com.openexchange.admin.soap.context.soap.StorageException faultDetail = new com.openexchange.admin.soap.context.soap.StorageException();
             faultDetail.setStorageException(new com.openexchange.admin.soap.context.exceptions.StorageException());
             throw new StorageException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             com.openexchange.admin.soap.context.soap.InvalidDataException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidDataException();
             com.openexchange.admin.soap.context.exceptions.InvalidDataException value = new com.openexchange.admin.soap.context.exceptions.InvalidDataException();
             value.setObjectname(e.getObjectname());
             faultDetail.setInvalidDataException(value);
             throw new InvalidDataException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final NoSuchDatabaseException e) {
+        } catch (NoSuchDatabaseException e) {
             com.openexchange.admin.soap.context.soap.NoSuchDatabaseException faultDetail = new com.openexchange.admin.soap.context.soap.NoSuchDatabaseException();
             com.openexchange.admin.soap.context.exceptions.NoSuchDatabaseException value = new com.openexchange.admin.soap.context.exceptions.NoSuchDatabaseException();
             faultDetail.setNoSuchDatabaseException(value);
@@ -1223,25 +1223,25 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
         final OXContextInterface contextInterface = getContextInterface();
         try {
             return context2Soap(contextInterface.getData(soap2Context(ctx), soap2Credentials(auth)));
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             com.openexchange.admin.soap.context.soap.RemoteException faultDetail = new com.openexchange.admin.soap.context.soap.RemoteException();
             com.openexchange.admin.soap.context.rmi.RemoteException value = new com.openexchange.admin.soap.context.rmi.RemoteException();
             value.setMessage(e.getMessage());
             faultDetail.setRemoteException(value);
             throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             com.openexchange.admin.soap.context.soap.InvalidCredentialsException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidCredentialsException();
             faultDetail.setInvalidCredentialsException(new com.openexchange.admin.soap.context.exceptions.InvalidCredentialsException());
             throw new InvalidCredentialsException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final NoSuchContextException e) {
+        } catch (NoSuchContextException e) {
             com.openexchange.admin.soap.context.soap.NoSuchContextException faultDetail = new com.openexchange.admin.soap.context.soap.NoSuchContextException();
             faultDetail.setNoSuchContextException(new com.openexchange.admin.soap.context.exceptions.NoSuchContextException());
             throw new NoSuchContextException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             com.openexchange.admin.soap.context.soap.StorageException faultDetail = new com.openexchange.admin.soap.context.soap.StorageException();
             faultDetail.setStorageException(new com.openexchange.admin.soap.context.exceptions.StorageException());
             throw new StorageException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             com.openexchange.admin.soap.context.soap.InvalidDataException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidDataException();
             com.openexchange.admin.soap.context.exceptions.InvalidDataException value = new com.openexchange.admin.soap.context.exceptions.InvalidDataException();
             value.setObjectname(e.getObjectname());
@@ -1553,7 +1553,7 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
                     final int port = i.intValue();
                     final URI newUri = new URI(defaults.getSSLPort() == port ? defaults.getSSLProtocol() : defaults.getProtocol(), null, uri.getHost(), port, null, null, null);
                     user.setImapServer(newUri.toString());
-                } catch (final URISyntaxException e) {
+                } catch (URISyntaxException e) {
                     final Logger logger = org.slf4j.LoggerFactory.getLogger(OXContextServicePortTypeImpl.class);
                     logger.warn("The IMAP URL {} is invalid: {}", s, e.getMessage());
 
@@ -1748,7 +1748,7 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
                     final int port = i.intValue();
                     final URI newUri = new URI(defaults.getSSLPort() == port ? defaults.getSSLProtocol() : defaults.getProtocol(), null, uri.getHost(), port, null, null, null);
                     user.setSmtpServer(newUri.toString());
-                } catch (final URISyntaxException e) {
+                } catch (URISyntaxException e) {
                     final Logger logger = org.slf4j.LoggerFactory.getLogger(OXContextServicePortTypeImpl.class);
                     logger.warn("The SMTP URL {} is invalid: {}", s, e.getMessage());
 
@@ -2223,7 +2223,7 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
             return null;
         }
         final java.util.List<SOAPMapEntry> entries = soapStringMapMap.getEntries();
-        final Map<String, Map<String, String>> map = new HashMap<String, Map<String, String>>(entries.size());
+        final Map<String, Map<String, String>> map = new LinkedHashMap<String, Map<String, String>>(entries.size());
         for (final SOAPMapEntry soapMapEntry : entries) {
             if (null != soapMapEntry) {
                 map.put(soapMapEntry.getKey(), soap2Map(soapMapEntry.getValue()));
@@ -2237,7 +2237,7 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
             return null;
         }
         final java.util.List<Entry> entries = soapStringMap.getEntries();
-        final Map<String, String> map = new HashMap<String, String>(entries.size());
+        final Map<String, String> map = new LinkedHashMap<String, String>(entries.size());
         for (final Entry entry : entries) {
             if (null != entry) {
                 map.put(entry.getKey(), entry.getValue());

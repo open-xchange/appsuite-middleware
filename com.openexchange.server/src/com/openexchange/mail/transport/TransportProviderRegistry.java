@@ -97,7 +97,7 @@ public final class TransportProviderRegistry {
         TransportProvider provider;
         try {
             provider = mailSessionCache.getParameter(accountId, key);
-        } catch (final ClassCastException e) {
+        } catch (ClassCastException e) {
             /*
              * Probably caused by bundle update(s)
              */
@@ -196,9 +196,9 @@ public final class TransportProviderRegistry {
              */
             providers.put(p, provider);
             return true;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
-        } catch (final RuntimeException t) {
+        } catch (RuntimeException t) {
             LOG.error("", t);
             return false;
         }
@@ -216,9 +216,9 @@ public final class TransportProviderRegistry {
             try {
                 provider.setDeprecated(true);
                 provider.shutDown();
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.error("Mail connection implementation could not be shut down", e);
-            } catch (final RuntimeException t) {
+            } catch (RuntimeException t) {
                 LOG.error("Mail connection implementation could not be shut down", t);
             }
         }
@@ -253,9 +253,9 @@ public final class TransportProviderRegistry {
             removed.setDeprecated(true);
             removed.shutDown();
             return removed;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
-        } catch (final RuntimeException t) {
+        } catch (RuntimeException t) {
             LOG.error("", t);
             return removed;
         }

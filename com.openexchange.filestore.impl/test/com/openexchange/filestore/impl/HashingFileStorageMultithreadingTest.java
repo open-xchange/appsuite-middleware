@@ -105,7 +105,7 @@ public class HashingFileStorageMultithreadingTest extends AbstractHashingFileSto
                 InputStream expected = IS(data);
 
                 int d = 0;
-                while((d = file.read()) != -1) {
+                while ((d = file.read()) != -1) {
                     assertEquals(d, expected.read());
                 }
                 assertEquals(-1, expected.read());

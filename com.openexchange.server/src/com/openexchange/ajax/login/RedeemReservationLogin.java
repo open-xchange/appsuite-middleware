@@ -64,7 +64,6 @@ import com.openexchange.authentication.Authenticated;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
@@ -78,6 +77,7 @@ import com.openexchange.session.reservation.Enhancer;
 import com.openexchange.session.reservation.Reservation;
 import com.openexchange.session.reservation.SessionReservationService;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.user.User;
 
 
 /**
@@ -184,7 +184,7 @@ public class RedeemReservationLogin implements LoginRequestHandler {
             uiWebPath = conf.getUiWebPath();
         }
 
-        resp.sendRedirect(generateRedirectURL(session, uiWebPath, conf.getHttpAuthAutoLogin()));
+        resp.sendRedirect(generateRedirectURL(session, uiWebPath));
     }
 
     private LoginResult login(HttpServletRequest httpRequest, final Context context, final User user, final Map<String, String> optState, LoginConfiguration loginConfiguration) throws OXException {
@@ -230,15 +230,12 @@ public class RedeemReservationLogin implements LoginRequestHandler {
         return user.getLoginInfo() + '@' + context.getLoginInfo()[0];
     }
 
-    private static String generateRedirectURL(Session session, String uiWebPath, String shouldStore) {
+    private static String generateRedirectURL(Session session, String uiWebPath) {
         String retval = uiWebPath;
 
         // Prevent HTTP response splitting.
         retval = retval.replaceAll("[\n\r]", "");
         retval = LoginTools.addFragmentParameter(retval, PARAMETER_SESSION, session.getSessionID());
-        if (shouldStore != null) {
-            retval = LoginTools.addFragmentParameter(retval, "store", shouldStore);
-        }
         return retval;
     }
 

@@ -49,7 +49,10 @@
 
 package com.openexchange.carddav.osgi;
 
+import static com.openexchange.dav.DAVTools.getExternalPath;
+import static com.openexchange.dav.DAVTools.getInternalPath;
 import org.osgi.service.http.HttpService;
+import org.slf4j.Logger;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.carddav.Tools;
 import com.openexchange.carddav.photos.PhotoPerformer;
@@ -61,6 +64,7 @@ import com.openexchange.contact.similarity.ContactSimilarityService;
 import com.openexchange.contact.vcard.VCardService;
 import com.openexchange.contact.vcard.storage.VCardStorageFactory;
 import com.openexchange.dav.DAVServlet;
+import com.openexchange.dav.WellKnownServlet;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.group.GroupService;
 import com.openexchange.groupware.userconfiguration.Permission;
@@ -79,6 +83,8 @@ import com.openexchange.webdav.protocol.osgi.OSGiPropertyMixin;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class CarddavActivator extends HousekeepingActivator {
+
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(CarddavActivator.class);
 
     private OSGiPropertyMixin mixin;
 
@@ -100,7 +106,7 @@ public class CarddavActivator extends HousekeepingActivator {
     @Override
     protected synchronized void startBundle() throws Exception {
         try {
-            org.slf4j.LoggerFactory.getLogger(CarddavActivator.class).info("starting bundle: \"com.openexchange.carddav\"");
+            LOG.info("starting bundle: \"com.openexchange.carddav\"");
             /*
              * prepare CardDAV performer & initialize global OSGi property mixin
              */
@@ -111,8 +117,11 @@ public class CarddavActivator extends HousekeepingActivator {
             /*
              * register CardDAV servlet & WebDAV path
              */
-            getService(HttpService.class).registerServlet("/servlet/dav/carddav", new CardDAV(performer), null, null);
+            ConfigViewFactory configViewFactory = getServiceSafe(ConfigViewFactory.class);
+            getService(HttpService.class).registerServlet(getInternalPath(configViewFactory, "/carddav"), new CardDAV(performer), null, null);
+            getService(HttpService.class).registerServlet("/.well-known/carddav", new WellKnownServlet(getExternalPath(configViewFactory, "/carddav"), Interface.CARDDAV), null, null);
             registerService(OAuthScopeProvider.class, new AbstractScopeProvider(Tools.OAUTH_SCOPE, OAuthStrings.SYNC_CONTACTS) {
+
                 @Override
                 public boolean canBeGranted(CapabilitySet capabilities) {
                     return capabilities.contains(Permission.CARDDAV.getCapabilityName());
@@ -121,7 +130,7 @@ public class CarddavActivator extends HousekeepingActivator {
             /*
              * register Photo performer for referenced contact images in vCards
              */
-            getService(HttpService.class).registerServlet("/servlet/dav/photos", new DAVServlet(new PhotoPerformer(this), Interface.CARDDAV), null, null);
+            getService(HttpService.class).registerServlet(getInternalPath(configViewFactory, "/photos"), new DAVServlet(new PhotoPerformer(this), Interface.CARDDAV), null, null);
             /*
              * track optional services
              */
@@ -137,7 +146,7 @@ public class CarddavActivator extends HousekeepingActivator {
 
     @Override
     protected synchronized void stopBundle() throws Exception {
-        org.slf4j.LoggerFactory.getLogger(CarddavActivator.class).info("stopping bundle: \"com.openexchange.carddav\"");
+        LOG.info("stopping bundle: \"com.openexchange.carddav\"");
         /*
          * close OSGi property mixin
          */
@@ -151,9 +160,10 @@ public class CarddavActivator extends HousekeepingActivator {
          */
         HttpService httpService = getService(HttpService.class);
         if (null != httpService) {
-            httpService.unregister("/servlet/dav/carddav");
+            ConfigViewFactory configViewFactory = getServiceSafe(ConfigViewFactory.class);
+            String carddavPath = getInternalPath(configViewFactory, "/carddav");
+            httpService.unregister(carddavPath);
         }
         super.stopBundle();
     }
-
 }

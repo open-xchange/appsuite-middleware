@@ -124,7 +124,7 @@ public final class Tools {
     private static int getMaximumSize(final Connection connection, final Table table, final String columnLabel) {
     	try {
 			return DBUtils.getColumnSize(connection, table.toString(), columnLabel);
-        } catch (final SQLException x) {
+        } catch (SQLException x) {
             LOG.error("", x);
             return 0;
         }
@@ -225,7 +225,7 @@ public final class Tools {
 	public static int parse(final String id) throws OXException {
 		try {
 			return Integer.parseInt(id);
-		} catch (final NumberFormatException e) {
+		} catch (NumberFormatException e) {
 			throw ContactExceptionCodes.ID_PARSING_FAILED.create(e, id);
 		}
 	}
@@ -248,7 +248,7 @@ public final class Tools {
                 intIDs[i] = Integer.parseInt(ids[i]);
             }
             return intIDs;
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
 			throw ContactExceptionCodes.ID_PARSING_FAILED.create(e, Arrays.toString(ids));
         }
     }

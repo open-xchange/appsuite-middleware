@@ -84,11 +84,6 @@ public class PhotoConsumer implements BiConsumer<ContactEntry, Contact> {
         this.googleContactsService = googleContactsService;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.util.function.BiConsumer#accept(java.lang.Object, java.lang.Object)
-     */
     @Override
     public void accept(ContactEntry t, Contact u) {
         Link photoLink = t.getContactPhotoLink();

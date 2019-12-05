@@ -58,10 +58,10 @@ import com.openexchange.drive.DriveFileField;
 import com.openexchange.drive.DriveMetaMode;
 import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.FilePattern;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 /**
  * {@link DefaultDriveSession}
@@ -82,6 +82,7 @@ public class DefaultDriveSession implements DriveSession {
     private List<FilePattern> fileExclusions;
     private List<DirectoryPattern> directoryExclusions;
     private String driveMeta;
+    private boolean includeQuota;
 
     /**
      * Initializes a new {@link DefaultDriveSession}.
@@ -156,6 +157,15 @@ public class DefaultDriveSession implements DriveSession {
      */
     public void setDriveMeta(String driveMeta) {
         this.driveMeta = driveMeta;
+    }
+
+    /**
+     * Configures to include current quota and usage in the response or not, when applicable.
+     *
+     * @param includeQuota <code>true</code> if quota information should be included, <code>false</code>, otherwise
+     */
+    public void setIncludeQuota(boolean includeQuota) {
+        this.includeQuota = includeQuota;
     }
 
     @Override
@@ -242,6 +252,11 @@ public class DefaultDriveSession implements DriveSession {
             return DriveMetaMode.INLINE;
         }
         return useDriveMeta() ? DriveMetaMode.DEFAULT : DriveMetaMode.DISABLED;
+    }
+
+    @Override
+    public boolean isIncludeQuota() {
+        return includeQuota;
     }
 
     @Override

@@ -82,7 +82,7 @@ public final class CSVDataRetentionActivator extends HousekeepingActivator {
     protected void handleAvailability(final Class<?> clazz) {
         try {
             CSVDataRetentionConfig.getInstance().init((ConfigurationService) getService(clazz));
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
         }
     }
@@ -97,7 +97,7 @@ public final class CSVDataRetentionActivator extends HousekeepingActivator {
         try {
             CSVDataRetentionConfig.getInstance().init(getService(ConfigurationService.class));
             registerService(DataRetentionService.class, new CSVDataRetentionService(), null);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("", e);
             throw e;
         }

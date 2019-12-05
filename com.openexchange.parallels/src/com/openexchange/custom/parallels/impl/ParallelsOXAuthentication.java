@@ -67,8 +67,8 @@ import com.openexchange.database.Databases;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 
@@ -118,7 +118,7 @@ public class ParallelsOXAuthentication implements AuthenticationService {
 
         try {
             configdb_read = Database.get(false);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("Error while setting up internal database connection", e);
             throw LoginExceptionCodes.DATABASE_DOWN.create(e);
         }
@@ -172,7 +172,7 @@ public class ParallelsOXAuthentication implements AuthenticationService {
             rs = prep.executeQuery();
             String cid = null;
             String loginmapping = null;
-            if(rs.next()){
+            if (rs.next()){
                 cid = rs.getString("cid");
                 loginmapping = rs.getString("login_info");
             }else{
@@ -185,7 +185,7 @@ public class ParallelsOXAuthentication implements AuthenticationService {
             final String[] tmp_ = loginmapping.split("\\|\\|");
 
             // only if we get 2 strings out of the split , then proceed
-            if(tmp_.length!=2){
+            if (tmp_.length!=2){
                 LOG.error("handleLoginInfo: Could not split up login_info mapping correctly for mappingstring \"{}\" ", loginmapping);
                 throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
             }
@@ -208,7 +208,7 @@ public class ParallelsOXAuthentication implements AuthenticationService {
             final int userId;
             try {
                 userId = userservice.getUserId(oxuser_, ctx);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.error("UserID for {} could not be resolved via OX API from database. Not provisioned yet?", oxuser_,e);
                 throw LoginExceptionCodes.INVALID_CREDENTIALS_MISSING_USER_MAPPING.create(oxuser_);
             }
@@ -235,13 +235,13 @@ public class ParallelsOXAuthentication implements AuthenticationService {
                 }
             };
 
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             LOG.error("Error in configdb query", e);
             throw LoginExceptionCodes.COMMUNICATION.create(e);
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             LOG.error("Error in parsing context id from configdb", e);
             throw LoginExceptionCodes.INVALID_CREDENTIALS.create(e);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("Error in loading user or context from loginstring {} from OX API", gui_loginstring, e);
             throw LoginExceptionCodes.INVALID_CREDENTIALS.create(e);
         } finally {

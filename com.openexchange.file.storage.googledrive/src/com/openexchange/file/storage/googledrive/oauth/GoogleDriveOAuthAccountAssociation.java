@@ -91,11 +91,6 @@ public class GoogleDriveOAuthAccountAssociation extends AbstractFileStorageOAuth
         return new GoogleDriveOAuthAccess(getFileStorageAccount(), session);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.association.OAuthAccountAssociation#getScopes()
-     */
     @Override
     public List<OAuthScope> getScopes() {
         return Collections.singletonList(GoogleOAuthScope.drive);

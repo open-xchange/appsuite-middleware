@@ -48,6 +48,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Vector;
@@ -69,6 +70,7 @@ import javax.mail.event.StoreEvent;
 import com.sun.mail.iap.BadCommandException;
 import com.sun.mail.iap.CommandFailedException;
 import com.sun.mail.iap.ConnectionException;
+import com.sun.mail.iap.Protocol;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.iap.ResponseCode;
@@ -251,6 +253,68 @@ public class IMAPStore extends Store
         return null == collection ? null : collection.snapshot();
     }
 
+    private static final AtomicReference<CommandExecutorCollection> COMMAND_EXECUTORS_REF = new AtomicReference<CommandExecutorCollection>(null);
+
+    /**
+     * Adds specified executor
+     *
+     * @param commandExecutor The executor to add
+     */
+    public static synchronized void addCommandExecutor(CommandExecutor commandExecutor) {
+        if (null == commandExecutor) {
+            return;
+        }
+
+        CommandExecutorCollection executors = COMMAND_EXECUTORS_REF.get();
+        if (null == executors) {
+            COMMAND_EXECUTORS_REF.set(CommandExecutorCollection.newCollection(commandExecutor));
+        } else {
+            executors.add(commandExecutor);
+        }
+    }
+
+    /**
+     * Removes specified executor
+     *
+     * @param commandExecutor The executor to remove
+     */
+    public static synchronized void removeCommandExecutor(CommandExecutor commandExecutor) {
+        if (null == commandExecutor) {
+            return;
+        }
+
+        CommandExecutorCollection executors = COMMAND_EXECUTORS_REF.get();
+        if (null == executors) {
+            return;
+        }
+
+        boolean lastRemoved = executors.remove(commandExecutor);
+        if (lastRemoved) {
+            COMMAND_EXECUTORS_REF.set(null);
+        }
+    }
+
+    /**
+     * Gets the matching command executor for given protocol instance.
+     *
+     * @param commandEvent The protocol instance
+     * @return The optional matching command executor
+     */
+    public static Optional<CommandExecutor> getMatchingCommandExecutor(Protocol protocol) {
+        CommandExecutorCollection collection = COMMAND_EXECUTORS_REF.get();
+        return null == collection ? Optional.empty() : collection.getMatchingCommandExecutorFor(protocol);
+    }
+
+    /**
+     * Gets a snapshot of the currently available executors.
+     *
+     * @return The executors or an empty <code>Optional</code> if none registered
+     */
+    public static Optional<CommandExecutorCollection> getCommandExecutors() {
+        CommandExecutorCollection collection = COMMAND_EXECUTORS_REF.get();
+        return null == collection ? Optional.empty() : Optional.of(collection.snapshot());
+    }
+
     protected final String name;		// name of this protocol
     protected final int defaultPort;	// default IMAP port
     protected final boolean isSSL;	// use SSL?
@@ -292,7 +356,7 @@ public class IMAPStore extends Store
     private String propagateClientIpAddress = null;
     private volatile String generatedExternalId = null;
     private Map<String, String> clientParameters = null;
-    private ExternalIdGenerator externalIdGenerator = null;
+    private volatile ExternalIdGenerator externalIdGenerator = null;
     private boolean failOnNOFetch = false;
     private final String guid;			// for Yahoo! Mail IMAP
     private boolean throwSearchException = false;
@@ -693,7 +757,7 @@ public class IMAPStore extends Store
     s = session.getProperty("mail." + name + ".failOnNOFetch");
     if (s != null) {
         failOnNOFetch = Boolean.parseBoolean(s.trim());
-        logger.log(Level.CONFIG, "mail.imap.failOnNOFetch: {0}", failOnNOFetch);
+        logger.log(Level.CONFIG, "mail.imap.failOnNOFetch: {0}", failOnNOFetch ? Boolean.TRUE : Boolean.FALSE);
     }
 
 	guid = session.getProperty("mail." + name + ".yahoo.guid");
@@ -923,23 +987,23 @@ public class IMAPStore extends Store
 	        // Verify login really failed due to an authentication/authorization issue
             switch (responseCode) {
                 case AUTHENTICATIONFAILED:
-                    throw new AuthenticationFailedException(cex.getResponse().getRest(), cex);
+                    throw new AuthenticationFailedException(cex.getResponse().getRest(), cex).setReason(responseCode.getName());
                 case AUTHORIZATIONFAILED:
-                    throw new javax.mail.AuthorizationFailedException(cex.getResponse().getRest(), cex);
+                    throw new javax.mail.AuthorizationFailedException(cex.getResponse().getRest(), cex).setReason(responseCode.getName());
                 case UNAVAILABLE:
                     if (++retry > 5) {
-                        throw new javax.mail.TemporaryAuthenticationFailureException(cex.getResponse().getRest(), cex);
+                        throw new javax.mail.TemporaryAuthenticationFailureException(cex.getResponse().getRest(), cex).setReason(responseCode.getName());
                     }
 
                     long nanosToWait = TimeUnit.NANOSECONDS.convert((retry * 1000) + ((long) (Math.random() * 1000)), TimeUnit.MILLISECONDS);
                     LockSupport.parkNanos(nanosToWait);
                     continue LoginAttempt;
                 case EXPIRED:
-                    throw new javax.mail.PasswordExpiredException(cex.getResponse().getRest(), cex);
+                    throw new javax.mail.PasswordExpiredException(cex.getResponse().getRest(), cex).setReason(responseCode.getName());
                 case PRIVACYREQUIRED:
-                    throw new javax.mail.PrivacyRequiredException(cex.getResponse().getRest(), cex);
+                    throw new javax.mail.PrivacyRequiredException(cex.getResponse().getRest(), cex).setReason(responseCode.getName());
                 default:
-                    /*fall-through*/
+                    throw new AuthenticationFailedException(cex.getResponse().getRest(), cex).setReason(responseCode.getName());
             }
         }
 

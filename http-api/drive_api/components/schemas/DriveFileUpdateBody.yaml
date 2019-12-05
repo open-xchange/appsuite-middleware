@@ -1,0 +1,6 @@
+type: object
+properties:
+  file:
+    $ref: '#/components/schemas/DriveFileMetadata'
+  notification:
+    $ref: '#/components/schemas/DriveNotificationData'

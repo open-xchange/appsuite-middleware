@@ -1,44 +1,45 @@
 /export?action=VCARD:
   get:
-    operationId: exportAsVCard
+    operationId: exportAsVCard_get_req
     tags:
       - Export
     summary: Exports contact data to a vCard file.
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: folder
-        type: string
-        description: Object ID of the folder whose content shall be exported. This must be a contact folder. Only required if there is no ids parameter submitted.
+        description: >-
+          Object ID of the folder whose content shall be exported. This must be
+          a contact folder. Only required if there is no ids parameter
+          submitted.
         required: false
-    responses:
-      200:
-        description: An input stream containing the content of the vCard file with the MIME type `text/x-vcard`.
         schema:
           type: string
+    responses:
+      '200':
+        description: >-
+          An input stream containing the content of the vCard file with the MIME
+          type `text/x-vcard`.
+        content:
+          application/json:
+            schema:
+              type: string
   put:
-    operationId: exportAsVCard
+    operationId: exportAsVCard_put_req
     tags:
       - Export
     summary: Exports a batch of contact data to a vCard file.
-    description: 
-      Exports a batch of contact data to a vCard file.
-    consumes:
-      - application/json
-    parameters:  
-      - $ref: "#/parameters/gblQueryParamSession"
-      - in: body
-        name: body
-        description: A JSON array of JSON objects with the id and folder_id.
-        required: true
-        schema:
-          type: array
-          items:
-            $ref: "#/definitions/InfoItemExport"
+    description: Exports a batch of contact data to a vCard file.
+    parameters:
+      - $ref: '#/components/parameters/gblQueryParamSession'
     responses:
-      200:
-        description: 'An input stream containing the content of the vCard file with the MIME type `text/x-vcard`.'
-        schema:
-          type: string
-      
-    
+      '200':
+        description: >-
+          An input stream containing the content of the vCard file with the MIME
+          type `text/x-vcard`.
+        content:
+          application/json:
+            schema:
+              type: string
+    requestBody:
+      $ref: '#/components/requestBodies/InfoItemExportArray'

@@ -83,7 +83,6 @@ import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Reference;
 import com.openexchange.java.Streams;
@@ -109,6 +108,7 @@ import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 
 /**
@@ -304,7 +304,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
                                         task.call();
                                         ran = true;
                                         task.afterExecute(null);
-                                    } catch (final Exception ex) {
+                                    } catch (Exception ex) {
                                         if (!ran) {
                                             task.afterExecute(ex);
                                         }
@@ -342,9 +342,9 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
             } else {
                 result.setResultObject(previewDocument, getOutputFormat());
             }
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             Streams.close(fileHolder);
@@ -398,7 +398,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
         }
         try {
             return new ContentType(contentType).getBaseType();
-        } catch (final OXException e) {
+        } catch (OXException e) {
             return contentType;
         }
     }
@@ -598,8 +598,8 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
     public static CachedResource getCachedResourceForContext(ServerSession session, String cacheKey, ResourceCache resourceCache) {
         CachedResource cachedResource= null;
         final int contextId = session.getContextId();
-        if(Strings.isNotEmpty(cacheKey)) {
-            if(resourceCache != null) {
+        if (Strings.isNotEmpty(cacheKey)) {
+            if (resourceCache != null) {
                 try {
                     cachedResource = resourceCache.get(cacheKey, 0, contextId);
                 } catch (OXException e) {

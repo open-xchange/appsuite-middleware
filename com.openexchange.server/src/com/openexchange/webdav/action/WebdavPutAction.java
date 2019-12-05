@@ -64,14 +64,14 @@ public class WebdavPutAction extends AbstractAction {
 	@Override
 	public void perform(final WebdavRequest req, final WebdavResponse res) throws WebdavProtocolException {
 		final WebdavResource resource = req.getResource();
-		if(null != req.getHeader("content-length")) {
+		if (null != req.getHeader("content-length")) {
 			resource.setLength(new Long(req.getHeader("content-length")));
 		}
 		String contentType = MimeType2ExtMap.getContentType(resource.getUrl().name());
-		if("application/octet-stream".equals(contentType)) {
+		if ("application/octet-stream".equals(contentType)) {
 		    contentType = req.getHeader("content-type");
 		}
-		if(contentType == null) {
+		if (contentType == null) {
 		    contentType = "application/octet-stream";
 		}
 		resource.setContentType(contentType);
@@ -79,22 +79,22 @@ public class WebdavPutAction extends AbstractAction {
 		SizeExceededInputStream in = null;
 		try {
 			InputStream data = null;
-			if(-1 != getMaxSize()) {
+			if (-1 != getMaxSize()) {
 				data = in = new SizeExceededInputStream(req.getBody(), getMaxSize());
 			} else {
 				data = req.getBody();
 			}
 
 			resource.putBodyAndGuessLength(data);
-			if(resource.exists() && ! resource.isLockNull()) {
+			if (resource.exists() && ! resource.isLockNull()) {
 				resource.save();
 			} else {
 				resource.create();
 			}
 			res.setStatus(HttpServletResponse.SC_CREATED);
-		} catch (final IOException e) {
+		} catch (IOException e) {
 			LOG.debug("Client Gone?", e);
-		} catch (final WebdavProtocolException x) {
+		} catch (WebdavProtocolException x) {
 			if (in != null && in.hasExceeded()) {
 				throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE);
 			} else {
@@ -120,7 +120,7 @@ public class WebdavPutAction extends AbstractAction {
 
 		@Override
 		public void size(final long size) throws IOException {
-			if(size > maxSize) {
+			if (size > maxSize) {
 				exceeded = true;
 				throw new IOException("Exceeded max upload size of "+maxSize);
 			}

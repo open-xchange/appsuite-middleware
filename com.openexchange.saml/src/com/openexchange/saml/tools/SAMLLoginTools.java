@@ -50,6 +50,7 @@
 package com.openexchange.saml.tools;
 
 import static com.openexchange.ajax.AJAXServlet.PARAMETER_SESSION;
+import java.util.Collection;
 import java.util.Map;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -57,12 +58,16 @@ import org.apache.http.client.utils.URIBuilder;
 import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.SessionUtility;
+import com.openexchange.ajax.login.HashCalculator;
 import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.ajax.login.LoginTools;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
+import com.openexchange.saml.SAMLSessionParameters;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionExceptionCodes;
+import com.openexchange.sessiond.SessionFilter;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.servlet.http.Cookies;
 import com.openexchange.tools.servlet.http.Tools;
 
@@ -90,6 +95,11 @@ public class SAMLLoginTools {
     public static final String PARAM_SHARD = "shard";
 
     /**
+     * The <code>uriFragment</code> parameter name.
+     */
+    public static final String PARAM_URI_FRAGMENT = "uriFragment";
+
+    /**
      * The <code>samlLogin</code> login action.
      */
     public static final String ACTION_SAML_LOGIN = "samlLogin";
@@ -109,13 +119,23 @@ public class SAMLLoginTools {
      *
      * @param session The session
      * @param uiWebPath The path to use
+     * @param uriFragment The requested uri fragment to add after the session parameter or <code>null</code>
      */
-    public static String buildFrontendRedirectLocation(Session session, String uiWebPath) {
+    public static String buildFrontendRedirectLocation(Session session, String uiWebPath, String uriFragment) {
         String retval = uiWebPath;
-
         // Prevent HTTP response splitting.
         retval = retval.replaceAll("[\n\r]", "");
         retval = LoginTools.addFragmentParameter(retval, PARAMETER_SESSION, session.getSessionID());
+
+        uriFragment = uriFragment == null ? "" : uriFragment;
+        while (uriFragment.length() > 0 && (uriFragment.charAt(0) == '#' || uriFragment.charAt(0) == '&' || uriFragment.charAt(0) == '!')) {
+            uriFragment = uriFragment.substring(1);
+        }
+
+        if (uriFragment.length() > 0) {
+            retval = retval + "&" + uriFragment;
+        }
+
         return retval;
     }
 
@@ -145,6 +165,41 @@ public class SAMLLoginTools {
     }
 
     /**
+     * Gets the {@code open-xchange-saml-<hash>} cookie from given HTTP request, if available.
+     *
+     * @param httpRequest The inbound HTTP request
+     * @param loginConfiguration The current login configuration
+     * @return The cookie or <code>null</code>
+     * @throws OXException If an unexpected error occurs
+     */
+    public static Cookie getSAMLCookie(HttpServletRequest httpRequest, LoginConfiguration loginConfiguration) throws OXException {
+        String hash = HashCalculator.getInstance().getHash(httpRequest, LoginTools.parseUserAgent(httpRequest), LoginTools.parseClient(httpRequest, false, loginConfiguration.getDefaultClient()));
+        Map<String, Cookie> cookies = Cookies.cookieMapFor(httpRequest);
+        return cookies.get(SAMLLoginTools.AUTO_LOGIN_COOKIE_PREFIX + hash);
+    }
+
+    /**
+     * Gets the node-local session object that belongs to given {@code open-xchange-saml-<hash>} cookie, if available.
+     *
+     * @param samlCookie The SAML cookie or <code>null</code>
+     * @param sessiondService The {@link SessiondService} instance to lookup the session
+     * @return The session or <code>null</code> if it doesn't exist or cookie was <code>null</code>
+     * @throws OXException  If an unexpected error occurs
+     */
+    public static Session getLocalSessionForSAMLCookie(Cookie samlCookie, SessiondService sessiondService) throws IllegalArgumentException, OXException {
+        if (samlCookie == null) {
+            return null;
+        }
+
+        Collection<String> sessions = sessiondService.findSessions(SessionFilter.create("(" + SAMLSessionParameters.SESSION_COOKIE + "=" + samlCookie.getValue() + ")"));
+        if (sessions.size() > 0) {
+            return sessiondService.getSession(sessions.iterator().next());
+        }
+
+        return null;
+    }
+
+    /**
      * Validates that the given session matches the given request with regards to the client IP and session secret.
      *
      * @param httpRequest The HTTP request
@@ -154,15 +209,32 @@ public class SAMLLoginTools {
      * @throws {@link SessionExceptionCodes#SESSION_EXPIRED}
      */
     public static void validateSession(HttpServletRequest httpRequest, Session session, String cookieHash, @SuppressWarnings("unused") LoginConfiguration loginConfiguration) throws OXException {
+        if (!isValidSession(httpRequest, session, cookieHash)) {
+            throw SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID());
+        }
+    }
+
+    /**
+     * Checks whether the given session is valid in terms of IP check and secret cookie.
+     *
+     * @param httpRequest The HTTP request
+     * @param session The session
+     * @param cookieHash The calculated cookie hash
+     * @return {@code true} if the session valid, other wise {@code false}
+     * @throws OXException
+     */
+    public static boolean isValidSession(HttpServletRequest httpRequest, Session session, String cookieHash) throws OXException {
         // IP check
-        SessionUtility.checkIP(session, httpRequest.getRemoteAddr());
+        try {
+            SessionUtility.checkIP(session, httpRequest.getRemoteAddr());
+        } catch (OXException e) {
+            return false;
+        }
 
         // Check secret cookie
         Map<String, Cookie> cookies = Cookies.cookieMapFor(httpRequest);
         Cookie secretCookie = cookies.get(LoginServlet.SECRET_PREFIX + cookieHash);
-        if (secretCookie == null || !session.getSecret().equals(secretCookie.getValue())) {
-            throw SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID());
-        }
+        return secretCookie != null && session.getSecret().equals(secretCookie.getValue());
     }
 
     /**

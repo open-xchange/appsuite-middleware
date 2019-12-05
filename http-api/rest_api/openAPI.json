@@ -1,0 +1,1326 @@
+{
+  "openapi" : "3.0.0",
+  "info" : {
+    "title" : "OX REST API",
+    "description" : "Documentation of the Open-Xchange REST API.\n",
+    "contact" : {
+      "name" : "Open-Xchange GmbH",
+      "email" : "info@open-xchange.com",
+      "url" : "https://www.open-xchange.com/"
+    },
+    "version" : "7.10.3"
+  },
+  "tags" : [ {
+    "name" : "Userfeedback",
+    "description" : "The user feedback module"
+  }, {
+    "name" : "Advertisement",
+    "description" : "The advertisement module"
+  }, {
+    "name" : "Admin",
+    "description" : "Interface for provisioning and other administrative operations."
+  }, {
+    "name" : "Health",
+    "description" : "The health-check module"
+  } ],
+  "paths" : {
+    "/admin/v1/contexts/{context-id}/users/{user-id}/passwd-changes" : {
+      "get" : {
+        "operationId" : "passwd-changes",
+        "tags" : [ "Admin" ],
+        "parameters" : [ {
+          "description" : "The context the user is in",
+          "in" : "path",
+          "name" : "context-id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }, {
+          "description" : "The ID representing the user",
+          "in" : "path",
+          "name" : "user-id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }, {
+          "description" : "Limits the output to a specific number of entries.",
+          "in" : "query",
+          "name" : "limit",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }, {
+          "description" : "Comma sperated list of fields to sort the output for. Field names that begin with \"-\" will be sorted descending else the fields get sorted ascending. Valid fields are 'date' and 'client_id'.",
+          "in" : "query",
+          "name" : "sort",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "An array of password change entries.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/PasswordChangeHistoryEntry"
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad request, response contains error message."
+          },
+          "401" : {
+            "description" : "Not authorized"
+          },
+          "404" : {
+            "description" : "Not found. If path is wrong. Response contains error message."
+          },
+          "500" : {
+            "description" : "Internal server error that might have multiple reasons, for instance no configured global database. Response contains error message."
+          }
+        },
+        "security" : [ {
+          "contextAdminAuth" : [ ]
+        } ],
+        "summary" : "Lists the history of password changes for a user."
+      }
+    },
+    "/advertisement/v1/config/package" : {
+      "put" : {
+        "operationId" : "putAdvertisementByResellerAndPackage",
+        "tags" : [ "Advertisement" ],
+        "summary" : "Sets an advertisement configuration for a package of a reseller",
+        "parameters" : [ {
+          "name" : "reseller",
+          "in" : "query",
+          "description" : "The reseller name",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "package",
+          "in" : "query",
+          "description" : "The package name",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "The configuration result"
+          },
+          "400" : {
+            "description" : "Bad request, response contains error message."
+          },
+          "401" : {
+            "description" : "Not authorized"
+          }
+        },
+        "requestBody" : {
+          "$ref" : "#/components/requestBodies/putAdvertisementByNameBody"
+        }
+      },
+      "delete" : {
+        "operationId" : "deleteAdvertisementByResellerAndPackage",
+        "tags" : [ "Advertisement" ],
+        "summary" : "Remove the current configuration for a package of a reseller",
+        "parameters" : [ {
+          "name" : "reseller",
+          "in" : "query",
+          "description" : "The reseller name",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "package",
+          "in" : "query",
+          "description" : "The package name",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "The configuration result"
+          },
+          "400" : {
+            "description" : "Bad request, response contains error message."
+          },
+          "401" : {
+            "description" : "Not authorized"
+          }
+        }
+      }
+    },
+    "/userfeedback/v1/export/{context-group}/{type}/raw" : {
+      "get" : {
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ],
+        "operationId" : "exportRAW",
+        "tags" : [ "Userfeedback" ],
+        "summary" : "Exports user feedback",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "context-group",
+          "description" : "The context group identifying the global DB where the feedback is stored.",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "default" : "default"
+          }
+        }, {
+          "in" : "path",
+          "name" : "type",
+          "description" : "The feedback type to send.",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "default" : "star-rating-v1"
+          }
+        }, {
+          "name" : "start",
+          "in" : "query",
+          "description" : "Start time in milliseconds since 1970-01-01 00:00:00 UTC. Only feedback given after this time is sent. If not set, all feedback up to -e is sent.",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }, {
+          "name" : "end",
+          "in" : "query",
+          "description" : "End time in milliseconds since 1970-01-01 00:00:00 UTC. Only feedback given before this time is sent. If not set, all feedback since -s is sent.",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A JSON array containing the stored user feedbacks.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad request, response contains error message.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Not authorized"
+          },
+          "404" : {
+            "description" : "Not found, if path is wrong (unknown context group or feedback type). Response contains error message.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal server error that might have multiple reasons, for instance no configured global database. Response contains error message.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        },
+        "x-ox-examples" : {
+          "Example" : {
+            "description" : "Export user feedback from 2016-01-01 to 2016-12-31",
+            "example" : "GET http://localhost:8009/userfeedback/v1/export/default/star-rating-v1/raw?start=1451606400&end=1483228799"
+          }
+        }
+      }
+    },
+    "/userfeedback/v1/export/{context-group}/{type}" : {
+      "get" : {
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ],
+        "operationId" : "exportCSV",
+        "tags" : [ "Userfeedback" ],
+        "summary" : "Exports user feedback as CSV",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "context-group",
+          "description" : "The context group identifying the global DB where the feedback is stored.",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "default" : "default"
+          }
+        }, {
+          "in" : "path",
+          "name" : "type",
+          "description" : "The feedback type to send.",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "default" : "star-rating-v1"
+          }
+        }, {
+          "name" : "start",
+          "in" : "query",
+          "description" : "Start time in milliseconds since 1970-01-01 00:00:00 UTC. Only feedback given after this time is sent. If not set, all feedback up to -e is sent.",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }, {
+          "name" : "end",
+          "in" : "query",
+          "description" : "End time in milliseconds since 1970-01-01 00:00:00 UTC. Only feedback given before this time is sent. If not set, all feedback since -s is sent.",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }, {
+          "name" : "delimiter",
+          "in" : "query",
+          "description" : "The column delimiter used. Default: ';'",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Export data into a CSV file",
+            "headers" : {
+              "Content-type" : {
+                "description" : "text/csv; charset=utf-8",
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            },
+            "content" : {
+              "application/octet-stream" : {
+                "schema" : {
+                  "type" : "string",
+                  "format" : "binary"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad request, response contains error message.",
+            "content" : {
+              "application/octet-stream" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Not authorized"
+          },
+          "404" : {
+            "description" : "Not found, if path is wrong (unknown context group or feedback type). Response contains error message.",
+            "content" : {
+              "application/octet-stream" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal server error that might have multiple reasons, for instance no configured global database. Response contains error message.",
+            "content" : {
+              "application/octet-stream" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        },
+        "x-ox-examples" : {
+          "Example" : {
+            "description" : "Export user feedback from 2016-01-01 to 2016-12-31 as CSV",
+            "example" : "GET http://localhost:8009/userfeedback/v1/export/default/star-rating-v1?start=1451606400&end=1483228799"
+          }
+        }
+      }
+    },
+    "/userfeedback/v1/send/{context-group}/{type}" : {
+      "post" : {
+        "operationId" : "send",
+        "tags" : [ "Userfeedback" ],
+        "summary" : "Exports user feedback and sends exported data to provided recipients",
+        "parameters" : [ {
+          "name" : "context-group",
+          "in" : "path",
+          "description" : "The context group identifying the global DB where the feedback is stored.",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "default" : "default"
+          }
+        }, {
+          "name" : "type",
+          "in" : "path",
+          "description" : "The feedback type to send.",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "default" : "star-rating-v1"
+          }
+        }, {
+          "name" : "start",
+          "in" : "query",
+          "description" : "Start time in milliseconds since 1970-01-01 00:00:00 UTC. Only feedback given after this time is sent. If not set, all feedback up to -e is sent.",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }, {
+          "name" : "end",
+          "in" : "query",
+          "description" : "End time in milliseconds since 1970-01-01 00:00:00 UTC. Only feedback given before this time is sent. If not set, all feedback since -s is sent.",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Info message about sent status",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad request, response contains error message.",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Not authorized"
+          },
+          "404" : {
+            "description" : "Not found, if path is wrong (unknown context group or feedback type). Response contains error message.",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal server error that might have multiple reasons, for instance no configured global database. Response contains error message.",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        },
+        "x-ox-examples" : {
+          "Example" : {
+            "description" : "Export user feedback from 2016-01-01 to 2016-12-31 and send it via mail to user1@example.org and user2@example.org",
+            "example" : "POST http://localhost:8009/userfeedback/v1/send/default/star-rating-v1?start=1451606400&end=1483228799 {\"subject\":\"User Feedback\",\n \"body\":\"User Feedback\",\n \"compress\":true,\n \"recipients\": [\n   {\"address\":\"user1@example.org\",\n    \"displayName\":\"User 1\",\n    \"pgp_key\":\"-----BEGIN PGP PUBLIC KEY BLOCK-----\\r\\nVersion: BCPG v1.56....\"},\n   {\"address\":\"user2@example.org\",\n    \"displayName\":\"User 2\",\n    \"pgp_key\":\"-----BEGIN PGP PUBLIC KEY BLOCK-----\\r\\nVersion: BCPG v1.56....\"}\n ]\n}\n"
+          }
+        },
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "string"
+              }
+            }
+          },
+          "description" : "JSONObject with fields \"subject\" for custom mail subject, \"body\" for custom mail body, boolean \"compress\" to compress the mail attachment and \"recipients\" (an JSON Array containing address, display name and PGP key (if available) for every recipient).",
+          "required" : true
+        }
+      }
+    },
+    "/admin/v1/contexts/{context-id}/users/{user-id}/multifactor/devices/{provider-name}/{device-id}" : {
+      "delete" : {
+        "operationId" : "multifactor-delete-device",
+        "tags" : [ "Admin" ],
+        "parameters" : [ {
+          "description" : "The context the user is in",
+          "in" : "path",
+          "name" : "context-id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }, {
+          "description" : "The ID representing the user",
+          "in" : "path",
+          "name" : "user-id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }, {
+          "description" : "The name of the provider to delete the device for",
+          "in" : "path",
+          "name" : "provider-name",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "description" : "The ID of the device to delete",
+          "in" : "path",
+          "name" : "device-id",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "If the device was deleted"
+          },
+          "401" : {
+            "description" : "Not authorized"
+          },
+          "404" : {
+            "description" : "Not found. If path is wrong, or if the given provider, or device was not found."
+          },
+          "500" : {
+            "description" : "Internal server error that might have multiple reasons. Response contains error message."
+          }
+        },
+        "security" : [ {
+          "contextAdminAuth" : [ ]
+        } ],
+        "summary" : "Deletes a multifactor authentication device."
+      }
+    },
+    "/userfeedback/v1/{context-group}/{type}" : {
+      "delete" : {
+        "operationId" : "delete",
+        "tags" : [ "Userfeedback" ],
+        "summary" : "Deletes user feedback",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "context-group",
+          "description" : "The context group identifying the global DB where the feedback is stored.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "path",
+          "name" : "type",
+          "description" : "The feedback type to delete.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "start",
+          "in" : "query",
+          "description" : "Start time in milliseconds since 1970-01-01 00:00:00 UTC. Only feedback given after this time is deleted. If not set, all feedback up to -e is deleted.",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }, {
+          "name" : "end",
+          "in" : "query",
+          "description" : "End time in milliseconds since 1970-01-01 00:00:00 UTC. Only feedback given before this time is deleted. If not set, all feedback since -s is deleted.",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Info message when successfull.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad request, response contains error message.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Not authorized"
+          },
+          "404" : {
+            "description" : "Not found, if path is wrong (unknown context group or feedback type). Response contains error message.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal server error that might have multiple reasons, for instance no configured global database. Response contains error message.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        },
+        "x-ox-examples" : {
+          "Example" : {
+            "description" : "Delete user feedback from 2016-01-01 to 2016-12-31",
+            "example" : "DELETE http://localhost:8009/userfeedback/v1/default/star-rating-v1?start=1451606400&end=1483228799"
+          }
+        }
+      }
+    },
+    "/health" : {
+      "get" : {
+        "operationId" : "get",
+        "tags" : [ "Health" ],
+        "summary" : "Get health status",
+        "responses" : {
+          "200" : {
+            "description" : "A JSON object containing health data\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/HealthData"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Not authorized"
+          },
+          "500" : {
+            "description" : "In case of \"DOWN\"-result or internal server error that might have multiple reasons. Response contains error message.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        },
+        "x-ox-examples" : {
+          "Example" : {
+            "description" : "Get health status",
+            "example" : "GET http://localhost:8009/health"
+          }
+        }
+      }
+    },
+    "/admin/v1/close-sessions/by-context" : {
+      "post" : {
+        "operationId" : "closeSessionsByContext",
+        "tags" : [ "Admin" ],
+        "summary" : "Close all sessions belonging to a context",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/globalQuery"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A JSON object containing all identifiers of the successfully closed sessions.\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CloseSessionsData"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad request, response contains error message."
+          },
+          "401" : {
+            "description" : "Not authorized"
+          },
+          "403" : {
+            "description" : "Forbidden"
+          },
+          "404" : {
+            "description" : "Not found. If path is wrong. Response contains error message."
+          },
+          "500" : {
+            "description" : "Internal server error that might have multiple reasons, for instance no configured global database. Response contains error message."
+          }
+        },
+        "security" : [ {
+          "masterAdminAuth" : [ ]
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "object",
+                "title" : "CloseSessionsByContextBody",
+                "properties" : {
+                  "contextIds" : {
+                    "type" : "array",
+                    "description" : "Array of context IDs",
+                    "items" : {
+                      "type" : "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "description" : "A JSON object containing an array of context ids.",
+          "required" : true
+        }
+      }
+    },
+    "/advertisement/v1/config/reseller" : {
+      "put" : {
+        "operationId" : "putAdvertisementByReseller",
+        "tags" : [ "Advertisement" ],
+        "summary" : "Sets all advertisement configurations for a given reseller",
+        "parameters" : [ {
+          "name" : "reseller",
+          "in" : "query",
+          "description" : "The reseller's name",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "The configuration result"
+          },
+          "400" : {
+            "description" : "Bad request, response contains error message."
+          },
+          "401" : {
+            "description" : "Not authorized"
+          }
+        },
+        "requestBody" : {
+          "$ref" : "#/components/requestBodies/putAdvertisementByNameBody"
+        }
+      }
+    },
+    "/advertisement/v1/config/user" : {
+      "put" : {
+        "operationId" : "putAdvertisementByUserId",
+        "tags" : [ "Advertisement" ],
+        "summary" : "Sets an advertisement configuration for a given user by id",
+        "parameters" : [ {
+          "name" : "contextId",
+          "in" : "query",
+          "description" : "The context id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }, {
+          "name" : "userId",
+          "in" : "query",
+          "description" : "The user id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "The configuration result"
+          },
+          "400" : {
+            "description" : "Bad request, response contains error message."
+          },
+          "401" : {
+            "description" : "Not authorized"
+          }
+        },
+        "requestBody" : {
+          "$ref" : "#/components/requestBodies/putAdvertisementByNameBody"
+        }
+      },
+      "delete" : {
+        "operationId" : "deleteAdvertisementByUserId",
+        "tags" : [ "Advertisement" ],
+        "summary" : "Remove the current configuration for the user identified by userId",
+        "parameters" : [ {
+          "name" : "contextId",
+          "in" : "query",
+          "description" : "The context id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }, {
+          "name" : "userId",
+          "in" : "query",
+          "description" : "The user id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "The configuration result"
+          },
+          "400" : {
+            "description" : "Bad request, response contains error message."
+          },
+          "401" : {
+            "description" : "Not authorized"
+          }
+        }
+      }
+    },
+    "/admin/v1/contexts/{context-id}/users/{user-id}/multifactor/devices" : {
+      "get" : {
+        "operationId" : "multifactor-get-devices",
+        "tags" : [ "Admin" ],
+        "parameters" : [ {
+          "description" : "The context the user is in",
+          "in" : "path",
+          "name" : "context-id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }, {
+          "description" : "The ID representing the user",
+          "in" : "path",
+          "name" : "user-id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "An array of multifactor devices.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/MultifactorDeviceData"
+                  }
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Not authorized"
+          },
+          "404" : {
+            "description" : "Not found. If path is wrong. Response contains error message."
+          },
+          "500" : {
+            "description" : "Internal server error that might have multiple reasons. Response contains error message."
+          }
+        },
+        "security" : [ {
+          "contextAdminAuth" : [ ]
+        } ],
+        "summary" : "Lists all multifactor authentication devices for a user."
+      },
+      "delete" : {
+        "operationId" : "multifactor-delete-devices",
+        "tags" : [ "Admin" ],
+        "parameters" : [ {
+          "description" : "The context the user is in",
+          "in" : "path",
+          "name" : "context-id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }, {
+          "description" : "The ID representing the user",
+          "in" : "path",
+          "name" : "user-id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "All devices deleted"
+          },
+          "401" : {
+            "description" : "Not authorized"
+          },
+          "404" : {
+            "description" : "Not found. If path is wrong. Response contains error message."
+          },
+          "500" : {
+            "description" : "Internal server error that might have multiple reasons. Response contains error message."
+          }
+        },
+        "security" : [ {
+          "contextAdminAuth" : [ ]
+        } ],
+        "summary" : "Deletes all multifactor authentication devices for a user."
+      }
+    },
+    "/admin/v1/close-sessions/by-user" : {
+      "post" : {
+        "operationId" : "closeSessionsByUser",
+        "tags" : [ "Admin" ],
+        "summary" : "Close all sessions belonging to a user",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/globalQuery"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          },
+          "400" : {
+            "description" : "Bad request, response contains error message."
+          },
+          "401" : {
+            "description" : "Not authorized"
+          },
+          "403" : {
+            "description" : "Forbidden"
+          },
+          "404" : {
+            "description" : "Not found. If path is wrong. Response contains error message."
+          },
+          "500" : {
+            "description" : "Internal server error that might have multiple reasons, for instance no configured global database. Response contains error message."
+          }
+        },
+        "security" : [ {
+          "masterAdminAuth" : [ ]
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "object",
+                "title" : "CloseSessionByUserBody",
+                "properties" : {
+                  "users" : {
+                    "type" : "array",
+                    "description" : "Array of context/user id tuples",
+                    "items" : {
+                      "type" : "object",
+                      "title" : "ContextUserTuple",
+                      "description" : "Object uniquely identifying a user",
+                      "properties" : {
+                        "contextId" : {
+                          "description" : "Context ID",
+                          "type" : "integer"
+                        },
+                        "userId" : {
+                          "description" : "User ID",
+                          "type" : "integer"
+                        }
+                      },
+                      "required" : [ "contextId", "userId" ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "description" : "A JSON object containing an array of user and context id tuples.",
+          "required" : true
+        }
+      }
+    },
+    "/advertisement/v1/config/name" : {
+      "put" : {
+        "operationId" : "putAdvertisementByName",
+        "tags" : [ "Advertisement" ],
+        "summary" : "Sets an advertisement configuration for a given user by name",
+        "parameters" : [ {
+          "name" : "name",
+          "in" : "query",
+          "description" : "The user's login name",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "contextId",
+          "in" : "query",
+          "description" : "The context id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "The configuration result"
+          },
+          "400" : {
+            "description" : "Bad request, response contains error message."
+          },
+          "401" : {
+            "description" : "Not authorized"
+          }
+        },
+        "requestBody" : {
+          "$ref" : "#/components/requestBodies/putAdvertisementByNameBody"
+        }
+      },
+      "delete" : {
+        "operationId" : "deleteAdvertisementByName",
+        "tags" : [ "Advertisement" ],
+        "summary" : "Remove the current configuration for the user",
+        "parameters" : [ {
+          "name" : "name",
+          "in" : "query",
+          "description" : "The user's login name",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "contextId",
+          "in" : "query",
+          "description" : "The context id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "The configuration result"
+          },
+          "400" : {
+            "description" : "Bad request, response contains error message."
+          },
+          "401" : {
+            "description" : "Not authorized"
+          }
+        }
+      }
+    },
+    "/admin/v1/close-sessions/by-id" : {
+      "post" : {
+        "operationId" : "closeSessionsById",
+        "tags" : [ "Admin" ],
+        "summary" : "Close a session by its ID",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/globalQuery"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          },
+          "400" : {
+            "description" : "Bad request, response contains error message."
+          },
+          "401" : {
+            "description" : "Not authorized"
+          },
+          "403" : {
+            "description" : "Forbidden"
+          },
+          "404" : {
+            "description" : "Not found. If path is wrong. Response contains error message."
+          },
+          "500" : {
+            "description" : "Internal server error that might have multiple reasons, for instance no configured global database. Response contains error message."
+          }
+        },
+        "security" : [ {
+          "masterAdminAuth" : [ ]
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "object",
+                "title" : "CloseSessionsByIdBody",
+                "properties" : {
+                  "sessionIds" : {
+                    "type" : "array",
+                    "description" : "Array of session IDs",
+                    "items" : {
+                      "type" : "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "description" : "A JSON object containing an array of session ids.",
+          "required" : true
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "PasswordChangeHistoryEntry" : {
+        "type" : "object",
+        "properties" : {
+          "date" : {
+            "type" : "integer",
+            "format" : "int64",
+            "description" : "Timestamp (milliseconds since 1970-01-01 00:00:00.000) of the change."
+          },
+          "client_id" : {
+            "type" : "string",
+            "description" : "Identifier of the client that was used to change the password. For example 'open-xchange-appsuite', 'provisioning-api'."
+          },
+          "client_address" : {
+            "type" : "string",
+            "description" : "IP address of the client that was used to change the password. Only contained if it could be determined during the change."
+          },
+          "client_name" : {
+            "type" : "string",
+            "description" : "Human-readable name of the client that was used to change the password. Only contained if the client ID has a known human-readable representation. If not set the client should fall-back to 'client_id'."
+          }
+        },
+        "required" : [ "date", "client_id" ]
+      },
+      "HealthData" : {
+        "type" : "object",
+        "properties" : {
+          "status" : {
+            "type" : "string",
+            "description" : "The health overall status",
+            "enum" : [ "UP", "DOWN" ]
+          },
+          "checks" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/HealthCheckData"
+            }
+          },
+          "service" : {
+            "$ref" : "#/components/schemas/ServiceData"
+          },
+          "blacklist" : {
+            "type" : "array",
+            "description" : "Blacklisted health checks",
+            "items" : {
+              "type" : "string",
+              "description" : "health check identifier"
+            }
+          },
+          "ignorelist" : {
+            "type" : "array",
+            "description" : "Ignored health checks",
+            "items" : {
+              "type" : "string",
+              "description" : "health check identifier"
+            }
+          }
+        }
+      },
+      "HealthCheckData" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string",
+            "description" : "The health-check's name"
+          },
+          "status" : {
+            "type" : "string",
+            "description" : "The health-check's status",
+            "enum" : [ "UP", "DOWN" ]
+          },
+          "data" : {
+            "type" : "object",
+            "description" : "JSON object containing health-check's additional data"
+          }
+        }
+      },
+      "ServiceData" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string",
+            "description" : "The name"
+          },
+          "version" : {
+            "type" : "string",
+            "description" : "The middleware version running on this node"
+          },
+          "buildDate" : {
+            "type" : "string",
+            "description" : "The build date of the middleware running on this node"
+          },
+          "date" : {
+            "type" : "string",
+            "description" : "The date the health-check was executed"
+          },
+          "timeZone" : {
+            "type" : "string",
+            "description" : "The node's default time zone"
+          },
+          "locale" : {
+            "type" : "string",
+            "description" : "The node's default locale"
+          },
+          "charset" : {
+            "type" : "string",
+            "description" : "The node's default charset"
+          }
+        }
+      },
+      "CloseSessionsData" : {
+        "type" : "object",
+        "properties" : {
+          "closed" : {
+            "type" : "array",
+            "description" : "Array of the closed session identifiers",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        }
+      },
+      "MultifactorDeviceData" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "description" : "The ID of the device"
+          },
+          "name" : {
+            "type" : "string",
+            "description" : "The name of the device"
+          },
+          "providerName" : {
+            "type" : "string",
+            "description" : "The name of the device's provider"
+          },
+          "enabled" : {
+            "type" : "boolean",
+            "description" : "true, if the device is enabled, false if disabled"
+          },
+          "backup" : {
+            "type" : "boolean",
+            "description" : "true, if the device is a backup device, false otherwise"
+          }
+        }
+      }
+    },
+    "parameters" : {
+      "globalQuery" : {
+        "name" : "global",
+        "in" : "query",
+        "description" : "Close sessions cluster-wide. Default: true",
+        "required" : false,
+        "schema" : {
+          "type" : "boolean"
+        }
+      }
+    },
+    "requestBodies" : {
+      "putAdvertisementByNameBody" : {
+        "content" : {
+          "application/json" : {
+            "schema" : {
+              "type" : "string"
+            }
+          }
+        },
+        "description" : "JSONObject describing the advertisement configuration",
+        "required" : true
+      }
+    },
+    "securitySchemes" : {
+      "basicAuth" : {
+        "type" : "http",
+        "scheme" : "basic",
+        "description" : "HTTP Basic Authentication."
+      },
+      "contextAdminAuth" : {
+        "type" : "http",
+        "scheme" : "basic",
+        "description" : "The API can be accessed via HTTP Basic Auth with context administrator credentials or reseller/master administrator credentials if MASTER_ACCOUNT_OVERRIDE is enabled."
+      },
+      "masterAdminAuth" : {
+        "type" : "http",
+        "scheme" : "basic",
+        "description" : "The API can be accessed via HTTP Basic Auth with reseller/master administrator credentials."
+      }
+    }
+  }
+}

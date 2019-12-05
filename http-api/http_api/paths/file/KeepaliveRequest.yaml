@@ -1,0 +1,28 @@
+/file?action=keepalive:
+  get:
+    operationId: keepAlive
+    tags:
+      - File
+    summary: Updates a file's last access timestamp and keeps it alive.
+    description: >
+      By updating the last access timestamp the file is prevented from being
+      deleted from both session and disk
+
+      storage.
+    parameters:
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - in: query
+        name: id
+        description: The ID of the uploaded file whose timestamp should be updated.
+        required: true
+        schema:
+          type: string
+    responses:
+      '200':
+        description: >-
+          In case of errors the responsible fields in the response are filled
+          (see [Error handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommonResponse'

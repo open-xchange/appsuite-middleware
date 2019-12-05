@@ -61,6 +61,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -92,22 +93,20 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.groupware.userconfiguration.service.PermissionAvailabilityService;
 import com.openexchange.java.BoolReference;
 import com.openexchange.java.ConcurrentEnumMap;
 import com.openexchange.java.Strings;
-import com.openexchange.log.LogProperties;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.session.Origin;
 import com.openexchange.session.Session;
 import com.openexchange.share.core.tools.ShareTool;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserPermissionService;
 
@@ -223,8 +222,6 @@ public abstract class AbstractCapabilityService implements CapabilityService {
 
     private final ServiceLookup services;
 
-    private volatile Boolean autologin;
-
     /**
      * Registry that provides the registered JSON bundles to check for permissions
      */
@@ -249,7 +246,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
         }
         try {
             return service.getCache(REGION_NAME_CONTEXT);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             return null;
         }
@@ -262,7 +259,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
         }
         try {
             return service.getCache(REGION_NAME_USER);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             return null;
         }
@@ -275,7 +272,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
         }
         try {
             return service.getCache(REGION_NAME);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             return null;
         }
@@ -289,58 +286,6 @@ public abstract class AbstractCapabilityService implements CapabilityService {
         final Object object = cache.getFromGroup(Integer.valueOf(userId), Integer.toString(contextId));
         return (object instanceof CapabilitySet) ? ((CapabilitySet) object).clone() : null;
     }
-
-    private boolean autologin() {
-        Boolean tmp = autologin;
-        if (null == tmp) {
-            synchronized (this) {
-                tmp = autologin;
-                if (null == tmp) {
-                    final ConfigurationService configurationService = services.getService(ConfigurationService.class);
-                    if (null == configurationService) {
-                        // Return default value
-                        return false;
-                    }
-                    tmp = Boolean.valueOf(configurationService.getBoolProperty("com.openexchange.sessiond.autologin", false));
-                    autologin = tmp;
-                }
-            }
-        }
-
-        String hostname = LogProperties.getHostName();
-        if (Strings.isEmpty(hostname)) {
-            return tmp.booleanValue();
-        }
-
-        // Determine "autologin" capability by host name
-        return isAutologinEnabledForHost(hostname, tmp.booleanValue());
-    }
-
-    private boolean isAutologinEnabledForHost(String hostname, boolean defaultValue) {
-        boolean isEnabled = defaultValue;
-        ServerConfigService serverConfigService = services.getService(ServerConfigService.class);
-        if (serverConfigService != null) {
-            try {
-                List<Map<String, Object>> applicableConfigs = serverConfigService.getCustomHostConfigurations(hostname, -1, -1);
-                isEnabled = getBooleanPropertyFromMaps(applicableConfigs, "com.openexchange.sessiond.autologin", isEnabled);
-            } catch (OXException e) {
-                LOG.error("", e);
-            }
-        }
-        return isEnabled;
-    }
-
-    private boolean getBooleanPropertyFromMaps(List<Map<String, Object>> applicableConfigs, String propertyName, boolean defaultValue) {
-        for (Map<String, Object> map : applicableConfigs) {
-            Object obj = map.get(propertyName);
-            if (obj instanceof Boolean) {
-                return ((Boolean) obj).booleanValue();
-            }
-        }
-        return defaultValue;
-    }
-
-    private static final Capability CAP_AUTO_LOGIN = new Capability("autologin");
 
     @Override
     public CapabilitySet getCapabilities(int userId, int contextId) throws OXException {
@@ -398,7 +343,6 @@ public abstract class AbstractCapabilityService implements CapabilityService {
          */
         CapabilitySet capabilities = new CapabilitySet(64);
         Map<Capability, Boolean> forcedCapabilities = new HashMap<Capability, Boolean>(4);
-        applyAutoLogin(capabilities);
         applyUserPermissions(capabilities, user, context);
         applyConfiguredCapabilities(capabilities, forcedCapabilities, user, context, allowCache);
         BoolReference putIntoCache = new BoolReference(true);
@@ -443,17 +387,6 @@ public abstract class AbstractCapabilityService implements CapabilityService {
             } catch (OXException e) {
                 LOG.warn("Failed to invalidate '{}' cache", REGION_NAME, e);
             }
-        }
-    }
-
-    /**
-     * Checks if autologin is enabled and adds the according capability to the passed set, if so.
-     *
-     * @param capabilities The capability set
-     */
-    private void applyAutoLogin(CapabilitySet capabilities) {
-        if (autologin()) {
-            capabilities.add(CAP_AUTO_LOGIN);
         }
     }
 
@@ -884,7 +817,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
             } else if (!checker.isEnabled(cap, session)) {
                 return false;
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.warn("Could not check availability for capability '{}'. Assuming as absent this time.", cap, e);
             putIntoCache.setValue(false);
             return false;
@@ -911,7 +844,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
             if (null != optCache) {
                 try {
                     optCache.localClear();
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     // ignore
                 }
             }
@@ -929,7 +862,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
             if (null != optCache) {
                 try {
                     optCache.localClear();
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     // ignore
                 }
             }
@@ -977,14 +910,28 @@ public abstract class AbstractCapabilityService implements CapabilityService {
     public Map<String, Map<String, Set<String>>> getCapabilitiesSource(int userId, int contextId) throws OXException {
         Map<String, Map<String, Set<String>>> sets = new LinkedHashMap<String, Map<String, Set<String>>>(6);
 
+        /*
+         * Add capabilities based on user permissions
+         */
         {
-            Set<String> capabilities = new TreeSet<String>();
-            UserPermissionBits userPermissionBits = services.getService(UserPermissionService.class).getUserPermissionBits(userId, contextId);
-            // Capabilities by user permission bits
-            for (final Permission p : Permission.byBits(userPermissionBits.getPermissionBits())) {
-                capabilities.add(p.getCapabilityName());
+            User user = null;
+            Context context = null;
+            if (contextId > 0) {
+                context = requireService(ContextService.class, services).getContext(contextId);
+                if (userId > 0) {
+                    user = requireService(UserService.class, services).getUser(userId, context);
+                }
             }
 
+            Set<String> capabilities = new TreeSet<String>();
+            CapabilitySet capabilitySet = new CapabilitySet(64);
+            applyUserPermissions(capabilitySet, user, context);
+            for (Iterator<Capability> iterator = capabilitySet.iterator(); iterator.hasNext();) {
+                Capability capability = iterator.next();
+                if (null != capability) {
+                    capabilities.add(capability.getId());
+                }
+            }
             Map<String, Set<String>> arr = new LinkedHashMap<String, Set<String>>(3);
             arr.put("granted", capabilities);
             arr.put("denied", new HashSet<String>(0));
@@ -1185,9 +1132,9 @@ public abstract class AbstractCapabilityService implements CapabilityService {
                 set.add(rs.getString(1));
             } while (rs.next());
             return set;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw CapabilityExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw CapabilityExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -1235,9 +1182,9 @@ public abstract class AbstractCapabilityService implements CapabilityService {
                 set.add(rs.getString(1));
             } while (rs.next());
             return set;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw CapabilityExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw CapabilityExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -1363,6 +1310,11 @@ public abstract class AbstractCapabilityService implements CapabilityService {
 
         @Override
         public boolean isTransient() {
+            return false;
+        }
+
+        @Override
+        public boolean isStaySignedIn() {
             return false;
         }
 

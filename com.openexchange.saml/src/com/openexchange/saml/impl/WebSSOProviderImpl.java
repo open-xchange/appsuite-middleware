@@ -215,6 +215,7 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
         requestInfo.setDomainName(domainName);
         requestInfo.setLoginPath(httpRequest.getParameter("loginPath"));
         requestInfo.setClientID(httpRequest.getParameter("client"));
+        requestInfo.setUriFragment(httpRequest.getParameter("hash"));
 
         String relayState = stateManagement.addAuthnRequestInfo(requestInfo, AUTHN_REQUEST_TIMEOUT, TimeUnit.MILLISECONDS);
         try {
@@ -290,6 +291,11 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
             String clientID = requestInfo.getClientID();
             if (clientID != null) {
                 redirectLocation.setParameter(LoginFields.CLIENT_PARAM, clientID);
+            }
+
+            String uriFragment = requestInfo.getUriFragment();
+            if (uriFragment != null) {
+                redirectLocation.setParameter(SAMLLoginTools.PARAM_URI_FRAGMENT, uriFragment);
             }
 
             Tools.disableCaching(httpResponse);
@@ -370,7 +376,7 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
     private void tryExchangeAssertionForOAuthToken(Assertion assertion, AuthenticationInfo authInfo) throws OXException {
         try {
             OAuthAccessTokenService service = services.getService(OAuthAccessTokenService.class);
-            if(service==null){
+            if (service==null){
                 LOG.debug("OAuthAccessTokenService is missing. Unable to exchange the assertion {} for an oauth token pair.", assertion.getID());
                 return;
             }
@@ -385,7 +391,7 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
             LOG.debug("Trying to exchange the assertion {} for an oauth token pair...", assertion.getID());
             OAuthAccessToken token = service.getAccessToken(OAuthGrantType.SAML, b64Assertion, authInfo.getUserId(), authInfo.getContextId(), null);
             authInfo.getProperties().put(SAMLSessionParameters.ACCESS_TOKEN, token.getAccessToken());
-            if(token.getRefreshToken()!=null){
+            if (token.getRefreshToken()!=null){
                 authInfo.getProperties().put(SAMLSessionParameters.REFRESH_TOKEN, token.getRefreshToken());
                 LOG.debug("Successfully exchanged the assertion {} for an oauth access and refresh token.", assertion.getID());
             } else {

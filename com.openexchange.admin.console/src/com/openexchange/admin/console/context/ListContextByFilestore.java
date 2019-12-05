@@ -115,7 +115,7 @@ public class ListContextByFilestore extends ContextAbstraction {
             }
 
             sysexit(0);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             if (null == getFilestoreid()) {
                 printErrors(null, null, e, parser);
             } else {

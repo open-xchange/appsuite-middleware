@@ -61,13 +61,13 @@ import javax.mail.internet.InternetAddress;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.notification.FullNameBuilder;
 import com.openexchange.notification.mail.MailData;
+import com.openexchange.regional.RegionalSettingsService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.serverconfig.ServerConfig;
 import com.openexchange.serverconfig.ServerConfigService;
@@ -77,6 +77,7 @@ import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.share.notification.NotificationStrings;
 import com.openexchange.share.notification.impl.LinkCreatedNotification;
 import com.openexchange.share.notification.impl.TextSnippets;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 /**
@@ -107,6 +108,7 @@ public class LinkCreatedMail extends ShareNotificationMail {
         ServerConfigService serverConfigService = requireService(ServerConfigService.class, services);
         TranslatorFactory translatorFactory = requireService(TranslatorFactory.class, services);
         ModuleSupport moduleSupport = requireService(ModuleSupport.class, services);
+        RegionalSettingsService regionalSettingsService = requireService(RegionalSettingsService.class, services);
 
         Context context = contextService.getContext(notification.getContextID());
         User sharingUser = userService.getUser(notification.getSession().getUserId(), context);
@@ -146,7 +148,12 @@ public class LinkCreatedMail extends ShareNotificationMail {
 
         Date expiryDate = notification.getExpiryDate();
         if (expiryDate != null) {
-            DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM, targetUser.getLocale());
+            DateFormat dateFormat;
+            if (null != regionalSettingsService) {
+                dateFormat = regionalSettingsService.getDateFormat(notification.getContextID(), notification.getTargetUserID(), targetUser.getLocale(), DateFormat.MEDIUM);
+            } else {
+                dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM, targetUser.getLocale());
+            }
             Date localExpiry = new Date(expiryDate.getTime() + TimeZone.getTimeZone(targetUser.getTimeZone()).getOffset(expiryDate.getTime()));
             vars.put(WILL_EXPIRE, String.format(translator.translate(NotificationStrings.LINK_EXPIRE), dateFormat.format(localExpiry)));
         }

@@ -92,71 +92,36 @@ public class GoogleMailOAuthAccountAssociation extends AbstractOAuthAccountAssoc
         this.mailAccount = mailAccount;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.association.OAuthAccountAssociation#getServiceId()
-     */
     @Override
     public String getServiceId() {
         return serviceId;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.association.OAuthAccountAssociation#getId()
-     */
     @Override
     public String getId() {
         return Integer.toString(mailAccount.getId());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.association.OAuthAccountAssociation#getDisplayName()
-     */
     @Override
     public String getDisplayName() {
         return mailAccount.getName();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.association.OAuthAccountAssociation#getModule()
-     */
     @Override
     public String getModule() {
         return Module.MAIL.getModuleName();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.association.OAuthAccountAssociation#optFolder()
-     */
     @Override
     public String getFolder() {
         return mailAccount.getRootFolder();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.association.OAuthAccountAssociation#getScopes()
-     */
     @Override
     public List<OAuthScope> getScopes() {
         return Collections.singletonList(GoogleOAuthScope.mail);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.association.AbstractOAuthAccountAssociation#getStatus(com.openexchange.session.Session)
-     */
     @Override
     public Status getStatus(Session session) throws OXException {
         try {
@@ -173,11 +138,6 @@ public class GoogleMailOAuthAccountAssociation extends AbstractOAuthAccountAssoc
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.association.AbstractOAuthAccountAssociation#newAccess(com.openexchange.session.Session)
-     */
     @Override
     protected AbstractOAuthAccess newAccess(Session session) throws OXException {
         throw new UnsupportedOperationException("No OAuthAccess for Google Mail.");

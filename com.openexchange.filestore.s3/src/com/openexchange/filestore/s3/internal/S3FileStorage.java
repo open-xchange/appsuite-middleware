@@ -56,11 +56,13 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.SequenceInputStream;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -115,10 +117,12 @@ public class S3FileStorage implements FileStorage {
     private final String bucketName;
     private final String prefix;
     private final long chunkSize;
+    private final URI uri;
 
     /**
      * Initializes a new {@link S3FileStorage}.
      *
+     * @param uri The URI that fully qualifies this file storage
      * @param amazonS3 The underlying S3 client
      * @param clientSideEncryption Whether S3 client has client encryption enabled or not
      * @param serverSideEncryption Whether to use server side encryption or not
@@ -126,19 +130,25 @@ public class S3FileStorage implements FileStorage {
      * @param prefix The prefix to use; e.g. <code>"1337ctxstore"</code>
      * @param chunkSize The chunk size in bytes to use for multipart uploads
      */
-    public S3FileStorage(AmazonS3Client amazonS3, boolean clientSideEncryption, boolean serverSideEncryption, String bucketName, String prefix, long chunkSize) {
+    public S3FileStorage(URI uri, AmazonS3Client amazonS3, boolean clientSideEncryption, boolean serverSideEncryption, String bucketName, String prefix, long chunkSize) {
         super();
         BucketNameUtils.validateBucketName(bucketName);
         if (Strings.isEmpty(prefix) || prefix.contains(DELIMITER)) {
             throw new IllegalArgumentException(prefix);
         }
+        this.uri = uri;
         this.amazonS3 = amazonS3;
         this.clientSideEncryption = clientSideEncryption;
         this.serverSideEncryption = serverSideEncryption;
         this.bucketName = bucketName;
         this.prefix = prefix;
         this.chunkSize = chunkSize;
-        LOG.info("S3 file storage initialized for \"{}/{}{}\"", bucketName, prefix, DELIMITER);
+        LOG.debug("S3 file storage initialized for \"{}/{}{}\"", bucketName, prefix, DELIMITER);
+    }
+
+    @Override
+    public URI getUri() {
+        return uri;
     }
 
     @Override
@@ -155,8 +165,9 @@ public class S3FileStorage implements FileStorage {
              * spool to file
              */
             if (!(input instanceof FileInputStream)) {
-                tmpFile = TempFileHelper.getInstance().newTempFile();
-                if (tmpFile != null) {
+                Optional<File> optionalTempFile = TempFileHelper.getInstance().newTempFile();
+                if (optionalTempFile.isPresent()) {
+                    tmpFile = optionalTempFile.get();
                     input = Streams.transferToFileAndCreateStream(input, tmpFile);
                 }
             }
@@ -366,8 +377,9 @@ public class S3FileStorage implements FileStorage {
                  * spool to file
                  */
                 if (!(file instanceof FileInputStream)) {
-                    tmpFile = TempFileHelper.getInstance().newTempFile();
-                    if (tmpFile != null) {
+                    Optional<File> optionalTempFile = TempFileHelper.getInstance().newTempFile();
+                    if (optionalTempFile.isPresent()) {
+                        tmpFile = optionalTempFile.get();
                         file = Streams.transferToFileAndCreateStream(file, tmpFile);
                     }
                 }
@@ -559,7 +571,7 @@ public class S3FileStorage implements FileStorage {
     }
 
     private ObjectMetadata prepareMetadataForSSE(ObjectMetadata metadata) {
-        if(serverSideEncryption) {
+        if (serverSideEncryption) {
             metadata.setSSEAlgorithm(ObjectMetadata.AES_256_SERVER_SIDE_ENCRYPTION);
         }
         return metadata;

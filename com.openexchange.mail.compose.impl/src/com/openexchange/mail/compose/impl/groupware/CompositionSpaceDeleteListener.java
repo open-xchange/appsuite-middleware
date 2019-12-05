@@ -69,8 +69,8 @@ import com.openexchange.groupware.delete.DeleteFailedExceptionCode;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.java.util.Pair;
 import com.openexchange.mail.compose.AttachmentStorageIdentifier;
-import com.openexchange.mail.compose.KnownAttachmentStorageType;
 import com.openexchange.mail.compose.AttachmentStorageIdentifier.KnownArgument;
+import com.openexchange.mail.compose.KnownAttachmentStorageType;
 import com.openexchange.mail.compose.impl.attachment.filestore.ContextAssociatedFileStorageAttachmentStorage;
 import com.openexchange.mail.compose.impl.attachment.filestore.DedicatedFileStorageAttachmentStorage;
 import com.openexchange.mail.compose.impl.security.FileStorageCompositionSpaceKeyStorage;
@@ -123,7 +123,7 @@ public class CompositionSpaceDeleteListener implements DeleteListener {
                     try {
                         fileStorage.remove();
                     } catch (Exception e) {
-                        LoggerHolder.LOG.warn("Failed to delete the filestore {}", uri);
+                        LoggerHolder.LOG.warn("Failed to delete the filestore {}", uri, e);
                     }
                 }
             }

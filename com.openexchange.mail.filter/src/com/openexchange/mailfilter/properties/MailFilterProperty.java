@@ -118,6 +118,11 @@ public enum MailFilterProperty implements Property {
     tls(Boolean.TRUE),
 
     /**
+     * What protocols to use if TLS is enabled
+     */
+    protocols("SSLv3, TLSv1, TLSv1.1, TLSv1.2", true, "com.openexchange.mail.filter.tls."),
+
+    /**
      * Specify here if vacation messages should only be sent to specific domains
      * If multiple domains are given, they should be separated by ","
      * e.g. VACATION_DOMAINS=testdomain.com,example.com
@@ -197,23 +202,56 @@ public enum MailFilterProperty implements Property {
      * once a connect timeout occurred
      */
     tempDownTimeout(I(10000), true),
-    ;
+
+    /**
+     * The enabled flag for mail filter circuit breaker
+     */
+    enabled(Boolean.FALSE, true, "com.openexchange.mail.filter.breaker."),
+
+    /**
+     * The failure threshold for mail filter circuit breaker, which is the number of successive failures that must occur in order to open
+     * the circuit
+     */
+    failureThreshold("5", true, "com.openexchange.mail.filter.breaker."),
+
+    /**
+     * The number of executions to measure the failures against
+     */
+    failureExecutions("", true, "com.openexchange.mail.filter.breaker."),
+
+    /**
+     * The success threshold for mail filter circuit breaker, which is the number of successive successful executions that must occur when
+     * in a half-open state in order to close the circuit
+     */
+    successThreshold("2", true, "com.openexchange.mail.filter.breaker."),
+
+    /**
+     * The number of executions to measure the successes against
+     */
+    successExecutions("", true, "com.openexchange.mail.filter.breaker."),
+
+    /**
+     * The delay in milliseconds for mail filter circuit breaker, which is the number of milliseconds to wait in open state before
+     * transitioning to half-open
+     */
+    delayMillis("60000", true, "com.openexchange.mail.filter.breaker.");
 
     private static final String EMPTY = "";
     private static final String PREFIX = "com.openexchange.mail.filter.";
-    private final String fqn;
+
+    private final String fqPrefix;
     private final Object defaultValue;
     private final boolean optional;
 
     /**
-     * Initialises a new {@link MailFilterProperty}.
+     * Initializes a new {@link MailFilterProperty}.
      */
     private MailFilterProperty() {
         this(EMPTY);
     }
 
     /**
-     * Initialises a new {@link MailFilterProperty}.
+     * Initializes a new {@link MailFilterProperty}.
      *
      * @param defaultValue The default value of the property
      */
@@ -222,15 +260,25 @@ public enum MailFilterProperty implements Property {
     }
 
     /**
-     * Initialises a new {@link MailFilterProperty}.
+     * Initializes a new {@link MailFilterProperty}.
      *
      * @param defaultValue The default value of the property
      * @param optional Whether the property is optional
      */
     private MailFilterProperty(Object defaultValue, boolean optional) {
+        this(defaultValue, optional, PREFIX);
+    }
+
+    /**
+     * Initializes a new {@link MailFilterProperty}.
+     *
+     * @param defaultValue The default value of the property
+     * @param optional Whether the property is optional
+     */
+    private MailFilterProperty(Object defaultValue, boolean optional, String prefix) {
         this.optional = optional;
         this.defaultValue = defaultValue;
-        this.fqn = PREFIX;
+        this.fqPrefix = prefix;
     }
 
     /**
@@ -242,21 +290,11 @@ public enum MailFilterProperty implements Property {
         return optional;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.config.lean.Property#getFQPropertyName()
-     */
     @Override
     public String getFQPropertyName() {
-        return fqn + name();
+        return fqPrefix + name();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.config.lean.Property#getDefaultValue(java.lang.Class)
-     */
     @Override
     public Object getDefaultValue() {
         return defaultValue;

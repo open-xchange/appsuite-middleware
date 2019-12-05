@@ -50,9 +50,9 @@
 package com.openexchange.groupware.infostore;
 
 import com.openexchange.groupware.container.EffectiveObjectPermission;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.user.User;
 
 public class EffectiveInfostorePermission {
 
@@ -169,10 +169,6 @@ public class EffectiveInfostorePermission {
         return permission.canWriteOwnObjects();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
     @Override
     public boolean equals(Object obj) {
         return permission.equals(obj);
@@ -279,10 +275,6 @@ public class EffectiveInfostorePermission {
         return permission;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see java.lang.Object#toString()
-     */
     @Override
     public String toString() {
         return permission.toString();

@@ -99,7 +99,7 @@ public abstract class AbstractJMXHandler {
 
             try {
                 md = MessageDigest.getInstance("SHA-1");
-            } catch (final NoSuchAlgorithmException e) {
+            } catch (NoSuchAlgorithmException e) {
                 LOG.error("", e);
                 return raw;
             }
@@ -109,7 +109,7 @@ public abstract class AbstractJMXHandler {
             md.reset();
             try {
                 md.update(raw.getBytes("UTF-8"));
-            } catch (final UnsupportedEncodingException e) {
+            } catch (UnsupportedEncodingException e) {
                 /*
                  * Cannot occur
                  */
@@ -161,7 +161,7 @@ public abstract class AbstractJMXHandler {
             if (jmxConnector != null) {
                 jmxConnector.close();
             }
-        } catch (final Exception exc) {
+        } catch (Exception exc) {
             throw new ConsoleException(exc);
         }
     }

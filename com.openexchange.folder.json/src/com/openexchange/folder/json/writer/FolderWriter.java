@@ -834,12 +834,12 @@ public final class FolderWriter {
                         ffw.writeField(jsonPutter, folder, state, session);
                     }
                     jsonArray.put(folderArray);
-                } catch (final NecessaryValueMissingException e) {
+                } catch (NecessaryValueMissingException e) {
                     LOG.warn(e.getMessage());
                 }
             }
             return jsonArray;
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw FolderExceptionErrorMessage.JSON_ERROR.create(e, e.getMessage());
         }
     }
@@ -881,9 +881,9 @@ public final class FolderWriter {
                 ffw.writeField(jsonPutter, folder, state, session);
             }
             return jsonObject;
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw FolderExceptionErrorMessage.JSON_ERROR.create(e, e.getMessage());
-        } catch (final NecessaryValueMissingException e) {
+        } catch (NecessaryValueMissingException e) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }

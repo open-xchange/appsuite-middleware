@@ -176,14 +176,14 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
             if (prepareStatement != null) {
                 try {
                     prepareStatement.close();
-                } catch (final SQLException e) {
+                } catch (SQLException e) {
                     LogFactory.getLogger().warning("", e);
                 }
             }
             if (resultSet != null) {
                 try {
                     resultSet.close();
-                } catch (final SQLException e) {
+                } catch (SQLException e) {
                     LogFactory.getLogger().warning("", e);
                 }
             }

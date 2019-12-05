@@ -96,7 +96,7 @@ public class CachingFilestoreStorage extends FilestoreStorage {
         if (service != null) {
             try {
                 filestoreCache = service.getCache(REGION_NAME);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.error("", e);
             }
         }
@@ -109,7 +109,7 @@ public class CachingFilestoreStorage extends FilestoreStorage {
             if (null != filestoreCache) {
                 try {
                     filestoreCache.put(I(id), retval, false);
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     LOG.error("", e);
                 }
             }

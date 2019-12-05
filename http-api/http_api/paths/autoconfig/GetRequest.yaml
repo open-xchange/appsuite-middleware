@@ -5,31 +5,46 @@
       - Autoconfig
     summary: Gets the auto configuration for a mail account.
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
-      - in: formData
-        name: email
-        type: string
-        description: The email address for which a mail configuration will be discovered.
-        required: true
-      - in: formData
-        name: password
-        type: string
-        description: The corresponding password for the mail account.
-        required: true
-      - in: formData
-        name: force_secure
-        type: boolean
-        description: Enforces a secure connection for configured mail account, default is `true`.
-        required: false
-      - in: formData
-        name: oauth
-        type: integer
-        description: The optional identifier of the OAuth account to use for authentication.
+      - $ref: '#/components/parameters/gblQueryParamSession'
     responses:
-      200:
-        description: |
-          A JSON object containing the best available settings for an appropriate mail server for the given email
-          address. The data may be incomplete or empty. In case of errors the responsible fields in the response
+      '200':
+        description: >
+          A JSON object containing the best available settings for an
+          appropriate mail server for the given email
+
+          address. The data may be incomplete or empty. In case of errors the
+          responsible fields in the response
+
           are filled (see [Error handling](#error-handling)).
-        schema:
-          $ref: "#/definitions/AutoConfigResponse"
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AutoConfigResponse'
+    requestBody:
+      content:
+        application/x-www-form-urlencoded:
+          schema:
+            type: object
+            title: autoConfigBody
+            properties:
+              email:
+                description: >-
+                  The email address for which a mail configuration will be
+                  discovered.
+                type: string
+              password:
+                description: The corresponding password for the mail account.
+                type: string
+              force_secure:
+                description: >-
+                  Enforces a secure connection for configured mail account,
+                  default is `true`.
+                type: boolean
+              oauth:
+                description: >-
+                  The optional identifier of the OAuth account to use for
+                  authentication.
+                type: integer
+            required:
+              - email
+              - password

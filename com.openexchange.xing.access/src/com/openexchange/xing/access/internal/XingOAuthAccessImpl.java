@@ -188,16 +188,16 @@ public final class XingOAuthAccessImpl extends AbstractOAuthAccess implements Xi
             final User accountInfo = xingApi.userInfo();
             xingUserId = accountInfo.getId();
             xingUserName = accountInfo.getDisplayName();
-        } catch (final XingUnlinkedException e) {
+        } catch (XingUnlinkedException e) {
             throw XingExceptionCodes.UNLINKED_ERROR.create();
-        } catch (final XingServerException e) {
+        } catch (XingServerException e) {
             if (e.getError() == XingServerException._404_NOT_FOUND) {
                 throw XingExceptionCodes.XING_SERVER_UNAVAILABLE.create(e, new Object[0]);
             }
             throw XingExceptionCodes.XING_ERROR.create(e, e.getMessage());
-        } catch (final XingException e) {
+        } catch (XingException e) {
             throw XingExceptionCodes.XING_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw XingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }

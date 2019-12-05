@@ -80,7 +80,7 @@ public class SimMessagingServiceRegistry implements MessagingServiceRegistry{
     }
 
     private void exception() throws OXException {
-        if(exception != null) {
+        if (exception != null) {
             throw exception;
         }
     }

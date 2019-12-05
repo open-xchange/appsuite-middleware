@@ -225,13 +225,13 @@ public final class Collections {
     public static <T> boolean any(final Collection<T> haystack, T... needles){
         for(T hay: haystack){
             for(T needle: needles){
-                if(needle == null){
-                    if(hay == null) {
+                if (needle == null){
+                    if (hay == null) {
                         return true;
                     }
                     continue;
                 }
-                if(needle.equals(hay)) {
+                if (needle.equals(hay)) {
                     return true;
                 }
             }
@@ -416,19 +416,11 @@ public final class Collections {
             this.iter = iter;
         }
 
-        /*
-         * (non-Javadoc)
-         * @see java.util.Enumeration#hasMoreElements()
-         */
         @Override
         public boolean hasMoreElements() {
             return iter.hasNext();
         }
 
-        /*
-         * (non-Javadoc)
-         * @see java.util.Enumeration#nextElement()
-         */
         @Override
         public T nextElement() {
             return iter.next();

@@ -100,8 +100,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         public boolean isRequired();
 
         /**
-         * @param required The value to set 
-         * 
+         * @param required The value to set
+         *
          * @deprecated since 7.10.2
          */
         @Deprecated
@@ -615,6 +615,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected static final String SIMPLE_INT = "int";
     protected static final String OPT_IMAPONLY_LONG = "imaponly";
     protected static final String OPT_DBONLY_LONG = "dbonly";
+    
+    protected static final String OPT_DRIVE_FOLDER_MODE_LONG = "drive-user-folder-mode";
 
     public static final ArrayList<OptionAndMethod> optionsandmethods = new ArrayList<OptionAndMethod>();
 
@@ -640,6 +642,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected CLIOption imapQuotaOption = null;
     protected CLIOption inetMailAccessOption = null;
     protected CLIOption spamFilterOption = null;
+    protected CLIOption driveFolderModeOption;
 
     protected CLIOption accessRightsCombinationName = null;
 
@@ -1006,7 +1009,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             public void callMethod(final String value) throws InvalidDataException {
                 try {
                     context.setId(Integer.valueOf(value));
-                } catch (final NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     throw new InvalidDataException("Value in field " + Constants.CONTEXTID.getString() + " is no integer");
                 }
             }
@@ -1608,7 +1611,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             public void callMethod(final String value) throws InvalidDataException {
                 try {
                     user.setUploadFileSizeLimit(Integer.valueOf(value));
-                } catch (final NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     throw new InvalidDataException("Value in field " + Constants.UPLOADFILESIZELIMIT.getString() + " is no integer");
                 }
             }
@@ -1619,7 +1622,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             public void callMethod(final String value) throws InvalidDataException {
                 try {
                     user.setUploadFileSizeLimitPerFile(Integer.valueOf(value));
-                } catch (final NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     throw new InvalidDataException("Value in field " + Constants.uploadfilesizelimitperfile.getString() + " is no integer");
                 }
             }
@@ -2536,6 +2539,11 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         setDepartmentOption(parser);
         setCompanyOption(parser);
         setAliasesOption(parser);
+        setUserFolderModeOptions(parser);
+    }
+    
+    protected void setUserFolderModeOptions(AdminParser parser) {
+        this.driveFolderModeOption = setLongOpt(parser, OPT_DRIVE_FOLDER_MODE_LONG, "stringvalue", "The mode how the default drive folders should be created. 'default', 'normal', 'none'. If not selected, 'default' is applied.", true, false, true);
     }
 
     protected void setExtendedOptions(final AdminParser parser) {
@@ -2754,7 +2762,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
                         usr.setBirthday(sdf.parse(date));
                     }
                 }
-            } catch (final ParseException e) {
+            } catch (ParseException e) {
                 throw new InvalidDataException("Wrong dateformat, use \"" + sdf.toPattern() + "\"", e);
             }
         }
@@ -2770,7 +2778,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
                         usr.setAnniversary(sdf.parse(date));
                     }
                 }
-            } catch (final ParseException e) {
+            } catch (ParseException e) {
                 throw new InvalidDataException("Wrong dateformat, use \"" + sdf.toPattern() + "\"");
             }
         }
@@ -3758,13 +3766,13 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         //                sdf.setTimeZone(TimeZone.getTimeZone(COMMANDLINE_TIMEZONE));
         //                try {
         //                    final String date = (String)parser.getOptionValue(optionAndMethod.getOption());
-        //                    if( date != null ) {
+        //                    if ( date != null ) {
         //                        final Date value = sdf.parse(date);
         //                        if (null != value) {
         //                            optionAndMethod.getMethod().invoke(usr, value);
         //                        }
         //                    }
-        //                } catch (final ParseException e) {
+        //                } catch (ParseException e) {
         //                    throw new InvalidDataException("Wrong dateformat, use \"" + sdf.toPattern() + "\"");
         //                }
         //            } else if (optionAndMethod.getReturntype().equals(JAVA_UTIL_HASH_SET)) {
@@ -3786,6 +3794,13 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
 
                 usr.setUserAttribute(namespace, name, value);
             }
+        }
+    }
+    
+    protected void applyDriveFolderModeOption(final AdminParser parser, final User usr) {
+        String value = (String) parser.getOptionValue(driveFolderModeOption);
+        if (null != value) {
+            usr.setDriveFolderMode(value);
         }
     }
 

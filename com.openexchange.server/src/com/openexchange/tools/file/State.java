@@ -147,11 +147,11 @@ class State {
                 unused.add(line);
                 line = reader.readLine();
             }
-        } catch (final UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             throw FileStorageCodes.ENCODING.create(e);
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             throw FileStorageCodes.NO_NUMBER.create(e);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw FileStorageCodes.IOERROR.create(e, e.getMessage());
         } finally {
             Streams.close(reader, isr);
@@ -183,9 +183,9 @@ class State {
             writer.close();
             osw.close();
             return new ByteArrayInputStream(baos.toByteArray());
-        } catch (final UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             throw FileStorageCodes.ENCODING.create(e);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw FileStorageCodes.IOERROR.create(e, e.getMessage());
         }
     }

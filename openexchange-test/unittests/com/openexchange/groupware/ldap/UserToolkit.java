@@ -51,6 +51,7 @@ package com.openexchange.groupware.ldap;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.user.User;
 
 /**
  *

@@ -66,7 +66,7 @@ import com.openexchange.groupware.tasks.Task;
 
 /**
  * Checks if the problem described in bug 8935 appears again.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class Bug8935Test extends AbstractTaskTest {
@@ -75,7 +75,7 @@ public class Bug8935Test extends AbstractTaskTest {
 
     /**
      * Default constructor.
-     * 
+     *
      * @param name name of the test.
      */
     public Bug8935Test() {
@@ -85,6 +85,7 @@ public class Bug8935Test extends AbstractTaskTest {
     /**
      * {@inheritDoc}
      */
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -93,7 +94,7 @@ public class Bug8935Test extends AbstractTaskTest {
 
     /**
      * Checks if a task can be created with a title of "null";
-     * 
+     *
      * @throws Throwable if an exception occurs.
      */
     @Test
@@ -102,7 +103,7 @@ public class Bug8935Test extends AbstractTaskTest {
         task.setTitle("null");
         task.setParentFolderID(client.getValues().getPrivateTaskFolder());
         final InsertResponse iResponse = client.execute(new InsertRequest(task, client.getValues().getTimeZone()));
-        final GetResponse gResponse = TaskTools.get(client, new GetRequest(iResponse));
+        final GetResponse gResponse = client.execute(new GetRequest(iResponse));
         final Task reload = gResponse.getTask(client.getValues().getTimeZone());
         TaskTools.compareAttributes(task, reload);
         client.execute(new DeleteRequest(reload));
@@ -114,7 +115,7 @@ public class Bug8935Test extends AbstractTaskTest {
         task.removeTitle();
         task.setParentFolderID(client.getValues().getPrivateTaskFolder());
         final InsertResponse iResponse = client.execute(new SpecialInsertRequest(task, client.getValues().getTimeZone()));
-        final GetResponse gResponse = TaskTools.get(client, new GetRequest(iResponse));
+        final GetResponse gResponse = client.execute(new GetRequest(iResponse));
         final Task reload = gResponse.getTask(client.getValues().getTimeZone());
         TaskTools.compareAttributes(task, reload);
         client.execute(new DeleteRequest(reload));
@@ -146,7 +147,7 @@ public class Bug8935Test extends AbstractTaskTest {
         final InsertResponse iResponse = client.execute(new SpecialInsertRequest(task, client.getValues().getTimeZone()));
         // remove it because server won't sent empty fields.
         task.removeTitle();
-        final GetResponse gResponse = TaskTools.get(client, new GetRequest(iResponse));
+        final GetResponse gResponse = client.execute(new GetRequest(iResponse));
         final Task reload = gResponse.getTask(client.getValues().getTimeZone());
         TaskTools.compareAttributes(task, reload);
         client.execute(new DeleteRequest(reload));

@@ -1,0 +1,22 @@
+/advertisement/v1/config/reseller:
+  put:
+    operationId: putAdvertisementByReseller
+    tags:
+      - Advertisement
+    summary: Sets all advertisement configurations for a given reseller
+    parameters:
+      - name: reseller
+        in: query
+        description: The reseller's name
+        required: true
+        schema:
+          type: string
+    responses:
+      '200':
+        description: The configuration result
+      '400':
+        description: 'Bad request, response contains error message.'
+      '401':
+        description: Not authorized
+    requestBody:
+      $ref: '#/components/requestBodies/putAdvertisementByNameBody'

@@ -81,11 +81,6 @@ public class MigrateMSLiveSubscriptionsTask implements UpdateTaskV2 {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.UpdateTaskV2#perform(com.openexchange.groupware.update.PerformParameters)
-     */
     @Override
     public void perform(PerformParameters params) throws OXException {
         Connection connection = params.getConnection();
@@ -94,26 +89,16 @@ public class MigrateMSLiveSubscriptionsTask implements UpdateTaskV2 {
             stmt.setString(2, DEPRECATED_SERVICE_ID);
             stmt.setString(3, DEPRECATED_SOURCE_ID);
             stmt.executeUpdate();
-        } catch (final SQLException x) {
+        } catch (SQLException x) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(x, x.getMessage());
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.UpdateTaskV2#getDependencies()
-     */
     @Override
     public String[] getDependencies() {
         return new String[0];
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.UpdateTaskV2#getAttributes()
-     */
     @Override
     public TaskAttributes getAttributes() {
         return new Attributes(UpdateConcurrency.BLOCKING);

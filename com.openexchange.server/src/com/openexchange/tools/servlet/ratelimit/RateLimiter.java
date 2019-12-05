@@ -50,6 +50,7 @@
 package com.openexchange.tools.servlet.ratelimit;
 
 import static com.openexchange.java.Strings.asciiLowerCase;
+import static com.openexchange.tools.servlet.http.Tools.JSESSIONID_COOKIE;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -104,7 +105,7 @@ public final class RateLimiter {
             if (null == cookies) {
                 return null;
             }
-            final Cookie cookie = cookies.get("JSESSIONID");
+            final Cookie cookie = cookies.get(JSESSIONID_COOKIE);
             return null == cookie ? null : cookie.getValue();
         }
     };
@@ -928,11 +929,11 @@ public final class RateLimiter {
             return false;
         }
         final int mlen = s.length() - 1;
-        int pos = s.indexOf("?");
+        int pos = s.indexOf('?');
         if (pos >= 0) {
             return false;
         }
-        pos = s.indexOf("*");
+        pos = s.indexOf('*');
         if (pos >= 0 && pos < mlen) {
             return false;
         }

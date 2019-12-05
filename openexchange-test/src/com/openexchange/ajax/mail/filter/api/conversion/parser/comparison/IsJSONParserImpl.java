@@ -67,11 +67,6 @@ public class IsJSONParserImpl implements ComparisonParser {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.mail.filter.parser.JSONParser#parse(org.json.JSONObject)
-     */
     @SuppressWarnings("unused")
     @Override
     public IsComparison parse(JSONObject jsonObject) throws JSONException {

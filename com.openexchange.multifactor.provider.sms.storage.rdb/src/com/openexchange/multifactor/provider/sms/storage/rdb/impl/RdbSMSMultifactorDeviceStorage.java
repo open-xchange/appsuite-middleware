@@ -143,8 +143,8 @@ public class RdbSMSMultifactorDeviceStorage extends MultifactorStorageCommon imp
             statement.setBoolean(index++, device.isBackup());
             statement.setString(index++, device.getPhoneNumber());
             statement.executeUpdate();
-        } catch (final SQLException e) {
-            if(e.getSQLState() != null && e.getSQLState().startsWith("23") /*Class Code 23: Constraint Violation*/ &&
+        } catch (SQLException e) {
+            if (e.getSQLState() != null && e.getSQLState().startsWith("23") /*Class Code 23: Constraint Violation*/ &&
                e.getMessage() != null && e.getMessage().contains("Duplicate entry")) {
                 throw MultifactorExceptionCodes.DEVICE_ALREADY_REGISTERED.create();
             }
@@ -171,7 +171,7 @@ public class RdbSMSMultifactorDeviceStorage extends MultifactorStorageCommon imp
             statement.setString(index++, deviceId);
             rows = statement.executeUpdate();
             return rows > 0 ? true : false;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw MultifactorExceptionCodes.SQL_EXCEPTION.create(e.getMessage(), e);
         } finally {
             Databases.closeSQLStuff(statement);
@@ -196,7 +196,7 @@ public class RdbSMSMultifactorDeviceStorage extends MultifactorStorageCommon imp
             statement.setInt(index++, contextId);
             statement.setInt(index++, userId);
             return createDevicesFrom(statement.executeQuery());
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw MultifactorExceptionCodes.SQL_EXCEPTION.create(e.getMessage(), e);
         } finally {
             Databases.closeSQLStuff(statement);
@@ -223,7 +223,7 @@ public class RdbSMSMultifactorDeviceStorage extends MultifactorStorageCommon imp
                 return Optional.of(createDeviceFrom(result));
             }
             return Optional.empty();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw MultifactorExceptionCodes.SQL_EXCEPTION.create(e.getMessage(), e);
         } finally {
             Databases.closeSQLStuff(result, statement);
@@ -248,7 +248,7 @@ public class RdbSMSMultifactorDeviceStorage extends MultifactorStorageCommon imp
                 return Optional.of(createDeviceFrom(result));
             }
             return Optional.empty();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw MultifactorExceptionCodes.SQL_EXCEPTION.create(e.getMessage(), e);
         } finally {
             Databases.closeSQLStuff(result, statement);
@@ -273,7 +273,7 @@ public class RdbSMSMultifactorDeviceStorage extends MultifactorStorageCommon imp
             statement.setString(index++, deviceId);
             rows = statement.executeUpdate();
             return rows > 0 ? true : false;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw MultifactorExceptionCodes.SQL_EXCEPTION.create(e.getMessage(), e);
         } finally {
             Databases.closeSQLStuff(statement);

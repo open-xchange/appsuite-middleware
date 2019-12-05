@@ -99,21 +99,21 @@ public class Bug19543Test_DeletingContactsInDistributionList extends AbstractMan
 
             actualSize = cotm.listAction(new int[] { folderID, objId })[0].getNumberOfDistributionLists();
             assertEquals("[list] Attempt #" + attempts + " failed", expectedSize, actualSize);
-            //			if(actualSize != expectedSize) listErrors++;
+            //			if (actualSize != expectedSize) listErrors++;
 
             actualSize = cotm.allAction(folderID, Contact.ALL_COLUMNS)[0].getNumberOfDistributionLists();
             assertEquals("[all] Attempt #" + attempts + " failed", expectedSize, actualSize);
-            //			if(actualSize != expectedSize) allErrors++;
+            //			if (actualSize != expectedSize) allErrors++;
 
             actualSize = cotm.updatesAction(folderID, updatesTimeStamp)[0].getNumberOfDistributionLists();
             assertEquals("[updates] Attempt #" + attempts + " failed", expectedSize, actualSize);
-            //			if(actualSize != expectedSize) updatesErrors++;
+            //			if (actualSize != expectedSize) updatesErrors++;
 
             // get for editing
             Contact actual = cotm.getAction(folderID, objId);
             actualSize = actual.getNumberOfDistributionLists();
             assertEquals("[get] Attempt #" + attempts + " failed", expectedSize, actualSize);
-            //			if(actual.getNumberOfDistributionLists() != expectedSize) getFullErrors++;
+            //			if (actual.getNumberOfDistributionLists() != expectedSize) getFullErrors++;
 
             //remove members
             Contact removeMemberUpdate = makeDistro(objId);
@@ -125,7 +125,7 @@ public class Bug19543Test_DeletingContactsInDistributionList extends AbstractMan
             //check
             actual = cotm.getAction(folderID, objId);
             assertEquals("[get] Attempt #" + attempts + " failed", 0, actual.getNumberOfDistributionLists());
-            //			if(actual.getNumberOfDistributionLists() != expectedSize) getEmptyErrors++;
+            //			if (actual.getNumberOfDistributionLists() != expectedSize) getEmptyErrors++;
         }
         if (allErrors + updatesErrors + listErrors + getEmptyErrors + getFullErrors > 0) {
             fail("Errors during the following requests :" + "\nall: " + allErrors + ", updates: " + updatesErrors + ", list: " + listErrors + ", get (before deletion): " + getFullErrors + ", get (after deletion): " + getEmptyErrors + ", during " + MAX_ATTEMPTS + " attempts");

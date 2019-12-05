@@ -51,8 +51,6 @@ package com.openexchange.sql.grammar.example;
 
 import static com.openexchange.sql.grammar.Constant.ASTERISK;
 import static com.openexchange.sql.grammar.Constant.PLACEHOLDER;
-import static com.openexchange.sql.schema.Tables.dateRights;
-import static com.openexchange.sql.schema.Tables.dates;
 import java.util.Date;
 import com.openexchange.sql.builder.StatementBuilder;
 import com.openexchange.sql.grammar.COUNT;
@@ -61,8 +59,12 @@ import com.openexchange.sql.grammar.IN;
 import com.openexchange.sql.grammar.LIST;
 import com.openexchange.sql.grammar.NOTNULL;
 import com.openexchange.sql.grammar.SELECT;
+import com.openexchange.sql.grammar.Table;
 
 public class SelectExample {
+
+    private static final Table dates = new Table("prg_dates", "pd");
+    private static final Table dateRights = new Table("prg_date_rights", "pdr");
 
     public static void main(String[] args) {
         new SelectExample().simpleSelect();

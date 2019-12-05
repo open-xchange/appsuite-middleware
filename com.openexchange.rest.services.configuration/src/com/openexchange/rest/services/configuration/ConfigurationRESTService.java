@@ -67,11 +67,11 @@ import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
-import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.rest.services.annotation.Role;
 import com.openexchange.rest.services.annotation.RoleAllowed;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.user.UserExceptionCode;
 
 /**
  * The {@link ConfigurationRESTService} allows clients to retrieve configuration values.

@@ -53,7 +53,6 @@ import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.sql.grammar.Constant.PLACEHOLDER;
-import static com.openexchange.sql.schema.Tables.subscriptions;
 import static com.openexchange.subscribe.SubscriptionErrorMessage.IDGiven;
 import static com.openexchange.subscribe.SubscriptionErrorMessage.SQLException;
 import static com.openexchange.subscribe.SubscriptionErrorMessage.SubscriptionNotFound;
@@ -75,7 +74,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.sql.builder.StatementBuilder;
 import com.openexchange.sql.grammar.DELETE;
 import com.openexchange.sql.grammar.EQUALS;
@@ -84,17 +82,21 @@ import com.openexchange.sql.grammar.IN;
 import com.openexchange.sql.grammar.INSERT;
 import com.openexchange.sql.grammar.LIST;
 import com.openexchange.sql.grammar.SELECT;
+import com.openexchange.sql.grammar.Table;
 import com.openexchange.sql.grammar.UPDATE;
 import com.openexchange.subscribe.AdministrativeSubscriptionStorage;
 import com.openexchange.subscribe.EncryptedField;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
+import com.openexchange.user.User;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> - deleteAllSubscriptionsForUser
  */
 public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage {
+
+    static final Table subscriptions = new Table("subscriptions");
 
     private final DBProvider dbProvider;
     private final DBTransactionPolicy txPolicy;
@@ -130,7 +132,7 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
 
             txPolicy.commit(writeConnection);
             rollback = 2;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw SQLException.create(e);
         } finally {
             if (rollback > 0) {
@@ -169,14 +171,14 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
             if (subscriptions.size() != 0) {
                 retval = subscriptions.get(0);
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw SQLException.create(e);
         } finally {
             try {
                 if (builder != null) {
                     builder.closePreparedStatement(null, resultSet);
                 }
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 throw SQLException.create(e);
             } finally {
                 dbProvider.releaseReadConnection(ctx, readConnection);
@@ -208,14 +210,14 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
             builder = new StatementBuilder();
             resultSet = builder.executeQuery(readConnection, select, values);
             retval = parseResultSet(resultSet, ctx, readConnection);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw SQLException.create(e);
         } finally {
             try {
                 if (builder != null) {
                     builder.closePreparedStatement(null, resultSet);
                 }
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 throw SQLException.create(e);
             } finally {
                 dbProvider.releaseReadConnection(ctx, readConnection);
@@ -306,7 +308,7 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
 
             txPolicy.commit(writeConnection);
             rollback = 2;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw SQLException.create(e);
         } finally {
             if (rollback > 0) {
@@ -338,7 +340,7 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
 
             txPolicy.commit(writeConnection);
             rollback = 2;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw SQLException.create(e);
         } finally {
             if (rollback > 0) {
@@ -446,7 +448,7 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
 
             txPolicy.commit(writeConnection);
             rollback = 2;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw SQLException.create(e);
         } finally {
             if (rollback > 0) {
@@ -485,14 +487,14 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
             if (resultSet.next()) {
                 retval = resultSet.getInt("configuration_id");
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw SQLException.create(e);
         } finally {
             try {
                 if (builder != null) {
                     builder.closePreparedStatement(null, resultSet);
                 }
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 throw SQLException.create(e);
             } finally {
                 dbProvider.releaseReadConnection(subscription.getContext(), readConection);
@@ -545,14 +547,14 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
             builder = new StatementBuilder();
             resultSet = builder.executeQuery(readConnection, select, values);
             retval = resultSet.next();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw SQLException.create(e);
         } finally {
             try {
                 if (builder != null) {
                     builder.closePreparedStatement(null, resultSet);
                 }
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 throw SQLException.create(e);
             } finally {
                 dbProvider.releaseReadConnection(ctx, readConnection);
@@ -574,15 +576,15 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
                 delete(sub, writeConnection);
             }
             txPolicy.commit(writeConnection);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw SQLException.create(e);
         } finally {
             try {
-                if(writeConnection != null) {
+                if (writeConnection != null) {
                     txPolicy.rollback(writeConnection);
                     txPolicy.setAutoCommit(writeConnection, true);
                 }
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 throw SQLException.create(e);
             }
             dbProvider.releaseWriteConnection(ctx, writeConnection);
@@ -606,15 +608,15 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
             new StatementBuilder().executeStatement(writeConnection, delete, values);
             storageService.delete(writeConnection, ctx);
             txPolicy.commit(writeConnection);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw SQLException.create(e);
         } finally {
             try {
-                if(writeConnection != null) {
+                if (writeConnection != null) {
                     txPolicy.rollback(writeConnection);
                     txPolicy.setAutoCommit(writeConnection, true);
                 }
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 throw SQLException.create(e);
             }
             dbProvider.releaseWriteConnection(ctx, writeConnection);
@@ -637,22 +639,22 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
             for (final Integer configId : configIds) {
                 values.set(2, configId);
                 final int deleted = new StatementBuilder().executeStatement(writeConnection, delete, values);
-                if(deleted == 1) {
+                if (deleted == 1) {
                     // Delete the generic configuration only if the source_id matched
                     storageService.delete(writeConnection, ctx, configId.intValue());
                     modified = true;
                 }
             }
             txPolicy.commit(writeConnection);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw SQLException.create(e);
         } finally {
             try {
-                if(writeConnection != null) {
+                if (writeConnection != null) {
                     txPolicy.rollback(writeConnection);
                     txPolicy.setAutoCommit(writeConnection, true);
                 }
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 throw SQLException.create(e);
             }
             if (modified) {
@@ -689,18 +691,18 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
 
             builder = new StatementBuilder();
             resultSet = builder.executeQuery(readConnection, select, values);
-            while(resultSet.next()) {
+            while (resultSet.next()) {
                 final String folderId = resultSet.getString(1);
                 retval.put(folderId, Boolean.TRUE);
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw SQLException.create(e);
         } finally {
             try {
                 if (builder != null) {
                     builder.closePreparedStatement(null, resultSet);
                 }
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 throw SQLException.create(e);
             } finally {
                 dbProvider.releaseReadConnection(ctx, readConnection);
@@ -728,14 +730,14 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
             builder = new StatementBuilder();
             resultSet = builder.executeQuery(readConnection, select, values);
             return resultSet.next();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw SQLException.create(e);
         } finally {
             try {
                 if (builder != null) {
                     builder.closePreparedStatement(null, resultSet);
                 }
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 throw SQLException.create(e);
             } finally {
                 dbProvider.releaseReadConnection(ctx, readConnection);

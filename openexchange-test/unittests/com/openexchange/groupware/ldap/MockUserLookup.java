@@ -52,6 +52,8 @@ package com.openexchange.groupware.ldap;
 import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.exception.OXException;
+import com.openexchange.user.User;
+import com.openexchange.user.UserExceptionCode;
 
 /**
  * MockUserStorage for now contains some testing data relevant to the notification tests.

@@ -75,11 +75,6 @@ public class BouncyCastleU2FClientCrypto implements U2FClientCrypto {
             Security.addProvider(new BouncyCastleProvider());
         }
     }
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.ajax.multifactor.u2fclient.U2FClientCrypto#sha256(byte)
-     */
     @Override
     public byte[] sha256(byte[] data) throws U2FClientException {
         MessageDigest md;
@@ -92,11 +87,6 @@ public class BouncyCastleU2FClientCrypto implements U2FClientCrypto {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.ajax.multifactor.u2fclient.U2FClientCrypto#sign(byte[], java.security.PrivateKey)
-     */
     @Override
     public byte[] sign(byte[] data, PrivateKey key) throws U2FClientException {
         try {

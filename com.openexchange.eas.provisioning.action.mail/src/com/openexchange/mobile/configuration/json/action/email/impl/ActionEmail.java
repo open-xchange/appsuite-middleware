@@ -110,11 +110,11 @@ public class ActionEmail implements ActionService {
 
 			provisioningResponse.setMessage("Provisioning mail has been send to " + provisioningInformation.getTarget());
 			provisioningResponse.setSuccess(true);
-		} catch (final OXException e) {
+		} catch (OXException e) {
 			logError("Couldn't send provisioning mail", e, provisioningResponse);
 			provisioningResponse.setMessage("Couldn't send provisioning mail");
 			provisioningResponse.setSuccess(false);
-		} catch (final AddressException e) {
+		} catch (AddressException e) {
 			logError("Target Spam email address cannot be parsed", e, provisioningResponse);
 			provisioningResponse.setMessage("Target Spam email address cannot be parsed");
 			provisioningResponse.setSuccess(false);

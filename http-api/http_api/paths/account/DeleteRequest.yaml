@@ -1,0 +1,28 @@
+/account?action=delete:
+  put:
+    operationId: deleteAccount
+    tags:
+      - Mailaccount
+    summary: Deletes a mail account.
+    parameters:
+      - $ref: '#/components/parameters/gblQueryParamSession'
+    responses:
+      '200':
+        description: >
+          A JSON object containing an array with identifiers of deleted
+          accounts. In case of errors the responsible fields in the response are
+
+          filled (see [Error handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MailAccountDeletionResponse'
+    requestBody:
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              type: integer
+      description: A JSON array with the ID of the mail account that shall be deleted.
+      required: true

@@ -75,7 +75,7 @@ public abstract class PermissionServlet extends SessionServlet {
                 return;
             }
             super.service(req, resp);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             handleOXException(e, req, resp);
         }
     }

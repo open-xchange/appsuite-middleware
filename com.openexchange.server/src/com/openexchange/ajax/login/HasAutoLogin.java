@@ -56,7 +56,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.tools.servlet.http.Tools;
 
@@ -68,13 +67,26 @@ import com.openexchange.tools.servlet.http.Tools;
  */
 public final class HasAutoLogin implements LoginRequestHandler {
 
-    private static final Logger LOG = LoggerFactory.getLogger(HasAutoLogin.class);
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(HasAutoLogin.class);
+    }
 
-    private final LoginConfiguration conf;
+    private static final HasAutoLogin INSTANCE = new HasAutoLogin();
 
-    public HasAutoLogin(LoginConfiguration conf) {
+    /**
+     * Gets the instance
+     *
+     * @return The instance
+     */
+    public static HasAutoLogin getInstance() {
+        return INSTANCE;
+    }
+
+    // ------------------------------------------------------------------------------------------------------------------------------------
+
+    private HasAutoLogin() {
         super();
-        this.conf = conf;
     }
 
     @Override
@@ -84,11 +96,12 @@ public final class HasAutoLogin implements LoginRequestHandler {
         resp.setContentType(LoginServlet.CONTENTTYPE_JAVASCRIPT);
         try {
             final JSONObject json = new JSONObject(2);
-            json.put(ACTION_AUTOLOGIN, conf.isSessiondAutoLogin(req.getServerName()));
+            json.put(ACTION_AUTOLOGIN, true); // Keeping this for compatibility...
             json.write(resp.getWriter());
         } catch (JSONException e) {
-            LOG.error(LoginServlet.RESPONSE_ERROR, e);
+            LoggerHolder.LOG.error(LoginServlet.RESPONSE_ERROR, e);
             LoginServlet.sendError(resp);
         }
     }
+
 }

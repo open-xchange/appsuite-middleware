@@ -83,10 +83,10 @@ import com.openexchange.download.limit.internal.Services;
 import com.openexchange.download.limit.storage.RdbFileAccessStorage;
 import com.openexchange.download.limit.util.LimitConfig;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 /**
  * {@link AnonymousGuestDownloadLimiterTest}

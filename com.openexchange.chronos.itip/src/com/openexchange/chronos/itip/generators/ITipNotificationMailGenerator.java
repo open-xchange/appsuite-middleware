@@ -72,7 +72,6 @@ import com.openexchange.chronos.itip.ITipMessage;
 import com.openexchange.chronos.itip.ITipMethod;
 import com.openexchange.chronos.itip.ITipRole;
 import com.openexchange.chronos.itip.Messages;
-import com.openexchange.chronos.itip.generators.changes.PassthroughWrapper;
 import com.openexchange.chronos.itip.osgi.Services;
 import com.openexchange.chronos.itip.tools.ITipEventUpdate;
 import com.openexchange.chronos.service.CalendarSession;
@@ -84,7 +83,6 @@ import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.notify.NotificationConfig;
 import com.openexchange.groupware.notify.NotificationConfig.NotificationProperty;
@@ -94,9 +92,12 @@ import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
+import com.openexchange.regional.RegionalSettings;
+import com.openexchange.regional.RegionalSettingsService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.templating.OXTemplate;
 import com.openexchange.templating.TemplateService;
+import com.openexchange.user.User;
 
 /**
  * {@link ITipNotificationMailGenerator}
@@ -359,7 +360,7 @@ public class ITipNotificationMailGenerator implements ITipMailGenerator {
                 if (senderSource.equals("defaultSenderAddress")) {
                     try {
                         fromAddr = UserSettingMailStorage.getInstance().loadUserSettingMail(n.getIdentifier(), context).getSendAddr();
-                    } catch (final OXException e) {
+                    } catch (OXException e) {
                         LOGGER.debug("", e);
                         fromAddr = UserStorage.getInstance().getUser(n.getIdentifier(), context).getMail();
                     }
@@ -688,6 +689,10 @@ public class ITipNotificationMailGenerator implements ITipMailGenerator {
         fastForwardToConcreteOriginalOccurrence(originalForRendering, updateForRendering);
 
         final NotificationParticipant participant = mail.getRecipient();
+        int recipientUserId = 0;
+        if (null != participant.getUser()) {
+            recipientUserId = participant.getUser().getId();
+        }
 
         final TemplateService templates = services.getService(TemplateService.class);
         if (templates == null) {
@@ -704,7 +709,7 @@ public class ITipNotificationMailGenerator implements ITipMailGenerator {
         env.put("formatters", dateHelperFor(mail.getRecipient()));
         env.put("labels", getLabelHelper(mail, wrapper, participant));
         if (originalForRendering != null) {
-            env.put("changes", new ChangeHelper(ctx, originalForRendering, updateForRendering, mail.getDiff(), participant.getLocale(), participant.getTimeZone(), wrapper).getChanges());
+            env.put("changes", new ChangeHelper(ctx, originalForRendering, updateForRendering, mail.getDiff(), participant.getLocale(), participant.getTimeZone(), wrapper, recipientUserId).getChanges());
         } else {
             env.put("changes", new ArrayList<String>());
         }
@@ -717,7 +722,7 @@ public class ITipNotificationMailGenerator implements ITipMailGenerator {
         wrapper = new HTMLWrapper();
         env.put("labels", getLabelHelper(mail, wrapper, participant));
         if (originalForRendering != null) {
-            env.put("changes", new ChangeHelper(ctx, originalForRendering, updateForRendering, mail.getDiff(), participant.getLocale(), participant.getTimeZone(), wrapper).getChanges());
+            env.put("changes", new ChangeHelper(ctx, originalForRendering, updateForRendering, mail.getDiff(), participant.getLocale(), participant.getTimeZone(), wrapper, recipientUserId).getChanges());
         }
         writer = new AllocatingStringWriter();
         htmlTemplate.process(env, writer);
@@ -741,7 +746,20 @@ public class ITipNotificationMailGenerator implements ITipMailGenerator {
     }
 
     private DateHelper dateHelperFor(final NotificationParticipant participant) {
-        return new DateHelper(updated, participant.getLocale(), participant.getTimeZone());
+        Context ctx = participant.getContext();
+        User user = participant.getUser();
+        int contextId = 0;
+        int userId = 0;
+        RegionalSettings regionalSettings = null;
+        if (null != ctx && null != user) {
+            contextId = ctx.getContextId();
+            userId = user.getId();
+            RegionalSettingsService regionalSettingsService = Services.getService(RegionalSettingsService.class);
+            if (null != regionalSettingsService) {
+                regionalSettings = regionalSettingsService.get(contextId, userId);
+            }
+        }
+        return new DateHelper(updated, participant.getLocale(), participant.getTimeZone(), regionalSettings);
     }
 
     @Override

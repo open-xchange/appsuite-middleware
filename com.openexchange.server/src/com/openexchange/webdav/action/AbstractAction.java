@@ -79,20 +79,20 @@ public abstract class AbstractAction implements WebdavAction {
 	}
 
 	protected final void preLoad(final LoadingHints loading) {
-		if(bulkLoader != null) {
+		if (bulkLoader != null) {
 			bulkLoader.load(loading);
 		}
 	}
 
 	protected final void preLoad(final List<LoadingHints> hints) {
-		if(bulkLoader != null) {
+		if (bulkLoader != null) {
 			bulkLoader.load(hints);
 		}
 	}
 
 	@Override
 	public String toString(){
-		if(null != next) {
+		if (null != next) {
 			return getClass().getSimpleName()+' '+next.toString();
 		}
 		return getClass().getSimpleName();

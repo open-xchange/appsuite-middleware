@@ -50,11 +50,11 @@
 package com.openexchange.login.internal.format;
 
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.LoginResult;
 import com.openexchange.session.Session;
+import com.openexchange.user.User;
 
 
 /**

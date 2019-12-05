@@ -194,7 +194,7 @@ public class MessagingRequestData {
         final String parameter = requireParameter("account");
         try {
             return Integer.parseInt(parameter);
-        } catch (final NumberFormatException x) {
+        } catch (NumberFormatException x) {
             throw MessagingExceptionCodes.INVALID_PARAMETER.create("account", parameter);
         }
     }
@@ -265,7 +265,7 @@ public class MessagingRequestData {
         }
         try {
             return Enum.valueOf(OrderDirection.class, parameter.toUpperCase());
-        } catch (final IllegalArgumentException x) {
+        } catch (IllegalArgumentException x) {
             throw MessagingExceptionCodes.INVALID_PARAMETER.create("order", parameter);
         }
     }

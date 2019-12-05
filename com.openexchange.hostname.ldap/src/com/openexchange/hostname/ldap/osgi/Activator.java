@@ -105,7 +105,7 @@ public class Activator extends HousekeepingActivator {
             deactivateCaching();
             super.stopBundle();
             Services.setServiceLookup(null);
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             LOG.error("", t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);
         }
@@ -125,7 +125,7 @@ public class Activator extends HousekeepingActivator {
         if (null != cacheService) {
             try {
                 cacheService.freeCache(LDAPHostnameCache.REGION_NAME);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.error("", e);
             }
         }

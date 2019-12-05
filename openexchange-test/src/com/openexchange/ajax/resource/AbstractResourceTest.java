@@ -53,7 +53,6 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.TimeZone;
 import org.json.JSONException;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.resource.actions.ResourceDeleteRequest;
@@ -89,12 +88,10 @@ public abstract class AbstractResourceTest extends AbstractAJAXSession {
      *             If an AJAX error occurs
      * @throws IOException
      *             If an I/O error occurs
-     * @throws SAXException
-     *             If a SAX error occurs
      * @throws JSONException
      *             If a JSON error occurs
      */
-    protected TimeZone getTimeZone() throws OXException, IOException, SAXException, JSONException {
+    protected TimeZone getTimeZone() throws OXException, IOException, JSONException {
         return getClient().getValues().getTimeZone();
     }
 
@@ -111,14 +108,12 @@ public abstract class AbstractResourceTest extends AbstractAJAXSession {
      *             If a JSON error occurs
      * @throws IOException
      *             If an I/O error occurs
-     * @throws SAXException
-     *             If a SAX error occurs
      */
-    protected Resource getResource(final int resourceId) throws OXException, JSONException, IOException, SAXException {
+    protected Resource getResource(final int resourceId) throws OXException, JSONException, IOException {
         if (resourceId <= 0) {
             return null;
         }
-        return ((ResourceGetResponse) Executor.execute(getSession(), new ResourceGetRequest(resourceId, true))).getResource();
+        return Executor.execute(getSession(), new ResourceGetRequest(resourceId, true)).getResource();
     }
 
     /**
@@ -133,17 +128,15 @@ public abstract class AbstractResourceTest extends AbstractAJAXSession {
      *             If a JSON error occurs
      * @throws IOException
      *             If an I/O error occurs
-     * @throws SAXException
-     *             If a SAX error occurs
      */
-    protected void deleteResource(final int resourceId) throws OXException, JSONException, IOException, SAXException {
+    protected void deleteResource(final int resourceId) throws OXException, JSONException, IOException {
         if (resourceId <= 0) {
             return;
         }
         /*
          * Perform GET to hold proper timestamp
          */
-        final ResourceGetResponse getResponse = (ResourceGetResponse) Executor.execute(getSession(), new ResourceGetRequest(resourceId, true));
+        final ResourceGetResponse getResponse = Executor.execute(getSession(), new ResourceGetRequest(resourceId, true));
         final Date timestamp = getResponse.getTimestamp();
         /*
          * Perform delete request
@@ -163,10 +156,8 @@ public abstract class AbstractResourceTest extends AbstractAJAXSession {
      *             If a JSON error occurs
      * @throws IOException
      *             If an I/O error occurs
-     * @throws SAXException
-     *             If a SAX error occurs
      */
-    protected int createResource(final Resource toCreate) throws OXException, JSONException, IOException, SAXException {
+    protected int createResource(final Resource toCreate) throws OXException, JSONException, IOException {
         /*
          * Perform new request
          */

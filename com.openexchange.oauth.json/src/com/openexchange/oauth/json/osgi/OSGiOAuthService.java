@@ -140,11 +140,6 @@ public final class OSGiOAuthService extends AbstractOSGiDelegateService<OAuthSer
         return getService0().getDefaultAccount(api, session);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.OAuthService#upsertAccount(java.lang.String, com.openexchange.oauth.OAuthInteractionType, java.util.Map, int, int, java.util.Set)
-     */
     @Override
     public OAuthAccount upsertAccount(Session session, String serviceMetaData, int accountId, OAuthInteractionType type, Map<String, Object> arguments, Set<OAuthScope> scopes) throws OXException {
         return getService0().upsertAccount(session, serviceMetaData, accountId, type, arguments, scopes);

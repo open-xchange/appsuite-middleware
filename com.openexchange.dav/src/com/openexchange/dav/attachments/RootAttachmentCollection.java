@@ -52,6 +52,7 @@ package com.openexchange.dav.attachments;
 import java.util.Collections;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dav.AttachmentUtils;
 import com.openexchange.dav.DAVFactory;
 import com.openexchange.dav.DAVProtocol;
@@ -83,7 +84,8 @@ public class RootAttachmentCollection extends DAVRootCollection {
      */
     public RootAttachmentCollection(AttachmentFactory factory) {
         super(factory, "Attachments");
-        includeProperties(new CurrentUserPrincipal(factory), new PrincipalCollectionSet(), new CalendarHomeSet(), new AddressbookHomeSet());
+        ConfigViewFactory configViewFactory = factory.getService(ConfigViewFactory.class);
+        includeProperties(new CurrentUserPrincipal(factory), new PrincipalCollectionSet(configViewFactory), new CalendarHomeSet(configViewFactory), new AddressbookHomeSet(configViewFactory));
     }
 
     @Override

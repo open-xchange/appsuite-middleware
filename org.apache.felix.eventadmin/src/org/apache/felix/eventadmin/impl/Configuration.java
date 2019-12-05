@@ -521,7 +521,7 @@ public class Configuration
                     m_threadPoolSize, m_timeout, m_requireTopic,
                     m_ignoreTimeout, m_ignoreTopics, m_asyncToSyncThreadRatio);
         }
-        catch (final Throwable t)
+        catch (Throwable t)
         {
             // we simply ignore this
         }
@@ -557,7 +557,7 @@ public class Configuration
     private int getIntProperty(final String key, final Object value,
         final int defaultValue, final int min)
     {
-        if(null != value)
+        if (null != value)
         {
             final int result;
             if ( value instanceof Integer )
@@ -577,7 +577,7 @@ public class Configuration
                     return defaultValue;
                 }
             }
-            if(result >= min)
+            if (result >= min)
             {
                 return result;
             }
@@ -598,7 +598,7 @@ public class Configuration
     private double getDoubleProperty(final String key, final Object value,
         final double defaultValue, final double min)
     {
-        if(null != value)
+        if (null != value)
         {
             final double result;
             if ( value instanceof Double )
@@ -618,7 +618,7 @@ public class Configuration
                     return defaultValue;
                 }
             }
-            if(result >= min)
+            if (result >= min)
             {
                 return result;
             }
@@ -638,7 +638,7 @@ public class Configuration
     private boolean getBooleanProperty(final Object obj,
         final boolean defaultValue)
     {
-        if(null != obj)
+        if (null != obj)
         {
             if ( obj instanceof Boolean )
             {
@@ -646,13 +646,13 @@ public class Configuration
             }
             String value = obj.toString().trim().toLowerCase();
 
-            if(0 < value.length() && ("0".equals(value) || "false".equals(value)
+            if (0 < value.length() && ("0".equals(value) || "false".equals(value)
                 || "no".equals(value)))
             {
                 return false;
             }
 
-            if(0 < value.length() && ("1".equals(value) || "true".equals(value)
+            if (0 < value.length() && ("1".equals(value) || "true".equals(value)
                 || "yes".equals(value)))
             {
                 return true;

@@ -101,7 +101,7 @@ public class MessagingRequestDataTest {
         try {
             final MessagingFolderAddress addr = messagingRequest.getLongFolder();
             fail("Should have failed parsing account number");
-        } catch (final OXException e) {
+        } catch (OXException e) {
             // SUCCESS
         }
 

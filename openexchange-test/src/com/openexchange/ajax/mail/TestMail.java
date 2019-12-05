@@ -391,7 +391,7 @@ public class TestMail {
                 try {
                     final int flags = values.getInt(index);
                     setFlags(flags);
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     final String flagString = values.getString(index);
                     final String[] flags = flagString.split(",");
                     int bitmask = 0;
@@ -500,7 +500,7 @@ public class TestMail {
             final String myValue = (String) value;
             try {
                 setFlags(Integer.valueOf(myValue).intValue());
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 final String[] flags = myValue.split(",");
                 int bitmask = 0;
                 for (final String flagName : flags) {

@@ -1,0 +1,19 @@
+'/gdpr/dataexport/availableModules':
+  get:
+    operationId: getDataExportAvailableModules
+    tags:
+      - DataExport
+    summary: Loads the available data export modules for session-associated user
+    parameters:
+      - $ref: '#/components/parameters/gblQueryParamSession'
+    responses:
+      '200':
+        description: A JSON object containing the available modules.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DataExportModules'
+      '400':
+        description: 'Bad request, response contains error message.'
+      '401':
+        description: Not authorized

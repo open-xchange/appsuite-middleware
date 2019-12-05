@@ -120,7 +120,7 @@ public class Activator extends DeferredActivator {
             servletRegisterer.registerServlet();
 
             serviceRegistration = context.registerService(PreferencesItemService.class, new SMSPreferencesItem(), null);
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             LOG.error("", t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);
         }
@@ -142,7 +142,7 @@ public class Activator extends DeferredActivator {
             }
             getServiceRegistry().clearRegistry();
             ServletRegisterer.PREFIX.set(null);
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             LOG.error("", t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);
         }

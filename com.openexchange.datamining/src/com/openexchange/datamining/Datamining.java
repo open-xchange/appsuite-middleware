@@ -239,16 +239,16 @@ public class Datamining {
 
     private static void cleanupSql(final Object... clobj) {
         try {
-            if( null != clobj ) {
+            if ( null != clobj ) {
                 for(final Object obj : clobj) {
-                    if( null != obj ) {
-                        if( obj instanceof Statement ) {
+                    if ( null != obj ) {
+                        if ( obj instanceof Statement ) {
                             ((Statement)obj).close();
                         }
-                        if( obj instanceof ResultSet) {
+                        if ( obj instanceof ResultSet) {
                             ((ResultSet)obj).close();
                         }
-                        if( obj instanceof MySQLConnection) {
+                        if ( obj instanceof MySQLConnection) {
                             ((MySQLConnection)obj).close();
                         }
                     }
@@ -717,9 +717,9 @@ public class Datamining {
                         // FIXME: maybe sufficient to just NOT check for savepoints and sum up just all data within jsonStorage with id=io.ox/core ?
                         InputStream is = result.getBlob(1).getBinaryStream();
                         JSONObject job = new JSONObject(new InputStreamReader(is));
-                        if( job.has("savepoints") ) {
+                        if ( job.has("savepoints") ) {
                             JSONArray sp = (JSONArray) job.get("savepoints");
-                            if( null != sp ) {
+                            if ( null != sp ) {
                                 int spsize = sp.toString().getBytes().length;
                                 int ll = 0;
                                 for (Map.Entry<Integer, Integer> entry : rm.entrySet()) {

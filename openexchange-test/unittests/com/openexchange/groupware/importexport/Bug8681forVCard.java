@@ -63,7 +63,7 @@ import com.openexchange.groupware.userconfiguration.MutableUserConfiguration;
 import com.openexchange.groupware.userconfiguration.OverridingUserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.importexport.formats.Format;
+import com.openexchange.importexport.Format;
 import com.openexchange.setuptools.TestConfig;
 
 public class Bug8681forVCard extends AbstractVCardTest {
@@ -99,7 +99,7 @@ public class Bug8681forVCard extends AbstractVCardTest {
             try {
                 imp.canImport(sessObj, Format.VCARD, folders, null);
                 fail("Could import Contacts without permission on Contact module!");
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 assertEquals("I_E-0607", e.getErrorCode());
             }
         } finally {

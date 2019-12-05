@@ -97,7 +97,6 @@ import com.openexchange.gmail.send.services.Services;
 import com.openexchange.google.api.client.GoogleApiClients;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.MailStrings;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.i18n.tools.StringHelper;
@@ -146,8 +145,10 @@ import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthUtil;
 import com.openexchange.oauth.scope.OXScope;
+import com.openexchange.regional.RegionalSettingsService;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 /**
@@ -165,7 +166,7 @@ public class GmailSendTransport extends MailTransport {
     static {
         try {
             staticHostName = InetAddress.getLocalHost().getCanonicalHostName();
-        } catch (final UnknownHostException e) {
+        } catch (UnknownHostException e) {
             staticHostName = "localhost";
             warnSpam = e;
         }
@@ -417,15 +418,15 @@ public class GmailSendTransport extends MailTransport {
         try {
             Gmail gmail = gmailAccess.gmail;
             gmail.users().getProfile("me").execute();
-        } catch (final HttpResponseException e) {
+        } catch (HttpResponseException e) {
             if (401 == e.getStatusCode() || 403 == e.getStatusCode()) {
                 // Not authorized...
                 throw OAuthExceptionCodes.INVALID_ACCOUNT_EXTENDED.create(gmailAccess.oauthAccount.getDisplayName(), I(gmailAccess.oauthAccount.getId()));
             }
             throw MailExceptionCode.PROTOCOL_ERROR.create(e, "HTTP", e.getStatusCode() + " " + e.getStatusMessage());
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
@@ -618,9 +619,15 @@ public class GmailSendTransport extends MailTransport {
 
             // Sent date in UTC time
             {
-                final MailDateFormat mdf = MimeMessageUtility.getMailDateFormat(session);
-                synchronized (mdf) {
-                    mimeMessage.setHeader("Date", mdf.format(new Date()));
+                RegionalSettingsService regionalSettingsService = Services.getService(RegionalSettingsService.class);
+                if (null != regionalSettingsService) {
+                    DateFormat df = regionalSettingsService.getDateFormat(session.getContextId(), session.getUserId(), locale, DateFormat.DEFAULT);
+                    mimeMessage.setHeader("Date", df.format(new Date()));
+                } else {
+                    final MailDateFormat mdf = MimeMessageUtility.getMailDateFormat(session);
+                    synchronized (mdf) {
+                        mimeMessage.setHeader("Date", mdf.format(new Date()));
+                    }
                 }
             }
 
@@ -691,7 +698,7 @@ public class GmailSendTransport extends MailTransport {
                         gmailSendFiller.setAccountId(accountId);
                         gmailSendFiller.setCommonHeaders(mimeMessage);
                     }
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     LOG.trace("Failed to extract MIME message from {} instance", ContentAware.class.getName(), e);
                     mimeMessage = null;
                 }
@@ -838,7 +845,7 @@ public class GmailSendTransport extends MailTransport {
         } catch (OXException e) {
             exception = e;
             throw e;
-        } catch (final HttpResponseException e) {
+        } catch (HttpResponseException e) {
             exception = e;
             if (401 == e.getStatusCode() || 403 == e.getStatusCode()) {
                 // Not authorized...
@@ -896,7 +903,7 @@ public class GmailSendTransport extends MailTransport {
              */
             try {
                 checkMimeVersionHeader(mimeMessage);
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 LOG.warn("Could not check for proper usage of \"MIME-Version\" header according to RFC2045.", e);
             }
         }
@@ -1081,7 +1088,7 @@ public class GmailSendTransport extends MailTransport {
                         }
                         try {
                             internetAddress.setPersonal("", "US-ASCII");
-                        } catch (final UnsupportedEncodingException e) {
+                        } catch (UnsupportedEncodingException e) {
                             LOG.trace("\"US-ASCII\" is not supported", e);
                             // Ignore as personal is cleared
                         }

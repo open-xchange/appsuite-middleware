@@ -49,7 +49,7 @@
 
 package com.openexchange.user.json.filter;
 
-import com.openexchange.groupware.ldap.User;
+import com.openexchange.user.User;
 
 
 /**

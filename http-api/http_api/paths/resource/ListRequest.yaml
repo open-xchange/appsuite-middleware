@@ -1,0 +1,28 @@
+/resource?action=list:
+  put:
+    operationId: getResourceList
+    tags:
+      - Resources
+    summary: Gets a list of resources.
+    parameters:
+      - $ref: '#/components/parameters/gblQueryParamSession'
+    responses:
+      '200':
+        description: >
+          A JSON object containing an array of resource objects. In case of
+          errors the responsible fields in the
+
+          response are filled (see [Error handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResourcesResponse'
+    requestBody:
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/ResourceListElement'
+      description: A JSON array of JSON objects with the id of the requested resources.
+      required: true

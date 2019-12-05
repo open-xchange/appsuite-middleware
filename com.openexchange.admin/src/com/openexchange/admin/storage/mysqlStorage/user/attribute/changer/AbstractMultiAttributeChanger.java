@@ -71,11 +71,6 @@ public abstract class AbstractMultiAttributeChanger extends AbstractAttributeCha
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AbstractAttributeChanger#fillSetStatement(java.sql.PreparedStatement, java.util.Map, java.util.Map, int, int)
-     */
     @Override
     protected int fillSetStatement(PreparedStatement stmt, Map<Attribute, Setter> setters, Map<Attribute, Object> attributes, int userId, int contextId) throws SQLException {
         int parameterIndex = 1;
@@ -89,11 +84,6 @@ public abstract class AbstractMultiAttributeChanger extends AbstractAttributeCha
         return appendContextUser(contextId, userId, stmt, parameterIndex);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AbstractAttributeChanger#fillUnsetStatement(java.sql.PreparedStatement, java.util.Map, java.util.Set, int, int)
-     */
     @Override
     protected int fillUnsetStatement(PreparedStatement stmt, Map<Attribute, Unsetter> unsetters, Set<Attribute> attributes, int userId, int contextId) throws SQLException {
         int parameterIndex = 1;

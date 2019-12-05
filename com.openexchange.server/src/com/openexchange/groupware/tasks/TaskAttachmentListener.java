@@ -87,7 +87,7 @@ public class TaskAttachmentListener implements AttachmentListener {
             task.setNumberOfAttachments(oldTask.getNumberOfAttachments() + 1);
             UpdateData.updateTask(ctx, con, task, lastRead, UPDATE_FIELDS, null,
                 null, null, null);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
         }
         LOG.trace("Increased number of attachments for task {} in context {} to {}", event.getAttachedId(), ctx.getContextId(), task.getNumberOfAttachments());
@@ -116,7 +116,7 @@ public class TaskAttachmentListener implements AttachmentListener {
             task.setNumberOfAttachments(numOfAttachments);
             UpdateData.updateTask(ctx, con, task, lastRead, UPDATE_FIELDS, null,
                 null, null, null);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
         }
         LOG.trace("Decreased number of attachments for task {} in context {} to {}", event.getAttachedId(), ctx.getContextId(), task.getNumberOfAttachments());

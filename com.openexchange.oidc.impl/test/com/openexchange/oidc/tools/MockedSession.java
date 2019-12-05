@@ -136,6 +136,11 @@ public class MockedSession implements Session {
     }
 
     @Override
+    public boolean isStaySignedIn() {
+        return false;
+    }
+
+    @Override
     public Set<String> getParameterNames() {
         // TODO Auto-generated method stub
         return null;

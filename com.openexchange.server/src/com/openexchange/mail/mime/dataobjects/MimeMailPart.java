@@ -230,7 +230,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
             MessageUtility.setContent(multipart, part);
             // part.setContent(multipart);
             this.part = part;
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         }
     }
@@ -276,12 +276,12 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
                     this.setContentType(MimeTypes.MIME_DEFAULT);
                 }
                 tmp = getContentType().startsWith(MULTIPART);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.error("", e);
-            } catch (final MessageRemovedException e) {
+            } catch (MessageRemovedException e) {
                 // Message has been removed in the meantime
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e, new Object[0]);
-            } catch (final MessagingException e) {
+            } catch (MessagingException e) {
                 LOG.error("", e);
             }
             isMulti = tmp;
@@ -304,7 +304,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
         if (part instanceof ManagedMimeMessage) {
             try {
                 ((ManagedMimeMessage) part).cleanUp();
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 LoggerFactory.getLogger(MimeMailPart.class).warn("Couldn't clean-up MIME resource.", e);
             }
         }
@@ -353,16 +353,16 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
             } else {
                 return obj;
             }
-        } catch (final UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             LOG.error("Unsupported encoding in a message detected and monitored", e);
             mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
             throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
-        } catch (final IOException e) {
+        } catch (IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         } finally {
             if (closeBackup) {
@@ -382,7 +382,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
         }
         try {
             return part.getDataHandler();
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         }
     }
@@ -403,7 +403,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
                 return ((MimeMessage) part).getRawInputStream();
             }
             throw MailExceptionCode.NO_CONTENT.create();
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         }
     }
@@ -436,15 +436,15 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
                 in.unread(read);
                 partStream = null;
                 return in;
-            } catch (final com.sun.mail.util.MessageRemovedIOException e) {
+            } catch (com.sun.mail.util.MessageRemovedIOException e) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 return getRawInputStream(e);
-            } catch (final MessageRemovedException e) {
+            } catch (MessageRemovedException e) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
-            } catch (final MessagingException e) {
+            } catch (MessagingException e) {
                 return getRawInputStream(e);
-            } catch (final NullPointerException e) {
+            } catch (NullPointerException e) {
                 // Occurs in case of non-JavaMail-parseable Content-Type header
                 if (!handleNpe) {
                     throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
@@ -457,7 +457,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
             } finally {
                 Streams.close(partStream);
             }
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         }
     }
@@ -474,7 +474,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
                 p = this.part;
             }
             p.setHeader("Content-Type", new ContentType(cts).toString(true));
-        } catch (final Exception x) {
+        } catch (Exception x) {
             // Couldn't sanitize
             LOG.trace("Sanitizing part failed", x);
             return null;
@@ -496,9 +496,9 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
                 throw MimeMailException.handleMessagingException((MessagingException) e);
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
-        } catch (final MessageRemovedException me) {
+        } catch (MessageRemovedException me) {
             throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(me);
-        } catch (final MessagingException me) {
+        } catch (MessagingException me) {
             me.setNextException(e);
             throw me;
         }
@@ -529,7 +529,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
                 final MultipartWrapper wrapper = getMultipartWrapper();
                 try {
                     return wrapper.getCount();
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     return handleMissingStartBoundary(e);
                 }
             }
@@ -573,13 +573,13 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
             final MultipartWrapper multipart = new MIMEMultipartWrapper(new MIMEMultipartMailPart(getContentType(), part.getDataHandler().getDataSource()));
             this.multipart = multipart;
             return multipart.getCount();
-        } catch (final IOException e1) {
+        } catch (IOException e1) {
             LOG.error("", e1);
             /*
              * Throw original mail exception
              */
             throw e;
-        } catch (final MessagingException e1) {
+        } catch (MessagingException e1) {
             LOG.error("", e1);
             /*
              * Throw original mail exception
@@ -599,16 +599,16 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
                 saneContentType();
             }
             part.writeTo(out);
-        } catch (final UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             LOG.error("Unsupported encoding in a message detected and monitored", e);
             mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
             throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
-        } catch (final IOException e) {
+        } catch (IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             if ("No content".equals(e.getMessage())) {
                 throw MailExceptionCode.NO_CONTENT.create(e, new Object[0]);
             }
@@ -622,7 +622,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
         if (null != header && header.length > 0) {
             try {
                 part.setHeader(MessageHeaders.HDR_CONTENT_TYPE, new ContentType(header[0]).toString());
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 // Ignore
                 LOG.trace("Failed to set header", e);
             }
@@ -694,13 +694,13 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
                 multipart = null;
                 contentLoaded = true;
             }
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
-        } catch (final UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             LOG.error("Unsupported encoding in a message detected and monitored", e);
             mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
             throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
-        } catch (final IOException e) {
+        } catch (IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
@@ -766,11 +766,11 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
              * Write common fields
              */
             out.defaultWriteObject();
-        } catch (final OXException e) {
+        } catch (OXException e) {
             final IOException ioe = new IOException(e.getMessage());
             ioe.initCause(e);
             throw ioe;
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             final IOException ioe = new IOException(e.getMessage());
             ioe.initCause(e);
             throw ioe;
@@ -830,7 +830,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
                     this.part = createMessageInMemory(Streams.newByteArrayInputStream(serializedContent));
                     contentLoaded = true;
                 }
-            } catch (final MessagingException e) {
+            } catch (MessagingException e) {
                 throw new IOException(e.getMessage(), e);
             } finally {
                 /*
@@ -1004,20 +1004,20 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
                                 this.multipart = multipart;
                             }
                        // }
-                    } catch (final MessageRemovedException e) {
+                    } catch (MessageRemovedException e) {
                         throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e, new Object[0]);
-                    } catch (final MessagingException e) {
+                    } catch (MessagingException e) {
                         throw MailExceptionCode.MESSAGING_ERROR.create(e, e.getMessage());
-                    } catch (final UnsupportedEncodingException e) {
+                    } catch (UnsupportedEncodingException e) {
                         LOG.error("Unsupported encoding in a message detected and monitored", e);
                         mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
                         throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
-                    } catch (final IOException e) {
+                    } catch (IOException e) {
                         if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                             throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
                         }
                         throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
-                    } catch (final ClassCastException e) {
+                    } catch (ClassCastException e) {
                         // Cast to javax.mail.Multipart failed
                         LOG.debug("Message's Content-Type indicates to be multipart/* but its content is not an instance of javax.mail.Multipart but {}", e.getMessage());
                         throw MailExceptionCode.MESSAGING_ERROR.create(e, e.getMessage());
@@ -1104,7 +1104,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
         public int getCount() throws OXException {
             try {
                 return jmMultipart.getCount();
-            } catch (final MessagingException e) {
+            } catch (MessagingException e) {
                 throw MailExceptionCode.MESSAGING_ERROR.create(e, e.getMessage());
             }
         }
@@ -1113,7 +1113,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
         public MailPart getMailPart(final int index) throws OXException {
             try {
                 return MimeMessageConverter.convertPart(jmMultipart.getBodyPart(index), false);
-            } catch (final MessagingException e) {
+            } catch (MessagingException e) {
                 throw MailExceptionCode.MESSAGING_ERROR.create(e, e.getMessage());
             }
         }
@@ -1128,7 +1128,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
     private static void closeQuitely(final Closeable closeable) {
         try {
             closeable.close();
-        } catch (final IOException e) {
+        } catch (IOException e) {
             LOG.trace("", e);
         }
     }

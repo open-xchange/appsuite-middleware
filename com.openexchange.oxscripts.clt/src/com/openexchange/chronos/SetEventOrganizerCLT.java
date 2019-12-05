@@ -105,7 +105,7 @@ public class SetEventOrganizerCLT extends AbstractRmiCLI<Void> {
             ChronosRMIService rmiService = getRmiStub(optRmiHostName, ChronosRMIService.RMI_NAME);
             rmiService.setEventOrganizer(contextId.intValue(), eventId.intValue(), userId.intValue());
             error = false;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             final String errMsg = e.getMessage();
             System.out.println(errMsg == null ? "An error occurred." : errMsg);
         } finally {
@@ -117,8 +117,8 @@ public class SetEventOrganizerCLT extends AbstractRmiCLI<Void> {
     }
 
     @Override
-    protected boolean requiresAdministrativePermission() {
-        return true;
+    protected Boolean requiresAdministrativePermission() {
+        return Boolean.TRUE;
     }
 
     @Override

@@ -72,7 +72,7 @@ public class Categories<T extends CalendarComponent, U extends CalendarObject> e
     @Override
     public void emit(final Mode mode, final int index, final U u, final T t, final List<ConversionWarning> warnings, final Context ctx, final Object... args) {
         final String categories = u.getCategories();
-        if(null == categories){
+        if (null == categories){
             return;
         }
         t.getProperties().add(new net.fortuna.ical4j.model.property.Categories(categories));
@@ -93,7 +93,7 @@ public class Categories<T extends CalendarComponent, U extends CalendarObject> e
                 bob.append(catObjects.next()).append(',');
             }
         }
-        if(bob.length() > 0) {
+        if (bob.length() > 0) {
             bob.setLength(bob.length()-1);
         }
         String value = bob.toString();

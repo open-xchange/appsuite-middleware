@@ -84,7 +84,7 @@ public class ServletRequestAdapter implements SimpleRequest {
 	}
 
 	public Writer getWriter() throws IOException {
-		if(w==null) {
+		if (w==null) {
 			w = res.getWriter();
 		}
 		return w;
@@ -97,7 +97,7 @@ public class ServletRequestAdapter implements SimpleRequest {
 
 	@Override
     public Object getBody() {
-		if(null != body) {
+		if (null != body) {
 			return body;
 		}
 		try {
@@ -116,9 +116,9 @@ public class ServletRequestAdapter implements SimpleRequest {
 			final String body =  new String(baos.toByteArray(), Charsets.forName(characterEncoding));
 
 			return this.body = new JSONObject("{\"data\": "+body+'}').get("data");
-		} catch (final IOException e) {
+		} catch (IOException e) {
 			return null;
-		} catch (final JSONException e) {
+		} catch (JSONException e) {
 			return null;
 		}
 	}
@@ -127,7 +127,7 @@ public class ServletRequestAdapter implements SimpleRequest {
 	public String toString(){
 		final StringBuilder b = new StringBuilder();
 		final Enumeration<?> e = req.getParameterNames();
-		while(e.hasMoreElements()) {
+		while (e.hasMoreElements()) {
 			final String name = e.nextElement().toString();
 			b.append(" | ");
 			b.append(name);
@@ -137,7 +137,7 @@ public class ServletRequestAdapter implements SimpleRequest {
 		}
 		b.append("BODY: ");
 		final Object body = getBody();
-		if(null == body) {
+		if (null == body) {
 			b.append("No body");
 		} else {
 			b.append(body);

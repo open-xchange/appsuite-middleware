@@ -126,7 +126,7 @@ public class HTMLServiceActivator extends HousekeepingActivator {
             Config.LoggerProvider = LoggerProvider.DISABLED;
             FilterMaps.loadWhitelist();
             WhitelistedSchemes.initInstance(configService);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("", e);
             throw e;
         }
@@ -153,7 +153,7 @@ public class HTMLServiceActivator extends HousekeepingActivator {
             super.stopBundle();
             HTMLImageFilterHandler.PREFIX.set(null);
             Services.setServiceLookup(null);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("", e);
             throw e;
         }
@@ -193,7 +193,7 @@ public class HTMLServiceActivator extends HousekeepingActivator {
         try {
             in = new FileInputStream(htmlEntityFile);
             htmlEntities.load(in);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             LOG.error("", e);
             return getDefaultHTMLEntityMaps();
         } finally {
@@ -414,7 +414,7 @@ public class HTMLServiceActivator extends HousekeepingActivator {
             entityMap.append("prod=8719\n");
             entityMap.append("le=8804");
             htmlEntities.load(new UnsynchronizedByteArrayInputStream(String.valueOf(entityMap.toString()).getBytes(com.openexchange.java.Charsets.UTF_8)));
-        } catch (final IOException e) {
+        } catch (IOException e) {
             /*
              * Cannot occur
              */
@@ -446,9 +446,9 @@ public class HTMLServiceActivator extends HousekeepingActivator {
                 } finally {
                     Streams.close(in);
                 }
-            } catch (final FileNotFoundException e) {
+            } catch (FileNotFoundException e) {
                 LOG.warn("Missing JTidy configuration file \"{}\"", tidyConfigFilename);
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 LOG.warn("I/O error while reading JTidy configuration from file \"{}\"", tidyConfigFilename);
             }
         }
@@ -475,12 +475,12 @@ public class HTMLServiceActivator extends HousekeepingActivator {
                 defaultConfig.append("output-xhtml=yes\n");
                 defaultConfig.append("char-encoding=latin1");
                 properties.load(new ByteArrayInputStream(String.valueOf(defaultConfig.toString()).getBytes(com.openexchange.java.Charsets.UTF_8)));
-            } catch (final UnsupportedEncodingException e) {
+            } catch (UnsupportedEncodingException e) {
                 /*
                  * Cannot occur
                  */
                 LOG.error("", e);
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 /*
                  * Cannot occur
                  */
@@ -503,7 +503,7 @@ public class HTMLServiceActivator extends HousekeepingActivator {
         if (null != tidyMessagesFilename) {
             try {
                 return new BufferedInputStream(new FileInputStream(tidyMessagesFilename), 65536);
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 LOG.warn("File providing JTidy messages could not be found: {}", tidyMessagesFilename, e);
             }
         }

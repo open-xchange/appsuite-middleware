@@ -187,7 +187,7 @@ public class ApnsHttp2DriveEventsActivator extends HousekeepingActivator {
                 // Assume keystore file is given as resource identifier
                 try {
                     byte[] keystoreBytes = Streams.stream2bytes(service.loadResource(keystoreName));
-                    if(keystoreBytes.length == 0) {
+                    if (keystoreBytes.length == 0) {
                         return null;
                     }
                     return new ApnsHttp2Options(keystoreBytes, password, production, topic);
@@ -212,7 +212,7 @@ public class ApnsHttp2DriveEventsActivator extends HousekeepingActivator {
                     } else {
                         // Assume private key file is given as resource identifier
                         privateKey = Streams.stream2bytes(service.loadResource(privateKeyFileName));
-                        if(privateKey.length == 0) {
+                        if (privateKey.length == 0) {
                             return null;
                         }
                     }

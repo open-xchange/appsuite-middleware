@@ -50,6 +50,8 @@
 package com.openexchange.admin.contextrestore.osgi;
 
 import java.rmi.Remote;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.admin.contextrestore.rmi.impl.OXContextRestore;
 import com.openexchange.admin.daemons.AdminDaemonService;
@@ -88,9 +90,11 @@ public class Activator extends HousekeepingActivator {
             AdminCache.compareAndSetConfigurationService(null, service);
             OXContextInterfaceReference.set(new OXContext());
             // Register service
-            registerService(Remote.class, new OXContextRestore());
+            Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
+            serviceProperties.put("RMI_NAME", OXContextRestore.RMI_NAME);
+            registerService(Remote.class, new OXContextRestore(), serviceProperties);
             log.info("RMI Interface for context restore registered.");
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             log.error("Error while creating instance for OXContextRestoreInterface interface", e);
             throw e;
         }

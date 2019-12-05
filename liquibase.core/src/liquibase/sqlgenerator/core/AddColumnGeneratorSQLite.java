@@ -41,20 +41,24 @@ public class AddColumnGeneratorSQLite extends AddColumnGenerator {
         // define alter table logic
         SQLiteDatabase.AlterTableVisitor rename_alter_visitor =
         new SQLiteDatabase.AlterTableVisitor() {
+            @Override
             public ColumnConfig[] getColumnsToAdd() {
                 return new ColumnConfig[] {
                     new ColumnConfig()
                             .setName(statement.getColumnName())
                         .setType(statement.getColumnType())
-                        .setAutoIncrement(statement.isAutoIncrement())
+                        .setAutoIncrement(statement.isAutoIncrement() ? Boolean.TRUE : Boolean.FALSE)
                 };
             }
+            @Override
             public boolean copyThisColumn(ColumnConfig column) {
                 return !column.getName().equals(statement.getColumnName());
             }
+            @Override
             public boolean createThisColumn(ColumnConfig column) {
                 return true;
             }
+            @Override
             public boolean createThisIndex(Index index) {
                 return true;
             }

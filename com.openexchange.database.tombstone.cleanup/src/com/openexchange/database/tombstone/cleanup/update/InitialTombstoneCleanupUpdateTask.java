@@ -79,7 +79,7 @@ public class InitialTombstoneCleanupUpdateTask extends UpdateTaskAdapter {
             SchemaTombstoneCleanerForUpdateTask schemaCleaner = new SchemaTombstoneCleanerForUpdateTask();
             Map<String, Integer> cleanedTables = schemaCleaner.cleanup(params.getConnection(), timestamp);
             schemaCleaner.logResults(params.getSchema().getSchema(), cleanedTables);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             LOG.error("Unable to clean up schema.", e);
         }
     }

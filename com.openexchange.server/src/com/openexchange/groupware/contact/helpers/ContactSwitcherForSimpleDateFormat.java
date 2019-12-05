@@ -108,7 +108,7 @@ public class ContactSwitcherForSimpleDateFormat extends AbstractContactSwitcherW
         try {
             final String invalidRegex = pattern.replaceAll("[a-zA-Z]+", "0+");
             return new RegexDateValidator(Pattern.compile(invalidRegex));
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             LOG.error("", e);
             return DEFAULT_VALIDATOR;
         }
@@ -172,7 +172,7 @@ public class ContactSwitcherForSimpleDateFormat extends AbstractContactSwitcherW
                     ((Contact) objects[0]).addWarning(ContactExceptionCodes.DATE_CONVERSION_FAILED.create(dateString));
                 }
                 return objects;
-            } catch (final ParseException e) {
+            } catch (ParseException e) {
                 LOG.debug(e.getMessage());
             }
         }        
@@ -217,7 +217,7 @@ public class ContactSwitcherForSimpleDateFormat extends AbstractContactSwitcherW
     public Object creationdate(final Object... objects) throws OXException {
         try {
             return delegate.creationdate(makeDate(objects));
-        } catch (final ClassCastException e) {
+        } catch (ClassCastException e) {
             throw ContactExceptionCodes.CONV_OBJ_2_DATE_FAILED.create(e, objects[1], "CreationDate");
         }
     }
@@ -226,7 +226,7 @@ public class ContactSwitcherForSimpleDateFormat extends AbstractContactSwitcherW
     public Object anniversary(final Object... objects) throws OXException {
         try {
             return delegate.anniversary(makeDate(objects));
-        } catch (final ClassCastException e) {
+        } catch (ClassCastException e) {
             throw ContactExceptionCodes.CONV_OBJ_2_DATE_FAILED.create(e, objects[1], "Anniversary");
         }
     }
@@ -235,7 +235,7 @@ public class ContactSwitcherForSimpleDateFormat extends AbstractContactSwitcherW
     public Object birthday(final Object... objects) throws OXException {
         try {
             return delegate.birthday(makeDate(objects));
-        } catch (final ClassCastException e) {
+        } catch (ClassCastException e) {
             throw ContactExceptionCodes.CONV_OBJ_2_DATE_FAILED.create(e, objects[1], "Birthday");
         }
     }
@@ -244,7 +244,7 @@ public class ContactSwitcherForSimpleDateFormat extends AbstractContactSwitcherW
     public Object imagelastmodified(final Object... objects) throws OXException {
         try {
             return delegate.imagelastmodified(makeDate(objects));
-        } catch (final ClassCastException e) {
+        } catch (ClassCastException e) {
             throw ContactExceptionCodes.CONV_OBJ_2_DATE_FAILED.create(e, objects[1], "ImageLastModified");
         }
     }
@@ -253,7 +253,7 @@ public class ContactSwitcherForSimpleDateFormat extends AbstractContactSwitcherW
     public Object lastmodified(final Object... objects) throws OXException {
         try {
             return delegate.lastmodified(makeDate(objects));
-        } catch (final ClassCastException e) {
+        } catch (ClassCastException e) {
             throw ContactExceptionCodes.CONV_OBJ_2_DATE_FAILED.create(e, objects[1], "LastModified");
         }
     }

@@ -80,12 +80,10 @@ import com.openexchange.config.Filter;
 import com.openexchange.config.ForcedReloadable;
 import com.openexchange.config.Interests;
 import com.openexchange.config.PropertyFilter;
-import com.openexchange.config.PropertyListener;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.Reloadables;
 import com.openexchange.config.WildcardFilter;
 import com.openexchange.config.cascade.ReinitializableConfigProviderService;
-import com.openexchange.config.internal.filewatcher.FileWatcher;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
@@ -435,62 +433,16 @@ public final class ConfigurationImpl implements ConfigurationService {
     }
 
     @Override
-    public String getProperty(final String name, final PropertyListener listener) {
-        if (watchProperty(name, listener)) {
-            return properties.get(name);
-        }
-        return null;
-    }
-
-    @Override
-    public String getProperty(final String name, final String defaultValue, final PropertyListener listener) {
-        if (watchProperty(name, listener)) {
-            return properties.get(name);
-        }
-        return defaultValue;
-    }
-
-    @Override
     public List<String> getProperty(String name, String defaultValue, String separator) {
         String property = getProperty(name, defaultValue);
         return Strings.splitAndTrim(property, separator);
     }
 
-    @Override
-    public List<String> getProperty(String name, String defaultValue, PropertyListener propertyListener, String separator) {
-        if (watchProperty(name, propertyListener)) {
-            return getProperty(name, defaultValue, separator);
-        }
-        return Strings.splitAndTrim(defaultValue, separator);
-    }
-
-    @Override
-    public void removePropertyListener(final String name, final PropertyListener listener) {
-        final PropertyWatcher pw = PropertyWatcher.getPropertyWatcher(name);
-        if (pw != null) {
-            pw.removePropertyListener(listener);
-            if (pw.isEmpty()) {
-                final PropertyWatcher removedWatcher = PropertyWatcher.removePropertWatcher(name);
-                final FileWatcher fileWatcher = FileWatcher.optFileWatcher(new File(propertiesFiles.get(name)));
-                if (null != fileWatcher) {
-                    fileWatcher.removeFileListener(removedWatcher);
-                }
-            }
-        }
-    }
-
     /**
      * {@inheritDoc}
      */
     @Override
-    public Properties getFile(final String fileName) {
-        return getFile(fileName, null);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Properties getFile(final String filename, final PropertyListener listener) {
+    public Properties getFile(final String filename) {
         if (null == filename) {
             return new Properties();
         }
@@ -502,11 +454,6 @@ public final class ConfigurationImpl implements ConfigurationService {
             if (matcher.matches(filename, entry.getKey())) {
                 Properties retval = new Properties();
                 retval.putAll(entry.getValue());
-                if (listener != null) {
-                    for (Object k : retval.keySet()) {
-                        getProperty((String) k, listener);
-                    }
-                }
                 return retval;
             }
         }
@@ -532,43 +479,18 @@ public final class ConfigurationImpl implements ConfigurationService {
 
     @Override
     public Properties getPropertiesInFolder(final String folderName) {
-        return getPropertiesInFolder(folderName, null);
-    }
-
-    public Properties getPropertiesInFolder(final String folderName, final PropertyListener listener) {
         Properties retval = new Properties();
         for (File dir : dirs) {
             String fldName = dir.getAbsolutePath() + File.separatorChar + folderName + File.separatorChar;
             for (Iterator<Entry<String, String>> iter = propertiesFiles.entrySet().iterator(); iter.hasNext();) {
                 Map.Entry<String, String> entry = iter.next();
                 if (entry.getValue().startsWith(fldName)) {
-                    String value = null == listener ? getProperty(entry.getKey()) : getProperty(entry.getKey(), listener);
+                    String value = getProperty(entry.getKey());
                     retval.put(entry.getKey(), value);
                 }
             }
         }
         return retval;
-    }
-
-    /**
-     * Watch a property for changes.
-     *
-     * @param name the name of the property to watch
-     * @param propertyListener the PropertyListener to register for property changes
-     * @return true if the property with the given name can be found and a watcher is added, else false
-     */
-    private boolean watchProperty(final String name, final PropertyListener propertyListener) {
-        final String value = properties.get(name);
-        if (null == value) {
-            LOG.error("Unable to watch missing property: {}", name);
-            return false;
-        }
-        final PropertyWatcher pw = PropertyWatcher.addPropertyWatcher(name, value, true);
-        pw.addPropertyListener(propertyListener);
-        final FileWatcher fileWatcher = FileWatcher.getFileWatcher(new File(propertiesFiles.get(name)));
-        fileWatcher.addFileListener(pw);
-        fileWatcher.startFileWatcher(10000);
-        return true;
     }
 
     @Override
@@ -578,30 +500,14 @@ public final class ConfigurationImpl implements ConfigurationService {
     }
 
     @Override
-    public boolean getBoolProperty(final String name, final boolean defaultValue, final PropertyListener propertyListener) {
-        if (watchProperty(name, propertyListener)) {
-            return getBoolProperty(name, defaultValue);
-        }
-        return defaultValue;
-    }
-
-    @Override
     public int getIntProperty(final String name, final int defaultValue) {
         final String prop = properties.get(name);
         if (prop != null) {
             try {
                 return Integer.parseInt(prop.trim());
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 LOG.trace("", e);
             }
-        }
-        return defaultValue;
-    }
-
-    @Override
-    public int getIntProperty(final String name, final int defaultValue, final PropertyListener propertyListener) {
-        if (watchProperty(name, propertyListener)) {
-            return getIntProperty(name, defaultValue);
         }
         return defaultValue;
     }
@@ -771,7 +677,7 @@ public final class ConfigurationImpl implements ConfigurationService {
                 builder.append(cbuf, 0, read);
             }
             return builder.toString();
-        } catch (final IOException x) {
+        } catch (IOException x) {
             LOG.error("Can't read file: {}", file, x);
             return null;
         } finally {

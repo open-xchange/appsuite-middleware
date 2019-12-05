@@ -107,7 +107,7 @@ public class MailMultipartAlternativeStructureTest extends AbstractMailTest {
                 }
             }
 
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }

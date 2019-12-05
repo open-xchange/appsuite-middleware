@@ -85,22 +85,22 @@ public final class UserWordTest extends AbstractSpellCheckTest {
     public void testCheck() throws Throwable {
 
         final String userWord = "clazz";
-        UserWordResponse userWordResponse = (UserWordResponse) Executor.execute(getSession(), new UserWordRequest(userWord, true, true));
+        UserWordResponse userWordResponse = Executor.execute(getSession(), new UserWordRequest(userWord, true, true));
         assertTrue("non NULL JSON object: ", JSONObject.NULL.equals(userWordResponse.getNullObject()));
 
         /*
          * en
          */
         final String htmlContent = "<html><head><title>quetsche</title></head><body>This is my clazz</body></html>";
-        CheckResponse checkResponse = (CheckResponse) Executor.execute(getSession(), new CheckRequest(htmlContent, "en", true));
+        CheckResponse checkResponse = Executor.execute(getSession(), new CheckRequest(htmlContent, "en", true));
 
         String[] mw = checkResponse.getMisspeltWords();
         assertTrue("Misspelt words: " + Arrays.toString(mw), mw.length == 0);
 
-        userWordResponse = (UserWordResponse) Executor.execute(getSession(), new UserWordRequest(userWord, false, true));
+        userWordResponse = Executor.execute(getSession(), new UserWordRequest(userWord, false, true));
         assertTrue("non NULL JSON object: ", JSONObject.NULL.equals(userWordResponse.getNullObject()));
 
-        checkResponse = (CheckResponse) Executor.execute(getSession(), new CheckRequest(htmlContent, "en", true));
+        checkResponse = Executor.execute(getSession(), new CheckRequest(htmlContent, "en", true));
         mw = checkResponse.getMisspeltWords();
         assertTrue("No misspelt words: " + Arrays.toString(mw), mw.length == 1);
 

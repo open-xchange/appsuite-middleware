@@ -152,7 +152,7 @@ public final class CSVDataRetentionConfig {
             final String versionNumberStr = configurationService.getProperty("com.openexchange.dataretention.versionNumber", "1").trim();
             try {
                 versionNumber = Integer.parseInt(versionNumberStr);
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 LOG.error("Property \"com.openexchange.dataretention.versionNumber\" is not a number: {}.Using fallback \"1\" instead.", versionNumberStr);
                 versionNumber = 1;
             }
@@ -220,7 +220,7 @@ public final class CSVDataRetentionConfig {
             }
             try {
                 rotateLength = Long.parseLong(rl);
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 LOG.error("Property \"com.openexchange.dataretention.rotateLength\" is not a number: {}.Using fallback \"0\" instead.", rl);
                 rotateLength = 0L;
             }

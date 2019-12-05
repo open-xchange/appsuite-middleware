@@ -87,11 +87,6 @@ public class ICAPOptionsCacheLoader extends CacheLoader<GenericICAPCacheKey, ICA
         this.client = client;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.google.common.cache.CacheLoader#reload(java.lang.Object, java.lang.Object)
-     */
     @Override
     public ListenableFuture<ICAPOptions> reload(GenericICAPCacheKey key, ICAPOptions oldValue) throws Exception {
         if (null != oldValue && false == isExpired(oldValue)) {
@@ -100,11 +95,6 @@ public class ICAPOptionsCacheLoader extends CacheLoader<GenericICAPCacheKey, ICA
         return super.reload(key, oldValue);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.google.common.cache.CacheLoader#load(java.lang.Object)
-     */
     @Override
     public ICAPOptions load(GenericICAPCacheKey key) throws Exception {
         ICAPResponse response = client.execute(new ICAPRequest.Builder().withServer(key.getServer()).withPort(key.getPort()).withService(key.getService()).build());

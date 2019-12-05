@@ -180,7 +180,7 @@ public class SchemaStoreImpl extends SchemaStore {
 
             con.commit();
             rollback = 2;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             if (rollback > 0) {
@@ -227,7 +227,7 @@ public class SchemaStoreImpl extends SchemaStore {
             rollback = 2;
             // Invalidate cache
             invalidateCache(schema);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             if (rollback > 0) {
@@ -258,7 +258,7 @@ public class SchemaStoreImpl extends SchemaStore {
             if (stmt.executeUpdate() == 0) {
                 throw SchemaExceptionCodes.LOCK_FAILED.create(schema.getSchema());
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             if (MYSQL_DEADLOCK == e.getErrorCode() || MYSQL_DUPLICATE == e.getErrorCode() || Databases.isPrimaryKeyConflictInMySQL(e)) {
                 throw SchemaExceptionCodes.ALREADY_LOCKED.create(e, schema.getSchema());
             }
@@ -296,7 +296,7 @@ public class SchemaStoreImpl extends SchemaStore {
             stmt.setLong(1, System.currentTimeMillis());
             stmt.setString(2, idiom.getName());
             return stmt.executeUpdate() > 0;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
@@ -319,9 +319,9 @@ public class SchemaStoreImpl extends SchemaStore {
             rollback = 2;
             // Invalidate
             invalidateCache(schema);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
         } finally {
             if (rollback > 0) {
@@ -355,7 +355,7 @@ public class SchemaStoreImpl extends SchemaStore {
             if (stmt.executeUpdate() == 0) {
                 throw SchemaExceptionCodes.UNLOCK_FAILED.create(schema.getSchema());
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             if (MYSQL_DEADLOCK == e.getErrorCode() || MYSQL_DUPLICATE == e.getErrorCode()) {
                 throw SchemaExceptionCodes.UNLOCK_FAILED.create(e, schema.getSchema());
             }
@@ -412,7 +412,7 @@ public class SchemaStoreImpl extends SchemaStore {
                     ExecutedTask task = new ExecutedTaskImpl(result.getString(1), result.getBoolean(2), new Date(result.getLong(3)), UUIDs.toUUID(result.getBytes(4)));
                     retval.add(task);
                 } while (result.next());
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
             } finally {
                 closeSQLStuff(result, stmt);
@@ -551,7 +551,7 @@ public class SchemaStoreImpl extends SchemaStore {
             ExecutedTask[] tasks = readUpdateTasks(con);
             con.commit();
             return tasks;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             autocommit(con);
@@ -563,7 +563,7 @@ public class SchemaStoreImpl extends SchemaStore {
     public void setCacheService(final CacheService cacheService) {
         try {
             cache = cacheService.getCache(CACHE_REGION);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
         }
     }
@@ -575,7 +575,7 @@ public class SchemaStoreImpl extends SchemaStore {
             this.cache = null;
             try {
                 cache.clear();
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.error("", e);
             }
         }
@@ -591,7 +591,7 @@ public class SchemaStoreImpl extends SchemaStore {
             CacheKey key = cache.newCacheKey(poolId, schema);
             try {
                 cache.remove(key);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.error("", e);
             }
         }

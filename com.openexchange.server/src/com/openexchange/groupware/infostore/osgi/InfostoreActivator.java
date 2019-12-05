@@ -221,7 +221,9 @@ public class InfostoreActivator implements BundleActivator {
             this.qfsTracker = qfsTracker;
             qfsTracker.open();
 
-            context.registerService(Remote.class, new FileChecksumsRMIServiceImpl(), null);
+            serviceProperties = new Hashtable<String, Object>(1);
+            serviceProperties.put("RMI_NAME", FileChecksumsRMIServiceImpl.RMI_NAME);
+            context.registerService(Remote.class, new FileChecksumsRMIServiceImpl(), serviceProperties);
 
             // Register settings
             List<ServiceRegistration<ConfigTreeEquivalent>> registeredSettings = new ArrayList<ServiceRegistration<ConfigTreeEquivalent>>(4);
@@ -235,7 +237,7 @@ public class InfostoreActivator implements BundleActivator {
             registeredSettings.add(context.registerService(ConfigTreeEquivalent.class, retentionDays, null));
 
             this.registeredSettings = registeredSettings;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(InfostoreActivator.class);
             logger.error("Starting InfostoreActivator failed.", e);
             throw e;
@@ -279,7 +281,7 @@ public class InfostoreActivator implements BundleActivator {
                 }
                 this.registrations = null;
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(InfostoreActivator.class);
             logger.error("Stopping InfostoreActivator failed.", e);
             throw e;

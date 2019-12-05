@@ -102,7 +102,7 @@ public class IDCreateTableTask extends UpdateTaskAdapter {
                 }
                 stmt = con.prepareStatement(sqlCreate);
                 stmt.executeUpdate();
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 throw createSQLError(e);
             }
         } finally {

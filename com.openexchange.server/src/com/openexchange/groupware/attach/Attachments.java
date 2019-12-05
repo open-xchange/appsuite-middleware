@@ -105,7 +105,7 @@ public abstract class Attachments {
             impl.registerAttachmentListener(new OverridableAttachmentListener(appointmentListener),Types.APPOINTMENT);
 
 
-        } catch (final ServicePriorityConflictException e) {
+        } catch (ServicePriorityConflictException e) {
             // Doesn't happen
             e.printStackTrace();
         }

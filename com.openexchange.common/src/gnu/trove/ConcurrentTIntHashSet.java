@@ -119,7 +119,7 @@ public final class ConcurrentTIntHashSet extends TIntHashSet implements Cloneabl
             final ConcurrentTIntHashSet clone = (ConcurrentTIntHashSet) super.clone();
             clone.readWriteLock = new ReentrantReadWriteLock();
             return clone;
-        } catch (final CloneNotSupportedException e) {
+        } catch (CloneNotSupportedException e) {
             // Cannot occur
             throw new InternalError("Clone not supported although Cloneable implemented.");
         }

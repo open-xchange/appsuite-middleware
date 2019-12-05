@@ -65,7 +65,6 @@ import com.openexchange.chronos.itip.tools.ITipUtils;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.QuotedInternetAddress;
@@ -75,6 +74,7 @@ import com.openexchange.notification.mail.NotificationMailFactory;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.serverconfig.ServerConfig;
 import com.openexchange.serverconfig.ServerConfigService;
+import com.openexchange.user.User;
 
 /**
  * 

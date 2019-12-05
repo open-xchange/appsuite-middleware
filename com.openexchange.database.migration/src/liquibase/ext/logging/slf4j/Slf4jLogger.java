@@ -212,10 +212,10 @@ public class Slf4jLogger extends AbstractLogger {
             @Override
             public String toString() {
                 StringBuilder msg = new StringBuilder(256);
-                if(changeLogName != null) {
+                if (changeLogName != null) {
                     msg.append(changeLogName).append(": ");
                 }
-                if(changeSetName != null) {
+                if (changeSetName != null) {
                     msg.append(changeSetName.replace(changeLogName + "::", "")).append(": ");
                 }
                 msg.append(message);

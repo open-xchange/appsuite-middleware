@@ -72,7 +72,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.infostore.InfostoreFacades;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.mail.MailSessionParameterNames;
@@ -83,6 +82,7 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 import com.openexchange.tools.oxfolder.OXFolderLoader;
 import com.openexchange.tools.oxfolder.OXFolderProperties;
+import com.openexchange.user.User;
 import gnu.trove.list.TIntList;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
@@ -409,7 +409,7 @@ public final class DatabaseFolderConverter {
             }
             // Handle database folder
             return handleDatabaseFolder(retval, folderId, fo, session, user, userPermissionBits, ctx, con);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         }
     }

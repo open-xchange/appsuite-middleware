@@ -1,0 +1,144 @@
+type: object
+properties:
+  $ref: ../common/CommonObjectData.yaml
+  object_permissions:
+    type: array
+    description: An array of object permissions.
+    items:
+      $ref: '#/components/schemas/InfoItemPermission'
+  shareable:
+    type: boolean
+    description: (read-only) Indicates if the item can be shared.
+    readOnly: true
+  title:
+    type: string
+    description: The title.
+  url:
+    type: string
+    description: Link/URL to item.
+  filename:
+    type: string
+    description: Displayed filename of the document.
+  file_mimetype:
+    type: string
+    description: >-
+      MIME type of the document. The client converts known types to more
+      readable names before displaying them.
+  file_size:
+    type: integer
+    format: int64
+    description: The size of the document in bytes.
+  version:
+    type: string
+    description: >-
+      Version of the document. NULL can be used to denote the most recent
+      version and will be set in responses if versions are not supported by the
+      underlying storage.
+  description:
+    type: string
+    description: A description if the item.
+  locked_until:
+    type: integer
+    format: int64
+    description: >-
+      The time until which this item will presumably be locked. Only set if the
+      docment is currently locked, `0` otherwise.
+    readOnly: true
+  file_md5sum:
+    type: string
+    description: MD5Sum of the document.
+  version_comment:
+    type: string
+    description: A version comment is used to file a changelog for the file.
+  current_version:
+    type: boolean
+    description: >-
+      `true` if this version is the current version, `false` otherwise. Note:
+      This is not writeable.
+    readOnly: true
+  number_of_versions:
+    type: integer
+    description: 'The number of all versions of the item. Note: This is not writeable.'
+    readOnly: true
+  sequence_number:
+    type: integer
+    format: int64
+    description: Sequence number of the infoitem.
+  capture_date:
+    type: integer
+    format: int64
+    description: Date and time when media file was captured/recorded
+    readOnly: true
+  geolocation:
+    type: string
+    description: >-
+      The geo location associated with the media resource as latitude and
+      longitude pair; e.g. "(45 23)"
+    readOnly: true
+  width:
+    type: integer
+    format: int64
+    description: The width of the media resource
+    readOnly: true
+  height:
+    type: integer
+    format: int64
+    description: The height of the media resource
+    readOnly: true
+  camera_iso_speed:
+    type: integer
+    format: int64
+    description: >-
+      The ISO speed value of a camera or input device associated with the media
+      resource
+    readOnly: true
+  camera_aperture:
+    type: string
+    description: The aperture used to create the photo (f-number)
+    readOnly: true
+  camera_exposure_time:
+    type: string
+    description: 'The length of the exposure, in seconds'
+    readOnly: true
+  camera_focal_length:
+    type: string
+    description: 'The focal length used to create the photo, in millimeters'
+    readOnly: true
+  camera_model:
+    type: string
+    description: The name of the camera model associated with the media resource
+    readOnly: true
+  media_meta:
+    type: object
+    description: Contains metadata extracted from the media resource
+    readOnly: true
+  media_status:
+    type: string
+    description: >-
+      Represents the status for the process of extracting metadata from a media
+      resource
+    readOnly: true
+  media_date:
+    type: integer
+    format: int64
+    description: >-
+      A special field, which prefers the capture date and falls-back to
+      last-modified date if absent
+    readOnly: true
+  com.openexchange.share.extendedObjectPermissions:
+    type: array
+    description: An array of extended object permissions (read-only).
+    items:
+      $ref: '#/components/schemas/InfoItemExtendedPermission'
+  com.openexchange.realtime.resourceID:
+    type: string
+    description: >-
+      The resource identifier for the infoitem for usage within the realtime
+      component.
+    readOnly: true
+  com.openexchange.file.storage.mail.mailMetadata:
+    type: object
+    description: Contains additional metadata for items in the "maildrive" file storage.
+    readOnly: true
+required:
+  - folder_id

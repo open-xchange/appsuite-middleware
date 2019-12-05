@@ -49,9 +49,9 @@
 
 package com.openexchange.mail.compose.impl.attachment;
 
+import java.util.Comparator;
 import com.openexchange.mail.compose.Attachment;
 import com.openexchange.mail.compose.AttachmentOrigin;
-import java.util.Comparator;
 
 /**
  * {@link AttachmentComparator} - Ensures that {@link AttachmentOrigin#VCARD vCard} attachment is the last attachment.

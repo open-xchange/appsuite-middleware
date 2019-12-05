@@ -140,7 +140,7 @@ public final class QuotaAJAXRequest {
         }
         try {
             return Integer.parseInt(parameter.trim());
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(name, parameter);
         }
     }
@@ -179,7 +179,7 @@ public final class QuotaAJAXRequest {
         }
         try {
             return new Date(Long.parseLong(parameter.trim()));
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(name, parameter);
         }
     }
@@ -191,7 +191,7 @@ public final class QuotaAJAXRequest {
         }
         try {
             return new Date(Long.parseLong(parameter.trim()));
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(name, parameter);
         }
     }
@@ -218,7 +218,7 @@ public final class QuotaAJAXRequest {
         }
         try {
             return Integer.parseInt(parameter.trim());
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(name, parameter);
         }
     }
@@ -245,7 +245,7 @@ public final class QuotaAJAXRequest {
         for (int i = 0; i < sa.length; i++) {
             try {
                 ret[i] = Integer.parseInt(sa[i].trim());
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(name, parameter);
             }
         }

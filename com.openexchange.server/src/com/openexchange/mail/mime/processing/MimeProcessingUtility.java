@@ -74,7 +74,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.i18n.MailStrings;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.tools.StringHelper;
@@ -103,9 +102,11 @@ import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.mailaccount.UnifiedInboxUID;
+import com.openexchange.regional.RegionalSettingsService;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 /**
  * {@link MimeProcessingUtility} - Provides some utility methods for {@link MimeForward} and {@link MimeReply}
@@ -401,7 +402,7 @@ public final class MimeProcessingUtility {
             access.connect(false);
             final MailFolder folder = access.getFolderStorage().getFolder(fullName);
             return folder.isShared() ? folder.getOwner() : null;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.warn("Couldn't resolve owner for {}", fullName, e);
             return null;
         } finally {
@@ -412,31 +413,55 @@ public final class MimeProcessingUtility {
     }
 
     /**
-     * Formats specified date in given style with given locale and time zone.
+     * Formats specified date in given style with given locale and time zone (optional for specific user).
      *
      * @param date The date to format
      * @param style The style to use
      * @param locale The locale
      * @param timeZone The time zone
+     * @param session The session identifying the user, may be <code>null</code>
      * @return The formatted date
      */
-    public static final String getFormattedDate(final Date date, final int style, final Locale locale, final TimeZone timeZone) {
-        final DateFormat dateFormat = DateFormat.getDateInstance(style, locale);
+    public static final String getFormattedDate(final Date date, final int style, final Locale locale, final TimeZone timeZone, Session session) {
+        DateFormat dateFormat;
+        if (null != session) {
+            RegionalSettingsService service = ServerServiceRegistry.getInstance().getService(RegionalSettingsService.class);
+            if (null != service) {
+                dateFormat = service.getDateFormat(session.getContextId(), session.getUserId(), locale, style);
+            } else {
+                LOG.info(RegionalSettingsService.class.getSimpleName() + " is not available, using default date format.");
+                dateFormat = DateFormat.getDateInstance(style, locale);
+            }
+        } else {
+            dateFormat = DateFormat.getDateInstance(style, locale);
+        }
         dateFormat.setTimeZone(timeZone);
         return dateFormat.format(date);
     }
 
     /**
-     * Formats specified time in given style with given locale and time zone.
+     * Formats specified time in given style with given locale and time zone (optional for specific user).
      *
      * @param date The time to format
      * @param style The style to use
      * @param locale The locale
      * @param timeZone The time zone
+     * @param session The session identifying the user, may be <code>null</code>
      * @return The formatted time
      */
-    static final String getFormattedTime(final Date date, final int style, final Locale locale, final TimeZone timeZone) {
-        final DateFormat dateFormat = DateFormat.getTimeInstance(style, locale);
+    static final String getFormattedTime(final Date date, final int style, final Locale locale, final TimeZone timeZone, Session session) {
+        DateFormat dateFormat;
+        if (null != session) {
+            RegionalSettingsService service = ServerServiceRegistry.getInstance().getService(RegionalSettingsService.class);
+            if (null != service) {
+                dateFormat = service.getTimeFormat(session.getContextId(), session.getUserId(), locale, style);
+            } else {
+                LOG.info(RegionalSettingsService.class.getSimpleName() + " is not available, using default time format.");
+                dateFormat = DateFormat.getTimeInstance(style, locale);
+            }
+        } else {
+            dateFormat = DateFormat.getTimeInstance(style, locale);
+        }
         dateFormat.setTimeZone(timeZone);
         return dateFormat.format(date);
     }
@@ -582,7 +607,7 @@ public final class MimeProcessingUtility {
     static String readContent(final MailPart mailPart, final String charset) throws OXException, IOException {
         try {
             return MessageUtility.readMailPart(mailPart, charset);
-        } catch (final java.io.CharConversionException e) {
+        } catch (java.io.CharConversionException e) {
             // Obviously charset was wrong or bogus implementation of character conversion
             final String fallback = "US-ASCII";
             LOG.warn("Character conversion exception while reading content with charset \"{}\". Using fallback charset \"{}\" instead.", charset, fallback, e);

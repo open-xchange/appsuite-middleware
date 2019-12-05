@@ -108,7 +108,7 @@ public class UnblockDatabase extends DatabaseAbstraction {
             }
 
             sysexit(0);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             printErrors(successtext, null, e, parser);
         }
     }

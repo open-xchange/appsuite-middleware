@@ -62,7 +62,6 @@ import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.authentication.LoginInfo;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
 import com.openexchange.login.LoginRampUpService;
 import com.openexchange.password.mechanism.PasswordMech;
@@ -72,6 +71,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 /**

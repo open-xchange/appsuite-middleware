@@ -55,18 +55,30 @@ package com.openexchange.antiabuse;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.4
  */
-public enum Protocol {
+public class Protocol {
 
     /**
      * The HTTP protocol.
      */
-    HTTP("http", false),
+    public static final Protocol HTTP = new Protocol("http", false);
+
     /**
      * The HTTPS protocol.
      */
-    HTTPS("http", true),
+    public static final Protocol HTTPS = new Protocol("http", true);
 
-    ;
+    /**
+     * Creates a new protocol instance.
+     *
+     * @param name The protocol name
+     * @param secure Whether protocol uses a secure transport layer (TLS)
+     * @return The protocol instance
+     */
+    public static Protocol newInstance(String name, boolean secure) {
+        return new Protocol(name, secure);
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
 
     private final String name;
     private final boolean secure;

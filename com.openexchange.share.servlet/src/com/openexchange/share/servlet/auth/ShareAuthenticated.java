@@ -53,9 +53,9 @@ import static com.openexchange.java.Autoboxing.B;
 import com.openexchange.authentication.GuestAuthenticated;
 import com.openexchange.authentication.SessionEnhancement;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.session.Session;
 import com.openexchange.share.AuthenticationMode;
+import com.openexchange.user.User;
 
 /**
  * {@link AuthenticationMode}

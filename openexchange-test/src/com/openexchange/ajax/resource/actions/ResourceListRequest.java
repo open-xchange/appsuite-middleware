@@ -87,11 +87,6 @@ public final class ResourceListRequest extends AbstractResourceRequest<ResourceL
         this(ids, true);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
-     */
     @Override
     public Object getBody() throws JSONException {
         final JSONArray data = new JSONArray();
@@ -103,21 +98,11 @@ public final class ResourceListRequest extends AbstractResourceRequest<ResourceL
         return data;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
-     */
     @Override
     public Method getMethod() {
         return Method.PUT;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
-     */
     @Override
     public Parameter[] getParameters() {
         final List<Parameter> params = new ArrayList<Parameter>();
@@ -125,11 +110,6 @@ public final class ResourceListRequest extends AbstractResourceRequest<ResourceL
         return params.toArray(new Parameter[params.size()]);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
-     */
     @Override
     public ResourceListParser getParser() {
         return new ResourceListParser(failOnError);

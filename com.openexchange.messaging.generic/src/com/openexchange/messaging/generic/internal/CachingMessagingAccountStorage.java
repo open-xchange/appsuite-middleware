@@ -276,7 +276,7 @@ public final class CachingMessagingAccountStorage implements MessagingAccountSto
                 try {
                     accounts.add(getAccount(serviceId, id, session, modifier));
                     return true;
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     me = e;
                     return false;
                 }

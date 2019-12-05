@@ -28,7 +28,6 @@ import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
@@ -36,6 +35,7 @@ import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
+import com.openexchange.session.SessionHolder;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
 import com.openexchange.setuptools.TestConfig;
 import com.openexchange.setuptools.TestContextToolkit;
@@ -44,7 +44,7 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.tools.session.SessionHolder;
+import com.openexchange.user.User;
 import com.openexchange.webdav.protocol.TestWebdavFactoryBuilder;
 import com.openexchange.webdav.protocol.WebdavCollection;
 import com.openexchange.webdav.protocol.WebdavPath;
@@ -160,7 +160,7 @@ public class PermissionTest implements SessionHolder {
         try {
             resource.save();
             fail("Shouldn't be able to save this, as user2 doesn't have write permissions");
-        } catch (final WebdavProtocolException x) {
+        } catch (WebdavProtocolException x) {
             if (x.getStatus() != HttpServletResponse.SC_UNAUTHORIZED) {
                 x.printStackTrace();
             }
@@ -182,7 +182,7 @@ public class PermissionTest implements SessionHolder {
         try {
             collection.save();
             fail("Shouldn't be able to save this, as user2 doesn't have write permissions");
-        } catch (final WebdavProtocolException x) {
+        } catch (WebdavProtocolException x) {
             if (x.getStatus() != HttpServletResponse.SC_FORBIDDEN) {
                 x.printStackTrace();
             }
@@ -205,7 +205,7 @@ public class PermissionTest implements SessionHolder {
             resource.putBodyAndGuessLength(new ByteArrayInputStream(new byte[] { 1, 2, 3 }));
             resource.save();
             assertTrue(true);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
@@ -225,7 +225,7 @@ public class PermissionTest implements SessionHolder {
             collection.setDisplayName("rename");
             collection.save();
             assertTrue(true);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
@@ -293,7 +293,7 @@ public class PermissionTest implements SessionHolder {
             resource.putBodyAndGuessLength(new ByteArrayInputStream(new byte[] { 1, 2, 3 }));
             resource.save();
             fail("Could update document even without write permissions to it");
-        } catch (final WebdavProtocolException x) {
+        } catch (WebdavProtocolException x) {
             if (x.getStatus() != HttpServletResponse.SC_UNAUTHORIZED) {
                 x.printStackTrace();
             }
@@ -308,7 +308,7 @@ public class PermissionTest implements SessionHolder {
             res.putBodyAndGuessLength(new ByteArrayInputStream(new byte[] { 1, 2, 3 }));
             res.save();
             fail("Shouldn't be able to save in root folder");
-        } catch (final WebdavProtocolException x) {
+        } catch (WebdavProtocolException x) {
             if (x.getStatus() != HttpServletResponse.SC_UNAUTHORIZED) {
                 x.printStackTrace();
             }
@@ -330,7 +330,7 @@ public class PermissionTest implements SessionHolder {
         return perm;
     }
 
-    public FolderObject createFolder(final FolderObject parent, final String fname, OCLPermission... permissions) throws OXException, OXException {
+    public FolderObject createFolder(final FolderObject parent, final String fname, OCLPermission... permissions) throws OXException {
         if (permissions.length == 0) {
             permissions = new OCLPermission[] { adminPermission(cleanupUser) };
         }
@@ -364,7 +364,7 @@ public class PermissionTest implements SessionHolder {
             final InputStream data = new ByteArrayInputStream(new byte[] { 1 });
             infostore.saveDocument(document, data, System.currentTimeMillis(), ServerSessionAdapter.valueOf(session, getContext()));
             return document;
-        } catch (final Exception x) {
+        } catch (Exception x) {
             infostore.rollback();
             throw x;
         } finally {
@@ -403,11 +403,6 @@ public class PermissionTest implements SessionHolder {
         return ctx;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.sessiond.impl.SessionHolder#getUser()
-     */
     @Override
     public User getUser() {
         // Nothing to do

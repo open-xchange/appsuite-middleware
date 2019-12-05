@@ -90,7 +90,7 @@ public class DummyLockNull extends DummyCollection {
 	@Override
 	public void unlock(final String token) throws WebdavProtocolException {
 		super.unlock(token);
-		if(getOwnLocks().isEmpty()) {
+		if (getOwnLocks().isEmpty()) {
 			mgr.removeLockNull(this.getUrl());
 		}
 	}
@@ -110,7 +110,7 @@ public class DummyLockNull extends DummyCollection {
 		final WebdavResource res = getRealResource();
 		try {
             res.create();
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw new WebdavProtocolException(getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
         }
 		if (res instanceof DummyResource) {

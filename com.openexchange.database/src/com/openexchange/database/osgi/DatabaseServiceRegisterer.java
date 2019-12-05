@@ -124,7 +124,7 @@ public class DatabaseServiceRegisterer implements ServiceTrackerCustomizer<Objec
                 databaseService = Initialization.getInstance().start(configService, configViewFactory, migrationService, connectionListeners, configuration, reloader);
                 LOG.info("Publishing DatabaseService.");
                 serviceRegistration = context.registerService(DatabaseService.class, databaseService, null);
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 LOG.error("Publishing the DatabaseService failed.", e);
             }
             try {
@@ -136,7 +136,7 @@ public class DatabaseServiceRegisterer implements ServiceTrackerCustomizer<Objec
                 } else {
                     LOG.error("Publishing AssignmentFactory failed due to missing DatabaseService.");
                 }
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 LOG.error("Publishing AssignmentFactory failed. This is normal until a server has been registered.", e);
             }
         }

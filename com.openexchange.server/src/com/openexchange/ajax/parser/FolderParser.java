@@ -97,7 +97,7 @@ public class FolderParser {
     public void parse(final FolderObject fo, final JSONObject jsonObj) throws OXException {
         try {
             parseElementFolder(fo, jsonObj);
-        } catch (final JSONException exc) {
+        } catch (JSONException exc) {
             throw OXFolderExceptionCode.JSON_ERROR.create(exc, exc.getMessage());
         }
     }
@@ -187,7 +187,7 @@ public class FolderParser {
             int entity;
             try {
                 entity = elem.getInt(FolderFields.ENTITY);
-            } catch (final JSONException e) {
+            } catch (JSONException e) {
                 if (null == userPermissionBits) {
                     throw e;
                 }

@@ -59,13 +59,13 @@ import org.osgi.service.event.EventAdmin;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceEventConstants;
 import com.openexchange.resource.ResourceExceptionCode;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.user.User;
 
 /**
  * {@link ResourceUpdate} - Performs update of a {@link Resource resource}.
@@ -162,7 +162,7 @@ public final class ResourceUpdate extends AbstractResourcePerformer {
     // try {
     // securityService.checkPermission(permissions == null ? null : permissions.toArray(new String[permissions
     // .size()]), PATH);
-    // } catch (final BundleAccessException e) {
+    // } catch (BundleAccessException e) {
     // throw new OXException(e);
     // }
     // }
@@ -193,7 +193,7 @@ public final class ResourceUpdate extends AbstractResourcePerformer {
         }
         if (resource.isSimpleNameSet()) {
             if (com.openexchange.java.Strings.isEmpty(resource.getSimpleName())) {
-                throw ResourceExceptionCode.MANDATORY_FIELD.create();
+                throw ResourceExceptionCode.MANDATORY_FIELD_NAME.create();
             }
             if (!ResourceTools.validateResourceIdentifier(resource.getSimpleName())) {
                 throw ResourceExceptionCode.INVALID_RESOURCE_IDENTIFIER.create(resource.getSimpleName());
@@ -207,7 +207,7 @@ public final class ResourceUpdate extends AbstractResourcePerformer {
         }
         if (resource.isMailSet()) {
             if (com.openexchange.java.Strings.isEmpty(resource.getMail())) {
-                throw ResourceExceptionCode.MANDATORY_FIELD.create();
+                throw ResourceExceptionCode.MANDATORY_FIELD_MAIL.create();
             }
             if (!ResourceTools.validateResourceEmail(resource.getMail())) {
                 throw ResourceExceptionCode.INVALID_RESOURCE_MAIL.create(resource.getMail());
@@ -232,13 +232,13 @@ public final class ResourceUpdate extends AbstractResourcePerformer {
             con.setAutoCommit(false);
             update(con);
             con.commit();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             Databases.rollback(con);
             throw ResourceExceptionCode.SQL_ERROR.create(e);
         } finally {
             try {
                 con.setAutoCommit(true);
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 LOG.error("Problem setting autocommit to true.", e);
             }
             DBPool.closeWriterSilent(ctx, con);

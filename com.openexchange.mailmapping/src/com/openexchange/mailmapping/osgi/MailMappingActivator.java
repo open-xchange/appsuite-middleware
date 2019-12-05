@@ -49,9 +49,7 @@
 
 package com.openexchange.mailmapping.osgi;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-import org.osgi.framework.Constants;
+import static com.openexchange.osgi.Tools.withRanking;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
@@ -84,9 +82,7 @@ public class MailMappingActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        Dictionary<String, Object> props = new Hashtable<String, Object>(2);
-        props.put(Constants.SERVICE_RANKING, Integer.valueOf(Integer.MIN_VALUE));
-        registerService(MailResolver.class, new DefaultMailMappingService(this), props);
+        registerService(MailResolver.class, new DefaultMailMappingService(this), withRanking(Integer.valueOf(Integer.MIN_VALUE)));
 
         MailResolverServiceImpl osgiMailMappingService = new MailResolverServiceImpl();
         track(MailResolver.class, osgiMailMappingService);

@@ -95,7 +95,7 @@ public final class MessagingFolderStorageActivator extends HousekeepingActivator
             final Dictionary<String, String> dictionary = new Hashtable<String, String>(2);
             dictionary.put("tree", FolderStorage.REAL_TREE_ID);
             registerService(FolderStorage.class, new MessagingFolderStorage(this), dictionary);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             org.slf4j.LoggerFactory.getLogger(MessagingFolderStorageActivator.class).error("", e);
             throw e;
         }

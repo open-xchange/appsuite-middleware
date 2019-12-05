@@ -71,11 +71,6 @@ public final class ListParser extends AbstractAJAXParser<ListResponse> {
         super(failOnError);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.ajax.framework.AbstractAJAXParser#createResponse(com.openexchange.ajax.container.Response)
-     */
     @Override
     protected ListResponse createResponse(final Response response) throws JSONException {
         final ListResponse retval = new ListResponse(response);

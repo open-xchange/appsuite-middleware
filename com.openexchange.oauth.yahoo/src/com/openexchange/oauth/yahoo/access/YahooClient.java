@@ -230,7 +230,7 @@ public class YahooClient {
                 return value.toObject();
             }
             throw OAuthExceptionCodes.JSON_ERROR.create("Not a JSON object, but " + value.getClass().getName());
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw OAuthExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         } finally {
             Streams.close(reader);

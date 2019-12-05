@@ -68,7 +68,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.importexport.ContactTestData;
-import com.openexchange.importexport.formats.Format;
+import com.openexchange.importexport.Format;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.test.FolderTestManager;
 

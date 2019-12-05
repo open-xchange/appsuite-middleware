@@ -716,21 +716,11 @@ public class Availability implements FieldAware, Comparable<Availability>, Clone
         fields.remove(AvailabilityField.user);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.chronos.FieldAware#contains(com.openexchange.chronos.service.CalendarAvailabilityField)
-     */
     @Override
     public boolean contains(CalendarAvailabilityField field) {
         return fields.contains(field);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#clone()
-     */
     @Override
     public Availability clone() {
         Availability clone;
@@ -807,11 +797,6 @@ public class Availability implements FieldAware, Comparable<Availability>, Clone
         return clone;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#toString()
-     */
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
@@ -819,11 +804,6 @@ public class Availability implements FieldAware, Comparable<Availability>, Clone
         return builder.toString();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Comparable#compareTo(java.lang.Object)
-     */
     @Override
     public int compareTo(Availability o) {
         //TODO: consider the '0' case

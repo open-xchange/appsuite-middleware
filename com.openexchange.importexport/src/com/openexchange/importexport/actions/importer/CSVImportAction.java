@@ -58,10 +58,10 @@ import java.io.InputStream;
 import java.util.Properties;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.importexport.formats.Format;
+import com.openexchange.importexport.Format;
+import com.openexchange.importexport.Importer;
 import com.openexchange.importexport.formats.csv.PropertyDrivenMapper;
 import com.openexchange.importexport.importers.CSVContactImporter;
-import com.openexchange.importexport.importers.Importer;
 import com.openexchange.importexport.osgi.ImportExportServices;
 import com.openexchange.java.Streams;
 import com.openexchange.server.ServiceLookup;
@@ -124,7 +124,7 @@ public class CSVImportAction extends AbstractImportAction implements AJAXActionS
             if (mapperAmount == 0) {
                 LOG.error("Did not load any CSV importer mappings from directory {}.", path);
             }
-        } catch (final IOException e) {
+        } catch (IOException e) {
             LOG.error("Failed when trying to load CSV importer mappings.", e);
         }
         return imp;
@@ -132,7 +132,7 @@ public class CSVImportAction extends AbstractImportAction implements AJAXActionS
 
 	@Override
 	public Importer getImporter() {
-		if(this.importer == null) {
+		if (this.importer == null) {
             this.importer = loadImporter();
         }
 		return this.importer;

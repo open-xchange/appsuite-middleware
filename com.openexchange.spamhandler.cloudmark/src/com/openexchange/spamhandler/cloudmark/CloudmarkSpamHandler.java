@@ -135,7 +135,7 @@ public final class CloudmarkSpamHandler extends SpamHandler {
         }
     }
 
-    private void getAndTransport(String mailId, InternetAddress targetAddress, InternetAddress senderAddress, boolean wrap, String fullName, final Session session, MailAccess<?, ?> mailAccess) throws OXException {
+    private void getAndTransport(String mailId, InternetAddress targetAddress, InternetAddress senderAddress, WrapOptions wrapOptions, String fullName, final Session session, MailAccess<?, ?> mailAccess) throws OXException {
         ThresholdFileHolder sink = writeMessage(MailMessageByteStream.newInstanceFrom(mailAccess.getMessageStorage().getMessage(fullName, mailId, false)));
         if (null != sink) {
             try {
@@ -143,7 +143,7 @@ public final class CloudmarkSpamHandler extends SpamHandler {
                 SendRawProperties sendRawProperties = MailTransport.SendRawProperties.newInstance().addRecipient(targetAddress).setSender(senderAddress).setValidateAddressHeaders(false).setSanitizeHeaders(false);
 
                 // Wrap if demanded
-                if (wrap) {
+                if (wrapOptions.isWrap()) {
                     MimeMessage transportMessage = new MimeMessage(MimeDefaultSession.getDefaultSession());
                     {
                         File tempFile = sink.getTempFile();
@@ -156,6 +156,10 @@ public final class CloudmarkSpamHandler extends SpamHandler {
                     transportMessage.setHeader("Return-Path", senderAddress.getAddress());
                     transportMessage.setHeader("Content-Type", "message/rfc822");
                     transportMessage.setHeader("Content-Disposition", "attachment; filename=\"" + mailId + ".eml\"");
+                    String subject = wrapOptions.optSubject();
+                    if (Strings.isNotEmpty(subject)) {
+                        transportMessage.setSubject(subject, MailProperties.getInstance().getDefaultMimeCharset());
+                    }
                     if (MailProperties.getInstance().isAddClientIPAddress()) {
                         MimeMessageFiller.addClientIPAddress(transportMessage, session);
                     }
@@ -190,11 +194,6 @@ public final class CloudmarkSpamHandler extends SpamHandler {
         }
     }
 
-    private <V> V getPropertyFromView(ConfigView view, String propertyName, V defaultValue, Class<V> clazz) throws OXException {
-        ComposedConfigProperty<V> property = view.property(propertyName, clazz);
-        return (null != property && property.isDefined()) ? property.get() : defaultValue;
-    }
-
     @Override
     public void handleSpam(int accountId, String fullName, String[] mailIDs, boolean move, Session session) throws OXException {
         ConfigViewFactory factory = services.getService(ConfigViewFactory.class);
@@ -213,20 +212,20 @@ public final class CloudmarkSpamHandler extends SpamHandler {
                 InternetAddress targetSpamAddress = null;
                 try {
                     targetSpamAddress = new QuotedInternetAddress(sTargetSpamEmailAddress, true);
-                } catch (final AddressException e) {
+                } catch (AddressException e) {
                     LOG.error("The configured target eMail address is not valid", e);
                 }
 
-                // Check whether we are supposed to wrap the message
-                boolean wrap = getPropertyFromView(view, "com.openexchange.spamhandler.cloudmark.wrapMessage", Boolean.FALSE, Boolean.class).booleanValue(); // <-- Call with 'false' as default to not change existing behavior
+                // Get the wrap options
+                WrapOptions wrapOptions = getWrapOptions(view, true);
 
                 if (null != targetSpamAddress) {
                     InternetAddress senderAddress = getSenderAddress(session);
-                    if(senderAddress==null){
+                    if (senderAddress == null) {
                         LOG.warn("Unable to transport spam mail. The sender address is missing.");
                     } else {
                         for (String mailId : mailIDs) {
-                            getAndTransport(mailId, targetSpamAddress, senderAddress, wrap, fullName, session, mailAccess);
+                            getAndTransport(mailId, targetSpamAddress, senderAddress, wrapOptions, fullName, session, mailAccess);
                         }
                     }
                 }
@@ -277,20 +276,20 @@ public final class CloudmarkSpamHandler extends SpamHandler {
                 InternetAddress targetHamAddress = null;
                 try {
                     targetHamAddress = new QuotedInternetAddress(sTargetHamEmailAddress, true);
-                } catch (final AddressException e) {
+                } catch (AddressException e) {
                     LOG.error("The configured target eMail address is not valid", e);
                 }
 
-                // Check whether we are supposed to wrap the message
-                boolean wrap = getPropertyFromView(view, "com.openexchange.spamhandler.cloudmark.wrapMessage", Boolean.FALSE, Boolean.class).booleanValue(); // <-- Call with 'false' as default to not change existing behavior
+                // Get the wrap options
+                WrapOptions wrapOptions = getWrapOptions(view, false);
 
                 if (null != targetHamAddress) {
                     InternetAddress senderAddress = getSenderAddress(session);
-                    if(senderAddress==null){
+                    if (senderAddress==null){
                         LOG.warn("Unable to transport ham mail. The sender address is missing.");
                     } else {
                         for (String mailId : mailIDs) {
-                            getAndTransport(mailId, targetHamAddress, senderAddress, wrap, fullName, session, mailAccess);
+                            getAndTransport(mailId, targetHamAddress, senderAddress, wrapOptions, fullName, session, mailAccess);
                         }
                     }
                 }
@@ -321,6 +320,29 @@ public final class CloudmarkSpamHandler extends SpamHandler {
     @Override
     public boolean isCreateConfirmedHam(Session session) {
         return false;
+    }
+
+    private WrapOptions getWrapOptions(ConfigView view, boolean forSpam) throws OXException {
+        // Check whether we are supposed to wrap the message
+        boolean wrap = getPropertyFromView(view, "com.openexchange.spamhandler.cloudmark.wrapMessage", Boolean.FALSE, Boolean.class).booleanValue(); // <-- Call with 'false' as default to not change existing behavior
+
+        String subject;
+        if (forSpam) {
+            subject = getPropertyFromView(view, "com.openexchange.spamhandler.cloudmark.spam.subjectForWrappingMessage", "", String.class).trim();
+        } else {
+            subject = getPropertyFromView(view, "com.openexchange.spamhandler.cloudmark.ham.subjectForWrappingMessage", "", String.class).trim();
+        }
+
+        return WrapOptions
+            .builder()
+            .withWrap(wrap)
+            .withSubject(Strings.isEmpty(subject) ? null : subject)
+            .build();
+    }
+
+    private <V> V getPropertyFromView(ConfigView view, String propertyName, V defaultValue, Class<V> clazz) throws OXException {
+        ComposedConfigProperty<V> property = view.property(propertyName, clazz);
+        return (null != property && property.isDefined()) ? property.get() : defaultValue;
     }
 
     /**

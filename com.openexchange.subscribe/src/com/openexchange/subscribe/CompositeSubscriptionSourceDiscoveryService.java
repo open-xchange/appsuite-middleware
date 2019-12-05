@@ -74,9 +74,9 @@ public class CompositeSubscriptionSourceDiscoveryService implements Subscription
     public SubscriptionSource getSource(final String identifier) {
         SubscriptionSource current = null;
         for(final SubscriptionSourceDiscoveryService subDiscoverer : services) {
-            if(subDiscoverer.knowsSource(identifier)) {
+            if (subDiscoverer.knowsSource(identifier)) {
                 final SubscriptionSource source = subDiscoverer.getSource(identifier);
-                if(current == null || current.getPriority() < source.getPriority()) {
+                if (current == null || current.getPriority() < source.getPriority()) {
                     current = source;
                 }
             }
@@ -91,7 +91,7 @@ public class CompositeSubscriptionSourceDiscoveryService implements Subscription
             final List<SubscriptionSource> sources = subDiscoverer.getSources(folderModule);
             for (final SubscriptionSource subscriptionSource : sources) {
                 final SubscriptionSource previousSource = allSources.get(subscriptionSource.getId());
-                if(previousSource == null || previousSource.getPriority() < subscriptionSource.getPriority()) {
+                if (previousSource == null || previousSource.getPriority() < subscriptionSource.getPriority()) {
                     allSources.put(subscriptionSource.getId(), subscriptionSource);
                 }
             }
@@ -101,7 +101,7 @@ public class CompositeSubscriptionSourceDiscoveryService implements Subscription
 
             @Override
             public int compare(final SubscriptionSource o1, final SubscriptionSource o2) {
-                if(o1.getDisplayName() != null && o2.getDisplayName() != null) {
+                if (o1.getDisplayName() != null && o2.getDisplayName() != null) {
                     return o1.getDisplayName().compareTo(o2.getDisplayName());
                 }
                 return o1.getDisplayName() == null ? -1 : 1;
@@ -119,7 +119,7 @@ public class CompositeSubscriptionSourceDiscoveryService implements Subscription
     @Override
     public boolean knowsSource(final String identifier) {
         for(final SubscriptionSourceDiscoveryService subDiscoverer : services) {
-            if(subDiscoverer.knowsSource(identifier)) {
+            if (subDiscoverer.knowsSource(identifier)) {
                 return true;
             }
         }
@@ -138,7 +138,7 @@ public class CompositeSubscriptionSourceDiscoveryService implements Subscription
     public SubscriptionSource getSource(final Context context, final int subscriptionId) throws OXException {
         for(final SubscriptionSourceDiscoveryService subDiscoverer : services) {
             final SubscriptionSource source = subDiscoverer.getSource(context, subscriptionId);
-            if(source != null) {
+            if (source != null) {
                 return source;
             }
         }

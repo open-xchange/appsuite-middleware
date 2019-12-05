@@ -49,7 +49,10 @@
 
 package com.openexchange.caldav.mixins;
 
+import static com.openexchange.dav.DAVTools.getExternalPath;
 import com.openexchange.caldav.CaldavProtocol;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 /**
@@ -61,14 +64,17 @@ import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 public class ScheduleOutboxURL extends SingleXMLPropertyMixin {
 
 	public static final String SCHEDULE_OUTBOX = "schedule-outbox";
+	
+	private final ServiceLookup serviceLookup;
 
-    public ScheduleOutboxURL() {
+    public ScheduleOutboxURL(ServiceLookup serviceLookup) {
         super(CaldavProtocol.CAL_NS.getURI(), "schedule-outbox-URL");
+        this.serviceLookup = serviceLookup;
     }
 
     @Override
     protected String getValue() {
-        return "<D:href>/caldav/" + SCHEDULE_OUTBOX + "</D:href>";
+        return "<D:href>" + getExternalPath(serviceLookup.getService(ConfigViewFactory.class),  "/caldav/" + SCHEDULE_OUTBOX) + "</D:href>";
     }
 
 }

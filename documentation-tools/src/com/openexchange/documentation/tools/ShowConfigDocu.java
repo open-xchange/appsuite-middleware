@@ -112,7 +112,7 @@ public class ShowConfigDocu {
         CommandLineParser parser = new DefaultParser();
         try {
             CommandLine parse = parser.parse(options, args);
-            if(parse.hasOption(HELP_OPTION)) {
+            if (parse.hasOption(HELP_OPTION)) {
                 printUsage(1);
             }
 
@@ -125,7 +125,7 @@ public class ShowConfigDocu {
             try {
                 ConfigDocu configDocu = new ConfigDocu(yamlFolder);
 
-                if(parse.hasOption(PRINT_TAG_OPTION)) {
+                if (parse.hasOption(PRINT_TAG_OPTION)) {
                     Set<String> tags = configDocu.getTags();
                     tags.add(CONFIG_CASCADE_TAG);
                     tags.add(RELOADABLE_TAG);
@@ -136,12 +136,12 @@ public class ShowConfigDocu {
                 boolean onlyKey = parse.hasOption(ONLY_KEY_OPTION);
 
                 List<Property> props = null;
-                if(parse.hasOption(TAG_OPTION)) {
+                if (parse.hasOption(TAG_OPTION)) {
                     String tag = parse.getOptionValue(TAG_OPTION);
-                    if(tag == null) {
+                    if (tag == null) {
                         props = configDocu.getProperties();
                     }
-                    switch(tag) {
+                    switch (tag) {
                         case RELOADABLE_TAG:
                             props = configDocu.getProperties();
                             props = props.stream()
@@ -163,13 +163,13 @@ public class ShowConfigDocu {
                     props = configDocu.getProperties();
                 }
 
-                if(parse.hasOption(KEY_OPTION)) {
+                if (parse.hasOption(KEY_OPTION)) {
                     String term = parse.getOptionValue(KEY_OPTION);
                     props = props.stream()
                         .filter(prop -> prop.getKey().contains(term))
                         .collect(Collectors.toList());
                 }
-                if(parse.hasOption(SEARCH_OPTION)) {
+                if (parse.hasOption(SEARCH_OPTION)) {
                     String term = parse.getOptionValue(SEARCH_OPTION);
                     props = props.stream()
                         .filter(prop -> prop.contains(term))
@@ -177,7 +177,7 @@ public class ShowConfigDocu {
                 }
 
                 boolean useAnsi = true;
-                if(parse.hasOption(ANSI_OPTION)) {
+                if (parse.hasOption(ANSI_OPTION)) {
                     useAnsi = Boolean.valueOf(parse.getOptionValue(ANSI_OPTION));
                 }
 
@@ -226,7 +226,7 @@ public class ShowConfigDocu {
 
     private static void printProperty(Property prop, String currentValue, boolean useAnsi, boolean onlyKey) {
         printKeyValue("Key", prop.getKey(), useAnsi);
-        if(onlyKey) {
+        if (onlyKey) {
             return;
         }
         System.out.println(format("Description", ANSI_RED, useAnsi)+":");
@@ -252,7 +252,7 @@ public class ShowConfigDocu {
             first = false;
         }
         for(String tag: prop.getTags()) {
-            if(first) {
+            if (first) {
                 System.out.print(tag);
                 first = false;
             } else {
@@ -262,7 +262,7 @@ public class ShowConfigDocu {
     }
 
     private static String formatDescription(String value, boolean useAnsi) {
-        if(useAnsi) {
+        if (useAnsi) {
             value = value.replaceAll("<code>|\\[\\[", ANSI_FRAME+" ");
             value = value.replaceAll("</code>|\\]\\]", " "+ANSI_RESET);
             value = value.replaceAll("<b>", ANSI_BOLD);
@@ -276,7 +276,7 @@ public class ShowConfigDocu {
     }
 
     private static String format(String value, String color, boolean useAnsi) {
-        if(useAnsi) {
+        if (useAnsi) {
             return color+value+ANSI_RESET;
         }
         return value;
@@ -287,9 +287,9 @@ public class ShowConfigDocu {
     }
 
     private static void printKeyValue(String key, String value, boolean printEmptyValue, boolean useAnsi) {
-        if(value!=null) {
+        if (value!=null) {
             System.out.println(format(key, ANSI_RED, useAnsi)+": "+value);
-        } else if(printEmptyValue) {
+        } else if (printEmptyValue) {
             System.out.println(format(key, ANSI_RED, useAnsi)+": ");
         }
     }

@@ -50,17 +50,19 @@
 package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.alias;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.UUID;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AbstractAttributeChangers;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.alias.UserAliasStorage;
+import com.openexchange.database.Databases;
 import com.openexchange.java.Strings;
+import com.openexchange.java.util.UUIDs;
 
 /**
  * {@link AliasUserAttributeChangers}
@@ -79,12 +81,11 @@ public class AliasUserAttributeChangers extends AbstractAttributeChangers {
 
     @Override
     public Set<String> change(User userData, int userId, int contextId, Connection connection, Collection<Runnable> pendingInvocations) throws StorageException {
-        UserAliasStorage aliasStorage = AdminServiceRegistry.getInstance().getService(UserAliasStorage.class);
         Set<String> aliases = userData.getAliases();
         try {
             if (null == aliases) {
                 if (userData.isAliasesset()) {
-                    aliasStorage.deleteAliases(connection, contextId, userId);
+                    deleteAliases(connection, contextId, userId);
                     return Collections.singleton("removed all user alias addresses");
                 }
                 return EMPTY_SET;
@@ -97,10 +98,45 @@ public class AliasUserAttributeChangers extends AbstractAttributeChangers {
                     aliasesToSet.add(alias);
                 }
             }
-            aliasStorage.setAliases(connection, contextId, userId, aliasesToSet);
+            deleteAliases(connection, contextId, userId);
+            setAliases(connection, contextId, userId, aliasesToSet);
             return Collections.singleton("aliases: " + aliasesToSet.toString());
-        } catch (OXException e) {
+        } catch (SQLException e) {
             throw new StorageException(e);
         }
     }
+
+    private static int[] setAliases(Connection connection, int contextId, int userId, Set<String> aliases) throws SQLException {
+        if (null == aliases || aliases.isEmpty()) {
+            return new int[0];
+        }
+        PreparedStatement stmt = null;
+        try {
+            stmt = connection.prepareStatement("INSERT INTO user_alias (cid,user,alias,uuid) VALUES (?,?,?,?) ON DUPLICATE KEY UPDATE alias=?;");
+            for (String alias : aliases) {
+                stmt.setInt(1, contextId);
+                stmt.setInt(2, userId);
+                stmt.setString(3, alias);
+                stmt.setBytes(4, UUIDs.toByteArray(UUID.randomUUID()));
+                stmt.setString(5, alias);
+                stmt.addBatch();
+            }
+            return stmt.executeBatch();
+        } finally {
+            Databases.closeSQLStuff(stmt);
+        }
+    }
+
+    private static int deleteAliases(Connection connection, int contextId, int userId) throws SQLException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = connection.prepareStatement("DELETE FROM user_alias WHERE cid=? AND user=?;");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, userId);
+            return stmt.executeUpdate();
+        } finally {
+            Databases.closeSQLStuff(stmt);
+        }
+    }
+
 }

@@ -56,12 +56,12 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.writer.AttachmentWriter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentMetadata;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 /**
  * {@link GetAction}
@@ -94,7 +94,7 @@ public final class GetAction extends AbstractAttachmentAction {
             final int id = requireNumber(requestData, AJAXServlet.PARAMETER_ID);
 
             return new AJAXRequestResult(get(folderId, attachedId, moduleId, id, session), "apiResponse");
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
@@ -123,7 +123,7 @@ public final class GetAction extends AbstractAttachmentAction {
             ATTACHMENT_BASE.commit();
 
             return w.getObject();
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             rollback();
             if (t instanceof OXException) {
                 throw (OXException) t;
@@ -132,7 +132,7 @@ public final class GetAction extends AbstractAttachmentAction {
         } finally {
             try {
                 ATTACHMENT_BASE.finish();
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.error("", e);
             }
         }

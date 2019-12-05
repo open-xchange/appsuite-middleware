@@ -113,7 +113,7 @@ public final class MergerUtility {
 			if (null != stmt) {
 				try {
 					stmt.close();
-				} catch (final SQLException e) {
+				} catch (SQLException e) {
 					System.err.println("Warning: Statement could not be properly closed");
 					e.printStackTrace(System.err);
 				}
@@ -211,7 +211,7 @@ public final class MergerUtility {
 				try {
 					rs.close();
 					rs = null;
-				} catch (final SQLException e) {
+				} catch (SQLException e) {
 					System.err.println("Warning: Result set could not be properly closed");
 					e.printStackTrace(System.err);
 				}
@@ -219,7 +219,7 @@ public final class MergerUtility {
 			if (null != stmt) {
 				try {
 					stmt.close();
-				} catch (final SQLException e) {
+				} catch (SQLException e) {
 					System.err.println("Warning: Statement could not be properly closed");
 					e.printStackTrace(System.err);
 				}
@@ -257,7 +257,7 @@ public final class MergerUtility {
 			if (null != stmt) {
 				try {
 					stmt.close();
-				} catch (final SQLException e) {
+				} catch (SQLException e) {
 					System.err.println("Warning: Statement could not be properly closed");
 					e.printStackTrace(System.err);
 				}
@@ -295,7 +295,7 @@ public final class MergerUtility {
 				try {
 					rs.close();
 					rs = null;
-				} catch (final SQLException e) {
+				} catch (SQLException e) {
 					System.err.println("Warning: Result set could not be properly closed");
 					e.printStackTrace(System.err);
 				}
@@ -303,7 +303,7 @@ public final class MergerUtility {
 			if (null != stmt) {
 				try {
 					stmt.close();
-				} catch (final SQLException e) {
+				} catch (SQLException e) {
 					System.err.println("Warning: Statement could not be properly closed");
 					e.printStackTrace(System.err);
 				}

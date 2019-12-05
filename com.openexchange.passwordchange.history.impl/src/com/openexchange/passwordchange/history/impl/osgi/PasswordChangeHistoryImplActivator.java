@@ -69,12 +69,12 @@ import com.openexchange.passwordchange.history.impl.PasswordChangeRecorderRegist
 import com.openexchange.passwordchange.history.impl.RdbPasswordChangeRecorder;
 import com.openexchange.passwordchange.history.impl.events.PasswordChangeEventListener;
 import com.openexchange.passwordchange.history.impl.events.PasswordChangeInterceptor;
-import com.openexchange.passwordchange.history.impl.groupware.PasswordChangeHistoryCreateTableTask;
 import com.openexchange.passwordchange.history.impl.groupware.PasswordChangeHistoryConvertToUtf8mb4;
+import com.openexchange.passwordchange.history.impl.groupware.PasswordChangeHistoryCreateTableTask;
 import com.openexchange.passwordchange.history.impl.groupware.PasswordHistoryDeleteListener;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.user.UserService;
-import com.openexchange.user.UserServiceInterceptor;
+import com.openexchange.user.interceptor.UserServiceInterceptor;
 
 /**
  *

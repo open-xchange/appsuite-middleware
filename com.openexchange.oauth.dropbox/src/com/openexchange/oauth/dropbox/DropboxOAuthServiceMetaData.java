@@ -103,41 +103,21 @@ public class DropboxOAuthServiceMetaData extends AbstractExtendedScribeAwareOAut
         return propertyNames;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityMethod()
-     */
     @Override
     public Verb getIdentityHTTPMethod() {
         return Verb.POST;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityURL()
-     */
     @Override
     public String getIdentityURL(String accessToken) {
         return IDENTITY_URL;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityPattern()
-     */
     @Override
     public String getIdentityFieldName() {
         return IDENTITY_FIELD_NAME;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.impl.AbstractScribeAwareOAuthServiceMetaData#getContentType()
-     */
     @Override
     public String getContentType() {
         // Empty content-type otherwise the getUserIdentity call will fail.

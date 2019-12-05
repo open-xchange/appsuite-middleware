@@ -81,7 +81,6 @@ import com.openexchange.group.Group;
 import com.openexchange.group.GroupService;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tools.alias.UserAliasUtility;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.TimeZones;
@@ -93,6 +92,7 @@ import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 /**
@@ -319,7 +319,8 @@ public class DefaultEntityResolver implements EntityResolver {
             } else if (CalendarUserType.RESOURCE.equals(cuType) || CalendarUserType.ROOM.equals(cuType)) {
                 Resource resource = getResource(calendarUser.getEntity());
                 calendarUser.setCn(resource.getDisplayName());
-                calendarUser.setUri(ResourceId.forResource(context.getContextId(), resource.getIdentifier()));
+                calendarUser.setUri(getCalAddress(resource));
+                calendarUser.setEMail(getEMail(resource));
             } else {
                 User user = getUser(calendarUser.getEntity());
                 calendarUser.setCn(user.getDisplayName());
@@ -592,21 +593,27 @@ public class DefaultEntityResolver implements EntityResolver {
         return attendee;
     }
 
-    private Attendee applyEntityData(Attendee attendee, Resource resource) {
+    private Attendee applyEntityData(Attendee attendee, Resource resource) throws OXException {
         attendee.setEntity(resource.getIdentifier());
         attendee.setCuType(CalendarUserType.RESOURCE);
-        attendee.setCn(resource.getDisplayName());
+        attendee.setCn(Strings.isNotEmpty(attendee.getCn()) ? attendee.getCn() : resource.getDisplayName());
         attendee.setComment(resource.getDescription());
         attendee.setPartStat(ParticipationStatus.ACCEPTED);
-        attendee.setUri(ResourceId.forResource(context.getContextId(), resource.getIdentifier()));
-        attendee.setEMail(resource.getMail());
+        if (Strings.isEmpty(attendee.getUri())) {
+            attendee.setUri(getCalAddress(resource));
+            attendee.setEMail(getEMail(resource));
+        } else {
+            attendee.setUri(Check.calendarAddressMatches(attendee.getUri(), context.getContextId(), resource));
+            String email = optEMailAddress(attendee.getUri());
+            attendee.setEMail(null != email ? email : getEMail(resource));
+        }
         return attendee;
     }
 
     private <T extends CalendarUser> T resolveExternals(T calendarUser, CalendarUserType cuType, boolean resolveResourceIds, int[] resolvableEntities) throws OXException {
         if (null != calendarUser) {
             if (false == isInternal(calendarUser, cuType)) {
-                ResourceId resourceId = resolveExternals(calendarUser.getUri(), resolveResourceIds, true);
+                ResourceId resourceId = resolveExternals(calendarUser.getUri(), resolveResourceIds, true, cuType);
                 if (null != resourceId && (null == resolvableEntities || com.openexchange.tools.arrays.Arrays.contains(resolvableEntities, resourceId.getEntity()))) {
                     /*
                      * resolved successfully; cross-check calendar user type, auto-correct if required
@@ -635,9 +642,10 @@ public class DefaultEntityResolver implements EntityResolver {
      * @param uri The URI to resolve
      * @param resolveResourceIds <code>true</code> to resolve (internal) resource identifiers, <code>false</code>, otherwise
      * @param considerAliases <code>true</code> to consider user aliases when resolving <code>mailto:</code>-URIs, <code>false</code>, otherwise
+     * @param suggestedCuType The suggested calendar user type to use
      * @return The resolved resource identifier, or <code>null</code> if not found
      */
-    private ResourceId resolveExternals(String uri, boolean resolveResourceIds, boolean considerAliases) throws OXException {
+    private ResourceId resolveExternals(String uri, boolean resolveResourceIds, boolean considerAliases, CalendarUserType suggestedCuType) throws OXException {
         if (Strings.isEmpty(uri)) {
             return null;
         }
@@ -659,11 +667,23 @@ public class DefaultEntityResolver implements EntityResolver {
             return null;
         }
         /*
-         * try lookup by e-mail address, otherwise
+         * try lookup by e-mail address, otherwise, preferring the provided cu-type
          */
         String mail = extractEMailAddress(uri);
+        if (CalendarUserType.INDIVIDUAL.matches(suggestedCuType)) {
+            resourceId = lookupUserByMail(mail, considerAliases);
+            if (null == resourceId) {
+                resourceId = lookupResourceByMail(mail);
+            }
+        } else if (CalendarUserType.RESOURCE.matches(suggestedCuType) || CalendarUserType.ROOM.matches(suggestedCuType)) {
+            resourceId = lookupResourceByMail(mail);
+        }
+        return resourceId;
+    }
+
+    private ResourceId lookupUserByMail(String mail, boolean considerAliases) throws OXException {
         for (User knownUser : knownUsers.values()) {
-            if (mail.equals(getEMail(knownUser)) || considerAliases && UserAliasUtility.isAlias(mail, knownUser.getAliases())) {
+            if (mail.equalsIgnoreCase(getEMail(knownUser)) || considerAliases && UserAliasUtility.isAlias(mail, knownUser.getAliases())) {
                 return new ResourceId(context.getContextId(), knownUser.getId(), CalendarUserType.INDIVIDUAL);
             }
         }
@@ -680,6 +700,24 @@ public class DefaultEntityResolver implements EntityResolver {
         if (null != user) {
             knownUsers.put(I(user.getId()), user);
             return new ResourceId(context.getContextId(), user.getId(), CalendarUserType.INDIVIDUAL);
+        }
+        return null;
+    }
+
+    private ResourceId lookupResourceByMail(String mail) throws OXException {
+        for (Resource knownResource : knownResources.values()) {
+            if (mail.equalsIgnoreCase(getEMail(knownResource))) {
+                return new ResourceId(context.getContextId(), knownResource.getIdentifier(), CalendarUserType.RESOURCE);
+            }
+        }
+        Resource[] resources = services.getServiceSafe(ResourceService.class).searchResourcesByMail(mail, context);
+        if (null != resources && 0 < resources.length) {
+            for (Resource resource : resources) {
+                knownResources.put(I(resource.getIdentifier()), resource);
+                if (mail.equalsIgnoreCase(getEMail(resource))) {
+                    return new ResourceId(context.getContextId(), resource.getIdentifier(), CalendarUserType.RESOURCE);
+                }
+            }
         }
         return null;
     }
@@ -787,6 +825,16 @@ public class DefaultEntityResolver implements EntityResolver {
     }
 
     /**
+     * Gets the calendar address for a resource (as <code>mailto</code>-URI).
+     *
+     * @param resource The resource
+     * @return The calendar address
+     */
+    private static String getCalAddress(Resource resource) {
+        return getURI(getEMail(resource));
+    }
+
+    /**
      * Gets the e-mail address for a user.
      *
      * @param user The user
@@ -794,6 +842,16 @@ public class DefaultEntityResolver implements EntityResolver {
      */
     private static String getEMail(User user) {
         return user.getMail();
+    }
+
+    /**
+     * Gets the e-mail address for a resource.
+     *
+     * @param resource The resource
+     * @return The e-mail address
+     */
+    private static String getEMail(Resource resource) {
+        return resource.getMail();
     }
 
 }

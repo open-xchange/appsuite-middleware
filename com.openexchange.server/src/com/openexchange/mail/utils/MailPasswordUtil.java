@@ -118,9 +118,9 @@ public final class MailPasswordUtil {
 
                 con.commit();
                 rollback = 2;
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-            } catch (final RuntimeException e) {
+            } catch (RuntimeException e) {
                 throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             } finally {
                 if (rollback > 0) {
@@ -172,7 +172,7 @@ public final class MailPasswordUtil {
 
                     try {
                         service.invalidateMailAccount(customizationNote.accountId, session.getUserId(), session.getContextId());
-                    } catch (final Exception e) {
+                    } catch (Exception e) {
                         LOG.warn("Could not invalidate mail account after password update.", e);
                     }
                 }
@@ -227,7 +227,7 @@ public final class MailPasswordUtil {
     public static String decrypt(final String encryptedPassword, final String key) throws GeneralSecurityException {
         try {
             return decrypt(encryptedPassword, generateSecretKey(key));
-        } catch (final GeneralSecurityException e) {
+        } catch (GeneralSecurityException e) {
             // Decrypting failed; retry with CryptoService
             final CryptoService crypto = ServerServiceRegistry.getInstance().getService(CryptoService.class);
             if (null == crypto) {
@@ -236,7 +236,7 @@ public final class MailPasswordUtil {
             }
             try {
                 return crypto.decrypt(encryptedPassword, key);
-            } catch (final OXException ce) {
+            } catch (OXException ce) {
                 // CryptoServce failed, too
                 final StringBuilder sb = new StringBuilder(128).append("MailPasswordUtil.decrypt(): Failed to decrypt \"");
                 sb.append(encryptedPassword).append("\" with ").append(CryptoService.class.getSimpleName());

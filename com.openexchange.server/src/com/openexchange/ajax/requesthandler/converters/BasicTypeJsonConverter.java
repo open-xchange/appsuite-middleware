@@ -132,7 +132,7 @@ public final class BasicTypeJsonConverter implements ResultConverter {
         }
         try {
             return new JSONTokener(propertyValue).nextValue();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             return propertyValue;
         }
     }

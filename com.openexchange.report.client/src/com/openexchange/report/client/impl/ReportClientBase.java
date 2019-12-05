@@ -334,19 +334,19 @@ public class ReportClientBase extends AbstractJMXTools {
                     print(totals, contextDetails, macDetails, serverConfiguration, versions, parser, clc, clcYear);
                     break;
             }
-        } catch (final MalformedObjectNameException e) {
+        } catch (MalformedObjectNameException e) {
             printServerException(e, parser);
             sysexit(1);
-        } catch (final NullPointerException e) {
+        } catch (NullPointerException e) {
             printServerException(e, parser);
             sysexit(1);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             printServerException(e, parser);
             sysexit(1);
-        } catch (final InvalidAttributeValueException e) {
+        } catch (InvalidAttributeValueException e) {
             printServerException(e, parser);
             sysexit(1);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             printServerException(e, parser);
             sysexit(1);
         }

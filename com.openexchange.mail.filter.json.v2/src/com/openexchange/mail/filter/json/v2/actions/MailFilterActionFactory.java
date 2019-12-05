@@ -94,6 +94,7 @@ public class MailFilterActionFactory implements AJAXActionServiceFactory{
 
         tmp.put(GetScriptMailFilterAction.ACTION.getAjaxName(), new GetScriptMailFilterAction(services));
         tmp.put(DeleteScriptMailFilterAction.ACTION.getAjaxName(), new DeleteScriptMailFilterAction(services));
+        tmp.put(ApplyMailFilterAction.ACTION.getAjaxName(), new ApplyMailFilterAction(ruleParser, services));
 
         return tmp.build();
     }

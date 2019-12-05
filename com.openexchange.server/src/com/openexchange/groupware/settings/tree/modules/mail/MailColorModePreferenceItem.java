@@ -52,7 +52,6 @@ package com.openexchange.groupware.settings.tree.modules.mail;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.ReadOnlyValue;
@@ -62,6 +61,7 @@ import com.openexchange.jslob.ConfigTreeEquivalent;
 import com.openexchange.mail.FlaggingMode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.user.User;
 
 /**
  * {@link MailColorModePreferenceItem}
@@ -88,7 +88,7 @@ public class MailColorModePreferenceItem implements PreferencesItemService, Conf
             @Override
             public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
                 ConfigViewFactory factory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
-                if(factory==null){
+                if (factory==null){
                     setting.setSingleValue(Boolean.FALSE);
                     return;
                 }

@@ -180,22 +180,16 @@ public class ExtractSessionProcessorHandler implements PacketProcessorHandler {
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.pgp.core.packethandling.PacketProcessorHandler#handlePacket(com.openexchange.pgp.core.packethandling.PGPPacket)
-     */
     @Override
     public PGPPacket[] handlePacket(PGPPacket packet) throws Exception {
         Packet rawPacket = packet.getBcPacket();
-        if(rawPacket instanceof PublicKeyEncSessionPacket) {
+        if (rawPacket instanceof PublicKeyEncSessionPacket) {
            PublicKeyEncSessionPacket sessionPacket = (PublicKeyEncSessionPacket) rawPacket;
            this.encryptedSessions.add(toEncryptedSession(sessionPacket));
         }
         return new PGPPacket[] {packet};
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.pgp.core.packethandling.PacketProcessorHandler#modifyPacketData(com.openexchange.pgp.core.packethandling.PGPPacket, byte[])
-     */
     @Override
     public byte[] handlePacketData(PGPPacket packet, byte[] packetData) {
         return packetData;

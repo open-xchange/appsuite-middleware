@@ -1,0 +1,4 @@
+requests: 
+  - PingRequest.yaml
+  - TimeRequest.yaml
+  - WhoAmIRequest.yaml

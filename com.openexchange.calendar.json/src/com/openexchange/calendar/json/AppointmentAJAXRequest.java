@@ -102,7 +102,7 @@ public class AppointmentAJAXRequest {
         }
         try {
             return Integer.parseInt(parameter.trim());
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(name, parameter);
         }
     }
@@ -141,7 +141,7 @@ public class AppointmentAJAXRequest {
         }
         try {
             return new Date(Long.parseLong(parameter.trim()));
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(name, parameter);
         }
     }
@@ -153,7 +153,7 @@ public class AppointmentAJAXRequest {
         }
         try {
             return new Date(Long.parseLong(parameter.trim()));
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(name, parameter);
         }
     }
@@ -193,7 +193,7 @@ public class AppointmentAJAXRequest {
         }
         try {
             return Integer.parseInt(parameter.trim());
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(name, parameter);
         }
     }
@@ -228,7 +228,7 @@ public class AppointmentAJAXRequest {
         for (int i = 0; i < sa.length; i++) {
             try {
                 ret[i] = Integer.parseInt(sa[i].trim());
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(name, parameter);
             }
         }
@@ -319,7 +319,7 @@ public class AppointmentAJAXRequest {
         return Boolean.parseBoolean(value);
     }
 
-    public Date checkTime(final String name, final TimeZone timeZone) throws OXException, OXException {
+    public Date checkTime(final String name, final TimeZone timeZone) throws OXException {
         final String tmp = getParameter(name);
         if (tmp == null) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(name);
@@ -329,7 +329,7 @@ public class AppointmentAJAXRequest {
             final int offset = timeZone.getOffset(d.getTime());
             d.setTime(d.getTime() - offset);
             return d;
-        } catch (final NumberFormatException exc) {
+        } catch (NumberFormatException exc) {
             throw OXJSONExceptionCodes.INVALID_VALUE.create(exc, name, tmp);
         }
     }

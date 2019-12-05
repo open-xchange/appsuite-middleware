@@ -77,11 +77,6 @@ public class AntiVirusCapabilityChecker implements CapabilityChecker {
         this.services = services;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.capabilities.CapabilityChecker#isEnabled(java.lang.String, com.openexchange.session.Session)
-     */
     @Override
     public boolean isEnabled(String capability, Session session) throws OXException {
         if (false == CAPABILITY.equals(capability)) {

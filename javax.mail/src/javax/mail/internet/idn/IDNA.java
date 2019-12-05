@@ -185,7 +185,7 @@ public final class IDNA {
                 b.append(gnu.inet.encoding.IDNA.toASCII(host.substring(0, pos), true)).append(host.substring(pos));
             }
             return b.toString();
-        } catch (final IDNAException e) {
+        } catch (IDNAException e) {
             LoggerFactory.getLogger(IDNA.class).warn("Couldn''t create ASCII representation for host name: {}", unicodeHostName, e);
             return unicodeHostName;
         }

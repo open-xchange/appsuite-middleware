@@ -63,8 +63,8 @@ public class WebdavPath implements Iterable<String>{
         final StringBuilder component = new StringBuilder();
         for(int i = 0; i < path.length(); i++) {
             final char c = path.charAt(i);
-            if(c == '/') {
-                if(component.length() > 0) {
+            if (c == '/') {
+                if (component.length() > 0) {
                     components.add(component.toString());
                 }
                 component.setLength(0);
@@ -72,7 +72,7 @@ public class WebdavPath implements Iterable<String>{
                 component.append(c);
             }
         }
-        if(component.length() > 0) {
+        if (component.length() > 0) {
             components.add(component.toString());
         }
     }
@@ -108,14 +108,14 @@ public class WebdavPath implements Iterable<String>{
     }
 
     public WebdavPath parent(){
-        if(components.size()<2) {
+        if (components.size()<2) {
             return new WebdavPath();
         }
         return new WebdavPath(components.subList(0,components.size()-1));
     }
 
     public String name(){
-        if(components.size() == 0) {
+        if (components.size() == 0) {
 			return "";
 		}
         return  components.get(components.size()-1);
@@ -143,12 +143,12 @@ public class WebdavPath implements Iterable<String>{
     }
 
     public boolean startsWith(final WebdavPath path) {
-        if(path.size() > size()) {
+        if (path.size() > size()) {
             return false;
         }
 
         for(int i = 0; i < path.size(); i++) {
-            if(!components.get(i).equals(path.components.get(i))){
+            if (!components.get(i).equals(path.components.get(i))){
                 return false;
             }
         }
@@ -176,7 +176,7 @@ public class WebdavPath implements Iterable<String>{
     }
 
     private String _escape(final String component) {
-        if(component.indexOf('/') < 0 && component.indexOf('\\') < 0) {
+        if (component.indexOf('/') < 0 && component.indexOf('\\') < 0) {
             return component;
         }
         return component.replaceAll("\\\\","\\\\\\\\").replaceAll("/","\\\\/");

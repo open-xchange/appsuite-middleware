@@ -105,4 +105,8 @@ public interface AttachmentMetadata {
 
     public AttachmentBatch getAttachmentBatch();
 
+    public abstract String getChecksum();
+
+    public abstract void setChecksum(String checksum);
+
 }

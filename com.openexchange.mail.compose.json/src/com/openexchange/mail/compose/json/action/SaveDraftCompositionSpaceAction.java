@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.compose.json.action;
 
+import java.util.Optional;
 import java.util.UUID;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -56,11 +57,12 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.upload.StreamedUpload;
+import com.openexchange.groupware.upload.StreamedUploadFileIterator;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailPath;
+import com.openexchange.mail.compose.Attachment.ContentDisposition;
 import com.openexchange.mail.compose.CompositionSpaceService;
 import com.openexchange.mail.compose.MessageDescription;
-import com.openexchange.mail.compose.Attachment.ContentDisposition;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
@@ -90,6 +92,7 @@ public class SaveDraftCompositionSpaceAction extends AbstractMailComposeAction {
         UUID uuid = parseCompositionSpaceId(sId);
 
         // Check for optional body data
+        Optional<StreamedUploadFileIterator> optionalUploadedAttachments = Optional.empty();
         {
             // Determine upload quotas
             UploadLimitations uploadLimitations = getUploadLimitations(session);
@@ -102,11 +105,6 @@ public class SaveDraftCompositionSpaceAction extends AbstractMailComposeAction {
                 String disposition = upload.getFormField("contentDisposition");
                 if (null == disposition) {
                     disposition = ContentDisposition.ATTACHMENT.getId();
-                }
-
-                if (hasFileUploads) {
-                    // File upload available...
-                    compositionSpaceService.addAttachmentToCompositionSpace(uuid, upload.getUploadFiles(), disposition, session);
                 }
 
                 // Check for JSON data
@@ -123,10 +121,19 @@ public class SaveDraftCompositionSpaceAction extends AbstractMailComposeAction {
                     parseJSONMessage(jMessage, md);
                     compositionSpaceService.updateCompositionSpace(uuid, md, session);
                 }
+
+                if (hasFileUploads) {
+                    // File upload available...
+                    if (null != jMessage && jMessage.optBoolean("streamThrough", false)) {
+                        optionalUploadedAttachments = Optional.of(upload.getUploadFiles());
+                    } else {
+                        compositionSpaceService.addAttachmentToCompositionSpace(uuid, upload.getUploadFiles(), disposition, session);
+                    }
+                }
             }
         }
 
-        MailPath mailPath = compositionSpaceService.saveCompositionSpaceToDraftMail(uuid, true, session);
+        MailPath mailPath = compositionSpaceService.saveCompositionSpaceToDraftMail(uuid, optionalUploadedAttachments, true, session);
         return new AJAXRequestResult(mailPath.toString(), "string");
     }
 

@@ -60,6 +60,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.SchedulingControl;
 import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.chronos.ical.ImportedCalendar;
 import com.openexchange.chronos.service.CalendarParameters;
@@ -124,7 +125,7 @@ public final class ICalInsertDataHandler extends ICalDataHandler {
         if (hasValue(dataArguments, ARGS[0])) {
             try {
                 calendarFolder = Integer.parseInt(dataArguments.get(ARGS[0]));
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 throw DataExceptionCodes.INVALID_ARGUMENT.create(ARGS[0], e, dataArguments.get(ARGS[0]));
             }
         }
@@ -133,7 +134,7 @@ public final class ICalInsertDataHandler extends ICalDataHandler {
         if (hasValue(dataArguments, ARGS[1])) {
             try {
                 taskFolder = Integer.parseInt(dataArguments.get(ARGS[1]));
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 throw DataExceptionCodes.INVALID_ARGUMENT.create(ARGS[1], e, dataArguments.get(ARGS[1]));
             }
         }
@@ -150,7 +151,7 @@ public final class ICalInsertDataHandler extends ICalDataHandler {
             long size;
             try {
                 size = Long.parseLong(data.getDataProperties().get(DataProperties.PROPERTY_SIZE));
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 size = 0;
             }
             inputStreamCopy = copyStream((InputStream) data.getData(), size);
@@ -183,7 +184,7 @@ public final class ICalInsertDataHandler extends ICalDataHandler {
                  */
                 tasks = parseTaskStream(ctx, iCalParser, inputStreamCopy, conversionErrors, conversionWarnings, defaultZone);
             }
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw DataExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
             safeClose(inputStreamCopy);
@@ -206,7 +207,7 @@ public final class ICalInsertDataHandler extends ICalDataHandler {
                     calendarSession.set(CalendarParameters.UID_CONFLICT_STRATEGY, UIDConflictStrategy.UPDATE_OR_REASSIGN);
                     calendarSession.set(CalendarParameters.PARAMETER_CHECK_CONFLICTS, Boolean.FALSE);
                     calendarSession.set(CalendarParameters.PARAMETER_SKIP_EXTERNAL_ATTENDEE_URI_CHECKS, Boolean.TRUE);
-                    calendarSession.set(CalendarParameters.PARAMETER_SUPPRESS_ITIP, Boolean.TRUE);
+                    calendarSession.set(CalendarParameters.PARAMETER_SCHEDULING, SchedulingControl.NONE);
                     calendarSession.set(CalendarParameters.PARAMETER_IGNORE_STORAGE_WARNINGS, Boolean.TRUE);
                     List<ImportResult> importEvents = calendarService.importEvents(calendarSession, String.valueOf(calendarFolder), events);
                     for (ImportResult importEvent : importEvents) {
@@ -235,7 +236,7 @@ public final class ICalInsertDataHandler extends ICalDataHandler {
                  */
                 try {
                     insertTasks(session, taskFolder, tasks, folderAndIdArray);
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
                 }
             }

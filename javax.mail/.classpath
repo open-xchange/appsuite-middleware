@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+	<classpathentry exported="true" kind="lib" path="lib/emailaddress-rfc2822-2.1.3.jar" sourcepath="lib/source/emailaddress-rfc2822-2.1.3-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/poi-3.17.jar" sourcepath="lib/source/poi-3.17-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jtnef-2.0.0.jar" sourcepath="lib/source/jtnef-2.0.0-src.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/emailaddress-rfc2822-1.1.0.jar" sourcepath="lib/source/emailaddress-rfc2822-1.1.0-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/EmailAddress.jar" sourcepath="lib/source/EmailAddress-src.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/libidn-1.9.jar" sourcepath="lib/libidn-1.9.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>

@@ -90,7 +90,7 @@ public class AllowAsteriskAsSeparatorCustomizer implements LoginCustomizer {
             public Map<String, List<String>> getHeaders() {
                 return loginReq.getHeaders();
             }
-            
+
             @Override
             public Map<String, String[]> getRequestParameter() {
                 return loginReq.getRequestParameter();
@@ -164,6 +164,20 @@ public class AllowAsteriskAsSeparatorCustomizer implements LoginCustomizer {
             @Override
             public boolean isStoreLanguage() {
                 return loginReq.isStoreLanguage();
+            }
+
+            @Override
+            public String getLocale() {
+                return loginReq.getLocale();
+            }
+
+            @Override
+            public boolean isStoreLocale() {
+                return loginReq.isStoreLocale();
+            }
+
+            public boolean isStaySignedIn() {
+                return loginReq.isStaySignedIn();
             }
         };
     }

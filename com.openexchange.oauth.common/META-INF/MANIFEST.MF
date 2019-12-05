@@ -2,8 +2,8 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange OAuth Common Bundle
 Bundle-SymbolicName: com.openexchange.oauth.common
-Bundle-Version: 7.10.2
-Bundle-Vendor: OX Software GmbH
+Bundle-Version: 7.10.3
+Bundle-Vendor: Open-Xchange Inc.
 Automatic-Module-Name: com.openexchange.oauth.common
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.openexchange.capabilities,
@@ -18,6 +18,7 @@ Import-Package: com.openexchange.capabilities,
  com.openexchange.osgi,
  com.openexchange.session,
  com.openexchange.tools.session,
+ com.openexchange.user,
  org.osgi.framework,
  org.slf4j
 Export-Package: com.openexchange.oauth.common.osgi

@@ -273,7 +273,9 @@ public enum SSLProperties {
         "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
         "TLS_DHE_RSA_WITH_AES_256_GCM_SHA384",
         "TLS_DHE_RSA_WITH_AES_256_CBC_SHA256",
-        "TLS_DHE_RSA_WITH_AES_256_CBC_SHA").build();
+        "TLS_DHE_RSA_WITH_AES_256_CBC_SHA",
+        "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256",
+        "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384").build();
 
     private static String[] getJvmApplicableCipherSuites(List<String> desiredCipherSuites, boolean allowDefaultOnes) {
         // Get the cipher suites actually supported by running JVM

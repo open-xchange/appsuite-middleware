@@ -1,0 +1,40 @@
+/login?action=changeip:
+  post:
+    operationId: changeIP
+    tags:
+      - Login
+    summary: Change IP of client host in a session.
+    description: >
+      The following request is especially for integration with systems located
+      in the providers
+
+      infrastructure. If those systems create a session with the following
+      request the client host
+
+      IP address in the session can be changed. The IP check for following
+      requests will be done using
+
+      this newly set client host IP address.
+    parameters:
+      - in: query
+        name: session
+        description: A session ID previously obtained from the login module.
+        required: true
+        schema:
+          type: string
+      - in: query
+        name: clientIP
+        description: New IP address of the client host for the current session.
+        required: true
+        schema:
+          type: string
+    responses:
+      '200':
+        description: >-
+          A JSON object containing the string "1" as data attribute. In case of
+          errors the responsible fields in the response are filled (see [Error
+          handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangeIPResponse'

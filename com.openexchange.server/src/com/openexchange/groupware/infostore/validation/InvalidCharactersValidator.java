@@ -65,9 +65,9 @@ public class InvalidCharactersValidator implements InfostoreValidator{
 		final GetSwitch get = new GetSwitch(metadata);
 		for(final Metadata field : Metadata.VALUES_ARRAY){
 			final Object value = field.doSwitch(get);
-			if(value != null && value instanceof String) {
+			if (value != null && value instanceof String) {
 				final String error = check((String)value);
-				if(null != error) {
+				if (null != error) {
 					validation.setError(field, error);
 				}
 			}

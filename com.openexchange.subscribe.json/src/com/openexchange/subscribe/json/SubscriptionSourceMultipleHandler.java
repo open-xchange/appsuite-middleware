@@ -64,11 +64,13 @@ import org.json.JSONValue;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.i18n.I18nService;
+import com.openexchange.i18n.I18nServiceRegistry;
 import com.openexchange.i18n.I18nTranslator;
 import com.openexchange.i18n.Translator;
 import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
+import com.openexchange.subscribe.json.osgi.Services;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -106,10 +108,10 @@ public class SubscriptionSourceMultipleHandler implements MultipleHandler {
     @Override
     public JSONValue performRequest(final String action, final JSONObject request, final ServerSession session, final boolean secure) throws JSONException, OXException {
         try {
-            if(null == action) {
+            if (null == action) {
                 MISSING_PARAMETER.create("action");
                 return null;
-            } else if(action.equals("listSources") || action.equals("all")) {
+            } else if (action.equals("listSources") || action.equals("all")) {
                 return listSources(request, session);
             } else if (action.equals("getSource") || action.equals("get")) {
                 return getSource(request, session);
@@ -117,16 +119,16 @@ public class SubscriptionSourceMultipleHandler implements MultipleHandler {
                 UNKNOWN_ACTION.create(action);
                 return null;
             }
-        } catch (final OXException x) {
+        } catch (OXException x) {
             throw x;
-        } catch (final JSONException x) {
+        } catch (JSONException x) {
             throw x;
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             throw wrapThrowable(t);
         }
     }
 
-    protected JSONValue listSources(final JSONObject req, final ServerSession session) throws OXException  {
+    protected JSONValue listSources(final JSONObject req, final ServerSession session) throws OXException {
         final int module = getModule(req);
         final List<SubscriptionSource> sources = getDiscovery(session).getSources(module);
         final String[] columns = getColumns(req);
@@ -135,21 +137,25 @@ public class SubscriptionSourceMultipleHandler implements MultipleHandler {
     }
 
     private Translator createTranslator(final ServerSession session) {
-        final I18nService service = I18nServices.getInstance().getService(session.getUser().getLocale());
+        I18nServiceRegistry registry = Services.getService(I18nServiceRegistry.class);
+        if (registry == null) {
+            return Translator.EMPTY;
+        }
+        I18nService service = registry.getI18nService(session.getUser().getLocale());
         return null == service ? Translator.EMPTY : new I18nTranslator(service);
     }
 
     private String[] getColumns(final JSONObject req) {
         final String columns = req.optString("columns");
-        if(columns == null) {
-            return new String[]{"id", "displayName", "module", "icon",  "formDescription"};
+        if (columns == null) {
+            return new String[] { "id", "displayName", "module", "icon", "formDescription" };
         }
         return columns.split("\\s*,\\s*");
     }
 
     protected JSONValue getSource(final JSONObject req, final ServerSession session) throws OXException, JSONException {
         final String identifier = req.getString("id");
-        if(identifier == null) {
+        if (identifier == null) {
             MISSING_PARAMETER.create("id");
         }
         final SubscriptionSource source = getDiscovery(session).getSource(identifier);
@@ -159,10 +165,10 @@ public class SubscriptionSourceMultipleHandler implements MultipleHandler {
 
     protected int getModule(final JSONObject req) {
         final String moduleAsString = req.optString("module");
-        if(moduleAsString == null) {
+        if (moduleAsString == null) {
             return -1;
         }
-        if(moduleAsString.equals("contacts")) {
+        if (moduleAsString.equals("contacts")) {
             return FolderObject.CONTACT;
         } else if (moduleAsString.equals("calendar")) {
             return FolderObject.CALENDAR;

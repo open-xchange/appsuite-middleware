@@ -134,7 +134,7 @@ public final class CreateAction extends AbstractOAuthTokenAction {
             final JSONObject jsonAccount = AccountWriter.write(newAccount, associationService.getAssociationsFor(newAccount.getId(), session), session);
             // Return appropriate result
             return new AJAXRequestResult(new SecureContentWrapper(jsonAccount, "json"), SecureContentWrapper.CONTENT_TYPE);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
     }

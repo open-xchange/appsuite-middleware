@@ -4,28 +4,28 @@
     tags:
       - Drive
     summary: Deletes a share link
-    description: Deletes a previously created link for a file or folder. This action is only available for items marked as `shareable`.
-    consumes:
-      - application/json
+    description: >-
+      Deletes a previously created link for a file or folder. This action is
+      only available for items marked as `shareable`.
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
-      - $ref: "#/parameters/gblQueryParamRoot"
-      - in: body
-        name: body
-        description: A JSON object describing the target file- or directory version to delete the link for.
-        required: true
-        schema:
-          $ref: "#/definitions/DriveShareTargetData"
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - $ref: '#/components/parameters/gblQueryParamRoot'
     responses:
-      200:
-        description: An empty JSON object. In case of errors the responsible fields in the response are filled.
-        schema:
-          $ref: "#/definitions/CommonResponse"
-    x-ox-examples:      
-      - Example1:
+      '200':
+        description: >
+          A JSON object containing the (possibly) updated share target. In case
+          of errors the corresponding fields in the response are filled.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DriveShareLinkResponse'
+    x-ox-examples:
+      - Example1: null
         description: Basic example
-        example: |
-          ==> PUT http://192.168.32.191/ajax/drive?action=deleteLink&session=35d55f0bd2284e78a8eb4dba99b1310b&root=9542
+        example: >
+          ==> PUT
+          http://192.168.32.191/ajax/drive?action=deleteLink&session=35d55f0bd2284e78a8eb4dba99b1310b&root=9542
+
           > Content:
             {
               "path": "/",
@@ -34,7 +34,17 @@
             }
 
           <== HTTP 200 OK (149.3251 ms elapsed, 11 bytes received)
+
           <   Content: 
               {
                 "data": {}
               }
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DriveShareTargetData'
+      description: >-
+        A JSON object describing the target file- or directory version to delete
+        the link for.
+      required: true

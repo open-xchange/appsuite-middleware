@@ -54,6 +54,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Pattern;
 import com.openexchange.java.Strings;
+import com.openexchange.push.PushClientWhitelist.IgnoreCaseExactClientMatcher;
+import com.openexchange.push.PushClientWhitelist.IgnoreCasePrefixClientMatcher;
+import com.openexchange.push.PushClientWhitelist.PatternClientMatcher;
 
 /**
  * {@link AllowedRedirectUris} - A white-list for allowed redirect/referrer URIs on login error.

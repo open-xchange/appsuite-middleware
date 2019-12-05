@@ -116,7 +116,7 @@ public class PushMsObject extends AbstractPushMsObject implements Serializable {
             final String hostname = (String) pojo.get("__hostname");
             final String topicName = (String) pojo.get("__topicName");
             return new PushMsObject(folderId, module, contextId, users, remote, timestamp, topicName, hostname, hash, new Date(creationDate));
-        } catch (final NullPointerException npe) {
+        } catch (NullPointerException npe) {
             LOG.warn("Missing required attribute.", npe);
             return null;
         }

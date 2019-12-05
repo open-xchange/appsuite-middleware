@@ -1537,8 +1537,10 @@ public class IMAPMessage extends MimeMessage implements ReadableMime {
 		    setHeadersLoaded(true);
 		else {
 		    // Mark all headers we asked for as 'loaded'
+		    if (hdrs != null) {
 		    for (int k = 0; k < hdrs.length; k++)
 			setHeaderLoaded(hdrs[k]);
+		    }
 		}
 	    }
 	} else

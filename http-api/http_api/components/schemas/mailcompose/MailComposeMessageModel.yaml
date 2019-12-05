@@ -1,0 +1,59 @@
+type: object
+properties:
+  id:
+    type: string
+    description: The identifier
+  from:
+    $ref: Address.yaml
+  to:
+    type: array
+    description: An array of addresses
+    items:
+      $ref: Address.yaml
+  cc:
+    type: array
+    description: An array of addresses
+    items:
+      $ref: Address.yaml
+  bcc:
+    type: array
+    description: An array of addresses
+    items:
+      $ref: Address.yaml
+  subject:
+    type: string
+    description: The subject
+  content:
+    type: string
+    description: The text content
+  contentType:
+    type: string
+    description: The content type
+    enum:
+      - text/plain
+      - text/html
+  attachments:
+    type: array
+    description: An array of attachments
+    items:
+      $ref: Attachment.yaml
+  meta:
+    $ref: Meta.yaml
+  requestReadReceipt:
+    type: boolean
+    description: Request read receipt flag
+  priority:
+    type: string
+    description: priority
+    enum:
+      - low
+      - normal
+      - high
+  sharedAttachments:
+    $ref: SharedAttachments.yaml
+  security:
+    $ref: Security.yaml
+  customHeaders:
+    type: object
+    additionalProperties:
+      type: string

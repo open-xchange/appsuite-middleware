@@ -97,7 +97,7 @@ public final class TwitterAccessImpl implements TwitterAccess {
                 ret.add(new DirectMessageImpl(dm));
             }
             return ret;
-        } catch (final twitter4j.TwitterException e) {
+        } catch (twitter4j.TwitterException e) {
             throw handleTwitterException(e);
         }
     }
@@ -112,7 +112,7 @@ public final class TwitterAccessImpl implements TwitterAccess {
                 ret.add(new DirectMessageImpl(dm));
             }
             return ret;
-        } catch (final twitter4j.TwitterException e) {
+        } catch (twitter4j.TwitterException e) {
             throw handleTwitterException(e);
         }
     }
@@ -127,7 +127,7 @@ public final class TwitterAccessImpl implements TwitterAccess {
                 ret.add(new StatusImpl(status));
             }
             return ret;
-        } catch (final twitter4j.TwitterException e) {
+        } catch (twitter4j.TwitterException e) {
             throw handleTwitterException(e);
         }
     }
@@ -142,7 +142,7 @@ public final class TwitterAccessImpl implements TwitterAccess {
                 ret.add(new StatusImpl(status));
             }
             return ret;
-        } catch (final twitter4j.TwitterException e) {
+        } catch (twitter4j.TwitterException e) {
             throw handleTwitterException(e);
         }
     }
@@ -157,7 +157,7 @@ public final class TwitterAccessImpl implements TwitterAccess {
                 ret.add(new StatusImpl(status));
             }
             return ret;
-        } catch (final twitter4j.TwitterException e) {
+        } catch (twitter4j.TwitterException e) {
             throw handleTwitterException(e);
         }
     }
@@ -172,7 +172,7 @@ public final class TwitterAccessImpl implements TwitterAccess {
                 ret.add(new StatusImpl(status));
             }
             return ret;
-        } catch (final twitter4j.TwitterException e) {
+        } catch (twitter4j.TwitterException e) {
             throw handleTwitterException(e);
         }
     }
@@ -181,7 +181,7 @@ public final class TwitterAccessImpl implements TwitterAccess {
     public DirectMessage sendDirectMessage(final String id, final String text) throws OXException {
         try {
             return new DirectMessageImpl(twitter4jTwitter.sendDirectMessage(id, text));
-        } catch (final twitter4j.TwitterException e) {
+        } catch (twitter4j.TwitterException e) {
             throw handleTwitterException(e);
         }
     }
@@ -190,7 +190,7 @@ public final class TwitterAccessImpl implements TwitterAccess {
     public Status updateStatus(final String status) throws OXException {
         try {
             return new StatusImpl(twitter4jTwitter.updateStatus(status));
-        } catch (final twitter4j.TwitterException e) {
+        } catch (twitter4j.TwitterException e) {
             throw handleTwitterException(e);
         }
     }
@@ -201,7 +201,7 @@ public final class TwitterAccessImpl implements TwitterAccess {
             final StatusUpdate statusUpdate = new StatusUpdate(status);
             statusUpdate.setInReplyToStatusId(inReplyToStatusId);
             return new StatusImpl(twitter4jTwitter.updateStatus(statusUpdate));
-        } catch (final twitter4j.TwitterException e) {
+        } catch (twitter4j.TwitterException e) {
             throw handleTwitterException(e);
         }
     }
@@ -210,7 +210,7 @@ public final class TwitterAccessImpl implements TwitterAccess {
     public Status retweetStatus(final long statusId) throws OXException {
         try {
             return new StatusImpl(twitter4jTwitter.retweetStatus(statusId));
-        } catch (final twitter4j.TwitterException e) {
+        } catch (twitter4j.TwitterException e) {
             throw handleTwitterException(e);
         }
     }
@@ -219,7 +219,7 @@ public final class TwitterAccessImpl implements TwitterAccess {
     public Status destroyStatus(final long statusId) throws OXException {
         try {
             return new StatusImpl(twitter4jTwitter.destroyStatus(statusId));
-        } catch (final twitter4j.TwitterException e) {
+        } catch (twitter4j.TwitterException e) {
             throw handleTwitterException(e);
         }
     }
@@ -228,7 +228,7 @@ public final class TwitterAccessImpl implements TwitterAccess {
     public Status showStatus(final long statusId) throws OXException {
         try {
             return new StatusImpl(twitter4jTwitter.showStatusAuthenticated(statusId));
-        } catch (final twitter4j.TwitterException e) {
+        } catch (twitter4j.TwitterException e) {
             throw handleTwitterException(e);
         }
     }
@@ -240,7 +240,7 @@ public final class TwitterAccessImpl implements TwitterAccess {
             // No need for synchronization
             try {
                 user = tmp = new UserImpl(twitter4jTwitter.verifyCredentials());
-            } catch (final twitter4j.TwitterException e) {
+            } catch (twitter4j.TwitterException e) {
                 throw handleTwitterException(e);
             }
         }
@@ -251,7 +251,7 @@ public final class TwitterAccessImpl implements TwitterAccess {
     public User showUser(final String id) throws OXException {
         try {
             return new UserImpl(twitter4jTwitter.showUser(id));
-        } catch (final twitter4j.TwitterException e) {
+        } catch (twitter4j.TwitterException e) {
             throw handleTwitterException(e);
         }
     }

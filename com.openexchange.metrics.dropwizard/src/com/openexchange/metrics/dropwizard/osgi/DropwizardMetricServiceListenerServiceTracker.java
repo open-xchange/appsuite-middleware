@@ -76,11 +76,6 @@ public class DropwizardMetricServiceListenerServiceTracker implements SimpleRegi
         listener = new AtomicReference<DropwizardMetricServiceMBeanListener>();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.osgi.SimpleRegistryListener#added(org.osgi.framework.ServiceReference, java.lang.Object)
-     */
     @Override
     public void added(ServiceReference<ManagementService> ref, ManagementService service) {
         if (listener.compareAndSet(null, new DropwizardMetricServiceMBeanListener(service, new DropwizardMetricMBeanFactory()))) {
@@ -88,11 +83,6 @@ public class DropwizardMetricServiceListenerServiceTracker implements SimpleRegi
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.osgi.SimpleRegistryListener#removed(org.osgi.framework.ServiceReference, java.lang.Object)
-     */
     @Override
     public void removed(ServiceReference<ManagementService> ref, ManagementService service) {
         DropwizardMetricServiceMBeanListener registerer = listener.get();

@@ -52,6 +52,8 @@ package com.openexchange.mail.mime;
 import static com.openexchange.exception.ExceptionUtils.isEitherOf;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
+import static com.sun.mail.iap.ResponseCode.ALERT;
+import static com.sun.mail.iap.ResponseCode.AUTHENTICATIONFAILED;
 import java.io.IOException;
 import java.net.SocketException;
 import java.util.Arrays;
@@ -59,6 +61,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.Address;
+import javax.mail.AuthenticationFailedException;
 import javax.mail.Folder;
 import javax.mail.MessageRemovedException;
 import javax.mail.MessagingException;
@@ -84,6 +87,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.exceptions.ExceptionUtils;
 import com.sun.mail.iap.CommandFailedException;
+import com.sun.mail.iap.Response;
 import com.sun.mail.iap.ResponseCode;
 import com.sun.mail.smtp.SMTPAddressFailedException;
 import com.sun.mail.smtp.SMTPSendFailedException;
@@ -424,7 +428,7 @@ public class MimeMailException extends OXException {
                 /*
                  * Default case
                  */
-                final String message = com.openexchange.java.Strings.toLowerCase(e.getMessage());
+                final String message = Strings.toLowerCase(e.getMessage());
                 if ("failed to load imap envelope".equals(message)) {
                     return MimeMailExceptionCode.MESSAGE_NOT_DISPLAYED.create(e);
                 }
@@ -498,7 +502,7 @@ public class MimeMailException extends OXException {
                     return handled;
                 }
 
-                String msg = com.openexchange.java.Strings.toLowerCase(nextException.getMessage());
+                String msg = Strings.toLowerCase(nextException.getMessage());
                 if (isOverQuotaException(msg)) {
                     // Over quota
                     if (null != mailConfig && null != session) {
@@ -572,7 +576,7 @@ public class MimeMailException extends OXException {
              * Default case
              */
             return MimeMailExceptionCode.MESSAGING_ERROR.create(nextException, appendInfo(nextException.getMessage(), folder));
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             ExceptionUtils.handleThrowable(t);
             LOG.warn("", t);
             /*
@@ -581,7 +585,7 @@ public class MimeMailException extends OXException {
             return MimeMailExceptionCode.MESSAGING_ERROR.create(e, appendInfo(e.getMessage(), folder));
         }
     }
-    
+
     /**
      * Handles specified IMAP protocol exception by its possibly available <a href="https://tools.ietf.org/html/rfc5530">response code</a>.<br>
      * If no such response code is present, <code>null</code> is returned.
@@ -601,10 +605,16 @@ public class MimeMailException extends OXException {
         switch (rc) {
             case ALREADYEXISTS:
                 return MailExceptionCode.DUPLICATE_FOLDER_SIMPLE.create(pe, new Object[0]);
-            case AUTHENTICATIONFAILED:
-                return handleAuthenticationFailedException(pe, mailConfig, session);
+            case EXPIRED:
+                //$FALL-THROUGH$
             case AUTHORIZATIONFAILED:
-                return handleAuthenticationFailedException(pe, mailConfig, session);
+                //$FALL-THROUGH$
+            case AUTHENTICATIONFAILED:
+                {
+                    Response offendingResponse = pe.getResponse();
+                    AuthenticationFailedException afe = new AuthenticationFailedException(null == offendingResponse ? pe.getMessage() : offendingResponse.getRest(), pe).setReason(rc.getName());
+                    return handleAuthenticationFailedException(afe, mailConfig, session);
+                }
             case CANNOT:
                 return MailExceptionCode.INVALID_FOLDER_NAME_SIMPLE.create(pe, pe.getResponseRest());
             case CLIENTBUG:
@@ -613,8 +623,6 @@ public class MimeMailException extends OXException {
                 break;
             case CORRUPTION:
                 break;
-            case EXPIRED:
-                return handleAuthenticationFailedException(pe, mailConfig, session);
             case EXPUNGEISSUED:
                 break;
             case INUSE:
@@ -692,14 +700,19 @@ public class MimeMailException extends OXException {
         return MimeMailExceptionCode.CONNECT_ERROR.create(e, mailConfig == null ? STR_EMPTY : mailConfig.getServer(), mailConfig == null ? STR_EMPTY : mailConfig.getLogin());
     }
 
-    private static OXException handleAuthenticationFailedException(Exception authenticationFailedException, MailConfig mailConfig, Session session) {
+    private static OXException handleAuthenticationFailedException(MessagingException authFailed, MailConfig mailConfig, Session session) {
         // Authentication failed...
+        javax.mail.AuthenticationFailedException afe = (authFailed instanceof javax.mail.AuthenticationFailedException) ? ((javax.mail.AuthenticationFailedException) authFailed) : null;
+        if (afe != null && ALERT.getName().equals(afe.getReason())) {
+            Exception e = afe.getNextException();
+            return MailExceptionCode.DENIED_CONNECT_ATTEMPT.create(e, mailConfig == null ? STR_EMPTY : mailConfig.getServer(), mailConfig == null ? STR_EMPTY : mailConfig.getLogin(), afe.getMessage());
+        }
 
         // OAuth token expired?
-        if (null != mailConfig && AuthType.isOAuthType(mailConfig.getAuthType())) {
+        if (null != mailConfig && AuthType.isOAuthType(mailConfig.getAuthType()) && afe != null && (afe.hasNoReason() || AUTHENTICATIONFAILED.getName().equals(afe.getReason()))) {
             if (MailAccount.DEFAULT_ID == mailConfig.getAccountId()) {
                 // OAuth token expired for primary account
-                return createInvalidCredentialsException(authenticationFailedException, mailConfig, session);
+                return createInvalidCredentialsException(authFailed, mailConfig, session);
             }
 
             Account account = mailConfig.getAccount();
@@ -717,37 +730,37 @@ public class MimeMailException extends OXException {
                         }
                         if (null != oAuthAccount) {
                             API api = oAuthAccount.getAPI();
-                            return OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(authenticationFailedException, api.getDisplayName(), I(oAuthAccount.getId()), I(session.getUserId()), I(session.getContextId()));
+                            return OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(authFailed, api.getDisplayName(), I(oAuthAccount.getId()), I(session.getUserId()), I(session.getContextId()));
                         }
                     }
                 }
             }
         }
-        
-        if (authenticationFailedException instanceof javax.mail.AuthorizationFailedException) {
-            return MimeMailExceptionCode.AUTHORIZATION_FAILED.create(authenticationFailedException, mailConfig == null ? STR_EMPTY : mailConfig.getServer(), mailConfig == null ? STR_EMPTY : mailConfig.getLogin());
-        } else if (authenticationFailedException instanceof javax.mail.TemporaryAuthenticationFailureException) {
-            return MimeMailExceptionCode.TEMPORARY_AUTH_FAILURE.create(authenticationFailedException, mailConfig == null ? STR_EMPTY : mailConfig.getServer(), mailConfig == null ? STR_EMPTY : mailConfig.getLogin());
-        } else if (authenticationFailedException instanceof javax.mail.PasswordExpiredException) {
-            return MimeMailExceptionCode.PASSWORD_EXPIRED.create(authenticationFailedException, mailConfig == null ? STR_EMPTY : mailConfig.getServer(), mailConfig == null ? STR_EMPTY : mailConfig.getLogin());
-        } else if (authenticationFailedException instanceof javax.mail.PrivacyRequiredException) {
-            return MimeMailExceptionCode.PRIVACY_REQUIRED.create(authenticationFailedException, mailConfig == null ? STR_EMPTY : mailConfig.getServer(), mailConfig == null ? STR_EMPTY : mailConfig.getLogin());
+
+        if (authFailed instanceof javax.mail.AuthorizationFailedException) {
+            return MimeMailExceptionCode.AUTHORIZATION_FAILED.create(authFailed, mailConfig == null ? STR_EMPTY : mailConfig.getServer(), mailConfig == null ? STR_EMPTY : mailConfig.getLogin());
+        } else if (authFailed instanceof javax.mail.TemporaryAuthenticationFailureException) {
+            return MimeMailExceptionCode.TEMPORARY_AUTH_FAILURE.create(authFailed, mailConfig == null ? STR_EMPTY : mailConfig.getServer(), mailConfig == null ? STR_EMPTY : mailConfig.getLogin());
+        } else if (authFailed instanceof javax.mail.PasswordExpiredException) {
+            return MimeMailExceptionCode.PASSWORD_EXPIRED.create(authFailed, mailConfig == null ? STR_EMPTY : mailConfig.getServer(), mailConfig == null ? STR_EMPTY : mailConfig.getLogin());
+        } else if (authFailed instanceof javax.mail.PrivacyRequiredException) {
+            return MimeMailExceptionCode.PRIVACY_REQUIRED.create(authFailed, mailConfig == null ? STR_EMPTY : mailConfig.getServer(), mailConfig == null ? STR_EMPTY : mailConfig.getLogin());
         }
 
         // Primary account?
         if (null != mailConfig && MailAccount.DEFAULT_ID == mailConfig.getAccountId()) {
-            return MimeMailExceptionCode.LOGIN_FAILED.create(authenticationFailedException, mailConfig.getServer(), mailConfig.getLogin());
+            return MimeMailExceptionCode.LOGIN_FAILED.create(authFailed, mailConfig.getServer(), mailConfig.getLogin());
         }
 
         // Temporary nature?
-        if ((authenticationFailedException.getMessage() != null) && ERR_TMP.equals(com.openexchange.java.Strings.toLowerCase(authenticationFailedException.getMessage()))) {
+        if ((authFailed.getMessage() != null) && ERR_TMP.equals(Strings.toLowerCase(authFailed.getMessage()))) {
             String server = mailConfig == null ? STR_EMPTY : mailConfig.getServer();
             String login = mailConfig == null ? STR_EMPTY : mailConfig.getLogin();
-            return MimeMailExceptionCode.LOGIN_FAILED.create(authenticationFailedException, server, login);
+            return MimeMailExceptionCode.LOGIN_FAILED.create(authFailed, server, login);
         }
 
         // Advertise invalid credential w/ or w/o additional info
-        return createInvalidCredentialsException(authenticationFailedException, mailConfig, session);
+        return createInvalidCredentialsException(authFailed, mailConfig, session);
     }
 
     private static OXException createInvalidCredentialsException(Exception authenticationFailedException, MailConfig mailConfig, Session session) {
@@ -795,7 +808,7 @@ public class MimeMailException extends OXException {
         if (null == info) {
             return info;
         }
-        final int pos = com.openexchange.java.Strings.toLowerCase(info).indexOf("error message: ");
+        final int pos = Strings.toLowerCase(info).indexOf("error message: ");
         return pos < 0 ? info : info.substring(pos + 15);
     }
 
@@ -841,7 +854,7 @@ public class MimeMailException extends OXException {
         if (null == msg) {
             return false;
         }
-        final String m = com.openexchange.java.Strings.toLowerCase(msg);
+        final String m = Strings.toLowerCase(msg);
         return (m.indexOf("exists") >= 0);
     }
 
@@ -870,7 +883,7 @@ public class MimeMailException extends OXException {
         if (null == msg) {
             return false;
         }
-        final String m = com.openexchange.java.Strings.toLowerCase(msg);
+        final String m = Strings.toLowerCase(msg);
         return (m.indexOf("alreadyexists") >= 0);
     }
 
@@ -899,7 +912,7 @@ public class MimeMailException extends OXException {
         if (null == msg) {
             return false;
         }
-        String m = com.openexchange.java.Strings.asciiLowerCase(msg);
+        String m = Strings.asciiLowerCase(msg);
         return (m.indexOf("quota") >= 0 || (m.indexOf("limit") >= 0 && m.indexOf("[limit]") < 0));
     }
 
@@ -918,7 +931,7 @@ public class MimeMailException extends OXException {
             }
         }
 
-        return isInUseException(com.openexchange.java.Strings.asciiLowerCase(e.getMessage()));
+        return isInUseException(Strings.asciiLowerCase(e.getMessage()));
     }
 
     /**
@@ -928,7 +941,7 @@ public class MimeMailException extends OXException {
         if (null == msg) {
             return false;
         }
-        return (com.openexchange.java.Strings.toLowerCase(msg).indexOf("[inuse]") >= 0);
+        return (Strings.toLowerCase(msg).indexOf("[inuse]") >= 0);
     }
 
     /**
@@ -1174,12 +1187,12 @@ public class MimeMailException extends OXException {
         }
         return builder.toString();
     }
-    
+
     /**
      * Retrieves the display name from the specified {@link MailConfig}.
      * If no {@link Account} is attached to the {@link MailConfig} or
      * no display name is present, then the login name is returned.
-     * 
+     *
      * @param mailConfig The {@link MailConfig}
      * @return The display name
      */

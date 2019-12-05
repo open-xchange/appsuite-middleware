@@ -250,7 +250,7 @@ public class OXResellerInterfaceTest extends AbstractOXResellerTest {
 
             try {
                 ctx1.addExtension(new OXContextExtensionImpl(new Restriction[] { MaxUserPerContextRestriction() }));
-            } catch (final DuplicateExtensionException e) {
+            } catch (DuplicateExtensionException e) {
                 // cannot occur on a newly created context
                 e.printStackTrace();
             }

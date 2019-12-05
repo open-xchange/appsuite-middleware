@@ -52,7 +52,6 @@ package com.openexchange.passwordchange;
 import org.apache.commons.lang.Validate;
 import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.Strings;
@@ -60,6 +59,7 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.user.User;
 import com.openexchange.userconf.UserPermissionService;
 
 /**

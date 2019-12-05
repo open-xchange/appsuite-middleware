@@ -119,22 +119,12 @@ public class PGPSessionKeyDecrypter extends PGPDecrypter {
         this(key.getKeyData(), strategy);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.pgp.core.PGPDecrypter#keyFound(org.bouncycastle.openpgp.PGPPrivateKey)
-     */
     @Override
     protected boolean keyFound(PGPPrivateKey key) {
         //Not dealing with asymmetric keys, because this class knows the symmetric key for decrypting the PGP data.
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.pgp.core.PGPDecrypter#getDecryptionFactory(com.openexchange.pgp.core.PGPDecrypter.PGPDataContainer)
-     */
     @Override
     protected PublicKeyDataDecryptorFactory getDecryptionFactory(PGPDataContainer publicKeyEncryptedData) {
         return new SymmetricKeyDataDecryptorFactory(key);

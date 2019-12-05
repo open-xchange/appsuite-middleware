@@ -59,10 +59,12 @@ import com.openexchange.group.Group;
 import com.openexchange.group.GroupService;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
+import com.openexchange.java.Autoboxing;
 import com.openexchange.principalusecount.PrincipalUseCountService;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.user.User;
 
 /**
  *
@@ -71,14 +73,14 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 public final class GroupServiceImpl implements GroupService {
 
     private final GroupStorage storage;
-    private final PrincipalUseCountService usecountService;
+    private final ServiceLookup services;
 
     /**
      * Initializes a new {@link GroupServiceImpl}.
      */
-    public GroupServiceImpl(GroupStorage storage, PrincipalUseCountService usecountService) {
+    public GroupServiceImpl(GroupStorage storage, ServiceLookup services) {
         this.storage = storage;
-        this.usecountService = usecountService;
+        this.services = services;
     }
 
     @Override
@@ -136,17 +138,21 @@ public final class GroupServiceImpl implements GroupService {
     }
 
     private Group[] sortGroupsByUseCount(Session session, Group[] groups) throws OXException {
+        PrincipalUseCountService usecountService = services.getOptionalService(PrincipalUseCountService.class);
+        if (usecountService == null) {
+            return groups;
+        }
+
         Integer[] principalIds = new Integer[groups.length];
         int x = 0;
         for (Group group : groups) {
-            principalIds[x++] = group.getIdentifier();
+            principalIds[x++] = Autoboxing.I(group.getIdentifier());
         }
-
         Map<Integer, Integer> useCounts = usecountService.get(session, principalIds);
         List<GroupAndUseCount> listToSort = new ArrayList<>(useCounts.size());
         x = 0;
         for (Group group : groups) {
-            listToSort.add(new GroupAndUseCount(group, useCounts.get(group.getIdentifier())));
+            listToSort.add(new GroupAndUseCount(group, useCounts.get(Autoboxing.I(group.getIdentifier()))));
         }
         Collections.sort(listToSort);
 

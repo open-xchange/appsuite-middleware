@@ -78,7 +78,7 @@ import com.openexchange.java.Strings;
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.1
  */
-class HazelcastSSLFactory implements SSLContextFactory {
+public class HazelcastSSLFactory implements SSLContextFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HazelcastSSLFactory.class);
 
@@ -228,7 +228,7 @@ class HazelcastSSLFactory implements SSLContextFactory {
      * @param configService The {@link ConfigurationService} to get the properties from
      * @return The SSL properties
      */
-    static Properties getPropertiesFromService(ConfigurationService configService) {
+    public static Properties getPropertiesFromService(ConfigurationService configService) {
         Properties properties = new Properties();
         for (String propertyName : SSL_PROPERTY_NAMES) {
             String value = configService.getProperty(propertyName);

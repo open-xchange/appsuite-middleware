@@ -51,8 +51,8 @@ package com.openexchange.test.mock;
 
 import org.mockito.Mockito;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 /**
  * {@link MockFactory}

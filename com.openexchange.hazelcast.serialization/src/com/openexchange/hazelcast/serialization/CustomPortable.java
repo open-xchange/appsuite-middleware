@@ -111,7 +111,9 @@ public interface CustomPortable extends Portable {
      * @return The factory ID.
      */
     @Override
-    int getFactoryId();
+    default int getFactoryId() {
+        return FACTORY_ID;
+    }
 
     /**
      * Gets the class ID of this portable implementation.
@@ -147,6 +149,7 @@ public interface CustomPortable extends Portable {
      *   &bull; 24 ---> com.openexchange.sessiond.serialization.PortableUserSessionsCleaner
      *   &bull; 25 ---> com.openexchange.sessiond.serialization.PortableSessionFilterApplier
      *   &bull; 26 ---> com.openexchange.ms.internal.portable.PortableContextInvalidationCallable
+     *   &bull; 27 ---> com.openexchange.drive.events.ms.PortableFolderContentChange
      *   &bull; 101 --> com.openexchange.push.impl.credstorage.inmemory.portable.PortableCredentials
      *   &bull; 102 --> com.openexchange.push.impl.portable.PortablePushUser
      *   &bull; 103 --> com.openexchange.push.impl.balancing.reschedulerpolicy.portable.PortableCheckForExtendedServiceCallable
@@ -165,6 +168,11 @@ public interface CustomPortable extends Portable {
      *   &bull; 206 --> com.openexchange.office.hazelcast.serialization.document.PortableRestoreID
      *   &bull; 207 --> com.openexchange.office.hazelcast.serialization.document.PortableCleanupStatus
      *   &bull; 208 --> com.openexchange.office.hazelcast.serialization.document.PortableMemberPredicate
+     *   &bull; 209 --> com.openexchange.office.rt2.hazelcast.serialization.PortableNodeHealthState
+     *   &bull; 210 --> com.openexchange.office.rt2.hazelcast.serialization.PortableNodeHealthPredicate
+     *   &bull; 211 --> com.openexchange.office.rt2.hazelcast.serialization.PortableNodeDocsPredicate
+     *   &bull; 212 --> com.openexchange.office.rt2.hazelcast.serialization.PortableNodeHealthStatePredicate
+     *   &bull; 213 --> com.openexchange.office.documents.hazelcast.serialization.PortableDocRequest
      *   &bull; 300 --> com.openexchange.saml.impl.hz.PortableAuthnRequestInfo
      *   &bull; 301 --> com.openexchange.saml.impl.hz.PortableLogoutRequestInfo
      *   &bull; 310 --> com.openexchange.oidc.hz.PortableAuthenticationRequest
@@ -180,6 +188,7 @@ public interface CustomPortable extends Portable {
      *   &bull; 700 --> com.openexchange.oauth.impl.internal.hazelcast.PortableCallbackRegistryFetch
      *   &bull; 701 --> com.openexchange.oauth.impl.internal.hazelcast.PortableMultipleCallbackRegistryFetch
      *   &bull; 800 --> com.openexchange.multifactor.storage.hazelcast.PortableMultifactorToken
+     *   &bull; 900 --> com.openexchange.hazelcast.serialization.PortableCheckForBooleanConfigOptionCallable
      * </pre>
      *
      * @return The class ID

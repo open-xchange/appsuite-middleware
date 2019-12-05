@@ -53,6 +53,7 @@ import java.util.Arrays;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.authentication.NamePart;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.config.lean.Property;
 import com.openexchange.java.Strings;
@@ -99,11 +100,6 @@ public abstract class AbstractOIDCBackendConfig implements OIDCBackendConfig {
     @Override
     public String getClientID() {
         return this.loadStringProperty(OIDCBackendProperty.clientId);
-    }
-
-    @Override
-    public String getRpRedirectURIInit() {
-        return this.loadStringProperty(OIDCBackendProperty.rpRedirectURIInit);
     }
 
     @Override
@@ -210,10 +206,45 @@ public abstract class AbstractOIDCBackendConfig implements OIDCBackendConfig {
     public String getBackendPath() {
         return this.loadStringProperty(OIDCBackendProperty.backendPath);
     }
-    
+
     @Override
     public String getFailureRedirect() {
         return this.loadStringProperty(OIDCBackendProperty.failureRedirect);
+    }
+
+    @Override
+    public NamePart getPasswordGrantUserNamePart() {
+        return this.loadNamePartProperty(OIDCBackendProperty.passwordGrantUserNamePart);
+    }
+
+    @Override
+    public String getContextLookupClaim() {
+        return this.loadStringProperty(OIDCBackendProperty.contextLookupClaim);
+    }
+
+    @Override
+    public NamePart getContextLookupNamePart() {
+        return this.loadNamePartProperty(OIDCBackendProperty.contextLookupNamePart);
+    }
+
+    @Override
+    public String getUserLookupClaim() {
+        return this.loadStringProperty(OIDCBackendProperty.userLookupClaim);
+    }
+
+    @Override
+    public NamePart getUserLookupNamePart() {
+        return this.loadNamePartProperty(OIDCBackendProperty.userLookupNamePart);
+    }
+
+    @Override
+    public long getTokenLockTimeoutSeconds() {
+        return this.loadIntProperty(OIDCBackendProperty.tokenLockTimeoutSeconds);
+    }
+
+    @Override
+    public boolean tryRecoverStoredTokens() {
+        return this.loadBooleanProperty(OIDCBackendProperty.tryRecoverStoredTokens);
     }
 
     /**
@@ -242,7 +273,11 @@ public abstract class AbstractOIDCBackendConfig implements OIDCBackendConfig {
      * @return The {@link int} value
      */
     protected int loadIntProperty(final OIDCBackendProperty backendProperty) {
-        return Integer.parseInt(this.loadStringProperty(backendProperty));
+        if (Strings.isEmpty(this.customPropertyPrefix)) {
+            return this.leanConfigurationService.getIntProperty(backendProperty);
+        }
+
+        return this.leanConfigurationService.getIntProperty(this.getCustomProperty(backendProperty));
     }
 
     /**
@@ -253,7 +288,22 @@ public abstract class AbstractOIDCBackendConfig implements OIDCBackendConfig {
      * @return The {@link boolean} value
      */
     protected boolean loadBooleanProperty(final OIDCBackendProperty backendProperty) {
-        return Boolean.parseBoolean(this.loadStringProperty(backendProperty));
+        if (Strings.isEmpty(this.customPropertyPrefix)) {
+            return this.leanConfigurationService.getBooleanProperty(backendProperty);
+        }
+
+        return this.leanConfigurationService.getBooleanProperty(this.getCustomProperty(backendProperty));
+    }
+
+    protected NamePart loadNamePartProperty(OIDCBackendProperty backendProperty) {
+        String value = this.loadStringProperty(backendProperty);
+        NamePart namePart = NamePart.of(value);
+        if (namePart == null) {
+            namePart = backendProperty.getDefaultValue(NamePart.class);
+            LOG.warn("Illegal value '{}' for property '{}'. Falling back to default: {}",
+                value, backendProperty.getFQPropertyName(), namePart.getConfigName());
+        }
+        return namePart;
     }
 
     protected Property getCustomProperty(final OIDCBackendProperty backendProperty) {

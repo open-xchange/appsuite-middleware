@@ -68,10 +68,16 @@ import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.FolderService;
+import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.folderstorage.Type;
+import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
+import com.openexchange.user.User;
+import com.openexchange.user.UserService;
 
 /**
  *
@@ -194,6 +200,15 @@ public class CalendarITipIntegrationUtility implements ITipIntegrationUtility {
             return event.getOrganizer().getSentBy().getEntity() == session.getUserId();
         }
         return false;
+    }
+
+    @Override
+    public Type getFolderType(Event event, CalendarSession session) throws OXException {
+        FolderService folderService = Services.getService(FolderService.class);
+        Context context = contexts.getContext(session.getContextId());
+        User user = Services.getService(UserService.class).getUser(session.getUserId(), context);
+        UserizedFolder folder = folderService.getFolder(FolderStorage.REAL_TREE_ID, event.getFolderId(), user, context, null);
+        return folder.getType();
     }
 
 }

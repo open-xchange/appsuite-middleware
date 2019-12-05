@@ -53,7 +53,6 @@ import java.io.InputStream;
 import java.util.UUID;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
-import com.openexchange.mail.compose.AttachmentStorageReference;
 
 /**
  * {@link DefaultAttachment}

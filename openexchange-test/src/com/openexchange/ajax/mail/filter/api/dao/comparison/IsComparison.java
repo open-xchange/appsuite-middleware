@@ -67,32 +67,17 @@ public class IsComparison extends AbstractComparison implements Comparison<IsCom
         super(MatchType.is);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.mail.filter.api.dao.comparison.Comparison#getMatchType()
-     */
     @Override
     public MatchType getMatchType() {
         return MatchType.is;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.mail.filter.api.dao.comparison.Comparison#setArgument(com.openexchange.ajax.mail.filter.api.dao.comparison.argument.ComparisonArgument, java.lang.Object)
-     */
     @SuppressWarnings("unused")
     @Override
     public void setArgument(IsComparisonArgument argument, Object value) {
         throw new UnsupportedOperationException("The '" + MatchType.is + "' comparison type can not have any arguments");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.mail.filter.api.dao.comparison.Comparison#getArgument(com.openexchange.ajax.mail.filter.api.dao.comparison.argument.ComparisonArgument)
-     */
     @SuppressWarnings("unused")
     @Override
     public Object getArgument(IsComparisonArgument argument) {

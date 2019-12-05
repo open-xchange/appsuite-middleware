@@ -96,7 +96,7 @@ public abstract class SimpleUpdateTask extends UpdateTaskAdapter {
 
 //  The following methods can be overridden, if different values make sense here
 
-    protected boolean shouldRun(@SuppressWarnings("unused") Connection con) {
+    protected boolean shouldRun(@SuppressWarnings("unused") Connection con) throws SQLException {
         return true;
     }
 

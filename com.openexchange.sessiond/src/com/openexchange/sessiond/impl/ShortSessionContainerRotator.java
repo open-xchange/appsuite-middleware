@@ -71,7 +71,7 @@ public class ShortSessionContainerRotator implements Runnable {
     public void run() {
         try {
             SessionHandler.cleanUp();
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             ExceptionUtils.handleThrowable(t);
             LOG.error("", t);
         }

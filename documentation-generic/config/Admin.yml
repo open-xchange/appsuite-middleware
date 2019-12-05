@@ -397,8 +397,10 @@ properties:
       description: |
         Defines the hash algorithm that will be used to hash the user password.
 
-        Possible values are: CRYPT / SHA / BCRYPT
-      defaultValue: SHA
+        Possible values are: CRYPT / SHA / SHA-256 / SHA-512 / BCRYPT
+
+        Note: SHA-256 and SHA-512 are available since 7.10.3
+      defaultValue: SHA-256
       version:
       reloadable: false
       configcascadeAware: false

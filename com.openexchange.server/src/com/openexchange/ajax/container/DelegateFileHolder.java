@@ -121,7 +121,7 @@ public class DelegateFileHolder implements IFileHolder {
         if (null != streamProvider) {
             try {
                 return streamProvider.newStream();
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
             }
         }

@@ -61,13 +61,13 @@ import com.openexchange.folderstorage.database.FolderIdNamePair;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.Groups;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
+import com.openexchange.user.User;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.TIntObjectMap;
@@ -144,7 +144,7 @@ public final class SharedPrefixFolder {
         final int sharedOwner;
         try {
             sharedOwner = Integer.parseInt(folderIdentifier.substring(2));
-        } catch (final NumberFormatException exc) {
+        } catch (NumberFormatException exc) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(exc, exc.getMessage());
         }
         return OXFolderIteratorSQL.hasVisibleSharedFolders(
@@ -170,13 +170,13 @@ public final class SharedPrefixFolder {
         final int sharedOwner;
         try {
             sharedOwner = Integer.parseInt(folderIdentifier.substring(2));
-        } catch (final NumberFormatException exc) {
+        } catch (NumberFormatException exc) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(exc, exc.getMessage());
         }
         String creatorDisplayName;
         try {
             creatorDisplayName = UserStorage.getInstance().getUser(sharedOwner, ctx).getDisplayName();
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (sharedOwner != OCLPermission.ALL_GROUPS_AND_USERS) {
                 throw e;
             }
@@ -210,7 +210,7 @@ public final class SharedPrefixFolder {
         final int sharedOwner;
         try {
             sharedOwner = Integer.parseInt(folderIdentifier.substring(2));
-        } catch (final NumberFormatException exc) {
+        } catch (NumberFormatException exc) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(exc, exc.getMessage());
         }
         Queue<FolderObject> q;
@@ -253,7 +253,7 @@ public final class SharedPrefixFolder {
         final int sharedOwner;
         try {
             sharedOwner = Integer.parseInt(folderIdentifier.substring(2));
-        } catch (final NumberFormatException exc) {
+        } catch (NumberFormatException exc) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(exc, exc.getMessage());
         }
         Queue<FolderObject> q;

@@ -62,7 +62,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentField;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.json.OXJSONWriter;
@@ -72,6 +71,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 /**
  * {@link ListAction}
@@ -103,11 +103,11 @@ public final class ListAction extends AbstractAttachmentAction {
             for (int i = 0; i < idsArray.length(); i++) {
                 try {
                     ids[i] = idsArray.getInt(i);
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     final String string = idsArray.getString(i);
                     try {
                         ids[i] = Integer.parseInt(string);
-                    } catch (final NumberFormatException e1) {
+                    } catch (NumberFormatException e1) {
                         throw AjaxExceptionCodes.INVALID_PARAMETER.create(string);
                     }
                 }
@@ -116,11 +116,11 @@ public final class ListAction extends AbstractAttachmentAction {
             String timeZoneId = requestData.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
             final JSONValue jsonValue = list(session, folderId, attachedId, moduleId, ids, columns, timeZoneId);
             return new AJAXRequestResult(jsonValue, "apiResponse");
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (final UnknownColumnException e) {
+        } catch (UnknownColumnException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
@@ -155,7 +155,7 @@ public final class ListAction extends AbstractAttachmentAction {
             ATTACHMENT_BASE.commit();
 
             return w.getObject();
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             rollback();
             if (t instanceof OXException) {
                 throw (OXException) t;
@@ -164,7 +164,7 @@ public final class ListAction extends AbstractAttachmentAction {
         } finally {
             try {
                 ATTACHMENT_BASE.finish();
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.error("", e);
             }
 

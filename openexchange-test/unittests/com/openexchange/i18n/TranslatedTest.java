@@ -65,8 +65,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Init;
-import com.openexchange.server.services.I18nServices;
+import com.openexchange.i18n.internal.I18nServiceRegistryImpl;
 import com.openexchange.test.I18nTests;
 
 /**
@@ -78,7 +79,6 @@ import com.openexchange.test.I18nTests;
 public class TranslatedTest {
 
     private static final Class<?>[] I18N_CLASSES = new Class<?>[] {
-        com.openexchange.calendar.printing.CalendarPrintingStrings.class,
         com.openexchange.groupware.i18n.FolderStrings.class,
         com.openexchange.groupware.i18n.Groups.class,
         com.openexchange.groupware.i18n.MailStrings.class,
@@ -140,8 +140,8 @@ public class TranslatedTest {
     }
 
     @Test
-    public void testTranslation() {
-        final I18nService i18nService = I18nServices.getInstance().getService(locale);
+    public void testTranslation() throws OXException {
+        final I18nService i18nService = I18nServiceRegistryImpl.getInstance().getI18nService(locale);
         assertNotNull("Can't get i18n service for " + locale.toString(), i18nService);
         final boolean isTranslated = i18nService.hasKey(key);
         assertTrue("No translation for key \"" + key + "\" of class " + className + " into language " + locale + ".", isTranslated);

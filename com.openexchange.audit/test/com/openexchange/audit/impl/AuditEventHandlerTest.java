@@ -74,11 +74,11 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.session.Session;
 import com.openexchange.test.mock.MockUtils;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 /**
@@ -146,7 +146,7 @@ public class AuditEventHandlerTest {
         PowerMockito.mockStatic(ContextStorage.class);
 
         userService = PowerMockito.mock(UserService.class);
-        User user = PowerMockito.mock(com.openexchange.groupware.ldap.User.class);
+        User user = PowerMockito.mock(com.openexchange.user.User.class);
         PowerMockito.when(user.getDisplayName()).thenReturn(this.objectTitle);
         PowerMockito.when(userService.getUser(ArgumentMatchers.anyInt(), (Context) ArgumentMatchers.any())).thenReturn(user);
 

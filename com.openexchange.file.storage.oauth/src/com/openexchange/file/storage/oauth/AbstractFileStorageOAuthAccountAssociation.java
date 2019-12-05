@@ -87,21 +87,11 @@ public abstract class AbstractFileStorageOAuthAccountAssociation extends Abstrac
         return fileStorageAccount.getDisplayName();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.association.OAuthAccountAssociation#getModule()
-     */
     @Override
     public String getModule() {
         return Module.INFOSTORE.getModuleName();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.association.OAuthAccountAssociation#optFolder()
-     */
     @Override
     public String getFolder() {
         return new FolderID(getServiceId(), getId(), FileStorageFolder.ROOT_FULLNAME).toUniqueID();

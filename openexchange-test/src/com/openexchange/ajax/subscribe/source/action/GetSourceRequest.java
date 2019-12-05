@@ -71,21 +71,11 @@ public class GetSourceRequest extends AbstractSubscriptionSourceRequest<GetSourc
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
-     */
     @Override
     public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
         return Method.GET;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
-     */
     @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
         List<Parameter> params = new LinkedList<Parameter>();
@@ -94,11 +84,6 @@ public class GetSourceRequest extends AbstractSubscriptionSourceRequest<GetSourc
         return params.toArray(new Parameter[] {});
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
-     */
     @Override
     public AbstractAJAXParser<? extends GetSourceResponse> getParser() {
         return new AbstractAJAXParser<GetSourceResponse>(getFailOnError()) {
@@ -110,11 +95,6 @@ public class GetSourceRequest extends AbstractSubscriptionSourceRequest<GetSourc
         };
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
-     */
     @Override
     public Object getBody() throws IOException, JSONException {
         return null;

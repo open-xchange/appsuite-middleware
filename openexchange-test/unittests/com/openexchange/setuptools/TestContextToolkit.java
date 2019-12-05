@@ -59,13 +59,13 @@ import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.resource.storage.ResourceStorage;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
+import com.openexchange.user.User;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -82,7 +82,7 @@ public class TestContextToolkit {
             uStorage = UserStorage.getInstance();
             final int pos = username.indexOf('@');
             return uStorage.getUserId((pos == -1 ? username : username.substring(0, pos)), ctx);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             e.printStackTrace();
             return -1;
         }
@@ -97,7 +97,7 @@ public class TestContextToolkit {
         try {
             rStorage = ServerServiceRegistry.getServize(ResourceStorage.class, true);
             return rStorage.searchResources(resource, ctx)[0].getIdentifier();
-        } catch (final OXException e) {
+        } catch (OXException e) {
             e.printStackTrace();
             return -1;
         }
@@ -112,7 +112,7 @@ public class TestContextToolkit {
         try {
             groupService = ServerServiceRegistry.getServize(GroupService.class, true);
             return groupService.search(ctx, group, true)[0].getIdentifier();
-        } catch (final OXException e) {
+        } catch (OXException e) {
             e.printStackTrace();
             return -1;
         }
@@ -128,7 +128,7 @@ public class TestContextToolkit {
         try {
             final ContextStorage storage = ContextStorage.getInstance();
             return storage.getContext(storage.getContextId(name));
-        } catch (final OXException e) {
+        } catch (OXException e) {
             e.printStackTrace();
             return null;
         }
@@ -137,7 +137,7 @@ public class TestContextToolkit {
     public int[] getGroups(final int user, final Context ctx) {
         try {
             return UserConfigurationStorage.getInstance().getUserConfiguration(user, ctx).getGroups();
-        } catch (final OXException e) {
+        } catch (OXException e) {
             e.printStackTrace();
             return new int[0];
         }
@@ -153,7 +153,7 @@ public class TestContextToolkit {
         try {
             groupService = ServerServiceRegistry.getServize(GroupService.class, true);
             return groupService.getGroup(ctx, id);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             e.printStackTrace();
             return null;
         }
@@ -164,7 +164,7 @@ public class TestContextToolkit {
         try {
             uStorage = UserStorage.getInstance();
             return uStorage.getUser(userId, ctx);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             e.printStackTrace();
             return null;
         }

@@ -1,0 +1,28 @@
+/calendar?action=resolveuid:
+  get:
+    operationId: resolveUID
+    tags:
+      - Calendar
+    summary: Resolves the UID to an OX object ID.
+    parameters:
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - in: query
+        name: uid
+        description: The UID that shall be resolved.
+        required: true
+        schema:
+          type: string
+    responses:
+      '200':
+        description: >
+          A JSON object containing the related object ID in the field `id`. If
+          no object exists with the
+
+          specified UID or in case of errors the responsible fields in the
+          response are filled
+
+          (see [Error handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AppointmentUpdateResponse'

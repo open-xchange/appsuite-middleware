@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: The chronos calendar account service
 Bundle-SymbolicName: com.openexchange.chronos.calendar.account.service.impl
-Bundle-Version: 7.10.2
+Bundle-Version: 7.10.3
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.openexchange.capabilities,
@@ -15,7 +15,6 @@ Import-Package: com.openexchange.capabilities,
  com.openexchange.chronos.service,
  com.openexchange.chronos.storage,
  com.openexchange.chronos.storage.operation,
- com.openexchange.chronos.storage.rdb,
  com.openexchange.config.cascade,
  com.openexchange.context,
  com.openexchange.database,

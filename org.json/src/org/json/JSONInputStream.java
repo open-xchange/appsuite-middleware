@@ -302,7 +302,7 @@ public final class JSONInputStream extends InputStream {
                     if (null != closeable) {
                         try {
                             closeable.close();
-                        } catch (final Exception e) {
+                        } catch (Exception e) {
                             // Ignore
                         }
                     }

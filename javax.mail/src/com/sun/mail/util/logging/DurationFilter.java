@@ -360,9 +360,9 @@ public class DurationFilter implements Filter {
             if (isTimeEntry(suffix, value)) {
                 try {
                     result = LogManagerProperties.parseDurationToMillis(value);
-                } catch (final RuntimeException ignore) {
-                } catch (final Exception ignore) {
-                } catch (final LinkageError ignore) {
+                } catch (RuntimeException ignore) {
+                } catch (Exception ignore) {
+                } catch (LinkageError ignore) {
                 }
             }
 
@@ -375,7 +375,7 @@ public class DurationFilter implements Filter {
                         }
                         result = multiplyExact(result, Long.parseLong(s));
                     }
-                } catch (final RuntimeException ignore) {
+                } catch (RuntimeException ignore) {
                     result = Long.MIN_VALUE;
                 }
             }

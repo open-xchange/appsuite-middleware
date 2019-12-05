@@ -64,7 +64,6 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.hazelcast.config.Config;
-import com.hazelcast.config.JoinConfig;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.HazelcastInstanceNotActiveException;
@@ -74,6 +73,7 @@ import com.openexchange.exception.ExceptionUtils;
 import com.openexchange.hazelcast.HazelcastMBean;
 import com.openexchange.hazelcast.HazelcastMBeanImpl;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
+import com.openexchange.hazelcast.configuration.KnownNetworkJoin;
 import com.openexchange.java.Strings;
 import com.openexchange.management.ManagementService;
 import com.openexchange.management.osgi.HousekeepingManagementTracker;
@@ -296,11 +296,13 @@ public class HazelcastActivator implements BundleActivator {
         Config config = configService.getConfig();
         {
             LOG.info("{}Hazelcast:{}    Creating new hazelcast instance...{}", lf, lf, lf);
-            JoinConfig networkJoin = config.getNetworkConfig().getJoin();
-            if (networkJoin.getMulticastConfig().isEnabled()) {
-                LOG.info("{}Hazelcast:{}    Using network join: {}{}", lf, lf, networkJoin.getMulticastConfig(), lf);
-            } else if (networkJoin.getTcpIpConfig().isEnabled()) {
-                LOG.info("{}Hazelcast:{}    Using network join: {}{}", lf, lf, networkJoin.getTcpIpConfig(), lf);
+            KnownNetworkJoin join = KnownNetworkJoin.networkJoinFor(config.getProperty("com.openexchange.hazelcast.network.join"));
+            if (join == KnownNetworkJoin.MULTICAST) {
+                LOG.info("{}Hazelcast:{}    Using network join: {}{}", lf, lf, config.getNetworkConfig().getJoin().getMulticastConfig(), lf);
+            } else if (join == KnownNetworkJoin.STATIC) {
+                LOG.info("{}Hazelcast:{}    Using network join: {}{}", lf, lf, config.getNetworkConfig().getJoin().getTcpIpConfig(), lf);
+            } else if (join == KnownNetworkJoin.DNS) {
+                LOG.info("{}Hazelcast:{}    Using DNS-based network join: {}{}", lf, lf, config.getNetworkConfig().getJoin().getTcpIpConfig(), lf);
             }
         }
 

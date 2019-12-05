@@ -254,7 +254,7 @@ public final class ImageUtility {
     private static String decodeQueryStringValue(final String queryStringValue) {
         try {
             return AJAXUtility.decodeUrl(queryStringValue, UTF_8);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             return queryStringValue;
         }
     }
@@ -433,7 +433,7 @@ public final class ImageUtility {
     private static String urlEncodeSafe(final String text) {
         try {
             return URLEncoder.encode(text, UTF_8);
-        } catch (final UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             // Cannot occur
             LOGGER.error("", e);
             return text;
@@ -453,7 +453,7 @@ public final class ImageUtility {
             checksum.setEncoding(encoding);
             checksum.update(string.getBytes(Charsets.UTF_8));
             return checksum.getFormattedValue();
-        } catch (final NoSuchAlgorithmException e) {
+        } catch (NoSuchAlgorithmException e) {
             LOGGER.error("", e);
         }
         return null;
@@ -483,9 +483,9 @@ public final class ImageUtility {
             checksum.setEncoding(encoding);
             checksum.update(string.getBytes(UTF_8));
             return checksum.getFormattedValue();
-        } catch (final NoSuchAlgorithmException e) {
+        } catch (NoSuchAlgorithmException e) {
             LOGGER.error("", e);
-        } catch (final UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             LOGGER.error("", e);
         }
         return null;

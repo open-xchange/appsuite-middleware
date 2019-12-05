@@ -142,7 +142,7 @@ public class VersionsTest extends InfostoreAJAXTest {
             assertTrue("Didn't expect " + comp.getInt(0), versions.remove(I(comp.getInt(0))));
             if (current != null && comp.getInt(0) != current.intValue()) {
                 assertFalse(comp.getBoolean(1));
-            } else if(current != null){
+            } else if (current != null){
                 assertTrue(comp.getBoolean(1));
             }
         }

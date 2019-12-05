@@ -59,14 +59,14 @@ import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.utils.Metadata;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.osgi.annotation.SingletonService;
+import com.openexchange.session.SessionHolder;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.tx.TransactionAware;
+import com.openexchange.user.User;
 
 /**
  * {@link InfostoreFacade} - Access to infostore documents.

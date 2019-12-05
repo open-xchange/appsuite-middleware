@@ -49,11 +49,10 @@
 
 package com.openexchange.ajax.login.osgi;
 
+import static com.openexchange.osgi.Tools.withRanking;
 import java.util.Dictionary;
-import java.util.Hashtable;
 import java.util.regex.Pattern;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
@@ -61,9 +60,9 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import com.openexchange.ajax.LoginServlet;
-import com.openexchange.ajax.login.RateLimiterByLogin;
 import com.openexchange.ajax.login.AllowedRedirectUris;
 import com.openexchange.ajax.login.LoginRequestHandler;
+import com.openexchange.ajax.login.RateLimiterByLogin;
 import com.openexchange.ajax.login.RedeemReservationLogin;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
@@ -183,9 +182,7 @@ public class LoginActivator extends HousekeepingActivator {
             int permits = configurationService.getIntProperty(propPermits, 3);
             long timeFrameInSeconds = configurationService.getIntProperty(propTimeFrame, 30);
             if (permits > 0 && timeFrameInSeconds > 0) {
-                Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
-                properties.put(Constants.SERVICE_RANKING, Integer.valueOf(999));
-                registerService(LoginListener.class, new RateLimiterByLogin(permits, timeFrameInSeconds), properties);
+                registerService(LoginListener.class, new RateLimiterByLogin(permits, timeFrameInSeconds), withRanking(999));
             } else {
                 LoggerHolder.LOG.warn("Value configured for \"{}\" and/or \"{}\" property must be positive. Rate limiting by login name is effectively disabled!", propPermits, propTimeFrame);
             }

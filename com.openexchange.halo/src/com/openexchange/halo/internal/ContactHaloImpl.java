@@ -77,7 +77,6 @@ import com.openexchange.groupware.contact.ParsedDisplayName;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.helpers.ContactMerger;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.halo.ContactHalo;
 import com.openexchange.halo.HaloContactDataSource;
@@ -90,6 +89,7 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserPermissionService;
 
@@ -230,7 +230,7 @@ public class ContactHaloImpl implements ContactHalo {
             if (user == null && resultContact.containsEmail1()) {
                 try {
                     user = userService.searchUser(resultContact.getEmail1(), session.getContext(), false);
-                } catch (final OXException x) {
+                } catch (OXException x) {
                     // Don't care. This is all best effort anyway.
                 }
             }
@@ -238,7 +238,7 @@ public class ContactHaloImpl implements ContactHalo {
             if (user == null && resultContact.containsEmail2()) {
                 try {
                     user = userService.searchUser(resultContact.getEmail2(), session.getContext(), false);
-                } catch (final OXException x) {
+                } catch (OXException x) {
                     // Don't care. This is all best effort anyway.
                 }
             }
@@ -246,7 +246,7 @@ public class ContactHaloImpl implements ContactHalo {
             if (user == null && resultContact.containsEmail3()) {
                 try {
                     user = userService.searchUser(resultContact.getEmail3(), session.getContext(), false);
-                } catch (final OXException x) {
+                } catch (OXException x) {
                     // Don't care. This is all best effort anyway.
                 }
             }
@@ -265,7 +265,7 @@ public class ContactHaloImpl implements ContactHalo {
                     if (match != null && match.getId() == session.getUserId()) {
                         user = match;
                     }
-                } catch (final OXException x) {
+                } catch (OXException x) {
                     // Don't care. This is all best effort anyway.
                 }
             }
@@ -276,7 +276,7 @@ public class ContactHaloImpl implements ContactHalo {
                     if (match != null && match.getId() == session.getUserId()) {
                         user = match;
                     }
-                } catch (final OXException x) {
+                } catch (OXException x) {
                     // Don't care. This is all best effort anyway.
                 }
             }
@@ -287,7 +287,7 @@ public class ContactHaloImpl implements ContactHalo {
                     if (match != null && match.getId() == session.getUserId()) {
                         user = match;
                     }
-                } catch (final OXException x) {
+                } catch (OXException x) {
                     // Don't care. This is all best effort anyway.
                 }
             }

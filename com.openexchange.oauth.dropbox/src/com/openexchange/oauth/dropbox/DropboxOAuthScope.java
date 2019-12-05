@@ -74,21 +74,11 @@ public enum DropboxOAuthScope implements OAuthScope {
         this.module = module;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.scope.OAuthScope#getMapping()
-     */
     @Override
     public String getProviderScopes() {
         return mapping;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.scope.OAuthScope#getModule()
-     */
     @Override
     public OXScope getOXScope() {
         return module;

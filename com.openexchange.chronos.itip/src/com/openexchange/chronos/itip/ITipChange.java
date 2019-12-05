@@ -182,7 +182,7 @@ public class ITipChange {
             Calendar recurrenceId = GregorianCalendar.getInstance(null == timeZone ? TimeZone.getTimeZone("UTC") : timeZone);
             recurrenceId.setTimeInMillis(newEvent.getRecurrenceId().getValue().getTimestamp());
             Event occurrence = CalendarUtils.getOccurrence(recurrenceService, master, newEvent.getRecurrenceId());
-            if(null != occurrence) {
+            if (null != occurrence) {
                 diff = new ITipEventUpdate(occurrence, newEvent, true, AbstractITipAnalyzer.SKIP);
             }
         }

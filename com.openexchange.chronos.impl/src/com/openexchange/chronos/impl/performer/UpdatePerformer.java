@@ -49,9 +49,12 @@
 
 package com.openexchange.chronos.impl.performer;
 
+import static com.openexchange.chronos.common.CalendarUtils.collectAttendees;
 import static com.openexchange.chronos.common.CalendarUtils.contains;
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.getExceptionDateUpdates;
+import static com.openexchange.chronos.common.CalendarUtils.getSimpleAttendeeUpdates;
+import static com.openexchange.chronos.common.CalendarUtils.getUpdatedResource;
 import static com.openexchange.chronos.common.CalendarUtils.getUserIDs;
 import static com.openexchange.chronos.common.CalendarUtils.hasExternalOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.initRecurrenceRule;
@@ -61,6 +64,7 @@ import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.impl.Check.requireUpToDateTimestamp;
+import static com.openexchange.chronos.impl.Utils.extractReplies;
 import static com.openexchange.tools.arrays.Collections.isNullOrEmpty;
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -76,19 +80,25 @@ import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
+import com.openexchange.chronos.CalendarObjectResource;
 import com.openexchange.chronos.CalendarUserType;
+import com.openexchange.chronos.DelegatingEvent;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.RecurrenceRange;
+import com.openexchange.chronos.RelatedTo;
 import com.openexchange.chronos.UnmodifiableEvent;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.DefaultCalendarObjectResource;
+import com.openexchange.chronos.common.mapping.AbstractSimpleCollectionUpdate;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.InternalCalendarResult;
+import com.openexchange.chronos.impl.InternalEventUpdate;
 import com.openexchange.chronos.impl.Role;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarSession;
@@ -167,18 +177,79 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         if (null == recurrenceId && updatedEventData.containsRecurrenceId()) {
             recurrenceId = updatedEventData.getRecurrenceId();
         }
-        if (null != recurrenceId) {
-            if (isSeriesMaster(originalEvent)) {
-                updateRecurrence(originalEvent, recurrenceId, updatedEventData);
-            } else if (isSeriesException(originalEvent) && recurrenceId.equals(originalEvent.getRecurrenceId())) {
-                updateEvent(originalEvent, updatedEventData);
-            } else {
-                throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create(String.valueOf(recurrenceId), null);
-            }
+        InternalUpdateResult result;
+        if (null == recurrenceId) {
+            result = updateEvent(originalEvent, updatedEventData);
+        } else if (isSeriesMaster(originalEvent)) {
+            result = updateRecurrence(originalEvent, recurrenceId, updatedEventData);
+        } else if (isSeriesException(originalEvent) && recurrenceId.equals(originalEvent.getRecurrenceId())) {
+            result = updateEvent(originalEvent, updatedEventData);
         } else {
-            updateEvent(originalEvent, updatedEventData);
+            throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create(String.valueOf(recurrenceId), null);
         }
+        /*
+         * track scheduling-related notifications & return result
+         */
+        handleScheduling(result);
+        logPerform(result.getEventUpdate());
         return resultTracker.getResult();
+    }
+
+    /**
+     * Handles any necessary scheduling after an update has been performed, i.e. tracks suitable scheduling messages and notifications.
+     * 
+     * @param result The update result
+     */
+    private void handleScheduling(InternalUpdateResult result) throws OXException {
+        /*
+         * prepare updated resource for scheduling messages and notifications
+         */
+        InternalEventUpdate eventUpdate = result.getEventUpdate();
+        if (eventUpdate.isReschedule() && false == hasExternalOrganizer(eventUpdate.getOriginal())) {
+            if (isSeriesMaster(eventUpdate.getOriginal())) {
+                /*
+                 * update of series, determine scheduling operations based on superset of attendees in all instances of the series
+                 */                
+                AbstractSimpleCollectionUpdate<Attendee> collectedAttendeeUpdates = getSimpleAttendeeUpdates(
+                    collectAttendees(result.getOriginalResource(), null, (CalendarUserType[]) null),
+                    collectAttendees(result.getUpdatedResource(), null, (CalendarUserType[]) null));
+                if (false == collectedAttendeeUpdates.getRemovedItems().isEmpty()) {
+                    schedulingHelper.trackDeletion(result.getOriginalResource(), result.getSeriesMaster(), collectedAttendeeUpdates.getRemovedItems());
+                }
+                if (false == collectedAttendeeUpdates.getRetainedItems().isEmpty()) {
+                    schedulingHelper.trackUpdate(result.getUpdatedResource(), result.getSeriesMaster(), eventUpdate, collectedAttendeeUpdates.getRetainedItems());
+                }
+                if (false == collectedAttendeeUpdates.getAddedItems().isEmpty()) {
+                    schedulingHelper.trackCreation(result.getUpdatedResource(), collectedAttendeeUpdates.getAddedItems());
+                }
+            } else {
+                /*
+                 * update of change exception or non-recurring, determine scheduling operations based on attendee updates in this event
+                 */
+                if (false == eventUpdate.getAttendeeUpdates().getRemovedItems().isEmpty()) {
+                    schedulingHelper.trackDeletion(result.getOriginalResource(), result.getSeriesMaster(), eventUpdate.getAttendeeUpdates().getRemovedItems());
+                }
+                if (false == eventUpdate.getAttendeeUpdates().getRetainedItems().isEmpty()) {
+                    schedulingHelper.trackUpdate(result.getUpdatedResource(), result.getSeriesMaster(), eventUpdate, eventUpdate.getAttendeeUpdates().getRetainedItems());
+                }
+                if (false == eventUpdate.getAttendeeUpdates().getAddedItems().isEmpty()) {
+                    schedulingHelper.trackCreation(result.getUpdatedResource(), eventUpdate.getAttendeeUpdates().getAddedItems());
+                }
+            }
+        } else if (eventUpdate.getAttendeeUpdates().isReply(calendarUser)) {
+            /*
+             * track reply message from calendar user to organizer
+             */
+            schedulingHelper.trackReply(result.getUpdatedResource(), result.getSeriesMaster(), result.getEventUpdate());
+        } else {
+            /*
+             * track deletions for newly created delete exceptions
+             */
+            List<Event> deletedExceptions = eventUpdate.getDeletedExceptions();
+            if (0 < deletedExceptions.size()) {
+                schedulingHelper.trackDeletion(new DefaultCalendarObjectResource(deletedExceptions), result.getSeriesMaster(), null);
+            }
+        }
     }
 
     /**
@@ -188,8 +259,9 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      * @param recurrenceId The recurrence identifier targeting the event occurrence to update
      * @param updatedEventData The updated event data
      * @param ignoredFields Additional fields to ignore during the update; {@link #SKIPPED_FIELDS} are always skipped
+     * @return The processed event update
      */
-    protected void updateRecurrence(Event originalSeriesMaster, RecurrenceId recurrenceId, Event updatedEventData, EventField... ignoredFields) throws OXException {
+    protected InternalUpdateResult updateRecurrence(Event originalSeriesMaster, RecurrenceId recurrenceId, Event updatedEventData, EventField... ignoredFields) throws OXException {
         recurrenceId = Check.recurrenceIdExists(session.getRecurrenceService(), originalSeriesMaster, recurrenceId);
         if (contains(originalSeriesMaster.getDeleteExceptionDates(), recurrenceId)) {
             /*
@@ -202,22 +274,35 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
              * update "this and future" recurrences; first split the series at this recurrence
              */
             Check.recurrenceRangeMatches(recurrenceId, RecurrenceRange.THISANDFUTURE);
-            new SplitPerformer(this).perform(originalSeriesMaster.getSeriesId(), recurrenceId.getValue(), null, originalSeriesMaster.getTimestamp());
+            Entry<CalendarObjectResource, CalendarObjectResource> splitResult = new SplitPerformer(this).split(originalSeriesMaster, recurrenceId.getValue(), null);
+
             /*
-             * reload the (now splitted) series event & apply the update, taking over a new recurrence rule as needed
+             * track scheduling messages and notifications for the newly created, detached series (externals, only)
              */
-            Event updatedMasterEvent = loadEventData(originalSeriesMaster.getId());
-            updatedEventData = applyRecurrenceRuleAfterSplit(originalSeriesMaster, updatedMasterEvent, updatedEventData);
-            updateEvent(updatedMasterEvent, updatedEventData, EventField.ID, EventField.RECURRENCE_ID, EventField.DELETE_EXCEPTION_DATES, EventField.CHANGE_EXCEPTION_DATES);
+            CalendarObjectResource detachedSeries = splitResult.getKey();
+            if (null != detachedSeries) {
+                schedulingHelper.trackCreation(detachedSeries, collectAttendees(detachedSeries, Boolean.FALSE, (CalendarUserType[]) null));
+            }
+            /*
+             * then apply the update for the splitted series master event after rolling back the related-to field, taking over a new recurrence rule as needed
+             */
+            Event updatedSeriesMaster = splitResult.getValue().getSeriesMaster();
+            if (null == updatedSeriesMaster) {
+                throw CalendarExceptionCodes.UNEXPECTED_ERROR.create("Unable to track update. Reason: Nothing was changed.");
+            }
+            Event originalEvent = adjustUpdatedSeriesAfterSplit(originalSeriesMaster, updatedSeriesMaster);
+            Event eventUpdate = adjustClientUpdateAfterSplit(originalSeriesMaster, updatedSeriesMaster, updatedEventData);
+            return updateEvent(originalEvent, eventUpdate, EventField.ID, EventField.RECURRENCE_ID, EventField.DELETE_EXCEPTION_DATES, EventField.CHANGE_EXCEPTION_DATES);
         } else if (contains(originalSeriesMaster.getChangeExceptionDates(), recurrenceId)) {
             /*
              * update for existing change exception, perform update, touch master & track results
              */
             Check.recurrenceRangeMatches(recurrenceId, null);
             Event originalExceptionEvent = loadExceptionData(originalSeriesMaster, recurrenceId);
-            updateEvent(originalExceptionEvent, updatedEventData, ignoredFields);
+            InternalUpdateResult result = updateEvent(originalExceptionEvent, updatedEventData, ignoredFields);
             touch(originalSeriesMaster.getSeriesId());
             resultTracker.trackUpdate(originalSeriesMaster, loadEventData(originalSeriesMaster.getId()));
+            return result;
         } else {
             /*
              * update for new change exception; prepare & insert a plain exception first, based on the original data from the master
@@ -237,8 +322,8 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
              * - recurrence rule is forcibly ignored during update to satisfy UsmFailureDuringRecurrenceTest.testShouldFailWhenTryingToMakeAChangeExceptionASeriesButDoesNot()
              * - sequence number is also ignored (since possibly incremented implicitly before)
              */
-            updateEvent(newExceptionEvent, updatedEventData, EventField.ID, EventField.RECURRENCE_RULE, EventField.SEQUENCE);
-            Event updatedExceptionEvent = loadEventData(newExceptionEvent.getId());
+            InternalUpdateResult result = updateEvent(newExceptionEvent, updatedEventData, EventField.ID, EventField.RECURRENCE_RULE, EventField.SEQUENCE);
+            Event updatedExceptionEvent = result.getUpdatedEvent();
             /*
              * add change exception date to series master & track results
              */
@@ -247,12 +332,13 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             Event updatedMasterEvent = loadEventData(originalSeriesMaster.getId());
             resultTracker.trackUpdate(originalSeriesMaster, updatedMasterEvent);
             /*
-             * reset alarm triggers for series master event and new change exception
+             * reset alarm triggers for series master event and new change exception & return result
              */
             storage.getAlarmTriggerStorage().deleteTriggers(updatedMasterEvent.getId());
             storage.getAlarmTriggerStorage().insertTriggers(updatedMasterEvent, seriesMasterAlarms);
             storage.getAlarmTriggerStorage().deleteTriggers(updatedExceptionEvent.getId());
             storage.getAlarmTriggerStorage().insertTriggers(updatedExceptionEvent, storage.getAlarmStorage().loadAlarms(updatedExceptionEvent));
+            return result;
         }
     }
 
@@ -262,16 +348,13 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      * @param originalEvent The original, plain event data
      * @param eventData The updated event data
      * @param ignoredFields Additional fields to ignore during the update; {@link #SKIPPED_FIELDS} are always skipped
-     * @return The updated event
+     * @return The processed event update
      */
-    protected Event updateEvent(Event originalEvent, Event eventData, EventField... ignoredFields) throws OXException {
+    protected InternalUpdateResult updateEvent(Event originalEvent, Event eventData, EventField... ignoredFields) throws OXException {
         /*
-         * check if folder view on event is allowed as needed
+         * check if folder view on event is allowed
          */
-        boolean assumeExternalOrganizerUpdate = assumeExternalOrganizerUpdate(originalEvent, eventData);
-        if (false == assumeExternalOrganizerUpdate) {
-            Check.eventIsInFolder(originalEvent, folder);
-        }
+        Check.eventIsInFolder(originalEvent, folder);
         /*
          * handle new delete exceptions from the calendar user's point of view beforehand
          */
@@ -288,9 +371,10 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         /*
          * prepare event update & check conflicts as needed
          */
+        boolean assumeExternalOrganizerUpdate = assumeExternalOrganizerUpdate(originalEvent, eventData);
         List<Event> originalChangeExceptions = isSeriesMaster(originalEvent) ? loadExceptionData(originalEvent) : null;
         Event originalSeriesMasterEvent = isSeriesException(originalEvent) ? loadEventData(originalEvent.getSeriesId()) : null;
-        EventUpdateProcessor eventUpdate = new EventUpdateProcessor(
+        InternalEventUpdate eventUpdate = new InternalEventUpdate(
             session, folder, originalEvent, originalChangeExceptions, originalSeriesMasterEvent, eventData, timestamp, Arrays.add(SKIPPED_FIELDS, ignoredFields));
         if (needsConflictCheck(eventUpdate)) {
             Check.noConflicts(storage, session, eventUpdate.getUpdate(), eventUpdate.getAttendeeUpdates().previewChanges());
@@ -298,9 +382,11 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         /*
          * recursively perform pending deletions of change exceptions if required, checking permissions as needed
          */
-        for (Event removedException : eventUpdate.getExceptionUpdates().getRemovedItems()) {
-            requireDeletePermissions(removedException);
-            delete(removedException);
+        if (0 < eventUpdate.getExceptionUpdates().getRemovedItems().size()) {
+            requireWritePermissions(originalEvent, assumeExternalOrganizerUpdate);
+            for (Event removedException : eventUpdate.getExceptionUpdates().getRemovedItems()) {
+                delete(removedException);
+            }
         }
         /*
          * update event data in storage, checking permissions as required
@@ -314,7 +400,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         if (eventData.containsAlarms()) {
             Event updatedEvent = loadEventData(originalEvent.getId());
             List<Alarm> originalAlarms = storage.getAlarmStorage().loadAlarms(originalEvent, calendarUserId);
-            if(originalChangeExceptions != null) {
+            if (originalChangeExceptions != null) {
 
                 List<Event> copies = new ArrayList<>(originalChangeExceptions.size());
                 for(Event eve: originalChangeExceptions) {
@@ -338,8 +424,10 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         /*
          * recursively perform pending updates of change exceptions if required
          */
+        List<Event> updatedChangeExceptions = new ArrayList<Event>();
         for (ItemUpdate<Event, EventField> updatedException : eventUpdate.getExceptionUpdates().getUpdatedItems()) {
-            updateEvent(updatedException.getOriginal(), updatedException.getUpdate());
+            InternalUpdateResult result = updateEvent(updatedException.getOriginal(), updatedException.getUpdate());
+            updatedChangeExceptions.add(result.getUpdatedEvent());
         }
         /*
          * track update result & update any stored alarm triggers of all users if required
@@ -360,13 +448,15 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             storage.getAlarmTriggerStorage().deleteTriggers(originalEvent.getId());
         }
         storage.getAlarmTriggerStorage().insertTriggers(updatedEvent, alarms);
-        return updatedEvent;
+        /*
+         * wrap so far results for further processing
+         */
+        return new InternalUpdateResult(this, eventUpdate, updatedEvent, updatedChangeExceptions);
     }
 
     /**
      * Determines if an incoming event update can be treated as initiated by the (external) organizer of a scheduling object resource or
-     * not. If yes, certain checks may be skipped, i.e. the existence check in the calendar user's folder, or the check against allowed
-     * attendee changes.
+     * not. If yes, certain checks may be skipped, e.g. the check against allowed attendee changes.
      * <p/>
      * An update is considered as <i>organizer-update</i> under certain circumstances, particularly:
      * <ul>
@@ -437,20 +527,31 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                 throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(originalEvent.getId(), EventField.DELETE_EXCEPTION_DATES);
             }
             if (0 < exceptionDateUpdates.getAddedItems().size()) {
+                List<EventUpdate> attendeeEventUpdates = new ArrayList<EventUpdate>();
                 for (RecurrenceId newDeleteException : exceptionDateUpdates.getAddedItems()) {
                     RecurrenceId recurrenceId = Check.recurrenceIdExists(session.getRecurrenceService(), originalEvent, newDeleteException);
                     if (contains(originalEvent.getChangeExceptionDates(), recurrenceId)) {
                         /*
                          * remove attendee from existing change exception
                          */
-                        Event originalExceptionEvent = loadExceptionData(originalEvent, recurrenceId);
-                        delete(originalExceptionEvent, userAttendee);
+                        Event originalChangeException = loadExceptionData(originalEvent, recurrenceId);
+                        Attendee originalAttendee = find(originalChangeException.getAttendees(), calendarUserId);
+                        if (null != originalAttendee) {
+                            attendeeEventUpdates.addAll(delete(originalChangeException, originalAttendee));
+                        }
                     } else {
                         /*
                          * creation of new delete exception for this attendee
                          */
-                        deleteFromRecurrence(originalEvent, recurrenceId, userAttendee);
+                        attendeeEventUpdates.addAll(deleteFromRecurrence(originalEvent, recurrenceId, userAttendee));
                     }
+                }
+                /*
+                 * track reply scheduling messages as needed
+                 */
+                List<EventUpdate> attendeeReplies = extractReplies(attendeeEventUpdates, calendarUser);
+                if (0 < attendeeReplies.size()) {
+                    schedulingHelper.trackReply(getUpdatedResource(attendeeReplies), attendeeReplies);
                 }
                 return true;
             }
@@ -565,27 +666,65 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
     }
 
     /**
-     * Selects the recurrence rule to use for the event update after a split has been performed on a recurring event series. This may be
-     * necessary when the rule's <code>COUNT</code> attribute was modified during the split operation.
+     * Adjusts the intermediate updated data of the series master event after a series split has been performed, effectively rolling back
+     * an already applied value for the <i>related-to</i> field, so that the split can be recognized properly afterwards.
+     *
+     * @param originalSeriesMaster The original series master event (before the split)
+     * @param updatedSeriesMaster The updated series master event (after the split)
+     * @return The (possibly modified) updated event data to take over
+     */
+    private static Event adjustUpdatedSeriesAfterSplit(Event originalSeriesMaster, Event updatedSeriesMaster) {
+        RelatedTo originalRelatedTo = originalSeriesMaster.getRelatedTo();
+        return new DelegatingEvent(updatedSeriesMaster) {
+
+            @Override
+            public RelatedTo getRelatedTo() {
+                return originalRelatedTo;
+            }
+        };
+    }
+
+    /**
+     * Adjusts the incoming client update for the series master event after a series split has been performed.
+     * <p/>
+     * This includes the selection of an appropriate recurrence rule, which may be necessary when the rule's <code>COUNT</code> attribute
+     * was modified during the split operation.
+     * <p/>
+     * Also, the sequence number is forcibly incremented unless not already done before.
      *
      * @param originalSeriesMaster The original series master event (before the split)
      * @param updatedSeriesMaster The updated series master event (after the split)
      * @param clientUpdate The updated event data as passed by the client
-     * @return The (possibly modified) updated event data to take over
+     * @return The (possibly modified) client update to take over
      */
-    private static Event applyRecurrenceRuleAfterSplit(Event originalSeriesMaster, Event updatedSeriesMaster, Event clientUpdate) throws OXException {
+    private static Event adjustClientUpdateAfterSplit(Event originalSeriesMaster, Event updatedSeriesMaster, Event clientUpdate) throws OXException {
+        Event adjustedClientUpdate = EventMapper.getInstance().copy(clientUpdate, null, (EventField[]) null);
+        /*
+         * ensure the sequence number is incremented
+         */
+        if (originalSeriesMaster.getSequence() >= updatedSeriesMaster.getSequence() && 
+            (false == clientUpdate.containsSequence() || originalSeriesMaster.getSequence() >= clientUpdate.getSequence())) {
+            adjustedClientUpdate.setSequence(updatedSeriesMaster.getSequence() + 1);
+        }
+        /*
+         * ensure the "related-to" value is set in the update
+         */
+        adjustedClientUpdate.setRelatedTo(updatedSeriesMaster.getRelatedTo());
+        /*
+         * adjust recurrence rule as needed
+         */        
         Mapping<? extends Object, Event> rruleMapping = EventMapper.getInstance().get(EventField.RECURRENCE_RULE);
         if (false == rruleMapping.isSet(clientUpdate) || rruleMapping.equals(updatedSeriesMaster, clientUpdate)) {
             /*
              * rrule not modified, nothing to do
              */
-            return clientUpdate;
+            return new UnmodifiableEvent(adjustedClientUpdate);
         }
         if (null == clientUpdate.getRecurrenceRule() || rruleMapping.equals(originalSeriesMaster, updatedSeriesMaster)) {
             /*
              * rrule is removed or was not changed by split, so take over new rrule from client as-is
              */
-            return clientUpdate;
+            return new UnmodifiableEvent(adjustedClientUpdate);
         }
         /*
          * rrule was modified during split, merge a possibly updated count value with client's rrule
@@ -596,15 +735,56 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             RecurrenceRule originalRule = initRecurrenceRule(originalSeriesMaster.getRecurrenceRule());
             if (null != clientRule.getCount() && clientRule.getCount().equals(originalRule.getCount())) {
                 clientRule.setCount(updatedRule.getCount().intValue());
-                clientUpdate = EventMapper.getInstance().copy(clientUpdate, null, (EventField[]) null);
-                clientUpdate.setRecurrenceRule(clientRule.toString());
-                return new UnmodifiableEvent(clientUpdate);
+                adjustedClientUpdate.setRecurrenceRule(clientRule.toString());
             }
         }
-        /*
-         * stick with client-supplied data, otherwise
-         */
-        return clientUpdate;
+        return new UnmodifiableEvent(adjustedClientUpdate);
+    }
+
+    private static class InternalUpdateResult {
+
+        private final AbstractUpdatePerformer performer;
+        private final InternalEventUpdate eventUpdate;
+        private final List<Event> updatedChangeExceptions;
+        private final Event updatedEvent;
+
+        private CalendarObjectResource updatedResource;
+
+        InternalUpdateResult(AbstractUpdatePerformer perfomer, InternalEventUpdate eventUpdate, Event updatedEvent, List<Event> updatedChangeExceptions) {
+            super();
+            this.performer = perfomer;
+            this.eventUpdate = eventUpdate;
+            this.updatedChangeExceptions = updatedChangeExceptions;
+            this.updatedEvent = updatedEvent;
+        }
+
+        Event getSeriesMaster() throws OXException {
+            return getUpdatedResource().getSeriesMaster();
+        }
+
+        CalendarObjectResource getOriginalResource() {
+            return eventUpdate.getOriginalResource();
+        }
+
+        CalendarObjectResource getUpdatedResource() throws OXException {
+            if (null == updatedResource) {
+                updatedResource = new DefaultCalendarObjectResource(updatedEvent, updatedChangeExceptions);
+                if (isSeriesException(updatedResource.getFirstEvent())) {
+                    Event seriesMaster = performer.loadEventData(updatedResource.getFirstEvent().getSeriesId());
+                    List<Event> changeExceptions = performer.loadExceptionData(seriesMaster);
+                    updatedResource = new DefaultCalendarObjectResource(seriesMaster, changeExceptions);
+                }
+            }
+            return updatedResource;
+        }
+
+        InternalEventUpdate getEventUpdate() {
+            return eventUpdate;
+        }
+
+        Event getUpdatedEvent() {
+            return updatedEvent;
+        }
     }
 
 }

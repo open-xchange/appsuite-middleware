@@ -93,14 +93,14 @@ public abstract class CommonRequest {
 			final JSONArray arr = new JSONArray(Arrays.asList(errorParams));
 			response.put("error_params",arr);
 			w.value(response);*/
-		} catch (final JSONException e) {
+		} catch (JSONException e) {
 			LOG.debug("",e);
 		}
 	}
 
 	protected void handle(final Throwable t, final Session session) {
 		final Response res = new Response();
-		if(t instanceof OXException) {
+		if (t instanceof OXException) {
 		    final OXException e = (OXException) t;
             switch (e.getCategories().get(0).getLogLevel()) {
                 case TRACE:
@@ -128,7 +128,7 @@ public abstract class CommonRequest {
 		}
 		try {
 			ResponseWriter.write(res, w, localeFrom(session));
-		} catch (final JSONException e) {
+		} catch (JSONException e) {
 			LOG.error("", t);
 		} catch (OXException e) {
 		    LOG.error("", e);
@@ -145,7 +145,7 @@ public abstract class CommonRequest {
 
 	protected boolean checkRequired(final SimpleRequest req, final String action, final String ...parameters) {
 		for(final String param : parameters) {
-			if(req.getParameter(param) == null) {
+			if (req.getParameter(param) == null) {
 				missingParameter(param,action);
 				return false;
 			}

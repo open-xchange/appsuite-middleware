@@ -97,11 +97,6 @@ public class SharesCLT extends AbstractRmiCLI<Void> {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractRmiCLI#administrativeAuth(java.lang.String, java.lang.String, org.apache.commons.cli.CommandLine, com.openexchange.auth.rmi.RemoteAuthenticator)
-     */
     @Override
     protected void administrativeAuth(String login, String password, CommandLine cmd, RemoteAuthenticator authenticator) throws RemoteException {
         if (contextId < 0) {
@@ -111,11 +106,6 @@ public class SharesCLT extends AbstractRmiCLI<Void> {
         authenticator.doAuthentication(login, password, contextId);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractRmiCLI#addOptions(org.apache.commons.cli.Options)
-     */
     @Override
     protected void addOptions(Options options) {
         options.addOption(createArgumentOption("c", "context", "contextId", "The context id.", false));
@@ -125,21 +115,11 @@ public class SharesCLT extends AbstractRmiCLI<Void> {
         options.addOption(createSwitch("f", "force", "Force removal of token.", false));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractAdministrativeCLI#requiresAdministrativePermission()
-     */
     @Override
-    protected boolean requiresAdministrativePermission() {
-        return true;
+    protected Boolean requiresAdministrativePermission() {
+        return Boolean.TRUE;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractCLI#checkOptions(org.apache.commons.cli.CommandLine)
-     */
     @Override
     protected void checkOptions(CommandLine cmd) {
         if (cmd.hasOption("c")) {
@@ -155,31 +135,16 @@ public class SharesCLT extends AbstractRmiCLI<Void> {
         remove = cmd.hasOption("r");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractRmiCLI#invoke(org.apache.commons.cli.Options, org.apache.commons.cli.CommandLine, java.lang.String)
-     */
     @Override
     protected Void invoke(Options options, CommandLine cmd, String optRmiHostName) throws Exception {
         return remove ? removeShares(optRmiHostName) : listShares(optRmiHostName);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractCLI#getFooter()
-     */
     @Override
     protected String getFooter() {
         return FOOTER;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractCLI#getName()
-     */
     @Override
     protected String getName() {
         return SYNTAX;

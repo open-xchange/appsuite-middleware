@@ -68,6 +68,7 @@ import com.openexchange.testing.httpclient.models.GroupsResponse;
 import com.openexchange.testing.httpclient.models.TaskData;
 import com.openexchange.testing.httpclient.models.TaskListElement;
 import com.openexchange.testing.httpclient.models.TaskParticipant;
+import com.openexchange.testing.httpclient.models.TaskParticipant.TypeEnum;
 import com.openexchange.testing.httpclient.models.TaskUpdateResponse;
 import com.openexchange.testing.httpclient.modules.GroupsApi;
 import com.openexchange.testing.httpclient.modules.TasksApi;
@@ -138,7 +139,7 @@ public class GroupUseCountTest extends AbstractChronosTest {
                 groupsApi.deleteGroup(getSessionId(), timestamp, body);
             }
         }
-        if(tasksToDelete != null && !tasksToDelete.isEmpty()) {
+        if (tasksToDelete != null && !tasksToDelete.isEmpty()) {
             taskApi.deleteTasks(getSessionId(), taskTimestamp, tasksToDelete);
         }
         super.tearDown();
@@ -200,7 +201,7 @@ public class GroupUseCountTest extends AbstractChronosTest {
         task.setFolderId(getTaskFolderId());
         TaskParticipant participant = new TaskParticipant();
         participant.setId(groupIds[1]);
-        participant.setType(I(2)); // 2 == user group
+        participant.setType(TypeEnum.NUMBER_2); // 2 == user group
         task.addParticipantsItem(participant);
         TaskUpdateResponse createTask = taskApi.createTask(getSessionId(), task);
         Assert.assertNull(createTask.getError(), createTask.getErrorDesc());

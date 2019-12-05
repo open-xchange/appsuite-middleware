@@ -131,7 +131,7 @@ public final class MessagingGenericCreateTableTask extends AbstractCreateTableIm
 
             stmt = connection.prepareStatement(sqlCreate);
             stmt.executeUpdate();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);
@@ -152,7 +152,7 @@ public final class MessagingGenericCreateTableTask extends AbstractCreateTableIm
     private <S> S getService(final Class<? extends S> clazz) throws OXException {
         try {
             return MessagingGenericServiceRegistry.getService(clazz);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw new OXException(e);
         }
     }

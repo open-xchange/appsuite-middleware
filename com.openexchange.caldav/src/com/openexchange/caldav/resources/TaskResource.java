@@ -75,10 +75,10 @@ import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.IncorrectString;
 import com.openexchange.exception.OXException.ProblematicAttribute;
 import com.openexchange.exception.OXException.Truncated;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProperty;
@@ -120,7 +120,7 @@ public class TaskResource extends CommonResource<Task> {
     private byte[] iCalFile;
     private int retryCount;
 
-    public TaskResource(GroupwareCaldavFactory factory, TaskCollection parent, Task object, WebdavPath url) throws OXException {
+    public TaskResource(GroupwareCaldavFactory factory, TaskCollection parent, Task object, WebdavPath url) {
         super(parent, object, url);
         this.parent = parent;
         this.factory = factory;
@@ -421,16 +421,15 @@ public class TaskResource extends CommonResource<Task> {
         List<Task> tasks = factory.getIcalParser().parseTasks(body, getTimeZone(), factory.getContext(), new LinkedList<ConversionError>(), new LinkedList<ConversionWarning>()).getImportedObjects();
         if (null == tasks || 1 != tasks.size()) {
             throw protocolException(getUrl(), HttpServletResponse.SC_BAD_REQUEST);
+        }
+        taskToSave = tasks.get(0);
+        taskToSave.removeLastModified();
+        if (null != object) {
+            taskToSave.setParentFolderID(object.getParentFolderID());
+            taskToSave.setObjectID(object.getObjectID());
+            taskToSave.removeUid();
         } else {
-            taskToSave = tasks.get(0);
-            taskToSave.removeLastModified();
-            if (null != object) {
-                taskToSave.setParentFolderID(object.getParentFolderID());
-                taskToSave.setObjectID(object.getObjectID());
-                taskToSave.removeUid();
-            } else {
-                taskToSave.setParentFolderID(getId(parent));
-            }
+            taskToSave.setParentFolderID(getId(parent));
         }
     }
 

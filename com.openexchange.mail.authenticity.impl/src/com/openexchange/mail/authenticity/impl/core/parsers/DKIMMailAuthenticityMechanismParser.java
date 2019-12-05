@@ -55,6 +55,7 @@ import com.openexchange.mail.authenticity.mechanism.AuthenticityMechanismResult;
 import com.openexchange.mail.authenticity.mechanism.DefaultMailAuthenticityMechanism;
 import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanismResult;
 import com.openexchange.mail.authenticity.mechanism.dkim.DKIMAuthMechResult;
+import com.openexchange.mail.authenticity.mechanism.dkim.DKIMProperty;
 import com.openexchange.mail.authenticity.mechanism.dkim.DKIMResult;
 import com.openexchange.mail.authenticity.mechanism.dkim.DKIMResultHeader;
 
@@ -72,11 +73,6 @@ public class DKIMMailAuthenticityMechanismParser extends AbstractMailAuthenticit
         super(DefaultMailAuthenticityMechanism.DKIM, DKIMResultHeader.HEADER_I, DKIMResultHeader.HEADER_D);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.mail.authenticity.impl.core.AbstractMailAuthenticityMechanismParser#parseMechanismResult(java.lang.String)
-     */
     @Override
     AuthenticityMechanismResult parseMechanismResult(String value) {
         try {
@@ -86,16 +82,11 @@ public class DKIMMailAuthenticityMechanismParser extends AbstractMailAuthenticit
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.mail.authenticity.impl.core.AbstractMailAuthenticityMechanismParser#createResult(java.lang.String, com.openexchange.mail.authenticity.mechanism.AuthenticityMechanismResult, java.lang.String, boolean, java.util.Map)
-     */
     @Override
     MailAuthenticityMechanismResult createResult(String domain, AuthenticityMechanismResult mechResult, String mechanismName, boolean domainMatch, Map<String, String> attributes) {
         DKIMAuthMechResult result = new DKIMAuthMechResult(domain, (DKIMResult) mechResult);
         result.setDomainMatch(domainMatch);
-        result.addProperty("signing_domain", result.getDomain());
+        result.addProperty(DKIMProperty.SIGNING_DOMAIN, result.getDomain());
         result.setReason(compileReasonPhrase(mechResult, MailAuthenticityFragmentPhrases.WITH_DOMAIN, result.getDomain()));
         return result;
     }

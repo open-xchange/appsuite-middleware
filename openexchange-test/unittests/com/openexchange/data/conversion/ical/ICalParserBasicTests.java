@@ -68,8 +68,8 @@ import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.user.User;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>

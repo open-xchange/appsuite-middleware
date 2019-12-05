@@ -52,7 +52,7 @@ package com.openexchange.user.json.filter;
 import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
-import com.openexchange.groupware.ldap.User;
+import com.openexchange.user.User;
 import com.openexchange.user.json.field.UserField;
 
 
@@ -79,7 +79,7 @@ public class NoGlobalAdressBookUserCensorship implements UserCensorship {
 
         @Override
         public String[] getAliases() {
-            if(UserField.isProtected(UserField.ALIASES.getColumn())) {
+            if (UserField.isProtected(UserField.ALIASES.getColumn())) {
                 return null;
             }
             return delegate.getAliases();
@@ -92,7 +92,7 @@ public class NoGlobalAdressBookUserCensorship implements UserCensorship {
 
         @Override
         public int getContactId() {
-            if(UserField.isProtected(UserField.CONTACT_ID.getColumn())) {
+            if (UserField.isProtected(UserField.CONTACT_ID.getColumn())) {
                 return -1;
             }
             return delegate.getContactId();
@@ -100,7 +100,7 @@ public class NoGlobalAdressBookUserCensorship implements UserCensorship {
 
         @Override
         public String getDisplayName() {
-            if(UserField.isProtected(UserField.DISPLAY_NAME.getColumn())) {
+            if (UserField.isProtected(UserField.DISPLAY_NAME.getColumn())) {
                 return null;
             }
             return delegate.getDisplayName();
@@ -108,7 +108,7 @@ public class NoGlobalAdressBookUserCensorship implements UserCensorship {
 
         @Override
         public String getGivenName() {
-            if(UserField.isProtected(UserField.FIRST_NAME.getColumn())) {
+            if (UserField.isProtected(UserField.FIRST_NAME.getColumn())) {
                 return null;
             }
             return delegate.getGivenName();
@@ -116,7 +116,7 @@ public class NoGlobalAdressBookUserCensorship implements UserCensorship {
 
         @Override
         public int[] getGroups() {
-            if(UserField.isProtected(UserField.GROUPS.getColumn())) {
+            if (UserField.isProtected(UserField.GROUPS.getColumn())) {
                 return null;
             }
             return delegate.getGroups();
@@ -124,7 +124,7 @@ public class NoGlobalAdressBookUserCensorship implements UserCensorship {
 
         @Override
         public int getId() {
-            if(UserField.isProtected(UserField.ID.getColumn())) {
+            if (UserField.isProtected(UserField.ID.getColumn())) {
                 return -1;
             }
             return delegate.getId();
@@ -142,7 +142,7 @@ public class NoGlobalAdressBookUserCensorship implements UserCensorship {
 
         @Override
         public Locale getLocale() {
-            if(UserField.isProtected(UserField.LOCALE.getColumn())) {
+            if (UserField.isProtected(UserField.LOCALE.getColumn())) {
                 return null;
             }
             return delegate.getLocale();
@@ -150,7 +150,7 @@ public class NoGlobalAdressBookUserCensorship implements UserCensorship {
 
         @Override
         public String getLoginInfo() {
-            if(UserField.isProtected(UserField.LOGIN_INFO.getColumn())) {
+            if (UserField.isProtected(UserField.LOGIN_INFO.getColumn())) {
                 return null;
             }
             return delegate.getLoginInfo();
@@ -188,7 +188,7 @@ public class NoGlobalAdressBookUserCensorship implements UserCensorship {
 
         @Override
         public String getSurname() {
-            if(UserField.isProtected(UserField.LAST_NAME.getColumn())) {
+            if (UserField.isProtected(UserField.LAST_NAME.getColumn())) {
                 return null;
             }
             return delegate.getSurname();
@@ -196,7 +196,7 @@ public class NoGlobalAdressBookUserCensorship implements UserCensorship {
 
         @Override
         public String getTimeZone() {
-            if(UserField.isProtected(UserField.TIME_ZONE.getColumn())) {
+            if (UserField.isProtected(UserField.TIME_ZONE.getColumn())) {
                 return null;
             }
             return delegate.getTimeZone();

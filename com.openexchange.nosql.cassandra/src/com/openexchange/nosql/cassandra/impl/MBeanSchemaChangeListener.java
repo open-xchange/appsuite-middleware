@@ -85,31 +85,16 @@ public class MBeanSchemaChangeListener extends SchemaChangeListenerBase {
         this.services = services;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.datastax.driver.core.SchemaChangeListener#onKeyspaceAdded(com.datastax.driver.core.KeyspaceMetadata)
-     */
     @Override
     public void onKeyspaceAdded(KeyspaceMetadata keyspace) {
         registerMBean(keyspace);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.datastax.driver.core.SchemaChangeListener#onKeyspaceRemoved(com.datastax.driver.core.KeyspaceMetadata)
-     */
     @Override
     public void onKeyspaceRemoved(KeyspaceMetadata keyspace) {
         unregisterMBean(keyspace);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.datastax.driver.core.SchemaChangeListener#onRegister(com.datastax.driver.core.Cluster)
-     */
     @Override
     public void onRegister(Cluster cluster) {
         // Register the keyspaces mbeans
@@ -119,11 +104,6 @@ public class MBeanSchemaChangeListener extends SchemaChangeListenerBase {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.datastax.driver.core.SchemaChangeListener#onUnregister(com.datastax.driver.core.Cluster)
-     */
     @Override
     public void onUnregister(Cluster cluster) {
         List<KeyspaceMetadata> keyspaces = cluster.getMetadata().getKeyspaces();

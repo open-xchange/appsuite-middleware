@@ -5,19 +5,25 @@
       - Folders
     summary: Gets a folder.
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: id
-        type: string
         description: Object ID of the requested folder.
         required: true
-      - $ref: "#/parameters/gblQueryParamFolderTree"
-      - $ref: "#/parameters/gblQueryParamAllowedModules"
-      - $ref: "#/parameters/gblQueryParamLanguage"
-    responses:
-      200:
-        description: |
-          A JSON object containing the data of the requested folder. In case of errors the responsible
-          fields in the response are filled (see [Error handling](#error-handling)).
         schema:
-          $ref: "#/definitions/FolderResponse"
+          type: string
+      - $ref: '#/components/parameters/gblQueryParamFolderTree'
+      - $ref: '#/components/parameters/gblQueryParamAllowedModules'
+      - $ref: '#/components/parameters/gblQueryParamLanguage'
+    responses:
+      '200':
+        description: >
+          A JSON object containing the data of the requested folder. In case of
+          errors the responsible
+
+          fields in the response are filled (see [Error
+          handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FolderResponse'

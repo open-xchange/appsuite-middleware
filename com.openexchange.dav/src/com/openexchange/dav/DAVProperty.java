@@ -56,6 +56,7 @@ import java.util.List;
 import java.util.Map;
 import org.jdom2.Attribute;
 import org.jdom2.Element;
+import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.java.Streams;
@@ -178,7 +179,7 @@ public class DAVProperty extends WebdavProperty {
         Writer writer = null;
         try {
             writer = new AllocatingStringWriter();
-            new XMLOutputter().output(element, writer);
+            new XMLOutputter(Format.getPrettyFormat()).output(element, writer);
             return writer.toString();
         } catch (IOException e) {
             org.slf4j.LoggerFactory.getLogger(DAVProperty.class);

@@ -135,9 +135,10 @@ public final class ShareServletUtils {
              * set secret & share cookies
              */
             LoginServlet.addHeadersAndCookies(loginResult, response);
-            response.addCookie(configureCookie(new Cookie(SECRET_PREFIX + session.getHash(), session.getSecret()), request, loginConfig));
-            if (loginConfig.isSessiondAutoLogin(request.getServerName(), session)) {
-                response.addCookie(configureCookie(new Cookie(LoginServlet.getShareCookieName(request), guest.getBaseToken()), request, loginConfig));
+            boolean staySignedIn = session.isStaySignedIn();
+            response.addCookie(configureCookie(new Cookie(SECRET_PREFIX + session.getHash(), session.getSecret()), request, loginConfig, staySignedIn));
+            if (staySignedIn) {
+                response.addCookie(configureCookie(new Cookie(LoginServlet.getShareCookieName(request), guest.getBaseToken()), request, loginConfig, true));
             }
             /*
              * set public session cookie
@@ -147,7 +148,7 @@ public final class ShareServletUtils {
                 String publicCookieName = getPublicSessionCookieName(request, new String[] { String.valueOf(session.getContextId()), String.valueOf(session.getUserId()) });
                 Cookie cookie = Cookies.cookieMapFor(request).get(publicCookieName);
                 if (null == cookie || false == alternativeID.equals(cookie.getValue())) {
-                    response.addCookie(configureCookie(new Cookie(publicCookieName, alternativeID), request, loginConfig));
+                    response.addCookie(configureCookie(new Cookie(publicCookieName, alternativeID), request, loginConfig, staySignedIn));
                 }
             }
             /*

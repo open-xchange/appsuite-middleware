@@ -55,6 +55,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URI;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.UUID;
@@ -71,8 +72,14 @@ import com.openexchange.java.util.UUIDs;
  */
 public class HashingFileStorage extends DefaultFileStorage {
 
-    public HashingFileStorage(File storage) {
-        super(storage);
+    /**
+     * Initializes a new {@link HashingFileStorage}.
+     *
+     * @param uri The URI that fully qualifies this file storage
+     * @param storage The parent directory; e.g. <code>"file:/Mount/disk/1_ctx_store/hashed"</code>
+     */
+    public HashingFileStorage(URI uri, File storage) {
+        super(uri, storage);
     }
 
     @Override
@@ -124,7 +131,7 @@ public class HashingFileStorage extends DefaultFileStorage {
             filePath = new File(path, filestorePath[1]);
             try {
                 out = new FileOutputStream(filePath);
-            } catch (final FileNotFoundException e) {
+            } catch (FileNotFoundException e) {
                 throw FileStorageCodes.FILE_NOT_FOUND.create(e, filePath.toString());
             }
 
@@ -138,7 +145,7 @@ public class HashingFileStorage extends DefaultFileStorage {
             String identifier = new StringBuilder(filestorePath[0]).append('/').append(filestorePath[1]).toString();
             success = true;
             return identifier;
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw FileStorageCodes.IOERROR.create(e, e.getMessage());
         } finally {
             Streams.close(file, out);

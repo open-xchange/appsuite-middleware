@@ -262,7 +262,7 @@ public final class GoogleDriveFile extends DefaultFile {
                     setMediaStatus(MediaStatus.valueFor(MediaStatus.Status.NONE));
                 }
 
-            } catch (final RuntimeException e) {
+            } catch (RuntimeException e) {
                 throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
         }
@@ -316,7 +316,7 @@ public final class GoogleDriveFile extends DefaultFile {
                 if (set.contains(Field.FILE_MD5SUM)) {
                     setFileMD5Sum(revision.getMd5Checksum());
                 }
-            } catch (final RuntimeException e) {
+            } catch (RuntimeException e) {
                 throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
         }

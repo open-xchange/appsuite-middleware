@@ -49,6 +49,8 @@
 
 package com.openexchange.dav.mixins;
 
+import static com.openexchange.dav.DAVTools.getExternalPath;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
@@ -61,15 +63,18 @@ import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 public class GroupMembership extends SingleXMLPropertyMixin {
 
     private final int[] groups;
+    private final ConfigViewFactory configViewFactory;
 
     /**
      * Initializes a new {@link GroupMembership}.
      *
      * @param groups The identifiers of those groups the user is a member of
+     * @param configViewFactory The configuration view
      */
-    public GroupMembership(int[] groups) {
+    public GroupMembership(int[] groups, ConfigViewFactory configViewFactory) {
         super(Protocol.DAV_NS.getURI(), "group-membership");
         this.groups = groups;
+        this.configViewFactory = configViewFactory;
     }
 
     @Override
@@ -77,7 +82,7 @@ public class GroupMembership extends SingleXMLPropertyMixin {
         StringBuilder stringBuilder = new StringBuilder();
         if (null != groups) {
             for (int group : groups) {
-                stringBuilder.append("<D:href>").append(PrincipalURL.forGroup(group)).append("</D:href>");
+                stringBuilder.append("<D:href>").append(getExternalPath(configViewFactory, PrincipalURL.forGroup(group, configViewFactory)) + "</D:href>");
             }
         }
         return stringBuilder.toString();

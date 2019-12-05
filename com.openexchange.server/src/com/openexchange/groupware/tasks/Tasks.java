@@ -92,7 +92,7 @@ public abstract class Tasks {
         try {
             ctx = Tools.getContext(session.getContextId());
             con = DBPool.pickup(ctx);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
         }
         try {

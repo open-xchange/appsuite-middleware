@@ -103,7 +103,7 @@ public final class RdbPOP3StorageProperties implements POP3StorageProperties {
             stmt.setInt(pos++, user);
             stmt.setInt(pos++, accountId);
             stmt.executeUpdate();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);

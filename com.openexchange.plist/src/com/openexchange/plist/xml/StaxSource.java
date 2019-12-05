@@ -153,7 +153,7 @@ public class StaxSource extends SAXSource implements XMLReader {
                 }
                 streamReader.next();
             }
-        } catch (final XMLStreamException e) {
+        } catch (XMLStreamException e) {
             SAXParseException spe;
             if (e.getLocation() != null) {
                 spe = new SAXParseException(e.getMessage(), null, null,

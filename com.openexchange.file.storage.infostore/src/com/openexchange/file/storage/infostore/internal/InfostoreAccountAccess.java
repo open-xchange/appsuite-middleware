@@ -92,7 +92,7 @@ public class InfostoreAccountAccess implements FileStorageAccountAccess, Capabil
 
     @Override
     public FileStorageFileAccess getFileAccess() throws OXException {
-        if(files != null) {
+        if (files != null) {
             return files;
         }
         return files = new InfostoreAdapterFileAccess(session, service.getInfostore(), service.getSearch(), this);
@@ -100,7 +100,7 @@ public class InfostoreAccountAccess implements FileStorageAccountAccess, Capabil
 
     @Override
     public FileStorageFolderAccess getFolderAccess() throws OXException {
-        if(folders != null) {
+        if (folders != null) {
             return folders;
         }
         return folders = new InfostoreFolderAccess(session, service.getInfostore());

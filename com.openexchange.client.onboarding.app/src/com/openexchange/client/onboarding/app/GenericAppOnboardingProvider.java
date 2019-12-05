@@ -138,7 +138,7 @@ public class GenericAppOnboardingProvider implements OnboardingProvider {
             throw OnboardingExceptionCodes.UNSUPPORTED_ACTION.create(request.getAction().getId());
         }
 
-        switch(scenario.getType()) {
+        switch (scenario.getType()) {
             case LINK:
                 {
                     // Return the link from associated scenario

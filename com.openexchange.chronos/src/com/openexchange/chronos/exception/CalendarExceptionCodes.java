@@ -61,6 +61,7 @@ import static com.openexchange.chronos.exception.CalendarExceptionMessages.DIFFE
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.END_BEFORE_START_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.EVENT_CONFLICTS_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.EVENT_NOT_FOUND_MSG;
+import static com.openexchange.chronos.exception.CalendarExceptionMessages.EVENT_SEQUENCE_NOT_FOUND_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.FOLDER_NOT_FOUND_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.IGNORED_INVALID_DATA_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.INCOMPATIBLE_DATE_TYPES_MSG;
@@ -86,6 +87,7 @@ import static com.openexchange.chronos.exception.CalendarExceptionMessages.NO_PE
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.OUT_OF_SEQUENCE_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.PROVIDER_NOT_AVAILABLE_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.QUERY_TOO_SHORT_MSG;
+import static com.openexchange.chronos.exception.CalendarExceptionMessages.STORAGE_NOT_AVAILABLE_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.TOO_MANY_ALARMS_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.TOO_MANY_ATTENDEES_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.TOO_MANY_EVENTS_MSG;
@@ -96,6 +98,7 @@ import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUP
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_CLASSIFICATION_FOR_RESOURCE_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_DATA_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_FOLDER_MSG;
+import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_METHOD_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_OPERATION_FOR_PROVIDER_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_RRULE_MSG;
 import static com.openexchange.exception.OXExceptionStrings.MESSAGE;
@@ -148,6 +151,11 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      * <li>Attachment not found [attachment %1$d, event %2$s, folder %3$s]</li>
      */
     ATTACHMENT_NOT_FOUND("Attachment not found [attachment %1$d, event %2$s, folder %3$s]", ATTACHMENT_NOT_FOUND_MSG, Category.CATEGORY_USER_INPUT, 4047),
+    /**
+     * <li>The requested version of the appointment was not found.</li>
+     * <li>Event not found with sequence [id %1$s, sequence [id %2$d]</li>
+     */
+    EVENT_SEQUENCE_NOT_FOUND("Event not found with sequence [id %1$s, sequence [id %2$d]", EVENT_SEQUENCE_NOT_FOUND_MSG, Category.CATEGORY_USER_INPUT, 4048),
     /**
      * <li>The operation could not be completed due to insufficient permissions.</li>
      * <li>Insufficient read permissions in folder [folder %1$s]</li>
@@ -260,14 +268,14 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
     END_BEFORE_START("End before start date [start %1$s, end %2$s]", END_BEFORE_START_MSG, Category.CATEGORY_USER_INPUT, 4221),
     /**
      * <li>Appointments in non-personal folders must not be classified as \"private\" or \"secret\".</li>
-     * <li>Unsupported classification [classification %1$s, folder %2$d, type %3$s]</li>
+     * <li>Unsupported classification [classification %1$s, folder %2$s, type %3$s]</li>
      */
-    UNSUPPORTED_CLASSIFICATION_FOR_FOLDER("Unsupported classification [classification %1$s, folder %2$d, type %3$s]", UNSUPPORTED_CLASSIFICATION_FOR_FOLDER_MSG, Category.CATEGORY_USER_INPUT, 4222),
+    UNSUPPORTED_CLASSIFICATION_FOR_FOLDER("Unsupported classification [classification %1$s, folder %2$s, type %3$s]", UNSUPPORTED_CLASSIFICATION_FOR_FOLDER_MSG, Category.CATEGORY_USER_INPUT, 4222),
     /**
      * <li>Appointments with resources must not be classified as \"secret\".".</li>
-     * <li>Unsupported classification [classification %1$s, attendee %2$d]</li>
+     * <li>Unsupported classification [classification %1$s, attendee %2$s]</li>
      */
-    UNSUPPORTED_CLASSIFICATION_FOR_RESOURCE("Unsupported classification [classification %1$s, attendee %2$d]", UNSUPPORTED_CLASSIFICATION_FOR_RESOURCE_MSG, Category.CATEGORY_USER_INPUT, 42210),
+    UNSUPPORTED_CLASSIFICATION_FOR_RESOURCE("Unsupported classification [classification %1$s, attendee %2$s]", UNSUPPORTED_CLASSIFICATION_FOR_RESOURCE_MSG, Category.CATEGORY_USER_INPUT, 42210),
     /**
      * <li>The supplied recurrence rule is not supported. Please use adjust the rule and try again.</li>
      * <li>Unsupported recurrence rule [rule %1$s, part %2$s, error %3$s]</li>
@@ -373,6 +381,11 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      */
     ACCOUNT_DISABLED("Calendar account disabled [provider: %1$s, account %2$d]", ACCOUNT_DISABLED_MSG, Category.CATEGORY_SERVICE_DOWN, 5031),
     /**
+     * <li>The calendar storage is temporarily not available. Please try again later.</li>
+     * <li>Calendar storage not available [%1$s]</li>
+     */
+    STORAGE_NOT_AVAILABLE("Calendar storage not available [%1$s]", STORAGE_NOT_AVAILABLE_MSG, Category.CATEGORY_SERVICE_DOWN, 5032),
+    /**
      * <li>Some data entered exceeded the field limit. Please shorten the value for \"%1$s\" (limit: %2$d, current: %3$d) and try again.</li>
      * <li>Data truncation [field %1$s, limit %2$d, current %3$d]</li>
      */
@@ -428,6 +441,11 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      * <li>Authentication failed to access a shared calendar at %1$s</li>
      */
     AUTH_FAILED_FOR_SHARE("Authentication failed to access a shared calendar at %1$s", AUTH_FAILED_MSG, Category.CATEGORY_USER_INPUT, 4011),
+    /**
+     * <li>The method \"%1$s\" is not supported.</li>
+     * <li>The method %1$s is unsupported for the provider %2$s.</li>
+     */
+    UNSUPPORTED_METHOD("The method %1$s is unsupported for the provider %2$s.", UNSUPPORTED_METHOD_MSG, Category.CATEGORY_TRUNCATED, 1992),
     
     ;
 

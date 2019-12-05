@@ -317,7 +317,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
         if (folderStorage != null) {
             try {
                 folderStorage.releaseResources();
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.error("Error while closing POP3 folder storage", e);
             } finally {
                 folderStorage = null;
@@ -326,7 +326,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
         if (messageStorage != null) {
             try {
                 messageStorage.releaseResources();
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.error("Error while closing POP3 message storage", e);
             } finally {
                 messageStorage = null;
@@ -347,7 +347,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
             if (pop3Storage != null) {
                 try {
                     pop3Storage.close();
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     LOG.error("Error while closing POP3 storage.", e);
                 }
             }
@@ -378,7 +378,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
     public POP3Config getPOP3Config() {
         try {
             return (POP3Config) getMailConfig();
-        } catch (final OXException e) {
+        } catch (OXException e) {
             /*
              * Cannot occur since already initialized
              */
@@ -435,10 +435,10 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
                         warnings.add(MailExceptionCode.NON_SECURE_WARNING.create());
                     }
                 }
-            } catch (final MessagingException e) {
+            } catch (MessagingException e) {
                 // Ignore
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
         } finally {
             /*
@@ -465,7 +465,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
         try {
             final POP3Config config = getPOP3Config();
             key = LoginKey.N(new InetSocketAddress(InetAddress.getByName(IDNA.toASCII(config.getServer())), config.getPort()), config.getLogin());
-        } catch (final UnknownHostException e) {
+        } catch (UnknownHostException e) {
             throw MimeMailException.handleMessagingException(new MessagingException(e.getMessage(), e), getPOP3Config(), session);
         }
         Future<Object> f = SYNCHRONIZER_MAP.get(key);
@@ -493,13 +493,13 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
         try {
             f.get();
             addWarnings(pop3Storage.getWarnings());
-        } catch (final InterruptedException e) {
+        } catch (InterruptedException e) {
             // Keep interrupted status
             Thread.currentThread().interrupt();
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (final CancellationException e) {
+        } catch (CancellationException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (final ExecutionException e) {
+        } catch (ExecutionException e) {
             final Throwable cause = e.getCause();
             if (cause instanceof OXException) {
                 throw ((OXException) cause);
@@ -590,7 +590,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
             int userId = session.getUserId();
             int contextId = session.getContextId();
             return new MailAccountPOP3Properties(storageService.getMailAccount(accountId, userId, contextId), userId, contextId);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
         }
     }
@@ -599,7 +599,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
         if (null != pop3Store) {
             try {
                 pop3Store.close();
-            } catch (final MessagingException e) {
+            } catch (MessagingException e) {
                 LOG.warn("", e);
             }
         }

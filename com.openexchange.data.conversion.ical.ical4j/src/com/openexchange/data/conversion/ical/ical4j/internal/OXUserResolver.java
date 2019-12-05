@@ -54,8 +54,8 @@ import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapExceptionCode;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 /**
@@ -84,7 +84,7 @@ public class OXUserResolver implements UserResolver {
         for (final String mail : mails) {
             try {
                 users.add(userService.searchUser(mail, ctx));
-            } catch (final OXException x) {
+            } catch (OXException x) {
                 if (!LdapExceptionCode.NO_USER_BY_MAIL.equals(x)) {
                     throw x;
                 }

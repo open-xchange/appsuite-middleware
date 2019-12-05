@@ -58,6 +58,7 @@ import org.slf4j.Logger;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
+import com.openexchange.session.Session;
 
 /**
  * {@link AbstractMimeProcessing}
@@ -98,9 +99,10 @@ public abstract class AbstractMimeProcessing {
      * @param prefixTemplate The string template to replace in
      * @param ltz The locale that determines format of date and time strings and time zone as well
      * @param msg The original message
+     * @param session The session identifying the user
      * @return The prefix text
      */
-    protected static String generatePrefixText(String prefixTemplate, LocaleAndTimeZone ltz, MailMessage msg) {
+    protected static String generatePrefixText(String prefixTemplate, LocaleAndTimeZone ltz, MailMessage msg, Session session) {
         StringHelper strHelper = StringHelper.valueOf(ltz.locale);
         String prefix = strHelper.getString(prefixTemplate);
 
@@ -124,16 +126,16 @@ public abstract class AbstractMimeProcessing {
             Date date = msg.getSentDate();
             if (prefix.indexOf("#DATE#") >= 0) {
                 try {
-                    prefix = PATTERN_DATE.matcher(prefix).replaceAll(date == null ? "" : quoteReplacement(MimeProcessingUtility.getFormattedDate(date, DateFormat.LONG, ltz.locale, ltz.timeZone)));
-                } catch (final Exception t) {
+                    prefix = PATTERN_DATE.matcher(prefix).replaceAll(date == null ? "" : quoteReplacement(MimeProcessingUtility.getFormattedDate(date, DateFormat.LONG, ltz.locale, ltz.timeZone, session)));
+                } catch (Exception t) {
                     LOG.warn("", t);
                     prefix = PATTERN_DATE.matcher(prefix).replaceAll("");
                 }
             }
             if (prefix.indexOf("#TIME#") >= 0) {
                 try {
-                    prefix = PATTERN_TIME.matcher(prefix).replaceAll(date == null ? "" : quoteReplacement(MimeProcessingUtility.getFormattedTime(date, DateFormat.SHORT, ltz.locale, ltz.timeZone)));
-                } catch (final Exception t) {
+                    prefix = PATTERN_TIME.matcher(prefix).replaceAll(date == null ? "" : quoteReplacement(MimeProcessingUtility.getFormattedTime(date, DateFormat.SHORT, ltz.locale, ltz.timeZone, session)));
+                } catch (Exception t) {
                     LOG.warn("", t);
                     prefix = PATTERN_TIME.matcher(prefix).replaceAll("");
                 }

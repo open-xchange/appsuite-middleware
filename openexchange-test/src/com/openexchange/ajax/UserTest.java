@@ -63,13 +63,13 @@ public class UserTest extends AbstractAJAXSession {
 
     @Test
     public void testSearch() throws Exception {
-        final com.openexchange.groupware.ldap.User users[] = UserTools.searchUser(getClient(), "*");
+        final com.openexchange.user.User users[] = UserTools.searchUser(getClient(), "*");
         assertTrue("user array size > 0", users.length > 0);
     }
 
     @Test
     public void testList() throws Exception {
-        com.openexchange.groupware.ldap.User users[] = UserTools.searchUser(getClient(), "*");
+        com.openexchange.user.User users[] = UserTools.searchUser(getClient(), "*");
         assertTrue("user array size > 0", users.length > 0);
 
         final int[] id = new int[users.length];
@@ -83,13 +83,13 @@ public class UserTest extends AbstractAJAXSession {
 
     @Test
     public void testSearchUsers() throws Exception {
-        final com.openexchange.groupware.ldap.User users[] = UserTools.searchUser(getClient(), "*");
+        final com.openexchange.user.User users[] = UserTools.searchUser(getClient(), "*");
         assertTrue("user array size > 0", users.length > 0);
     }
 
     @Test
     public void testGet() throws Exception {
-        final com.openexchange.groupware.ldap.User users[] = UserTools.searchUser(getClient(), "*");
+        final com.openexchange.user.User users[] = UserTools.searchUser(getClient(), "*");
         assertTrue("user array size > 0", users.length > 0);
         UserTools.getUser(getClient(), users[0].getId());
     }

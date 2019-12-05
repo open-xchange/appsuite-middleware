@@ -100,7 +100,7 @@ public class PushMsHandler implements EventHandler {
             }
             try {
                 event = (CommonEvent) obj;
-            } catch (final ClassCastException cce) {
+            } catch (ClassCastException cce) {
                 LOG.warn("Unexpected type", cce);
                 return;
             }
@@ -111,7 +111,7 @@ public class PushMsHandler implements EventHandler {
         try {
             final ContextService contextService = Services.getService(ContextService.class);
             ctx = contextService.getContext(contextId);
-        } catch (final OXException exc) {
+        } catch (OXException exc) {
             LOG.error("cannot resolve context id: {}", Integer.valueOf(contextId), exc);
             return;
         }

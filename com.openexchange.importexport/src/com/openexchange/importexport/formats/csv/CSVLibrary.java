@@ -218,7 +218,7 @@ public final class CSVLibrary {
         FolderObject fo = null;
         try {
             fo = new OXFolderAccess(sessObj.getContext()).getFolderObject(folderId);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw ImportExportExceptionCodes.LOADING_FOLDER_FAILED.create(e, folder);
         }
         return fo;
@@ -232,9 +232,9 @@ public final class CSVLibrary {
      * @throws OXException
      */
     public static int getFolderId(final String folderString) throws OXException {
-        try{
+        try {
             return Integer.parseInt(folderString);
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             throw ImportExportExceptionCodes.NUMBER_FAILED.create(e, folderString);
         }
     }
@@ -271,10 +271,10 @@ public final class CSVLibrary {
                 }
             }
             return bob.toString();
-        } catch (final UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             LOG.error("", e);
             throw ImportExportExceptionCodes.UTF8_ENCODE_FAILED.create(e);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             if ("Bad file descriptor".equals(e.getMessage())) {
                 // Stream is already closed
                 throw ImportExportExceptionCodes.IOEXCEPTION_RETRY.create(e);
@@ -343,26 +343,26 @@ public final class CSVLibrary {
 	private static int lengthOfBOM(char[] buf) {
 		int length = buf.length;
 
-		if(length > 3) {
-            if(Character.getNumericValue(buf[0]) < 0 && Character.getNumericValue(buf[1]) < 0 && Character.getNumericValue(buf[2]) < 0 && Character.getNumericValue(buf[3]) < 0){
-				if(Character.getType(buf[0]) == 15 && Character.getType(buf[1]) == 15 && Character.getType(buf[2]) == 28 && Character.getType(buf[3]) == 28) {
+		if (length > 3) {
+            if (Character.getNumericValue(buf[0]) < 0 && Character.getNumericValue(buf[1]) < 0 && Character.getNumericValue(buf[2]) < 0 && Character.getNumericValue(buf[3]) < 0){
+				if (Character.getType(buf[0]) == 15 && Character.getType(buf[1]) == 15 && Character.getType(buf[2]) == 28 && Character.getType(buf[3]) == 28) {
                     return 4;
                 }
-				if(Character.getType(buf[0]) == 28 && Character.getType(buf[1]) == 28 && Character.getType(buf[2]) == 15 && Character.getType(buf[3]) == 15) {
+				if (Character.getType(buf[0]) == 28 && Character.getType(buf[1]) == 28 && Character.getType(buf[2]) == 15 && Character.getType(buf[3]) == 15) {
                     return 4;
                 }
 			}
         }
-		if(length > 1) {
-            if(Character.getNumericValue(buf[0]) < 0 && Character.getNumericValue(buf[1]) < 0) {
-                if(Character.getType(buf[0]) == 28 && Character.getType(buf[1]) == 28) {
+		if (length > 1) {
+            if (Character.getNumericValue(buf[0]) < 0 && Character.getNumericValue(buf[1]) < 0) {
+                if (Character.getType(buf[0]) == 28 && Character.getType(buf[1]) == 28) {
                     return 2;
                 }
             }
         }
-		if(length > 0) {
-            if(Character.getNumericValue(buf[0]) < 0) {
-                if(Character.getType(buf[0]) == 16) {
+		if (length > 0) {
+            if (Character.getNumericValue(buf[0]) < 0) {
+                if (Character.getType(buf[0]) == 16) {
                     return 1;
                 }
             }

@@ -66,8 +66,8 @@ import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.user.UserService;
-import com.openexchange.user.UserServiceInterceptor;
-import com.openexchange.user.UserServiceInterceptorRegistry;
+import com.openexchange.user.interceptor.UserServiceInterceptor;
+import com.openexchange.user.interceptor.UserServiceInterceptorRegistry;
 import com.openexchange.userconf.UserConfigurationService;
 import com.openexchange.userconf.UserPermissionService;
 
@@ -119,7 +119,7 @@ public class ContactServiceActivator extends HousekeepingActivator {
             final ContactService contactService = new FilteringContactService(new ContactServiceImpl(interceptorRegistry), this);
             super.registerService(ContactService.class, contactService);
             ServerServiceRegistry.getInstance().addService(ContactService.class, contactService);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("error starting \"com.openexchange.contact.service\"", e);
             throw e;
         }

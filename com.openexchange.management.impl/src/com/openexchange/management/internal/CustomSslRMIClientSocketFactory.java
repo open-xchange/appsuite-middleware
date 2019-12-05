@@ -102,7 +102,7 @@ public final class CustomSslRMIClientSocketFactory extends SslRMIClientSocketFac
             }
             try {
                 sslSocket.setEnabledCipherSuites(enabledCipherSuitesList);
-            } catch (final IllegalArgumentException e) {
+            } catch (IllegalArgumentException e) {
                 throw (IOException) new IOException(e.getMessage()).initCause(e);
             }
         }
@@ -118,7 +118,7 @@ public final class CustomSslRMIClientSocketFactory extends SslRMIClientSocketFac
             }
             try {
                 sslSocket.setEnabledProtocols(enabledProtocolsList);
-            } catch (final IllegalArgumentException e) {
+            } catch (IllegalArgumentException e) {
                 throw (IOException) new IOException(e.getMessage()).initCause(e);
             }
         }

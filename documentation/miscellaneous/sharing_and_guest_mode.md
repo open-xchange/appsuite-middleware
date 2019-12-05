@@ -1,6 +1,6 @@
 ---
 title: Sharing and Guest Mode
-icon: fa-share-alt
+icon: fa-share-alt-square
 tags: Sharing, Configuration, Administration
 ---
 
@@ -228,7 +228,7 @@ Once the webserver configuration is done and the web client is accessible using 
 
 ## Cookies
 
-Guest sessions basically make use of the same cookies as regular user sessions do. This includes the JSESSONID cookie for the JVM route, as well as the <code>open-xchange-secret-&lt;hash&gt;</code> and <code>open-xchange-public-session-&lt;hash&gt;</code> cookies. Additionally, if configured, the client may also issue a <code>store</code> request to persist the open-xchange-session-<hash> cookie. This cookie may then be used to auto-login the guest client into the previously used session if it is still valid.
+Guest sessions basically make use of the same cookies as regular user sessions do. This includes the JSESSONID cookie for the JVM route, as well as the <code>open-xchange-secret-&lt;hash&gt;</code>, <code> open-xchange-session-&lt;hash&gt;</code> and <code>open-xchange-public-session-&lt;hash&gt;</code> cookies. Cookie lifetime is set depending on the 'staySignedIn' parameter during login.
 
 Besides the common cookies, another special cookie is set: <code>open-xchange-share-&lt;hash&gt;</code>. The value contains the unique share token bound to the guest user accessing the share. here, the cookie hash is calculated as it's done for ordinary sessions, so that there can only be one <code>open-xchange-share-&lt;hash&gt;</code> cookie in a client at the same time. Whenever an auto-login request is issued by the client, the server checks for the existence of this &quot;share&quot; cookie, and, once recognized and checked for validity, it will try to perform the auto-login for an existing guest session first, i.e. using the session cookie based on the special guest hash calculation outlined above. Otherwise, the common auto-login process takes place. The &quot;share&quot; cookie is removed once the guest session terminates, i.e. the guest user logs out.
 
@@ -236,7 +236,6 @@ Since guest users access the web interface on a separate (sub)domain (see [Guest
 
 #### Administrator Notes:
 
-* Whether guest sessions are enabled for auto-login is configurable via the property <code>com.openexchange.share.autoLogin</code> in <code>share.properties</code>
 * By default, the cookie TTL for guest sessions is inherited from the TTL for cookies of regular sessions as defined by <code>com.openexchange.cookie.ttl</code> - this default may be overridden by defining a timespan at <code>com.openexchange.share.cookieTTL</code>
 
 ## Login Modes

@@ -80,7 +80,7 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
 /**
- * {@link Resend} - Utility class to open a composition space for a forward.
+ * {@link Resend} - Utility class to open a composition space for a re-send.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.2

@@ -119,7 +119,7 @@ public enum CalendarField {
 
     public static CalendarField getByAppointmentObjectId(final int id){
         for(final CalendarField field : values()){
-            if( id == field.getAppointmentObjectID() ){
+            if ( id == field.getAppointmentObjectID() ){
                 return field;
             }
         }
@@ -128,7 +128,7 @@ public enum CalendarField {
 
     public static CalendarField getByName(final String name){
         for(final CalendarField field : values()){
-            if( name.equals( field.getName() ) ){
+            if ( name.equals( field.getName() ) ){
                 return field;
             }
         }

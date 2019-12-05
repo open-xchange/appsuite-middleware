@@ -1,6 +1,6 @@
 ---
 title: OAuth 2.0 Provider
-icon: fa-drivers-license-o
+icon: fas fa-id-badge
 tags: OAuth
 ---
 

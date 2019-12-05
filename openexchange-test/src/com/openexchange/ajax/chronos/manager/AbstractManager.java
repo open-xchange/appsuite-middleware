@@ -79,7 +79,7 @@ abstract class AbstractManager {
      */
     <T> T checkResponse(String error, String errorDesc, String category, T data) {
 
-        if(WARNING.equalsIgnoreCase(category)) {
+        if (WARNING.equalsIgnoreCase(category)) {
             return data;
         }
         assertNull(errorDesc, error);

@@ -1,6 +1,0 @@
-type: object
-properties:
-  $ref: ../common/CommonResponseData.yaml
-  data:
-    type: object
-    description: An array of the data of the requests that was processed with the multiple module.

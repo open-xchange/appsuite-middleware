@@ -68,7 +68,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.CommonResponse;
-import com.openexchange.testing.httpclient.models.DeleteBody;
+import com.openexchange.testing.httpclient.models.DeleteEventBody;
 import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventId;
 import com.openexchange.testing.httpclient.models.FolderPermission;
@@ -76,7 +76,7 @@ import com.openexchange.testing.httpclient.models.FolderUpdateResponse;
 import com.openexchange.testing.httpclient.models.FoldersVisibilityResponse;
 import com.openexchange.testing.httpclient.models.NewFolderBody;
 import com.openexchange.testing.httpclient.models.NewFolderBodyFolder;
-import com.openexchange.testing.httpclient.models.UpdateBody;
+import com.openexchange.testing.httpclient.models.UpdateEventBody;
 import com.openexchange.testing.httpclient.modules.ChronosApi;
 import com.openexchange.testing.httpclient.modules.FoldersApi;
 
@@ -143,9 +143,9 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
         Exception exception = null;
         try {
             if (eventIds != null) {
-                DeleteBody body = new DeleteBody();
+                DeleteEventBody body = new DeleteEventBody();
                 body.setEvents(new ArrayList<>(eventIds));
-                defaultUserApi.getChronosApi().deleteEvent(defaultUserApi.getSession(), Long.valueOf(Long.MAX_VALUE), body, null, null, Boolean.FALSE, Boolean.FALSE, null, null);
+                defaultUserApi.getChronosApi().deleteEvent(defaultUserApi.getSession(), Long.valueOf(Long.MAX_VALUE), body, null, null, Boolean.FALSE, Boolean.FALSE, null, null, null);
             }
             // Clean-up event manager
             eventManager.cleanUp();
@@ -209,6 +209,21 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
 
         List<FolderPermission> permissions = new ArrayList<>();
         permissions.add(perm);
+        return createAndRememberNewFolder(api, session, parent, entity, permissions);
+    }
+
+    /**
+     * Creates a new folder and remembers it.
+     *
+     * @param api The {@link UserApi}
+     * @param session The user's session
+     * @param parent The parent folder
+     * @param entity The user id
+     * @param permissions The permissions to set
+     * @return The result of the operation
+     * @throws ApiException if an API error is occurred
+     */
+    protected String createAndRememberNewFolder(UserApi api, String session, String parent, int entity, List<FolderPermission> permissions) throws ApiException {
 
         NewFolderBodyFolder folderData = new NewFolderBodyFolder();
         folderData.setModule(EVENT_MODULE);
@@ -294,7 +309,7 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
      * @return The default calendar folder of the user
      * @throws Exception if the default calendar folder cannot be found
      */
-    private String getDefaultFolder(String session, FoldersApi foldersApi) throws Exception {
+    protected String getDefaultFolder(String session, FoldersApi foldersApi) throws Exception {
         ArrayList<ArrayList<?>> privateList = getPrivateFolderList(foldersApi, session, "event", "1,308", "0");
         if (privateList.size() == 1) {
             return (String) privateList.get(0).get(0);
@@ -394,12 +409,12 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
      * @param eventData The {@link EventData} to update
      * @return An {@link UpdateBody}.
      */
-    protected UpdateBody getUpdateBody(EventData eventData) {
-        UpdateBody body = new UpdateBody();
+    protected UpdateEventBody getUpdateBody(EventData eventData) {
+    	UpdateEventBody body = new UpdateEventBody();
         body.setEvent(eventData);
         return body;
     }
-    
+
     protected static List<EventData> getEventsByUid(List<EventData> events, String uid) {
         List<EventData> matchingEvents = new ArrayList<EventData>();
         if (null != events) {
@@ -426,7 +441,7 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
         });
         return matchingEvents;
     }
-    
+
     /**
      * Returns the id of the calendar user of the default user api
      *

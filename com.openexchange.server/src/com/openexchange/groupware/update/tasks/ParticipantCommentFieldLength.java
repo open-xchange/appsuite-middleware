@@ -76,6 +76,9 @@ public class ParticipantCommentFieldLength extends UpdateTaskAdapter {
         Connection con = params.getConnection();
         int rollback = 0;
         try {
+            if (false == Databases.tablesExist(con, "prg_dates_members", "del_dates_members", "dateExternal", "delDateExternal")) {
+                return;
+            }
             con.setAutoCommit(false);
             rollback = 1;
             checkAndModifyColumns(con, "prg_dates_members", new Column("reason", "TEXT"));

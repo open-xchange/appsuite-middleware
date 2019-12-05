@@ -729,9 +729,12 @@ public final class InternalList {
         list.add(new UnsupportedSubscriptionsRemoverTask());
 
         // +++++++++++++++++++++++++++++++++ Version 7.10.3 starts here. +++++++++++++++++++++++++++++++++
-        // TODO Enable UpdateTask with 7.10.3, see MW-1108
-        // list.add(new com.openexchange.groupware.update.tasks.DropPublicationTablesTask());
-        // list.add(new com.openexchange.groupware.update.tasks.DeleteOXMFSubscriptionTask());
+        // Drop publication related tables
+        list.add(new com.openexchange.groupware.update.tasks.DropPublicationTablesTask());
+        list.add(new com.openexchange.groupware.update.tasks.DeleteOXMFSubscriptionTask());
+
+        // Add 'checksum' column to attachment tablesm see MW-1235
+        list.add(new com.openexchange.groupware.update.tasks.AddChecksumColumnToAttachmentsTablesUpdateTask());
 
 
         return list.toArray(new UpdateTaskV2[list.size()]);

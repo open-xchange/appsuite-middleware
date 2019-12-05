@@ -52,7 +52,6 @@ package com.openexchange.resource.internal;
 import java.util.Date;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.resource.storage.ResourceStorage;
@@ -60,6 +59,7 @@ import com.openexchange.resource.storage.UsecountAwareResourceStorage;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.user.User;
 
 /**
  * {@link ResourceServiceImpl}

@@ -1,0 +1,19 @@
+/system?action=whoami:
+  get:
+    operationId: whoami
+    tags:
+      - System
+    summary: Returns information about the session
+    parameters:
+      - $ref: '#/components/parameters/gblQueryParamSession'
+    responses:
+      '200':
+        description: >
+          A JSON object signaling success. In case of errors the responsible
+          fields in the response are
+
+          filled (see [Error handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WhoAmIResponse'

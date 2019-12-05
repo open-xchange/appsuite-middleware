@@ -51,6 +51,7 @@ package com.openexchange.admin.user.copy.rmi.impl;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
+import java.rmi.RemoteException;
 import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -61,6 +62,7 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchObjectException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
+import com.openexchange.admin.rmi.exceptions.RemoteExceptionUtils;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.exceptions.UserExistsException;
 import com.openexchange.admin.rmi.impl.BasicAuthenticator;
@@ -84,10 +86,10 @@ public class OXUserCopy extends OXCommonImpl implements OXUserCopyInterface {
     }
 
     @Override
-    public User copyUser(final User user, final Context src, final Context dest, final Credentials auth) throws InvalidDataException, InvalidCredentialsException, StorageException, NoSuchUserException, DatabaseUpdateException, NoSuchContextException, UserExistsException {
+    public User copyUser(final User user, final Context src, final Context dest, final Credentials auth) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, NoSuchUserException, DatabaseUpdateException, NoSuchContextException, UserExistsException {
         try {
             doNullCheck(user);
-        } catch (final InvalidDataException e2) {
+        } catch (InvalidDataException e2) {
             final InvalidDataException invalidDataException = new InvalidDataException(THE_GIVEN_SOURCE_USER_OBJECT_IS_NULL);
             LOG.error(invalidDataException.getMessage(), invalidDataException);
             throw invalidDataException;
@@ -122,12 +124,15 @@ public class OXUserCopy extends OXCommonImpl implements OXUserCopyInterface {
                 throw userExistsExeption;
             }
 
-        } catch (final InvalidDataException e1) {
-            LOG.error(e1.getMessage(), e1);
-            throw e1;
-        } catch (final StorageException e1) {
-            LOG.error(e1.getMessage(), e1);
-            throw e1;
+        } catch (InvalidDataException e) {
+            LOG.error("", e);
+            throw e;
+        } catch (StorageException e) {
+            LOG.error("", e);
+            throw e;
+        } catch (RuntimeException e) {
+            LOG.error("", e);
+            throw RemoteExceptionUtils.convertException(e);
         }
 
         int srcContextId = i(src.getId());
@@ -137,7 +142,7 @@ public class OXUserCopy extends OXCommonImpl implements OXUserCopyInterface {
         final int newUserId;
         try {
             newUserId = service.copyUser(srcContextId, dstContextId, srcUserId);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             final StorageException storageException = new StorageException(e.getMessage());
             setStackTraceSafe(storageException, e);
@@ -158,7 +163,7 @@ public class OXUserCopy extends OXCommonImpl implements OXUserCopyInterface {
     private void setStackTraceSafe(final Exception dest, final Exception src) {
         try {
             dest.setStackTrace(src.getStackTrace());
-        } catch (final Exception x) {
+        } catch (Exception x) {
             // Ignore
         }
     }

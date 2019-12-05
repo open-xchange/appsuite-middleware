@@ -135,7 +135,17 @@ public enum Client {
     /**
      * The client identifier for Windows Drive client: <code>"OpenXchange.Android.OXDrive"</code>
      */
-    DRIVE_ANDROID("OpenXchange.Android.OXDrive", "The client identifier for Android Drive client");
+    DRIVE_ANDROID("OpenXchange.Android.OXDrive", "The client identifier for Android Drive client"),
+    /**
+     * The client identifier for Mail App: <code>"open-xchange-mailapp"</code>
+     */
+    @Deprecated
+    MAIL_APP("open-xchange-mailapp", "The client identifier for Mail App"),
+    /**
+     * The client identifier for plain Mobile API Facade: <code>"open-xchange-mobile-api-facade"</code>
+     */
+    MOBILE_API_FACADE("open-xchange-mobile-api-facade", "The client identifier for plain Mobile API Facade");
+
 
     private final String clientId;
     private final String description;

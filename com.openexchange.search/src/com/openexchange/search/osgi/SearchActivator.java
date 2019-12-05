@@ -79,7 +79,7 @@ public final class SearchActivator implements BundleActivator {
         logger.info("Starting bundle: com.openexchange.search");
         try {
             searchServiceRegistration = context.registerService(SearchService.class, new SearchServiceImpl(), null);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             logger.error("Failed starting bundle com.openexchange.search", e);
             throw e;
         }
@@ -95,7 +95,7 @@ public final class SearchActivator implements BundleActivator {
                 searchServiceRegistration.unregister();
                 this.searchServiceRegistration = null;
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             logger.error("Failed stopping bundle com.openexchange.search", e);
             throw e;
         }

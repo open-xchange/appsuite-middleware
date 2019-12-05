@@ -58,6 +58,7 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.SchedulingControl;
 import com.openexchange.chronos.provider.extensions.PermissionAware;
 import com.openexchange.chronos.provider.folder.FolderCalendarAccess;
 import com.openexchange.chronos.service.CalendarParameters;
@@ -135,9 +136,10 @@ public interface GroupwareCalendarAccess extends FolderCalendarAccess, Permissio
      * appropriate parent folder identifier assigned.
      *
      * @param eventId The identifier of the event to resolve
+     * @param sequence The expected sequence number to match, or <code>null</code> to resolve independently of the event's sequence number
      * @return The resolved event from the user's point of view, or <code>null</code> if not found
      */
-    Event resolveEvent(String eventId) throws OXException;
+    Event resolveEvent(String eventId, Integer sequence) throws OXException;
 
     /**
      * Gets lists of new and updated as well as deleted events since a specific timestamp of a user.
@@ -162,7 +164,7 @@ public interface GroupwareCalendarAccess extends FolderCalendarAccess, Permissio
      * The following calendar parameters are evaluated:
      * <ul>
      * <li>{@link CalendarParameters#PARAMETER_CHECK_CONFLICTS}</li>
-     * <li>{@link CalendarParameters#PARAMETER_NOTIFICATION}</li>
+     * <li>{@link CalendarParameters#PARAMETER_SCHEDULING}</li>
      * </ul>
      *
      * @param folderId The identifier of the folder to create the event in
@@ -177,7 +179,7 @@ public interface GroupwareCalendarAccess extends FolderCalendarAccess, Permissio
      * The following calendar parameters are evaluated:
      * <ul>
      * <li>{@link CalendarParameters#PARAMETER_CHECK_CONFLICTS}</li>
-     * <li>{@link CalendarParameters#PARAMETER_NOTIFICATION}</li>
+     * <li>{@link CalendarParameters#PARAMETER_SCHEDULING}</li>
      * </ul>
      *
      * @param eventID The identifier of the event to update
@@ -193,7 +195,7 @@ public interface GroupwareCalendarAccess extends FolderCalendarAccess, Permissio
      * The following calendar parameters are evaluated:
      * <ul>
      * <li>{@link CalendarParameters#PARAMETER_CHECK_CONFLICTS}</li>
-     * <li>{@link CalendarParameters#PARAMETER_NOTIFICATION}</li>
+     * <li>{@link CalendarParameters#PARAMETER_SCHEDULING}</li>
      * </ul>
      *
      * @param eventID The identifier of the event to update
@@ -264,9 +266,8 @@ public interface GroupwareCalendarAccess extends FolderCalendarAccess, Permissio
      * The following calendar parameters are evaluated:
      * <ul>
      * <li>{@link CalendarParameters#PARAMETER_CHECK_CONFLICTS}, defaulting to {@link Boolean#FALSE} unless overridden</li>
-     * <li>{@link CalendarParameters#PARAMETER_SUPPRESS_ITIP}, defaulting to {@link Boolean#TRUE} unless overridden</li>
+     * <li>{@link CalendarParameters#PARAMETER_SCHEDULING}, defaulting to {@link SchedulingControl#NONE} unless overridden</li>
      * <li>{@link CalendarParameters#PARAMETER_IGNORE_STORAGE_WARNINGS}, defaulting to {@link Boolean#TRUE} unless overridden</li>
-     * <li>{@link CalendarParameters#PARAMETER_NOTIFICATION}</li>
      * <li>{@link CalendarParameters#UID_CONFLICT_STRATEGY}</li>
      * </ul>
      *

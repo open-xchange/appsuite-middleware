@@ -86,10 +86,10 @@ public final class DelegatingRejectedExecutionHandler implements RejectedExecuti
             final CustomFutureTask<?> cft = (CustomFutureTask<?>) r;
             try {
                 handleTask(cft);
-            } catch (final RejectedExecutionException e) {
+            } catch (RejectedExecutionException e) {
                 // No remedy
                 throw e;
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 // Signal failed execution
                 cft.setException(e);
             }

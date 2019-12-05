@@ -67,7 +67,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.SimUser;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.MutableUserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.session.SimSession;
@@ -76,6 +75,7 @@ import com.openexchange.templating.OXTemplate;
 import com.openexchange.templating.OXTemplate.TemplateLevel;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.user.User;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>

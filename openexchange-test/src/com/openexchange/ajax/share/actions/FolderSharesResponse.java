@@ -74,7 +74,7 @@ public class FolderSharesResponse extends AbstractAJAXResponse {
      * @param response The underlying response
      * @param columns The requested columns
      */
-    public FolderSharesResponse(Response response, int[] columns) throws JSONException {
+    public FolderSharesResponse(Response response, int[] columns) {
         super(response);
         this.columns = columns;
         this.data = response.hasError() ? null : (JSONArray) response.getData();

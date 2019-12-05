@@ -70,6 +70,8 @@ import com.openexchange.lock.LockService;
 import com.openexchange.log.LogProperties;
 import com.openexchange.password.mechanism.PasswordMech;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.user.User;
+import com.openexchange.user.UserExceptionCode;
 import com.openexchange.user.internal.mapping.UserMapper;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
@@ -530,7 +532,7 @@ public class CachingUserStorage extends UserStorage {
             identifier = delegate.getUserId(uid, context);
             try {
                 cache.put(key, Integer.valueOf(identifier), false);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 throw LdapExceptionCode.CACHE_PROBLEM.create(e, new Object[0]).setPrefix("USR");
             }
         } else {
@@ -597,14 +599,14 @@ public class CachingUserStorage extends UserStorage {
                         cache.remove(key);
                     }
                     cache.put(key, identifiers, false);
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     throw UserExceptionCode.CACHE_PROBLEM.create(e);
                 }
             } else {
                 identifiers = tmp;
             }
             return identifiers;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw UserExceptionCode.CACHE_PROBLEM.create(e);
         }
     }
@@ -625,7 +627,7 @@ public class CachingUserStorage extends UserStorage {
             try {
                 final Cache cache = cacheService.getCache(REGION_NAME);
                 cache.remove(cache.newCacheKey(ctx.getContextId(), userId));
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 throw UserExceptionCode.CACHE_PROBLEM.create(e);
             }
         }

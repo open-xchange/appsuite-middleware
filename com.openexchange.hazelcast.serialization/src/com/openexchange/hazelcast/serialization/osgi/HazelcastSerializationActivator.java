@@ -50,10 +50,13 @@
 
 package com.openexchange.hazelcast.serialization.osgi;
 
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 import com.openexchange.hazelcast.serialization.DynamicPortableFactory;
+import com.openexchange.hazelcast.serialization.PortableCheckForBooleanConfigOptionCallableFactory;
 import com.openexchange.hazelcast.serialization.internal.DynamicPortableFactoryImpl;
 import com.openexchange.osgi.HousekeepingActivator;
 
@@ -80,6 +83,7 @@ public class HazelcastSerializationActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
+        Services.setServiceLookup(this);
         /*
          * create & register dynamic factory
          */
@@ -88,6 +92,7 @@ public class HazelcastSerializationActivator extends HousekeepingActivator {
         /*
          * track generic portable factories
          */
+        final BundleContext context = this.context;
         track(CustomPortableFactory.class, new ServiceTrackerCustomizer<CustomPortableFactory, CustomPortableFactory>() {
 
             @Override
@@ -108,12 +113,16 @@ public class HazelcastSerializationActivator extends HousekeepingActivator {
                 context.ungetService(reference);
             }
         });
+        trackService(ConfigurationService.class);
         openTrackers();
+
+        registerService(CustomPortableFactory.class, new PortableCheckForBooleanConfigOptionCallableFactory(), null);
     }
 
     @Override
     public void stopBundle() throws Exception {
         super.stopBundle();
+        Services.setServiceLookup(null);
     }
 
 }

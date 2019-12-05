@@ -50,6 +50,8 @@
 package com.openexchange.admin.user.copy.osgi;
 
 import java.rmi.Remote;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
@@ -79,8 +81,9 @@ public class RMIUserCopyRegisterer implements ServiceTrackerCustomizer<UserCopyS
     public UserCopyService addingService(final ServiceReference<UserCopyService> reference) {
         final UserCopyService service = context.getService(reference);
         {
-            final OXUserCopy userCopy = new OXUserCopy(service);
-            registration = context.registerService(Remote.class, userCopy, null);
+            Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
+            serviceProperties.put("RMI_NAME", OXUserCopy.RMI_NAME);
+            registration = context.registerService(Remote.class, new OXUserCopy(service), serviceProperties);
             LOG.info("RMI Interface for usercopy bundle bound to RMI registry");
         }
         return service;
@@ -100,7 +103,7 @@ public class RMIUserCopyRegisterer implements ServiceTrackerCustomizer<UserCopyS
                 registration = null;
             }
             context.ungetService(reference);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("", e);
         }
     }

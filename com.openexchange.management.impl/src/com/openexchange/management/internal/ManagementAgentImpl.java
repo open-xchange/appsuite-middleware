@@ -109,8 +109,6 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
 
     private String jmxPassword;
 
-    private String jmxPasswordHashAlgorithm;
-
     private final Stack<ObjectName> objectNames = new Stack<ObjectName>();
 
     private JMXServiceURL jmxURL;
@@ -166,7 +164,7 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
                          */
                         registry0 = LocateRegistry.getRegistry(jmxPort);
                         registry0.list();
-                    } catch (final RemoteException e) {
+                    } catch (RemoteException e) {
                         LOG.debug("No responsive RMI registry found that listens on port {}. A new one is going to be created", I(jmxPort), e);
                         /*
                          * Create a new one
@@ -181,7 +179,7 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
                 //
                 final Map<String, Object> env = new HashMap<String, Object>(4);
                 if (jmxLogin != null && jmxPassword != null) {
-                    env.put(JMXConnectorServer.AUTHENTICATOR, new AbstractAgentJMXAuthenticator(new String[] { jmxLogin, jmxPassword, jmxPasswordHashAlgorithm }));
+                    env.put(JMXConnectorServer.AUTHENTICATOR, new AbstractAgentJMXAuthenticator(new String[] { jmxLogin, jmxPassword }));
                 }
                 // The port specified in "service:jmx:rmi://"+hostname+":"+port
                 // is the second port, where RMI connection objects will be exported.
@@ -234,7 +232,7 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
                         public synchronized void start() throws IOException {
                             try {
                                 registry.bind("server", stub);
-                            } catch (final AlreadyBoundException x) {
+                            } catch (AlreadyBoundException x) {
                                 final IOException io = new IOException(x.getMessage());
                                 io.initCause(x);
                                 throw io;
@@ -293,19 +291,19 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
                  *  Our URL service:jmx:rmi:///jndi/rmi://localhost:9999/server
                  */
                 final JMXServiceURL jmxServiceURL = jmxServiceUrlFor(ip, jmxServerPort, jmxPort);
-                jmxURL = addConnectorServer(jmxServiceURL, jmxLogin, jmxPassword, jmxPasswordHashAlgorithm);
+                jmxURL = addConnectorServer(jmxServiceURL, jmxLogin, jmxPassword);
             }
             LOG.info("\n\n\tUse JConsole or MC4J to connect to MBeanServer with this URL: {}\n", jmxURL);
             running.set(true);
-        } catch (final MalformedURLException e) {
+        } catch (MalformedURLException e) {
             LOG.error("", e);
-        } catch (final UnknownHostException e) {
+        } catch (UnknownHostException e) {
             LOG.error("", e);
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             LOG.error("", e);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             LOG.error("", e);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
         }
     }
@@ -339,7 +337,7 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
             while (!objectNames.isEmpty()) {
                 unregisterMBean(objectNames.pop());
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
         }
         removeConnectorServer(jmxURL);
@@ -357,7 +355,7 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
         }
         try {
             return InetAddress.getByName(host).getHostName();
-        } catch (final UnknownHostException e) {
+        } catch (UnknownHostException e) {
             LOG.error("", e);
             return null;
         }
@@ -371,7 +369,7 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
         final ObjectName objectName;
         try {
             objectName = new ObjectName(name);
-        } catch (final MalformedObjectNameException e) {
+        } catch (MalformedObjectNameException e) {
             throw ManagementExceptionCode.MALFORMED_OBJECT_NAME.create(e, name);
         }
         super.registerMBean(objectName, mbean);
@@ -395,7 +393,7 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
         final ObjectName objectName;
         try {
             objectName = new ObjectName(name);
-        } catch (final MalformedObjectNameException e) {
+        } catch (MalformedObjectNameException e) {
             throw ManagementExceptionCode.MALFORMED_OBJECT_NAME.create(e, name);
         }
         super.unregisterMBean(objectName);
@@ -463,14 +461,5 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
      */
     public void setJmxPassword(final String jmxPassword) {
         this.jmxPassword = jmxPassword;
-    }
-
-    /**
-     * Sets the JMX password hash algorithm
-     *
-     * @param hashAlgorithm the JMX password hash algorithm
-     */
-    public void setJmxPasswordHashAlgorithm(final String hashAlgorithm) {
-        this.jmxPasswordHashAlgorithm = hashAlgorithm;
     }
 }

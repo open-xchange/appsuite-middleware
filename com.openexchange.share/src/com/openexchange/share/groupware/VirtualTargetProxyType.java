@@ -64,7 +64,7 @@ public class VirtualTargetProxyType implements TargetProxyType {
     private VirtualTargetProxyType() {};
     
     public static VirtualTargetProxyType getInstance() {
-        if(instance == null) {
+        if (instance == null) {
             instance = new VirtualTargetProxyType();
         }
         return instance;

@@ -1,6 +1,9 @@
 
 package com.openexchange.report.appsuite.defaultHandlers;
 
+import static com.openexchange.java.Autoboxing.B;
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -63,10 +66,10 @@ public class CapabilityHandlerTest {
 
     @Mock
     private ConfigurationService configService;
-    
+
     private ContextReport contextReport;
     private Report report;
-    private CapabilityHandler capabilityHandlerTest = new CapabilityHandler();
+    private final CapabilityHandler capabilityHandlerTest = new CapabilityHandler();
 
     private final String CAPS1 = "active_sync, autologin, boxcom, caldav, calendar, carddav, client-onboarding, collect_email_addresses, conflict_handling, contacts, delegate_tasks";
     private final String CAPS2 = "active_sync, autologin, boxcom, caldav, calendar, carddav, client-onboarding, collect_email_addresses, conflict_handling, contacts";
@@ -78,7 +81,7 @@ public class CapabilityHandlerTest {
     private final String REPORT_UUID_LOCKS = "locksUID";
     private final String REPORT_PATH = "./test/testfiles/storage";
     private final String REPORT_TYPE = "default";
-    private final Long REPORT_TIME = new Date().getTime();
+    private final Long REPORT_TIME = L(new Date().getTime());
     private Report reportStoringLocks;
 
     ExecutorService eService = null;
@@ -89,8 +92,8 @@ public class CapabilityHandlerTest {
         PowerMockito.mockStatic(Services.class);
         PowerMockito.when(Services.getService(ConfigurationService.class)).thenReturn(configService);
         Mockito.when(configService.getProperty("com.openexchange.report.appsuite.fileStorage", "/tmp")).thenReturn(REPORT_PATH);
-        Mockito.when(configService.getIntProperty("com.openexchange.report.appsuite.maxChunkSize", 200)).thenReturn(200);
-        this.contextReport = initContextReport(2);
+        Mockito.when(I(configService.getIntProperty("com.openexchange.report.appsuite.maxChunkSize", 200))).thenReturn(I(200));
+        this.contextReport = initContextReport(I(2));
         this.initReport("default");
         this.initReportForStorage();
         this.initReportForStorageWithLocks();
@@ -109,39 +112,39 @@ public class CapabilityHandlerTest {
      @Test
      public void testAddContextToEmptyReport() {
         capabilityHandlerTest.merge(contextReport, report);
-        long quota = contextReport.get(Report.MACDETAIL_QUOTA, Report.QUOTA, 0l, Long.class);
+        long quota = contextReport.get(Report.MACDETAIL_QUOTA, Report.QUOTA, L(0l), Long.class).longValue();
         String quotaSpec = "fileQuota[" + quota + "]";
         HashMap<String, Object> capS1 = report.get(Report.MACDETAIL, CAPS1 + "," + quotaSpec, HashMap.class);
         HashMap<String, Object> capS2 = report.get(Report.MACDETAIL, CAPS2 + "," + quotaSpec, HashMap.class);
         HashMap<String, Object> capS3 = report.get(Report.MACDETAIL, CAPS3 + "," + quotaSpec, HashMap.class);
-        validateCapSCount(capS1, 1l, 0l, 1l, 0l, 0l, 1l, 1l, 1l, 1l);
-        validateCapSCount(capS2, 0l, 2l, 5l, 3l, 0l, 5l, 5l, 5l, 1l);
-        validateCapSCount(capS3, 0l, 0l, 2l, 0l, 8l, 2l, 2l, 2l, 1l);
+        validateCapSCount(capS1, L(1l), L(0l), L(1l), L(0l), L(0l), L(1l), L(1l), L(1l), L(1l));
+        validateCapSCount(capS2, L(0l), L(2l), L(5l), L(3l), L(0l), L(5l), L(5l), L(5l), L(1l));
+        validateCapSCount(capS3, L(0l), L(0l), L(2l), L(0l), L(8l), L(2l), L(2l), L(2l), L(1l));
     }
 
     @SuppressWarnings("unchecked")
      @Test
      public void testAddContextToReportCapSValues() {
-        capabilityHandlerTest.merge(initContextReport(4), report);
-        capabilityHandlerTest.merge(initContextReport(5), report);
+        capabilityHandlerTest.merge(initContextReport(I(4)), report);
+        capabilityHandlerTest.merge(initContextReport(I(5)), report);
         String quotaSpec = "fileQuota[0]";
         HashMap<String, Object> capS1 = report.get(Report.MACDETAIL, CAPS1 + "," + quotaSpec, HashMap.class);
         HashMap<String, Object> capS2 = report.get(Report.MACDETAIL, CAPS2 + "," + quotaSpec, HashMap.class);
         HashMap<String, Object> capS3 = report.get(Report.MACDETAIL, CAPS3 + "," + quotaSpec, HashMap.class);
-        validateCapSCount(capS1, 2l, 0l, 2l, 0l, 0l, 1l, 1l, 1l, 2l);
-        validateCapSCount(capS2, 0l, 4l, 10l, 6l, 0l, 5l, 5l, 5l, 2l);
-        validateCapSCount(capS3, 0l, 0l, 4l, 0l, 16l, 2l, 2l, 2l, 2l);
+        validateCapSCount(capS1, L(2l), L(0l), L(2l), L(0l), L(0l), L(1l), L(1l), L(1l), L(2l));
+        validateCapSCount(capS2, L(0l), L(4l), L(10l), L(6l), L(0l), L(5l), L(5l), L(5l), L(2l));
+        validateCapSCount(capS3, L(0l), L(0l), L(4l), L(0l), L(16l), L(2l), L(2l), L(2l), L(2l));
     }
 
     @SuppressWarnings("unchecked")
      @Test
      public void testAddContextToReportTenantMapValues() {
-        capabilityHandlerTest.merge(initContextReport(4), report);
-        capabilityHandlerTest.merge(initContextReport(5), report);
+        capabilityHandlerTest.merge(initContextReport(I(4)), report);
+        capabilityHandlerTest.merge(initContextReport(I(5)), report);
         // all thre capS have their entry inside the tenant map on deployment level (index 0)
         assertEquals(3, report.getTenantMap().get("deployment").size());
         // Second capS has a context with id 4 and inside is a user with id 5
-        assertEquals(true, ((LinkedHashMap<Integer, ArrayList<Integer>>) report.getTenantMap().get("deployment").get(CAPS2 + ",fileQuota[0]")).get(4).contains(5));
+        assertEquals(Boolean.TRUE, B(((LinkedHashMap<Integer, ArrayList<Integer>>) report.getTenantMap().get("deployment").get(CAPS2 + ",fileQuota[0]")).get(I(4)).contains(I(5))));
         // Second capS has two contexts total
         assertEquals(2, ((LinkedHashMap<Integer, ArrayList<Integer>>) report.getTenantMap().get("deployment").get(CAPS2 + ",fileQuota[0]")).size());
     }
@@ -149,36 +152,36 @@ public class CapabilityHandlerTest {
     @SuppressWarnings("unchecked")
      @Test
      public void testAddAdminToContextReport() {
-        UserReport userReport = initUserReport(7, false, true, false, contextReport, CAPS1);
+        UserReport userReport = initUserReport(I(7), false, true, false, contextReport, CAPS1);
         capabilityHandlerTest.merge(userReport, contextReport);
         HashMap<String, Object> capS1 = contextReport.get(Report.MACDETAIL, CAPS1, HashMap.class);
         // the number of admin users has increased from 1 to 2 and total from 1 to 2
-        validateCapSCount(capS1, 2l, null, 2l, null, null, null, null, null, null);
+        validateCapSCount(capS1, L(2l), null, L(2l), null, null, null, null, null, null);
     }
 
     @SuppressWarnings("unchecked")
      @Test
      public void testAddDisabledUserToContextReport() {
-        UserReport userReport = initUserReport(7, false, false, true, contextReport, CAPS2);
+        UserReport userReport = initUserReport(I(7), false, false, true, contextReport, CAPS2);
         capabilityHandlerTest.merge(userReport, contextReport);
         HashMap<String, Object> capS2 = contextReport.get(Report.MACDETAIL, CAPS2, HashMap.class);
         // the number of disabled users has increased from 2 to 3 and total from 5 to 6
-        validateCapSCount(capS2, null, 3l, 6l, 3l, null, null, null, null, null);
+        validateCapSCount(capS2, null, L(3l), L(6l), L(3l), null, null, null, null, null);
     }
 
     @SuppressWarnings("unchecked")
      @Test
      public void testAddGuestUserToContextReport() {
-        UserReport userReport = initUserReport(7, true, false, false, contextReport, CAPS3);
+        UserReport userReport = initUserReport(I(7), true, false, false, contextReport, CAPS3);
         capabilityHandlerTest.merge(userReport, contextReport);
         HashMap<String, Object> capS3 = contextReport.get(Report.MACDETAIL, CAPS3, HashMap.class);
         // The number of guests has increased from 0 to 1
-        validateCapSCount(capS3, null, null, 2l, 1l, 8l, null, null, null, null);
+        validateCapSCount(capS3, null, null, L(2l), L(1l), L(8l), null, null, null, null);
     }
 
      @Test
      public void testAddUserWithLoginsToContextReport() {
-        UserReport userReport = initUserReport(7, false, false, false, contextReport, CAPS2);
+        UserReport userReport = initUserReport(I(7), false, false, false, contextReport, CAPS2);
         capabilityHandlerTest.merge(userReport, contextReport);
         // A logins ArrayList exists and has a size of 2
         assertEquals(2, userReport.get(Report.MACDETAIL, Report.USER_LOGINS, HashMap.class).size());
@@ -207,7 +210,7 @@ public class CapabilityHandlerTest {
             @Override
             public Map<String, Integer> getFileCountNoVersions(Map<PoolAndSchema, Map<Integer, List<Integer>>> dbContextToUserBash) throws SQLException, OXException {
                 HashMap<String, Integer> returnMap = new HashMap<>();
-                returnMap.put("total", 2);
+                returnMap.put("total", I(2));
                 return returnMap;
             }
 
@@ -239,20 +242,20 @@ public class CapabilityHandlerTest {
         PowerMockito.when(Services.getService(InfostoreInformationService.class)).thenReturn(informationService);
         ServerServiceRegistry serverServiceRegistry = PowerMockito.mock(ServerServiceRegistry.class);
         PowerMockito.when(ServerServiceRegistry.getInstance()).thenReturn(serverServiceRegistry);
-        
+
         ContextService contextService = PowerMockito.mock(ContextService.class);
         PowerMockito.when(serverServiceRegistry.getService(ContextService.class)).thenReturn(contextService);
-        
+
         Map<PoolAndSchema, List<Integer>> poolContextMap = new HashMap<>();
         PoolAndSchema poolAndSchema = new PoolAndSchema(4, "testSchema");
-        poolContextMap.put(poolAndSchema, Arrays.asList(15));
+        poolContextMap.put(poolAndSchema, Arrays.asList(I(15)));
         PowerMockito.when(contextService.getSchemaAssociationsFor(ArgumentMatchers.anyList())).thenReturn(poolContextMap);
-        
+
         this.initReport("extended");
         initTenantMapForReport();
         addCapSToReport(report, CAPS1);
         capabilityHandlerTest.finish(report);
-        validateDriveTotalAvgs(report.get(Report.TOTAL, Report.DRIVE_TOTAL, LinkedHashMap.class), 15l, 15l, 1l, 1l, 1l, 1l);
+        validateDriveTotalAvgs(report.get(Report.TOTAL, Report.DRIVE_TOTAL, LinkedHashMap.class), L(15l), L(15l), L(1l), L(1l), L(1l), L(1l));
     }
 
      @Test
@@ -263,7 +266,7 @@ public class CapabilityHandlerTest {
             @Override
             public Map<String, Integer> getStorageUseMetrics(Map<PoolAndSchema, Map<Integer, List<Integer>>> dbContextToUserBash) throws SQLException, OXException {
                 for (PoolAndSchema pool : dbContextToUserBash.keySet()) {
-                    if (dbContextToUserBash.get(pool).containsKey(20) && dbContextToUserBash.get(pool).get(20) != null) {
+                    if (dbContextToUserBash.get(pool).containsKey(I(20)) && dbContextToUserBash.get(pool).get(I(20)) != null) {
                         return createPotentialInfostoreReturn(30, 60, 45, 135, null, 0);
                     }
                 }
@@ -272,7 +275,7 @@ public class CapabilityHandlerTest {
 
             @Override
             public Map<String, Integer> getQuotaUsageMetrics(Map<Integer, List<Integer>> usersInContext) throws SQLException, OXException {
-                if (usersInContext.containsKey(20) && usersInContext.get(20) != null) {
+                if (usersInContext.containsKey(I(20)) && usersInContext.get(I(20)) != null) {
                     return createPotentialInfostoreReturn(5, 20, 15, 3, "sum", 35);
                 }
                 return createPotentialInfostoreReturn(1, 1, 1, 1, "sum", 1);
@@ -281,7 +284,7 @@ public class CapabilityHandlerTest {
             @Override
             public Map<String, Integer> getFileSizeMetrics(Map<PoolAndSchema, Map<Integer, List<Integer>>> dbContextToUserBash) throws SQLException, OXException {
                 for (PoolAndSchema pool : dbContextToUserBash.keySet()) {
-                        if (dbContextToUserBash.get(pool).containsKey(20) && dbContextToUserBash.get(pool).get(20) != null) {
+                        if (dbContextToUserBash.get(pool).containsKey(I(20)) && dbContextToUserBash.get(pool).get(I(20)) != null) {
                         return createPotentialInfostoreReturn(30, 60, 45, 135, null, 0);
                     }
                 }
@@ -292,12 +295,12 @@ public class CapabilityHandlerTest {
             public Map<String, Integer> getFileCountNoVersions(Map<PoolAndSchema, Map<Integer, List<Integer>>> dbContextToUserBash) throws SQLException, OXException {
                 HashMap<String, Integer> returnMap = new HashMap<>();
                 for (PoolAndSchema pool : dbContextToUserBash.keySet()) {
-                        if (dbContextToUserBash.get(pool).containsKey(20) && dbContextToUserBash.get(pool).get(20) != null) {
-                        returnMap.put("total", 3);
+                        if (dbContextToUserBash.get(pool).containsKey(I(20)) && dbContextToUserBash.get(pool).get(I(20)) != null) {
+                        returnMap.put("total", I(3));
                         return returnMap;
                     }
                 }
-                returnMap.put("total", 2);
+                returnMap.put("total", I(2));
                 return returnMap;
             }
 
@@ -309,7 +312,7 @@ public class CapabilityHandlerTest {
             @Override
             public Map<String, Integer> getFileCountMetrics(Map<PoolAndSchema, Map<Integer, List<Integer>>> dbContextToUserBash) throws SQLException, OXException {
                 for (PoolAndSchema pool : dbContextToUserBash.keySet()) {
-                        if (dbContextToUserBash.get(pool).containsKey(20) && dbContextToUserBash.get(pool).get(20) != null) {
+                        if (dbContextToUserBash.get(pool).containsKey(I(20)) && dbContextToUserBash.get(pool).get(I(20)) != null) {
                         return createPotentialInfostoreReturn(1, 1, 1, 3, "users", 3);
                     }
                 }
@@ -319,7 +322,7 @@ public class CapabilityHandlerTest {
             @Override
             public Map<String, Integer> getFileCountInTimeframeMetrics(Map<PoolAndSchema, Map<Integer, List<Integer>>> dbContextToUserBash, Date start, Date end) throws SQLException, OXException {
                 for (PoolAndSchema pool : dbContextToUserBash.keySet()) {
-                        if (dbContextToUserBash.get(pool).containsKey(20) && dbContextToUserBash.get(pool).get(20) != null) {
+                        if (dbContextToUserBash.get(pool).containsKey(I(20)) && dbContextToUserBash.get(pool).get(I(20)) != null) {
                         return createPotentialInfostoreReturn(1, 1, 1, 3, null, 0);
                     }
                 }
@@ -329,7 +332,7 @@ public class CapabilityHandlerTest {
             @Override
             public Map<String, Integer> getExternalStorageMetrics(Map<PoolAndSchema, Map<Integer, List<Integer>>> dbContextToUserBash) throws SQLException, OXException {
                 for (PoolAndSchema pool : dbContextToUserBash.keySet()) {
-                        if (dbContextToUserBash.get(pool).containsKey(20) && dbContextToUserBash.get(pool).get(20) != null) {
+                        if (dbContextToUserBash.get(pool).containsKey(I(20)) && dbContextToUserBash.get(pool).get(I(20)) != null) {
                         return createPotentialInfostoreReturn(0, 0, 0, 0, null, 0);
                     }
                 }
@@ -342,21 +345,21 @@ public class CapabilityHandlerTest {
         PowerMockito.when(Services.getService(InfostoreInformationService.class)).thenReturn(informationService);
         ServerServiceRegistry serverServiceRegistry = PowerMockito.mock(ServerServiceRegistry.class);
         PowerMockito.when(ServerServiceRegistry.getInstance()).thenReturn(serverServiceRegistry);
-        
+
         ContextService contextService = PowerMockito.mock(ContextService.class);
         PowerMockito.when(serverServiceRegistry.getService(ContextService.class)).thenReturn(contextService);
-        
+
         Map<PoolAndSchema, List<Integer>> poolContextMap = new HashMap<>();
         PoolAndSchema poolAndSchema = new PoolAndSchema(4, "testSchema");
-        poolContextMap.put(poolAndSchema, Arrays.asList(15, 20));
+        poolContextMap.put(poolAndSchema, Arrays.asList(I(15), I(20)));
         PowerMockito.when(contextService.getSchemaAssociationsFor(ArgumentMatchers.anyList())).thenReturn(poolContextMap);
-        
+
         this.initReport("extended");
         initTenantMapForReport();
         addCapSToReport(report, CAPS1);
         addSecondCapSToReport();
         capabilityHandlerTest.finish(report);
-        validateDriveTotalAvgs(report.get(Report.TOTAL, Report.DRIVE_TOTAL, LinkedHashMap.class), 33l, 33l, 1l, 1l, 9l, 1l);
+        validateDriveTotalAvgs(report.get(Report.TOTAL, Report.DRIVE_TOTAL, LinkedHashMap.class), L(33l), L(33l), L(1l), L(1l), L(9l), L(1l));
     }
 
      @Test
@@ -385,14 +388,14 @@ public class CapabilityHandlerTest {
             sc.close();
             HashMap<String, Object> mergedData = (HashMap<String, Object>) JSONCoercion.parseAndCoerceToNative(content);
             // Have the merged .part file the correct content?
-            assertEquals("Merged total users are wrong", 70, mergedData.get(Report.TOTAL));
-            assertEquals("Merged context-users-max are wrong", 30, mergedData.get(Report.CONTEXT_USERS_MAX));
-            assertEquals("Merged context-users-min are wrong", 5, mergedData.get(Report.CONTEXT_USERS_MIN));
-            assertEquals("Merged context-users-avg are wrong", 5, mergedData.get(Report.CONTEXT_USERS_AVG));
+            assertEquals("Merged total users are wrong", I(70), mergedData.get(Report.TOTAL));
+            assertEquals("Merged context-users-max are wrong", I(30), mergedData.get(Report.CONTEXT_USERS_MAX));
+            assertEquals("Merged context-users-min are wrong", I(5), mergedData.get(Report.CONTEXT_USERS_MIN));
+            assertEquals("Merged context-users-avg are wrong", I(5), mergedData.get(Report.CONTEXT_USERS_AVG));
             // Are loaded Long-values also calculated correctly
-            assertEquals(100000000001l, mergedData.get(Report.ADMIN));
+            assertEquals(L(100000000001l), mergedData.get(Report.ADMIN));
             // Are client login informations also calculated correctly?
-            int appsuiteClients = ((HashMap<String, Integer>) mergedData.get("client-list")).get("open-xchange-appsuite");
+            int appsuiteClients = ((HashMap<String, Integer>) mergedData.get("client-list")).get("open-xchange-appsuite").intValue();
             assertEquals(2, appsuiteClients);
         } catch (FileNotFoundException e) {
             // TODO Auto-generated catch block
@@ -470,11 +473,11 @@ public class CapabilityHandlerTest {
             sc.close();
             HashMap<String, Object> mergedData = (HashMap<String, Object>) JSONCoercion.parseAndCoerceToNative(content);
             // Have the merged .part file the correct content?
-            assertEquals("Merged total users are wrong", 20, mergedData.get(Report.TOTAL));
-            assertEquals("Merged disabled users are wrong", 1, mergedData.get(Report.DISABLED));
+            assertEquals("Merged total users are wrong", I(20), mergedData.get(Report.TOTAL));
+            assertEquals("Merged disabled users are wrong", I(1), mergedData.get(Report.DISABLED));
             // Are loaded Long-values also calculated correctly
             // Are client login informations also calculated correctly?
-            int appsuiteClients = ((HashMap<String, Integer>) mergedData.get("client-list")).get("open-xchange-appsuite");
+            int appsuiteClients = ((HashMap<String, Integer>) mergedData.get("client-list")).get("open-xchange-appsuite").intValue();
             assertEquals(2, appsuiteClients);
         } catch (FileNotFoundException e) {
             // TODO Auto-generated catch block
@@ -512,7 +515,7 @@ public class CapabilityHandlerTest {
     }
 
     //-------------------Helpers-------------------
-    
+
     private void initWrongDataForLocks() {
         try {
             copyFileUsingStream(new File(reportStoringLocks.getStorageFolderPath() + "/filelock_test_wrong.init"), new File(reportStoringLocks.getStorageFolderPath() + "/" + reportStoringLocks.getUUID() + "_-853702361.part"));
@@ -595,7 +598,7 @@ public class CapabilityHandlerTest {
 
     private ContextReport initContextReport(Integer contextId) {
 
-        ContextImpl ctx = new ContextImpl(contextId);
+        ContextImpl ctx = new ContextImpl(contextId.intValue());
         ctx.setEnabled(false);
         ContextReport contextReport = new ContextReport(UUID.randomUUID().toString(), "default", ctx);
         contextReport.set(ContextReport.MACDETAIL_LISTS, CAPS1, CAPS1);
@@ -605,22 +608,22 @@ public class CapabilityHandlerTest {
         macdetail.put(CAPS1, new HashMap<String, Long>());
         macdetail.put(CAPS2, new HashMap<String, Long>());
         macdetail.put(CAPS3, new HashMap<String, Long>());
-        addValuesToMap(macdetail, CAPS1, Report.ADMIN, 1l);
-        addValuesToMap(macdetail, CAPS1, Report.TOTAL, 1l);
-        addValuesToMap(macdetail, CAPS2, Report.TOTAL, 5l);
-        addValuesToMap(macdetail, CAPS2, Report.GUESTS, 3l);
-        addValuesToMap(macdetail, CAPS2, Report.DISABLED, 2l);
-        addValuesToMap(macdetail, CAPS3, Report.TOTAL, 2l);
-        addValuesToMap(macdetail, CAPS3, Report.LINKS, 8l);
+        addValuesToMap(macdetail, CAPS1, Report.ADMIN, L(1l));
+        addValuesToMap(macdetail, CAPS1, Report.TOTAL, L(1l));
+        addValuesToMap(macdetail, CAPS2, Report.TOTAL, L(5l));
+        addValuesToMap(macdetail, CAPS2, Report.GUESTS, L(3l));
+        addValuesToMap(macdetail, CAPS2, Report.DISABLED, L(2l));
+        addValuesToMap(macdetail, CAPS3, Report.TOTAL, L(2l));
+        addValuesToMap(macdetail, CAPS3, Report.LINKS, L(8l));
 
-        addUserToCapS(contextReport, CAPS1, 1);
-        addUserToCapS(contextReport, CAPS2, 1);
-        addUserToCapS(contextReport, CAPS2, 2);
-        addUserToCapS(contextReport, CAPS2, 3);
-        addUserToCapS(contextReport, CAPS2, 4);
-        addUserToCapS(contextReport, CAPS2, 5);
-        addUserToCapS(contextReport, CAPS3, 1);
-        addUserToCapS(contextReport, CAPS3, 2);
+        addUserToCapS(contextReport, CAPS1, I(1));
+        addUserToCapS(contextReport, CAPS2, I(1));
+        addUserToCapS(contextReport, CAPS2, I(2));
+        addUserToCapS(contextReport, CAPS2, I(3));
+        addUserToCapS(contextReport, CAPS2, I(4));
+        addUserToCapS(contextReport, CAPS2, I(5));
+        addUserToCapS(contextReport, CAPS3, I(1));
+        addUserToCapS(contextReport, CAPS3, I(2));
         return contextReport;
     }
 
@@ -631,18 +634,18 @@ public class CapabilityHandlerTest {
     }
 
     private void initReportForStorage() {
-        reportStoring = new Report(REPORT_UUID, REPORT_TYPE, REPORT_TIME);
+        reportStoring = new Report(REPORT_UUID, REPORT_TYPE, REPORT_TIME.longValue());
         reportStoring.setStorageFolderPath(REPORT_PATH);
         HashMap<String, Object> singleCaps = initDefaultValuesForCapS();
-        singleCaps.put(Report.CONTEXT_USERS_MAX, 10l);
-        singleCaps.put(Report.CONTEXTS, 1l);
+        singleCaps.put(Report.CONTEXT_USERS_MAX, L(10l));
+        singleCaps.put(Report.CONTEXTS, L(1l));
         HashMap<String, Object> singleCaps2 = initDefaultValuesForCapS();
         HashMap<String, Object> singleCaps3 = initDefaultValuesForCapS();
         HashMap<String, Object> singleCaps4 = initDefaultValuesForCapS();
         ArrayList<HashMap<String, Object>> capabilitySets = new ArrayList<>();
 
         HashMap<String, Long> clientList = new HashMap<>();
-        clientList.put("open-xchange-appsuite", 1l);
+        clientList.put("open-xchange-appsuite", L(1l));
 
         singleCaps.put("client-list", clientList);
         singleCaps2.put("client-list", clientList);
@@ -655,7 +658,7 @@ public class CapabilityHandlerTest {
         capabilities.add("boxcom");
         capabilities.add("caldav");
         singleCaps.put("capabilities", capabilities);
-        singleCaps.put("total", 10l);
+        singleCaps.put("total", L(10l));
         capabilitySets.add(singleCaps);
 
         List<String> capabilities2 = new ArrayList<>();
@@ -663,40 +666,40 @@ public class CapabilityHandlerTest {
         capabilities2.add("autologin");
         capabilities2.add("boxcom");
         singleCaps2.put("capabilities", capabilities2);
-        singleCaps2.put("total", 10l);
+        singleCaps2.put("total", L(10l));
         capabilitySets.add(singleCaps2);
 
         List<String> capabilities3 = new ArrayList<>();
         capabilities3.add("active_sync");
         capabilities3.add("autologin");
         singleCaps3.put("capabilities", capabilities3);
-        singleCaps3.put("total", 10l);
+        singleCaps3.put("total", L(10l));
         capabilitySets.add(singleCaps3);
 
         List<String> capabilities4 = new ArrayList<>();
         capabilities4.add("active_sync");
         singleCaps4.put("capabilities", capabilities4);
-        singleCaps4.put("total", 60l);
-        singleCaps4.put("guests", 1l);
-        singleCaps4.put("admin", 1l);
-        singleCaps4.put("disabled", 1l);
-        singleCaps4.put("Context-users-max", 30l);
-        singleCaps4.put("Context-users-min", 5l);
-        singleCaps4.put("Context-users-avg", 20l);
-        singleCaps4.put("contexts", 3l);
+        singleCaps4.put("total", L(60l));
+        singleCaps4.put("guests", L(1l));
+        singleCaps4.put("admin", L(1l));
+        singleCaps4.put("disabled", L(1l));
+        singleCaps4.put("Context-users-max", L(30l));
+        singleCaps4.put("Context-users-min", L(5l));
+        singleCaps4.put("Context-users-avg", L(20l));
+        singleCaps4.put("contexts", L(3l));
 
         capabilitySets.add(singleCaps4);
         reportStoring.set(Report.MACDETAIL, Report.CAPABILITY_SETS, capabilitySets);
     }
 
     private void initReportForStorageWithLocks() {
-        reportStoringLocks = new Report(REPORT_UUID_LOCKS, REPORT_TYPE, REPORT_TIME);
+        reportStoringLocks = new Report(REPORT_UUID_LOCKS, REPORT_TYPE, REPORT_TIME.longValue());
         reportStoringLocks.setStorageFolderPath(REPORT_PATH);
         HashMap<String, Object> singleCaps3 = initDefaultValuesForCapS();
         ArrayList<HashMap<String, Object>> capabilitySets = new ArrayList<>();
 
         HashMap<String, Long> clientList = new HashMap<>();
-        clientList.put("open-xchange-appsuite", 1l);
+        clientList.put("open-xchange-appsuite", L(1l));
 
         singleCaps3.put("client-list", clientList);
 
@@ -704,13 +707,13 @@ public class CapabilityHandlerTest {
         capabilities3.add("active_sync");
         capabilities3.add("autologin");
         singleCaps3.put("capabilities", capabilities3);
-        singleCaps3.put("total", 10l);
-        singleCaps3.put("admin", 1l);
-        singleCaps3.put("disabled", 1l);
-        singleCaps3.put("Context-users-max", 10l);
-        singleCaps3.put("Context-users-min", 10l);
-        singleCaps3.put("Context-users-avg", 10l);
-        singleCaps3.put("contexts", 1l);
+        singleCaps3.put("total", L(10l));
+        singleCaps3.put("admin", L(1l));
+        singleCaps3.put("disabled", L(1l));
+        singleCaps3.put("Context-users-max", L(10l));
+        singleCaps3.put("Context-users-min", L(10l));
+        singleCaps3.put("Context-users-avg", L(10l));
+        singleCaps3.put("contexts", L(1l));
         capabilitySets.add(singleCaps3);
 
         reportStoringLocks.set(Report.MACDETAIL, Report.CAPABILITY_SETS, capabilitySets);
@@ -718,15 +721,15 @@ public class CapabilityHandlerTest {
 
     private HashMap<String, Object> initDefaultValuesForCapS() {
         HashMap<String, Object> capSMap = new HashMap<>();
-        capSMap.put(Report.ADMIN, 0l);
-        capSMap.put(Report.DISABLED, 0l);
-        capSMap.put(Report.TOTAL, 0l);
-        capSMap.put(Report.GUESTS, 0l);
-        capSMap.put(Report.LINKS, 0l);
-        capSMap.put(Report.CONTEXTS, 0l);
-        capSMap.put(Report.CONTEXT_USERS_MAX, 0l);
-        capSMap.put(Report.CONTEXT_USERS_MIN, 0l);
-        capSMap.put(Report.CONTEXT_USERS_AVG, 0l);
+        capSMap.put(Report.ADMIN, L(0l));
+        capSMap.put(Report.DISABLED, L(0l));
+        capSMap.put(Report.TOTAL, L(0l));
+        capSMap.put(Report.GUESTS, L(0l));
+        capSMap.put(Report.LINKS, L(0l));
+        capSMap.put(Report.CONTEXTS, L(0l));
+        capSMap.put(Report.CONTEXT_USERS_MAX, L(0l));
+        capSMap.put(Report.CONTEXT_USERS_MIN, L(0l));
+        capSMap.put(Report.CONTEXT_USERS_AVG, L(0l));
         return capSMap;
     }
 
@@ -739,19 +742,19 @@ public class CapabilityHandlerTest {
         Map<String, Object> macdetail = report.getNamespace(Report.MACDETAIL);
         macdetail.put(CAPS2, new HashMap<String, Object>());
         ArrayList<Integer> userList = new ArrayList<>();
-        userList.add(6);
-        userList.add(7);
-        userList.add(8);
-        addValuesToTenantMap(CAPS2, 20, userList);
+        userList.add(I(6));
+        userList.add(I(7));
+        userList.add(I(8));
+        addValuesToTenantMap(CAPS2, I(20), userList);
 
     }
 
     private void initTenantMapForReport() {
         ArrayList<Integer> userList = new ArrayList<>();
-        userList.add(2);
-        userList.add(3);
-        userList.add(4);
-        addValuesToTenantMap(CAPS1, 15, userList);
+        userList.add(I(2));
+        userList.add(I(3));
+        userList.add(I(4));
+        addValuesToTenantMap(CAPS1, I(15), userList);
     }
 
     private void addValuesToTenantMap(String capS, Integer context, ArrayList<Integer> users) {
@@ -767,21 +770,21 @@ public class CapabilityHandlerTest {
         }
     }
 
-    private Map<String, Integer> createPotentialInfostoreReturn(int min, int max, int avg, int total, String counterName, int counterValue) {
+    Map<String, Integer> createPotentialInfostoreReturn(int min, int max, int avg, int total, String counterName, int counterValue) {
         HashMap<String, Integer> returnMap = new HashMap<>();
-        returnMap.put("min", min);
-        returnMap.put("max", max);
-        returnMap.put("avg", avg);
-        returnMap.put("total", total);
+        returnMap.put("min", I(min));
+        returnMap.put("max", I(max));
+        returnMap.put("avg", I(avg));
+        returnMap.put("total", I(total));
         if (counterName != null) {
-            returnMap.put(counterName, counterValue);
+            returnMap.put(counterName, I(counterValue));
         }
         return returnMap;
     }
 
     private UserReport initUserReport(Integer userID, boolean isGuest, boolean isAdmin, boolean isDisabled, ContextReport contextReport, String userCapS) {
         UserImpl user = new UserImpl();
-        user.setId(userID);
+        user.setId(userID.intValue());
         user.setMailEnabled(!isDisabled);
         UserReport userReport = new UserReport(UUID.randomUUID().toString(), "default", contextReport.getContext(), user, contextReport);
         if (isGuest) {
@@ -789,13 +792,13 @@ public class CapabilityHandlerTest {
             user.setMail("abc@sonstwo.de");
         }
         if (isAdmin) {
-            ((ContextImpl) contextReport.getContext()).setMailadmin(userID);
+            ((ContextImpl) contextReport.getContext()).setMailadmin(userID.intValue());
         }
-        userReport.set(Report.MACDETAIL, Report.MAILADMIN, isAdmin);
-        userReport.set(Report.MACDETAIL, Report.DISABLED, isDisabled);
+        userReport.set(Report.MACDETAIL, Report.MAILADMIN, B(isAdmin));
+        userReport.set(Report.MACDETAIL, Report.DISABLED, B(isDisabled));
         HashMap<String, Long> userLogins = new HashMap<>();
-        userLogins.put("open-xchange-appsuite", 1453879860000L);
-        userLogins.put("com.openexchange.mobileapp", 1453879860000L);
+        userLogins.put("open-xchange-appsuite", L(1453879860000L));
+        userLogins.put("com.openexchange.mobileapp", L(1453879860000L));
         userReport.set(Report.MACDETAIL, Report.USER_LOGINS, userLogins);
         ArrayList<String> capSList = new ArrayList<>();
         capSList.add("boxcom");
@@ -808,10 +811,10 @@ public class CapabilityHandlerTest {
         LinkedHashMap<Integer, ArrayList<Integer>> capSContextMap = contextReport.getCapSToContext().get(capS);
         if (capSContextMap == null) {
             capSContextMap = new LinkedHashMap<Integer, ArrayList<Integer>>();
-            capSContextMap.put(contextReport.getContext().getContextId(), new ArrayList<Integer>());
+            capSContextMap.put(I(contextReport.getContext().getContextId()), new ArrayList<Integer>());
             contextReport.getCapSToContext().put(capS, capSContextMap);
         }
-        capSContextMap.get(contextReport.getContext().getContextId()).add(userID);
+        capSContextMap.get(I(contextReport.getContext().getContextId())).add(userID);
     }
 
     private void addValuesToMap(Map<String, Object> macdetail, String macDetailKey, String insertKey, Long insertValue) {

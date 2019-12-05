@@ -68,11 +68,6 @@ public class ReorderParser extends AbstractAJAXParser<ReorderResponse> {
         super(failOnError);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.framework.AbstractAJAXParser#createResponse(com.openexchange.ajax.container.Response)
-     */
     @Override
     protected ReorderResponse createResponse(Response response) throws JSONException {
         return new ReorderResponse(response);

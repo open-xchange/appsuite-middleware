@@ -52,9 +52,12 @@ package com.openexchange.imap.osgi;
 import java.io.ByteArrayInputStream;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.activation.MailcapCommandMap;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.service.event.EventConstants;
@@ -119,6 +122,19 @@ public final class IMAPActivator extends HousekeepingActivator {
 
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(IMAPActivator.class);
 
+    private static final AtomicReference<BundleContext> CONTEXT_REFERENCE = new AtomicReference<>(null);
+
+    /**
+     * Gets the optional bundle context.
+     *
+     * @return The optional bundle context
+     */
+    public static Optional<BundleContext> getOptionalBundleContext() {
+        return Optional.ofNullable(CONTEXT_REFERENCE.get());
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
     private WhiteboardSecretService secretService;
 
     /**
@@ -140,6 +156,7 @@ public final class IMAPActivator extends HousekeepingActivator {
     @Override
     public void startBundle() throws Exception {
         try {
+            CONTEXT_REFERENCE.set(context);
             Services.setServiceLookup(this);
             Config.LoggerProvider = LoggerProvider.DISABLED;
             IMAPStoreCache.initInstance();
@@ -385,11 +402,12 @@ public final class IMAPActivator extends HousekeepingActivator {
             ConversationCache.releaseInstance();
             IMAPStoreCache.shutDownInstance();
             Services.setServiceLookup(null);
+            CONTEXT_REFERENCE.set(null);
             if (secretService != null) {
                 secretService.close();
                 secretService = null;
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("", e);
             throw e;
         }

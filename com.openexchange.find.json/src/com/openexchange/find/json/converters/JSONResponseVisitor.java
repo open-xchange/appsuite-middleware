@@ -70,6 +70,7 @@ import com.openexchange.find.json.QueryResult;
 import com.openexchange.find.json.osgi.ResultConverterRegistry;
 import com.openexchange.find.mail.MailDocument;
 import com.openexchange.find.tasks.TasksDocument;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -147,11 +148,17 @@ public class JSONResponseVisitor implements DocumentVisitor {
             } else {
                 mailFieldWriters = new ArrayList<MailFieldWriter>(columns.length);
                 for (String c : columns) {
-                    try {
-                        int ic = Integer.parseInt(c);
-                        mailFieldWriters.add(MessageWriter.getMailFieldWriter(MailListField.getField(ic)));
-                    } catch (NumberFormatException e) {
-                        mailFieldWriters.add(MessageWriter.getHeaderFieldWriter(c));
+                    if (Strings.isNotEmpty(c)) {
+                        MailFieldWriter mailFieldWriter;
+                        int field = Strings.getUnsignedInt(c.trim());
+                        if (field > 0) {
+                            mailFieldWriter = MessageWriter.getMailFieldWriter(MailListField.getField(field));
+                        } else {
+                            mailFieldWriter = MessageWriter.getHeaderFieldWriter(c.trim());
+                        }
+                        if (mailFieldWriter != null) {
+                            mailFieldWriters.add(mailFieldWriter);
+                        }
                     }
                 }
             }

@@ -121,7 +121,7 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
         if (CacheService.class.equals(clazz)) {
             try {
                 initCacheFolderStorage();
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.error("", e);
                 unregisterCacheFolderStorage();
             }
@@ -134,7 +134,7 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
         if (CacheService.class.equals(clazz)) {
             try {
                 disposeCacheFolderStorage();
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.error("", e);
                 unregisterCacheFolderStorage();
             }
@@ -171,7 +171,7 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
             for (final ServiceTracker<?,?> serviceTracker : serviceTrackers) {
                 serviceTracker.open();
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("", e);
             throw e;
         }
@@ -194,7 +194,7 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
              * Clear service registry
              */
             getServiceRegistry().clearRegistry();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("", e);
             throw e;
         }
@@ -240,7 +240,7 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
                             public Void call() throws Exception {
                                 try {
                                     doHandleEvent(event);
-                                } catch (final Exception e) {
+                                } catch (Exception e) {
                                     LOG.warn("Handling event {} failed.", event.getTopic(), e);
                                 }
                                 return null;
@@ -297,7 +297,7 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
                             public Void call() throws Exception {
                                 try {
                                     doHandleEvent(cache, event);
-                                } catch (final Exception e) {
+                                } catch (Exception e) {
                                     LOG.warn("Handling event {} failed.", event.getTopic(), e);
                                 }
                                 return null;
@@ -328,7 +328,7 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
                         } else {
                             tmp.removeFromCache(folderID, FolderStorage.REAL_TREE_ID, false, session.getUser(), session.getContext(), session);
                         }
-                    } catch (final OXException e) {
+                    } catch (OXException e) {
                         LOG.error("", e);
                     }
                 }
@@ -351,7 +351,7 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
                 if (matcher.matches()) {
                     fid = DEFAULT + matcher.group(1);
                 }
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 LOG.warn("Couldn't sanitize folder identifier: {}. Returning unchanged.", id, e);
                 return id;
             }

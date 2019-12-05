@@ -64,7 +64,7 @@ import com.openexchange.sessiond.rmi.SessiondRMIService;
  */
 public final class CloseSessionsCLT extends AbstractRmiCLI<Void> {
 
-    private static final String SYNTAX = "closesessions -c <contextId> [-u <userId>] [-g] -A <masterAdmin | contextAdmin> -P <masterAdminPassword | contextAdminPassword> [-p <RMI-Port>] [-s <RMI-Server] | [-h]";
+    private static final String SYNTAX = "closesessions -c <contextId> [-u <userId>] [-g] -A <masterAdmin | contextAdmin> -P <masterAdminPassword | contextAdminPassword> [-p <RMI-Port>] [-s <RMI-Server>] | [-h]";
 
     private int contextId;
     private int userId;
@@ -72,7 +72,7 @@ public final class CloseSessionsCLT extends AbstractRmiCLI<Void> {
 
     /**
      * Entry point
-     * 
+     *
      * @param args the command line arguments
      */
     public static void main(String[] args) {
@@ -111,8 +111,8 @@ public final class CloseSessionsCLT extends AbstractRmiCLI<Void> {
     }
 
     @Override
-    protected boolean requiresAdministrativePermission() {
-        return true;
+    protected Boolean requiresAdministrativePermission() {
+        return Boolean.TRUE;
     }
 
     @Override
@@ -127,7 +127,7 @@ public final class CloseSessionsCLT extends AbstractRmiCLI<Void> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.cli.AbstractRmiCLI#administrativeAuth(java.lang.String, java.lang.String, org.apache.commons.cli.CommandLine, com.openexchange.auth.rmi.RemoteAuthenticator)
      */
     @Override
@@ -137,7 +137,7 @@ public final class CloseSessionsCLT extends AbstractRmiCLI<Void> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.cli.AbstractRmiCLI#invoke(org.apache.commons.cli.Options, org.apache.commons.cli.CommandLine, java.lang.String)
      */
     @Override

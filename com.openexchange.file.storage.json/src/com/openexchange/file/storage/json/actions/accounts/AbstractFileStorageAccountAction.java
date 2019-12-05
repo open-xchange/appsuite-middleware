@@ -85,7 +85,7 @@ public abstract class AbstractFileStorageAccountAction implements AJAXActionServ
     public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
         try {
             return doIt(requestData, session);
-        } catch (final JSONException x) {
+        } catch (JSONException x) {
             throw FileStorageExceptionCodes.JSON_ERROR.create(x,x.toString());
         }
     }

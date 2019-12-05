@@ -1,0 +1,12 @@
+feature_name: Hostname (Config Cascade)
+properties:
+    - key: com.openexchange.hostname
+      description: |
+        Configures the hostname through the config cascade.
+      defaultValue: 
+      version: 7.0.1
+      reloadable: true
+      configcascadeAware: true
+      file: hostnameconfigcascade.properties
+      packageName: open-xchange-hostname-config-cascade
+      tags: ["Hosting", "Notification"]

@@ -55,9 +55,9 @@ import org.osgi.framework.BundleActivator;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
+import com.openexchange.gmail.send.GmailSendProvider;
 import com.openexchange.gmail.send.ListenerChain;
 import com.openexchange.gmail.send.groupware.ReplaceSMTPTransportAccountsWithGmailSend;
-import com.openexchange.gmail.send.GmailSendProvider;
 import com.openexchange.gmail.send.oauth.GmailSendOAuthAccountAssociationProvider;
 import com.openexchange.gmail.send.services.Services;
 import com.openexchange.groupware.notify.hostname.HostnameService;
@@ -76,6 +76,7 @@ import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.association.spi.OAuthAccountAssociationProvider;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
+import com.openexchange.regional.RegionalSettingsService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.user.UserService;
 
@@ -98,7 +99,7 @@ public final class GmailSendActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { ConfigurationService.class, MailAccountStorageService.class, ConfigViewFactory.class, ThreadPoolService.class, ContextService.class, UserService.class,
-            SSLSocketFactoryProvider.class, SSLConfigurationService.class, UserAwareSSLConfigurationService.class };
+            SSLSocketFactoryProvider.class, SSLConfigurationService.class, UserAwareSSLConfigurationService.class, RegionalSettingsService.class };
     }
 
     @Override
@@ -138,7 +139,7 @@ public final class GmailSendActivator extends HousekeepingActivator {
             ListenerChain.releaseInstance();
             super.stopBundle();
             Services.setServiceLookup(null);
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             LOG.error("", t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);
         }

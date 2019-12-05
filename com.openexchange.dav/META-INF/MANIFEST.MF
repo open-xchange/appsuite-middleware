@@ -2,17 +2,19 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Common *DAV logic
 Bundle-SymbolicName: com.openexchange.dav
-Bundle-Version: 7.10.2
+Bundle-Version: 7.10.3
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.google.common.annotations,
  com.google.common.base,
  com.google.common.cache,
+ com.google.common.collect,
  com.google.common.io,
  com.openexchange.ajax,
  com.openexchange.ajax.container,
  com.openexchange.ajax.fileholder,
  com.openexchange.ajax.requesthandler.oauth,
+ com.openexchange.annotation,
  com.openexchange.authentication,
  com.openexchange.chronos,
  com.openexchange.chronos.common,

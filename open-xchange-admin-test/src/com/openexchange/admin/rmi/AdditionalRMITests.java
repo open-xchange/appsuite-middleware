@@ -96,7 +96,7 @@ public class AdditionalRMITests extends AbstractRMITest {
 
     private void setupContexts() throws Exception {
         context = getContextManager().create(ContextFactory.createContext(1000L), contextAdminCredentials);
-        
+
         User user = UserFactory.createUser("thorben.betten", "secret", myDisplayName, "Thorben", "Betten", "oxuser@example.com");
         user.setImapServer("example.com");
         user.setImapLogin("oxuser");
@@ -410,16 +410,16 @@ public class AdditionalRMITests extends AbstractRMITest {
         User user = queriedUsers[0];
 
         UserModuleAccess access = getUserManager().getModuleAccess(context, user, contextAdminCredentials);
-        assertEquals("Calendar access should be granted by default", true, access.getCalendar());
+        assertEquals("Calendar access should be granted by default", Boolean.TRUE, access.getCalendar() ? Boolean.TRUE : Boolean.FALSE);
         access.setCalendar(false);
         getUserManager().changeModuleAccess(context, user, access, contextAdminCredentials);
         access = getUserManager().getModuleAccess(context, user, contextAdminCredentials);
-        assertEquals("Calendar access should be turned off now", false, access.getCalendar());
+        assertEquals("Calendar access should be turned off now", Boolean.FALSE, access.getCalendar() ? Boolean.TRUE : Boolean.FALSE);
         // reset access and check again
         access.setCalendar(true);
         getUserManager().changeModuleAccess(context, user, access, contextAdminCredentials);
         access = getUserManager().getModuleAccess(context, user, contextAdminCredentials);
-        assertEquals("Calendar access should be granted again", true, access.getCalendar());
+        assertEquals("Calendar access should be granted again", Boolean.TRUE, access.getCalendar() ? Boolean.TRUE : Boolean.FALSE);
     }
 
     @Test

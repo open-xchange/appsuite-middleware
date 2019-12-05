@@ -165,7 +165,7 @@ public class ICalTaskImporter extends AbstractICalImporter {
                             .getObjectID()));
                     importResult.setDate(task.getLastModified());
                     importResult.setFolder(String.valueOf(taskFolderId));
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     LOG.error("", e);
                     importResult.setException(e);
                 }

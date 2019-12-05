@@ -98,7 +98,7 @@ public class AddressHeaderParser implements MessagingHeaderParser {
     public void parseAndAdd(final Map<String, Collection<MessagingHeader>> headers, final String key, final Object value) throws JSONException, OXException {
         final ArrayList<MessagingHeader> list = new ArrayList<MessagingHeader>();
 
-        if(JSONArray.class.isInstance(value)) {
+        if (JSONArray.class.isInstance(value)) {
             final JSONArray arr = (JSONArray) value;
             for(int i = 0, size = arr.length(); i < size; i++) {
                 parse(key, arr.get(i), list);
@@ -111,7 +111,7 @@ public class AddressHeaderParser implements MessagingHeaderParser {
     }
 
     private void parse(final String key, final Object value, final ArrayList<MessagingHeader> list) throws OXException {
-        if(JSONObject.class.isInstance(value)) {
+        if (JSONObject.class.isInstance(value)) {
             list.add(parseObject(key, (JSONObject) value));
         } else if (String.class.isInstance(value)) {
             list.add(parseString(key, (String) value));

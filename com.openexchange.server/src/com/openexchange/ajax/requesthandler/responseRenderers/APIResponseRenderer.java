@@ -70,10 +70,10 @@ import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.ajax.writer.ResponseWriter;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
 import com.openexchange.java.UnsynchronizedStringWriter;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 /**
  * {@link APIResponseRenderer}
@@ -92,6 +92,8 @@ public class APIResponseRenderer implements ResponseRenderer {
     private static final String CALLBACK = "callback";
 
     private static final String PLAIN_JSON = AJAXServlet.PARAM_PLAIN_JSON;
+
+    private static final String FORCE_JSON = "force_json_response";
 
     private static final String INCLUDE_STACK_TRACE_ON_ERROR = com.openexchange.ajax.AJAXServlet.PARAMETER_INCLUDE_STACK_TRACE_ON_ERROR;
 
@@ -119,7 +121,12 @@ public class APIResponseRenderer implements ResponseRenderer {
         Boolean plainJson = (Boolean) result.getParameter(PLAIN_JSON);
         if (null == plainJson) {
             boolean b = AJAXRequestDataTools.parseBoolParameter(PLAIN_JSON, request);
-            plainJson = b ? Boolean.TRUE : null;
+            if (b) {
+                plainJson = Boolean.TRUE;
+            } else {
+                b = AJAXRequestDataTools.parseBoolParameter(FORCE_JSON, request);
+                plainJson = b ? Boolean.TRUE : null;
+            }
         }
 
         Response response = (Response) result.getResultObject();

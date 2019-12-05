@@ -91,7 +91,7 @@ public class SMSMultifactorDevice extends AbstractMultifactorDevice {
      * @return The tail of the number with the given length, or null if the number is empty or not long enough
      */
     private String createPhoneNumberTail(String phoneNumber, int tailLength) {
-       if(Strings.isNotEmpty(phoneNumber) && phoneNumber.length() >= tailLength) {
+       if (Strings.isNotEmpty(phoneNumber) && phoneNumber.length() >= tailLength) {
          return phoneNumber.substring(phoneNumber.length() - tailLength);
        }
        return null;

@@ -105,9 +105,9 @@ public final class ContactAdjustLastModifiedForChangedSenderAddress extends Upda
 
             con.commit();
             rollback = 2;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
             if (rollback > 0) {
@@ -160,7 +160,7 @@ public final class ContactAdjustLastModifiedForChangedSenderAddress extends Upda
                                     pStmt.setInt(3, id);
                                     pStmt.addBatch();
                                     return true;
-                                } catch (final SQLException e) {
+                                } catch (SQLException e) {
                                     exceptionReference.set(e);
                                     return false;
                                 }
@@ -172,7 +172,7 @@ public final class ContactAdjustLastModifiedForChangedSenderAddress extends Upda
                         }
                         innerStmt.executeBatch();
                         return true;
-                    } catch (final SQLException e) {
+                    } catch (SQLException e) {
                         exceptionReference.set(e);
                         return false;
                     } finally {

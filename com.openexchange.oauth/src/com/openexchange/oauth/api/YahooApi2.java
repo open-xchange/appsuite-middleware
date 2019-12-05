@@ -81,21 +81,11 @@ public class YahooApi2 extends DefaultApi20 {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.scribe.builder.api.DefaultApi20#getAccessTokenEndpoint()
-     */
     @Override
     public String getAccessTokenEndpoint() {
         return "https://api.login.yahoo.com/oauth2/get_token";
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.scribe.builder.api.DefaultApi20#getAuthorizationUrl(org.scribe.model.OAuthConfig)
-     */
     @Override
     public String getAuthorizationUrl(OAuthConfig config) {
         if (config.hasScope()) {
@@ -105,31 +95,16 @@ public class YahooApi2 extends DefaultApi20 {
         return String.format(AUTHORIZE_URL, config.getApiKey(), OAuthEncoder.encode(config.getCallback()));
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.scribe.builder.api.DefaultApi20#createService(org.scribe.model.OAuthConfig)
-     */
     @Override
     public OAuthService createService(OAuthConfig config) {
         return new YahooOAuth2Service(this, config);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.scribe.builder.api.DefaultApi20#getAccessTokenVerb()
-     */
     @Override
     public Verb getAccessTokenVerb() {
         return Verb.POST;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.scribe.builder.api.DefaultApi20#getAccessTokenExtractor()
-     */
     @Override
     public AccessTokenExtractor getAccessTokenExtractor() {
         // Yahoo returns a JSONObject thus we need the JsonTokenExtractor to extract the 'access_token'
@@ -156,11 +131,6 @@ public class YahooApi2 extends DefaultApi20 {
             this.config = config;
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see org.scribe.oauth.OAuth20ServiceImpl#getAccessToken(org.scribe.model.Token, org.scribe.model.Verifier)
-         */
         @Override
         public Token getAccessToken(Token requestToken, Verifier verifier) {
             OAuthRequest request = new OAuthRequest(api.getAccessTokenVerb(), api.getAccessTokenEndpoint());

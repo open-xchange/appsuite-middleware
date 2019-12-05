@@ -90,6 +90,7 @@ import java.util.TreeSet;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
+import com.openexchange.chronos.CalendarObjectResource;
 import com.openexchange.chronos.CalendarStrings;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
@@ -98,10 +99,13 @@ import com.openexchange.chronos.DelegatingEvent;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Organizer;
+import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DataAwareRecurrenceId;
+import com.openexchange.chronos.common.DefaultCalendarObjectResource;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
+import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.osgi.Services;
@@ -112,7 +116,10 @@ import com.openexchange.chronos.service.CalendarConfig;
 import com.openexchange.chronos.service.CalendarEvent;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.EntityResolver;
+import com.openexchange.chronos.service.EventUpdate;
+import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.service.SimpleCollectionUpdate;
 import com.openexchange.chronos.storage.CalendarStorage;
@@ -124,7 +131,6 @@ import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.i18n.tools.StringHelper;
@@ -140,6 +146,7 @@ import com.openexchange.search.internal.operands.ColumnFieldOperand;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 /**
@@ -163,6 +170,12 @@ public class Utils {
         EventField.ID, EventField.TIMESTAMP, EventField.MODIFIED_BY, EventField.FOLDER_ID, EventField.SERIES_ID,
         EventField.RECURRENCE_RULE, EventField.SEQUENCE, EventField.START_DATE, EventField.TRANSP
     };
+
+    /**
+     * Attendee fields that, when modified, indicate that a <i>reply</i> of the associated calendar object resource is assumed, usually
+     * leading to appropriate notifications and scheduling messages being sent out to the organizer.
+     */
+    private static final AttendeeField[] REPLY_FIELDS = { AttendeeField.PARTSTAT, AttendeeField.COMMENT };
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Utils.class);
 
@@ -770,6 +783,112 @@ public class Utils {
     }
 
     /**
+     * Initializes a {@link DelegatingEvent} that overrides the participation status of the attendee matching a specific calendar user.
+     * 
+     * @param event The event to override the participation status in
+     * @param calendarUser The calendar user to override the participation status for
+     * @param partStat The participation status to indicate for the matching attendee
+     * @return A delegating event that overrides the participation status accordingly
+     */
+    public static Event overridePartStat(Event event, CalendarUser calendarUser, ParticipationStatus partStat) {
+        return new DelegatingEvent(event) {
+
+            @Override
+            public List<Attendee> getAttendees() {
+                List<Attendee> attendees = super.getAttendees();
+                if (null != attendees && 0 < attendees.size()) {
+                    List<Attendee> modifiedAttendees = new ArrayList<Attendee>(attendees.size());
+                    for (Attendee attendee : attendees) {
+                        if (matches(calendarUser, attendee)) {
+                            try {
+                                attendee = AttendeeMapper.getInstance().copy(attendee, null, (AttendeeField[]) null);
+                            } catch (OXException e) {
+                                org.slf4j.LoggerFactory.getLogger(Utils.class).warn("Unexpected error copying attendee data", e);
+                            }
+                            attendee.setPartStat(partStat);
+                        }
+                        modifiedAttendees.add(attendee);
+                    }
+                }
+                return attendees;
+            }
+        };
+    }
+
+    /**
+     * Initializes a calendar object resource based on {@link DelegatingEvent}s that override the participation status of the attendee
+     * matching a specific calendar user.
+     * 
+     * @param resource The resource to override the participation status in
+     * @param calendarUser The calendar user to override the participation status for
+     * @param partStat The participation status to indicate for the matching attendee
+     * @return A new calendar object resource that overrides the participation status accordingly
+     */
+    public static CalendarObjectResource overridePartStat(CalendarObjectResource resource, CalendarUser calendarUser, ParticipationStatus partStat) {
+        List<Event> overriddenEvents = new ArrayList<Event>();
+        for (Event event : resource.getEvents()) {
+            overriddenEvents.add(overridePartStat(event, calendarUser, partStat));
+        }
+        return new DefaultCalendarObjectResource(overriddenEvents);
+    }
+
+    /**
+     * Gets a valued indicating whether changed properties in an updated attendee represents a modification that needs to be reported as
+     * <i>reply</i> to the of a group scheduled event organizer or not.
+     * 
+     * @param originalAttendee The original attendee
+     * @param updatedAttendee The updated attendee
+     * @return <code>true</code> if the changed properties represent a reply, <code>false</code>, otherwise
+     * @see <a href="https://tools.ietf.org/html/rfc6638#section-3.2.2.3">RFC 6638, section 3.2.2.3</a>
+     */
+    public static boolean isReply(Attendee originalAttendee, Attendee updatedAttendee) throws OXException {
+        if (null == originalAttendee) {
+            return false;
+        }
+        if (null == updatedAttendee) {
+            return true;
+        }
+        return false == AttendeeMapper.getInstance().get(AttendeeField.PARTSTAT).equals(originalAttendee, updatedAttendee) ||
+            false == AttendeeMapper.getInstance().get(AttendeeField.COMMENT).equals(originalAttendee, updatedAttendee);
+    }
+
+    /**
+     * Gets a value indicating whether the applied changes represent an attendee reply of a specific calendar user for the associated
+     * calendar object resource or not, depending on the modified attendee fields.
+     * 
+     * @return <code>true</code> if the underlying calendar resource is replied to along with the update, <code>false</code>, otherwise
+     */
+    public static boolean isReply(CollectionUpdate<Attendee, AttendeeField> attendeeUpdates, CalendarUser calendarUser) {
+        for (ItemUpdate<Attendee, AttendeeField> itemUpdate : attendeeUpdates.getUpdatedItems()) {
+            if (matches(itemUpdate.getOriginal(), calendarUser)) {
+                return itemUpdate.containsAnyChangeOf(REPLY_FIELDS);
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Extracts those event updates that represent a <i>reply</i> scheduling operation from a specific calendar user's point of view.
+     * 
+     * @param eventUpdates The event updates to extract the replies from
+     * @param calendarUser The calendar user to extract the replies for
+     * @return The event updates representing <i>reply</i> scheduling operations, or an empty list if there are none
+     * @see #isReply(CollectionUpdate, CalendarUser)
+     */
+    public static List<EventUpdate> extractReplies(List<EventUpdate> eventUpdates, CalendarUser calendarUser) {
+        if (null == eventUpdates || eventUpdates.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<EventUpdate> replyEventUpdates = new ArrayList<EventUpdate>(eventUpdates);
+        for (Iterator<EventUpdate> iterator = replyEventUpdates.iterator(); iterator.hasNext();) {
+            if (false == isReply(iterator.next().getAttendeeUpdates(), calendarUser)) {
+                iterator.remove();
+            }
+        }
+        return replyEventUpdates;
+    }
+
+    /**
      * Applies <i>userized</i> versions of change- and delete-exception dates in the series master event based on the user's actual
      * attendance.
      *
@@ -822,7 +941,7 @@ public class Utils {
      * @return The passed event reference, with possibly adjusted exception dates
      * @see <a href="https://tools.ietf.org/html/rfc6638#section-3.2.6">RFC 6638, section 3.2.6</a>
      */
-    private static Event applyExceptionDates(Event seriesMaster, SortedSet<RecurrenceId> attendedChangeExceptionDates) {
+    public static Event applyExceptionDates(Event seriesMaster, SortedSet<RecurrenceId> attendedChangeExceptionDates) {
         /*
          * check which change exceptions exist where the user is attending
          */

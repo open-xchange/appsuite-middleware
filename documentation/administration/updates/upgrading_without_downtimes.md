@@ -1,10 +1,10 @@
 ---
 title: Upgrading Without Downtimes
-icon: fa-level-up
+icon: fas fa-level-up-alt
 tags: Administration, Upgrade, Database
 ---
 
-Starting with 7.10.0, it is possible to upgrade directly to to any of its successor future releases without having any downtimes. This guide is mainly focused on sites with multiple OX nodes and multiple database schemata 
+Starting with 7.10.0, it is possible to upgrade directly to any of its successor future releases without having any downtimes. This guide is mainly focused on sites with multiple OX nodes and multiple database schemata 
 hosting thousands, if not millions, of contexts; sites which cannot afford or do not want to have any downtimes during an upgrade phase. 
 Note that in this document the words "*upgrade*" / "*update*" as well as "*server*" / "*node*" will be used interchangeably.
 
@@ -19,7 +19,6 @@ correctly, at least not without the extra component and extra configuration we d
 To overcome this situation and minimise the downtimes, we have come up with the idea of upgrading one database schema at a time, while keeping the rest of the schemata intact and subsequently the cluster with the old version operational. 
 In order to have no downtimes on the cluster and simulate the multi-version support, an extra component is needed, that is a secondary load balancer. The use of that component and its place in the architecture is explained below. 
 Also, starting with 7.10.0 a new property was introduced for the migration/upgrade purpose. The value of that new property is a URL which points to the secondary load balancer. 
-With that being said please note that we do **NOT** support multi-version setups and operations.
 
 Now, in a nutshell, the upgrade process consists out of the following steps. The initial step is to set the value of the migration property to all nodes with the old version in the cluster. The purpose of that URL is to redirect users 
 to the correct node (see [Q and A](#q-and-a) section). Then, one node is taken out of the main load balancer and upgraded as [usual](http://oxpedia.org/wiki/index.php?title=Running_a_cluster#Updating_a_Cluster). 
@@ -60,7 +59,7 @@ Now that everything is set, you can perform the upgrade to the future release x.
 [install](http://oxpedia.org/wiki/index.php?title=AppSuite:Main_Page_AppSuite#quickinstall)/[update](http://oxpedia.org/wiki/index.php?title=AppSuite:UpdatingOXPackages) documentation.
 
 To avoid any Hazelcast incompatibility issues that future releases might have with their predecessors, make sure that you have [configured](http://oxpedia.org/wiki/index.php?title=AppSuite:Running_a_cluster#Configuration) 
-both versions, 7.10.0 and it's future successor to form different Hazelcast clusters.
+both versions, 7.10.0 and its future successor to form different Hazelcast clusters.
 
 After completing step 2 the setup will look as follows:
 
@@ -74,7 +73,7 @@ From a working 7.10.0 node register the newly upgraded x.y.z node.
 registerserver -A oxadminmaster -P secret -n oxserver-xyz
 ```
 
-Make a note of the new server identifier as it will be used later on to point all contexts that reside with in the schema that is going to be upgraded to the new x.y.z node. Also ensure that the name of the newly registered x.y.z server is set 
+Make a note of the new server identifier as it will be used later on to point all contexts that reside within the schema that is going to be upgraded to the new x.y.z node. Also ensure that the name of the newly registered x.y.z server is set 
 via the `SERVER_NAME` property in the `system.properties`.
 
 ## Step 4
@@ -98,7 +97,7 @@ be temporary disabled for the upgrade phase.
 
 ## Step 5
 
-Point all contexts, that reside with in the candidate schema that is to be updated, to the x.y.z node by using the command line tool ```changeserver``` (also from a working 7.10.0 node):
+Point all contexts, that reside within the candidate schema that is to be updated, to the x.y.z node by using the command line tool ```changeserver``` (also from a working 7.10.0 node):
 
 ```bash
 changeserver -A oxadminmaster -P secret -s 8 -m oxdatabase_5

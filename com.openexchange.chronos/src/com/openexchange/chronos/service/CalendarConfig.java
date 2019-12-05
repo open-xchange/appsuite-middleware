@@ -105,6 +105,77 @@ public interface CalendarConfig {
     Available[] getAvailability(int userId) throws OXException;
 
     /**
+     * Gets a value indicating whether notifications for newly created / scheduled events are enabled or not.
+     * <p/>
+     * This setting is either used for internal user attendees when the operation is performed by the organizer, or for the organizer or
+     * calendar owner in case the operation is performed by another user on his behalf.
+     * 
+     * @param userId The identifier of the user to get the notification preference for
+     * @return <code>true</code> of notifications are enabled, <code>false</code>, otherwise
+     * @see com.openexchange.mail.usersetting.UserSettingMail#isNotifyAppointments()
+     */
+    boolean isNotifyOnCreate(int userId);
+
+    /**
+     * Gets a value indicating whether notifications for updated / re-scheduled events are enabled or not.
+     * <p/>
+     * This setting is either used for internal user attendees when the operation is performed by the organizer, or for the organizer or
+     * calendar owner in case the operation is performed by another user on his behalf.
+     * <p/>
+     * This setting is <b>not</b> used for changes towards a user's participation status (reply operations).
+     * 
+     * @param userId The identifier of the user to get the notification preference for
+     * @return <code>true</code> of notifications are enabled, <code>false</code>, otherwise
+     * @see com.openexchange.mail.usersetting.UserSettingMail#isNotifyAppointments()
+     */
+    boolean isNotifyOnUpdate(int userId);
+
+    /**
+     * Gets a value indicating whether notifications for deleted (cancelled) events are enabled or not.
+     * <p/>
+     * This setting is either used for internal user attendees when the operation is performed by the organizer, or for the organizer or
+     * calendar owner in case the operation is performed by another user on his behalf.
+     * 
+     * @param userId The identifier of the user to get the notification preference for
+     * @return <code>true</code> of notifications are enabled, <code>false</code>, otherwise
+     * @see com.openexchange.mail.usersetting.UserSettingMail#isNotifyAppointments()
+     */
+    boolean isNotifyOnDelete(int userId);
+
+    /**
+     * Gets a value indicating whether notifications for replies of attendees are enabled or not.
+     * <p/>
+     * This setting used if the user is the event organizer and the operation is performed by an invited attendee.
+     * 
+     * @param userId The identifier of the user to get the notification preference for
+     * @return <code>true</code> of notifications are enabled, <code>false</code>, otherwise
+     * @see com.openexchange.mail.usersetting.UserSettingMail#isNotifyAppointmentsConfirmOwner()
+     */
+    boolean isNotifyOnReply(int userId);
+
+    /**
+     * Gets a value indicating whether notifications for replies of attendees are enabled or not.
+     * <p/>
+     * This setting used if the user is an attendee and the operation is performed by another invited attendee.
+     * 
+     * @param userId The identifier of the user to get the notification preference for
+     * @return <code>true</code> of notifications are enabled, <code>false</code>, otherwise
+     * @see com.openexchange.mail.usersetting.UserSettingMail#isNotifyAppointmentsConfirmParticipant()
+     */
+    boolean isNotifyOnReplyAsAttendee(int userId);
+
+    /**
+     * Gets a value indicating the preferred message format of notification mails.
+     * <p>
+     * The returned <code>int</code> value is wither <code>1</code> (text only), <code>2</code> (HTML only), or <code>3</code> (both).
+     *
+     * @param userId The identifier of the user to get the notification preference for
+     * @return The desired message format
+     * @see com.openexchange.mail.usersetting.UserSettingMail#getMsgFormat()
+     */
+    int getMsgFormat(int userId);
+    
+    /**
      * Gets a value indicating whether newly added group attendees should be resolved to their individual members, without preserving the
      * group reference, or not.
      *

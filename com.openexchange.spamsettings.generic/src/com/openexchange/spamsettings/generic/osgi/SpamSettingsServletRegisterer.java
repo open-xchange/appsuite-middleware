@@ -83,7 +83,7 @@ public class SpamSettingsServletRegisterer {
         final HttpService http_service;
         try {
             http_service = SpamSettingsServiceRegistry.getServiceRegistry().getService(HttpService.class, true);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("Error registering spam settings servlet!", e);
             return;
         }
@@ -93,9 +93,9 @@ public class SpamSettingsServletRegisterer {
             this.alias = alias;
             LOG.info("Servlet {} registered.", alias);
             SpamSettingsModulePreferences.setModule(true);
-        } catch (final ServletException e) {
+        } catch (ServletException e) {
             LOG.error("Error registering spam settings servlet!", e);
-        } catch (final NamespaceException e) {
+        } catch (NamespaceException e) {
             LOG.error("Error registering spam settings servlet!", e);
         }
     }
@@ -104,7 +104,7 @@ public class SpamSettingsServletRegisterer {
         final HttpService http_service;
         try {
             http_service = SpamSettingsServiceRegistry.getServiceRegistry().getService(HttpService.class, true);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("Error unregistering spam settings servlet!", e);
             return;
         }

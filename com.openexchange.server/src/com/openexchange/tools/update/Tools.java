@@ -863,18 +863,24 @@ public final class Tools {
      * @param con The connection to use
      * @param tableName The table name
      * @param cols The columns to add
+     * @return <code>true</code> if any of given columns was added; otherwise <code>false</code> if none was added
      * @throws SQLException If operation fails
      */
-    public static void checkAndAddColumns(final Connection con, final String tableName, final Column... cols) throws SQLException {
-        final List<Column> notExisting = new LinkedList<Column>();
-        for (final Column col : cols) {
+    public static boolean checkAndAddColumns(final Connection con, final String tableName, final Column... cols) throws SQLException {
+        List<Column> notExisting = new LinkedList<Column>();
+        for (Column col : cols) {
             if (!columnExists(con, tableName, col.getName())) {
                 notExisting.add(col);
             }
         }
-        if (!notExisting.isEmpty()) {
-            addColumns(con, tableName, notExisting.toArray(new Column[notExisting.size()]));
+
+        int size = notExisting.size();
+        if (size <= 0) {
+            return false;
         }
+
+        addColumns(con, tableName, notExisting.toArray(new Column[size]));
+        return true;
     }
 
     /**
@@ -883,18 +889,24 @@ public final class Tools {
      * @param con The connection to use
      * @param tableName The table name
      * @param cols The columns to drop
+     * @return <code>true</code> if any of given columns was dropped; otherwise <code>false</code> if none was dropped
      * @throws SQLException If operation fails
      */
-    public static void checkAndDropColumns(final Connection con, final String tableName, final Column... cols) throws SQLException {
+    public static boolean checkAndDropColumns(final Connection con, final String tableName, final Column... cols) throws SQLException {
         final List<Column> existing = new LinkedList<Column>();
         for (final Column col : cols) {
             if (columnExists(con, tableName, col.getName())) {
                 existing.add(col);
             }
         }
-        if (!existing.isEmpty()) {
-            dropColumns(con, tableName, existing.toArray(new Column[existing.size()]));
+
+        int size = existing.size();
+        if (size <= 0) {
+            return false;
         }
+
+        dropColumns(con, tableName, existing.toArray(new Column[size]));
+        return true;
     }
 
     public static void modifyColumns(final Connection con, final String tableName, final Collection<Column> columns) throws SQLException {
@@ -1018,9 +1030,9 @@ public final class Tools {
             if (doAlterTable) {
                 modifyColumns(con, tableName, new Column(colName, "VARCHAR(" + newSize + ")"));
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rsColumns);
@@ -1053,9 +1065,9 @@ public final class Tools {
 
             // No such VARCHAR column
             return -1;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rsColumns);

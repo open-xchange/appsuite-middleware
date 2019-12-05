@@ -74,12 +74,12 @@ public class InMemoryAliases implements WebdavFolderAliases {
 
     @Override
     public int getId(String alias, int parent) {
-        if(! ids.containsKey(alias)) {
+        if (! ids.containsKey(alias)) {
             return NOT_REGISTERED;
         }
         int id = ids.get(alias);
         int realParent = parents.get(id);
-        if(realParent != parent) {
+        if (realParent != parent) {
             return NOT_REGISTERED;
         }
         return id;

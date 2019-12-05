@@ -62,6 +62,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.SchedulingControl;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.session.Session;
@@ -321,7 +322,7 @@ public interface CalendarService {
      * The following calendar parameters are evaluated:
      * <ul>
      * <li>{@link CalendarParameters#PARAMETER_CHECK_CONFLICTS}</li>
-     * <li>{@link CalendarParameters#PARAMETER_NOTIFICATION}</li>
+     * <li>{@link CalendarParameters#PARAMETER_SCHEDULING}</li>
      * <li>{@link CalendarParameters#PARAMETER_TRACK_ATTENDEE_USAGE}</li>
      * </ul>
      *
@@ -338,7 +339,7 @@ public interface CalendarService {
      * The following calendar parameters are evaluated:
      * <ul>
      * <li>{@link CalendarParameters#PARAMETER_CHECK_CONFLICTS}</li>
-     * <li>{@link CalendarParameters#PARAMETER_NOTIFICATION}</li>
+     * <li>{@link CalendarParameters#PARAMETER_SCHEDULING}</li>
      * <li>{@link CalendarParameters#PARAMETER_TRACK_ATTENDEE_USAGE}</li>
      * <li>{@link CalendarParameters#PARAMETER_IGNORE_FORBIDDEN_ATTENDEE_CHANGES}</li>
      * </ul>
@@ -357,7 +358,7 @@ public interface CalendarService {
      * The following calendar parameters are evaluated:
      * <ul>
      * <li>{@link CalendarParameters#PARAMETER_CHECK_CONFLICTS}</li>
-     * <li>{@link CalendarParameters#PARAMETER_NOTIFICATION}</li>
+     * <li>{@link CalendarParameters#PARAMETER_SCHEDULING}</li>
      * <li>{@link CalendarParameters#PARAMETER_TRACK_ATTENDEE_USAGE}</li>
      * </ul>
      *
@@ -384,7 +385,7 @@ public interface CalendarService {
      * The following calendar parameters are evaluated:
      * <ul>
      * <li>{@link CalendarParameters#PARAMETER_CHECK_CONFLICTS}</li>
-     * <li>{@link CalendarParameters#PARAMETER_NOTIFICATION}</li>
+     * <li>{@link CalendarParameters#PARAMETER_SCHEDULING}</li>
      * </ul>
      *
      * @param session The calendar session
@@ -480,9 +481,8 @@ public interface CalendarService {
      * The following calendar parameters are evaluated:
      * <ul>
      * <li>{@link CalendarParameters#PARAMETER_CHECK_CONFLICTS}, defaulting to {@link Boolean#FALSE} unless overridden</li>
-     * <li>{@link CalendarParameters#PARAMETER_SUPPRESS_ITIP}, defaulting to {@link Boolean#TRUE} unless overridden</li>
      * <li>{@link CalendarParameters#PARAMETER_IGNORE_STORAGE_WARNINGS}, defaulting to {@link Boolean#TRUE} unless overridden</li>
-     * <li>{@link CalendarParameters#PARAMETER_NOTIFICATION}</li>
+     * <li>{@link CalendarParameters#PARAMETER_SCHEDULING}, defaulting to {@link SchedulingControl#NONE} unless overridden</li>
      * <li>{@link CalendarParameters#UID_CONFLICT_STRATEGY}</li>
      * </ul>
      *

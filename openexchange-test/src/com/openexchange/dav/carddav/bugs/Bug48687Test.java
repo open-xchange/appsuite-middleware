@@ -57,6 +57,7 @@ import org.apache.commons.httpclient.HttpState;
 import org.apache.jackrabbit.webdav.client.methods.ReportMethod;
 import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
 import org.junit.Test;
+import com.openexchange.dav.Config;
 import com.openexchange.dav.PropertyNames;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.SyncToken;
@@ -104,7 +105,7 @@ public class Bug48687Test extends CardDAVTest {
         props.add(PropertyNames.GETETAG);
         props.add(PropertyNames.ADDRESS_DATA);
         SyncCollectionReportInfo reportInfo = new SyncCollectionReportInfo(syncToken.getToken(), props);
-        String uri = getBaseUri() + "/carddav/Contacts";
+        String uri = getBaseUri() + Config.getPathPrefix() + "/carddav/Contacts";
         String responseBody = null;
         ReportMethod report = null;
         try {

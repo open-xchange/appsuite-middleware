@@ -68,10 +68,10 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.custom.parallels.osgi.Services;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.user.User;
 
 /**
  *
@@ -99,7 +99,7 @@ public final class ParallelsOpenApiServletRequest  {
     public ParallelsOpenApiServletRequest(final Session sessionObj, final Context ctx)	throws OXException, ServiceException {
         try {
             this.user = UserStorage.getInstance().getUser(sessionObj.getUserId(), ctx);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             throw new OXException(e);
         }
@@ -112,7 +112,7 @@ public final class ParallelsOpenApiServletRequest  {
         Object retval = null;
 
         if (module.equalsIgnoreCase(MODULE_WHITELIST)) {
-            if(action.equalsIgnoreCase(ACTION_ADD)){
+            if (action.equalsIgnoreCase(ACTION_ADD)){
                 retval = addOrDeleteFromList("pem.spam_assassin.addItems", "white", jsonObject);
             }else if (action.equalsIgnoreCase(ACTION_DELETE)){
                 retval = addOrDeleteFromList("pem.spam_assassin.deleteItems", "white", jsonObject);
@@ -121,8 +121,8 @@ public final class ParallelsOpenApiServletRequest  {
             }else{
                 throw AjaxExceptionCodes.UNKNOWN_ACTION.create(module);
             }
-        }else if(module.equalsIgnoreCase(MODULE_BLACKLIST)){
-            if(action.equalsIgnoreCase(ACTION_ADD)){
+        }else if (module.equalsIgnoreCase(MODULE_BLACKLIST)){
+            if (action.equalsIgnoreCase(ACTION_ADD)){
                 retval = addOrDeleteFromList("pem.spam_assassin.addItems", "black", jsonObject);
             }else if (action.equalsIgnoreCase(ACTION_DELETE)){
                 retval = addOrDeleteFromList("pem.spam_assassin.deleteItems", "black", jsonObject);
@@ -145,7 +145,7 @@ public final class ParallelsOpenApiServletRequest  {
         // we need the data parameter here
         checkForMissingParameter(jsonObject);
 
-        try{
+        try {
 
 
             final HashMap<String, Object> rpcargs = new HashMap<String, Object>();
@@ -161,16 +161,16 @@ public final class ParallelsOpenApiServletRequest  {
             rpcargs.put("login", this.user.getLoginInfo());
             final Map<?, ?> response = (HashMap<?, ?>) getRpcClient().execute(method,new Object[]{rpcargs});
             checkXMLRpcResponseForError(response);
-        } catch (final XmlRpcException e) {
+        } catch (XmlRpcException e) {
             LOG.error("xml-rpc error detected while communicating with openapi interface");
             throw ParallelsOpenApiServletExceptionCodes.HTTP_COMMUNICATION_ERROR.create(e.getMessage());
-        } catch (final MalformedURLException e) {
+        } catch (MalformedURLException e) {
             LOG.error("IO error occured while communicating with openapi interface");
             throw ParallelsOpenApiServletExceptionCodes.HTTP_COMMUNICATION_ERROR.create(e.getMessage());
-        } catch (final ServiceException e) {
+        } catch (ServiceException e) {
             LOG.error("internal configuration error occured");
             throw ParallelsOpenApiServletExceptionCodes.OPENAPI_COMMUNICATION_ERROR.create(e.getMessage());
-        }finally{
+        } finally {
         }
 
         return null;
@@ -182,7 +182,7 @@ public final class ParallelsOpenApiServletRequest  {
      * @throws ParallelsOpenApiServletExceptionCodes
      */
     private void checkXMLRpcResponseForError(final Map<?, ?> response) throws OXException {
-        if(response.containsKey("error_code") || response.containsKey("error_message")){
+        if (response.containsKey("error_code") || response.containsKey("error_message")){
             throw ParallelsOpenApiServletExceptionCodes.OPENAPI_COMMUNICATION_ERROR.create(response.get("error_message")+" (OPEN_API_ERROR_CODE:"+response.get("error_code")+" )");
         }
     }
@@ -191,7 +191,7 @@ public final class ParallelsOpenApiServletRequest  {
 
         final JSONObject json_response = new JSONObject();
 
-        try{
+        try {
 
 
 
@@ -207,7 +207,7 @@ public final class ParallelsOpenApiServletRequest  {
 
             final JSONArray retval = new JSONArray();
 
-            if(response.containsKey("result")){
+            if (response.containsKey("result")){
                 final HashMap<?, ?> tmp_ = (HashMap<?, ?>)response.get("result");
                 final Object[] tmp__ = (Object[])tmp_.get("list");
                 for (final Object addy : tmp__){
@@ -217,16 +217,16 @@ public final class ParallelsOpenApiServletRequest  {
             LOG.debug("Got the following items from openapi for list \"{}\" {}", list, retval);
             json_response.put("items", retval);
             return json_response;
-        } catch (final XmlRpcException e) {
+        } catch (XmlRpcException e) {
             LOG.error("xml-rpc error detected while communicating with openapi interface");
             throw ParallelsOpenApiServletExceptionCodes.HTTP_COMMUNICATION_ERROR.create(e.getMessage());
-        } catch (final MalformedURLException e) {
+        } catch (MalformedURLException e) {
             LOG.error("IO error occured while communicating with openapi interface");
             throw ParallelsOpenApiServletExceptionCodes.HTTP_COMMUNICATION_ERROR.create(e.getMessage());
-        } catch (final ServiceException e) {
+        } catch (ServiceException e) {
             LOG.error("internal configuration error occured");
             throw ParallelsOpenApiServletExceptionCodes.OPENAPI_COMMUNICATION_ERROR.create(e.getMessage());
-        }finally{
+        } finally {
         }
 
 
@@ -236,7 +236,7 @@ public final class ParallelsOpenApiServletRequest  {
         final XmlRpcClientConfigImpl config = new XmlRpcClientConfigImpl();
         config.setServerURL(new URL(getOpenAPIInterfaceURL()));
         config.setUserAgent("Open-Xchange Paralles Plugin");
-        if(isOpenAPIAuthEnabled()){
+        if (isOpenAPIAuthEnabled()){
             LOG.debug("Using HTTP BASIC AUTH (Username: {}) for sending XML-RPC requests to OpenAPI...", getOpenAPIAuthID());
             config.setBasicUserName(getOpenAPIAuthID());
             config.setBasicPassword(getOpenAPIAuthPassword());
@@ -248,7 +248,7 @@ public final class ParallelsOpenApiServletRequest  {
     }
 
     private void checkForMissingParameter(final JSONObject jsonObject) throws OXException{
-        if(!jsonObject.has(PARAMETER_DATA)){
+        if (!jsonObject.has(PARAMETER_DATA)){
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("data");
         }
     }

@@ -140,7 +140,7 @@ public class UseCountTest extends ContactTest {
         int at;
 
         // Check if given mail address is 'valid'  
-        if ((at = mailAddress.indexOf("@")) < 0) {
+        if ((at = mailAddress.indexOf('@')) < 0) {
             return mailAddress;
         }
 

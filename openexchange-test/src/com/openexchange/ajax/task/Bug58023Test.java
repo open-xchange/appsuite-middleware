@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.task;
 
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
@@ -90,7 +91,6 @@ public class Bug58023Test extends AbstractAPIClientSession {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-//        apiClient.login(testUser.getLogin(), testUser.getPassword());
         tasksApi = new TasksApi(apiClient);
         foldersApi = new FoldersApi(apiClient);
         privateTaskFolder = foldersApi.createFolder(getPrivateTaskFolder(), apiClient.getSession(), generateFolderBody(), "1", Module.TASK.getName(), null).getData();
@@ -123,7 +123,7 @@ public class Bug58023Test extends AbstractAPIClientSession {
         FolderPermission perm = new FolderPermission();
         perm.setEntity(apiClient.getUserId());
         perm.setGroup(Boolean.FALSE);
-        perm.setBits(403710016);
+        perm.setBits(I(403710016));
 
         List<FolderPermission> permissions = new ArrayList<>();
         permissions.add(perm);

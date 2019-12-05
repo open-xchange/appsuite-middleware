@@ -91,7 +91,7 @@ public final class DeleteAction extends AbstractOAuthAJAXActionService {
              */
             final OAuthService oAuthService = getOAuthService();
             oAuthService.deleteAccount(session, getUnsignedInteger(accountId));
-        } else if(data instanceof JSONArray) {
+        } else if (data instanceof JSONArray) {
             JSONArray jsonArray = (JSONArray) data;
             for (int i = 0; i < jsonArray.length(); i++) {
                 try {

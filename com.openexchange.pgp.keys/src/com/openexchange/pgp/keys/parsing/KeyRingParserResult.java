@@ -74,7 +74,7 @@ public class KeyRingParserResult {
      */
     public PGPPublicKey toEncryptionKey() throws IOException {
         List<PGPPublicKeyRing> publicKeyRings = toPublicKeyRings();
-        if(publicKeyRings != null && publicKeyRings.size() > 0) {
+        if (publicKeyRings != null && publicKeyRings.size() > 0) {
             return PGPKeysUtil.getEncryptionKey(publicKeyRings.get(0));
         }
         return null;

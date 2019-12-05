@@ -56,11 +56,13 @@ import com.openexchange.config.Reloadable;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.hazelcast.configuration.internal.AddNodeUtilCommandProvider;
 import com.openexchange.hazelcast.configuration.internal.HazelcastConfigurationServiceImpl;
-import com.openexchange.hazelcast.configuration.internal.HazelcastReloadable;
-import com.openexchange.hazelcast.configuration.internal.HazelcastSSLReloadable;
-import com.openexchange.hazelcast.configuration.internal.Services;
+import com.openexchange.hazelcast.configuration.reloadable.HazelcastDnsNetworkJoinReloadable;
+import com.openexchange.hazelcast.configuration.reloadable.HazelcastSSLReloadable;
+import com.openexchange.hazelcast.configuration.reloadable.HazelcastStaticNetworkJoinReloadable;
+import com.openexchange.hazelcast.dns.HazelcastDnsService;
 import com.openexchange.hazelcast.serialization.DynamicPortableFactory;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.timer.TimerService;
 import com.openexchange.tools.strings.StringParser;
 
 /**
@@ -70,7 +72,7 @@ import com.openexchange.tools.strings.StringParser;
  */
 public class HazelcastConfigurationActivator extends HousekeepingActivator {
 
-    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HazelcastConfigurationActivator.class);
+    private HazelcastConfigurationServiceImpl configService;
 
     /**
      * Initializes a new {@link HazelcastConfigurationActivator}.
@@ -81,22 +83,30 @@ public class HazelcastConfigurationActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { ConfigurationService.class, StringParser.class, DynamicPortableFactory.class};
+        return new Class[] { ConfigurationService.class, StringParser.class, DynamicPortableFactory.class, TimerService.class, HazelcastDnsService.class};
     }
 
     @Override
-    protected void startBundle() throws Exception {
+    protected synchronized void startBundle() throws Exception {
         Services.set(this);
+        openTrackers();
         HazelcastConfigurationServiceImpl configService = new HazelcastConfigurationServiceImpl();
+        this.configService = configService;
         registerService(HazelcastConfigurationService.class, configService);
-        registerService(Reloadable.class, new HazelcastReloadable(configService));
+        registerService(Reloadable.class, new HazelcastStaticNetworkJoinReloadable(configService));
+        registerService(Reloadable.class, new HazelcastDnsNetworkJoinReloadable(configService));
         registerService(Reloadable.class, new HazelcastSSLReloadable(configService));
         registerService(CommandProvider.class, new AddNodeUtilCommandProvider(configService));
     }
 
     @Override
-    public void stopBundle() throws Exception {
+    public synchronized void stopBundle() throws Exception {
         super.stopBundle();
+        HazelcastConfigurationServiceImpl configService = this.configService;
+        if (configService != null) {
+            this.configService = null;
+            configService.shutDown();
+        }
         Services.set(null);
     }
 

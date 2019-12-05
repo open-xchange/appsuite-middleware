@@ -83,11 +83,6 @@ public class SizeTestCommandParser implements CommandParser<TestCommand> {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser#parse(org.json.JSONObject)
-     */
     @Override
     public TestCommand parse(JSONObject jsonObject, ServerSession session) throws JSONException, SieveException, OXException {
         String commandName = Commands.SIZE.getCommandName();
@@ -171,11 +166,6 @@ public class SizeTestCommandParser implements CommandParser<TestCommand> {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser#parse(org.json.JSONObject, java.lang.Object)
-     */
     @Override
     public void parse(JSONObject jsonObject, TestCommand command) throws JSONException, OXException {
         jsonObject.put(GeneralField.id.name(), TestCommand.Commands.SIZE.getCommandName());

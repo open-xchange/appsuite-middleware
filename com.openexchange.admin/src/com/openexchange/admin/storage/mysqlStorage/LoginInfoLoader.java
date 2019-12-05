@@ -90,7 +90,7 @@ public class LoginInfoLoader implements Filter<Context, Context> {
         }
         try {
             loadLoginInfo(contexts);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             throw new PipesAndFiltersException(e);
         }
         return contexts.values().toArray(new Context[contexts.size()]);
@@ -102,7 +102,7 @@ public class LoginInfoLoader implements Filter<Context, Context> {
         final Connection con;
         try {
             con = cache.getReadConnectionForConfigDB();
-        } catch (final PoolException e) {
+        } catch (PoolException e) {
             throw new StorageException(e);
         }
         PreparedStatement stmt = null;
@@ -124,13 +124,13 @@ public class LoginInfoLoader implements Filter<Context, Context> {
                     context.addLoginMapping(loginMapping);
                 }
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw new StorageException(e.getMessage(), e);
         } finally {
             closeSQLStuff(rs, stmt);
             try {
                 cache.pushReadConnectionForConfigDB(con);
-            } catch (final PoolException e) {
+            } catch (PoolException e) {
                 LOG.error("", e);
             }
         }

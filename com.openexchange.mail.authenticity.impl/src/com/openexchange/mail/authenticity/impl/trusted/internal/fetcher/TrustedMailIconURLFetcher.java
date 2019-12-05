@@ -76,11 +76,6 @@ public class TrustedMailIconURLFetcher extends AbstractTrustedMailIconFetcher im
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.mail.authenticity.impl.trusted.internal.fetcher.TrustedMailIconFetcher#exists(java.lang.String)
-     */
     @Override
     public boolean exists(String resourceUrl) {
         HttpURLConnection connection = null;
@@ -97,11 +92,6 @@ public class TrustedMailIconURLFetcher extends AbstractTrustedMailIconFetcher im
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.mail.authenticity.impl.trusted.internal.fetcher.TrustedMailIconFetcher#fetch(java.lang.String, java.lang.String)
-     */
     @Override
     public byte[] fetch(String url) {
         HttpURLConnection connection = null;

@@ -29,6 +29,8 @@ The response body consists of an object, which contains up to four fields as des
 The fields `timestamp`, `error` and `error_params` are present when data objects are returned, if an error occurred and if the error message contains conversion specifiers, respectively. 
 Following sections describe the contents of these fields in more detail.<br>
 
+<div class="simpleTable">
+
 | Name | Type | Value |
 |:------|:------|:-------|
 | data | Value | Payload of the response. |
@@ -42,8 +44,12 @@ Following sections describe the contents of these fields in more detail.<br>
 | categories | String OR Array | Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs. |
 | category | Number | Maintained for legacy reasons: The numeric representation of the first category. |
 
+</div>
+
 <br>
 The following table shows the different category identifiers:
+
+<div class="simpleTable">
 
 | Name | Description |
 |:------|:------|
@@ -59,6 +65,7 @@ The following table shows the different category identifiers:
 | TRUNCATED | The given data could not be stored into the database because an attribute contains a too long value. |
 | WARNING | Action was at least partially successful, but a condition occurred that merited a warning |
 
+</div>
 
 Data from the client to the server can be sent in several formats. Small amounts of data are sent as `application/x-www-urlencoded` in query parameters in the request URI. 
 For POST requests, some or all parameters may be sent in the request body instead of in the URI using any valid encoding for POST requests. 
@@ -87,6 +94,8 @@ Some error message contain data sizes which must be expressed in Bytes or Kiloby
 the client. Unfortunately, standard printf()-style formatting does not have a specifier for this kind of translation. Therefore, the conversion specification for sizes is the same as for 
 normal strings, and the client has to determine which parameters to translate based on the error code. The current error codes and the corresponding size parameters are listed below:
 
+<div class="simpleTable">
+
 | Error code | Parameter indices |
 |:------------|:-------------------|
 | CON-0101 | 2, 3 |
@@ -94,6 +103,8 @@ normal strings, and the client has to determine which parameters to translate ba
 | MSG-0065 | 1, 3 |
 | MSG-0066 | 1 |
 | NON-0005 | 1, 2 |
+
+</div>
 
 ## Date and time
 
@@ -106,17 +117,23 @@ Dates with time are transmitted as the number of milliseconds since 1970-01-01 0
 Then dates with time are transmitted as the number of milliseconds since 1970-01-01 00:00 UTC (again, ignoring leap seconds) plus the offset between the _specified_ timezone and 
 UTC at the time in question.
 
+To prevent the timezone offset getting applied implicitly on the server for dates with time, e.g. because the client handles timezones on his own, requests should be decorated with the URL parameter `timezone` set to `UTC` statically.  
+
 For some date and time values, especially timestamps, monotonicity is more important than the actual value. Such values are transmitted as the number of 
 milliseconds since 1970-01-01 00:00 UTC, ignoring leap seconds and without timezone correction. If possible, a unique strictly monotonic increasing value should be used instead, as it avoids 
 some race conditions described below.
 
 This specification refers to these three interpretations of the type Number as separate data types.
 
+<div class="simpleTable">
+
 | Type | Time | Timezone | Comment |
 |:------|:------|:----------|:---------|
 | Date | No | UTC | Date without time. |
 | Time | Yes | User | Date and time. |
 | Timestamp | Yes | UTC | Timestamp or unique sequence number. |
+
+</div>
 
 ## Updates
 

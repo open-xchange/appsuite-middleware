@@ -93,7 +93,7 @@ public class AlarmPreparator {
      * @throws OXException
      */
     public void prepareEMailAlarms(CalendarSession session, List<Alarm> alarms) throws OXException {
-        if(alarms!=null) {
+        if (alarms!=null) {
             for (Alarm alarm : alarms) {
                 if (alarm.containsAction() && AlarmAction.EMAIL.equals(alarm.getAction())) {
                     prepareAlarm(session.getEntityResolver(), session.getUserId(), alarm);
@@ -110,7 +110,7 @@ public class AlarmPreparator {
      * @throws OXException
      */
     public void prepareEMailAlarms(Session session, CalendarUtilities calUtil, List<Alarm> alarms) throws OXException {
-        if(alarms!=null) {
+        if (alarms!=null) {
             for (Alarm alarm : alarms) {
                 if (alarm.containsAction() && AlarmAction.EMAIL.equals(alarm.getAction())) {
                     prepareAlarm(calUtil == null ? null : calUtil.getEntityResolver(session.getContextId()), session.getUserId(), alarm);

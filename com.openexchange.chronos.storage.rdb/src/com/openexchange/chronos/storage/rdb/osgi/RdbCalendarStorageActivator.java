@@ -59,6 +59,7 @@ import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.chronos.storage.rdb.AdministrativeRdbAlarmTriggerStorage;
 import com.openexchange.chronos.storage.rdb.groupware.CalendarAlarmAddTimestampColumnTask;
 import com.openexchange.chronos.storage.rdb.groupware.CalendarAlarmTriggerCorrectFolderTask;
+import com.openexchange.chronos.storage.rdb.groupware.CalendarAlarmTriggerRemoveOrphanedTask;
 import com.openexchange.chronos.storage.rdb.groupware.CalendarAttendeeAddHiddenColumnTask;
 import com.openexchange.chronos.storage.rdb.groupware.CalendarEventAddAttendeePrivilegesColumnTask;
 import com.openexchange.chronos.storage.rdb.groupware.CalendarEventAddRDateColumnTask;
@@ -82,7 +83,7 @@ import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.quota.QuotaService;
-import com.openexchange.user.UserServiceInterceptor;
+import com.openexchange.user.interceptor.UserServiceInterceptor;
 import com.openexchange.userconf.UserPermissionService;
 
 /**
@@ -140,13 +141,12 @@ public class RdbCalendarStorageActivator extends HousekeepingActivator {
                 new CalendarAlarmAddTimestampColumnTask(),
                 new CalendarAlarmTriggerCorrectFolderTask(),
                 new CalendarEventAddAttendeePrivilegesColumnTask(),
-                new RemoveOrphanedCalendarAlarmsTask(), 
-                new CalendarEventRemoveStaleFolderReferencesTask()
+                new RemoveOrphanedCalendarAlarmsTask(),
+                new CalendarAlarmTriggerRemoveOrphanedTask(),
+                new CalendarEventRemoveStaleFolderReferencesTask(),
+                new CalendarEventCorrectOrganizerSentByTask()
             ));
-            if (getService(ConfigurationService.class).getBoolProperty("com.openexchange.calendar.enableCalendarEventCorrectOrganizerSentByTask", false)) {
-                registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new CalendarEventCorrectOrganizerSentByTask()));
-            }
-            if (getService(ConfigurationService.class).getBoolProperty("com.openexchange.calendar.migration.purgeLegacyData", false)) {
+            if (getService(ConfigurationService.class).getBoolProperty("com.openexchange.calendar.migration.purgeLegacyData", true)) {
                 registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new ChronosStoragePurgeLegacyDataTask()));
             }
             registerService(UserServiceInterceptor.class, new CalendarStorageInterceptor(this, defaultDbProvider));

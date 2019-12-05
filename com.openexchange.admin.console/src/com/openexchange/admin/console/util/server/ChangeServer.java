@@ -134,7 +134,7 @@ public class ChangeServer extends ServerAbstraction {
             oxutil.changeServer(srv, schemaName, auth);
             System.out.println("Successfully changed to server '" + serverId + "' for schema '" + schemaName + "'.");
             sysexit(0);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             printErrors(null, null, e, parser);
         }
     }

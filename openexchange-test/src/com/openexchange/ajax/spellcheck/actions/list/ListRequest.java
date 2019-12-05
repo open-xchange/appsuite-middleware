@@ -61,7 +61,7 @@ import com.openexchange.ajax.spellcheck.actions.AbstractSpellCheckRequest;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  *
  */
-public final class ListRequest extends AbstractSpellCheckRequest {
+public final class ListRequest extends AbstractSpellCheckRequest<ListResponse> {
 
     private final boolean failOnError;
 
@@ -73,31 +73,16 @@ public final class ListRequest extends AbstractSpellCheckRequest {
         this.failOnError = failOnError;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
-     */
     @Override
     public Object getBody() throws JSONException {
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
-     */
     @Override
     public Method getMethod() {
         return Method.GET;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
-     */
     @Override
     public Parameter[] getParameters() {
         final List<Parameter> params = new ArrayList<Parameter>();
@@ -105,11 +90,6 @@ public final class ListRequest extends AbstractSpellCheckRequest {
         return params.toArray(new Parameter[params.size()]);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
-     */
     @Override
     public ListParser getParser() {
         return new ListParser(failOnError);

@@ -74,21 +74,11 @@ public class DiscardActionCommandParser implements CommandParser<ActionCommand> 
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.ActionCommandParser#parse(org.json.JSONObject)
-     */
     @Override
     public ActionCommand parse(JSONObject jsonObject, ServerSession session) throws JSONException, SieveException {
         return new ActionCommand(Commands.DISCARD, new ArrayList<Object>(0));
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.ActionCommandParser#parse(org.json.JSONObject, com.openexchange.jsieve.commands.ActionCommand)
-     */
     @Override
     public void parse(JSONObject jsonObject, ActionCommand actionCommand) throws JSONException, OXException {
         jsonObject.put(GeneralField.id.name(), Commands.DISCARD.getJsonName());

@@ -85,7 +85,7 @@ public class MoveContextFilestore extends ContextAbstraction {
 
             displayMovedMessage(successtext, null, "to filestore " + getFilestoreid() + " scheduled as job " + jobId, parser);
             sysexit(0);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             // In this special case the second parameter is not the context id but the filestore id
             // this also applies to all following error outputting methods
             // see com.openexchange.admin.console.context.ContextHostingAbstraction.printFirstPartOfErrorText(Integer, Integer)

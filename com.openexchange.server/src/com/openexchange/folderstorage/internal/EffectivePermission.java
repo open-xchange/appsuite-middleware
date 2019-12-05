@@ -260,7 +260,7 @@ public final class EffectivePermission implements Permission {
         if (null == userPermissionBits) {
             try {
                 userPermissionBits = this.userPermissionBits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(getEntity(), context);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 userPermissionBits = this.userPermissionBits = new AllowAllUserPermissionBits(getEntity(), null, context);
             }
         }
@@ -444,7 +444,7 @@ public final class EffectivePermission implements Permission {
             clone.allowedContentTypes =
                 (null == allowedContentTypes || allowedContentTypes.isEmpty()) ? new TIntHashSet(1) : new TIntHashSet(allowedContentTypes.toArray());
             return clone;
-        } catch (final CloneNotSupportedException e) {
+        } catch (CloneNotSupportedException e) {
             throw new InternalError(e.getMessage());
         }
     }

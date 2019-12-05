@@ -94,7 +94,7 @@ public class Bug16174StructureTest extends AbstractMailTest {
             }
 
             assertTrue("Missing \"data\" key.", jsonBodyObject.hasAndNotNull("data"));
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }

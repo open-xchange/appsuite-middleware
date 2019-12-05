@@ -64,7 +64,6 @@ import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.FolderService;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.secret.SecretEncryptionFactoryService;
 import com.openexchange.secret.SecretEncryptionService;
@@ -77,6 +76,7 @@ import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.user.User;
 import com.openexchange.userconf.UserPermissionService;
 
 /**
@@ -124,7 +124,7 @@ public abstract class AbstractSubscribeService implements SubscribeService {
             if (subscription.getSource() != null && getSubscriptionSource() != null && subscription.getSource().getId().equals(
                 getSubscriptionSource().getId())) {
 
-                if(userId == -1) {
+                if (userId == -1) {
                     subscriptions.add(subscription);
                 } else if (canSee.containsKey(subscription.getFolderId()) && canSee.get(subscription.getFolderId()).booleanValue()) {
                     subscriptions.add(subscription);
@@ -132,7 +132,7 @@ public abstract class AbstractSubscribeService implements SubscribeService {
                     final EffectivePermission folderPermission = FOLDERS.get().getFolderPermission(Integer.parseInt(subscription.getFolderId()), userId, context.getContextId());
                     final boolean visible = folderPermission.isFolderVisible() ;
                     canSee.put(subscription.getFolderId(), B(visible));
-                    if(visible) {
+                    if (visible) {
                         subscriptions.add(subscription);
                     }
 
@@ -302,7 +302,7 @@ public abstract class AbstractSubscribeService implements SubscribeService {
                         try {
                             // If we can already decrypt with the new secret, we're done with this entry
                             cryptoService.decrypt(password, newSecret);
-                        } catch (final OXException x) {
+                        } catch (OXException x) {
                             // This one needs migration
                             final String transcriptedPassword = cryptoService.encrypt(cryptoService.decrypt(password, oldSecret), newSecret);
                             update.put(passwordField, transcriptedPassword);
@@ -341,7 +341,7 @@ public abstract class AbstractSubscribeService implements SubscribeService {
                         try {
                             // If we can already decrypt with the new secret, we're done with this entry
                             cryptoService.decrypt(password, secret);
-                        } catch (final OXException x) {
+                        } catch (OXException x) {
                             // This one needs clean-up
                             update.put(passwordField, "");
                             save = true;
@@ -379,7 +379,7 @@ public abstract class AbstractSubscribeService implements SubscribeService {
                         try {
                             // If we can already decrypt with the new secret, we're done with this entry
                             cryptoService.decrypt(password, secret);
-                        } catch (final OXException x) {
+                        } catch (OXException x) {
                             // This one needs clean-up
                             if (!subscriptionsToDelete.contains(subscription)) {
                                 subscriptionsToDelete.add(subscription);

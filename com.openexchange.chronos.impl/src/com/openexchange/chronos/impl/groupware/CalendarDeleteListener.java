@@ -51,7 +51,7 @@ package com.openexchange.chronos.impl.groupware;
 
 import static com.openexchange.chronos.common.CalendarUtils.getSearchTerm;
 import static com.openexchange.chronos.common.CalendarUtils.isLastUserAttendee;
-import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_SUPPRESS_ITIP;
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_SCHEDULING;
 import static com.openexchange.java.Autoboxing.i;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -69,6 +69,7 @@ import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ResourceId;
+import com.openexchange.chronos.SchedulingControl;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultCalendarParameters;
 import com.openexchange.chronos.common.EntityUtils;
@@ -197,7 +198,7 @@ public final class CalendarDeleteListener implements DeleteListener {
             // Legacy storage doesen't know a calendar user, so make an independent call
             updater.replaceAttendeeIn(updater.searchEvents(CalendarUtils.getSearchTerm(EventField.CALENDAR_USER, SingleOperation.EQUALS, Integer.valueOf(userId))));
         } catch (IllegalArgumentException e) {
-            if(false == e.getMessage().equals("No mapping available for: CALENDAR_USER")) {
+            if (false == e.getMessage().equals("No mapping available for: CALENDAR_USER")) {
                 throw e;
             }
         }
@@ -211,7 +212,7 @@ public final class CalendarDeleteListener implements DeleteListener {
         updater.deleteAccount();
 
         // Trigger calendar events
-        updater.notifyCalendarHandlers(adminSession, new DefaultCalendarParameters().set(PARAMETER_SUPPRESS_ITIP, Boolean.TRUE));
+        updater.notifyCalendarHandlers(adminSession, new DefaultCalendarParameters().set(PARAMETER_SCHEDULING, SchedulingControl.NONE));
     }
 
     private static final String SELECT_TOMBSTONES = "SELECT account, event, uri FROM calendar_attendee_tombstone WHERE cid = ? AND entity = ?;";
@@ -287,7 +288,7 @@ public final class CalendarDeleteListener implements DeleteListener {
         CalendarStorage storage = Services.getService(CalendarStorageFactory.class).create(context, Utils.ACCOUNT_ID, entityResolver, dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
         StorageUpdater updater = new StorageUpdater(storage, entityResolver, notificationService, attendeeId, context.getMailadmin());
         updater.removeAttendeeFrom(updater.searchEvents());
-        updater.notifyCalendarHandlers(adminSession, new DefaultCalendarParameters().set(PARAMETER_SUPPRESS_ITIP, Boolean.TRUE));
+        updater.notifyCalendarHandlers(adminSession, new DefaultCalendarParameters().set(PARAMETER_SCHEDULING, SchedulingControl.NONE));
     }
 
 }

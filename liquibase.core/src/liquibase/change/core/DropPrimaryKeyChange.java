@@ -75,23 +75,23 @@ public class DropPrimaryKeyChange extends AbstractChange {
     		// return special statements for SQLite databases
     		return generateStatementsForSQLiteDatabase(database);
         }
-    	
+
         return new SqlStatement[]{
                 new DropPrimaryKeyStatement(getCatalogName(), getSchemaName(), getTableName(), getConstraintName()),
         };
     }
-    
+
     private SqlStatement[] generateStatementsForSQLiteDatabase(Database database) {
-    	
+
     	// SQLite does not support this ALTER TABLE operation until now.
 		// For more information see: http://www.sqlite.org/omitted.html.
 		// This is a small work around...
-    	
-    	// Note: The attribute "constraintName" is used to pass the column 
+
+    	// Note: The attribute "constraintName" is used to pass the column
     	// name instead of the constraint name.
-		
+
     	List<SqlStatement> statements = new ArrayList<SqlStatement>();
-    	
+
 		// define alter table logic
 		AlterTableVisitor rename_alter_visitor = new AlterTableVisitor() {
 			@Override
@@ -105,7 +105,7 @@ public class DropPrimaryKeyChange extends AbstractChange {
 			@Override
             public boolean createThisColumn(ColumnConfig column) {
 				if (column.getName().equals(getConstraintName())) {
-					column.getConstraints().setPrimaryKey(false);
+					column.getConstraints().setPrimaryKey(Boolean.FALSE);
 				}
 				return true;
 			}
@@ -114,7 +114,7 @@ public class DropPrimaryKeyChange extends AbstractChange {
 				return true;
 			}
 		};
-    		
+
     	try {
     		// alter table
 			statements.addAll(SQLiteDatabase.getAlterTableStatements(
@@ -123,7 +123,7 @@ public class DropPrimaryKeyChange extends AbstractChange {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 		return statements.toArray(new SqlStatement[statements.size()]);
     }
 

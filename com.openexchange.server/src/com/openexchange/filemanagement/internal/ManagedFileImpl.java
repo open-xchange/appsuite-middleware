@@ -245,7 +245,7 @@ public final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry, 
             final CallbackInputStream retval = new CallbackInputStream(new BufferedInputStream(new FileInputStream(file), 65536), this);
             listeners.offer(retval);
             return retval;
-        } catch (final FileNotFoundException e) {
+        } catch (FileNotFoundException e) {
             throw ManagedFileExceptionErrorMessage.FILE_NOT_FOUND.create(e, file.getPath());
         }
     }
@@ -290,7 +290,7 @@ public final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry, 
                 }
             }
             return n;
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw ManagedFileExceptionErrorMessage.IO_ERROR.create(e, e.getMessage());
         } finally {
             Streams.close(raf);

@@ -174,21 +174,11 @@ public class SchedJoulesServiceImpl implements SchedJoulesService, Reloadable {
         rootItemIdCache.asMap().entrySet().stream().filter(predicate -> false == blacklistedItems.contains(predicate.getValue()));
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.service.SchedJoulesService#getRoot()
-     */
     @Override
     public SchedJoulesResult getRoot(int contextId, Set<SchedJoulesPageField> filteredFields) throws OXException {
         return getRoot(contextId, SchedJoulesAPIDefaultValues.DEFAULT_LOCALE, SchedJoulesAPIDefaultValues.DEFAULT_LOCATION, filteredFields);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.service.SchedJoulesService#getRoot(java.lang.String, java.lang.String)
-     */
     @Override
     public SchedJoulesResult getRoot(int contextId, String locale, String location, Set<SchedJoulesPageField> filteredFields) throws OXException {
         try {
@@ -208,21 +198,11 @@ public class SchedJoulesServiceImpl implements SchedJoulesService, Reloadable {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.service.SchedJoulesService#getPage(int)
-     */
     @Override
     public SchedJoulesResult getPage(int contextId, int pageId, Set<SchedJoulesPageField> filteredFields) throws OXException {
         return getPage(contextId, pageId, SchedJoulesAPIDefaultValues.DEFAULT_LOCALE, filteredFields);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.schedjoules.SchedJoulesService#getPage(int, java.lang.String)
-     */
     @Override
     public SchedJoulesResult getPage(int contextId, int pageId, String locale, Set<SchedJoulesPageField> filteredFields) throws OXException {
         if (blacklistedItems.contains(Integer.valueOf(pageId))) {
@@ -237,11 +217,6 @@ public class SchedJoulesServiceImpl implements SchedJoulesService, Reloadable {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.schedjoules.SchedJoulesService#listCountries(java.lang.String)
-     */
     @Override
     public SchedJoulesResult listCountries(int contextId, String locale) throws OXException {
         try {
@@ -251,11 +226,6 @@ public class SchedJoulesServiceImpl implements SchedJoulesService, Reloadable {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.schedjoules.SchedJoulesService#listLanguages()
-     */
     @Override
     public SchedJoulesResult listLanguages(int contextId) throws OXException {
         try {
@@ -265,31 +235,16 @@ public class SchedJoulesServiceImpl implements SchedJoulesService, Reloadable {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.schedjoules.SchedJoulesService#search(java.lang.String, java.lang.String, int, int, int)
-     */
     @Override
     public SchedJoulesResult search(int contextId, String query, String locale, int countryId, int categoryId, int maxRows, Set<SchedJoulesPageField> filteredFields) throws OXException {
         return new SchedJoulesResult(filterContent((JSONObject) apiCache.getAPI(contextId).pages().search(query, locale, countryId, categoryId, maxRows).getItemData(), SchedJoulesPageField.toSring(filteredFields)));
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.schedjoules.SchedJoulesService#getCalendar(int, java.net.URL, java.lang.String, long)
-     */
     @Override
     public SchedJoulesCalendar getCalendar(int contextId, URL url, String etag, long lastModified) throws OXException {
         return apiCache.getAPI(contextId).calendar().getCalendar(url, etag, lastModified);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.schedjoules.SchedJoulesService#isAvailable(int)
-     */
     @Override
     public boolean isAvailable(int contextId) {
         try {
@@ -426,21 +381,11 @@ public class SchedJoulesServiceImpl implements SchedJoulesService, Reloadable {
         return SchedJoulesAPIExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.config.Reloadable#reloadConfiguration(com.openexchange.config.ConfigurationService)
-     */
     @Override
     public void reloadConfiguration(ConfigurationService configService) {
         initialiseBlackListedItems();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.config.Reloadable#getInterests()
-     */
     @Override
     public Interests getInterests() {
         return DefaultInterests.builder().propertiesOfInterest(SchedJoulesProperty.itemBlacklist.getFQPropertyName()).build();

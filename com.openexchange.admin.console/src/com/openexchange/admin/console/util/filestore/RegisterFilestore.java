@@ -85,7 +85,7 @@ public class RegisterFilestore extends FilestoreAbstraction {
 
             displayRegisteredMessage(String.valueOf(oxutil.registerFilestore(fstore, auth).getId()), parser);
             sysexit(0);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             printErrors(null, null, e, parser);
         }
 

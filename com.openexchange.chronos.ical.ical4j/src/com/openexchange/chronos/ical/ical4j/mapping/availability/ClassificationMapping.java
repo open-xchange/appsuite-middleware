@@ -70,32 +70,17 @@ public class ClassificationMapping extends ICalTextMapping<VAvailability, Availa
         super(Property.CLASS);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalTextMapping#getValue(java.lang.Object)
-     */
     @Override
     protected String getValue(Availability object) {
         Classification value = object.getClassification();
         return value != null ? value.getValue() : null;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalTextMapping#setValue(java.lang.Object, java.lang.String)
-     */
     @Override
     protected void setValue(Availability object, String value) {
         object.setClassification(value != null ? new Classification(value) : null);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalTextMapping#createProperty()
-     */
     @Override
     protected Property createProperty() {
         return new Clazz();

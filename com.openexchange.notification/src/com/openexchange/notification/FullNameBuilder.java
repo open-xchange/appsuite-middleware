@@ -2,11 +2,11 @@
 package com.openexchange.notification;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.Translator;
 import com.openexchange.notification.osgi.Services;
 import com.openexchange.notification.service.FullNameBuilderService;
 import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 /**

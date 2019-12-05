@@ -79,51 +79,26 @@ public class DropboxApi2 extends DefaultApi20 {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.scribe.builder.api.DefaultApi20#getAccessTokenEndpoint()
-     */
     @Override
     public String getAccessTokenEndpoint() {
         return "https://api.dropboxapi.com/oauth2/token";
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.scribe.builder.api.DefaultApi20#getAuthorizationUrl(org.scribe.model.OAuthConfig)
-     */
     @Override
     public String getAuthorizationUrl(OAuthConfig config) {
         return String.format(AUTHORISE_URL, config.getApiKey(), OAuthEncoder.encode(config.getCallback()));
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.scribe.builder.api.DefaultApi20#createService(org.scribe.model.OAuthConfig)
-     */
     @Override
     public OAuthService createService(OAuthConfig config) {
         return new DropboxOAuth2Service(this, config);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.scribe.builder.api.DefaultApi20#getAccessTokenVerb()
-     */
     @Override
     public Verb getAccessTokenVerb() {
         return Verb.POST;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.scribe.builder.api.DefaultApi20#getAccessTokenExtractor()
-     */
     @Override
     public AccessTokenExtractor getAccessTokenExtractor() {
         // Dropbox returns a JSONObject thus we need the JsonTokenExtractor to extract the 'access_token'
@@ -150,11 +125,6 @@ public class DropboxApi2 extends DefaultApi20 {
             this.config = config;
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see org.scribe.oauth.OAuth20ServiceImpl#getAccessToken(org.scribe.model.Token, org.scribe.model.Verifier)
-         */
         @Override
         public Token getAccessToken(Token requestToken, Verifier verifier) {
             OAuthRequest request = new OAuthRequest(api.getAccessTokenVerb(), api.getAccessTokenEndpoint());
@@ -168,11 +138,6 @@ public class DropboxApi2 extends DefaultApi20 {
             return api.getAccessTokenExtractor().extract(response.getBody());
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.scribe.oauth.OAuth20ServiceImpl#signRequest(org.scribe.model.Token, org.scribe.model.OAuthRequest)
-         */
         @Override
         public void signRequest(Token accessToken, OAuthRequest request) {
             request.addQuerystringParameter("authorization", "Bearer " + accessToken.getToken());

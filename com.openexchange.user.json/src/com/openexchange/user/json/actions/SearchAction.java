@@ -69,7 +69,6 @@ import com.openexchange.contacts.json.mapping.ContactMapper;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.search.Order;
@@ -78,6 +77,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 import com.openexchange.user.json.Constants;
 import com.openexchange.user.json.UserContact;
@@ -276,7 +276,7 @@ public final class SearchAction extends AbstractUserAction {
             }
 
             return i;
-        } catch (final NumberFormatException exc) {
+        } catch (NumberFormatException exc) {
             throw OXJSONExceptionCodes.INVALID_VALUE.create(exc, name, tmp);
         }
     }
@@ -318,7 +318,7 @@ public final class SearchAction extends AbstractUserAction {
             }
 
             return d;
-        } catch (final NumberFormatException exc) {
+        } catch (NumberFormatException exc) {
             throw OXJSONExceptionCodes.INVALID_VALUE.create(exc, name, tmp);
         }
     }

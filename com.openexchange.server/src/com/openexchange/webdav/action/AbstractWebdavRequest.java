@@ -77,7 +77,7 @@ public abstract class AbstractWebdavRequest implements WebdavRequest {
 
     @Override
     public WebdavResource getResource() throws WebdavProtocolException {
-        if(res != null) {
+        if (res != null) {
             return res;
         }
         return res = factory.resolveResource(getUrl());
@@ -85,10 +85,10 @@ public abstract class AbstractWebdavRequest implements WebdavRequest {
 
     @Override
     public WebdavResource getDestination() throws WebdavProtocolException {
-        if(null == getDestinationUrl()) {
+        if (null == getDestinationUrl()) {
             return null;
         }
-        if(dest != null) {
+        if (dest != null) {
             return dest;
         }
         return dest = factory.resolveResource(getDestinationUrl());
@@ -96,7 +96,7 @@ public abstract class AbstractWebdavRequest implements WebdavRequest {
 
     @Override
     public WebdavCollection getCollection() throws WebdavProtocolException {
-        if(res != null && res.isCollection()) {
+        if (res != null && res.isCollection()) {
             return (WebdavCollection) res;
         }
         return (WebdavCollection) (res = factory.resolveCollection(getUrl()));
@@ -113,7 +113,7 @@ public abstract class AbstractWebdavRequest implements WebdavRequest {
     @Override
     public IfHeader getIfHeader() throws IfHeaderParseException {
         final String ifHeader = getHeader("If");
-        if(ifHeader == null) {
+        if (ifHeader == null) {
             return null;
         }
         return new IfHeaderParser().parse(getHeader("If"));
@@ -122,7 +122,7 @@ public abstract class AbstractWebdavRequest implements WebdavRequest {
     @Override
     public int getDepth(final int def){
         final String depth = getHeader("depth");
-        if(null == depth) {
+        if (null == depth) {
             return def;
         }
         return "Infinity".equalsIgnoreCase(depth) ? WebdavCollection.INFINITY : Integer.parseInt(depth);
@@ -135,7 +135,7 @@ public abstract class AbstractWebdavRequest implements WebdavRequest {
 
     @Override
     public boolean hasBody() {
-        if(getHeader("Content-Length") == null) {
+        if (getHeader("Content-Length") == null) {
             return false;
         }
         int length;

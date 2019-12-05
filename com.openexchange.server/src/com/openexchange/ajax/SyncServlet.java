@@ -122,7 +122,7 @@ public class SyncServlet extends PermissionServlet {
         Tools.disableCaching(resp);
         try {
             actionPut(req, resp);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             switch (e.getCategories().get(0).getLogLevel()) {
                 case TRACE:
                     LOG.trace("", e);
@@ -147,10 +147,10 @@ public class SyncServlet extends PermissionServlet {
             response.setException(e);
             try {
                 ResponseWriter.write(response, writer, localeFrom(getSessionObject(req)));
-            } catch (final JSONException e1) {
+            } catch (JSONException e1) {
                 LOG.error("", e1);
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             final OXException wrapper = getWrappingOXException(e);
             LOG.error("", wrapper);
             final Writer writer = resp.getWriter();
@@ -158,7 +158,7 @@ public class SyncServlet extends PermissionServlet {
             response.setException(wrapper);
             try {
                 ResponseWriter.write(response, writer, localeFrom(getSessionObject(req)));
-            } catch (final JSONException e1) {
+            } catch (JSONException e1) {
                 LOG.error("", e1);
             }
         }
@@ -179,7 +179,7 @@ public class SyncServlet extends PermissionServlet {
     private final void actionPutClearFolderContent(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         try {
             actionPutClearFolderContent(getSessionObject(req), resp.getWriter(), getBody(req), ParamContainer.getInstance(req, resp));
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             writeErrorResponse((HttpServletResponseWrapper) resp, e, getSessionObject(req));
         }
     }
@@ -191,7 +191,7 @@ public class SyncServlet extends PermissionServlet {
         final Response response;
         try {
             response = new Response(sessionObj);
-        } catch (final OXException e1) {
+        } catch (OXException e1) {
             ResponseWriter.write(new Response().setException(e1), writer, localeFrom(sessionObj));
             return;
         }
@@ -225,7 +225,7 @@ public class SyncServlet extends PermissionServlet {
                         FolderObject delFolderObj;
                         try {
                             delFolderObj = access.getFolderObject(delFolderId);
-                        } catch (final OXException exc) {
+                        } catch (OXException exc) {
                             LOG.warn("", exc);
                             continue NextId;
                         }
@@ -257,7 +257,7 @@ public class SyncServlet extends PermissionServlet {
                     mailInterface = null;
                 }
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             switch (e.getCategories().get(0).getLogLevel()) {
                 case TRACE:
                     LOG.trace("", e);
@@ -281,7 +281,7 @@ public class SyncServlet extends PermissionServlet {
             if (!e.getCategory().equals(Category.CATEGORY_PERMISSION_DENIED)) {
                 response.setException(e);
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             final OXException wrapper = getWrappingOXException(e);
             LOG.error("", wrapper);
             response.setException(wrapper);
@@ -311,7 +311,7 @@ public class SyncServlet extends PermissionServlet {
         response.setException(e);
         try {
             ResponseWriter.write(response, writer, localeFrom(session));
-        } catch (final JSONException e1) {
+        } catch (JSONException e1) {
             LOG.error("", e1);
         }
     }

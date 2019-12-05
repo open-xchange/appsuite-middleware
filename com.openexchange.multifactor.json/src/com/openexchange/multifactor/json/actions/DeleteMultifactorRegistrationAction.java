@@ -51,10 +51,10 @@ package com.openexchange.multifactor.json.actions;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.stream.Collectors;
-import org.json.JSONArray;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+import org.json.JSONArray;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.multifactor.MultifactorAuthenticator;
@@ -145,9 +145,6 @@ public class DeleteMultifactorRegistrationAction extends AbstractMultifactorActi
         return false == devices.stream().anyMatch((device) -> !device.isBackup());
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.multifactor.json.actions.AbstractMultifactorAction#doPerform(com.openexchange.multifactor.json.actions.AJAXMultifactorRequest)
-     */
     @Override
     protected AJAXRequestResult doPerform(AJAXMultifactorRequest request) throws OXException {
         final MultifactorProvider provider = requireProvider(request.getProviderName());

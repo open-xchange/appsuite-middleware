@@ -95,6 +95,7 @@ import com.openexchange.mail.json.compose.share.spi.MessageGenerator;
 import com.openexchange.mail.json.compose.share.spi.ShareLinkGenerator;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
+import com.openexchange.regional.RegionalSettingsService;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.templating.TemplateService;
@@ -246,6 +247,30 @@ public class ShareComposeActivator extends HousekeepingActivator {
                 }
             };
             track(TemplateService.class, tracker);
+        }
+
+        {
+            ServiceTrackerCustomizer<RegionalSettingsService, RegionalSettingsService> tracker = new ServiceTrackerCustomizer<RegionalSettingsService, RegionalSettingsService>() {
+
+                @Override
+                public void removedService(ServiceReference<RegionalSettingsService> reference, RegionalSettingsService service) {
+                    MessageGenerators.setRegionalSettingsService(null);
+                    context.ungetService(reference);
+                }
+
+                @Override
+                public void modifiedService(ServiceReference<RegionalSettingsService> reference, RegionalSettingsService service) {
+                    // Ignore
+                }
+
+                @Override
+                public RegionalSettingsService addingService(ServiceReference<RegionalSettingsService> reference) {
+                    RegionalSettingsService service = context.getService(reference);
+                    MessageGenerators.setRegionalSettingsService(service);
+                    return service;
+                }
+            };
+            track(RegionalSettingsService.class, tracker);
         }
 
         openTrackers();

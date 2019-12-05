@@ -290,7 +290,7 @@ public class Metadata {
     }
 
     public static Metadata get(final int id){
-        switch(id){
+        switch (id){
         case LAST_MODIFIED : return LAST_MODIFIED_LITERAL;
         case CREATION_DATE : return CREATION_DATE_LITERAL;
         case MODIFIED_BY: return MODIFIED_BY_LITERAL;
@@ -355,7 +355,7 @@ public class Metadata {
     }
 
     public Object doSwitch(final MetadataSwitcher switcher){
-        switch(id){
+        switch (id){
         case LAST_MODIFIED : return switcher.lastModified();
         case CREATION_DATE : return switcher.creationDate();
         case MODIFIED_BY: return switcher.modifiedBy();
@@ -402,7 +402,7 @@ public class Metadata {
     }
 
     public static AttachmentField getAttachmentField(final Metadata attachmentCompatible) {
-        switch(attachmentCompatible.getId()) {
+        switch (attachmentCompatible.getId()) {
         case FILENAME : return AttachmentField.FILENAME_LITERAL;
         case FILE_SIZE : return AttachmentField.FILE_SIZE_LITERAL;
         case FILE_MIMETYPE : return AttachmentField.FILE_MIMETYPE_LITERAL;

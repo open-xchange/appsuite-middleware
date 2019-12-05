@@ -71,7 +71,6 @@ import org.slf4j.Logger;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.imap.IMAPCapabilities;
 import com.openexchange.imap.IMAPFolderStorage;
 import com.openexchange.imap.IMAPProvider;
@@ -111,6 +110,7 @@ import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadRenamer;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.imap.IMAPFolder;
@@ -533,7 +533,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
                     this.imapFolderInUse = null;
                     try {
                         imapFolder.close(false);
-                    } catch (final Exception e) {
+                    } catch (Exception e) {
                         // Ignore
                     }
                     this.additionalProps = null;
@@ -688,7 +688,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
                 this.imapFolderInUse = null;
                 try {
                     imapFolderInUse.close(false);
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     // Ignore
                 }
             }
@@ -923,7 +923,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
         mailMessage.setSentDate(MimeMessageUtility.getSentDate(im));
         try {
             mailMessage.setSize(im.getSize());
-        } catch (final Exception e) {
+        } catch (Exception e) {
             // Size unavailable
             mailMessage.setSize(-1);
         }
@@ -941,7 +941,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
         if (null != mailAccess) {
             try {
                 mailAccess.close(false);
-            } catch (final Exception x) {
+            } catch (Exception x) {
                 // Ignore
             }
         }

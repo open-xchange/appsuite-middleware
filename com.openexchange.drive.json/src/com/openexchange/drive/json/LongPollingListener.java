@@ -53,6 +53,7 @@ import java.util.List;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.events.DriveEvent;
+import com.openexchange.drive.events.subscribe.SubscriptionMode;
 import com.openexchange.exception.OXException;
 
 /**
@@ -101,5 +102,12 @@ public interface LongPollingListener {
      * @return The root folder identifiers
      */
     List<String> getRootFolderIDs();
+
+    /**
+     * Gets the subscription mode of the listener.
+     * 
+     * @return The subscription mode
+     */
+    SubscriptionMode getSubscriptionMode();
 
 }

@@ -157,7 +157,7 @@ public class SizeTestCommandParser extends AbstractTestCommandParser {
             final List<Object> argList = new ArrayList<Object>();
             String matcher = CommandParserJSONUtil.getString(jsonObject, BodyTestField.comparison.name(), commandName);
             String normalizedMatcher = MatchType.getNormalName(matcher);
-            if(normalizedMatcher != null){
+            if (normalizedMatcher != null){
                 argList.add(ArgumentUtil.createTagArgument(normalizedMatcher));
                 argList.add(ArgumentUtil.createNumberArgument(sizeToSend));
                 return NotTestCommandUtil.wrapTestCommand(new TestCommand(TestCommand.Commands.SIZE, argList, new ArrayList<TestCommand>()));
@@ -184,7 +184,7 @@ public class SizeTestCommandParser extends AbstractTestCommandParser {
         if (matchType == null) {
             jsonObject.put(SizeTestField.comparison.name(), MatchType.is.name());
         } else {
-            if(transformToNotMatcher){
+            if (transformToNotMatcher){
                 String notMatchType = MatchType.getNotNameForArgumentName(matchType);
                 jsonObject.put(SizeTestField.comparison.name(), notMatchType);
             } else {

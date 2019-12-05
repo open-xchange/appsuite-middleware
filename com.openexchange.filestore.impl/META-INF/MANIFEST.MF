@@ -2,12 +2,11 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: The file storage implementation bundle
 Bundle-SymbolicName: com.openexchange.filestore.impl
-Bundle-Version: 7.10.2
+Bundle-Version: 7.10.3
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.google.common.cache,
  com.google.common.collect,
- com.openexchange.caching,
  com.openexchange.config,
  com.openexchange.config.cascade,
  com.openexchange.configuration,
@@ -34,7 +33,9 @@ Import-Package: com.google.common.cache,
  com.openexchange.osgi,
  com.openexchange.server,
  com.openexchange.session,
+ com.openexchange.threadpool,
  com.openexchange.tools.update,
+ com.openexchange.uploaddir,
  com.openexchange.user,
  gnu.trove,
  gnu.trove.decorator,
@@ -69,6 +70,7 @@ Import-Package: com.google.common.cache,
  org.apache.commons.io.input,
  org.apache.commons.io.monitor,
  org.apache.commons.io.output,
+ org.apache.commons.io.serialization,
  org.osgi.framework,
  org.osgi.util.tracker,
  org.slf4j

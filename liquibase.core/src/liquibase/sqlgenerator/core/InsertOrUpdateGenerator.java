@@ -104,7 +104,7 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
             }
         }
         // this isn't very elegant but the code fails above without any columns to update
-        if(updateStatement.getNewColumnValues().isEmpty()) {
+        if (updateStatement.getNewColumnValues().isEmpty()) {
         	throw new LiquibaseException("No fields to update in set clause");
         }
 

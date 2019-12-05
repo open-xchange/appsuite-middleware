@@ -156,11 +156,11 @@ public class WhiteboardContextService implements ServiceTrackerCustomizer<Contex
     }
 
     private ContextService getDelegate() {
-        if(delegate != null) {
+        if (delegate != null) {
             return delegate;
         }
         ServiceReference<ContextService> serviceReference = context.getServiceReference(ContextService.class);
-        if(serviceReference == null) {
+        if (serviceReference == null) {
             return null;
         }
         return context.getService(serviceReference);

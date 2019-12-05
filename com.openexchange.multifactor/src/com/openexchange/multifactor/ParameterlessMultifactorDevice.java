@@ -75,9 +75,6 @@ public class ParameterlessMultifactorDevice extends AbstractMultifactorDevice {
         enable(delegate.isEnabled());
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.multifactor.AbstractMultifactorDevice#setParameter(java.lang.String, java.lang.Object)
-     */
     @Override
     protected void setParameter(String name, Object value) {
         throw new UnsupportedOperationException();

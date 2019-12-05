@@ -49,84 +49,96 @@
 
 package com.openexchange.metrics;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import javax.management.ObjectName;
+import com.google.common.collect.ImmutableMap;
 
 /**
- * 
+ *
  * {@link MetricDescriptor}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class MetricDescriptor {
 
-    private String group;
-    private String name;
-    private String unit;
-    private MetricType metricType;
-    private TimeUnit rate;
-    private Supplier<?> metricSupplier;
-    private String fullName;
-    private String description;
-    private Map<String, String> dimensions;
+    private final String group;
+    private final String name;
+    private final String unit;
+    private final MetricType metricType;
+    private final TimeUnit rate;
+    private final Supplier<?> metricSupplier;
+    private final String fullName;
+    private final String description;
+    private final Map<String, String> dimensions;
 
     /**
-     * Initialises a new {@link MetricDescriptor}.
+     * Initializes a new {@link MetricDescriptor}.
      */
-    public MetricDescriptor() {
+    MetricDescriptor(String group, String name, String unit, MetricType metricType, TimeUnit rate, Supplier<?> metricSupplier, String fullName, String description, Map<String, String> dimensions) {
         super();
+        this.group = group;
+        this.name = name;
+        this.unit = unit;
+        this.metricType = metricType;
+        this.rate = rate;
+        this.metricSupplier = metricSupplier;
+        this.fullName = fullName;
+        this.description = description;
+        this.dimensions = dimensions == null || dimensions.isEmpty() ? null : ImmutableMap.copyOf(dimensions);
     }
 
+
     /**
-     * Returns the group of this metric
-     * 
-     * @return the group of this metric
+     * Gets the group name of this metric.
+     *
+     * @return The group name of this metric
      */
     public String getGroup() {
         return group;
     }
 
     /**
-     * Returns the name of this metric
-     * 
-     * @return the name of this metric
+     * Gets the name of this metric.
+     *
+     * @return The name of this metric
      */
     public String getName() {
         return name;
     }
 
     /**
-     * Gets the metricType
+     * Gets the metric type.
      *
-     * @return The metricType
+     * @return The metric type
      */
     public MetricType getMetricType() {
         return metricType;
     }
 
     /**
-     * Gets the rate
-     * 
-     * @return the rate
+     * Gets the rate.
+     *
+     * @return The rate
      */
     public TimeUnit getRate() {
         return rate;
     }
 
     /**
-     * Gets the unit
-     * 
-     * @return the unit
+     * Gets the unit.
+     *
+     * @return The unit
      */
     public String getUnit() {
         return unit;
     }
 
     /**
-     * Gets the metric {@link Supplier} or <code>null</code> if none is specified
+     * Gets the metric {@link Supplier} or <code>null</code> if none is specified.
      *
      * @return The metric {@link Supplier} or <code>null</code> if none is specified
      */
@@ -135,8 +147,8 @@ public class MetricDescriptor {
     }
 
     /**
-     * Returns the full name of the metric
-     * 
+     * Gets the fully qualifying name of the metric.
+     *
      * @return The full name of the metric
      */
     public String getFullName() {
@@ -144,7 +156,7 @@ public class MetricDescriptor {
     }
 
     /**
-     * Gets the description
+     * Gets the description.
      *
      * @return The description
      */
@@ -152,11 +164,15 @@ public class MetricDescriptor {
         return description;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#hashCode()
+    /**
+     * Gets the optional dimensions.
+     *
+     * @return The optional dimensions
      */
+    public Optional<Map<String, String>> getDimensions() {
+        return Optional.ofNullable(dimensions);
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -168,14 +184,10 @@ public class MetricDescriptor {
         result = prime * result + ((name == null) ? 0 : name.hashCode());
         result = prime * result + ((rate == null) ? 0 : rate.hashCode());
         result = prime * result + ((unit == null) ? 0 : unit.hashCode());
+        result = prime * result + ((dimensions == null) ? 0 : dimensions.hashCode());
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
     @Override
     public boolean equals(final Object obj) {
         if (this == obj) {
@@ -229,106 +241,21 @@ public class MetricDescriptor {
         } else if (!unit.equals(other.unit)) {
             return false;
         }
+        if (dimensions == null) {
+            if (other.dimensions != null) {
+                return false;
+            }
+        } else if (!dimensions.equals(other.dimensions)) {
+            return false;
+        }
         return true;
     }
 
-    ////////////////////////////// SETTERS //////////////////////////////
+    /////////////////////////////// Builder /////////////////////////////////
 
     /**
-     * Sets the rate
-     * 
-     * @param rate to set
-     */
-    void setRate(final TimeUnit rate) {
-        this.rate = rate;
-    }
-
-    /**
-     * Sets the unit
-     * 
-     * @param unit to set
-     */
-    void setUnit(final String unit) {
-        this.unit = unit;
-    }
-
-    /**
-     * Sets the group for this metric
-     * 
-     * @param group the group to set
-     */
-    void setGroup(final String group) {
-        this.group = group;
-    }
-
-    /**
-     * Sets the name for this metric
-     * 
-     * @param name the name to set
-     */
-    void setName(final String name) {
-        this.name = name;
-    }
-
-    /**
-     * Sets the metricType
+     * Initializes a new {@link MetricBuilder}
      *
-     * @param metricType The metricType to set
-     */
-    void setMetricType(final MetricType metricType) {
-        this.metricType = metricType;
-    }
-
-    /**
-     * Sets the metricSupplier
-     *
-     * @param metricSupplier The metricSupplier to set
-     */
-    void setMetricSupplier(final Supplier<?> metricSupplier) {
-        this.metricSupplier = metricSupplier;
-    }
-
-    /**
-     * Sets the full qualified name of the metric
-     * 
-     * @param fqn The full qualified name of the metric
-     */
-    void setFQN(final String fqn) {
-        fullName = fqn;
-    }
-
-    /**
-     * Sets the description
-     *
-     * @param description The description to set
-     */
-    public void setDescription(final String description) {
-        this.description = description;
-    }
-    
-    
-    /**
-     * Sets the dimensions
-     *
-     * @param dimensions The dimensions to set
-     */
-    public void setDimensions(Map<String, String> dimensions) {
-        this.dimensions = dimensions;
-    }
-    
-    
-    /**
-     * Gets the dimensions
-     *
-     * @return The dimensions
-     */
-    public Map<String, String> getDimensions() {
-        return dimensions;
-    }
-
-    /**
-     * Initialises a new {@link MetricBuilder}
-     * 
      * @param group The group
      * @param name The metric's name
      * @param metricType metric's type
@@ -338,18 +265,14 @@ public class MetricDescriptor {
         return new MetricBuilder(group, name, metricType);
     }
 
-    /////////////////////////////// Builder /////////////////////////////////
-
     /**
-     * {@link AbstractBuilder}
+     * The builder ofr an instance of <code>MetricDescriptor</code>.
      */
     public static class MetricBuilder {
 
-        protected static final String MISSING_FIELD = "A %s must be set!";
-
-        protected final String group;
-        protected final String name;
-        protected final MetricType metricType;
+        private final String group;
+        private final String name;
+        private final MetricType metricType;
         private TimeUnit rate = TimeUnit.SECONDS;
         private String unit = "events";
         private Supplier<?> supplier;
@@ -357,13 +280,13 @@ public class MetricDescriptor {
         private Map<String, String> dimensions;
 
         /**
-         * Initialises a new {@link AbstractBuilder}.
-         * 
+         * Initializes a new {@link AbstractBuilder}.
+         *
          * @param group The group for the metric
          * @param name The name for the metric
          * @param metricType The {@link MetricType}
          */
-        public MetricBuilder(final String group, final String name, final MetricType metricType) {
+        MetricBuilder(final String group, final String name, final MetricType metricType) {
             super();
             this.group = group;
             this.name = name;
@@ -372,7 +295,7 @@ public class MetricDescriptor {
 
         /**
          * Set the {@link TimeUnit} rate
-         * 
+         *
          * @param rate The {@link TimeUnit} rate to set
          * @return the {@link MetricBuilder} for chained calls
          */
@@ -383,7 +306,7 @@ public class MetricDescriptor {
 
         /**
          * Set the unit
-         * 
+         *
          * @param unit The unit to set
          * @return the {@link MetricBuilder} for chained calls
          */
@@ -394,7 +317,7 @@ public class MetricDescriptor {
 
         /**
          * Set the {@link Supplier}
-         * 
+         *
          * @param supplier The {@link Supplier} to set
          * @return the {@link MetricBuilder} for chained calls
          */
@@ -405,7 +328,7 @@ public class MetricDescriptor {
 
         /**
          * Sets the description
-         * 
+         *
          * @param description the description to set
          * @return the {@link MetricBuilder} for chained calls
          */
@@ -413,81 +336,92 @@ public class MetricDescriptor {
             this.description = description;
             return this;
         }
-        
+
         /**
          * Adds an additional dimension to this descriptor.
-         * 
-         * This dimensions are used to create the {@link ObjectName} for the mbean.
+         * <p>
+         * This dimensions are used to create the {@link ObjectName} for the MBean.
          * So please see {@link ObjectName} descriptions for limitations.
-         * 
+         *
          * @param key The key of the dimension. Must not be 'type' or 'name'
          * @param value The value of the dimension
          * @return the {@link MetricBuilder} for chained calls
+         * @throws IllegalArgumentException If either key or value are invalid
          */
         public MetricBuilder addDimension(String key, String value) {
-            if("type".equals(key) || "name".equals(key)) {
+            if (key == null) {
+                throw new IllegalArgumentException("The key must not be null");
+            }
+            if (value == null) {
+                throw new IllegalArgumentException("The value must not be null");
+            }
+            if ("type".equals(key) || "name".equals(key)) {
                 throw new IllegalArgumentException("The key is not allowed");
             }
-            if(dimensions == null) {
-                dimensions = new ConcurrentHashMap<>();
+            checkKey(key);
+            checkValue(value);
+
+            if (dimensions == null) {
+                dimensions = new LinkedHashMap<>();
             }
             dimensions.put(key, value);
             return this;
         }
 
+        private static void checkKey(String key) {
+            int len = key.length();
+            for (int i = len; i-- > 0;) {
+                char c = key.charAt(i);
+                switch (c) {
+                    case '*':
+                    case '?':
+                    case ',':
+                    case ':':
+                    case '\n':
+                        String ichar = ((c == '\n') ? "\\n" : "" + c);
+                        throw new IllegalArgumentException("Invalid character in key: '" + ichar + "'");
+                    default:
+                        break;
+                }
+            }
+        }
+
+        private static void checkValue(String value) {
+            int len = value.length();
+            for (int i = len; i-- > 0;) {
+                char c = value.charAt(i);
+                switch (c) {
+                    case '=':
+                    case ':':
+                    case '\n':
+                        String ichar = ((c == '\n') ? "\\n" : "" + c);
+                        throw new IllegalArgumentException("Invalid character '" + ichar + "' in value");
+                    default:
+                        break;
+                }
+            }
+        }
+
         /**
          * Builds and returns the {@link MetricDescriptor}
-         * 
+         *
          * @return the {@link MetricDescriptor}
          */
         public MetricDescriptor build() {
             checkNotNull(group, "group");
             checkNotNull(name, "name");
-            final MetricDescriptor descriptor = prepare();
-            fill(descriptor);
-            return descriptor;
-        }
-
-        /**
-         * Performs a preliminary check of the descriptor's values
-         */
-        protected void check() {
-            checkNotNull(rate, "rate");
-            checkNotNull(unit, "unit");
-        }
-
-        /**
-         * Prepares the {@link MetricDescriptor}
-         * 
-         * @return The prepared {@link MetricDescriptor} as type {@link T}
-         */
-        protected MetricDescriptor prepare() {
-            final MetricDescriptor descriptor = new MetricDescriptor();
-            descriptor.setGroup(group);
-            descriptor.setName(name);
-            return descriptor;
-        }
-
-        /**
-         * Fills values of the specified descriptor
-         * 
-         * @param descriptor The descriptor of which the values shall be filled
-         */
-        protected void fill(final MetricDescriptor descriptor) {
-            descriptor.setRate(rate);
-            descriptor.setUnit(unit);
-            descriptor.setMetricSupplier(supplier);
-            descriptor.setMetricType(metricType);
-            descriptor.setFQN(group + "." + name);
-            descriptor.setDescription(description);
-            if(dimensions != null) {
-                descriptor.setDimensions(dimensions);
+            StringBuilder fqn = new StringBuilder(group).append('.').append(name);
+            if (dimensions != null) {
+                for (Map.Entry<String, String> dimension : dimensions.entrySet()) {
+                    fqn.append('.').append(dimension.getKey()).append('-').append(dimension.getValue());
+                }
             }
+            return new MetricDescriptor(group, name, unit, metricType, rate, supplier, fqn.toString(), description, dimensions);
         }
 
         /**
          * Check for <code>null</code> reference
-         * 
+         *
          * @param reference The reference to check for <code>null</code>
          * @param errorMessage The error message for the {@link IllegalArgumentException}
          * @return The reference if not <code>null</code>
@@ -499,5 +433,6 @@ public class MetricDescriptor {
             }
             return reference;
         }
-    }
+    } // End of MetricBuilder
+
 }

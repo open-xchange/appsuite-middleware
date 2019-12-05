@@ -57,7 +57,7 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.settings.PreferencesItemService;
-import com.openexchange.i18n.I18nService;
+import com.openexchange.i18n.I18nServiceRegistry;
 import com.openexchange.java.Charsets;
 import com.openexchange.messaging.json.Enabled;
 import com.openexchange.messaging.json.GUI;
@@ -98,10 +98,15 @@ public class MessagingJSONActivator extends AJAXModuleActivator {
     }
 
     @Override
+    protected Class<?>[] getOptionalServices() {
+        return new Class[] { I18nServiceRegistry.class };
+    }
+
+    @Override
     protected void handleAvailability(final Class<?> clazz) {
         try {
             register();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("", e);
         }
     }
@@ -130,7 +135,6 @@ public class MessagingJSONActivator extends AJAXModuleActivator {
             writer = new MessagingMessageWriter();
             rememberTracker(new ContentWriterTracker(context, writer));
             rememberTracker(new HeaderWriterTracker(context, writer));
-            track(I18nService.class, new I18nServiceCustomizer(context));
 
             openTrackers();
 
@@ -138,7 +142,7 @@ public class MessagingJSONActivator extends AJAXModuleActivator {
             fileInputStreamRegistry.start(context);
 
             register();
-        } catch (final Exception x) {
+        } catch (Exception x) {
             LOG.error("", x);
             throw x;
         }
@@ -210,7 +214,7 @@ public class MessagingJSONActivator extends AJAXModuleActivator {
             }
             Services.setServiceLookup(null);
             super.stopBundle();
-        } catch (final Exception x) {
+        } catch (Exception x) {
             LOG.error("", x);
             throw x;
         }

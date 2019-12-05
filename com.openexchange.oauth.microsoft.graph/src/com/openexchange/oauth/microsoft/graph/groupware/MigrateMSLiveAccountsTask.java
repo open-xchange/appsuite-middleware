@@ -83,11 +83,6 @@ public class MigrateMSLiveAccountsTask implements UpdateTaskV2 {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.UpdateTaskV2#perform(com.openexchange.groupware.update.PerformParameters)
-     */
     @Override
     public void perform(PerformParameters params) throws OXException {
         Connection connection = params.getConnection();
@@ -95,34 +90,24 @@ public class MigrateMSLiveAccountsTask implements UpdateTaskV2 {
             stmt.setString(1, KnownApi.MICROSOFT_GRAPH.getServiceId());
             stmt.setString(2, DEPRECATED_SERVICE_ID);
             stmt.executeUpdate();
-        } catch (final SQLException x) {
+        } catch (SQLException x) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(x, x.getMessage());
         }
         try (PreparedStatement stmt = connection.prepareStatement(RENAME_DISPLAY_NAME)) {
             stmt.setString(1, "My " + KnownApi.MICROSOFT_GRAPH.getDisplayName() + " account");
             stmt.setString(2, DEPRECATED_DISPLAY_NAME);
             stmt.executeUpdate();
-        } catch (final SQLException x) {
+        } catch (SQLException x) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(x, x.getMessage());
         }
         // Also rename accounts with numerical index, e.g. 'My MS Live account (1)' ?
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.UpdateTaskV2#getDependencies()
-     */
     @Override
     public String[] getDependencies() {
         return new String[0];
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.UpdateTaskV2#getAttributes()
-     */
     @Override
     public TaskAttributes getAttributes() {
         return new Attributes(UpdateConcurrency.BLOCKING);

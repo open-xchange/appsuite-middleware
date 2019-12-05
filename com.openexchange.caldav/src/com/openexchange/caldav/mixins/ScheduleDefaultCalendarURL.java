@@ -49,6 +49,7 @@
 
 package com.openexchange.caldav.mixins;
 
+import static com.openexchange.dav.DAVTools.getExternalPath;
 import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.caldav.Tools;
@@ -99,10 +100,11 @@ public class ScheduleDefaultCalendarURL extends SingleXMLPropertyMixin {
             if (null != defaultFolder) {
                 value = Tools.encodeFolderId(defaultFolder.getID());
             }
+            return null == value ? null : "<D:href>" + getExternalPath(factory.getConfigViewFactory(), "/caldav/" + value + "/") + "</D:href>";
         } catch (OXException e) {
             org.slf4j.LoggerFactory.getLogger(ScheduleDefaultCalendarURL.class).warn("Error determining 'schedule-default-calendar-URL'", e);
+            return null;
         }
-        return null == value ? null : "<D:href>/caldav/" + value + "/</D:href>";
     }
 
 }

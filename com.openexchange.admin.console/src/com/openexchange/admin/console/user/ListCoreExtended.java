@@ -96,7 +96,7 @@ public abstract class ListCoreExtended extends ListCore {
             }
 
             return maincall(parser, oxusr, pattern, ignoreCase.booleanValue(), ctx, auth, includeGuests.booleanValue(), excludeUsers.booleanValue());
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw e;
         }
     }

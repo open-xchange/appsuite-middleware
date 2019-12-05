@@ -87,7 +87,7 @@ public final class FileStorageFolderStorageActivator extends HousekeepingActivat
             final Dictionary<String, String> dictionary = new Hashtable<String, String>();
             dictionary.put("tree", FolderStorage.REAL_TREE_ID);
             registerService(FolderStorage.class, new FileStorageFolderStorage(this), dictionary);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             logger.error("", e);
             throw e;
         }

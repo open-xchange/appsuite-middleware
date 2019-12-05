@@ -66,8 +66,6 @@ import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.alias.UserAliasStorage;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
@@ -80,6 +78,8 @@ import com.openexchange.share.impl.DefaultGuestInfo;
 import com.openexchange.share.impl.ShareUtils;
 import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.user.User;
+import com.openexchange.user.UserExceptionCode;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserPermissionService;
 

@@ -1,3 +1,0 @@
-requests:
-  - InitRequest.yaml
-  - LogoutRequest.yaml

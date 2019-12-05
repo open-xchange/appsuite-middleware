@@ -77,7 +77,6 @@ import com.openexchange.groupware.infostore.database.impl.InfostoreQueryCatalog.
 import com.openexchange.groupware.infostore.database.impl.InfostoreQueryCatalog.Table;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.infostore.utils.SetSwitch;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.AsciiReader;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.GeoLocation;
@@ -85,6 +84,7 @@ import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
+import com.openexchange.user.User;
 
 public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
 
@@ -256,7 +256,7 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
                 if (!next) {
                     close();
                 }
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 this.exception = InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
             }
         }
@@ -322,7 +322,7 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
     @Override
     public DocumentMetadata next() throws OXException {
         hasNext();
-        if(exception != null) {
+        if (exception != null) {
             throw exception;
         }
         initNext = true;
@@ -412,7 +412,7 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
                             set.setValue(process(m, rs.getObject(column)));
                             break;
                     }
-                } catch (final SQLException e) {
+                } catch (SQLException e) {
                     throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, sb.append("Failed to query \"").append(column).append("\" from result set.").toString());
                 }
                 m.doSwitch(set);
@@ -423,7 +423,7 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
     }
 
     private Object process(final Metadata m, final Object object) {
-        switch(m.getId()) {
+        switch (m.getId()) {
         default : return object;
         case Metadata.LAST_MODIFIED : case Metadata.CREATION_DATE : case Metadata.LAST_MODIFIED_UTC: return new Date(((Long)object).longValue());
         case Metadata.MODIFIED_BY : case Metadata.CREATED_BY : case Metadata.VERSION : case Metadata.ID:case  Metadata.COLOR_LABEL:

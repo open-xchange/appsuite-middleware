@@ -127,13 +127,13 @@ public final class JsonCacheServiceImpl implements JsonCacheService {
                 return null;
             }
             throw AjaxExceptionCodes.JSON_ERROR.create("Not a JSON value.");
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -151,9 +151,9 @@ public final class JsonCacheServiceImpl implements JsonCacheService {
             stmt.setInt(2, userId);
             stmt.setString(3, id);
             stmt.executeUpdate();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);
@@ -222,9 +222,9 @@ public final class JsonCacheServiceImpl implements JsonCacheService {
                 }
             }
             stmt.executeUpdate();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -272,7 +272,7 @@ public final class JsonCacheServiceImpl implements JsonCacheService {
                                     }
                                     throw AjaxExceptionCodes.JSON_ERROR.create("Not a JSON value.");
                                 }
-                            } catch (final JSONException e) {
+                            } catch (JSONException e) {
                                 // Read invalid JSON data
                                 prev = null;
                             }
@@ -326,11 +326,11 @@ public final class JsonCacheServiceImpl implements JsonCacheService {
             }
             stmt.executeUpdate();
             return true;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -371,7 +371,7 @@ public final class JsonCacheServiceImpl implements JsonCacheService {
                 boolean inserted;
                 try {
                     inserted = stmt.executeUpdate() > 0;
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     inserted = false;
                 }
                 if (inserted) {
@@ -387,12 +387,12 @@ public final class JsonCacheServiceImpl implements JsonCacheService {
             final boolean updated = (stmt.executeUpdate() > 0);
             con.commit();
             return updated;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             if (transactional) {
                 Databases.rollback(con);
             }
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             if (transactional) {
                 Databases.rollback(con);
             }
@@ -420,12 +420,12 @@ public final class JsonCacheServiceImpl implements JsonCacheService {
             stmt.setString(3, id);
             stmt.executeUpdate();
             con.commit();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             if (transactional) {
                 Databases.rollback(con);
             }
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             if (transactional) {
                 Databases.rollback(con);
             }

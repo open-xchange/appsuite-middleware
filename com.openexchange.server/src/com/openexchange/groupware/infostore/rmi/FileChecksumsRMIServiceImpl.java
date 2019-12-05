@@ -72,11 +72,6 @@ public class FileChecksumsRMIServiceImpl implements FileChecksumsRMIService {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.infostore.rmi.FileChecksumsRMIService#listFilesWithoutChecksumInContext(int)
-     */
     @Override
     public List<String> listFilesWithoutChecksumInContext(int contextId) throws RemoteException {
         try {
@@ -86,11 +81,6 @@ public class FileChecksumsRMIServiceImpl implements FileChecksumsRMIService {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.infostore.rmi.FileChecksumsRMIService#listFilesWithoutChecksumInDatabase(int)
-     */
     @Override
     public List<String> listFilesWithoutChecksumInDatabase(int databaseId) throws RemoteException {
         try {
@@ -100,11 +90,6 @@ public class FileChecksumsRMIServiceImpl implements FileChecksumsRMIService {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.infostore.rmi.FileChecksumsRMIService#listAllFilesWithoutChecksum()
-     */
     @Override
     public List<String> listAllFilesWithoutChecksum() throws RemoteException {
         try {
@@ -114,11 +99,6 @@ public class FileChecksumsRMIServiceImpl implements FileChecksumsRMIService {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.infostore.rmi.FileChecksumsRMIService#calculateMissingChecksumsInContext(int)
-     */
     @Override
     public List<String> calculateMissingChecksumsInContext(int contextId) throws RemoteException {
         try {
@@ -128,11 +108,6 @@ public class FileChecksumsRMIServiceImpl implements FileChecksumsRMIService {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.infostore.rmi.FileChecksumsRMIService#calculateMissingChecksumsInDatabase(int)
-     */
     @Override
     public List<String> calculateMissingChecksumsInDatabase(int databaseId) throws RemoteException {
         try {
@@ -142,11 +117,6 @@ public class FileChecksumsRMIServiceImpl implements FileChecksumsRMIService {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.infostore.rmi.FileChecksumsRMIService#calculateAllMissingChecksums()
-     */
     @Override
     public List<String> calculateAllMissingChecksums() throws RemoteException {
         try {

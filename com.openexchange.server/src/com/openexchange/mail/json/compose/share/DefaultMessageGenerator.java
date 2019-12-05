@@ -57,6 +57,7 @@ import static com.openexchange.mail.json.compose.share.ShareComposeConstants.USE
 import static com.openexchange.mail.text.HtmlProcessing.htmlFormat;
 import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -72,7 +73,6 @@ import org.apache.commons.lang.StringEscapeUtils;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.LocaleTools;
@@ -95,6 +95,8 @@ import com.openexchange.mailaccount.TransportAccount;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.notification.service.CommonNotificationVariables;
 import com.openexchange.notification.service.FullNameBuilderService;
+import com.openexchange.regional.RegionalSettings;
+import com.openexchange.regional.RegionalSettingsService;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.serverconfig.NotificationMailConfig;
@@ -105,6 +107,7 @@ import com.openexchange.share.notification.NotificationStrings;
 import com.openexchange.templating.OXTemplate;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 
 /**
@@ -336,7 +339,12 @@ public class DefaultMessageGenerator implements MessageGenerator {
     protected ComposedMailMessage generateInternalVersion(Recipient recipient, ShareComposeMessageInfo info, ShareReference shareReference, Map<String, String> shareHeaders, Map<String, String> cidMapping, int moreFiles) throws OXException {
         // Generate locale-specific version using user's locale
         Locale locale = recipient.getUser().getLocale();
-        return generateLocaleSpecificVersion(locale, recipient, info, shareReference, shareHeaders, cidMapping, moreFiles);
+        RegionalSettingsService regionalSettingsService = MessageGenerators.getRegionalSettingsService();
+        if (null != regionalSettingsService) {
+            RegionalSettings regionalSettings = regionalSettingsService.get(shareReference.getContextId(), recipient.getUser().getId());
+            return generateLocaleSpecificVersion(locale, recipient, info, shareReference, shareHeaders, cidMapping, moreFiles, regionalSettings);
+        }
+        return generateLocaleSpecificVersion(locale, recipient, info, shareReference, shareHeaders, cidMapping, moreFiles, null);
     }
 
     /**
@@ -352,7 +360,7 @@ public class DefaultMessageGenerator implements MessageGenerator {
      */
     protected ComposedMailMessage generateExternalVersion(Locale localeForExternalRecipients, Recipient recipient, ShareComposeMessageInfo info, ShareReference shareReference, Map<String, String> shareHeaders, Map<String, String> cidMapping, int moreFiles) throws OXException {
         // Generate locale-specific version using the configured locale for external recipients
-        return generateLocaleSpecificVersion(localeForExternalRecipients, recipient, info, shareReference, shareHeaders, cidMapping, moreFiles);
+        return generateLocaleSpecificVersion(localeForExternalRecipients, recipient, info, shareReference, shareHeaders, cidMapping, moreFiles, null);
     }
 
     /**
@@ -363,10 +371,13 @@ public class DefaultMessageGenerator implements MessageGenerator {
      * @param info The share info object
      * @param shareReference The share reference
      * @param shareHeaders The share headers to add
+     * @param cidMapping
+     * @param moreFiles
+     * @param regionalSettings Optional regional settings used for date/time formatting
      * @return The generated message for specified locale
      * @throws OXException If message cannot be generated
      */
-    protected ComposedMailMessage generateLocaleSpecificVersion(Locale locale, Recipient recipient, ShareComposeMessageInfo info, ShareReference shareReference, Map<String, String> shareHeaders, Map<String, String> cidMapping, int moreFiles) throws OXException {
+    protected ComposedMailMessage generateLocaleSpecificVersion(Locale locale, Recipient recipient, ShareComposeMessageInfo info, ShareReference shareReference, Map<String, String> shareHeaders, Map<String, String> cidMapping, int moreFiles, RegionalSettings regionalSettings) throws OXException {
         ShareTransportComposeContext composeContext = info.getComposeContext();
         ComposedMailMessage composedMessage = Utilities.copyOfSourceMessage(composeContext);
 
@@ -380,7 +391,7 @@ public class DefaultMessageGenerator implements MessageGenerator {
                 StringBuilder textBuilder = new StringBuilder(text.length() + 512);
 
                 // Append the prefix that notifies about to access the message's attachment via provided share link
-                textBuilder.append(generatePrefix(locale, info, shareReference, false, cidMapping, moreFiles, false));
+                textBuilder.append(generatePrefix(locale, info, shareReference, false, cidMapping, moreFiles, false, regionalSettings));
 
                 // Append actual text
                 textBuilder.append(text);
@@ -392,7 +403,7 @@ public class DefaultMessageGenerator implements MessageGenerator {
                 StringBuilder plainTextBuilder = new StringBuilder(plainText.length() + 512);
 
                 // Append the prefix that notifies about to access the message's attachment via provided share link
-                plainTextBuilder.append(generatePrefix(locale, info, shareReference, loadPrefixFromTemplate(), cidMapping, moreFiles, true));
+                plainTextBuilder.append(generatePrefix(locale, info, shareReference, loadPrefixFromTemplate(), cidMapping, moreFiles, true, regionalSettings));
 
                 plainTextBuilder.append(plainText);
 
@@ -404,7 +415,7 @@ public class DefaultMessageGenerator implements MessageGenerator {
             StringBuilder textBuilder = new StringBuilder(text.length() + 512);
 
             // Append the prefix that notifies about to access the message's attachment via provided share link
-            textBuilder.append(generatePrefix(locale, info, shareReference, loadPrefixFromTemplate(), cidMapping, moreFiles, false));
+            textBuilder.append(generatePrefix(locale, info, shareReference, loadPrefixFromTemplate(), cidMapping, moreFiles, false, regionalSettings));
 
             // Append actual text
             textBuilder.append(text);
@@ -454,15 +465,19 @@ public class DefaultMessageGenerator implements MessageGenerator {
      * @param info The share info object
      * @param shareReference The share reference
      * @param fromTemplate <code>true</code> to generate the prefix by loading from template; otherwise <code>false</code>
+     * @param previews
+     * @param moreFiles
+     * @param isPlainText
+     * @param regionalSettings Optional regional settings used for date/time formatting
      * @return The generated prefix
      * @throws OXException If generating prefix from template fails
      */
-    protected String generatePrefix(Locale locale, ShareComposeMessageInfo info, ShareReference shareReference, boolean fromTemplate, Map<String, String> previews, int moreFiles, boolean isPlainText) throws OXException {
+    protected String generatePrefix(Locale locale, ShareComposeMessageInfo info, ShareReference shareReference, boolean fromTemplate, Map<String, String> previews, int moreFiles, boolean isPlainText, RegionalSettings regionalSettings) throws OXException {
         if (isPlainText) {
             HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
-            return htmlService.html2text(generatePrefixPlain(locale, info, shareReference), true);
+            return htmlService.html2text(generatePrefixPlain(locale, info, shareReference, regionalSettings), true);
         }
-        return fromTemplate ? loadPrefixFromTemplate(locale, info, shareReference, previews, moreFiles) : generatePrefixPlain(locale, info, shareReference);
+        return fromTemplate ? loadPrefixFromTemplate(locale, info, shareReference, previews, moreFiles, regionalSettings) : generatePrefixPlain(locale, info, shareReference, regionalSettings);
     }
 
     /**
@@ -471,10 +486,11 @@ public class DefaultMessageGenerator implements MessageGenerator {
      * @param locale The locale to use for translation
      * @param info The share info object
      * @param shareReference The share reference
+     * @param regionalSettings Optional regional settings used for date/time formatting
      * @return The generated prefix
      * @throws OXException If generating prefix from template fails
      */
-    protected String generatePrefixPlain(Locale locale, ShareComposeMessageInfo info, ShareReference shareReference) throws OXException {
+    protected String generatePrefixPlain(Locale locale, ShareComposeMessageInfo info, ShareReference shareReference, RegionalSettings regionalSettings) throws OXException {
         TranslatorFactory translatorFactory = MessageGenerators.getTranslatorFactory();
         if (null == translatorFactory) {
             throw ServiceExceptionCode.absentService(TranslatorFactory.class);
@@ -521,7 +537,18 @@ public class DefaultMessageGenerator implements MessageGenerator {
         // expiration
         if (null != info.getExpirationDate()) {
             String translated = translator.translate(ShareComposeStrings.SHARED_ATTACHMENTS_EXPIRATION);
-            translated = String.format(translated, DateFormat.getDateInstance(DateFormat.LONG, locale).format(info.getExpirationDate()));
+            if (null != regionalSettings) {
+                String pattern = regionalSettings.getDateFormatLong();
+                DateFormat df;
+                if (Strings.isNotEmpty(pattern)) {
+                    df = new SimpleDateFormat(pattern, locale);
+                } else {
+                    df = DateFormat.getDateInstance(DateFormat.LONG, locale);
+                }
+                translated = String.format(translated, df.format(info.getExpirationDate()));
+            } else {
+                translated = String.format(translated, DateFormat.getDateInstance(DateFormat.LONG, locale).format(info.getExpirationDate()));
+            }
             textBuilder.append(translated).append("<br>");
         }
 
@@ -559,10 +586,13 @@ public class DefaultMessageGenerator implements MessageGenerator {
      * @param locale The locale to use for translation
      * @param info The share info object
      * @param shareReference The share reference
+     * @param cidMapping
+     * @param moreFiles
+     * @param regionalSettings Optional regional settings used for date/time formatting
      * @return The loaded prefix
      * @throws OXException If loading prefix from template fails
      */
-    protected String loadPrefixFromTemplate(Locale locale, ShareComposeMessageInfo info, ShareReference shareReference, Map<String, String> cidMapping, int moreFiles) throws OXException {
+    protected String loadPrefixFromTemplate(Locale locale, ShareComposeMessageInfo info, ShareReference shareReference, Map<String, String> cidMapping, int moreFiles, RegionalSettings regionalSettings) throws OXException {
         TemplateService templateService = MessageGenerators.getTemplateService();
         if (null == templateService) {
             throw ServiceExceptionCode.absentService(TemplateService.class);
@@ -618,7 +648,18 @@ public class DefaultMessageGenerator implements MessageGenerator {
         // expiration
         if (null != info.getExpirationDate()) {
             String translated = translator.translate(ShareComposeStrings.SHARED_ATTACHMENTS_EXPIRATION);
-            translated = String.format(translated, DateFormat.getDateInstance(DateFormat.LONG, locale).format(info.getExpirationDate()));
+            if (null != regionalSettings) {
+                String pattern = regionalSettings.getDateFormatLong();
+                DateFormat df;
+                if (Strings.isNotEmpty(pattern)) {
+                    df = new SimpleDateFormat(pattern, locale);
+                } else {
+                    df = DateFormat.getDateInstance(DateFormat.LONG, locale);
+                }
+                translated = String.format(translated, df.format(info.getExpirationDate()));
+            } else {
+                translated = String.format(translated, DateFormat.getDateInstance(DateFormat.LONG, locale).format(info.getExpirationDate()));
+            }
             vars.put(VARIABLE_EXPIRATION, translated);
         }
 

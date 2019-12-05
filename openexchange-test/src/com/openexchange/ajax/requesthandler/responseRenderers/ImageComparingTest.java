@@ -121,7 +121,7 @@ public class ImageComparingTest {
         final SimConfigurationService simConfigurationService = new SimConfigurationService();
         simConfigurationService.stringProperties.put("UPLOAD_DIRECTORY", "/tmp/");
         ServerServiceRegistry.getInstance().addService(ConfigurationService.class, simConfigurationService);
-        simManagedFileManagement = new ManagedFileManagementImpl(simConfigurationService, timerService, new DefaultDispatcherPrefixService("/ajax/"));
+        simManagedFileManagement = new ManagedFileManagementImpl(timerService, new DefaultDispatcherPrefixService("/ajax/"));
         ServerServiceRegistry.getInstance().addService(ManagedFileManagement.class, simManagedFileManagement);
         PowerMockito.when(com.openexchange.imagetransformation.java.osgi.Services.getService(TimerService.class)).thenReturn(timerService);
     }
@@ -189,7 +189,7 @@ public class ImageComparingTest {
             }
 
             assertTrue("Rotation of image not succesfull", transformed);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
@@ -236,7 +236,7 @@ public class ImageComparingTest {
 
             // histogram should not differ too much +- 0,5
             assertValueInRange(currentHistogramValue, expectedHistogramValue - 0.5f, expectedHistogramValue + 0.5f);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
@@ -274,8 +274,8 @@ public class ImageComparingTest {
 
             // Converts byte streams to buffered images
             InputStream inAfter = new ByteArrayInputStream(bytesCurrent);
-            assertTrue("Animated GIF image not animated anymore", ImageUtils.isAnimatedGif(inAfter));
-        } catch (final Exception e) {
+            assertTrue("Animated GIF image not animated anymore", ImageUtils.isAnimatedGif (inAfter));
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }

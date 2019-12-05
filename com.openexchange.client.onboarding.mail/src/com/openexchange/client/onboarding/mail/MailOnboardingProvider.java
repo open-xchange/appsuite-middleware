@@ -54,6 +54,7 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
 import com.openexchange.client.onboarding.AvailabilityResult;
@@ -71,7 +72,6 @@ import com.openexchange.client.onboarding.mail.custom.CustomLoginSource;
 import com.openexchange.client.onboarding.plist.OnboardingPlistProvider;
 import com.openexchange.client.onboarding.plist.PlistResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Strings;
@@ -88,10 +88,12 @@ import com.openexchange.plist.PListDict;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.session.Sessions;
 import com.openexchange.session.UserAndContext;
 import com.openexchange.sessiond.SessionMatcher;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 /**
@@ -195,7 +197,7 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
             throw OnboardingExceptionCodes.UNSUPPORTED_ACTION.create(request.getAction().getId());
         }
 
-        switch(scenario.getType()) {
+        switch (scenario.getType()) {
             case LINK:
                 throw OnboardingExceptionCodes.UNSUPPORTED_TYPE.create(identifier, scenario.getType().getId());
             case MANUAL:
@@ -374,22 +376,23 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
     }
 
     private Configurations getEffectiveConfigurations(int userId, int contextId) throws OXException {
-        SessiondService sessiondService = services.getOptionalService(SessiondService.class);
-        if (null == sessiondService) {
-            throw ServiceExceptionCode.absentService(SessiondService.class);
-        }
-
-        Session session = sessiondService.getAnyActiveSessionForUser(userId, contextId);
-        if (null == session) {
+        Optional<Session> optionalSession = Sessions.getValidatedSessionForCurrentThread(userId, contextId);
+        if (!optionalSession.isPresent()) {
             return getEffectiveConfigurations(UserAndContext.newInstance(userId, contextId), null, null);
         }
 
         // Check if session is suitable to obtain the MailConfig instance
+        Session session = optionalSession.get();
         MailConfig mailConfig = null;
         try {
             mailConfig = services.getService(MailService.class).getMailConfig(session, MailAccount.DEFAULT_ID);
         } catch (OXException e) {
             if (!MailExceptionCode.MISSING_CONNECT_PARAM.equals(e) || session.getPassword() != null) {
+                throw e;
+            }
+
+            SessiondService sessiondService = services.getOptionalService(SessiondService.class);
+            if (null == sessiondService) {
                 throw e;
             }
 

@@ -66,6 +66,7 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.caching.events.CacheEventConfiguration;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.caching.events.internal.CacheEventServiceImpl;
+import com.openexchange.caching.events.monitoring.CacheEventMetricHandler;
 import com.openexchange.caching.internal.JCSCacheService;
 import com.openexchange.caching.internal.JCSCacheServiceInit;
 import com.openexchange.capabilities.CapabilityChecker;
@@ -84,7 +85,6 @@ import com.openexchange.config.cascade.ReinitializableConfigProviderService;
 import com.openexchange.config.cascade.impl.ConfigCascade;
 import com.openexchange.config.cascade.impl.InMemoryConfigProvider;
 import com.openexchange.config.internal.ConfigurationImpl;
-import com.openexchange.config.internal.filewatcher.FileWatcher;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.internal.ContactServiceImpl;
@@ -140,6 +140,7 @@ import com.openexchange.i18n.impl.I18nImpl;
 import com.openexchange.i18n.impl.POTranslationsDiscoverer;
 import com.openexchange.i18n.impl.ResourceBundleDiscoverer;
 import com.openexchange.i18n.impl.TranslationsI18N;
+import com.openexchange.i18n.internal.I18nServiceRegistryImpl;
 import com.openexchange.i18n.parsing.Translations;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.imap.IMAPProvider;
@@ -154,6 +155,8 @@ import com.openexchange.mail.transport.config.TransportPropertiesInit;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.mailaccount.internal.MailAccountStorageInit;
+import com.openexchange.metrics.MetricService;
+import com.openexchange.metrics.dropwizard.impl.DropwizardMetricService;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.net.ssl.TrustedSSLSocketFactory;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
@@ -171,7 +174,6 @@ import com.openexchange.resource.internal.ResourceServiceImpl;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.SimpleServiceLookup;
-import com.openexchange.server.services.I18nServices;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.SessiondInit;
 import com.openexchange.sessiond.impl.SessiondServiceImpl;
@@ -205,8 +207,8 @@ import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.strings.BasicTypesStringParser;
 import com.openexchange.user.UserService;
-import com.openexchange.user.UserServiceInterceptor;
-import com.openexchange.user.UserServiceInterceptorRegistry;
+import com.openexchange.user.interceptor.UserServiceInterceptor;
+import com.openexchange.user.interceptor.UserServiceInterceptorRegistry;
 import com.openexchange.user.internal.UserServiceImpl;
 import com.openexchange.userconf.UserConfigurationService;
 import com.openexchange.userconf.UserPermissionService;
@@ -382,6 +384,10 @@ public final class Init {
         startTestServices = System.currentTimeMillis();
         startAndInjectNotification();
         System.out.println("startAndInjectNotification took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
+        startAndInjectMetricService();
+        System.out.println("startAndInjectMetricService took " + (System.currentTimeMillis() - startTestServices) + "ms.");
 
         startTestServices = System.currentTimeMillis();
         startAndInjectCache();
@@ -600,7 +606,6 @@ public final class Init {
 
     private static void startAndInjectBasicServices() throws OXException {
         if (null == TestServiceRegistry.getInstance().getService(UserService.class)) {
-            com.openexchange.password.mechanism.osgi.Services.setServiceLookup(LOOKUP);
             final UserService us = new UserServiceImpl(new UserServiceInterceptorRegistry(null) {
 
                 @Override
@@ -622,9 +627,9 @@ public final class Init {
                 final CollectionCharsetProvider collectionCharsetProvider = (CollectionCharsetProvider) results[1];
                 collectionCharsetProvider.addCharsetProvider(new net.freeutils.charset.CharsetProvider());
                 collectionCharsetProvider.addCharsetProvider(new CustomCharsetProvider());
-            } catch (final NoSuchFieldException e) {
+            } catch (NoSuchFieldException e) {
                 throw getWrappingOXException(e);
-            } catch (final IllegalAccessException e) {
+            } catch (IllegalAccessException e) {
                 throw getWrappingOXException(e);
             }
             services.put(UserConfigurationService.class, new UserConfigurationServiceImpl());
@@ -747,15 +752,15 @@ public final class Init {
             return;
         }
         final File dir = new File(directory_name);
-        final I18nServices i18nServices = I18nServices.getInstance();
+        final I18nServiceRegistryImpl i18nServices = I18nServiceRegistryImpl.getInstance();
         try {
             for (final ResourceBundle rc : new ResourceBundleDiscoverer(dir).getResourceBundles()) {
-                i18nServices.addService(new I18nImpl(rc));
+                i18nServices.addI18nService(new I18nImpl(rc));
             }
             for (final Translations tr : new POTranslationsDiscoverer(dir).getTranslations()) {
-                i18nServices.addService(new TranslationsI18N(tr));
+                i18nServices.addI18nService(new TranslationsI18N(tr));
             }
-        } catch (final NullPointerException e) {
+        } catch (NullPointerException e) {
             e.printStackTrace();
         }
     }
@@ -776,7 +781,7 @@ public final class Init {
         ParticipantConfig.getInstance().initialize(config);
     }
 
-    public static void startAndInjectDatabaseBundle() throws OXException, OXException {
+    public static void startAndInjectDatabaseBundle() throws OXException {
         if (null == services.get(DatabaseService.class)) {
             final ConfigurationService configurationService = (ConfigurationService) services.get(ConfigurationService.class);
             final TimerService timerService = (TimerService) services.get(TimerService.class);
@@ -899,9 +904,9 @@ public final class Init {
     private static void startAndInjectGroupService() {
         if (null == TestServiceRegistry.getInstance().getService(GroupService.class)) {
             // TODO properly inject group service
-//            final GroupService us = new GroupServiceImpl();
-//            services.put(GroupService.class, us);
-//            TestServiceRegistry.getInstance().addService(GroupService.class, us);
+            //            final GroupService us = new GroupServiceImpl();
+            //            services.put(GroupService.class, us);
+            //            TestServiceRegistry.getInstance().addService(GroupService.class, us);
         }
     }
 
@@ -957,6 +962,14 @@ public final class Init {
         }
     }
 
+    private static void startAndInjectMetricService() throws Exception {
+        if (null == TestServiceRegistry.getInstance().getService(MetricService.class)) {
+            MetricService metricService = new DropwizardMetricService();
+            services.put(MetricService.class, metricService);
+            TestServiceRegistry.getInstance().addService(MetricService.class, metricService);
+        }
+    }
+
     public static void startAndInjectCache() throws OXException {
         if (null == TestServiceRegistry.getInstance().getService(CacheService.class)) {
             CacheEventConfiguration config = new CacheEventConfiguration() {
@@ -966,8 +979,11 @@ public final class Init {
                     return false;
                 }
             };
+
             ThreadPoolService threadPool = (ThreadPoolService) services.get(ThreadPoolService.class);
-            CacheEventService cacheEventService = new CacheEventServiceImpl(config, threadPool);
+            MetricService metricService = (MetricService) services.get(MetricService.class);
+            CacheEventMetricHandler metricHandler = new CacheEventMetricHandler(metricService);
+            CacheEventService cacheEventService = new CacheEventServiceImpl(config, threadPool, metricHandler);
             services.put(CacheEventService.class, cacheEventService);
             TestServiceRegistry.getInstance().addService(CacheEventService.class, cacheEventService);
             JCSCacheServiceInit.initInstance();
@@ -1080,11 +1096,10 @@ public final class Init {
     public static void dropConfigBundle() {
         services.remove(ConfigurationService.class);
         TestServiceRegistry.getInstance().removeService(ConfigurationService.class);
-        FileWatcher.dropTimer();
     }
 
     public static void dropI18NBundle() {
-        final I18nServices i18nServices = I18nServices.getInstance();
+        final I18nServiceRegistryImpl i18nServices = I18nServiceRegistryImpl.getInstance();
         i18nServices.clear();
     }
 

@@ -55,6 +55,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.osgi.annotation.OptionalService;
 import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.session.Session;
+import com.openexchange.session.SessionAttributes;
 
 /**
  * {@link SessionStorageService} - The session storage service.
@@ -256,31 +257,13 @@ public interface SessionStorageService {
     void changePassword(String sessionId, String newPassword) throws OXException;
 
     /**
-     * Sets the local IP address for denoted session.
+     * Applies given attributes to denoted session.
      *
-     * @param sessionId The session Id
-     * @param localIp The new local IP address
-     * @throws OXException If changing local IP address fails or any reason
+     * @param sessionId The session identifier
+     * @param attrs The attributes to set
+     * @throws OXException If arguments cannot be set
      */
-    void setLocalIp(String sessionId, String localIp) throws OXException;
-
-    /**
-     * Sets the client identifier for denoted session.
-     *
-     * @param sessionId The session Id
-     * @param client The new client identifier
-     * @throws OXException If changing client identifier fails or any reason
-     */
-    void setClient(String sessionId, String client) throws OXException;
-
-    /**
-     * Sets the hash identifier for denoted session.
-     *
-     * @param sessionId The session Id
-     * @param client The new hash identifier
-     * @throws OXException If changing hash identifier fails or any reason
-     */
-    void setHash(String sessionId, String hash) throws OXException;
+    void setSessionAttributes(String sessionId, SessionAttributes attrs) throws OXException;
 
     /**
      * Checks authId for duplicates

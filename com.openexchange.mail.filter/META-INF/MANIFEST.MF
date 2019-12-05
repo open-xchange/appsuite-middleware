@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Mail Filter
 Automatic-Module-Name: com.openexchange.mail.filter
 Bundle-SymbolicName: com.openexchange.mail.filter
-Bundle-Version: 7.10.2
+Bundle-Version: 7.10.3
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Activator: com.openexchange.mailfilter.osgi.MailFilterActivator
@@ -39,6 +39,12 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.mail,
  com.openexchange.mail.mime,
  com.openexchange.mail.utils,
+ com.openexchange.mailaccount,
+ com.openexchange.metrics,
+ com.openexchange.metrics.circuitbreaker,
+ com.openexchange.metrics.types,
+ com.openexchange.monitoring,
+ com.openexchange.monitoring.sockets,
  com.openexchange.net.ssl,
  com.openexchange.osgi,
  com.openexchange.osgi.annotation,
@@ -52,6 +58,7 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.tools.servlet.http,
  com.openexchange.tools.session,
  com.openexchange.tools.ssl,
+ com.openexchange.user,
  com.sun.mail.imap.protocol,
  javax.mail.internet,
  javax.mail.internet.idn,
@@ -61,11 +68,15 @@ Import-Package: com.fasterxml.jackson.core,
  javax.security.sasl,
  javax.servlet,
  javax.servlet.http,
+ net.jodah.failsafe,
+ net.jodah.failsafe.function,
+ net.jodah.failsafe.util,
  org.apache.commons.logging,
  org.json,
  org.osgi.framework,
  org.osgi.service.event,
  org.osgi.service.http,
+ org.osgi.util.tracker,
  org.slf4j
 Export-Package: com.openexchange.jsieve.commands,
  com.openexchange.jsieve.commands.test,

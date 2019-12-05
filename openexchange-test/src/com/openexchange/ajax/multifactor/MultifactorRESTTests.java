@@ -138,7 +138,7 @@ public class MultifactorRESTTests extends AbstractMultifactorTest {
         com.openexchange.testing.restclient.invoker.ApiClient adminRestClient =
             new com.openexchange.testing.restclient.invoker.ApiClient();
         adminRestClient.setBasePath(getRestBasePath());
-        if(username != null && password != null) {
+        if (username != null && password != null) {
             String authorizationHeaderValue = "Basic " + Base64.encodeBase64String((username + ":" + password).getBytes(StandardCharsets.UTF_8));
             adminRestClient.addDefaultHeader(HttpHeaders.AUTHORIZATION, authorizationHeaderValue);
         }

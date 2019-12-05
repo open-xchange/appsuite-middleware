@@ -142,7 +142,7 @@ public class RssResult {
 
 	public RssResult setDate(Date... possibleDates) {
 		for(Date d: possibleDates) {
-			if(d != null) {
+			if (d != null) {
 				this.date = d;
 				return this;
 			}

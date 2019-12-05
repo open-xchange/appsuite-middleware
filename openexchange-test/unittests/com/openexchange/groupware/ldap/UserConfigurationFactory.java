@@ -11,6 +11,7 @@ import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.mail.usersetting.UserSettingMail;
+import com.openexchange.user.User;
 
 /**
  *
@@ -152,7 +153,7 @@ public class UserConfigurationFactory {
             configs.put(10, config);
             settings.put(10, mailSetting);
 
-        } catch (final OXException x) {
+        } catch (OXException x) {
             throw new RuntimeException(x);
         }
     }

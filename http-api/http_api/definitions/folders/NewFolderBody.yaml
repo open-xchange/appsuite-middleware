@@ -1,8 +1,0 @@
-type: object
-required:
-  - folder
-properties:
-  folder:
-    $ref: "./NewFolderData.yaml"
-  notification:
-    $ref: "#/definitions/FolderBodyNotification"

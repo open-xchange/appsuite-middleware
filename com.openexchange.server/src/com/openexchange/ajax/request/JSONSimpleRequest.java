@@ -66,7 +66,7 @@ public class JSONSimpleRequest implements SimpleRequest {
     public String getParameter(final String param) {
         try {
             return jsonObject.getString(param);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             return null;
         }
     }
@@ -80,7 +80,7 @@ public class JSONSimpleRequest implements SimpleRequest {
     public Object getBody() {
         try {
             return jsonObject.get(ResponseFields.DATA);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             return null;
         }
     }

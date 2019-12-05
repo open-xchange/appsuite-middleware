@@ -147,12 +147,12 @@ public class UserSettingsCopyTask implements CopyUserTaskService {
          */
         final UserSettingMailStorage usmStorage = UserSettingMailStorage.getInstance();
         final UserSettingMail srcMailSettings = usmStorage.getUserSettingMail(i(srcUsrId), srcCtx, srcCon);
-        if(srcMailSettings == null) {
+        if (srcMailSettings == null) {
             throw UserCopyExceptionCodes.SAVE_MAIL_SETTINGS_PROBLEM.create();
         }
         try {
             usmStorage.saveUserSettingMail(srcMailSettings, i(dstUsrId), dstCtx, dstCon);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw UserCopyExceptionCodes.SAVE_MAIL_SETTINGS_PROBLEM.create(e);
         }
 
@@ -200,7 +200,7 @@ public class UserSettingsCopyTask implements CopyUserTaskService {
                 setting.setFolderTree(getIntOrNegative(i++, rs));
                 setting.setUuidBinary(rs.getBytes("uuid"));
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -225,7 +225,7 @@ public class UserSettingsCopyTask implements CopyUserTaskService {
             setIntOrNull(i++, stmt, setting.getFolderTree());
             stmt.setBytes(i++, setting.getUuidBinary());
             stmt.executeUpdate();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
             Databases.closeSQLStuff(stmt);
@@ -249,7 +249,7 @@ public class UserSettingsCopyTask implements CopyUserTaskService {
 
                 settings.add(setting);
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -277,7 +277,7 @@ public class UserSettingsCopyTask implements CopyUserTaskService {
                 stmt.addBatch();
             }
             stmt.executeBatch();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
             Databases.closeSQLStuff(stmt);

@@ -1,5 +1,0 @@
-type: object
-properties:
-  value:
-    type: string
-    description: The concrete value to set.

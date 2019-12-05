@@ -106,49 +106,43 @@ public class ExceptionAwarePipedInputStream extends PipedInputStream {
         exception = new AtomicReference<IOException>();
     }
 
-    @Override
-    public synchronized int available() throws IOException {
-        final IOException exception = this.exception.get();
-        if (exception != null) {
-            throw exception;
-        }
-        return super.available();
-    }
-
-    @Override
-    public synchronized int read() throws IOException {
-        final IOException exception = this.exception.get();
-        if (exception != null) {
-            throw exception;
-        }
-        return super.read();
-    }
-
-    @Override
-    public synchronized int read(final byte[] b, final int off, final int len) throws IOException {
-        final IOException exception = this.exception.get();
-        if (exception != null) {
-            throw exception;
-        }
-        return super.read(b, off, len);
-    }
-
-    @Override
-    public void close() throws IOException {
-        final IOException exception = this.exception.get();
-        if (exception != null) {
-            throw exception;
-        }
-        super.close();
-    }
-
     /**
      * Sets specified exception that gets re-thrown on further read attempts.
      *
      * @param e The exception to set
      */
     public void setException(final Exception e) {
-        exception.set((e instanceof IOException) ? (IOException) e : new IOException("Error while writing to connected OutputStream", e));
+        exception.set((e instanceof IOException) ? (IOException) e : new IOException("Error while writing to connected piped output stream", e));
+    }
+
+    private void checkForException() throws IOException {
+        IOException exception = this.exception.get();
+        if (exception != null) {
+            throw exception;
+        }
+    }
+
+    @Override
+    public synchronized int available() throws IOException {
+        checkForException();
+        return super.available();
+    }
+
+    @Override
+    public synchronized int read() throws IOException {
+        checkForException();
+        return super.read();
+    }
+
+    @Override
+    public synchronized int read(final byte[] b, final int off, final int len) throws IOException {
+        checkForException();
+        return super.read(b, off, len);
+    }
+
+    @Override
+    public void close() throws IOException {
+        super.close();
     }
 
 }

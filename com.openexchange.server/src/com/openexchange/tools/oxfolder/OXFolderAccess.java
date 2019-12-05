@@ -73,7 +73,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Tasks;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
@@ -87,6 +86,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.memory.ConditionTreeMapManagement;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.user.User;
 
 /**
  * {@link OXFolderAccess} - Provides access to database folders.
@@ -141,7 +141,7 @@ public class OXFolderAccess {
         try {
             getFolderObject(folderId);
             return true;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (OXFolderExceptionCode.isNotFound(e)) {
                 return false;
             }
@@ -192,7 +192,7 @@ public class OXFolderAccess {
         for (final int fuid : folderIDs) {
             try {
                 retval.add(getFolderObject(fuid));
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 if (OXFolderExceptionCode.NOT_EXISTS.equals(e)) {
                     continue;
                 }
@@ -216,7 +216,7 @@ public class OXFolderAccess {
         for (int i = 0; i < size; i++) {
             try {
                 retval.add(getFolderObject(iter.next().intValue()));
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 if (OXFolderExceptionCode.NOT_EXISTS.equals(e)) {
                     continue;
                 }
@@ -355,7 +355,7 @@ public class OXFolderAccess {
         try {
             final FolderObject fo = getFolderObject(folderId);
             return fo.getEffectiveUserPermission(userId, userConfig, readCon);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
     }
@@ -373,7 +373,7 @@ public class OXFolderAccess {
         try {
             final FolderObject fo = getFolderObject(folderId);
             return fo.getEffectiveUserPermission(userId, userPermissionBits, readCon);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
     }
@@ -412,7 +412,7 @@ public class OXFolderAccess {
         }
         try {
             return fo.getEffectiveUserPermission(userId, permissions, readCon).isFolderVisible();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
     }
@@ -451,7 +451,7 @@ public class OXFolderAccess {
         }
         try {
             return fo.getEffectiveUserPermission(userId, permissions, readCon).getFolderPermission() >= OCLPermission.READ_FOLDER;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
     }
@@ -615,9 +615,9 @@ public class OXFolderAccess {
              * No delete permission: Return true if folder is empty
              */
             return isEmpty(folder, session, ctx);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException t) {
+        } catch (RuntimeException t) {
             throw OXFolderExceptionCode.RUNTIME_ERROR.create(t, Integer.valueOf(ctx.getContextId()));
         }
     }
@@ -661,7 +661,7 @@ public class OXFolderAccess {
             } else {
                 throw OXFolderExceptionCode.UNKNOWN_MODULE.create(folderModule2String(module), Integer.valueOf(ctx.getContextId()));
             }
-        } catch (final RuntimeException t) {
+        } catch (RuntimeException t) {
             throw OXFolderExceptionCode.RUNTIME_ERROR.create(t, Integer.valueOf(ctx.getContextId()));
         }
     }
@@ -699,7 +699,7 @@ public class OXFolderAccess {
                 default:
                     throw OXFolderExceptionCode.UNKNOWN_MODULE.create(folderModule2String(module), Integer.valueOf(ctx.getContextId()));
             }
-        } catch (final RuntimeException t) {
+        } catch (RuntimeException t) {
             throw OXFolderExceptionCode.RUNTIME_ERROR.create(t, Integer.valueOf(ctx.getContextId()));
         }
     }
@@ -729,7 +729,7 @@ public class OXFolderAccess {
                     try {
                         final ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class);
                         return contactService.countContacts(session, Integer.toString(folder.getObjectID()));
-                    } catch (final OXException e) {
+                    } catch (OXException e) {
                         if (ContactExceptionCodes.NO_ACCESS_PERMISSION.equals(e)) {
                             return 0;
                         }
@@ -739,7 +739,7 @@ public class OXFolderAccess {
                     try {
                         final InfostoreFacade db = new InfostoreFacadeImpl(readCon == null ? new DBPoolProvider() : new StaticDBPoolProvider(readCon));
                         return db.countDocuments(folder.getObjectID(), ServerSessionAdapter.valueOf(session, ctx));
-                    } catch (final OXException e) {
+                    } catch (OXException e) {
                         if (InfostoreExceptionCodes.NO_READ_PERMISSION.equals(e)) {
                             return 0;
                         }
@@ -748,7 +748,7 @@ public class OXFolderAccess {
                 default:
                     return -1;
             }
-        } catch (final RuntimeException t) {
+        } catch (RuntimeException t) {
             throw OXFolderExceptionCode.RUNTIME_ERROR.create(t, Integer.valueOf(ctx.getContextId()));
         }
     }

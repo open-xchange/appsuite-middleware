@@ -92,7 +92,7 @@ public class UserCopyTest extends AbstractRMITest {
         try {
             getUserManager().copy(null, srcCtx, dstCtx);
             Assert.fail("No error message thrown");
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             Assert.assertEquals("The given source user object is null", e.getMessage());
         }
     }
@@ -103,7 +103,7 @@ public class UserCopyTest extends AbstractRMITest {
         try {
             getUserManager().copy(user, srcCtx, dstCtx);
             Assert.fail("No error message thrown");
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             Assert.assertEquals("One userobject has no userid or username", e.getMessage());
         }
     }
@@ -115,7 +115,7 @@ public class UserCopyTest extends AbstractRMITest {
         try {
             getUserManager().copy(user, src, dstCtx);
             Assert.fail("No error message thrown");
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             Assert.assertEquals("Client sent invalid source context data object", e.getMessage());
         }
     }
@@ -127,7 +127,7 @@ public class UserCopyTest extends AbstractRMITest {
         try {
             getUserManager().copy(user, src, dstCtx);
             Assert.fail("No error message thrown");
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             Assert.assertEquals("Client sent invalid source context data object", e.getMessage());
         }
     }
@@ -139,7 +139,7 @@ public class UserCopyTest extends AbstractRMITest {
         try {
             getUserManager().copy(user, srcCtx, dest);
             Assert.fail("No error message thrown");
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             Assert.assertEquals("Client sent invalid destination context data object", e.getMessage());
         }
     }
@@ -151,7 +151,7 @@ public class UserCopyTest extends AbstractRMITest {
         try {
             getUserManager().copy(user, srcCtx, dest);
             Assert.fail("No error message thrown");
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             Assert.assertEquals("Client sent invalid destination context data object", e.getMessage());
         }
     }

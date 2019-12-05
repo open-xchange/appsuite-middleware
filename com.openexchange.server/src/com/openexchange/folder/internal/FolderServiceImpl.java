@@ -85,7 +85,7 @@ public final class FolderServiceImpl implements FolderService {
     public FolderObject getFolderObject(final int folderId, final int contextId) throws OXException {
         try {
             return new OXFolderAccess(ContextStorage.getStorageContext(contextId)).getFolderObject(folderId);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (!OXFolderExceptionCode.NOT_EXISTS.equals(e)) {
                 throw e;
             }
@@ -142,7 +142,7 @@ public final class FolderServiceImpl implements FolderService {
     public EffectivePermission getFolderPermission(final int folderId, final int userId, final int contextId) throws OXException {
         try {
             return getFolderPermission(folderId, userId, contextId, true);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (OXFolderExceptionCode.NOT_EXISTS.equals(e)) {
                 return getFolderPermission(folderId, userId, contextId, false);
             }
@@ -162,7 +162,7 @@ public final class FolderServiceImpl implements FolderService {
             final FolderObject delFolder =
                 OXFolderLoader.loadFolderObjectFromDB(folderId, ctx, con, true, false, DEL_OXFOLDER_TREE, DEL_OXFOLDER_PERMISSIONS);
             return delFolder.getEffectiveUserPermission(userId, permissionBits, con);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Database.back(ctx, false, con);

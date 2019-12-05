@@ -52,8 +52,10 @@ package com.openexchange.chronos.itip;
 import java.util.Locale;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.itip.osgi.Services;
 import com.openexchange.i18n.I18nService;
-import com.openexchange.server.services.I18nServices;
+import com.openexchange.i18n.I18nServiceRegistry;
 
 /**
  * {@link ContextSensitiveMessages}
@@ -62,7 +64,7 @@ import com.openexchange.server.services.I18nServices;
  * @since v7.8.1
  */
 public class ContextSensitiveMessages {
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(ContextSensitiveMessages.class);
 
     public enum Context {
@@ -70,7 +72,7 @@ public class ContextSensitiveMessages {
     }
 
     public static String accepted(Locale locale, Context ctxt) {
-        I18nService i18nService = I18nServices.getInstance().getService(locale);
+        I18nService i18nService = getI18Service(locale);
         if (i18nService == null) {
             LOG.debug("No service for {}  found. Using default for bundle ", locale);
             return "accepted";
@@ -88,8 +90,21 @@ public class ContextSensitiveMessages {
         }
     }
 
+    /**
+     * Returns the {@link I18nService} or null if none found
+     *
+     * @return The {@link I18nService}
+     */
+    private static I18nService getI18Service(Locale locale) {
+        I18nServiceRegistry registry = Services.getOptionalService(I18nServiceRegistry.class);
+        if (registry == null) {
+            return null;
+        }
+        return registry.getI18nService(locale);
+    }
+
     public static String declined(Locale locale, Context ctxt) {
-        I18nService i18nService = I18nServices.getInstance().getService(locale);
+        I18nService i18nService = getI18Service(locale);
         if (i18nService == null) {
             LOG.debug("No service for {}  found. Using default for bundle ", locale);
             return "declined";
@@ -108,7 +123,7 @@ public class ContextSensitiveMessages {
     }
 
     public static String tentative(Locale locale, Context ctxt) {
-        I18nService i18nService = I18nServices.getInstance().getService(locale);
+        I18nService i18nService = getI18Service(locale);
         if (i18nService == null) {
             LOG.debug("No service for {}  found. Using default for bundle ", locale);
             return "tentatively accepted";
@@ -125,4 +140,16 @@ public class ContextSensitiveMessages {
                 return "tentatively accepted";
         }
     }
+
+    public static String partStat(ParticipationStatus status, Locale locale, Context ctxt) {
+        if (ParticipationStatus.ACCEPTED.matches(status)) {
+            return accepted(locale, ctxt);
+        } else if (ParticipationStatus.DECLINED.matches(status)) {
+            return declined(locale, ctxt);
+        } else if (ParticipationStatus.TENTATIVE.matches(status)) {
+            return tentative(locale, ctxt);
+        }
+        return status.getValue();
+    }
+
 }

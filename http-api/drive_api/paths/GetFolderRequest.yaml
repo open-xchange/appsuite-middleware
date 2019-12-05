@@ -5,16 +5,21 @@
       - Drive
     summary: Gets metadata of a specific synchronized directory.
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
-      - $ref: "#/parameters/gblQueryParamRoot"
-      - $ref: "#/parameters/gblQueryParamPath"
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - $ref: '#/components/parameters/gblQueryParamRoot'
+      - $ref: '#/components/parameters/gblQueryParamPath'
       - in: query
         name: checksum
-        type: string
         description: The checksum of the directory.
         required: true
-    responses:
-      200:
-        description: A JSON object containing the metadata of the requested directory. In case of errors the responsible fields in the response are filled.
         schema:
-          $ref: "#/definitions/DriveFolderResponse"
+          type: string
+    responses:
+      '200':
+        description: >-
+          A JSON object containing the metadata of the requested directory. In
+          case of errors the responsible fields in the response are filled.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DriveFolderResponse'

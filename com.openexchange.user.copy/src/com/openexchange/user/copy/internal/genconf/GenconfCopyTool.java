@@ -111,7 +111,7 @@ public class GenconfCopyTool {
             }
 
             stmt.executeBatch();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
             Databases.closeSQLStuff(stmt);
@@ -142,7 +142,7 @@ public class GenconfCopyTool {
 
                 attributes.add(attribute);
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
             Databases.closeSQLStuff(rs, stmt);

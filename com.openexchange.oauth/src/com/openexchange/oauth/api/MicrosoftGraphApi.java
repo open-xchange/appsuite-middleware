@@ -101,41 +101,21 @@ public class MicrosoftGraphApi extends DefaultApi20 {
     /** The <code>"expires_in": &lt;number&gt;</code> pattern */
     static final Pattern PATTERN_EXPIRES = Pattern.compile("\"expires_in\" *: *([0-9]+)");
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.scribe.builder.api.DefaultApi20#getAccessTokenEndpoint()
-     */
     @Override
     public String getAccessTokenEndpoint() {
         return TOKEN_URL;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.scribe.builder.api.DefaultApi20#getAuthorizationUrl(org.scribe.model.OAuthConfig)
-     */
     @Override
     public String getAuthorizationUrl(OAuthConfig config) {
         return config.hasScope() ? String.format(SCOPED_AUTHORIZE_URL, config.getApiKey(), OAuthEncoder.encode(config.getCallback()), OAuthEncoder.encode(config.getScope())) : String.format(AUTHORIZE_URL, config.getApiKey(), OAuthEncoder.encode(config.getCallback()));
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.scribe.builder.api.DefaultApi20#getAccessTokenVerb()
-     */
     @Override
     public Verb getAccessTokenVerb() {
         return Verb.POST;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.scribe.builder.api.DefaultApi20#getAccessTokenExtractor()
-     */
     @Override
     public AccessTokenExtractor getAccessTokenExtractor() {
         return new AccessTokenExtractor() {
@@ -165,11 +145,6 @@ public class MicrosoftGraphApi extends DefaultApi20 {
         };
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.scribe.builder.api.DefaultApi20#createService(org.scribe.model.OAuthConfig)
-     */
     @Override
     public OAuthService createService(OAuthConfig config) {
         return new MicrosoftGraphService(this, config);
@@ -221,11 +196,6 @@ public class MicrosoftGraphApi extends DefaultApi20 {
             return api.getAccessTokenExtractor().extract(response.getBody());
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.scribe.oauth.OAuth20ServiceImpl#signRequest(org.scribe.model.Token, org.scribe.model.OAuthRequest)
-         */
         @Override
         public void signRequest(Token accessToken, OAuthRequest request) {
             request.addHeader("Authorization", "Bearer " + accessToken.getToken());

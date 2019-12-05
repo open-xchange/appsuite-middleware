@@ -1,0 +1,29 @@
+/resource?action=updates:
+  get:
+    operationId: getResourceUpdates
+    tags:
+      - Resources
+    summary: 'Gets the new, modified and deleted resources.'
+    parameters:
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - in: query
+        name: timestamp
+        description: Timestamp of the last update of the requested resources.
+        required: true
+        schema:
+          type: integer
+          format: int64
+    responses:
+      '200':
+        description: >
+          A JSON object with fields `new`, `modified` and `deleted` representing
+          arrays of new, modified and
+
+          deleted resource objects. In case of errors the responsible fields in
+          the response are filled
+
+          (see [Error handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResourceUpdatesResponse'

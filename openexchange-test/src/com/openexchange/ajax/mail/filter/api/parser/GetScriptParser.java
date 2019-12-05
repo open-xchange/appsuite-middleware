@@ -68,11 +68,6 @@ public class GetScriptParser extends AbstractAJAXParser<GetScriptResponse> {
         super(failOnError);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.framework.AbstractAJAXParser#createResponse(com.openexchange.ajax.container.Response)
-     */
     @Override
     protected GetScriptResponse createResponse(Response response) throws JSONException {
         GetScriptResponse r = new GetScriptResponse(response);

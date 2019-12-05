@@ -107,31 +107,16 @@ public abstract class AbstractOAuthSubscribeService extends AbstractSubscribeSer
         this.source = initialiseSubscriptionSource();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.subscribe.SubscribeService#getSubscriptionSource()
-     */
     @Override
     public SubscriptionSource getSubscriptionSource() {
         return source;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.subscribe.SubscribeService#handles(int)
-     */
     @Override
     public boolean handles(int folderModule) {
         return folderModule == module;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.subscribe.AbstractSubscribeService#modifyIncoming(com.openexchange.subscribe.Subscription)
-     */
     @Override
     public void modifyIncoming(Subscription subscription) throws OXException {
         if (subscription == null) {
@@ -151,11 +136,6 @@ public abstract class AbstractOAuthSubscribeService extends AbstractSubscribeSer
         subscription.getConfiguration().put("account", Integer.toString(Autoboxing.a2i(subscription.getConfiguration().get("account"))));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.subscribe.AbstractSubscribeService#modifyOutgoing(com.openexchange.subscribe.Subscription)
-     */
     @Override
     public void modifyOutgoing(Subscription subscription) throws OXException {
         String accountId = (String) subscription.getConfiguration().get("account");

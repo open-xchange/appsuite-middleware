@@ -84,9 +84,6 @@ postFix() {
     # SoftwareChange_Request-2662
     ox_add_property com.openexchange.file.storage.numberOfPregeneratedPreviews 20 /opt/open-xchange/etc/filestorage.properties
 
-    # SoftwareChange_Request-2665
-    ox_add_property com.openexchange.calendar.notify.poolenabled true /opt/open-xchange/etc/notification.properties
-
     # SoftwareChange_Request-2672
     ox_add_property com.openexchange.connector.shutdownFast false /opt/open-xchange/etc/server.properties
     ox_add_property com.openexchange.connector.awaitShutDownSeconds 90 /opt/open-xchange/etc/server.properties
@@ -301,17 +298,6 @@ d
     cat <<EOF | /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o $TMPFILE -x /configuration/logger -d @name -m -
 <configuration>
     <logger name="com.hazelcast.internal.monitors" level="INFO"/>
-</configuration>
-EOF
-    if [ -e $TMPFILE ]; then
-      cat $TMPFILE > /opt/open-xchange/etc/logback.xml
-      rm -f $TMPFILE
-    fi
-    # Bug #53993: Zap duplicate loggers
-    rm -f $TMPFILE
-    cat <<EOF | /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o $TMPFILE -x /configuration/logger -d @name -z -r -
-<configuration>
-    <logger name="com.hazelcast.internal.diagnostics" level="INFO"/>
 </configuration>
 EOF
     if [ -e $TMPFILE ]; then
@@ -629,7 +615,7 @@ EOF
 
     # SCR-426
     if ! contains "Allow users to configure the showContactImage setting" /opt/open-xchange/etc/settings/ui.properties; then
-        cat <<EOF | (cd /opt/open-xchange/etc && patch -p3 -N -r -)
+        cat <<EOF | (cd /opt/open-xchange/etc && patch --strip=3 --forward --no-backup-if-mismatch --reject-file=- --fuzz=3 >/dev/null)
 diff --git a/com.openexchange.groupware.settings.extensions/conf/settings/ui.properties b/com.openexchange.groupware.settings.extensions/conf/settings/ui.properties
 index 3ce3af8146f..61ee86367b8 100644
 --- a/com.openexchange.groupware.settings.extensions/conf/settings/ui.properties
@@ -668,6 +654,98 @@ EOF
     if ! contains "onmouseleave" /opt/open-xchange/etc/globaleventhandlers.list; then
         sed -i "s/onmounseleave/onmouseleave/" /opt/open-xchange/etc/globaleventhandlers.list
     fi
+
+    SCR=SCR-480
+    ox_scr_todo ${SCR} && {
+      set -e
+      TMPFILE=$(mktemp)
+      rm -f $TMPFILE
+      /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -s 480 -o $TMPFILE
+      if [ -e $TMPFILE ]; then
+        cat $TMPFILE > /opt/open-xchange/etc/logback.xml
+        rm -f $TMPFILE
+      fi
+      set +e
+      ox_scr_done ${SCR}
+    }
+
+    SCR=SCR-481
+    ox_scr_todo ${SCR} && {
+      pfile=/opt/open-xchange/etc/hazelcast.properties
+      pkey=com.openexchange.hazelcast.group.password
+      comment="# - ${pkey}"
+
+      if contains "${comment}" ${pfile}
+      then
+        sed -i -e "/^# If this is a single-node installation/,/^# - com.openexchange.hazelcast.network.interfaces/{
+          /${comment}/d
+        }" ${pfile}
+      fi
+
+      ox_remove_property ${pkey} ${pfile}
+      ox_scr_done ${SCR}
+    }
+
+    SCR=SCR-489
+    ox_scr_todo ${SCR} && {
+      pfile_sessiond=/opt/open-xchange/etc/sessiond.properties
+      pkey_sessiond=com.openexchange.sessiond.autologin
+      pfile_share=/opt/open-xchange/etc/share.properties
+      pkey_share=com.openexchange.share.autoLogin
+
+      ox_remove_property ${pkey_sessiond} ${pfile_sessiond}
+      ox_remove_property ${pkey_share} ${pfile_share}
+
+      ox_scr_done ${SCR}
+    }
+
+    SCR=SCR-502
+    ox_scr_todo ${SCR} && {
+      scriptconf=/opt/open-xchange/etc/ox-scriptconf.sh
+      contains JAVA_OPTS_SECURITY= ${scriptconf}  || {
+        sed -i -e '/^JAVA_OPTS_SERVER=.*$/a #JAVA_OPTS_SECURITY="-Dorg.osgi.framework.security=osgi -Djava.security.policy=/opt/open-xchange/etc/all.policy -Dopenexchange.security.policy=/opt/open-xchange/etc/security/policies.policy -Duser.dir=/opt/open-xchange/bundles -Djna.platform.library.path=/usr/lib/x86_64-linux-gnu:/usr/lib64"' ${scriptconf}
+      }
+      ox_scr_done ${SCR}
+    }
+
+    # obsoletes SoftwareChange_Request-2665
+    SCR=SCR-548
+    ox_scr_todo ${SCR} && {
+      pfile=/opt/open-xchange/etc/notification.properties
+
+      ox_remove_property imipForInternalUsers ${pfile}
+      ox_remove_property notify_participants_on_delete ${pfile}
+      ox_remove_property com.openexchange.calendar.notify.poolenabled ${pfile}
+
+      ox_scr_done ${SCR}
+    }
+
+    # SCR-522
+    if ! contains "of other nodes via multicast) or \"dns\" to consult a DNS server to resolve the" /opt/open-xchange/etc/hazelcast.properties; then
+        cat <<EOF | (cd /opt/open-xchange/etc && patch --strip=1 --forward --no-backup-if-mismatch --reject-file=- --fuzz=3 >/dev/null)
+diff --git a/hazelcast.properties b/hazelcast.properties
+index d56a04f3e1f..1214fd369fe 100644
+--- a/hazelcast.properties
++++ b/hazelcast.properties
+@@ -44,10 +44,11 @@ com.openexchange.hazelcast.group.name=
+ 
+ # Specifies which mechanism is used to discover other backend nodes in the
+ # cluster. Possible values are "empty" (no discovery for single-node setups),
+-# "static" (fixed set of cluster member nodes) or "multicast" (automatic
+-# discovery of other nodes via multicast). Defaults to "empty". Depending on
+-# the specified value, further configuration might be needed, see "Networking"
+-# section below.
++# "static" (fixed set of cluster member nodes), "multicast" (automatic discovery
++# of other nodes via multicast) or "dns" to consult a DNS server to resolve the
++# domain names to the most recent set of IP addresses of all service nodes.
++# Defaults to "empty". Depending on the specified value, further configuration
++# might be needed; see "Networking" section below.
+ com.openexchange.hazelcast.network.join=empty
+ 
+ # Configures a comma-separated list of IP addresses / hostnames of possible
+EOF
+    fi
+    ox_add_property com.openexchange.hazelcast.network.join.dns.domainNames "" /opt/open-xchange/etc/hazelcast.properties
 }
 
 setConfigFilePermissions() {

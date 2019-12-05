@@ -407,7 +407,7 @@ public final class Tools {
             }
             storageService.updateMailAccount(mad, attributes, userId, contextId, serverSession, con, false);
             return storageService.getMailAccount(accountId, userId, contextId, con);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             /*
              * Checking full names failed
              */

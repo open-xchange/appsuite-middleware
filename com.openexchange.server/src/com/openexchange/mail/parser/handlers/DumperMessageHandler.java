@@ -103,11 +103,6 @@ public class DumperMessageHandler implements MailMessageHandler {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.parser.MailMessageHandler#handleAttachment(com.openexchange.mail.dataobjects.MailContent, boolean,
-     * java.lang.String, java.lang.String, java.lang.String)
-     */
     @Override
     public boolean handleAttachment(final MailPart part, final boolean isInline, final String baseContentType, final String fileName, final String id) throws OXException {
         if (bodyOnly) {
@@ -120,16 +115,12 @@ public class DumperMessageHandler implements MailMessageHandler {
         strBuilder.append("sequenceId=").append(id).append('\n');
         try {
             strBuilder.append("Content:\n").append(MessageUtility.readMailPart(part, "US-ASCII"));
-        } catch (final IOException e) {
+        } catch (IOException e) {
             LOG.error("", e);
         }
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.parser.MailMessageHandler#handleBccRecipient(javax.mail.internet.InternetAddress[])
-     */
     @Override
     public boolean handleBccRecipient(final InternetAddress[] recipientAddrs) throws OXException {
         if (bodyOnly) {
@@ -140,10 +131,6 @@ public class DumperMessageHandler implements MailMessageHandler {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.parser.MailMessageHandler#handleCcRecipient(javax.mail.internet.InternetAddress[])
-     */
     @Override
     public boolean handleCcRecipient(final InternetAddress[] recipientAddrs) throws OXException {
         if (bodyOnly) {
@@ -154,10 +141,6 @@ public class DumperMessageHandler implements MailMessageHandler {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.parser.MailMessageHandler#handleColorLabel(int)
-     */
     @Override
     public boolean handleColorLabel(final int colorLabel) throws OXException {
         if (bodyOnly) {
@@ -168,10 +151,6 @@ public class DumperMessageHandler implements MailMessageHandler {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.parser.MailMessageHandler#handleContentId(java.lang.String)
-     */
     @Override
     public boolean handleContentId(final String contentId) throws OXException {
         if (bodyOnly) {
@@ -182,10 +161,6 @@ public class DumperMessageHandler implements MailMessageHandler {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.parser.MailMessageHandler#handleFrom(javax.mail.internet.InternetAddress[])
-     */
     @Override
     public boolean handleFrom(final InternetAddress[] fromAddrs) throws OXException {
         if (bodyOnly) {
@@ -196,10 +171,6 @@ public class DumperMessageHandler implements MailMessageHandler {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.parser.MailMessageHandler#handleHeaders(int, java.util.Iterator)
-     */
     @Override
     public boolean handleHeaders(final int size, final Iterator<Entry<String, String>> iter) throws OXException {
         if (bodyOnly) {
@@ -213,11 +184,6 @@ public class DumperMessageHandler implements MailMessageHandler {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.parser.MailMessageHandler#handleImagePart(com.openexchange.mail.dataobjects.MailContent, java.lang.String,
-     * java.lang.String, java.lang.String)
-     */
     @Override
     public boolean handleImagePart(final MailPart part, final String imageCID, final String baseContentType, final boolean isInline, final String fileName, final String id) throws OXException {
         if (bodyOnly) {
@@ -231,17 +197,12 @@ public class DumperMessageHandler implements MailMessageHandler {
         strBuilder.append("sequenceId=").append(id).append('\n');
         try {
             strBuilder.append("Content:\n").append(MessageUtility.readStream(part.getInputStream(), "US-ASCII"));
-        } catch (final IOException e) {
+        } catch (IOException e) {
             LOG.error("", e);
         }
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.parser.MailMessageHandler#handleInlineHtml(java.lang.String, java.lang.String, int, java.lang.String,
-     * java.lang.String)
-     */
     @Override
     public boolean handleInlineHtml(final ContentProvider htmlContent, final ContentType contentType, final long size, final String fileName, final String id) throws OXException {
         strBuilder.append('\n').append("handleInlineHtml:\n");
@@ -255,11 +216,6 @@ public class DumperMessageHandler implements MailMessageHandler {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.parser.MailMessageHandler#handleInlinePlainText(java.lang.String, java.lang.String, int, java.lang.String,
-     * java.lang.String)
-     */
     @Override
     public boolean handleInlinePlainText(final String plainTextContent, final ContentType contentType, final long size, final String fileName, final String id) throws OXException {
         strBuilder.append('\n').append("handleInlinePlainText:\n");
@@ -272,49 +228,25 @@ public class DumperMessageHandler implements MailMessageHandler {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.parser.MailMessageHandler#handleInlineUUEncodedAttachment(com.openexchange.tools.mail.UUEncodedPart,
-     * java.lang.String)
-     */
     @Override
     public boolean handleInlineUUEncodedAttachment(final UUEncodedPart part, final String id) throws OXException {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.parser.MailMessageHandler#handleInlineUUEncodedPlainText(java.lang.String, java.lang.String, int,
-     * java.lang.String, java.lang.String)
-     */
     @Override
     public boolean handleInlineUUEncodedPlainText(final String decodedTextContent, final ContentType contentType, final int size, final String fileName, final String id) throws OXException {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.parser.MailMessageHandler#handleMessageEnd(com.openexchange.mail.dataobjects.MailMessage)
-     */
     @Override
     public void handleMessageEnd(final MailMessage msg) throws OXException {
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.parser.MailMessageHandler#handleMultipart(com.openexchange.mail.dataobjects.MailContent, int,
-     * java.lang.String)
-     */
     @Override
     public boolean handleMultipart(final MailPart mp, final int bodyPartCount, final String id) throws OXException {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.parser.MailMessageHandler#handleNestedMessage(com.openexchange.mail.dataobjects.MailMessage,
-     * java.lang.String)
-     */
     @Override
     public boolean handleNestedMessage(final MailPart mailPart, final String id) throws OXException {
         final Object content = mailPart.getContent();
@@ -326,7 +258,7 @@ public class DumperMessageHandler implements MailMessageHandler {
                 nestedMail = MimeMessageConverter.convertMessage(new MimeMessage(
                     MimeDefaultSession.getDefaultSession(),
                     (InputStream) content));
-            } catch (final MessagingException e) {
+            } catch (MessagingException e) {
                 throw MimeMailException.handleMessagingException(e);
             }
         } else {
@@ -339,10 +271,6 @@ public class DumperMessageHandler implements MailMessageHandler {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.parser.MailMessageHandler#handlePriority(int)
-     */
     @Override
     public boolean handlePriority(final int priority) throws OXException {
         if (bodyOnly) {
@@ -353,10 +281,6 @@ public class DumperMessageHandler implements MailMessageHandler {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.parser.MailMessageHandler#handleMsgRef(java.lang.String)
-     */
     @Override
     public boolean handleMsgRef(final String msgRef) throws OXException {
         if (bodyOnly) {
@@ -367,10 +291,6 @@ public class DumperMessageHandler implements MailMessageHandler {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.parser.MailMessageHandler#handleDispositionNotification(javax.mail.internet.InternetAddress)
-     */
     @Override
     public boolean handleDispositionNotification(final InternetAddress dispositionNotificationTo, final boolean seen) throws OXException {
         if (bodyOnly) {
@@ -381,10 +301,6 @@ public class DumperMessageHandler implements MailMessageHandler {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.parser.MailMessageHandler#handleReceivedDate(java.util.Date)
-     */
     @Override
     public boolean handleReceivedDate(final Date receivedDate) throws OXException {
         if (bodyOnly) {
@@ -395,10 +311,6 @@ public class DumperMessageHandler implements MailMessageHandler {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.parser.MailMessageHandler#handleSentDate(java.util.Date)
-     */
     @Override
     public boolean handleSentDate(final Date sentDate) throws OXException {
         if (bodyOnly) {
@@ -409,11 +321,6 @@ public class DumperMessageHandler implements MailMessageHandler {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.parser.MailMessageHandler#handleSpecialPart(com.openexchange.mail.dataobjects.MailContent,
-     * java.lang.String, java.lang.String)
-     */
     @Override
     public boolean handleSpecialPart(final MailPart part, final String baseContentType, final String fileName, final String id) throws OXException {
         if (bodyOnly) {
@@ -425,16 +332,12 @@ public class DumperMessageHandler implements MailMessageHandler {
         strBuilder.append("sequenceId=").append(id).append('\n');
         try {
             strBuilder.append("Content:\n").append(MessageUtility.readStream(part.getInputStream(), "US-ASCII"));
-        } catch (final IOException e) {
+        } catch (IOException e) {
             LOG.error("", e);
         }
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.parser.MailMessageHandler#handleSubject(java.lang.String)
-     */
     @Override
     public boolean handleSubject(final String subject) throws OXException {
         strBuilder.append('\n').append("handleSubject:\n");
@@ -442,10 +345,6 @@ public class DumperMessageHandler implements MailMessageHandler {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.parser.MailMessageHandler#handleSystemFlags(int)
-     */
     @Override
     public boolean handleSystemFlags(final int flags) throws OXException {
         if (bodyOnly) {
@@ -456,10 +355,6 @@ public class DumperMessageHandler implements MailMessageHandler {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.parser.MailMessageHandler#handleToRecipient(javax.mail.internet.InternetAddress[])
-     */
     @Override
     public boolean handleToRecipient(final InternetAddress[] recipientAddrs) throws OXException {
         if (bodyOnly) {
@@ -470,10 +365,6 @@ public class DumperMessageHandler implements MailMessageHandler {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.parser.MailMessageHandler#handleUserFlags(java.lang.String[])
-     */
     @Override
     public boolean handleUserFlags(final String[] userFlags) throws OXException {
         if (bodyOnly) {

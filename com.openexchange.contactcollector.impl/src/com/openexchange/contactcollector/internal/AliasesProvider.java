@@ -62,8 +62,8 @@ import com.openexchange.concurrent.TimeoutConcurrentMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.alias.UserAliasStorage;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.mail.mime.QuotedInternetAddress;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 
@@ -154,10 +154,10 @@ public final class AliasesProvider {
         }
         try {
             return f.get();
-        } catch (final InterruptedException e) {
+        } catch (InterruptedException e) {
             // Cannot occur
             throw e;
-        } catch (final ExecutionException e) {
+        } catch (ExecutionException e) {
             final Throwable cause = e.getCause();
             if (cause instanceof Exception) {
                 throw (Exception) cause;
@@ -186,7 +186,7 @@ public final class AliasesProvider {
                 for (String aliase : aliases) {
                     try {
                         set.add(new QuotedInternetAddress(aliase, false));
-                    } catch (final AddressException e) {
+                    } catch (AddressException e) {
                         LOG.debug("Alias could not be parsed to an internet address: {}", aliase, e);
                     }
                 }

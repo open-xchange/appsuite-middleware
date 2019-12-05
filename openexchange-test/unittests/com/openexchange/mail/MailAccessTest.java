@@ -87,14 +87,14 @@ public final class MailAccessTest extends AbstractMailTest {
             mailConfig.setServer(getServer());
             mailConfig.setPort(getPort());
             mailAccess.connect();
-        } catch (final Exception e) {
+        } catch (Exception e) {
         } finally {
             try {
                 /*
                  * close
                  */
                 mailAccess.close(false);
-            } catch (final Exception e2) {
+            } catch (Exception e2) {
             }
         }
 
@@ -113,7 +113,7 @@ public final class MailAccessTest extends AbstractMailTest {
         try {
             mailAccess.connect();
             assertTrue("Connect invocation should fail", false);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             assertTrue(true);
         }
 
@@ -196,7 +196,7 @@ public final class MailAccessTest extends AbstractMailTest {
                 try {
                     mailAccess.connect();
                     assertTrue("Connect invocation should fail", false);
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     assertTrue(true);
                 }
 
@@ -209,7 +209,7 @@ public final class MailAccessTest extends AbstractMailTest {
                  */
                 mailAccess.close(false);
 
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }

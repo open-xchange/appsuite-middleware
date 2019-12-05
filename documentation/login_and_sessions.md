@@ -1,5 +1,5 @@
 ---
 title: Login and Sessions
 description: 
-icon: fa-sign-in
+icon: fas fa-sign-in-alt
 ---

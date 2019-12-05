@@ -143,11 +143,11 @@ public abstract class AbstractIMAPCommand<T> {
                          */
                         try {
                             protocol.notifyResponseHandlers(r);
-                        } catch (final RuntimeException e) {
+                        } catch (RuntimeException e) {
                             // Ignore runtime error in trailing Protocol.notifyResponseHandlers() invocation
                             LOG.debug("Runtime error during Protocol.notifyResponseHandlers() invocation.", e);
                         }
-                    } catch (final MessagingException e) {
+                    } catch (MessagingException e) {
                         final ProtocolException pe = new ProtocolException(e.getMessage());
                         pe.initCause(e);
                         throw pe;
@@ -187,7 +187,7 @@ public abstract class AbstractIMAPCommand<T> {
             }
             try {
                 return abstractIMAPCommand.getReturnVal();
-            } catch (final MessagingException e) {
+            } catch (MessagingException e) {
                 final ProtocolException pe = new ProtocolException(e.getMessage());
                 pe.initCause(e);
                 throw pe;

@@ -83,11 +83,6 @@ public class OAuthFileStorageAccountEventHandler implements EventHandler {
         this.api = api;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.osgi.service.event.EventHandler#handleEvent(org.osgi.service.event.Event)
-     */
     @Override
     public void handleEvent(Event event) {
         String topic = event.getTopic();
@@ -104,7 +99,7 @@ public class OAuthFileStorageAccountEventHandler implements EventHandler {
                         }
                     }
                 }
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 LOG.error("Error while handling SessionD event \"{}\"", topic, e);
             }
         }

@@ -92,11 +92,6 @@ public class CassandraKeyspaceMBeanImpl extends AnnotatedDynamicStandardMBean im
         this.keyspaceName = keyspaceName;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.nosql.cassandra.beans.AbstractCassandraMBean#refresh()
-     */
     @Override
     protected void refresh() {
         try {
@@ -108,11 +103,6 @@ public class CassandraKeyspaceMBeanImpl extends AnnotatedDynamicStandardMBean im
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.nosql.cassandra.CassandraKeyspaceMBean#getTables()
-     */
     @Override
     public Set<String> getTables() {
         Collection<TableMetadata> tables = keyspaceMetadata.getTables();
@@ -123,21 +113,11 @@ public class CassandraKeyspaceMBeanImpl extends AnnotatedDynamicStandardMBean im
         return tableNames;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.nosql.cassandra.CassandraKeyspaceMBean#getReplicationOptions()
-     */
     @Override
     public Map<String, String> getReplicationOptions() {
         return keyspaceMetadata.getReplication();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.nosql.cassandra.CassandraKeyspaceMBean#getUserTypes()
-     */
     @Override
     public Set<String> getUserTypes() {
         Set<String> userTypes = new HashSet<>();
@@ -147,11 +127,6 @@ public class CassandraKeyspaceMBeanImpl extends AnnotatedDynamicStandardMBean im
         return userTypes;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.nosql.cassandra.CassandraKeyspaceMBean#getFunctions()
-     */
     @Override
     public Set<String> getFunctions() {
         Set<String> functions = new HashSet<>();

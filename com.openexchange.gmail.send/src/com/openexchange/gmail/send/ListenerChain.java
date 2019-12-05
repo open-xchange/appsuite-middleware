@@ -50,6 +50,7 @@
 package com.openexchange.gmail.send;
 
 import java.util.Iterator;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.mail.Address;
 import javax.mail.internet.MimeMessage;
 import com.openexchange.exception.OXException;
@@ -68,7 +69,7 @@ import com.openexchange.session.Session;
  */
 public class ListenerChain implements MailTransportListener {
 
-    private static volatile ListenerChain instance;
+    private static final AtomicReference<ListenerChain> INSTANCE_REFERENCE = new AtomicReference<>();
 
     /**
      * Gets the instance
@@ -76,7 +77,7 @@ public class ListenerChain implements MailTransportListener {
      * @return The instance
      */
     public static ListenerChain getInstance() {
-        return instance;
+        return INSTANCE_REFERENCE.get();
     }
 
     /**
@@ -85,16 +86,14 @@ public class ListenerChain implements MailTransportListener {
      * @param listing The associated service listing
      */
     public static synchronized void initInstance(ServiceListing<MailTransportListener> listing) {
-        if (null == instance) {
-            instance = new ListenerChain(listing);
-        }
+        INSTANCE_REFERENCE.compareAndSet(null, new ListenerChain(listing));
     }
 
     /**
      * Release the instance
      */
     public static synchronized void releaseInstance() {
-        instance = null;
+        INSTANCE_REFERENCE.set(null);
     }
 
     // -------------------------------------------------------------------------------------------------------------------------------

@@ -4,48 +4,78 @@
     tags:
       - Find
     summary: Performs the actual search and returns the found items.
-    description: |
-      Before querying the search you should fetch the search filters (facets) by calling the [/find?action=autocomplete](#operation--find-action-autocomplete-put) 
+    description: >
+      Before querying the search you should fetch the search filters (facets) by
+      calling the
+      [/find?action=autocomplete](#operation--find-action-autocomplete-put) 
+
       request.
+
       #### Active facets
-      Every value that has been selected by a user must be remembered and provided with every subsequent request.
-      The representation of a facet within a request body differs from the one within an autocomplete response.
-      We call those "active facets". Their representation is independent from their style.
-    consumes:
-      - application/json
+
+      Every value that has been selected by a user must be remembered and
+      provided with every subsequent request.
+
+      The representation of a facet within a request body differs from the one
+      within an autocomplete response.
+
+      We call those "active facets". Their representation is independent from
+      their style.
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: module
-        type: string
-        description: |
-          The name of the module within that the search shall be performed. Possible modules are: mail, contacts,
-          calendar, tasks, drive. Because a user may have limited access to modules the useable modules might only
-          be a subset of the available ones. Retrieve a list of allowed modules by querying the user configuration,
-          see module "config" (path `search`) or module "JSlob" (e.g. `id=io.ox/core`).
+        description: >
+          The name of the module within that the search shall be performed.
+          Possible modules are: mail, contacts,
+
+          calendar, tasks, drive. Because a user may have limited access to
+          modules the useable modules might only
+
+          be a subset of the available ones. Retrieve a list of allowed modules
+          by querying the user configuration,
+
+          see module "config" (path `search`) or module "JSlob" (e.g.
+          `id=io.ox/core`).
         required: true
+        schema:
+          type: string
       - in: query
         name: columns
-        type: string
-        description: |
-          A comma-separated list of module-specific columns that shall be contained in the response items. 
-          See [Column identifiers](#column-identifiers) for the numeric IDs of fields for specific modules.
+        description: >
+          A comma-separated list of module-specific columns that shall be
+          contained in the response items. 
+
+          See [Column identifiers](#column-identifiers) for the numeric IDs of
+          fields for specific modules.
         required: false
+        schema:
+          type: string
       - in: query
         name: fields
-        type: string
-        description: A comma-separated list of field identifiers. This parameter must be used instead of columns in case the module is set to 'calendar'.
+        description: >-
+          A comma-separated list of field identifiers. This parameter must be
+          used instead of columns in case the module is set to 'calendar'.
         required: false
-      - in: body
-        name: body
-        description: A JSON object containing the selected `facets` and possible `options`. For pagination the keys `start` and `size` can be set.
-        required: true
         schema:
-          $ref: "#/definitions/FindQueryBody"
+          type: string
     responses:
-      200:
-        description: |
-          A JSON object containing the search result. In case of errors the responsible fields in the response are
+      '200':
+        description: >
+          A JSON object containing the search result. In case of errors the
+          responsible fields in the response are
+
           filled (see [Error handling](#error-handling)).
-        schema:
-          $ref: "#/definitions/FindQueryResponse"
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FindQueryResponse'
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/FindQueryBody'
+      description: >-
+        A JSON object containing the selected `facets` and possible `options`.
+        For pagination the keys `start` and `size` can be set.
+      required: true

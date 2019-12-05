@@ -49,14 +49,34 @@
 
 package com.openexchange.oauth.impl.internal;
 
+/**
+ * {@link PWUpdate} - Use to update possibly changed access key or secret.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.3
+ */
 final class PWUpdate {
-    public String field;
-    public int cid = -1;
-    public int id = -1;
 
-    public PWUpdate(String field, int cid, int id) {
+    /** The name of the database field */
+    public final String field;
+
+    /** The context identifier */
+    public final int cid;
+
+    /** The account identifier */
+    public final int id;
+
+    /**
+     * Initializes a new {@link PWUpdate}.
+     *
+     * @param field The name of the database field
+     * @param cid The context identifier
+     * @param id The account identifier
+     */
+    PWUpdate(String field, int cid, int id) {
         this.field = field;
         this.cid = cid;
         this.id = id;
     }
+
 }

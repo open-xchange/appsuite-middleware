@@ -97,7 +97,7 @@ public class ContactCollectorFolderCreator implements LoginHandlerService, NonTr
 
     @Override
     public void handleLogin(final LoginResult login) throws OXException {
-        if (!necessary()) {
+        if (!necessary() || login.getUser().isGuest()) {
             return;
         }
 
@@ -127,7 +127,7 @@ public class ContactCollectorFolderCreator implements LoginHandlerService, NonTr
             try {
                 String folderName = StringHelper.valueOf(login.getUser().getLocale()).getString(FolderStrings.DEFAULT_CONTACT_COLLECT_FOLDER_NAME);
                 modifiedData = create(login.getSession(), login.getContext(), folderName, con);
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
             } finally {
                 if (modifiedData) {
@@ -180,7 +180,7 @@ public class ContactCollectorFolderCreator implements LoginHandlerService, NonTr
     private static boolean isContactCollectionEnabled(final Session session) {
         try {
             return ServerSessionAdapter.valueOf(session).getUserPermissionBits().isCollectEmailAddresses();
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
         }
         return false;
@@ -201,7 +201,7 @@ public class ContactCollectorFolderCreator implements LoginHandlerService, NonTr
                 final FolderObject folder = createNewContactFolder(userId, folderName, parent);
                 final OXFolderManager folderManager = OXFolderManager.getInstance(session, folderAccess, con, con);
                 collectFolderID = folderManager.createFolder(folder, true, System.currentTimeMillis()).getObjectID();
-            } catch (final OXException oxe) {
+            } catch (OXException oxe) {
                 if (oxe.isPrefix("FLD") && oxe.getCode() == OXFolderExceptionCode.NO_DUPLICATE_FOLDER.getNumber()) {
                     LOG.info("Found Folder with name of contact collect folder. Guess this is the dedicated folder.");
                     collectFolderID = OXFolderSQL.lookUpFolder(parent, folderName, FolderObject.CONTACT, con, ctx);

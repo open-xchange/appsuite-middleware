@@ -71,13 +71,13 @@ import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapExceptionCode;
-import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.java.Sets;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.update.Tools;
+import com.openexchange.user.UserExceptionCode;
 
 /**
  * This class implements a storage for contexts in a relational database.
@@ -129,7 +129,7 @@ public class RdbContextStorage extends ContextStorage {
         final Connection con;
         try {
             con = DBPool.pickup();
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw ContextExceptionCodes.NO_CONNECTION.create(e);
         }
         int contextId = NOT_FOUND;
@@ -142,7 +142,7 @@ public class RdbContextStorage extends ContextStorage {
             if (result.next()) {
                 contextId = result.getInt(1);
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw ContextExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
@@ -173,7 +173,7 @@ public class RdbContextStorage extends ContextStorage {
         Connection con;
         try {
             con = databaseService.getReadOnly();
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw ContextExceptionCodes.NO_CONNECTION.create(e);
         }
 
@@ -192,7 +192,7 @@ public class RdbContextStorage extends ContextStorage {
             // Load context data from UserDB
             loadContextDataFromUserDb(context, databaseService);
             return context;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw ContextExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
@@ -222,7 +222,7 @@ public class RdbContextStorage extends ContextStorage {
             }
 
             identifier = result.getInt(1);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw ContextExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
@@ -246,7 +246,7 @@ public class RdbContextStorage extends ContextStorage {
                 loginInfo.add(result.getString(1));
             } while (result.next());
             return loginInfo.toArray(new String[loginInfo.size()]);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw ContextExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
@@ -334,14 +334,14 @@ public class RdbContextStorage extends ContextStorage {
                 final String value = result.getString(2);
                 ctx.addAttribute(name, value);
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             try {
                 if (!Tools.tableExists(con, "contextAttribute")) {
                     // This would be an explanation for the exception. Will
                     // happen once for every schema.
                     return;
                 }
-            } catch (final SQLException e1) {
+            } catch (SQLException e1) {
                 // IGNORE
             }
             throw ContextExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -373,7 +373,7 @@ public class RdbContextStorage extends ContextStorage {
             }
 
             return loadContextDataFromResultSet(result, contextId);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw ContextExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
@@ -413,7 +413,7 @@ public class RdbContextStorage extends ContextStorage {
             }
 
             return context;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw ContextExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         }
     }
@@ -438,7 +438,7 @@ public class RdbContextStorage extends ContextStorage {
                 retval.add(Integer.valueOf(result.getInt(1)));
             } while (result.next());
             return retval;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw ContextExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
@@ -464,7 +464,7 @@ public class RdbContextStorage extends ContextStorage {
                 retval.add(Integer.valueOf(result.getInt(1)));
             } while (result.next());
             return retval;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw ContextExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
@@ -511,7 +511,7 @@ public class RdbContextStorage extends ContextStorage {
                 stmt = null;
             }
             return map;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw ContextExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
@@ -582,7 +582,7 @@ public class RdbContextStorage extends ContextStorage {
                 }
             }
             return map;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw ContextExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             if (null != con) {
@@ -609,7 +609,7 @@ public class RdbContextStorage extends ContextStorage {
                 retval.add(Integer.valueOf(result.getInt(1)));
             } while (result.next());
             return retval;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw ContextExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);

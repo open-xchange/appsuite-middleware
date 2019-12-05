@@ -49,9 +49,9 @@
 
 package com.openexchange.importexport.actions.importer;
 
-import com.openexchange.importexport.formats.Format;
+import com.openexchange.importexport.Format;
+import com.openexchange.importexport.Importer;
 import com.openexchange.importexport.importers.ICalImporter;
-import com.openexchange.importexport.importers.Importer;
 import com.openexchange.server.ServiceLookup;
 
 public class ICalImportAction extends AbstractImportAction {
@@ -73,7 +73,7 @@ public class ICalImportAction extends AbstractImportAction {
 
 	@Override
 	public Importer getImporter() {
-		if(importer == null) {
+		if (importer == null) {
             importer = new ICalImporter(services);
         }
 		return importer;

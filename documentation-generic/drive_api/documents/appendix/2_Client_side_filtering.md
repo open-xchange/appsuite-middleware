@@ -8,22 +8,29 @@ The exclusion filters may be set, changed or unset at any time during synchroniz
 
 A directory pattern is defined by a pattern string and further attributes.
 
+<div class="simpleTable">
+
 |Name|Type|Value|
 |:---|:---|:----|
 |type|String|The pattern type, currently one of `exact` or `glob`.|
 |path|String|The path pattern, in a format depending on the pattern type.|
 |caseSensitive|Boolean|Optional flag to enable case-sensitive matching, defaults to `false`|
+
+</div>
 
 ## File pattern
 
 A file pattern is defined by pattern strings for the filename and path, as well as further attributes.
 
-|Name|Type|Value|
+<div class="simpleTable">|Name|Type|Value|
+
 |:---|:---|:----|
 |type|String|The pattern type, currently one of `exact` or `glob`.|
 |path|String|The path pattern, in a format depending on the pattern type.|
 |name|String|The filename pattern, in a format depending on the pattern type.|
 |caseSensitive|Boolean|Optional flag to enable case-sensitive matching, defaults to `false`|
+
+</div>
 
 ## Pattern types
 

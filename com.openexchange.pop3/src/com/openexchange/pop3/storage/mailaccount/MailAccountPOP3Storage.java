@@ -186,7 +186,7 @@ public class MailAccountPOP3Storage implements POP3Storage, IMailStoreAware {
                     MailAccountStorageService.class,
                     true);
                 accountName = stripSpecials(storageService.getMailAccount(pop3AccountId, user, cid).getName());
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 throw e;
             }
             String fullname;
@@ -281,7 +281,7 @@ public class MailAccountPOP3Storage implements POP3Storage, IMailStoreAware {
             if (defaultMailAccess.isConnected()) {
                 try {
                     defaultMailAccess.getFolderStorage().deleteFolder(path, true);
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     if (MimeMailExceptionCode.FOLDER_NOT_FOUND.equals(e) || (e.getCode()==MimeMailExceptionCode.FOLDER_NOT_FOUND.getNumber() && e.getPrefix().equals("IMAP"))) {
                         // Ignore
                         LOG.trace("", e);
@@ -293,7 +293,7 @@ public class MailAccountPOP3Storage implements POP3Storage, IMailStoreAware {
                 defaultMailAccess.connect(false);
                 try {
                     defaultMailAccess.getFolderStorage().deleteFolder(path, true);
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     if (MimeMailExceptionCode.FOLDER_NOT_FOUND.equals(e) || (e.getCode()==MimeMailExceptionCode.FOLDER_NOT_FOUND.getNumber() && e.getPrefix().equals("IMAP"))) {
                         // Ignore
                         LOG.trace("", e);
@@ -321,7 +321,7 @@ public class MailAccountPOP3Storage implements POP3Storage, IMailStoreAware {
         if (null != messageStorage) {
             try {
                 messageStorage.releaseResources();
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 // Ignore
             }
             messageStorage = null;
@@ -329,7 +329,7 @@ public class MailAccountPOP3Storage implements POP3Storage, IMailStoreAware {
         if (null != folderStorage) {
             try {
                 folderStorage.releaseResources();
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 // Ignore
             }
             folderStorage = null;
@@ -337,7 +337,7 @@ public class MailAccountPOP3Storage implements POP3Storage, IMailStoreAware {
         if (null != defaultMailAccess) {
             try {
                 defaultMailAccess.close(true);
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 // Ignore
             }
             defaultMailAccess = null;
@@ -431,7 +431,7 @@ public class MailAccountPOP3Storage implements POP3Storage, IMailStoreAware {
 
                 try {
                     fs.createFolder(toCreate);
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     throw POP3ExceptionCode.ILLEGAL_PATH.create(e,
                         path,
                         Integer.valueOf(session.getUserId()),
@@ -443,7 +443,7 @@ public class MailAccountPOP3Storage implements POP3Storage, IMailStoreAware {
                  */
                 getFolderStorage().checkDefaultFolders();
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             /*
              * Close on error
              */
@@ -451,7 +451,7 @@ public class MailAccountPOP3Storage implements POP3Storage, IMailStoreAware {
                 defaultMailAccess.close(true);
             }
             throw e;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             /*
              * Close on error
              */
@@ -498,12 +498,12 @@ public class MailAccountPOP3Storage implements POP3Storage, IMailStoreAware {
     public void releaseResources() {
         try {
             getFolderStorage().releaseResources();
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.debug("Error while closing POP3 folder storage", e);
         }
         try {
             getMessageStorage().releaseResources();
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.debug("Error while closing POP3 message storage", e);
         }
         /*-
@@ -550,7 +550,7 @@ public class MailAccountPOP3Storage implements POP3Storage, IMailStoreAware {
                             // Another thread is already in process.
                             return;
                         }
-                    } catch (final SQLException e) {
+                    } catch (SQLException e) {
                         // INSERT failed. Another thread is already in process.
                         return;
                     }
@@ -568,7 +568,7 @@ public class MailAccountPOP3Storage implements POP3Storage, IMailStoreAware {
                         return;
                     }
                 }
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 // Concurrency check failed
                 throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
             } finally {
@@ -686,7 +686,7 @@ public class MailAccountPOP3Storage implements POP3Storage, IMailStoreAware {
                     if (inbox.isOpen()) {
                         inbox.close(doExpunge);
                     }
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     LOG.warn("POP3 mailbox {} could not be expunged/closed for login {}", pop3Config.getServer(), pop3Config.getLogin(), e);
                 }
                 // Trashed UIDLs not needed anymore
@@ -694,7 +694,7 @@ public class MailAccountPOP3Storage implements POP3Storage, IMailStoreAware {
                     getTrashContainer().clear();
                 }
             }
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             final Exception nested = e.getNextException();
             if (nested instanceof IOException) {
                 LOG.warn("Connect to POP3 account failed", nested);
@@ -703,7 +703,7 @@ public class MailAccountPOP3Storage implements POP3Storage, IMailStoreAware {
                 LOG.warn("Connect to POP3 account failed", e);
                 warnings.add(MimeMailException.handleMessagingException(e, pop3Access.getPOP3Config(), session));
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (MimeMailExceptionCode.LOGIN_FAILED.equals(e) || MimeMailExceptionCode.INVALID_CREDENTIALS.equals(e)) {
                 throw e;
             }
@@ -714,7 +714,7 @@ public class MailAccountPOP3Storage implements POP3Storage, IMailStoreAware {
                 if (null != pop3Store) {
                     pop3Store.close();
                 }
-            } catch (final MessagingException e) {
+            } catch (MessagingException e) {
                 LOG.error("", e);
             }
             releaseLock(session);
@@ -770,14 +770,14 @@ public class MailAccountPOP3Storage implements POP3Storage, IMailStoreAware {
                         // Another thread is already in process.
                         return false;
                     }
-                } catch (final SQLException e) {
+                } catch (SQLException e) {
                     // INSERT failed. Another thread is already in process.
                     return false;
                 }
             }
             // Locked...
             return true;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             // Concurrency check failed
             throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -800,7 +800,7 @@ public class MailAccountPOP3Storage implements POP3Storage, IMailStoreAware {
             stmt.setInt(pos++, session.getUserId());
             stmt.setString(pos++, "pop3.lock");
             stmt.executeUpdate();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             // Concurrency check failed
             throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -902,7 +902,7 @@ public class MailAccountPOP3Storage implements POP3Storage, IMailStoreAware {
         if (pop3MessageStorage.isMimeSupported()) {
             try {
                 pop3MessageStorage.appendPOP3Messages(msgs, seqnum2uidl);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.debug("Batch append operation to POP3 storage failed", e);
                 final Throwable cause = e.getCause();
                 if ((cause instanceof MessagingException) && com.openexchange.java.Strings.toLowerCase(cause.getMessage()).indexOf("quota") >= 0) {
@@ -919,7 +919,7 @@ public class MailAccountPOP3Storage implements POP3Storage, IMailStoreAware {
                     try {
                         arr[0] = msg;
                         pop3MessageStorage.appendPOP3Messages(arr, seqnum2uidl);
-                    } catch (final OXException inner) {
+                    } catch (OXException inner) {
                         LOG.warn("POP3 message could not be appended to POP3 storage", inner);
                     }
                 }
@@ -932,14 +932,14 @@ public class MailAccountPOP3Storage implements POP3Storage, IMailStoreAware {
                 final long start = System.currentTimeMillis();
                 inbox.fetch(msgs, FETCH_PROFILE_ENVELOPE);
                 MailServletInterface.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-            } catch (final MessagingException e) {
+            } catch (MessagingException e) {
                 // Try one-by-one loading
                 LOG.debug("Batch retrieval of POP3 messages failed. Retry with one-by-one loading.", e);
                 for (int i = 0; i < msgs.length; i++) {
                     final int msgno = msgs[i].getMessageNumber();
                     try {
                         msgs[i] = inbox.getMessage(msgno);
-                    } catch (final MessagingException inner) {
+                    } catch (MessagingException inner) {
                         LOG.warn("Retrieval of POP3 message {} failed.", I(msgno), inner);
                         msgs[i] = null;
                     }
@@ -957,7 +957,7 @@ public class MailAccountPOP3Storage implements POP3Storage, IMailStoreAware {
                         final MailMessage mm = MimeMessageConverter.convertMessage((MimeMessage) message, false);
                         mm.setMailId(seqnum2uidl.get(msgno));
                         toAppend.add(mm);
-                    } catch (final Exception e) {
+                    } catch (Exception e) {
                         LOG.warn("POP3 message #{} could not be fetched from POP3 server.", I(msgno), e);
                     }
                 }
@@ -967,7 +967,7 @@ public class MailAccountPOP3Storage implements POP3Storage, IMailStoreAware {
              */
             try {
                 pop3MessageStorage.appendPOP3Messages(toAppend.toArray(new MailMessage[toAppend.size()]));
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.debug("Batch append operation to POP3 storage failed", e);
                 final Throwable cause = e.getCause();
                 if ((cause instanceof MessagingException) && com.openexchange.java.Strings.toLowerCase(cause.getMessage()).indexOf("quota") >= 0) {
@@ -984,7 +984,7 @@ public class MailAccountPOP3Storage implements POP3Storage, IMailStoreAware {
                     try {
                         arr[0] = mailMessage;
                         pop3MessageStorage.appendPOP3Messages(arr);
-                    } catch (final OXException inner) {
+                    } catch (OXException inner) {
                         LOG.warn("POP3 message could not be appended to POP3 storage", inner);
                     }
                 }
@@ -1058,9 +1058,9 @@ public class MailAccountPOP3Storage implements POP3Storage, IMailStoreAware {
         try {
             f = POP3Folder.class.getDeclaredField("message_cache");
             f.setAccessible(true);
-        } catch (final SecurityException e) {
+        } catch (SecurityException e) {
             f = null;
-        } catch (final NoSuchFieldException e) {
+        } catch (NoSuchFieldException e) {
             f = null;
         }
         messageCacheField = f;
@@ -1074,13 +1074,13 @@ public class MailAccountPOP3Storage implements POP3Storage, IMailStoreAware {
                 return (POP3Message[]) messageCacheField.get(inbox);
             }
             throw new NoSuchFieldException("message_cache");
-        } catch (final SecurityException e) {
+        } catch (SecurityException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (final IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (final NoSuchFieldException e) {
+        } catch (NoSuchFieldException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (final IllegalAccessException e) {
+        } catch (IllegalAccessException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }

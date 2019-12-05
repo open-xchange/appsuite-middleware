@@ -161,7 +161,7 @@ public class MultifactorLoginServiceImpl implements MultifactorLoginService {
             final MultifactorProviderStrategy multifactorStrategy = new SingleMultifactorProviderStrategy(multifactorAuthFactory, device, new ChallengeAnswer(getParameters(request)));
             try {
                 return multifactorStrategy.requireAuthentication(multifactorProviders, multifactorRequest);
-            } catch (final OXException ex) {
+            } catch (OXException ex) {
                 // Failed to auth
                 throw MultifactorExceptionCodes.INVALID_AUTHENTICATION_FACTOR.create(ex);
             }

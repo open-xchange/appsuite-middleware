@@ -32,7 +32,7 @@ public class Bug17393Test extends ManagedAppointmentTest {
             + "LOCATION:Sr K 2026\n"
             + "TRANSP:OPAQUE\n"
             + "RRULE:FREQ=WEEKLY;INTERVAL=1;UNTIL=20110204;BYDAY=MO\n"
-            + "EXDATE:20101220T140000Z,20101220T140000Z\n"
+            + "EXDATE:20101220T130000Z,20101220T130000Z\n"
             + "CREATED:20101101T135448Z\n"
             + "LAST-MODIFIED:20101029T081757Z\n"
             + "ORGANIZER:mailto:wolf@example.com\n"

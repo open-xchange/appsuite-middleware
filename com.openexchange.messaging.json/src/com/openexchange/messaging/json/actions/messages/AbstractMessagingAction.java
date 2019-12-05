@@ -94,9 +94,9 @@ public abstract class AbstractMessagingAction implements AJAXActionService {
         try {
             final AJAXRequestResult result = doIt(req, session);
             return result;
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw MessagingExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
             req.cleanUp();

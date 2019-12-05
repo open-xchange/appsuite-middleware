@@ -98,6 +98,9 @@ public class CalendarExtendDNColumnTaskV2 implements UpdateTaskV2 {
         Connection con = params.getConnection();
         int rollback = 0;
         try {
+            if (false == Databases.tablesExist(con, "prg_date_rights", "del_date_rights")) {
+                return;
+            }
             con.setAutoCommit(false);
             rollback = 1;
 
@@ -144,7 +147,7 @@ public class CalendarExtendDNColumnTaskV2 implements UpdateTaskV2 {
                     }
                 }
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw wrapSQLException(e);
         } finally {
             Databases.closeSQLStuff(rs);
@@ -156,7 +159,7 @@ public class CalendarExtendDNColumnTaskV2 implements UpdateTaskV2 {
         try {
             stmt = con.prepareStatement(Strings.replaceSequenceWith(SQL_MODIFY, "#TABLE#", tableName));
             stmt.executeUpdate();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw wrapSQLException(e);
         } finally {
             Databases.closeSQLStuff(stmt);

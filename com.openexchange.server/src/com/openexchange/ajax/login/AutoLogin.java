@@ -79,6 +79,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.server.services.SessionInspector;
 import com.openexchange.session.Reply;
 import com.openexchange.session.Session;
+import com.openexchange.session.SessionSsoService;
 import com.openexchange.session.inspector.Reason;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -123,7 +124,7 @@ public class AutoLogin extends AbstractLoginRequestHandler {
              */
             LoginResult loginResult = AutoLoginTools.tryGuestAutologin(shareConf.getLoginConfig(), req, resp);
             if (null == loginResult) {
-                if (false == conf.isSessiondAutoLogin(req.getServerName())) {
+                if (skipAutoLoginForSsoSession(req, resp)) {
                     // Auto-login disabled per configuration.
                     // Try to perform a login using HTTP request/response to see if invocation signals that an auto-login should proceed afterwards
                     if (doAutoLogin(req, resp)) {
@@ -134,6 +135,7 @@ public class AutoLogin extends AbstractLoginRequestHandler {
                     }
                     return;
                 }
+
                 /*
                  * try auto-login for regular user
                  */
@@ -185,11 +187,11 @@ public class AutoLogin extends AbstractLoginRequestHandler {
                     if (null != oModules) {
                         json.put("modules", oModules);
                     }
-                } catch (final InterruptedException e) {
+                } catch (InterruptedException e) {
                     // Keep interrupted state
                     Thread.currentThread().interrupt();
                     throw LoginExceptionCodes.UNKNOWN.create(e, "Thread interrupted.");
-                } catch (final ExecutionException e) {
+                } catch (ExecutionException e) {
                     // Cannot occur
                     final Throwable cause = e.getCause();
                     LOG.warn("Modules could not be added to login JSON response", cause);
@@ -222,7 +224,7 @@ public class AutoLogin extends AbstractLoginRequestHandler {
              */
             LoginServlet.writePublicSessionCookie(req, resp, session, req.isSecure(), req.getServerName());
 
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (AjaxExceptionCodes.DISABLED_ACTION.equals(e)) {
                 LOG.debug("", e);
             } else {
@@ -253,12 +255,12 @@ public class AutoLogin extends AbstractLoginRequestHandler {
                     SessionUtility.removeOXCookies(session.getHash(), req, resp);
                     SessionUtility.removeJSESSIONID(req, resp);
                     sessiondService.removeSession(session.getSessionID());
-                } catch (final Exception e2) {
+                } catch (Exception e2) {
                     LOG.error("Cookies could not be removed.", e2);
                 }
             }
             response.setException(e);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
             LOG.error("", oje);
             response.setException(oje);
@@ -273,7 +275,7 @@ public class AutoLogin extends AbstractLoginRequestHandler {
             } else {
                 ((JSONObject) response.getData()).write(resp.getWriter());
             }
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             LOG.error(LoginServlet.RESPONSE_ERROR, e);
             LoginServlet.sendError(resp);
         }
@@ -320,6 +322,26 @@ public class AutoLogin extends AbstractLoginRequestHandler {
         b.cookies(cookies).secure(Tools.considerSecure(req, conf.isCookieForceHTTPS()));
         b.serverName(req.getServerName()).serverPort(req.getServerPort()).httpSessionID(httpSessionId);
         return b.build();
+    }
+
+    /**
+     * Checks whether auto login attempt shall be skipped due to SSO requirements.
+     *
+     * @param req The associated HTTP request
+     * @param resp The associated HTTP response
+     * @return <code>true</code> if auto login should abort afterwards; otherwise <code>false</code>
+     */
+    private static boolean skipAutoLoginForSsoSession(HttpServletRequest req, HttpServletResponse resp) {
+        SessionSsoService ssoService = ServerServiceRegistry.getInstance().getService(SessionSsoService.class);
+        if (ssoService != null) {
+            try {
+                return ssoService.skipAutoLoginAttempt(req, resp);
+            } catch (OXException e) {
+                LOG.warn("Error while checking if autologin shall be skipped due to SSO requirements", e);
+            }
+        }
+
+        return false;
     }
 
 }

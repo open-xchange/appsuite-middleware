@@ -94,7 +94,7 @@ public final class JSlobStorageTracker implements ServiceTrackerCustomizer<JSlob
     public void removedService(final ServiceReference<JSlobStorage> reference, final JSlobStorage service) {
         try {
             JSlobStorageRegistryImpl.getInstance().removeJSlobStorage(service.getIdentifier());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             org.slf4j.LoggerFactory.getLogger(JSlobStorageTracker.class).error("", e);
         } finally {
             context.ungetService(reference);

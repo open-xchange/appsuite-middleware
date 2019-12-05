@@ -181,4 +181,26 @@ public class Logback {
         logfile = logfileText == null ? logfile : logfileText;
         return logfile;
     }
+    
+    /**
+     * Remove a list of nodes from the logback.xml document
+     * 
+     * @param nodeList The list of nodes to remove
+     * @return the number of removed nodes
+     */
+    public static int removeNodeList(NodeList nodeList) {
+    	int removed=0;
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            Node original = nodeList.item(i);
+            Node parent = original.getParentNode();
+            // remove previous text to remove empty lines
+            Node prev = original.getPreviousSibling();
+            if (prev != null && prev.getNodeType() == Node.TEXT_NODE && prev.getNodeValue().trim().isEmpty()) {
+                parent.removeChild(prev);
+            }
+            parent.removeChild(original);
+            removed++;
+        }
+        return removed;
+    }
 }

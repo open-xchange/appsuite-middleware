@@ -169,7 +169,7 @@ public final class MessagingFolderWriter {
             public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws OXException {
                 try {
                     jsonContainer.put(DataFields.ID, null == id ? MessagingFolderIdentifier.getFQN(serviceId, accountId, folder.getId()) : id);
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
                 }
             }
@@ -180,7 +180,7 @@ public final class MessagingFolderWriter {
             public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws OXException {
                 try {
                     jsonContainer.put(DataFields.CREATED_BY, Integer.valueOf(-1));
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
                 }
             }
@@ -191,7 +191,7 @@ public final class MessagingFolderWriter {
             public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws OXException {
                 try {
                     jsonContainer.put(DataFields.MODIFIED_BY, Integer.valueOf(-1));
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
                 }
             }
@@ -202,7 +202,7 @@ public final class MessagingFolderWriter {
             public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws OXException {
                 try {
                     jsonContainer.put(DataFields.CREATION_DATE, Integer.valueOf(0));
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
                 }
             }
@@ -213,7 +213,7 @@ public final class MessagingFolderWriter {
             public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws OXException {
                 try {
                     jsonContainer.put(DataFields.LAST_MODIFIED, Integer.valueOf(0));
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
                 }
             }
@@ -230,7 +230,7 @@ public final class MessagingFolderWriter {
                         parent = MessagingFolderIdentifier.getFQN(serviceId, accountId, folder.getParentId());
                     }
                     jsonContainer.put(FolderChildFields.FOLDER_ID, parent);
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
                 }
             }
@@ -241,7 +241,7 @@ public final class MessagingFolderWriter {
             public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws OXException {
                 try {
                     jsonContainer.put(FolderFields.TITLE, name == null ? folder.getName() : name);
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
                 }
             }
@@ -252,7 +252,7 @@ public final class MessagingFolderWriter {
             public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws OXException {
                 try {
                     jsonContainer.put(FolderFields.MODULE, AJAXServlet.getModuleString(module == -1 ? FolderObject.MESSAGING : module, -1));
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
                 }
             }
@@ -263,7 +263,7 @@ public final class MessagingFolderWriter {
             public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws OXException {
                 try {
                     jsonContainer.put(FolderFields.TYPE, Integer.valueOf(FolderObject.MESSAGING));
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
                 }
             }
@@ -283,7 +283,7 @@ public final class MessagingFolderWriter {
                      * Put value
                      */
                     jsonContainer.put(FolderFields.SUBFOLDERS, Boolean.valueOf(boolVal));
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
                 }
             }
@@ -336,7 +336,7 @@ public final class MessagingFolderWriter {
                      * Put value
                      */
                     jsonContainer.put(FolderFields.OWN_RIGHTS, Integer.valueOf(permissionBits));
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
                 }
             }
@@ -359,7 +359,7 @@ public final class MessagingFolderWriter {
                      * Put value
                      */
                     jsonContainer.put(FolderFields.PERMISSIONS, ja);
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
                 }
             }
@@ -374,7 +374,7 @@ public final class MessagingFolderWriter {
                      */
                     final String value = folder.isRootFolder() ? "" : new StringBuilder(16).append('(').append(folder.getMessageCount()).append('/').append(folder.getUnreadMessageCount()).append(')').toString();
                     jsonContainer.put(FolderFields.SUMMARY, value);
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
                 }
             }
@@ -388,7 +388,7 @@ public final class MessagingFolderWriter {
                      * Put value
                      */
                     jsonContainer.put(FolderFields.STANDARD_FOLDER, Boolean.valueOf(folder.containsDefaultFolderType() ? folder.isDefaultFolder() : false));
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
                 }
             }
@@ -402,7 +402,7 @@ public final class MessagingFolderWriter {
                      * Put value
                      */
                     jsonContainer.put(FolderFields.TOTAL, Integer.valueOf(folder.getMessageCount()));
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
                 }
             }
@@ -416,7 +416,7 @@ public final class MessagingFolderWriter {
                      * Put value
                      */
                     jsonContainer.put(FolderFields.NEW, Integer.valueOf(folder.getNewMessageCount()));
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
                 }
             }
@@ -430,7 +430,7 @@ public final class MessagingFolderWriter {
                      * Put value
                      */
                     jsonContainer.put(FolderFields.UNREAD, Integer.valueOf(folder.getUnreadMessageCount()));
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
                 }
             }
@@ -444,7 +444,7 @@ public final class MessagingFolderWriter {
                      * Put value
                      */
                     jsonContainer.put(FolderFields.DELETED, Integer.valueOf(folder.getDeletedMessageCount()));
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
                 }
             }
@@ -464,7 +464,7 @@ public final class MessagingFolderWriter {
                         boolVal = Boolean.TRUE;
                     }
                     jsonContainer.put(FolderFields.SUBSCRIBED, boolVal);
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
                 }
             }
@@ -486,7 +486,7 @@ public final class MessagingFolderWriter {
                      * Put value
                      */
                     jsonContainer.put(FolderFields.SUBSCR_SUBFLDS, boolVal);
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
                 }
             }
@@ -501,7 +501,7 @@ public final class MessagingFolderWriter {
                      */
                     final Integer caps = Integer.valueOf(MessagingFolderImpl.parseCaps(folder.getCapabilities()));
                     jsonContainer.put(FolderFields.CAPABILITIES, caps);
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
                 }
             }
@@ -586,7 +586,7 @@ public final class MessagingFolderWriter {
                             fo.setType(FolderObject.MESSAGING);
                             fo.setCreatedBy(-1);
                             jsonContainer.put(folderField.getColumnName(), folderField.renderJSON(null, folderField.getValue(fo, session)));
-                        } catch (final JSONException e) {
+                        } catch (JSONException e) {
                             throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
                         }
                     }
@@ -634,7 +634,7 @@ public final class MessagingFolderWriter {
                 } else {
                     try {
                         retval += mapping[permission[i]] << shiftVal;
-                    } catch (final Exception e) {
+                    } catch (Exception e) {
                         throw MessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
                     }
                 }

@@ -51,7 +51,6 @@ package com.openexchange.sessiond.impl;
 
 import static com.openexchange.java.Autoboxing.B;
 import static org.junit.Assert.assertEquals;
-import java.util.List;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -75,11 +74,11 @@ public class Bug16158Test {
 
     @Before
     public void setUp() throws Exception {
-        sessionData = new SessionData(100, 1, 60000, 167, false);
+        sessionData = new SessionData(100, 1, 60000, 167);
         threadPoolService = new SimThreadPoolService();
         sessionData.addThreadPoolService(threadPoolService);
         final SessionIdGenerator idGenerator = UUIDSessionIdGenerator.getInstance();
-        session = new SessionImpl(-1, "bug16158", null, 0, idGenerator.createSessionId(null), null, idGenerator.createRandomId(), null, null, null, null, null, false, null);
+        session = new SessionImpl(-1, "bug16158", null, 0, idGenerator.createSessionId(null), null, idGenerator.createRandomId(), null, null, null, null, null, false, false, null);
         sessionData.addSession(session, true);
         for (int i = 0; i < finders.length; i++) {
             finders[i] = new SessionFinder();
@@ -174,7 +173,7 @@ public class Bug16158Test {
                     final SessionControl control = sessionData.getSession(session.getSessionID());
                     notFound = null == control;
                 }
-            } catch (final NullPointerException e) {
+            } catch (NullPointerException e) {
                 e.printStackTrace();
                 notFound = true;
             }
@@ -203,10 +202,10 @@ public class Bug16158Test {
             while (run && !timeout) {
                 try {
                     Thread.sleep(1);
-                } catch (final InterruptedException e) {
+                } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                final List<SessionControl> removed = sessionData.rotateShort();
+                final RotateShortResult removed = sessionData.rotateShort();
                 timeout = !removed.isEmpty();
             }
         }

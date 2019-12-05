@@ -114,7 +114,6 @@ public class GrizzlyConfig {
         private String robotsMetaTag = "none";
         private int maxBodySize = 104857600;
         private int maxNumberOfHttpSessions = 250000;
-        private boolean isSessionAutologin = false;
         private List<String> enabledCiphers = null;
         private long wsTimeoutMillis;
         private int sessionExpiryCheckInterval = 60;
@@ -177,7 +176,7 @@ public class GrizzlyConfig {
 
             this.httpHost = configService.getProperty("com.openexchange.connector.networkListenerHost", "127.0.0.1");
             // keep backwards compatibility with AJP configuration
-            if(httpHost.equals("*")) {
+            if (httpHost.equals("*")) {
                 this.httpHost="0.0.0.0";
             }
             this.httpPort = configService.getIntProperty("com.openexchange.connector.networkListenerPort", 8009);
@@ -191,9 +190,6 @@ public class GrizzlyConfig {
             } else {
                 this.robotsMetaTag = null;
             }
-
-            // sessiond properties
-            this.isSessionAutologin = configService.getBoolProperty("com.openexchange.sessiond.autologin", false);
 
             this.enabledCiphers = configService.getProperty("com.openexchange.http.grizzly.enabledCipherSuites", "", ",");
 
@@ -432,11 +428,6 @@ public class GrizzlyConfig {
             return this;
         }
 
-        public Builder setSessionAutologin(boolean isSessionAutologin) {
-            this.isSessionAutologin = isSessionAutologin;
-            return this;
-        }
-
         public Builder setEnabledCiphers(List<String> enabledCiphers) {
             this.enabledCiphers = enabledCiphers;
             return this;
@@ -463,7 +454,7 @@ public class GrizzlyConfig {
         }
 
         public GrizzlyConfig build() {
-            return new GrizzlyConfig(httpHost, httpPort, httpsPort, isJMXEnabled, accessLogConfig, isWebsocketsEnabled, isCometEnabled, maxRequestParameters, backendRoute, isAbsoluteRedirect, shutdownFast, awaitShutDownSeconds, maxHttpHeaderSize, isSslEnabled, keystorePath, keystorePassword, sessionExpiryCheckInterval, maxNumberOfConcurrentRequests, checkTrackingIdInRequestParameters, cookieMaxAge, cookieMaxInactivityInterval, isForceHttps, isCookieHttpOnly, contentSecurityPolicy, defaultEncoding, isConsiderXForwards, knownProxies, forHeader, protocolHeader, httpsProtoValue, httpProtoPort, httpsProtoPort, echoHeader, robotsMetaTag, maxBodySize, maxNumberOfHttpSessions, isSessionAutologin, enabledCiphers, wsTimeoutMillis, supportHierachicalLookupOnNotFound);
+            return new GrizzlyConfig(httpHost, httpPort, httpsPort, isJMXEnabled, accessLogConfig, isWebsocketsEnabled, isCometEnabled, maxRequestParameters, backendRoute, isAbsoluteRedirect, shutdownFast, awaitShutDownSeconds, maxHttpHeaderSize, isSslEnabled, keystorePath, keystorePassword, sessionExpiryCheckInterval, maxNumberOfConcurrentRequests, checkTrackingIdInRequestParameters, cookieMaxAge, cookieMaxInactivityInterval, isForceHttps, isCookieHttpOnly, contentSecurityPolicy, defaultEncoding, isConsiderXForwards, knownProxies, forHeader, protocolHeader, httpsProtoValue, httpProtoPort, httpsProtoPort, echoHeader, robotsMetaTag, maxBodySize, maxNumberOfHttpSessions, enabledCiphers, wsTimeoutMillis, supportHierachicalLookupOnNotFound);
         }
     }
 
@@ -575,11 +566,6 @@ public class GrizzlyConfig {
     /** The max. number of HTTP sessions */
     private final int maxNumberOfHttpSessions;
 
-    // sessiond properties
-
-    /** Is autologin enabled in the session.d properties? */
-    private final boolean isSessionAutologin;
-
     private final List<String> enabledCiphers;
 
     /** The Web Socket timeout in milliseconds */
@@ -597,7 +583,7 @@ public class GrizzlyConfig {
     /** Checks if hierarchical look-up of "parent" servlets should be supported. */
     private final boolean supportHierachicalLookupOnNotFound;
 
-    GrizzlyConfig(String httpHost, int httpPort, int httpsPort, boolean isJMXEnabled, GrizzlyAccessLogConfig accessLogConfig, boolean isWebsocketsEnabled, boolean isCometEnabled, int maxRequestParameters, String backendRoute, boolean isAbsoluteRedirect, boolean shutdownFast, int awaitShutDownSeconds, int maxHttpHeaderSize, boolean isSslEnabled, String keystorePath, String keystorePassword, int sessionExpiryCheckInterval, int maxNumberOfConcurrentRequests, boolean checkTrackingIdInRequestParameters, int cookieMaxAge, int cookieMaxInactivityInterval, boolean isForceHttps, boolean isCookieHttpOnly, String contentSecurityPolicy, String defaultEncoding, boolean isConsiderXForwards, List<IPRange> knownProxies, String forHeader, String protocolHeader, String httpsProtoValue, int httpProtoPort, int httpsProtoPort, String echoHeader, String robotsMetaTag, int maxBodySize, int maxNumberOfHttpSessions, boolean isSessionAutologin, List<String> enabledCiphers, long wsTimeoutMillis, boolean supportHierachicalLookupOnNotFound) {
+    GrizzlyConfig(String httpHost, int httpPort, int httpsPort, boolean isJMXEnabled, GrizzlyAccessLogConfig accessLogConfig, boolean isWebsocketsEnabled, boolean isCometEnabled, int maxRequestParameters, String backendRoute, boolean isAbsoluteRedirect, boolean shutdownFast, int awaitShutDownSeconds, int maxHttpHeaderSize, boolean isSslEnabled, String keystorePath, String keystorePassword, int sessionExpiryCheckInterval, int maxNumberOfConcurrentRequests, boolean checkTrackingIdInRequestParameters, int cookieMaxAge, int cookieMaxInactivityInterval, boolean isForceHttps, boolean isCookieHttpOnly, String contentSecurityPolicy, String defaultEncoding, boolean isConsiderXForwards, List<IPRange> knownProxies, String forHeader, String protocolHeader, String httpsProtoValue, int httpProtoPort, int httpsProtoPort, String echoHeader, String robotsMetaTag, int maxBodySize, int maxNumberOfHttpSessions, List<String> enabledCiphers, long wsTimeoutMillis, boolean supportHierachicalLookupOnNotFound) {
         super();
         this.httpHost = httpHost;
         this.httpPort = httpPort;
@@ -635,7 +621,6 @@ public class GrizzlyConfig {
         this.robotsMetaTag = robotsMetaTag;
         this.maxBodySize = maxBodySize;
         this.maxNumberOfHttpSessions = maxNumberOfHttpSessions;
-        this.isSessionAutologin = isSessionAutologin;
         this.enabledCiphers = enabledCiphers;
         this.wsTimeoutMillis = wsTimeoutMillis;
         this.supportHierachicalLookupOnNotFound = supportHierachicalLookupOnNotFound;
@@ -794,15 +779,6 @@ public class GrizzlyConfig {
      */
     public String getContentSecurityPolicy() {
         return contentSecurityPolicy;
-    }
-
-    /**
-     * Gets the isSessionAutologin
-     *
-     * @return The isSessionAutologin
-     */
-    public boolean isSessionAutologin() {
-        return isSessionAutologin;
     }
 
     /**

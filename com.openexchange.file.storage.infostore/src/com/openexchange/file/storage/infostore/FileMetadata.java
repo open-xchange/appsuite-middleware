@@ -383,7 +383,7 @@ public class FileMetadata implements DocumentMetadata {
                 try {
                     // -1 is a valid id
                     Integer.valueOf(id);
-                } catch (final NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     throw FileStorageExceptionCodes.INVALID_FILE_IDENTIFIER.create(e, id);
                 }
             }

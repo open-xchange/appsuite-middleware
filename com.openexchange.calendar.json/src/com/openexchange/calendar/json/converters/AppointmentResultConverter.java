@@ -119,7 +119,7 @@ public class AppointmentResultConverter extends AbstractCalendarJSONResultConver
                 } else {
                     writer.writeArray(appointment, columns, startUTC, endUTC, jsonResponseArray);
                 }
-            } catch (final JSONException e) {
+            } catch (JSONException e) {
                 throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
             }
         }
@@ -149,7 +149,7 @@ public class AppointmentResultConverter extends AbstractCalendarJSONResultConver
             try {
                 appointmentWriter.writeAppointment(appointment, jsonAppointmentObj);
                 jsonResponseArray.put(jsonAppointmentObj);
-            } catch (final JSONException e) {
+            } catch (JSONException e) {
                 throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
             }
         }
@@ -176,7 +176,7 @@ public class AppointmentResultConverter extends AbstractCalendarJSONResultConver
         for (final Appointment appointment : appointmentList) {
             try {
                 writer.writeArray(appointment, columns, startUTC, endUTC, jsonResponseArray);
-            } catch (final JSONException e) {
+            } catch (JSONException e) {
                 throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
             }
         }
@@ -222,7 +222,7 @@ public class AppointmentResultConverter extends AbstractCalendarJSONResultConver
         appointmentwriter.setSession(session);
         try {
             appointmentwriter.writeAppointment(appointmentobject, jsonResponseObj);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
         }
 

@@ -135,7 +135,7 @@ public class InfostoreDowngradeTest {
             con = DBPool.pickupWriteable(ctx);
             final DowngradeEvent event = new DowngradeEvent(config, con, ctx);
             new InfostoreDowngrade().downgradePerformed(event);
-        } catch (final OXException x) {
+        } catch (OXException x) {
             x.printStackTrace();
             fail(x.getMessage());
         } finally {
@@ -173,7 +173,7 @@ public class InfostoreDowngradeTest {
         try {
             database.getDocumentMetadata(id, InfostoreFacade.CURRENT_VERSION, session);
             fail("The document still exists!");
-        } catch (final OXException e) {
+        } catch (OXException e) {
             assertTrue(e.getMessage(), InfostoreExceptionCodes.NOT_EXIST.equals(e) || InfostoreExceptionCodes.DOCUMENT_NOT_EXIST.equals(e));
         }
     }

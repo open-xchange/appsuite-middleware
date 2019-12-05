@@ -203,7 +203,7 @@ public final class ExecutorContinuation<V> implements Continuation<Collection<V>
         for (final Future<V> completedFuture : completedFutures) {
             try {
                 retval.add(completedFuture.get());
-            } catch (final ExecutionException e) {
+            } catch (ExecutionException e) {
                 final Throwable cause = e.getCause();
                 if (cause instanceof OXException) {
                     throw (OXException) cause;

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: UWAWidget Management JSON Interface
 Bundle-SymbolicName: com.openexchange.frontend.uwa.json
-Bundle-Version: 7.10.2
+Bundle-Version: 7.10.3
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.fasterxml.jackson.core,
@@ -12,7 +12,7 @@ Import-Package: com.fasterxml.jackson.core,
  com.fasterxml.jackson.core.json,
  com.fasterxml.jackson.core.sym,
  com.fasterxml.jackson.core.type,
- com.fasterxml.jackson.core.util, 
+ com.fasterxml.jackson.core.util,
  com.openexchange.ajax,
  com.openexchange.ajax.osgi,
  com.openexchange.ajax.requesthandler,
@@ -33,6 +33,7 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.tools.service,
  com.openexchange.tools.servlet,
  com.openexchange.tools.session,
+ com.openexchange.user,
  javax.servlet,
  javax.servlet.http,
  org.json,

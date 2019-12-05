@@ -68,11 +68,11 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFinishedListenerRegistry;
 import com.openexchange.groupware.delete.DeleteRegistry;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.user.User;
 
 /**
  * This class integrates all operations to be done for deleting a group.
@@ -149,7 +149,7 @@ public final class Delete {
         if (groupId == GroupStorage.GROUP_ZERO_IDENTIFIER) {
             try {
                 throw GroupExceptionCodes.NO_GROUP_DELETE.create(GroupTools.getGroupZero(ctx).getDisplayName());
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.error("", e);
                 throw GroupExceptionCodes.NO_GROUP_DELETE.create(I(GroupStorage.GROUP_ZERO_IDENTIFIER));
             }
@@ -178,16 +178,16 @@ public final class Delete {
             delete(con);
             con.commit();
             propagateDeleteFinished();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             Databases.rollback(con);
             throw GroupExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             Databases.rollback(con);
             throw e;
         } finally {
             try {
                 con.setAutoCommit(true);
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 LOG.error("Problem setting autocommit to true.", e);
             }
             DBPool.closeWriterSilent(ctx, con);

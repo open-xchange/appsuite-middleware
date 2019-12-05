@@ -93,7 +93,7 @@ public final class SessionPOP3StorageTrashContainer implements POP3StorageTrashC
         try {
             try {
                 cached = (SessionPOP3StorageTrashContainer) session.getParameter(key);
-            } catch (final ClassCastException e) {
+            } catch (ClassCastException e) {
                 cached = null;
             }
             if (null == cached) {

@@ -168,7 +168,7 @@ public abstract class ScribeGenericHTTPRequestBuilder<T extends HTTPGenericReque
             String finalUrl;
             try {
                 finalUrl = isVerbatimUrl ? verbatimUrl : URIUtil.encodeQuery(baseUrl);
-            } catch (final URIException e) {
+            } catch (URIException e) {
                 finalUrl = baseUrl;
             }
             request = new OAuthRequest(getVerb(), finalUrl);
@@ -214,7 +214,7 @@ public abstract class ScribeGenericHTTPRequestBuilder<T extends HTTPGenericReque
         final OAuthAccount account = coreBuilder.getAccount();
         try {
             return new Token(account.getToken(), account.getSecret());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ScribeGenericHTTPRequestBuilder.class);
             logger.warn("Associated OAuth \"{} ({})\" account misses token information.", account.getDisplayName(), I(account.getId()));
             throw OAuthExceptionCodes.INVALID_ACCOUNT_EXTENDED.create(e, account.getDisplayName(), I(account.getId()));

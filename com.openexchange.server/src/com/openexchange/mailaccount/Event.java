@@ -49,7 +49,6 @@
 
 package com.openexchange.mailaccount;
 
-
 /**
  * {@link Event} - A mail account event.
  *
@@ -73,4 +72,12 @@ public enum Event {
         this.id = id;
     }
 
+    /**
+     * Gets the identifier for this event.
+     *
+     * @return The identifier
+     */
+    public String getId() {
+        return id;
+    }
 }

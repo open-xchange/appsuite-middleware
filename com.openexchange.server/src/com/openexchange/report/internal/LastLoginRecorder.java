@@ -55,8 +55,6 @@ import com.openexchange.ajax.Client;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.java.Streams;
 import com.openexchange.lock.AccessControl;
 import com.openexchange.lock.LockService;
@@ -65,6 +63,8 @@ import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.LoginResult;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.user.User;
+import com.openexchange.user.UserExceptionCode;
 import com.openexchange.user.UserService;
 
 /**

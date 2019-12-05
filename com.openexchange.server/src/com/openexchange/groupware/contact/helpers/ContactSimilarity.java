@@ -165,7 +165,7 @@ public class ContactSimilarity {
             score += 5;
         }
 
-        if( score < THRESHHOLD && original.matches(candidate, MATCH_COLUMNS)) { //the score check is only to speed the process up
+        if ( score < THRESHHOLD && original.matches(candidate, MATCH_COLUMNS)) { //the score check is only to speed the process up
             score = THRESHHOLD + 1;
         }
         return score;

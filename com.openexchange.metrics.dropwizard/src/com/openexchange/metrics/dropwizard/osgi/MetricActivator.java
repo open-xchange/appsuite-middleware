@@ -68,21 +68,11 @@ public class MetricActivator extends HousekeepingActivator {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
-     */
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {};
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.osgi.DeferredActivator#startBundle()
-     */
     @Override
     protected void startBundle() throws Exception {
         DropwizardMetricService dropwizardService = new DropwizardMetricService();
@@ -91,11 +81,6 @@ public class MetricActivator extends HousekeepingActivator {
         openTrackers();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.osgi.HousekeepingActivator#stopBundle()
-     */
     @Override
     protected void stopBundle() throws Exception {
         unregisterService(MetricService.class);

@@ -93,8 +93,14 @@ public class LoginFields {
     public static final String LANGUAGE_PARAM = "language";
 
     public static final String STORE_LANGUAGE = "storeLanguage";
+    
+    public static final String LOCALE_PARAM = "locale";
+
+    public static final String STORE_LOCALE = "storeLocale";
 
     public static final String TRANSIENT = "transient";
+
+    public static final String STAY_SIGNED_IN = "staySignedIn";
 
     private LoginFields() {
         super();

@@ -128,9 +128,6 @@ public class SybaseASADatabase extends AbstractJdbcDatabase {
         return PRIORITY_DEFAULT;
     }
     
-	/* (non-Javadoc)
-	 * @see liquibase.database.Database#getDefaultDriver(java.lang.String)
-	 */
 	@Override
     public String getDefaultDriver(String url) {
         if (url.startsWith("jdbc:sybase")) {
@@ -150,18 +147,12 @@ public class SybaseASADatabase extends AbstractJdbcDatabase {
         return "Sybase Anywhere";
     }
 
-    /* (non-Javadoc)
-    * @see liquibase.database.Database#getShortName()
-    */
-	@Override
+    @Override
     public String getShortName() {
 		
 		return "asany";
 	}
 
-	/* (non-Javadoc)
-	 * @see liquibase.database.Database#isCorrectDatabaseImplementation(java.sql.Connection)
-	 */
 	@Override
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
 		return "Adaptive Server Anywhere".equalsIgnoreCase(conn.getDatabaseProductName())
@@ -194,17 +185,11 @@ public class SybaseASADatabase extends AbstractJdbcDatabase {
 		return super.getViewDefinition(schema, viewName);
 	}
 
-	/* (non-Javadoc)
-	 * @see liquibase.database.Database#supportsInitiallyDeferrableColumns()
-	 */
 	@Override
     public boolean supportsInitiallyDeferrableColumns() {
 		return false;
 	}
 
-	/* (non-Javadoc)
-	 * @see liquibase.database.Database#supportsTablespaces()
-	 */
 	@Override
     public boolean supportsTablespaces() {
 		return true;
@@ -220,9 +205,6 @@ public class SybaseASADatabase extends AbstractJdbcDatabase {
         return false;
     }
 
-	/* (non-Javadoc)
-	 * @see liquibase.database.AbstractJdbcDatabase#getAutoIncrementClause()
-	 */
 	@Override
 	protected String getAutoIncrementClause() {
 		return "DEFAULT AUTOINCREMENT";

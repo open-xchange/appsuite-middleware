@@ -60,13 +60,13 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceEventConstants;
 import com.openexchange.resource.ResourceExceptionCode;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.user.User;
 
 /**
  * {@link ResourceCreate} - Performs insertion of a {@link Resource resource}.
@@ -151,7 +151,7 @@ public final class ResourceCreate extends AbstractResourcePerformer {
     // try {
     // securityService.checkPermission(permissions == null ? null : permissions.toArray(new String[permissions
     // .size()]), PATH);
-    // } catch (final BundleAccessException e) {
+    // } catch (BundleAccessException e) {
     // throw new OXException(e);
     // }
     // }
@@ -167,8 +167,12 @@ public final class ResourceCreate extends AbstractResourcePerformer {
         /*
          * Check mandatory fields: identifier, displayName, and mail
          */
-        if (com.openexchange.java.Strings.isEmpty(resource.getSimpleName()) || com.openexchange.java.Strings.isEmpty(resource.getDisplayName()) || com.openexchange.java.Strings.isEmpty(resource.getMail())) {
-            throw ResourceExceptionCode.MANDATORY_FIELD.create();
+        if (com.openexchange.java.Strings.isEmpty(resource.getSimpleName())) {
+            throw ResourceExceptionCode.MANDATORY_FIELD_NAME.create();
+        } else if (com.openexchange.java.Strings.isEmpty(resource.getDisplayName())) {
+            throw ResourceExceptionCode.MANDATORY_FIELD_DISPLAY_NAME.create();
+        } else if (com.openexchange.java.Strings.isEmpty(resource.getMail())) {
+            throw ResourceExceptionCode.MANDATORY_FIELD_MAIL.create();
         }
         /*
          * Check for invalid values
@@ -199,13 +203,13 @@ public final class ResourceCreate extends AbstractResourcePerformer {
             con.setAutoCommit(false);
             insert(con);
             con.commit();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             Databases.rollback(con);
             throw ResourceExceptionCode.SQL_ERROR.create(e);
         } finally {
             try {
                 con.setAutoCommit(true);
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 LOG.error("Problem setting autocommit to true.", e);
             }
             DBPool.closeWriterSilent(ctx, con);
@@ -230,7 +234,7 @@ public final class ResourceCreate extends AbstractResourcePerformer {
             final int id = IDGenerator.getId(ctx.getContextId(), Types.PRINCIPAL, con);
             resource.setIdentifier(id);
             storage.insertResource(ctx, con, resource);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw ResourceExceptionCode.SQL_ERROR.create(e);
         }
     }

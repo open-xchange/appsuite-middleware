@@ -87,7 +87,7 @@ public final class Send {
         final AllocatingStringWriter sWriter = new AllocatingStringWriter();
         try {
             ResponseWriter.write(response, sWriter);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             LOG.error("", e);
             sendError(resp);
         }
@@ -104,7 +104,7 @@ public final class Send {
         resp.setContentType(AJAXServlet.CONTENTTYPE_JAVASCRIPT);
         try {
             ResponseWriter.write(response, resp.getWriter());
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             LOG.error("", e);
             sendError(resp);
         }

@@ -168,7 +168,7 @@ public class ExternalMailAccountRootFolder extends AbstractFolder {
                 } else {
                     try {
                         retval += mapping[permission[i]] << shiftVal;
-                    } catch (final Exception e) {
+                    } catch (Exception e) {
                         throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
                     }
                 }

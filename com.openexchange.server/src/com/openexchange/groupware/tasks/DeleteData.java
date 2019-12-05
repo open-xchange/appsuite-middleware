@@ -61,10 +61,10 @@ import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.session.Session;
+import com.openexchange.user.User;
 
 /**
  * Process of deleting a task.
@@ -134,10 +134,10 @@ public final class DeleteData {
             TaskLogic.deleteTask(ctx, con, user.getId(), TaskLogic.clone(getOrigTask()), lastModified);
             deleteReminder(con);
             con.commit();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             rollback(con);
             throw TaskExceptionCode.DELETE_FAILED.create(e, e.getMessage());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             rollback(con);
             throw e;
         } finally {

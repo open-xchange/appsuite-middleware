@@ -82,7 +82,6 @@ import com.openexchange.groupware.attach.AttachmentField;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
@@ -101,6 +100,7 @@ import com.openexchange.tools.servlet.UploadServletException;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.user.User;
 
 /**
  * Attachment
@@ -150,7 +150,7 @@ public class Attachment extends PermissionServlet {
         try {
             session = ServerSessionAdapter.valueOf(getSessionObject(req));
             user = UserStorage.getInstance().getUser(session.getUserId(), session.getContext());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             handle(res, e, action, getSessionObject(req));
             return;
         }
@@ -163,7 +163,7 @@ public class Attachment extends PermissionServlet {
         if (ACTION_DOCUMENT.equals(action)) {
             try {
                 require(req, PARAMETER_FOLDERID, PARAMETER_ATTACHEDID, PARAMETER_MODULE, PARAMETER_ID);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 handle(res, e, action, session);
                 return;
             }
@@ -175,13 +175,14 @@ public class Attachment extends PermissionServlet {
                 moduleId = requireNumber(req, res, action, PARAMETER_MODULE, session);
                 id = requireNumber(req, res, action, PARAMETER_ID, session);
 
-            } catch (final OXAborted x) {
+            } catch (OXAborted x) {
                 return;
             }
 
             document(
-                session, res,
-                req.getHeader("user-agent"),
+                session,
+                req, 
+                res,
                 isIE(req),
                 folderId,
                 attachedId,
@@ -200,7 +201,7 @@ public class Attachment extends PermissionServlet {
             res.setContentType(AJAXServlet.CONTENTTYPE_JAVASCRIPT);
             try {
                 ((JSONObject) writer.getObject()).write(res.getWriter());
-            } catch (final JSONException e) {
+            } catch (JSONException e) {
                 if (e.getCause() instanceof IOException) {
                     /*
                      * Throw proper I/O error since a serious socket error could been occurred which prevents further communication. Just
@@ -217,7 +218,7 @@ public class Attachment extends PermissionServlet {
         final String value = req.getParameter(parameter);
         try {
             return Integer.parseInt(value);
-        } catch (final NumberFormatException nfe) {
+        } catch (NumberFormatException nfe) {
             handle(res, AttachmentExceptionCodes.INVALID_REQUEST_PARAMETER.create(parameter, value), action, session);
             throw new OXAborted();
         }
@@ -235,7 +236,7 @@ public class Attachment extends PermissionServlet {
         final ServerSession session;
         try {
             session = ServerSessionAdapter.valueOf(getSessionObject(req));
-        } catch (final OXException e) {
+        } catch (OXException e) {
             handle(res, e, action, getSessionObject(req));
             return;
         }
@@ -248,7 +249,7 @@ public class Attachment extends PermissionServlet {
         res.setContentType(AJAXServlet.CONTENTTYPE_JAVASCRIPT);
         try {
             ((JSONObject) writer.getObject()).write(res.getWriter());
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             if (e.getCause() instanceof IOException) {
                 /*
                  * Throw proper I/O error since a serious socket error could been occurred which prevents further communication. Just
@@ -276,7 +277,7 @@ public class Attachment extends PermissionServlet {
         try {
             session = ServerSessionAdapter.valueOf(getSessionObject(req));
             user = UserStorage.getInstance().getUser(session.getUserId(), session.getContext());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             handle(res, e, action, getSessionObject(req));
             return;
         }
@@ -337,7 +338,7 @@ public class Attachment extends PermissionServlet {
                     }
                 }
             }
-        } catch (final OXException x) {
+        } catch (OXException x) {
             final Response resp = new Response(getSessionObject(req));
             resp.setException(x);
             try {
@@ -346,11 +347,11 @@ public class Attachment extends PermissionServlet {
                 throw new UploadServletException(res, substituteJS(
                         ResponseWriter.getJSON(resp).toString(), "error"),
                         x.getMessage(), x);
-            } catch (final JSONException e) {
+            } catch (JSONException e) {
                 LOG.error("Giving up", e);
             }
 
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             LOG.error("", e);
         }
     }
@@ -368,7 +369,7 @@ public class Attachment extends PermissionServlet {
 
     }
 
-    private void document(Session session, final HttpServletResponse res, final String userAgent, final boolean ie, final int folderId, final int attachedId, final int moduleId, final int id, final String contentType, final Context ctx, final User user, final UserConfiguration userConfig) {
+    private void document(Session session, final HttpServletRequest req, final HttpServletResponse res, final boolean ie, final int folderId, final int attachedId, final int moduleId, final int id, final String contentType, final Context ctx, final User user, final UserConfiguration userConfig) {
         Readable documentData = null;
         OutputStream os = null;
         boolean rollback = false;
@@ -393,7 +394,7 @@ public class Attachment extends PermissionServlet {
                     documentData,
                     attachment.getFilename(),
                     attachment.getFileMIMEType(),
-                    userAgent,
+                    req.getHeader("user-agent"),
                     ServerSessionAdapter.valueOf(session));
 
                 res.setHeader("Content-Disposition", checkedDownload.getContentDisposition());
@@ -401,10 +402,10 @@ public class Attachment extends PermissionServlet {
                 documentData = checkedDownload.getInputStream();
             }
 
-            // Browsers doesn't like the Pragma header the way we usually set
-            // this. Especially if files are sent to the browser. So removing
-            // pragma header
-            Tools.removeCachingHeader(res);
+            /*
+             * Handle caching headers
+             */
+            Tools.updateCachingHeaders(req, res);
 
             os = res.getOutputStream();
 
@@ -418,7 +419,7 @@ public class Attachment extends PermissionServlet {
 
             ATTACHMENT_BASE.commit();
             rollback = false;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             exc = e;
             return;
         } finally {
@@ -434,7 +435,7 @@ public class Attachment extends PermissionServlet {
             Streams.flush(os);
             try {
                 ATTACHMENT_BASE.finish();
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.debug("", e);
             }
         }
@@ -443,7 +444,7 @@ public class Attachment extends PermissionServlet {
     private void rollback(final Throwable t, final HttpServletResponse res, final String action, final Session session) {
         try {
             ATTACHMENT_BASE.rollback();
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.debug("", e);
         }
         if (null != t) {
@@ -469,7 +470,7 @@ public class Attachment extends PermissionServlet {
             long timestamp = 0;
 
             for (final AttachmentMetadata attachment : attachments) {
-                // while(attIter.hasNext()) {
+                // while (attIter.hasNext()) {
                 // final AttachmentMetadata attachment = attIter.next();
                 final UploadFile uploadFile = ufIter.next();
 
@@ -488,26 +489,26 @@ public class Attachment extends PermissionServlet {
             w = res.getWriter();
             w.print(substituteJS(result.toString(), ACTION_ATTACH));
             ATTACHMENT_BASE.commit();
-        } catch (final OXException t) {
+        } catch (OXException t) {
             try {
                 ATTACHMENT_BASE.rollback();
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.error("", e);
             }
             handle(res, t, ResponseFields.ERROR, session);
             return;
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             try {
                 ATTACHMENT_BASE.rollback();
-            } catch (final OXException x) {
+            } catch (OXException x) {
                 LOG.error("", e);
             }
             handle(res, AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage()), ResponseFields.ERROR, session);
             return;
-        } catch (final IOException e) {
+        } catch (IOException e) {
             try {
                 ATTACHMENT_BASE.rollback();
-            } catch (final OXException x) {
+            } catch (OXException x) {
                 LOG.error("", e);
             }
             handle(res, AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage()), ResponseFields.ERROR, session);
@@ -515,7 +516,7 @@ public class Attachment extends PermissionServlet {
         } finally {
             try {
                 ATTACHMENT_BASE.finish();
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.debug("", e);
             }
         }
@@ -528,7 +529,7 @@ public class Attachment extends PermissionServlet {
 
         int index = 0;
         for (final AttachmentMetadata attachment : attList) {
-            // while(attIter.hasNext()) {
+            // while (attIter.hasNext()) {
             // final AttachmentMetadata attachment = attIter.next();
             if (attachment == null) {
                 attachments.remove(index);
@@ -566,9 +567,9 @@ public class Attachment extends PermissionServlet {
             writer = new AllocatingStringWriter();
             ResponseWriter.write(resp, writer, localeFrom(session));
             res.getWriter().write(substituteJS(writer.toString(), action));
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             LOG.error("", t);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             LOG.error("", e);
         }
     }

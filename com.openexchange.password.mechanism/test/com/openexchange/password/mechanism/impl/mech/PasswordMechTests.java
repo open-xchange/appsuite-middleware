@@ -93,7 +93,7 @@ public class PasswordMechTests {
         assertEquals(this.passwordMech.getIdentifier(), encode.getPasswordMech());
         assertNotNull(encode.getEncodedPassword());
 
-        boolean check = this.passwordMech.check(PASSWORD, encode.getEncodedPassword(), null);
+        boolean check = this.passwordMech.check(PASSWORD, encode.getEncodedPassword(), encode.getSalt());
         assertTrue(check);
     }
 
@@ -105,7 +105,7 @@ public class PasswordMechTests {
         assertNull(encode.getEncodedPassword());
         assertEquals(this.passwordMech.getIdentifier(), encode.getPasswordMech());
 
-        boolean check = this.passwordMech.check(null, encode.getEncodedPassword(), null);
+        boolean check = this.passwordMech.check(null, encode.getEncodedPassword(), encode.getSalt());
         assertTrue(check);
     }
 
@@ -117,7 +117,7 @@ public class PasswordMechTests {
         assertNull(encode.getEncodedPassword());
         assertEquals(this.passwordMech.getIdentifier(), encode.getPasswordMech());
 
-        boolean check = this.passwordMech.check("", encode.getEncodedPassword(), null);
+        boolean check = this.passwordMech.check("", encode.getEncodedPassword(), encode.getSalt());
         assertTrue(check);
     }
 

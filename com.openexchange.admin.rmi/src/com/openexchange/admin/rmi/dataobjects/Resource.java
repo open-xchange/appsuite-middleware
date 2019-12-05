@@ -119,33 +119,21 @@ public class Resource extends ExtendableDataObject implements NameAndIdObject {
         this.available = null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.admin.rmi.dataobjects.NameAndIdObject#getId()
-     */
     @Override
     public Integer getId() {
         return id;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.admin.rmi.dataobjects.NameAndIdObject#setId(java.lang.Integer)
-     */
     @Override
     public void setId(final Integer id) {
         this.id = id;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.admin.rmi.dataobjects.NameAndIdObject#getName()
-     */
     @Override
     public String getName() {
         return name;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.admin.rmi.dataobjects.NameAndIdObject#setName(java.lang.String)
-     */
     @Override
     public void setName(final String name) {
         nameset = true;
@@ -224,9 +212,6 @@ public class Resource extends ExtendableDataObject implements NameAndIdObject {
         this.description = description;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.admin.rmi.dataobjects.ExtendableDataObject#toString()
-     */
     @Override
     public String toString() {
         StringBuilder ret = new StringBuilder();
@@ -383,9 +368,6 @@ public class Resource extends ExtendableDataObject implements NameAndIdObject {
         return availableset;
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#hashCode()
-     */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -404,9 +386,6 @@ public class Resource extends ExtendableDataObject implements NameAndIdObject {
         return result;
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {

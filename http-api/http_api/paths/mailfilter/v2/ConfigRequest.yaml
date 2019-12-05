@@ -1,0 +1,50 @@
+/mailfilter/v2?action=config:
+  get:
+    operationId: getConfig_v2
+    tags:
+      - Mailfilter
+    summary: Gets the configuration of the mail filter backend.
+    description: >
+      A mail filter can have different rules each containing one command. A
+      command has a test condition and actions
+
+      that are executed if the condition is true. The list of available
+      comparisions (that can be used in test
+
+      conditions) and the list of available actions depends on a given test and
+      the mail filter server configuration
+
+      and must be determined at runtime.
+
+
+      All those dynamic values can be fetched via a config object at startup,
+      which shows the capabilities of the server
+
+      to the client.
+    parameters:
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - in: query
+        name: username
+        description: >-
+          Must contain the user name for **admin mode**. So the normal
+          credentials are taken for authentication but the mail filter of the
+          user with this username is being changed.
+        required: false
+        schema:
+          type: string
+    responses:
+      '200':
+        description: >
+          A JSON object with the fields `tests` (containing an array of
+          available test-objects, see [Possible tests](#possible-tests).) and
+          `actioncommands`
+
+          (containing an array of valid actions. See [Possible action
+          commands](#possible-action-commands)). In case of errors the
+          responsible fields in the response are
+
+          filled (see [Error handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MailFilterConfigResponsev2'

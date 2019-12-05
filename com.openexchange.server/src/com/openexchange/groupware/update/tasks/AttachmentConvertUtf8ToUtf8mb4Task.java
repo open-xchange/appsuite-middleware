@@ -64,6 +64,6 @@ public class AttachmentConvertUtf8ToUtf8mb4Task extends SimpleConvertUtf8ToUtf8m
      * Initializes a new {@link AttachmentConvertUtf8ToUtf8mb4Task}.
      */
     public AttachmentConvertUtf8ToUtf8mb4Task() {
-        super(ImmutableList.of("prg_attachment", "del_attachment"), AttachmentCountUpdateTask.class.getName());
+        super(ImmutableList.of("prg_attachment", "del_attachment"));
     }
 }

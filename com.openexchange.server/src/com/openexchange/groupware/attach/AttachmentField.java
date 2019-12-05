@@ -66,6 +66,7 @@ public class AttachmentField {
 	public static final int FOLDER_ID = 800;
 	public static final int COMMENT = 807;
 	public static final int FILE_ID = 880;
+	public static final int CHECKSUM = 890;
 
 	public static final AttachmentField CREATED_BY_LITERAL = new AttachmentField(CREATED_BY,"created_by");
 	public static final AttachmentField CREATION_DATE_LITERAL = new AttachmentField(CREATION_DATE, "creation_date");
@@ -79,6 +80,7 @@ public class AttachmentField {
 	public static final AttachmentField FOLDER_ID_LITERAL = new AttachmentField(FOLDER_ID,"folder");
 	public static final AttachmentField COMMENT_LITERAL = new AttachmentField(COMMENT,"comment");
 	public static final AttachmentField FILE_ID_LITERAL = new AttachmentField(FILE_ID,"file_id");
+	public static final AttachmentField CHECKSUM_LITERAL = new AttachmentField(CHECKSUM, "checksum");
 
 	public static final AttachmentField[] VALUES_ARRAY = new AttachmentField[]{
 		CREATED_BY_LITERAL,
@@ -92,7 +94,8 @@ public class AttachmentField {
 		ID_LITERAL,
 		FOLDER_ID_LITERAL,
 		COMMENT_LITERAL,
-		FILE_ID_LITERAL
+		FILE_ID_LITERAL,
+		CHECKSUM_LITERAL
 	};
 
 	private static final AttachmentField[] HTTPAPI_VALUES_ARRAY = new AttachmentField[]{
@@ -127,13 +130,14 @@ public class AttachmentField {
 		case RTF_FLAG : return RTF_FLAG_LITERAL;
 		case COMMENT : return COMMENT_LITERAL;
 		case FILE_ID : return FILE_ID_LITERAL;
+		case CHECKSUM : return CHECKSUM_LITERAL;
 		default : return null;
 		}
 	}
 
 	public static AttachmentField get(final String s) {
 		for(final AttachmentField field : VALUES) {
-			if(field.name.equals(s)) {
+			if (field.name.equals(s)) {
 				return field;
 			}
 		}
@@ -154,6 +158,7 @@ public class AttachmentField {
 		case RTF_FLAG : return sw.rtfFlag();
 		case COMMENT : return sw.comment();
 		case FILE_ID : return sw.fileId();
+		case CHECKSUM : return sw.checksum();
 		default : return null;
 		}
 	}
@@ -206,6 +211,8 @@ public class AttachmentField {
 		public Object fileMIMEType();
 
 		public Object creationDate();
+
+		public Object checksum();
 
 	}
 

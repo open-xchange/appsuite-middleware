@@ -109,7 +109,7 @@ public class ActionActivator extends HousekeepingActivator {
 	        final Hashtable<String, ActionTypes> ht = new Hashtable<String, ActionTypes>();
 	        ht.put("action", ActionTypes.EMAIL);
 	        registerService(ActionService.class, new ActionEmail(), ht);
-		} catch (final Throwable t) {
+		} catch (Throwable t) {
 			LOG.error("", t);
 			throw t instanceof Exception ? (Exception) t : new Exception(t);
 		}
@@ -124,7 +124,7 @@ public class ActionActivator extends HousekeepingActivator {
              * Clear service registry
              */
 			getServiceRegistry().clearRegistry();
-		} catch (final Throwable t) {
+		} catch (Throwable t) {
 			LOG.error("", t);
 			throw t instanceof Exception ? (Exception) t : new Exception(t);
 		}

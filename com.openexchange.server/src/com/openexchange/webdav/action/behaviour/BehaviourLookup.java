@@ -78,11 +78,11 @@ public class BehaviourLookup {
 	}
 
 	public <T> T get(final Class<T> clazz) {
-		if(null == registry) {
+		if (null == registry) {
 			return null;
 		}
 		final WebdavRequest req = requestHolder.get();
-		if(req == null) {
+		if (req == null) {
 			return null;
 		}
 

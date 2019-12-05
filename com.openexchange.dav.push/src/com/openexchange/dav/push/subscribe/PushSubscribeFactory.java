@@ -60,7 +60,7 @@ import com.openexchange.dav.push.gcm.DavPushGateway;
 import com.openexchange.dav.push.gcm.PushTransportOptions;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.SessionHolder;
+import com.openexchange.session.SessionHolder;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavCollection;
 import com.openexchange.webdav.protocol.WebdavPath;
@@ -149,7 +149,7 @@ public class PushSubscribeFactory extends DAVFactory {
 
     @Override
     public String getURLPrefix() {
-        return "/subscribe/";
+        return getURLPrefix("/subscribe/");
     }
 
 }

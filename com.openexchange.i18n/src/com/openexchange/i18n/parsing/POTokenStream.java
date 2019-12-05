@@ -91,7 +91,7 @@ final class POTokenStream {
     public void setCharset(final String charset) {
         try {
             this.charset = Charset.forName(charset);
-        } catch (final java.nio.charset.UnsupportedCharsetException e) {
+        } catch (java.nio.charset.UnsupportedCharsetException e) {
             LOG.warn("Unsupported charset: \"{}\". Therefore using fall-back \"UTF-8\". Forgot to replace header appropriately?", charset);
             this.charset = Charsets.UTF_8;
         }
@@ -160,14 +160,14 @@ final class POTokenStream {
                 line++;
             }
             return b;
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw I18NExceptionCode.IO_EXCEPTION.create(e, filename);
         }
     }
 
     private void comment() throws OXException {
         /*
-         * StringBuilder data = new StringBuilder(); int c = -1; while((c = read()) != '\n') { data.append((char) c); } nextToken =
+         * StringBuilder data = new StringBuilder(); int c = -1; while ((c = read()) != '\n') { data.append((char) c); } nextToken =
          * POToken.COMMENT; element(data.toString());
          */
         // Ignore comments
@@ -276,7 +276,7 @@ final class POTokenStream {
             } else {
                 element(Integer.valueOf(number));
             }
-        } catch (final NumberFormatException x) {
+        } catch (NumberFormatException x) {
             throw I18NExceptionCode.EXPECTED_NUMBER.create(number, filename, Integer.valueOf(line));
         }
     }

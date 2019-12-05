@@ -125,9 +125,9 @@ abstract class AbstractDateTestCommandParser {
     void parseZone(JSONObject jsonObject, TestCommand command) throws JSONException {
         for(int x=0; x<command.getArguments().size(); x++){
             Object arg = command.getArguments().get(x);
-            if(ZONE_TAG.equals(arg)){
+            if (ZONE_TAG.equals(arg)){
                 Object zoneArgument = command.getArguments().get(x + 1);
-                if(zoneArgument instanceof List<?>){
+                if (zoneArgument instanceof List<?>){
                     jsonObject.put(DateTestField.zone.name(), ((List<?>) zoneArgument).get(0));
                 } else {
                     jsonObject.put(DateTestField.zone.name(), zoneArgument);

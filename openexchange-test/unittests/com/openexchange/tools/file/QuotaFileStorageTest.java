@@ -56,7 +56,9 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.net.URI;
 import java.sql.Connection;
+import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 import org.junit.Test;
 import com.openexchange.database.Assignment;
 import com.openexchange.database.DatabaseService;
@@ -129,7 +131,7 @@ public class QuotaFileStorageTest {
             final ByteArrayInputStream bais = new ByteArrayInputStream(fileContent.getBytes(com.openexchange.java.Charsets.UTF_8));
             quotaStorage.saveNewFile(bais);
             fail("Managed to exceed quota");
-        } catch (final OXException x) {
+        } catch (OXException x) {
             assertTrue(true);
         }
         rmdir(tempFile);
@@ -223,6 +225,16 @@ public class QuotaFileStorageTest {
 
         @Override
         public void backWritableAfterReading(int contextId, Connection con) {
+            // Nothing to do.
+        }
+
+        @Override
+        public void backWritableForGlobalAfterReading(int contextId, Connection connection) {
+            // Nothing to do.
+        }
+
+        @Override
+        public void backWritableForGlobalAfterReading(String group, Connection connection) {
             // Nothing to do.
         }
 
@@ -482,6 +494,11 @@ public class QuotaFileStorageTest {
         }
 
         @Override
+        public Set<String> getDistinctGroupsPerSchema() {
+            return Collections.emptySet();
+        }
+
+        @Override
         public Map<String, Integer> getAllSchemata(Connection con) throws OXException {
             return null;
         }
@@ -490,6 +507,7 @@ public class QuotaFileStorageTest {
         public SchemaInfo getSchemaInfo(int contextId) throws OXException {
             return null;
         }
+
     }
 
     private static void rmdir(final File tempFile) {

@@ -3,11 +3,15 @@
     operationId: refreshAutoLoginCookie
     tags:
       - Login
-    summary: Refreshes the auto-login cookie.
+    summary: Deprecated since 7.10.3. Refreshes the auto-login cookie.
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: '#/components/parameters/gblQueryParamSession'
     responses:
-      200:
-        description: In case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).
-        schema:
-          $ref: "#/definitions/CommonResponse"
+      '200':
+        description: >-
+          In case of errors the responsible fields in the response are filled
+          (see [Error handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommonResponse'

@@ -59,6 +59,13 @@ package com.openexchange.config;
 public interface Reloadable {
 
     /**
+     * Gets the interests in property names and/or configuration files.
+     *
+     * @return The interests
+     */
+    Interests getInterests();
+
+    /**
      * Signals that the configuration has been reloaded.
      * <p>
      * This {@link Reloadable} instance should perform necessary actions in order to apply (possibly) new configuration.
@@ -66,12 +73,4 @@ public interface Reloadable {
      * @param configService The configuration service providing newly initialized properties
      */
     void reloadConfiguration(ConfigurationService configService);
-
-    /**
-     * Gets the interests in property names and/or configuration files.
-     *
-     * @return The interests
-     */
-    Interests getInterests();
-
 }

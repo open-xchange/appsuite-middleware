@@ -379,7 +379,7 @@ public final class PGPKeysUtil {
         PGPPublicKey newPublicMasterKey = addUID(publicMasterKey, privateKey, userId);
 
         ModifyingPGPPublicKeyRing modifyingPGPPublicKeyRing = new ModifyingPGPPublicKeyRing(publicKeyRing);
-        if(modifyingPGPPublicKeyRing.removePublicKey(publicMasterKey)) {
+        if (modifyingPGPPublicKeyRing.removePublicKey(publicMasterKey)) {
             modifyingPGPPublicKeyRing.addPublicKey(newPublicMasterKey);
             publicKeyRing = modifyingPGPPublicKeyRing.getRing();
             return publicKeyRing;
@@ -434,7 +434,7 @@ public final class PGPKeysUtil {
         userId = userId.toUpperCase();
         for(Iterator<String> ids = publicKey.getUserIDs(); ids.hasNext();) {
             String keyUserId = ids.next().toUpperCase();
-            if(keyUserId.contains(userId) || userId.contains(keyUserId)) {
+            if (keyUserId.contains(userId) || userId.contains(keyUserId)) {
                 return true;
             }
         }
@@ -450,7 +450,7 @@ public final class PGPKeysUtil {
      */
     public static boolean containsUID(PGPPublicKeyRing publicKeyring, String userId) {
        for(Iterator<PGPPublicKey> keys = publicKeyring.getPublicKeys(); keys.hasNext();) {
-          if(containsUID(keys.next(), userId)){
+          if (containsUID(keys.next(), userId)){
              return true;
           }
        }
@@ -483,7 +483,7 @@ public final class PGPKeysUtil {
                             return setHashes (gen, vectors);
                         }
                         Date signatureCreationTime = vectors.getSignatureCreationTime();
-                        if(mostRecentSignatureDate == null || (signatureCreationTime != null && signatureCreationTime.getTime() >  mostRecentSignatureDate.getTime())) {
+                        if (mostRecentSignatureDate == null || (signatureCreationTime != null && signatureCreationTime.getTime() >  mostRecentSignatureDate.getTime())) {
                             mostRecentSignatureDate = signatureCreationTime;
                             last = vectors;
                         }

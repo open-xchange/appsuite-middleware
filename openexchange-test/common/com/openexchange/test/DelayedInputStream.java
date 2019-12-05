@@ -76,7 +76,7 @@ public class DelayedInputStream extends InputStream {
     private void sleep() {
         try {
             Thread.sleep(delay);
-        } catch (final InterruptedException e) {
+        } catch (InterruptedException e) {
             // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
             Thread.currentThread().interrupt();
         }

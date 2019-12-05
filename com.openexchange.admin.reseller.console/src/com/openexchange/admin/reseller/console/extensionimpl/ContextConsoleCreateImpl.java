@@ -167,7 +167,7 @@ public class ContextConsoleCreateImpl implements ContextConsoleCreateInterface {
                 }
 
             }
-        } catch (final DuplicateExtensionException e) {
+        } catch (DuplicateExtensionException e) {
             // Throw this one, but this should never occur as we check beforehand
             throw new OXConsolePluginException(e);
         } catch (InvalidDataException e) {
@@ -197,7 +197,7 @@ public class ContextConsoleCreateImpl implements ContextConsoleCreateInterface {
         try {
             HashSet<Restriction> ret = getRestrictions(ResellerAbstraction.parseRestrictions(parser, this.addRestrictionsOption));
             Restriction[] restrictions = null;
-            if( ret != null ) {
+            if ( ret != null ) {
                 restrictions = ret.toArray(new Restriction[ret.size()]);
             }
             final String customid = ResellerAbstraction.parseCustomId(parser, customidOption);
@@ -221,11 +221,11 @@ public class ContextConsoleCreateImpl implements ContextConsoleCreateInterface {
                     firstExtensionByName.setCustomid(customid);
                 }
             }
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             throw new OXConsolePluginException(e);
-        } catch (final OXResellerException e) {
+        } catch (OXResellerException e) {
             throw new OXConsolePluginException("A reseller exception occured: " + e.getMessage());
-        } catch (final DuplicateExtensionException e) {
+        } catch (DuplicateExtensionException e) {
             // Throw this one, but this should never occur as we check beforehand
             throw new OXConsolePluginException(e);
         }

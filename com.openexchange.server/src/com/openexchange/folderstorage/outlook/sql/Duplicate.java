@@ -135,7 +135,7 @@ public final class Duplicate {
         final ConnectionManager cm = new ConnectionManager(con, false, cid, databaseService);
         try {
             return lookupDuplicateNames(cid, tree, user, cm);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             cm.releaseConnection();
@@ -252,9 +252,9 @@ public final class Duplicate {
              * Return
              */
             return name2ids;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);

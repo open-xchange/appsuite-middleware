@@ -158,7 +158,7 @@ public final class DBJSlobStorage implements JSlobStorage {
             stmt.executeUpdate();
             con.commit(); // COMMIT
             committed = true;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             if (!committed) {
@@ -206,7 +206,7 @@ public final class DBJSlobStorage implements JSlobStorage {
 
             con.commit(); // COMMIT
             committed = true;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             if (!committed) {
@@ -266,9 +266,9 @@ public final class DBJSlobStorage implements JSlobStorage {
             }
             return new DefaultJSlob(new JSONObject(new AsciiReader(rs.getBinaryStream(1)))).setId(id);
             // return new JSlob(new JSONObject(new AsciiReader(rs.getBlob(1).getBinaryStream()))).setId(id);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw JSlobExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -333,7 +333,7 @@ public final class DBJSlobStorage implements JSlobStorage {
                 String sId = rs.getString(2);
                 try {
                     map.put(sId, new DefaultJSlob(new JSONObject(new AsciiReader(rs.getBinaryStream(1)))).setId(new JSlobId(serviceId, sId, user, contextId)));
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     // JSON garbage contained in BLOB - provide an empty JSlob
                     LOG.warn("Error deserializing stored JSlob data - falling back to empty JSlob", e);
                     if (null != failedOnes) {
@@ -352,7 +352,7 @@ public final class DBJSlobStorage implements JSlobStorage {
                 list.add(map.get(jSlobId.getId()));
             }
             return list;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -393,7 +393,7 @@ public final class DBJSlobStorage implements JSlobStorage {
             stmt.executeBatch();
             con.commit();
             committed = true;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             final Logger logger = org.slf4j.LoggerFactory.getLogger(DBJSlobStorage.class);
             logger.warn("Failed to delete corrupt JSlobs from service {} (user={}, context={}): {}", serviceId, I(userId), I(contextId), ids, e);
         } finally {
@@ -438,9 +438,9 @@ public final class DBJSlobStorage implements JSlobStorage {
                 list.add(new DefaultJSlob(new JSONObject(new AsciiReader(rs.getBinaryStream(1)))).setId(new JSlobId(id.getServiceId(), rs.getString(2), id.getUser(), contextId)));
             } while (rs.next());
             return list;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw JSlobExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -491,7 +491,7 @@ public final class DBJSlobStorage implements JSlobStorage {
                 list.add(rs.getString(1));
             } while (rs.next());
             return list;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -541,7 +541,7 @@ public final class DBJSlobStorage implements JSlobStorage {
             con.commit();
             committed = true;
             return toDelete;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             if (!committed) {
@@ -582,7 +582,7 @@ public final class DBJSlobStorage implements JSlobStorage {
             stmt.setString(4, id.getId());
             rs = stmt.executeQuery();
             return rs.next();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -604,14 +604,14 @@ public final class DBJSlobStorage implements JSlobStorage {
             setBinaryStream(jslob.getJsonObject(), stmt, 5, 6);
             int updated = stmt.executeUpdate();
             return updated == 1;
-        } catch (final DataTruncation e) {
+        } catch (DataTruncation e) {
             // A BLOB can be 65535 bytes maximum.
             // If you need more consider using a MEDIUMBLOB for 16777215 bytes or a LONGBLOB for 4294967295
             OXException x = JSlobExceptionCodes.JSLOB_TOO_BIG.create(
                 e, id.getId(), Integer.valueOf(contextId), Integer.valueOf(id.getUser()));
             LOG.debug("The following JSlob is too big:\n{}", jslob.getJsonObject());
             throw x;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);
@@ -702,9 +702,9 @@ public final class DBJSlobStorage implements JSlobStorage {
                     stmt.setBytes(pos, data);
                 }
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw JSlobExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
     }

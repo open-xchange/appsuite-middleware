@@ -18,7 +18,7 @@ properties:
         This property is required.
       defaultValue: 
       version: 
-      reloadable: false
+      reloadable: true
       configcascadeAware: false
       related: 
       file: filestore-sproxyd.properties
@@ -33,7 +33,7 @@ properties:
         This property is required.
       defaultValue:
       version: 
-      reloadable: false
+      reloadable: true
       configcascadeAware: false
       related: 
       file: filestore-sproxyd.properties
@@ -48,7 +48,7 @@ properties:
         This property is required.
       defaultValue:
       version: 
-      reloadable: false
+      reloadable: true
       configcascadeAware: false
       related: 
       file: filestore-sproxyd.properties
@@ -63,7 +63,7 @@ properties:
         maxConnectionsPerHost < maxConnections <= n * maxConnectionsPerHost.
       defaultValue: 100
       version: 
-      reloadable: false
+      reloadable: true
       configcascadeAware: false
       related: 
       file: filestore-sproxyd.properties
@@ -76,7 +76,7 @@ properties:
         sproxyd endpoint.
       defaultValue: 100
       version: 
-      reloadable: false
+      reloadable: true
       configcascadeAware: false
       related: 
       file: filestore-sproxyd.properties
@@ -91,7 +91,7 @@ properties:
         whether an endpoint is considered available again.
       defaultValue: 5000
       version: 
-      reloadable: false
+      reloadable: true
       configcascadeAware: false
       related: 
       file: filestore-sproxyd.properties
@@ -106,7 +106,7 @@ properties:
         whether an endpoint is considered available again.
       defaultValue: 15000
       version: 
-      reloadable: false
+      reloadable: true
       configcascadeAware: false
       related: 
       file: filestore-sproxyd.properties
@@ -124,7 +124,7 @@ properties:
         run might block until a timeout happens for every still unavailable host.
       defaultValue: 60000
       version: 
-      reloadable: false
+      reloadable: true
       configcascadeAware: false
       related: 
       file: filestore-sproxyd.properties

@@ -115,15 +115,15 @@ public abstract class AbstractXingAction implements AJAXActionService {
         }
         try {
             return perform(new XingRequest(requestData, session));
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-        } catch (final XingUnlinkedException e) {
+        } catch (XingUnlinkedException e) {
             throw XingExceptionCodes.UNLINKED_ERROR.create(e, new Object[0]);
-        } catch (final XingPermissionDeniedException e) {
+        } catch (XingPermissionDeniedException e) {
             throw XingExceptionCodes.INSUFFICIENT_PRIVILEGES.create(e, new Object[0]);
-        } catch (final XingException e) {
+        } catch (XingException e) {
             throw XingExceptionCodes.XING_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw XingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
@@ -269,7 +269,7 @@ public abstract class AbstractXingAction implements AJAXActionService {
     protected String validateMailAddress(String email) throws OXException {
         try {
             return QuotedInternetAddress.toIDN(new QuotedInternetAddress(email, false).getAddress());
-        } catch (final AddressException e) {
+        } catch (AddressException e) {
             throw MimeMailException.handleMessagingException(e);
         }
     }

@@ -122,7 +122,7 @@ public final class SpamExpertsServlet extends DataServlet {
             JSONObject jsonObj;
             try {
                 jsonObj = convertParameter2JSONObject(req);
-            } catch (final JSONException e) {
+            } catch (JSONException e) {
                 LOG.error("", e);
                 response.setException(OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e));
                 writeResponse(response, resp, session);

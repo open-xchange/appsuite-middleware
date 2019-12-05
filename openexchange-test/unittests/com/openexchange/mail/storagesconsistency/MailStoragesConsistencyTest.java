@@ -140,12 +140,12 @@ public final class MailStoragesConsistencyTest extends AbstractMailTest {
                  */
                 try {
                     mailAccess.getMessageStorage().getAllMessages(fullname, IndexRange.NULL, null, null, FIELDS_ID);
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     if (e.getCause() != null) {
                         e.printStackTrace();
                         fail("Folder/message storage inconsistency detected: " + e.getCause().getMessage());
                     }
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                     fail("Folder/message storage inconsistency detected: " + e.getMessage());
                 } finally {
@@ -159,7 +159,7 @@ public final class MailStoragesConsistencyTest extends AbstractMailTest {
 
                 mailAccess.close(false);
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
@@ -256,7 +256,7 @@ public final class MailStoragesConsistencyTest extends AbstractMailTest {
 
                 mailAccess.close(false);
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
@@ -316,7 +316,7 @@ public final class MailStoragesConsistencyTest extends AbstractMailTest {
                 mailAccess.close(false);
             }
 
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }

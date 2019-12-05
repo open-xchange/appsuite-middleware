@@ -196,5 +196,4 @@ public final class PluginInterfaces {
     public ServiceListing<OXResourcePluginInterface> getResourcePlugins() {
         return resourcePlugins;
     }
-
 }

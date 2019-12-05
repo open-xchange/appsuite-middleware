@@ -99,7 +99,7 @@ public class PendingAction extends ChronosAction {
 
         String parameter = requestData.getParameter(ACTIONS_PARAM);
         Set<String> actions = null;
-        if(parameter!=null){
+        if (parameter!=null){
             String[] splitByComma = Strings.splitByComma(parameter);
             for(int x=0; x<splitByComma.length; x++){
                 splitByComma[x]=splitByComma[x].toUpperCase();

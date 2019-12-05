@@ -19,7 +19,7 @@ public class TestInit {
                     propfile = "conf/test.properties";
                 }
                 testProps.load(new FileInputStream(propfile));
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 throw new RuntimeException(e);
             }
             testPropertiesLoaded = true;

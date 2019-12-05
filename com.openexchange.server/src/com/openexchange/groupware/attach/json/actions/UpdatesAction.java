@@ -60,7 +60,6 @@ import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.AttachmentField;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.json.OXJSONWriter;
@@ -70,6 +69,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 /**
  * {@link UpdatesAction}
@@ -103,7 +103,7 @@ public final class UpdatesAction extends AbstractAttachmentAction {
             long timestamp = -1;
             try {
                 timestamp = Long.parseLong(requestData.getParameter(AJAXServlet.PARAMETER_TIMESTAMP).trim());
-            } catch (final NumberFormatException nfe) {
+            } catch (NumberFormatException nfe) {
                 throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(
                     AJAXServlet.PARAMETER_TIMESTAMP,
                     requestData.getParameter(AJAXServlet.PARAMETER_TIMESTAMP));
@@ -136,9 +136,9 @@ public final class UpdatesAction extends AbstractAttachmentAction {
                 sort,
                 order,
                 timeZoneId), "apiResponse");
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (final UnknownColumnException e) {
+        } catch (UnknownColumnException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
@@ -179,7 +179,7 @@ public final class UpdatesAction extends AbstractAttachmentAction {
             ATTACHMENT_BASE.commit();
 
             return w.getObject();
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             rollback();
             if (t instanceof OXException) {
                 throw (OXException) t;
@@ -188,7 +188,7 @@ public final class UpdatesAction extends AbstractAttachmentAction {
         } finally {
             try {
                 ATTACHMENT_BASE.finish();
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.error("", e);
             }
             SearchIterators.close(iter);

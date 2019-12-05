@@ -103,23 +103,23 @@ public class PropfindResponseMarshaller extends PropertiesMarshaller implements 
 		for(final WebdavProperty prop : requestedProps) {
 			try {
 				final WebdavProperty p = resource.getProperty(prop);
-				if(p == null) {
+				if (p == null) {
 				    if (false == brief) {
 				        notFound.add(prop);
 				    }
 				} else {
 					props.add(p);
 				}
-			} catch (final WebdavProtocolException e) {
+			} catch (WebdavProtocolException e) {
 				multistatus.addStatus(new WebdavStatusImpl<Iterable<WebdavProperty>>(e.getStatus(), e.getUrl(),Arrays.asList(prop)));
-			} catch (final OXException e) {
+			} catch (OXException e) {
                 multistatus.addStatus(new WebdavStatusImpl<Iterable<WebdavProperty>>(500, new WebdavPath(), Arrays.asList(prop)));
             }
 		}
-		if(!props.isEmpty()) {
+		if (!props.isEmpty()) {
 			multistatus.addStatus(new WebdavStatusImpl<Iterable<WebdavProperty>>(HttpServletResponse.SC_OK, resource.getUrl(), props));
 		}
-		if(!notFound.isEmpty()) {
+		if (!notFound.isEmpty()) {
 			multistatus.addStatus(new WebdavStatusImpl<Iterable<WebdavProperty>>(HttpServletResponse.SC_NOT_FOUND, resource.getUrl(), notFound));
 		}
 

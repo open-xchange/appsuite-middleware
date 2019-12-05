@@ -112,7 +112,7 @@ public final class SizeTerm extends SearchTerm<ComparablePattern<Integer>> {
         final int size;
         try {
             size = msg.getSize();
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             org.slf4j.LoggerFactory.getLogger(SizeTerm.class).warn("Error during search.", e);
             return false;
         }

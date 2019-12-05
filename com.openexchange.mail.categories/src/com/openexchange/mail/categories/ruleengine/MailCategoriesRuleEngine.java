@@ -128,4 +128,14 @@ public interface MailCategoriesRuleEngine {
      */
     public void cleanUp(List<String> flags, Session session) throws OXException;
 
+    /**
+     * Applies a given rule to the inbox
+     *
+     * @param session The user session
+     * @param rule The rule to apply
+     * @return false in case the imap server doesn't support the FILTER=SIEVE extension, true otherwise
+     * @throws OXException
+     */
+    public boolean applyRule(Session session, MailCategoryRule rule) throws OXException;
+
 }

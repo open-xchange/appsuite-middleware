@@ -273,7 +273,7 @@ public class ICalFeedClient {
         if (null != request) {
             try {
                 request.reset();
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 // Ignore
             }
         }

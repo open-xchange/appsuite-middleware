@@ -49,8 +49,16 @@
 
 package com.openexchange.caching.events.ms.internal;
 
+import static com.openexchange.caching.events.ms.internal.MsCacheEventHandler.getTopicName;
+import static com.openexchange.tools.arrays.Collections.put;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import com.hazelcast.nio.serialization.ClassDefinition;
 import com.hazelcast.nio.serialization.ClassDefinitionBuilder;
 import com.hazelcast.nio.serialization.Portable;
@@ -89,15 +97,34 @@ public class PortableCacheEvent extends AbstractCustomPortable {
         if (null == cacheEvent) {
             return null;
         }
-        PortableCacheEvent portableEvent = new PortableCacheEvent();
-        portableEvent.region = cacheEvent.getRegion();
-        portableEvent.groupName = cacheEvent.getGroupName();
-        portableEvent.operationId = cacheEvent.getOperation().getId();
-        portableEvent.hasKeys = null != cacheEvent.getKeys();
-        if (portableEvent.hasKeys) {
-            portableEvent.keys = PortableCacheKey.wrap(cacheEvent.getKeys());
+        return new PortableCacheEvent(cacheEvent.getRegion(), cacheEvent.getGroupName(), cacheEvent.getOperation().getId(), PortableCacheKey.wrap(cacheEvent.getKeys()));
+    }
+
+    /**
+     * Wraps the supplied cache event into one or more portable cache event, ready to be distributed on the designated topic(s).
+     *
+     * @param cacheEvent The cache event to wrap
+     * @param topicCount The number of available topics to select from when constructing the name of the destination topic
+     * @return The portable cache events, mapped to the corresponding topic names
+     */
+    public static Map<String, PortableCacheEvent> wrap(CacheEvent cacheEvent, int topicCount) {
+        List<Serializable> keys = cacheEvent.getKeys();
+        if (null == keys || keys.isEmpty()) {
+            return Collections.singletonMap(getTopicName(null, topicCount), wrap(cacheEvent));
         }
-        return portableEvent;
+        if (1 == keys.size()) {
+            return Collections.singletonMap(getTopicName(keys.get(0), topicCount), wrap(cacheEvent));
+        }
+        Map<String, List<PortableCacheKey>> keysPerTopic = new HashMap<String, List<PortableCacheKey>>(topicCount);
+        for (Serializable key : keys) {
+            put(keysPerTopic, getTopicName(key, topicCount), PortableCacheKey.wrap(key));
+        }
+        Map<String, PortableCacheEvent> eventsPerTopic = new HashMap<String, PortableCacheEvent>(keysPerTopic.size());
+        for (Entry<String, List<PortableCacheKey>> entry : keysPerTopic.entrySet()) {
+            PortableCacheKey[] portableKeys = entry.getValue().toArray(new PortableCacheKey[entry.getValue().size()]);
+            eventsPerTopic.put(entry.getKey(), new PortableCacheEvent(cacheEvent.getRegion(), cacheEvent.getGroupName(), cacheEvent.getOperation().getId(), portableKeys));
+        }
+        return eventsPerTopic;
     }
 
     /**
@@ -122,6 +149,23 @@ public class PortableCacheEvent extends AbstractCustomPortable {
      */
     public PortableCacheEvent() {
         super();
+    }
+
+    /**
+     * Initializes a new {@link PortableCacheEvent}.
+     * 
+     * @param region The cache region
+     * @param groupName The cache group name
+     * @param operationId The cache operation identifier
+     * @param keys The keys of the affected cache entries
+     */
+    private PortableCacheEvent(String region, String groupName, String operationId, PortableCacheKey[] keys) {
+        super();
+        this.region = region;
+        this.groupName = groupName;
+        this.operationId = operationId;
+        this.hasKeys = null != keys;
+        this.keys = keys;
     }
 
     @Override
@@ -202,6 +246,17 @@ public class PortableCacheEvent extends AbstractCustomPortable {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder(128).append("PortableCacheEvent [");
+        sb.append("operation=").append(operationId);
+        sb.append(", region=").append(region);
+        sb.append(", groupName=").append(groupName);
+        sb.append(", keys=").append(null == keys ? "null" : Arrays.toString(keys));
+        sb.append(']');
+        return sb.toString();
     }
 
 }

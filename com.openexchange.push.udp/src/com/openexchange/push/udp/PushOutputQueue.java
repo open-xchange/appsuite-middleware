@@ -200,7 +200,7 @@ public class PushOutputQueue implements Runnable {
                     final RegisterObject registerObj = RegisterHandler.getRegisterObject(user, contextId);
                     try {
                         channels.makeAndSendPackage(bytes, registerObj.getHostAddress(), registerObj.getPort(), EXTERNAL);
-                    } catch (final Exception exc) {
+                    } catch (Exception exc) {
                         LOG.error("createPushPackage", exc);
                     }
                 }
@@ -277,7 +277,7 @@ public class PushOutputQueue implements Runnable {
                         LOG.trace("remote host object is timed out");
                         iter.remove();
                     }
-                } catch (final Exception exc) {
+                } catch (Exception exc) {
                     LOG.error("createPushPackage", exc);
                 }
             }
@@ -296,7 +296,7 @@ public class PushOutputQueue implements Runnable {
             sb.append("OK\1");
             try {
                 channels.makeAndSendPackage(sb.toString().getBytes(StandardCharsets.UTF_8), registerObject.getHostAddress(), registerObject.getPort(), EXTERNAL);
-            } catch (final Exception exc) {
+            } catch (Exception exc) {
                 LOG.error("createRegisterPackage", exc);
             }
         }
@@ -338,7 +338,7 @@ public class PushOutputQueue implements Runnable {
                         LOG.trace("remote host object is timed out");
                         iter.remove();
                     }
-                } catch (final Exception exc) {
+                } catch (Exception exc) {
                     LOG.error("createRegisterPackage", exc);
                 }
             }
@@ -424,7 +424,7 @@ public class PushOutputQueue implements Runnable {
                 // } else {
                 // Thread.sleep(10000);
                 // }
-            } catch (final Exception exc) {
+            } catch (Exception exc) {
                 LOG.error("", exc);
             }
         }

@@ -77,7 +77,6 @@ import com.openexchange.groupware.attach.util.GetSwitch;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.ldap.MockUser;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.groupware.results.Delta;
@@ -91,6 +90,7 @@ import com.openexchange.setuptools.TestContextToolkit;
 import com.openexchange.test.OXTestToolkit;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 public class AttachmentBaseTest extends AbstractAttachmentTest {
 
@@ -177,9 +177,9 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
         try {
             attachmentBase.getAttachment(MODE.getSession(), folderId, attachedId, moduleId, Integer.MAX_VALUE, MODE.getContext(), MODE.getUser(), new MutableUserConfiguration(new HashSet<String>(), 0, new int[0], null));
             fail("Got Wrong Exception");
-        } catch (final OXException x) {
+        } catch (OXException x) {
             assertTrue(true);
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             t.printStackTrace();
             fail("Got Wrong Exception: " + t);
         }
@@ -279,7 +279,7 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
         try {
             attachmentBase.getAttachment(MODE.getSession(), folderId, attachedId, moduleId, id, MODE.getContext(), MODE.getUser(), new MutableUserConfiguration(new HashSet<String>(), 0, new int[0], null));
             fail("The attachment wasn't removed");
-        } catch (final Exception x) {
+        } catch (Exception x) {
             assertTrue(true);
         }
     }
@@ -490,55 +490,55 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
                 attachmentBase.attachToObject(attachment, null, MODE.getSession(), MODE.getContext(), MODE.getUser(), new MutableUserConfiguration(new HashSet<String>(), 0, new int[0], null));
                 clean.add(attachment);
                 fail("Disallow failed");
-            } catch (final OXException x) {
+            } catch (OXException x) {
                 authz.assertMayAttach();
             }
             try {
                 attachmentBase.getAttachment(MODE.getSession(), folderId, attachedId, moduleId, attachmentId, MODE.getContext(), MODE.getUser(), new MutableUserConfiguration(new HashSet<String>(), 0, new int[0], null));
                 fail("Disallow failed");
-            } catch (final OXException x) {
+            } catch (OXException x) {
                 authz.assertMayRead();
             }
 
             try {
                 attachmentBase.getAttachedFile(MODE.getSession(), folderId, attachedId, moduleId, attachmentId, MODE.getContext(), MODE.getUser(), new MutableUserConfiguration(new HashSet<String>(), 0, new int[0], null));
                 fail("Disallow failed");
-            } catch (final OXException x) {
+            } catch (OXException x) {
                 authz.assertMayRead();
             }
 
             try {
                 attachmentBase.getAttachments(MODE.getSession(), folderId, attachedId, moduleId, MODE.getContext(), MODE.getUser(), new MutableUserConfiguration(new HashSet<String>(), 0, new int[0], null));
                 fail("Disallow failed");
-            } catch (final OXException x) {
+            } catch (OXException x) {
                 authz.assertMayRead();
             }
 
             try {
                 attachmentBase.getDelta(MODE.getSession(), folderId, attachedId, moduleId, 0, false, MODE.getContext(), MODE.getUser(), new MutableUserConfiguration(new HashSet<String>(), 0, new int[0], null));
                 fail("Disallow failed");
-            } catch (final OXException x) {
+            } catch (OXException x) {
                 authz.assertMayRead();
             }
 
             try {
                 attachmentBase.getAttachments(MODE.getSession(), folderId, attachedId, moduleId, new AttachmentField[] { AttachmentField.ID_LITERAL }, AttachmentField.ID_LITERAL, AttachmentBase.ASC, MODE.getContext(), MODE.getUser(), new MutableUserConfiguration(new HashSet<String>(), 0, new int[0], null));
                 fail("Disallow failed");
-            } catch (final OXException x) {
+            } catch (OXException x) {
                 authz.assertMayRead();
             }
 
             try {
                 attachmentBase.getDelta(MODE.getSession(), folderId, attachedId, moduleId, 0, false, new AttachmentField[] { AttachmentField.ID_LITERAL }, AttachmentField.ID_LITERAL, AttachmentBase.ASC, MODE.getContext(), MODE.getUser(), new MutableUserConfiguration(new HashSet<String>(), 0, new int[0], null));
                 fail("Disallow failed");
-            } catch (final OXException x) {
+            } catch (OXException x) {
                 authz.assertMayRead();
             }
 
             try {
                 attachmentBase.detachFromObject(folderId, attachedId, moduleId, new int[] {}, MODE.getSession(), MODE.getContext(), MODE.getUser(), new MutableUserConfiguration(new HashSet<String>(), 0, new int[0], null));
                 fail("Disallow failed");
-            } catch (final OXException x) {
+            } catch (OXException x) {
                 authz.assertMayDetach();
             }
 
@@ -600,6 +600,7 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
         assertTrue(d1 + " != " + d2 + " diff is " + diff, diff <= clockSkew);
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -612,6 +613,7 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
         clean.clear();
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         for (final AttachmentMetadata m : clean) {
@@ -689,7 +691,7 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
                 final TestContextToolkit tools = new TestContextToolkit();
                 final String ctxName = config.getContextName();
                 return null == ctxName || ctxName.trim().length() == 0 ? tools.getDefaultContext() : tools.getContextByName(ctxName);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 e.printStackTrace();
                 return null;
             }
@@ -705,7 +707,7 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
 
                 final int id = users.getUserId(getUsername(config.getUser()), ctx);
                 return users.getUser(id, ctx);
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         }
@@ -723,7 +725,7 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
             final ConfigurableDBProvider provider = new ConfigurableDBProvider();
             try {
                 provider.setDriver("com.mysql.jdbc.Driver");
-            } catch (final ClassNotFoundException e) {
+            } catch (ClassNotFoundException e) {
                 System.err.println("Can't find MySQL Driver. Add mysql.jar to the classpath");
             }
             provider.setUrl("jdbc:mysql://localhost/openexchange");

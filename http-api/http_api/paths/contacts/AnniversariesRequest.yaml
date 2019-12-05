@@ -1,0 +1,78 @@
+/contacts?action=anniversaries:
+  get:
+    operationId: searchContactsByAnniversary
+    tags:
+      - Contacts
+    summary: Search for contacts by anniversary.
+    description: Finds contacts whose anniversary falls into a specified time range.
+    parameters:
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - $ref: '#/components/parameters/gblQueryParamContactColumns'
+      - in: query
+        name: start
+        description: The lower (inclusive) limit of the requested time range.
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - in: query
+        name: end
+        description: The upper (exclusive) limit of the requested time range.
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - in: query
+        name: folder
+        description: >-
+          Object ID of the parent folder that is searched. If not set, all
+          visible folders are used.
+        required: false
+        schema:
+          type: string
+      - in: query
+        name: sort
+        description: >-
+          The identifier of a column which determines the sort order of the
+          response. If this parameter is specified , then the parameter order
+          must be also specified.
+        required: false
+        schema:
+          type: string
+      - in: query
+        name: order
+        description: >-
+          "asc" if the response entires should be sorted in the ascending order,
+          "desc" if the response entries should be sorted in the descending
+          order. If this parameter is specified, then the parameter sort must be
+          also specified.
+        required: false
+        schema:
+          type: string
+      - in: query
+        name: collation
+        description: >-
+          Allows you to specify a collation to sort the contacts by. Only
+          supports "gbk" and "gb2312", not needed for other languages. Parameter
+          sort should be set for this to work.
+        required: false
+        schema:
+          type: string
+          enum:
+            - gbk
+            - gb2312
+    responses:
+      '200':
+        description: >
+          A JSON object containing an array with matching contacts. Contacts are
+          represented by arrays. The elements of each array contain the
+
+          information specified by the corresponding identifiers in the
+          `columns` parameter. In case of errors the
+
+          responsible fields in the response are filled (see [Error
+          handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContactsResponse'

@@ -190,45 +190,6 @@ public class Compat {
         return event;
     }
 
-
-    /**
-     * Adjusts certain properties of an event prior inserting it into the database.
-     *
-     * @param eventStorage The associated event storage
-     * @param connection The connection to use
-     * @param event The event to adjust
-     * @return The adjusted event data to store
-     */
-    public static Event adjustPriorInsert(RdbEventStorage eventStorage, Connection connection, Event event) {
-        Event eventData = adjustPriorSave(eventStorage, connection, event);
-        /*
-         * derive created- / modified-by from calendar user if required
-         */
-        if (false == eventData.containsCreatedBy()) {
-            eventData.setCreatedBy(eventData.getCalendarUser());
-        }
-        if (false == eventData.containsModifiedBy()) {
-            eventData.setModifiedBy(eventData.getCalendarUser());
-        }
-        return eventData;
-    }
-
-    /**
-     * Adjusts certain properties of an event prior updating it in the database.
-     *
-     * @param eventStorage The associated event storage
-     * @param connection The connection to use
-     * @param event The event to adjust
-     * @return The adjusted event data to store
-     */
-    public static Event adjustPriorUpdate(RdbEventStorage eventStorage, Connection connection, Event event) {
-        return adjustPriorSave(eventStorage, connection, event);
-    }
-
-    private static Event adjustPriorSave(RdbEventStorage eventStorage, Connection connection, Event event) {
-        return new StoredEvent(eventStorage, connection, event);
-    }
-
     private static Event adjustRecurrenceForMasterAfterLoad(RdbEventStorage eventStorage, Event event) throws OXException {
         RecurrenceData recurrenceData = null;
         if (null != event.getRecurrenceRule()) {
@@ -402,6 +363,9 @@ public class Compat {
      */
     private static SortedSet<RecurrenceId> getRecurrenceIDs(RdbEventStorage eventStorage, String eventId, RecurrenceData recurrenceData, Collection<Date> recurrenceDatePositions, EventField field) throws OXException {
         RecurrenceService recurrenceService = Services.getService(RecurrenceService.class);
+        if (recurrenceService == null) {
+            throw new IllegalStateException("No such service: " + RecurrenceService.class.getName());
+        }
         try {
             return Appointment2Event.getRecurrenceIDs(recurrenceService, recurrenceData, recurrenceDatePositions);
         } catch (OXException e) {

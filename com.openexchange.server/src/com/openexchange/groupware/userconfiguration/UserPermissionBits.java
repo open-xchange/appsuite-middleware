@@ -309,7 +309,7 @@ public class UserPermissionBits implements Serializable, Cloneable {
                 System.arraycopy(groups, 0, clone.groups, 0, groups.length);
             }
             return clone;
-        } catch (final CloneNotSupportedException e) {
+        } catch (CloneNotSupportedException e) {
             throw new InternalError(e.getMessage());
         }
     }
@@ -935,7 +935,7 @@ public class UserPermissionBits implements Serializable, Cloneable {
     public boolean isGlobalAddressBookEnabled(final ServerSession serverSession) {
         try {
             return new OXFolderAccess(context).isReadFolder(FolderObject.SYSTEM_LDAP_FOLDER_ID, userId, groups, this);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(UserPermissionBits.class);
             logger.warn("Cannot check availability of Global Address Book.", e);
             return false;
@@ -951,7 +951,7 @@ public class UserPermissionBits implements Serializable, Cloneable {
     public boolean isGlobalAddressBookEnabled() {
         try {
             return new OXFolderAccess(context).isReadFolder(FolderObject.SYSTEM_LDAP_FOLDER_ID, userId, groups, this);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(UserPermissionBits.class);
             logger.warn("Cannot check availability of Global Address Book.", e);
             return false;

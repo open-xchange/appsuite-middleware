@@ -52,6 +52,7 @@ package com.openexchange.importexport.exporters;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
@@ -76,9 +77,9 @@ import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.importexport.Format;
 import com.openexchange.importexport.actions.exporter.ContactExportAction;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
-import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.helpers.DelayInitServletOutputStream;
 import com.openexchange.importexport.helpers.SizedInputStream;
 import com.openexchange.importexport.osgi.ImportExportServices;
@@ -206,6 +207,13 @@ public class VCardExporter extends AbstractExporter {
         Contact.YOMI_LAST_NAME
     };
 
+    /**
+     * Initializes a new {@link VCardExporter}.
+     */
+    public VCardExporter() {
+        super();
+    }
+
     @Override
     public boolean canExport(final ServerSession session, final Format format, final String folder, final Map<String, Object> optionalParams) throws OXException {
         if (!format.equals(Format.VCARD)) {
@@ -216,7 +224,7 @@ public class VCardExporter extends AbstractExporter {
         final FolderObject fo;
         try {
             fo = new OXFolderAccess(session.getContext()).getFolderObject(folderId);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             return false;
         }
         //check format of folder
@@ -231,9 +239,9 @@ public class VCardExporter extends AbstractExporter {
         final EffectivePermission perm;
         try {
             perm = fo.getEffectiveUserPermission(session.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext()));
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw ImportExportExceptionCodes.NO_DATABASE_CONNECTION.create(e);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw ImportExportExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         }
         return perm.canReadAllObjects();
@@ -261,6 +269,7 @@ public class VCardExporter extends AbstractExporter {
         }
 
         boolean exportDistributionLists = null == optionalParams ? false : Boolean.parseBoolean(String.valueOf(optionalParams.get(ContactExportAction.PARAMETER_EXPORT_DLISTS)));
+
         AJAXRequestData requestData = (AJAXRequestData) (optionalParams == null ? null : optionalParams.get("__requestData"));
         if (null != requestData) {
             // Try to stream
@@ -275,6 +284,18 @@ public class VCardExporter extends AbstractExporter {
                 } finally {
                     Streams.close(writer);
                 }
+            }
+        }
+
+        OutputStream out = (OutputStream) (optionalParams == null ? null : optionalParams.get("__outputStream"));
+        if (null != out) {
+            Writer writer = null;
+            try {
+                writer = new OutputStreamWriter(out, DEFAULT_CHARSET);
+                exportByFolder(session, folder, exportDistributionLists, fieldsToBeExported, writer);
+                return null;
+            } finally {
+                Streams.close(writer, out);
             }
         }
 
@@ -316,6 +337,18 @@ public class VCardExporter extends AbstractExporter {
                 } finally {
                     Streams.close(writer);
                 }
+            }
+        }
+
+        OutputStream out = (OutputStream) (optionalParams == null ? null : optionalParams.get("__outputStream"));
+        if (null != out) {
+            Writer writer = null;
+            try {
+                writer = new OutputStreamWriter(out, DEFAULT_CHARSET);
+                exportByBatchIds(session, exportDistributionLists, fieldsToBeExported, writer, batchIds);
+                return null;
+            } finally {
+                Streams.close(writer, out);
             }
         }
 

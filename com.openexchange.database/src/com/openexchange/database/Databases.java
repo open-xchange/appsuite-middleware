@@ -71,6 +71,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.openexchange.exception.ExceptionUtils;
 import com.openexchange.java.ConcurrentList;
+import com.openexchange.java.Strings;
 
 /**
  * Utilities for database resource handling.
@@ -491,14 +492,38 @@ public final class Databases {
     public static boolean tableExists(Connection con, String table) throws SQLException {
         DatabaseMetaData metaData = con.getMetaData();
         ResultSet rs = null;
-        boolean retval = false;
         try {
             rs = metaData.getTables(null, null, table, new String[] { "TABLE" });
-            retval = (rs.next() && rs.getString("TABLE_NAME").equals(table));
+            if (false == rs.next()) {
+                return false;
+            }
+            String foundTable = rs.getString("TABLE_NAME");
+            closeSQLStuff(rs);
+            rs = null;
+            if (table.equals(foundTable)) {
+                return true;
+            }
+            if (table.equalsIgnoreCase(foundTable)) {
+                /*
+                 * assume table exists based on 'lower_case_table_names' configuration
+                 */
+                try (PreparedStatement stmt = con.prepareStatement("SHOW variables LIKE 'lower_case_table_names';"); ResultSet result = stmt.executeQuery()) {
+                    if (result.next()) {
+                        switch (result.getInt("Value")) {
+                            case 1: // table names are stored in lowercase, name comparisons are case-insensitive ("windows")
+                            case 2: // table names are stored in specified lettercase, but lowercased on lookup, name comparisons are case-insensitive ("mac os")
+                                return true;
+                            case 0: // table names are stored in specified lettercase, name comparisons are case-sensitive ("unix")
+                            default:
+                                return false;
+                        }
+                    }
+                }
+            }
+            return false;
         } finally {
             closeSQLStuff(rs);
         }
-        return retval;
     }
 
     private static final Pattern DUPLICATE_KEY = Pattern.compile("Duplicate entry '([^']+)' for key '([^']+)'");
@@ -562,6 +587,20 @@ public final class Databases {
                     return true;
                 }
             }
+        }
+        return false;
+    }
+
+    /**
+     * Checks if given SQL exception represents a duplicate key conflict in MySQL.
+     *
+     * @param e The SQL exception to check
+     * @return <code>true</code> for duplicate key conflict; otherwise <code>false</code>
+     */
+    public static boolean isDuplicateKeyConflictInMySQL(SQLException e) {
+        if ("23000".equals(e.getSQLState())) {
+            int errorCode = e.getErrorCode();
+            return (1062 == errorCode || 1586 == errorCode);
         }
         return false;
     }
@@ -735,6 +774,89 @@ public final class Databases {
      */
     public static String removeParametersFromJdbcUrl(String url) {
         return JdbcProperties.removeParametersFromJdbcUrl(url);
+    }
+
+    /**
+     * Checks if passed <tt>SQLException</tt> (or any of chained <tt>SQLException</tt>s) indicates a failed transaction roll-back.
+     *
+     * <pre>
+     * Deadlock found when trying to get lock; try restarting transaction
+     * </pre>
+     *
+     * @param sqlException The SQL exception to check
+     * @return <code>true</code> if a failed transaction roll-back is indicated; otherwise <code>false</code>
+     */
+    public static boolean isTransactionRollbackException(final SQLException sqlException) {
+        if (null == sqlException) {
+            return false;
+        }
+        if (suggestsRestartingTransaction(sqlException) || sqlException.getClass().getName().endsWith("TransactionRollbackException")) {
+            return true;
+        }
+        if (isTransactionRollbackException(sqlException.getNextException())) {
+            return true;
+        }
+        final Throwable cause = sqlException.getCause();
+        if (null == cause || !(cause instanceof Exception)) {
+            return false;
+        }
+        return isTransactionRollbackException((Exception) cause);
+    }
+
+    /**
+     * Checks if passed <tt>SQLException</tt> (or any of chained <tt>SQLException</tt>s) indicates a failed transaction roll-back.
+     *
+     * <pre>
+     * Deadlock found when trying to get lock; try restarting transaction
+     * </pre>
+     *
+     * @param exception The exception to check
+     * @return <code>true</code> if a failed transaction roll-back is indicated; otherwise <code>false</code>
+     */
+    public static boolean isTransactionRollbackException(final Exception exception) {
+        if (null == exception) {
+            return false;
+        }
+        if (exception instanceof SQLException) {
+            return isTransactionRollbackException((SQLException) exception);
+        }
+        final Throwable cause = exception.getCause();
+        if (null == cause || !(cause instanceof Exception)) {
+            return false;
+        }
+        return isTransactionRollbackException((Exception) cause);
+    }
+
+    /**
+     * Checks if specified SQL exception's detail message contains a suggestion to restart the transaction;<br>
+     * e.g. <code>"Lock wait timeout exceeded; try restarting transaction"</code>
+     *
+     * @param sqlException The SQL exception to check
+     * @return <code>true</code> if SQL exception suggests restarting transaction; otherwise <code>false</code>
+     */
+    public static boolean suggestsRestartingTransaction(SQLException sqlException) {
+        String message = null == sqlException ? null : sqlException.getMessage();
+        return null != message && Strings.asciiLowerCase(message).indexOf("try restarting transaction") >= 0;
+    }
+
+    /**
+     * Extracts possibly nested <tt>SQLException</tt> reference.
+     *
+     * @param exception The parental exception to extract from
+     * @return The <tt>SQLException</tt> reference or <code>null</code>
+     */
+    public static SQLException extractSqlException(final Exception exception) {
+        if (null == exception) {
+            return null;
+        }
+        if (exception instanceof SQLException) {
+            return (SQLException) exception;
+        }
+        final Throwable cause = exception.getCause();
+        if (null == cause || !(cause instanceof Exception)) {
+            return null;
+        }
+        return extractSqlException((Exception) cause);
     }
 
 }

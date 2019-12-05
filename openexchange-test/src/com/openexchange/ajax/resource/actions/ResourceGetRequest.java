@@ -81,31 +81,16 @@ public final class ResourceGetRequest extends AbstractResourceRequest<ResourceGe
         this.failOnError = failOnError;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
-     */
     @Override
     public Object getBody() throws JSONException {
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
-     */
     @Override
     public Method getMethod() {
         return Method.GET;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
-     */
     @Override
     public Parameter[] getParameters() {
         final List<Parameter> params = new ArrayList<Parameter>();
@@ -114,11 +99,6 @@ public final class ResourceGetRequest extends AbstractResourceRequest<ResourceGe
         return params.toArray(new Parameter[params.size()]);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
-     */
     @Override
     public ResourceGetParser getParser() {
         return new ResourceGetParser(failOnError);

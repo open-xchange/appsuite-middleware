@@ -530,7 +530,7 @@ public final class DOMUtils {
     public static DocumentBuilder createDocumentBuilder() {
         try {
             return getBuilder();
-        } catch (final ParserConfigurationException e) {
+        } catch (ParserConfigurationException e) {
             throw new RuntimeException("Couldn't find a DOM parser.", e);
         }
     }
@@ -538,7 +538,7 @@ public final class DOMUtils {
     public static Document createDocument() {
         try {
             return getBuilder().newDocument();
-        } catch (final ParserConfigurationException e) {
+        } catch (ParserConfigurationException e) {
             throw new RuntimeException("Couldn't find a DOM parser.", e);
         }
     }

@@ -103,7 +103,7 @@ public final class XMailboxTerm extends SearchTerm<String> {
         }
 
         String fullName = originalFolder.getFullName();
-        return null != fullName && fullName.regionMatches(true, 0, this.fullName, 0, this.fullName.length());
+        return null != fullName && fullName.equalsIgnoreCase(this.fullName);
     }
 
     @Override
@@ -114,7 +114,7 @@ public final class XMailboxTerm extends SearchTerm<String> {
             }
 
             String xMailbox = (String) ((IMAPMessage) msg).getItem("X-MAILBOX");
-            return null != xMailbox && xMailbox.regionMatches(true, 0, this.fullName, 0, this.fullName.length());
+            return null != xMailbox && xMailbox.equalsIgnoreCase(this.fullName);
         } catch (Exception e) {
             org.slf4j.LoggerFactory.getLogger(XMailboxTerm.class).warn("Error during search.", e);
             return false;

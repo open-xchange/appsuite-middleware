@@ -14,7 +14,7 @@ public class UIFactory {
 
     @SuppressWarnings("unchecked")
 	public UIFacade getFacade() {
-    	if(facade==null) {
+    	if (facade==null) {
     		ClassLoader cl = UIFacade.class.getClassLoader();
     		try {
 				Class<UIFacade> swingUIClazz = (Class<UIFacade>)cl.loadClass(UI_IMPL_CLASSNAME);

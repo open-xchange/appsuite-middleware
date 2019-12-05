@@ -51,6 +51,7 @@ package com.openexchange.ajax.jslob;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
+import com.openexchange.ajax.jslob.api.RegionalSettingsTest;
 import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
@@ -62,7 +63,7 @@ import com.openexchange.test.concurrent.ParallelSuite;
 @Suite.SuiteClasses({
     Bug28821Test.class,
     Bug34552Test.class,
-
+    RegionalSettingsTest.class
 })
 public class JSlobTestSuite {
 

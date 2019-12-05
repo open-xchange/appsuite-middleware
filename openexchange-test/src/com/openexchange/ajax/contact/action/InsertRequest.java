@@ -107,7 +107,7 @@ public class InsertRequest extends AbstractContactRequest<InsertResponse> {
         if (withImage) {
             try {
                 fieldContent = convert(contactObj).toString();
-            } catch (final JSONException e) {
+            } catch (JSONException e) {
                 throw new IllegalArgumentException(e);
             }
         }

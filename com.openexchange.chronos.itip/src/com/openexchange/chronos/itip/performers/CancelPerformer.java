@@ -54,7 +54,11 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.SchedulingControl;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.itip.ITipAction;
 import com.openexchange.chronos.itip.ITipAnalysis;
 import com.openexchange.chronos.itip.ITipAttributes;
@@ -74,6 +78,9 @@ import com.openexchange.exception.OXException;
  * @since v7.10.0
  */
 public class CancelPerformer extends AbstractActionPerformer {
+    
+    private static final Logger LOGGER = LoggerFactory.getLogger(CancelPerformer.class);
+
 
     public CancelPerformer(ITipIntegrationUtility util, MailSenderService sender, ITipMailGeneratorFactory generators) {
         super(util, sender, generators);
@@ -87,7 +94,7 @@ public class CancelPerformer extends AbstractActionPerformer {
     @Override
     public List<Event> perform(ITipAction action, ITipAnalysis analysis, CalendarSession session, ITipAttributes attributes) throws OXException {
         // Suppress iTip
-        session.<Boolean> set(CalendarParameters.PARAMETER_SUPPRESS_ITIP, Boolean.TRUE);
+        session.set(CalendarParameters.PARAMETER_SCHEDULING, SchedulingControl.NONE);
 
         List<ITipChange> changes = analysis.getChanges();
         List<Event> deleted = new ArrayList<Event>();
@@ -99,8 +106,14 @@ public class CancelPerformer extends AbstractActionPerformer {
             }
             // TODO: appointment.setNotification(true);
             if (change.getType() == ITipChange.Type.CREATE_DELETE_EXCEPTION) {
-                event = change.getCurrentEvent();
-                event.setRecurrenceId(change.getDeletedEvent().getRecurrenceId());
+                if (null != change.getCurrentEvent()) {
+                    event = change.getCurrentEvent();
+                    event.setRecurrenceId(change.getDeletedEvent().getRecurrenceId());
+                } else {
+                    LOGGER.debug("Skipping the deletion of a single occurrence. Corresponding event not found.");
+                    session.addWarning(CalendarExceptionCodes.EVENT_NOT_FOUND.create("null"));
+                    continue;
+                }
             }
             deleted.add(event);
             util.deleteEvent(event, session, new Date(Long.MAX_VALUE));

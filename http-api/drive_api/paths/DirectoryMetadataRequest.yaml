@@ -3,16 +3,20 @@
     operationId: getDirectoryMetadata
     tags:
       - Drive
-    summary: Gets directory metadata (**deprecated, available until API version 2**).
+    summary: 'Gets directory metadata (**deprecated, available until API version 2**).'
     description: Additional metadata of synchronized directories is made available.
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
-      - $ref: "#/parameters/gblQueryParamRoot"
-      - $ref: "#/parameters/gblQueryParamPath"
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - $ref: '#/components/parameters/gblQueryParamRoot'
+      - $ref: '#/components/parameters/gblQueryParamPath'
     responses:
-      200:
-        description: |
-          A JSON object containing the fields `path`, `checksum`, `directLink`, and `directLinkFragments`. In case of errors
+      '200':
+        description: >
+          A JSON object containing the fields `path`, `checksum`, `directLink`,
+          and `directLinkFragments`. In case of errors
+
           the responsible fields in the response are filled.
-        schema:
-          $ref: "#/definitions/DriveDirectoryMetadataResponse"
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DriveDirectoryMetadataResponse'

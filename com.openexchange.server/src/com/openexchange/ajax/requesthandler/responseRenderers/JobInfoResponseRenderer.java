@@ -66,9 +66,9 @@ import com.openexchange.ajax.requesthandler.jobqueue.JobInfo;
 import com.openexchange.ajax.requesthandler.jobqueue.JobQueueExceptionCodes;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 /**
  * {@link JobInfoResponseRenderer}
@@ -148,7 +148,7 @@ public class JobInfoResponseRenderer implements ResponseRenderer {
                 jResponse.write(writer, false);
                 // Successfully written...
                 return true;
-            } catch (final JSONException e) {
+            } catch (JSONException e) {
                 if (e.getCause() instanceof IOException) {
                     /*
                      * Throw proper I/O error since a serious socket error could been occurred which prevents further communication. Just

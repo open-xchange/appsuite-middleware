@@ -189,7 +189,7 @@ public final class IMAPFolderConverter {
                 ListLsubCache.getSeparator(imapConfig.getAccountId(), imapFolder, session, imapConfig.getIMAPProperties().isIgnoreSubscription()),
                 NamespaceFoldersCache.getUserNamespaces((IMAPStore) imapFolder.getStore(), true, session, imapConfig.getAccountId()),
                 NamespaceFoldersCache.getSharedNamespaces((IMAPStore) imapFolder.getStore(), true, session, imapConfig.getAccountId()));
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e, imapConfig, session);
         }
     }
@@ -268,7 +268,7 @@ public final class IMAPFolderConverter {
                     if (!shared) {
                         final String[] shares = NamespaceFoldersCache.getSharedNamespaces(imapStore, true, session, accountId);
                         final String[] personals = NamespaceFoldersCache.getPersonalNamespaces(imapStore, true, session, accountId);
-                        for (int i = 0; !shared && i < shares.length; i++) {
+                        for (int i = 0; !isPublic && i < shares.length; i++) {
                             final String sharedNamespace = shares[i];
                             if (!com.openexchange.java.Strings.isEmpty(sharedNamespace)) {
                                 if (imapFullName.equals(sharedNamespace)) {
@@ -348,7 +348,7 @@ public final class IMAPFolderConverter {
                         mailFolder.setDefaultFolderType(DefaultFolderType.INBOX);
                     } else if (isDefaultFoldersChecked(session, accountId)) {
                         final String[] defaultMailFolders = getDefaultMailFolders(session, accountId);
-                        if(defaultMailFolders != null) {
+                        if (defaultMailFolders != null) {
                             for (int i = 0; i < defaultMailFolders.length && !mailFolder.isDefaultFolder(); i++) {
                                 if (imapFullName.equals(defaultMailFolders[i])) {
                                     mailFolder.setDefaultFolder(true);
@@ -451,7 +451,7 @@ public final class IMAPFolderConverter {
                     if (selectable && exists && imapConfig.getACLExtension().canGetACL(ownRights)) {
                         try {
                             applyACL2Permissions(imapFolder, listEntry, session, imapConfig, mailFolder, ownRights, ctx);
-                        } catch (final OXException e) {
+                        } catch (OXException e) {
                             LOG.warn("ACLs could not be parsed", e);
                             mailFolder.removePermissions();
                             addOwnACL(mailFolder);
@@ -471,12 +471,22 @@ public final class IMAPFolderConverter {
                 LOG.debug("IMAP folder \"{}\" converted in {}msec.", imapFullName, L(System.currentTimeMillis() - st));
                 return mailFolder;
             }
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         }
     }
 
-    private static boolean startsWithOneOf(final String imapFullName, final char sep, final String[] personalNamespaces, final String[] userNamespaces, final StringBuilder tmp) {
+    /**
+     * Checks if given IMAP full name starts with any of given personal/user namespaces.
+     *
+     * @param imapFullName The IMAP full name
+     * @param sep The separator character
+     * @param personalNamespaces The personal namespaces
+     * @param userNamespaces The user namespaces
+     * @param tmp Helper instance of <code>StringBuilder</code>
+     * @return <code>true</code> if given IMAP full name starts with any of given personal/user namespaces; otherwise <code>false</code>
+     */
+    public static boolean startsWithOneOf(final String imapFullName, final char sep, final String[] personalNamespaces, final String[] userNamespaces, final StringBuilder tmp) {
         for (final String string : userNamespaces) {
             if (imapFullName.equals(string)) {
                 return true;
@@ -592,7 +602,7 @@ public final class IMAPFolderConverter {
              */
             mailFolder.setSupportsUserFlags(false);
             return mailFolder;
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e, imapConfig, session);
         }
     }
@@ -631,7 +641,7 @@ public final class IMAPFolderConverter {
             } else {
                 acls = list.toArray(new ACL[list.size()]);
             }
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             if (!ownRights.contains(Rights.Right.ADMINISTER)) {
                 LOG.warn("ACLs could not be requested for folder {}. A newer ACL extension (RFC 4314) seems to be supported by IMAP server {}, which denies GETACL command if no ADMINISTER right is granted.", imapFolder.getFullName(), imapConfig.getServer(), e);
                 addOwnACL(mailFolder);
@@ -665,7 +675,7 @@ public final class IMAPFolderConverter {
                     }
                 }
                 mailFolder.addPermission(aclPerm);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 if (!isUnknownEntityError(e)) {
                     throw e;
                 }
@@ -744,7 +754,7 @@ public final class IMAPFolderConverter {
         try {
             final int[] status = IMAPCommandsCollection.getStatus(imapFolder);
             return status[2];
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         }
     }

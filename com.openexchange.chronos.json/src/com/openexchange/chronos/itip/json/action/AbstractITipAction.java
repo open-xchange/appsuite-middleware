@@ -158,10 +158,10 @@ public abstract class AbstractITipAction implements AJAXActionService {
             final JSONObject body = (JSONObject) data;
             try {
                 return new ByteArrayInputStream(body.getString("ical").getBytes("UTF-8"));
-            } catch (final UnsupportedEncodingException e) {
+            } catch (UnsupportedEncodingException e) {
                 LOG.error("", e);
                 return null;
-            } catch (final JSONException x) {
+            } catch (JSONException x) {
                 throw AjaxExceptionCodes.JSON_ERROR.create(x);
             }
         }

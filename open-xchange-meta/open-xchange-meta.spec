@@ -3,7 +3,7 @@
 Name:           open-xchange-meta
 BuildArch:      noarch
 Version:        @OXVERSION@
-%define         ox_release 18
+%define         ox_release 3
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -14,7 +14,7 @@ Summary:        Open-Xchange Meta packages
 
 %define all_lang_ui_ox6 open-xchange-gui-l10n-de-de, open-xchange-gui-l10n-cs-cz, open-xchange-gui-l10n-es-es, open-xchange-gui-l10n-hu-hu, open-xchange-gui-l10n-it-it, open-xchange-gui-l10n-ja-jp, open-xchange-gui-l10n-lv-lv, open-xchange-gui-l10n-nl-nl, open-xchange-gui-l10n-pl-pl, open-xchange-gui-l10n-sk-sk, open-xchange-gui-l10n-zh-cn, open-xchange-gui-l10n-zh-tw, open-xchange-online-help-de-de, open-xchange-online-help-en-us, open-xchange-online-help-es-es, open-xchange-online-help-fr-fr, open-xchange-online-help-it-it, open-xchange-online-help-ja-jp, open-xchange-online-help-nl-nl, open-xchange-online-help-pl-pl, open-xchange-online-help-zh-cn, open-xchange-online-help-zh-tw
 
-%define all_lang_ui_appsuite open-xchange-appsuite-help-de-de, open-xchange-appsuite-help-en-us, open-xchange-appsuite-l10n-cs-cz, open-xchange-appsuite-l10n-de-de, open-xchange-appsuite-l10n-en-us, open-xchange-appsuite-l10n-es-es, open-xchange-appsuite-l10n-es-mx, open-xchange-appsuite-l10n-fr-ca, open-xchange-appsuite-l10n-fr-fr, open-xchange-appsuite-l10n-hu-hu, open-xchange-appsuite-l10n-it-it, open-xchange-appsuite-l10n-ja-jp, open-xchange-appsuite-l10n-lv-lv, open-xchange-appsuite-l10n-nl-nl, open-xchange-appsuite-l10n-pl-pl, open-xchange-appsuite-l10n-ro-ro, open-xchange-appsuite-l10n-sk-sk, open-xchange-appsuite-l10n-zh-cn, open-xchange-appsuite-l10n-zh-tw
+%define all_lang_ui_appsuite open-xchange-appsuite-help-de-de, open-xchange-appsuite-help-en-gb, open-xchange-appsuite-help-en-us, open-xchange-appsuite-help-es-es, open-xchange-appsuite-help-es-mx, open-xchange-appsuite-help-fr-fr, open-xchange-appsuite-help-it-it, open-xchange-appsuite-help-ja-jp, open-xchange-appsuite-help-nl-nl, open-xchange-appsuite-help-pl-pl, open-xchange-appsuite-help-zh-cn, open-xchange-appsuite-help-zh-tw, open-xchange-appsuite-l10n-ca-es, open-xchange-appsuite-l10n-cs-cz, open-xchange-appsuite-l10n-da-dk, open-xchange-appsuite-l10n-de-de, open-xchange-appsuite-l10n-en-gb, open-xchange-appsuite-l10n-en-us, open-xchange-appsuite-l10n-es-es, open-xchange-appsuite-l10n-es-mx, open-xchange-appsuite-l10n-et-ee, open-xchange-appsuite-l10n-fi-fi, open-xchange-appsuite-l10n-fr-ca, open-xchange-appsuite-l10n-fr-fr, open-xchange-appsuite-l10n-hu-hu, open-xchange-appsuite-l10n-it-it, open-xchange-appsuite-l10n-ja-jp, open-xchange-appsuite-l10n-lv-lv, open-xchange-appsuite-l10n-nl-nl, open-xchange-appsuite-l10n-pl-pl, open-xchange-appsuite-l10n-pt-br, open-xchange-appsuite-l10n-ro-ro, open-xchange-appsuite-l10n-ru-ru, open-xchange-appsuite-l10n-sk-sk, open-xchange-appsuite-l10n-sv-se, open-xchange-appsuite-l10n-tr-tr, open-xchange-appsuite-l10n-zh-cn, open-xchange-appsuite-l10n-zh-tw
 
 %define all_lang_backend open-xchange-l10n-de-de, open-xchange-l10n-cs-cz, open-xchange-l10n-es-es, open-xchange-l10n-hu-hu, open-xchange-l10n-it-it, open-xchange-l10n-ja-jp, open-xchange-l10n-lv-lv, open-xchange-l10n-nl-nl, open-xchange-l10n-pl-pl, open-xchange-l10n-sk-sk, open-xchange-l10n-zh-cn, open-xchange-l10n-zh-tw
 
@@ -260,11 +260,85 @@ Authors:
 # ----------------------------------------------------------------------------------------------------
 %package -n     open-xchange-linkedin
 Group:          Applications/Productivity
-Summary:        The Open-Xchange Meta package for OX6 backend packages
+Summary:        Empty transitional package.
 
 %description -n open-xchange-linkedin
 Empty transitional package. This package can be removed as the integration of
 Open-Xchange with LinkedIn was discontinued.
+
+Authors:
+--------
+    Open-Xchange
+
+# ----------------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------
+%package -n     open-xchange-calendar-printing
+Group:          Applications/Productivity
+Summary:        Empty transitional package.
+
+%description -n open-xchange-calendar-printing
+Empty transitional package. This package can be removed as the printing logic
+was moved to the client-side.
+
+Authors:
+--------
+    Open-Xchange
+
+# ----------------------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------------------
+%package -n     open-xchange-realtime-core
+Group:          Applications/Productivity
+Summary:        Empty transitional package.
+
+%description -n open-xchange-realtime-core
+Empty transitional package. This package can be removed as the realtime logic
+was moved to the collaboration-server.
+
+Authors:
+--------
+    Open-Xchange
+
+# ----------------------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------------------
+%package -n     open-xchange-realtime-json
+Group:          Applications/Productivity
+Summary:        Empty transitional package.
+
+%description -n open-xchange-realtime-json
+Empty transitional package. This package can be removed as the realtime logic
+was moved to the collaboration-server.
+
+Authors:
+--------
+    Open-Xchange
+
+# ----------------------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------------------
+%package -n     open-xchange-realtime-events
+Group:          Applications/Productivity
+Summary:        Empty transitional package.
+
+%description -n open-xchange-realtime-events
+Empty transitional package. This package can be removed as realtime events are
+deprecated.
+
+Authors:
+--------
+    Open-Xchange
+
+# ----------------------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------------------
+%package -n     open-xchange-realtime-events-json
+Group:          Applications/Productivity
+Summary:        Empty transitional package.
+
+%description -n open-xchange-realtime-events-json
+Empty transitional package. This package can be removed as realtime events are
+deprecated.
 
 Authors:
 --------
@@ -365,35 +439,35 @@ Authors:
 %defattr(-,root,root)
 %doc README.TXT
 
+%files -n open-xchange-calendar-printing
+%defattr(-,root,root)
+%doc README.TXT
+
+%files -n open-xchange-realtime-core
+%defattr(-,root,root)
+%doc README.TXT
+
+%files -n open-xchange-realtime-json
+%defattr(-,root,root)
+%doc README.TXT
+
+%files -n open-xchange-realtime-events
+%defattr(-,root,root)
+%doc README.TXT
+
+%files -n open-xchange-realtime-events-json
+%defattr(-,root,root)
+%doc README.TXT
+
 %changelog
-* Tue Nov 19 2019 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2019-11-25 (5484)
-* Mon Nov 04 2019 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2019-11-11 (5473)
-* Sat Nov 02 2019 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2019-11-11 (5473)
-* Tue Oct 22 2019 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2019-10-28 (5461)
-* Thu Oct 10 2019 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2019-10-14 (5439)
-* Mon Sep 23 2019 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2019-09-30 (5420)
-* Mon Sep 02 2019 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2019-09-09 (5397)
-* Mon Aug 19 2019 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2019-08-26 (5374)
-* Fri Aug 09 2019 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2019-08-12 (5359)
-* Mon Jul 22 2019 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2019-07-29 (5341)
-* Tue Jul 09 2019 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2019-07-15 (5310)
-* Thu Jun 27 2019 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2019-07-01 (5291)
-* Wed Jun 26 2019 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2019-06-27 (5299)
-* Thu Jun 06 2019 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2019-06-11 (5261)
+* Thu Nov 28 2019 Carsten Hoeger <choeger@open-xchange.com>
+Second candidate for 7.10.3 release
+* Thu Nov 21 2019 Carsten Hoeger <choeger@open-xchange.com>
+First candidate for 7.10.3 release
+* Thu Oct 17 2019 Carsten Hoeger <choeger@open-xchange.com>
+First preview for 7.10.3 release
+* Mon Jun 17 2019 Carsten Hoeger <choeger@open-xchange.com>
+prepare for 7.10.3 release
 * Fri May 10 2019 Carsten Hoeger <choeger@open-xchange.com>
 Second candidate for 7.10.2 release
 * Fri May 10 2019 Carsten Hoeger <choeger@open-xchange.com>

@@ -77,31 +77,16 @@ public class PGP extends AbstractAction implements Action<PGPActionArgument> {
         addArgument(PGPActionArgument.keys, keys);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.mail.filter.api.dao.action.Action#getActionCommand()
-     */
     @Override
     public ActionCommand getActionCommand() {
         return ActionCommand.pgp;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.mail.filter.api.dao.action.Action#setArgument(com.openexchange.ajax.mail.filter.api.dao.action.argument.ActionArgument, java.lang.Object)
-     */
     @Override
     public void setArgument(PGPActionArgument argument, Object value) {
         addArgument(argument, value);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.mail.filter.api.dao.action.Action#getArgument(com.openexchange.ajax.mail.filter.api.dao.action.argument.ActionArgument)
-     */
     @Override
     public Object getArgument(PGPActionArgument argument) {
         return getArguments().get(argument);

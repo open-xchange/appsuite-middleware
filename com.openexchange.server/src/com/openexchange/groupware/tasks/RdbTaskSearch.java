@@ -101,7 +101,7 @@ public class RdbTaskSearch extends TaskSearch {
             while (result.next()) {
                 tasks.add(Integer.valueOf(result.getInt(1)));
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw TaskExceptionCode.SQL_ERROR.create(e);
         } finally {
             closeSQLStuff(result, stmt);
@@ -209,9 +209,6 @@ public class RdbTaskSearch extends TaskSearch {
         return iter1;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.tasks.TaskSearch#find()
-     */
     @Override
     public SearchIterator<Task> find(final Context context, final int userID, TaskSearchObject searchObject, int[] columns, int orderBy, Order order, final List<Integer> all, final List<Integer> own, final List<Integer> shared) throws OXException {
         final List<Object> searchParameters = new ArrayList<Object>();

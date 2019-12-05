@@ -69,12 +69,12 @@ import com.openexchange.folderstorage.type.MailType;
 import com.openexchange.folderstorage.type.SystemType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.i18n.MailStrings;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.messaging.MessagingFolder;
 import com.openexchange.messaging.MessagingFolder.DefaultFolderType;
 import com.openexchange.messaging.MessagingPermission;
 import com.openexchange.tools.id.IDMangler;
+import com.openexchange.user.User;
 
 /**
  * {@link MessagingFolderImpl} - A messaging folder.
@@ -232,7 +232,7 @@ public final class MessagingFolderImpl extends AbstractFolder {
                         messagingFolderType = MessagingFolderType.NONE;
                     }
                 }
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 org.slf4j.LoggerFactory.getLogger(MessagingFolderImpl.class).error("", e);
                 messagingFolderType = MessagingFolderType.NONE;
             }
@@ -400,7 +400,7 @@ public final class MessagingFolderImpl extends AbstractFolder {
         public Object clone() {
             try {
                 return super.clone();
-            } catch (final CloneNotSupportedException e) {
+            } catch (CloneNotSupportedException e) {
                 /*
                  * Cannot not occur since Cloneable is implemented
                  */

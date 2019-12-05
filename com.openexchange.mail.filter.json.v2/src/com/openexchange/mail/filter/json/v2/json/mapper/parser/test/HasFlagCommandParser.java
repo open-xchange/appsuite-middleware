@@ -91,7 +91,7 @@ public class HasFlagCommandParser extends AbstractSimplifiedMatcherAwareCommandP
         String matcher = CommandParserJSONUtil.getString(jsonObject, Fields.comparison.name(), Commands.HASFLAG.getCommandName());
         String normalizedMatcher = MatchType.getNormalName(matcher);
         if (normalizedMatcher != null) {
-            if(StartsOrEndsWithMatcherUtil.isSimplifiedMatcher(normalizedMatcher)){
+            if (StartsOrEndsWithMatcherUtil.isSimplifiedMatcher(normalizedMatcher)){
                 handleSimplifiedMatcher(normalizedMatcher, flagArgList, jsonObject);
             } else {
                 flagArgList.add(ArgumentUtil.createTagArgument(normalizedMatcher));
@@ -129,7 +129,7 @@ public class HasFlagCommandParser extends AbstractSimplifiedMatcherAwareCommandP
             matchType = matchType.substring(1);
             type = MatchType.valueOf(matchType);
             type = StartsOrEndsWithMatcherUtil.checkMatchType(type, values);
-            if(transformToNotMatcher){
+            if (transformToNotMatcher){
                 jsonObject.put(Fields.comparison.name(), type.getNotName());
             } else {
                 jsonObject.put(Fields.comparison.name(), type.name());

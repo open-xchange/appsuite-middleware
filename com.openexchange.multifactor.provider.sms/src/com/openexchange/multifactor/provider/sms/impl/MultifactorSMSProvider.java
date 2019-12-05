@@ -138,7 +138,7 @@ public class MultifactorSMSProvider implements MultifactorProvider, Reloadable{
     }
 
     private SMSMultifactorDeviceStorage getStorageSave() throws OXException {
-        if(storage == null) {
+        if (storage == null) {
             throw MultifactorExceptionCodes.SERVICE_UNAVAILABLE.create(SMSMultifactorDeviceStorage.class.getSimpleName());
         }
         return storage;
@@ -149,7 +149,7 @@ public class MultifactorSMSProvider implements MultifactorProvider, Reloadable{
     }
 
     private boolean isDemoMode() {
-        if(demoMode == null) {
+        if (demoMode == null) {
             demoMode = Boolean.valueOf(configService.getBooleanProperty(MultifactorProperties.demo));
         }
         return demoMode.booleanValue();
@@ -187,7 +187,7 @@ public class MultifactorSMSProvider implements MultifactorProvider, Reloadable{
         String phoneNumber = sourceDevice.getPhoneNumber();
         phoneNumber = phoneNumberParser.parsePhoneNumber(phoneNumber /**always store in the same format => international format*/);
         //ensure "+"-sign
-        if(!phoneNumber.startsWith("+")) {
+        if (!phoneNumber.startsWith("+")) {
             phoneNumber = "+" + phoneNumber;
         }
 
@@ -278,7 +278,7 @@ public class MultifactorSMSProvider implements MultifactorProvider, Reloadable{
      */
     private void sendToken(MultifactorRequest multifactorRequest, SMSMultifactorDevice device, MultifactorToken<String> token) throws OXException {
         final String formattedToken = MultifactorFormatter.divide(token.getValue());
-        if(!isDemoMode()) {
+        if (!isDemoMode()) {
             smsService.sendMessage(
                 new String[] { device.getPhoneNumber()},
                 SMSMessageCreator.createMessage(multifactorRequest, formattedToken),
@@ -386,7 +386,7 @@ public class MultifactorSMSProvider implements MultifactorProvider, Reloadable{
 
     @Override
     public Collection<? extends MultifactorDevice> getDevices(MultifactorRequest multifactorRequest) throws OXException {
-        if(storage == null) {
+        if (storage == null) {
             return Collections.emptyList();
         }
         Collection<SMSMultifactorDevice> devices = storage.getDevices(multifactorRequest.getContextId(), multifactorRequest.getUserId());
@@ -421,7 +421,7 @@ public class MultifactorSMSProvider implements MultifactorProvider, Reloadable{
         try {
             //Send SMS token
             triggerToken(phoneDevice, multifactorRequest);
-        } catch (final Exception e) {
+        } catch (Exception e) {
            pendingStorage.unregisterDevice(multifactorRequest.getContextId(), multifactorRequest.getContextId(), phoneDevice);
            throw e;
         }

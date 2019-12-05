@@ -58,9 +58,9 @@ import java.util.Map;
 import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.exception.OXException;
+import com.openexchange.session.SessionHolder;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
@@ -137,28 +137,28 @@ public class PropertyHelper {
     }
 
     private void loadProperty(final String namespace, final String name) throws WebdavProtocolException {
-		if(removedProperties.contains(new WebdavProperty(namespace, name))) {
+		if (removedProperties.contains(new WebdavProperty(namespace, name))) {
 			return;
 		}
-		if(loadedAllProps) {
+		if (loadedAllProps) {
 			return;
 		}
 		try {
             final ServerSession session = getSession();
 			final List<WebdavProperty> list = propertyStore.loadProperties(id, Arrays.asList(new WebdavProperty(namespace,name)), session.getContext());
-			if(list.isEmpty()) {
+			if (list.isEmpty()) {
 				return;
 			}
 			final WebdavProperty prop = list.get(0);
 			properties.put(new WebdavProperty(prop.getNamespace(), prop.getName()), prop);
 
-		} catch (final OXException e) {
+		} catch (OXException e) {
 			throw WebdavProtocolException.generalError(e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 	}
 
 	private void loadAllProperties() throws WebdavProtocolException {
-		if(loadedAllProps) {
+		if (loadedAllProps) {
 			return;
 		}
 		loadedAllProps = true;
@@ -168,13 +168,13 @@ public class PropertyHelper {
 			for(final WebdavProperty prop : list) {
 				properties.put(new WebdavProperty(prop.getNamespace(), prop.getName()), prop);
 			}
-		} catch (final OXException e) {
+		} catch (OXException e) {
 		    throw WebdavProtocolException.Code.GENERAL_ERROR.create(url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
 		}
 	}
 
 	public void dumpPropertiesToDB() throws OXException {
-		if(!changed) {
+		if (!changed) {
 			return;
 		}
 		changed = false;
@@ -197,7 +197,7 @@ public class PropertyHelper {
     private ServerSession getSession() throws OXException {
         try {
             return ServerSessionAdapter.valueOf(sessionHolder.getSessionObject());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
         }
     }

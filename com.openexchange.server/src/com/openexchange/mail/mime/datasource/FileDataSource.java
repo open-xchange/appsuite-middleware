@@ -58,7 +58,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import javax.activation.DataSource;
 import com.openexchange.configuration.ServerConfig;
-import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.java.Streams;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 
@@ -83,7 +82,7 @@ public final class FileDataSource implements DataSource {
         FileOutputStream fos = null;
         final File tmpFile;
         try {
-            tmpFile = File.createTempFile("openexchange-fds-", null, new File(ServerConfig.getProperty(Property.UploadDirectory)));
+            tmpFile = File.createTempFile("openexchange-fds-", null, ServerConfig.getTmpDir());
             tmpFile.deleteOnExit();
             final int bufLen = 8192;
             final byte[] buf = new byte[bufLen];

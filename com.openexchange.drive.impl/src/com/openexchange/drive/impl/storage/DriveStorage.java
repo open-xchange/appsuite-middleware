@@ -215,21 +215,26 @@ public class DriveStorage {
      * @throws OXException
      */
     public File copyFile(File sourceFile, String targetFileName, String targetPath) throws OXException {
-        File copiedFile = new DefaultFile();
-        copiedFile.setFileName(targetFileName);
-        copiedFile.setTitle(targetFileName);
-        copiedFile.setFolderId(getFolderID(targetPath, true));
-        copiedFile.setLastModified(new Date());
-        copiedFile.setVersion("1");
-        copiedFile.setFileMIMEType(sourceFile.getFileMIMEType());
+        File fileCopy = new DefaultFile();
+        fileCopy.setFileName(targetFileName);
+        fileCopy.setTitle(targetFileName);
+        fileCopy.setFolderId(getFolderID(targetPath, true));
+        fileCopy.setLastModified(new Date());
+        fileCopy.setVersion("1");
+        fileCopy.setFileMIMEType(sourceFile.getFileMIMEType());
         List<Field> fileFields = Arrays.asList(new Field[] { Field.FILENAME, Field.TITLE, Field.FOLDER_ID, Field.LAST_MODIFIED, Field.VERSION });
         if (session.isTraceEnabled()) {
             session.trace(this.toString() + "cp " + combine(getPath(sourceFile.getFolderId()), sourceFile.getFileName()) + " " +
                 combine(targetPath, targetFileName));
         }
         String sourceVersion = sourceFile.isCurrentVersion() ? FileStorageFileAccess.CURRENT_VERSION : sourceFile.getVersion();
-        String targetId = getFileAccess().copy(sourceFile.getId(), sourceVersion, copiedFile.getFolderId(), copiedFile, null, fileFields);
-        copiedFile.setId(targetId);
+        String targetId = getFileAccess().copy(sourceFile.getId(), sourceVersion, fileCopy.getFolderId(), fileCopy, null, fileFields);
+        File copiedFile = getFile(targetId);
+        if (false == targetFileName.equals(copiedFile.getFileName())) {
+            Exception cause = new Exception("File copied to " + copiedFile.getFileName());
+            deleteFile(copiedFile, true);
+            throw DriveExceptionCodes.FILE_NOT_FOUND.create(cause, targetFileName, targetPath);
+        }
         return copiedFile;
     }
 
@@ -833,6 +838,16 @@ public class DriveStorage {
     }
 
     /**
+     * Gets the directory path to internal 'real' root folder with id '9'
+     *
+     * @param folderId The folder identifier to get the path for
+     * @return The path
+     */
+    public String getInternalPath(String folderId) throws OXException {
+        return resolveToRoot(folderId, "9", null);
+    }
+
+    /**
      * Gets the identifier of the folder behind the supplied path.
      *
      * @param path The path to get the folder identifier for
@@ -1063,24 +1078,29 @@ public class DriveStorage {
     }
 
     private String resolveToRoot(String folderID) throws OXException {
+        return resolveToRoot(folderID, rootFolderID.toUniqueID(), knownFolders);
+    }
+
+    private String resolveToRoot(String folderID, String rootFolderID, FolderCache folderCache) throws OXException {
         LinkedList<FileStorageFolder> folders = new LinkedList<FileStorageFolder>();
         String currentFolderID = folderID;
         do {
             FileStorageFolder folder = getFolderAccess().getFolder(currentFolderID);
             folders.addFirst(folder);
             currentFolderID = folder.getParentId();
-        } while (null != currentFolderID && false == "0".equals(currentFolderID) && false == rootFolderID.toUniqueID().equals(currentFolderID));
-        if (0 < folders.size() && rootFolderID.toUniqueID().equals(folders.getFirst().getParentId())) {
+        } while (null != currentFolderID && false == "0".equals(currentFolderID) && false == rootFolderID.equals(currentFolderID));
+        if (0 < folders.size() && rootFolderID.equals(folders.getFirst().getParentId())) {
             StringBuilder pathBuilder = new StringBuilder();
             for (int i = 0; i < folders.size(); i++) {
                 FileStorageFolder folder = folders.get(i);
                 pathBuilder.append(PATH_SEPARATOR).append(PathNormalizer.normalize(folder.getName()));
-                knownFolders.remember(pathBuilder.toString(), folder);
+                if (null != folderCache) {
+                    folderCache.remember(pathBuilder.toString(), folder);
+                }
             }
             return pathBuilder.toString();
-        } else {
-            return null;
         }
+        return null;
     }
 
     /**
@@ -1256,7 +1276,7 @@ public class DriveStorage {
      */
     public TrashContent getTrashContent() throws OXException {
         FileStorageFolder trashFolder = getTrashFolder();
-        if(trashFolder == null) {
+        if (trashFolder == null) {
             return null;
         }
         FileStorageFolder[] subfolders = getFolderAccess().getSubfolders(trashFolder.getId(), true);

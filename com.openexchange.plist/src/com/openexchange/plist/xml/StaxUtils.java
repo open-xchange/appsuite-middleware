@@ -116,7 +116,7 @@ public final class StaxUtils {
                 i = def;
             }
             return i;
-        } catch (final Exception t) {
+        } catch (Exception t) {
             // ignore
         }
         return def;
@@ -145,7 +145,7 @@ public final class StaxUtils {
             if (!xifClassName.contains("ctc.wstx") && !xifClassName.contains("xml.xlxp") && !xifClassName.contains("xml.xlxp2") && !xifClassName.contains("bea.core")) {
                 xif = null;
             }
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             // ignore, can always drop down to the pooled factories
             xif = null;
         }
@@ -185,7 +185,7 @@ public final class StaxUtils {
             if (cl != null) {
                 return cl.loadClass(className);
             }
-        } catch (final ClassNotFoundException e) {
+        } catch (ClassNotFoundException e) {
             // ignore
         }
         return loadClass2(className, callingClass);
@@ -198,7 +198,7 @@ public final class StaxUtils {
             if (cl != null) {
                 return cl.loadClass(className).asSubclass(type);
             }
-        } catch (final ClassNotFoundException e) {
+        } catch (ClassNotFoundException e) {
             // ignore
         }
         return loadClass2(className, callingClass).asSubclass(type);
@@ -207,12 +207,12 @@ public final class StaxUtils {
     private static Class<?> loadClass2(final String className, final Class<?> callingClass) throws ClassNotFoundException {
         try {
             return Class.forName(className);
-        } catch (final ClassNotFoundException ex) {
+        } catch (ClassNotFoundException ex) {
             try {
                 if (StaxUtils.class.getClassLoader() != null) {
                     return StaxUtils.class.getClassLoader().loadClass(className);
                 }
-            } catch (final ClassNotFoundException exc) {
+            } catch (ClassNotFoundException exc) {
                 if (callingClass != null && callingClass.getClassLoader() != null) {
                     return callingClass.getClassLoader().loadClass(className);
                 }
@@ -240,7 +240,7 @@ public final class StaxUtils {
     public static boolean isWoodstox() {
         try {
             loadClass("org.codehaus.stax2.XMLStreamReader2", StaxUtils.class);
-        } catch (final ClassNotFoundException e) {
+        } catch (ClassNotFoundException e) {
             return false;
         }
         return true;
@@ -296,7 +296,7 @@ public final class StaxUtils {
         if (!setRestrictionProperties(factory)) {
             try {
                 factory = createWoodstoxFactory();
-            } catch (final Throwable t) {
+            } catch (Throwable t) {
                 // ignore for now
             }
             if (!setRestrictionProperties(factory)) {
@@ -339,7 +339,7 @@ public final class StaxUtils {
         try {
             f.setProperty(p, o);
             return true;
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             // ignore
         }
         return false;
@@ -349,7 +349,7 @@ public final class StaxUtils {
         final XMLOutputFactory factory = getXMLOutputFactory();
         try {
             return factory.createXMLStreamWriter(out);
-        } catch (final XMLStreamException e) {
+        } catch (XMLStreamException e) {
             throw new RuntimeException("Can't create XMLStreamWriter", e);
         } finally {
             returnXMLOutputFactory(factory);
@@ -367,7 +367,7 @@ public final class StaxUtils {
         final XMLOutputFactory factory = getXMLOutputFactory();
         try {
             return factory.createXMLStreamWriter(out, encoding);
-        } catch (final XMLStreamException e) {
+        } catch (XMLStreamException e) {
             throw new RuntimeException("Can't create XMLStreamWriter", e);
         } finally {
             returnXMLOutputFactory(factory);
@@ -391,7 +391,7 @@ public final class StaxUtils {
         final XMLOutputFactory factory = getXMLOutputFactory();
         try {
             return factory.createXMLStreamWriter(r);
-        } catch (final XMLStreamException e) {
+        } catch (XMLStreamException e) {
             throw new RuntimeException("Cant' create XMLStreamWriter", e);
         } finally {
             returnXMLOutputFactory(factory);
@@ -404,7 +404,7 @@ public final class StaxUtils {
         final XMLInputFactory factory = getXMLInputFactory();
         try {
             return factory.createFilteredReader(reader, filter);
-        } catch (final XMLStreamException e) {
+        } catch (XMLStreamException e) {
             throw new RuntimeException("Cant' create XMLStreamReader", e);
         } finally {
             returnXMLInputFactory(factory);
@@ -431,7 +431,7 @@ public final class StaxUtils {
                 final StreamSource ss = new StreamSource(url.openStream(), sysId);
                 ss.setPublicId(pubId);
                 return createXMLStreamReader(ss);
-            } catch (final Exception ex) {
+            } catch (Exception ex) {
                 // ignore - not a valid URL
             }
         }
@@ -452,7 +452,7 @@ public final class StaxUtils {
         final XMLInputFactory factory = getXMLInputFactory();
         try {
             return factory.createXMLStreamReader(in, encoding);
-        } catch (final XMLStreamException e) {
+        } catch (XMLStreamException e) {
             throw new RuntimeException("Couldn't parse stream.", e);
         } finally {
             returnXMLInputFactory(factory);
@@ -467,7 +467,7 @@ public final class StaxUtils {
         final XMLInputFactory factory = getXMLInputFactory();
         try {
             return factory.createXMLStreamReader(in);
-        } catch (final XMLStreamException e) {
+        } catch (XMLStreamException e) {
             throw new RuntimeException("Couldn't parse stream.", e);
         } finally {
             returnXMLInputFactory(factory);
@@ -478,7 +478,7 @@ public final class StaxUtils {
         final XMLInputFactory factory = getXMLInputFactory();
         try {
             return factory.createXMLStreamReader(systemId, in);
-        } catch (final XMLStreamException e) {
+        } catch (XMLStreamException e) {
             throw new RuntimeException("Couldn't parse stream.", e);
         } finally {
             returnXMLInputFactory(factory);
@@ -519,7 +519,7 @@ public final class StaxUtils {
             } else if ("javax.xml.transform.stax.StAXSource".equals(source.getClass().getName())) {
                 try {
                     return (XMLStreamReader) source.getClass().getMethod("getXMLStreamReader").invoke(source);
-                } catch (final Exception ex) {
+                } catch (Exception ex) {
                     // ignore
                 }
             } else if (source instanceof StaxSource) {
@@ -534,7 +534,7 @@ public final class StaxUtils {
 
                 try {
                     reader = factory.createXMLStreamReader(source);
-                } catch (final UnsupportedOperationException e) {
+                } catch (UnsupportedOperationException e) {
                     // ignore
                 }
                 if (reader == null && source instanceof StreamSource) {
@@ -550,7 +550,7 @@ public final class StaxUtils {
             } finally {
                 returnXMLInputFactory(factory);
             }
-        } catch (final XMLStreamException e) {
+        } catch (XMLStreamException e) {
             throw new RuntimeException("Couldn't parse stream.", e);
         }
     }
@@ -563,7 +563,7 @@ public final class StaxUtils {
         final XMLInputFactory factory = getXMLInputFactory();
         try {
             return factory.createXMLStreamReader(reader);
-        } catch (final XMLStreamException e) {
+        } catch (XMLStreamException e) {
             throw new RuntimeException("Couldn't parse stream.", e);
         } finally {
             returnXMLInputFactory(factory);
@@ -604,7 +604,7 @@ public final class StaxUtils {
         if (reader != null) {
             try {
                 reader.close();
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 // ignore
             }
         }
@@ -614,7 +614,7 @@ public final class StaxUtils {
         if (writer != null) {
             try {
                 writer.close();
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 // ignore
             }
         }

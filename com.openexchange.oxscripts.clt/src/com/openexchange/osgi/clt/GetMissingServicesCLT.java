@@ -70,7 +70,7 @@ import com.openexchange.osgi.rmi.DeferredActivatorRMIService;
  */
 public class GetMissingServicesCLT extends AbstractRmiCLI<Void> {
 
-    private static String SYNTAX = "getmissingservices [-n <bundleName>] -A <masterAdmin | contextAdmin> -P <masterAdminPassword | contextAdminPassword> [-p <RMI-Port>] [-s <RMI-Server] | [-h]";
+    private static String SYNTAX = "getmissingservices [-n <bundleName>] -A <masterAdmin | contextAdmin> -P <masterAdminPassword | contextAdminPassword> [-p <RMI-Port>] [-s <RMI-Server>] [--responsetimeout <responseTimeout>] | [-h]";
     private static String FOOTER = "";
 
     private boolean testAll = true;
@@ -85,7 +85,7 @@ public class GetMissingServicesCLT extends AbstractRmiCLI<Void> {
 
     /**
      * entry point
-     * 
+     *
      * @param args
      */
     public static void main(String[] args) {
@@ -94,7 +94,7 @@ public class GetMissingServicesCLT extends AbstractRmiCLI<Void> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.cli.AbstractRmiCLI#administrativeAuth(java.lang.String, java.lang.String, org.apache.commons.cli.CommandLine, com.openexchange.auth.rmi.RemoteAuthenticator)
      */
     @Override
@@ -104,7 +104,7 @@ public class GetMissingServicesCLT extends AbstractRmiCLI<Void> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.cli.AbstractRmiCLI#addOptions(org.apache.commons.cli.Options)
      */
     @Override
@@ -114,7 +114,7 @@ public class GetMissingServicesCLT extends AbstractRmiCLI<Void> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.cli.AbstractRmiCLI#invoke(org.apache.commons.cli.Options, org.apache.commons.cli.CommandLine, java.lang.String)
      */
     @Override
@@ -158,16 +158,6 @@ public class GetMissingServicesCLT extends AbstractRmiCLI<Void> {
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.cli.AbstractAdministrativeCLI#requiresAdministrativePermission()
-     */
-    @Override
-    protected boolean requiresAdministrativePermission() {
-        return true;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
      * @see com.openexchange.cli.AbstractCLI#checkOptions(org.apache.commons.cli.CommandLine)
      */
     @Override
@@ -180,7 +170,7 @@ public class GetMissingServicesCLT extends AbstractRmiCLI<Void> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.cli.AbstractCLI#getFooter()
      */
     @Override
@@ -190,7 +180,7 @@ public class GetMissingServicesCLT extends AbstractRmiCLI<Void> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.cli.AbstractCLI#getName()
      */
     @Override
@@ -200,7 +190,7 @@ public class GetMissingServicesCLT extends AbstractRmiCLI<Void> {
 
     /**
      * Lists all missing services
-     * 
+     *
      * @param rmiHostName The optional remote hostname
      */
     private void listAllMissingServices(String rmiHostName) throws MalformedURLException, RemoteException, NotBoundException {
@@ -219,7 +209,7 @@ public class GetMissingServicesCLT extends AbstractRmiCLI<Void> {
 
     /**
      * Lists all missing services for the specified bundle
-     * 
+     *
      * @param optRmiHostName The optional remote hostname
      */
     private void listMissingServicesForBundle(String rmiHostName) throws MalformedURLException, RemoteException, NotBoundException {
@@ -235,7 +225,7 @@ public class GetMissingServicesCLT extends AbstractRmiCLI<Void> {
 
     /**
      * Prints the missing services for the specified bundle
-     * 
+     *
      * @param bundleName The bundle's name
      * @param missingServices the missing services
      */

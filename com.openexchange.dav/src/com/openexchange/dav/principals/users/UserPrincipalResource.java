@@ -51,6 +51,7 @@ package com.openexchange.dav.principals.users;
 
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.ResourceId;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dav.DAVFactory;
 import com.openexchange.dav.mixins.AddressbookHomeSet;
 import com.openexchange.dav.mixins.CalendarHomeSet;
@@ -64,7 +65,7 @@ import com.openexchange.dav.mixins.PrincipalCollectionSet;
 import com.openexchange.dav.mixins.PrincipalURL;
 import com.openexchange.dav.mixins.RecordType;
 import com.openexchange.dav.resources.DAVResource;
-import com.openexchange.groupware.ldap.User;
+import com.openexchange.user.User;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 
@@ -88,25 +89,15 @@ public class UserPrincipalResource extends DAVResource {
     public UserPrincipalResource(DAVFactory factory, User user, WebdavPath url) {
         super(factory, url);
         this.user = user;
-        includeProperties(new PrincipalURL(user.getId(), CalendarUserType.INDIVIDUAL), new AddressbookHomeSet(),
-            new CalendarHomeSet(), new EmailAddressSet(user), new PrincipalCollectionSet(),
-            new CalendarUserAddressSet(factory.getContext().getContextId(), user),
+        ConfigViewFactory configViewFactory = factory.getService(ConfigViewFactory.class);
+        includeProperties(new PrincipalURL(user.getId(), CalendarUserType.INDIVIDUAL, configViewFactory), new AddressbookHomeSet(configViewFactory),
+            new CalendarHomeSet(configViewFactory), new EmailAddressSet(user), new PrincipalCollectionSet(configViewFactory),
+            new CalendarUserAddressSet(factory.getContext().getContextId(), user, configViewFactory),
             new DisplayName(user.getDisplayName()), new FirstName(user), new LastName(user),
             new com.openexchange.dav.mixins.CalendarUserType(CalendarUserType.INDIVIDUAL), new RecordType(RecordType.RECORD_TYPE_USER),
             new com.openexchange.dav.mixins.ResourceId(ResourceId.forUser(factory.getContext().getContextId(), user.getId())),
-            new GroupMembership(user.getGroups())
+            new GroupMembership(user.getGroups(), configViewFactory)
         );
-    }
-
-    /**
-     * Initializes a new {@link UserPrincipalResource}.
-     *
-     * @param factory The factory
-     * @param user The user
-     * @param url The WebDAV path of the resource
-     */
-    public UserPrincipalResource(DAVFactory factory, User user) {
-        this(factory, user, new WebdavPath("principals", "users", String.valueOf(user.getId())));
     }
 
     @Override

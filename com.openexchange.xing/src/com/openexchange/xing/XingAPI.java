@@ -156,9 +156,9 @@ public class XingAPI<S extends Session> {
                 VERSION,
                 session);
             return new User(responseInformation.getJSONArray("users").getJSONObject(0));
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw new XingException(e);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw new XingException(e);
         }
     }
@@ -185,9 +185,9 @@ public class XingAPI<S extends Session> {
                 VERSION,
                 session);
             return new User(responseInformation.getJSONArray("users").getJSONObject(0));
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw new XingException(e);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw new XingException(e);
         }
     }
@@ -244,9 +244,9 @@ public class XingAPI<S extends Session> {
                     userIds.add(jUser.getString("id"));
                 }
             }
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw new XingException(e);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw new XingException(e);
         }
 
@@ -310,9 +310,9 @@ public class XingAPI<S extends Session> {
             }
 
             return jUser.getString("id");
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw new XingException(e);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw new XingException(e);
         }
     }
@@ -354,7 +354,7 @@ public class XingAPI<S extends Session> {
                 session);
 
             return responseInformation.asMap();
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw new XingException(e);
         }
     }
@@ -437,9 +437,9 @@ public class XingAPI<S extends Session> {
                 }
             }
             return new Path(from, to, inBetween);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw new XingException(e);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw new XingException(e);
         }
     }
@@ -514,9 +514,9 @@ public class XingAPI<S extends Session> {
             final Contacts contacts = new Contacts(responseInformation.getJSONObject("contacts"));
             Collections.sort(contacts.getUsers(), (null == orderBy ? UserField.ID : orderBy).getComparator(false));
             return contacts;
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw new XingException(e);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw new XingException(e);
         }
     }
@@ -567,7 +567,7 @@ public class XingAPI<S extends Session> {
             // Sort users
             Collections.sort(users, (null == orderBy ? UserField.ID : orderBy).getComparator(false));
             return new Contacts(total, users);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw new XingException(e);
         }
     }
@@ -640,9 +640,9 @@ public class XingAPI<S extends Session> {
             final Contacts contacts = new Contacts(responseInformation.getJSONObject("shared_contacts"));
             Collections.sort(contacts.getUsers(), orderBy.getComparator(false));
             return contacts;
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw new XingException(e);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw new XingException(e);
         }
     }
@@ -705,9 +705,9 @@ public class XingAPI<S extends Session> {
                 params.toArray(new String[0]),
                 session).toObject();
             return new Conversations(responseInformation.getJSONObject("conversations"));
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw new XingException(e);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw new XingException(e);
         }
     }
@@ -761,7 +761,7 @@ public class XingAPI<S extends Session> {
                 offset += chunk.size();
             }
             return new Conversations(total, items);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw new XingException(e);
         }
     }
@@ -812,9 +812,9 @@ public class XingAPI<S extends Session> {
                 params.toArray(new String[0]),
                 session).toObject();
             return new Conversation(responseInformation.getJSONObject("conversation"));
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw new XingException(e);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw new XingException(e);
         }
     }
@@ -846,7 +846,7 @@ public class XingAPI<S extends Session> {
                 params.toArray(new String[0]),
                 session,
                 EXPECTED_201_CREATED);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw new XingException(e);
         }
     }
@@ -899,9 +899,9 @@ public class XingAPI<S extends Session> {
                 params.toArray(new String[0]),
                 session).toObject();
             return new InvitationStats(responseInformation.getJSONObject("invitation_stats"));
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw new XingException(e);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw new XingException(e);
         }
     }
@@ -968,7 +968,7 @@ public class XingAPI<S extends Session> {
 
             return responseInformation.asMap();
 
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw new XingException(e);
         }
     }
@@ -992,7 +992,7 @@ public class XingAPI<S extends Session> {
                 null,
                 session,
                 EXPECTED_204_NO_CONTENT);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw new XingException(e);
         }
     }
@@ -1049,7 +1049,7 @@ public class XingAPI<S extends Session> {
 
             return responseInformation.asMap();
 
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw new XingException(e);
         }
     }
@@ -1078,7 +1078,7 @@ public class XingAPI<S extends Session> {
                 params.toArray(new String[0]),
                 session,
                 EXPECTED_201_CREATED);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw new XingException(e);
         }
     }
@@ -1126,7 +1126,7 @@ public class XingAPI<S extends Session> {
                 params.toArray(new String[0]),
                 session).toObject();
             return response.asMap();
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw new XingException(e);
         }
     }
@@ -1149,7 +1149,7 @@ public class XingAPI<S extends Session> {
                 null,
                 session,
                 EXPECTED_204_NO_CONTENT);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw new XingException(e);
         }
     }
@@ -1178,7 +1178,7 @@ public class XingAPI<S extends Session> {
                 params.toArray(new String[0]),
                 session,
                 EXPECTED_201_CREATED);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw new XingException(e);
         }
     }
@@ -1202,7 +1202,7 @@ public class XingAPI<S extends Session> {
                 null,
                 session,
                 EXPECTED_204_NO_CONTENT);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw new XingException(e);
         }
     }
@@ -1226,7 +1226,7 @@ public class XingAPI<S extends Session> {
                 null,
                 session,
                 EXPECTED_204_NO_CONTENT);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw new XingException(e);
         }
     }
@@ -1274,7 +1274,7 @@ public class XingAPI<S extends Session> {
                 params.toArray(new String[0]),
                 session).toObject();
             return response.asMap();
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw new XingException(e);
         }
     }
@@ -1313,7 +1313,7 @@ public class XingAPI<S extends Session> {
                 params.toArray(new String[0]),
                 session).toObject();
             return response.asMap();
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw new XingException(e);
         }
     }
@@ -1347,7 +1347,7 @@ public class XingAPI<S extends Session> {
                 params.toArray(new String[0]),
                 session,
                 EXPECTED_204_NO_CONTENT);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw new XingException(e);
         }
     }
@@ -1375,7 +1375,7 @@ public class XingAPI<S extends Session> {
                 params.toArray(new String[0]),
                 session,
                 EXPECTED_204_NO_CONTENT);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw new XingException(e);
         }
     }
@@ -1404,7 +1404,7 @@ public class XingAPI<S extends Session> {
                 session,
                 EXPECTED_201_CREATED).toObject();
             return response.asMap();
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw new XingException(e);
         }
     }
@@ -1466,7 +1466,7 @@ public class XingAPI<S extends Session> {
                 session,
                 EXPECTED_201_CREATED).toObject();
             return jResponse.asMap();
-        } catch (final XingApiException e) {
+        } catch (XingApiException e) {
             if ("INVALID".equals(e.getErrorName())) {
                 String desc = null;
                 @SuppressWarnings("unchecked") Map<String, Object> errorProps = (Map<String, Object>) e.getProperties().get("errors");
@@ -1509,9 +1509,9 @@ public class XingAPI<S extends Session> {
             }
 
             throw e;
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw new XingException(e);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw new XingException(e);
         }
     }
@@ -1551,7 +1551,7 @@ public class XingAPI<S extends Session> {
     private static IFileHolder loadImageFromURL(final String url) throws XingException {
         try {
             return loadImageFromURL(new URL(url));
-        } catch (final MalformedURLException e) {
+        } catch (MalformedURLException e) {
             throw new XingException("Problem loading photo from URL: " + url, e);
         }
     }
@@ -1581,9 +1581,9 @@ public class XingAPI<S extends Session> {
             } finally {
                 Streams.close(in);
             }
-        } catch (final SocketTimeoutException e) {
+        } catch (SocketTimeoutException e) {
             throw new XingException("Timeout while loading photo from URL: " + url, e);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw new XingException("I/O problem loading photo from URL: " + url, e);
         }
         if (null != bytes) {
@@ -1625,7 +1625,7 @@ public class XingAPI<S extends Session> {
         java.awt.image.BufferedImage bimg = null;
         try {
             bimg = javax.imageio.ImageIO.read(Streams.newByteArrayInputStream(data));
-        } catch (final Exception e) {
+        } catch (Exception e) {
             return false;
         }
         return (bimg != null);

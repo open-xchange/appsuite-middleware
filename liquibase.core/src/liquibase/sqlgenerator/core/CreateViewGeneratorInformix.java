@@ -36,7 +36,7 @@ public class CreateViewGeneratorInformix extends AbstractSqlGenerator<CreateView
         validationErrors.checkRequiredField("selectQuery", createViewStatement.getSelectQuery());
 
         if (createViewStatement.isReplaceIfExists()) {
-            validationErrors.checkDisallowedField("replaceIfExists", createViewStatement.isReplaceIfExists(), database, HsqlDatabase.class, H2Database.class, DB2Database.class, CacheDatabase.class, MSSQLDatabase.class, DerbyDatabase.class, SybaseASADatabase.class, InformixDatabase.class);
+            validationErrors.checkDisallowedField("replaceIfExists", createViewStatement.isReplaceIfExists() ? Boolean.TRUE : Boolean.FALSE, database, HsqlDatabase.class, H2Database.class, DB2Database.class, CacheDatabase.class, MSSQLDatabase.class, DerbyDatabase.class, SybaseASADatabase.class, InformixDatabase.class);
         }
 
         return validationErrors;
@@ -45,9 +45,9 @@ public class CreateViewGeneratorInformix extends AbstractSqlGenerator<CreateView
     @Override
     public Sql[] generateSql(CreateViewStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
     	String viewName = database.escapeViewName(statement.getCatalogName(), statement.getSchemaName(), statement.getViewName());
-    	        
+
         String createClause = "CREATE VIEW  " + viewName + " AS SELECT * FROM (" + statement.getSelectQuery() + ") AS v";
-        
+
         if (statement.isReplaceIfExists()) {
         	return new Sql[] {
     			new UnparsedSql("DROP VIEW IF EXISTS " + viewName),
@@ -56,6 +56,6 @@ public class CreateViewGeneratorInformix extends AbstractSqlGenerator<CreateView
         }
         return new Sql[] {
                 new UnparsedSql(createClause)
-            }; 
+            };
     }
 }

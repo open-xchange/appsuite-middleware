@@ -1,0 +1,26 @@
+/account?action=get:
+  get:
+    operationId: getAccount
+    tags:
+      - Mailaccount
+    summary: Gets a mail account.
+    parameters:
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - in: query
+        name: id
+        description: Account ID of the requested account.
+        required: true
+        schema:
+          type: integer
+    responses:
+      '200':
+        description: >
+          An object containing all data of the requested account. In case of
+          errors the
+
+          responsible fields in the response are filled (see [Error
+          handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MailAccountResponse'

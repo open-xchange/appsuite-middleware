@@ -82,7 +82,7 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
 /**
- * {@link EditCopy} - Utility class to open a composition space for a forward.
+ * {@link EditCopy} - Utility class to open a composition space for a edit-copy.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.2

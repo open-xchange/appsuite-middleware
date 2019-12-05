@@ -1,0 +1,10 @@
+{
+    "modelPackage" : "com.openexchange.testing.httpclient.models",
+    "apiPackage"   : "com.openexchange.testing.httpclient.modules",
+    "invokerPackage" : "com.openexchange.testing.httpclient.invoker",
+    "groupId" : "com.openexchange.testing",
+    "artifactId"  : "httpclient",
+    "fullJavaUtil" : true,
+    "dateLibrary" : "java8",
+    "java8" : true
+}   

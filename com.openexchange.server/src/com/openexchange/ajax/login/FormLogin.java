@@ -62,12 +62,12 @@ import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.LoginResult;
 import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.http.Tools;
+import com.openexchange.user.User;
 
 /**
  * Implementes the formLogin action.
@@ -94,14 +94,7 @@ public class FormLogin implements LoginRequestHandler {
 
     private void doFormLogin(HttpServletRequest req, HttpServletResponse resp) throws OXException, IOException {
         // Parse HTTP request
-        LoginRequest request = LoginTools.parseLogin(
-            req,
-            LoginFields.LOGIN_PARAM,
-            true,
-            conf.getDefaultClient(),
-            conf.isCookieForceHTTPS(),
-            conf.isDisableTrimLogin(),
-            !conf.isFormLoginWithoutAuthId());
+        LoginRequest request = LoginTools.parseLogin(req, LoginFields.LOGIN_PARAM, true, conf.getDefaultClient(), conf.isCookieForceHTTPS(), conf.isDisableTrimLogin(), !conf.isFormLoginWithoutAuthId());
 
         // Fill properties for re-authenticate attempt
         Map<String, Object> properties = new HashMap<String, Object>(4);
@@ -149,9 +142,11 @@ public class FormLogin implements LoginRequestHandler {
         // retval = LoginTools.addFragmentParameter(retval, PARAMETER_USER, session.getLogin()); <--- Removed because login string might exposing sensitive user data; e.g. E-Mail address
         retval = LoginTools.addFragmentParameter(retval, PARAMETER_USER_ID, Integer.toString(session.getUserId()));
         retval = LoginTools.addFragmentParameter(retval, "context_id", String.valueOf(session.getContextId()));
-        retval = LoginTools.addFragmentParameter(retval, "language", language);
+        retval = LoginTools.addFragmentParameter(retval, LoginFields.LANGUAGE_PARAM, language);
+        retval = LoginTools.addFragmentParameter(retval, LoginFields.LOCALE_PARAM, language);
         if (shouldStore != null) {
             retval = LoginTools.addFragmentParameter(retval, "store", shouldStore);
+            retval = LoginTools.addFragmentParameter(retval, LoginFields.STORE_LOCALE, shouldStore);
         }
         return retval;
     }

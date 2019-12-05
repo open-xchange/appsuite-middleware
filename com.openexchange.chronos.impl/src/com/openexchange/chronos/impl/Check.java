@@ -58,7 +58,9 @@ import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -93,13 +95,14 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tools.alias.UserAliasUtility;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Strings;
 import com.openexchange.quota.Quota;
 import com.openexchange.quota.QuotaExceptionCodes;
+import com.openexchange.resource.Resource;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 /**
  * {@link CalendarService}
@@ -433,6 +436,28 @@ public class Check extends com.openexchange.chronos.common.Check {
     }
 
     /**
+     * Checks that the unique identifier (UID) matches in all events within the supplied collection, i.e. it is either undefined, or
+     * equal in all events.
+     *
+     * @param events The events to check the UID for equality
+     * @return The event's common unique identifier, after it was checked to be equal in all events, or <code>null</code> if not assigned
+     * @throws OXException {@link CalendarExceptionCodes#INVALID_DATA}
+     */
+    public static String uidMatches(Collection<Event> events) throws OXException {
+        if (null == events || events.isEmpty()) {
+            return null;
+        }
+        Iterator<Event> iterator = events.iterator();
+        String uid = iterator.next().getUid();
+        while (iterator.hasNext()) {
+            if (false == Objects.equals(uid, iterator.next().getUid())) {
+                throw CalendarExceptionCodes.INVALID_DATA.create(EventField.UID, "UID mismatch");
+            }
+        }
+        return uid;
+    }
+
+    /**
      * Checks that the organizer matches in all events from a calendar object resource, i.e. it is either undefined, or equal in all
      * events.
      *
@@ -472,8 +497,7 @@ public class Check extends com.openexchange.chronos.common.Check {
                     try {
                         String eventId = storage.getAttachmentStorage().resolveAttachmentId(attachment.getManagedId());
                         if (null != eventId) {
-                            event = new ResolvePerformer(session, storage).resolveById(eventId);
-
+                            event = new ResolvePerformer(session, storage).resolveById(eventId, null);
                         }
                     } catch (OXException e) {
                         throw CalendarExceptionCodes.ATTACHMENT_NOT_FOUND.create(e, I(attachment.getManagedId()), null, null);
@@ -485,6 +509,23 @@ public class Check extends com.openexchange.chronos.common.Check {
             }
         }
         return attachments;
+    }
+
+    /**
+     * Checks that a specific attachment is contained in one of the supplied events, based on the attachment's managed identifier.
+     * 
+     * @param events The events to search
+     * @param managedId The managed identifier to lookup
+     * @return The matching attachment
+     * @throws OXException {@link CalendarExceptionCodes#ATTACHMENT_NOT_FOUND}
+     * @see CalendarUtils#findAttachment(Collection, int)
+     */
+    public static Attachment containsAttachment(Collection<Event> events, int managedId) throws OXException {
+        Attachment attachment = CalendarUtils.findAttachment(events, managedId);
+        if (null == attachment) {
+            throw CalendarExceptionCodes.ATTACHMENT_NOT_FOUND.create(I(managedId), null, null);
+        }
+        return attachment;
     }
 
     /**
@@ -508,10 +549,14 @@ public class Check extends com.openexchange.chronos.common.Check {
      * Checks that the event's organizer is also contained in the list of attendees, in case it is an <i>internal</i> user.
      *
      * @param event The event to check
+     * @param folder 
      * @throws OXException {@link CalendarExceptionCodes#MISSING_ORGANIZER}
      */
-    public static void internalOrganizerIsAttendee(Event event) throws OXException {
+    public static void internalOrganizerIsAttendee(Event event, CalendarFolder folder) throws OXException {
         Organizer organizer = event.getOrganizer();
+        if (PublicType.getInstance().equals(folder.getType())) {
+            return;
+        }
         if (null != organizer && CalendarUtils.isInternal(organizer, CalendarUserType.INDIVIDUAL) && false == contains(event.getAttendees(), organizer)) {
             throw CalendarExceptionCodes.MISSING_ORGANIZER.create();
         }
@@ -641,7 +686,7 @@ public class Check extends com.openexchange.chronos.common.Check {
      */
     public static String calendarAddressMatches(String uri, int contextId, User user) throws OXException {
         if (null == uri) {
-            CalendarExceptionCodes.INVALID_CALENDAR_USER.create(uri, I(user.getId()), CalendarUserType.INDIVIDUAL);
+            throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(uri, I(user.getId()), CalendarUserType.INDIVIDUAL);
         }
         ResourceId resourceId = ResourceId.parse(uri);
         if (null != resourceId && resourceId.getContextID() == contextId && resourceId.getEntity() == user.getId()) {
@@ -667,6 +712,40 @@ public class Check extends com.openexchange.chronos.common.Check {
          * mismatch, otherwise
          */
         throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(uri, I(user.getId()), CalendarUserType.INDIVIDUAL);
+    }
+
+    /**
+     * Checks that a calendar user address URI matches a specific resource, i.e. it either matches the resource's resource identifier, or
+     * references the resource's e-mail addresses.
+     * 
+     * @param uri The calendar user address string to check
+     * @param contextId The context identifier
+     * @param resource The internal resource to match against
+     * @return The passed calendar address, after it was checked to match the referenced user
+     * @throws OXException {@link CalendarExceptionCodes#INVALID_CALENDAR_USER}
+     */
+    public static String calendarAddressMatches(String uri, int contextId, Resource resource) throws OXException {
+        if (null == uri) {
+            throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(uri, I(resource.getIdentifier()), CalendarUserType.INDIVIDUAL);
+        }
+        ResourceId resourceId = ResourceId.parse(uri);
+        if (null != resourceId && resourceId.getContextID() == contextId && resourceId.getEntity() == resource.getIdentifier()) {
+            /*
+             * resource id address matches referenced resource
+             */
+            return uri;
+        }
+        String mailAddress = extractEMailAddress(uri);
+        if (Strings.isNotEmpty(mailAddress) && mailAddress.equalsIgnoreCase(resource.getMail())) {
+            /*
+             * e-mail address matches referenced resource
+             */
+            return uri;
+        }
+        /*
+         * mismatch, otherwise
+         */
+        throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(uri, I(resource.getIdentifier()), CalendarUserType.INDIVIDUAL);
     }
 
 }

@@ -80,7 +80,6 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.database.SchemaInfo;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.java.Sets;
 import com.openexchange.java.Strings;
 import com.openexchange.threadpool.BoundedCompletionService;
@@ -139,7 +138,7 @@ public class Filestore2UserUtil {
         } catch (SQLException e) {
             throw new StorageException(e);
         } catch (RuntimeException e) {
-            throw new StorageException(e);
+            throw StorageException.storageExceotionFor(e);
         } finally {
             if (null != con) {
                 try {
@@ -175,7 +174,7 @@ public class Filestore2UserUtil {
         } catch (SQLException e) {
             throw new StorageException(e);
         } catch (RuntimeException e) {
-            throw new StorageException(e);
+            throw StorageException.storageExceotionFor(e);
         } finally {
             if (null != con) {
                 try {
@@ -232,7 +231,7 @@ public class Filestore2UserUtil {
         } catch (SQLException e) {
             throw new StorageException(e);
         } catch (RuntimeException e) {
-            throw new StorageException(e);
+            throw StorageException.storageExceotionFor(e);
         } finally {
             if (null != con) {
                 try {
@@ -281,7 +280,7 @@ public class Filestore2UserUtil {
         } catch (SQLException e) {
             throw new StorageException(e);
         } catch (RuntimeException e) {
-            throw new StorageException(e);
+            throw StorageException.storageExceotionFor(e);
         } finally {
             if (null != con) {
                 try {
@@ -336,7 +335,7 @@ public class Filestore2UserUtil {
         } catch (SQLException e) {
             throw new StorageException(e);
         } catch (RuntimeException e) {
-            throw new StorageException(e);
+            throw StorageException.storageExceotionFor(e);
         } finally {
             if (null != con) {
                 try {
@@ -421,7 +420,7 @@ public class Filestore2UserUtil {
         } catch (SQLException e) {
             throw new StorageException(e);
         } catch (RuntimeException e) {
-            throw new StorageException(e);
+            throw StorageException.storageExceotionFor(e);
         } finally {
             if (null != con) {
                 if (rollback > 0) {
@@ -477,7 +476,7 @@ public class Filestore2UserUtil {
         } catch (SQLException e) {
             throw new StorageException(e);
         } catch (RuntimeException e) {
-            throw new StorageException(e);
+            throw StorageException.storageExceotionFor(e);
         } finally {
             if (null != con) {
                 if (rollback > 0) {
@@ -532,7 +531,7 @@ public class Filestore2UserUtil {
         } catch (SQLException e) {
             throw new StorageException(e);
         } catch (RuntimeException e) {
-            throw new StorageException(e);
+            throw StorageException.storageExceotionFor(e);
         } finally {
             if (null != con) {
                 if (rollback > 0) {
@@ -589,7 +588,7 @@ public class Filestore2UserUtil {
         } catch (SQLException e) {
             throw new StorageException(e);
         } catch (RuntimeException e) {
-            throw new StorageException(e);
+            throw StorageException.storageExceotionFor(e);
         } finally {
             if (null != con) {
                 if (rollback > 0) {
@@ -651,7 +650,7 @@ public class Filestore2UserUtil {
         } catch (SQLException e) {
             throw new StorageException(e);
         } catch (RuntimeException e) {
-            throw new StorageException(e);
+            throw StorageException.storageExceotionFor(e);
         } finally {
             if (null != con) {
                 if (rollback > 0) {
@@ -732,11 +731,11 @@ public class Filestore2UserUtil {
                 con = null;
             }
         } catch (OXException e) {
-            throw new StorageException(e);
+            throw StorageException.wrapForRMI(e);
         } catch (SQLException e) {
             throw new StorageException(e);
         } catch (RuntimeException e) {
-            throw new StorageException(e);
+            throw StorageException.storageExceotionFor(e);
         } finally {
             if (null != con) {
                 // Check whether to roll-back transactional changes
@@ -783,7 +782,7 @@ public class Filestore2UserUtil {
      *
      */
 
-    private static List<SchemaInfo> getAllNonEmptySchemas(Connection con) throws OXException {
+    private static List<SchemaInfo> getAllNonEmptySchemas(Connection con) throws StorageException, SQLException {
         // Determine all DB schemas that are currently in use
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -801,10 +800,8 @@ public class Filestore2UserUtil {
                 l.add(SchemaInfo.valueOf(rs.getInt(1), rs.getString(2)));
             } while (rs.next());
             return l;
-        } catch (SQLException e) {
-            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
-            throw UpdateExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw StorageException.storageExceotionFor(e);
         } finally {
             Databases.closeSQLStuff(rs, stmt);
         }
@@ -877,7 +874,7 @@ public class Filestore2UserUtil {
 
                             if (doThrow) {
                                 LOG.error("Failed to determine user-associated file storages for schema \"{}\" in database {}", schema.getSchema(), I(schema.getPoolId()), e);
-                                throw new StorageException(e);
+                                throw StorageException.wrapForRMI(e);
                             }
                         } catch (SQLException e) {
                             LOG.error("Failed to determine user-associated file storages for schema \"{}\" in database 1}", schema.getSchema(), I(schema.getPoolId()), e);

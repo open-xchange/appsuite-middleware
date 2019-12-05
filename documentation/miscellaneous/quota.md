@@ -1,6 +1,6 @@
 ---
 title: Quota
-icon: fa-pie-chart
+icon: fas fa-chart-pie
 tags: Limits, Configuration, Installation
 ---
 

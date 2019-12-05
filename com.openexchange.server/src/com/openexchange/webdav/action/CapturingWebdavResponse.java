@@ -65,7 +65,7 @@ public class CapturingWebdavResponse implements WebdavResponse {
 
 	@Override
     public OutputStream getOutputStream() throws IOException {
-		if(stream != null) {
+		if (stream != null) {
 			return stream;
 		}
 		return stream = new CapturingOutputStream(delegate.getOutputStream());
@@ -144,12 +144,12 @@ public class CapturingWebdavResponse implements WebdavResponse {
 	}
 
 	public String getBodyAsString() {
-		if(stream == null) {
+		if (stream == null) {
 			return "No Body";
 		}
 		try {
 			return new String(stream.getCapture().toByteArray(), "UTF-8");
-		} catch (final UnsupportedEncodingException e) {
+		} catch (UnsupportedEncodingException e) {
 			return e.toString();
 		}
 	}

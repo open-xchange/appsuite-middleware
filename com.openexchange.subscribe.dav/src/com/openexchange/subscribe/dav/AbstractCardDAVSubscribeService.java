@@ -276,7 +276,7 @@ public abstract class AbstractCardDAVSubscribeService extends AbstractDAVSubscri
                 try {
                     String body = Streams.reader2string(new InputStreamReader(httpResponse.getEntity().getContent(), Charsets.UTF_8));
                     reason = body;
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     reason = statusLine.getReasonPhrase();
                 }
                 throw new HttpResponseException(statusCode, reason);
@@ -354,7 +354,7 @@ public abstract class AbstractCardDAVSubscribeService extends AbstractDAVSubscri
                 try {
                     String body = Streams.reader2string(new InputStreamReader(httpResponse.getEntity().getContent(), Charsets.UTF_8));
                     reason = body;
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     reason = statusLine.getReasonPhrase();
                 }
                 throw new HttpResponseException(statusCode, reason);
@@ -431,7 +431,7 @@ public abstract class AbstractCardDAVSubscribeService extends AbstractDAVSubscri
                 try {
                     String body = Streams.reader2string(new InputStreamReader(httpResponse.getEntity().getContent(), Charsets.UTF_8));
                     reason = body;
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     reason = statusLine.getReasonPhrase();
                 }
                 throw new HttpResponseException(statusCode, reason);
@@ -530,7 +530,7 @@ public abstract class AbstractCardDAVSubscribeService extends AbstractDAVSubscri
                 try {
                     String body = Streams.reader2string(new InputStreamReader(httpResponse.getEntity().getContent(), Charsets.UTF_8));
                     reason = body;
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     reason = statusLine.getReasonPhrase();
                 }
                 throw new HttpResponseException(statusCode, reason);

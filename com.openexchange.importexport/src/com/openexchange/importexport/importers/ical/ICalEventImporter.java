@@ -59,6 +59,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.SchedulingControl;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.chronos.ical.ImportedCalendar;
@@ -283,14 +284,14 @@ public class ICalEventImporter extends AbstractICalImporter {
         parameters.set(CalendarParameters.PARAMETER_IGNORE_STORAGE_WARNINGS, Boolean.TRUE);
         if (null != optionalParameters) {
             if (optionalParameters.containsKey("suppressNotification")) {
-                parameters.set(CalendarParameters.PARAMETER_NOTIFICATION, Boolean.FALSE);
+                parameters.set(CalendarParameters.PARAMETER_SCHEDULING, SchedulingControl.NONE);
             }
             String[] ignoreUIDsValue = optionalParameters.get("ignoreUIDs");
             if (null != ignoreUIDsValue && 0 < ignoreUIDsValue.length && Boolean.parseBoolean(ignoreUIDsValue[0])) {
                 parameters.set(CalendarParameters.UID_CONFLICT_STRATEGY, UIDConflictStrategy.REASSIGN);
             }
         }
-        parameters.set(CalendarSession.PARAMETER_SUPPRESS_ITIP, Boolean.TRUE);
+        parameters.set(CalendarSession.PARAMETER_SCHEDULING, SchedulingControl.NONE);
         return parameters;
     }
 

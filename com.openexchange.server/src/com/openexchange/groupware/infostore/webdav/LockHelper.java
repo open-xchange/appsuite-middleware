@@ -58,13 +58,13 @@ import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.session.SessionHolder;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.tools.session.SessionHolder;
+import com.openexchange.user.User;
 import com.openexchange.webdav.protocol.WebdavLock;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
@@ -83,7 +83,7 @@ public abstract class LockHelper {
 
 	public LockHelper(final LockManager lockManager, final SessionHolder sessionHolder, final WebdavPath url) {
 		this.lockManager = lockManager;
-		if(null == sessionHolder) {
+		if (null == sessionHolder) {
 			throw new IllegalArgumentException("sessionHolder may not be null");
 		}
 		this.sessionHolder = sessionHolder;
@@ -105,7 +105,7 @@ public abstract class LockHelper {
 		final List<WebdavLock> notExpired = new ArrayList<WebdavLock>();
 		final long now = System.currentTimeMillis();
 		for(final WebdavLock lock : lockList) {
-			if(lock.isActive(now)) {
+			if (lock.isActive(now)) {
 				notExpired.add(lock);
 			} else {
 				removeLock(lock.getToken());
@@ -118,7 +118,7 @@ public abstract class LockHelper {
 	public void addLock(final WebdavLock lock) throws WebdavProtocolException {
 		try {
 			loadLocks();
-			if(lock.getToken()!= null && locks.containsKey(lock.getToken())) {
+			if (lock.getToken()!= null && locks.containsKey(lock.getToken())) {
 				relock(lock);
                 locks.put(lock.getToken(), lock);
                 return;
@@ -128,7 +128,7 @@ public abstract class LockHelper {
 			final int lockId = saveLock(lock);
 			lock.setToken("http://www.open-xchange.com/webdav/locks/"+lockId);
 			locks.put(lock.getToken(), lock);
-		} catch (final OXException e) {
+		} catch (OXException e) {
 		    throw WebdavProtocolException.generalError(e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 	}
@@ -153,10 +153,10 @@ public abstract class LockHelper {
 	protected abstract Lock toLock(WebdavLock lock);
 
 	private synchronized void loadLocks() throws WebdavProtocolException {
-		if(loadedLocks) {
+		if (loadedLocks) {
 			return;
 		}
-		if(id == 0) {
+		if (id == 0) {
 			return;
 		}
 		loadedLocks = true;
@@ -170,7 +170,7 @@ public abstract class LockHelper {
 				}
 			}
 			setLocks(cleanedLocks);
-		} catch (final OXException e) {
+		} catch (OXException e) {
 		    throw WebdavProtocolException.generalError(e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 	}
@@ -182,7 +182,7 @@ public abstract class LockHelper {
 	}
 
 	public void dumpLocksToDB() throws OXException {
-		if(removedLocks.isEmpty()) {
+		if (removedLocks.isEmpty()) {
 			return;
 		}
 		final ServerSession session = getSession();
@@ -209,7 +209,7 @@ public abstract class LockHelper {
     private ServerSession getSession() throws OXException {
         try {
             return ServerSessionAdapter.valueOf(sessionHolder.getSessionObject());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
         }
     }

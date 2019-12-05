@@ -73,21 +73,11 @@ public class SchedJoulesActivator extends HousekeepingActivator {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
-     */
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { LeanConfigurationService.class, ICalService.class, TimerService.class };
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.osgi.DeferredActivator#startBundle()
-     */
     @Override
     protected void startBundle() throws Exception {
         Logger log = LoggerFactory.getLogger(SchedJoulesActivator.class);
@@ -99,11 +89,6 @@ public class SchedJoulesActivator extends HousekeepingActivator {
         log.info("Registered SchedJoules Service.");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.osgi.HousekeepingActivator#stopBundle()
-     */
     @Override
     protected void stopBundle() throws Exception {
         unregisterService(SchedJoulesService.class);

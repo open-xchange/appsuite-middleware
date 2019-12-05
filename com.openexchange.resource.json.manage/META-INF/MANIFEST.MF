@@ -1,8 +1,8 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Resource Manage Request
-Bundle-SymbolicName: com.openexchange.resource.managerequest
-Bundle-Version: 7.10.2
+Bundle-SymbolicName: com.openexchange.resource.json.manage
+Bundle-Version: 7.10.3
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.fasterxml.jackson.core,
@@ -40,4 +40,4 @@ Import-Package: com.fasterxml.jackson.core,
  org.json,
  org.osgi.framework,
  org.slf4j
-Bundle-Activator: com.openexchange.resource.managerequest.osgi.ResourceRequestActivator
+Bundle-Activator: com.openexchange.resource.json.manage.osgi.ResourceRequestActivator

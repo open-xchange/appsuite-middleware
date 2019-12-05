@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.json.osgi;
 
+import static com.openexchange.osgi.Tools.withRanking;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Map;
@@ -58,7 +59,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
@@ -204,11 +204,7 @@ public final class MailJSONActivator extends AJAXModuleActivator {
         DefaultMailAttachmentStorageRegistry.initInstance(context);
         registerService(MailAttachmentStorageRegistry.class, DefaultMailAttachmentStorageRegistry.getInstance());
 
-        {
-            Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
-            properties.put(Constants.SERVICE_RANKING, Integer.valueOf(0));
-            registerService(MailAttachmentStorage.class, new DefaultMailAttachmentStorage(this), properties);
-        }
+        registerService(MailAttachmentStorage.class, new DefaultMailAttachmentStorage(this), withRanking(0));
 
         {
             final String topicRemoveSession = SessiondEventConstants.TOPIC_REMOVE_SESSION;
@@ -381,7 +377,7 @@ public final class MailJSONActivator extends AJAXModuleActivator {
                         fromImageURLs.put(imageURL);
                     }
                     ((JSONObject) result.getResultObject()).put("from_image_urls", fromImageURLs);
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     throw OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e);
                 }
             }
@@ -398,7 +394,7 @@ public final class MailJSONActivator extends AJAXModuleActivator {
             if (0 < contact.getNumberOfImages() || contact.containsImage1() && null != contact.getImage1()) {
                 try {
                     return ContactUtil.generateImageUrl(session, contact);
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     LOG.warn("Error generating contact image URL", e);
                 }
             }

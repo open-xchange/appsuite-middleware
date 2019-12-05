@@ -498,7 +498,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
             }
             mailAccess.setCacheable(false);
             return mailAccess;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (null != mailConfig) {
                 Throwable cause = e.getCause();
                 while ((null != cause) && (cause instanceof OXException)) {
@@ -522,7 +522,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
     private static URI parseUri(String mailServerURL) throws OXException {
         try {
             return URIParser.parse(mailServerURL, URIDefaults.IMAP);
-        } catch (final URISyntaxException e) {
+        } catch (URISyntaxException e) {
             throw MailExceptionCode.URI_PARSE_FAILED.create(e, mailServerURL);
         }
     }

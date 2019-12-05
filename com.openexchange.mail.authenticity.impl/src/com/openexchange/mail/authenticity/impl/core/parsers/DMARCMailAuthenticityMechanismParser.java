@@ -57,6 +57,7 @@ import com.openexchange.mail.authenticity.mechanism.AuthenticityMechanismResult;
 import com.openexchange.mail.authenticity.mechanism.DefaultMailAuthenticityMechanism;
 import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanismResult;
 import com.openexchange.mail.authenticity.mechanism.dmarc.DMARCAuthMechResult;
+import com.openexchange.mail.authenticity.mechanism.dmarc.DMARCProperty;
 import com.openexchange.mail.authenticity.mechanism.dmarc.DMARCResult;
 import com.openexchange.mail.authenticity.mechanism.dmarc.DMARCResultHeader;
 
@@ -74,11 +75,6 @@ public class DMARCMailAuthenticityMechanismParser extends AbstractMailAuthentici
         super(DefaultMailAuthenticityMechanism.DMARC, DMARCResultHeader.HEADER_FROM);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.mail.authenticity.impl.core.AbstractMailAuthenticityMechanismParser#parseMechanismResult(java.lang.String)
-     */
     @Override
     AuthenticityMechanismResult parseMechanismResult(String value) {
         try {
@@ -88,18 +84,13 @@ public class DMARCMailAuthenticityMechanismParser extends AbstractMailAuthentici
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.mail.authenticity.impl.core.AbstractMailAuthenticityMechanismParser#createResult(java.lang.String, com.openexchange.mail.authenticity.mechanism.AuthenticityMechanismResult, java.lang.String, boolean, java.util.Map)
-     */
     @Override
     MailAuthenticityMechanismResult createResult(String domain, AuthenticityMechanismResult mechResult, String mechanismName, boolean domainMatch, Map<String, String> attributes) {
         DMARCAuthMechResult result = new DMARCAuthMechResult(domain, (DMARCResult) mechResult);
         result.setReason(mechResult.getDisplayName());
         result.setDomainMatch(domainMatch);
-        result.addProperty("from_domain", result.getDomain());
-        result.addProperty("policy", extractPolicy(mechanismName));
+        result.addProperty(DMARCProperty.FROM_DOMAIN, result.getDomain());
+        result.addProperty(DMARCProperty.POLICY, extractPolicy(mechanismName));
         return result;
     }
 
@@ -124,7 +115,7 @@ public class DMARCMailAuthenticityMechanismParser extends AbstractMailAuthentici
                 continue;
             }
             if (split[0].equalsIgnoreCase("p")) {
-                return split[1];
+                return split[1].toLowerCase();
             }
         }
         return "";

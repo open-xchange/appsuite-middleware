@@ -129,7 +129,7 @@ public class AbstractMailAccountProperties {
         if (null != value) {
             try {
                 return Integer.parseInt(value.trim());
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 LOG.error("Non parseable integer value for property {}: {}", name, value, e);
             }
         }

@@ -65,7 +65,6 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.session.Origin;
 import com.openexchange.session.Session;
@@ -133,7 +132,7 @@ public class Bug36228Test {
 
     private int getContextId(String login) throws OXException {
         int ctxId = -1;
-        int pos = login.indexOf("@");
+        int pos = login.indexOf('@');
         String ctxName = login.substring(pos + 1);
         ctxId = ContextStorage.getInstance().getContextId(ctxName);
         return ctxId;
@@ -141,7 +140,7 @@ public class Bug36228Test {
 
     private int getUserId(String login) throws OXException {
         int userId = -1;
-        int pos = login.indexOf("@");
+        int pos = login.indexOf('@');
         if (pos > -1) {
             String userName = login.substring(0, pos);
             userId = UserStorage.getInstance().getUserId(userName, context);
@@ -157,6 +156,11 @@ public class Bug36228Test {
 
             @Override
             public boolean isTransient() {
+                return false;
+            }
+
+            @Override
+            public boolean isStaySignedIn() {
                 return false;
             }
 

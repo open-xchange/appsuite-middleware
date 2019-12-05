@@ -5,6 +5,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.google.android.gcm"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.google.guava"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.google.json"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.nimbus"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.annotation"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.antivirus"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.authentication.driver.basic"/>
@@ -42,6 +43,11 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.chronos.provider.internal"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.chronos.push"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.chronos.recurrence"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.chronos.scheduling.changes.impl"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.chronos.scheduling.common"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.chronos.scheduling.impl"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.chronos.scheduling.impl.imip"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.chronos.scheduling.impl.notification"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.chronos.storage"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.chronos.storage.rdb"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.common"/>
@@ -101,6 +107,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.fragment.properties.loader"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.frontend.uwa"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.frontend.uwa.json"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.gdpr.dataexport"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.geolocation"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.geolocation.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.global"/>
@@ -111,6 +118,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.guard.api"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.hazelcast"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.hazelcast.configuration"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.hazelcast.dns"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.hazelcast.serialization"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.health"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.health.impl"/>
@@ -167,6 +175,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.modules.model"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.modules.storage"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.monitoring"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.monitoring.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.ms"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.net"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.net.ssl"/>
@@ -205,6 +214,8 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.quota"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.ratelimit"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.ratelimit.rdb"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.regional"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.regional.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.report.appsuite"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.report.appsuite.serialization"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.reseller"/>
@@ -215,6 +226,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.secret.recovery"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.secret.recovery.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.secret.recovery.mail"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.security.manager"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.server"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.serialization"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.ajax.requesthandler.jobqueue.json"/>
@@ -223,6 +235,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.session.management"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.session.management.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.session.management.json"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.session.oauth"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.sessiond"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.session.reservation.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.sessionstorage"/>
@@ -289,3 +302,4 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.pluginsloaded.mbean"/>
 </provider>
 </psf>
+

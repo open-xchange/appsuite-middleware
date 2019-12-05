@@ -82,7 +82,7 @@ public class UnregisterFilestore extends FilestoreAbstraction {
 
             displayUnregisteredMessage(filestoreid, parser);
             sysexit(0);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             printErrors(filestoreid, null, e, parser);
         }
 

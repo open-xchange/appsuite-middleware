@@ -58,12 +58,12 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.halo.HaloContactDataSource;
 import com.openexchange.halo.HaloContactQuery;
 import com.openexchange.java.Strings;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 import com.openexchange.xing.Contacts;
 import com.openexchange.xing.Path;
 import com.openexchange.xing.UserField;
@@ -142,9 +142,9 @@ public class XingUserDataSource implements HaloContactDataSource {
                         LOG.warn("Could not load shared contacts from XING.", e);
                     }
                 }
-            } catch (final XingUnlinkedException e) {
+            } catch (XingUnlinkedException e) {
                 throw XingExceptionCodes.UNLINKED_ERROR.create();
-            } catch (final XingException e) {
+            } catch (XingException e) {
                 throw XingExceptionCodes.XING_ERROR.create(e, e.getMessage());
             }
         }
@@ -168,9 +168,9 @@ public class XingUserDataSource implements HaloContactDataSource {
             if (!userIds.isEmpty()) {
                 return api.userInfo(userIds.get(0));
             }
-        } catch (final XingUnlinkedException e) {
+        } catch (XingUnlinkedException e) {
             throw XingExceptionCodes.UNLINKED_ERROR.create();
-        } catch (final XingException e) {
+        } catch (XingException e) {
             throw XingExceptionCodes.XING_ERROR.create(e, e.getMessage());
         }
 

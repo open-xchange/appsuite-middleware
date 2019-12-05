@@ -82,7 +82,7 @@ public final class WstxDelegateBundleActivator implements BundleActivator {
         try {
             delegate.start(context);
             logger.info("Bundle successfully started: com.ctc.wstx");
-        } catch (final Exception e) {
+        } catch (Exception e) {
             logger.error("Error while starting bundle: com.ctc.wstx", e);
             throw e;
         }
@@ -95,7 +95,7 @@ public final class WstxDelegateBundleActivator implements BundleActivator {
         try {
             delegate.stop(context);
             logger.info("Bundle successfully stopped: com.ctc.wstx");
-        } catch (final Exception e) {
+        } catch (Exception e) {
             logger.error("Error while stopping bundle: com.ctc.wstx", e);
             throw e;
         }

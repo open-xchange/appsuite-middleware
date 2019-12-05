@@ -128,7 +128,7 @@ public class AbstractFreeBusyPerformer extends AbstractQueryPerformer {
     protected boolean considerForFreeBusy(Event event) {
 
         String maskId = session.get(CalendarParameters.PARAMETER_MASK_ID, String.class);
-        if(maskId != null && (maskId.equals(event.getId()) || maskId.equals(event.getSeriesId()))){
+        if (maskId != null && (maskId.equals(event.getId()) || maskId.equals(event.getSeriesId()))){
             return false;
         }
 

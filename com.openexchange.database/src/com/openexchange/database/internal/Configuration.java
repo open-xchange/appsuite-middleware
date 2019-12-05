@@ -282,7 +282,7 @@ public final class Configuration {
         }
         try {
             Class.forName(readDriverClass);
-        } catch (final ClassNotFoundException e) {
+        } catch (ClassNotFoundException e) {
             throw DBPoolingExceptionCodes.NO_DRIVER.create(e, readDriverClass);
         }
         final String writeDriverClass = getProperty(Property.WRITE_DRIVER_CLASS);
@@ -291,7 +291,7 @@ public final class Configuration {
         }
         try {
             Class.forName(writeDriverClass);
-        } catch (final ClassNotFoundException e) {
+        } catch (ClassNotFoundException e) {
             throw DBPoolingExceptionCodes.NO_DRIVER.create(e, writeDriverClass);
         }
     }

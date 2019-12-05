@@ -55,7 +55,6 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.Setting;
@@ -68,6 +67,7 @@ import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.MsisdnUtility;
 import com.openexchange.session.Session;
+import com.openexchange.user.User;
 
 /**
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
@@ -175,7 +175,7 @@ public class SendAddress implements PreferencesItemService {
                         settings.setSendAddr(newAlias);
                         storage.saveUserSettingMail(settings, user.getId(), ctx);
                     }
-                } catch (final AddressException e) {
+                } catch (AddressException e) {
                     throw MimeMailException.handleMessagingException(e);
                 }
             }

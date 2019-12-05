@@ -64,11 +64,6 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public class GoogleContactsActivator extends HousekeepingActivator {
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
-     */
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { OAuthService.class, ContextService.class, ClusterLockService.class, FolderService.class };

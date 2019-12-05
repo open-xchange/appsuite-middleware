@@ -57,6 +57,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.events.DriveEvent;
+import com.openexchange.drive.events.subscribe.SubscriptionMode;
 import com.openexchange.drive.json.DefaultLongPollingListener;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -80,9 +81,10 @@ public class BlockingListener extends DefaultLongPollingListener {
      *
      * @param session The session
      * @param rootFolderIDs The root folder IDs to listen for changes in
+     * @param mode The subscription mode
      */
-    public BlockingListener(DriveSession session, List<String> rootFolderIDs) {
-        super(session, rootFolderIDs);
+    public BlockingListener(DriveSession session, List<String> rootFolderIDs, SubscriptionMode mode) {
+        super(session, rootFolderIDs, mode);
         this.lock = new ReentrantLock();
         this.hasEvent = this.lock.newCondition();
     }

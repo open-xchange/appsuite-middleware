@@ -52,7 +52,6 @@ package com.openexchange.contactcollector.preferences;
 import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.Setting;
@@ -60,6 +59,7 @@ import com.openexchange.groupware.settings.SettingExceptionCodes;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.session.Session;
+import com.openexchange.user.User;
 
 public class ContactCollectFolder implements PreferencesItemService {
 
@@ -109,7 +109,7 @@ public class ContactCollectFolder implements PreferencesItemService {
                     } else {
                         value = Integer.valueOf(singleValue.toString());
                     }
-                } catch (final NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     throw SettingExceptionCodes.INVALID_VALUE.create(e, setting.getSingleValue(), "contactCollectFolder");
                 }
                 if (null == value || !value.equals(getPrevValue(session))) {

@@ -51,6 +51,7 @@ package com.openexchange.dav.principals.groups;
 
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.ResourceId;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dav.DAVFactory;
 import com.openexchange.dav.mixins.CalendarUserAddressSet;
 import com.openexchange.dav.mixins.DisplayName;
@@ -78,13 +79,15 @@ public class GroupPrincipalResource extends DAVResource {
      *
      * @param factory The factory
      * @param group The group
+     * @param url The WebDAV path of the resource
      */
-    public GroupPrincipalResource(DAVFactory factory, Group group) {
-        super(factory, new WebdavPath("principals", "groups", String.valueOf(group.getIdentifier())));
+    public GroupPrincipalResource(DAVFactory factory, Group group, WebdavPath url) {
+        super(factory, url);
         this.group = group;
+        ConfigViewFactory configViewFactory = factory.getService(ConfigViewFactory.class);
         includeProperties(new DisplayName(group.getDisplayName()), new com.openexchange.dav.mixins.CalendarUserType(CalendarUserType.GROUP), 
-            new RecordType(RecordType.RECORD_TYPE_GROUPS), new GroupMemberSet(group.getMember()), new ExpandedGroupMemberSet(group.getMember()), 
-            new PrincipalURL(group.getIdentifier(), CalendarUserType.GROUP), new CalendarUserAddressSet(factory.getContext().getContextId(), group), 
+            new RecordType(RecordType.RECORD_TYPE_GROUPS), new GroupMemberSet(group.getMember(), configViewFactory), new ExpandedGroupMemberSet(group.getMember(), configViewFactory), 
+            new PrincipalURL(group.getIdentifier(), CalendarUserType.GROUP, configViewFactory), new CalendarUserAddressSet(factory.getContext().getContextId(), group, configViewFactory), 
             new com.openexchange.dav.mixins.ResourceId(ResourceId.forGroup(factory.getContext().getContextId(), group.getIdentifier()))
             
         );

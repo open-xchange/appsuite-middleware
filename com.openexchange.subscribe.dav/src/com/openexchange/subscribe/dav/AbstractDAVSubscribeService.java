@@ -197,7 +197,7 @@ public abstract class AbstractDAVSubscribeService extends AbstractSubscribeServi
         if (null != request) {
             try {
                 request.reset();
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 // Ignore
             }
         }
@@ -245,7 +245,7 @@ public abstract class AbstractDAVSubscribeService extends AbstractSubscribeServi
             URIBuilder builder = new URIBuilder();
             builder.setScheme(baseUri.getScheme()).setHost(baseUri.getHost()).setPort(baseUri.getPort()).setPath(null == optPath ? baseUri.getPath() : optPath).setQuery(null == queryString ? null : URLEncodedUtils.format(queryString, "UTF-8"));
             return builder.build();
-        } catch (final URISyntaxException x) {
+        } catch (URISyntaxException x) {
             throw new IllegalArgumentException("Failed to build URI", x);
         }
     }

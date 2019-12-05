@@ -206,16 +206,16 @@ public abstract class BasicCommandlineOptions {
                     val = "<NOT SET>";
                 }
                 opts.put(opt, val);
-            } catch (final SecurityException e) {
+            } catch (SecurityException e) {
                 System.err.println("unable to get commandline option \"" + opt + "\"");
                 e.printStackTrace();
-            } catch (final NoSuchFieldException e) {
+            } catch (NoSuchFieldException e) {
                 System.err.println("unable to get commandline option \"" + opt + "\"");
                 e.printStackTrace();
-            } catch (final IllegalArgumentException e) {
+            } catch (IllegalArgumentException e) {
                 System.err.println("unable to get commandline option \"" + opt + "\"");
                 e.printStackTrace();
-            } catch (final IllegalAccessException e) {
+            } catch (IllegalAccessException e) {
                 System.err.println("unable to get commandline option \"" + opt + "\"");
                 e.printStackTrace();
             }
@@ -239,16 +239,16 @@ public abstract class BasicCommandlineOptions {
                 try {
                     final Field f = BasicCommandlineOptions.class.getDeclaredField(opt);
                     f.set(this, setOpt);
-                } catch (final SecurityException e) {
+                } catch (SecurityException e) {
                     System.err.println("unable to set commandline option for \"" + opt + "\" to \"" + setOpt + "\"");
                     e.printStackTrace();
-                } catch (final NoSuchFieldException e) {
+                } catch (NoSuchFieldException e) {
                     System.err.println("unable to set commandline option for \"" + opt + "\" to \"" + setOpt + "\"");
                     e.printStackTrace();
-                } catch (final IllegalArgumentException e) {
+                } catch (IllegalArgumentException e) {
                     System.err.println("unable to set commandline option for \"" + opt + "\" to \"" + setOpt + "\"");
                     e.printStackTrace();
-                } catch (final IllegalAccessException e) {
+                } catch (IllegalAccessException e) {
                     System.err.println("unable to set commandline option for \"" + opt + "\" to \"" + setOpt + "\"");
                     e.printStackTrace();
                 }
@@ -637,7 +637,7 @@ public abstract class BasicCommandlineOptions {
             // fill up part
             try {
                 columnsizes[i] = Integer.parseInt(columnsizesandalignments[i].substring(0, columnsizesandalignments[i].length() - 1));
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 // there's no number, so use longest line as alignment value
                 columnsizes[i] = longestLine(data, columnnames, i);
             }

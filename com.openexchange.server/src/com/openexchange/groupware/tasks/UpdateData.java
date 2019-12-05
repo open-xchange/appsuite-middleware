@@ -69,7 +69,6 @@ import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.mapping.Status;
@@ -78,6 +77,7 @@ import com.openexchange.server.impl.DBPool;
 import com.openexchange.session.Session;
 import com.openexchange.tools.arrays.Arrays;
 import com.openexchange.tools.iterator.SearchIterators;
+import com.openexchange.user.User;
 
 /**
  * This class contains the logic for updating tasks. It calculates what is to modify.
@@ -667,10 +667,10 @@ class UpdateData {
                 foldStor.deleteFolder(ctx, con, getTaskId(), getDestFolderId(), DELETED, false);
             }
             con.commit();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             rollback(con);
             throw TaskExceptionCode.UPDATE_FAILED.create(e, e.getMessage());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             rollback(con);
             throw e;
         } finally {
@@ -748,12 +748,12 @@ class UpdateData {
     static void sentEvent(final Session session, final Task updated, final Task orig, final FolderObject dest) throws OXException {
         try {
             new EventClient(session).modify(orig, updated, dest);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw TaskExceptionCode.EVENT.create(e);
         }
     }
 
-    void updateReminder() throws OXException, OXException {
+    void updateReminder() throws OXException {
         if (isMove() && getUpdatedParticipants().isEmpty()) {
             Reminder.updateReminderOnMove(ctx, getUpdated().getObjectID(), getFolderId(), getDestFolderId(), getUpdated().getPrivateFlag());
         }
@@ -783,7 +783,7 @@ class UpdateData {
 
             try {
                 Permission.checkReadInFolder(ctx, user, permissionBits, folder);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 throw e;
             }
 
@@ -851,13 +851,13 @@ class UpdateData {
      * @throws OXException if creating the new task fails.
      * @throws OXException if sending an event about new task fails.
      */
-    private static void insertNextRecurrence(final Session session, final Context ctx, final int userId, final UserPermissionBits permissionBits, final FolderObject folder, final Task task, final Set<TaskParticipant> parts, final Set<Folder> folders) throws OXException, OXException {
+    private static void insertNextRecurrence(final Session session, final Context ctx, final int userId, final UserPermissionBits permissionBits, final FolderObject folder, final Task task, final Set<TaskParticipant> parts, final Set<Folder> folders) throws OXException {
         // TODO create insert class
         TaskLogic.checkNewTask(task, userId, permissionBits, parts);
         InsertData.insertTask(ctx, task, parts, folders);
         try {
             new EventClient(session).create(task, folder);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
         }
     }

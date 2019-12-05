@@ -57,6 +57,7 @@ import java.util.Map;
 import org.json.JSONObject;
 import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.ExtendedProperty;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.provider.AccountAwareCalendarFolder;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarFolder;
@@ -91,6 +92,17 @@ public class CalendarFolderConverter {
     public static final FolderField CALENDAR_ACCOUNT_ERROR_FIELD = CalendarAccountErrorField.getInstance();
 
     /**
+     * Checks if given folder belongs to default account.
+     *
+     * @param calendarFolder The folder to check
+     * @return <code>true</code> if folder belongs to default account; otherwise <code>false</code>
+     */
+    public static boolean isDefaultAccountFolder(CalendarFolder calendarFolder) {
+        String id = calendarFolder == null ? null : calendarFolder.getId();
+        return id != null && id.startsWith(CalendarUtils.DEFAULT_ACCOUNT_PREFIX);
+    }
+
+    /**
      * Converts a calendar folder into a folder storage compatible folder.
      *
      * @param treeId The identifier of the folder tree to take over
@@ -102,7 +114,7 @@ public class CalendarFolderConverter {
      * @return The folder-storage compatible folder
      */
     public static ParameterizedFolder getStorageFolder(String treeId, ContentType contentType, CalendarFolder calendarFolder, String providerId, int accountId, JSONObject userConfig) {
-        ParameterizedFolder folder = new CalendarStorageFolder(treeId, contentType);
+        ParameterizedFolder folder = new CalendarStorageFolder(treeId, contentType, isDefaultAccountFolder(calendarFolder));
         folder.setAccountID(getQualifiedAccountID(accountId));
         folder.setID(calendarFolder.getId());
         folder.setLastModified(calendarFolder.getLastModified());

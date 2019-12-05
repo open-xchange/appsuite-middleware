@@ -50,9 +50,9 @@
 package com.openexchange.share.impl.quota;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.core.tools.ShareTool;
+import com.openexchange.user.User;
 
 
 /**

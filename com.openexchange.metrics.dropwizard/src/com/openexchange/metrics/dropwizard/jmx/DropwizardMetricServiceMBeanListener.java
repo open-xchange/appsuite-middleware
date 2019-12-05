@@ -76,101 +76,51 @@ public class DropwizardMetricServiceMBeanListener extends AbstractMetricServiceL
         super(managementService, mbeanFactory);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.jmx.MetricServiceListener#onGaugeAdded(com.openexchange.metrics.MetricDescriptor, Gauge)
-     */
     @Override
     public void onGaugeAdded(MetricDescriptor descriptor, Gauge<?> gauge) {
         registerMBean(gauge, descriptor);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.jmx.MetricServiceListener#onGaugeRemoved(java.lang.String)
-     */
     @Override
     public void onGaugeRemoved(String name) {
         unregisterMBean(name);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.jmx.MetricServiceListener#onCounterAdded(com.openexchange.metrics.MetricDescriptor, Counter)
-     */
     @Override
     public void onCounterAdded(MetricDescriptor descriptor, Counter counter) {
         registerMBean(counter, descriptor);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.jmx.MetricServiceListener#onCounterRemoved(java.lang.String)
-     */
     @Override
     public void onCounterRemoved(String name) {
         unregisterMBean(name);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.jmx.MetricServiceListener#onHistogramAdded(com.openexchange.metrics.MetricDescriptor, Histogram)
-     */
     @Override
     public void onHistogramAdded(MetricDescriptor descriptor, Histogram histogram) {
         registerMBean(histogram, descriptor);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.jmx.MetricServiceListener#onHistogramRemoved(java.lang.String)
-     */
     @Override
     public void onHistogramRemoved(String name) {
         unregisterMBean(name);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.jmx.MetricServiceListener#onMeterAdded(com.openexchange.metrics.MetricDescriptor, Meter)
-     */
     @Override
     public void onMeterAdded(MetricDescriptor descriptor, Meter meter) {
         registerMBean(meter, descriptor);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.jmx.MetricServiceListener#onMeterRemoved(java.lang.String)
-     */
     @Override
     public void onMeterRemoved(String name) {
         unregisterMBean(name);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.jmx.MetricServiceListener#onTimerAdded(com.openexchange.metrics.MetricDescriptor, Timer)
-     */
     @Override
     public void onTimerAdded(MetricDescriptor descriptor, Timer timer) {
         registerMBean(timer, descriptor);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.jmx.MetricServiceListener#onTimerRemoved(java.lang.String)
-     */
     @Override
     public void onTimerRemoved(String name) {
         unregisterMBean(name);

@@ -1,0 +1,9 @@
+type: object
+properties:
+  facets:
+    type: array
+    description: >-
+      An array of facets each describing a possible search category or an
+      already applied category.
+    items:
+      $ref: '#/components/schemas/FindFacetData'

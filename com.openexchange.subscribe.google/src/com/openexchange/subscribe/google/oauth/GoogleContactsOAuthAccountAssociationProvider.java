@@ -73,11 +73,6 @@ public class GoogleContactsOAuthAccountAssociationProvider extends AbstractSubsc
         this.subscriptionService = subscriptionService;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.subscribe.oauth.AbstractSubscribeOAuthAccountAssociationProvider#createAssociation(int, int, int, java.lang.String, com.openexchange.subscribe.Subscription)
-     */
     @Override
     public OAuthAccountAssociation createAssociation(int accountId, int userId, int contextId, String folderName, Subscription subscription) {
         return new GoogleContactsOAuthAccountAssociation(accountId, userId, contextId, folderName, subscription, subscriptionService);

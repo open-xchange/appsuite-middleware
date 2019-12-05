@@ -53,13 +53,13 @@ import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.passwordchange.history.PasswordChangeClients;
 import com.openexchange.passwordchange.history.PasswordChangeRecorderRegistryService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
-import com.openexchange.user.AbstractUserServiceInterceptor;
+import com.openexchange.user.User;
+import com.openexchange.user.interceptor.AbstractUserServiceInterceptor;
 
 /**
  * {@link PasswordChangeInterceptor} - Provisioning based password changes will call this interceptor

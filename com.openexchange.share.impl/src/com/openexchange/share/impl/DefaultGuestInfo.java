@@ -53,7 +53,6 @@ import static org.slf4j.LoggerFactory.getLogger;
 import java.util.Date;
 import java.util.Locale;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.java.Strings;
 import com.openexchange.password.mechanism.PasswordMechRegistry;
@@ -66,6 +65,7 @@ import com.openexchange.share.core.tools.ShareLinks;
 import com.openexchange.share.core.tools.ShareToken;
 import com.openexchange.share.core.tools.ShareTool;
 import com.openexchange.share.recipient.RecipientType;
+import com.openexchange.user.User;
 
 /**
  * {@link DefaultGuestInfo}

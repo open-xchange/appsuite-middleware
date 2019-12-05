@@ -1232,7 +1232,7 @@ public class FilenameUtils {
         // used by wildcardMatch
         // package level so a unit test may run on this
 
-        if (text.indexOf("?") == -1 && text.indexOf("*") == -1) {
+        if (text.indexOf('?') == -1 && text.indexOf('*') == -1) {
             return new String[] { text };
         }
 

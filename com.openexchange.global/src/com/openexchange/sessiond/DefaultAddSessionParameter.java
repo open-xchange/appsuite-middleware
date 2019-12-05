@@ -72,6 +72,7 @@ public class DefaultAddSessionParameter implements AddSessionParameter {
     private String client;
     private String clientToken;
     private boolean tranzient;
+    private boolean staySignedIn;
     private ArrayList<SessionEnhancement> enhancements;
     private String userAgent;
     private Origin origin;
@@ -137,6 +138,11 @@ public class DefaultAddSessionParameter implements AddSessionParameter {
     @Override
     public boolean isTransient() {
         return tranzient;
+    }
+
+    @Override
+    public boolean isStaySignedIn() {
+        return staySignedIn;
     }
 
     /**
@@ -257,6 +263,17 @@ public class DefaultAddSessionParameter implements AddSessionParameter {
      */
     public DefaultAddSessionParameter setTransient(boolean tranzient) {
         this.tranzient = tranzient;
+        return this;
+    }
+
+    /**
+     * Sets the "stay signed in" flag.
+     *
+     * @param staySignedIn The flag to set
+     * @return This {@code DefaultAddSessionParameter} with new attribute applied
+     */
+    public DefaultAddSessionParameter setStaySignedIn(boolean staySignedIn) {
+        this.staySignedIn = staySignedIn;
         return this;
     }
 

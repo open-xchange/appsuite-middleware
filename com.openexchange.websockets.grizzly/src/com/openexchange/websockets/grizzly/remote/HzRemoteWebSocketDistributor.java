@@ -487,7 +487,7 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
                     public void run() {
                         try {
                             triggerDistribution();
-                        } catch (final Exception e) {
+                        } catch (Exception e) {
                             log.warn("Failed to trigger publishing notifications.", e);
                         }
                     }

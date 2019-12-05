@@ -108,7 +108,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.importexport.MailImportResult;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.i18n.tools.StringHelper;
@@ -202,6 +201,7 @@ import com.openexchange.tools.iterator.SearchIteratorDelegator;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.sql.SearchStrings;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 import com.sun.mail.smtp.SMTPSendFailedException;
 import gnu.trove.map.TIntObjectMap;
@@ -4400,7 +4400,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     }
                     try {
                         mailAccess.getFolderStorage().createFolder(toCreate);
-                    } catch (final OXException e) {
+                    } catch (OXException e) {
                         if (SUBFOLDERS_NOT_ALLOWED_PREFIX.equals(e.getPrefix()) && e.getCode() == SUBFOLDERS_NOT_ALLOWED_ERROR_CODE) {
                             if (mailAccess.getFolderStorage().exists(archiveFullname)) {
                                 fn = archiveFullname;
@@ -4419,9 +4419,9 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             }
 
             return;
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (SUBFOLDERS_NOT_ALLOWED_PREFIX.equals(e.getPrefix()) && e.getCode() == SUBFOLDERS_NOT_ALLOWED_ERROR_CODE) {
                 throw MailExceptionCode.ARCHIVE_SUBFOLDER_NOT_ALLOWED.create(e);
             }
@@ -4458,7 +4458,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         }
         try {
             move2Archive(msgs, fullName, archiveFullname, separator, retval);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (SUBFOLDERS_NOT_ALLOWED_PREFIX.equals(e.getPrefix()) && e.getCode() == SUBFOLDERS_NOT_ALLOWED_ERROR_CODE) {
                 throw MailExceptionCode.ARCHIVE_SUBFOLDER_NOT_ALLOWED.create(e);
             }
@@ -4597,7 +4597,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 }
                 try {
                     mailAccess.getFolderStorage().createFolder(toCreate);
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     if (SUBFOLDERS_NOT_ALLOWED_PREFIX.equals(e.getPrefix()) && e.getCode() == SUBFOLDERS_NOT_ALLOWED_ERROR_CODE) {
                         //Using parent folder as fallback
                         if (mailAccess.getFolderStorage().exists(archiveFullname)) {

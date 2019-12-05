@@ -1,0 +1,39 @@
+/admin/v1/close-sessions/by-id:
+  post:
+    operationId: closeSessionsById
+    tags:
+      - Admin
+    summary: Close a session by its ID
+    parameters:
+      - $ref: '#/components/parameters/globalQuery'
+    responses:
+      '200':
+        description: OK
+      '400':
+        description: 'Bad request, response contains error message.'
+      '401':
+        description: Not authorized
+      '403':
+        description: Forbidden
+      '404':
+        description: Not found. If path is wrong. Response contains error message.
+      '500':
+        description: >-
+          Internal server error that might have multiple reasons, for instance
+          no configured global database. Response contains error message.
+    security:
+      - masterAdminAuth: []
+    requestBody:
+      content:
+        application/json:
+          schema:
+            type: object
+            title: CloseSessionsByIdBody
+            properties:
+              sessionIds:
+                type: array
+                description: Array of session IDs
+                items:
+                  type: string
+      description: A JSON object containing an array of session ids.
+      required: true

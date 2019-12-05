@@ -75,20 +75,6 @@ public class HTTPServletRegistration extends ServiceTracker<HttpService, HttpSer
      * Initializes a new {@link HTTPServletRegistration}.
      *
      * @param context The bundle context
-     * @param alias The Servlet's alias
-     * @param servlet The Servlet instance to register/de-register on {@link HttpService} presence/absence
-     */
-    public HTTPServletRegistration(final BundleContext context, final String alias, final Servlet servlet) {
-        super(context, HttpService.class, null);
-        this.alias = alias;
-        this.servlet = servlet;
-        open();
-    }
-
-    /**
-     * Initializes a new {@link HTTPServletRegistration}.
-     *
-     * @param context The bundle context
      * @param servlet The Servlet instance to register/de-register on {@link HttpService} presence/absence
      * @param alias The Servlet's alias
      */
@@ -105,10 +91,10 @@ public class HTTPServletRegistration extends ServiceTracker<HttpService, HttpSer
             final HttpService service = super.addingService(reference);
             service.registerServlet(alias, servlet, null, null);
             return service;
-        } catch (final ServletException e) {
+        } catch (ServletException e) {
             LOG.error("", e);
             context.ungetService(reference);
-        } catch (final NamespaceException e) {
+        } catch (NamespaceException e) {
             LOG.error("", e);
             context.ungetService(reference);
         }

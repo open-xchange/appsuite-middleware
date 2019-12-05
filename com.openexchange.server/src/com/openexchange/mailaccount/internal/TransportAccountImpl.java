@@ -119,7 +119,7 @@ public class TransportAccountImpl implements TransportAccount {
         final String protocol = transportSecure ? transportProtocol + 's' : transportProtocol;
         try {
             return transportServerUrl = URITools.generateURI(protocol, IDNA.toASCII(transportServer), transportPort).toString();
-        } catch (final URISyntaxException e) {
+        } catch (URISyntaxException e) {
             LOG.error("", e);
             // Old implementation is not capable of handling IPv6 addresses.
             final StringBuilder sb = new StringBuilder(32);
@@ -214,7 +214,7 @@ public class TransportAccountImpl implements TransportAccount {
         }
         try {
             setTransportServer(URIParser.parse(IDNA.toASCII(transportServerURL), URIDefaults.SMTP));
-        } catch (final URISyntaxException e) {
+        } catch (URISyntaxException e) {
             setTransportServer((String) null);
             return;
             //throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.URI_PARSE_FAILED, e, transportServerURL);

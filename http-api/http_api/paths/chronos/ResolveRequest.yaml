@@ -3,16 +3,30 @@
     operationId: resolveEvent
     tags:
       - Chronos
-    summary: Resolves an event identifier to an event, and returns it in the perspective of the current session's user, i.e. having an appropriate parent folder identifier assigned. 
+    summary: >-
+      Resolves an event identifier to an event, and returns it in the
+      perspective of the current session's user, i.e. having an appropriate
+      parent folder identifier assigned.
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
-      - $ref: "#/parameters/QueryParamChronosID"
-      - $ref: "#/parameters/QueryParamChronosFields"
-      - $ref: "#/parameters/QueryParamChronosExtendedEntities"
-    responses:
-      200:
-        description: |
-          An object containing all data of the requested event, or an empty result if no event was found. In case of errors the
-          responsible fields in the response are filled (see [Error handling](#error-handling)).
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - $ref: '#/components/parameters/QueryParamChronosID'
+      - $ref: '#/components/parameters/QueryParamChronosFields'
+      - $ref: '#/components/parameters/QueryParamChronosExtendedEntities'
+      - in: query
+        name: sequence
+        description: The expected sequence number to match. If set, a resolved event is only returned if the stored sequence number is equal to this value.
+        required: false
         schema:
-          $ref: "#/definitions/EventResponse"
+          type: integer
+    responses:
+      '200':
+        description: >
+          An object containing all data of the requested event, or an empty
+          result if no event was found. In case of errors the
+
+          responsible fields in the response are filled (see [Error
+          handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventResponse'

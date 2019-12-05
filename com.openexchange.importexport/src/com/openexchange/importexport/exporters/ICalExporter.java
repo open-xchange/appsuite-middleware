@@ -49,6 +49,7 @@
 
 package com.openexchange.importexport.exporters;
 
+import java.io.OutputStream;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -59,12 +60,12 @@ import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.database.contentType.TaskContentType;
+import com.openexchange.importexport.Format;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.exporters.ical.ICalCompositeEventExporter;
 import com.openexchange.importexport.exporters.ical.ICalEventExporter;
 import com.openexchange.importexport.exporters.ical.ICalExport;
 import com.openexchange.importexport.exporters.ical.ICalTaskExporter;
-import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.helpers.SizedInputStream;
 import com.openexchange.importexport.osgi.ImportExportServices;
 import com.openexchange.tools.session.ServerSession;
@@ -80,7 +81,7 @@ public class ICalExporter extends AbstractExporter {
 
     @Override
     public boolean canExport(ServerSession session, Format format, String folder, Map<String, Object> optionalParams) throws OXException {
-        if(!format.equals(Format.ICAL)){
+        if (!format.equals(Format.ICAL)){
             return false;
         }
         UserizedFolder userizedFolder = getUserizedFolder(session, folder);
@@ -119,7 +120,8 @@ public class ICalExporter extends AbstractExporter {
             throw ImportExportExceptionCodes.CANNOT_EXPORT.create(folder, format);
         }
         AJAXRequestData requestData = (AJAXRequestData) (optionalParams == null ? null : optionalParams.get("__requestData"));
-        return getExporter(getUserizedFolder(session, folder), Collections.emptyMap(), fieldsToBeExported).exportData(session, requestData, isSaveToDisk(optionalParams), appendFileNameParameter(requestData, getFolderExportFileName(session, folder, Format.ICAL.getExtension())));
+        OutputStream out = (OutputStream) (optionalParams == null ? null : optionalParams.get("__outputStream"));
+        return getExporter(getUserizedFolder(session, folder), Collections.emptyMap(), fieldsToBeExported).exportData(session, requestData, out, isSaveToDisk(optionalParams), appendFileNameParameter(requestData, getFolderExportFileName(session, folder, Format.ICAL.getExtension())));
     }
 
     @Override
@@ -130,7 +132,8 @@ public class ICalExporter extends AbstractExporter {
             }
         }
         AJAXRequestData requestData = (AJAXRequestData) (optionalParams == null ? null : optionalParams.get("__requestData"));
-        return getBatchExporter(session, batchIds, fieldsToBeExported).exportData(session, requestData, isSaveToDisk(optionalParams), appendFileNameParameter(requestData, getBatchExportFileName(session, batchIds, Format.ICAL.getExtension())));
+        OutputStream out = (OutputStream) (optionalParams == null ? null : optionalParams.get("__outputStream"));
+        return getBatchExporter(session, batchIds, fieldsToBeExported).exportData(session, requestData, out, isSaveToDisk(optionalParams), appendFileNameParameter(requestData, getBatchExportFileName(session, batchIds, Format.ICAL.getExtension())));
     }
 
     private ICalExport getBatchExporter(ServerSession session, Map<String, List<String>> batchIds, int[] fieldsToBeExported) throws OXException {

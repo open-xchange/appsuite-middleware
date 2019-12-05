@@ -50,11 +50,13 @@
 package com.openexchange.caldav.resources;
 
 import static com.openexchange.osgi.Tools.requireService;
+import com.openexchange.chronos.SchedulingControl;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.webdav.WebDAVRequestContext;
@@ -137,11 +139,17 @@ public abstract class CalendarAccessOperation<T> {
      */
     private static void applySuppressScheduleReply(IDBasedCalendarAccess access) {
         /*
-         * evaluate "Schedule-Reply" header if present, then set calendar parameter accordingly
+         * evaluate "Schedule-Reply" and "Scheduling" headers if present, then set calendar parameter accordingly
          */
         WebDAVRequestContext requestContext = DAVProtocol.getRequestContext();
-        if (null != requestContext && "F".equals(requestContext.getHeader("Schedule-Reply"))) {
-            access.set(CalendarParameters.PARAMETER_SUPPRESS_ITIP, Boolean.TRUE);
+        if (null != requestContext) {
+            if ("F".equals(requestContext.getHeader("Schedule-Reply"))) {
+                access.set(CalendarParameters.PARAMETER_SCHEDULING, SchedulingControl.NONE);
+            }
+            String schedulingHeader = requestContext.getHeader("Scheduling");
+            if (Strings.isNotEmpty(schedulingHeader)) {
+                access.set(CalendarParameters.PARAMETER_SCHEDULING, new SchedulingControl(schedulingHeader));
+            }
         }
     }
 

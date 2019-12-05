@@ -71,11 +71,11 @@ import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.user.AbstractUserServiceInterceptor;
+import com.openexchange.user.User;
+import com.openexchange.user.interceptor.AbstractUserServiceInterceptor;
 import com.openexchange.userconf.UserPermissionService;
 
 /**
@@ -93,7 +93,7 @@ public class CalendarStorageInterceptor extends AbstractUserServiceInterceptor {
 
     /**
      * Initializes a new {@link CalendarStorageInterceptor}.
-     * 
+     *
      * @param services A service lookup reference
      * @param dbProvider The database provider to use
      */
@@ -145,7 +145,7 @@ public class CalendarStorageInterceptor extends AbstractUserServiceInterceptor {
          */
         String replacementUri = CalendarUtils.getURI(user.getMail());
         int updated = replaceCalendarUserAddresses(dbProvider, context, user.getId(), attendeeURIsToReplace, replacementUri);
-        LOG.info("Successfully replaced {} references to no longer valid calendar user addresses {} with \"{}\" in context {} for user {}.", 
+        LOG.info("Successfully replaced {} references to no longer valid calendar user addresses {} with \"{}\" in context {} for user {}.",
             I(updated), Arrays.toString(attendeeURIsToReplace.toArray()), replacementUri, I(context.getContextId()), I(user.getId()));
     }
 
@@ -165,7 +165,7 @@ public class CalendarStorageInterceptor extends AbstractUserServiceInterceptor {
 
     /**
      * Replaces the URI property of a specific attendee.
-     * 
+     *
      * @param dbProvider The database provider to use
      * @param context The context
      * @param userId The user identifier
@@ -206,7 +206,7 @@ public class CalendarStorageInterceptor extends AbstractUserServiceInterceptor {
 
     /**
      * Queries all calendar user addresses as URI string that are actually used for the attendee records of a specific entity.
-     * 
+     *
      * @param connection The database connection to use
      * @param contextId The context identifier
      * @param entity The entity identifier
@@ -232,7 +232,7 @@ public class CalendarStorageInterceptor extends AbstractUserServiceInterceptor {
 
     /**
      * Replaces the URI property of a specific attendee.
-     * 
+     *
      * @param connection The connection to use
      * @param cid The context identifier
      * @param entity The user identifier

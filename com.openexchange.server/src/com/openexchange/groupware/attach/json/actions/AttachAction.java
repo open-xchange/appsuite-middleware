@@ -81,7 +81,6 @@ import com.openexchange.groupware.attach.AttachmentField;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.AttachmentUtility;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
@@ -90,6 +89,7 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 /**
  * {@link AttachAction}
@@ -252,7 +252,7 @@ public final class AttachAction extends AbstractAttachmentAction {
                         user,
                         userConfiguration);
                 ATTACHMENT_BASE.commit();
-            } catch (final OXException x) {
+            } catch (OXException x) {
                 ATTACHMENT_BASE.rollback();
                 throw x;
             } finally {
@@ -260,9 +260,9 @@ public final class AttachAction extends AbstractAttachmentAction {
             }
 
             return new AJAXRequestResult(Integer.valueOf(attachment.getId()), new Date(ts), "int");
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
@@ -301,7 +301,7 @@ public final class AttachAction extends AbstractAttachmentAction {
             ATTACHMENT_BASE.commit();
             rollback = false;
             return new AJAXRequestResult(arr, new Date(timestamp), "json");
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
             if (rollback) {
@@ -318,7 +318,7 @@ public final class AttachAction extends AbstractAttachmentAction {
 
         int index = 0;
         for (final AttachmentMetadata attachment : attList) {
-            // while(attIter.hasNext()) {
+            // while (attIter.hasNext()) {
             // final AttachmentMetadata attachment = attIter.next();
             if (attachment == null) {
                 attachments.remove(index);

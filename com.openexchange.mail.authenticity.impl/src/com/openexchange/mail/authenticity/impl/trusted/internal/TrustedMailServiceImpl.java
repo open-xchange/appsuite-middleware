@@ -226,11 +226,6 @@ public class TrustedMailServiceImpl implements ForcedReloadable, TrustedMailServ
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.mail.authenticity.impl.trusted.TrustedMailService#handle(com.openexchange.session.Session, com.openexchange.mail.dataobjects.MailMessage)
-     */
     @Override
     public void handle(Session session, MailMessage mailMessage) {
         if (null == mailMessage) {
@@ -270,11 +265,6 @@ public class TrustedMailServiceImpl implements ForcedReloadable, TrustedMailServ
         authenticityResult.addAttribute(MailAuthenticityResultKey.IMAGE, trustedDomain.getImage().getUID());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.config.Reloadable#reloadConfiguration(com.openexchange.config.ConfigurationService)
-     */
     @Override
     public void reloadConfiguration(ConfigurationService configService) {
         trustedMailAddressesPerTenant.clear();
@@ -284,11 +274,6 @@ public class TrustedMailServiceImpl implements ForcedReloadable, TrustedMailServ
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.mail.authenticity.impl.trusted.TrustedMailService#getIcon(com.openexchange.session.Session, java.lang.String)
-     */
     @Override
     public Icon getIcon(Session session, String uri) throws OXException {
         String tenant = (String) session.getParameter(Session.PARAM_HOST_NAME);

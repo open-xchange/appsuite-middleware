@@ -148,7 +148,7 @@ public final class MailFolderUtility {
         final int accountId;
         try {
             accountId = (index == LEN ? MailAccount.DEFAULT_ID : Integer.parseInt(fullnameArgument.substring(LEN, index)));
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             throw new IllegalArgumentException("Mail account identifier is not a number: " + fullnameArgument, e);
         }
         if (index >= len) {
@@ -263,6 +263,16 @@ public final class MailFolderUtility {
         }
         final Matcher m = P_FOLDER.matcher(fullName);
         return m.matches() ? m.group(1) : fullName;
+    }
+
+    /**
+     * Checks if given full name is invalid.
+     *
+     * @param fullName The full name to check
+     * @return <code>true</code> if invalid; otherwise <code>false</code>
+     */
+    public static boolean isInvalidFullName(String fullName) {
+        return Strings.isEmpty(fullName) ? false : DEFAULT_FOLDER_ID.equals(fullName);
     }
 
 }

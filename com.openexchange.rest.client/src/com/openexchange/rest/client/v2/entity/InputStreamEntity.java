@@ -88,11 +88,6 @@ public class InputStreamEntity implements RESTBodyEntity {
         entity = new org.apache.http.entity.InputStreamEntity(stream, contentLength, ContentType.create(contentType));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.rest.client.v2.RESTBodyEntity#getBodyEntity()
-     */
     @Override
     public HttpEntity getBodyEntity() {
         return entity;

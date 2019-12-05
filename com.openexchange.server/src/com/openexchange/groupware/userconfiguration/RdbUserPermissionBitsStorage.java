@@ -59,12 +59,12 @@ import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.user.User;
 import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 
@@ -107,7 +107,7 @@ public class RdbUserPermissionBitsStorage extends UserPermissionBitsStorage {
     public UserPermissionBits getUserPermissionBits(Connection con, int userId, Context ctx) throws OXException {
         try {
             return loadUserPermissionBits(userId, ctx, con);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UserConfigurationCodes.SQL_ERROR.create(e, e.getMessage());
         }
     }
@@ -218,7 +218,7 @@ public class RdbUserPermissionBitsStorage extends UserPermissionBitsStorage {
                 }
             }
             saveUserPermissionBits(permissionBits, userId, insert, ctx.getContextId(), con);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UserConfigurationCodes.SQL_ERROR.create(e, e.getMessage());
         }
     }

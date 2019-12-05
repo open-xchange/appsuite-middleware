@@ -88,7 +88,8 @@ public class PropertiesMarshaller implements ResourceMarshaller {
 
 	private final String charset;
 
-	protected Multistatus<Iterable<WebdavProperty>> getProps(final WebdavResource resource) {
+	@SuppressWarnings("unused") // used by children
+    protected Multistatus<Iterable<WebdavProperty>> getProps(final WebdavResource resource) {
 		return new Multistatus<Iterable<WebdavProperty>>();
 	}
 
@@ -99,12 +100,12 @@ public class PropertiesMarshaller implements ResourceMarshaller {
 	}
 
 	public PropertiesMarshaller(final String uriPrefix, final String charset) {
-		this.uriPrefix = uriPrefix;
-		if(!this.uriPrefix.endsWith("/")) {
-			this.uriPrefix += "/";
-		}
-		this.charset = charset;
-	}
+        this.uriPrefix = uriPrefix;
+        if (!this.uriPrefix.endsWith("/")) {
+            this.uriPrefix += "/";
+        }
+        this.charset = charset;
+    }
 
 	@Override
 	public List<Element> marshal(final WebdavResource resource) throws WebdavProtocolException {
@@ -134,30 +135,30 @@ public class PropertiesMarshaller implements ResourceMarshaller {
 		return Arrays.asList(response);
 	}
 
-	public Element marshalHREF(final WebdavPath uri, boolean trailingSlash) {
-		final Element href = new Element("href", DAV_NS);
+    public Element marshalHREF(WebdavPath uri, boolean trailingSlash) {
+        final Element href = new Element("href", DAV_NS);
         final StringBuilder builder = new StringBuilder(uriPrefix);
-        if(builder.charAt(builder.length()-1) != '/') {
-			builder.append('/');
-		}
-        for(final String component : uri) {
+        if (builder.charAt(builder.length() - 1) != '/') {
+            builder.append('/');
+        }
+        for (final String component : uri) {
             builder.append(escape(component)).append('/');
         }
         if (!trailingSlash) {
-            builder.setLength(builder.length()-1);
+            builder.setLength(builder.length() - 1);
         }
         href.setText(builder.toString());
-		return href;
-	}
+        return href;
+    }
 
 	private String escape(final String string) {
 		final PropfindResponseUrlEncoder encoder = BehaviourLookup.getInstance().get(PropfindResponseUrlEncoder.class);
-		if(null != encoder) {
+		if (null != encoder) {
 			return encoder.encode(string);
 		}
 		try {
 			return URLEncoder.encode(string,charset).replaceAll("\\+","%20");
-		} catch (final UnsupportedEncodingException e) {
+		} catch (UnsupportedEncodingException e) {
 			LOG.error(e.toString());
 			return string;
 		}
@@ -241,6 +242,7 @@ public class PropertiesMarshaller implements ResourceMarshaller {
                     return value.replaceAll(String.valueOf(character), replacement);
                 } catch (Exception e) {
                     // ignore
+                    LOG.trace("", e);
                 }
             }
         }
@@ -249,10 +251,9 @@ public class PropertiesMarshaller implements ResourceMarshaller {
 
 	private Namespace getNamespace(final WebdavProperty property) {
 		final String namespace = property.getNamespace();
-		if(namespace.equals("DAV:")) {
+		if (namespace.equals("DAV:")) {
 			return DAV_NS;
 		}
 		return Namespace.getNamespace(namespace);
 	}
-
 }

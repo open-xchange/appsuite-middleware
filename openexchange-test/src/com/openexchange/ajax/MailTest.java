@@ -66,7 +66,7 @@ public class MailTest extends AbstractAJAXSession {
             writer.close();
             tmpFile.deleteOnExit();
             return tmpFile;
-        } catch (final IOException e) {
+        } catch (IOException e) {
             return null;
         }
     }
@@ -93,7 +93,7 @@ public class MailTest extends AbstractAJAXSession {
             mtm.send(new TestMail(mailObj));
             AbstractAJAXResponse jResp = mtm.getLastResponse();
             assertTrue(jResp == null || jResp.hasError());
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }

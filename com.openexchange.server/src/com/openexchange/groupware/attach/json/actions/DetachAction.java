@@ -57,11 +57,11 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 /**
  * {@link DetachAction}
@@ -93,11 +93,11 @@ public final class DetachAction extends AbstractAttachmentAction {
             for (int i = 0; i < idsArray.length(); i++) {
                 try {
                     ids[i] = idsArray.getInt(i);
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     final String string = idsArray.getString(i);
                     try {
                         ids[i] = Integer.parseInt(string);
-                    } catch (final NumberFormatException e1) {
+                    } catch (NumberFormatException e1) {
                         throw AjaxExceptionCodes.INVALID_PARAMETER.create(string);
                     }
                 }
@@ -105,9 +105,9 @@ public final class DetachAction extends AbstractAttachmentAction {
 
             final Date timestamp = detach(session, folderId, attachedId, moduleId, ids);
             return new AJAXRequestResult("", timestamp, "string");
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
@@ -123,7 +123,7 @@ public final class DetachAction extends AbstractAttachmentAction {
             timestamp = ATTACHMENT_BASE.detachFromObject(folderId, attachedId, moduleId, ids, session, ctx, user, userConfig);
 
             ATTACHMENT_BASE.commit();
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             rollback();
             if (t instanceof OXException) {
                 throw (OXException) t;
@@ -132,7 +132,7 @@ public final class DetachAction extends AbstractAttachmentAction {
         } finally {
             try {
                 ATTACHMENT_BASE.finish();
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.error("", e);
             }
         }

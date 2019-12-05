@@ -75,12 +75,12 @@ public class BinaryContentDumper implements MessagingContentDumper {
         final BufferedOutputStream bout = new BufferedOutputStream(outputStream);
         try {
             int i = -1;
-            while((i = bin.read()) > 0) { bout.write(i); }
+            while ((i = bin.read()) > 0) { bout.write(i); }
         } finally {
-            if(bin != null) {
+            if (bin != null) {
                 bin.close();
             }
-            if(bout != null) {
+            if (bout != null) {
                 bout.flush();
             }
         }

@@ -39,21 +39,27 @@ Subsequently all transferred objects and all possible actions are listed.
 
 A file in a directory is uniquely identified by its filename and the checksum of its content.
 
+<div class="simpleTable">
 
 |Name|Type|Value|
 |:---|:---|:----|
 |name|String|The name of the file, including its extension, e.g. `test.doc`.|
 |checksum|String|The MD5 hash of the file, expressed as a lowercase hexadecimal number string, 32 characters long, e.g. f8cacac95379527cd4fa15f0cb782a09.|
 
+</div>
+
 ### Directory Version
 
 A directory is uniquely identified by its full path, relative to the root folder, and the checksum of its content.
 
+<div class="simpleTable">
 
 |Name|Type|Value|
 |:---|:---|:----|
 |path|String|The path of the directory, including the directory's name, relative to the root folder, e.g. `/sub/test/letters`.|
 |checksum|String|	The MD5 hash of the directory, expressed as a lowercase hexadecimal number string, 32 characters long, e.g. `f8cacac95379527cd4fa15f0cb782a09`.|
+
+</div>
 
 Note: the checksum of a directory is calculated based on its contents in the following algorithm:
 
@@ -80,6 +86,8 @@ RETURN LENGTH(fn1) - LENGTH(fn2)
 
 All actions are encoded in the following format. Depending on the action type, not all properties may be present.
 
+<div class="simpleTable">
+
 |Name|Type|Value|
 |:---|:---|:----|
 |action|String|The type of action to execute, currently one of `acknowledge`, `edit`, `download`, `upload`, `remove`, `sync`, `error`.|
@@ -102,6 +110,7 @@ All actions are encoded in the following format. Depending on the action type, n
 |directLink|String|A direct link to the detail view of the file in the web interface (deprecated, available until API version 2).|
 |directLinkFragments|String|The fragments part of the direct link (deprecated, available until API version 2).|
 
+</div>
 
 The following list gives an overview about the used action types:
 

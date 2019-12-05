@@ -93,7 +93,7 @@ public final class UserPermissionMerger {
             final Permission merged;
             try {
                 merged = MergerUtility.getMergedPermission(corruptPermission.permission_id, admin, corruptPermission.fuid, corruptPermission.cid, con, delete);
-            } catch (final IllegalStateException e) {
+            } catch (IllegalStateException e) {
                 // Strange. Previously detected corrupt user permission does no more exist.
                 continue Next;
             }

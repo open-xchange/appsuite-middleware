@@ -90,49 +90,31 @@ public final class RecurringResult implements RecurringResultInterface {
 		this.position = position;
 	}
 
-	/* (non-Javadoc)
-     * @see com.openexchange.calendar.RecurringResultInterface#getStart()
-     */
 	@Override
     public long getStart() {
 		return start;
 	}
 
-	/* (non-Javadoc)
-     * @see com.openexchange.calendar.RecurringResultInterface#getNormalized()
-     */
 	@Override
     public long getNormalized() {
 		return normalized;
 	}
 
-	/* (non-Javadoc)
-     * @see com.openexchange.calendar.RecurringResultInterface#getEnd()
-     */
 	@Override
     public long getEnd() {
 		return start + diff + (lengthOffset * Constants.MILLI_DAY);
 	}
 
-	/* (non-Javadoc)
-     * @see com.openexchange.calendar.RecurringResultInterface#getDiff()
-     */
 	@Override
     public long getDiff() {
 		return diff;
 	}
 
-	/* (non-Javadoc)
-     * @see com.openexchange.calendar.RecurringResultInterface#getOffset()
-     */
 	@Override
     public int getOffset() {
 		return lengthOffset;
 	}
 
-	/* (non-Javadoc)
-     * @see com.openexchange.calendar.RecurringResultInterface#getPosition()
-     */
 	@Override
     public int getPosition() {
 		return position;

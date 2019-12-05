@@ -49,6 +49,8 @@
 
 package com.openexchange.chronos.itip.generators;
 
+import java.util.Map;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.compat.ShownAsTransparency;
 
@@ -58,6 +60,8 @@ import com.openexchange.chronos.compat.ShownAsTransparency;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface TypeWrapper {
+
+    static final Map<String, TypeWrapper> WRAPPER = ImmutableMap.of("text", new PassthroughWrapper(), "html", new HTMLWrapper());
 
     String participant(Object argument);
 
@@ -76,4 +80,6 @@ public interface TypeWrapper {
     String shownAs(Object argument, ShownAsTransparency shownAs);
 
     String italic(Object argument);
+    
+    String getFormat();
 }

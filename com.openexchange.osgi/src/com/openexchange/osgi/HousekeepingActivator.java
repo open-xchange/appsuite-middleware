@@ -155,7 +155,7 @@ public abstract class HousekeepingActivator extends DeferredActivator {
             try {
                 listener.added(serviceReference, service);
                 return service;
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 context.ungetService(serviceReference);
                 LOG.warn("Adding service ({}) to listener failed. Service released.", service.getClass().getName(), e);
                 return null;
@@ -305,9 +305,7 @@ public abstract class HousekeepingActivator extends DeferredActivator {
      * @param serviceRanking The value to configure the {@link Constants#SERVICE_RANKING} to
      */
     protected <S> void registerService(final Class<S> clazz, final S service, int serviceRanking) {
-        Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
-        properties.put(Constants.SERVICE_RANKING, Integer.valueOf(serviceRanking));
-        registerService(clazz, service, properties);
+        registerService(clazz, service, Tools.withRanking(serviceRanking));
     }
 
     /**

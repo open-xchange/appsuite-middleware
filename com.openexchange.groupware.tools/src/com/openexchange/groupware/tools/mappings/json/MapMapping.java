@@ -80,7 +80,7 @@ public abstract class MapMapping<O> extends DefaultJsonMapping<Map<String,Object
 
     @Override
     public void deserialize(JSONObject from, O to) throws JSONException, OXException {
-        if(from.isNull(getAjaxName())) {
+        if (from.isNull(getAjaxName())) {
            set(to, null);
         } else {
             JSONObject jsonObject = from.getJSONObject(getAjaxName());

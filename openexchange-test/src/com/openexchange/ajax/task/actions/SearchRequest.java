@@ -104,7 +104,7 @@ public class SearchRequest extends AbstractTaskRequest<SearchResponse> {
     public JSONObject getBody() throws JSONException {
         try {
             return TaskSearchJSONWriter.write(search);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw new JSONException(e);
         }
     }

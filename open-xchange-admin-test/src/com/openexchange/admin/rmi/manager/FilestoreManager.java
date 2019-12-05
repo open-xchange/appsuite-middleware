@@ -136,11 +136,6 @@ public class FilestoreManager extends AbstractManager {
         return utilInterface.listFilestore(searchPattern, getMasterCredentials(), omitUsage);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.admin.plugin.hosting.rmi.manager.AbstractManager#clean(java.lang.Object)
-     */
     @Override
     void clean(Object object) throws Exception {
         unregister((Filestore) object);

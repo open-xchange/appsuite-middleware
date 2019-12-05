@@ -101,7 +101,7 @@ public final class OXContextRestoreMySQLStorage extends OXContextRestoreSQLStora
             BufferedReader reader;
             try {
                 reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8));
-            } catch (final FileNotFoundException e1) {
+            } catch (FileNotFoundException e1) {
                 throw new OXContextRestoreException(Code.CONFIGDB_FILE_NOT_FOUND, e1);
             }
             try {
@@ -125,7 +125,7 @@ public final class OXContextRestoreMySQLStorage extends OXContextRestoreSQLStora
             file = tempfilemap.get(configdbname);
             try {
                 reader = new BufferedReader(new FileReader(file));
-            } catch (final FileNotFoundException e1) {
+            } catch (FileNotFoundException e1) {
                 throw new OXContextRestoreException(Code.USERDB_FILE_NOT_FOUND);
             }
             try {
@@ -160,7 +160,7 @@ public final class OXContextRestoreMySQLStorage extends OXContextRestoreSQLStora
             final String filestore_name = executeQuery.getString(1);
             final String uri = executeQuery.getString(2);
             return uri + File.separatorChar + filestore_name;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw new StorageException(e.getMessage(), e);
         } finally {
             if (doRollback) {
@@ -200,7 +200,7 @@ public final class OXContextRestoreMySQLStorage extends OXContextRestoreSQLStora
             if (!con.isClosed() && !con.getAutoCommit()) {
                 con.setAutoCommit(true);
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             LOG.error("", e);
         }
     }
@@ -214,7 +214,7 @@ public final class OXContextRestoreMySQLStorage extends OXContextRestoreSQLStora
         if (null != toClose) {
             try {
                 toClose.close();
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 // Ignore
             }
         }

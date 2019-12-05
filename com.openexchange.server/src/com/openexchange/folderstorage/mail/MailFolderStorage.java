@@ -104,7 +104,6 @@ import com.openexchange.folderstorage.type.MailType;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.i18n.MailStrings;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Collators;
 import com.openexchange.mail.FullnameArgument;
@@ -149,6 +148,7 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.user.User;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.procedure.TObjectProcedure;
@@ -824,7 +824,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
                 fullname,
                 storageParameters.getUserId(),
                 storageParameters.getContextId());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
         }
     }
@@ -1224,7 +1224,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
         return false;
     }
 
-    private static ServerSession getServerSession(final StorageParameters storageParameters) throws OXException, OXException {
+    private static ServerSession getServerSession(final StorageParameters storageParameters) throws OXException {
         final Session s = storageParameters.getSession();
         if (null == s) {
             throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
@@ -1243,7 +1243,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
         while (count++ < max) {
             try {
                 return mailAccess.getFolderStorage().getFolder(fullname);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 if (count < max && (MimeMailExceptionCode.STORE_CLOSED.equals(e)) || e.equalsCode(2001, "IMAP")) {
                     MailAccess.reconnect(mailAccess, true);
                     exc = e;
@@ -1941,7 +1941,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
                 for (final MailPermission perm : perms) {
                     mfd.addPermission((MailPermission) perm.clone());
                 }
-            } catch (final CloneNotSupportedException e) {
+            } catch (CloneNotSupportedException e) {
                 throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
         }
@@ -2388,7 +2388,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
      */
     protected static void closeMailAccess(final MailAccess<?, ?> mailAccess) {
         if (null != mailAccess) {
-            try { mailAccess.close(true); } catch (final Exception e) {/**/}
+            try { mailAccess.close(true); } catch (Exception e) {/**/}
         }
     }
 

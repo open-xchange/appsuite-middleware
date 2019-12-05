@@ -101,7 +101,7 @@ public class MailAccountLifecycleTest extends AbstractMailAccountTest {
     }
 
     @Test
-    public void testLifeCycle() throws OXException, IOException, JSONException, OXException {
+    public void testLifeCycle() throws OXException, IOException, JSONException {
 
         createMailAccount();
         readByGet();
@@ -122,7 +122,7 @@ public class MailAccountLifecycleTest extends AbstractMailAccountTest {
         // *shrugs* don't need the response
     }
 
-    private void readByList() throws OXException, IOException, JSONException, OXException {
+    private void readByList() throws OXException, IOException, JSONException {
 
         final MailAccountListResponse response = getClient().execute(new MailAccountListRequest(new int[] { mailAccountDescription.getId() }, allFields()));
 
@@ -140,7 +140,7 @@ public class MailAccountLifecycleTest extends AbstractMailAccountTest {
         assertTrue("Did not find mail account in response", found);
     }
 
-    private void readByAll() throws OXException, IOException, JSONException, OXException {
+    private void readByAll() throws OXException, IOException, JSONException {
         final int[] fields = allFields();
         final MailAccountAllResponse response = getClient().execute(new MailAccountAllRequest(fields));
 
@@ -166,7 +166,7 @@ public class MailAccountLifecycleTest extends AbstractMailAccountTest {
         return fields;
     }
 
-    private void readByGet() throws OXException, IOException, JSONException, OXException {
+    private void readByGet() throws OXException, IOException, JSONException {
         final MailAccountGetRequest request = new MailAccountGetRequest(mailAccountDescription.getId());
         final MailAccountGetResponse response = getClient().execute(request);
 

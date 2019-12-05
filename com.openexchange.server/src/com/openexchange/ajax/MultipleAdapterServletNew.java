@@ -169,7 +169,7 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
                 }
 
                 AJAXActionService actionService = factory.createActionService(action);
-                if(actionService == null) {
+                if (actionService == null) {
                     resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Unknown action.");
                     return;
                 }
@@ -185,14 +185,14 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
                     data.cleanUploads();
                 }
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (AjaxExceptionCodes.BAD_REQUEST.equals(e)) {
                 resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
                 return;
             }
             LOG.error("", e);
             response.setException(e);
-        }  catch (final IllegalStateException e) {
+        }  catch (IllegalStateException e) {
             final Throwable cause = e.getCause();
             if (cause instanceof OXException) {
                 final OXException oxe = (OXException) cause;
@@ -207,7 +207,7 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
             String callback = req.getParameter("callback");
             if ((isFileUpload || (req.getParameter("respondWithHTML") != null && req.getParameter("respondWithHTML").equalsIgnoreCase("true"))) && (action != null || callback != null)) {
                 resp.setContentType(AJAXServlet.CONTENTTYPE_HTML);
-                if(callback == null) {
+                if (callback == null) {
                     callback = action;
                 }
                 final AllocatingStringWriter w = new AllocatingStringWriter();
@@ -217,7 +217,7 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
             } else {
                 ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
             }
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             final OXException e1 = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
             LOG.error("", e1);
             sendError(resp);
@@ -313,7 +313,7 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
                     if ('[' == c || '{' == c) {
                         try {
                             retval.setData(JSONObject.parse(reader));
-                        } catch (final JSONException e) {
+                        } catch (JSONException e) {
                             retval.setData(AJAXServlet.readFrom(reader));
                         }
                     } else {

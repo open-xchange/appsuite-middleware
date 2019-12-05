@@ -82,7 +82,7 @@ public class ContextOnlyUWAService implements UWAWidgetService {
     public List<UWAWidget> all() throws OXException {
         try {
             return contextWidgets.load();
-        } catch (final SQLException x) {
+        } catch (SQLException x) {
             throw UWAWidgetExceptionCodes.SQLError.create(x.getMessage());
         }
     }
@@ -94,7 +94,7 @@ public class ContextOnlyUWAService implements UWAWidgetService {
             final int dbId = idGenerator.getId("uwaWidget", ctxId);
             widget.setId(String.valueOf(dbId));
             contextWidgets.create(widget);
-        } catch (final SQLException x) {
+        } catch (SQLException x) {
             throw UWAWidgetExceptionCodes.SQLError.create(x.getMessage());
         }
     }
@@ -103,7 +103,7 @@ public class ContextOnlyUWAService implements UWAWidgetService {
     public void delete(final String id) throws OXException {
         try {
             contextWidgets.delete(id);
-        } catch (final SQLException x) {
+        } catch (SQLException x) {
             throw UWAWidgetExceptionCodes.SQLError.create(x.getMessage());
         }
     }
@@ -112,7 +112,7 @@ public class ContextOnlyUWAService implements UWAWidgetService {
     public UWAWidget get(final String id) throws OXException {
         try {
             return contextWidgets.load(id);
-        } catch (final SQLException x) {
+        } catch (SQLException x) {
             throw UWAWidgetExceptionCodes.SQLError.create(x.getMessage());
         }
     }
@@ -122,7 +122,7 @@ public class ContextOnlyUWAService implements UWAWidgetService {
         UWAUtility.checkUrl(widget);
         try {
             contextWidgets.update(widget, modified);
-        } catch (final SQLException x) {
+        } catch (SQLException x) {
             throw UWAWidgetExceptionCodes.SQLError.create(x.getMessage());
         }
     }

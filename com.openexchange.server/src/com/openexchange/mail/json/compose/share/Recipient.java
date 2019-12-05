@@ -49,7 +49,7 @@
 
 package com.openexchange.mail.json.compose.share;
 
-import com.openexchange.groupware.ldap.User;
+import com.openexchange.user.User;
 
 /**
  * {@link Recipient}

@@ -56,7 +56,6 @@ import javax.mail.internet.InternetAddress;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.mail.transport.TransportProvider;
@@ -66,6 +65,7 @@ import com.openexchange.serverconfig.ServerConfig;
 import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.share.notification.NotificationStrings;
 import com.openexchange.share.notification.impl.PasswordResetConfirmNotification;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 

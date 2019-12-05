@@ -61,7 +61,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
@@ -71,6 +70,7 @@ import com.openexchange.tools.iterator.ArrayIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
+import com.openexchange.user.User;
 
 /**
  * This class implements the methods needed by the tasks interface of the API version 2.
@@ -109,7 +109,7 @@ public class TasksSQLImpl implements TasksSQLInterface {
             user = Tools.getUser(ctx, userId);
             permissionBits = Tools.getUserPermissionBits(ctx, userId);
             folder = Tools.getFolder(ctx, folderId);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (OXFolderExceptionCode.NOT_EXISTS.equals(e)) {
                 return SearchIteratorAdapter.emptyIterator();
             }
@@ -120,7 +120,7 @@ public class TasksSQLImpl implements TasksSQLInterface {
         try {
             return TaskStorage.getInstance().list(ctx, folderId, from, until,
                 orderBy, order, columns, onlyOwn, userId, noPrivate);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
         }
     }
@@ -134,7 +134,7 @@ public class TasksSQLImpl implements TasksSQLInterface {
         try {
             GetTask get = new GetTask(ctx, user, permissionBits, folderId, taskId, StorageType.ACTIVE);
             return get.loadAndCheck();
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (OXFolderExceptionCode.NOT_EXISTS.equals(e)) {
                 // Parent folder does no more exist
                 try {
@@ -159,7 +159,7 @@ public class TasksSQLImpl implements TasksSQLInterface {
             user = Tools.getUser(ctx, userId);
             permissionBits = Tools.getUserPermissionBits(ctx, userId);
             folder = Tools.getFolder(ctx, folderId);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (OXFolderExceptionCode.NOT_EXISTS.equals(e)) {
                 return SearchIteratorAdapter.emptyIterator();
             }
@@ -246,7 +246,7 @@ public class TasksSQLImpl implements TasksSQLInterface {
             update.makeNextRecurrence(session);
 
             collectAddresses(update, false);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
         }
     }
@@ -323,7 +323,7 @@ public class TasksSQLImpl implements TasksSQLInterface {
                 objectAndFolderId[1], objectAndFolderId[0], StorageType.ACTIVE);
             try {
                 tasks.add(get.loadAndCheck());
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.debug("", e);
             }
         }
@@ -351,9 +351,6 @@ public class TasksSQLImpl implements TasksSQLInterface {
         return TaskStorage.getInstance().countTasks(ctx, userId, folder.getObjectID(), onlyOwn, isShared);
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.api2.TasksSQLInterface#findTask(com.openexchange.groupware.search.TaskSearchObject, int, com.openexchange.groupware.search.Order, int[])
-     */
     @Override
     public SearchIterator<Task> findTask(TaskSearchObject searchObj, int orderBy, Order order, int[] cols) throws OXException {
         final Context ctx = Tools.getContext(session.getContextId());

@@ -230,9 +230,9 @@ public final class MimeMessageConverter {
                 return new MimeBodyPart(Streams.newByteArrayInputStream(sink.toByteArray()));
             }
             return new MimeBodyPart(new SharedFileInputStream(tempFile));
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
@@ -492,9 +492,9 @@ public final class MimeMessageConverter {
             filler.fillMailBody(composedMail, mimeMessage, ComposeType.NEW);
             saveChanges(mimeMessage);
             return mimeMessage;
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MailExceptionCode.MESSAGING_ERROR.create(e, e.getMessage());
-        } catch (final IOException e) {
+        } catch (IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
@@ -543,9 +543,9 @@ public final class MimeMessageConverter {
             filler.fillMailBody(composedMail, mimeMessage, ComposeType.NEW);
             saveChanges(mimeMessage);
             return convertMessage(mimeMessage);
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MailExceptionCode.MESSAGING_ERROR.create(e, e.getMessage());
-        } catch (final IOException e) {
+        } catch (IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
@@ -609,9 +609,9 @@ public final class MimeMessageConverter {
         if (content instanceof InputStream) {
             try {
                 return new MimeMultipart(new MessageDataSource((InputStream) content, contentType));
-            } catch (final MessagingException e) {
+            } catch (MessagingException e) {
                 throw MimeMailException.handleMessagingException(e);
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                     throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
                 }
@@ -621,9 +621,9 @@ public final class MimeMessageConverter {
         if (content instanceof String) {
             try {
                 return new MimeMultipart(new MessageDataSource(Streams.newByteArrayInputStream(((String) content).getBytes(Charsets.ISO_8859_1)), contentType));
-            } catch (final MessagingException e) {
+            } catch (MessagingException e) {
                 throw MimeMailException.handleMessagingException(e);
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                     throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
                 }
@@ -773,7 +773,7 @@ public final class MimeMessageConverter {
                 }
             }
             return mails;
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MailExceptionCode.MESSAGING_ERROR.create(e, e.getMessage());
         }
     }
@@ -808,7 +808,7 @@ public final class MimeMessageConverter {
                 }
             }
             return mails;
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MailExceptionCode.MESSAGING_ERROR.create(e, e.getMessage());
         }
     }
@@ -1096,7 +1096,7 @@ public final class MimeMessageConverter {
                     final Header h = e.nextElement();
                     try {
                         mailMessage.addHeader(h.getName(), h.getValue());
-                    } catch (final Exception exc) {
+                    } catch (Exception exc) {
                         logger.warn("", exc);
                     }
                 }
@@ -1124,7 +1124,7 @@ public final class MimeMessageConverter {
                 public void fillField(final MailConfig mailConfig, final MailMessage mailMessage, final Message msg) throws OXException, MessagingException {
                     try {
                         mailMessage.setContentType(((ExtendedMimeMessage) msg).getContentType());
-                    } catch (final OXException e) {
+                    } catch (OXException e) {
                         /*
                          * Cannot occur
                          */
@@ -1405,7 +1405,7 @@ public final class MimeMessageConverter {
                     final Header h = e.nextElement();
                     try {
                         mailMessage.addHeader(h.getName(), h.getValue());
-                    } catch (final Exception exc) {
+                    } catch (Exception exc) {
                         logger.warn("", exc);
                     }
                 }
@@ -1425,14 +1425,14 @@ public final class MimeMessageConverter {
                         } else {
                             ct = new ContentType(MimeTypes.MIME_DEFAULT);
                         }
-                    } catch (final OXException e) {
+                    } catch (OXException e) {
                         /*
                          * Cannot occur
                          */
                         LOG1.error(MessageFormat.format("Invalid content type: {0}", msg.getContentType()), e);
                         try {
                             ct = new ContentType(MimeTypes.MIME_DEFAULT);
-                        } catch (final OXException e1) {
+                        } catch (OXException e1) {
                             /*
                              * Cannot occur
                              */
@@ -1495,7 +1495,7 @@ public final class MimeMessageConverter {
                             LOG1.error("Invalid content type: {}", msg.getContentType(), e);
                             try {
                                 ct = new ContentType(MimeTypes.MIME_DEFAULT);
-                            } catch (final OXException e1) {
+                            } catch (OXException e1) {
                                 /*
                                  * Cannot occur
                                  */
@@ -1504,15 +1504,15 @@ public final class MimeMessageConverter {
                             }
                         }
                         mailMessage.setAlternativeHasAttachment(ct.startsWith(multipart) && hasAttachments((Part) msg.getContent()));
-                    } catch (final ClassCastException e) {
+                    } catch (ClassCastException e) {
                         // Cast to javax.mail.Multipart failed
                         LOG1.debug(new StringBuilder(256).append("Message's Content-Type indicates to be multipart/* but its content is not an instance of javax.mail.Multipart but ").append(e.getMessage()).append(".\nIn case if IMAP it is due to a wrong BODYSTRUCTURE returned by IMAP server.\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.").toString());
                         mailMessage.setAlternativeHasAttachment(null != ct && ct.startsWith(MimeTypes.MIME_MULTIPART_MIXED));
-                    } catch (final MessagingException e) {
+                    } catch (MessagingException e) {
                         // A messaging error occurred
                         LOG1.debug(new StringBuilder(256).append("Parsing message's multipart/* content to check for file attachments caused a messaging error: ").append(e.getMessage()).append(".\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.").toString());
                         mailMessage.setAlternativeHasAttachment(null != ct && ct.startsWith(MimeTypes.MIME_MULTIPART_MIXED));
-                    } catch (final IOException e) {
+                    } catch (IOException e) {
                         if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                             throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
                         }
@@ -1814,7 +1814,7 @@ public final class MimeMessageConverter {
     public static MailMessage convertMessage(final InputStream in) throws OXException {
         try {
             return convertMessage(new MimeMessage(MimeDefaultSession.getDefaultSession(), in));
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         }
     }
@@ -1829,7 +1829,7 @@ public final class MimeMessageConverter {
     public static MailMessage convertMessage(final byte[] asciiBytes) throws OXException {
         try {
             return convertMessage(new MimeMessage(MimeDefaultSession.getDefaultSession(), new UnsynchronizedByteArrayInputStream(asciiBytes)));
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         }
     }
@@ -1970,7 +1970,7 @@ public final class MimeMessageConverter {
                     mail.removeHeader(MessageHeaders.HDR_X_OXMSGREF);
                     try {
                         msg.removeHeader(MessageHeaders.HDR_X_OXMSGREF);
-                    } catch (final Exception e) {
+                    } catch (Exception e) {
                         // Ignore...
                         LOG.debug("", e);
                     }
@@ -1997,7 +1997,7 @@ public final class MimeMessageConverter {
             mail.setSentDate(MimeMessageUtility.getSentDate(mail));
             try {
                 mail.setSize(msg.getSize());
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 // Size unavailable
                 LOG.debug("Message's size could not be obtained.", e);
                 mail.setSize(-1);
@@ -2017,7 +2017,7 @@ public final class MimeMessageConverter {
             mail.setThreadLevel(0);
             mail.setSecurityInfo(getSecurityInfo(mail));
             return mail;
-        } catch (final MessageRemovedException e) {
+        } catch (MessageRemovedException e) {
             final String[] sa = getFolderAndIdSafe(msg);
             final String folder = null == sa ? null : sa[0];
             final String mailId = null == sa ? null : sa[1];
@@ -2025,7 +2025,7 @@ public final class MimeMessageConverter {
                 throw MailExceptionCode.MAIL_NOT_FOUND.create(e, mailId, folder);
             }
             throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e, new Object[0]);
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         }
     }
@@ -2072,7 +2072,7 @@ public final class MimeMessageConverter {
             // A messaging error occurred
             LOG.debug("Parsing message's multipart/* content to check for file attachments caused a messaging error: {}.\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.", e.getMessage());
             return ct.startsWith(MimeTypes.MIME_MULTIPART_MIXED);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
@@ -2098,7 +2098,7 @@ public final class MimeMessageConverter {
                 }
                 return ret;
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             // Ignore
             LOG.debug("{}", e.getMessage(), e);
         }
@@ -2127,7 +2127,7 @@ public final class MimeMessageConverter {
     public static MailMessage convertMessage(final byte[] asciiBytes, final String uid, final String fullname, final char separator, final MailField[] fields) throws OXException {
         try {
             return convertMessage(new MimeMessage(MimeDefaultSession.getDefaultSession(), new UnsynchronizedByteArrayInputStream(asciiBytes)), uid, fullname, separator, fields);
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         }
     }
@@ -2172,7 +2172,7 @@ public final class MimeMessageConverter {
             final MailMessage mail = (set.contains(MailField.BODY)) ? new MimeMailMessage(msg) : new MimeMailMessage();
             fillMessage(mailConfig, fillers, mail, msg);
             return mail;
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MailExceptionCode.MESSAGING_ERROR.create(e, e.getMessage());
         }
     }
@@ -2187,7 +2187,7 @@ public final class MimeMessageConverter {
     public static MailPart convertPart(final byte[] asciiBytes) throws OXException {
         try {
             return convertPart(new MimeBodyPart(new UnsynchronizedByteArrayInputStream(asciiBytes)), false);
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         }
     }
@@ -2282,7 +2282,7 @@ public final class MimeMessageConverter {
                     mailPart.removeHeader(MessageHeaders.HDR_X_OXMSGREF);
                     try {
                         part.removeHeader(MessageHeaders.HDR_X_OXMSGREF);
-                    } catch (final Exception e) {
+                    } catch (Exception e) {
                         // Ignore...
                         LOG.debug("", e);
                     }
@@ -2294,7 +2294,7 @@ public final class MimeMessageConverter {
             int size;
             try {
                 size = part.getSize();
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 // Ignore
                 size = -1;
             }
@@ -2306,7 +2306,7 @@ public final class MimeMessageConverter {
                 final String tansferEnc = mailPart.getHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC, null);
                 try {
                     size = estimateSize(part.getInputStream(), tansferEnc);
-                } catch (final IOException e) {
+                } catch (IOException e) {
                     try {
                         if (part instanceof MimeBodyPart) {
                             size = estimateSize(((MimeBodyPart) part).getRawInputStream(), tansferEnc);
@@ -2315,16 +2315,16 @@ public final class MimeMessageConverter {
                         } else {
                             LOG.warn("{}'s size cannot be determined", part.getClass().getCanonicalName(), e);
                         }
-                    } catch (final IOException e1) {
+                    } catch (IOException e1) {
                         LOG.warn("{}'s size cannot be determined", part.getClass().getCanonicalName(), e1);
-                    } catch (final MessagingException e1) {
+                    } catch (MessagingException e1) {
                         LOG.warn("{}'s size cannot be determined", part.getClass().getCanonicalName(), e1);
                     }
                 }
             }
             mailPart.setSize(size);
             return mailPart;
-        } catch (final MessageRemovedException e) {
+        } catch (MessageRemovedException e) {
             final String[] sa = part instanceof MimeMessage ? getFolderAndIdSafe((MimeMessage) part) : null;
             final String folder = null == sa ? null : sa[0];
             final String mailId = null == sa ? null : sa[1];
@@ -2332,7 +2332,7 @@ public final class MimeMessageConverter {
                 throw MailExceptionCode.MAIL_NOT_FOUND.create(e, mailId, folder);
             }
             throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e, new Object[0]);
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MailExceptionCode.MESSAGING_ERROR.create(e, e.getMessage());
         }
     }
@@ -2440,7 +2440,7 @@ public final class MimeMessageConverter {
                 }
             }
             //}
-        } catch (final MessageRemovedException e) {
+        } catch (MessageRemovedException e) {
             final String[] sa = part instanceof MimeMessage ? getFolderAndIdSafe((MimeMessage) part) : null;
             final String folder = null == sa ? null : sa[0];
             final String mailId = null == sa ? null : sa[1];
@@ -2448,43 +2448,43 @@ public final class MimeMessageConverter {
                 throw MailExceptionCode.MAIL_NOT_FOUND.create(e, mailId, folder);
             }
             throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e, new Object[0]);
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             LOG.debug("JavaMail API failed to load part's headers. Using own routine.", e);
             final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(DEFAULT_MESSAGE_SIZE);
             try {
                 part.writeTo(out);
                 headers = loadHeaders(new String(out.toByteArray(), Charsets.ISO_8859_1));
-            } catch (final MessageRemovedIOException e2) {
+            } catch (MessageRemovedIOException e2) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e2, new Object[0]);
-            } catch (final IOException e2) {
+            } catch (IOException e2) {
                 LOG.warn("Unable to parse headers. Assuming no headers...", e2);
                 headers = new HeaderCollection(0);
-            } catch (final MessageRemovedException e2) {
+            } catch (MessageRemovedException e2) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e2, new Object[0]);
-            } catch (final MessagingException e2) {
+            } catch (MessagingException e2) {
                 LOG.warn("Unable to parse headers Assuming no headers...", e2);
                 headers = new HeaderCollection(0);
-            } catch (final RuntimeException e2) {
+            } catch (RuntimeException e2) {
                 LOG.warn("Unable to parse headers Assuming no headers...", e2);
                 headers = new HeaderCollection(0);
             }
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             LOG.debug("JavaMail API failed to load part's headers. Using own routine.", e);
             final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(DEFAULT_MESSAGE_SIZE);
             try {
                 part.writeTo(out);
                 headers = loadHeaders(new String(out.toByteArray(), Charsets.ISO_8859_1));
-            } catch (final MessageRemovedIOException e2) {
+            } catch (MessageRemovedIOException e2) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e2, new Object[0]);
-            } catch (final IOException e2) {
+            } catch (IOException e2) {
                 LOG.warn("Unable to parse headers Assuming no headers...", e2);
                 headers = new HeaderCollection(0);
-            } catch (final MessageRemovedException e2) {
+            } catch (MessageRemovedException e2) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e2, new Object[0]);
-            } catch (final MessagingException e2) {
+            } catch (MessagingException e2) {
                 LOG.warn("Unable to parse headers Assuming no headers...", e2);
                 headers = new HeaderCollection(0);
-            } catch (final RuntimeException e2) {
+            } catch (RuntimeException e2) {
                 LOG.warn("Unable to parse headers Assuming no headers...", e2);
                 headers = new HeaderCollection(0);
             }

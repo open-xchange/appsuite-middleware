@@ -1,0 +1,48 @@
+feature_name: DAV
+properties:
+    - key: com.openexchange.dav.prefixPath
+      description: |
+         Configures a static prefix for *DAV-servlets. Defaults to "/servlet/dav" for backwards compatibility.
+         
+         The prefix will be considered when the *DAV servlets are registered, as well when constructing paths to 
+         *DAV resources and collections that are indicated to clients. The value should be set in accordance with 
+         "com.openexchange.dav.proxyPrefixPath" in case the load balancer / proxy in front of the application server 
+         forwards or rewrites client requests to a certain path. 
+         
+         Otherwise, when no special handling for *DAV requests is configured on the proxy-side, this value may also 
+         be set to an arbitrary value like "/dav". 
+      defaultValue: /servlet/dav/
+      version: 7.10.3
+      reloadable: false
+      configcascadeAware: false
+      related: com.openexchange.dav.proxyPrefixPath
+      file:
+      packageName: open-xchange-dav
+      tags: ["CalDAV", "CardDAV", "DAV"]
+    - key: com.openexchange.dav.proxyPrefixPath
+      description: |
+         Configures the prefix path that is used by the proxy / load balancer when forwarding requests to this 
+         application server. Defaults to "/servlet/dav" for backwards compatibility. 
+         
+         For example, if a ProxyPass directive like the following is configured: 
+            ProxyPass / balancer://oxserver-sync/servlet/dav/
+         
+         Or, if a RewriteRule has been set up to modify incoming queries like this:
+            RewriteRule (.*)  http://localhost:8009/servlet/dav$1
+         
+         Then, the value "/servlet/dav" should be specified here. 
+         
+         The correct value is necessary to indicate the  correct paths to *DAV clients in responses, which in turn 
+         avoids avoid duplicated prefix paths in case the proxy forwards or rewrites requests to a subpath, too. 
+         
+         Also, in case no special handling for *DAV requests is configured on the proxy-side, this value should be 
+         set "/", meaning that client requests will be routed as-is to the application server.
+      defaultValue: /servlet/dav/
+      version: 7.10.3
+      reloadable: false
+      configcascadeAware: false
+      related: com.openexchange.dav.prefixPath
+      file: dav.properties
+      packageName: open-xchange-dav
+      tags: ["CalDAV", "CardDAV", "DAV"]
+      

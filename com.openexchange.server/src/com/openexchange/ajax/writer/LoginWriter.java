@@ -135,7 +135,7 @@ public final class LoginWriter {
         } else {
             try {
                 locale = UserStorage.getInstance().getUser(session.getUserId(), session.getContextId()).getLocale();
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 // Ignore
             }
         }
@@ -217,7 +217,7 @@ public final class LoginWriter {
         // Possibly an E-Mail address
         try {
             return QuotedInternetAddress.toIDN(login);
-        } catch (final Exception x) {
+        } catch (Exception x) {
             return login;
         }
     }
@@ -228,7 +228,7 @@ public final class LoginWriter {
         }
         try {
             return UserStorage.getInstance().getUser(session.getUserId(), session.getContextId()).getLocale();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             return defaultLocale;
         }
     }

@@ -63,7 +63,8 @@ import com.openexchange.test.concurrent.ParallelSuite;
 @Suite.SuiteClasses({
     // @formatter:off
     CompositionSpaceTest.class,
-    AttachmentsTest.class
+    AttachmentsTest.class,
+    Bug67701Test.class
     // @formatter:on
 })
 public class MailComposeTestSuite {

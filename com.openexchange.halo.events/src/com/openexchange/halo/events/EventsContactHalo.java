@@ -55,8 +55,11 @@ import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_ORDE
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_RANGE_END;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_RANGE_START;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -73,14 +76,22 @@ import com.openexchange.chronos.service.EventsResult;
 import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.service.SortOrder.Order;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.FolderResponse;
+import com.openexchange.folderstorage.FolderService;
+import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.folderstorage.calendar.contentType.CalendarContentType;
+import com.openexchange.folderstorage.type.PrivateType;
+import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.halo.AbstractContactHalo;
 import com.openexchange.halo.HaloContactDataSource;
 import com.openexchange.halo.HaloContactQuery;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 /**
  * {@link EventsContactHalo}
@@ -91,14 +102,17 @@ import com.openexchange.tools.session.ServerSession;
 public class EventsContactHalo extends AbstractContactHalo implements HaloContactDataSource {
 
     private final IDBasedCalendarAccessFactory calendarAccessFactory;
+    private final FolderService folderService;
 
     /**
      * Initializes a new {@link EventsContactHalo}.
      *
      * @param calendarAccessFactory The calendar access factory
+     * @param folderService
      */
-    public EventsContactHalo(IDBasedCalendarAccessFactory calendarAccessFactory) {
+    public EventsContactHalo(IDBasedCalendarAccessFactory calendarAccessFactory, FolderService folderService) {
         this.calendarAccessFactory = calendarAccessFactory;
+        this.folderService = folderService;
     }
 
     @Override
@@ -116,7 +130,7 @@ public class EventsContactHalo extends AbstractContactHalo implements HaloContac
         /*
          * extract search filters from halo query
          */
-        List<SearchFilter> filters = getSearchFilters(query);
+        List<SearchFilter> filters = getSearchFilters(query, session);
         if (null == filters || 0 == filters.size()) {
             return AJAXRequestResult.EMPTY_REQUEST_RESULT;
         }
@@ -126,9 +140,13 @@ public class EventsContactHalo extends AbstractContactHalo implements HaloContac
         Map<String, EventsResult> resultsPerFolder = null;
         IDBasedCalendarAccess calendarAccess = initCalendarAccess(request);
         boolean committed = false;
+        List<String> folders = visiblePrivateAndPublicFolders(session);
+        if (folders == null || folders.isEmpty()) {
+            return AJAXRequestResult.EMPTY_REQUEST_RESULT;
+        }
         try {
             calendarAccess.startTransaction();
-            resultsPerFolder = calendarAccess.searchEvents(null, filters, null);
+            resultsPerFolder = calendarAccess.searchEvents(folders, filters, null);
             calendarAccess.commit();
             committed = true;
         } finally {
@@ -137,19 +155,44 @@ public class EventsContactHalo extends AbstractContactHalo implements HaloContac
             }
             calendarAccess.finish();
         }
-        List<Event> events = new ArrayList<Event>();
+        Map<String, Event> events = new HashMap<>();
         for (Entry<String, EventsResult> entry : resultsPerFolder.entrySet()) {
             List<Event> eventsPerFolder = entry.getValue().getEvents();
             if (null != eventsPerFolder) {
-                events.addAll(eventsPerFolder);
+                for (Event event : eventsPerFolder) {
+                    events.put(event.getId(), event);
+                }
             }
         }
-        AJAXRequestResult result = new AJAXRequestResult(events, getMaximumTimestamp(events), "event");
+        AJAXRequestResult result = new AJAXRequestResult(new ArrayList<>(events.values()), getMaximumTimestamp(events.values()), "event");
         List<OXException> warnings = calendarAccess.getWarnings();
         if (null != warnings && 0 < warnings.size()) {
             result.addWarnings(warnings);
         }
         return result;
+    }
+
+    private List<String> visiblePrivateAndPublicFolders(ServerSession session) throws OXException {
+        List<String> folderIDs = new LinkedList<String>();
+        FolderResponse<UserizedFolder[]> visibleFolders = folderService.getVisibleFolders(FolderStorage.REAL_TREE_ID, CalendarContentType.getInstance(), PrivateType.getInstance(), false, session, null);
+        UserizedFolder[] folders = visibleFolders.getResponse();
+        if (folders != null) {
+            for (UserizedFolder folder : folders) {
+                if (folder.getOwnPermission().getReadPermission() >= Permission.READ_OWN_OBJECTS) {
+                    folderIDs.add(folder.getID());
+                }
+            }
+        }
+        visibleFolders = folderService.getVisibleFolders(FolderStorage.REAL_TREE_ID, CalendarContentType.getInstance(), PublicType.getInstance(), false, session, null);
+        folders = visibleFolders.getResponse();
+        if (folders != null) {
+            for (UserizedFolder folder : folders) {
+                if (folder.getOwnPermission().getReadPermission() >= Permission.READ_OWN_OBJECTS) {
+                    folderIDs.add(folder.getID());
+                }
+            }
+        }
+        return folderIDs;
     }
 
     private IDBasedCalendarAccess initCalendarAccess(AJAXRequestData request) throws OXException {
@@ -171,21 +214,21 @@ public class EventsContactHalo extends AbstractContactHalo implements HaloContac
         return calendarAccess;
     }
 
-    private List<SearchFilter> getSearchFilters(HaloContactQuery query) {
+    private List<SearchFilter> getSearchFilters(HaloContactQuery query, ServerSession session) {
         if (null != query.getUser()) {
-            return Collections.singletonList(getUserFilter(query.getUser()));
+            return Collections.singletonList(getUserFilter(query.getUser(), session));
         }
         if (null != query.getContact()) {
             SearchFilter filter = getParticipantFilter(query.getContact());
             if (null != filter) {
-                return Collections.singletonList(filter);
+                return Arrays.asList(filter, getUserFilter(null, session));
             }
         }
         if (null != query.getMergedContacts() && 0 < query.getMergedContacts().size()) {
             for (Contact contact : query.getMergedContacts()) {
                 SearchFilter filter = getParticipantFilter(contact);
                 if (null != filter) {
-                    return Collections.singletonList(filter);
+                    return Arrays.asList(filter, getUserFilter(null, session));
                 }
             }
         }
@@ -204,8 +247,13 @@ public class EventsContactHalo extends AbstractContactHalo implements HaloContac
         return new DefaultSearchFilter("participants", queries);
     }
 
-    private SearchFilter getUserFilter(User user) {
-        return new DefaultSearchFilter("users", Collections.singletonList(String.valueOf(user.getId())));
+    private SearchFilter getUserFilter(User user, ServerSession session) {
+        List<String> queries = new ArrayList<>();
+        queries.add(String.valueOf(session.getUserId()));
+        if (user != null) {
+            queries.add(String.valueOf(user.getId()));
+        }
+        return new DefaultSearchFilter("users", queries);
     }
 
 }

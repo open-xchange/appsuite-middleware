@@ -55,6 +55,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
+import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
 import com.openexchange.ajax.share.actions.GetLinkRequest;
@@ -149,12 +150,13 @@ public class Bug40369Test extends ShareTest {
         final GetLinkResponse[] responses = new GetLinkResponse[threads.length];
         for (int i = 0; i < threads.length; i++) {
             final int index = i;
+            AJAXClient client = getClient();
             threads[i] = new Thread(new Runnable() {
 
                 @Override
                 public void run() {
                     try {
-                        responses[index] = getClient().execute(request);
+                        responses[index] = client.execute(request);
                     } catch (Exception e) {
                         fail(e.getMessage());
                     }

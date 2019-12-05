@@ -70,11 +70,6 @@ public class MoveParserImpl implements ActionParser {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.mail.filter.api.conversion.parser.JSONParser#parse(org.json.JSONObject)
-     */
     @Override
     public Action<MoveActionArgument> parse(JSONObject jsonObject) throws JSONException {
         String folder = jsonObject.getString(MoveActionArgument.into.name());

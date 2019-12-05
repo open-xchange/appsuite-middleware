@@ -26,9 +26,6 @@ public class OXResellerGroupServicePortTypeImpl3 implements OXResellerGroupServi
 
     private static final Logger LOG = Logger.getLogger(OXResellerGroupServicePortTypeImpl.class.getName());
 
-    /* (non-Javadoc)
-     * @see com.openexchange.admin.soap.reseller.group.reseller.soap.OXResellerGroupServicePortType#change(com.openexchange.admin.soap.reseller.group.reseller.soap.Change  parameters )*
-     */
     @Override
     public void change(Change parameters) throws DatabaseUpdateException_Exception , NoSuchUserException_Exception , InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , StorageException_Exception , RemoteException_Exception , NoSuchGroupException_Exception , InvalidDataException_Exception    {
         LOG.info("Executing operation change");
@@ -49,9 +46,6 @@ public class OXResellerGroupServicePortTypeImpl3 implements OXResellerGroupServi
         //throw new InvalidDataException_Exception("InvalidDataException...");
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.admin.soap.reseller.group.reseller.soap.OXResellerGroupServicePortType#removeMember(com.openexchange.admin.soap.reseller.group.reseller.soap.RemoveMember  parameters )*
-     */
     @Override
     public void removeMember(RemoveMember parameters) throws DatabaseUpdateException_Exception , NoSuchUserException_Exception , InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , StorageException_Exception , RemoteException_Exception , NoSuchGroupException_Exception , InvalidDataException_Exception    {
         LOG.info("Executing operation removeMember");
@@ -72,9 +66,6 @@ public class OXResellerGroupServicePortTypeImpl3 implements OXResellerGroupServi
         //throw new InvalidDataException_Exception("InvalidDataException...");
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.admin.soap.reseller.group.reseller.soap.OXResellerGroupServicePortType#delete(com.openexchange.admin.soap.reseller.group.reseller.soap.Delete  parameters )*
-     */
     @Override
     public void delete(Delete parameters) throws DatabaseUpdateException_Exception , InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , StorageException_Exception , RemoteException_Exception , NoSuchGroupException_Exception , InvalidDataException_Exception    {
         LOG.info("Executing operation delete");
@@ -94,9 +85,6 @@ public class OXResellerGroupServicePortTypeImpl3 implements OXResellerGroupServi
         //throw new InvalidDataException_Exception("InvalidDataException...");
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.admin.soap.reseller.group.reseller.soap.OXResellerGroupServicePortType#list(com.openexchange.admin.soap.reseller.group.reseller.soap.dataobjects.ResellerContext  ctx ,)java.lang.String  pattern ,)com.openexchange.admin.soap.reseller.group.rmi.dataobjects.Credentials  auth )*
-     */
     @Override
     public java.util.List<com.openexchange.admin.soap.reseller.group.soap.dataobjects.Group> list(com.openexchange.admin.soap.reseller.group.reseller.soap.dataobjects.ResellerContext ctx,java.lang.String pattern,com.openexchange.admin.soap.reseller.group.rmi.dataobjects.Credentials auth) throws DatabaseUpdateException_Exception , InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    {
         LOG.info("Executing operation list");
@@ -119,9 +107,6 @@ public class OXResellerGroupServicePortTypeImpl3 implements OXResellerGroupServi
         //throw new InvalidDataException_Exception("InvalidDataException...");
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.admin.soap.reseller.group.reseller.soap.OXResellerGroupServicePortType#getMembers(com.openexchange.admin.soap.reseller.group.reseller.soap.dataobjects.ResellerContext  ctx ,)com.openexchange.admin.soap.reseller.group.soap.dataobjects.Group  grp ,)com.openexchange.admin.soap.reseller.group.rmi.dataobjects.Credentials  auth )*
-     */
     @Override
     public java.util.List<com.openexchange.admin.soap.reseller.group.soap.dataobjects.User> getMembers(com.openexchange.admin.soap.reseller.group.reseller.soap.dataobjects.ResellerContext ctx,com.openexchange.admin.soap.reseller.group.soap.dataobjects.Group grp,com.openexchange.admin.soap.reseller.group.rmi.dataobjects.Credentials auth) throws DatabaseUpdateException_Exception , InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , StorageException_Exception , RemoteException_Exception , NoSuchGroupException_Exception , InvalidDataException_Exception    {
         LOG.info("Executing operation getMembers");
@@ -145,9 +130,6 @@ public class OXResellerGroupServicePortTypeImpl3 implements OXResellerGroupServi
         //throw new InvalidDataException_Exception("InvalidDataException...");
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.admin.soap.reseller.group.reseller.soap.OXResellerGroupServicePortType#getDefaultGroup(com.openexchange.admin.soap.reseller.group.reseller.soap.dataobjects.ResellerContext  ctx ,)com.openexchange.admin.soap.reseller.group.rmi.dataobjects.Credentials  auth )*
-     */
     @Override
     public com.openexchange.admin.soap.reseller.group.soap.dataobjects.Group getDefaultGroup(com.openexchange.admin.soap.reseller.group.reseller.soap.dataobjects.ResellerContext ctx,com.openexchange.admin.soap.reseller.group.rmi.dataobjects.Credentials auth) throws DatabaseUpdateException_Exception , InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    {
         LOG.info("Executing operation getDefaultGroup");
@@ -169,9 +151,6 @@ public class OXResellerGroupServicePortTypeImpl3 implements OXResellerGroupServi
         //throw new InvalidDataException_Exception("InvalidDataException...");
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.admin.soap.reseller.group.reseller.soap.OXResellerGroupServicePortType#addMember(com.openexchange.admin.soap.reseller.group.reseller.soap.AddMember  parameters )*
-     */
     @Override
     public void addMember(AddMember parameters) throws DatabaseUpdateException_Exception , NoSuchUserException_Exception , InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , StorageException_Exception , RemoteException_Exception , NoSuchGroupException_Exception , InvalidDataException_Exception    {
         LOG.info("Executing operation addMember");
@@ -192,9 +171,6 @@ public class OXResellerGroupServicePortTypeImpl3 implements OXResellerGroupServi
         //throw new InvalidDataException_Exception("InvalidDataException...");
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.admin.soap.reseller.group.reseller.soap.OXResellerGroupServicePortType#create(com.openexchange.admin.soap.reseller.group.reseller.soap.dataobjects.ResellerContext  ctx ,)com.openexchange.admin.soap.reseller.group.soap.dataobjects.Group  grp ,)com.openexchange.admin.soap.reseller.group.rmi.dataobjects.Credentials  auth )*
-     */
     @Override
     public com.openexchange.admin.soap.reseller.group.soap.dataobjects.Group create(com.openexchange.admin.soap.reseller.group.reseller.soap.dataobjects.ResellerContext ctx,com.openexchange.admin.soap.reseller.group.soap.dataobjects.Group grp,com.openexchange.admin.soap.reseller.group.rmi.dataobjects.Credentials auth) throws DatabaseUpdateException_Exception , NoSuchUserException_Exception , InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    {
         LOG.info("Executing operation create");
@@ -218,9 +194,6 @@ public class OXResellerGroupServicePortTypeImpl3 implements OXResellerGroupServi
         //throw new InvalidDataException_Exception("InvalidDataException...");
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.admin.soap.reseller.group.reseller.soap.OXResellerGroupServicePortType#listAll(com.openexchange.admin.soap.reseller.group.reseller.soap.dataobjects.ResellerContext  ctx ,)com.openexchange.admin.soap.reseller.group.rmi.dataobjects.Credentials  auth )*
-     */
     @Override
     public java.util.List<com.openexchange.admin.soap.reseller.group.soap.dataobjects.Group> listAll(com.openexchange.admin.soap.reseller.group.reseller.soap.dataobjects.ResellerContext ctx,com.openexchange.admin.soap.reseller.group.rmi.dataobjects.Credentials auth) throws DatabaseUpdateException_Exception , InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    {
         LOG.info("Executing operation listAll");
@@ -242,9 +215,6 @@ public class OXResellerGroupServicePortTypeImpl3 implements OXResellerGroupServi
         //throw new InvalidDataException_Exception("InvalidDataException...");
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.admin.soap.reseller.group.reseller.soap.OXResellerGroupServicePortType#getMultipleData(com.openexchange.admin.soap.reseller.group.reseller.soap.dataobjects.ResellerContext  ctx ,)java.util.List<com.openexchange.admin.soap.reseller.group.soap.dataobjects.Group>  grps ,)com.openexchange.admin.soap.reseller.group.rmi.dataobjects.Credentials  auth )*
-     */
     @Override
     public java.util.List<com.openexchange.admin.soap.reseller.group.soap.dataobjects.Group> getMultipleData(com.openexchange.admin.soap.reseller.group.reseller.soap.dataobjects.ResellerContext ctx,java.util.List<com.openexchange.admin.soap.reseller.group.soap.dataobjects.Group> grps,com.openexchange.admin.soap.reseller.group.rmi.dataobjects.Credentials auth) throws DatabaseUpdateException_Exception , InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , StorageException_Exception , RemoteException_Exception , NoSuchGroupException_Exception , InvalidDataException_Exception    {
         LOG.info("Executing operation getMultipleData");
@@ -268,9 +238,6 @@ public class OXResellerGroupServicePortTypeImpl3 implements OXResellerGroupServi
         //throw new InvalidDataException_Exception("InvalidDataException...");
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.admin.soap.reseller.group.reseller.soap.OXResellerGroupServicePortType#getData(com.openexchange.admin.soap.reseller.group.reseller.soap.dataobjects.ResellerContext  ctx ,)com.openexchange.admin.soap.reseller.group.soap.dataobjects.Group  grp ,)com.openexchange.admin.soap.reseller.group.rmi.dataobjects.Credentials  auth )*
-     */
     @Override
     public com.openexchange.admin.soap.reseller.group.soap.dataobjects.Group getData(com.openexchange.admin.soap.reseller.group.reseller.soap.dataobjects.ResellerContext ctx,com.openexchange.admin.soap.reseller.group.soap.dataobjects.Group grp,com.openexchange.admin.soap.reseller.group.rmi.dataobjects.Credentials auth) throws DatabaseUpdateException_Exception , InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , StorageException_Exception , RemoteException_Exception , NoSuchGroupException_Exception , InvalidDataException_Exception    {
         LOG.info("Executing operation getData");
@@ -294,9 +261,6 @@ public class OXResellerGroupServicePortTypeImpl3 implements OXResellerGroupServi
         //throw new InvalidDataException_Exception("InvalidDataException...");
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.admin.soap.reseller.group.reseller.soap.OXResellerGroupServicePortType#deleteMultiple(com.openexchange.admin.soap.reseller.group.reseller.soap.DeleteMultiple  parameters )*
-     */
     @Override
     public void deleteMultiple(DeleteMultiple parameters) throws DatabaseUpdateException_Exception , InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , StorageException_Exception , RemoteException_Exception , NoSuchGroupException_Exception , InvalidDataException_Exception    {
         LOG.info("Executing operation deleteMultiple");
@@ -316,9 +280,6 @@ public class OXResellerGroupServicePortTypeImpl3 implements OXResellerGroupServi
         //throw new InvalidDataException_Exception("InvalidDataException...");
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.admin.soap.reseller.group.reseller.soap.OXResellerGroupServicePortType#listGroupsForUser(com.openexchange.admin.soap.reseller.group.reseller.soap.dataobjects.ResellerContext  ctx ,)com.openexchange.admin.soap.reseller.group.soap.dataobjects.User  usr ,)com.openexchange.admin.soap.reseller.group.rmi.dataobjects.Credentials  auth )*
-     */
     @Override
     public java.util.List<com.openexchange.admin.soap.reseller.group.soap.dataobjects.Group> listGroupsForUser(com.openexchange.admin.soap.reseller.group.reseller.soap.dataobjects.ResellerContext ctx,com.openexchange.admin.soap.reseller.group.soap.dataobjects.User usr,com.openexchange.admin.soap.reseller.group.rmi.dataobjects.Credentials auth) throws DatabaseUpdateException_Exception , NoSuchUserException_Exception , InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    {
         LOG.info("Executing operation listGroupsForUser");

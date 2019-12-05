@@ -121,7 +121,7 @@ public class UserCopy extends ObjectNamingAbstraction {
             final User result = rsi.copyUser(user, src, dest, auth);
             displaySuccessMessage(user, result, src.getId(), dest.getId(), parser);
             sysexit(0);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             printErrors(null, null, e, parser);
             sysexit(1);
         }
@@ -151,7 +151,7 @@ public class UserCopy extends ObjectNamingAbstraction {
             sb.append(" with new user id ");
             sb.append(destuserid);
         }
-        if( null != parser && parser.checkNoNewLine()) {
+        if ( null != parser && parser.checkNoNewLine()) {
             final String output = sb.toString().replace("\n", "");
             System.out.println(output);
         } else {

@@ -167,11 +167,6 @@ public abstract class AbstractScribeAwareOAuthServiceMetaData extends AbstractOA
         return api;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.OAuthServiceMetaData#getUserIdentity(java.lang.String)
-     */
     @Override
     public String getUserIdentity(Session session, int accountId, String accessToken, String accessSecret) throws OXException {
         // Contact the OAuth provider and fetch the identity of the current logged in user
@@ -197,11 +192,6 @@ public abstract class AbstractScribeAwareOAuthServiceMetaData extends AbstractOA
         throw OAuthExceptionCodes.CANNOT_GET_USER_IDENTITY.create(getId());
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.impl.OAuthIdentityAware#getContentType()
-     */
     @Override
     public String getContentType() {
         return DEFAULT_CONTENT_TYPE;

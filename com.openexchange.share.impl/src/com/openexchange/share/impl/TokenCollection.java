@@ -59,7 +59,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderPermissionType;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.ShareExceptionCodes;
@@ -71,6 +70,7 @@ import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.groupware.SubfolderAwareTargetPermission;
 import com.openexchange.share.groupware.TargetPermission;
 import com.openexchange.share.groupware.TargetProxy;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 /**
@@ -191,8 +191,8 @@ public class TokenCollection {
 
     private boolean checkForLegatorPermission(List<TargetPermission> permissions, int guestId){
         for(TargetPermission perm: permissions) {
-            if(perm.isGroup() == false && perm.getBits() == LINK_PERMISSION_BITS && perm.getEntity() == guestId) {
-                if(perm instanceof SubfolderAwareTargetPermission) {
+            if (perm.isGroup() == false && perm.getBits() == LINK_PERMISSION_BITS && perm.getEntity() == guestId) {
+                if (perm instanceof SubfolderAwareTargetPermission) {
                     return ((SubfolderAwareTargetPermission) perm).getType() == FolderPermissionType.LEGATOR.getTypeNumber();
                 } else {
                     return false;

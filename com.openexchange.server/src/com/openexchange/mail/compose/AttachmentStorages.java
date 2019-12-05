@@ -63,6 +63,7 @@ import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.session.Session;
@@ -184,15 +185,25 @@ public class AttachmentStorages {
             ContentDisposition contentDisposition = ContentDisposition.dispositionFor(disposition);
             attachment.setContentDisposition(null == contentDisposition ? ATTACHMENT : contentDisposition);
         }
-        {
-            ContentType contentType = new ContentType(uploadFile.getContentType());
-            attachment.setMimeType(contentType.getBaseType());
-            if (INLINE == attachment.getContentDisposition() && contentType.startsWith("image/")) {
-                // Set a Content-Id for inline image, too
-                attachment.setContentId(UUIDs.getUnformattedStringFromRandom() + "@Open-Xchange");
-            }
+
+        ContentType contentType = new ContentType(uploadFile.getContentType());
+        attachment.setMimeType(contentType.getBaseType());
+        if (INLINE == attachment.getContentDisposition() && contentType.startsWith("image/")) {
+            // Set a Content-Id for inline image, too
+            attachment.setContentId(UUIDs.getUnformattedStringFromRandom() + "@Open-Xchange");
         }
-        attachment.setName(uploadFile.getPreparedFileName());
+
+        {
+            String fileName = uploadFile.getPreparedFileName();
+            if (fileName.indexOf('.') < 0) {
+                // Ensure file extension is present in file name
+                String fileExtension = MimeType2ExtMap.getFileExtension(contentType.getBaseType(), null);
+                if (fileExtension != null) {
+                    fileName = new StringBuilder(fileName).append('.').append(fileExtension).toString();
+                }
+            }
+            attachment.setName(fileName);
+        }
         attachment.setOrigin(AttachmentOrigin.UPLOAD);
         return attachment;
     }

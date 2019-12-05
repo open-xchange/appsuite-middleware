@@ -51,6 +51,7 @@ package com.openexchange.mail.json.compose.share;
 
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.i18n.TranslatorFactory;
+import com.openexchange.regional.RegionalSettingsService;
 import com.openexchange.templating.TemplateService;
 
 /**
@@ -110,6 +111,28 @@ public class MessageGenerators {
      */
     public static TemplateService getTemplateService() {
         return TEMPLATE_SERVICE_REF.get();
+    }
+
+    // ---------------------------------------------------------------------------------------------------------------------------------
+
+    private static final AtomicReference<RegionalSettingsService> REGIONAL_SERVICE_REF = new AtomicReference<RegionalSettingsService>(null);
+
+    /**
+     * Sets the regional settings service.
+     *
+     * @param regionalSettingsService The regional settings service to set or <code>null</code> to clear
+     */
+    public static void setRegionalSettingsService(RegionalSettingsService regionalSettingsService) {
+        REGIONAL_SERVICE_REF.set(regionalSettingsService);
+    }
+
+    /**
+     * Gets the regional settings service.
+     *
+     * @return The regional settings service or <code>null</code>
+     */
+    public static RegionalSettingsService getRegionalSettingsService() {
+        return REGIONAL_SERVICE_REF.get();
     }
 
 }

@@ -119,7 +119,7 @@ public class MessagingMessageParserTest {
         assertEquals(3, flags.size());
         final Iterator<String> iterator = flags.iterator();
         final Set<String> expectedFlags = new HashSet<String>(Arrays.asList("flag1", "flag2", "flag3"));
-        while(iterator.hasNext()) {
+        while (iterator.hasNext()) {
             assertTrue(expectedFlags.remove(iterator.next()));
         }
         assertTrue(expectedFlags.isEmpty());
@@ -200,7 +200,7 @@ public class MessagingMessageParserTest {
         final MessagingMessageGetSwitch get = new MessagingMessageGetSwitch();
 
         for (final MessagingField field : MessagingField.values()) {
-            if(field.getEquivalentHeader() != null) {
+            if (field.getEquivalentHeader() != null) {
                 final Object value = field.doSwitch(get, message);
                 assertNotNull(value);
             }
@@ -236,7 +236,7 @@ public class MessagingMessageParserTest {
     }
 
     private String getStringData(final MessagingContent content) throws OXException, IOException {
-        if(StringContent.class.isInstance(content)) {
+        if (StringContent.class.isInstance(content)) {
             return ((StringContent) content).getData();
         } else if (BinaryContent.class.isInstance(content)) {
             return inputStream2String(((BinaryContent) content).getData());
@@ -377,7 +377,7 @@ public class MessagingMessageParserTest {
     private String inputStream2String(final InputStream data) throws IOException {
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
         int b = 1;
-        while((b = data.read()) != -1) {
+        while ((b = data.read()) != -1) {
             baos.write(b);
         }
         return new String(baos.toByteArray(), com.openexchange.java.Charsets.UTF_8);

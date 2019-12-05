@@ -50,6 +50,7 @@
 package com.openexchange.admin.reseller.osgi;
 
 import java.rmi.Remote;
+import java.util.Dictionary;
 import java.util.Hashtable;
 import com.openexchange.admin.daemons.AdminDaemonService;
 import com.openexchange.admin.exceptions.OXGenericException;
@@ -57,10 +58,12 @@ import com.openexchange.admin.plugins.BasicAuthenticatorPluginInterface;
 import com.openexchange.admin.plugins.OXContextPluginInterface;
 import com.openexchange.admin.plugins.OXUserPluginInterface;
 import com.openexchange.admin.reseller.daemons.ClientAdminThreadExtended;
+import com.openexchange.admin.reseller.plugins.OXResellerPluginInterface;
 import com.openexchange.admin.reseller.rmi.impl.OXReseller;
 import com.openexchange.admin.reseller.rmi.impl.OXResellerContextImpl;
 import com.openexchange.admin.reseller.rmi.impl.OXResellerUserImpl;
 import com.openexchange.admin.reseller.rmi.impl.ResellerAuth;
+import com.openexchange.admin.reseller.services.PluginInterfaces;
 import com.openexchange.admin.reseller.tools.AdminCacheExtended;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.tools.AdminCache;
@@ -68,6 +71,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.migration.DBMigrationExecutorService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 
 public class Activator extends HousekeepingActivator {
 
@@ -85,8 +89,9 @@ public class Activator extends HousekeepingActivator {
             AdminCache.compareAndSetConfigurationService(null, configurationService);
             initCache(configurationService);
 
-            final OXReseller reseller = new OXReseller();
-            registerService(Remote.class, reseller, null);
+            Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
+            serviceProperties.put("RMI_NAME", OXReseller.RMI_NAME);
+            registerService(Remote.class, new OXReseller(), serviceProperties);
             LOG.info("RMI Interface for reseller bundle bound to RMI registry");
 
             Hashtable<String, String> props = new Hashtable<String, String>(2);
@@ -106,17 +111,35 @@ public class Activator extends HousekeepingActivator {
 
             track(DatabaseService.class, new DatabaseServiceCustomizer(context, ClientAdminThreadExtended.cache.getPool()));
             track(DBMigrationExecutorService.class, new ResellerDBMigrationServiceTracker(this, context));
+
+            // Plugin interfaces
+            {
+                final int defaultRanking = 100;
+                final RankingAwareNearRegistryServiceTracker<OXResellerPluginInterface> rtracker = new RankingAwareNearRegistryServiceTracker<OXResellerPluginInterface>(context, OXResellerPluginInterface.class, defaultRanking);
+                rememberTracker(rtracker);
+
+                final PluginInterfaces.Builder builder = new PluginInterfaces.Builder().resellerPlugins(rtracker);
+
+                PluginInterfaces.setInstance(builder.build());
+            }
+
             openTrackers();
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             LOG.error("Error while creating one instance for RMI interface", e);
             throw e;
-        } catch (final OXGenericException e) {
+        } catch (OXGenericException e) {
             LOG.error("", e);
             throw e;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("", e);
             throw e;
         }
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        PluginInterfaces.setInstance(null);
+        super.stopBundle();
     }
 
     private void initCache(final ConfigurationService service) throws OXGenericException {

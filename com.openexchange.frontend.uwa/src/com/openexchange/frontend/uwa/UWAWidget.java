@@ -63,7 +63,9 @@ import com.openexchange.modules.model.Metadata;
  * {@link UWAWidget}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @deprecated with 7.10.3. Used for OX6 UI which is no longer supported.
  */
+@Deprecated
 public class UWAWidget extends AbstractModel<UWAWidget> implements Serializable{
 
     private static final long serialVersionUID = -2197679662094962986L;
@@ -175,7 +177,7 @@ public class UWAWidget extends AbstractModel<UWAWidget> implements Serializable{
 
         @Override
         public Object get(UWAWidget thing) {
-            switch(this) {
+            switch (this) {
             case ADJ: return thing.getADJ();
             case AUTOREFRESH: return Autoboxing.valueOf(thing.isAutorefresh());
             case ID: return thing.getId();
@@ -198,10 +200,10 @@ public class UWAWidget extends AbstractModel<UWAWidget> implements Serializable{
 
         @Override
         public void set(UWAWidget thing, Object value) {
-            if(value == null && ! NULLABLE.contains(this)) {
+            if (value == null && ! NULLABLE.contains(this)) {
                 return ;
             }
-            switch(this) {
+            switch (this) {
             case ADJ: thing.setADJ((String) value); break;
             case AUTOREFRESH:  thing.setAutorefresh(a2b(value)); break;
             case ID:  thing.setId((String) value); break;

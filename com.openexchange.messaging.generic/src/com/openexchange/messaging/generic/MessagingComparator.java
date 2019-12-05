@@ -215,7 +215,7 @@ public class MessagingComparator implements Comparator<MessagingMessage> {
             }
 
             throw MessagingExceptionCodes.INVALID_SORTING_COLUMN.create(field);
-        } catch (final OXException x) {
+        } catch (OXException x) {
             throw new RuntimeException(x);
         }
     }
@@ -229,7 +229,7 @@ public class MessagingComparator implements Comparator<MessagingMessage> {
             synchronized (DATE_FORMAT) {
                 try {
                     return DATE_FORMAT.parse(h.getValue());
-                } catch (final ParseException e) {
+                } catch (ParseException e) {
                     // IGNORE
                     org.slf4j.LoggerFactory.getLogger(MessagingComparator.class).error("Comparison failed.", e);
                 }
@@ -244,7 +244,7 @@ public class MessagingComparator implements Comparator<MessagingMessage> {
         if (INT_FIELDS.contains(field) && String.class.isInstance(o)) {
             try {
                 return Integer.valueOf((String) o);
-            } catch (final NumberFormatException x) {
+            } catch (NumberFormatException x) {
                 return o;
             }
         }

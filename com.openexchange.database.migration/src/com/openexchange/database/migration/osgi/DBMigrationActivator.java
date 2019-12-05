@@ -50,6 +50,8 @@
 package com.openexchange.database.migration.osgi;
 
 import java.rmi.Remote;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import com.openexchange.database.migration.DBMigrationExecutorService;
 import com.openexchange.database.migration.DBMigrationMonitorService;
 import com.openexchange.database.migration.internal.BundlePackageScanClassResolver;
@@ -93,7 +95,9 @@ public class DBMigrationActivator extends HousekeepingActivator {
         executorService.setRegisterer(rmiService);
         registerService(DBMigrationMonitorService.class, DBMigrationMonitor.getInstance());
         registerService(DBMigrationExecutorService.class, executorService);
-        registerService(Remote.class, rmiService);
+        Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
+        serviceProperties.put("RMI_NAME", DBMigrationRMIServiceImpl.RMI_NAME);
+        registerService(Remote.class, rmiService, serviceProperties);
         openTrackers();
     }
 

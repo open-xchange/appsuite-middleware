@@ -40,15 +40,15 @@ public class XMLCompare {
         if (m != null) {
             try {
                 return ((Boolean) m.invoke(this, expectedDoc, gotDoc)).booleanValue();
-            } catch (final IllegalArgumentException e) {
+            } catch (IllegalArgumentException e) {
                 e.printStackTrace();
-            } catch (final IllegalAccessException e) {
+            } catch (IllegalAccessException e) {
                 e.printStackTrace();
-            } catch (final InvocationTargetException e) {
+            } catch (InvocationTargetException e) {
                 e.printStackTrace();
             }
         }
-        if (checkText(nodeName) && !expectedDoc.getText().equals(gotDoc.getText())) {
+        if (checkText(nodeName) && !expectedDoc.getText().trim().equals(gotDoc.getText().trim())) {
             return false;
         }
         return compareChildElems(expectedDoc, gotDoc);

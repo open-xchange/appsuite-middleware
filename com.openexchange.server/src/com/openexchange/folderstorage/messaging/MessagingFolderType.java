@@ -102,7 +102,7 @@ public final class MessagingFolderType implements FolderType {
         final MessagingFolderIdentifier pfi;
         try {
             pfi = new MessagingFolderIdentifier(folderId);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             // org.slf4j.LoggerFactory.getLogger(MessagingFolderType.class).warn("", e);
             return false;
         }

@@ -61,8 +61,8 @@ import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 /**
  * {@link AllVisibleFoldersPerformer} - Serves the request to deliver all visible folders.
@@ -148,12 +148,12 @@ public final class AllVisibleFoldersPerformer extends AbstractUserizedFolderPerf
             }
 
             return ret;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             for (final FolderStorage fs : openedStorages) {
                 fs.rollback(storageParameters);
             }
             throw e;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             for (final FolderStorage fs : openedStorages) {
                 fs.rollback(storageParameters);
             }

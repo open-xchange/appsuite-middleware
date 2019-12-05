@@ -88,7 +88,7 @@ public class ConnectionPool extends ReentrantLockPool<Connection> implements Con
     public Connection getWithoutTimeout() throws PoolingException {
         try {
             return lifecycle.createWithoutTimeout();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw new PoolingException("Cannot create pooled object.", e);
         }
     }

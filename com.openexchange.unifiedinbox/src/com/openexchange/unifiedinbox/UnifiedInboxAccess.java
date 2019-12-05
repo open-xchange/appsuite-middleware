@@ -307,7 +307,7 @@ public final class UnifiedInboxAccess extends MailAccess<UnifiedInboxFolderStora
                 accountId,
                 session.getUserId(),
                 session.getContextId()), session.getUserId(), session.getContextId());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
         }
     }

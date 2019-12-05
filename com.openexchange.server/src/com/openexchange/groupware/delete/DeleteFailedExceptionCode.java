@@ -62,9 +62,9 @@ public enum DeleteFailedExceptionCode {
      */
     UNKNOWN_TYPE("Unknown delete event type: %1$d", Category.CATEGORY_ERROR, 1),
     /**
-     * A SQL error occurred: %1$s
+     * An SQL error occurred: %1$s
      */
-    SQL_ERROR("A SQL error occurred: %1$s", Category.CATEGORY_ERROR, 2),
+    SQL_ERROR("An SQL error occurred: %1$s", Category.CATEGORY_ERROR, 2),
     /**
      * An error occurred: %1$s
      */

@@ -54,6 +54,7 @@ import java.rmi.RemoteException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import com.openexchange.logging.LogResponse;
 import ch.qos.logback.classic.Level;
 
 /**
@@ -76,10 +77,10 @@ public interface LogbackConfigurationRMIService extends Remote {
      * 
      * @param contextId The context identifier
      * @param loggers The logger names and their {@link Level}s
-     * @return A {@link LogbackRemoteResponse} with information about the outcome of the operation
+     * @return A {@link LogResponse} with information about the outcome of the operation
      * @throws RemoteException if an error is occurred
      */
-    LogbackRemoteResponse filterContext(int contextId, Map<String, Level> loggers) throws RemoteException;
+    LogResponse filterContext(int contextId, Map<String, Level> loggers) throws RemoteException;
 
     /**
      * Creates a logging filter for the specified loggers for the specified user in the specified context
@@ -87,20 +88,20 @@ public interface LogbackConfigurationRMIService extends Remote {
      * @param contextId The context identifier
      * @param userId The user identifier
      * @param loggers The logger names and their {@link Level}s
-     * @return A {@link LogbackRemoteResponse} with information about the outcome of the operation
+     * @return A {@link LogResponse} with information about the outcome of the operation
      * @throws RemoteException if an error is occurred
      */
-    LogbackRemoteResponse filterUser(int contextId, int userId, Map<String, Level> loggers) throws RemoteException;
+    LogResponse filterUser(int contextId, int userId, Map<String, Level> loggers) throws RemoteException;
 
     /**
      * Creates a logging filter for the specified loggers for the specified session
      * 
      * @param sessionId The session identifier
      * @param loggers The logger names and their {@link Level}s
-     * @return A {@link LogbackRemoteResponse} with information about the outcome of the operation
+     * @return A {@link LogResponse} with information about the outcome of the operation
      * @throws RemoteException if an error is occurred
      */
-    LogbackRemoteResponse filterSession(String sessionId, Map<String, Level> loggers) throws RemoteException;
+    LogResponse filterSession(String sessionId, Map<String, Level> loggers) throws RemoteException;
 
     /**
      * Returns a {@link Set} with all logging filters
@@ -115,10 +116,10 @@ public interface LogbackConfigurationRMIService extends Remote {
      * 
      * @param contextId The context identifier
      * @param loggers The logger names
-     * @return A {@link LogbackRemoteResponse} with information about the outcome of the operation
+     * @return A {@link LogResponse} with information about the outcome of the operation
      * @throws RemoteException if an error is occurred
      */
-    LogbackRemoteResponse removeContextFilter(int contextId, List<String> loggers) throws RemoteException;
+    LogResponse removeContextFilter(int contextId, List<String> loggers) throws RemoteException;
 
     /**
      * Removes the logging filter for the specified user in the specified context and for the specified loggers
@@ -126,46 +127,46 @@ public interface LogbackConfigurationRMIService extends Remote {
      * @param contextId The context identifier
      * @param userId The user identifier
      * @param loggers The logger names
-     * @return A {@link LogbackRemoteResponse} with information about the outcome of the operation
+     * @return A {@link LogResponse} with information about the outcome of the operation
      * @throws RemoteException if an error is occurred
      */
-    LogbackRemoteResponse removeUserFilter(int contextId, int userId, List<String> loggers) throws RemoteException;
+    LogResponse removeUserFilter(int contextId, int userId, List<String> loggers) throws RemoteException;
 
     /**
      * Removes the logging filter for the specified session and for the specified loggers
      * 
      * @param sessionId The session identifier
      * @param loggers The logger names
-     * @return A {@link LogbackRemoteResponse} with information about the outcome of the operation
+     * @return A {@link LogResponse} with information about the outcome of the operation
      * @throws RemoteException if an error is occurred
      */
-    LogbackRemoteResponse removeSessionFilter(String sessionId, List<String> loggers) throws RemoteException;
+    LogResponse removeSessionFilter(String sessionId, List<String> loggers) throws RemoteException;
 
     /**
      * Removes all logging filters
      * 
-     * @return A {@link LogbackRemoteResponse} with information about the outcome of the operation
+     * @return A {@link LogResponse} with information about the outcome of the operation
      * @throws RemoteException if an error is occurred
      */
-    LogbackRemoteResponse clearFilters() throws RemoteException;
+    LogResponse clearFilters() throws RemoteException;
 
     /**
      * Modifies the specified level for the specified loggers
      * 
      * @param loggers The loggers for which to modify the levels
-     * @return A {@link LogbackRemoteResponse} with information about the outcome of the operation
+     * @return A {@link LogResponse} with information about the outcome of the operation
      * @throws RemoteException if an error is occurred
      */
-    LogbackRemoteResponse modifyLogLevels(Map<String, Level> loggers) throws RemoteException;
+    LogResponse modifyLogLevels(Map<String, Level> loggers) throws RemoteException;
 
     /**
      * Overrides {@link Exception} categories to be suppressed (comma separated)
      * 
      * @param categories The categories to suppress (TODO: Maybe use a {@link List}?)
-     * @return A {@link LogbackRemoteResponse} with information about the outcome of the operation
+     * @return A {@link LogResponse} with information about the outcome of the operation
      * @throws RemoteException if an error is occurred
      */
-    LogbackRemoteResponse overrideExceptionCategories(String categories) throws RemoteException;
+    LogResponse overrideExceptionCategories(String categories) throws RemoteException;
 
     /**
      * Returns a {@link Set} with all {@link Exception} categories

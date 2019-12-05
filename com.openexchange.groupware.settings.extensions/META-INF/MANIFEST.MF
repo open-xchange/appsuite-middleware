@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Dynamic ConfigTree Settings
 Bundle-SymbolicName: com.openexchange.groupware.settings.extensions
-Bundle-Version: 7.10.2
+Bundle-Version: 7.10.3
 Bundle-Activator: com.openexchange.groupware.settings.extensions.osgi.Activator
 Bundle-Vendor: Open-Xchange GmbH
 Import-Package: com.fasterxml.jackson.core,
@@ -25,6 +25,7 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.osgi,
  com.openexchange.session,
  com.openexchange.tools.strings,
+ com.openexchange.user,
  org.apache.commons.logging,
  org.json,
  org.osgi.framework,

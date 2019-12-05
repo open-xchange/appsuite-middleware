@@ -82,7 +82,7 @@ public final class Rdiffs {
         try {
             in = new FileInputStream(fname);
             return DigestUtils.md5Hex(in);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw RdiffExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
             Streams.close(in);
@@ -101,7 +101,7 @@ public final class Rdiffs {
         try {
             in = new FileInputStream(fname);
             return DigestUtils.md5(in);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw RdiffExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
             Streams.close(in);

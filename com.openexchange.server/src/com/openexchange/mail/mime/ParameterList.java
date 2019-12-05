@@ -205,7 +205,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
                 }
             }
             return clone;
-        } catch (final CloneNotSupportedException e) {
+        } catch (CloneNotSupportedException e) {
             /*
              * Cannot occur since it's cloneable
              */
@@ -220,7 +220,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
             while (m.find()) {
                 parseParameter(Strings.toLowerCase(m.group(1)), m.group(2));
             }
-        } catch (final StackOverflowError regexFailed) {
+        } catch (StackOverflowError regexFailed) {
             /*
              * Regex failed for given parameter list. Perform very simple manual parsing.
              */
@@ -293,7 +293,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
                 int num = -1;
                 try {
                     num = Integer.parseInt(procName.substring(pos + 1));
-                } catch (final NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     num = -1;
                 }
                 if (num != -1) {
@@ -640,7 +640,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
             try {
                 final Parameter clone = (Parameter) super.clone();
                 return clone;
-            } catch (final CloneNotSupportedException e) {
+            } catch (CloneNotSupportedException e) {
                 LOG.error("", e);
                 throw new RuntimeException("Clone failed even though 'Cloneable' interface is implemented");
             }
@@ -721,7 +721,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
 
             try {
                 sb.append("; ").append(name).append('=').append(checkQuotation(MimeUtility.encodeText(getValue(), CHARSET_UTF_8, "Q")));
-            } catch (final UnsupportedEncodingException e) {
+            } catch (UnsupportedEncodingException e) {
                 /*
                  * Cannot occur
                  */
@@ -734,7 +734,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
             try {
                 DirectValue clone = (DirectValue) super.clone();
                 return clone;
-            } catch (final CloneNotSupportedException e) {
+            } catch (CloneNotSupportedException e) {
                 LOG.error("", e);
                 throw new RuntimeException("Clone failed even though 'Cloneable' interface is implemented");
             }
@@ -861,7 +861,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
                 }
                 clone.value = null;
                 return clone;
-            } catch (final CloneNotSupportedException e) {
+            } catch (CloneNotSupportedException e) {
                 LOG.error("", e);
                 throw new RuntimeException("Clone failed even though 'Cloneable' interface is implemented");
             }

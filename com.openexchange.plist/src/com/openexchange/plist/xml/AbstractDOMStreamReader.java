@@ -113,21 +113,11 @@ public abstract class AbstractDOMStreamReader<T, I> implements XMLStreamReader {
         return frame;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see javax.xml.stream.XMLStreamReader#getProperty(java.lang.String)
-     */
     @Override
     public Object getProperty(final String key) throws IllegalArgumentException {
         return properties.get(key);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see javax.xml.stream.XMLStreamReader#next()
-     */
     @Override
     public int next() throws XMLStreamException {
         if (frame.ended) {
@@ -177,22 +167,11 @@ public abstract class AbstractDOMStreamReader<T, I> implements XMLStreamReader {
     protected abstract int nextChild();
     protected abstract ElementFrame<T, I> getChildFrame();
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see javax.xml.stream.XMLStreamReader#require(int, java.lang.String,
-     *      java.lang.String)
-     */
     @Override
     public void require(final int arg0, final String arg1, final String arg2) throws XMLStreamException {
         throw new UnsupportedOperationException();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see javax.xml.stream.XMLStreamReader#getElementText()
-     */
     @Override
     public abstract String getElementText() throws XMLStreamException;
 
@@ -207,11 +186,6 @@ public abstract class AbstractDOMStreamReader<T, I> implements XMLStreamReader {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see javax.xml.stream.XMLStreamReader#nextTag()
-     */
     @Override
     public int nextTag() throws XMLStreamException {
         while (hasNext()) {
@@ -223,11 +197,6 @@ public abstract class AbstractDOMStreamReader<T, I> implements XMLStreamReader {
         return currentEvent;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see javax.xml.stream.XMLStreamReader#hasNext()
-     */
     @Override
     public boolean hasNext() throws XMLStreamException {
 
@@ -235,58 +204,28 @@ public abstract class AbstractDOMStreamReader<T, I> implements XMLStreamReader {
 
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see javax.xml.stream.XMLStreamReader#close()
-     */
     @Override
     public void close() throws XMLStreamException {
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see javax.xml.stream.XMLStreamReader#getNamespaceURI(java.lang.String)
-     */
     @Override
     public abstract String getNamespaceURI(String prefix);
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see javax.xml.stream.XMLStreamReader#isStartElement()
-     */
     @Override
     public boolean isStartElement() {
         return currentEvent == START_ELEMENT;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see javax.xml.stream.XMLStreamReader#isEndElement()
-     */
     @Override
     public boolean isEndElement() {
         return currentEvent == END_ELEMENT;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see javax.xml.stream.XMLStreamReader#isCharacters()
-     */
     @Override
     public boolean isCharacters() {
         return currentEvent == CHARACTERS;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see javax.xml.stream.XMLStreamReader#isWhiteSpace()
-     */
     @Override
     public boolean isWhiteSpace() {
         if (currentEvent == CHARACTERS || currentEvent == CDATA) {

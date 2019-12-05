@@ -742,7 +742,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                 in.unread(read);
                 error = false;
                 return in;
-            } catch (final com.sun.mail.util.FolderClosedIOException e) {
+            } catch (com.sun.mail.util.FolderClosedIOException e) {
                 // Need to reconnect
                 return getReconnectedStream();
             } finally {

@@ -58,7 +58,7 @@ import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
+import com.openexchange.user.User;
 
 public class FolderTreeUtilImpl implements FolderTreeUtil {
 
@@ -74,8 +74,8 @@ public class FolderTreeUtilImpl implements FolderTreeUtil {
         try {
             FolderObject folder = getFolder(folderid, ctx);
             path.add(Integer.valueOf(folder.getObjectID()));
-            while(folder != null) {
-                if(folder.getParentFolderID() == FolderObject.SYSTEM_ROOT_FOLDER_ID) {
+            while (folder != null) {
+                if (folder.getParentFolderID() == FolderObject.SYSTEM_ROOT_FOLDER_ID) {
                     path.add(Integer.valueOf(FolderObject.SYSTEM_ROOT_FOLDER_ID));
                     folder = null;
                 } else {
@@ -83,7 +83,7 @@ public class FolderTreeUtilImpl implements FolderTreeUtil {
                     path.add(Integer.valueOf(folder.getObjectID()));
                 }
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw new OXException(e);
         }
         Collections.reverse(path);
@@ -119,7 +119,7 @@ public class FolderTreeUtilImpl implements FolderTreeUtil {
                 } finally {
                     provider.releaseReadConnection(ctx, readCon);
                 }
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 MODE = new NORMAL_MODE();
                 return MODE.getFolder(folderid, ctx);
             }

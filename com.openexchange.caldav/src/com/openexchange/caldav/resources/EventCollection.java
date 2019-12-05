@@ -95,8 +95,8 @@ import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
@@ -147,9 +147,9 @@ public class EventCollection extends CalDAVFolderCollection<Event> {
             includeProperties(
                 new RefreshRate(this),
                 new Source(this),
-                new SubscribedStripAlarms(this),
-                new SubscribedStripAttachments(this),
-                new SubscribedStripTodos(this)
+                new SubscribedStripAlarms(),
+                new SubscribedStripAttachments(),
+                new SubscribedStripTodos()
             );
         }
         if (supportsPermissions(folder)) {
@@ -302,7 +302,13 @@ public class EventCollection extends CalDAVFolderCollection<Event> {
         return new EventResource(this, event, constructPathForChildResource(event));
     }
 
+    @Override
     protected SyncStatus<WebdavResource> getSyncStatus(SyncToken syncToken) throws OXException {
+        return getSyncStatus(syncToken, -1);
+    }
+
+    @Override
+    protected SyncStatus<WebdavResource> getSyncStatus(SyncToken syncToken, int limit) throws OXException {
         SyncStatus<WebdavResource> syncStatus = new SyncStatus<WebdavResource>();
         /*
          * get new, modified & deleted objects since client token within synchronized interval
@@ -311,13 +317,17 @@ public class EventCollection extends CalDAVFolderCollection<Event> {
 
             @Override
             protected UpdatesResult perform(IDBasedCalendarAccess access) throws OXException {
+                int maxResults = getMaxResults();
+                if (0 < limit) {
+                    maxResults = 0 < maxResults ? Math.min(maxResults, limit) : limit;
+                }
                 if (syncToken.isInitial()) {
                     access.set(CalendarParameters.PARAMETER_IGNORE, new String[] { "deleted" }); // exclude deleted events for initial sync
                 }
                 access.set(CalendarParameters.PARAMETER_FIELDS, SYNC_STATUS_FIELDS);
                 access.set(CalendarParameters.PARAMETER_RANGE_START, minDateTime.getMinDateTime());
                 access.set(CalendarParameters.PARAMETER_RANGE_END, maxDateTime.getMaxDateTime());
-                access.set(CalendarParameters.PARAMETER_RIGHT_HAND_LIMIT, I(getMaxResults()));
+                access.set(CalendarParameters.PARAMETER_RIGHT_HAND_LIMIT, I(maxResults));
                 return access.getUpdatedEventsInFolder(folderID, syncToken.getTimestamp());
             }
         }.execute(factory.getSession());

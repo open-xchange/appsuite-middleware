@@ -52,16 +52,14 @@ package com.openexchange.ajax.chronos.itip;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
-import java.io.File;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
-import org.apache.commons.io.output.FileWriterWithEncoding;
 import org.jdom2.IllegalDataException;
 import org.junit.Assert;
 import com.openexchange.ajax.chronos.AbstractChronosTest;
-import com.openexchange.ajax.chronos.factory.AttendeeFactory;
-import com.openexchange.ajax.chronos.factory.ICalFacotry;
-import com.openexchange.ajax.chronos.factory.ITipMailFactory;
 import com.openexchange.test.pool.TestContext;
 import com.openexchange.test.pool.TestContextPool;
 import com.openexchange.test.pool.TestUser;
@@ -69,14 +67,13 @@ import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.ActionResponse;
 import com.openexchange.testing.httpclient.models.AnalyzeResponse;
-import com.openexchange.testing.httpclient.models.Attendee;
-import com.openexchange.testing.httpclient.models.Attendee.CuTypeEnum;
+import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
 import com.openexchange.testing.httpclient.models.ConversionDataSource;
-import com.openexchange.testing.httpclient.models.DeleteBody;
+import com.openexchange.testing.httpclient.models.DeleteEventBody;
 import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventId;
+import com.openexchange.testing.httpclient.models.MailData;
 import com.openexchange.testing.httpclient.models.MailDestinationData;
-import com.openexchange.testing.httpclient.models.MailImportResponse;
 import com.openexchange.testing.httpclient.models.MailListElement;
 import com.openexchange.testing.httpclient.models.UserResponse;
 import com.openexchange.testing.httpclient.modules.ChronosApi;
@@ -91,8 +88,33 @@ import com.openexchange.testing.httpclient.modules.UserApi;
  */
 public abstract class AbstractITipTest extends AbstractChronosTest {
 
+    /** Participant status */
+    public static enum PartStat {
+
+        ACCEPTED("ACCEPTED"),
+        TENTATIVE("TENTATIVE"),
+        DECLINED("DECLINED"),
+        NEEDS_ACTION("NEEDS-ACTION");
+
+        protected final String status;
+
+        private PartStat(String status) {
+            this.status = status;
+        }
+
+        /**
+         * Gets the status
+         *
+         * @return The status
+         */
+        public String getStatus() {
+            return status;
+        }
+
+    }
+
     /** All available data sources for iTIP calls */
-    enum DataSources {
+    public static enum DataSources {
 
         /** Currently the only valid input for the field 'dataSoure' on iTIP actions */
         MAIL("com.openexchange.mail.ical");
@@ -109,7 +131,8 @@ public abstract class AbstractITipTest extends AbstractChronosTest {
     }
 
     /** All available output formats for iTIP calls */
-    enum DescriptionFormat {
+    public static enum DescriptionFormat {
+
         /** Currently the only valid input for the field 'descriptionFormat' on iTIP actions */
         HTML("html");
 
@@ -124,19 +147,9 @@ public abstract class AbstractITipTest extends AbstractChronosTest {
         }
     }
 
-    private static final String FOLDER_HUMAN_READABLE = "default0/INBOX";
-
-    private static final String FOLDER_MACHINE_READABLE = "default0%2FINBOX";
-
-    private String session;
-
-    protected String mailFromUser;
-
-    protected String mailToUser;
+    protected UserResponse userResponseC1;
 
     protected UserResponse userResponseC2;
-
-    protected UserResponse userResponseC1;
 
     protected ApiClient apiClientC2;
 
@@ -144,37 +157,52 @@ public abstract class AbstractITipTest extends AbstractChronosTest {
 
     protected TestContext context2;
 
+    protected String folderIdC2;
+
+    private List<TearDownOperation> operations = new LinkedList<>();
+
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        session = getApiClient().getSession();
 
         UserApi api = new UserApi(getApiClient());
         userResponseC1 = api.getUser(getApiClient().getSession(), String.valueOf(getClient().getValues().getUserId()));
 
         context2 = TestContextPool.acquireContext(AbstractITipTest.class.getName());
+        addTearDownOperation(() -> {
+            TestContextPool.backContext(context2);
+        });
+
         testUserC2 = context2.acquireUser();
+        addTearDownOperation(() -> {
+            if (null != context2) {
+                context2.backUser(testUserC2);
+            }
+        });
+
         apiClientC2 = generateApiClient(testUserC2);
+        rememberClient(apiClientC2);
         UserApi anotherUserApi = new UserApi(apiClientC2);
         userResponseC2 = anotherUserApi.getUser(apiClientC2.getSession(), String.valueOf(apiClientC2.getUserId()));
         // Validate
         if (null == userResponseC1 || null == userResponseC2) {
             throw new IllegalDataException("Need both users for iTIP tests!");
         }
+
+        folderIdC2 = getDefaultFolder(apiClientC2.getSession(), apiClientC2);
     }
 
     @Override
     public void tearDown() throws Exception {
+        /*
+         * Call operations from last added item to first added item (FIFO)
+         * to avoid premature closing of e.g. API clients before all relevant
+         * operations for this client has been called
+         */
+        for (int i = operations.size() - 1; i >= 0; i--) {
+            operations.get(i).safeTearDown();
+        }
         super.tearDown();
-        if (null != context2) {
-            if (null != testUserC2) {
-                context2.backUser(testUserC2);
-            }
-            TestContextPool.backContext(context2);
-        }
-        if (null != apiClientC2) {
-            logoutClient(apiClientC2);
-        }
     }
 
     /*
@@ -187,7 +215,14 @@ public abstract class AbstractITipTest extends AbstractChronosTest {
      * @See {@link ChronosApi#accept(String,String, String, ConversionDataSource)}
      */
     protected ActionResponse accept(ConversionDataSource body) throws ApiException {
-        ActionResponse response = chronosApi.accept(session, DataSources.MAIL.getDataSource(), DescriptionFormat.HTML.getFormat(), body);
+        return accept(apiClient, body);
+    }
+
+    /**
+     * @See {@link ChronosApi#accept(String,String, String, ConversionDataSource)}
+     */
+    protected ActionResponse accept(ApiClient apiClient, ConversionDataSource body) throws ApiException {
+        ActionResponse response = new ChronosApi(apiClient).accept(apiClient.getSession(), DataSources.MAIL.getDataSource(), DescriptionFormat.HTML.getFormat(), body);
         validateActionResponse(response);
         return response;
     }
@@ -196,7 +231,7 @@ public abstract class AbstractITipTest extends AbstractChronosTest {
      * @See {@link ChronosApi#acceptAndIgnoreConflicts(String, String, String, ConversionDataSource)}
      */
     protected ActionResponse acceptAndIgnoreConflicts(ConversionDataSource body) throws ApiException {
-        ActionResponse response = chronosApi.acceptAndIgnoreConflicts(session, DataSources.MAIL.getDataSource(), DescriptionFormat.HTML.getFormat(), body);
+        ActionResponse response = chronosApi.acceptAndIgnoreConflicts(apiClient.getSession(), DataSources.MAIL.getDataSource(), DescriptionFormat.HTML.getFormat(), body);
         validateActionResponse(response);
         return response;
     }
@@ -205,7 +240,7 @@ public abstract class AbstractITipTest extends AbstractChronosTest {
      * @See {@link ChronosApi#tentative(String, String, String, ConversionDataSource)}
      */
     protected ActionResponse tentative(ConversionDataSource body) throws ApiException {
-        ActionResponse response = chronosApi.tentative(session, DataSources.MAIL.getDataSource(), DescriptionFormat.HTML.getFormat(), body);
+        ActionResponse response = chronosApi.tentative(apiClient.getSession(), DataSources.MAIL.getDataSource(), DescriptionFormat.HTML.getFormat(), body);
         validateActionResponse(response);
         return response;
     }
@@ -214,7 +249,7 @@ public abstract class AbstractITipTest extends AbstractChronosTest {
      * @See {@link ChronosApi#decline(String, String, String, ConversionDataSource)}
      */
     protected ActionResponse decline(ConversionDataSource body) throws ApiException {
-        ActionResponse response = chronosApi.decline(session, DataSources.MAIL.getDataSource(), DescriptionFormat.HTML.getFormat(), body);
+        ActionResponse response = chronosApi.decline(apiClient.getSession(), DataSources.MAIL.getDataSource(), DescriptionFormat.HTML.getFormat(), body);
         validateActionResponse(response);
         return response;
     }
@@ -223,7 +258,14 @@ public abstract class AbstractITipTest extends AbstractChronosTest {
      * @See {@link ChronosApi#update(String, String, String, ConversionDataSource)}
      */
     protected ActionResponse update(ConversionDataSource body) throws ApiException {
-        ActionResponse response = chronosApi.update(session, DataSources.MAIL.getDataSource(), DescriptionFormat.HTML.getFormat(), body);
+        return update(apiClient, body);
+    }
+
+    /**
+     * @See {@link ChronosApi#update(String, String, String, ConversionDataSource)}
+     */
+    protected ActionResponse update(ApiClient apiClient, ConversionDataSource body) throws ApiException {
+        ActionResponse response = new ChronosApi(apiClient).update(apiClient.getSession(), DataSources.MAIL.getDataSource(), DescriptionFormat.HTML.getFormat(), body);
         validateActionResponse(response);
         return response;
     }
@@ -236,84 +278,125 @@ public abstract class AbstractITipTest extends AbstractChronosTest {
      * @See {@link ChronosApi#analyze(String, String, String, ConversionDataSource, String)}
      */
     protected AnalyzeResponse analyze(ConversionDataSource body) throws ApiException {
-        return chronosApi.analyze(session, DataSources.MAIL.getDataSource(), DescriptionFormat.HTML.getFormat(), body, null);
+        return chronosApi.analyze(apiClient.getSession(), DataSources.MAIL.getDataSource(), DescriptionFormat.HTML.getFormat(), body, null);
     }
 
-    /**
-     * Uploads a mail to the INBOX
-     *
-     * @param data The event to send iTip mail for
-     * @return {@link MailDestinationData} with set mail ID and folder ID
-     * @throws Exception In case of error
-     */
-    protected MailDestinationData createMailInInbox(List<EventData> data) throws Exception {
-        return createMailInInbox(new ITipMailFactory(userResponseC2.getData().getEmail1(), userResponseC1.getData().getEmail1(), new ICalFacotry(data).build()).build());
-    }
-
-    /**
-     * Uploads a mail to the INBOX
-     *
-     * @param eml The mail to upload
-     * @return {@link MailDestinationData} with set mail ID and folder ID
-     * @throws Exception In case of error
-     */
-    protected MailDestinationData createMailInInbox(String eml) throws Exception {
-        File tmpFile = File.createTempFile("test", ".eml");
-        FileWriterWithEncoding writer = new FileWriterWithEncoding(tmpFile, "ASCII");
-        writer.write(eml);
-        writer.close();
-
-        MailApi mailApi = new MailApi(getApiClient());
-        MailImportResponse importMail = mailApi.importMail(session, FOLDER_MACHINE_READABLE, tmpFile, null, Boolean.TRUE);
-        return importMail.getData().get(0);
-    }
-
-    protected ConversionDataSource constructBody(String mailId) {
-        return constructBody(mailId, "1.3");
-    }
-
-    protected ConversionDataSource constructBody(String mailId, String sequenceId) {
-        ConversionDataSource body = new ConversionDataSource();
-        body.setComOpenexchangeMailConversionFullname(FOLDER_HUMAN_READABLE);
-        body.setComOpenexchangeMailConversionMailid(mailId);
-        body.setComOpenexchangeMailConversionSequenceid(sequenceId);
-        return body;
-    }
-
-    protected Attendee createAttendee(TestUser convertee, ApiClient converteeClient) {
-        Attendee attendee = AttendeeFactory.createAttendee(converteeClient.getUserId(), CuTypeEnum.INDIVIDUAL);
-
-        attendee.cn(convertee.getUser());
-        attendee.comment("Comment for user " + convertee.getUser());
-        attendee.email(convertee.getLogin());
-        attendee.setUri("mailto:" + convertee.getLogin());
-        return attendee;
-    }
-
-    protected void removeMail(MailDestinationData data) throws Exception {
-        MailApi mailApi = new MailApi(getApiClient());
-        MailListElement elm = new MailListElement();
-        elm.setId(data.getId());
-        elm.setFolder(data.getFolderId());
-        mailApi.deleteMails(getApiClient().getSession(), Collections.singletonList(elm), now());
+    protected static AnalyzeResponse analyze(ApiClient apiClient, MailData mailData) throws Exception {
+        ConversionDataSource body = ITipUtil.constructBody(mailData);
+        return new ChronosApi(apiClient).analyze(apiClient.getSession(), DataSources.MAIL.getDataSource(), DescriptionFormat.HTML.getFormat(), body, null);
     }
 
     protected EventData createEvent(EventData event) throws ApiException {
+        EventData createEvent = createEvent(apiClient, event, defaultFolderId);
+        rememberForCleanup(createEvent);
+        return createEvent;
+    }
 
-        return chronosApi.createEvent(session, defaultFolderId, event, Boolean.FALSE, Boolean.FALSE, Boolean.TRUE, null, null, null, Boolean.FALSE, null).getData().getCreated().get(0);
+    protected EventData createEvent(ApiClient apiClient, EventData event, String folderId) throws ApiException {
+        ChronosCalendarResultResponse response = new ChronosApi(apiClient).createEvent(apiClient.getSession(), folderId, event, Boolean.FALSE, null, Boolean.TRUE, null, null, null, Boolean.FALSE, null);
+        assertNotNull(response);
+        assertNull(response.getError());
+        return response.getData().getCreated().get(0);
     }
 
     protected void deleteEvent(EventData data) throws Exception {
+        deleteEvent(apiClient, data);
+    }
+
+    protected void deleteEvent(ApiClient apiClient, EventData data) throws Exception {
         EventId id = new EventId();
         id.setFolder(data.getFolder());
         id.setId(data.getId());
-        DeleteBody body  = new DeleteBody();
+        DeleteEventBody body = new DeleteEventBody();
         body.addEventsItem(id);
-        chronosApi.deleteEvent(session, now(), body, null, null, Boolean.FALSE, Boolean.FALSE, null, null);
+        new ChronosApi(apiClient).deleteEvent(apiClient.getSession(), now(), body, null, null, Boolean.FALSE, Boolean.FALSE, null, null, null);
     }
 
-    private Long now() {
+    protected Long now() {
         return Long.valueOf(System.currentTimeMillis());
     }
 
+    /*
+     * =========================
+     * =========CLEANUP=========
+     * =========================
+     */
+
+    protected void rememberMail(MailData data) {
+        rememberMail(getApiClient(), data);
+    }
+
+    protected void rememberMail(ApiClient apiClient, MailData data) {
+        if (null == apiClient || null == data) {
+            return;
+        }
+        MailApi mailApi = new MailApi(apiClient);
+        MailListElement elm = new MailListElement();
+        elm.setId(data.getId());
+        elm.setFolder(data.getFolderId());
+        operations.add(() -> {
+            mailApi.deleteMails(apiClient.getSession(), Collections.singletonList(elm), now());
+        });
+    }
+
+    protected void rememberMail(ApiClient apiClient, MailDestinationData data) {
+        if (null == apiClient || null == data) {
+            return;
+        }
+        MailApi mailApi = new MailApi(apiClient);
+        MailListElement elm = new MailListElement();
+        elm.setId(data.getId());
+        elm.setFolder(data.getFolderId());
+        operations.add(() -> {
+            mailApi.deleteMails(apiClient.getSession(), Collections.singletonList(elm), now());
+        });
+    }
+
+    protected void rememberForCleanup(EventData eventData) {
+        rememberForCleanup(apiClient, eventData);
+    }
+
+    protected void rememberForCleanup(ApiClient apiClient, EventData eventData) {
+        if (null == apiClient || null == eventData) {
+            return;
+        }
+        EventId eventId = new EventId();
+        eventId.setId(eventData.getId());
+        eventId.setFolder(eventData.getFolder());
+
+        addTearDownOperation(() -> {
+            DeleteEventBody body = new DeleteEventBody();
+            body.addEventsItem(eventId);
+            new ChronosApi(apiClient).deleteEvent(apiClient.getSession(), now(), body, null, null, Boolean.FALSE, Boolean.FALSE, null, null, "none");
+        });
+    }
+
+    /**
+     * Adds a new {@link TearDownOperation} to call in this classes {@link #tearDown()} method
+     * <p>
+     * Note: Operations will be remembered in order and will be executed with the first-in first-out (FIFO)
+     * principal. Therefore e.g. first add removal the test client afterwards the calendar event to remove.
+     *
+     * @param operation A {@link TearDownOperation} to execute with {@link TearDownOperation#safeTearDown()}
+     */
+    protected void addTearDownOperation(TearDownOperation operation) {
+        if (null != operation) {
+            operations.add(operation);
+        }
+    }
+
+    @FunctionalInterface
+    public interface TearDownOperation {
+
+        void tearDown() throws Exception;
+
+        default void safeTearDown() {
+            try {
+                tearDown();
+            } catch (Exception e) {
+                // Ignore
+            }
+        }
+
+    }
 }

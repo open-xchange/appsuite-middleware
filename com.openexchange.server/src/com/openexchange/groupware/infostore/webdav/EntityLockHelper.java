@@ -51,9 +51,9 @@ package com.openexchange.groupware.infostore.webdav;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.session.SessionHolder;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.webdav.protocol.WebdavLock;
 import com.openexchange.webdav.protocol.WebdavPath;
 
@@ -131,7 +131,7 @@ public class EntityLockHelper extends LockHelper {
     private ServerSession getSession() throws OXException {
         try {
             return ServerSessionAdapter.valueOf(sessionHolder.getSessionObject());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
         }
     }

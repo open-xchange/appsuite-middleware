@@ -66,11 +66,6 @@ abstract class AbstractEndpointAuthenticator implements EndpointAuthenticator {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.rest.services.EndpointAuthenticator#getRealmName()
-     */
     @Override
     public String getRealmName() {
         return "OX REST";

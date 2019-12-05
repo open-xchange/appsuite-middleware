@@ -73,10 +73,10 @@ import org.bouncycastle.openpgp.PGPSignatureSubpacketGenerator;
 import org.bouncycastle.openpgp.PGPUtil;
 import org.bouncycastle.openpgp.operator.PBESecretKeyDecryptor;
 import org.bouncycastle.openpgp.operator.bc.BcPBESecretKeyDecryptorBuilder;
-import org.bouncycastle.openpgp.operator.bc.BcPGPDataEncryptorBuilder;
 import org.bouncycastle.openpgp.operator.bc.BcPGPDigestCalculatorProvider;
-import org.bouncycastle.openpgp.operator.bc.BcPublicKeyKeyEncryptionMethodGenerator;
 import org.bouncycastle.openpgp.operator.jcajce.JcaPGPContentSignerBuilder;
+import org.bouncycastle.openpgp.operator.jcajce.JcePGPDataEncryptorBuilder;
+import org.bouncycastle.openpgp.operator.jcajce.JcePublicKeyKeyEncryptionMethodGenerator;
 import com.openexchange.exception.OXException;
 import com.openexchange.pgp.core.exceptions.PGPCoreExceptionCodes;
 
@@ -167,14 +167,13 @@ public class PGPEncrypter {
         }
 
         //Initialize encrypting
-        BcPGPDataEncryptorBuilder builder = new BcPGPDataEncryptorBuilder(PGPEncryptedData.AES_256);
+        JcePGPDataEncryptorBuilder builder = new JcePGPDataEncryptorBuilder(PGPEncryptedData.AES_256);
         builder.setSecureRandom(new SecureRandom());
         builder.setWithIntegrityPacket(withIntegrityPacket);
-
         //Adding recipients
         PGPEncryptedDataGenerator encryptedDataGenerator = new PGPEncryptedDataGenerator(builder);
         for (PGPPublicKey recipient : recipientsKeys) {
-            BcPublicKeyKeyEncryptionMethodGenerator encKeyGen = new BcPublicKeyKeyEncryptionMethodGenerator(recipient);
+            JcePublicKeyKeyEncryptionMethodGenerator encKeyGen = new JcePublicKeyKeyEncryptionMethodGenerator(recipient).setProvider("BC");
             encryptedDataGenerator.addMethod(encKeyGen);
         }
 

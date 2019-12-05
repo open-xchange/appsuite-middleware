@@ -56,9 +56,9 @@ import java.util.List;
 import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 public abstract class AbstractContactHalo implements HaloContactDataSource {
 

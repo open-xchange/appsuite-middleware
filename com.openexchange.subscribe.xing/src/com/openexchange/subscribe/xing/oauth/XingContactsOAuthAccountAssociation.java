@@ -89,31 +89,16 @@ public class XingContactsOAuthAccountAssociation extends AbstractSubscribeOAuthA
         super(accountId, userId, contextId, displayName, subscription);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.association.OAuthAccountAssociation#getModule()
-     */
     @Override
     public String getModule() {
         return Module.CONTACTS.getModuleName();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.association.OAuthAccountAssociation#getScopes()
-     */
     @Override
     public List<OAuthScope> getScopes() {
         return Collections.singletonList(XingOAuthScope.contacts_ro);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.association.AbstractOAuthAccountAssociation#getStatus(com.openexchange.session.Session)
-     */
     @Override
     public Status getStatus(Session session) throws OXException {
         XingOAuthAccessProvider provider = Services.getService(XingOAuthAccessProvider.class);
@@ -131,11 +116,6 @@ public class XingContactsOAuthAccountAssociation extends AbstractSubscribeOAuthA
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.association.AbstractOAuthAccountAssociation#newAccess(com.openexchange.session.Session)
-     */
     @Override
     protected AbstractOAuthAccess newAccess(Session session) throws OXException {
         throw new UnsupportedOperationException("No OAuthAccess for Xing.");

@@ -1,0 +1,31 @@
+/config?action=set_property:
+  put:
+    operationId: setConfigProperty
+    tags:
+      - Config
+    summary: Sets a property of the configuration.
+    parameters:
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - in: query
+        name: name
+        description: The name of the property to return.
+        required: true
+        schema:
+          type: string
+    responses:
+      '200':
+        description: >-
+          A JSON response providing the property's name and its value. In case
+          of errors the responsible fields in the response are filled (see
+          [Error handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfigPropertyResponse'
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ConfigPropertyBody'
+      description: 'A JSON object providing the value to set (Example: {"value":"test123"}).'
+      required: true

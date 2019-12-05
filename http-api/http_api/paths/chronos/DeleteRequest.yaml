@@ -4,53 +4,73 @@
     tags:
       - Chronos
     summary: Deletes events.
-    consumes:
-      - application/json
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: timestamp
-        type: integer
-        format: int64
         description: Timestamp of the last update of the events.
         required: true
+        schema:
+          type: integer
+          format: int64
       - in: query
         name: rangeStart
-        type: string
-        description: |
-          If expand is set to 'true' this parameter defines a lower inclusive limit as a utc date-time value as specified in rfc 5545 chapter 3.3.5. E.g. "20170708T220000Z". 
+        description: >
+          If expand is set to 'true' this parameter defines a lower inclusive
+          limit as a utc date-time value as specified in rfc 5545 chapter 3.3.5.
+          E.g. "20170708T220000Z". 
+
           Only events which start on or after this date are returned.
         required: false
+        schema:
+          type: string
       - in: query
         name: rangeEnd
-        type: string
-        description: |
-          If expand is set to 'true' this parameter defines a upper exclusive limit as a utc date-time value as specified in rfc 5545 chapter 3.3.5. E.g. "20170708T220000Z". 
+        description: >
+          If expand is set to 'true' this parameter defines a upper exclusive
+          limit as a utc date-time value as specified in rfc 5545 chapter 3.3.5.
+          E.g. "20170708T220000Z". 
+
           Only events which end before this date are returned.
         required: false
-      - $ref: "#/parameters/QueryParamChronosExpand"
-      - $ref: "#/parameters/QueryParamChronosExtendedEntities"
-      - $ref: "#/parameters/QueryParamChronosFields"
-      - $ref: "#/parameters/QueryParamChronosPushToken"
-      - in: body
-        name: deleteBody
-        description: A JSON array of JSON objects with the id and optionally the recurrence position of the event.
-        required: true
         schema:
-          type: object
-          properties:
-            events:
-              type: array
-              items: 
-                $ref: "#/definitions/EventId"
-            comment:
-              type: string
-              description: |
-                Optional comment for the user to provide information about the deletion of the event. This will not be peristed and is just used to inform the attendees via notifications and invitation mails.
+          type: string
+      - $ref: '#/components/parameters/QueryParamChronosExpand'
+      - $ref: '#/components/parameters/QueryParamChronosExtendedEntities'
+      - $ref: '#/components/parameters/QueryParamChronosFields'
+      - $ref: '#/components/parameters/QueryParamChronosPushToken'
+      - $ref: '#/components/parameters/QueryParamChronosScheduling'
     responses:
-      200:
-        description: |
-          An json object containing the deleted event if the deletion was successful. In case of errors the responsible fields in the response are
+      '200':
+        description: >
+          An json object containing the deleted event if the deletion was
+          successful. In case of errors the responsible fields in the response
+          are
+
           filled (see [Error handling](#error-handling)).
-        schema:
-          $ref: "#/definitions/ChronosMultipleCalendarResultResponse"
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChronosMultipleCalendarResultResponse'
+    requestBody:
+      content:
+        application/json:
+          schema:
+            type: object
+            title: deleteEventBody
+            properties:
+              events:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EventId'
+              comment:
+                type: string
+                description: >
+                  Optional comment for the user to provide information about the
+                  deletion of the event. This will not be peristed and is just
+                  used to inform the attendees via notifications and invitation
+                  mails.
+      description: >-
+        A JSON array of JSON objects with the id and optionally the recurrence
+        position of the event.
+      required: true

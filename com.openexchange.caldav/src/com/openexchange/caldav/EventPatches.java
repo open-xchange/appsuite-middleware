@@ -65,7 +65,9 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.SortedSet;
@@ -80,6 +82,7 @@ import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmAction;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Calendar;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
@@ -93,6 +96,7 @@ import com.openexchange.chronos.RelatedTo;
 import com.openexchange.chronos.Trigger;
 import com.openexchange.chronos.common.AlarmUtils;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.common.mapping.DefaultEventUpdate;
 import com.openexchange.chronos.ical.CalendarExport;
 import com.openexchange.chronos.ical.ICalParameters;
@@ -105,6 +109,7 @@ import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.EventUpdate;
 import com.openexchange.chronos.service.RecurrenceService;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dav.AttachmentUtils;
 import com.openexchange.dav.DAVUserAgent;
 import com.openexchange.exception.OXException;
@@ -397,7 +402,7 @@ public class EventPatches {
                         return;
                     }
                     Event newChangeException = newChangeExceptions.get(0);
-                    if(newChangeException == null) {
+                    if (newChangeException == null) {
                         return;
                     }
                     Alarm snoozedAlarm = null;
@@ -669,7 +674,7 @@ public class EventPatches {
             }
         }
 
-        private static void applyManagedAttachments(Event importedEvent) {
+        private static void applyManagedAttachments(Event importedEvent, ConfigViewFactory configViewFactory) {
             List<Attachment> attachments = importedEvent.getAttachments();
             if (null != attachments && 0 < attachments.size()) {
                 for (Attachment attachment : attachments) {
@@ -678,7 +683,7 @@ public class EventPatches {
                     }
                     if (null != attachment.getUri()) {
                         try {
-                            AttachmentMetadata metadata = AttachmentUtils.decodeURI(new URI(attachment.getUri()));
+                            AttachmentMetadata metadata = AttachmentUtils.decodeURI(new URI(attachment.getUri()), configViewFactory);
                             attachment.setManagedId(metadata.getId());
                         } catch (URISyntaxException e) {
                             LOG.warn("Error decoding attachment URI", e);
@@ -818,6 +823,125 @@ public class EventPatches {
         }
 
         /**
+         * User Agents which tend to automatically add the Organizer as Attendee on updates.
+         */
+        private static final EnumSet<DAVUserAgent> AUTO_ORGANIZER_AGENTS = EnumSet.of(DAVUserAgent.MAC_CALENDAR, DAVUserAgent.IOS);
+
+        /**
+         * Remove the organizer attendee if added by MacOS Calendar in public folders.
+         *
+         * @param resource The event resource
+         * @param importedEvent The imported series master event as supplied by the client
+         * @param importedChangeExceptions The imported change exceptions as supplied by the client
+         */
+        private void removeOrganizerAttendee(EventResource resource, Event importedEvent, List<Event> importedChangeExceptions) {
+            if (!resource.exists()  || !AUTO_ORGANIZER_AGENTS.contains(resource.getUserAgent()) || !PublicType.getInstance().equals(resource.getParent().getFolder().getType())) {
+                return;
+            }
+            
+            Event orig = resource.getEvent();
+            removeOrganizer(importedEvent, orig);
+            if (importedChangeExceptions != null) {
+                for (Event changeException : importedChangeExceptions) {
+                    removeOrganizer(changeException, orig);
+                }
+            }
+        }
+
+        private void removeOrganizer(Event importedEvent, Event orig) {
+            if (importedEvent != null && importedEvent.getAttendees() != null) {
+                Optional<Attendee> organiser = orig.getAttendees().stream().filter(a -> matches(a, orig.getOrganizer())).findFirst();
+                if (!organiser.isPresent()) {
+                    for (Iterator<Attendee> i = importedEvent.getAttendees().iterator(); i.hasNext();) {
+                        if (CalendarUtils.matches(i.next(), orig.getOrganizer())) {
+                            i.remove();
+                        }
+                    }
+                }
+            }
+        }
+        
+        /**
+         * Restores the participant status of attendees on incoming event patches if the client
+         * set the status to {@link ParticipationStatus#NEEDS_ACTION}
+         *
+         * @param resource The event resource
+         * @param master The master event
+         * @param exceptions The event exceptions
+         */
+        private void restoreParticipantStatus(EventResource resource, Event event) {
+            if (false == resource.exists() || false == DAVUserAgent.MAC_CALENDAR.equals(resource.getUserAgent())) {
+                return;
+            }
+            try {
+                restoreParticipantStatus(event, resource.getEvent().getFolderId(), resource.getEvent().getId());
+            } catch (OXException e) {
+                LOG.warn("Error restoring the participant status", e);
+            }
+        }
+
+        private void restoreParticipantStatus(Event event, String folderId, String eventId) throws OXException {
+            if (null == event || isNullOrEmpty(event.getAttendees()) || Strings.isEmpty(folderId) || Strings.isEmpty(eventId)) {
+                return;
+            }
+            List<Attendee> attendees = new LinkedList<Attendee>(event.getAttendees());
+            List<Attendee> originalAttendees = null;
+            for (int i = 0; i < attendees.size(); i++) {
+                Attendee attendee = attendees.get(i);
+                if (ParticipationStatus.NEEDS_ACTION.equals(attendee.getPartStat())) {
+                    /*
+                     * Found user to check the status in DB for
+                     */
+                    if (null == originalAttendees) {
+                        originalAttendees = getAttendees(event, folderId, eventId);
+                    }
+                    Attendee originalAttendee = CalendarUtils.find(originalAttendees, attendee);
+                    if (null != originalAttendee && false == ParticipationStatus.NEEDS_ACTION.matches(originalAttendee.getPartStat())) {
+                        /*
+                         * Replace with the original status
+                         */
+                        Attendee copy = AttendeeMapper.getInstance().copy(attendee, null, (AttendeeField[]) null);
+                        copy.setPartStat(originalAttendee.getPartStat());
+                        attendees.set(i, copy);
+                    }
+                }
+            }
+            event.setAttendees(attendees);
+        }
+
+        /**
+         * Loads the original event from the DB and returns the attendee list
+         *
+         * @param event The event to load
+         * @param folderId The ID of the folder
+         * @return The attendees or empty list if event can't be found
+         * @throws OXException
+         */
+        private List<Attendee> getAttendees(Event event, String folderId, String eventId) throws OXException {
+            return new CalendarAccessOperation<List<Attendee>>(factory) {
+
+                @Override
+                protected List<Attendee> perform(IDBasedCalendarAccess access) throws OXException {
+                    /*
+                     * Get existing event and and search for user
+                     */
+                    EventID id;
+                    if (null != event.getRecurrenceId()) {
+                        id = new EventID(folderId, eventId, event.getRecurrenceId());
+                    } else {
+                        id = new EventID(folderId, eventId);
+                    }
+                    Event original = access.getEvent(id);
+                    if (null == original) {
+                        return Collections.emptyList();
+                    }
+                    List<Attendee> attendees = original.getAttendees();
+                    return isNullOrEmpty(attendees) ? Collections.emptyList() : attendees;
+                }
+            }.execute(factory.getSession());
+        }
+
+        /**
          * Applies all known patches to an event after importing.
          *
          * @param resource The parent event resource
@@ -843,8 +967,10 @@ public class EventPatches {
                 adjustSnoozeExceptions(resource, importedEvent, importedChangeExceptions);
                 adjustAlarms(resource, importedEvent, null, null);
                 adjustAppleTravelAdvisory(resource, importedEvent);
-                applyManagedAttachments(importedEvent);
+                applyManagedAttachments(importedEvent, factory.getConfigViewFactory());
                 stripExtendedPropertiesFromAttendeeSchedulingResource(resource, importedEvent);
+                removeOrganizerAttendee(resource, importedEvent, importedChangeExceptions);
+                restoreParticipantStatus(resource, importedEvent);
             }
             if (null != importedChangeExceptions && 0 < importedChangeExceptions.size()) {
                 /*
@@ -855,9 +981,10 @@ public class EventPatches {
                     adjustProposedTimePrefixes(importedChangeException);
                     adjustAlarms(resource, importedChangeException, importedEvent, caldavImport.getCalender());
                     adjustAppleTravelAdvisory(resource, importedEvent);
-                    applyManagedAttachments(importedChangeException);
+                    applyManagedAttachments(importedChangeException, factory.getConfigViewFactory());
                     removeAttachmentsFromExceptions(resource, importedChangeException);
                     stripExtendedPropertiesFromAttendeeSchedulingResource(resource, importedChangeException);
+                    restoreParticipantStatus(resource, importedChangeException);
                 }
             }
             /*
@@ -1080,16 +1207,17 @@ public class EventPatches {
          *
          * @param resource The parent event resource
          * @param exportedEvent The event being exported
+         * @param configViewFactory The configuration view
          * @return The patched event
          */
-        private static Event prepareManagedAttachments(EventResource resource, Event exportedEvent) {
+        private static Event prepareManagedAttachments(EventResource resource, Event exportedEvent, ConfigViewFactory configViewFactory) {
             List<Attachment> attachments = exportedEvent.getAttachments();
             if (null != attachments && 0 < attachments.size()) {
                 for (Attachment attachment : attachments) {
                     if (0 < attachment.getManagedId() && null == attachment.getUri()) {
                         try {
                             AttachmentMetadata metadata = Tools.getAttachmentMetadata(attachment, resource, exportedEvent);
-                            URI uri = AttachmentUtils.buildURI(resource.getHostData(), metadata);
+                            URI uri = AttachmentUtils.buildURI(resource.getHostData(), metadata, configViewFactory);
                             attachment.setUri(uri.toString());
                         } catch (OXException | URISyntaxException e) {
                             LOG.warn("Error preparing managed attachment", e);
@@ -1114,7 +1242,7 @@ public class EventPatches {
             exportedEvent = applyAttendeeComments(resource, exportedEvent);
             exportedEvent = adjustAlarms(resource, exportedEvent);
             exportedEvent = adjustAppleTravelAdvisory(resource, exportedEvent);
-            exportedEvent = prepareManagedAttachments(resource, exportedEvent);
+            exportedEvent = prepareManagedAttachments(resource, exportedEvent, factory.getConfigViewFactory());
             exportedEvent = removeAttachmentsFromExceptions(resource, exportedEvent);
             return exportedEvent;
         }
@@ -1156,7 +1284,7 @@ public class EventPatches {
             extendedProperties.add(new ExtendedProperty(Lightning.X_MOZ_FAKED_MASTER.getId(), "1"));
             extendedProperties.add(new ExtendedProperty(Lightning.X_MOZ_GENERATION.getId(), Integer.valueOf(phantom.getSequence())));
             Optional<Object> ack = findXMOZASTACK(exportedEvents);
-            if(ack.isPresent()) {
+            if (ack.isPresent()) {
                 extendedProperties.add(new ExtendedProperty(Lightning.X_MOZ_LASTACK.getId(), ack.get()));
             }
             fake.setExtendedProperties(extendedProperties);

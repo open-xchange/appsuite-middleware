@@ -87,7 +87,7 @@ public abstract class AbstractMessagingActionTest {
         try {
             final AJAXRequestResult result = action.perform(requestData, session);
             fail("Should have thrown exception");
-        } catch (final OXException x) {
+        } catch (OXException x) {
             // SUCCESS
         }
 

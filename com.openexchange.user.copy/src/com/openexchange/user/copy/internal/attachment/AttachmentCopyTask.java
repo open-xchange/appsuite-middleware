@@ -168,7 +168,7 @@ public class AttachmentCopyTask implements CopyUserTaskService {
         try {
             srcFileStorage = qfsf.getQuotaFileStorage(srcCtxId.intValue(), Info.general());
             dstFileStorage = qfsf.getQuotaFileStorage(dstCtxId.intValue(), Info.general());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw UserCopyExceptionCodes.FILE_STORAGE_PROBLEM.create(e);
         }
 
@@ -209,7 +209,7 @@ public class AttachmentCopyTask implements CopyUserTaskService {
             }
 
             stmt.executeBatch();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
             Databases.closeSQLStuff(stmt);
@@ -250,7 +250,7 @@ public class AttachmentCopyTask implements CopyUserTaskService {
                 attachment.setId(newId);
                 attachment.setCreatedBy(uid);
                 attachment.setAttachedId(newAttachedId);
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
             }
 
@@ -269,7 +269,7 @@ public class AttachmentCopyTask implements CopyUserTaskService {
 
                 final String newFileId = dstFileStorage.saveNewFile(is);
                 attachment.setFileId(newFileId);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 throw UserCopyExceptionCodes.FILE_STORAGE_PROBLEM.create(e);
             } finally {
                 Streams.close(is);
@@ -316,7 +316,7 @@ public class AttachmentCopyTask implements CopyUserTaskService {
 
                     attachments.add(attachment);
                 }
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
             } finally {
                 Databases.closeSQLStuff(rs, stmt);

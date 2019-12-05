@@ -95,7 +95,7 @@ public final class MsEventHandlerImpl implements EventHandler {
                     msTopic.publish(map);
                 }
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             // Ignore
             final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(MsActivator.class);
             logger.warn("Could not handle event with topic ''{}''", event.getTopic(), e);

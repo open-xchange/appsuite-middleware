@@ -141,7 +141,7 @@ public final class AttachmentTest extends AbstractMailTest {
              */
             assertTrue("Web response does not indicate HTML content", webResponse.isHTML());
 
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         } finally {

@@ -95,6 +95,7 @@ public class Bug41622Test extends ShareTest {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -104,6 +105,7 @@ public class Bug41622Test extends ShareTest {
         clientsAndFolders.put(client2, new ArrayList<Integer>());
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
@@ -207,10 +209,10 @@ public class Bug41622Test extends ShareTest {
         /*
          * check if both sharing users can be resolved
          */
-        com.openexchange.groupware.ldap.User expectedUser1 = getClient().execute(new com.openexchange.ajax.user.actions.GetRequest(getClient().getValues().getUserId(), TimeZones.UTC, true)).getUser();
-        com.openexchange.groupware.ldap.User expectedUser2 = client2.execute(new com.openexchange.ajax.user.actions.GetRequest(client2.getValues().getUserId(), TimeZones.UTC, true)).getUser();
-        com.openexchange.groupware.ldap.User actualUser1 = guestClientA.execute(new com.openexchange.ajax.user.actions.GetRequest(getClient().getValues().getUserId(), TimeZones.UTC, true)).getUser();
-        com.openexchange.groupware.ldap.User actualUser2 = guestClientA.execute(new com.openexchange.ajax.user.actions.GetRequest(client2.getValues().getUserId(), TimeZones.UTC, true)).getUser();
+        com.openexchange.user.User expectedUser1 = getClient().execute(new com.openexchange.ajax.user.actions.GetRequest(getClient().getValues().getUserId(), TimeZones.UTC, true)).getUser();
+        com.openexchange.user.User expectedUser2 = client2.execute(new com.openexchange.ajax.user.actions.GetRequest(client2.getValues().getUserId(), TimeZones.UTC, true)).getUser();
+        com.openexchange.user.User actualUser1 = guestClientA.execute(new com.openexchange.ajax.user.actions.GetRequest(getClient().getValues().getUserId(), TimeZones.UTC, true)).getUser();
+        com.openexchange.user.User actualUser2 = guestClientA.execute(new com.openexchange.ajax.user.actions.GetRequest(client2.getValues().getUserId(), TimeZones.UTC, true)).getUser();
         assertEquals(expectedUser1.getDisplayName(), actualUser1.getDisplayName());
         assertEquals(expectedUser1.getGivenName(), actualUser1.getGivenName());
         assertEquals(expectedUser1.getSurname(), actualUser1.getSurname());

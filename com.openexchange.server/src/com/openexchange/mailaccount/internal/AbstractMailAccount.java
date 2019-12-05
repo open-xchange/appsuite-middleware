@@ -60,7 +60,6 @@ import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.transport.config.TransportProperties;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
-import com.openexchange.mailaccount.MailAccounts;
 import com.openexchange.mailaccount.TransportAuth;
 import com.openexchange.tools.net.URIDefaults;
 import com.openexchange.tools.net.URIParser;
@@ -563,7 +562,7 @@ public abstract class AbstractMailAccount implements MailAccount {
         final String protocol = mailSecure ? mailProtocol + 's' : mailProtocol;
         try {
             return mailServerUrl = URITools.generateURI(protocol, IDNA.toASCII(mailServer), mailPort).toString();
-        } catch (final URISyntaxException e) {
+        } catch (URISyntaxException e) {
             LOG.error("", e);
             // Old implementation is not capable of handling IPv6 addresses.
             final StringBuilder sb = new StringBuilder(32);
@@ -584,7 +583,7 @@ public abstract class AbstractMailAccount implements MailAccount {
     public void parseMailServerURL(final String mailServerURL) throws OXException {
         try {
             setMailServer(URIParser.parse(IDNA.toASCII(mailServerURL), URIDefaults.IMAP));
-        } catch (final URISyntaxException e) {
+        } catch (URISyntaxException e) {
             throw MailAccountExceptionCodes.URI_PARSE_FAILED.create(e, mailServerURL);
         }
     }
@@ -620,7 +619,7 @@ public abstract class AbstractMailAccount implements MailAccount {
         }
         try {
             setTransportServer(URIParser.parse(IDNA.toASCII(transportServerURL), URIDefaults.SMTP));
-        } catch (final URISyntaxException e) {
+        } catch (URISyntaxException e) {
             setTransportServer((String) null);
             return;
             //throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.URI_PARSE_FAILED, e, transportServerURL);
@@ -656,7 +655,7 @@ public abstract class AbstractMailAccount implements MailAccount {
         final String protocol = transportSecure ? transportProtocol + 's' : transportProtocol;
         try {
             return transportServerUrl = URITools.generateURI(protocol, IDNA.toASCII(transportServer), transportPort).toString();
-        } catch (final URISyntaxException e) {
+        } catch (URISyntaxException e) {
             LOG.error("", e);
             // Old implementation is not capable of handling IPv6 addresses.
             final StringBuilder sb = new StringBuilder(32);

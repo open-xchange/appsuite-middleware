@@ -52,6 +52,7 @@ package com.openexchange.chronos.service;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.quota.Quota;
@@ -92,6 +93,23 @@ public interface CalendarServiceUtilities {
     String resolveByUID(CalendarSession session, String uid, int calendarUserId) throws OXException;
 
     /**
+     * Resolves an UID and optional recurrence identifier pair to the identifier of an existing event. The lookup is performed case-
+     * sensitive and context-wise, independently of the current session user's access rights, within the scope of a specific calendar user.
+     * I.e., the unique identifier and recurrence identifier are resolved to events residing in the user's <i>personal</i>, as well as
+     * <i>public</i> calendar folders.
+     * <p/>
+     * If no recurrence identifier is given and an event series with change exceptions is matched, the identifier of the recurring
+     * <i>master</i> event is returned.
+     *
+     * @param session The calendar session
+     * @param uid The UID to resolve
+     * @param recurrenceId The recurrence identifier to match, or <code>null</code> to resolve to non-recurring or series master events only
+     * @param calendarUserId The identifier of the calendar user the unique identifier should be resolved for
+     * @return The identifier of the resolved event, or <code>null</code> if not found
+     */
+    String resolveByUID(CalendarSession session, String uid, RecurrenceId recurrenceId, int calendarUserId) throws OXException;
+
+    /**
      * Resolves an event identifier to an event, and returns it in the perspective of the current session's user, i.e. having an
      * appropriate parent folder identifier assigned.
      * <p/>
@@ -102,9 +120,10 @@ public interface CalendarServiceUtilities {
      *
      * @param session The calendar session
      * @param id The identifier of the event to resolve
+     * @param sequence The expected sequence number to match, or <code>null</code> to resolve independently of the event's sequence number
      * @return The resolved event from the user's point of view, or <code>null</code> if not found
      */
-    Event resolveByID(CalendarSession session, String id) throws OXException;
+    Event resolveByID(CalendarSession session, String id, Integer sequence) throws OXException;
 
     /**
      * Resolves a specific event (and any overridden instances or <i>change exceptions</i>) by its externally used resource name, which

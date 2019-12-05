@@ -112,11 +112,6 @@ public class GoogleContactsSubscribeService extends AbstractOAuthSubscribeServic
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.subscribe.SubscribeService#getContent(com.openexchange.subscribe.Subscription)
-     */
     @Override
     public Collection<?> getContent(Subscription subscription) throws OXException {
         Session session = subscription.getSession();
@@ -242,11 +237,6 @@ public class GoogleContactsSubscribeService extends AbstractOAuthSubscribeServic
         });
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.subscribe.oauth.AbstractOAuthSubscribeService#getKnownApi()
-     */
     @Override
     protected KnownApi getKnownApi() {
         return KnownApi.GOOGLE;

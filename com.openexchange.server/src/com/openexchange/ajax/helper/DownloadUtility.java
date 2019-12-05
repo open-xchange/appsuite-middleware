@@ -523,9 +523,9 @@ public final class DownloadUtility {
                 retval = new CheckedDownload(contentType.toString(), sContentDisposition, fn, in, sz, harmful);
             }
             return retval;
-        } catch (final UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
             Streams.close(sink);
@@ -721,7 +721,7 @@ public final class DownloadUtility {
             } else {
                 tmp.append(Helper.encodeFilename(fileName, "UTF-8", internetExplorer));
             }
-        } catch (final UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             LOG.error("", e);
             return fileName;
         }

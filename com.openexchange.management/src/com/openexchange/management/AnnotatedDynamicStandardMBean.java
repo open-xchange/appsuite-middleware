@@ -91,11 +91,6 @@ public abstract class AnnotatedDynamicStandardMBean extends AnnotatedStandardMBe
      */
     protected abstract void refresh();
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.management.StandardMBean#getAttributes(java.lang.String[])
-     */
     @Override
     public AttributeList getAttributes(String[] attributes) {
         // Refresh information (if necessary)
@@ -110,11 +105,6 @@ public abstract class AnnotatedDynamicStandardMBean extends AnnotatedStandardMBe
         return list;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.management.StandardMBean#getAttribute(java.lang.String)
-     */
     @Override
     public Object getAttribute(String attribute) throws AttributeNotFoundException, MBeanException, ReflectionException {
         long now = System.currentTimeMillis();

@@ -219,7 +219,7 @@ public interface Session {
     public static final String PARAM_OAUTH_REFRESH_TOKEN = "__session.oauth.refresh".intern();
 
     /**
-     * The parameter that holds when the OAuth token expires.
+     * The parameter that holds when the OAuth token expires. Value is string of unix timestamp.
      *
      * @type <code>java.lang.String</code>
      */
@@ -272,7 +272,7 @@ public interface Session {
      */
     public static final String PARAM_PUSH_TOKEN = "__session.pushtoken".intern();
 
-    /** 
+    /**
      * Parameter if multifactor authentication enabled for the user
      */
     public final static String MULTIFACTOR_PARAMETER = "multifactor".intern();
@@ -429,7 +429,7 @@ public interface Session {
      * The client is remembered through the whole session. It should identify what client uses the back-end. Normally this is the web
      * front-end but there may be other clients especially those that synchronize their data with OX. The client is a parameter passed to the
      * back-end during the login request.
-     * 
+     *
      * @return the client identifier of the client using the back-end.
      */
     String getClient();
@@ -463,5 +463,12 @@ public interface Session {
      * @return The origin or <code>null</code>
      */
     Origin getOrigin();
+
+    /**
+     * Checks whether session is annotated with "stay signed in".
+     *
+     * @return <code>true</code> if annotated with "stay signed in"; otherwise <code>false</code>
+     */
+    boolean isStaySignedIn();
 
 }

@@ -55,6 +55,7 @@ import static com.openexchange.tools.update.Tools.createIndex;
 import static com.openexchange.tools.update.Tools.existsIndex;
 import java.sql.Connection;
 import java.sql.SQLException;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
@@ -84,6 +85,9 @@ public final class CalendarAddChangingDateIndexTask extends UpdateTaskAdapter {
         Connection con = params.getConnection();
         int rollback = 0;
         try {
+            if (false == Databases.tablesExist(con, "prg_dates", "del_dates")) {
+                return;
+            }
             con.setAutoCommit(false);
             rollback = 1;
 
@@ -92,9 +96,9 @@ public final class CalendarAddChangingDateIndexTask extends UpdateTaskAdapter {
 
             con.commit();
             rollback = 2;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
             if (rollback > 0) {
@@ -118,7 +122,7 @@ public final class CalendarAddChangingDateIndexTask extends UpdateTaskAdapter {
                 } else {
                     log.info("New index named \"{}\" with columns (cid,changing_date) already exists on table {}.", indexName, table);
                 }
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 log.error("Problem adding index \"{}\" on table {}.", name, table, e);
             }
         }

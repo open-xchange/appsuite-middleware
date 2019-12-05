@@ -4,30 +4,47 @@
     tags:
       - Drive
     summary: Gets quota limits and current usage.
-    description: |
-      Gets the quota limits and current usage for the storage the supplied root folder belongs to. Depending on
-      the filestore configuration, this may include both restrictions on the number of allowed files and the total
+    description: >
+      Gets the quota limits and current usage for the storage the supplied root
+      folder belongs to. Depending on
+
+      the filestore configuration, this may include both restrictions on the
+      number of allowed files and the total
+
       size of all contained files in bytes. If there's no limit, -1 is returned.
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
-      - $ref: "#/parameters/gblQueryParamRoot"
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - $ref: '#/components/parameters/gblQueryParamRoot'
     responses:
-      200:
-        description: |
-          A JSON object containing a field `quota` that is an array of quota objects. The array size may be zero, one
-          or two, depending on the filestore configuration. If one or more quota types are missing in the array, the
-          client can expect that there are no limitations for that type. Besides the array, the JSON object also contains
-          a hyperlink behind the `manageLink` field, poiting to an URL where the user can manage his quota restrictions.
+      '200':
+        description: >
+          A JSON object containing a field `quota` that is an array of quota
+          objects. The array size may be zero, one
+
+          or two, depending on the filestore configuration. If one or more quota
+          types are missing in the array, the
+
+          client can expect that there are no limitations for that type. Besides
+          the array, the JSON object also contains
+
+          a hyperlink behind the `manageLink` field, poiting to an URL where the
+          user can manage his quota restrictions.
+
           In case of errors the responsible fields in the response are filled.
-        schema:
-          $ref: "#/definitions/DriveQuotaResponse"
-    x-ox-examples:      
-      - Example1:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DriveQuotaResponse'
+    x-ox-examples:
+      - Example1: null
         description: Basic example
-        example: |
-          ==> GET http://192.168.32.191/ajax/drive?action=quota&root=56&session=35cb8c2d1423480692f0d5053d14ba52
-  
+        example: >
+          ==> GET
+          http://192.168.32.191/ajax/drive?action=quota&root=56&session=35cb8c2d1423480692f0d5053d14ba52
+
+
           <== HTTP 200 OK (9.6854 ms elapsed, 113 bytes received)
+
           <   Content: 
               {
                 "data" : {

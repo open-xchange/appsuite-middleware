@@ -116,6 +116,9 @@ public final class OAuthExceptionMessages implements LocalizableStrings {
 
     // Thrown in case OAuth for a certain provider access has been disabled for a user
     public static final String DISABLED_OAUTH_SERVICE_META_DATA = "'%1$s' OAuth service is not enabled for you.";
+    
+    // Unable to update the account '%1$s', because a different service account has been used to create it.
+    public static final String WRONG_ACCOUNT = "Unable to update the account '%1$s', because a different service account has been used to create it.";
 
     /**
      * Initializes a new {@link OAuthExceptionMessages}.

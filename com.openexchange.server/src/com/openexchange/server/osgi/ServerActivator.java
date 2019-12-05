@@ -172,6 +172,7 @@ import com.openexchange.groupware.userconfiguration.osgi.CapabilityRegistrationL
 import com.openexchange.guest.GuestService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.I18nService;
+import com.openexchange.i18n.I18nServiceRegistry;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.imagetransformation.ImageMetadataService;
@@ -258,8 +259,10 @@ import com.openexchange.server.reloadable.GenericReloadable;
 import com.openexchange.server.services.ServerRequestHandlerRegistry;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.serverconfig.ServerConfigService;
+import com.openexchange.session.SessionHolder;
+import com.openexchange.session.SessionSsoService;
+import com.openexchange.session.ThreadLocalSessionHolder;
 import com.openexchange.sessiond.SessiondService;
-import com.openexchange.sessiond.impl.ThreadLocalSessionHolder;
 import com.openexchange.snippet.QuotaAwareSnippetService;
 import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.spamhandler.osgi.SpamHandlerServiceTracker;
@@ -269,13 +272,14 @@ import com.openexchange.textxtraction.TextXtractService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
 import com.openexchange.tools.oxfolder.GABRestorerRMIServiceImpl;
-import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.tools.strings.StringParser;
 import com.openexchange.uadetector.UserAgentParser;
-import com.openexchange.user.FilteringUserService;
+import com.openexchange.uploaddir.UploadDirService;
+import com.openexchange.uploaddir.impl.UploadDirServiceImpl;
 import com.openexchange.user.UserService;
-import com.openexchange.user.UserServiceInterceptor;
-import com.openexchange.user.UserServiceInterceptorRegistry;
+import com.openexchange.user.interceptor.UserServiceInterceptor;
+import com.openexchange.user.interceptor.UserServiceInterceptorRegistry;
+import com.openexchange.user.internal.FilteringUserService;
 import com.openexchange.user.internal.UserServiceImpl;
 import com.openexchange.userconf.UserConfigurationService;
 import com.openexchange.userconf.UserPermissionService;
@@ -384,7 +388,7 @@ public final class ServerActivator extends HousekeepingActivator {
             if (null != reg) {
                 try {
                     reg.notifyAbsence();
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     LOG.error("", e);
                 }
             }
@@ -401,7 +405,7 @@ public final class ServerActivator extends HousekeepingActivator {
             if (null != reg) {
                 try {
                     reg.notifyAvailability();
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     LOG.error("", e);
                 }
             }
@@ -444,6 +448,7 @@ public final class ServerActivator extends HousekeepingActivator {
         serviceTrackerList.add(confTracker);
 
         // I18n service load
+        track(I18nServiceRegistry.class, new RegistryCustomizer<I18nServiceRegistry>(context, I18nServiceRegistry.class));
         track(I18nService.class, new I18nServiceListener(context));
 
         // Audit logger
@@ -495,6 +500,9 @@ public final class ServerActivator extends HousekeepingActivator {
 
         // Push notification service (PNS)
         track(PushNotificationService.class, new RegistryCustomizer<PushNotificationService>(context, PushNotificationService.class));
+
+        // Session SSO checker
+        track(SessionSsoService.class, new RegistryCustomizer<SessionSsoService>(context, SessionSsoService.class));
 
         // Image transformation service
         track(ImageTransformationService.class, new RegistryCustomizer<ImageTransformationService>(context, ImageTransformationService.class));
@@ -696,7 +704,11 @@ public final class ServerActivator extends HousekeepingActivator {
         ServerServiceRegistry.getInstance().addService(UserConfigurationService.class, new UserConfigurationServiceImpl());
         registerService(UserConfigurationService.class, ServerServiceRegistry.getInstance().getService(UserConfigurationService.class, true));
 
-        registerService(Remote.class, new GABRestorerRMIServiceImpl());
+        {
+            Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
+            serviceProperties.put("RMI_NAME", GABRestorerRMIServiceImpl.RMI_NAME);
+            registerService(Remote.class, new GABRestorerRMIServiceImpl(), serviceProperties);
+        }
 
         ServerServiceRegistry.getInstance().addService(UserPermissionService.class, new UserPermissionServiceImpl());
         registerService(UserPermissionService.class, ServerServiceRegistry.getInstance().getService(UserPermissionService.class, true));
@@ -832,6 +844,9 @@ public final class ServerActivator extends HousekeepingActivator {
         // Register SessionHolder
         registerService(SessionHolder.class, ThreadLocalSessionHolder.getInstance());
         ServerServiceRegistry.getInstance().addService(SessionHolder.class, ThreadLocalSessionHolder.getInstance());
+
+        // Register upload directory service
+        registerService(UploadDirService.class, new UploadDirServiceImpl());
 
         // Fake bundle start
         activators.add(new FolderStorageActivator());

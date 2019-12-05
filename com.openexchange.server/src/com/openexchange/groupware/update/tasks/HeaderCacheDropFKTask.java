@@ -102,9 +102,9 @@ public final class HeaderCacheDropFKTask extends UpdateTaskAdapter {
 
             con.commit();
             doRollback = false;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
             if (doRollback) {

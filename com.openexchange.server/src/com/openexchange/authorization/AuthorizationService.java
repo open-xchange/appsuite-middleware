@@ -50,8 +50,8 @@ package com.openexchange.authorization;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.osgi.annotation.SingletonService;
+import com.openexchange.user.User;
 
 
 /**

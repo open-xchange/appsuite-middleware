@@ -60,7 +60,6 @@ import com.openexchange.dovecot.doveadm.client.DoveAdmCommand;
 import com.openexchange.dovecot.doveadm.client.DoveAdmDataResponse;
 import com.openexchange.dovecot.doveadm.client.DoveAdmResponse;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.imap.IMAPFolderStorage;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailFolderStorageDelegator;
@@ -83,6 +82,7 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
@@ -287,7 +287,7 @@ public class DefaultRegistrationPerformer implements RegistrationPerformer {
         if (null != mailAccess) {
             try {
                 mailAccess.close(false);
-            } catch (final Exception x) {
+            } catch (Exception x) {
                 // Ignore
             }
         }

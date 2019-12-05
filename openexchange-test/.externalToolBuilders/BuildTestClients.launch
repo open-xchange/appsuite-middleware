@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<launchConfiguration type="org.eclipse.ui.externaltools.ProgramBuilderLaunchConfigurationType">
+<stringAttribute key="org.eclipse.debug.core.ATTR_REFRESH_SCOPE" value="${working_set:&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&#10;&lt;resources&gt;&#10;&lt;item path=&quot;/open-xchange-test&quot; type=&quot;4&quot;/&gt;&#10;&lt;/resources&gt;}"/>
+<booleanAttribute key="org.eclipse.debug.ui.ATTR_LAUNCH_IN_BACKGROUND" value="false"/>
+<booleanAttribute key="org.eclipse.ui.externaltools.ATTR_BUILDER_ENABLED" value="true"/>
+<stringAttribute key="org.eclipse.ui.externaltools.ATTR_BUILD_SCOPE" value="${working_set:&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&#10;&lt;resources&gt;&#10;&lt;item path=&quot;/http-api/build.gradle.kts&quot; type=&quot;1&quot;/&gt;&#10;&lt;item path=&quot;/http-api/drive_api&quot; type=&quot;2&quot;/&gt;&#10;&lt;item path=&quot;/http-api/gradle&quot; type=&quot;2&quot;/&gt;&#10;&lt;item path=&quot;/http-api/http_api&quot; type=&quot;2&quot;/&gt;&#10;&lt;item path=&quot;/http-api/rest_api&quot; type=&quot;2&quot;/&gt;&#10;&lt;item path=&quot;/http-api/settings.gradle.kts&quot; type=&quot;1&quot;/&gt;&#10;&lt;item path=&quot;/http-api/version&quot; type=&quot;1&quot;/&gt;&#10;&lt;/resources&gt;}"/>
+<stringAttribute key="org.eclipse.ui.externaltools.ATTR_LOCATION" value="${workspace_loc:/http-api/gradlew}"/>
+<stringAttribute key="org.eclipse.ui.externaltools.ATTR_RUN_BUILD_KINDS" value="full,incremental,"/>
+<stringAttribute key="org.eclipse.ui.externaltools.ATTR_TOOL_ARGUMENTS" value="clean resolve http_api_client:build rest_api_client:build copyClients"/>
+<booleanAttribute key="org.eclipse.ui.externaltools.ATTR_TRIGGERS_CONFIGURED" value="true"/>
+<stringAttribute key="org.eclipse.ui.externaltools.ATTR_WORKING_DIRECTORY" value="${workspace_loc:/http-api}"/>
+</launchConfiguration>

@@ -50,8 +50,6 @@
 package com.openexchange.sql.grammar.example;
 
 import static com.openexchange.sql.grammar.Constant.PLACEHOLDER;
-import static com.openexchange.sql.schema.Tables.dates;
-import static com.openexchange.sql.schema.Tables.delDates;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -66,8 +64,12 @@ import com.openexchange.sql.grammar.PLUS;
 import com.openexchange.sql.grammar.SELECT;
 import com.openexchange.sql.grammar.SQRT;
 import com.openexchange.sql.grammar.TIMES;
+import com.openexchange.sql.grammar.Table;
 
 public class InsertExample {
+
+    private static final Table dates = new Table("prg_dates", "pd");
+    private static final Table delDates = new Table("del_dates", "dd");
 
 	public static void main(String[] args) throws Exception {
 		simpleUpdate();

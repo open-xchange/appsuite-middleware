@@ -1,7 +1,0 @@
-type: object
-required:
-  - data
-properties:
-  data:
-    type: object
-    description: The new value of the node specified by path.

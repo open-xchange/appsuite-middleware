@@ -77,21 +77,11 @@ public class ReorderRequest extends AbstractMailFilterRequest<ReorderResponse> {
         this.ids = ids;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
-     */
     @Override
     public Method getMethod() {
         return Method.PUT;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
-     */
     @Override
     public Parameter[] getParameters() throws IOException, JSONException {
         List<Parameter> parameters = new LinkedList<Parameter>();
@@ -102,21 +92,11 @@ public class ReorderRequest extends AbstractMailFilterRequest<ReorderResponse> {
         return parameters.toArray(new Parameter[parameters.size()]);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
-     */
     @Override
     public AbstractAJAXParser<? extends ReorderResponse> getParser() {
         return new ReorderParser(failOnError);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
-     */
     @Override
     public Object getBody() throws IOException, JSONException {
         JSONArray array = new JSONArray(ids.length);

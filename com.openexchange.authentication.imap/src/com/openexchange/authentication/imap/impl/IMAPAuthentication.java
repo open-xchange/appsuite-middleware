@@ -240,7 +240,7 @@ public class IMAPAuthentication implements AuthenticationService {
 	                UserService userService = services.getService(UserService.class);
 	                try {
 	                    userId = userService.getUserId(userInfo, ctx);
-	                } catch (final OXException e) {
+	                } catch (OXException e) {
 	                    throw INVALID_CREDENTIALS_MISSING_USER_MAPPING.create(loginInfo.getUsername());
 	                }
 	            }

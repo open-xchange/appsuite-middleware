@@ -52,7 +52,6 @@ package com.openexchange.chronos.itip.generators;
 import org.apache.commons.text.StringEscapeUtils;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.compat.ShownAsTransparency;
-import com.openexchange.chronos.itip.generators.changes.PassthroughWrapper;
 
 /**
  * {@link HTMLWrapper}
@@ -147,6 +146,11 @@ public class HTMLWrapper extends PassthroughWrapper {
             return "";
         }
         return "<i>" + escapeHtml(argument.toString()) + "</i>";
+    }
+    
+    @Override
+    public String getFormat() {
+        return "html";
     }
 
 }

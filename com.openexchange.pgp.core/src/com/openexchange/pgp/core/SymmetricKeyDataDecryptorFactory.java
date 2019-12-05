@@ -90,21 +90,11 @@ public class SymmetricKeyDataDecryptorFactory implements PublicKeyDataDecryptorF
         this.delegate = new JcePublicKeyDataDecryptorFactoryBuilder().setProvider(providerName).build(NULL_KEY);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.bouncycastle.openpgp.operator.PGPDataDecryptorFactory#createDataDecryptor(boolean, int, byte[])
-     */
     @Override
     public PGPDataDecryptor createDataDecryptor(boolean withIntegrityPacket, int encAlgorithm, byte[] key) throws PGPException {
         return delegate.createDataDecryptor(withIntegrityPacket, encAlgorithm, key);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.bouncycastle.openpgp.operator.PublicKeyDataDecryptorFactory#recoverSessionData(int, byte[][])
-     */
     @Override
     public byte[] recoverSessionData(int keyAlgorithm, byte[][] secKeyData) throws PGPException {
         return this.sessionKey;

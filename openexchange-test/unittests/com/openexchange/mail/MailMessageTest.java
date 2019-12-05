@@ -131,7 +131,7 @@ public final class MailMessageTest extends AbstractMailTest {
             } finally {
                 mailConnection.close(true);
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
@@ -149,7 +149,7 @@ public final class MailMessageTest extends AbstractMailTest {
             } finally {
                 mailConnection.close(true);
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
@@ -170,7 +170,7 @@ public final class MailMessageTest extends AbstractMailTest {
         MailMessage[] msgs = null;
         try {
             msgs = mailConnection.getMessageStorage().searchMessages(folder.getFullname(), null, MailSortField.RECEIVED_DATE, OrderDirection.DESC, null, COMMON_LIST_FIELDS);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             assertTrue("Error during fetching messages: " + e.getMessage(), e.getCategory().equals(Category.CATEGORY_PERMISSION_DENIED));
             return;
         }

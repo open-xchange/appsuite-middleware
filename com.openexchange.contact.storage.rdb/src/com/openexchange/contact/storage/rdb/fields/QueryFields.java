@@ -96,6 +96,7 @@ public class QueryFields {
          */
         final Set<ContactField> imageDataFieldsSet = new HashSet<ContactField>();
         final Set<ContactField> contactDataFieldsSet = new HashSet<ContactField>();
+        boolean loadImageUrl = false;
         for (final ContactField field : fields) {
         	if (Fields.CONTACT_DATABASE.contains(field)) {
         		contactDataFieldsSet.add(field);
@@ -105,7 +106,9 @@ public class QueryFields {
                 this.hasDistListData = true;
         	} else if (ContactField.LAST_MODIFIED_OF_NEWEST_ATTACHMENT.equals(field)) {
         		this.hasAttachmentData = true;
-        	}
+        	} else if (ContactField.IMAGE1_URL.equals(field)) {
+                loadImageUrl = true;
+            }
 		}
         if (null != mandatoryFields) {
 	        for (final ContactField field : mandatoryFields) {
@@ -117,13 +120,15 @@ public class QueryFields {
 	                this.hasDistListData = true;
 	        	} else if (ContactField.LAST_MODIFIED_OF_NEWEST_ATTACHMENT.equals(field)) {
 	        		this.hasAttachmentData = true;
-	        	}
+	        	} else if (ContactField.IMAGE1_URL.equals(field)) {
+	                loadImageUrl = true;
+	            }
 			}
         }
         /*
          * check image data fields
          */
-        if (0 < imageDataFieldsSet.size()) {
+        if (0 < imageDataFieldsSet.size() || loadImageUrl) {
         	imageDataFieldsSet.add(ContactField.OBJECT_ID);
         	this.hasImageData = true;
         	this.imageDataFields = imageDataFieldsSet.toArray(new ContactField[imageDataFieldsSet.size()]);

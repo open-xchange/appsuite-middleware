@@ -1,0 +1,8 @@
+type: object
+properties:
+  $ref: ../../common/CommonResponseData.yaml
+  data:
+    type: object
+    description: >-
+      Array of halo data objects specified by the corresponding identifiers in
+      the `columns` parameter. The element types can be distinguished.

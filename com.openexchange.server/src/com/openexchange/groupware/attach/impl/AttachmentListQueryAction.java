@@ -68,7 +68,7 @@ public abstract class AttachmentListQueryAction extends AbstractAttachmentAction
 				@Override
 				public void fillStatement() throws SQLException {
 					final int number = fillFields(m, stmt);
-					if(addId) {
+					if (addId) {
 						stmt.setInt(number,m.getId());
 					}
 				}

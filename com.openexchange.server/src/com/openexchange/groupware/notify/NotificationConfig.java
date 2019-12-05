@@ -68,9 +68,7 @@ public class NotificationConfig extends AbstractConfig implements Initialization
 
     public enum NotificationProperty{
 
-        NOTIFY_ON_DELETE("notify_participants_on_delete"),
         OBJECT_LINK("object_link"),
-        INTERNAL_IMIP("imipForInternalUsers"),
         FROM_SOURCE("com.openexchange.notification.fromSource");
 
 
@@ -112,15 +110,15 @@ public class NotificationConfig extends AbstractConfig implements Initialization
     			return overridden;
     		}
     	}
-        if(!INSTANCE.isPropertiesLoadInternal()) {
+        if (!INSTANCE.isPropertiesLoadInternal()) {
             try {
                 INSTANCE.loadPropertiesInternal();
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.error("", e);
                 return def;
             }
         }
-        if(!INSTANCE.isPropertiesLoadInternal()) {
+        if (!INSTANCE.isPropertiesLoadInternal()) {
             return def;
         }
         return INSTANCE.getPropertyInternal(prop.getName(), def);
@@ -128,7 +126,7 @@ public class NotificationConfig extends AbstractConfig implements Initialization
 
     public static boolean getPropertyAsBoolean(final NotificationProperty prop, final boolean def) {
         final String boolVal = getProperty(prop,null);
-        if(boolVal == null) {
+        if (boolVal == null) {
             return def;
         }
         return Boolean.parseBoolean(boolVal);
@@ -147,7 +145,7 @@ public class NotificationConfig extends AbstractConfig implements Initialization
 
     @Override
     public void start() throws OXException {
-        if(!INSTANCE.isPropertiesLoadInternal()) {
+        if (!INSTANCE.isPropertiesLoadInternal()) {
             INSTANCE.loadPropertiesInternal();
         }
         NotificationPool.getInstance().startup();

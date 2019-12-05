@@ -1,0 +1,42 @@
+/chronos/itip?action=analyze:
+  put:
+    operationId: analyze
+    tags:
+      - Chronos
+    summary: Analyzes an itip message.
+    parameters:
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - in: query
+        name: dataSource
+        description: >-
+          The identifier of the data source. Currently only
+          "com.openexchange.mail.ical" is valid.
+        required: true
+        schema:
+          type: string
+          default: com.openexchange.mail.ical
+      - in: query
+        name: descriptionFormat
+        description: The desired output fromat. Currently only "html" is valid.
+        required: true
+        schema:
+          type: string
+          default: html
+      - in: query
+        name: timezone
+        description: The timezone to show the event in.
+        required: false
+        schema:
+          type: string
+          default: UTC
+    responses:
+      '200':
+        description: >-
+          An analyze response describing what the ical intends to do and
+          handling suggestions.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnalyzeResponse'
+    requestBody:
+      $ref: '#/components/requestBodies/ConversionDataSource'

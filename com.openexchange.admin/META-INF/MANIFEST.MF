@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Administration
 Bundle-SymbolicName: com.openexchange.admin
-Bundle-Version: 7.10.2
+Bundle-Version: 7.10.3
 Bundle-Activator: com.openexchange.admin.osgi.AdminActivator
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Vendor: OX Software GmbH
@@ -29,7 +29,6 @@ Import-Package: com.damienmiller,
  com.openexchange.file.storage,
  com.openexchange.filestore,
  com.openexchange.groupware,
- com.openexchange.groupware.alias,
  com.openexchange.groupware.contact,
  com.openexchange.groupware.container,
  com.openexchange.groupware.contexts,
@@ -74,6 +73,7 @@ Import-Package: com.damienmiller,
  com.openexchange.tools.session,
  com.openexchange.tools.sql,
  com.openexchange.user,
+ com.openexchange.user.interceptor,
  com.openexchange.version,
  gnu.trove,
  gnu.trove.iterator,

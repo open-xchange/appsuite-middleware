@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: The calendar provider for contact birthdays
 Bundle-SymbolicName: com.openexchange.chronos.provider.birthdays
-Bundle-Version: 7.10.2
+Bundle-Version: 7.10.3
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.openexchange.ajax.fileholder,
@@ -45,6 +45,7 @@ Import-Package: com.openexchange.ajax.fileholder,
  com.openexchange.jslob,
  com.openexchange.osgi,
  com.openexchange.osgi.util,
+ com.openexchange.regional,
  com.openexchange.search,
  com.openexchange.search.internal.operands,
  com.openexchange.server,
@@ -53,6 +54,7 @@ Import-Package: com.openexchange.ajax.fileholder,
  com.openexchange.tools.arrays,
  com.openexchange.tools.iterator,
  com.openexchange.tools.session,
+ com.openexchange.user,
  javax.mail.internet,
  javax.mail.internet.idn,
  org.dmfs.rfc5545,

@@ -96,7 +96,7 @@ public final class ControlActivator extends HousekeepingActivator {
             final Thread shutdownHookThread = new ControlShutdownHookThread(context);
             Runtime.getRuntime().addShutdownHook(shutdownHookThread);
             this.shutdownHookThread = shutdownHookThread;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("", e);
             throw e;
         }
@@ -116,7 +116,7 @@ public final class ControlActivator extends HousekeepingActivator {
                         if (!Runtime.getRuntime().removeShutdownHook(shutdownHookThread)) {
                             LOG.error("com.openexchange.control shutdown hook could not be deregistered");
                         }
-                    } catch (final IllegalStateException e) {
+                    } catch (IllegalStateException e) {
                         /*
                          * Just for safety reason...
                          */
@@ -127,7 +127,7 @@ public final class ControlActivator extends HousekeepingActivator {
             }
             // Do bundle clean-up
             cleanUp();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("", e);
             throw e;
         }

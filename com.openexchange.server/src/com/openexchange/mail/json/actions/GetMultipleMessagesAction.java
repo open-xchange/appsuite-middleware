@@ -235,7 +235,7 @@ public final class GetMultipleMessagesAction extends AbstractMailAction {
                                 entry = new ZipArchiveEntry(entryName);
                                 zipOutput.putArchiveEntry(entry);
                                 break;
-                            } catch (final java.util.zip.ZipException e) {
+                            } catch (java.util.zip.ZipException e) {
                                 final String eMessage = e.getMessage();
                                 if (eMessage == null || !eMessage.startsWith("duplicate entry")) {
                                     throw e;

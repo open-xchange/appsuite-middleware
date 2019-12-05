@@ -114,7 +114,7 @@ public class SingleMultifactorProviderStrategy implements MultifactorProviderStr
      * @return The provider with the given name
      */
     private Optional<MultifactorProvider> getProvider(Collection<MultifactorProvider> providers, String name){
-       if(providers.size() == 1) {
+       if (providers.size() == 1) {
            return providers.stream().findFirst();
        }
        return providers.stream().filter(p -> p.getName().equals(name)).findFirst();
@@ -123,18 +123,18 @@ public class SingleMultifactorProviderStrategy implements MultifactorProviderStr
     @Override
     public boolean requireAuthentication(Collection<MultifactorProvider> providers, MultifactorRequest multifactorRequest) throws OXException {
         final Collection<MultifactorProvider> enabledProviders = getEnabledProviders(multifactorRequest, providers);
-        if(!enabledProviders.isEmpty()) {
+        if (!enabledProviders.isEmpty()) {
             //Multifactor-authentication required because at least one provider is enabled for the session.
 
             //Get the name of the provider the client wants to authenticate against
             //Can be omitted if there is exactly one provider enabled
-            if(device.getProviderName() == null && enabledProviders.size() != 1) {
+            if (device.getProviderName() == null && enabledProviders.size() != 1) {
                 //No provider was chosen by the client but authentication against at least one provider is required
                 throw MultifactorExceptionCodes.MISSING_PROVIDER_NAME.create();
             }
 
             final Optional<MultifactorProvider> provider = getProvider(enabledProviders, device.getProviderName());
-            if(provider.isPresent()){
+            if (provider.isPresent()){
                 //Authenticate
 
                 final MultifactorAuthenticator authenticator = multifactorAuthFactory.createAuthenticator(provider.get());

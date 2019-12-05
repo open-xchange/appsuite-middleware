@@ -73,11 +73,6 @@ public class JSONObjectEntity implements RESTBodyEntity {
         entity = new StringEntity(body.toString(), Charsets.UTF_8);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.rest.client.v2.RESTBodyEntity#getBodyEntity()
-     */
     @Override
     public HttpEntity getBodyEntity() {
         return entity;

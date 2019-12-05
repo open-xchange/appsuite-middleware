@@ -71,10 +71,6 @@ public final class ElementEventImpl extends EventObject implements ElementEvent 
         this.elementEvent = elementEvent;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.cache.ElementEvent#getElementEvent()
-     */
     @Override
     public int getElementEvent() {
         return elementEvent;

@@ -80,7 +80,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.i18n.MailStrings;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.tools.StringHelper;
@@ -127,6 +126,7 @@ import com.openexchange.mailaccount.UnifiedInboxUID;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.regex.MatcherReplacer;
+import com.openexchange.user.User;
 
 /**
  * {@link MimeReply} - MIME message reply.
@@ -608,7 +608,7 @@ public final class MimeReply extends AbstractMimeProcessing {
                      * No reply text found at all
                      */
                     retvalContentType.setParameter("nature", "virtual");
-                    String replyPrefix = generatePrefixText(MailStrings.REPLY_PREFIX, ltz, origMsg);
+                    String replyPrefix = generatePrefixText(MailStrings.REPLY_PREFIX, ltz, origMsg, session);
                     boolean isHtml = retvalContentType.startsWith(TEXT_HTM);
                     if (isHtml) {
                         replyPrefix = HtmlProcessing.htmlFormat(new StringBuilder(replyPrefix.length() + 1).append(replyPrefix).append('\n').append('\n').toString());
@@ -675,9 +675,9 @@ public final class MimeReply extends AbstractMimeProcessing {
             replyMail.setAuthenticityResult(originalMsg.getAuthenticityResult());
 
             return replyMail;
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
@@ -779,7 +779,7 @@ public final class MimeReply extends AbstractMimeProcessing {
         }
         if (found && !usm.isDropReplyForwardPrefix()) {
             boolean isHtml = retvalContentType.startsWith(TEXT_HTM);
-            String replyPrefix = generatePrefixText(MailStrings.REPLY_PREFIX, ltz, msg);
+            String replyPrefix = generatePrefixText(MailStrings.REPLY_PREFIX, ltz, msg, session);
             {
                 char nextLine = '\n';
                 if (isHtml) {

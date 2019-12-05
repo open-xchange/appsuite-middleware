@@ -72,18 +72,12 @@ public class PGPKeyParserImpl implements PGPKeyRingParser {
         this.parser = Objects.requireNonNull(parser, "parser must not be null");
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.pgp.keys.parsing.PGPKeyParser#parse(java.io.InputStream)
-     */
     @Override
     public KeyRingParserResult parse(InputStream inputStream) throws IOException {
         KeyRingParserResult result = parser.parse(inputStream);
         return result;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.pgp.keys.parsing.PGPKeyRingParser#parse(java.lang.String)
-     */
     @Override
     public KeyRingParserResult parse(String data) throws IOException {
         KeyRingParserResult result = parser.parse(data);

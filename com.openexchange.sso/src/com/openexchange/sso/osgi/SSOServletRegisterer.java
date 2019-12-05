@@ -87,9 +87,9 @@ public final class SSOServletRegisterer implements ServiceTrackerCustomizer<Http
             String alias = SSOServiceRegistry.getInstance().getService(DispatcherPrefixService.class).getPrefix() + SSOConstants.SERVLET_PATH_APPENDIX;
             service.registerServlet(alias, new SSOServlet(), null, null);
             this.alias = alias;
-        } catch (final ServletException e) {
+        } catch (ServletException e) {
             org.slf4j.LoggerFactory.getLogger(SSOServletRegisterer.class).error("", e);
-        } catch (final NamespaceException e) {
+        } catch (NamespaceException e) {
             org.slf4j.LoggerFactory.getLogger(SSOServletRegisterer.class).error("", e);
         }
         return service;

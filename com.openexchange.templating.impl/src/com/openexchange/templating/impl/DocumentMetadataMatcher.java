@@ -83,22 +83,22 @@ public class DocumentMetadataMatcher {
         if (fileName == null) {
             return;
         }
-        if(fileName.equals(name)) {
+        if (fileName.equals(name)) {
             newScore = 100;
         }
-        if(fileName.indexOf('.') >= 0) {
+        if (fileName.indexOf('.') >= 0) {
             final String filenameWithoutExtension = fileName.substring(0, fileName.lastIndexOf('.'));
-            if(filenameWithoutExtension.equals(name)) {
+            if (filenameWithoutExtension.equals(name)) {
                 newScore = 5;
             }
         }
 
-        if(document.getTitle() != null && document.getTitle().equals(name)) {
+        if (document.getTitle() != null && document.getTitle().equals(name)) {
             newScore = 7;
         }
 
 
-        if(newScore > score) {
+        if (newScore > score) {
             score = newScore;
             bestMatch = document;
         }

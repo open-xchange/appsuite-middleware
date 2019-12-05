@@ -110,7 +110,7 @@ public final class Autoboxing {
      * @return Boolean object.
      */
     public static Boolean B(final boolean b) {
-        return Boolean.valueOf(b);
+        return (b ? Boolean.TRUE : Boolean.FALSE);
     }
 
     /**
@@ -128,7 +128,7 @@ public final class Autoboxing {
      * @return <code>Boolean.TRUE</code> if b == false, <code>Boolean.FALSE</code> otherwise.
      */
     public static Boolean NOT(final boolean b) {
-        return Boolean.valueOf(!b);
+        return (!b ? Boolean.TRUE : Boolean.FALSE);
     }
 
     /**
@@ -163,7 +163,28 @@ public final class Autoboxing {
     }
 
     /**
+     * Short method name for {@link Character#charValue()}.
+     * 
+     * @param c {@link Character} object to be converted to a char value.
+     * @return char value.
+     */
+    public static char c(Character c) {
+        return c.charValue();
+    }
+
+    /**
+     * Short method name for {@link Character#valueOf(char)} that uses cached instances.
+     * 
+     * @param c char value to be converted to a Character object.
+     * @return Character object.
+     */
+    public static Character C(char c) {
+        return Character.valueOf(c);
+    }
+
+    /**
      * Short method name for {@link Double#doubleValue()}.
+     * 
      * @param b {@link Double} object to be converted to a double value.
      * @return double value.
      */
@@ -322,19 +343,19 @@ public final class Autoboxing {
     // Type Coercion
 
     public static int a2i(final Object anything) {
-        if(anything == null) {
+        if (anything == null) {
             throw new NullPointerException("Can't convert null into integer");
         }
-        if(Integer.class.isInstance(anything)){
+        if (Integer.class.isInstance(anything)){
             return ((Integer) anything).intValue();
         }
-        if(Byte.class.isInstance(anything)) {
+        if (Byte.class.isInstance(anything)) {
             return ((Byte) anything).intValue();
         }
-        if(Long.class.isInstance(anything)) {
+        if (Long.class.isInstance(anything)) {
             return ((Long) anything).intValue();
         }
-        if(String.class.isInstance(anything)) {
+        if (String.class.isInstance(anything)) {
             return Integer.parseInt((String) anything);
         }
 
@@ -342,14 +363,14 @@ public final class Autoboxing {
     }
 
     public static boolean a2b(final Object anything) {
-        if(anything == null) {
+        if (anything == null) {
             throw new NullPointerException("Can't convert null into boolean");
         }
-        if(Boolean.class.isInstance(anything)){
+        if (Boolean.class.isInstance(anything)){
             return ((Boolean) anything).booleanValue();
         }
 
-        if(String.class.isInstance(anything)) {
+        if (String.class.isInstance(anything)) {
             return Boolean.parseBoolean((String) anything);
         }
 

@@ -241,7 +241,7 @@ public class InfostoreCopyTask implements CopyUserTaskService {
 
             stmt1.executeBatch();
             stmt2.executeBatch();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
             Databases.closeSQLStuff(stmt1);
@@ -307,7 +307,7 @@ public class InfostoreCopyTask implements CopyUserTaskService {
 
                     documents.put(document, new ArrayList<DocumentMetadata>());
                 }
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
             } finally {
                 Databases.closeSQLStuff(rs, stmt);
@@ -340,7 +340,7 @@ public class InfostoreCopyTask implements CopyUserTaskService {
 
                         versions.add(document);
                     }
-                } catch (final SQLException e) {
+                } catch (SQLException e) {
                     throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
                 } finally {
                     Databases.closeSQLStuff(rs, stmt);

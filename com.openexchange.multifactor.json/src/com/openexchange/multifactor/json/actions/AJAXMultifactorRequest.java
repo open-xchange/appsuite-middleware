@@ -142,7 +142,7 @@ public class AJAXMultifactorRequest {
      * @throws OXException
      */
     protected MultifactorRequest getMultifactorRequest() {
-        if(multifactorRequest == null) {
+        if (multifactorRequest == null) {
             multifactorRequest = new MultifactorRequest(session, locale);
         }
         return multifactorRequest;

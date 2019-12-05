@@ -133,7 +133,7 @@ public final class MessagingFolderParser {
                 if (folderJsonObject.hasAndNotNull(FolderFields.SUBSCRIBED)) {
                     try {
                         setSubscribed(folderJsonObject.getInt(FolderFields.SUBSCRIBED) > 0);
-                    } catch (final JSONException e) {
+                    } catch (JSONException e) {
                         /*
                          * Not an integer value
                          */
@@ -150,7 +150,7 @@ public final class MessagingFolderParser {
                     setPermissions(permissions);
                 }
 
-            } catch (final JSONException e) {
+            } catch (JSONException e) {
                 throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
             }
         }
@@ -195,7 +195,7 @@ public final class MessagingFolderParser {
                     perms[i] = oclPerm;
                 }
                 return perms;
-            } catch (final JSONException e) {
+            } catch (JSONException e) {
                 throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
             }
         }
@@ -219,7 +219,7 @@ public final class MessagingFolderParser {
                 try {
                     final MessagingFolderIdentifier mfi = new MessagingFolderIdentifier(jsonObj.getString(FolderChildFields.FOLDER_ID));
                     messagingFolder.setParentId(mfi.getFullname());
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     throw e;
                 }
             }
@@ -229,7 +229,7 @@ public final class MessagingFolderParser {
             if (jsonObj.hasAndNotNull(FolderFields.SUBSCRIBED)) {
                 try {
                     messagingFolder.setSubscribed(jsonObj.getInt(FolderFields.SUBSCRIBED) > 0);
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     /*
                      * Not an integer value
                      */
@@ -250,11 +250,11 @@ public final class MessagingFolderParser {
                         int entity;
                         try {
                             entity = elem.getInt(FolderFields.ENTITY);
-                        } catch (final JSONException e) {
+                        } catch (JSONException e) {
                             final String entityStr = elem.getString(FolderFields.ENTITY);
                             try {
                                 entity = us.getUserId(entityStr, ContextStorage.getStorageContext(session.getContextId()));
-                            } catch (final OXException e1) {
+                            } catch (OXException e1) {
                                 throw e1;
                             }
                         }
@@ -275,9 +275,9 @@ public final class MessagingFolderParser {
                     messagingFolder.setPermissions(mailPerms);
                 }
             }
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
         }
     }

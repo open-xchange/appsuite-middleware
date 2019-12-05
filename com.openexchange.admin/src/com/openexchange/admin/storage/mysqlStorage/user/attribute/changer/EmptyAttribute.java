@@ -60,41 +60,21 @@ public enum EmptyAttribute implements Attribute {
 
     private static final String EMPTY = "";
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute#getSQLFieldName()
-     */
     @Override
     public String getSQLFieldName() {
         return EMPTY;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute#getSQLTableName()
-     */
     @Override
     public String getSQLTableName() {
         return EMPTY;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute#getOriginalType()
-     */
     @Override
     public Class<?> getOriginalType() {
         return String.class;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute#getName()
-     */
     @Override
     public String getName() {
         return EMPTY;

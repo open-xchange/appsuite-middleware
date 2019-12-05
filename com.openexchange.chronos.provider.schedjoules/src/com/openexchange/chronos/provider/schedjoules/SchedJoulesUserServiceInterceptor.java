@@ -64,9 +64,9 @@ import com.openexchange.chronos.provider.caching.CachingCalendarUtils;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.user.AbstractUserServiceInterceptor;
+import com.openexchange.user.User;
+import com.openexchange.user.interceptor.AbstractUserServiceInterceptor;
 
 /**
  * {@link SchedJoulesUserServiceInterceptor}
@@ -97,11 +97,6 @@ public class SchedJoulesUserServiceInterceptor extends AbstractUserServiceInterc
         this.services = services;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.user.AbstractUserServiceInterceptor#afterUpdate(com.openexchange.groupware.contexts.Context, com.openexchange.groupware.ldap.User, com.openexchange.groupware.container.Contact, java.util.Map)
-     */
     @Override
     public void afterUpdate(Context context, User user, Contact contactData, Map<String, Object> properties) throws OXException {
         if (null == user || null == user.getLocale()) {

@@ -131,7 +131,7 @@ public class InfostoreConfig extends AbstractConfig implements Initialization {
             try {
                 singleton = getInstance();
                 singleton.start();
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.error("Can't init config:", e);
             }
         }
@@ -152,7 +152,7 @@ public class InfostoreConfig extends AbstractConfig implements Initialization {
         long size;
         try {
             size = Long.parseLong(sizeS.trim());
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             LOG.warn("{} is not a number: {}. Fall-back to system upload limitation.", InfoProperty.MAX_UPLOAD_SIZE.name(), sizeS);
             size = -1;
         }
@@ -169,7 +169,7 @@ public class InfostoreConfig extends AbstractConfig implements Initialization {
         }
         try {
             return Long.parseLong(sizeS.trim());
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             LOG.warn("{} is not a number: {}. Fall-back to no upload limitation for InfoStore module.", com.openexchange.configuration.ServerConfig.Property.MAX_UPLOAD_SIZE.name(), sizeS);
             return 0;
         }

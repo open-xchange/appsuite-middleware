@@ -122,4 +122,9 @@ public class GetSwitch implements AttachmentField.AttachmentSwitch {
 		return attachment.getFileId();
 	}
 
+	@Override
+	public Object checksum() {
+	    return attachment.getChecksum();
+	}
+
 }

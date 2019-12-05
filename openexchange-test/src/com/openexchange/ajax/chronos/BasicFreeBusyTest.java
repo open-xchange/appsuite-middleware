@@ -52,7 +52,6 @@ package com.openexchange.ajax.chronos;
 import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -66,7 +65,6 @@ import com.openexchange.ajax.chronos.util.DateTimeUtil;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.Attendee;
 import com.openexchange.testing.httpclient.models.Attendee.CuTypeEnum;
-import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
 import com.openexchange.testing.httpclient.models.ChronosFreeBusyResponse;
 import com.openexchange.testing.httpclient.models.ChronosFreeBusyResponseData;
 import com.openexchange.testing.httpclient.models.EventData;
@@ -159,16 +157,11 @@ public class BasicFreeBusyTest extends AbstractChronosTest {
                 attendees.add(att);
             }
         }
-        // FIXME: Use the EventManager instead
-        ChronosCalendarResultResponse createEvent = defaultUserApi.getChronosApi().createEvent(defaultUserApi.getSession(), folderId, createSingleEvent(summary, start, end, attendees), Boolean.FALSE, Boolean.FALSE, Boolean.FALSE, null, null, null, Boolean.FALSE, null);
-        assertNull(createEvent.getErrorDesc(), createEvent.getError());
-        assertNotNull(createEvent.getData());
-        EventData event = createEvent.getData().getCreated().get(0);
+        EventData event = eventManager.createEvent(createSingleEvent(summary, start, end, attendees));
         EventId eventId = new EventId();
         eventId.setId(event.getId());
         eventId.setFolder(folderId);
         rememberEventId(eventId);
-        setLastTimestamp(createEvent.getTimestamp().longValue());
         return event;
     }
 

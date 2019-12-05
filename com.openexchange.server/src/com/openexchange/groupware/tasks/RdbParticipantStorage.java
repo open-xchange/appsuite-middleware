@@ -142,7 +142,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
                 }
                 participants.add(taskParticipant);
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw TaskExceptionCode.SQL_ERROR.create(e);
         } finally {
             closeSQLStuff(result, stmt);
@@ -174,11 +174,11 @@ public class RdbParticipantStorage extends ParticipantStorage {
                 stmt.addBatch();
             }
             stmt.executeBatch();
-        } catch (final DataTruncation e) {
+        } catch (DataTruncation e) {
             throw parseTruncated(con, e, type, participants);
         } catch (IncorrectStringSQLException e) {
             throw Tools.parseIncorrectString(e);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw TaskExceptionCode.SQL_ERROR.create(e);
         } finally {
             closeSQLStuff(null, stmt);
@@ -212,7 +212,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
                 stmt.setInt(counter++, user);
             }
             deleted = stmt.executeUpdate();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw TaskExceptionCode.SQL_ERROR.create(e);
         } finally {
             closeSQLStuff(null, stmt);
@@ -242,7 +242,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
             while (result.next()) {
                 tasks.add(Integer.valueOf(result.getInt(1)));
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw TaskExceptionCode.SQL_ERROR.create(e);
         } finally {
             closeSQLStuff(result, stmt);
@@ -268,7 +268,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
             while (result.next()) {
                 tasks.add(Integer.valueOf(result.getInt(1)));
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw TaskExceptionCode.SQL_ERROR.create(e);
         } finally {
             closeSQLStuff(result, stmt);
@@ -306,7 +306,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
                     participants.add(participant);
                 }
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw TaskExceptionCode.SQL_ERROR.create(e);
         }
         return retval;
@@ -326,7 +326,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
                 stmt.setString(counter++, Strings.replaceSurrogatePairs(address, '@'));
             }
             deleted = stmt.executeUpdate();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw TaskExceptionCode.SQL_ERROR.create(e);
         }
         if (check && addresses.length != deleted) {
@@ -389,7 +389,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
                 if (-1 == tmp) {
                     tmp = 0;
                 }
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 LOG.error("", e);
                 tmp = 0;
             }
@@ -468,11 +468,11 @@ public class RdbParticipantStorage extends ParticipantStorage {
                 stmt.addBatch();
             }
             stmt.executeBatch();
-        } catch (final DataTruncation e) {
+        } catch (DataTruncation e) {
             throw parseTruncated(con, e, type, participants);
         } catch (IncorrectStringSQLException e) {
             throw Tools.parseIncorrectString(e);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw TaskExceptionCode.SQL_ERROR.create(e);
         } finally {
             closeSQLStuff(null, stmt);
@@ -493,7 +493,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
             if (-1 == tmp) {
                 tmp = 0;
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             LOG.error("", e);
             tmp = 0;
         }

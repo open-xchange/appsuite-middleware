@@ -77,131 +77,66 @@ public class HistogramMBeanImpl extends AbstractMetricMBean implements Histogram
         this.histogram = histogram;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.jmx.HistogramMBean#getCount()
-     */
     @Override
     public long getCount() {
         return histogram.getCount();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.jmx.HistogramMBean#getMin()
-     */
     @Override
     public long getMin() {
         return histogram.getSnapshot().getMin();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.jmx.HistogramMBean#getMax()
-     */
     @Override
     public long getMax() {
         return histogram.getSnapshot().getMax();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.jmx.HistogramMBean#getMean()
-     */
     @Override
     public double getMean() {
         return histogram.getSnapshot().getMean();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.jmx.HistogramMBean#getStdDev()
-     */
     @Override
     public double getStdDev() {
         return histogram.getSnapshot().getStdDev();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.jmx.HistogramMBean#get50thPercentile()
-     */
     @Override
     public double get50thPercentile() {
         return histogram.getSnapshot().getMedian();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.jmx.HistogramMBean#get75thPercentile()
-     */
     @Override
     public double get75thPercentile() {
         return histogram.getSnapshot().get75thPercentile();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.jmx.HistogramMBean#get95thPercentile()
-     */
     @Override
     public double get95thPercentile() {
         return histogram.getSnapshot().get95thPercentile();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.jmx.HistogramMBean#get98thPercentile()
-     */
     @Override
     public double get98thPercentile() {
         return histogram.getSnapshot().get98thPercentile();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.jmx.HistogramMBean#get99thPercentile()
-     */
     @Override
     public double get99thPercentile() {
         return histogram.getSnapshot().get99thPercentile();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.jmx.HistogramMBean#get999thPercentile()
-     */
     @Override
     public double get999thPercentile() {
         return histogram.getSnapshot().get999thPercentile();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.jmx.HistogramMBean#values()
-     */
     @Override
     public long[] values() {
         return histogram.getSnapshot().getValues();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.jmx.HistogramMBean#getSnapshotSize()
-     */
     @Override
     public long getSnapshotSize() {
         return histogram.getSnapshot().size();

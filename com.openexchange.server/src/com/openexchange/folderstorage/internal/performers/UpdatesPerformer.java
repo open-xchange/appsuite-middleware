@@ -58,6 +58,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.CalculatePermission;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
@@ -71,17 +72,16 @@ import com.openexchange.folderstorage.StorageType;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
-import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 /**
  * {@link UpdatesPerformer} - Serves the <code>UPDATES</code> request.
@@ -209,14 +209,14 @@ public final class UpdatesPerformer extends AbstractUserizedFolderPerformer {
                                 FolderStorage.REAL_TREE_ID,
                                 Arrays.asList(modifiedFolderIDs),
                                 storageParameters));
-                        } catch (final OXException e) {
+                        } catch (OXException e) {
                             for (final String modifiedFolderID : modifiedFolderIDs) {
                                 try {
                                     modifiedFolders.add(folderStorage.getFolder(
                                         FolderStorage.REAL_TREE_ID,
                                         modifiedFolderID,
                                         storageParameters));
-                                } catch (final OXException ee) {
+                                } catch (OXException ee) {
                                     LOG.error("Updated folder \"{}\" could not be fetched from storage \"{}\":\n{}", modifiedFolderID, folderStorage.getClass().getName(), ee.getMessage(),
                                         ee);
                                 }
@@ -237,14 +237,14 @@ public final class UpdatesPerformer extends AbstractUserizedFolderPerformer {
                                         FolderStorage.REAL_TREE_ID,
                                         Arrays.asList(modifiedFolderIDs),
                                         storageParameters));
-                                } catch (final OXException e) {
+                                } catch (OXException e) {
                                     for (final String modifiedFolderID : modifiedFolderIDs) {
                                         try {
                                             modifiedFolders.add(storage.getFolder(
                                                 FolderStorage.REAL_TREE_ID,
                                                 modifiedFolderID,
                                                 storageParameters));
-                                        } catch (final OXException ee) {
+                                        } catch (OXException ee) {
                                             LOG.error("Updated folder \"{}\" could not be fetched from storage \"{}\":\n{}", modifiedFolderID, storage.getClass().getName(), ee.getMessage(),
                                                 ee);
                                         }
@@ -254,12 +254,12 @@ public final class UpdatesPerformer extends AbstractUserizedFolderPerformer {
                             if (started) {
                                 storage.commitTransaction(storageParameters);
                             }
-                        } catch (final OXException e) {
+                        } catch (OXException e) {
                             if (started) {
                                 storage.rollback(storageParameters);
                             }
                             throw e;
-                        } catch (final Exception e) {
+                        } catch (Exception e) {
                             if (started) {
                                 storage.rollback(storageParameters);
                             }
@@ -451,12 +451,12 @@ public final class UpdatesPerformer extends AbstractUserizedFolderPerformer {
              * Return result
              */
             return new UserizedFolder[][] { modified, deleted };
-        } catch (final OXException e) {
+        } catch (OXException e) {
             for (final FolderStorage folderStorage : openedStorages) {
                 folderStorage.rollback(storageParameters);
             }
             throw e;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             for (final FolderStorage folderStorage : openedStorages) {
                 folderStorage.rollback(storageParameters);
             }

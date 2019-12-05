@@ -74,41 +74,21 @@ public final class OneDriveServiceRegisterer extends AbstractCloudStorageService
         super(context, services);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.file.storage.oauth.osgi.AbstractCloudStorageServiceRegisterer#getCloudFileStorageService(com.openexchange.server.ServiceLookup)
-     */
     @Override
     protected AbstractOAuthFileStorageService getCloudFileStorageService() {
         return new OneDriveFileStorageService(getServiceLookup());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.file.storage.oauth.osgi.AbstractCloudStorageServiceRegisterer#getCloudFileStorageService(com.openexchange.server.ServiceLookup, com.openexchange.file.storage.CompositeFileStorageAccountManagerProvider)
-     */
     @Override
     protected AbstractOAuthFileStorageService getCloudFileStorageService(CompositeFileStorageAccountManagerProvider compositeProvider) {
         return new OneDriveFileStorageService(getServiceLookup(), compositeProvider);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.file.storage.oauth.osgi.AbstractCloudStorageServiceRegisterer#getOAuthAccountAssociationProvider(com.openexchange.file.storage.oauth.AbstractOAuthFileStorageService)
-     */
     @Override
     protected OAuthAccountAssociationProvider getOAuthAccountAssociationProvider(AbstractOAuthFileStorageService storageService) {
         return new OneDriveOAuthAccountAssociationProvider((OneDriveFileStorageService) storageService);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.file.storage.oauth.osgi.AbstractCloudStorageServiceRegisterer#getProviderId()
-     */
     @Override
     protected String getProviderId() {
         return OneDriveConstants.ID;

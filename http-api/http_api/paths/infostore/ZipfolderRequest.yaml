@@ -1,0 +1,41 @@
+/infostore?action=zipfolder:
+  get:
+    operationId: getFolderAsZip
+    tags:
+      - Infostore
+    summary: Gets a ZIP archive containing all ifoitems of a denoted folder.
+    description: >
+      It is possible to add a filename to the request's URI like
+      `/infostore/{filename}?action=zipfolder`.
+
+      The filename may be added to the customary infostore path to suggest a
+      filename to a Save-As dialog.
+    parameters:
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - $ref: '#/components/parameters/gblQueryParamInfostoreFolder'
+      - in: query
+        name: recursive
+        description: >-
+          `true` to also include subfolders and their infoitems respectively;
+          otherwise `false` to only consider the infoitems of specified.
+        required: false
+        schema:
+          type: boolean
+      - in: query
+        name: scan
+        description: >
+          Flag to request an Anti-Virus scan for the ifoitems in the specified
+          folder before downloading them.
+        required: false
+        schema:
+          type: boolean
+    responses:
+      '200':
+        description: >-
+          The raw byte data of the ZIP archive. The response type for the HTTP
+          request is set to `application/zip`.
+        content:
+          application/zip:
+            schema:
+              type: string
+              format: binary

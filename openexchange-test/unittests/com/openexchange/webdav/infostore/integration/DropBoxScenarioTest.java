@@ -69,7 +69,7 @@ public class DropBoxScenarioTest {
             switchUser(user1);
             createDropBox();
 
-        } catch (final Exception x) {
+        } catch (Exception x) {
             tearDown();
             throw x;
         }
@@ -96,13 +96,13 @@ public class DropBoxScenarioTest {
             assertEquals(-1, is.read());
             is.close();
 
-        } catch (final OXException e) {
+        } catch (OXException e) {
             e.printStackTrace();
             fail(e.getMessage());
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
             fail(e.getMessage());
-        } catch (final IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
@@ -121,13 +121,13 @@ public class DropBoxScenarioTest {
         }
     }
 
-    private void switchUser(final String username) throws OXException, OXException, OXException, SQLException {
+    private void switchUser(final String username) throws OXException, SQLException {
         factory.endRequest(200);
         factory.setSessionHolder(new DummySessionHolder(username, ctx));
         factory.beginRequest();
     }
 
-    private void createDropBox() throws OXException, OXException, OXException {
+    private void createDropBox() throws OXException {
         final Session session = factory.getSessionHolder().getSessionObject();
         final OXFolderManager mgr = OXFolderManager.getInstance(session);
         final OXFolderAccess acc = new OXFolderAccess(ContextStorage.getInstance().getContext(session.getContextId()));

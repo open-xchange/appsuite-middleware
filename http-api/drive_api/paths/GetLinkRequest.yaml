@@ -4,32 +4,32 @@
     tags:
       - Drive
     summary: Gets a share link
-    description: |
-      Creates a new or gets the previously created link for a file or folder that can be used to access the item in a browser
+    description: >
+      Creates a new or gets the previously created link for a file or folder
+      that can be used to access the item in a browser
+
       by anyone. This request is only available for items marked as `shareable`.
-    consumes:
-      - application/json
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
-      - $ref: "#/parameters/gblQueryParamRoot"
-      - in: body
-        name: body
-        description: A JSON object describing the target file- or directory version to get the link for.
-        required: true
-        schema:
-          $ref: "#/definitions/DriveShareTargetData"
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - $ref: '#/components/parameters/gblQueryParamRoot'
     responses:
-      200:
-        description: |
-          A JSON object containing details about the share link, including its URL. In case of errors the responsible
+      '200':
+        description: >
+          A JSON object containing details about the share link, including its
+          URL. In case of errors the responsible
+
           fields in the response are filled.
-        schema:
-          $ref: "#/definitions/DriveShareLinkResponse"
-    x-ox-examples:      
-      - Example1:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DriveShareLinkResponse'
+    x-ox-examples:
+      - Example1: null
         description: Get the intial link for a file
-        example: |
-          ==> PUT http://192.168.32.191/ajax/drive?action=getLink&session=35d55f0bd2284e78a8eb4dba99b1310b&root=9542
+        example: >
+          ==> PUT
+          http://192.168.32.191/ajax/drive?action=getLink&session=35d55f0bd2284e78a8eb4dba99b1310b&root=9542
+
           > Content:
             {
              "path": "/",
@@ -38,6 +38,7 @@
             }
 
           <== HTTP 200 OK (311.8978 ms elapsed, 118 bytes received)
+
           <   Content: 
               {
                 "data": {
@@ -46,10 +47,12 @@
                   "checksum": "bdf3bf1da3405725be763540d6601144"
                 }
               }
-      - Example2:
+      - Example2: null
         description: Get an already existing link for a file
-        example: |
-          ==> PUT http://192.168.32.191/ajax/drive?action=getLink&session=35d55f0bd2284e78a8eb4dba99b1310b&root=9542
+        example: >
+          ==> PUT
+          http://192.168.32.191/ajax/drive?action=getLink&session=35d55f0bd2284e78a8eb4dba99b1310b&root=9542
+
           > Content:
             {
               "path": "/",
@@ -58,6 +61,7 @@
             }
 
           <== HTTP 200 OK (78.0547 ms elapsed, 167 bytes received)
+
           <   Content: 
               {
                 "data": {
@@ -68,3 +72,12 @@
                   "checksum": "bdf3bf1da3405725be763540d6601144"
                 }
               }
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DriveShareTargetData'
+      description: >-
+        A JSON object describing the target file- or directory version to get
+        the link for.
+      required: true

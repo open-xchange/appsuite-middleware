@@ -72,41 +72,21 @@ public class DtStartMapping extends ICalDateTimeMapping<VAvailability, Availabil
         super(Property.DTSTART);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalDateTimeMapping#getValue(java.lang.Object)
-     */
     @Override
     protected DateTime getValue(Availability object) {
         return object.getStartTime().getTimestamp() == 0 ? null : object.getStartTime();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalDateTimeMapping#setValue(java.lang.Object, org.dmfs.rfc5545.DateTime)
-     */
     @Override
     protected void setValue(Availability object, DateTime value) {
         object.setStartTime(value);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalDateTimeMapping#createProperty()
-     */
     @Override
     protected DateProperty createProperty() {
         return new DtStart();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalDateTimeMapping#getProperty(net.fortuna.ical4j.model.Component)
-     */
     @Override
     protected DateProperty getProperty(VAvailability component) {
         DtStart dtStart = (DtStart) component.getProperty(Property.DTSTART);

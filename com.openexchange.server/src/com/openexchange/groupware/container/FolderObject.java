@@ -64,7 +64,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.i18n.FolderStrings;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
@@ -82,6 +81,7 @@ import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 import com.openexchange.tools.oxfolder.OXFolderLoader;
 import com.openexchange.tools.oxfolder.OXFolderSQL;
 import com.openexchange.tools.oxfolder.OXFolderUtility;
+import com.openexchange.user.User;
 
 /**
  * {@link FolderObject} - Represents a folder.
@@ -912,9 +912,9 @@ public class FolderObject extends FolderChildObject implements Cloneable {
                 return subfolderFlag;
             }
             return (iter = OXFolderIteratorSQL.getVisibleSubfoldersIterator(objectId, userId, groups, ctx, userConfig.getUserPermissionBits(), null)).hasNext();
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             SearchIterators.close(iter);
@@ -1015,11 +1015,11 @@ public class FolderObject extends FolderChildObject implements Cloneable {
      * Returns a list of subfolder IDs. If <code>enforce</code> is set and list has not been already loaded, their IDs are going to be
      * loaded from storage. Otherwise a exception is thrown that no subfolder IDs are present in this folder object.
      */
-    public final List<Integer> getSubfolderIds(final boolean enforce, final Context ctx) throws OXException, SQLException, OXException {
+    public final List<Integer> getSubfolderIds(final boolean enforce, final Context ctx) throws OXException, SQLException {
         return getSubfolderIds(enforce, null, ctx);
     }
 
-    public final List<Integer> getSubfolderIds(final boolean enforce, final Connection readCon, final Context ctx) throws OXException, SQLException, OXException {
+    public final List<Integer> getSubfolderIds(final boolean enforce, final Connection readCon, final Context ctx) throws OXException, SQLException {
         if (!b_subfolderIds) {
             /*
              * Subfolder list not set, yet
@@ -1167,7 +1167,7 @@ public class FolderObject extends FolderChildObject implements Cloneable {
         if (other.containsSubfolderIds() && (overwrite || !containsSubfolderIds())) {
             try {
                 setSubfolderIds((ArrayList<Integer>) other.getSubfolderIds());
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.error("", e);
             }
         }
@@ -1190,7 +1190,7 @@ public class FolderObject extends FolderChildObject implements Cloneable {
         if (containsObjectID()) {
             try {
                 return OXFolderSQL.exists(getObjectID(), null, ctx);
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
             }
         } else if (containsParentFolderID() && containsFolderName() && containsModule()) {
@@ -1201,7 +1201,7 @@ public class FolderObject extends FolderChildObject implements Cloneable {
                 }
                 setObjectID(fuid);
                 return true;
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
             }
         }
@@ -1240,7 +1240,7 @@ public class FolderObject extends FolderChildObject implements Cloneable {
         if (!containsPermissions()) {
             try {
                 setPermissionsAsArray(FolderObject.getFolderPermissions(getObjectID(), ContextStorage.getStorageContext(userPerm.getContextId()), null));
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
             }
         }
@@ -1255,7 +1255,7 @@ public class FolderObject extends FolderChildObject implements Cloneable {
         if (!containsPermissions()) {
             try {
                 setPermissionsAsArray(FolderObject.getFolderPermissions(getObjectID(), userConfig.getContext(), null));
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
             }
         }
@@ -1447,7 +1447,7 @@ public class FolderObject extends FolderChildObject implements Cloneable {
                         sb.append('|');
                     }
                 }
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 sb.append("");
             }
         }
@@ -1457,10 +1457,6 @@ public class FolderObject extends FolderChildObject implements Cloneable {
         return sb.toString();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see java.lang.Object#clone()
-     */
     @Override
     public FolderObject clone() {
         try {
@@ -1514,7 +1510,7 @@ public class FolderObject extends FolderChildObject implements Cloneable {
                 clone.setMap(copyMap(map));
             }
             return clone;
-        } catch (final CloneNotSupportedException exc) {
+        } catch (CloneNotSupportedException exc) {
             return null;
         }
     }

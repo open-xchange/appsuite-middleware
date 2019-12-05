@@ -67,6 +67,7 @@ import com.openexchange.ajax.share.bugs.Bug43270Test;
 import com.openexchange.ajax.share.bugs.Bug44962Test;
 import com.openexchange.ajax.share.bugs.Bug52843Test;
 import com.openexchange.ajax.share.bugs.Bug58051Test;
+import com.openexchange.ajax.share.bugs.Bug65805Test;
 import com.openexchange.ajax.share.tests.AddGuestPermissionTest;
 import com.openexchange.ajax.share.tests.AddGuestUserToGroupTest;
 import com.openexchange.ajax.share.tests.AggregateSharesTest;
@@ -91,6 +92,7 @@ import com.openexchange.ajax.share.tests.GuestContactTest;
 import com.openexchange.ajax.share.tests.LinkUpdateTest;
 import com.openexchange.ajax.share.tests.ListFileSharesTest;
 import com.openexchange.ajax.share.tests.ListFolderSharesTest;
+import com.openexchange.ajax.share.tests.LocalizedMessagesTest;
 import com.openexchange.ajax.share.tests.LoginScreenTest;
 import com.openexchange.ajax.share.tests.MailNotificationTest;
 import com.openexchange.ajax.share.tests.NotifyFileSharesTest;
@@ -158,7 +160,8 @@ import com.openexchange.test.concurrent.ParallelSuite;
     Bug52843Test.class,
     Bug58051Test.class,
     AnonymousGuestFoldersTest.class,
-
+    Bug65805Test.class,
+    LocalizedMessagesTest.class,
 })
 public class ShareAJAXSuite  {
 }

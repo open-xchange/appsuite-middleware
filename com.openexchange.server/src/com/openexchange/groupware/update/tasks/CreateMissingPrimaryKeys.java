@@ -398,20 +398,20 @@ public final class CreateMissingPrimaryKeys extends UpdateTaskAdapter {
             for (final Callable<Void> task : tasks) {
                 try {
                     task.call();
-                } catch (final SQLException e) {
+                } catch (SQLException e) {
                     log.warn("ALTER TABLE failed with: >>{}<<\nStatement: >>{}<<", e.getMessage(), task);
                 }
             }
 
             con.commit();
             rollback = 2;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
             if (rollback > 0) {

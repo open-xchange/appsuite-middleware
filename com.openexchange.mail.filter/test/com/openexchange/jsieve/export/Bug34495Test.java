@@ -56,6 +56,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.StringReader;
+import java.util.Optional;
 import java.util.StringTokenizer;
 import org.junit.Before;
 import org.junit.Test;
@@ -79,7 +80,7 @@ public class Bug34495Test extends SieveHandler {
     private static final String DELIMS = "\"\\\r\n ";
 
     public Bug34495Test() {
-        super(null, null, null, null, 0, null, null, -1, -1);
+        super(null, null, null, null, 0, null, null, Optional.empty(), Optional.empty(), -1, -1);
     }
 
 

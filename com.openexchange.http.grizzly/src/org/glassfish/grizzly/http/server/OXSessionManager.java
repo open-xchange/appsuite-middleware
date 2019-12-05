@@ -272,13 +272,9 @@ public class OXSessionManager implements SessionManager {
         cookie.setSecure(isCookieSecure);
 
         /*
-         * If auto-login is enabled we transform the session cookie into a persistent cookie
+         * Always set cookie max age to configured maximum value, otherwise it may break 'stay signed in' sessions
          */
-        if (grizzlyConfig.isSessionAutologin()) {
-            cookie.setMaxAge(grizzlyConfig.getCookieMaxAge());
-        } else {
-            cookie.setMaxAge(-1); // cookies auto-expire
-        }
+        cookie.setMaxAge(grizzlyConfig.getCookieMaxAge());
     }
 
     private static String determineServerNameByLogProperty() {

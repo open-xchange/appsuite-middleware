@@ -50,6 +50,8 @@
 package com.openexchange.contact.storage.rdb.osgi;
 
 import java.rmi.Remote;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -110,7 +112,11 @@ public class RdbContactStorageActivator extends HousekeepingActivator {
 
             registerService(QuotaProvider.class, new RdbContactQuotaProvider());
             registerService(Reloadable.class, FulltextAutocompleteAdapter.RELOADABLE);
-            registerService(Remote.class, new ContactStorageRMIServiceImpl());
+            {
+                Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
+                serviceProperties.put("RMI_NAME", ContactStorageRMIServiceImpl.RMI_NAME);
+                registerService(Remote.class, new ContactStorageRMIServiceImpl(), serviceProperties);
+            }
             track(I18nService.class, new I18nTracker(context));
             trackService(ImageMetadataService.class);
             openTrackers();

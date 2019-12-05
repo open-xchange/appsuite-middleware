@@ -231,7 +231,7 @@ public class DistributionListEntryObject implements Serializable {
 	         */
 	        try {
 	            new QuotedInternetAddress(emailaddress);
-	        } catch (final AddressException e) {
+	        } catch (AddressException e) {
 	            throw ContactExceptionCodes.INVALID_EMAIL.create(e, emailaddress);
 	        }
     	}

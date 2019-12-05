@@ -99,7 +99,7 @@ public class Change extends ChangeCore {
 
         final String accessCombinationName = parseAndSetAccessCombinationName(parser);
 
-        if( wantsChange && accessCombinationName == null) {
+        if ( wantsChange && accessCombinationName == null) {
             // user wants to change individual perms
             oxctx.changeModuleAccess(ctx, changed_access, auth);
         } else if (accessCombinationName != null && !wantsChange) {

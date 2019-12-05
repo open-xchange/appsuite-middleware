@@ -70,11 +70,6 @@ public final class UserWordParser extends AbstractAJAXParser<UserWordResponse> {
         super(failOnError);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.ajax.framework.AbstractAJAXParser#createResponse(com.openexchange.ajax.container.Response)
-     */
     @Override
     protected UserWordResponse createResponse(final Response response) throws JSONException {
         final UserWordResponse retval = new UserWordResponse(response);

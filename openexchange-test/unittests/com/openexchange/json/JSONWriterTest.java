@@ -19,7 +19,7 @@ public class JSONWriterTest {
             json.object();
             json.endObject();
             assertEquals("{}", json.getObject().toString());
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             fail(e.getMessage());
         }
     }
@@ -45,7 +45,7 @@ public class JSONWriterTest {
             assertEquals(3.14, object.optDouble("float"));
             assertTrue(object.optBoolean("boolean"));
 
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             fail(e.getMessage());
         }
     }
@@ -58,7 +58,7 @@ public class JSONWriterTest {
             json.array();
             json.endArray();
             assertEquals("[]", json.getObject().toString());
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             fail(e.getMessage());
         }
     }
@@ -80,7 +80,7 @@ public class JSONWriterTest {
             assertEquals(3.14, arr.getDouble(2));
             assertTrue(arr.getBoolean(3));
 
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             fail(e.getMessage());
         }
     }
@@ -115,7 +115,7 @@ public class JSONWriterTest {
             assertEquals("Testerine", object2.optString("first"));
             assertEquals("von Testeringen", object2.optString("last"));
 
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             fail(e.getMessage());
         }
     }
@@ -146,7 +146,7 @@ public class JSONWriterTest {
             assertEquals("Testerine", arr2.getString(0));
             assertEquals("von Testeringen", arr2.getString(1));
 
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
@@ -181,7 +181,7 @@ public class JSONWriterTest {
             assertEquals("Testerine", object2.optString("first"));
             assertEquals("von Testeringen", object2.optString("last"));
 
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             fail(e.getMessage());
         }
     }
@@ -210,7 +210,7 @@ public class JSONWriterTest {
 
             json.getObject().toString();
 
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
@@ -231,7 +231,7 @@ public class JSONWriterTest {
             json.endArray();
 
             assertEquals(ja.toString(), json.getObject().toString());
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
@@ -256,7 +256,7 @@ public class JSONWriterTest {
 
             assertEquals(jo.toString(), json.getObject().toString());
 
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             e.printStackTrace();
             fail(e.getMessage());
         }

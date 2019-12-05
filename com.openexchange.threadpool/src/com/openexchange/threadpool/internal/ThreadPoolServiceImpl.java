@@ -317,9 +317,9 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
                 if (!f.isDone()) {
                     try {
                         f.get();
-                    } catch (final CancellationException ignore) {
+                    } catch (CancellationException ignore) {
                         LOG.debug("", ignore);
-                    } catch (final ExecutionException ignore) {
+                    } catch (ExecutionException ignore) {
                         LOG.debug("", ignore);
                     }
                 }
@@ -373,11 +373,11 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
                     }
                     try {
                         f.get(nanos, TimeUnit.NANOSECONDS);
-                    } catch (final CancellationException ignore) {
+                    } catch (CancellationException ignore) {
                         LOG.debug("", ignore);
-                    } catch (final ExecutionException ignore) {
+                    } catch (ExecutionException ignore) {
                         LOG.debug("", ignore);
-                    } catch (final TimeoutException toe) {
+                    } catch (TimeoutException toe) {
                         return futures;
                     }
                     final long now = System.nanoTime();

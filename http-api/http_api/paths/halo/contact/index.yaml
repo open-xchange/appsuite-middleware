@@ -1,4 +1,3 @@
-requests:
-  - ServicesRequest.yaml
+requests: 
   - InvestigateRequest.yaml
-  - PictureRequest.yaml
+  - ServicesRequest.yaml

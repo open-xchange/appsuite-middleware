@@ -52,7 +52,7 @@ package com.openexchange.dav.principals;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.dav.DAVFactory;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.SessionHolder;
+import com.openexchange.session.SessionHolder;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavCollection;
 import com.openexchange.webdav.protocol.WebdavPath;
@@ -107,7 +107,7 @@ public class PrincipalFactory extends DAVFactory {
 
     @Override
     public String getURLPrefix() {
-        return "/principals/";
+        return getURLPrefix("/principals/");
     }
 
 }

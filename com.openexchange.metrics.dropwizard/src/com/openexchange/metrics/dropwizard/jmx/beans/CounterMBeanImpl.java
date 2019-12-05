@@ -77,11 +77,6 @@ public class CounterMBeanImpl extends AbstractMetricMBean implements CounterMBea
         this.counter = counter;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.jmx.CounterMBean#getCount()
-     */
     @Override
     public long getCount() {
         return counter.getCount();

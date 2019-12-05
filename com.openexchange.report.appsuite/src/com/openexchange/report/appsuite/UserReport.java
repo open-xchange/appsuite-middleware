@@ -51,8 +51,8 @@ package com.openexchange.report.appsuite;
 
 import java.io.Serializable;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.report.appsuite.serialization.Report;
+import com.openexchange.user.User;
 
 /**
  * A {@link UserReport} holds information about a user

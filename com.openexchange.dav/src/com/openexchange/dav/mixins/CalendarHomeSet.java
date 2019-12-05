@@ -49,6 +49,8 @@
 
 package com.openexchange.dav.mixins;
 
+import static com.openexchange.dav.DAVTools.getExternalPath;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
@@ -63,17 +65,22 @@ public class CalendarHomeSet extends SingleXMLPropertyMixin {
 
     /** The static path to a user's calendar home */
     public static final WebdavPath CALENDAR_HOME = new WebdavPath("caldav");
+    
+    private final ConfigViewFactory configViewFactory;
 
     /**
      * Initializes a new {@link CalendarHomeSet}.
+     * 
+     * @param configViewFactory The configuration view
      */
-    public CalendarHomeSet() {
+    public CalendarHomeSet(ConfigViewFactory configViewFactory) {
         super("urn:ietf:params:xml:ns:caldav", "calendar-home-set");
+        this.configViewFactory = configViewFactory;
     }
 
     @Override
     protected String getValue() {
-        return "<D:href>" + CALENDAR_HOME + "/</D:href>";
+        return "<D:href>" + getExternalPath(configViewFactory, CALENDAR_HOME.toString() + "/") + "</D:href>";
     }
 
 }

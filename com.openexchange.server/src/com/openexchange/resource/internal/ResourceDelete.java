@@ -61,7 +61,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteRegistry;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceEventConstants;
@@ -69,6 +68,7 @@ import com.openexchange.resource.ResourceExceptionCode;
 import com.openexchange.resource.storage.ResourceStorage.StorageType;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.user.User;
 
 /**
  * {@link ResourceDelete} - Performs update of a {@link Resource resource}.
@@ -165,7 +165,7 @@ public final class ResourceDelete extends AbstractResourcePerformer {
     // try {
     // securityService.checkPermission(permissions == null ? null : permissions.toArray(new String[permissions
     // .size()]), PATH);
-    // } catch (final BundleAccessException e) {
+    // } catch (BundleAccessException e) {
     // throw new OXException(e);
     // }
     // }
@@ -208,13 +208,13 @@ public final class ResourceDelete extends AbstractResourcePerformer {
             propagateDelete(con);
             delete(con);
             con.commit();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             Databases.rollback(con);
             throw ResourceExceptionCode.SQL_ERROR.create(e);
         } finally {
             try {
                 con.setAutoCommit(true);
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 LOG.error("Problem setting autocommit to true.", e);
             }
             DBPool.closeWriterSilent(ctx, con);

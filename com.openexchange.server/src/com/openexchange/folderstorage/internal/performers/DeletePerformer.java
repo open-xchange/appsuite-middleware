@@ -53,6 +53,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.CalculatePermission;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderServiceDecorator;
@@ -63,12 +64,11 @@ import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.TrashAwareFolderStorage;
 import com.openexchange.folderstorage.TrashResult;
-import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.folderstorage.tx.TransactionManager;
 import com.openexchange.folderstorage.virtual.VirtualFolderStorage;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 /**
  * {@link DeletePerformer} - Serves the <code>DELETE</code> request.
@@ -181,9 +181,9 @@ public final class DeletePerformer extends AbstractUserizedFolderPerformer {
                  */
                 transactionManager.commit();
                 rollbackTransaction = false;
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 throw e;
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
             } finally {
                 if (rollbackTransaction) {
@@ -263,9 +263,9 @@ public final class DeletePerformer extends AbstractUserizedFolderPerformer {
                 transactionManager.commit();
                 rollbackTransaction = false;
                 return result;
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 throw e;
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
             } finally {
                 if (rollbackTransaction) {
@@ -291,7 +291,7 @@ public final class DeletePerformer extends AbstractUserizedFolderPerformer {
     }
 
     private void checkTrashAware(FolderStorage storage) throws OXException {
-        if(!(storage instanceof TrashAwareFolderStorage)){
+        if (!(storage instanceof TrashAwareFolderStorage)){
             throw FolderExceptionErrorMessage.UNSUPPORTED_OPERATION.create();
         }
     }

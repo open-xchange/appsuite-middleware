@@ -49,6 +49,9 @@
 
 package com.openexchange.groupware.update.tasks;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import com.openexchange.database.Databases;
 import com.openexchange.groupware.update.SimpleStatementsUpdateTask;
 
 /**
@@ -60,6 +63,11 @@ public class CorrectOrganizerInAppointments extends SimpleStatementsUpdateTask {
 
     public CorrectOrganizerInAppointments() {
         super();
+    }
+
+    @Override
+    protected boolean shouldRun(Connection con) throws SQLException {
+        return Databases.tableExists(con, "prg_dates");
     }
 
     @Override

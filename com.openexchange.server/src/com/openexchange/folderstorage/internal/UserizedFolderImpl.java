@@ -67,9 +67,9 @@ import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.session.Session;
+import com.openexchange.user.User;
 
 /**
  * {@link UserizedFolderImpl} - The {@link UserizedFolder} implementation.
@@ -188,7 +188,7 @@ public class UserizedFolderImpl implements UserizedFolder {
             clone.creationDateUTC = null == creationDateUTC ? null : new Date(creationDateUTC.getTime());
             clone.locale = (Locale) (null == locale ? null : locale.clone());
             return clone;
-        } catch (final CloneNotSupportedException e) {
+        } catch (CloneNotSupportedException e) {
             throw new InternalError(e.getMessage());
         }
     }

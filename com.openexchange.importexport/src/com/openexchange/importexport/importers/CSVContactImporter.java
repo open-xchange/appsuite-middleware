@@ -93,8 +93,8 @@ import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.groupware.importexport.csv.CSVParser;
 import com.openexchange.groupware.importexport.csv.CsvExceptionCodes;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.importexport.Format;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
-import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.formats.csv.CSVLibrary;
 import com.openexchange.importexport.formats.csv.ContactFieldMapper;
 import com.openexchange.importexport.osgi.ImportExportServices;
@@ -155,7 +155,7 @@ public class CSVContactImporter extends AbstractImporter {
         FolderObject fo = null;
         try {
             fo = getFolderObject(session, folder);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             return false;
         }
         if (fo == null) {
@@ -172,7 +172,7 @@ public class CSVContactImporter extends AbstractImporter {
             perm = fo.getEffectiveUserPermission(
                 session.getUserId(),
                 UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext()));
-        } catch (final OXException e) {
+        } catch (OXException e) {
             return false;
         }
         return perm.canCreateObjects();
@@ -208,7 +208,7 @@ public class CSVContactImporter extends AbstractImporter {
                     throw ImportExportExceptionCodes.NO_FIELD_FOR_NAMING.create();
                 }
 
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 throw ImportExportExceptionCodes.IOEXCEPTION.create(e);
             } finally {
                 Streams.close(input);
@@ -328,7 +328,7 @@ public class CSVContactImporter extends AbstractImporter {
             }
             result.setException(ImportExportExceptionCodes.NO_FIELD_IMPORTED.create(I(lineNumber)));
             result.setDate(new Date());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (e.getCategory() != Category.CATEGORY_TRUNCATED || (e.getCategory() == Category.CATEGORY_TRUNCATED && !canOverrideInCaseOfTruncation)) {
                 result.setException(wrapException(e, lineNumber, session));
                 addErrorInformation(result, lineNumber, fields);
@@ -360,12 +360,12 @@ public class CSVContactImporter extends AbstractImporter {
             // skip unsupported import fields
             boolean skip = false;
             for(ContactField field: UNSUPPORTED_FIELDS){
-                if(field.getReadableName().equals(fieldName)){
+                if (field.getReadableName().equals(fieldName)){
                     skip=true;
                     break;
                 }
             }
-            if(skip){
+            if (skip){
                 continue;
             }
             final ContactField currField = getRelevantField(fieldName);

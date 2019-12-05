@@ -84,11 +84,6 @@ public class GeoLocationStorageServiceRegistrationTracker implements ServiceTrac
         this.services = services;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
-     */
     @Override
     public GeoLocationStorageService addingService(ServiceReference<GeoLocationStorageService> reference) {
         GeoLocationStorageService storage = context.getService(reference);
@@ -98,21 +93,11 @@ public class GeoLocationStorageServiceRegistrationTracker implements ServiceTrac
         return storage;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#modifiedService(org.osgi.framework.ServiceReference, java.lang.Object)
-     */
     @Override
     public void modifiedService(ServiceReference<GeoLocationStorageService> reference, GeoLocationStorageService service) {
         // no-op
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(org.osgi.framework.ServiceReference, java.lang.Object)
-     */
     @Override
     public void removedService(ServiceReference<GeoLocationStorageService> reference, GeoLocationStorageService service) {
         GeoLocationStorageServiceRegistry.getInstance().unregisterServiceProvider(service.getProviderId());

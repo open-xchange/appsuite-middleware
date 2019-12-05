@@ -86,11 +86,6 @@ public class GeoLocationServiceImpl implements GeoLocationService {
         this.services = services;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.geolocation.GeoLocationService#getGeoInformation(com.openexchange.session.Session, java.lang.String)
-     */
     @Override
     public GeoInformation getGeoInformation(int contextId, InetAddress ipAddress) throws OXException {
         return getStorage(contextId).getGeoInformation(contextId, ipAddress);

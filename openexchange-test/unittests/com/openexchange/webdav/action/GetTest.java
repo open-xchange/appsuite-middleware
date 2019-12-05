@@ -57,7 +57,7 @@ public class GetTest extends ActionTestCase {
         try {
             action.perform(req, res);
             fail("Expected 404 not found");
-        } catch (final WebdavProtocolException x) {
+        } catch (WebdavProtocolException x) {
             assertEquals(HttpServletResponse.SC_NOT_FOUND, x.getStatus());
         }
 
@@ -105,7 +105,7 @@ public class GetTest extends ActionTestCase {
         try {
             rangeTest(INDEX_HTML_URL, "23-25", getBytes(INDEX_HTML_URL, 0, 10));
             fail();
-        } catch (final WebdavProtocolException x) {
+        } catch (WebdavProtocolException x) {
             assertEquals(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE, x.getStatus());
         }
     }

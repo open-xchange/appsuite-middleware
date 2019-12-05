@@ -69,31 +69,16 @@ public class DropwizardHistogram implements Histogram {
         this.delegate = histogram;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.types.Histogram#update(int)
-     */
     @Override
     public void update(int value) {
         delegate.update(value);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.types.Histogram#update(long)
-     */
     @Override
     public void update(long value) {
         delegate.update(value);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.types.Histogram#getCount()
-     */
     @Override
     public long getCount() {
         return delegate.getCount();

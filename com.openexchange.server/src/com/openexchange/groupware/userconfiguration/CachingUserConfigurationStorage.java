@@ -59,10 +59,10 @@ import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.user.User;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.TIntObjectMap;
@@ -171,7 +171,7 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
         }
         try {
             this.cache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache(CACHE_REGION_NAME);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw UserConfigurationCodes.CACHE_INITIALIZATION_FAILED.create(e, CACHE_REGION_NAME);
         }
     }
@@ -192,7 +192,7 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
             if (null != cacheService) {
                 cacheService.freeCache(CACHE_REGION_NAME);
             }
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw UserConfigurationCodes.CACHE_INITIALIZATION_FAILED.create(e, CACHE_REGION_NAME);
         } finally {
             this.cache = null;
@@ -369,7 +369,7 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
         }
         try {
             cache.clear();
-        } catch (final RuntimeException rte) {
+        } catch (RuntimeException rte) {
             /*
              * Swallow
              */
@@ -405,7 +405,7 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
             }
             try {
                 cacheService.getCache("CapabilitiesUser").removeFromGroup(I(userId), String.valueOf(ctx.getContextId()));
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 LOG.warn("Error invalidating \"CapabilitiesUser\" cache for user {} in context {}: {}",
                     Integer.valueOf(userId), Integer.valueOf(ctx.getContextId()), e.getMessage(), e);
             }

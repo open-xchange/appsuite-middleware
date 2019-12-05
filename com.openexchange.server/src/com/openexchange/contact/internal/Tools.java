@@ -163,9 +163,9 @@ public final class Tools {
          * sort using the mapping's comparator with collation
          */
 	    Comparator<Object> comp = null;
-	    if(null != sortOptions.getCollation()) {
+	    if (null != sortOptions.getCollation()) {
 	        SuperCollator superCollator = SuperCollator.get(sortOptions.getCollation());
-	        if(superCollator != null) {
+	        if (superCollator != null) {
 	            comp = Collators.getDefaultInstance(superCollator.getJavaLocale());
 	        } else {
 	            LOG.warn("The collation {} is unknown. Falling back to default collation.", sortOptions.getCollation());
@@ -525,7 +525,7 @@ public final class Tools {
 	public static int parse(final String id) throws OXException {
 		try {
 			return Integer.parseInt(id);
-		} catch (final NumberFormatException e) {
+		} catch (NumberFormatException e) {
 			throw ContactExceptionCodes.ID_PARSING_FAILED.create(e, id);
 		}
 	}

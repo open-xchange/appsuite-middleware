@@ -138,7 +138,7 @@ public final class MailDriveFolder extends DefaultFileStorageFolder implements T
                 setSubscribedSubfolders(false);
 
             }
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
         return this;

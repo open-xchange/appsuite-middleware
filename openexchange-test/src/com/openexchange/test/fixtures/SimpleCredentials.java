@@ -227,7 +227,7 @@ public class SimpleCredentials implements Cloneable {
             try {
                 final String[] language_country = getConfig().getString(Tree.Language).split("_");
                 locale = new Locale(language_country[0], language_country[1]);
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 throw new FixtureException("Unable to determine locale.", e);
             }
         }
@@ -274,7 +274,7 @@ public class SimpleCredentials implements Cloneable {
     public Object clone() {
         try {
             return super.clone();
-        } catch (final CloneNotSupportedException e) {
+        } catch (CloneNotSupportedException e) {
             e.printStackTrace();
             return null;
         }

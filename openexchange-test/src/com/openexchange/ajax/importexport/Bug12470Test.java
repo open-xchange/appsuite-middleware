@@ -117,7 +117,7 @@ public final class Bug12470Test extends AbstractAJAXSession {
     }
 
     @Test
-    public void testDueDate() throws OXException, IOException, JSONException, OXException {
+    public void testDueDate() throws OXException, IOException, JSONException {
         final GetRequest request = new GetRequest(folderId, objectId);
         final GetResponse response = client.execute(request);
         final Task task = response.getTask(tz);

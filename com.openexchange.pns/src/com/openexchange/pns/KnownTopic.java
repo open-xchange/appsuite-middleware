@@ -80,11 +80,11 @@ public enum KnownTopic {
     // ------------------------------------------------ CALENDAR ------------------------------------------------
 
     /**
-     * <code>ox:calendar:new</code>
+     * <code>ox:calendar:updates</code>
      * <p>
-     * The topic for a newly created appointment.
+     * The topic for updates in the calendar module.
      */
-    CALENDAR_NEW("ox:calendar:new"),
+    CALENDAR_UPDATES("ox:calendar:updates"),
 
     ;
 

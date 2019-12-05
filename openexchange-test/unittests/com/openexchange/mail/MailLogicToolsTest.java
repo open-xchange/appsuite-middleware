@@ -100,7 +100,7 @@ public final class MailLogicToolsTest extends AbstractMailTest {
                 mailAccess.close(true);
             }
 
-        } catch (final OXException e) {
+        } catch (OXException e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
@@ -138,7 +138,7 @@ public final class MailLogicToolsTest extends AbstractMailTest {
                 mailConnection.close(true);
             }
 
-        } catch (final OXException e) {
+        } catch (OXException e) {
             e.printStackTrace();
             fail(e.getMessage());
         }

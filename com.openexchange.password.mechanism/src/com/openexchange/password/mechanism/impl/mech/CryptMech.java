@@ -52,6 +52,7 @@ package com.openexchange.password.mechanism.impl.mech;
 import java.io.UnsupportedEncodingException;
 import java.util.Base64;
 import com.openexchange.exception.OXException;
+import com.openexchange.password.mechanism.AbstractPasswordMech;
 import com.openexchange.password.mechanism.PasswordDetails;
 import com.openexchange.password.mechanism.exceptions.PasswordMechExceptionCodes;
 import com.openexchange.password.mechanism.impl.algorithm.UnixCrypt;
@@ -62,7 +63,7 @@ import com.openexchange.password.mechanism.impl.algorithm.UnixCrypt;
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a> moved
  * @since v7.10.2
  */
-public class CryptMech extends ConfigAwarePasswordMech {
+public class CryptMech extends AbstractPasswordMech {
 
     /**
      * Initializes a new {@link CryptMech}.
@@ -74,12 +75,9 @@ public class CryptMech extends ConfigAwarePasswordMech {
     @Override
     public PasswordDetails encodePassword(String str) throws OXException {
         try {
-            if (doSalt()) {
-                byte[] salt = getSalt();
-                String saltString = Base64.getUrlEncoder().withoutPadding().encodeToString(salt);
-                return new PasswordDetails(str, UnixCrypt.crypt(saltString, str), getIdentifier(), null);
-            }
-            return new PasswordDetails(str, UnixCrypt.crypt(str), getIdentifier(), null);
+            byte[] salt = getSalt();
+            String saltString = Base64.getUrlEncoder().withoutPadding().encodeToString(salt);
+            return new PasswordDetails(str, UnixCrypt.crypt(saltString, str), getIdentifier(), null);
         } catch (UnsupportedEncodingException e) {
             LOG.error("Error encrypting password according to CRYPT mechanism", e);
             throw PasswordMechExceptionCodes.UNSUPPORTED_ENCODING.create(e, e.getMessage());

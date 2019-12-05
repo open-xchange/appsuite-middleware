@@ -61,13 +61,13 @@ public abstract class CompositeParser implements StringParser {
 
     @Override
     public <T> T parse(String s, Class<T> t) {
-        if(s == null) {
+        if (s == null) {
             return null;
         }
         Collection<StringParser> parsers = getParsers();
         for (StringParser stringParser : parsers) {
             T value = stringParser.parse(s, t);
-            if(value != null) {
+            if (value != null) {
                 return value;
             }
         }

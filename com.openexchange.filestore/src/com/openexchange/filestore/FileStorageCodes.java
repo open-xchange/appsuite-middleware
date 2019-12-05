@@ -85,7 +85,7 @@ public enum FileStorageCodes implements DisplayableOXExceptionCode {
     /** Eliminating the file storage failed. */
     NOT_ELIMINATED("Eliminating the file storage failed.", MESSAGE, Category.CATEGORY_SERVICE_DOWN, 16),
     /** File does not exist in file storage "%1$s". Consider running consistency tool. */
-    FILE_NOT_FOUND("File does not exist in file store \"%1$s\". Consider running the consistency tool.", MESSAGE, Category.CATEGORY_SERVICE_DOWN, 17),
+    FILE_NOT_FOUND("File does not exist in file store \"%1$s\". Consider running the consistency tool.", MESSAGE, Category.CATEGORY_ERROR, 17),
     /** The requested range (offset: %1$d, length: %2$d) for the file \"%3$s\" (current size: %4$d) is invalid. */
     INVALID_RANGE("The requested range (offset: %1$d, length: %2$d) for the file \"%3$s\" (current size: %4$d) is invalid.", MESSAGE_RETRY, Category.CATEGORY_USER_INPUT, 18),
     /** The specified offset %1$d for the file \"%2$s\" (current size: %3$d) is invalid. */

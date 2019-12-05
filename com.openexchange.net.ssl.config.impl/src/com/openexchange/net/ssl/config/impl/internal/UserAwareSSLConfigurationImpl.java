@@ -142,11 +142,6 @@ public class UserAwareSSLConfigurationImpl implements UserAwareSSLConfigurationS
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.net.ssl.config.UserAwareSSLConfigurationService#canManageCertificates(int, int)
-     */
     @Override
     public boolean canManageCertificates(int userId, int contextId) {
         boolean allowedToDefineTrustLevel = isAllowedToDefineTrustLevel(userId, contextId);

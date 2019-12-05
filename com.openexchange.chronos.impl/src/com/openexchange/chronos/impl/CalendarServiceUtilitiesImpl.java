@@ -56,6 +56,7 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.performer.CountEventsPerformer;
@@ -86,7 +87,7 @@ public class CalendarServiceUtilitiesImpl implements CalendarServiceUtilities {
      * @return The calendar service utilities
      */
     public static CalendarServiceUtilities getInstance() {
-        if(instance == null){
+        if (instance == null){
             instance = new CalendarServiceUtilitiesImpl();
         }
         return instance;
@@ -145,6 +146,18 @@ public class CalendarServiceUtilitiesImpl implements CalendarServiceUtilities {
     }
 
     @Override
+    public String resolveByUID(CalendarSession session, String uid, RecurrenceId recurrenceId, int calendarUserId) throws OXException {
+        return new InternalCalendarStorageOperation<String>(session) {
+
+            @Override
+            protected String execute(CalendarSession session, CalendarStorage storage) throws OXException {
+                EventID eventID = new ResolvePerformer(session, storage).resolveByUid(uid, recurrenceId, calendarUserId);
+                return null == eventID ? null : eventID.getObjectID();
+            }
+        }.executeQuery();
+    }
+
+    @Override
     public Quota[] getQuotas(CalendarSession session) throws OXException {
         return new InternalCalendarStorageOperation<Quota[]>(session) {
 
@@ -175,12 +188,12 @@ public class CalendarServiceUtilitiesImpl implements CalendarServiceUtilities {
     }
 
     @Override
-    public Event resolveByID(CalendarSession session, String id) throws OXException {
+    public Event resolveByID(CalendarSession session, String id, Integer sequence) throws OXException {
         return new InternalCalendarStorageOperation<Event>(session) {
 
             @Override
             protected Event execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return new ResolvePerformer(session, storage).resolveById(id);
+                return new ResolvePerformer(session, storage).resolveById(id, sequence);
             }
         }.executeQuery();
     }

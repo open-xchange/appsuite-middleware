@@ -49,12 +49,11 @@
 
 package com.openexchange.tools.session;
 
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.session.Session;
+import com.openexchange.session.UserContextSession;
 
 /**
  * {@link ServerSession} - Extends common {@link Session} interface by additional getter methods for common used objects like context, user,
@@ -63,22 +62,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface ServerSession extends Session {
-
-    /**
-     * Gets the context object.
-     *
-     * @return The context object.
-     */
-    Context getContext();
-
-    /**
-     * Gets the user object
-     *
-     * @return The user object
-     * @throws IllegalStateException If user object could not be loaded
-     */
-    User getUser();
+public interface ServerSession extends UserContextSession {
 
     /**
      * Gets the user configuration object.

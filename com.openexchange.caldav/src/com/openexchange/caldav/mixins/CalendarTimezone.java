@@ -55,9 +55,9 @@ import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.resources.FolderCollection;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
+import com.openexchange.user.User;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 /**

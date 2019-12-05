@@ -108,7 +108,7 @@ public class ThreadPoolCompletionService<V> implements CancelableCompletionServi
                 super.run();
                 ran = true;
                 t.afterExecute(null);
-            } catch (final Exception ex) {
+            } catch (Exception ex) {
                 if (!ran) {
                     t.afterExecute(ex);
                 }

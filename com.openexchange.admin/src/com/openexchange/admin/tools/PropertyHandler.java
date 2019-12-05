@@ -87,9 +87,9 @@ public class PropertyHandler {
         this.sysprops = sysprops;
         try {
             loadProps(sysprops);
-        } catch (final FileNotFoundException e) {
+        } catch (FileNotFoundException e) {
             log.error("", e);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             log.error("", e);
         }
     }

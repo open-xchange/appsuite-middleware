@@ -52,8 +52,10 @@ package com.openexchange.dav.reports;
 import static com.openexchange.java.Autoboxing.I;
 import javax.servlet.http.HttpServletResponse;
 import org.jdom2.Element;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.actions.PROPFINDAction;
+import com.openexchange.dav.mixins.PrincipalURL;
 import com.openexchange.dav.principals.groups.GroupPrincipalResource;
 import com.openexchange.dav.principals.users.UserPrincipalResource;
 import com.openexchange.dav.resources.DAVCollection;
@@ -62,7 +64,7 @@ import com.openexchange.folderstorage.Permission;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupService;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 import com.openexchange.webdav.action.WebdavRequest;
 import com.openexchange.webdav.action.WebdavResponse;
@@ -109,10 +111,12 @@ public class ACLPrincipalPropSet extends PROPFINDAction {
                     WebdavResource resource;
                     if (permission.isGroup()) {
                         Group group = collection.getFactory().requireService(GroupService.class).getGroup(context, permission.getEntity());
-                        resource = new GroupPrincipalResource(collection.getFactory(), group);
+                        WebdavPath url = new WebdavPath(PrincipalURL.forGroup(group.getIdentifier(), collection.getFactory().requireService(ConfigViewFactory.class)));
+                        resource = new GroupPrincipalResource(collection.getFactory(), group, url);
                     } else {
                         User user = collection.getFactory().requireService(UserService.class).getUser(permission.getEntity(), context);
-                        resource = new UserPrincipalResource(collection.getFactory(), user);
+                        WebdavPath url = new WebdavPath(PrincipalURL.forUser(user.getId(), collection.getFactory().requireService(ConfigViewFactory.class)));
+                        resource = new UserPrincipalResource(collection.getFactory(), user, url);
                     }
                     multistatusElement.addContent(marshaller.marshal(resource));
                 } catch (OXException e) {

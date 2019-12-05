@@ -69,7 +69,7 @@ public class JdbcExecutor extends AbstractExecutor implements Executor {
 
     @Override
     public void execute(final SqlStatement sql, final List<SqlVisitor> sqlVisitors) throws DatabaseException {
-        if(sql instanceof ExecutablePreparedStatement) {
+        if (sql instanceof ExecutablePreparedStatement) {
             ((ExecutablePreparedStatement) sql).execute(new PreparedStatementFactory((JdbcConnection)database.getConnection()));
             return;
         }

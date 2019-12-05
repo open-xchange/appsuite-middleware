@@ -49,6 +49,7 @@
 
 package com.openexchange.dav.osgi;
 
+import static com.openexchange.dav.DAVTools.getInternalPath;
 import org.osgi.service.http.HttpService;
 import com.openexchange.clientinfo.ClientInfoProvider;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -73,7 +74,7 @@ import com.openexchange.webdav.protocol.osgi.OSGiPropertyMixin;
 /**
  * {@link DAVActivator}
  *
- * @author <a href="mailto:firstname.lastname@open-xchange.com">Firstname Lastname</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.1
  */
 public class DAVActivator extends HousekeepingActivator {
@@ -87,37 +88,37 @@ public class DAVActivator extends HousekeepingActivator {
 
     @Override
     protected synchronized void startBundle() throws Exception {
+        ConfigViewFactory configViewFactory = getService(ConfigViewFactory.class);
         HttpService httpService = getService(HttpService.class);
         /*
          * root
          */
         RootPerformer rootPerformer = new RootPerformer(this);
-        httpService.registerServlet("/servlet/dav", new DAVServlet(rootPerformer, Interface.CALDAV), null, null);
+        httpService.registerServlet(getInternalPath(configViewFactory, null), new DAVServlet(rootPerformer, Interface.CALDAV), null, null);
         /*
          * attachments
          */
         AttachmentPerformer attachmentPerformer = new AttachmentPerformer(this);
-        httpService.registerServlet("/servlet/dav/attachments", new DAVServlet(attachmentPerformer, Interface.CALDAV), null, null);
+        httpService.registerServlet(getInternalPath(configViewFactory, "attachments"), new DAVServlet(attachmentPerformer, Interface.CALDAV), null, null);
         /*
          * principals
          */
         PrincipalPerformer principalPerformer = new PrincipalPerformer(this);
-        httpService.registerServlet("/servlet/dav/principals", new DAVServlet(principalPerformer, Interface.CARDDAV), null, null);
+        httpService.registerServlet(getInternalPath(configViewFactory, "principals"), new DAVServlet(principalPerformer, Interface.CARDDAV), null, null);
         OSGiPropertyMixin mixin = new OSGiPropertyMixin(context, principalPerformer);
         principalPerformer.setGlobalMixins(mixin);
         this.mixin = mixin;
         /*
          * OSGi mixins
          */
-        registerService(PropertyMixin.class, new PrincipalCollectionSet());
-        registerService(PropertyMixin.class, new CalendarHomeSet());
-        registerService(PropertyMixin.class, new AddressbookHomeSet());
+        registerService(PropertyMixin.class, new PrincipalCollectionSet(configViewFactory));
+        registerService(PropertyMixin.class, new CalendarHomeSet(configViewFactory));
+        registerService(PropertyMixin.class, new AddressbookHomeSet(configViewFactory));
         /*
          * DAV client info
          */
         registerService(ClientInfoProvider.class, new DAVClientInfoProvider(getService(UserAgentParser.class)), 0);
         openTrackers();
-        Services.setServiceLookup(this);
     }
 
     @Override

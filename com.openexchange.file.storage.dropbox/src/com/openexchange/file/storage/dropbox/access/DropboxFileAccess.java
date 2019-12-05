@@ -160,11 +160,6 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         return folderAccess.moveFolder(folderId, newParentId, newName, autoRename);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFileAccess#exists(java.lang.String, java.lang.String, java.lang.String)
-     */
     @Override
     public boolean exists(String folderId, String id, String version) throws OXException {
         // Dropbox V2 API does not support metadata fetching for a specific version, thus it is being ignored.
@@ -182,11 +177,6 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFileAccess#getFileMetadata(java.lang.String, java.lang.String, java.lang.String)
-     */
     @Override
     public File getFileMetadata(String folderId, String id, String version) throws OXException {
         // Dropbox V2 API does not support metadata fetching for a specific version, thus it is being ignored.
@@ -209,21 +199,11 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFileAccess#saveFileMetadata(com.openexchange.file.storage.File, long)
-     */
     @Override
     public IDTuple saveFileMetadata(File file, long sequenceNumber) throws OXException {
         return saveFileMetadata(file, sequenceNumber, null);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFileAccess#saveFileMetadata(com.openexchange.file.storage.File, long, java.util.List)
-     */
     @Override
     public IDTuple saveFileMetadata(File file, long sequenceNumber, List<Field> modifiedFields) throws OXException {
         if (file.getId() == FileStorageFileAccess.NEW) {
@@ -272,11 +252,6 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         return new IDTuple(file.getFolderId(), file.getId());
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFileAccess#copy(com.openexchange.file.storage.FileStorageFileAccess.IDTuple, java.lang.String, java.lang.String, com.openexchange.file.storage.File, java.io.InputStream, java.util.List)
-     */
     @Override
     public IDTuple copy(IDTuple source, String version, String destFolder, File update, InputStream newFile, List<Field> modifiedFields) throws OXException {
         if (version != CURRENT_VERSION) {
@@ -312,11 +287,6 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFileAccess#move(com.openexchange.file.storage.FileStorageFileAccess.IDTuple, java.lang.String, long, com.openexchange.file.storage.File, java.util.List)
-     */
     @Override
     public IDTuple move(IDTuple source, String destFolder, long sequenceNumber, File update, List<Field> modifiedFields) throws OXException {
         checkFolderExistence(destFolder);
@@ -341,11 +311,6 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFileAccess#getDocument(java.lang.String, java.lang.String, java.lang.String)
-     */
     @Override
     public InputStream getDocument(String folderId, String id, String version) throws OXException {
         try {
@@ -358,31 +323,16 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFileAccess#saveDocument(com.openexchange.file.storage.File, java.io.InputStream, long)
-     */
     @Override
     public IDTuple saveDocument(File file, InputStream data, long sequenceNumber) throws OXException {
         return saveDocument(file, data, sequenceNumber, null);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFileAccess#saveDocument(com.openexchange.file.storage.File, java.io.InputStream, long, java.util.List)
-     */
     @Override
     public IDTuple saveDocument(File file, InputStream data, long sequenceNumber, List<Field> modifiedFields) throws OXException {
         return saveDocument(file, data, modifiedFields);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFileAccess#removeDocument(java.lang.String, long)
-     */
     @Override
     public void removeDocument(String folderId, long sequenceNumber) throws OXException {
         try {
@@ -405,21 +355,11 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFileAccess#removeDocument(java.util.List, long)
-     */
     @Override
     public List<IDTuple> removeDocument(List<IDTuple> ids, long sequenceNumber) throws OXException {
         return removeDocument(ids, sequenceNumber, false);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFileAccess#removeDocument(java.util.List, long, boolean)
-     */
     @Override
     public List<IDTuple> removeDocument(List<IDTuple> ids, long sequenceNumber, boolean hardDelete) throws OXException {
         try {
@@ -439,21 +379,11 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFileAccess#touch(java.lang.String, java.lang.String)
-     */
     @Override
     public void touch(String folderId, String id) throws OXException {
         exists(folderId, id, CURRENT_VERSION);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFileAccess#getDocuments(java.lang.String)
-     */
     @Override
     public TimedResult<File> getDocuments(String folderId) throws OXException {
         try {
@@ -476,21 +406,11 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFileAccess#getDocuments(java.lang.String, java.util.List)
-     */
     @Override
     public TimedResult<File> getDocuments(String folderId, List<Field> fields) throws OXException {
         return getDocuments(folderId);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFileAccess#getDocuments(java.lang.String, java.util.List, com.openexchange.file.storage.File.Field, com.openexchange.file.storage.FileStorageFileAccess.SortDirection)
-     */
     @Override
     public TimedResult<File> getDocuments(String folderId, List<Field> fields, Field sort, SortDirection order) throws OXException {
         try {
@@ -513,11 +433,6 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFileAccess#getDocuments(java.util.List, java.util.List)
-     */
     @Override
     public TimedResult<File> getDocuments(List<IDTuple> ids, List<Field> fields) throws OXException {
         List<File> files = new ArrayList<>(ids.size());
@@ -567,41 +482,21 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
     private static final SearchIterator<File> EMPTY_ITER = SearchIteratorAdapter.emptyIterator();
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFileAccess#getDelta(java.lang.String, long, java.util.List, boolean)
-     */
     @Override
     public Delta<File> getDelta(String folderId, long updateSince, List<Field> fields, boolean ignoreDeleted) throws OXException {
         return new FileDelta(EMPTY_ITER, EMPTY_ITER, EMPTY_ITER, 0L);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFileAccess#getDelta(java.lang.String, long, java.util.List, com.openexchange.file.storage.File.Field, com.openexchange.file.storage.FileStorageFileAccess.SortDirection, boolean)
-     */
     @Override
     public Delta<File> getDelta(String folderId, long updateSince, List<Field> fields, Field sort, SortDirection order, boolean ignoreDeleted) throws OXException {
         return new FileDelta(EMPTY_ITER, EMPTY_ITER, EMPTY_ITER, 0L);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFileAccess#search(java.lang.String, java.util.List, java.lang.String, com.openexchange.file.storage.File.Field, com.openexchange.file.storage.FileStorageFileAccess.SortDirection, int, int)
-     */
     @Override
     public SearchIterator<File> search(String pattern, List<Field> fields, String folderId, Field sort, SortDirection order, int start, int end) throws OXException {
         return search(pattern, fields, folderId, false, sort, order, start, end);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFileAccess#search(java.lang.String, java.util.List, java.lang.String, boolean, com.openexchange.file.storage.File.Field, com.openexchange.file.storage.FileStorageFileAccess.SortDirection, int, int)
-     */
     @Override
     public SearchIterator<File> search(String pattern, List<Field> fields, String folderId, boolean includeSubfolders, Field sort, SortDirection order, int start, int end) throws OXException {
         if (folderId == null) {
@@ -620,91 +515,46 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         return new SearchIteratorAdapter<>(results.iterator(), results.size());
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFileAccess#getAccountAccess()
-     */
     @Override
     public FileStorageAccountAccess getAccountAccess() {
         return accountAccess;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.tx.TransactionAware#startTransaction()
-     */
     @Override
     public void startTransaction() throws OXException {
         // no op
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.tx.TransactionAware#commit()
-     */
     @Override
     public void commit() throws OXException {
         // no op
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.tx.TransactionAware#rollback()
-     */
     @Override
     public void rollback() throws OXException {
         // no op
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.tx.TransactionAware#finish()
-     */
     @Override
     public void finish() throws OXException {
         // no op
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.tx.TransactionAware#setTransactional(boolean)
-     */
     @Override
     public void setTransactional(boolean transactional) {
         // no op
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.tx.TransactionAware#setRequestTransactional(boolean)
-     */
     @Override
     public void setRequestTransactional(boolean transactional) {
         // no op
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.tx.TransactionAware#setCommitsTransaction(boolean)
-     */
     @Override
     public void setCommitsTransaction(boolean commits) {
         // no op
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageSequenceNumberProvider#getSequenceNumbers(java.util.List)
-     */
     @Override
     public Map<String, Long> getSequenceNumbers(List<String> folderIds) throws OXException {
         Map<String, Long> sequenceNumbers = new HashMap<>(folderIds.size());
@@ -721,11 +571,6 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         return sequenceNumbers;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.ThumbnailAware#getThumbnailStream(java.lang.String, java.lang.String, java.lang.String)
-     */
     @Override
     public InputStream getThumbnailStream(String folderId, String id, String version) throws OXException {
         try {

@@ -138,7 +138,7 @@ public final class CreateSchemas extends DatabaseAbstraction {
             System.out.println(schemas.length + " schemas successfully created for database " + (null == dbid ? dbname : dbid));
 
             sysexit(0);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             printErrors(null, null, e, parser);
             sysexit(SYSEXIT_SERVERSTORAGE_ERROR);
         }

@@ -61,7 +61,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
-import com.openexchange.groupware.ldap.User;
+import com.openexchange.user.User;
 
 /**
  * {@link CreateInfoitemSolver}
@@ -121,26 +121,26 @@ public class CreateInfoitemSolver implements ProblemSolver {
                     if (numbers[2] == 1) {
                         LOG.info(MessageFormat.format("Dummy entry for {0} in database created. The admin of this context has now a new document", identifier));
                     }
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     LOG.error("{}", e.getMessage(), e);
                     try {
                         database.rollback();
                         return;
-                    } catch (final OXException e1) {
+                    } catch (OXException e1) {
                         LOG.debug("{}", e1.getMessage(), e1);
                     }
-                } catch (final RuntimeException e) {
+                } catch (RuntimeException e) {
                     LOG.error("{}", e.getMessage(), e);
                     try {
                         database.rollback();
                         return;
-                    } catch (final OXException e1) {
+                    } catch (OXException e1) {
                         LOG.debug("{}", e1.getMessage(), e1);
                     }
                 } finally {
                     try {
                         database.finish();
-                    } catch (final OXException e) {
+                    } catch (OXException e) {
                         LOG.debug("{}", e.getMessage(), e);
                     }
                 }

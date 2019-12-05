@@ -60,6 +60,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.SchedulingControl;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.chronos.ical.ImportedCalendar;
@@ -143,7 +144,7 @@ public final class ICalChronosDataHandler extends ICalDataHandler {
             inputStreamCopy = copyStream((InputStream) data.getData(), getSize(data));
             handleEvents(session, calendarFolder, inputStreamCopy, folderAndIdArray, result);
             handleTasks(session, taskFolder, inputStreamCopy, folderAndIdArray, result);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw DataExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
             safeClose(inputStreamCopy);
@@ -182,7 +183,7 @@ public final class ICalChronosDataHandler extends ICalDataHandler {
         try {
             IDBasedCalendarAccess access = services.getServiceSafe(IDBasedCalendarAccessFactory.class).createAccess(session);
             access.set(CalendarParameters.UID_CONFLICT_STRATEGY, UIDConflictStrategy.UPDATE_OR_REASSIGN);
-            access.set(CalendarParameters.PARAMETER_SUPPRESS_ITIP, Boolean.TRUE);
+            access.set(CalendarParameters.PARAMETER_SCHEDULING, SchedulingControl.NONE);
             access.set(CalendarParameters.PARAMETER_SKIP_EXTERNAL_ATTENDEE_URI_CHECKS, Boolean.TRUE);
             List<ImportResult> importEvents = access.importEvents(calendarFolder, events);
             for (ImportResult importEvent : importEvents) {
@@ -234,7 +235,7 @@ public final class ICalChronosDataHandler extends ICalDataHandler {
          */
         try {
             insertTasks(session, taskFolder, tasks, folderAndIdArray);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
         }
     }
@@ -265,7 +266,7 @@ public final class ICalChronosDataHandler extends ICalDataHandler {
         if (hasValue(dataArguments, key)) {
             try {
                 return Integer.parseInt(dataArguments.get(key));
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 throw DataExceptionCodes.INVALID_ARGUMENT.create(key, e, dataArguments.get(key));
             }
         }
@@ -275,7 +276,7 @@ public final class ICalChronosDataHandler extends ICalDataHandler {
     private long getSize(final Data<? extends Object> data) {
         try {
             return Long.parseLong(data.getDataProperties().get(DataProperties.PROPERTY_SIZE));
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             return 0;
         }
     }

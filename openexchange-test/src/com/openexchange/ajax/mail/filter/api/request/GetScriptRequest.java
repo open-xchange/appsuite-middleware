@@ -73,41 +73,21 @@ public class GetScriptRequest extends AbstractMailFilterRequest<GetScriptRespons
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
-     */
     @Override
     public Method getMethod() {
         return Method.PUT;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
-     */
     @Override
     public Parameter[] getParameters() throws IOException, JSONException {
         return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, "getscript") };
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
-     */
     @Override
     public AbstractAJAXParser<? extends GetScriptResponse> getParser() {
         return new GetScriptParser(failOnError);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
-     */
     @Override
     public Object getBody() throws IOException, JSONException {
         return null;

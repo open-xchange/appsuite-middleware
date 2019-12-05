@@ -95,6 +95,9 @@ public class FileMetadataParser implements FileMetadataParserService{
     }
 
     public File parse(JSONObject object, TimeZone timeZone) throws OXException {
+        if (null == object) {
+            return null;
+        }
         try {
             return File.Field.inject(jsonHandler, new DefaultFile(), object, timeZone);
         } catch (RuntimeException x) {
@@ -123,7 +126,7 @@ public class FileMetadataParser implements FileMetadataParserService{
         public Object handle(final Field field, final Object... args) {
             final File md = md(args);
             final JSONObject object = get(1, JSONObject.class, args);
-            if(!object.has(field.getName())) {
+            if (!object.has(field.getName())) {
                 return md;
             }
             TimeZone timeZone = get(2, TimeZone.class, args);
@@ -133,7 +136,7 @@ public class FileMetadataParser implements FileMetadataParserService{
                 value = process(field, value, timeZone);
 
                 field.doSwitch(set, md, value);
-            } catch (final JSONException x) {
+            } catch (JSONException x) {
                 throw new RuntimeException(x);
             } catch (OXException x) {
                 throw new RuntimeException(x);
@@ -155,7 +158,7 @@ public class FileMetadataParser implements FileMetadataParserService{
             @Override
             public Object handle(final Field field, final Object... args) {
                 final List<File.Field> fields = (List<File.Field>) args[0];
-                if(object.has(field.getName())) {
+                if (object.has(field.getName())) {
                     fields.add(field);
                 }
                 return fields;

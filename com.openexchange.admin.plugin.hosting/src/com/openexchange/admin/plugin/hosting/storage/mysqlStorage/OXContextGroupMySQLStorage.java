@@ -99,7 +99,7 @@ public class OXContextGroupMySQLStorage implements OXContextGroupStorageInterfac
             connection = globalDBService.getWritableForGlobal(contextGroupId);
         } catch (OXException e) {
             LOG.error("{}", e.getMessage(), e);
-            throw new StorageException(e);
+            throw StorageException.wrapForRMI(e);
         }
 
         try {

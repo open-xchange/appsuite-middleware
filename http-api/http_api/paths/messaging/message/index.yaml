@@ -1,6 +1,6 @@
-requests:
+requests: 
   - AllRequest.yaml
-  - ListRequest.yaml
   - GetRequest.yaml
-  - SendRequest.yaml
+  - ListRequest.yaml
   - PerformRequest.yaml
+  - SendRequest.yaml

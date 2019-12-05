@@ -99,9 +99,9 @@ public final class IDGeneratorServiceImpl implements IDGeneratorService {
              * Return identifier
              */
             return id;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw IDExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw IDExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             Database.back(contextId, true, con);
@@ -195,7 +195,7 @@ public final class IDGeneratorServiceImpl implements IDGeneratorService {
             try {
                 final int result = stmt.executeUpdate();
                 return (result > 0);
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 return false;
             }
         } finally {

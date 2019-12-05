@@ -1,0 +1,7 @@
+type: object
+properties:
+  $ref: ../common/CommonResponseData.yaml
+  data:
+    type: integer
+    format: int64
+    description: The system time of the node as long

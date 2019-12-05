@@ -66,7 +66,6 @@ import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRendere
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionConstants;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.java.Streams;
@@ -76,13 +75,14 @@ import com.openexchange.session.Reply;
 import com.openexchange.session.Session;
 import com.openexchange.session.SessionResult;
 import com.openexchange.session.SessionThreadCounter;
+import com.openexchange.session.ThreadLocalSessionHolder;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
-import com.openexchange.sessiond.impl.ThreadLocalSessionHolder;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 /**
  * Overridden service method that checks if a valid session can be found for the request.
@@ -173,7 +173,7 @@ public abstract class SessionServlet extends AJAXServlet {
             super.doService(req, resp, checkRateLimit);
         } catch (RateLimitedException e) {
             e.send(resp);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             Locale locale = getLocaleFrom(session, null);
             if (null != locale) {
                 e.setProperty(OXExceptionConstants.PROPERTY_LOCALE, locale.toString());
@@ -515,16 +515,16 @@ public abstract class SessionServlet extends AJAXServlet {
         if (null == set) {
             try {
                 return ServerConfig.getInt(ServerConfig.Property.DEFAULT_MAX_CONCURRENT_AJAX_REQUESTS);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 return Integer.parseInt(ServerConfig.Property.DEFAULT_MAX_CONCURRENT_AJAX_REQUESTS.getDefaultValue());
             }
         }
         try {
             return Integer.parseInt(set);
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             try {
                 return ServerConfig.getInt(ServerConfig.Property.DEFAULT_MAX_CONCURRENT_AJAX_REQUESTS);
-            } catch (final OXException oxe) {
+            } catch (OXException oxe) {
                 return Integer.parseInt(ServerConfig.Property.DEFAULT_MAX_CONCURRENT_AJAX_REQUESTS.getDefaultValue());
             }
         }

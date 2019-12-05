@@ -112,9 +112,9 @@ public class RateLimiterImpl implements RateLimiter {
             rollback = 2;
             readOnly = readOnly && !result;
             return result;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LoggerHolder.LOG.error("Unable to aquire permits.", e);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             LoggerHolder.LOG.error("Unable to aquire permits.", e);
         } finally {
             if (writeCon != null) {
@@ -144,7 +144,7 @@ public class RateLimiterImpl implements RateLimiter {
             if (getCount(readCon) < amount) {
                 return false;
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LoggerHolder.LOG.error("Unable to check exceeded attempts", e);
         } finally {
             if (readCon != null) {
@@ -159,7 +159,7 @@ public class RateLimiterImpl implements RateLimiter {
             writeCon = dbProvider.getWriteConnection(ctx);
             readOnly = deleteOldPermits(writeCon) <= 0;
             return (getCount(writeCon) >= amount);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LoggerHolder.LOG.error("Unable to check exceeded attempts", e);
             return false;
         } finally {
@@ -182,7 +182,7 @@ public class RateLimiterImpl implements RateLimiter {
             if (getCount(readCon) <= 0) {  // Nothing to clean
                 return;
             }
-        }  catch (final OXException e) {
+        }  catch (OXException e) {
             LoggerHolder.LOG.error("Unable to check exceeded attempts", e);
         } finally {
             if (readCon != null) {
@@ -192,7 +192,7 @@ public class RateLimiterImpl implements RateLimiter {
         // Need cleanup
         try {
             cleanUp();
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LoggerHolder.LOG.error("Unable to reset rateLimiter", e);
         }
     }
@@ -212,12 +212,12 @@ public class RateLimiterImpl implements RateLimiter {
     private boolean insertPermit(Connection writeCon, long permits) {
         try (PreparedStatement stmt = writeCon.prepareStatement(SQL_INSERT)) {
             return executeStmt(stmt, permits);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             if (Databases.isPrimaryKeyConflictInMySQL(e)) {
                 // Duplicate primary key. Try again
                 try (PreparedStatement stmt = writeCon.prepareStatement(SQL_INSERT)) {
                     return executeStmt(stmt, permits);
-                } catch (final SQLException e2) {
+                } catch (SQLException e2) {
                     // ignore
                 }
             }
@@ -240,10 +240,10 @@ public class RateLimiterImpl implements RateLimiter {
             stmt.setInt(index++, userId);
             stmt.setString(index++, id);
             rowsUpdated = stmt.executeUpdate();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             LoggerHolder.LOG.error("Error deleting rateLimit permits.", e);
         } finally {
-            if(rowsUpdated > 0) {
+            if (rowsUpdated > 0) {
                 dbProvider.releaseWriteConnection(ctx, con);
             } else {
                 dbProvider.releaseWriteConnectionAfterReading(ctx, con);
@@ -281,7 +281,7 @@ public class RateLimiterImpl implements RateLimiter {
             stmt.setString(index++, id);
             stmt.setLong(index, start);
             return stmt.executeUpdate();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             LoggerHolder.LOG.error("Unable to delete old permits.", e);
             return -1;
         }
@@ -304,7 +304,7 @@ public class RateLimiterImpl implements RateLimiter {
                 }
             }
             return -1;  // Shouldn't happen
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             LoggerHolder.LOG.error("Unable to get count of permits.", e);
             return -1;
         }

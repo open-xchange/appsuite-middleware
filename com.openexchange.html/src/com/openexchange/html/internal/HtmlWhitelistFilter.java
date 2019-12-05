@@ -235,7 +235,7 @@ public final class HtmlWhitelistFilter {
                 tmp.setLength(2);
                 tmp.append(Integer.parseInt(m.group(1), 16)).append(';');
                 mr.appendLiteralReplacement(builder, tmp.toString());
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 tmp.setLength(0);
                 tmp.append("&amp;#x").append(m.group(1)).append("&#59;");
                 mr.appendLiteralReplacement(builder, tmp.toString());
@@ -274,32 +274,34 @@ public final class HtmlWhitelistFilter {
         final OutputDocument outputDocument = new OutputDocument(source);
         final List<Tag> tags = source.getAllTags();
         int pos = 0;
-        for (final Tag tag : tags) {
-            if (processTag(tag, outputDocument, dropExternalImages)) {
-                tag.setUserData(VALID_MARKER);
-                // Handle content of an allowed tag
-                if (HTMLElementName.STYLE == tag.getName()) {
-                    reencodeCSSTextSegment(source, outputDocument, pos, tag.getBegin(), dropExternalImages);
-                } else {
-                    reencodeTextSegment(source, outputDocument, pos, tag.getBegin(), formatWhiteSpace);
-                }
-            } else {
-                if (!stripInvalidElements) {
-                    continue; // element will be encoded along with surrounding text
-                }
-                // Handle content of a forbidden tag
-                outputDocument.remove(tag);
-                if (HTMLElementName.STYLE == tag.getName()) {
-                    reencodeCSSTextSegment(source, outputDocument, pos, tag.getBegin(), dropExternalImages);
-                } else {
-                    if (!body || isRemoveWholeTag(tag)) {
-                        removeTextSegment(source, outputDocument, pos, tag.getBegin());
-                    } else { // Within body: retain content
+        if (null != tags) {
+            for (final Tag tag : tags) {
+                if (processTag(tag, outputDocument, dropExternalImages)) {
+                    tag.setUserData(VALID_MARKER);
+                    // Handle content of an allowed tag
+                    if (HTMLElementName.STYLE == tag.getName()) {
+                        reencodeCSSTextSegment(source, outputDocument, pos, tag.getBegin(), dropExternalImages);
+                    } else {
                         reencodeTextSegment(source, outputDocument, pos, tag.getBegin(), formatWhiteSpace);
                     }
+                } else {
+                    if (!stripInvalidElements) {
+                        continue; // element will be encoded along with surrounding text
+                    }
+                    // Handle content of a forbidden tag
+                    outputDocument.remove(tag);
+                    if (HTMLElementName.STYLE == tag.getName()) {
+                        reencodeCSSTextSegment(source, outputDocument, pos, tag.getBegin(), dropExternalImages);
+                    } else {
+                        if (!body || isRemoveWholeTag(tag)) {
+                            removeTextSegment(source, outputDocument, pos, tag.getBegin());
+                        } else { // Within body: retain content
+                            reencodeTextSegment(source, outputDocument, pos, tag.getBegin(), formatWhiteSpace);
+                        }
+                    }
                 }
+                pos = tag.getEnd();
             }
-            pos = tag.getEnd();
         }
         reencodeTextSegment(source, outputDocument, pos, source.getEnd(), formatWhiteSpace);
         return outputDocument.toString();
@@ -565,7 +567,7 @@ public final class HtmlWhitelistFilter {
                                 }
                             }
                             mapStr = sb.toString();
-                        } catch (final Exception e) {
+                        } catch (Exception e) {
                             LOG.warn("Using default white list", e);
                             mapStr = new String(DEFAULT_WHITELIST);
                         } finally {

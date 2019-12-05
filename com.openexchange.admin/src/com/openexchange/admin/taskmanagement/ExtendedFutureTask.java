@@ -107,11 +107,11 @@ public class ExtendedFutureTask<V> extends FutureTask<V> {
         if (isDone()) {
             try {
                 get();
-            } catch (final InterruptedException e) {
+            } catch (InterruptedException e) {
                 // Keep interrupted state
                 Thread.currentThread().interrupt();
                 return true;
-            } catch (final ExecutionException e) {
+            } catch (ExecutionException e) {
                 return true;
             }
         }

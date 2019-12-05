@@ -205,7 +205,7 @@ public class AppointmentWriter extends CalendarWriter {
         try {
             final int folderID = appointmentObject.getParentFolderID();
             return folderID > 0 && FolderObject.PUBLIC == new OXFolderAccess(session.getContext()).getFolderType(folderID);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             return false;
         }
     }

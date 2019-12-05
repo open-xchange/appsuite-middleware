@@ -123,6 +123,8 @@ public class EnhancedAuthenticated implements Authenticated, ResponseEnhancement
 
     /**
      * Override this to apply your session enhancement after potential other enhancements took place.
+     * <p>
+     * Most likely specified session is an instance of <code>SessionDescription</code> providing more possibilities to modify spawned session.
      *
      * @param session The session
      */

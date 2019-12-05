@@ -75,11 +75,11 @@ public class PrefixServiceActivator extends HousekeepingActivator {
 	        ServerServiceRegistry.getInstance().addService(DispatcherPrefixService.class, prefixService);
 	        ImageMatcher.setPrefixService(prefixService);
 	        registerService(DispatcherPrefixService.class, prefixService);
-		} catch (final Exception e) {
+		} catch (Exception e) {
             final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(PrefixServiceActivator.class);
             log.error("DispatcherPrefixService could not be registered", e);
             throw e;
-        } catch (final Error e) {
+        } catch (Error e) {
 		    final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(PrefixServiceActivator.class);
 		    log.error("DispatcherPrefixService could not be registered", e);
 		    throw e;

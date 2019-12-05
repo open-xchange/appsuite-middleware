@@ -64,15 +64,15 @@ public class FireDetachedEventAction extends AttachmentEventAction {
         final List<AttachmentMetadata> processed = new ArrayList<AttachmentMetadata>();
         try {
             fireAttached(getAttachments(), processed, getUser(), getUserConfiguration(), getSession(), getContext(), getProvider());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             try {
                 fireDetached(processed, getUser(), getUserConfiguration(), getSession(), getContext(), getProvider());
-            } catch (final Exception e1) {
+            } catch (Exception e1) {
                 LOG.error("", e);
                 throw AttachmentExceptionCodes.UNDONE_FAILED.create(e1);
             }
             throw e;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw AttachmentExceptionCodes.ATTACH_FAILED.create(e);
         }
     }
@@ -81,9 +81,9 @@ public class FireDetachedEventAction extends AttachmentEventAction {
     public void perform() throws OXException {
         try {
             fireDetached(getAttachments(), getUser(), getUserConfiguration(), getSession(), getContext(), getProvider());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw AttachmentExceptionCodes.DETACH_FAILED.create(e);
         }
     }

@@ -87,62 +87,32 @@ public class DropwizardMetricService extends AbstractMetricService {
         addRegisterer(MetricType.GAUGE, new GaugeMetricRegisterer(registry));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.MetricService#getHistogram(java.lang.String, java.lang.String)
-     */
     @Override
     public Histogram getHistogram(MetricDescriptor descriptor) {
         return (Histogram) registerOrGet(descriptor);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.MetricService#timer(java.lang.String, java.lang.String)
-     */
     @Override
     public Timer getTimer(MetricDescriptor descriptor) {
         return (Timer) registerOrGet(descriptor);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.MetricService#getCounter(java.lang.String, java.lang.String)
-     */
     @Override
     public Counter getCounter(MetricDescriptor descriptor) {
         return (Counter) registerOrGet(descriptor);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.MetricService#getGauge(java.lang.String, java.lang.String, java.util.function.Supplier)
-     */
     @Override
     @SuppressWarnings("unchecked")
     public <T> Gauge<T> getGauge(MetricDescriptor descriptor) {
         return (Gauge<T>) registerOrGet(descriptor);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.MetricService#meter(com.openexchange.metrics.MetricDescriptor)
-     */
     @Override
     public Meter getMeter(MetricDescriptor descriptor) {
         return (Meter) registerOrGet(descriptor);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.MetricService#removeMetric(com.openexchange.metrics.MetricDescriptor)
-     */
     @Override
     public void removeMetric(MetricDescriptor descriptor) {
         remove(descriptor);

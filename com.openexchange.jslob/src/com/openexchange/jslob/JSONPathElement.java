@@ -101,7 +101,7 @@ public final class JSONPathElement {
                 }
             }
             return list;
-        } catch (final IndexOutOfBoundsException e) {
+        } catch (IndexOutOfBoundsException e) {
             throw JSlobExceptionCodes.INVALID_PATH.create(path);
         }
     }
@@ -139,7 +139,7 @@ public final class JSONPathElement {
                     try {
                         final JSONArray jsonArray = jCurrent.getJSONArray(name);
                         jCurrent = jsonArray.getJSONObject(index);
-                    } catch (final JSONException e) {
+                    } catch (JSONException e) {
                         return null;
                     }
                 } else {
@@ -152,7 +152,7 @@ public final class JSONPathElement {
                 if (isInstance(name, JSONObject.class, jCurrent)) {
                     try {
                         jCurrent = jCurrent.getJSONObject(name);
-                    } catch (final JSONException e) {
+                    } catch (JSONException e) {
                         return null;
                     }
                 } else {
@@ -171,7 +171,7 @@ public final class JSONPathElement {
                 retval = jCurrent.get(name);
             }
             return retval;
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             return null;
         }
     }
@@ -235,7 +235,7 @@ public final class JSONPathElement {
                         final JSONArray jsonArray = jCurrent.getJSONArray(name);
                         jCurrent = jsonArray.getJSONObject(index);
                         entry = new Entry(jPathElement, jCurrent, entry);
-                    } catch (final JSONException e) {
+                    } catch (JSONException e) {
                         return null;
                     }
                 } else {
@@ -249,7 +249,7 @@ public final class JSONPathElement {
                     try {
                         jCurrent = jCurrent.getJSONObject(name);
                         entry = new Entry(jPathElement, jCurrent, entry);
-                    } catch (final JSONException e) {
+                    } catch (JSONException e) {
                         return null;
                     }
                 } else {
@@ -275,7 +275,7 @@ public final class JSONPathElement {
             }
             entry.removeIfEmpty();
             return retval;
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             return null;
         }
     }

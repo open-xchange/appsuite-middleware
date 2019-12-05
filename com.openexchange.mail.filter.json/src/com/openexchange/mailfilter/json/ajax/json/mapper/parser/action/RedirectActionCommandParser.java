@@ -97,7 +97,7 @@ public class RedirectActionCommandParser implements CommandParser<ActionCommand>
         // Check for valid email address here:
         try {
             new QuotedInternetAddress(stringParam, true);
-        } catch (final AddressException e) {
+        } catch (AddressException e) {
             throw MailFilterExceptionCode.INVALID_REDIRECT_ADDRESS.create(e, stringParam);
         }
         // And finally check of that forward address is allowed
@@ -108,7 +108,7 @@ public class RedirectActionCommandParser implements CommandParser<ActionCommand>
         }
         argList.add(CommandParserJSONUtil.stringToList(stringParam));
         ActionCommand result =  new ActionCommand(Commands.REDIRECT, argList);
-        if(copy){
+        if (copy){
             result.addOptionalRequired(RedirectActionField.copy.name());
         }
         return result;
@@ -120,7 +120,7 @@ public class RedirectActionCommandParser implements CommandParser<ActionCommand>
         ArrayList<Object> arguments = actionCommand.getArguments();
 
         jsonObject.put(GeneralField.id.name(), Commands.REDIRECT.getJsonName());
-        if(arguments.size()==1){
+        if (arguments.size()==1){
             jsonObject.put(RedirectActionField.to.name(), ((List<String>) arguments.get(0)).get(0));
         } else {
             String copyCommandString = ArgumentUtil.createTagArgument(RedirectActionField.copy.name()).toString();

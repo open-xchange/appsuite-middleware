@@ -4,30 +4,44 @@
     tags:
       - Drive
     summary: Gets synchronizable folders.
-    description: |
-      Allows getting a list of folders that are available on the server for synchronization. This request should be used to
-      build up a folder tree and let the user select the root synchronization folder(s).
+    description: >
+      Allows getting a list of folders that are available on the server for
+      synchronization. This request should be used to
+
+      build up a folder tree and let the user select the root synchronization
+      folder(s).
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: parent
-        type: string
-        description: The ID of the parent folder to get the subfolders for as read from a previously fetched directory metadata object.
+        description: >-
+          The ID of the parent folder to get the subfolders for as read from a
+          previously fetched directory metadata object.
         required: false
-    responses:
-      200:
-        description: |
-          A JSON object holding metadata information for all subfolders. The `files` array of the directory metadata
-          objects will be left out. In case of errors the responsible fields in the response are filled.
         schema:
-          $ref: "#/definitions/DriveSubfoldersResponse"
-    x-ox-examples:      
-      - Example1:
+          type: string
+    responses:
+      '200':
+        description: >
+          A JSON object holding metadata information for all subfolders. The
+          `files` array of the directory metadata
+
+          objects will be left out. In case of errors the responsible fields in
+          the response are filled.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DriveSubfoldersResponse'
+    x-ox-examples:
+      - Example1: null
         description: Basic example
-        example: |
-          ==> GET http://192.168.32.191/ajax/drive?action=subfolders&session=35cb8c2d1423480692f0d5053d14ba52
-  
+        example: >
+          ==> GET
+          http://192.168.32.191/ajax/drive?action=subfolders&session=35cb8c2d1423480692f0d5053d14ba52
+
+
           <== HTTP 200 OK (241.0252 ms elapsed, 966 bytes received)
+
           <   Content: 
               {
                 "data": [{

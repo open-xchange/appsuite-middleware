@@ -109,21 +109,11 @@ public class DropboxFile extends DefaultFile {
         return new IDTuple(getFolderId(), getId());
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.DefaultFile#getSequenceNumber()
-     */
     @Override
     public long getSequenceNumber() {
         return 0 != this.sequenceNumber ? sequenceNumber : super.getSequenceNumber();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.AbstractFile#toString()
-     */
     @Override
     public String toString() {
         String folder = normalizeFolderId(getFolderId());

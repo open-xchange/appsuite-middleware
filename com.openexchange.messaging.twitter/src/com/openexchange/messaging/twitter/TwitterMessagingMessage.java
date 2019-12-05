@@ -136,7 +136,7 @@ public final class TwitterMessagingMessage implements MessagingMessage {
         long sz = -1;
         try {
             sz = multipartContent.get(0).getSize() + multipartContent.get(1).getSize();
-        } catch (final OXException e) {
+        } catch (OXException e) {
             // Cannot occur
             org.slf4j.LoggerFactory.getLogger(TwitterMessagingMessage.class).error("", e);
         }

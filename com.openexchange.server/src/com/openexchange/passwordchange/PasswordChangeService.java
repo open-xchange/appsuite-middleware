@@ -49,6 +49,7 @@
 
 package com.openexchange.passwordchange;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -64,13 +65,13 @@ import com.openexchange.authentication.service.Authentication;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
-import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.cascade.ConfigViews;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.event.CommonEvent;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.java.Strings;
@@ -81,6 +82,8 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.user.User;
+import com.openexchange.user.UserExceptionCode;
 import com.openexchange.user.UserService;
 
 /**
@@ -197,17 +200,17 @@ public abstract class PasswordChangeService {
                         properties.put("cookies", cookies);
                     }
                 }
-                if (!user.isGuest()) {
-                    Authentication.login(new _LoginInfo(session.getLogin(), event.getOldPassword(), properties), authenticationService);
-                } else {
+                if (user.isGuest()) {
                     BasicAuthenticationService basicService = Authentication.getBasicService();
                     if (basicService == null) {
                         throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(BasicAuthenticationService.class.getName());
                     }
                     basicService.handleLoginInfo(user.getId(), session.getContextId(), event.getOldPassword());
+                } else {
+                    Authentication.login(new _LoginInfo(session.getLogin(), event.getOldPassword(), properties), authenticationService);
                 }
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (e.equalsCode(6, "LGI")) {
                 /*
                  * Verification of old password failed
@@ -216,42 +219,55 @@ public abstract class PasswordChangeService {
             }
             throw e;
         }
-        /*
-         * Check min/max length restrictions
-         */
+
         if (false == user.isGuest()) {
-            final int len = event.getNewPassword().length();
-            final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-            int property = service.getIntProperty("com.openexchange.passwordchange.minLength", 4);
-            if (property > 0 && len < property) {
-                throw UserExceptionCode.INVALID_MIN_LENGTH.create(Integer.valueOf(property));
+            ConfigViewFactory factory = ServerServiceRegistry.getServize(ConfigViewFactory.class, true);
+            ConfigView view = factory.getView(event.getSession().getUserId(), event.getSession().getContextId());
+            checkLength(event, view);
+            checkPattern(event, view);
+        }
+    }
+
+    /**
+     * Check min/max length restrictions
+     *
+     * @param event The password change event
+     * @param view The user config view
+     * @throws OXException If restrictions aren't met
+     */
+    private void checkLength(PasswordChangeEvent event, ConfigView view) throws OXException {
+        int len = event.getNewPassword().length();
+        int min = ConfigViews.getDefinedIntPropertyFrom("com.openexchange.passwordchange.minLength", 4, view);
+        if (min > 0 && len < min) {
+            throw UserExceptionCode.INVALID_MIN_LENGTH.create(I(min));
+        }
+
+        int max = ConfigViews.getDefinedIntPropertyFrom("com.openexchange.passwordchange.maxLength", 0, view);
+        if (max > 0 && len > max) {
+            throw UserExceptionCode.INVALID_MAX_LENGTH.create(I(max));
+        }
+    }
+
+    /**
+     * Check against "allowed" pattern if defined. However does no
+     * validation of new password since admin daemon does no validation, too
+     *
+     * @param event The password change event
+     * @param view The user config view
+     * @throws OXException If restrictions aren't met
+     */
+    private void checkPattern(PasswordChangeEvent event, ConfigView view) throws OXException {
+        String allowedPattern = ConfigViews.getDefinedStringPropertyFrom("com.openexchange.passwordchange.allowedPattern", "", view).trim();
+        if (Strings.isEmpty(allowedPattern)) {
+            return;
+        }
+        try {
+            if (false == Pattern.matches(allowedPattern, event.getNewPassword())) {
+                String allowedPatternHint = ConfigViews.getDefinedStringPropertyFrom("com.openexchange.passwordchange.allowedPatternHint", "", view);
+                throw UserExceptionCode.NOT_ALLOWED_PASSWORD.create(allowedPatternHint);
             }
-            property = service.getIntProperty("com.openexchange.passwordchange.maxLength", 0);
-            if (property > 0 && len > property) {
-                throw UserExceptionCode.INVALID_MAX_LENGTH.create(Integer.valueOf(property));
-            }
-            /*
-             * Check against "allowed" pattern if defined
-             */
-            String allowedPattern = service.getProperty("com.openexchange.passwordchange.allowedPattern");
-            if (Strings.isNotEmpty(allowedPattern)) {
-                try {
-                    if (false == Pattern.matches(allowedPattern, event.getNewPassword())) {
-                        String allowedPatternHint = service.getProperty("com.openexchange.passwordchange.allowedPatternHint");
-                        throw UserExceptionCode.NOT_ALLOWED_PASSWORD.create(allowedPatternHint);
-                    }
-                } catch (PatternSyntaxException e) {
-                    throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, "com.openexchange.passwordchange.allowedPattern");
-                }
-            }
-            /*
-             * No validation of new password since admin daemon does no validation, too
-             */
-            /*-
-             * if (!validatePassword(event.getNewPassword())) {
-             *     throw new OXException(OXException.Code.INVALID_PASSWORD);
-             * }
-             */
+        } catch (PatternSyntaxException e) {
+            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, "com.openexchange.passwordchange.allowedPattern");
         }
     }
 
@@ -293,7 +309,7 @@ public abstract class PasswordChangeService {
         }
         try {
             sessiondService.changeSessionPassword(session.getSessionID(), event.getNewPassword());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("Updating password in user session failed", e);
             throw e;
         }
@@ -336,7 +352,7 @@ public abstract class PasswordChangeService {
                 jcs.remove(cacheService.newCacheKey(contextId, String.valueOf(0), String.valueOf(userId)));
                 jcs.remove(cacheService.newCacheKey(contextId, Integer.toString(userId)));
                 jcs.invalidateGroup(Integer.toString(contextId));
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 // Ignore
             }
         }

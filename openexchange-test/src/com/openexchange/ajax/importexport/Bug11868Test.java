@@ -67,9 +67,9 @@ import com.openexchange.ajax.user.actions.SearchRequest;
 import com.openexchange.ajax.user.actions.SearchResponse;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.importexport.ImportResult;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.resource.Resource;
+import com.openexchange.user.User;
 
 /**
  *

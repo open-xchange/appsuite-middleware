@@ -54,7 +54,7 @@ import java.util.List;
 import org.osgi.framework.BundleContext;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.NearRegistryServiceTracker;
-import com.openexchange.tools.session.SessionHolder;
+import com.openexchange.session.SessionHolder;
 import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.helpers.PropertyMixin;

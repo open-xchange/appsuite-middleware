@@ -53,7 +53,7 @@ public class AddUniqueConstraintGenerator extends AbstractSqlGenerator<AddUnique
 					, database.escapeColumnNameList(statement.getColumnNames())
 			);
 		}
-		if(database instanceof OracleDatabase) {
+		if (database instanceof OracleDatabase) {
 	        if (statement.isDeferrable() || statement.isInitiallyDeferred()) {
 	            if (statement.isDeferrable()) {
 	            	sql += " DEFERRABLE";

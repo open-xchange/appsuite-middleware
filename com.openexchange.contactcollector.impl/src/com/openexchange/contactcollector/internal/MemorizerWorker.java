@@ -100,6 +100,7 @@ import com.openexchange.search.internal.operands.ConstantOperand;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
+import com.openexchange.session.UserAndContext;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.behavior.CallerRunsBehavior;
@@ -268,7 +269,8 @@ public final class MemorizerWorker {
             /*
              * Stay active as long as flag is true
              */
-            final List<MemorizerTask> tasks = new ArrayList<MemorizerTask>();
+            List<MemorizerTask> tasks = new ArrayList<MemorizerTask>();
+            Set<UserAndContext> alreadyCleanedUp = new HashSet<>();
             while (flag.get()) {
                 /*
                  * Wait for IDs
@@ -296,8 +298,13 @@ public final class MemorizerWorker {
                 /*
                  * Process tasks
                  */
+                alreadyCleanedUp.clear();
                 for (MemorizerTask task : tasks) {
-                    handleTask(task, services);
+                    Session session = task.getSession();
+                    if (alreadyCleanedUp.add(UserAndContext.newInstance(session))) {
+                        ContactCleanUp.performContactCleanUp(session, services);
+                    }
+                    handleTask(task, session, services);
                 }
             }
             return null;
@@ -307,18 +314,29 @@ public final class MemorizerWorker {
     // ------------------------------------------------------------------------------------------------------------------------------------
 
     /**
-     * Handles specified task
+     * Handles specified memorizer task.
      *
-     * @param memorizerTask The task
+     * @param memorizerTask The memorizer task
      * @param services The service look-up
      */
     static void handleTask(MemorizerTask memorizerTask, ServiceLookup services) {
-        Session session = memorizerTask.getSession();
-        if (!isEnabled(session)) {
+        handleTask(memorizerTask, memorizerTask.getSession(), services);
+    }
+
+    /**
+     * Handles specified memorizer task.
+     *
+     * @param memorizerTask The memorizer task
+     * @param session The session associated with given task
+     * @param services The service look-up
+     */
+    static void handleTask(MemorizerTask memorizerTask, Session session, ServiceLookup services) {
+        Session sessionToUse = session == null ? memorizerTask.getSession() : session;
+        if (!isEnabled(sessionToUse)) {
             return;
         }
 
-        int folderId = getFolderId(session);
+        int folderId = getFolderId(sessionToUse);
         if (folderId == 0) {
             return;
         }
@@ -331,8 +349,8 @@ public final class MemorizerWorker {
                 LOG.warn("Contact collector run aborted: missing context service");
                 return;
             }
-            ctx = contextService.getContext(session.getContextId());
-        } catch (final Exception e) {
+            ctx = contextService.getContext(sessionToUse.getContextId());
+        } catch (Exception e) {
             LOG.error("Contact collector run aborted.", e);
             return;
         }
@@ -353,15 +371,15 @@ public final class MemorizerWorker {
             UserAliasStorage aliasStorage = services.getOptionalService(UserAliasStorage.class);
             UserPermissionService userPermissions = services.getService(UserPermissionService.class);
             Set<InternetAddress> aliases;
-            if (userPermissions.getUserPermissionBits(session.getUserId(), ctx).isGlobalAddressBookEnabled()) {
+            if (userPermissions.getUserPermissionBits(sessionToUse.getUserId(), ctx).isGlobalAddressBookEnabled()) {
                 // All context-known users' aliases
                 aliases = AliasesProvider.getInstance().getContextAliases(ctx, userService, aliasStorage);
             } else {
                 // Only aliases of session user
-                aliases = AliasesProvider.getInstance().getAliases(userService.getUser(session.getUserId(), ctx), ctx, aliasStorage);
+                aliases = AliasesProvider.getInstance().getAliases(userService.getUser(sessionToUse.getUserId(), ctx), ctx, aliasStorage);
             }
             addresses.removeAll(aliases);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("Contact collector run aborted.", e);
             return;
         }
@@ -393,8 +411,8 @@ public final class MemorizerWorker {
                 return;
             }
 
-            userConfig = userConfigurationService.getUserConfiguration(session.getUserId(), ctx);
-        } catch (final Exception e) {
+            userConfig = userConfigurationService.getUserConfiguration(sessionToUse.getUserId(), ctx);
+        } catch (Exception e) {
             LOG.error("Contact collector run aborted.", e);
             return;
         }
@@ -403,14 +421,14 @@ public final class MemorizerWorker {
         TObjectIntMap<BatchIncrementArguments.ObjectAndFolder> useCounts = memorizerTask.isIncrementUseCount() ? new TObjectIntHashMap<BatchIncrementArguments.ObjectAndFolder>(6, 0.9F, 0) : null;
         for (InternetAddress address : addresses) {
             try {
-                memorizeContact(address, folderId, session, ctx, userConfig, contactService, useCounts, services);
+                memorizeContact(address, folderId, sessionToUse, ctx, userConfig, contactService, useCounts, services);
             } catch (Exception e) {
                 LOG.warn("Contact collector run aborted for address: {}", address.toUnicodeString(), e);
             }
         }
         if (null != useCounts && !useCounts.isEmpty()) {
             ObjectUseCountService useCountService = services.getOptionalService(ObjectUseCountService.class);
-            batchIncrementUseCount(useCounts, session, useCountService);
+            batchIncrementUseCount(useCounts, sessionToUse, useCountService);
         }
     }
 
@@ -569,7 +587,7 @@ public final class MemorizerWorker {
     static boolean isEnabled(final Session session) {
         try {
             return ServerSessionAdapter.valueOf(session).getUserPermissionBits().isCollectEmailAddresses();
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
         }
         return false;
@@ -579,7 +597,7 @@ public final class MemorizerWorker {
         try {
             final Integer folder = ServerUserSetting.getInstance().getContactCollectionFolder(session.getContextId(), session.getUserId());
             return null == folder ? 0 : folder.intValue();
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             return 0;
         }

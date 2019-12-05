@@ -192,7 +192,7 @@ public final class HeaderName implements Serializable, Cloneable, Comparable<Hea
     public Object clone() {
         try {
             return super.clone();
-        } catch (final CloneNotSupportedException e) {
+        } catch (CloneNotSupportedException e) {
             /*
              * Cannot not occur since Cloneable is implemented
              */

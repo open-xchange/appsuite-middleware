@@ -210,6 +210,8 @@ public class MailFolder implements Serializable, Cloneable {
         mfi.setSubfolders(hasSubfolders);
         mfi.setSubscribed(subscribed);
         mfi.setSubscribedSubfolders(hasSubscribedSubfolders);
+        mfi.setShared(shared);
+        mfi.setPublic(isPublic);
         return mfi;
     }
 
@@ -301,7 +303,7 @@ public class MailFolder implements Serializable, Cloneable {
                 }
             }
             return clone;
-        } catch (final CloneNotSupportedException e) {
+        } catch (CloneNotSupportedException e) {
             throw new InternalError("Clone failed although Cloneable is implemented.");
         }
     }

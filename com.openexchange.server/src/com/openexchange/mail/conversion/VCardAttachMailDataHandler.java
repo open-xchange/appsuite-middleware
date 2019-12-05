@@ -223,11 +223,11 @@ public final class VCardAttachMailDataHandler implements DataHandler {
             ConversionResult result = new ConversionResult();
             result.setData(mailObject);
             return result;
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw DataExceptionCodes.ERROR.create(e, e.getMessage());
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw DataExceptionCodes.ERROR.create(e, e.getMessage());
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw DataExceptionCodes.ERROR.create(e, e.getMessage());
         }
     }
@@ -264,7 +264,7 @@ public final class VCardAttachMailDataHandler implements DataHandler {
                 return management.createManagedFile((byte[]) vcard);
             }
             throw DataExceptionCodes.TYPE_NOT_SUPPORTED.create(vcard.getClass().getName());
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw DataExceptionCodes.ERROR.create(e, e.getMessage());
         }
     }

@@ -51,6 +51,9 @@ package com.openexchange.webdav.protocol.helpers;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import javax.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.webdav.protocol.WebdavCollection;
 import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavPath;
@@ -63,6 +66,9 @@ import com.openexchange.webdav.protocol.WebdavResource;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public abstract class AbstractWebdavFactory implements WebdavFactory {
+    
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractWebdavFactory.class);
+
 
     private PropertyMixin[] mixins;
 
@@ -88,13 +94,17 @@ public abstract class AbstractWebdavFactory implements WebdavFactory {
         return resolveResource(decode(new WebdavPath(url)));
     }
 
-    public WebdavPath decode(final WebdavPath webdavPath) {
+    public WebdavPath decode(final WebdavPath webdavPath) throws WebdavProtocolException {
         final WebdavPath path = new WebdavPath();
         for(final String component : webdavPath) {
             try {
                 path.append(URLDecoder.decode(component, "UTF-8"));
-            } catch (final UnsupportedEncodingException e) {
+            } catch (UnsupportedEncodingException e) {
                 // Won't happen
+                LOGGER.trace("Encoding error", e);
+            } catch (IllegalArgumentException e) {
+                LOGGER.error("Unable to decode component: {}", component, e);
+                throw WebdavProtocolException.generalError(e, webdavPath, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             }
         }
         return path;
@@ -108,11 +118,11 @@ public abstract class AbstractWebdavFactory implements WebdavFactory {
     }
 
     protected String normalize(String url) {
-        if(url.length()==0) {
+        if (url.length()==0) {
             return "/";
         }
         url = url.replaceAll("/+", "/");
-        if(url.charAt(url.length()-1)=='/') {
+        if (url.charAt(url.length()-1)=='/') {
             return url.substring(0,url.length()-1);
         }
         return url;

@@ -131,11 +131,11 @@ public class RdbBackupStringMultifactorDeviceStorage extends MultifactorStorageC
             statement.setString(index++, device.getHashedSharedSecret());
             statement.setInt(index++, device.getSecretLength());
             statement.executeUpdate();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw MultifactorExceptionCodes.SQL_EXCEPTION.create(e.getMessage(), e);
         } finally {
             Databases.closeSQLStuff(statement);
-            if(connection != null) {
+            if (connection != null) {
                 dbs.backWritable(connection);
             }
         }
@@ -155,7 +155,7 @@ public class RdbBackupStringMultifactorDeviceStorage extends MultifactorStorageC
             statement.setString(index++, deviceId);
             rows = statement.executeUpdate();
             return rows > 0 ? true : false;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw MultifactorExceptionCodes.SQL_EXCEPTION.create(e.getMessage(), e);
         } finally {
             Databases.closeSQLStuff(statement);
@@ -180,11 +180,11 @@ public class RdbBackupStringMultifactorDeviceStorage extends MultifactorStorageC
             statement.setInt(index++, contextId);
             statement.setInt(index++, userId);
             return createDevicesFrom(statement.executeQuery());
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw MultifactorExceptionCodes.SQL_EXCEPTION.create(e.getMessage(), e);
         } finally {
             Databases.closeSQLStuff(statement);
-            if(connection != null) {
+            if (connection != null) {
                 dbs.backReadOnly(connection);
             }
         }
@@ -203,15 +203,15 @@ public class RdbBackupStringMultifactorDeviceStorage extends MultifactorStorageC
             statement.setInt(index++, userId);
             statement.setString(index++, deviceId);
             result = statement.executeQuery();
-            if(result.next()) {
+            if (result.next()) {
                 return Optional.of(createDeviceFrom(result));
             }
             return Optional.empty();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw MultifactorExceptionCodes.SQL_EXCEPTION.create(e.getMessage(), e);
         } finally {
             Databases.closeSQLStuff(result, statement);
-            if(connection != null) {
+            if (connection != null) {
                 dbs.backReadOnly(connection);
             }
         }
@@ -232,7 +232,7 @@ public class RdbBackupStringMultifactorDeviceStorage extends MultifactorStorageC
             statement.setString(index++, deviceId);
             rows = statement.executeUpdate();
             return rows > 0 ? true : false;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw MultifactorExceptionCodes.SQL_EXCEPTION.create(e.getMessage(), e);
         } finally {
             Databases.closeSQLStuff(statement);

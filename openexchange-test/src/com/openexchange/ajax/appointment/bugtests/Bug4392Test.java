@@ -41,7 +41,7 @@ public class Bug4392Test extends AppointmentTest {
         final Appointment loadAppointment = catm.get(appointmentFolderId, objectId);
         try {
             compareObject(appointmentObj, loadAppointment, appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate().getTime());
-        } catch (final OXException exc) {
+        } catch (OXException exc) {
             fail("exception: " + exc.toString());
         }
     }

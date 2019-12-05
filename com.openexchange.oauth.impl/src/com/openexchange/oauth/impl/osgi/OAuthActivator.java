@@ -106,12 +106,12 @@ import com.openexchange.secret.SecretEncryptionFactoryService;
 import com.openexchange.secret.recovery.EncryptedItemCleanUpService;
 import com.openexchange.secret.recovery.EncryptedItemDetectorService;
 import com.openexchange.secret.recovery.SecretMigrator;
+import com.openexchange.session.SessionHolder;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
-import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.user.UserService;
 
 /**
@@ -135,9 +135,11 @@ public final class OAuthActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
+        //@formatter:off
         return new Class<?>[] { DatabaseService.class, SessiondService.class, EventAdmin.class, SecretEncryptionFactoryService.class,
             SessionHolder.class, CryptoService.class, ConfigViewFactory.class, TimerService.class, DispatcherPrefixService.class,
             UserService.class, SSLSocketFactoryProvider.class, ThreadPoolService.class };
+        //@formatter:on
     }
 
     @Override
@@ -292,7 +294,7 @@ public final class OAuthActivator extends HousekeepingActivator {
             };
             ServiceTracker<HTTPResponseProcessor, HTTPResponseProcessor> tracker = track(HTTPResponseProcessor.class, listener);
             tracker.open();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             log.error("Starting bundle \"com.openexchange.oauth\" failed.", e);
             throw e;
         }
@@ -337,7 +339,7 @@ public final class OAuthActivator extends HousekeepingActivator {
             DeleteListenerRegistry.releaseInstance();
             OSGiMetaDataRegistry.releaseInstance();
             Services.setServiceLookup(null);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             log.error("Stopping bundle \"com.openexchange.oauth\" failed.", e);
             throw e;
         }

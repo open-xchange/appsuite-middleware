@@ -226,6 +226,7 @@ public final class DefaultSMTPTransport extends AbstractSMTPTransport {
             final Address[] recipients = new Address[] { dispNotification };
             processAddressHeader(smtpMessage);
             checkRecipients(recipients);
+            smtpMessage.removeHeader(MessageHeaders.HDR_X_OX_NO_REPLY_PERSONAL);
             smtpMessage.addRecipients(RecipientType.TO, recipients);
             /*
              * Set header
@@ -300,7 +301,7 @@ public final class DefaultSMTPTransport extends AbstractSMTPTransport {
              * Transport message
              */
             transport(smtpMessage, smtpMessage.getAllRecipients(), getSMTPSession(smtpConfig), smtpConfig);
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e, smtpConfig, session);
         }
     }

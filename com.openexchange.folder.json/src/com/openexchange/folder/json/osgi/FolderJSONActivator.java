@@ -136,7 +136,7 @@ public class FolderJSONActivator extends AJAXModuleActivator {
              */
             registerService(PreferencesItemService.class, new Tree());
             registerService(LoginHandlerService.class, new FolderConsistencyLoginHandler());
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("", e);
             throw e;
         }
@@ -155,7 +155,7 @@ public class FolderJSONActivator extends AJAXModuleActivator {
              * Restore
              */
             restore();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("", e);
             throw e;
         }

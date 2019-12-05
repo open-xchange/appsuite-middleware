@@ -75,7 +75,7 @@ public class Multistatus<T> implements Iterable<WebdavStatus<T>>{
 	public void addStatus(final WebdavStatus<T> status) {
 		stadi.add(status);
 		List<WebdavStatus<T>> collocated = rcMap.get(status.getStatus());
-		if(null == collocated) {
+		if (null == collocated) {
 			collocated = new ArrayList<WebdavStatus<T>>();
 			rcMap.put(status.getStatus(), collocated);
 		}

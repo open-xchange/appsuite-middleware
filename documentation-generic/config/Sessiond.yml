@@ -37,19 +37,19 @@ properties:
   - key: com.openexchange.sessiond.sessionDefaultLifeTime
     description: |
       Life time (in milliseconds) of a session in the short term session containers. After this time the session is put into the long life time container and all
-      temporary session data is removed. This only applies if [[com.openexchange.sessiond.autologin]] is enabled.
+      temporary session data is removed. This only applies if the user requested to stay signed in.
       Short term session containers are rotated every 6 minutes. Therefore this value should be a multiple of 6 minutes.
     defaultValue: 3600000
     version: 
     reloadable: false
     configcascadeAware: false
-    related: com.openexchange.sessiond.autologin
+    related:
     file: sessiond.properties
     packageName: open-xchange-core
     tags: ["Session"]
   - key: com.openexchange.sessiond.sessionLongLifeTime
     description: |
-      This amount of time a session can live without any interaction, if [[com.openexchange.sessiond.autologin]] is enabled. First the session lives
+      This amount of time a session can live without any interaction, if the user requested to stay signed in. First the session lives
       in the short term session container, see configuration option [[com.openexchange.sessiond.sessionDefaultLifeTime]]. Then the session is moved
       into the long term session container. The session can be restored from here, but it won't have any temporary session data anymore.
       Restoring temporary session data may cause some slower functionality and maybe temporary errors on image, proxy data or the like. The
@@ -61,7 +61,7 @@ properties:
     version: 
     reloadable: false
     configcascadeAware: false
-    related: ["com.openexchange.sessiond.autologin","com.openexchange.sessiond.sessionDefaultLifeTime"]
+    related: com.openexchange.sessiond.sessionDefaultLifeTime
     file: sessiond.properties
     packageName: open-xchange-core
     tags: ["Session"]
@@ -70,17 +70,6 @@ properties:
       The random token to access a newly created session is valid for this configured time.
       Can contain units of measurement: D(=days) W(=weeks) H(=hours) M(=minutes).
     defaultValue: 30000
-    version: 
-    reloadable: false
-    configcascadeAware: false
-    related: 
-    file: sessiond.properties
-    packageName: open-xchange-core
-    tags: ["Session"]
-  - key: com.openexchange.sessiond.autologin
-    description: |
-      Whether autologin is allowed or not.
-    defaultValue: false
     version: 
     reloadable: false
     configcascadeAware: false

@@ -147,7 +147,7 @@ public final class RegisterDatabase extends DatabaseAbstraction {
             // Success..
             displayRegisteredMessage(String.valueOf(dbId.get()), parser);
             sysexit(0);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             printErrors(null, null, e, parser);
         }
 

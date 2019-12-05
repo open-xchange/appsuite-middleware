@@ -279,7 +279,7 @@ public class Enriched2HtmlConverter {
                 Streams.close(input);
             }
             return sb.toString();
-        } catch (final IOException e) {
+        } catch (IOException e) {
             LOG.error("", e);
             return enrichedText;
         }

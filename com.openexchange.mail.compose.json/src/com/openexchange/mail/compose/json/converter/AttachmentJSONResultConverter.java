@@ -112,7 +112,7 @@ public class AttachmentJSONResultConverter implements ResultConverter {
                 jArray.put(convertAttachment(attachment));
             }
             result.setResultObject(jArray, "json");
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
     }

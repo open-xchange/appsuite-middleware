@@ -79,7 +79,7 @@ import com.openexchange.server.impl.OCLPermission;
 
 /**
  * Tests if bug 12595 appears again.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Bug12595Test extends AbstractAJAXSession {
@@ -100,7 +100,7 @@ public final class Bug12595Test extends AbstractAJAXSession {
 
     /**
      * Default constructor.
-     * 
+     *
      * @param name test name.
      */
     public Bug12595Test() {
@@ -174,7 +174,7 @@ public final class Bug12595Test extends AbstractAJAXSession {
         series.setLastModified(response.getTimestamp());
     }
 
-    private void createException() throws OXException, IOException, JSONException, OXException {
+    private void createException() throws OXException, IOException, JSONException {
         final GetRequest request = new GetRequest(sharedFolder.getObjectID(), series.getObjectID(), 2);
         final GetResponse response = secretary.execute(request);
         final Appointment occurrence = response.getAppointment(secTZ);

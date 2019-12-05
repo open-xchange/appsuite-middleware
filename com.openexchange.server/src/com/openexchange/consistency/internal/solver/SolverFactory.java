@@ -53,7 +53,7 @@ import com.openexchange.consistency.RepairAction;
 import com.openexchange.filestore.FileStorage;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
-import com.openexchange.groupware.ldap.User;
+import com.openexchange.user.User;
 
 /**
  * {@link SolverFactory}
@@ -177,5 +177,21 @@ public class SolverFactory {
             default:
                 return new DoNothingSolver();
         }
+    }
+
+    /**
+     * Creates a preview solver
+     *
+     * @param action The repair action
+     * @return the new {@link ProblemSolver}
+     */
+    public static final ProblemSolver createPreviewSolver(RepairAction action) {
+        switch (action) {
+            case DELETE:
+                return new DeleteBrokenPreviewReferencesSolver();
+            default:
+                return new DoNothingSolver();
+        }
+
     }
 }

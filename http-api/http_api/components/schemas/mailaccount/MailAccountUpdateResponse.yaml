@@ -1,0 +1,12 @@
+type: object
+properties:
+  $ref: ../common/CommonResponseData.yaml
+  data:
+    $ref: '#/components/schemas/MailAccountData'
+  warnings:
+    type: array
+    description: >-
+      An array of error objects that occurred during the creation of the
+      account.
+    items:
+      $ref: '#/components/schemas/CommonResponse'

@@ -64,11 +64,11 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.resource.storage.ResourceStorage;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.test.AjaxInit;
+import com.openexchange.user.User;
 
 /**
  * {@link ResourceDeleteTest}
@@ -89,7 +89,7 @@ public final class ResourceDeleteTest {
             int pos = -1;
             final String c = (pos = ctxStr.indexOf('@')) > -1 ? ctxStr.substring(pos + 1) : ctxStr;
             return ContextStorage.getStorageContext(ContextStorage.getInstance().getContextId(c));
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             t.printStackTrace();
             return null;
         }
@@ -100,7 +100,7 @@ public final class ResourceDeleteTest {
             int pos = -1;
             final String u = (pos = user.indexOf('@')) > -1 ? user.substring(0, pos) : user;
             return UserStorage.getInstance().getUser(UserStorage.getInstance().getUserId(u, ctx), ctx);
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             t.printStackTrace();
             return null;
         }
@@ -120,7 +120,7 @@ public final class ResourceDeleteTest {
             ctx = resolveContext(login);
             user = resolveUser(login, ctx);
             admin = UserStorage.getInstance().getUser(ctx.getMailadmin(), ctx);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             throw e;
         }
@@ -136,7 +136,7 @@ public final class ResourceDeleteTest {
     private static final String SQL_DELETE_DELETE = "DELETE FROM del_resource WHERE cid = ? AND id = ?";
 
     @Test
-    public void testResourceDelete() throws OXException, OXException, SQLException {
+    public void testResourceDelete() throws OXException, SQLException {
         int id = -1;
         try {
             final Resource resource = createDummyResource(admin, ctx);
@@ -149,7 +149,7 @@ public final class ResourceDeleteTest {
             OXException expected = null;
             try {
                 ServerServiceRegistry.getServize(ResourceStorage.class, true).getResource(id, ctx);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 expected = e;
             }
             assertTrue("Resource has not been deleted", expected != null);
@@ -177,21 +177,21 @@ public final class ResourceDeleteTest {
                     stmt.setInt(1, ctx.getContextId());
                     stmt.setInt(2, id);
                     stmt.executeUpdate();
-                } catch (final SQLException e) {
+                } catch (SQLException e) {
                     e.printStackTrace();
                     fail(e.getMessage());
                 } finally {
                     if (rs != null) {
                         try {
                             rs.close();
-                        } catch (final SQLException e) {
+                        } catch (SQLException e) {
                             e.printStackTrace();
                         }
                         rs = null;
                     }
                     try {
                         stmt.close();
-                    } catch (final SQLException e) {
+                    } catch (SQLException e) {
                         e.printStackTrace();
                     }
                 }
@@ -217,7 +217,7 @@ public final class ResourceDeleteTest {
             ServerServiceRegistry.getInstance().getService(ResourceService.class).delete(admin, ctx, resource, resource.getLastModified());
 
             fail("Delete succeeded with missing mandatory field");
-        } catch (final OXException e) {
+        } catch (OXException e) {
             // Exception is expected
         } finally {
             deleteResource(id, ctx.getContextId());
@@ -245,7 +245,7 @@ public final class ResourceDeleteTest {
         final Connection writeCon;
         try {
             writeCon = Database.get(cid, true);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             e.printStackTrace();
             return;
         }
@@ -256,13 +256,13 @@ public final class ResourceDeleteTest {
             stmt.setInt(2, id);
             stmt.executeUpdate();
 
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         } finally {
             if (null != stmt) {
                 try {
                     stmt.close();
-                } catch (final SQLException e) {
+                } catch (SQLException e) {
                 }
                 stmt = null;
             }

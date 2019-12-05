@@ -81,11 +81,6 @@ public class ClusterLockServiceHazelcastImpl extends AbstractClusterLockServiceI
         this.unregisterer = unregisterer;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.cluster.lock.ClusterLockService#acquireClusterLock(com.openexchange.cluster.lock.ClusterTask)
-     */
     @Override
     public <T> boolean acquireClusterLock(ClusterTask<T> clusterTask) throws OXException {
         HazelcastInstance hzInstance = getHazelcastInstance();
@@ -104,11 +99,6 @@ public class ClusterLockServiceHazelcastImpl extends AbstractClusterLockServiceI
         return clusterLocks.replace(clusterTask.getTaskName(), timeThen, timeNow);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.cluster.lock.ClusterLockService#releaseClusterLock(com.openexchange.cluster.lock.ClusterTask)
-     */
     @Override
     public <T> void releaseClusterLock(ClusterTask<T> clusterTask) throws OXException {
         HazelcastInstance hzInstance = getHazelcastInstance();
@@ -116,21 +106,11 @@ public class ClusterLockServiceHazelcastImpl extends AbstractClusterLockServiceI
         map.remove(clusterTask.getTaskName());
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.cluster.lock.ClusterLockService#runClusterTask(com.openexchange.cluster.lock.ClusterTask)
-     */
     @Override
     public <T> T runClusterTask(ClusterTask<T> clusterTask) throws OXException {
         return runClusterTask(clusterTask, new RunOnceRetryPolicy());
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.cluster.lock.ClusterLockService#runClusterTask(com.openexchange.cluster.lock.ClusterTask, com.openexchange.cluster.lock.RetryPolicy)
-     */
     @Override
     public <T> T runClusterTask(ClusterTask<T> clusterTask, RetryPolicy retryPolicy) throws OXException {
         try {
@@ -180,11 +160,6 @@ public class ClusterLockServiceHazelcastImpl extends AbstractClusterLockServiceI
             this.taskName = taskName;
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.lang.Runnable#run()
-         */
         @Override
         public void run() {
             try {

@@ -249,7 +249,7 @@ public class AuditEventHandler implements EventHandler {
             if (logBuilder.length() > 0) {
                 logger.info(logBuilder.toString());
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             logger.error("", e);
         }
     }
@@ -580,7 +580,7 @@ public class AuditEventHandler implements EventHandler {
             for (int i = 0; i < size; i++) {
                 retval = iter.next().getFolderName() + "/" + retval;
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             logger.error("", e);
         } finally {
             Streams.close(it);

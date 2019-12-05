@@ -1148,7 +1148,7 @@ public final class Session {
 		    String currTuple = tuples.nextToken().trim();
 			
 		    // set the value of each attribute based on its key
-		    int sep = currTuple.indexOf("=");
+		    int sep = currTuple.indexOf('=');
 		    if (currTuple.startsWith("protocol=")) {
 			protocol = currTuple.substring(sep+1);
 		    } else if (currTuple.startsWith("type=")) {

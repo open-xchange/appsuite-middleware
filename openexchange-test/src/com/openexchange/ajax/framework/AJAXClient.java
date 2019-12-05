@@ -84,11 +84,11 @@ public class AJAXClient {
         this.mustLogout = logout;
     }
 
-    public AJAXClient(TestUser user) throws OXException, OXException, IOException, JSONException {
+    public AJAXClient(TestUser user) throws OXException, IOException, JSONException {
         this(user, AJAXClient.class.getName());
     }
 
-    public AJAXClient(TestUser user, String client) throws OXException, OXException, IOException, JSONException {
+    public AJAXClient(TestUser user, String client) throws OXException, IOException, JSONException {
         super();
 
         if (hostname == null) {
@@ -185,7 +185,7 @@ public class AJAXClient {
     public <T extends AbstractAJAXResponse> T executeSafe(final AJAXRequest<T> request) {
         try {
             return execute(request, -1);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             // ignore
             return null;
         }

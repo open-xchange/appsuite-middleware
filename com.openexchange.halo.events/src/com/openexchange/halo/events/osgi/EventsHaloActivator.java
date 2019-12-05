@@ -54,6 +54,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
+import com.openexchange.folderstorage.FolderService;
 import com.openexchange.halo.HaloContactDataSource;
 import com.openexchange.halo.events.EventsContactHalo;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -75,7 +76,7 @@ public class EventsHaloActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+        return new Class<?>[] { FolderService.class };
     }
 
     @Override
@@ -91,7 +92,7 @@ public class EventsHaloActivator extends HousekeepingActivator {
             @Override
             public synchronized IDBasedCalendarAccessFactory addingService(ServiceReference<IDBasedCalendarAccessFactory> serviceReference) {
                 IDBasedCalendarAccessFactory calendarAccessFactory = context.getService(serviceReference);
-                eventsHaloRegistration = context.registerService(HaloContactDataSource.class, new EventsContactHalo(calendarAccessFactory), null);
+                eventsHaloRegistration = context.registerService(HaloContactDataSource.class, new EventsContactHalo(calendarAccessFactory, getService(FolderService.class)), null);
                 return calendarAccessFactory;
             }
 

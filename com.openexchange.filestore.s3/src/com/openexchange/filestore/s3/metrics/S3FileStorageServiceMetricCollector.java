@@ -78,11 +78,6 @@ public class S3FileStorageServiceMetricCollector extends ServiceMetricCollector 
         this.metricService = metricService;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.amazonaws.metrics.ServiceMetricCollector#collectByteThroughput(com.amazonaws.metrics.ByteThroughputProvider)
-     */
     @Override
     public void collectByteThroughput(final ByteThroughputProvider provider) {
         ThroughputMetricType throughputMetricType = provider.getThroughputMetricType();
@@ -92,11 +87,6 @@ public class S3FileStorageServiceMetricCollector extends ServiceMetricCollector 
         meter.mark(Integer.toUnsignedLong(bytes));
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.amazonaws.metrics.ServiceMetricCollector#collectLatency(com.amazonaws.metrics.ServiceLatencyProvider)
-     */
     @Override
     public void collectLatency(final ServiceLatencyProvider provider) {
         // no-op

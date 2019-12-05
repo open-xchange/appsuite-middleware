@@ -90,7 +90,7 @@ public abstract class DateMapping<O> extends DefaultJsonMapping<Date, O> {
                 if (!com.openexchange.java.Strings.isEmpty(sObject)) {
                     try {
                         set(to, new Date(Long.parseLong(sObject)));
-                    } catch (final NumberFormatException e) {
+                    } catch (NumberFormatException e) {
                         throw new JSONException("JSONObject[\""+ajaxName+"\"] is not a number: " + object);
                     }
                 }

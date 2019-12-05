@@ -40,10 +40,10 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
    @Override
    public InputSource resolveEntity(String name, String publicId, String baseURI, String systemId) throws SAXException, IOException {
        InputSource resolved=null;
-       if(systemId!=null && systemId.toLowerCase().endsWith(".xsd")) {
+       if (systemId!=null && systemId.toLowerCase().endsWith(".xsd")) {
             resolved=tryResolveLiquibaseSchema(systemId, publicId);
        }
-       if(resolved==null && resourceAccessor!=null && basePath!=null && systemId!=null) {
+       if (resolved==null && resourceAccessor!=null && basePath!=null && systemId!=null) {
             resolved=tryResolveFromResourceAccessor(systemId);
        }
        return resolved;

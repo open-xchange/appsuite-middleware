@@ -150,7 +150,7 @@ public class Infostore extends OXServlet {
         ServerSession session;
         try {
             session = ServerSessionAdapter.valueOf(getSession(req));
-        } catch (final OXException exc) {
+        } catch (OXException exc) {
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             return;
         }

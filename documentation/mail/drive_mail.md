@@ -1,6 +1,6 @@
 ---
 title: Drive Mail
-icon: fa-hdd-o
+icon: fas fa-hdd
 tags: Mail, Configuration, Installation
 ---
 

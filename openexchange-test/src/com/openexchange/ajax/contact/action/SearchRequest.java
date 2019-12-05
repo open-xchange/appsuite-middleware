@@ -108,7 +108,7 @@ public class SearchRequest extends AbstractContactRequest<SearchResponse> {
             if (pattern != null) {
                 body.put(SearchFields.PATTERN, pattern);
             }
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw new IllegalStateException(e); // Shouldn't happen
         }
     }

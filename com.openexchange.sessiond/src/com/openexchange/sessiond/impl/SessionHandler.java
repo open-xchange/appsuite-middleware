@@ -83,6 +83,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Origin;
 import com.openexchange.session.Session;
+import com.openexchange.session.SessionAttributes;
 import com.openexchange.session.SessionDescription;
 import com.openexchange.session.SessionSerializationInterceptor;
 import com.openexchange.sessiond.SessionCounter;
@@ -169,8 +170,7 @@ public final class SessionHandler {
         SessionData sessionData = new SessionData(  config.getNumberOfSessionContainers(),
                                                     config.getMaxSessions(),
                                                     config.getRandomTokenTimeout(),
-                                                    config.getNumberOfLongTermSessionContainers(),
-                                                    config.isAutoLogin()
+                                                    config.getNumberOfLongTermSessionContainers()
                                                     );
         // @formatter:on
         SESSION_DATA_REF.set(sessionData);
@@ -225,8 +225,8 @@ public final class SessionHandler {
     /**
      * Removes all sessions associated with given user in specified context
      *
-     * @param userId The user ID
-     * @param contextId The context ID
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @return The wrapper objects for removed sessions
      */
     public static Session[] removeUserSessions(final int userId, final int contextId) {
@@ -288,8 +288,8 @@ public final class SessionHandler {
     /**
      * Globally removes sessions associated to the given contexts. 'Globally' means sessions on all cluster nodes
      *
-     * @param userId The user ID
-     * @param contextId The context ID
+     * @param userId The user identifier
+     * @param contextId The context identifier
      */
     public static void removeUserSessionsGlobal(int userId, int contextId) {
         SessionHandler.removeRemoteUserSessions(userId, contextId);
@@ -372,7 +372,7 @@ public final class SessionHandler {
      * Removes all sessions from remote nodes that match the given filter (excluding this node).
      *
      * @param filter The filter
-     * @return The session IDs of all removed sessions
+     * @return The session identifiers of all removed sessions
      */
     public static List<String> removeRemoteSessions(SessionFilter filter) {
         LOG.debug("Trying to remove sessions from remote nodes by filter '{}'", filter);
@@ -393,7 +393,7 @@ public final class SessionHandler {
      * Finds all sessions on remote nodes that match the given filter (excluding this node).
      *
      * @param filter The filter
-     * @return The session IDs of all found sessions
+     * @return The session identifiers of all found sessions
      */
     public static List<String> findRemoteSessions(SessionFilter filter) {
         LOG.debug("Trying to find sessions on remote nodes by filter '{}'", filter);
@@ -411,10 +411,10 @@ public final class SessionHandler {
     }
 
     /**
-     * Finds all local sessions that match the given filter and returns their IDs.
+     * Finds all local sessions that match the given filter and returns their identifiers.
      *
      * @param filter The filter
-     * @return The found session IDs
+     * @return The found session identifiers
      */
     public static List<String> findLocalSessions(SessionFilter filter) {
         final SessionData sessionData = SESSION_DATA_REF.get();
@@ -433,10 +433,10 @@ public final class SessionHandler {
     }
 
     /**
-     * Removes all local sessions that match the given filter and returns their IDs.
+     * Removes all local sessions that match the given filter and returns their identifiers.
      *
      * @param filter The filter
-     * @return The session IDs
+     * @return The session identifiers
      */
     public static List<String> removeLocalSessions(SessionFilter filter) {
         List<String> sessionIds = findLocalSessions(filter);
@@ -548,7 +548,7 @@ public final class SessionHandler {
     /**
      * Removes all sessions associated with given context.
      *
-     * @param contextId The context ID
+     * @param contextId The context identifier
      */
     public static void removeContextSessions(final int contextId) {
         /*
@@ -635,8 +635,8 @@ public final class SessionHandler {
     /**
      * Gets all <b>local-only</b> active (short-term-only) sessions associated with given user in specified context
      *
-     * @param userId The user ID
-     * @param contextId The context ID
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @return The wrapper objects for active sessions
      */
     public static List<SessionControl> getUserActiveSessions(int userId, int contextId) {
@@ -652,8 +652,8 @@ public final class SessionHandler {
     /**
      * Gets all sessions associated with given user in specified context
      *
-     * @param userId The user ID
-     * @param contextId The context ID
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @param considerSessionStorage <code>true</code> to also consider session storage; otherwise <code>false</code>
      * @return The wrapper objects for sessions
      */
@@ -723,8 +723,8 @@ public final class SessionHandler {
     /**
      * Gets an active session of an user if available.
      *
-     * @param userId The user ID
-     * @param contextId The context ID
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @param includeLongTerm <code>true</code> to also lookup the long term sessions, <code>false</code>, otherwise
      * @param includeStorage <code>true</code> to also lookup the distributed session storage, <code>false</code>, otherwise
      * @return
@@ -814,7 +814,7 @@ public final class SessionHandler {
     /**
      * Adds a new session containing given attributes to session container(s)
      *
-     * @param userId The user ID
+     * @param userId The user identifier
      * @param loginName The user's login name
      * @param password The user's password
      * @param contextId The context identifier
@@ -822,13 +822,11 @@ public final class SessionHandler {
      * @param login The full user's login; e.g. <i>test@foo.bar</i>
      * @param tranzient <code>true</code> if the session should be transient, <code>false</code>, otherwise
      * @param origin The session's origin
-     * @param enhancement after creating the session, this callback will be called when not <code>null</code> for extending the session.
+     * @param enhancements After creating the session, these call-backs will be called for extending the session.
      * @return The created session
      * @throws OXException If creating a new session fails
      */
-
-    protected static SessionImpl addSession(int userId, String loginName, String password, int contextId, String clientHost, String login, String authId, String hash, String client, String clientToken, boolean tranzient, Origin origin, List<SessionEnhancement> enhancements, String userAgent) throws OXException {
-
+    protected static SessionImpl addSession(int userId, String loginName, String password, int contextId, String clientHost, String login, String authId, String hash, String client, String clientToken, boolean tranzient, boolean staySignedIn, Origin origin, List<SessionEnhancement> enhancements, String userAgent) throws OXException {
         SessionData sessionData = SESSION_DATA_REF.get();
         if (null == sessionData) {
             throw SessionExceptionCodes.NOT_INITIALIZED.create();
@@ -842,12 +840,12 @@ public final class SessionHandler {
         // Create and optionally enhance new session instance
         SessionImpl newSession;
         {
-            if (null == enhancements) {
-                newSession = createNewSession(userId, loginName, password, contextId, clientHost, login, authId, hash, client, tranzient, origin);
+            // Create session instance
+            if (null == enhancements || enhancements.isEmpty()) {
+                newSession = createNewSession(userId, loginName, password, contextId, clientHost, login, authId, hash, client, tranzient, staySignedIn, origin);
             } else {
                 // Create intermediate SessionDescription instance to offer more flexibility to possible SessionEnhancement implementations
-
-                SessionDescription sessionDescription = createSessionDescription(userId, loginName, password, contextId, clientHost, login, authId, hash, client, tranzient, origin);
+                SessionDescription sessionDescription = createSessionDescription(userId, loginName, password, contextId, clientHost, login, authId, hash, client, tranzient, staySignedIn, origin);
                 for (SessionEnhancement enhancement: enhancements) {
                     enhancement.enhanceSession(sessionDescription);
                 }
@@ -898,10 +896,11 @@ public final class SessionHandler {
      * @param hash The hash string
      * @param client The client identifier
      * @param tranzient Whether the session is meant to be transient/volatile; typically the session gets dropped soon
+     * @param staySignedIn Whether session is supposed to be annotated with "stay signed in"; otherwise <code>false</code>
      * @return The newly created {@code SessionImpl} instance
      * @throws OXException If create attempt fails
      */
-    private static SessionImpl createNewSession(int userId, String loginName, String password, int contextId, String clientHost, String login, String authId, String hash, String client, boolean tranzient, Origin origin) throws OXException {
+    private static SessionImpl createNewSession(int userId, String loginName, String password, int contextId, String clientHost, String login, String authId, String hash, String client, boolean tranzient, boolean staySignedIn, Origin origin) throws OXException {
         // Generate identifier, secret, and random
         SessionIdGenerator sessionIdGenerator = SessionIdGenerator.getInstance();
         String sessionId = sessionIdGenerator.createSessionId(loginName);
@@ -909,7 +908,7 @@ public final class SessionHandler {
         String randomToken = sessionIdGenerator.createRandomId();
 
         // Create the instance
-        SessionImpl newSession = new SessionImpl(userId, loginName, password, contextId, sessionId, secret, randomToken, clientHost, login, authId, hash, client, tranzient, origin);
+        SessionImpl newSession = new SessionImpl(userId, loginName, password, contextId, sessionId, secret, randomToken, clientHost, login, authId, hash, client, tranzient, staySignedIn, origin);
 
         // Return...
         return newSession;
@@ -928,10 +927,11 @@ public final class SessionHandler {
      * @param hash The hash string
      * @param client The client identifier
      * @param tranzient Whether the session is meant to be transient/volatile; typically the session gets dropped soon
+     * @param staySignedIn Whether session is supposed to be annotated with "stay signed in"; otherwise <code>false</code>
      * @return The newly created {@code SessionDescription} instance
      * @throws OXException If create attempt fails
      */
-    private static SessionDescription createSessionDescription(int userId, String loginName, String password, int contextId, String clientHost, String login, String authId, String hash, String client, boolean tranzient, Origin origin) throws OXException {
+    private static SessionDescription createSessionDescription(int userId, String loginName, String password, int contextId, String clientHost, String login, String authId, String hash, String client, boolean tranzient, boolean staySignedIn, Origin origin) throws OXException {
         // Generate identifier, secret, and random
         SessionIdGenerator sessionIdGenerator = SessionIdGenerator.getInstance();
         String sessionId = sessionIdGenerator.createSessionId(loginName);
@@ -944,6 +944,7 @@ public final class SessionHandler {
         newSession.setLocalIp(clientHost);
         newSession.setAuthId(authId);
         newSession.setTransient(tranzient);
+        newSession.setStaySignedIn(staySignedIn);
         newSession.setClient(client);
         newSession.setRandomToken(randomToken);
         newSession.setHash(hash);
@@ -1169,9 +1170,9 @@ public final class SessionHandler {
     }
 
     /**
-     * Clears the session denoted by given session ID from session container(s)
+     * Clears the session denoted by given session identifier from session container(s)
      *
-     * @param sessionid The session ID
+     * @param sessionid The session identifier
      * @param postEvent <code>true</code> to post an event about session removal; otherwise <code>false</code> for no such event
      * @return <code>true</code> if a session could be removed; otherwise <code>false</code>
      */
@@ -1193,9 +1194,9 @@ public final class SessionHandler {
     }
 
     /**
-     * Changes the password stored in session denoted by given session ID
+     * Changes the password stored in session denoted by given session identifier
      *
-     * @param sessionid The session ID
+     * @param sessionid The session identifier
      * @param newPassword The new password
      * @throws OXException If changing the password fails
      */
@@ -1255,144 +1256,62 @@ public final class SessionHandler {
         removeRemoteUserSessions(userId, contextId);
     }
 
-    /**
-     * Sets the local IP address for given session.
-     *
-     * @param session The session
-     * @param localIp The new local IP address
-     * @throws OXException If changing local IP address fails or any reason
-     */
-    protected static void setLocalIp(final SessionImpl session, final String localIp) throws OXException {
-        if (null != session) {
-            try {
-                session.setLocalIp(localIp, false);
-                if (useSessionStorage(session)) {
-                    final SessionStorageService sessionStorageService = Services.optService(SessionStorageService.class);
-                    if (sessionStorageService != null) {
-                        AbstractTask<Void> c = new AbstractTask<Void>() {
-
-                            @Override
-                            public Void call() throws Exception {
-                                try {
-                                    sessionStorageService.setLocalIp(session.getSessionID(), localIp);
-                                } catch (OXException e) {
-                                    if (SessionStorageExceptionCodes.NO_SESSION_FOUND.equals(e)) {
-                                        // No such session held in session storage
-                                        LOG.debug("Session {} not available in session storage.", session.getSessionID(), e);
-                                    } else {
-                                        LOG.warn("Failed to set local IP address", e);
-                                    }
-                                } catch (Exception e) {
-                                    if (e.getCause() instanceof InterruptedException) {
-                                        // Timed out
-                                        LOG.warn("Failed to set local IP address in time");
-                                    } else {
-                                        LOG.warn("Failed to set local IP address", e);
-                                    }
-                                }
-                                return null;
-                            }
-                        };
-                        submit(c);
-                    }
-                }
-            } catch (RuntimeException e) {
-                throw SessionExceptionCodes.SESSIOND_EXCEPTION.create(e, e.getMessage());
-            }
+    protected static void setSessionAttributes(SessionImpl session, SessionAttributes attrs) throws OXException {
+        if (null == session) {
+            return;
         }
-    }
 
-    /**
-     * Sets the client identifier for given session.
-     *
-     * @param session The session
-     * @param client The new client identifier
-     * @throws OXException If changing client identifier fails or any reason
-     */
-    protected static void setClient(final SessionImpl session, final String client) throws OXException {
-        if (null != session) {
-            try {
-                session.setClient(client, false);
-                if (useSessionStorage(session)) {
-                    final SessionStorageService sessionStorageService = Services.optService(SessionStorageService.class);
-                    if (sessionStorageService != null) {
-                        AbstractTask<Void> c = new AbstractTask<Void>() {
-
-                            @Override
-                            public Void call() throws Exception {
-                                try {
-                                    sessionStorageService.setClient(session.getSessionID(), client);
-                                } catch (OXException e) {
-                                    if (SessionStorageExceptionCodes.NO_SESSION_FOUND.equals(e)) {
-                                        // No such session held in session storage
-                                        LOG.debug("Session {} not available in session storage.", session.getSessionID(), e);
-                                    } else {
-                                        LOG.warn("Failed to set client", e);
-                                    }
-                                } catch (Exception e) {
-                                    if (e.getCause() instanceof InterruptedException) {
-                                        // Timed out
-                                        LOG.warn("Failed to set client in time");
-                                    } else {
-                                        LOG.warn("Failed to set client", e);
-                                    }
-                                }
-                                return null;
-                            }
-                        };
-                        submit(c);
-                    }
-                }
-            } catch (RuntimeException e) {
-                throw SessionExceptionCodes.SESSIOND_EXCEPTION.create(e, e.getMessage());
+        try {
+            boolean anySet = false;
+            if (attrs.getLocalIp().isSet()) {
+                session.setLocalIp(attrs.getLocalIp().get(), false);
+                anySet = true;
             }
-        }
-    }
-
-    /**
-     * Sets the hash identifier for given session.
-     *
-     * @param session The session
-     * @param client The new hash identifier
-     * @throws OXException If changing hash identifier fails or any reason
-     */
-    protected static void setHash(final SessionImpl session, final String hash) throws OXException {
-        if (null != session) {
-            try {
-                session.setHash(hash, false);
-                if (useSessionStorage(session)) {
-                    final SessionStorageService sessionStorageService = Services.optService(SessionStorageService.class);
-                    if (sessionStorageService != null) {
-                        AbstractTask<Void> c = new AbstractTask<Void>() {
-
-                            @Override
-                            public Void call() throws Exception {
-                                try {
-                                    sessionStorageService.setHash(session.getSessionID(), hash);
-                                } catch (OXException e) {
-                                    if (SessionStorageExceptionCodes.NO_SESSION_FOUND.equals(e)) {
-                                        // No such session held in session storage
-                                        LOG.debug("Session {} not available in session storage.", session.getSessionID(), e);
-                                    } else {
-                                        LOG.warn("Failed to set hash", e);
-                                    }
-                                } catch (Exception e) {
-                                    if (e.getCause() instanceof InterruptedException) {
-                                        // Timed out
-                                        LOG.warn("Failed to set hash in time");
-                                    } else {
-                                        LOG.warn("Failed to set hash", e);
-                                    }
-                                }
-                                return null;
-                            }
-                        };
-                        submit(c);
-                    }
-                }
-            } catch (RuntimeException e) {
-                throw SessionExceptionCodes.SESSIOND_EXCEPTION.create(e, e.getMessage());
+            if (attrs.getClient().isSet()) {
+                session.setClient(attrs.getClient().get(), false);
+                anySet = true;
             }
+            if (attrs.getHash().isSet()) {
+                session.setHash(attrs.getHash().get(), false);
+                anySet = true;
+            }
+            if (attrs.getUserAgent().isSet()) {
+                session.setParameter(Session.PARAM_USER_AGENT, attrs.getUserAgent().get());
+                anySet = true;
+            }
+
+            if (anySet && useSessionStorage(session)) {
+                SessionStorageService sessionStorageService = Services.optService(SessionStorageService.class);
+                if (sessionStorageService != null) {
+                    AbstractTask<Void> c = new AbstractTask<Void>() {
+
+                        @Override
+                        public Void call() throws Exception {
+                            try {
+                                sessionStorageService.setSessionAttributes(session.getSessionID(), attrs);
+                            } catch (OXException e) {
+                                if (SessionStorageExceptionCodes.NO_SESSION_FOUND.equals(e)) {
+                                    // No such session held in session storage
+                                    LOG.debug("Session {} not available in session storage.", session.getSessionID(), e);
+                                } else {
+                                    LOG.warn("Failed to set session attributes", e);
+                                }
+                            } catch (Exception e) {
+                                if (e.getCause() instanceof InterruptedException) {
+                                    // Timed out
+                                    LOG.warn("Failed to set session attributes in time");
+                                } else {
+                                    LOG.warn("Failed to set session attributes", e);
+                                }
+                            }
+                            return null;
+                        }
+                    };
+                    submit(c);
+                }
+            }
+        } catch (RuntimeException e) {
+            throw SessionExceptionCodes.SESSIOND_EXCEPTION.create(e, e.getMessage());
         }
     }
 
@@ -1466,21 +1385,21 @@ public final class SessionHandler {
     }
 
     /**
-     * Gets the session associated with given session ID
+     * Gets the session associated with given session identifier
      *
-     * @param sessionId The session ID
+     * @param sessionId The session identifier
      * @param considerSessionStorage <code>true</code> to consider session storage for possible distributed session; otherwise
      *            <code>false</code>
-     * @return The session associated with given session ID; otherwise <code>null</code> if expired or none found
+     * @return The session associated with given session identifier; otherwise <code>null</code> if expired or none found
      */
     protected static SessionControl getSession(String sessionId, final boolean considerSessionStorage) {
         return getSession(sessionId, true, considerSessionStorage, false);
     }
 
     /**
-     * Gets the session associated with given session ID
+     * Gets the session associated with given session identifier
      *
-     * @param sessionId The session ID
+     * @param sessionId The session identifier
      * @param considerLocalStorage <code>true</code> to consider local storage; otherwise <code>false</code>
      * @param considerSessionStorage <code>true</code> to consider session storage for possible distributed session; otherwise
      *            <code>false</code>
@@ -1688,18 +1607,23 @@ public final class SessionHandler {
             LOG.warn("\tSessionData instance is null.");
             return;
         }
-        List<SessionControl> controls = sessionData.rotateShort();
-        if (!controls.isEmpty()) {
-            if (config.isAutoLogin()) {
-                for (final SessionControl sessionControl : controls) {
+        RotateShortResult result = sessionData.rotateShort();
+        {
+            List<SessionControl> movedToLongTerm = result.getMovedToLongTerm();
+            if (!movedToLongTerm.isEmpty()) {
+                for (SessionControl sessionControl : movedToLongTerm) {
                     LOG.info("Session is moved to long life time container. All temporary session data will be cleaned up. ID: {}", sessionControl.getSession().getSessionID());
                 }
-                postSessionDataRemoval(controls);
-            } else {
-                for (final SessionControl sessionControl : controls) {
+                postSessionDataRemoval(movedToLongTerm);
+            }
+        }
+        {
+            List<SessionControl> removed = result.getRemoved();
+            if (!removed.isEmpty()) {
+                for (SessionControl sessionControl : removed) {
                     LOG.info("Session timed out. ID: {}", sessionControl.getSession().getSessionID());
                 }
-                postContainerRemoval(controls, true);
+                postContainerRemoval(removed, true);
             }
         }
     }
@@ -1740,7 +1664,7 @@ public final class SessionHandler {
      */
     public static int getMetricActiveSessions() {
         SessionData sessionData = SESSION_DATA_REF.get();
-        if(sessionData == null) {
+        if (sessionData == null) {
             return 0;
         }
         int[] shortTermSessionsPerContainer = sessionData.getShortTermSessionsPerContainer();
@@ -1754,7 +1678,7 @@ public final class SessionHandler {
      */
     public static int getMetricShortSessions() {
         SessionData sessionData = SESSION_DATA_REF.get();
-        if(sessionData == null) {
+        if (sessionData == null) {
             return 0;
         }
         return sessionData.getNumShortTerm();
@@ -1767,7 +1691,7 @@ public final class SessionHandler {
      */
     public static int getMetricLongSessions() {
         SessionData sessionData = SESSION_DATA_REF.get();
-        if(sessionData == null) {
+        if (sessionData == null) {
             return 0;
         }
         return sessionData.getNumLongTerm();
@@ -1943,7 +1867,7 @@ public final class SessionHandler {
                                 }
                             }
                             sessionStorageService.removeSessions(sessionsToRemove);
-                        } catch (final RuntimeException e) {
+                        } catch (RuntimeException e) {
                             LOG.error("", e);
                         } catch (OXException e) {
                             LOG.error("", e);
@@ -2059,10 +1983,8 @@ public final class SessionHandler {
 
         long containerTimeout = config.getSessionContainerTimeout();
         shortSessionContainerRotator = service.scheduleWithFixedDelay(new ShortSessionContainerRotator(), containerTimeout, containerTimeout);
-        if (config.isAutoLogin()) {
-            long longContainerTimeout = config.getLongTermSessionContainerTimeout();
-            longSessionContainerRotator = service.scheduleWithFixedDelay(new LongSessionContainerRotator(), longContainerTimeout, longContainerTimeout);
-        }
+        long longContainerTimeout = config.getLongTermSessionContainerTimeout();
+        longSessionContainerRotator = service.scheduleWithFixedDelay(new LongSessionContainerRotator(), longContainerTimeout, longContainerTimeout);
     }
 
     public static void removeTimerService() {
@@ -2146,7 +2068,7 @@ public final class SessionHandler {
                     LOG.info("Put session {} with auth Id {} into session storage.", session.getSessionID(), session.getAuthId());
                     postSessionStored(session);
                 }
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 LOG.warn("Failed to put session {} with Auth-Id {} into session storage (user={}, context={})", session.getSessionID(), session.getAuthId(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), e);
             }
             return null;
@@ -2251,7 +2173,7 @@ public final class SessionHandler {
     /**
      * Gets a value indicating whether the supplied client identifier indicates an USM session or not.
      *
-     * @param clientId the client ID to check
+     * @param clientId the client identifier to check
      * @return <code>true</code> if the client denotes an USM client, <code>false</code>, otherwise
      */
     private static boolean isUsmEas(String clientId) {
@@ -2304,4 +2226,5 @@ public final class SessionHandler {
             return true;
         }
     }
+
 }

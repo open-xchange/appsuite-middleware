@@ -148,7 +148,7 @@ public class ResourcePrincipalCollection extends DAVCollection {
     }
 
     private ResourcePrincipalResource createResourceResource(Resource resource) {
-        return new ResourcePrincipalResource(factory, resource);
+        return new ResourcePrincipalResource(factory, resource, constructPathForChildResource(String.valueOf(resource.getIdentifier())));
     }
 
 }

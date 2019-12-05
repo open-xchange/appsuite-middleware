@@ -50,6 +50,8 @@
 package com.openexchange.mailaccount;
 
 import java.util.Locale;
+import com.openexchange.exception.OXException;
+import com.openexchange.i18n.tools.StringHelper;
 
 /**
  * {@link DefaultStatus} - The default immutable status implementation.
@@ -61,14 +63,30 @@ public class DefaultStatus implements Status {
 
     private final String identifier;
     private final String message;
+    private final OXException error;
 
     /**
      * Initializes a new {@link DefaultStatus}.
+     * 
+     * @param identifier The status identifier
+     * @param message The status message
      */
     public DefaultStatus(String identifier, String message) {
+        this(identifier, message, null);
+    }
+
+    /**
+     * Initializes a new {@link DefaultStatus}.
+     * 
+     * @param identifier The status identifier
+     * @param message The status message
+     * @param error The optional error
+     */
+    public DefaultStatus(String identifier, String message, OXException error) {
         super();
         this.identifier = identifier;
         this.message = message;
+        this.error = error;
     }
 
     @Override
@@ -78,7 +96,12 @@ public class DefaultStatus implements Status {
 
     @Override
     public String getMessage(Locale locale) {
-        return message;
+        return StringHelper.valueOf(null == locale ? Locale.US : locale).getString(message);
+    }
+
+    @Override
+    public OXException getError() {
+        return error;
     }
 
 }

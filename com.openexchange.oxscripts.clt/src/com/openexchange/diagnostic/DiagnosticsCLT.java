@@ -167,21 +167,11 @@ public class DiagnosticsCLT extends AbstractRmiCLI<Void> {
         toExecute = new HashSet<>(8);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractRmiCLI#administrativeAuth(java.lang.String, java.lang.String, org.apache.commons.cli.CommandLine, com.openexchange.auth.rmi.RemoteAuthenticator)
-     */
     @Override
     protected void administrativeAuth(String login, String password, CommandLine cmd, RemoteAuthenticator authenticator) throws RemoteException {
         // no-op
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractRmiCLI#addOptions(org.apache.commons.cli.Options)
-     */
     @Override
     protected void addOptions(Options options) {
         options.addOption(new Option("c", "cipher-suites", false, "A list with all supported cipher suites of this JVM."));
@@ -191,11 +181,6 @@ public class DiagnosticsCLT extends AbstractRmiCLI<Void> {
         options.addOption(new Option("al", "charsets-long", false, "A long list with all supported charsets of this JVM. Along the charsets their aliases will also be listed as a comma separated list. The name of each charset will always be first. This switch is mutually-exclusive with it's counter-part '-a'"));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractRmiCLI#invoke(org.apache.commons.cli.Options, org.apache.commons.cli.CommandLine, java.lang.String)
-     */
     @Override
     protected Void invoke(Options options, CommandLine cmd, String optRmiHostName) throws Exception {
         RemoteDiagnosticService diagnosticService = getRmiStub(optRmiHostName, RemoteDiagnosticService.RMI_NAME);
@@ -241,21 +226,11 @@ public class DiagnosticsCLT extends AbstractRmiCLI<Void> {
         System.out.println();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractAdministrativeCLI#requiresAdministrativePermission()
-     */
     @Override
-    protected boolean requiresAdministrativePermission() {
-        return false;
+    protected Boolean requiresAdministrativePermission() {
+        return Boolean.FALSE;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractCLI#checkOptions(org.apache.commons.cli.CommandLine)
-     */
     @Override
     protected void checkOptions(CommandLine cmd) {
         for (CommandLineOption clo : CommandLineOption.values()) {
@@ -269,21 +244,11 @@ public class DiagnosticsCLT extends AbstractRmiCLI<Void> {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractCLI#getFooter()
-     */
     @Override
     protected String getFooter() {
         return "Prints out diagnostic information about the JVM and the middleware";
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractCLI#getName()
-     */
     @Override
     protected String getName() {
         return CLT_NAME;

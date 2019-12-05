@@ -275,7 +275,15 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
             TransportAccount transportAccount = storageService.getTransportAccount(accountDescription.getId(), session.getUserId(), session.getContextId());
             s1 = transportAccount.getTransportPassword();
             if (null != s1) {
-                s1 = MailPasswordUtil.decrypt(s1, session, accountDescription.getId(), accountDescription.getLogin(), accountDescription.getMailServer());
+                try {
+                    s1 = MailPasswordUtil.decrypt(s1, session, accountDescription.getId(), accountDescription.getLogin(), accountDescription.getMailServer());
+                } catch (OXException e) {
+                    if (!CryptoErrorMessage.BadPassword.equals(e)) {
+                        throw e;
+                    }
+                    // Password cannot be decrypted
+                    s1 = null;
+                }
                 if (!s2.equals(s1)) {
                     return true;
                 }
@@ -317,7 +325,15 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
         }
 
         if (checkPassword) {
-            s1 = MailPasswordUtil.decrypt(storageMailAccount.getPassword(), session, accountDescription.getId(), accountDescription.getLogin(), accountDescription.getMailServer());
+            try {
+                s1 = MailPasswordUtil.decrypt(storageMailAccount.getPassword(), session, accountDescription.getId(), accountDescription.getLogin(), accountDescription.getMailServer());
+            } catch (OXException e) {
+                if (!CryptoErrorMessage.BadPassword.equals(e)) {
+                    throw e;
+                }
+                // Password cannot be decrypted
+                s1 = null;
+            }
             s2 = accountDescription.getPassword();
             if (null == s1) {
                 if (null != s2) {
@@ -340,7 +356,15 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
         if (null != s2) {
             s1 = storageMailAccount.getTransportPassword();
             if (null != s1) {
-                s1 = MailPasswordUtil.decrypt(s1, session, accountDescription.getId(), accountDescription.getLogin(), accountDescription.getMailServer());
+                try {
+                    s1 = MailPasswordUtil.decrypt(s1, session, accountDescription.getId(), accountDescription.getLogin(), accountDescription.getMailServer());
+                } catch (OXException e) {
+                    if (!CryptoErrorMessage.BadPassword.equals(e)) {
+                        throw e;
+                    }
+                    // Password cannot be decrypted
+                    s1 = null;
+                }
                 if (!s2.equals(s1)) {
                     return true;
                 }
@@ -440,7 +464,7 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
         int mailPort = jAccount.optInt(MailAccountFields.MAIL_PORT, mailSecure ? URIDefaults.IMAP.getPort() : URIDefaults.IMAP.getSSLPort());
         try {
             return URITools.generateURI(mailSecure ? mailProtocol + 's' : mailProtocol, IDNA.toASCII(mailServer), mailPort).toString();
-        } catch (final URISyntaxException e) {
+        } catch (URISyntaxException e) {
             final StringBuilder sb = new StringBuilder(32);
             sb.append(mailProtocol);
             if (mailSecure) {
@@ -461,7 +485,7 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
         int transportPort = jAccount.optInt(MailAccountFields.TRANSPORT_PORT, transportSecure ? URIDefaults.SMTP.getPort() : URIDefaults.SMTP.getSSLPort());
         try {
             return URITools.generateURI(transportSecure ? transportProtocol + 's' : transportProtocol, IDNA.toASCII(transportServer), transportPort).toString();
-        } catch (final URISyntaxException e) {
+        } catch (URISyntaxException e) {
             final StringBuilder sb = new StringBuilder(32);
             sb.append(transportProtocol);
             if (transportSecure) {

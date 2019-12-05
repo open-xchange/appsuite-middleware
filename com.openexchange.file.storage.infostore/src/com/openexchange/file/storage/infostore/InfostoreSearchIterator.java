@@ -107,7 +107,7 @@ public class InfostoreSearchIterator implements SearchIterator<File> {
     @Override
     public File next() throws OXException {
         DocumentMetadata next = delegate.next();
-        if(next == null) {
+        if (next == null) {
             return null;
         }
         return new InfostoreFile(next);

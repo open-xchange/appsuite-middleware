@@ -51,6 +51,8 @@ package com.openexchange.context.osgi;
 
 import java.rmi.Remote;
 import java.util.Arrays;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import com.openexchange.context.rmi.ContextRMIServiceImpl;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
@@ -85,7 +87,9 @@ public class ContextActivator extends HousekeepingActivator {
 
         ContextAttributeTableUpdateTask updateTask = new ContextAttributeTableUpdateTask(dbase);
 
-        registerService(Remote.class, new ContextRMIServiceImpl());
+        Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
+        serviceProperties.put("RMI_NAME", ContextRMIServiceImpl.RMI_NAME);
+        registerService(Remote.class, new ContextRMIServiceImpl(), serviceProperties);
         ChangePrimaryKeyForContextAttribute changePrimaryKeyForContextAttribute = new ChangePrimaryKeyForContextAttribute();
 
         registerService(UpdateTaskProviderService.class, () -> Arrays.asList(updateTask, changePrimaryKeyForContextAttribute));

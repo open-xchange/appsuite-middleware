@@ -157,7 +157,7 @@ public final class Delete {
                 folderIds.add(rs.getString(1));
             } while (rs.next());
             return folderIds;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -187,9 +187,9 @@ public final class Delete {
 
             con.commit(); // COMMIT
             rollback = 2;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             if (rollback > 0) {
@@ -241,7 +241,7 @@ public final class Delete {
                 if ("default".equals(shadow)) {
                     throw FolderExceptionErrorMessage.FOLDER_NOT_DELETEABLE.create(folderId, Integer.valueOf(user), Integer.valueOf(cid));
                 }
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
             } finally {
                 Databases.closeSQLStuff(rs, stmt);
@@ -261,7 +261,7 @@ public final class Delete {
                 stmt.setInt(pos++, user);
                 stmt.setString(pos, folderId);
                 stmt.executeUpdate();
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
             } finally {
                 Databases.closeSQLStuff(stmt);
@@ -277,7 +277,7 @@ public final class Delete {
                 stmt.setInt(pos++, user);
                 stmt.setString(pos, folderId);
                 stmt.executeUpdate();
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
             } finally {
                 Databases.closeSQLStuff(stmt);
@@ -293,7 +293,7 @@ public final class Delete {
                 stmt.setInt(pos++, user);
                 stmt.setString(pos, folderId);
                 stmt.executeUpdate();
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
             } finally {
                 Databases.closeSQLStuff(stmt);
@@ -310,7 +310,7 @@ public final class Delete {
             stmt.setInt(pos++, user);
             stmt.setString(pos, folderId);
             stmt.executeUpdate();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);
@@ -326,7 +326,7 @@ public final class Delete {
             stmt.setInt(pos++, user);
             stmt.setString(pos, folderId);
             stmt.executeUpdate();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);
@@ -342,7 +342,7 @@ public final class Delete {
             stmt.setInt(pos++, user);
             stmt.setString(pos, folderId);
             stmt.executeUpdate();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);
@@ -362,7 +362,7 @@ public final class Delete {
                         final ServerSession serverSession = ServerSessionAdapter.valueOf(session);
                         new EventClient(serverSession).delete(new OXFolderAccess(con, serverSession.getContext()).getFolderObject(unsignedInt(folderId)));
                     }
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     // Ignore
                     org.slf4j.LoggerFactory.getLogger(Delete.class).error("", e);
                 }

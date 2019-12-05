@@ -97,7 +97,7 @@ public class PrincipalUseCountDeleteListener implements DeleteListener {
         try {
             stmt = writeCon.createStatement();
             stmt.executeUpdate("DELETE FROM principalUseCount WHERE cid=" + ctx.getContextId());
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);
@@ -109,7 +109,7 @@ public class PrincipalUseCountDeleteListener implements DeleteListener {
         try {
             stmt = writeCon.createStatement();
             stmt.executeUpdate("DELETE FROM principalUseCount WHERE cid=" + ctx.getContextId() + " AND principal=" + id);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);
@@ -121,7 +121,7 @@ public class PrincipalUseCountDeleteListener implements DeleteListener {
         try {
             stmt = writeCon.createStatement();
             stmt.executeUpdate("DELETE FROM principalUseCount WHERE cid=" + ctx.getContextId() + " AND user=" + userId);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);

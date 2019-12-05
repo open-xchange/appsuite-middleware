@@ -56,7 +56,6 @@ import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.search.SearchObject;
 import com.openexchange.groupware.search.TaskSearchObject;
@@ -65,6 +64,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 import com.openexchange.tools.sql.SearchStrings;
+import com.openexchange.user.User;
 
 /**
  * Implements the search operation logic.
@@ -102,7 +102,7 @@ public class Search {
         this.columns = columns;
     }
 
-    public SearchIterator<Task> perform() throws OXException, OXException {
+    public SearchIterator<Task> perform() throws OXException {
         checkConditions();
         prepareFolder();
         if (all.size() + own.size() + shared.size() == 0) {
@@ -124,7 +124,7 @@ public class Search {
         }
     }
 
-    protected void prepareFolder() throws OXException, OXException {
+    protected void prepareFolder() throws OXException {
         SearchIterator<FolderObject> folders;
         if (search.hasFolders()) {
             folders = loadFolder(ctx, search.getFolders());
@@ -136,7 +136,7 @@ public class Search {
                     permissionBits.getAccessibleModules(),
                     FolderObject.TASK,
                     ctx);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 throw e;
             }
         }
@@ -155,7 +155,7 @@ public class Search {
                     all.add(Integer.valueOf(folder.getObjectID()));
                 }
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
         }
         LOG.trace("Search tasks, all: {}, own: {}, shared: {}", all, own, shared);

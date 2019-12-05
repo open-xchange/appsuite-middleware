@@ -307,7 +307,7 @@ public class W3CDOMStreamReader extends AbstractDOMStreamReader<Node, Node> {
         TypeInfo schemaType = null;
         try {
             schemaType = attr.getSchemaTypeInfo();
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             //DOM level 2?
             schemaType = null;
         }
@@ -391,8 +391,8 @@ public class W3CDOMStreamReader extends AbstractDOMStreamReader<Node, Node> {
         String ln = getCurrentNode().getLocalName();
         if (ln == null) {
             ln = getCurrentNode().getNodeName();
-            if (ln.indexOf(":") != -1) {
-                ln = ln.substring(ln.indexOf(":") + 1);
+            if (ln.indexOf(':') != -1) {
+                ln = ln.substring(ln.indexOf(':') + 1);
             }
         }
         return ln;
@@ -403,10 +403,10 @@ public class W3CDOMStreamReader extends AbstractDOMStreamReader<Node, Node> {
         String ln = getCurrentNode().getLocalName();
         if (ln == null) {
             ln = getCurrentNode().getNodeName();
-            if (ln.indexOf(":") == -1) {
+            if (ln.indexOf(':') == -1) {
                 ln = getNamespaceURI("");
             } else {
-                ln = getNamespaceURI(ln.substring(0, ln.indexOf(":")));
+                ln = getNamespaceURI(ln.substring(0, ln.indexOf(':')));
             }
             return ln;
         }
@@ -418,8 +418,8 @@ public class W3CDOMStreamReader extends AbstractDOMStreamReader<Node, Node> {
         String prefix = getCurrentNode().getPrefix();
         if (prefix == null) {
             final String nodeName = getCurrentNode().getNodeName();
-            if (nodeName.indexOf(":") != -1) {
-                prefix = nodeName.substring(0, nodeName.indexOf(":"));
+            if (nodeName.indexOf(':') != -1) {
+                prefix = nodeName.substring(0, nodeName.indexOf(':'));
             }  else {
                 prefix = "";
             }
@@ -443,7 +443,7 @@ public class W3CDOMStreamReader extends AbstractDOMStreamReader<Node, Node> {
             if (o instanceof Location) {
                 return (Location)o;
             }
-        } catch (final Throwable ex) {
+        } catch (Throwable ex) {
             //ignore, probably not DOM level 3
         }
         return super.getLocation();
@@ -459,9 +459,9 @@ public class W3CDOMStreamReader extends AbstractDOMStreamReader<Node, Node> {
         }
         try {
             return StaxUtils.toString(document);
-        } catch (final XMLStreamException e) {
+        } catch (XMLStreamException e) {
             return super.toString();
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             t.printStackTrace();
             return super.toString();
         }

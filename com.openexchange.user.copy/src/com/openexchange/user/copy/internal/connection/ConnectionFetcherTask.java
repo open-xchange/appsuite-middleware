@@ -104,14 +104,14 @@ public class ConnectionFetcherTask implements CopyUserTaskService {
 
         try {
             dstCon = service.getForUpdateTask(dstCtxId);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             service.backReadOnly(srcCtx, srcCon);
             throw e;
         }
 
         try {
             Databases.startTransaction(dstCon);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             service.backForUpdateTask(dstCtxId, dstCon);
             service.backReadOnly(srcCtx, srcCon);
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
@@ -130,7 +130,7 @@ public class ConnectionFetcherTask implements CopyUserTaskService {
                 } else {
                     dstCon.commit();
                 }
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 LOG.error("", e);
             }
             service.backForUpdateTask(dstCtxId, dstCon);

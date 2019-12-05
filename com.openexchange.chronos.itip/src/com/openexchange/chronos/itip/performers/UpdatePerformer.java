@@ -63,6 +63,7 @@ import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.SchedulingControl;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.common.mapping.EventMapper;
@@ -80,6 +81,7 @@ import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.EventUpdate;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.groupware.tools.mappings.Mapping;
 import com.openexchange.java.Strings;
 
@@ -106,7 +108,7 @@ public class UpdatePerformer extends AbstractActionPerformer {
 
     @Override
     public List<Event> perform(ITipAction action, ITipAnalysis analysis, CalendarSession session, ITipAttributes attributes) throws OXException {
-        session.<Boolean> set(CalendarParameters.PARAMETER_SUPPRESS_ITIP, Boolean.TRUE);
+        session.set(CalendarParameters.PARAMETER_SCHEDULING, SchedulingControl.NONE);
         List<ITipChange> changes = analysis.getChanges();
         List<Event> result = new ArrayList<Event>(changes.size());
 
@@ -124,7 +126,9 @@ public class UpdatePerformer extends AbstractActionPerformer {
             final int owner = analysis.getMessage().getOwner() > 0 ? analysis.getMessage().getOwner() : session.getUserId();
             boolean exceptionCreate = isExceptionCreate(change);
 
-            ensureAttendee(event, exceptionCreate ? change.getMasterEvent() : change.getCurrentEvent(), action, owner, attributes, session);
+            if (Strings.isEmpty(event.getFolderId()) || !PublicType.getInstance().equals(util.getFolderType(event, session))) {
+                ensureAttendee(event, exceptionCreate ? change.getMasterEvent() : change.getCurrentEvent(), action, owner, attributes, session);
+            }
             Event original = determineOriginalEvent(change, processed, session);
             Event updatedEvent;
 

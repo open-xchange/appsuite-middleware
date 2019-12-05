@@ -56,33 +56,47 @@ import java.io.PrintWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.nimbusds.oauth2.sdk.token.AccessToken;
+import com.nimbusds.oauth2.sdk.token.RefreshToken;
+import com.nimbusds.oauth2.sdk.token.Tokens;
 import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.SessionUtility;
 import com.openexchange.ajax.login.HashCalculator;
 import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.ajax.login.LoginTools;
+import com.openexchange.authentication.Authenticated;
+import com.openexchange.authentication.DefaultAuthenticated;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
+import com.openexchange.oidc.AuthenticationInfo;
 import com.openexchange.oidc.OIDCBackend;
 import com.openexchange.oidc.OIDCBackendConfig;
 import com.openexchange.oidc.OIDCExceptionCode;
 import com.openexchange.oidc.osgi.Services;
 import com.openexchange.session.Session;
+import com.openexchange.session.oauth.OAuthTokens;
+import com.openexchange.session.oauth.TokenRefreshConfig;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessionFilter;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.servlet.http.Cookies;
 import com.openexchange.tools.servlet.http.Tools;
+import com.openexchange.user.User;
 
 /**
  * {@link OIDCTools}
@@ -129,6 +143,16 @@ public class OIDCTools {
     public static final String PARAM_DEEP_LINK = "hash";
 
     public static final String PARAM_SHARD = "shard";
+
+    /**
+     * Map key to preserve user login info
+     */
+    public static final String USER_LOGIN_INFO = "user_login_info";
+
+    /**
+     * Map key to preserve context login info
+     */
+    public static final String CONTEXT_LOGIN_INFO = "context_login_info";
 
     public static String getPathString(String path) {
         if (Strings.isEmpty(path)) {
@@ -401,4 +425,160 @@ public class OIDCTools {
 
         return session;
     }
+
+    /**
+     * Creates an {@link Authenticated} instance based on the given context, user and {@link AuthenticationInfo}
+     * properties.
+     */
+    public static Authenticated getDefaultAuthenticated(final Context context, final User user, Map<String, String> state) {
+        LOG.trace("getDefaultAuthenticated(final Context context: {}, final User user: {})", I(context.getContextId()), I(user.getId()));
+        String contextInfo = state.get(OIDCTools.CONTEXT_LOGIN_INFO);
+        if (Strings.isEmpty(contextInfo)) {
+            contextInfo = context.getLoginInfo()[0];
+        }
+
+        String userInfo = state.get(OIDCTools.USER_LOGIN_INFO);
+        if (Strings.isEmpty(userInfo)) {
+            userInfo = user.getLoginInfo();
+        }
+
+        return new DefaultAuthenticated(contextInfo, userInfo);
+    }
+
+    /**
+     * Adds OIDC specific parameters to a session instance. Any parameter must be contained in the provided
+     * map. The following parameters and keys are allowed/expected:
+     * <p>
+     * <ul>
+     *   <li>ID token: {@link OIDCTools#IDTOKEN}</li>
+     *   <li>access token: {@link OIDCTools#ACCESS_TOKEN}</li>
+     *   <li>refresh token: {@link OIDCTools#REFRESH_TOKEN}</li>
+     *   <li>access token expiry: {@link OIDCTools#ACCESS_TOKEN_EXPIRY}</li>
+     *   <li>backend path: {@link OIDCTools#BACKEND_PATH}</li>
+     *   <li>last token refresh timestamp: {@link OIDCTools#LAST_REFRESH_TIMESTAMP}</li>
+     * </ul>
+     * <p>
+     */
+    public static void setSessionParameters(Session session, Map<String, String> params) {
+        OIDCTools.addParameterToSession(session, params, OIDCTools.IDTOKEN, OIDCTools.IDTOKEN);
+        OIDCTools.addParameterToSession(session, params, OIDCTools.ACCESS_TOKEN, Session.PARAM_OAUTH_ACCESS_TOKEN);
+        OIDCTools.addParameterToSession(session, params, OIDCTools.REFRESH_TOKEN, Session.PARAM_OAUTH_REFRESH_TOKEN);
+        OIDCTools.addParameterToSession(session, params, OIDCTools.ACCESS_TOKEN_EXPIRY, Session.PARAM_OAUTH_ACCESS_TOKEN_EXPIRY_DATE);
+
+        // preserve empty string which typically indicates the default backend
+        String backendPath = params.get(OIDCTools.BACKEND_PATH);
+        if (backendPath != null) {
+            session.setParameter(OIDCTools.BACKEND_PATH, backendPath);
+        }
+    }
+
+    /**
+     * Converts a token map into an {@link OAuthTokens} instance. The following parameters and keys are allowed/expected:
+     * <p>
+     * <ul>
+     *   <li>access token: {@link OIDCTools#ACCESS_TOKEN}</li>
+     *   <li>refresh token: {@link OIDCTools#REFRESH_TOKEN}</li>
+     *   <li>access token expiry: {@link OIDCTools#ACCESS_TOKEN_EXPIRY}</li>
+     * </ul>
+     *
+     * @param params
+     */
+    public static Optional<OAuthTokens> convertTokenMap(Map<String, String> params) {
+        String accessToken = params.get(OIDCTools.ACCESS_TOKEN);
+        String expiryString = params.get(OIDCTools.ACCESS_TOKEN_EXPIRY);
+        String refreshToken = params.get(OIDCTools.REFRESH_TOKEN);
+
+        Date expiryDate = null;
+        if (expiryString != null) {
+            try {
+                long expiryMillis = Long.parseLong(expiryString);
+                expiryDate = new Date(expiryMillis);
+            } catch (NumberFormatException e) {
+                LOG.warn("Illegal format of session parameter '{}': {}", Session.PARAM_OAUTH_ACCESS_TOKEN_EXPIRY_DATE, expiryString);
+            }
+        }
+
+        if (accessToken == null) {
+            return Optional.empty();
+        }
+
+        return Optional.of(new OAuthTokens(accessToken, expiryDate, refreshToken));
+    }
+
+
+    /**
+     * Gets OIDC specific parameters from a session instance. The following parameters and keys are extracted if available:
+     * <p>
+     * <ul>
+     *   <li>ID token: {@link OIDCTools#IDTOKEN}</li>
+     *   <li>access token: {@link OIDCTools#ACCESS_TOKEN}</li>
+     *   <li>refresh token: {@link OIDCTools#REFRESH_TOKEN}</li>
+     *   <li>access token expiry: {@link OIDCTools#ACCESS_TOKEN_EXPIRY}</li>
+     *   <li>backend path: {@link OIDCTools#BACKEND_PATH}</li>
+     *   <li>last token refresh timestamp: {@link OIDCTools#LAST_REFRESH_TIMESTAMP}</li>
+     * </ul>
+     * <p>
+     */
+    public static Map<String, String> getSessionParameters(Session session) {
+        Map<String, String> params = new HashMap<String, String>(6, 1.0f);
+        Object parameter = session.getParameter(OIDCTools.IDTOKEN);
+        if (parameter instanceof String) {
+            params.put(IDTOKEN, (String) parameter);
+        }
+        parameter = session.getParameter(Session.PARAM_OAUTH_ACCESS_TOKEN);
+        if (parameter instanceof String) {
+            params.put(ACCESS_TOKEN, (String) parameter);
+        }
+        parameter = session.getParameter(Session.PARAM_OAUTH_REFRESH_TOKEN);
+        if (parameter instanceof String) {
+            params.put(REFRESH_TOKEN, (String) parameter);
+        }
+        parameter = session.getParameter(Session.PARAM_OAUTH_ACCESS_TOKEN_EXPIRY_DATE);
+        if (parameter instanceof String) {
+            params.put(ACCESS_TOKEN_EXPIRY, (String) parameter);
+        }
+        parameter = session.getParameter(BACKEND_PATH);
+        if (parameter instanceof String) {
+            params.put(BACKEND_PATH, (String) parameter);
+        }
+        return params;
+    }
+
+    /**
+     * Converts a {@link Tokens} instance to an {@link OAuthTokens} instance.
+     *
+     * @param tokens
+     */
+    public static OAuthTokens convertNimbusTokens(Tokens tokens) {
+        AccessToken accessToken = tokens.getAccessToken();
+        long lifetime = accessToken.getLifetime();
+        Date expiryDate = null;
+        if (lifetime > 0) {
+            long expiryDateMillis = System.currentTimeMillis();
+            expiryDateMillis += lifetime * 1000;
+            expiryDate = new Date(expiryDateMillis);
+        }
+
+        RefreshToken refreshToken = tokens.getRefreshToken();
+        String refreshTokenValue = null;
+        if (refreshToken != null) {
+            refreshTokenValue = refreshToken.getValue();
+        }
+
+        return new OAuthTokens(tokens.getAccessToken().getValue(), expiryDate, refreshTokenValue);
+    }
+
+    /**
+     * Gets a {@link TokenRefreshConfig} instance based on backend config
+     *
+     * @param config
+     */
+    public static TokenRefreshConfig getTokenRefreshConfig(OIDCBackendConfig config) {
+        return TokenRefreshConfig.newBuilder()
+            .setLockTimeout(config.getTokenLockTimeoutSeconds(), TimeUnit.SECONDS)
+            .setRefreshThreshold(config.getOauthRefreshTime(), TimeUnit.MILLISECONDS)
+            .setTryRecoverStoredTokens(config.tryRecoverStoredTokens())
+            .build();
+    }
+
 }

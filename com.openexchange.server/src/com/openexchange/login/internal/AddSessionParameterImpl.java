@@ -54,11 +54,11 @@ import java.util.Collections;
 import java.util.List;
 import com.openexchange.authentication.SessionEnhancement;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.login.Interface;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.session.Origin;
 import com.openexchange.sessiond.AddSessionParameter;
+import com.openexchange.user.User;
 
 /**
  * Implements {@link AddSessionParameter}.
@@ -149,13 +149,18 @@ public final class AddSessionParameterImpl implements AddSessionParameter {
     }
 
     @Override
+    public boolean isStaySignedIn() {
+        return request.isStaySignedIn();
+    }
+
+    @Override
     public List<SessionEnhancement> getEnhancements() {
         return enhancements;
     }
 
     /**
      * Add a sessionEnhancement
-     * 
+     *
      * @param enhancement
      */
     public void addEnhancement(SessionEnhancement enhancement) {

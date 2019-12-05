@@ -103,21 +103,11 @@ public enum AvailabilityField implements CalendarAvailabilityField {
         this.multiOccurrent = multiOccurrent;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.chronos.service.CalendarAvailabilityField#isMandatory()
-     */
     @Override
     public boolean isMandatory() {
         return mandatory;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.chronos.service.CalendarAvailabilityField#isMultiOccurrent()
-     */
     @Override
     public boolean isMultiOccurrent() {
         return multiOccurrent;

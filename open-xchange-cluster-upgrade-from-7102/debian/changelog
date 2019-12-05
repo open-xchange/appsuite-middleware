@@ -1,0 +1,17 @@
+open-xchange-cluster-upgrade-from-7102 (7.10.3-3) stable; urgency=medium
+
+  * Second candidate for 7.10.3 release
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Thu, 28 Nov 2019 11:52:50 +0100
+
+open-xchange-cluster-upgrade-from-7102 (7.10.3-2) stable; urgency=medium
+
+  * First candidate for 7.10.3 release
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Thu, 21 Nov 2019 14:49:04 +0100
+
+open-xchange-cluster-upgrade-from-7102 (7.10.3-0) unstable; urgency=low
+
+  * Initial release
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Wed, 20 Nov 2019 14:49:04 +0100

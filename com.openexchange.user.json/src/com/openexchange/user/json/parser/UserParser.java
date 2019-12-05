@@ -100,7 +100,7 @@ public final class UserParser {
             }
             user.setId(userId);
             return user;
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create( e, e.getMessage());
         }
     }
@@ -166,7 +166,7 @@ public final class UserParser {
                 }
             }
             return contact;
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create( e, e.getMessage());
         }
     }
@@ -1309,7 +1309,7 @@ public final class UserParser {
         }
         try {
             return Integer.parseInt(tmp);
-        } catch (final NumberFormatException exc) {
+        } catch (NumberFormatException exc) {
             final StringBuilder sb = new StringBuilder(32).append("Attribute \"");
             sb.append(name).append("\" is not a number: ").append(tmp);
             throw new JSONException(sb.toString());
@@ -1335,7 +1335,7 @@ public final class UserParser {
         }
         try {
             return new Date(Long.parseLong(tmp));
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             final StringBuilder sb = new StringBuilder(64).append("Attribute \"");
             sb.append(name).append("\" does not denote date's milliseconds since January 1, 1970, 00:00:00 GMT: ").append(tmp);
             throw new JSONException(sb.toString());

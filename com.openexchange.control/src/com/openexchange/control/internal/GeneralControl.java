@@ -140,7 +140,7 @@ public class GeneralControl extends StandardMBean implements GeneralControlMBean
         }
         try {
             bundle.start();
-        } catch (final BundleException exc) {
+        } catch (BundleException exc) {
             LOG.error("cannot start bundle: {}", name, exc);
             String message = exc.getMessage();
             throw new MBeanException(new Exception(message), message);
@@ -156,7 +156,7 @@ public class GeneralControl extends StandardMBean implements GeneralControlMBean
         }
         try {
             bundle.stop();
-        } catch (final BundleException exc) {
+        } catch (BundleException exc) {
             LOG.error("cannot stop bundle: {}", name, exc);
             String message = exc.getMessage();
             throw new MBeanException(new Exception(message), message);
@@ -174,7 +174,7 @@ public class GeneralControl extends StandardMBean implements GeneralControlMBean
         LOG.info("install bundle: {}", location);
         try {
             bundleContext.installBundle(location);
-        } catch (final BundleException exc) {
+        } catch (BundleException exc) {
             LOG.error("cannot install bundle: {}", location, exc);
             String message = exc.getMessage();
             throw new MBeanException(new Exception(message), message);
@@ -190,7 +190,7 @@ public class GeneralControl extends StandardMBean implements GeneralControlMBean
         }
         try {
             bundle.uninstall();
-        } catch (final BundleException exc) {
+        } catch (BundleException exc) {
             LOG.error("cannot uninstall bundle: {}", name, exc);
             String message = exc.getMessage();
             throw new MBeanException(new Exception(message), message);
@@ -218,7 +218,7 @@ public class GeneralControl extends StandardMBean implements GeneralControlMBean
             if (autofresh) {
                 freshPackages(bundleContext);
             }
-        } catch (final BundleException exc) {
+        } catch (BundleException exc) {
             LOG.error("cannot update bundle: {}", name, exc);
             String message = exc.getMessage();
             throw new MBeanException(new Exception(message), message);
@@ -348,7 +348,7 @@ public class GeneralControl extends StandardMBean implements GeneralControlMBean
                     }
                 }
             }
-        } catch (final InvalidSyntaxException exc) {
+        } catch (InvalidSyntaxException exc) {
             LOG.error("", exc);
         }
 
@@ -393,7 +393,7 @@ public class GeneralControl extends StandardMBean implements GeneralControlMBean
     public Integer getNbObjects() {
         try {
             return Integer.valueOf((server.queryMBeans(new ObjectName("*:*"), null)).size());
-        } catch (final Exception e) {
+        } catch (Exception e) {
             return Integer.valueOf(-1);
         }
     }

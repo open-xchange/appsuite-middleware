@@ -49,6 +49,8 @@
 
 package com.openexchange.config.admin.internal;
 
+import static com.openexchange.java.Autoboxing.B;
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -83,12 +85,12 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.ObjectPermission;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIterators;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 /**
@@ -112,11 +114,11 @@ public class HideAdminServiceImplTest {
     @Mock
     private ContextService contextService;
 
-    private int contextId = 11;
+    private final int contextId = 11;
 
-    private int adminUserId = 3;
+    private final int adminUserId = 3;
 
-    private int adminContactId = 2;
+    private final int adminContactId = 2;
 
     @Before
     public void setUp() throws Exception {
@@ -125,9 +127,9 @@ public class HideAdminServiceImplTest {
         HideAdminServiceImpl service = new HideAdminServiceImpl(leanConfigurationService, contextService, userService);
         serviceSpy = PowerMockito.spy(service);
 
-        PowerMockito.doReturn(adminUserId).when(serviceSpy, "getAdminUserId", ArgumentMatchers.anyInt());
-        PowerMockito.doReturn(adminContactId).when(serviceSpy, "getAdminContactId", ArgumentMatchers.anyInt());
-        PowerMockito.doReturn(false).when(serviceSpy, "showAdmin", ArgumentMatchers.anyInt());
+        PowerMockito.doReturn(I(adminUserId)).when(serviceSpy, "getAdminUserId", I(ArgumentMatchers.anyInt()));
+        PowerMockito.doReturn(I(adminContactId)).when(serviceSpy, "getAdminContactId", I(ArgumentMatchers.anyInt()));
+        PowerMockito.doReturn(Boolean.FALSE).when(serviceSpy, "showAdmin", I(ArgumentMatchers.anyInt()));
     }
 
     @Test
@@ -141,7 +143,7 @@ public class HideAdminServiceImplTest {
 
     @Test
     public void testShowAdmin_disabled_returnFalse() {
-        Mockito.when(leanConfigurationService.getBooleanProperty(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt(), (Property) ArgumentMatchers.any())).thenReturn(Boolean.FALSE.booleanValue());
+        Mockito.when(B(leanConfigurationService.getBooleanProperty(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt(), (Property) ArgumentMatchers.any()))).thenReturn(Boolean.FALSE);
         HideAdminServiceImpl service = new HideAdminServiceImpl(leanConfigurationService, contextService, userService);
 
         boolean showAdmin = service.showAdmin(contextId);
@@ -151,7 +153,7 @@ public class HideAdminServiceImplTest {
 
     @Test
     public void testShowAdmin_enabled_returnTrue() {
-        Mockito.when(leanConfigurationService.getBooleanProperty(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt(), (Property) ArgumentMatchers.any())).thenReturn(Boolean.TRUE.booleanValue());
+        Mockito.when(B(leanConfigurationService.getBooleanProperty(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt(), (Property) ArgumentMatchers.any()))).thenReturn(Boolean.TRUE);
         HideAdminServiceImpl service = new HideAdminServiceImpl(leanConfigurationService, contextService, userService);
 
         boolean showAdmin = service.showAdmin(contextId);
@@ -179,29 +181,29 @@ public class HideAdminServiceImplTest {
 
     @Test
     public void testRemoveAdminFromContacts_featureDisabled_returnAllContacts() throws OXException {
-        Mockito.when(leanConfigurationService.getBooleanProperty(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt(), (Property) ArgumentMatchers.any())).thenReturn(Boolean.TRUE.booleanValue());
+        Mockito.when(B(leanConfigurationService.getBooleanProperty(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt(), (Property) ArgumentMatchers.any()))).thenReturn(Boolean.TRUE);
         HideAdminServiceImpl service = new HideAdminServiceImpl(leanConfigurationService, contextService, userService);
-        List<Integer> contactIds = Arrays.asList(adminContactId, 3, 4, 5, 6);
+        List<Integer> contactIds = Arrays.asList(I(adminContactId), I(3), I(4), I(5), I(6));
 
-        try (SearchIterator<Contact> org = getContacts(contactIds.stream().mapToInt(i -> i).toArray()); SearchIterator<Contact> result = service.removeAdminFromContacts(contextId, org)) {
+        try (SearchIterator<Contact> org = getContacts(contactIds.stream().mapToInt(i -> i.intValue()).toArray()); SearchIterator<Contact> result = service.removeAdminFromContacts(contextId, org)) {
             assertTrue(org.equals(result));
         }
     }
 
     @Test
     public void testRemoveAdminFromContacts_contactsWithoutAdmin_returnAllContacts() throws OXException {
-        List<Integer> contactIds = Arrays.asList(3, 4, 5, 6);
+        List<Integer> contactIds = Arrays.asList(I(3), I(4), I(5), I(6));
 
-        try (SearchIterator<Contact> result = serviceSpy.removeAdminFromContacts(contextId, getContacts(contactIds.stream().mapToInt(i -> i).toArray()))) {
+        try (SearchIterator<Contact> result = serviceSpy.removeAdminFromContacts(contextId, getContacts(contactIds.stream().mapToInt(i -> i.intValue()).toArray()))) {
             assertEquals(contactIds.size(), SearchIterators.asList(result).size());
         }
     }
 
     @Test
     public void testRemoveAdminFromContacts_contactsWithAdmin_returnWithoutContacts() throws OXException {
-        List<Integer> contactIds = Arrays.asList(2, 3, 4, 5, 6);
+        List<Integer> contactIds = Arrays.asList(I(2), I(3), I(4), I(5), I(6));
 
-        try (SearchIterator<Contact> result = serviceSpy.removeAdminFromContacts(contextId, getContacts(contactIds.stream().mapToInt(i -> i).toArray()))) {
+        try (SearchIterator<Contact> result = serviceSpy.removeAdminFromContacts(contextId, getContacts(contactIds.stream().mapToInt(i -> i.intValue()).toArray()))) {
 
             assertEquals(contactIds.size() - 1, SearchIterators.asList(result).size());
             List<Contact> returnedContacts = SearchIterators.asList(result);
@@ -253,36 +255,36 @@ public class HideAdminServiceImplTest {
 
     @Test
     public void testRemoveAdminFromGroups_groupsWithoutAdmin_returnGroups() throws OXException {
-        List<Integer> groupsAndMembers = Arrays.asList(6, 7, 8, 9);
-        Group[] groups = getGroups(groupsAndMembers.stream().mapToInt(i -> i).toArray());
+        List<Integer> groupsAndMembers = Arrays.asList(I(6), I(7), I(8), I(9));
+        Group[] groups = getGroups(groupsAndMembers.stream().mapToInt(i -> i.intValue()).toArray());
 
         Group[] result = serviceSpy.removeAdminFromGroupMemberList(contextId, groups);
 
         assertEquals(groupsAndMembers.size(), result.length);
         for (int j = 0; j < result.length; j++) {
-            assertTrue(groupsAndMembers.contains(result[j].getIdentifier()));
+            assertTrue(groupsAndMembers.contains(I(result[j].getIdentifier())));
             int[] member = result[j].getMember();
             assertEquals(groupsAndMembers.size(), member.length);
             for (int k : member) {
-                assertTrue(groupsAndMembers.contains(k));
+                assertTrue(groupsAndMembers.contains(I(k)));
             }
         }
     }
 
     @Test
     public void testRemoveAdminFromGroups_groupsContainAdmin_returnGroupsWithRemovedAdmin() throws OXException {
-        List<Integer> groupsAndMembers = Arrays.asList(adminUserId, 6, 7, 8, 9);
-        Group[] groups = getGroups(groupsAndMembers.stream().mapToInt(i -> i).toArray());
+        List<Integer> groupsAndMembers = Arrays.asList(I(adminUserId), I(6), I(7), I(8), I(9));
+        Group[] groups = getGroups(groupsAndMembers.stream().mapToInt(i -> i.intValue()).toArray());
 
         Group[] result = serviceSpy.removeAdminFromGroupMemberList(contextId, groups);
 
         assertEquals(groupsAndMembers.size(), result.length);
         for (int j = 0; j < result.length; j++) {
-            assertTrue(groupsAndMembers.contains(result[j].getIdentifier()));
+            assertTrue(groupsAndMembers.contains(I(result[j].getIdentifier())));
             int[] member = result[j].getMember();
             assertEquals(groupsAndMembers.size() - 1, member.length);
             for (int k : member) {
-                assertTrue(groupsAndMembers.contains(k));
+                assertTrue(groupsAndMembers.contains(I(k)));
             }
         }
         assertFalse(Arrays.stream(result).filter(i -> Arrays.stream(i.getMember()).anyMatch(j -> j == adminUserId)).peek(i -> System.out.println(i.getIdentifier())).findFirst().isPresent());
@@ -290,10 +292,10 @@ public class HideAdminServiceImplTest {
 
     @Test
     public void testRemoveAdminFromGroups_featureDisabled_returnGroupsWithAdmin() throws OXException {
-        Mockito.when(leanConfigurationService.getBooleanProperty(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt(), (Property) ArgumentMatchers.any())).thenReturn(Boolean.TRUE.booleanValue());
+        Mockito.when(B(leanConfigurationService.getBooleanProperty(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt(), (Property) ArgumentMatchers.any()))).thenReturn(Boolean.TRUE);
         HideAdminServiceImpl service = new HideAdminServiceImpl(leanConfigurationService, contextService, userService);
-        List<Integer> groupsAndMembers = Arrays.asList(adminUserId, 6, 7, 8, 9);
-        Group[] groups = getGroups(groupsAndMembers.stream().mapToInt(i -> i).toArray());
+        List<Integer> groupsAndMembers = Arrays.asList(I(adminUserId), I(6), I(7), I(8), I(9));
+        Group[] groups = getGroups(groupsAndMembers.stream().mapToInt(i -> i.intValue()).toArray());
 
         Group[] result = service.removeAdminFromGroupMemberList(contextId, groups);
 
@@ -306,8 +308,8 @@ public class HideAdminServiceImplTest {
 
     @Test
     public void testAddAdminToGroupIds_orginalNull_returnUpdate() throws OXException {
-        List<Integer> groupMembers = Arrays.asList(adminUserId, 6, 7, 8, 9);
-        int[] updatedGroupMember = groupMembers.stream().mapToInt(i -> i).toArray();
+        List<Integer> groupMembers = Arrays.asList(I(adminUserId), I(6), I(7), I(8), I(9));
+        int[] updatedGroupMember = groupMembers.stream().mapToInt(i -> i.intValue()).toArray();
 
         int[] result = serviceSpy.addAdminToGroupMemberList(contextId, null, updatedGroupMember);
 
@@ -317,8 +319,8 @@ public class HideAdminServiceImplTest {
 
     @Test
     public void testAddAdminToGroupIds_updatedNull_returnUpdate() throws OXException {
-        List<Integer> groupMembers = Arrays.asList(adminUserId, 6, 7, 8, 9);
-        int[] origGroupMember = groupMembers.stream().mapToInt(i -> i).toArray();
+        List<Integer> groupMembers = Arrays.asList(I(adminUserId), I(6), I(7), I(8), I(9));
+        int[] origGroupMember = groupMembers.stream().mapToInt(i -> i.intValue()).toArray();
 
         int[] result = serviceSpy.addAdminToGroupMemberList(contextId, origGroupMember, null);
 
@@ -327,34 +329,34 @@ public class HideAdminServiceImplTest {
 
     @Test
     public void testAddAdminToGroupIds_adminNotInOriginal_returnUpdate() throws OXException {
-        List<Integer> groupMembers = Arrays.asList(6, 7, 8, 9);
-        int[] origGroupMember = groupMembers.stream().mapToInt(i -> i).toArray();
-        List<Integer> updateGroupMembers = Arrays.asList(adminUserId, 11, 22, 33, 9);
-        int[] updateGroupMembersArray = updateGroupMembers.stream().mapToInt(i -> i).toArray();
+        List<Integer> groupMembers = Arrays.asList(I(6), I(7), I(8), I(9));
+        int[] origGroupMember = groupMembers.stream().mapToInt(i -> i.intValue()).toArray();
+        List<Integer> updateGroupMembers = Arrays.asList(I(adminUserId), I(11), I(22), I(33), I(9));
+        int[] updateGroupMembersArray = updateGroupMembers.stream().mapToInt(i -> i.intValue()).toArray();
 
         int[] result = serviceSpy.addAdminToGroupMemberList(contextId, origGroupMember, updateGroupMembersArray);
 
         assertEquals(updateGroupMembers.size(), result.length);
         for (int j = 0; j < result.length; j++) {
-            assertTrue(updateGroupMembers.contains(result[j]));
+            assertTrue(updateGroupMembers.contains(I(result[j])));
         }
     }
 
     @Test
     public void testAddAdminToGroupIds_adminInOriginal_returnAdminInUpdate() throws OXException {
-        List<Integer> groupMembers = Arrays.asList(adminUserId, 6, 7, 8, 9);
-        int[] origGroupMember = groupMembers.stream().mapToInt(i -> i).toArray();
-        List<Integer> updateGroupMembers = Arrays.asList(11, 22, 33, 9);
-        int[] updateGroupMembersArray = updateGroupMembers.stream().mapToInt(i -> i).toArray();
+        List<Integer> groupMembers = Arrays.asList(I(adminUserId), I(6), I(7), I(8), I(9));
+        int[] origGroupMember = groupMembers.stream().mapToInt(i -> i.intValue()).toArray();
+        List<Integer> updateGroupMembers = Arrays.asList(I(11), I(22), I(33), I(9));
+        int[] updateGroupMembersArray = updateGroupMembers.stream().mapToInt(i -> i.intValue()).toArray();
 
         int[] result = serviceSpy.addAdminToGroupMemberList(contextId, origGroupMember, updateGroupMembersArray);
 
         List<Integer> expected = new ArrayList<>(updateGroupMembers);
-        expected.add(adminUserId);
+        expected.add(I(adminUserId));
         assertEquals(expected.size(), result.length);
         boolean adminFound = false;
         for (int j = 0; j < result.length; j++) {
-            assertTrue(expected.contains(result[j]));
+            assertTrue(expected.contains(I(result[j])));
             if (result[j] == adminUserId) {
                 adminFound = true;
             }
@@ -364,10 +366,10 @@ public class HideAdminServiceImplTest {
 
     @Test
     public void testAddAdminToGroupIds_adminInOriginalAndUpdate_returnAdminInUpdate() throws OXException {
-        List<Integer> groupMembers = Arrays.asList(adminUserId, 6, 7, 8, 9);
-        int[] origGroupMember = groupMembers.stream().mapToInt(i -> i).toArray();
-        List<Integer> updateGroupMembers = Arrays.asList(11, 22, 33, 9, adminUserId);
-        int[] updateGroupMembersArray = updateGroupMembers.stream().mapToInt(i -> i).toArray();
+        List<Integer> groupMembers = Arrays.asList(I(adminUserId), I(6), I(7), I(8), I(9));
+        int[] origGroupMember = groupMembers.stream().mapToInt(i -> i.intValue()).toArray();
+        List<Integer> updateGroupMembers = Arrays.asList(I(11), I(22), I(33), I(9), I(adminUserId));
+        int[] updateGroupMembersArray = updateGroupMembers.stream().mapToInt(i -> i.intValue()).toArray();
 
         int[] result = serviceSpy.addAdminToGroupMemberList(contextId, origGroupMember, updateGroupMembersArray);
 
@@ -376,12 +378,12 @@ public class HideAdminServiceImplTest {
 
     @Test
     public void testAddAdminToGroupIds_featureDisabled_returnUpdate() throws OXException {
-        Mockito.when(leanConfigurationService.getBooleanProperty(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt(), (Property) ArgumentMatchers.any())).thenReturn(Boolean.TRUE.booleanValue());
+        Mockito.when(B(leanConfigurationService.getBooleanProperty(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt(), (Property) ArgumentMatchers.any()))).thenReturn(Boolean.TRUE);
         HideAdminServiceImpl service = new HideAdminServiceImpl(leanConfigurationService, contextService, userService);
-        List<Integer> groupMembers = Arrays.asList(adminUserId, 6, 7, 8, 9);
-        int[] origGroupMember = groupMembers.stream().mapToInt(i -> i).toArray();
-        List<Integer> updateGroupMembers = Arrays.asList(11, 22, 33, 9);
-        int[] updateGroupMembersArray = updateGroupMembers.stream().mapToInt(i -> i).toArray();
+        List<Integer> groupMembers = Arrays.asList(I(adminUserId), I(6), I(7), I(8), I(9));
+        int[] origGroupMember = groupMembers.stream().mapToInt(i -> i.intValue()).toArray();
+        List<Integer> updateGroupMembers = Arrays.asList(I(11), I(22), I(33), I(9));
+        int[] updateGroupMembersArray = updateGroupMembers.stream().mapToInt(i -> i.intValue()).toArray();
 
         int[] result = service.addAdminToGroupMemberList(contextId, origGroupMember, updateGroupMembersArray);
 
@@ -431,36 +433,36 @@ public class HideAdminServiceImplTest {
 
     @Test
     public void testRemoveAdminFromFolderPermissions_folderDoesNotContainAdminPermission_returnFolderList() throws OXException {
-        List<Integer> foldersAndPermissionIdentifiers = Arrays.asList(4, 5, 6, 7);
-        UserizedFolder[] folders = getUserizedFolders(foldersAndPermissionIdentifiers.stream().mapToInt(i -> i).toArray());
+        List<Integer> foldersAndPermissionIdentifiers = Arrays.asList(I(4), I(5), I(6), I(7));
+        UserizedFolder[] folders = getUserizedFolders(foldersAndPermissionIdentifiers.stream().mapToInt(i -> i.intValue()).toArray());
 
         UserizedFolder[] result = serviceSpy.removeAdminFromFolderPermissions(contextId, folders);
 
         assertEquals(foldersAndPermissionIdentifiers.size(), result.length);
         for (UserizedFolder userizedFolder : result) {
-            assertTrue(foldersAndPermissionIdentifiers.contains(Integer.parseInt(userizedFolder.getID())));
+            assertTrue(foldersAndPermissionIdentifiers.contains(Integer.valueOf(userizedFolder.getID())));
             Permission[] permissions = userizedFolder.getPermissions();
             for (Permission permission : permissions) {
-                assertTrue(foldersAndPermissionIdentifiers.contains(permission.getEntity()));
+                assertTrue(foldersAndPermissionIdentifiers.contains(I(permission.getEntity())));
             }
         }
     }
 
     @Test
     public void testRemoveAdminFromFolderPermissions_folderDoesContainAdminPermission_returnWithoutFolderPermissionForAdmin() throws OXException {
-        List<Integer> foldersAndPermissionIdentifiers = Arrays.asList(4, 5, 6, 7, adminUserId);
-        UserizedFolder[] folders = getUserizedFolders(foldersAndPermissionIdentifiers.stream().mapToInt(i -> i).toArray());
+        List<Integer> foldersAndPermissionIdentifiers = Arrays.asList(I(4), I(5), I(6), I(7), I(adminUserId));
+        UserizedFolder[] folders = getUserizedFolders(foldersAndPermissionIdentifiers.stream().mapToInt(i -> i.intValue()).toArray());
 
         UserizedFolder[] result = serviceSpy.removeAdminFromFolderPermissions(contextId, folders);
 
         assertEquals(foldersAndPermissionIdentifiers.size(), result.length);
         for (UserizedFolder userizedFolder : result) {
-            assertTrue(foldersAndPermissionIdentifiers.contains(Integer.parseInt(userizedFolder.getID())));
+            assertTrue(foldersAndPermissionIdentifiers.contains(Integer.valueOf(userizedFolder.getID())));
             Permission[] permissions = userizedFolder.getPermissions();
             assertEquals(foldersAndPermissionIdentifiers.size() - 1, permissions.length);
             boolean adminFound = false;
             for (Permission permission : permissions) {
-                assertTrue(foldersAndPermissionIdentifiers.contains(permission.getEntity()));
+                assertTrue(foldersAndPermissionIdentifiers.contains(I(permission.getEntity())));
                 if (permission.getEntity() == adminUserId) {
                     adminFound = true;
                 }
@@ -471,10 +473,10 @@ public class HideAdminServiceImplTest {
 
     @Test
     public void testRemoveAdminFromFolderPermissions_featureDisabled_returnWithFolderPermissionForAdmin() throws OXException {
-        Mockito.when(leanConfigurationService.getBooleanProperty(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt(), (Property) ArgumentMatchers.any())).thenReturn(Boolean.TRUE.booleanValue());
+        Mockito.when(B(leanConfigurationService.getBooleanProperty(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt(), (Property) ArgumentMatchers.any()))).thenReturn(Boolean.TRUE);
         HideAdminServiceImpl service = new HideAdminServiceImpl(leanConfigurationService, contextService, userService);
-        List<Integer> foldersAndPermissionIdentifiers = Arrays.asList(4, 5, 6, 7, adminUserId);
-        UserizedFolder[] folders = getUserizedFolders(foldersAndPermissionIdentifiers.stream().mapToInt(i -> i).toArray());
+        List<Integer> foldersAndPermissionIdentifiers = Arrays.asList(I(4), I(5), I(6), I(7), I(adminUserId));
+        UserizedFolder[] folders = getUserizedFolders(foldersAndPermissionIdentifiers.stream().mapToInt(i -> i.intValue()).toArray());
 
         UserizedFolder[] result = service.removeAdminFromFolderPermissions(contextId, folders);
 
@@ -487,22 +489,22 @@ public class HideAdminServiceImplTest {
 
     @Test
     public void testAddAdminToFolderPermissions_origNull_returnUpdate() throws OXException {
-        List<Integer> foldersAndPermissionIdentifiers = Arrays.asList(4, 5, 6, 7, adminUserId);
-        Permission[] updatedPermissions = getPermissions(foldersAndPermissionIdentifiers.stream().mapToInt(i -> i).toArray());
+        List<Integer> foldersAndPermissionIdentifiers = Arrays.asList(I(4), I(5), I(6), I(7), I(adminUserId));
+        Permission[] updatedPermissions = getPermissions(foldersAndPermissionIdentifiers.stream().mapToInt(i -> i.intValue()).toArray());
 
         Permission[] result = serviceSpy.addAdminToFolderPermissions(contextId, null, updatedPermissions);
 
         assertTrue(updatedPermissions.equals(result));
         for (int i = 0; i < result.length; i++) {
-            assertTrue(foldersAndPermissionIdentifiers.contains(result[i].getEntity()));
+            assertTrue(foldersAndPermissionIdentifiers.contains(I(result[i].getEntity())));
 
         }
     }
 
     @Test
     public void testAddAdminToFolderPermissions_updatedNull_returnNull() throws OXException {
-        List<Integer> foldersAndPermissionIdentifiers = Arrays.asList(4, 5, 6, 7, adminUserId);
-        Permission[] originalPermissions = getPermissions(foldersAndPermissionIdentifiers.stream().mapToInt(i -> i).toArray());
+        List<Integer> foldersAndPermissionIdentifiers = Arrays.asList(I(4), I(5), I(6), I(7), I(adminUserId));
+        Permission[] originalPermissions = getPermissions(foldersAndPermissionIdentifiers.stream().mapToInt(i -> i.intValue()).toArray());
 
         Permission[] result = serviceSpy.addAdminToFolderPermissions(contextId, originalPermissions, null);
 
@@ -511,10 +513,10 @@ public class HideAdminServiceImplTest {
 
     @Test
     public void testAddAdminToFolderPermissions_adminNotInOrig_returnUpdate() throws OXException {
-        List<Integer> original = Arrays.asList(4, 5, 6, 7);
-        Permission[] originalPermissions = getPermissions(original.stream().mapToInt(i -> i).toArray());
-        List<Integer> updated = Arrays.asList(4, 5, 6, 7, 8);
-        Permission[] updatedPermissions = getPermissions(updated.stream().mapToInt(i -> i).toArray());
+        List<Integer> original = Arrays.asList(I(4), I(5), I(6), I(7));
+        Permission[] originalPermissions = getPermissions(original.stream().mapToInt(i -> i.intValue()).toArray());
+        List<Integer> updated = Arrays.asList(I(4), I(5), I(6), I(7), I(8));
+        Permission[] updatedPermissions = getPermissions(updated.stream().mapToInt(i -> i.intValue()).toArray());
 
         Permission[] result = serviceSpy.addAdminToFolderPermissions(contextId, originalPermissions, updatedPermissions);
 
@@ -524,10 +526,10 @@ public class HideAdminServiceImplTest {
 
     @Test
     public void testAddAdminToFolderPermissions_adminInUpdate_returnUpdate() throws OXException {
-        List<Integer> original = Arrays.asList(4, 5, 6, 7);
-        Permission[] originalPermissions = getPermissions(original.stream().mapToInt(i -> i).toArray());
-        List<Integer> updated = Arrays.asList(4, 5, 6, 7, 8, adminUserId);
-        Permission[] updatedPermissions = getPermissions(updated.stream().mapToInt(i -> i).toArray());
+        List<Integer> original = Arrays.asList(I(4), I(5), I(6), I(7));
+        Permission[] originalPermissions = getPermissions(original.stream().mapToInt(i -> i.intValue()).toArray());
+        List<Integer> updated = Arrays.asList(I(4), I(5), I(6), I(7), I(8), I(adminUserId));
+        Permission[] updatedPermissions = getPermissions(updated.stream().mapToInt(i -> i.intValue()).toArray());
 
         Permission[] result = serviceSpy.addAdminToFolderPermissions(contextId, originalPermissions, updatedPermissions);
 
@@ -537,10 +539,10 @@ public class HideAdminServiceImplTest {
 
     @Test
     public void testAddAdminToFolderPermissions_adminInUpdateAndOriginal_returnUpdate() throws OXException {
-        List<Integer> original = Arrays.asList(adminUserId, 44, 55, 66, 77);
-        Permission[] originalPermissions = getPermissions(original.stream().mapToInt(i -> i).toArray());
-        List<Integer> updated = Arrays.asList(4, 5, 6, 7, 8, adminUserId);
-        Permission[] updatedPermissions = getPermissions(updated.stream().mapToInt(i -> i).toArray());
+        List<Integer> original = Arrays.asList(I(adminUserId), I(44), I(55), I(66), I(77));
+        Permission[] originalPermissions = getPermissions(original.stream().mapToInt(i -> i.intValue()).toArray());
+        List<Integer> updated = Arrays.asList(I(4), I(5), I(6), I(7), I(8), I(adminUserId));
+        Permission[] updatedPermissions = getPermissions(updated.stream().mapToInt(i -> i.intValue()).toArray());
 
         Permission[] result = serviceSpy.addAdminToFolderPermissions(contextId, originalPermissions, updatedPermissions);
 
@@ -550,10 +552,10 @@ public class HideAdminServiceImplTest {
 
     @Test
     public void testAddAdminToFolderPermissions_adminInOrig_returnInUpdate() throws OXException {
-        List<Integer> original = Arrays.asList(4, 5, 6, 7, adminUserId);
-        Permission[] originalPermissions = getPermissions(original.stream().mapToInt(i -> i).toArray());
-        List<Integer> updated = Arrays.asList(4, 5, 6, 7, 8);
-        Permission[] updatedPermissions = getPermissions(updated.stream().mapToInt(i -> i).toArray());
+        List<Integer> original = Arrays.asList(I(4), I(5), I(6), I(7), I(adminUserId));
+        Permission[] originalPermissions = getPermissions(original.stream().mapToInt(i -> i.intValue()).toArray());
+        List<Integer> updated = Arrays.asList(I(4), I(5), I(6), I(7), I(8));
+        Permission[] updatedPermissions = getPermissions(updated.stream().mapToInt(i -> i.intValue()).toArray());
 
         Permission[] result = serviceSpy.addAdminToFolderPermissions(contextId, originalPermissions, updatedPermissions);
 
@@ -563,12 +565,12 @@ public class HideAdminServiceImplTest {
 
     @Test
     public void testAddAdminToFolderPermissions_featureDisabled_returnUpdate() throws OXException {
-        Mockito.when(leanConfigurationService.getBooleanProperty(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt(), (Property) ArgumentMatchers.any())).thenReturn(Boolean.TRUE.booleanValue());
+        Mockito.when(B(leanConfigurationService.getBooleanProperty(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt(), (Property) ArgumentMatchers.any()))).thenReturn(Boolean.TRUE);
         HideAdminServiceImpl service = new HideAdminServiceImpl(leanConfigurationService, contextService, userService);
-        List<Integer> original = Arrays.asList(4, 5, 6, 7, adminUserId);
-        Permission[] originalPermissions = getPermissions(original.stream().mapToInt(i -> i).toArray());
-        List<Integer> updated = Arrays.asList(4, 5, 6, 7, 8);
-        Permission[] updatedPermissions = getPermissions(updated.stream().mapToInt(i -> i).toArray());
+        List<Integer> original = Arrays.asList(I(4), I(5), I(6), I(7), I(adminUserId));
+        Permission[] originalPermissions = getPermissions(original.stream().mapToInt(i -> i.intValue()).toArray());
+        List<Integer> updated = Arrays.asList(I(4), I(5), I(6), I(7), I(8));
+        Permission[] updatedPermissions = getPermissions(updated.stream().mapToInt(i -> i.intValue()).toArray());
 
         Permission[] result = service.addAdminToFolderPermissions(contextId, originalPermissions, updatedPermissions);
 
@@ -609,22 +611,22 @@ public class HideAdminServiceImplTest {
 
     @Test
     public void testRemoveAdminFromUsers_adminNotInUserList_returnUpdate() throws OXException {
-        List<Integer> original = Arrays.asList(4, 5, 6, 7);
-        User[] users = getUsers(original.stream().mapToInt(i -> i).toArray());
+        List<Integer> original = Arrays.asList(I(4), I(5), I(6), I(7));
+        User[] users = getUsers(original.stream().mapToInt(i -> i.intValue()).toArray());
 
         User[] result = serviceSpy.removeAdminFromUsers(contextId, users);
 
         assertEquals(users.length, result.length);
         for (int j = 0; j < result.length; j++) {
             User user = result[j];
-            assertTrue(original.contains(user.getId()));
+            assertTrue(original.contains(I(user.getId())));
         }
     }
 
     @Test
     public void testRemoveAdminFromUsers_adminInUserList_removeFromUpdate() throws OXException {
-        List<Integer> original = Arrays.asList(4, 5, 6, 7, adminUserId);
-        User[] users = getUsers(original.stream().mapToInt(i -> i).toArray());
+        List<Integer> original = Arrays.asList(I(4), I(5), I(6), I(7), I(adminUserId));
+        User[] users = getUsers(original.stream().mapToInt(i -> i.intValue()).toArray());
 
         User[] result = serviceSpy.removeAdminFromUsers(contextId, users);
 
@@ -634,10 +636,10 @@ public class HideAdminServiceImplTest {
 
     @Test
     public void testRemoveAdminFromUsers_featureDisabeld_leaveAdminInUpdate() throws OXException {
-        Mockito.when(leanConfigurationService.getBooleanProperty(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt(), (Property) ArgumentMatchers.any())).thenReturn(Boolean.TRUE.booleanValue());
+        Mockito.when(B(leanConfigurationService.getBooleanProperty(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt(), (Property) ArgumentMatchers.any()))).thenReturn(Boolean.TRUE);
         HideAdminServiceImpl service = new HideAdminServiceImpl(leanConfigurationService, contextService, userService);
-        List<Integer> original = Arrays.asList(4, 5, 6, 7, adminUserId);
-        User[] users = getUsers(original.stream().mapToInt(i -> i).toArray());
+        List<Integer> original = Arrays.asList(I(4), I(5), I(6), I(7), I(adminUserId));
+        User[] users = getUsers(original.stream().mapToInt(i -> i.intValue()).toArray());
 
         User[] removeAdminFromUsers = service.removeAdminFromUsers(contextId, users);
 
@@ -659,16 +661,16 @@ public class HideAdminServiceImplTest {
     public void testRemoveAdminFromUserIds_idsEmpty_returnEmpty() throws OXException {
         List<Integer> original = Arrays.asList();
 
-        int[] result = serviceSpy.removeAdminFromUserIds(contextId, original.stream().mapToInt(i -> i).toArray());
+        int[] result = serviceSpy.removeAdminFromUserIds(contextId, original.stream().mapToInt(i -> i.intValue()).toArray());
 
         assertEquals(original.size(), result.length);
     }
 
     @Test
     public void testRemoveAdminFromUserIds_adminNotInIds_returnIds() throws OXException {
-        List<Integer> original = Arrays.asList(6, 7, 8, 9, 11, 9999);
+        List<Integer> original = Arrays.asList(I(6), I(7), I(8), I(9), I(11), I(9999));
 
-        int[] result = serviceSpy.removeAdminFromUserIds(contextId, original.stream().mapToInt(i -> i).toArray());
+        int[] result = serviceSpy.removeAdminFromUserIds(contextId, original.stream().mapToInt(i -> i.intValue()).toArray());
 
         assertEquals(original.size(), result.length);
         assertFalse(Arrays.stream(result).anyMatch(x -> x == adminUserId));
@@ -676,9 +678,9 @@ public class HideAdminServiceImplTest {
 
     @Test
     public void testRemoveAdminFromUserIds_adminInIds_returnIdsWithoutAdmin() throws OXException {
-        List<Integer> original = Arrays.asList(6, 7, 8, 9, 11, 9999, adminUserId);
+        List<Integer> original = Arrays.asList(I(6), I(7), I(8), I(9), I(11), I(9999), I(adminUserId));
 
-        int[] result = serviceSpy.removeAdminFromUserIds(contextId, original.stream().mapToInt(i -> i).toArray());
+        int[] result = serviceSpy.removeAdminFromUserIds(contextId, original.stream().mapToInt(i -> i.intValue()).toArray());
 
         assertEquals(original.size() - 1, result.length);
         assertFalse(Arrays.stream(result).anyMatch(x -> x == adminUserId));
@@ -686,11 +688,11 @@ public class HideAdminServiceImplTest {
 
     @Test
     public void testRemoveAdminFromUserIds_featureDisabled_returnIdsWithAdmin() throws OXException {
-        Mockito.when(leanConfigurationService.getBooleanProperty(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt(), (Property) ArgumentMatchers.any())).thenReturn(Boolean.TRUE.booleanValue());
+        Mockito.when(B(leanConfigurationService.getBooleanProperty(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt(), (Property) ArgumentMatchers.any()))).thenReturn(Boolean.TRUE);
         HideAdminServiceImpl service = new HideAdminServiceImpl(leanConfigurationService, contextService, userService);
-        List<Integer> original = Arrays.asList(6, 7, 8, 9, 11, 9999, adminUserId);
+        List<Integer> original = Arrays.asList(I(6), I(7), I(8), I(9), I(11), I(9999), I(adminUserId));
 
-        int[] result = service.removeAdminFromUserIds(contextId, original.stream().mapToInt(i -> i).toArray());
+        int[] result = service.removeAdminFromUserIds(contextId, original.stream().mapToInt(i -> i.intValue()).toArray());
 
         assertEquals(original.size(), result.length);
         assertTrue(Arrays.stream(result).anyMatch(x -> x == adminUserId));
@@ -740,7 +742,7 @@ public class HideAdminServiceImplTest {
 
     @Test
     public void testRemoveAdminFromObjectPermissionsIntListOfObjectPermission_featureDisabled_returnUnchanged() throws OXException {
-        Mockito.when(leanConfigurationService.getBooleanProperty(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt(), (Property) ArgumentMatchers.any())).thenReturn(Boolean.TRUE.booleanValue());
+        Mockito.when(B(leanConfigurationService.getBooleanProperty(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt(), (Property) ArgumentMatchers.any()))).thenReturn(Boolean.TRUE);
         HideAdminServiceImpl service = new HideAdminServiceImpl(leanConfigurationService, contextService, userService);
         List<ObjectPermission> objectPermissions = getObjectPermissions(77, 99, 1111, adminUserId);
 
@@ -776,8 +778,8 @@ public class HideAdminServiceImplTest {
 
     @Test
     public void testRemoveAdminFromObjectPermissionsIntSearchIteratorOfDocumentMetadata_adminNotInIterator_returnIterator() throws OXException {
-        List<Integer> original = Arrays.asList(4, 5, 6, 7);
-        SearchIterator<DocumentMetadata> documentMetaData = getObjectPermissionsSearchIterator(original.stream().mapToInt(i -> i).toArray());
+        List<Integer> original = Arrays.asList(I(4), I(5), I(6), I(7));
+        SearchIterator<DocumentMetadata> documentMetaData = getObjectPermissionsSearchIterator(original.stream().mapToInt(i -> i.intValue()).toArray());
 
         SearchIterator<DocumentMetadata> result = serviceSpy.removeAdminFromObjectPermissions(contextId, documentMetaData);
 
@@ -790,8 +792,8 @@ public class HideAdminServiceImplTest {
 
     @Test
     public void testRemoveAdminFromObjectPermissionsIntSearchIteratorOfDocumentMetadata_adminInIterator_returnWithRemovedAdmin() throws OXException {
-        List<Integer> original = Arrays.asList(4, 5, 6, 7, adminUserId, adminContactId);
-        SearchIterator<DocumentMetadata> documentMetaData = getObjectPermissionsSearchIterator(original.stream().mapToInt(i -> i).toArray());
+        List<Integer> original = Arrays.asList(I(4), I(5), I(6), I(7), I(adminUserId), I(adminContactId));
+        SearchIterator<DocumentMetadata> documentMetaData = getObjectPermissionsSearchIterator(original.stream().mapToInt(i -> i.intValue()).toArray());
 
         SearchIterator<DocumentMetadata> result = serviceSpy.removeAdminFromObjectPermissions(contextId, documentMetaData);
 
@@ -799,16 +801,16 @@ public class HideAdminServiceImplTest {
         List<DocumentMetadata> asList = SearchIterators.asList(result);
         for (DocumentMetadata documentMetadata2 : asList) {
             assertTrue(documentMetadata2.getObjectPermissions().stream().allMatch(x -> x.getEntity() != adminUserId));
-            assertTrue(documentMetadata2.getObjectPermissions().stream().allMatch(x -> original.contains(x.getEntity())));
+            assertTrue(documentMetadata2.getObjectPermissions().stream().allMatch(x -> original.contains(I(x.getEntity()))));
         }
     }
 
     @Test
     public void testRemoveAdminFromObjectPermissionsIntSearchIteratorOfDocumentMetadata_featureDisabled_returnUnchanged() throws OXException {
-        Mockito.when(leanConfigurationService.getBooleanProperty(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt(), (Property) ArgumentMatchers.any())).thenReturn(Boolean.TRUE.booleanValue());
+        Mockito.when(B(leanConfigurationService.getBooleanProperty(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt(), (Property) ArgumentMatchers.any()))).thenReturn(Boolean.TRUE);
         HideAdminServiceImpl service = new HideAdminServiceImpl(leanConfigurationService, contextService, userService);
-        List<Integer> original = Arrays.asList(4, 5, 6, 7, adminUserId, adminContactId);
-        SearchIterator<DocumentMetadata> documentMetaData = getObjectPermissionsSearchIterator(original.stream().mapToInt(i -> i).toArray());
+        List<Integer> original = Arrays.asList(I(4), I(5), I(6), I(7), I(adminUserId), I(adminContactId));
+        SearchIterator<DocumentMetadata> documentMetaData = getObjectPermissionsSearchIterator(original.stream().mapToInt(i -> i.intValue()).toArray());
 
         SearchIterator<DocumentMetadata> result = service.removeAdminFromObjectPermissions(contextId, documentMetaData);
 
@@ -816,7 +818,7 @@ public class HideAdminServiceImplTest {
         List<DocumentMetadata> asList = SearchIterators.asList(result);
         for (DocumentMetadata documentMetadata2 : asList) {
             assertTrue(documentMetadata2.getObjectPermissions().stream().anyMatch(x -> x.getEntity() == adminUserId));
-            assertTrue(documentMetadata2.getObjectPermissions().stream().allMatch(x -> original.contains(x.getEntity())));
+            assertTrue(documentMetadata2.getObjectPermissions().stream().allMatch(x -> original.contains(I(x.getEntity()))));
         }
     }
 
@@ -876,8 +878,8 @@ public class HideAdminServiceImplTest {
 
     @Test
     public void testRemoveAdminFromObjectPermissionsIntTimedResultOfDocumentMetadata_adminNotInInDocumentMetadata_returnUnchanged() throws OXException {
-        List<Integer> originalIdentifiers = Arrays.asList(4, 44, 99999, adminContactId);
-        TimedResult<DocumentMetadata> original = getDocumentMetadataTimedResult(originalIdentifiers.stream().mapToInt(i -> i).toArray());
+        List<Integer> originalIdentifiers = Arrays.asList(I(4), I(44), I(99999), I(adminContactId));
+        TimedResult<DocumentMetadata> original = getDocumentMetadataTimedResult(originalIdentifiers.stream().mapToInt(i -> i.intValue()).toArray());
 
         TimedResult<DocumentMetadata> result = serviceSpy.removeAdminFromObjectPermissions(contextId, original);
 
@@ -886,14 +888,14 @@ public class HideAdminServiceImplTest {
         List<DocumentMetadata> resultAsList = SearchIterators.asList(result.results());
         for (DocumentMetadata documentMetadata : resultAsList) {
             assertTrue(documentMetadata.getObjectPermissions().stream().noneMatch(x -> x.getEntity() == adminUserId));
-            assertTrue(documentMetadata.getObjectPermissions().stream().allMatch(x -> originalIdentifiers.contains(x.getEntity())));
+            assertTrue(documentMetadata.getObjectPermissions().stream().allMatch(x -> originalIdentifiers.contains(I(x.getEntity()))));
         }
     }
 
     @Test
     public void testRemoveAdminFromObjectPermissionsIntTimedResultOfDocumentMetadata_adminInDocumentMetadata_removeAdmin() throws OXException {
-        List<Integer> originalIdentifiers = Arrays.asList(4, 44, 99999, adminContactId, adminUserId);
-        TimedResult<DocumentMetadata> original = getDocumentMetadataTimedResult(originalIdentifiers.stream().mapToInt(i -> i).toArray());
+        List<Integer> originalIdentifiers = Arrays.asList(I(4), I(44), I(99999), I(adminContactId), I(adminUserId));
+        TimedResult<DocumentMetadata> original = getDocumentMetadataTimedResult(originalIdentifiers.stream().mapToInt(i -> i.intValue()).toArray());
 
         TimedResult<DocumentMetadata> result = serviceSpy.removeAdminFromObjectPermissions(contextId, original);
 
@@ -902,16 +904,16 @@ public class HideAdminServiceImplTest {
         List<DocumentMetadata> resultAsList = SearchIterators.asList(result.results());
         for (DocumentMetadata documentMetadata : resultAsList) {
             assertTrue(documentMetadata.getObjectPermissions().stream().noneMatch(x -> x.getEntity() == adminUserId));
-            assertTrue(documentMetadata.getObjectPermissions().stream().allMatch(x -> originalIdentifiers.contains(x.getEntity())));
+            assertTrue(documentMetadata.getObjectPermissions().stream().allMatch(x -> originalIdentifiers.contains(I(x.getEntity()))));
         }
     }
 
     @Test
     public void testRemoveAdminFromObjectPermissionsIntTimedResultOfDocumentMetadata_featureDisabeld_returnUnchanged() throws OXException {
-        Mockito.when(leanConfigurationService.getBooleanProperty(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt(), (Property) ArgumentMatchers.any())).thenReturn(Boolean.TRUE.booleanValue());
+        Mockito.when(B(leanConfigurationService.getBooleanProperty(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt(), (Property) ArgumentMatchers.any()))).thenReturn(Boolean.TRUE);
         HideAdminServiceImpl service = new HideAdminServiceImpl(leanConfigurationService, contextService, userService);
-        List<Integer> originalIdentifiers = Arrays.asList(4, 44, 99999, adminContactId, adminUserId);
-        TimedResult<DocumentMetadata> original = getDocumentMetadataTimedResult(originalIdentifiers.stream().mapToInt(i -> i).toArray());
+        List<Integer> originalIdentifiers = Arrays.asList(I(4), I(44), I(99999), I(adminContactId), I(adminUserId));
+        TimedResult<DocumentMetadata> original = getDocumentMetadataTimedResult(originalIdentifiers.stream().mapToInt(i -> i.intValue()).toArray());
 
         TimedResult<DocumentMetadata> result = service.removeAdminFromObjectPermissions(contextId, original);
 
@@ -920,7 +922,7 @@ public class HideAdminServiceImplTest {
         List<DocumentMetadata> resultAsList = SearchIterators.asList(result.results());
         for (DocumentMetadata documentMetadata : resultAsList) {
             assertTrue(documentMetadata.getObjectPermissions().stream().anyMatch(x -> x.getEntity() == adminUserId));
-            assertTrue(documentMetadata.getObjectPermissions().stream().allMatch(x -> originalIdentifiers.contains(x.getEntity())));
+            assertTrue(documentMetadata.getObjectPermissions().stream().allMatch(x -> originalIdentifiers.contains(I(x.getEntity()))));
         }
     }
 
@@ -1001,7 +1003,7 @@ public class HideAdminServiceImplTest {
 
     @Test
     public void testAddAdminToObjectPermissions_featureDisabled_returnUpdated() throws OXException {
-        Mockito.when(leanConfigurationService.getBooleanProperty(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt(), (Property) ArgumentMatchers.any())).thenReturn(Boolean.TRUE.booleanValue());
+        Mockito.when(B(leanConfigurationService.getBooleanProperty(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt(), (Property) ArgumentMatchers.any()))).thenReturn(Boolean.TRUE);
         HideAdminServiceImpl service = new HideAdminServiceImpl(leanConfigurationService, contextService, userService);
         List<ObjectPermission> originalPermissions = getObjectPermissions(77, 88, 99, adminUserId);
         List<ObjectPermission> updatedPermissions = getObjectPermissions(59, 444, 99);

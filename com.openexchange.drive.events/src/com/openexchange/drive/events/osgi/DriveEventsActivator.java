@@ -63,6 +63,7 @@ import com.openexchange.drive.events.internal.DriveEventServiceImpl;
 import com.openexchange.drive.events.internal.DriveEventServiceLookup;
 import com.openexchange.drive.events.ms.MsDriveEventHandler;
 import com.openexchange.drive.events.ms.PortableDriveEventFactory;
+import com.openexchange.drive.events.ms.PortableFolderContentChangeFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageEventConstants;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
@@ -113,6 +114,7 @@ public class DriveEventsActivator extends HousekeepingActivator {
         });
         registerService(EventHandler.class, service, serviceProperties);
         registerService(CustomPortableFactory.class, new PortableDriveEventFactory());
+        registerService(CustomPortableFactory.class, new PortableFolderContentChangeFactory());
         track(PortableMsService.class, new ServiceTrackerCustomizer<PortableMsService, PortableMsService>() {
 
             private MsDriveEventHandler eventHandler;

@@ -351,7 +351,7 @@ public class UserConfiguration implements Serializable, Cloneable {
              * if (userSettingMail != null) { clone.userSettingMail = (UserSettingMail) userSettingMail.clone(); }
              */
             return clone;
-        } catch (final CloneNotSupportedException e) {
+        } catch (CloneNotSupportedException e) {
             LOG.error("", e);
             throw new InternalError(e.getMessage());
         }

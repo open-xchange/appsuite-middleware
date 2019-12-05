@@ -75,25 +75,16 @@ public class CreateMultifactorBackupStringTable extends AbstractCreateTableImpl 
 
 
 
-    /* (non-Javadoc)
-     * @see com.openexchange.database.CreateTableService#requiredTables()
-     */
     @Override
     public String[] requiredTables() {
         return NO_TABLES;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.database.CreateTableService#tablesToCreate()
-     */
     @Override
     public String[] tablesToCreate() {
         return new String[] {TABLE_MULTIFACTOR_TOTP};
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.database.AbstractCreateTableImpl#getCreateStatements()
-     */
     @Override
     protected String[] getCreateStatements() {
         return new String[] {CREATE_MULTIFACTOR_TABLE};

@@ -69,11 +69,6 @@ public class DropboxOAuthAccountAssociationProvider extends AbstractFileStorageO
         super(storageService);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.file.storage.oauth.AbstractFileStorageOAuthAccountAssociationProvider#createAssociation(int, com.openexchange.file.storage.FileStorageAccount, int, int)
-     */
     @Override
     public OAuthAccountAssociation createAssociation(int accountId, FileStorageAccount account, int userId, int contextId) {
         return new DropboxOAuthAccountAssociation(accountId, account, userId, contextId);

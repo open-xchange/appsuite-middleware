@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Implementation for templating plug-in
 Bundle-SymbolicName: com.openexchange.templating.impl
-Bundle-Version: 7.10.2
+Bundle-Version: 7.10.3
 Bundle-Activator: com.openexchange.templating.impl.osgi.TemplatingActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
@@ -32,6 +32,7 @@ Import-Package: com.openexchange.config,
  com.openexchange.tools.session,
  com.openexchange.tools.strings,
  com.openexchange.tx,
+ com.openexchange.user,
  javax.swing.tree,
  org.apache.commons.io,
  org.apache.commons.logging,

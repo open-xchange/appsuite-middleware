@@ -112,7 +112,7 @@ public final class TrustedMailDataSource implements ImageDataSource {
         }
 
         TrustedMailService service = Services.getService(TrustedMailService.class);
-        if(service == null) {
+        if (service == null) {
             throw ServiceExceptionCode.absentService(TrustedMailService.class);
         }
 

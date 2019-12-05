@@ -80,7 +80,7 @@ public final class MailProviderProxyGenerator {
                 MailProvider.class.getClassLoader(),
                 new Class<?>[] { MailProvider.class },
                 new MailProviderInvocationHandler(mailProviderServiceReference, context));
-        } catch (final ClassCastException e) {
+        } catch (ClassCastException e) {
             LOG.error("", e);
             return null;
         }
@@ -118,9 +118,9 @@ public final class MailProviderProxyGenerator {
                 } finally {
                     context.ungetService(mailProviderServiceReference);
                 }
-            } catch (final InvocationTargetException e) {
+            } catch (InvocationTargetException e) {
                 throw e.getTargetException();
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 throw new RuntimeException("unexpected invocation exception: " + e.getMessage(), e);
             }
             return result;

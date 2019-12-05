@@ -50,13 +50,11 @@
 package com.openexchange.filestore.utils;
 
 import java.io.File;
+import java.util.Optional;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Interests;
-import com.openexchange.config.Reloadable;
-import com.openexchange.config.Reloadables;
-import com.openexchange.configuration.ServerConfig;
+import com.openexchange.filestore.utils.osgi.Services;
+import com.openexchange.uploaddir.UploadDirService;
 
 /**
  * {@link TempFileHelper}
@@ -64,7 +62,7 @@ import com.openexchange.configuration.ServerConfig;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.3
  */
-public class TempFileHelper implements Reloadable {
+public class TempFileHelper {
 
     /** Simple class to delay initialization until needed */
     private static class LoggerHolder {
@@ -94,37 +92,11 @@ public class TempFileHelper implements Reloadable {
 
     // -------------------------------------------------------------------------------------------------------------------------------------
 
-    private volatile File uploadDirectory;
-
     /**
      * Initializes a new {@link TempFileHelper}.
      */
     private TempFileHelper() {
         super();
-    }
-
-    private File uploadDirectory() {
-        File tmp = uploadDirectory;
-        if (null == tmp) {
-            synchronized (TempFileHelper.class) {
-                tmp = uploadDirectory;
-                if (null == tmp) {
-                    tmp = new File(ServerConfig.getProperty(ServerConfig.Property.UploadDirectory));
-                    uploadDirectory = tmp;
-                }
-            }
-        }
-        return tmp;
-    }
-
-    @Override
-    public Interests getInterests() {
-        return Reloadables.interestsForProperties(ServerConfig.Property.UploadDirectory.getPropertyName());
-    }
-
-    @Override
-    public void reloadConfiguration(ConfigurationService configService) {
-        uploadDirectory = null;
     }
 
     /**
@@ -135,9 +107,9 @@ public class TempFileHelper implements Reloadable {
      * machine.
      * </ol>
      *
-     * @return An abstract pathname denoting a newly-created empty file or <code>null</code> if a file could not be created
+     * @return The optional abstract pathname denoting a newly-created empty file
      */
-    public File newTempFile() {
+    public Optional<File> newTempFile() {
         return newTempFile("open-xchange-spoolfile-");
     }
 
@@ -150,16 +122,17 @@ public class TempFileHelper implements Reloadable {
      * </ol>
      *
      * @param prefix The prefix to use for generated file
-     * @return An abstract pathname denoting a newly-created empty file or <code>null</code> if a file could not be created
+     * @return The optional abstract pathname denoting a newly-created empty file
      */
-    public File newTempFile(String prefix) {
+    public Optional<File> newTempFile(String prefix) {
         try {
-            File tmpFile = File.createTempFile(null == prefix ? "open-xchange-spoolfile-" : prefix, ".tmp", uploadDirectory());
+            UploadDirService service = Services.getService(UploadDirService.class);
+            File tmpFile = File.createTempFile(null == prefix ? "open-xchange-spoolfile-" : prefix, ".tmp", service.getUploadDir());
             tmpFile.deleteOnExit();
-            return tmpFile;
+            return Optional.of(tmpFile);
         } catch (Exception e) {
             LoggerHolder.LOG.warn("Failed to create new temporary file", e);
-            return null;
+            return Optional.empty();
         }
     }
 

@@ -78,7 +78,6 @@ import com.openexchange.folderstorage.type.MailType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.i18n.MailStrings;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.IndexRange;
@@ -99,6 +98,7 @@ import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.user.User;
 import gnu.trove.map.hash.TIntIntHashMap;
 
 /**
@@ -120,6 +120,7 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
     private static final String CAPABILITY_FILENAME_SEARCH = "FILENAME_SEARCH";
     private static final String CAPABILITY_ATTACHMENT_MARKER = "ATTACHMENT_MARKER";
     private static final String CAPABILITY_TEXT_PREVIEW = "TEXT_PREVIEW";
+    private static final String CAPABILITY_MAIL_FILTER_APPLICATION = "MAIL_FILTER";
 
     /**
      * The mail folder content type.
@@ -332,6 +333,9 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
         if (mailCapabilities.hasTextPreview()) {
             addSupportedCapabilities(CAPABILITY_TEXT_PREVIEW);
         }
+        if (mailCapabilities.hasMailFilterApplication()) {
+            addSupportedCapabilities(CAPABILITY_MAIL_FILTER_APPLICATION);
+        }
         if (!mailFolder.isHoldsFolders() && mp.canCreateSubfolders()) {
             // Cannot contain subfolders; therefore deny subfolder creation
             mp.setFolderPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER);
@@ -510,7 +514,7 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
                             }
                         }
                     }
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     org.slf4j.LoggerFactory.getLogger(MailFolderImpl.class).error("", e);
                     mailFolderType = MailFolderType.NONE;
                 }
@@ -581,10 +585,10 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
             }
 
             return mailAccess.getMessageStorage().getUnreadMessages(ensureFullName(fullName), MailSortField.RECEIVED_DATE, OrderDirection.DESC, FIELDS_ID, -1).length;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.debug("Cannot return up-to-date unread counter.", e);
             return super.getUnread();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.debug("Cannot return up-to-date unread counter.", e);
             return super.getUnread();
         } finally {
@@ -611,10 +615,10 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
             }
 
             return mailAccess.getMessageStorage().searchMessages(ensureFullName(fullName), IndexRange.NULL, MailSortField.RECEIVED_DATE, OrderDirection.ASC, null, FIELDS_ID).length;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.debug("Cannot return up-to-date total counter.", e);
             return super.getTotal();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.debug("Cannot return up-to-date total counter.", e);
             return super.getTotal();
         } finally {
@@ -637,10 +641,10 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
                 mailAccess = MailAccess.getInstance(userId, contextId, mailAccountId);
                 mailAccess.connect(false);
                 return totalAndUnread(mailAccess);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.debug("Cannot return up-to-date total counter.", e);
                 return null;
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 LOG.debug("Cannot return up-to-date total counter.", e);
                 return null;
             } finally {
@@ -652,10 +656,10 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
         try {
             final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = mailAccess(optParams);
             return totalAndUnread(mailAccess);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.debug("Cannot return up-to-date total counter.", e);
             return null;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.debug("Cannot return up-to-date total counter.", e);
             return null;
         }

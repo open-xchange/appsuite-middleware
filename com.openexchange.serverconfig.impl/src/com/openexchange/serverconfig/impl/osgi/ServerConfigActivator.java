@@ -69,7 +69,7 @@ import com.openexchange.serverconfig.impl.values.Hosts;
 import com.openexchange.serverconfig.impl.values.Languages;
 import com.openexchange.serverconfig.impl.values.Prefix;
 import com.openexchange.serverconfig.impl.values.ServerVersion;
-import com.openexchange.tools.session.SessionHolder;
+import com.openexchange.session.SessionHolder;
 import com.openexchange.version.VersionService;
 
 /**

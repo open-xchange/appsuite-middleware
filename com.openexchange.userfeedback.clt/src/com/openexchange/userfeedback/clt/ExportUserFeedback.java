@@ -134,7 +134,7 @@ public class ExportUserFeedback extends AbstractUserFeedback {
     private void setFilePath(CommandLine cmd) {
         String pathStr = cmd.getArgs()[0];
         String normalize = FilenameUtils.normalize(pathStr);
-        if(normalize == null) {
+        if (normalize == null) {
             throw new IllegalArgumentException("Normalized destination file is null!!");
         }
         String normalizedPath = normalize.replaceFirst("^~", System.getProperty("user.home"));

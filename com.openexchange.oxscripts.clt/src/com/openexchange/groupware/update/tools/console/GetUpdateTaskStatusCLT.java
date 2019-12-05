@@ -82,21 +82,11 @@ public class GetUpdateTaskStatusCLT extends AbstractUpdateTasksCLT<Void> {
         //@formatter:on
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.cli.AbstractRmiCLI#addOptions(org.apache.commons.cli.Options)
-     */
     @Override
     protected void addOptions(Options options) {
         options.addOption(createArgumentOption("j", "job-id", "job-id", "The job identifier for which to retrieve its status.", true));
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.cli.AbstractRmiCLI#invoke(org.apache.commons.cli.Options, org.apache.commons.cli.CommandLine, java.lang.String)
-     */
     @Override
     protected Void invoke(Options options, CommandLine cmd, String optRmiHostName) throws Exception {
         UpdateTaskService updateTaskService = getRmiStub(UpdateTaskService.RMI_NAME);
@@ -110,11 +100,6 @@ public class GetUpdateTaskStatusCLT extends AbstractUpdateTasksCLT<Void> {
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.cli.AbstractCLI#checkOptions(org.apache.commons.cli.CommandLine)
-     */
     @Override
     protected void checkOptions(CommandLine cmd) {
         //no-op

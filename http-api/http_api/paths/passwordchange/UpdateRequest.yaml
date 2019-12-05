@@ -4,21 +4,26 @@
     tags:
       - Passwordchange
     summary: Updates or changes the password of the current use.
-    description: |
+    description: >
       #### Note
-      The new password will be set without any checks. The client must ensure that it is the password the user wants to set.
-    consumes:
-      - application/json
+
+      The new password will be set without any checks. The client must ensure
+      that it is the password the user wants to set.
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
-      - in: body
-        name: body
-        description: A JSON object containing the old and the new password.
-        required: true
-        schema:
-          $ref: "#/definitions/PasswordChangeBody"
+      - $ref: '#/components/parameters/gblQueryParamSession'
     responses:
-      200:
-        description: In case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).
-        schema:
-          $ref: "#/definitions/CommonResponse"
+      '200':
+        description: >-
+          In case of errors the responsible fields in the response are filled
+          (see [Error handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommonResponse'
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PasswordChangeBody'
+      description: A JSON object containing the old and the new password.
+      required: true

@@ -61,7 +61,7 @@ public class UID implements Item {
      * @param	r	the FetchResponse
      * @exception	ParsingException	for parsing failures
      */
-    public UID(FetchResponse r) throws ParsingException {
+    public UID(IMAPResponse r) throws ParsingException {
 	seqnum = r.getNumber();
 	r.skipSpaces();
 	uid = r.readLong();

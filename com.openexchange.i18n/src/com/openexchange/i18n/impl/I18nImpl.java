@@ -79,7 +79,7 @@ public class I18nImpl implements I18nService {
         }
         try {
             return serverBundle.getString(key);
-        } catch (final MissingResourceException x) {
+        } catch (MissingResourceException x) {
             LOG.info("Missing key {} for locale {}. Using default.", key, getLocale());
             return key;
         }
@@ -90,7 +90,7 @@ public class I18nImpl implements I18nService {
         try {
             serverBundle.getString(key);
             return true;
-        } catch (final MissingResourceException x) {
+        } catch (MissingResourceException x) {
             return false;
         }
     }

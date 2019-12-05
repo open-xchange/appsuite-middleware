@@ -66,21 +66,11 @@ public final class BoxComOAuthActivator extends AbstractOAuthActivator {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.osgi.AbstractOAuthActivator#getOAuthServiceMetaData()
-     */
     @Override
     protected OAuthServiceMetaData getOAuthServiceMetaData() {
         return new BoxComOAuthServiceMetaData(this);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.osgi.AbstractOAuthActivator#getScopes()
-     */
     @Override
     protected OAuthScope[] getScopes() {
         return BoxComOAuthScope.values();

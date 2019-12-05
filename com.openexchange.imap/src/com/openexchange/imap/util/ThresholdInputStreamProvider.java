@@ -178,7 +178,7 @@ public final class ThresholdInputStreamProvider implements Closeable, InputStrea
         super.finalize();
         try {
             close();
-        } catch (final Exception ignore) {
+        } catch (Exception ignore) {
             // Ignore
         }
     }

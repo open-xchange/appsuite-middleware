@@ -101,7 +101,7 @@ public class LockExpiryTest extends AbstractInfostoreTest {
     }
 
     @Test
-    public void testExpiredLocksOnInfoitemsHaveThemShowUpInUpdatesResponse() throws OXException, UnsupportedEncodingException, InterruptedException, OXException {
+    public void testExpiredLocksOnInfoitemsHaveThemShowUpInUpdatesResponse() throws OXException, UnsupportedEncodingException, InterruptedException {
         FolderCollection folderCollection = resolveFolder(testCollection);
         folderCollection.create();
 

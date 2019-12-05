@@ -953,7 +953,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             stmt.setInt(parameterIndex++, accountId);
             stmt.setInt(parameterIndex++, alarmId);
             try (ResultSet resultSet = logExecuteQuery(stmt)) {
-                if(resultSet.next()) {
+                if (resultSet.next()) {
                     String eventId = resultSet.getString(1);
                     return readAlarm(eventId, resultSet, fields);
                 }

@@ -124,7 +124,7 @@ public class NewAction extends ContactAction {
                     final String mimeType = json.optString("image1_content_type", "image/jpeg");
                     RequestTools.setImageData(contact, image1, mimeType);
                 }
-            } catch (final RuntimeException e) {
+            } catch (RuntimeException e) {
                 throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
         }

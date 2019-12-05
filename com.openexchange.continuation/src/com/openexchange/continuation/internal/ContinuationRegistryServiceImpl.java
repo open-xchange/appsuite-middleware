@@ -102,7 +102,7 @@ public class ContinuationRegistryServiceImpl implements ContinuationRegistryServ
                 if (null != continuation) {
                     try {
                         continuation.cancel(true);
-                    } catch (final Exception x) {
+                    } catch (Exception x) {
                         LOGGER.warn("Failed to cancel continuation {}", continuation.getUuid());
                     }
                 }
@@ -165,7 +165,7 @@ public class ContinuationRegistryServiceImpl implements ContinuationRegistryServ
                         final com.google.common.cache.Cache<UUID, Continuation<?>> newUserCache = newUserCache();
                         cache.putSafe(cacheKey, (Serializable) newUserCache);
                         object = newUserCache;
-                    } catch (final OXException e) {
+                    } catch (OXException e) {
                         if (!CacheExceptionCode.FAILED_SAFE_PUT.equals(e)) {
                             throw e;
                         }

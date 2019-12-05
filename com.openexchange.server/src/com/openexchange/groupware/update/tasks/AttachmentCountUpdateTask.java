@@ -99,6 +99,9 @@ public class AttachmentCountUpdateTask extends UpdateTaskAdapter {
         ResultSet rs = null;
         int rollback = 0;
         try {
+            if (false == Databases.tableExists(con, "prg_dates")) {
+                return;
+            }
             stmt = con.createStatement();
             rs = stmt.executeQuery(SELECT);
             if (false == rs.next()) {
@@ -148,7 +151,7 @@ public class AttachmentCountUpdateTask extends UpdateTaskAdapter {
 
             con.commit();
             rollback = 2;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(repairStmt);

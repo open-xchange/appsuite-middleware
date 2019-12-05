@@ -219,7 +219,7 @@ public class CallbackRegistryImpl implements CustomRedirectURLDetermination, Run
                     iter.remove();
                 }
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LoggerHolder.LOG.error("", e);
         }
     }

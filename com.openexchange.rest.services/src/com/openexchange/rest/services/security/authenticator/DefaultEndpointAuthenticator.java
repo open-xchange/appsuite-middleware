@@ -71,11 +71,6 @@ public class DefaultEndpointAuthenticator extends AbstractEndpointAuthenticator 
         this.password = password;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.rest.services.EndpointAuthenticator#authenticate(java.lang.String, java.lang.String, java.lang.reflect.Method)
-     */
     @Override
     public boolean authenticate(String login, String password, Method invokedMethod) {
         return this.login.equals(login) && this.password.equals(password);

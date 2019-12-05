@@ -59,6 +59,8 @@ import com.openexchange.password.mechanism.PasswordMech;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
+import com.openexchange.user.UserExceptionCode;
 import com.openexchange.user.UserService;
 
 /**
@@ -281,7 +283,7 @@ public abstract class UserStorage {
      * @param userId The user id to change
      * @param mech The password mech to set
      * @param password The (encoded) password to set
-     * @param salt The salt 
+     * @param salt The salt
      * @throws OXException if an error occurs.
      */
     public void updatePassword(Connection connection, Context context, int userId, PasswordMech mech, String password, byte[] salt) throws OXException {
@@ -672,7 +674,7 @@ public abstract class UserStorage {
                         tmp = new CachingUserStorage(new RdbUserStorage());
                         tmp.startInternal();
                         instance = tmp;
-                    } catch (final OXException e) {
+                    } catch (OXException e) {
                         // Cannot occur
                         LOG.warn("", e);
                     }

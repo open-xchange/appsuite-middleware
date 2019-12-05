@@ -68,10 +68,12 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import org.apache.commons.io.FileUtils;
+import com.openexchange.configuration.ServerConfig;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
@@ -566,7 +568,7 @@ public class DBQuotaFileStorage implements SpoolingCapableQuotaFileStorage, Seri
                 Long size = L(getFileSize(identifier));
                 deleted = fileStorage.deleteFile(identifier);
                 fileSizes.put(identifier, size);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 if (!FileStorageCodes.FILE_NOT_FOUND.equals(e)) {
                     throw e;
                 }
@@ -645,7 +647,7 @@ public class DBQuotaFileStorage implements SpoolingCapableQuotaFileStorage, Seri
             }
 
             return result.getLong(1);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw QuotaFileStorageExceptionCodes.SQLSTATEMENTERROR.create(e);
         } finally {
             Databases.closeSQLStuff(result, stmt);
@@ -691,8 +693,9 @@ public class DBQuotaFileStorage implements SpoolingCapableQuotaFileStorage, Seri
 
             // Spool to temporary file to not exhaust/block file storage resources (e.g. HTTP connection pool)
             if (spool(spoolToFile, source)) {
-                tmpFile = TempFileHelper.getInstance().newTempFile();
-                if (tmpFile != null) {
+                Optional<File> optionalTempFile = TempFileHelper.getInstance().newTempFile();
+                if (optionalTempFile.isPresent()) {
+                    tmpFile = optionalTempFile.get();
                     is = Streams.transferToFileAndCreateStream(is, tmpFile);
                 }
             }
@@ -778,8 +781,9 @@ public class DBQuotaFileStorage implements SpoolingCapableQuotaFileStorage, Seri
 
             // Spool to temporary file to not exhaust/block file storage resources (e.g. HTTP connection pool)
             if (spool(spoolToFile, source)) {
-                tmpFile = TempFileHelper.getInstance().newTempFile();
-                if (tmpFile != null) {
+                Optional<File> optionalTempFile = TempFileHelper.getInstance().newTempFile();
+                if (optionalTempFile.isPresent()) {
+                    tmpFile = optionalTempFile.get();
                     is = Streams.transferToFileAndCreateStream(is, tmpFile);
                 }
             }

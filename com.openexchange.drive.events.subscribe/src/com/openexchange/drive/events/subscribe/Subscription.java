@@ -70,12 +70,13 @@ public class Subscription {
     private int userID;
     private String rootFolderID;
     private long timestamp;
+    private SubscriptionMode mode;
 
     public Subscription() {
         super();
     }
 
-    public Subscription(String uuid, int contextID, int userID, String serviceID, String token, String rootFolderID, long timestamp) {
+    public Subscription(String uuid, int contextID, int userID, String serviceID, String token, String rootFolderID, SubscriptionMode mode, long timestamp) {
         super();
         this.uuid = uuid;
         this.serviceID = serviceID;
@@ -83,6 +84,7 @@ public class Subscription {
         this.contextID = contextID;
         this.userID = userID;
         this.rootFolderID = rootFolderID;
+        this.mode = mode;
         this.timestamp = timestamp;
     }
 
@@ -213,6 +215,24 @@ public class Subscription {
     }
 
     /**
+     * Gets the mode
+     *
+     * @return The mode
+     */
+    public SubscriptionMode getMode() {
+        return mode;
+    }
+
+    /**
+     * Sets the mode
+     *
+     * @param mode The mode to set
+     */
+    public void setMode(SubscriptionMode mode) {
+        this.mode = mode;
+    }
+
+    /**
      * Gets a value indicating whether this subscription's push registration token matches the supplied token value, trying to match
      * either the token itself or the md5 checksum of the token.
      *
@@ -239,7 +259,7 @@ public class Subscription {
 
     @Override
     public String toString() {
-        return "Subscription [uuid=" + uuid + ", serviceID=" + serviceID + ", token=" + token + ", contextID=" + contextID + ", userID=" + userID + ", rootFolderID=" + rootFolderID + ", timestamp=" + timestamp + "]";
+        return "Subscription [uuid=" + uuid + ", serviceID=" + serviceID + ", token=" + token + ", contextID=" + contextID + ", userID=" + userID + ", rootFolderID=" + rootFolderID + ", mode=" + mode + ", timestamp=" + timestamp + "]";
     }
 
 }

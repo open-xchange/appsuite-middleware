@@ -83,8 +83,10 @@ public class CookieRefresher implements SessionServletInterceptor {
 
     @Override
     public void intercept(Session session, HttpServletRequest req, HttpServletResponse resp) throws OXException {
-        String host = req.getServerName();
-        if (needsCookieRefresh(session, host)) {
+        if (null == session || !session.isStaySignedIn()) {
+            return;
+        }
+        if (needsCookieRefresh(session)) {
             String hash = session.getHash();
 
             // Write secret+public cookie
@@ -92,7 +94,7 @@ public class CookieRefresher implements SessionServletInterceptor {
 
             // Refresh HTTP session, too
             req.getSession();
-        } else if (needsSessionCookieRefresh(session) && conf.isSessiondAutoLogin(host, session)) {
+        } else if (needsSessionCookieRefresh(session)) {
             String hash = session.getHash();
 
             // Check whether to write session cookie as well
@@ -117,7 +119,7 @@ public class CookieRefresher implements SessionServletInterceptor {
         return false;
     }
 
-    private boolean needsCookieRefresh(Session session, String host) {
+    private boolean needsCookieRefresh(Session session) {
         Long stamp = (Long) session.getParameter(PARAM_COOKIE_REFRESH_TIMESTAMP);
         if (null == stamp) {
             // No time stamp available, yet
@@ -141,7 +143,7 @@ public class CookieRefresher implements SessionServletInterceptor {
                 }
 
                 session.setParameter(PARAM_COOKIE_REFRESH_TIMESTAMP, createNewStamp());
-                if (conf.isSessiondAutoLogin(host, session)) {
+                if (session.isStaySignedIn()) {
                     // Set marker for session cookie for the next request
                     session.setParameter(PARAM_REFRESH_SESSION_COOKIE_FLAG, Boolean.TRUE);
                 }

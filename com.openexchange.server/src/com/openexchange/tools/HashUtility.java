@@ -119,9 +119,9 @@ public final class HashUtility {
             checksum.setEncoding(encoding);
             checksum.update(string.getBytes("UTF-8"));
             return checksum.getFormattedValue();
-        } catch (final NoSuchAlgorithmException e) {
+        } catch (NoSuchAlgorithmException e) {
             org.slf4j.LoggerFactory.getLogger(HashUtility.class).error("", e);
-        } catch (final UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             org.slf4j.LoggerFactory.getLogger(HashUtility.class).error("", e);
         }
         return null;
@@ -141,9 +141,9 @@ public final class HashUtility {
             checksum.setEncoding(encoding);
             checksum.update(string.getBytes("UTF-8"));
             return getLong(checksum.getByteArray(), 0);
-        } catch (final NoSuchAlgorithmException e) {
+        } catch (NoSuchAlgorithmException e) {
             org.slf4j.LoggerFactory.getLogger(HashUtility.class).error("", e);
-        } catch (final UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             org.slf4j.LoggerFactory.getLogger(HashUtility.class).error("", e);
         }
         return 0L;
@@ -163,9 +163,9 @@ public final class HashUtility {
             checksum.setEncoding(encoding);
             checksum.update(string.getBytes("UTF-8"));
             return checksum.getFormattedValue();
-        } catch (final NoSuchAlgorithmException e) {
+        } catch (NoSuchAlgorithmException e) {
             org.slf4j.LoggerFactory.getLogger(HashUtility.class).error("", e);
-        } catch (final UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             org.slf4j.LoggerFactory.getLogger(HashUtility.class).error("", e);
         }
         return null;
@@ -185,9 +185,9 @@ public final class HashUtility {
             checksum.setEncoding(encoding);
             checksum.update(string.getBytes("UTF-8"));
             return getLong(checksum.getByteArray(), 0);
-        } catch (final NoSuchAlgorithmException e) {
+        } catch (NoSuchAlgorithmException e) {
             org.slf4j.LoggerFactory.getLogger(HashUtility.class).error("", e);
-        } catch (final UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             org.slf4j.LoggerFactory.getLogger(HashUtility.class).error("", e);
         }
         return 0L;
@@ -217,9 +217,9 @@ public final class HashUtility {
             checksum.setEncoding(encoding);
             checksum.update(string.getBytes("UTF-8"));
             return checksum.getFormattedValue();
-        } catch (final NoSuchAlgorithmException e) {
+        } catch (NoSuchAlgorithmException e) {
             org.slf4j.LoggerFactory.getLogger(HashUtility.class).error("", e);
-        } catch (final UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             org.slf4j.LoggerFactory.getLogger(HashUtility.class).error("", e);
         }
         return null;

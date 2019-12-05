@@ -3,7 +3,7 @@ package liquibase.snapshot;
 import java.util.Map;
 
 public class CachedRow {
-    private Map row;
+    private final Map row;
 
     public CachedRow(Map row) {
         this.row = row;
@@ -31,7 +31,7 @@ public class CachedRow {
     public Integer getInt(String columnName) {
         Object o = row.get(columnName);
         if (o instanceof Number) {
-            return ((Number) o).intValue();
+            return Integer.valueOf(((Number) o).intValue());
         } else if (o instanceof String) {
             return Integer.valueOf((String) o);
         }
@@ -41,7 +41,7 @@ public class CachedRow {
     public Short getShort(String columnName) {
         Object o = row.get(columnName);
         if (o instanceof Number) {
-            return ((Number) o).shortValue();
+            return Short.valueOf(((Number) o).shortValue());
         } else if (o instanceof String) {
             return Short.valueOf((String) o);
         }
@@ -51,14 +51,10 @@ public class CachedRow {
     public Boolean getBoolean(String columnName) {
         Object o = row.get(columnName);
         if (o instanceof Number) {
-            if (((Number) o).longValue() == 0) {
-                return false;
-            } else {
-                return true;
-            }
+            return ((Number) o).longValue() == 0 ? Boolean.FALSE : Boolean.TRUE;
         }
         if (o instanceof String) {
-            return Boolean.valueOf((String) o);
+            return Boolean.valueOf(o.toString());
         }
         return (Boolean) o;
     }

@@ -170,11 +170,6 @@ public class DefaultOAuthAccount extends DefaultOAuthToken implements OAuthAccou
         return enabledScopesSet;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.OAuthAccount#getUserIdentity()
-     */
     @Override
     public String getUserIdentity() {
         return userIdentity;

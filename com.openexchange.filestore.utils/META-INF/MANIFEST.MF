@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Utility bundle for filestore
 Bundle-SymbolicName: com.openexchange.filestore.utils
-Bundle-Version: 7.10.2
+Bundle-Version: 7.10.3
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.google.common.annotations,
@@ -18,6 +18,8 @@ Import-Package: com.google.common.annotations,
  com.openexchange.java.util,
  com.openexchange.log,
  com.openexchange.osgi,
+ com.openexchange.server,
+ com.openexchange.uploaddir,
  javax.annotation.concurrent;version="1.1.0",
  org.apache.commons.io,
  org.osgi.framework,

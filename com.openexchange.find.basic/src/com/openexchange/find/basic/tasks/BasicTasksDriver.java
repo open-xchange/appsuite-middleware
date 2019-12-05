@@ -165,7 +165,7 @@ public class BasicTasksDriver extends AbstractContactFacetingModuleSearchDriver 
         SearchIterator<Task> si = tasksSQL.findTask(searchObject, Task.TITLE, Order.ASCENDING, fields);
         try {
             List<Document> documents = new ArrayList<Document>();
-            while(si.hasNext()) {
+            while (si.hasNext()) {
                 documents.add(new TasksDocument(si.next()));
             }
             return new SearchResult(documents.size(), searchRequest.getStart(), documents, searchRequest.getActiveFacets());

@@ -134,7 +134,7 @@ import com.sun.mail.util.MailLogger;
  * the range -9959 through +9959.
  *
  * <h3><a name="synchronization">Synchronization</a></h3>
- * 
+ *
  * <p>
  * Date formats are not synchronized.
  * It is recommended to create separate format instances for each thread.
@@ -205,7 +205,7 @@ public class MailDateFormat extends SimpleDateFormat {
     }
 
     /**
-     * Formats the given date in the format specified by 
+     * Formats the given date in the format specified by
      * RFC 2822 in the current TimeZone.
      *
      * @param   date            the Date object
@@ -934,9 +934,9 @@ public class MailDateFormat extends SimpleDateFormat {
             // '-' is allowed to accomodate for the date format as specified in
             // <a href="http://www.ietf.org/rfc/rfc3501.txt">RFC 3501</a>
             if (hasDefaultFws == null) {
-                hasDefaultFws = !skipChar('-');
+                hasDefaultFws = !skipChar('-') ? Boolean.TRUE : Boolean.FALSE;
                 skipFoldingWhiteSpace();
-            } else if (hasDefaultFws) {
+            } else if (hasDefaultFws.booleanValue()) {
                 skipFoldingWhiteSpace();
             } else {
                 parseChar('-');

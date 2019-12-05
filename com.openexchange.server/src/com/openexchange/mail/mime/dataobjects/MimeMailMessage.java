@@ -166,7 +166,7 @@ public final class MimeMailMessage extends MailMessage implements MimeRawSource,
         if (mimeMessage instanceof MimeCleanUp) {
             try {
                 ((MimeCleanUp) mimeMessage).cleanUp();
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 LoggerFactory.getLogger(MimeMailMessage.class).warn("Couldn't clean-up MIME resource.", e);
             }
         }

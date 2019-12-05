@@ -18,13 +18,13 @@ import com.openexchange.groupware.attach.impl.AttachmentImpl;
 import com.openexchange.groupware.attach.impl.AttachmentQueryCatalog;
 import com.openexchange.groupware.attach.util.GetSwitch;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tx.AbstractActionTest;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
 import com.openexchange.setuptools.TestConfig;
 import com.openexchange.setuptools.TestContextToolkit;
+import com.openexchange.user.User;
 
 public abstract class AbstractAttachmentActionTest extends AbstractActionTest {
 

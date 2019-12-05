@@ -4,32 +4,44 @@
     tags:
       - Drive
     summary: Autocomplete contacts
-    description: |
-      Performs a "starts-with" search to find users, contacts and groups, e.g. to look up recipients when sharing a folder or item. 
-      Prior triggering the request, clients should check the user input against the configured value of minSearchChars received in the Settings request.
+    description: >
+      Performs a "starts-with" search to find users, contacts and groups, e.g.
+      to look up recipients when sharing a folder or item. 
+
+      Prior triggering the request, clients should check the user input against
+      the configured value of minSearchChars received in the Settings request.
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: query
-        type: string
         description: The query to search for (no need to include additional wildcards).
         required: true
-    responses:
-      200:
-        description: |
-          A JSON array holding the found users, contacts and groups. 
-          Each element is an object as described in HTTP API (Extended Permission Object), without the "bits" property set. For external contacts, the fields "entity" and "type" are also not set.
         schema:
-          type: array
-          items:
-            type: string
-    x-ox-examples:      
-      - Example1:
+          type: string
+    responses:
+      '200':
+        description: >
+          A JSON array holding the found users, contacts and groups. 
+
+          Each element is an object as described in HTTP API (Extended
+          Permission Object), without the "bits" property set. For external
+          contacts, the fields "entity" and "type" are also not set.
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: string
+    x-ox-examples:
+      - Example1: null
         description: Basic example
-        example: |
-          ==> GET http://192.168.32.191/ajax/drive?action=autocomplete&query=tes&session=35d55f0bd2284e78a8eb4dba99b1310b
+        example: >
+          ==> GET
+          http://192.168.32.191/ajax/drive?action=autocomplete&query=tes&session=35d55f0bd2284e78a8eb4dba99b1310b
+
 
           <== HTTP 200 OK (184.0234 ms elapsed, 52 bytes received)
+
           <   Content: 
               {
                 "data": [{

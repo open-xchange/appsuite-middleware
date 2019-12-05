@@ -68,7 +68,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
-import com.openexchange.groupware.ldap.User;
+import com.openexchange.user.User;
 
 public abstract class LockManagerImpl<T extends Lock> extends DBService implements LockManager{
 
@@ -144,7 +144,7 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
         lock.setOwner(rs.getInt("userid"));
         final int scopeNum = rs.getInt("scope");
         for(final Scope scope : Scope.values()) {
-            if(scopeNum == scope.ordinal()) {
+            if (scopeNum == scope.ordinal()) {
                 lock.setScope(scope);
             }
         }
@@ -175,9 +175,9 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
             set(1, stmt, additional, Integer.valueOf(entity), Long.valueOf(tm), Integer.valueOf(scope.ordinal()), Integer.valueOf(type.ordinal()), ownerDesc, Integer.valueOf(ctx.getContextId()), Integer.valueOf(user.getId()), Integer.valueOf(id));
             stmt.executeUpdate();
             return id;
-        } catch (final SQLException x) {
+        } catch (SQLException x) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(x, getStatement(stmt));
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
         } finally {
             close(stmt, null);
@@ -189,7 +189,7 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
             final Context ctx, final User user, final Object...additional) throws OXException {
         try {
             return createLockForceId(entity, IDGenerator.getId(ctx, getType()), timeout, scope, type, ownerDesc, ctx, user, additional);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw InfostoreExceptionCodes.NEW_ID_FAILED.create(e);
         }
     }
@@ -209,9 +209,9 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
             final int index = set(1, stmt, additional, Long.valueOf(tm), Integer.valueOf(scope.ordinal()), Integer.valueOf(type.ordinal()), ownerDesc);
             set(index, stmt, null, Integer.valueOf(lockId), Integer.valueOf(ctx.getContextId()));
             stmt.executeUpdate();
-        } catch (final SQLException x) {
+        } catch (SQLException x) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(x, getStatement(stmt));
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
         } finally {
             close(stmt, null);
@@ -227,9 +227,9 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
             stmt = con.prepareStatement(DELETE);
             set(1, stmt, null, Integer.valueOf(ctx.getContextId()), Integer.valueOf(id));
             stmt.executeUpdate();
-        } catch (final SQLException x) {
+        } catch (SQLException x) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(x, getStatement(stmt));
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
         } finally {
             close(stmt, null);
@@ -288,9 +288,9 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
                 locks.put(entity, Collections.<T> emptyList());
             }
             return locks;
-        } catch (final SQLException x) {
+        } catch (SQLException x) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(x, getStatement(stmt));
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
         } finally {
             close(stmt, null);
@@ -319,9 +319,9 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
 
             rs = stmt.executeQuery();
             return rs.next();
-        } catch (final SQLException x) {
+        } catch (SQLException x) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(x, getStatement(stmt));
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
         } finally {
             close(stmt, null);
@@ -339,9 +339,9 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
             stmt.setInt(2, from);
             stmt.setInt(3, ctx.getContextId());
             stmt.executeUpdate();
-        } catch (final SQLException x) {
+        } catch (SQLException x) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(x, getStatement(stmt));
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
         } finally {
             close(stmt, null);
@@ -358,9 +358,9 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, entity);
             stmt.executeUpdate();
-        } catch (final SQLException x) {
+        } catch (SQLException x) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(x, getStatement(stmt));
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
         } finally {
             close(stmt, null);

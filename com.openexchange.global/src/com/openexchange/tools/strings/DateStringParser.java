@@ -84,11 +84,11 @@ public class DateStringParser implements StringParser {
 
     @Override
     public <T> T parse(final String s, final Class<T> t) {
-        if(t != Date.class || s == null) {
+        if (t != Date.class || s == null) {
             return null;
         }
         final Long parsed = subParser.parse(s, Long.class);
-        if(parsed != null) {
+        if (parsed != null) {
             @SuppressWarnings("unchecked") T date = (T) new Date(parsed.longValue());
             return date;
         }
@@ -105,16 +105,16 @@ public class DateStringParser implements StringParser {
                 for(final int timeStyle: styles){
                     final DateFormat sdf = DateFormat.getDateTimeInstance(dateStyle, timeStyle, loc);
                     try { return sdf.parse(data);
-                        } catch (final ParseException e) {/*Next*/ }
+                        } catch (ParseException e) {/*Next*/ }
                 }
                 final DateFormat sdf = DateFormat.getDateInstance(dateStyle, loc);
                 try { return sdf.parse(data);
-                    } catch (final ParseException e) {/*Next*/ }
+                    } catch (ParseException e) {/*Next*/ }
                 }
         }
         final DateFormat sdf = DateFormat.getInstance();
         try { return sdf.parse(data);
-            } catch (final ParseException e) {/*Next*/ }
+            } catch (ParseException e) {/*Next*/ }
 
         return null;
     }

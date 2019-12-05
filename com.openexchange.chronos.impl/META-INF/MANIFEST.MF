@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: The chronos implementation bundle
 Bundle-SymbolicName: com.openexchange.chronos.impl
-Bundle-Version: 7.10.2
+Bundle-Version: 7.10.3
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.google.common.collect,
@@ -18,6 +18,8 @@ Import-Package: com.google.common.collect,
  com.openexchange.chronos.provider,
  com.openexchange.chronos.provider.account,
  com.openexchange.chronos.rmi,
+ com.openexchange.chronos.scheduling,
+ com.openexchange.chronos.scheduling.changes,
  com.openexchange.chronos.service,
  com.openexchange.chronos.storage,
  com.openexchange.chronos.storage.operation,
@@ -44,6 +46,7 @@ Import-Package: com.google.common.collect,
  com.openexchange.groupware.downgrade,
  com.openexchange.groupware.ldap,
  com.openexchange.groupware.modules,
+ com.openexchange.groupware.notify,
  com.openexchange.groupware.notify.hostname,
  com.openexchange.groupware.tools.alias,
  com.openexchange.groupware.tools.mappings,
@@ -54,6 +57,7 @@ Import-Package: com.google.common.collect,
  com.openexchange.java,
  com.openexchange.java.util,
  com.openexchange.mail.mime,
+ com.openexchange.mail.usersetting,
  com.openexchange.net.ssl,
  com.openexchange.net.ssl.config,
  com.openexchange.objectusecount,
@@ -63,6 +67,7 @@ Import-Package: com.google.common.collect,
  com.openexchange.principalusecount,
  com.openexchange.quota,
  com.openexchange.quota.groupware,
+ com.openexchange.regional,
  com.openexchange.resource,
  com.openexchange.rest.client.httpclient,
  com.openexchange.search,

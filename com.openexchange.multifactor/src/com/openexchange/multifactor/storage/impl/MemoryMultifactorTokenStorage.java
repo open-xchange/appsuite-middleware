@@ -105,7 +105,7 @@ public class MemoryMultifactorTokenStorage<T extends MultifactorToken<?>> implem
         Map<String, T> tokensForSession = getTokensFor(multifactorRequest);
         synchronized(tokensForSession){
             T token = tokensForSession.get(key);
-            if(token != null && !token.isExpired()) {
+            if (token != null && !token.isExpired()) {
                tokensForSession.remove(key);
                return Optional.of(token);
             }
@@ -117,10 +117,10 @@ public class MemoryMultifactorTokenStorage<T extends MultifactorToken<?>> implem
     public void add(MultifactorRequest multifactorRequest, String key, T token) {
         cleanup();
         Map<String, T> tokensForSession = storage.get(multifactorRequest);
-        if(tokensForSession == null) {
+        if (tokensForSession == null) {
             tokensForSession = Collections.synchronizedMap(new HashMap<String,T>());
             Map<String, T> old = storage.putIfAbsent(multifactorRequest, tokensForSession);
-            if(old != null) {
+            if (old != null) {
                 tokensForSession = old;
             }
         }

@@ -74,7 +74,6 @@ import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.osgi.Tools;
 import com.openexchange.session.Session;
 
 /**
@@ -100,13 +99,9 @@ public class BasicSchedJoulesCalendarAccess extends BasicCachingCalendarAccess i
      * @param session The {@link Session}
      * @param account The {@link CalendarAccount}
      * @param parameters The optional {@link CalendarParameters}
-     * @throws OXException If the context cannot be resolved
      */
-    protected BasicSchedJoulesCalendarAccess(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        super(  session,
-                account,
-                parameters,
-                Tools.requireService(CalendarUtilities.class, Services.getServiceLookup()));
+    protected BasicSchedJoulesCalendarAccess(Session session, CalendarAccount account, CalendarParameters parameters) {
+        super(session, account, parameters);
     }
 
     @Override
@@ -210,7 +205,7 @@ public class BasicSchedJoulesCalendarAccess extends BasicCachingCalendarAccess i
 
     @Override
     public CalendarResult updateAlarms(EventID eventID, List<Alarm> alarms, long clientTimestamp) throws OXException {
-        return updateAlarmsInternal(eventID, alarms, clientTimestamp);
+        return updateAlarmsInternal(eventID, alarms, clientTimestamp, Services.getService(CalendarUtilities.class));
     }
 
     @Override

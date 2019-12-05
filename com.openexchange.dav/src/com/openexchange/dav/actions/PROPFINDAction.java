@@ -53,7 +53,6 @@ import static com.openexchange.webdav.protocol.Protocol.DAV_NS;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
-import org.jdom2.output.XMLOutputter;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.webdav.action.WebdavResponse;
 import com.openexchange.webdav.protocol.Protocol;
@@ -65,8 +64,6 @@ import com.openexchange.webdav.protocol.Protocol;
  * @since v7.8.1
  */
 public abstract class PROPFINDAction extends DAVAction {
-
-    protected static final XMLOutputter OUTPUTTER = new XMLOutputter();
 
     /**
      * Initializes a new {@link PROPFINDAction}.
@@ -83,6 +80,7 @@ public abstract class PROPFINDAction extends DAVAction {
      *
      * @return A new multistatus element
      */
+    @Override
     protected Element prepareMultistatusElement() {
         Element multistatusElement = new Element("multistatus", DAV_NS);
         for (Namespace namespace : protocol.getAdditionalNamespaces()) {
@@ -97,6 +95,7 @@ public abstract class PROPFINDAction extends DAVAction {
      * @param response The WebDAV response to write to
      * @param multistatusElement The root element for the multistatus response
      */
+    @Override
     protected void sendMultistatusResponse(WebdavResponse response, Element multistatusElement) {
         sendXMLResponse(response, new Document(multistatusElement), Protocol.SC_MULTISTATUS);
     }

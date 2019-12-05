@@ -61,10 +61,10 @@ import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.user.User;
 
 /**
  * {@link StorageParametersImpl} - Implementation of {@link StorageParameters}.
@@ -164,7 +164,7 @@ public final class StorageParametersImpl implements StorageParameters {
                 userId = user.getId();
                 context = this.session.getContext();
                 contextId = context.getContextId();
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 throw new IllegalStateException(e);
             }
         }
@@ -219,7 +219,7 @@ public final class StorageParametersImpl implements StorageParameters {
         try {
             @SuppressWarnings("unchecked") final P retval = (P) m.get(name);
             return retval;
-        } catch (final ClassCastException e) {
+        } catch (ClassCastException e) {
             /*
              * Wrong type
              */
@@ -236,7 +236,7 @@ public final class StorageParametersImpl implements StorageParameters {
         try {
             @SuppressWarnings("unchecked") final P retval = (P) m.remove(name);
             return retval;
-        } catch (final ClassCastException e) {
+        } catch (ClassCastException e) {
             /*
              * Wrong type
              */

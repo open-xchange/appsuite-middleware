@@ -89,17 +89,17 @@ public enum AddressParts {
     }
 
     public boolean isValid(Set<String> capabilities){
-        if(neededCapabilities==null){
+        if (neededCapabilities==null){
             return true;
         }
         return capabilities.containsAll(Arrays.asList(neededCapabilities));
     }
 
     public String getNeededCapabilities(){
-        if(neededCapabilities==null){
+        if (neededCapabilities==null){
             return "";
         }
-        if(neededCapabilities.length==1){
+        if (neededCapabilities.length==1){
             return neededCapabilities[0];
         }
         return Strings.toCommaSeparatedList(neededCapabilities);

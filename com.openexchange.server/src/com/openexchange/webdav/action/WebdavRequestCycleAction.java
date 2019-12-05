@@ -65,13 +65,13 @@ public class WebdavRequestCycleAction extends AbstractAction {
 			yield(req,res);
 			req.getFactory().endRequest(200);
 			stopped = true;
-		} catch (final WebdavProtocolException x) {
+		} catch (WebdavProtocolException x) {
 			LOG.debug("Got Webdav Exception", x);
 			req.getFactory().endRequest(x.getStatus());
 			stopped = true;
 			throw x;
 		} finally {
-			if(!stopped) {
+			if (!stopped) {
 				req.getFactory().endRequest(500);
 			}
 		}

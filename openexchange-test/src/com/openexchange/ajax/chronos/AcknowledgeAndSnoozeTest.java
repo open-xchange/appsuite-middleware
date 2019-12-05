@@ -68,7 +68,6 @@ import com.openexchange.ajax.chronos.factory.EventFactory;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
 import com.openexchange.testing.httpclient.models.Alarm;
 import com.openexchange.testing.httpclient.models.AlarmTrigger;
-import com.openexchange.testing.httpclient.models.AlarmTriggerData;
 import com.openexchange.testing.httpclient.models.DateTimeData;
 import com.openexchange.testing.httpclient.models.EventData;
 
@@ -110,7 +109,9 @@ public class AcknowledgeAndSnoozeTest extends AbstractAlarmTriggerTest {
         EventData expectedEventData = eventManager.createEvent(toCreate, true);
         getAndAssertAlarms(expectedEventData, 1, folderId);
 
-        AlarmTriggerData triggerData = getAndCheckAlarmTrigger(1);
+
+        //AlarmTriggerData triggerData = getAndCheckAlarmTrigger(1);
+        List<AlarmTrigger> triggerData = getAndCheckAlarmTrigger(1);
         AlarmTrigger alarmTrigger = findTrigger(expectedEventData.getId(), triggerData);
 
         EventData getEvent = getAndAssertAlarms(expectedEventData, 1, folderId);
@@ -141,7 +142,8 @@ public class AcknowledgeAndSnoozeTest extends AbstractAlarmTriggerTest {
         EventData expectedEventData = eventManager.createEvent(toCreate, true);
         getAndAssertAlarms(expectedEventData, 1, folderId);
 
-        AlarmTriggerData triggerData = getAndCheckAlarmTrigger(1);
+        //AlarmTriggerData triggerData = getAndCheckAlarmTrigger(1);
+        List<AlarmTrigger> triggerData = getAndCheckAlarmTrigger(1);
         AlarmTrigger alarmTrigger = findTrigger(expectedEventData.getId(), triggerData);
 
         EventData getEvent = getAndAssertAlarms(expectedEventData, 1, folderId);

@@ -71,17 +71,17 @@ import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.importexport.formats.Format;
-import com.openexchange.importexport.importers.Importer;
+import com.openexchange.importexport.Format;
+import com.openexchange.importexport.Importer;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.test.AjaxInit;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionFactory;
+import com.openexchange.user.User;
 
 /**
  * Basis for folder tests: Creates a folder and deletes it after testing.
@@ -291,7 +291,7 @@ public class AbstractContactTest {
 
     protected final RdbContactStorage contactStorage;
 
-    public static int createTestFolder(final int type, final ServerSession sessObj, final Context ctx, final String folderTitle) throws OXException, OXException {
+    public static int createTestFolder(final int type, final ServerSession sessObj, final Context ctx, final String folderTitle) throws OXException {
         final User user = UserStorage.getInstance().getUser(sessObj.getUserId(), ctx);
         final FolderObject fo = new FolderObject();
         fo.setFolderName(folderTitle);
@@ -365,7 +365,7 @@ public class AbstractContactTest {
         return null != contactStorage.get(sessObj, String.valueOf(folderId), String.valueOf(entryNumber), new ContactField[] { ContactField.OBJECT_ID });
     }
 
-    protected Contact getEntry(final int entryNumber) throws OXException, OXException {
+    protected Contact getEntry(final int entryNumber) throws OXException {
         return contactStorage.get(sessObj, String.valueOf(folderId), String.valueOf(entryNumber), ContactField.values());
     }
 

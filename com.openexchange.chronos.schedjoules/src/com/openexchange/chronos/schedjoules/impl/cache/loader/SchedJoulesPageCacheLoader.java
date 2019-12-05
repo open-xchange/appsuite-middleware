@@ -69,22 +69,12 @@ public class SchedJoulesPageCacheLoader extends AbstractSchedJoulesCacheLoader {
         super(apiCache);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.chronos.schedjoules.impl.cache.AbstractSchedJoulesCacheLoader#isModified(com.openexchange.chronos.schedjoules.api.cache.SchedJoulesPage)
-     */
     @Override
     boolean isModified(SchedJoulesCachedItemKey key, SchedJoulesPage page) throws OXException {
         SchedJoulesAPI api = apiCache.getAPI(key.getContextId());
         return api.pages().isModified(key.getItemId(), key.getLocale(), page.getEtag(), page.getLastModified());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.google.common.cache.CacheLoader#load(java.lang.Object)
-     */
     @Override
     public SchedJoulesPage load(SchedJoulesCachedItemKey key) throws Exception {
         SchedJoulesAPI api = apiCache.getAPI(key.getContextId());

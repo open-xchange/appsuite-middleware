@@ -62,34 +62,26 @@ public enum FindBasicProperty implements Property {
      * Some mail backends provide a virtual folder that contains all messages of
      * a user to enable cross-folder mail search. Open-Xchange can make use of
      * this feature to improve the search experience.
-     * 
+     *
      * Set the value to the name of the virtual mail folder containing all messages.
      * Leave blank if no such folder exists.
      */
-    allMessageFolder,
+    allMessageFolder(""),
 
     /**
      * Denotes if mail search queries should be matched against mail bodies.
      * This improves the search experience within the mail module, if your mail
      * backend supports fast full text search. Otherwise it can slow down the
      * search requests significantly.
-     * 
+     *
      * Change the value to 'true', if fast full text search is supported. Default
      * is 'false'.
      */
-    searchmailbody(false);
+    searchmailbody(Boolean.FALSE);
 
-    private final Object defaultValue;
-
-    private static final String EMPTY = "";
     private static final String PREFIX = "com.openexchange.find.basic.mail.";
 
-    /**
-     * Initialises a new {@link MailFilterProperty}.
-     */
-    private FindBasicProperty() {
-        this(EMPTY);
-    }
+    private final Object defaultValue;
 
     /**
      * Initializes a new {@link FindBasicProperty}.
@@ -98,23 +90,14 @@ public enum FindBasicProperty implements Property {
         this.defaultValue = defaultValue;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.config.lean.Property#getFQPropertyName()
-     */
     @Override
     public String getFQPropertyName() {
         return PREFIX + name();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.config.lean.Property#getDefaultValue()
-     */
     @Override
     public Object getDefaultValue() {
         return defaultValue;
     }
+
 }

@@ -126,7 +126,7 @@ public final class ProxyRegistryImpl implements ProxyRegistry {
                 AJAXServlet.PARAMETER_UID).append('=').append(UUIDs.getUnformattedString(uuid)).toString();
         try {
             return new URI(uriStr);
-        } catch (final URISyntaxException e) {
+        } catch (URISyntaxException e) {
             throw ProxyExceptionCodes.MALFORMED_URI.create(uriStr);
         }
     }

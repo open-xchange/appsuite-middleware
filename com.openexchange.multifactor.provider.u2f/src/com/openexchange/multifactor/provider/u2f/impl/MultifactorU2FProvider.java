@@ -201,10 +201,10 @@ public class MultifactorU2FProvider  implements MultifactorProvider {
                 LOG.error("Unable to increment U2F counter");
             }
             return;
-        } catch (final U2fAuthenticationException e) {
+        } catch (U2fAuthenticationException e) {
             LOG.info(e.getMessage());
             throw MultifactorExceptionCodes.AUTHENTICATION_FAILED.create();
-        } catch (final U2fBadInputException e) {
+        } catch (U2fBadInputException e) {
             throw MultifactorExceptionCodes.UNKNOWN_ERROR.create(e.getMessage());
         }
     }
@@ -340,7 +340,7 @@ public class MultifactorU2FProvider  implements MultifactorProvider {
             device.setRegisterRequestData(registerData);
             pendingStorage.registerDevice(multifactorRequest.getContextId(), multifactorRequest.getUserId(), device);
             return new U2FRegistrationChallenge(device.getId(), registerData);
-        } catch (final U2fBadConfigurationException e) {
+        } catch (U2fBadConfigurationException e) {
             throw MultifactorExceptionCodes.UNKNOWN_ERROR.create(e, e.getMessage());
         }
     }
@@ -376,7 +376,7 @@ public class MultifactorU2FProvider  implements MultifactorProvider {
                     pendingStorage.unregisterDevice(multifactorRequest.getContextId(), multifactorRequest.getUserId(), deviceId);
 
                     return pendingDevice.get();
-                } catch (final U2fRegistrationException e) {
+                } catch (U2fRegistrationException e) {
                     // Registration denied; Could not validate signature
                     throw MultifactorExceptionCodes.REGISTRATION_FAILED.create(e);
                 } catch (U2fBadInputException | CertificateException e) {

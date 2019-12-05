@@ -70,7 +70,7 @@ public class MobileConfigSignerTest {
         try {
             mobileConfigSigner.close();
             Assert.fail("No exception thrown");
-        } catch (final IOException e) {
+        } catch (IOException e) {
             Assert.assertTrue("Wrong exception message: " + e.getMessage(), MobileConfigSigner.OPENSSL_DIDN_T_RETURN_IN_A_TIMELY_MANNER_KILLED_PROCESS.equals(e.getMessage()));
         }
 
@@ -94,7 +94,7 @@ public class MobileConfigSignerTest {
         try {
             mobileConfigSigner.close();
             Assert.fail("No exception thrown");
-        } catch (final IOException e) {
+        } catch (IOException e) {
             Assert.assertTrue("Wrong exception message: " + e.getMessage(), (MobileConfigSigner.OPENSSL_EXITED_UNEXPECTEDLY_WITH + 1).equals(e.getMessage()));
         }
     }

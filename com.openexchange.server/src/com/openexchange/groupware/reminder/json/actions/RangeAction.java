@@ -67,7 +67,6 @@ import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.groupware.reminder.ReminderService;
 import com.openexchange.groupware.reminder.json.ReminderAJAXRequest;
@@ -78,6 +77,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 
 /**
@@ -138,7 +138,7 @@ public final class RangeAction extends AbstractReminderAction {
             }
 
             return new AJAXRequestResult(jsonResponseArray, "json");
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
         }
     }

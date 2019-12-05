@@ -1,0 +1,70 @@
+reorderRulesBody:
+  content:
+    application/json:
+      schema:
+        type: array
+        items:
+          type: integer
+  description: >-
+    A JSON array with unique identifiers, which represents how the corresponding
+    rules are order.
+  required: true
+MessagingMessageData:
+  content:
+    spplication/json:
+      schema:
+        $ref: '#/components/schemas/MessagingMessageData'
+  description: >-
+    A JSON array of JSON arrays with the folder and ID as elements each
+    identifying a message.
+  required: true
+ConversionDataSource:
+  content:
+    application/json:
+      schema:
+        $ref: '#/components/schemas/ConversionDataSource'
+  description: The data source object.
+  required: true
+ContactListElementArray:
+  content:
+    application/json:
+      schema:
+        type: array
+        items:
+          $ref: '#/components/schemas/ContactListElement'
+  description: A JSON array of JSON objects with the id and folder of the contacts.
+  required: true
+InfoItemExportArray:
+  content:
+    application/json:
+      schema:
+        type: array
+        items:
+          $ref: '#/components/schemas/InfoItemExport'
+  description: A JSON array of JSON objects with the id and folder_id.
+  required: true
+deleteFoldersBody:
+  content:
+    application/json:
+      schema:
+        type: array
+        items:
+          type: string
+  description: A JSON array with object IDs of the folders.
+  required: true
+MailFilterDeletionBody:
+  content:
+    application/json:
+      schema:
+        $ref: '#/components/schemas/MailFilterDeletionBody'
+  description: A JSON object with the ID of the rule to delete.
+  required: true
+TaskListElementArray:
+  content:
+    application/json:
+      schema:
+        type: array
+        items:
+          $ref: '#/components/schemas/TaskListElement'
+  description: A JSON array of JSON objects with the id and folder of the tasks.
+  required: true

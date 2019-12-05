@@ -66,7 +66,7 @@ public class URLHelper {
 	    if (null == url) {
             return null;
         }
-		if(!hasSchema(url)) {
+		if (!hasSchema(url)) {
 			return new StringBuilder(url.length() + 8).append(isMail(url) ? "mailto:" : "http://").append(url).toString();
 		}
 		return url;

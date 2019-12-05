@@ -50,10 +50,9 @@
 package com.openexchange.admin.osgi;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.osgi.Tools.withRanking;
 import java.rmi.Remote;
 import java.util.Dictionary;
-import java.util.Hashtable;
-import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
@@ -62,7 +61,6 @@ import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.mysql.CreateAttachmentTables;
-import com.openexchange.admin.mysql.CreateCalendarTables;
 import com.openexchange.admin.mysql.CreateContactsTables;
 import com.openexchange.admin.mysql.CreateInfostoreTables;
 import com.openexchange.admin.mysql.CreateLdap2SqlTables;
@@ -72,6 +70,7 @@ import com.openexchange.admin.mysql.CreateSequencesTables;
 import com.openexchange.admin.mysql.CreateSettingsTables;
 import com.openexchange.admin.mysql.CreateVirtualFolderTables;
 import com.openexchange.admin.plugins.BasicAuthenticatorPluginInterface;
+import com.openexchange.admin.plugins.ContextDbLookupPluginInterface;
 import com.openexchange.admin.plugins.OXContextPluginInterface;
 import com.openexchange.admin.plugins.OXGroupPluginInterface;
 import com.openexchange.admin.plugins.OXResourcePluginInterface;
@@ -94,7 +93,6 @@ import com.openexchange.context.ContextService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.filestore.FileStorageUnregisterListenerRegistry;
-import com.openexchange.groupware.alias.UserAliasStorage;
 import com.openexchange.groupware.filestore.FileLocationHandler;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -109,8 +107,8 @@ import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
 import com.openexchange.tools.pipesnfilters.PipesAndFiltersService;
 import com.openexchange.user.UserService;
-import com.openexchange.user.UserServiceInterceptor;
-import com.openexchange.user.UserServiceInterceptorRegistry;
+import com.openexchange.user.interceptor.UserServiceInterceptor;
+import com.openexchange.user.interceptor.UserServiceInterceptorRegistry;
 import com.openexchange.version.VersionService;
 
 public class AdminActivator extends HousekeepingActivator {
@@ -151,6 +149,7 @@ public class AdminActivator extends HousekeepingActivator {
         final ConfigurationService configurationService = getService(ConfigurationService.class);
         AdminCache.compareAndSetConfigurationService(null, configurationService);
         AdminServiceRegistry.getInstance().addService(ConfigurationService.class, configurationService);
+
         track(CreateTableService.class, new CreateTableCustomizer(context));
         track(CacheService.class, new RegistryServiceTrackerCustomizer<CacheService>(context, AdminServiceRegistry.getInstance(), CacheService.class));
         track(CapabilityService.class, new RegistryServiceTrackerCustomizer<CapabilityService>(context, AdminServiceRegistry.getInstance(), CapabilityService.class));
@@ -159,7 +158,6 @@ public class AdminActivator extends HousekeepingActivator {
         UserServiceInterceptorRegistry interceptorRegistry = new UserServiceInterceptorRegistry(context);
         track(UserServiceInterceptor.class, interceptorRegistry);
         track(UserService.class, new RegistryServiceTrackerCustomizer<UserService>(context, AdminServiceRegistry.getInstance(), UserService.class));
-        track(UserAliasStorage.class, new RegistryServiceTrackerCustomizer<UserAliasStorage>(context, AdminServiceRegistry.getInstance(), UserAliasStorage.class));
         track(FileStorageUnregisterListenerRegistry.class, new RegistryServiceTrackerCustomizer<FileStorageUnregisterListenerRegistry>(context, AdminServiceRegistry.getInstance(), FileStorageUnregisterListenerRegistry.class));
         track(PluginsLoadedService.class, new RegistryServiceTrackerCustomizer<PluginsLoadedService>(context, AdminServiceRegistry.getInstance(), PluginsLoadedService.class));
         track(QuotaAwareSnippetService.class, new RankingAwareRegistryServiceTrackerCustomizer<QuotaAwareSnippetService>(context, AdminServiceRegistry.getInstance(), QuotaAwareSnippetService.class));
@@ -183,7 +181,10 @@ public class AdminActivator extends HousekeepingActivator {
             final RankingAwareNearRegistryServiceTracker<OXResourcePluginInterface> rtracker = new RankingAwareNearRegistryServiceTracker<OXResourcePluginInterface>(context, OXResourcePluginInterface.class, defaultRanking);
             rememberTracker(rtracker);
 
-            final PluginInterfaces.Builder builder = new PluginInterfaces.Builder().basicAuthenticatorPlugins(batracker).contextPlugins(ctracker).groupPlugins(gtracker).resourcePlugins(rtracker).userPlugins(utracker);
+            final RankingAwareNearRegistryServiceTracker<ContextDbLookupPluginInterface> dbtracker = new RankingAwareNearRegistryServiceTracker<ContextDbLookupPluginInterface>(context, ContextDbLookupPluginInterface.class, defaultRanking);
+            rememberTracker(dbtracker);
+
+            final PluginInterfaces.Builder builder = new PluginInterfaces.Builder().basicAuthenticatorPlugins(batracker).contextPlugins(ctracker).groupPlugins(gtracker).resourcePlugins(rtracker).userPlugins(utracker).dbLookupPlugins(dbtracker);
 
             PluginInterfaces.setInstance(builder.build());
         }
@@ -203,10 +204,10 @@ public class AdminActivator extends HousekeepingActivator {
         try {
             AdminDaemon.initCache(configurationService);
             daemon.initAccessCombinationsInCache();
-        } catch (final OXGenericException e) {
+        } catch (OXGenericException e) {
             log.error("", e);
             throw e;
-        } catch (final ClassNotFoundException e) {
+        } catch (ClassNotFoundException e) {
             log.error("", e);
             throw e;
         }
@@ -261,9 +262,8 @@ public class AdminActivator extends HousekeepingActivator {
 
         // UserServiceInterceptor Bridge
         {
-            Dictionary<String, Object> props = new Hashtable<String, Object>(2);
+            Dictionary<String, Object> props = withRanking(200);
             props.put("name", "OXUser");
-            props.put(Constants.SERVICE_RANKING, Integer.valueOf(200));
             registerService(OXUserPluginInterface.class, new UserServiceInterceptorBridge(interceptorRegistry), props);
         }
 
@@ -273,7 +273,6 @@ public class AdminActivator extends HousekeepingActivator {
         registerService(CreateTableService.class, new CreateOXFolderTables());
         registerService(CreateTableService.class, new CreateVirtualFolderTables());
         registerService(CreateTableService.class, new CreateSettingsTables());
-        registerService(CreateTableService.class, new CreateCalendarTables());
         registerService(CreateTableService.class, new CreateContactsTables());
         registerService(CreateTableService.class, new CreateInfostoreTables());
         registerService(CreateTableService.class, new CreateAttachmentTables());

@@ -67,6 +67,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.slf4j.spi.MDCAdapter;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
@@ -340,6 +341,38 @@ public final class LogProperties {
          */
         FILESTORE_SPOOL("com.openexchange.filestore.spool"),
         /**
+         * com.openexchange.rt2.client.uid
+         */
+        RT2_CLIENT_UID("com.openexchange.rt2.client.uid"),
+        /**
+         * com.openexchange.rt2.document.uid
+         */
+        RT2_DOC_UID("com.openexchange.rt2.document.uid"),
+        /**
+         * com.openexchange.rt2.backend.uid
+         */
+        RT2_BACKEND_UID("com.openexchange.rt2.backend.uid"),
+        /**
+         * com.openexchange.rt2.backend.type
+         */
+        RT2_BACKEND_PART("com.openexchange.rt2.backend.type"),
+        /**
+         * com.openexchange.rt2.backend.recipients
+         */
+        RT2_BACKEND_RECIPIENTS("com.openexchange.rt2.backend.recipients"),
+        /**
+         * com.openexchange.rt2.request.type
+         */
+        RT2_REQUEST_TYPE("com.openexchange.rt2.request.type"),
+        /**
+         * com.openexchange.rt2.admin.type
+         */
+        RT2_ADMIN_MSG("com.openexchange.rt2.admin.type"),
+        /**
+         * com.openexchange.rt2.filename
+         */
+        RT2_FILENAME("com.openexchange.rt2.filename"),
+        /**
          * mail.imap.discardresponses
          * <p>
          * A special log property that controls whether regular untagged IMAP responses are supposed to be discarded
@@ -364,12 +397,12 @@ public final class LogProperties {
 
         private static final Map<String, Name> STRING2NAME;
         static {
-            final Name[] values = Name.values();
-            final Map<String, Name> m = new HashMap<String, Name>(values.length);
-            for (final Name name : values) {
+            Name[] values = Name.values();
+            ImmutableMap.Builder<String, Name> m = ImmutableMap.builderWithExpectedSize(values.length);
+            for (Name name : values) {
                 m.put(name.getName(), name);
             }
-            STRING2NAME = m;
+            STRING2NAME = m.build();
         }
 
         /**

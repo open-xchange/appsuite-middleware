@@ -63,6 +63,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Base64;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -90,8 +91,8 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.JdbcProperties;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.password.mechanism.PasswordMech;
 import com.openexchange.password.mechanism.PasswordDetails;
+import com.openexchange.password.mechanism.PasswordMech;
 import com.openexchange.password.mechanism.PasswordMechRegistry;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -641,7 +642,7 @@ public class AdminCache {
         try {
             return passwordMech.encode(user.getPassword());
         } catch (OXException e) {
-            throw new StorageException("Unable to encode password.", e);
+            throw StorageException.wrapForRMI("Unable to encode password.", e);
         }
     }
 
@@ -656,7 +657,7 @@ public class AdminCache {
     public PasswordMech getPasswordMechanism(PasswordMechObject user) throws StorageException {
         String passwordMechIdentifier = user.getPasswordMech();
         if (Strings.isEmpty(passwordMechIdentifier) || "null".equals(Strings.toLowerCase(passwordMechIdentifier))) {
-            passwordMechIdentifier = getProperties().getUserProp(AdminProperties.User.DEFAULT_PASSWORD_MECHANISM, "SHA");
+            passwordMechIdentifier = getProperties().getUserProp(AdminProperties.User.DEFAULT_PASSWORD_MECHANISM, "{SHA-256}");
         }
 
         try {
@@ -670,7 +671,7 @@ public class AdminCache {
             return passwordMech;
         } catch (OXException e) {
             log.error("Unable to get password mechanism.", e);
-            throw new StorageException("Unable to get password mechanism.", e);
+            throw StorageException.wrapForRMI("Unable to get password mechanism.", e);
         }
     }
 
@@ -736,7 +737,7 @@ public class AdminCache {
                 if (user_pass_combination.length == 4) {
                     String salt = user_pass_combination[3];
                     if (Strings.isNotEmpty(salt)) {
-                        masterCredentials.setSalt(salt.getBytes());
+                        masterCredentials.setSalt(Base64.getUrlDecoder().decode(salt));
                     }
                 }
                 return masterCredentials;

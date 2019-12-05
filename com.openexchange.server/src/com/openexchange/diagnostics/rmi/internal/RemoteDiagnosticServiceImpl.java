@@ -71,41 +71,21 @@ public class RemoteDiagnosticServiceImpl implements RemoteDiagnosticService {
         this.delegate = diagnosticService;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.diagnostics.rmi.RemoteDiagnosticInterface#getCharsets(boolean)
-     */
     @Override
     public List<String> getCharsets(boolean aliases) throws RemoteException {
         return delegate.getCharsets(aliases);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.diagnostics.rmi.RemoteDiagnosticInterface#getProtocols()
-     */
     @Override
     public List<String> getProtocols() throws RemoteException {
         return delegate.getProtocols();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.diagnostics.rmi.RemoteDiagnosticInterface#getCipherSuites()
-     */
     @Override
     public List<String> getCipherSuites() throws RemoteException {
         return delegate.getCipherSuites();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.diagnostics.rmi.RemoteDiagnosticInterface#getVersion()
-     */
     @Override
     public String getVersion() throws RemoteException {
         return delegate.getVersion();

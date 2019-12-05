@@ -183,7 +183,7 @@ public class TemplateServiceImpl implements TemplateService {
 
                     retval = new Template(templateName, new StringReader(templateText), config);
                 }
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 throw IOException.create(e);
             }
             if (retval == null) {
@@ -283,7 +283,7 @@ public class TemplateServiceImpl implements TemplateService {
                 template.setProperties(properties);
                 checkTrustLevel(template);
                 return template;
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 throw IOException.create(e);
             }
         }
@@ -324,7 +324,7 @@ public class TemplateServiceImpl implements TemplateService {
             final OXException e = TemplateErrorMessage.AccessDenied.create();
             LOG.error("{}: Acces to file denied: \"{}\" exceptionID={}", e.getErrorCode(), templatePath, e.getExceptionId());
             throw e;
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw TemplateErrorMessage.IOException.create(e, e.getMessage());
         }
     }
@@ -438,7 +438,7 @@ public class TemplateServiceImpl implements TemplateService {
                 builder.append(line).append('\n');
             }
             return builder.toString();
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw IOException.create(e);
         } finally {
             Streams.close(reader);
@@ -545,7 +545,7 @@ public class TemplateServiceImpl implements TemplateService {
                     final Set<String> categories = new HashSet<String>(Arrays.asList(categoriesArr));
                     tagMap.put(filename, categories);
                 }
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 LOG.error("", e);
             } finally {
                 Streams.close(inStream);

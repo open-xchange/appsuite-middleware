@@ -77,21 +77,11 @@ public class SSLCertificateManagementActivator extends HousekeepingActivator {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
-     */
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { DatabaseService.class };
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.osgi.DeferredActivator#startBundle()
-     */
     @Override
     protected void startBundle() throws Exception {
         registerService(CreateTableService.class, new CreateSSLCertificateManagementTable());
@@ -102,11 +92,6 @@ public class SSLCertificateManagementActivator extends HousekeepingActivator {
         logger.info("SSLCertificateManagementService registered successfully");
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.osgi.HousekeepingActivator#stopBundle()
-     */
     @Override
     protected void stopBundle() throws Exception {
         unregisterService(SSLCertificateManagementService.class);

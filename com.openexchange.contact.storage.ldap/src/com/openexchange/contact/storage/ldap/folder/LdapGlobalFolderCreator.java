@@ -146,20 +146,20 @@ public class LdapGlobalFolderCreator {
                 return executeQuery.getInt(1);
             }
             return -1;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw e;
         } finally {
             if (null != executeQuery) {
                 try {
                     executeQuery.close();
-                } catch (final SQLException e) {
+                } catch (SQLException e) {
                     LOG.error("", e);
                 }
             }
             if (null != ps) {
                 try {
                     ps.close();
-                } catch (final SQLException e) {
+                } catch (SQLException e) {
                     LOG.error("", e);
                 }
             }
@@ -296,6 +296,11 @@ public class LdapGlobalFolderCreator {
 
             @Override
             public boolean isTransient() {
+                return false;
+            }
+
+            @Override
+            public boolean isStaySignedIn() {
                 return false;
             }
 

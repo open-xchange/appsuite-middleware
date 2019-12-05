@@ -201,7 +201,7 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
                 result = stmt.executeQuery(TEST_SELECT);
                 retval = result.next() ? result.getInt(1) == 1 : false;
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             long connectionId = MysqlUtils.getConnectionId(con);
             ConnectionPool.LOG.debug("Test SELECT statement failed ({})", L(connectionId), e);
             retval = false;
@@ -216,7 +216,7 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
         boolean retval;
         try {
             retval = MysqlUtils.ClosedState.OPEN == MysqlUtils.isClosed(data.getPooled(), true);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             retval = false;
         }
         return retval;
@@ -273,7 +273,7 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
                     ConnectionPool.LOG.error(openStatement, dbe);
                     retval = false;
                 }
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 ConnectionPool.LOG.error("", e);
             }
             // Write warning if using this connection was longer than 2 seconds.
@@ -282,7 +282,7 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
                 addTrace(dbe, data);
                 ConnectionPool.LOG.warn("", dbe);
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             retval = false;
         }
         return retval;

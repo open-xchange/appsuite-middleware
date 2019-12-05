@@ -7,7 +7,6 @@ feature_description: |
   When setting up a cluster of multiple nodes, at least the following parameters should be configured additionally:
   <ul>
   <li><code>com.openexchange.hazelcast.group.name</code></li>
-  <li><code>com.openexchange.hazelcast.group.password</code></li>
   <li><code>com.openexchange.hazelcast.network.join</code> (including join-specific options)</li>
   <li><code>com.openexchange.hazelcast.network.interfaces</code></li>
   </ul>
@@ -43,7 +42,8 @@ properties:
     - key: com.openexchange.hazelcast.group.name
       description: |
         Configures the name of the cluster. Only nodes using the same group name will join each other and form the cluster. 
-        Required if [[com.openexchange.hazelcast.network.join]] is not <code>empty</code>.
+        Required if [[com.openexchange.hazelcast.network.join]] is not <code>empty</code>. 
+        Please mind that the effective group name will be extended by a version string automatically for non-enterprise versions. 
       defaultValue:
       version:
       reloadable: false
@@ -52,17 +52,6 @@ properties:
       file: hazelcast.properties
       packageName: open-xchange-core
       tags: ["Hazelcast"]
-    - key: com.openexchange.hazelcast.group.password
-      description: |
-        The password used when joining the cluster. Please change this value, and ensure it's equal on all nodes in the cluster!!!
-      defaultValue: wtV6$VQk8#+3ds!a
-      version:
-      reloadable: false
-      configcascadeAware: false
-      related:
-      file: hazelcast.properties
-      packageName: open-xchange-core
-      tags: ["Hazelcast", "Credential"]
     - key: com.openexchange.hazelcast.network.join
       description: |
         Specifies which mechanism is used to discover other backend nodes in the cluster. 
@@ -71,6 +60,7 @@ properties:
           <li><code>empty</code> - No discovery for single-node setups</li>
           <li><code>static</code> - Fixed set of cluster member nodes</li>
           <li><code>multicast</code> - Automatic discovery of other nodes via multicast</li>
+          <li><code>dns</code> - Consult a DNS server to resolve configured domain names to the most recent set of IP addresses of all service nodes</li>
         </ul>
         Depending on the specified value, further configuration might be needed.
       defaultValue:
@@ -487,4 +477,53 @@ properties:
       related: com.openexchange.hazelcast.ssl.trustStore
       file: 
       packageName: open-xchange-core
-      tags: ["Hazelcast", "Encryption"]  
+      tags: ["Hazelcast", "Encryption"] 
+    - key: com.openexchange.hazelcast.network.join.dns.domainNames
+      description: |
+        The comma-separated list of domain names that are supposed to be resolved to a (super-)set of host addresses through a DNS look-up.
+        Only effective if property "com.openexchange.hazelcast.network.join" is set to "dns"
+      defaultValue:
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: hazelcast.properties
+      packageName: open-xchange-core
+      tags: ["Hazelcast"]
+    - key: com.openexchange.hazelcast.network.join.dns.resolverHost
+      description: |
+        The optional host name for the DNS server. If not specified system's default DNS service is used.
+        Only effective if property "com.openexchange.hazelcast.network.join" is set to "dns"
+      defaultValue:
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: hazelcast.properties
+      packageName: open-xchange-core
+      tags: ["Hazelcast"]
+    - key: com.openexchange.hazelcast.network.join.dns.resolverPort
+      description: |
+        The optional port number for the DNS server. If not specified default port (53 UDP) is used.
+        Only effective if property "com.openexchange.hazelcast.network.join" is set to "dns"
+      defaultValue: -1
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: hazelcast.properties
+      packageName: open-xchange-core
+      tags: ["Hazelcast"]
+    - key: com.openexchange.hazelcast.network.join.dns.refreshMillis
+      description: |
+        The refrsh rate in milliseconds when a new DNS look-up is supported to be performed to apply possibly changed members to Hazelcast
+        network configuration.
+        Only effective if property "com.openexchange.hazelcast.network.join" is set to "dns"
+      defaultValue: 60000
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: hazelcast.properties
+      packageName: open-xchange-core
+      tags: ["Hazelcast"]

@@ -55,12 +55,22 @@ import java.sql.SQLException;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.groupware.contexts.Context;
 
+/**
+ * Only used for testing!
+ */
 public class ConfigurableDBProvider implements DBProvider {
 
     private String url;
     private String driver;
     private String login;
     private String password;
+
+    /**
+     * Initializes a new {@link ConfigurableDBProvider}.
+     */
+    public ConfigurableDBProvider() {
+        super();
+    }
 
     @Override
     public Connection getReadConnection(final Context ctx) {
@@ -74,21 +84,21 @@ public class ConfigurableDBProvider implements DBProvider {
             }
             defaults.setProperty("useSSL", "false");
             return DriverManager.getConnection(url, defaults);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
         }
         return null;
     }
 
     @Override
     public void releaseReadConnection(final Context ctx, final Connection con) {
-        if(con == null) {
+        if (con == null) {
             return;
         }
         try {
-            if(!con.isClosed()) {
+            if (!con.isClosed()) {
                 con.close();
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
         }
     }
 

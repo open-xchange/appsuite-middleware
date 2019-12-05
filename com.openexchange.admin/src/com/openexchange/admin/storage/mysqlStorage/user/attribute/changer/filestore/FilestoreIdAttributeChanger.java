@@ -73,11 +73,6 @@ public class FilestoreIdAttributeChanger extends AbstractUserAttributeChanger {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.UserAttributeChanger#changeAttribute(int, int, com.openexchange.admin.rmi.dataobjects.User, java.sql.Connection)
-     */
     @Override
     public boolean changeAttribute(int userId, int contextId, User userData, Connection connection) throws SQLException {
         Integer filestoreId = userData.getFilestoreId();

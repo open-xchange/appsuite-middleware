@@ -54,8 +54,9 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.ajax.response.IncludeStackTraceService;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.PropertyEvent;
-import com.openexchange.config.PropertyListener;
+import com.openexchange.config.Interests;
+import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.logging.filter.ExceptionCategoryFilter;
 import com.openexchange.logging.filter.RankingAwareTurboFilterList;
 
@@ -64,13 +65,22 @@ import com.openexchange.logging.filter.RankingAwareTurboFilterList;
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class ExceptionCategoryFilterRegisterer implements ServiceTrackerCustomizer<ConfigurationService, ConfigurationService>, PropertyListener {
+public class ExceptionCategoryFilterRegisterer implements ServiceTrackerCustomizer<ConfigurationService, ConfigurationService>, Reloadable {
+
+    private static final String PROP_SUPPRESSED_CATEGORIES = "com.openexchange.log.suppressedCategories";
 
     private final BundleContext context;
-    private volatile ExceptionCategoryFilter exceptionCategoryFilter = null;
-    private RankingAwareTurboFilterList rankingAwareTurboFilterList;
+    private ExceptionCategoryFilter exceptionCategoryFilter = null; // Guarded by synchronized
+    private final RankingAwareTurboFilterList rankingAwareTurboFilterList;
     private final IncludeStackTraceService traceService;
 
+    /**
+     * Initializes a new {@link ExceptionCategoryFilterRegisterer}.
+     *
+     * @param context The bundle context
+     * @param rankingAwareTurboFilterList The list of logback turbo filters
+     * @param traceService The "include stack trace" service
+     */
     public ExceptionCategoryFilterRegisterer(final BundleContext context, final RankingAwareTurboFilterList rankingAwareTurboFilterList, final IncludeStackTraceService traceService) {
         super();
         this.context = context;
@@ -79,23 +89,17 @@ public class ExceptionCategoryFilterRegisterer implements ServiceTrackerCustomiz
     }
 
     @Override
-    public ConfigurationService addingService(ServiceReference<ConfigurationService> reference) {
+    public synchronized ConfigurationService addingService(ServiceReference<ConfigurationService> reference) {
         ConfigurationService service = context.getService(reference);
-        String suppressedCategories = service.getProperty("com.openexchange.log.suppressedCategories", "USER_INPUT", this);
+        String suppressedCategories = service.getProperty(PROP_SUPPRESSED_CATEGORIES, "USER_INPUT");
         ExceptionCategoryFilter.setCategories(suppressedCategories);
 
         ExceptionCategoryFilter exceptionCategoryFilter = this.exceptionCategoryFilter;
         if (exceptionCategoryFilter == null) {
-            synchronized (this) {
-                exceptionCategoryFilter = this.exceptionCategoryFilter;
-                if (exceptionCategoryFilter == null) {
-                    exceptionCategoryFilter = new ExceptionCategoryFilter(traceService);
-                    rankingAwareTurboFilterList.addTurboFilter(exceptionCategoryFilter);
-                    this.exceptionCategoryFilter = exceptionCategoryFilter;
-                }
-            }
+            exceptionCategoryFilter = new ExceptionCategoryFilter(traceService);
+            rankingAwareTurboFilterList.addTurboFilter(exceptionCategoryFilter);
+            this.exceptionCategoryFilter = exceptionCategoryFilter;
         }
-        exceptionCategoryFilter.adaptName();
 
         return service;
     }
@@ -106,30 +110,24 @@ public class ExceptionCategoryFilterRegisterer implements ServiceTrackerCustomiz
     }
 
     @Override
-    public void removedService(ServiceReference<ConfigurationService> reference, ConfigurationService service) {
+    public synchronized void removedService(ServiceReference<ConfigurationService> reference, ConfigurationService service) {
         ExceptionCategoryFilter exceptionCategoryFilter = this.exceptionCategoryFilter;
         if (exceptionCategoryFilter != null) {
-            synchronized (this) {
-                exceptionCategoryFilter = this.exceptionCategoryFilter;
-                if (exceptionCategoryFilter != null) {
-                    rankingAwareTurboFilterList.removeTurboFilter(exceptionCategoryFilter);
-                    this.exceptionCategoryFilter = null;
-                }
-            }
+            rankingAwareTurboFilterList.removeTurboFilter(exceptionCategoryFilter);
+            this.exceptionCategoryFilter = null;
         }
     }
 
+    // ------------------------------------------------ Reloadable stuff -------------------------------------------------------------------
+
     @Override
-    public void onPropertyChange(PropertyEvent event) {
-        switch (event.getType()) {
-            case CHANGED:
-                ExceptionCategoryFilter.setCategories(event.getValue());
-                break;
-            case DELETED:
-                ExceptionCategoryFilter.setCategories("USER_INPUT");
-                break;
-            default:
-                break;
-        }
+    public Interests getInterests() {
+        return Reloadables.interestsForProperties(PROP_SUPPRESSED_CATEGORIES);
     }
+
+    @Override
+    public void reloadConfiguration(ConfigurationService configService) {
+        ExceptionCategoryFilter.setCategories(configService.getProperty(PROP_SUPPRESSED_CATEGORIES, "USER_INPUT"));
+    }
+
 }

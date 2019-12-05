@@ -59,7 +59,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.reminder.ReminderExceptionCode;
 import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.reminder.ReminderObject;
@@ -67,6 +66,7 @@ import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.tools.Collections;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
+import com.openexchange.user.User;
 
 /**
  * This class contains everything for handling reminder for tasks.
@@ -191,7 +191,7 @@ final class Reminder {
         try {
             reminders = remStor.loadReminder(Collections.toArray(tmp.keySet()),
                 userId, Types.TASK, ctx);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
         }
         for (final ReminderObject reminder : reminders) {
@@ -232,7 +232,7 @@ final class Reminder {
                     userId, Types.TASK, ctx);
                 task.setAlarm(remind.getDate());
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
         }
     }
@@ -241,7 +241,7 @@ final class Reminder {
         final ReminderSQLInterface reminder = ReminderHandler.getInstance();
         try {
             reminder.deleteReminder(task.getObjectID(), Types.TASK, con, ctx);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (!ReminderExceptionCode.NOT_FOUND.equals(e)) {
                 throw e;
             }

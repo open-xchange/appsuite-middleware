@@ -124,11 +124,6 @@ public class ServerManager extends AbstractManager {
         return utilInterface.listServer(searchPattern, getMasterCredentials());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.admin.rmi.manager.AbstractManager#clean(java.lang.Object)
-     */
     @Override
     void clean(Object object) throws Exception {
         unregister((Server) object);

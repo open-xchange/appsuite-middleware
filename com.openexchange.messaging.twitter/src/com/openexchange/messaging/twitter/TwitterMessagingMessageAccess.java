@@ -155,7 +155,7 @@ public final class TwitterMessagingMessageAccess implements MessagingMessageAcce
         checkFolder(folder);
         try {
             return get(parseUnsignedLong(id));
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
         }
     }
@@ -174,7 +174,7 @@ public final class TwitterMessagingMessageAccess implements MessagingMessageAcce
                 l.add(get(id2));
             }
             return l;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
         }
     }
@@ -194,14 +194,14 @@ public final class TwitterMessagingMessageAccess implements MessagingMessageAcce
         if (TwitterConstants.TYPE_RETWEET.equalsIgnoreCase(action)) {
             try {
                 return new TwitterRetweetMessage(twitterAccess.showStatus(parseUnsignedLong(id)), twitterAccess.getUser());
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 throw e;
             }
         }
         if (TwitterConstants.TYPE_DIRECT_MESSAGE.equalsIgnoreCase(action)) {
             try {
                 return new TwitterDirectMessage(twitterAccess.showStatus(parseUnsignedLong(id)).getUser(), twitterAccess.getUser());
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 throw e;
             }
         }
@@ -209,7 +209,7 @@ public final class TwitterMessagingMessageAccess implements MessagingMessageAcce
             try {
                 twitterAccess.retweetStatus(parseUnsignedLong(id));
                 return null;
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 throw e;
             }
         }
@@ -231,7 +231,7 @@ public final class TwitterMessagingMessageAccess implements MessagingMessageAcce
                 final StringContent content = TwitterMessagingUtility.checkContent(StringContent.class, message);
                 twitterAccess.updateStatus(content.toString());
                 return null;
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 throw e;
             }
         }
@@ -270,7 +270,7 @@ public final class TwitterMessagingMessageAccess implements MessagingMessageAcce
              * Return
              */
             return msgs;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
         }
     }

@@ -149,7 +149,7 @@ public final class Select {
             stmt.setString(pos, name);
             rs = stmt.executeQuery();
             return rs.next() ? rs.getString(1) : null;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -207,9 +207,9 @@ public final class Select {
             stmt.setString(pos, parentId);
             rs = stmt.executeQuery();
             return rs.next();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -266,9 +266,9 @@ public final class Select {
             stmt.setString(pos, folderId);
             rs = stmt.executeQuery();
             return rs.next();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -323,9 +323,9 @@ public final class Select {
             stmt.setString(pos, folderId);
             rs = stmt.executeQuery();
             return rs.next() ? rs.getString(2) : null;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -388,9 +388,9 @@ public final class Select {
             stmt = null;
             rs = null;
             return ret;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -453,9 +453,9 @@ public final class Select {
             stmt = null;
             rs = null;
             return ret;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -480,7 +480,7 @@ public final class Select {
         final Connection con = databaseService.getReadOnly(cid);
         try {
             return fillFolder(cid, tree, user, locale, outlookFolder, storageType, con);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             databaseService.backReadOnly(cid, con);
@@ -549,7 +549,7 @@ public final class Select {
                     outlookFolder.setLastModified(new Date(date));
                 }
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             if (null != stmt) {
                 final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Select.class);
                 if (LOG.isDebugEnabled()) {
@@ -595,7 +595,7 @@ public final class Select {
             } else {
                 outlookFolder.setPermissions(permissions.toArray(new Permission[permissions.size()]));
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             if (null != stmt) {
                 final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Select.class);
                 if (LOG.isDebugEnabled()) {
@@ -623,7 +623,7 @@ public final class Select {
                 subscribed = rs.getInt(pos) > 0;
             }
             outlookFolder.setSubscribed(subscribed);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             if (null != stmt) {
                 final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Select.class);
                 if (LOG.isDebugEnabled()) {
@@ -664,7 +664,7 @@ public final class Select {
             if (subscribedSubfolder) {
                 outlookFolder.setSubscribedSubfolders(true);
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             if (null != stmt) {
                 final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Select.class);
                 if (LOG.isDebugEnabled()) {
@@ -783,7 +783,7 @@ public final class Select {
                 }
             }
             return subfolderIds.toArray(new String[subfolderIds.size()]);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             if (null != stmt) {
                 final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Select.class);
                 if (LOG.isDebugEnabled()) {
@@ -832,7 +832,7 @@ public final class Select {
                 l.add(rs.getString(fpos));
             }
             return l;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             if (null != stmt) {
                 final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Select.class);
                 if (LOG.isDebugEnabled()) {
@@ -841,7 +841,7 @@ public final class Select {
                 }
             }
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -884,7 +884,7 @@ public final class Select {
                 l.add(new String[] { rs.getString(fpos), rs.getString(spos) });
             }
             return l;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             if (null != stmt) {
                 final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Select.class);
                 if (LOG.isDebugEnabled()) {
@@ -893,7 +893,7 @@ public final class Select {
                 }
             }
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);

@@ -5,127 +5,170 @@
       - Mail
     summary: Gets a mail attachment.
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
-      - $ref: "#/parameters/gblQueryParamMailFolder"
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - $ref: '#/components/parameters/gblQueryParamMailFolder'
       - in: query
         name: id
-        type: string
-        description:  Object ID of the mail which contains the attachment.
+        description: Object ID of the mail which contains the attachment.
         required: true
-      - in: query
-        name: attachment
-        type: string
-        description:  ID of the requested attachment (can be substituted by the parameter `cid` otherwise this parameter is **madatory**).
-        required: false
-      - in: query
-        name: cid
-        type: string
-        description:  Value of header 'Content-ID' of the requested attachment (can be substituted by the parameter `attachment` otherwise this parameter is **madatory**).
-        required: false
-      - in: query
-        name: save
-        type: integer
-        minimum: 0
-        maximum: 1
-        description: 1 overwrites the defined mimetype for this attachment to force the download dialog, otherwise 0.
-        required: false
-      - in: query
-        name: filter
-        type: integer
-        minimum: 0
-        maximum: 1
-        description:  1 to apply HTML white-list filter rules if and only if requested attachment is of MIME type `text/htm*` **AND** parameter `save` is set to 0.
-        required: false
-      - in: query
-        name: allow_nested_messages
-        type: boolean
-        description:  A value of "false" leads to light-weight JSON objects for nested messages containing only the "id" field
-        required: false
-      - in: query
-        name: scan
-        type: boolean
-        description: |
-          Flag to request an Anti-Virus scan for the specified e-mail attachment before downloading it. 
-          Note that if there is a max file limitation set on the middleware, the URL parameter 'exact_length'
-          has to be set to 'true' to instruct the middleware to calculate the attachment's size before passing
-          it to the Anti-Virus scanner.
-        required: false
-      - in: query
-        name: as_json
-        type: boolean
-        description: Nested messages are parsed into full JSON objects. Can lead to longer loading times, for multiple nested messages.
-        required: false
-      - $ref: "#/parameters/gblQueryParamsDecrypt"
-      - $ref: "#/parameters/glbQueryParamsCryptoAuth"
-      - $ref: "#/parameters/glbQueryParamsImageTransformationRotate"
-      - $ref: "#/parameters/glbQueryParamsImageTransformationWidth"
-      - $ref: "#/parameters/glbQueryParamsImageTransformationHeight"
-      - $ref: "#/parameters/glbQueryParamsImageTransformationShrinkOnly"
-      - $ref: "#/parameters/glbQueryParamsImageTransformationScaleType"
-      - $ref: "#/parameters/glbQueryParamsImageTransformationCropWidth"
-      - $ref: "#/parameters/glbQueryParamsImageTransformationCropHeight"
-      - $ref: "#/parameters/glbQueryParamsImageTransformationCropX"
-      - $ref: "#/parameters/glbQueryParamsImageTransformationCropY"
-    responses:
-      200:
-        description: The raw byte data of the document. The response type for the HTTP Request is set accordingly to the defined mimetype for this attachment, except the parameter save is set to 1.
         schema:
           type: string
-          format: binary
+      - in: query
+        name: attachment
+        description: >-
+          ID of the requested attachment (can be substituted by the parameter
+          `cid` otherwise this parameter is **mandatory**).
+        required: false
+        schema:
+          type: string
+      - in: query
+        name: cid
+        description: >-
+          Value of header 'Content-ID' of the requested attachment (can be
+          substituted by the parameter `attachment` otherwise this parameter is
+          **mandatory**).
+        required: false
+        schema:
+          type: string
+      - in: query
+        name: save
+        description: >-
+          1 overwrites the defined mimetype for this attachment to force the
+          download dialog, otherwise 0.
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          maximum: 1
+      - in: query
+        name: filter
+        description: >-
+          1 to apply HTML white-list filter rules if and only if requested
+          attachment is of MIME type `text/htm*` **AND** parameter `save` is set
+          to 0.
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          maximum: 1
+      - in: query
+        name: allow_nested_messages
+        description: >-
+          A value of "false" leads to light-weight JSON objects for nested
+          messages containing only the "id" field
+        required: false
+        schema:
+          type: boolean
+      - in: query
+        name: scan
+        description: >
+          Flag to request an Anti-Virus scan for the specified e-mail attachment
+          before downloading it. 
+
+          Note that if there is a max file limitation set on the middleware, the
+          URL parameter 'exact_length'
+
+          has to be set to 'true' to instruct the middleware to calculate the
+          attachment's size before passing
+
+          it to the Anti-Virus scanner.
+        required: false
+        schema:
+          type: boolean
+      - in: query
+        name: as_json
+        description: >-
+          Nested messages are parsed into full JSON objects. Can lead to longer
+          loading times, for multiple nested messages.
+        required: false
+        schema:
+          type: boolean
+      - $ref: '#/components/parameters/gblQueryParamsDecrypt'
+      - $ref: '#/components/parameters/glbQueryParamsCryptoAuth'
+      - $ref: '#/components/parameters/glbQueryParamsImageTransformationRotate'
+      - $ref: '#/components/parameters/glbQueryParamsImageTransformationWidth'
+      - $ref: '#/components/parameters/glbQueryParamsImageTransformationHeight'
+      - $ref: '#/components/parameters/glbQueryParamsImageTransformationShrinkOnly'
+      - $ref: '#/components/parameters/glbQueryParamsImageTransformationScaleType'
+      - $ref: '#/components/parameters/glbQueryParamsImageTransformationCropWidth'
+      - $ref: '#/components/parameters/glbQueryParamsImageTransformationCropHeight'
+      - $ref: '#/components/parameters/glbQueryParamsImageTransformationCropX'
+      - $ref: '#/components/parameters/glbQueryParamsImageTransformationCropY'
+    responses:
+      '200':
+        description: >-
+          The raw byte data of the document. The response type for the HTTP
+          Request is set accordingly to the defined mimetype for this
+          attachment, except the parameter save is set to 1.
+        content:
+          application/json:
+            schema:
+              type: string
+              format: byte
   put:
     operationId: putMailAttachment
     tags:
       - Mail
     summary: Stores a mail attachment to the drive.
-    consumes:
-      - application/json
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
-      - $ref: "#/parameters/gblQueryParamMailFolder"
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - $ref: '#/components/parameters/gblQueryParamMailFolder'
       - in: query
         name: id
-        type: string
-        description:  Object ID of the mail which contains the attachment.
+        description: Object ID of the mail which contains the attachment.
         required: true
+        schema:
+          type: string
       - in: query
         name: attachment
-        type: string
-        description:  ID of the requested attachment.
+        description: ID of the requested attachment.
         required: true
+        schema:
+          type: string
       - in: query
         name: dest_folder
-        type: string
-        description:  Object ID of the folder in which the attachment should be stored.
-        required: true
-      - in: body
-        name: body
-        description: |
-          A possible empty JSON object containing the optional fields `description` and `filename`. The filename and description values will be used for the newly created file in the drive module.
+        description: Object ID of the folder in which the attachment should be stored.
         required: true
         schema:
-          $ref: "#/definitions/PutAttachmentBody"
+          type: string
     responses:
-      200:
-        description: A JSON object containting the data of the store operation. E.g. contains the id of the newly created drive file.
-        schema:
-          type: object
-          properties:
-            data: 
+      '200':
+        description: >-
+          A JSON object containting the data of the store operation. E.g.
+          contains the id of the newly created drive file.
+        content:
+          application/json:
+            schema:
               type: object
+              title: PutAttachmentResponse
               properties:
-                mailFolder:
-                  type: string
-                  description: Object ID of the folder who contains the mails.
-                mailUID:
-                  type: string
-                  description: Object ID of the mail which contains the attachment.
-                id:
-                  type: string
-                  description: Object ID of the newly created drive file.
-                folder_id: 
-                  type: string
-                  description: Object ID of the folder in which the attachment is stored to.
-                filename:
-                  type: string
-                  description: Name of the newly created drive file.
-
+                data:
+                  type: object
+                  properties:
+                    mailFolder:
+                      type: string
+                      description: Object ID of the folder who contains the mails.
+                    mailUID:
+                      type: string
+                      description: Object ID of the mail which contains the attachment.
+                    id:
+                      type: string
+                      description: Object ID of the newly created drive file.
+                    folder_id:
+                      type: string
+                      description: >-
+                        Object ID of the folder in which the attachment is
+                        stored to.
+                    filename:
+                      type: string
+                      description: Name of the newly created drive file.
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PutAttachmentBody'
+      description: >
+        A possible empty JSON object containing the optional fields
+        `description` and `filename`. The filename and description values will
+        be used for the newly created file in the drive module.
+      required: true

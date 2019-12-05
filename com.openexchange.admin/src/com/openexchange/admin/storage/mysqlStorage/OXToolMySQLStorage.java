@@ -67,6 +67,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.osgi.framework.BundleContext;
@@ -103,6 +104,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.update.UpdateStatus;
 import com.openexchange.groupware.update.Updater;
+import com.openexchange.i18n.LocaleTools;
 import com.openexchange.java.Strings;
 import com.openexchange.sql.builder.StatementBuilder;
 import com.openexchange.sql.grammar.BitAND;
@@ -137,17 +139,17 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             final Group[] grp = getDomainUsedbyGroup(ctx, domain, con);
             final User[] usr = getDomainUsedbyUser(ctx, domain, con);
             return (res != null || grp != null || usr != null);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("SQL Error", e);
             throw new StorageException(e.toString());
-        } catch (final PoolException e) {
+        } catch (PoolException e) {
             log.error("Pool Error", e);
             throw new StorageException(e);
         } finally {
             if (null != con) {
                 try {
                     cache.pushConnectionForContextAfterReading(contextId, con);
-                } catch (final PoolException e) {
+                } catch (PoolException e) {
                     log.error("Error pushing ox db read connection to pool!", e);
                 }
             }
@@ -168,17 +170,17 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         try {
             con = cache.getConnectionForContext(context_id);
             return getDomainUsedbyResource(ctx, domain, con);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("SQL Error", e);
             throw new StorageException(e.toString());
-        } catch (final PoolException e) {
+        } catch (PoolException e) {
             log.error("Pool Error", e);
             throw new StorageException(e);
         } finally {
             if (null != con) {
                 try {
                     cache.pushConnectionForContextAfterReading(context_id, con);
-                } catch (final PoolException e) {
+                } catch (PoolException e) {
                     log.error("Error pushing ox db read connection to pool!", e);
                 }
             }
@@ -193,17 +195,17 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         try {
             con = cache.getConnectionForContext(context_id);
             return getDomainUsedbyUser(ctx, domain, con);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("SQL Error", e);
             throw new StorageException(e.toString());
-        } catch (final PoolException e) {
+        } catch (PoolException e) {
             log.error("Pool Error", e);
             throw new StorageException(e);
         } finally {
             if (null != con) {
                 try {
                     cache.pushConnectionForContextAfterReading(context_id, con);
-                } catch (final PoolException e) {
+                } catch (PoolException e) {
                     log.error("Error pushing ox db read connection to pool!", e);
                 }
             }
@@ -224,10 +226,10 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             stmt.setInt(1, ctx.getId().intValue());
             rs = stmt.executeQuery();
             return rs.next();
-        } catch (final PoolException e) {
+        } catch (PoolException e) {
             log.error("Pool Error", e);
             throw new StorageException(e);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("SQL Error", e);
             throw new StorageException(e.toString());
         } finally {
@@ -235,7 +237,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             if (null != con) {
                 try {
                     cache.pushReadConnectionForConfigDB(con);
-                } catch (final PoolException e) {
+                } catch (PoolException e) {
                     log.error("Error pushing connection to pool!", e);
                 }
             }
@@ -248,14 +250,14 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         try {
             con = cache.getReadConnectionForConfigDB();
             return existsContextInServer(ctx, con);
-        } catch (final PoolException e) {
+        } catch (PoolException e) {
             log.error("Pool Error", e);
             throw new StorageException(e);
         } finally {
             if (null != con) {
                 try {
                     cache.pushReadConnectionForConfigDB(con);
-                } catch (final PoolException e) {
+                } catch (PoolException e) {
                     log.error("Error pushing connection to pool!", e);
                 }
             }
@@ -306,14 +308,14 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         try {
             con = cache.getConnectionForContext(ctx.getId().intValue());
             return existsContextLoginMappings(ctx, con);
-        } catch (final PoolException e) {
+        } catch (PoolException e) {
             log.error("Pool Error", e);
             throw new StorageException(e);
         } finally {
             if (con != null) {
                 try {
                     cache.pushConnectionForContextAfterReading(ctx.getId().intValue(), con);
-                } catch (final PoolException e) {
+                } catch (PoolException e) {
                     log.error("Error pushing configdb write connection to pool!", e);
                 }
             }
@@ -350,7 +352,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                     }
                 }
                 return retval;
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 log.error("SQL Error", e);
                 throw new StorageException(e.toString());
             } finally {
@@ -375,7 +377,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         final Connection con;
         try {
             con = cache.getConnectionForContext(ctxId);
-        } catch (final PoolException e) {
+        } catch (PoolException e) {
             log.error("Pool Error", e);
             throw new StorageException(e);
         }
@@ -391,7 +393,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             while (!foundOther && rs.next()) {
                 foundOther = user.getDisplay_name().equals(rs.getString(1)) && (userId == 0 || userId != rs.getInt(2));
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("SQL Error", e);
             throw new StorageException(e);
         } finally {
@@ -400,7 +402,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             if (null != con) {
                 try {
                     cache.pushConnectionForContextAfterReading(ctxId, con);
-                } catch (final PoolException e) {
+                } catch (PoolException e) {
                     log.error("Error pushing context connection to pool.", e);
                 }
             }
@@ -430,10 +432,10 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                     return false;
                 }
             }
-        } catch (final PoolException e) {
+        } catch (PoolException e) {
             log.error("Pool Error", e);
             throw new StorageException(e);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("SQL Error", e);
             throw new StorageException(e.toString());
         } finally {
@@ -442,7 +444,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             if (con != null) {
                 try {
                     cache.pushConnectionForContextAfterReading(ctx.getId().intValue(), con);
-                } catch (final PoolException e) {
+                } catch (PoolException e) {
                     log.error("Error pushing configdb write connection to pool!", e);
                 }
             }
@@ -495,10 +497,10 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                     return false;
                 }
             }
-        } catch (final PoolException e) {
+        } catch (PoolException e) {
             log.error("Pool Error", e);
             throw new StorageException(e);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("SQL Error", e);
             throw new StorageException(e.toString());
         } finally {
@@ -507,7 +509,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             if (con != null) {
                 try {
                     cache.pushConnectionForContextAfterReading(ctx.getId().intValue(), con);
-                } catch (final PoolException e) {
+                } catch (PoolException e) {
                     log.error("Error pushing configdb write connection to pool!", e);
                 }
             }
@@ -552,10 +554,10 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                 ret = true;
             }
             prep.close();
-        } catch (final PoolException e) {
+        } catch (PoolException e) {
             log.error("Pool Error", e);
             throw new StorageException(e);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("SQL Error", e);
             throw new StorageException(e.toString());
         } finally {
@@ -565,7 +567,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             if (null != con) {
                 try {
                     cache.pushConnectionForContextAfterReading(contextId, con);
-                } catch (final PoolException ecp) {
+                } catch (PoolException ecp) {
                     log.error("Error pushing ox db write connection to pool!", ecp);
                 }
             }
@@ -617,10 +619,10 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             prep_check.setInt(2, resource_id);
             rs = prep_check.executeQuery();
             return rs.next();
-        } catch (final PoolException e) {
+        } catch (PoolException e) {
             log.error("Pool Error", e);
             throw new StorageException(e);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("SQL Error", e);
             throw new StorageException(e.toString());
         } finally {
@@ -630,18 +632,13 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             if (null != con) {
                 try {
                     cache.pushConnectionForContextAfterReading(contextId, con);
-                } catch (final PoolException e) {
+                } catch (PoolException e) {
                     log.error("Error pushing ox write connection to pool!", e);
                 }
             }
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.admin.storage.sqlStorage.OXToolSQLStorage#existsResourceAddress(com.openexchange.admin.rmi.dataobjects.Context, java.lang.String)
-     */
     @Override
     public boolean existsResourceAddress(final Context ctx, final String address) throws StorageException {
         final int context_id = ctx.getId().intValue();
@@ -658,10 +655,10 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             prep_check.setString(2, address);
             rs = prep_check.executeQuery();
             return rs.next();
-        } catch (final PoolException e) {
+        } catch (PoolException e) {
             log.error("Pool Error", e);
             throw new StorageException(e);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("SQL Error", e);
             throw new StorageException(e.toString());
         } finally {
@@ -671,7 +668,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             if (con != null) {
                 try {
                     cache.pushConnectionForContextAfterReading(context_id, con);
-                } catch (final PoolException e) {
+                } catch (PoolException e) {
                     log.error("Error pushing ox write connection to pool!", e);
                 }
             }
@@ -694,10 +691,10 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             prep_check.setInt(3, resource_id.intValue());
             rs = prep_check.executeQuery();
             return rs.next();
-        } catch (final PoolException e) {
+        } catch (PoolException e) {
             log.error("Pool Error", e);
             throw new StorageException(e);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("SQL Error", e);
             throw new StorageException(e.toString());
         } finally {
@@ -707,7 +704,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             if (con != null) {
                 try {
                     cache.pushConnectionForContextAfterReading(context_id, con);
-                } catch (final PoolException e) {
+                } catch (PoolException e) {
                     log.error("Error pushing ox write connection to pool!", e);
                 }
             }
@@ -766,10 +763,10 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             prep_check.setInt(2, uid);
             rs = prep_check.executeQuery();
             return rs.next();
-        } catch (final PoolException e) {
+        } catch (PoolException e) {
             log.error("Pool Error", e);
             throw new StorageException(e);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("SQL Error", e);
             throw new StorageException(e.toString());
         } finally {
@@ -779,7 +776,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             if (con != null) {
                 try {
                     cache.pushConnectionForContextAfterReading(contextId, con);
-                } catch (final PoolException e) {
+                } catch (PoolException e) {
                     log.error("Error pushing configdb write connection to pool!", e);
                 }
             }
@@ -825,10 +822,10 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                 // ok, those users all exist
                 ret = true;
             }
-        } catch (final PoolException e) {
+        } catch (PoolException e) {
             log.error("Pool Error", e);
             throw new StorageException(e);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("SQL Error", e);
             throw new StorageException(e.toString());
         } finally {
@@ -837,7 +834,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             if (null != con) {
                 try {
                     cache.pushConnectionForContextAfterReading(contextId, con);
-                } catch (final PoolException ecp) {
+                } catch (PoolException ecp) {
                     log.error("Error pushing ox db write connection to pool!", ecp);
                 }
             }
@@ -888,17 +885,17 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                 }
             }
             return true;
-        } catch (final PoolException e) {
+        } catch (PoolException e) {
             log.error("Pool Error", e);
             throw new StorageException(e);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("SQL Error", e);
             throw new StorageException(e.toString());
         } finally {
             if (prep != null) {
                 try {
                     prep.close();
-                } catch (final SQLException e) {
+                } catch (SQLException e) {
                     log.error("Error closing statement", e);
                 }
             }
@@ -906,7 +903,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             if (prep2 != null) {
                 try {
                     prep2.close();
-                } catch (final SQLException e) {
+                } catch (SQLException e) {
                     log.error("Error closing statement", e);
                 }
             }
@@ -914,7 +911,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             if (null != con) {
                 try {
                     cache.pushConnectionForContextAfterReading(intValue, con);
-                } catch (final PoolException ecp) {
+                } catch (PoolException ecp) {
                     log.error("Error pushing ox db write connection to pool!", ecp);
                 }
             }
@@ -933,24 +930,24 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             prep.setInt(2, userId);
             rs = prep.executeQuery();
             return rs.next();
-        } catch (final PoolException e) {
+        } catch (PoolException e) {
             log.error("Pool Error", e);
             throw new StorageException(e);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("SQL Error", e);
             throw new StorageException(e.toString());
         } finally {
             if (prep != null) {
                 try {
                     prep.close();
-                } catch (final SQLException e) {
+                } catch (SQLException e) {
                     log.error("Error closing statement", e);
                 }
             }
             if (null != con) {
                 try {
                     cache.pushConnectionForContextAfterReading(ctx.getId().intValue(), con);
-                } catch (final PoolException ecp) {
+                } catch (PoolException ecp) {
                     log.error("Error pushing ox db write connection to pool!", ecp);
                 }
             }
@@ -982,14 +979,14 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             } else {
                 throw new SQLException("Unable to determine admin for context " + ctx.getId());
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("SQL Error", e);
             throw new StorageException(e.toString());
         } finally {
             if (rs != null) {
                 try {
                     rs.close();
-                } catch (final SQLException e) {
+                } catch (SQLException e) {
                     log.error("Error closing resultset", e);
                 }
             }
@@ -1006,14 +1003,14 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         try {
             con = cache.getConnectionForContext(contextId);
             return getAdminForContext(ctx, con);
-        } catch (final PoolException e) {
+        } catch (PoolException e) {
             log.error("Pool Error", e);
             throw new StorageException(e);
         } finally {
             if (con != null) {
                 try {
                     cache.pushConnectionForContextAfterReading(contextId, con);
-                } catch (final PoolException e) {
+                } catch (PoolException e) {
                     log.error("Error pushing oxdb read connection to pool!", e);
                 }
             }
@@ -1075,7 +1072,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             if (null != con) {
                 try {
                     cache.pushReadConnectionForConfigDB(con);
-                } catch (final PoolException e) {
+                } catch (PoolException e) {
                     log.error("Error pushing ox db read connection to pool!", e);
                 }
             }
@@ -1147,10 +1144,10 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             }
 
             return numPools == 1;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("SQL Error", e);
             throw new StorageException(e.toString());
-        } catch (final PoolException e) {
+        } catch (PoolException e) {
             log.error("Pool Error", e);
             throw new StorageException(e);
         } finally {
@@ -1158,7 +1155,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             if (con != null) {
                 try {
                     cache.pushReadConnectionForConfigDB(con);
-                } catch (final PoolException e) {
+                } catch (PoolException e) {
                     log.error("Error pushing oxdb read connection to pool!", e);
                 }
             }
@@ -1184,21 +1181,21 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             } else {
                 throw new SQLException("UNABLE TO GET DEFAULT GROUP FOR CONTEXT " + ctx.getId());
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("SQL Error", e);
             throw new StorageException(e.toString());
         } finally {
             if (null != rs) {
                 try {
                     rs.close();
-                } catch (final SQLException e) {
+                } catch (SQLException e) {
                     log.error("Error closing resultset!", e);
                 }
             }
             if (stmt != null) {
                 try {
                     stmt.close();
-                } catch (final SQLException e) {
+                } catch (SQLException e) {
                     log.error("Error closing prepared statement!", e);
                 }
             }
@@ -1227,31 +1224,31 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                 throw new SQLException("UNABLE TO GET DEFAULT GROUP FOR CONTEXT " + ctx.getId());
             }
             group_id = rs.getInt("MIN(id)");
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("SQL Error", e);
             throw new StorageException(e.toString());
-        } catch (final PoolException e) {
+        } catch (PoolException e) {
             log.error("Pool Error", e);
             throw new StorageException(e);
         } finally {
             if (rs != null) {
                 try {
                     rs.close();
-                } catch (final SQLException e) {
+                } catch (SQLException e) {
                     log.error("Error closing resultset!", e);
                 }
             }
             if (stmt != null) {
                 try {
                     stmt.close();
-                } catch (final SQLException e) {
+                } catch (SQLException e) {
                     log.error("Error closing prepared statement!", e);
                 }
             }
             if (con != null) {
                 try {
                     cache.pushConnectionForContextAfterReading(context_id, con);
-                } catch (final PoolException e) {
+                } catch (PoolException e) {
                     log.error("Error pushing oxdb read connection to pool!", e);
                 }
             }
@@ -1278,7 +1275,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             if (rs.wasNull()) {
                 gid_number = -1;
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("SQL Error", e);
             throw new StorageException(e.toString());
         } finally {
@@ -1345,10 +1342,10 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             }
             // grab username and return
             return rs.getString("identifier");
-        } catch (final PoolException e) {
+        } catch (PoolException e) {
             log.error("Pool Error", e);
             throw new StorageException(e);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("SQL Error", e);
             throw new StorageException(e.toString());
         } finally {
@@ -1358,7 +1355,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             if (null != con) {
                 try {
                     cache.pushConnectionForContextAfterReading(contextId, con);
-                } catch (final PoolException e) {
+                } catch (PoolException e) {
                     log.error("Error pushing ox db read connection to pool!", e);
                 }
             }
@@ -1417,10 +1414,10 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             }
             // grab user name and return
             return rs.getString("identifier");
-        } catch (final PoolException e) {
+        } catch (PoolException e) {
             log.error("Pool Error", e);
             throw new StorageException(e);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("SQL Error", e);
             throw new StorageException(e.toString());
         } finally {
@@ -1430,7 +1427,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             if (null != con) {
                 try {
                     cache.pushConnectionForContextAfterReading(ctx.getId().intValue(), con);
-                } catch (final PoolException e) {
+                } catch (PoolException e) {
                     log.error("Error pushing ox db read connection to pool!", e);
                 }
             }
@@ -1508,10 +1505,10 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             }
             // grab user name and return
             return rs.getString("uid");
-        } catch (final PoolException e) {
+        } catch (PoolException e) {
             log.error("Pool Error", e);
             throw new StorageException(e);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("SQL Error", e);
             throw new StorageException(e.toString());
         } finally {
@@ -1521,7 +1518,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             if (null != con) {
                 try {
                     cache.pushConnectionForContextAfterReading(ctx.getId().intValue(), con);
-                } catch (final PoolException e) {
+                } catch (PoolException e) {
                     log.error("Error pushing ox db read connection to pool!", e);
                 }
             }
@@ -1536,10 +1533,10 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         try {
             con = cache.getConnectionForContext(ctx.getId().intValue());
             return isGuest(con, ctx, user_id);
-        } catch (final PoolException e) {
+        } catch (PoolException e) {
             log.error("Pool Error", e);
             throw new StorageException(e);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("SQL Error", e);
             throw new StorageException(e.toString());
         } finally {
@@ -1549,7 +1546,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             if (null != con) {
                 try {
                     cache.pushConnectionForContextAfterReading(ctx.getId().intValue(), con);
-                } catch (final PoolException e) {
+                } catch (PoolException e) {
                     log.error("Error pushing ox db read connection to pool!", e);
                 }
             }
@@ -1612,17 +1609,17 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     //            if (rs.next()) {
     //                retBool = true;
     //            }
-    //        } catch (final PoolException e) {
+    //        } catch (PoolException e) {
     //            log.error("Pool Error",e);
     //            throw new StorageException(e);
-    //        } catch (final SQLException e) {
+    //        } catch (SQLException e) {
     //            log.error("SQL Error",e);
     //            throw new StorageException(e);
     //        } finally {
     //            if (null != rs) {
     //                try {
     //                    rs.close();
-    //                } catch (final SQLException e) {
+    //                } catch (SQLException e) {
     //                    log.error("Error closing resultset", e);
     //                }
     //            }
@@ -1630,7 +1627,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     //                if (null != prep_check) {
     //                    prep_check.close();
     //                }
-    //            } catch (final SQLException e) {
+    //            } catch (SQLException e) {
     //                log.error("Error closing prepared statement!", e);
     //            }
     //
@@ -1640,7 +1637,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     //                } else {
     //                    cache.pushConfigDBWrite(con);
     //                }
-    //            } catch (final PoolException e) {
+    //            } catch (PoolException e) {
     //                log.error("Error pushing configdb write connection to pool!", e);
     //            }
     //
@@ -1666,14 +1663,14 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             if (a == user_id) {
                 isadmin = true;
             }
-        } catch (final PoolException e) {
+        } catch (PoolException e) {
             log.error("Pool Error", e);
             throw new StorageException(e);
         } finally {
             if (con != null) {
                 try {
                     cache.pushConnectionForContextAfterReading(contextId, con);
-                } catch (final PoolException e) {
+                } catch (PoolException e) {
                     log.error("Error pushing oxdb read connection to pool!", e);
                 }
             }
@@ -1712,10 +1709,10 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             stmt.setInt(2, userid.intValue());
             rs = stmt.executeQuery();
             return rs.next();
-        } catch (final PoolException e) {
+        } catch (PoolException e) {
             log.error("Pool Error", e);
             throw new StorageException(e);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("SQL Error", e);
             throw new StorageException(e.toString());
         } finally {
@@ -1724,7 +1721,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             if (con != null) {
                 try {
                     cache.pushConnectionForContextAfterReading(ctxid.intValue(), con);
-                } catch (final PoolException e) {
+                } catch (PoolException e) {
                     log.error("Error pushing oxdb read connection to pool!", e);
                 }
             }
@@ -1749,10 +1746,10 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                 throw new SQLException("UNABLE TO QUERY CONTEXT STATUS");
             }
             retBool = rs.getBoolean("enabled");
-        } catch (final PoolException e) {
+        } catch (PoolException e) {
             log.error("Pool Error", e);
             throw new StorageException(e);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("SQL Error", e);
             throw new StorageException(e.toString());
         } finally {
@@ -1761,7 +1758,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
 
             try {
                 cache.pushReadConnectionForConfigDB(con);
-            } catch (final PoolException e) {
+            } catch (PoolException e) {
                 log.error("Error pushing configdb read connection to pool!", e);
             }
         }
@@ -1790,7 +1787,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             }
             final int bits = rs.getInt("bits");
             return (bits & bit) == bit;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("SQL Error", e);
             throw new StorageException(e.toString());
         } finally {
@@ -1825,7 +1822,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         } catch (PoolException e) {
             log.error("Pool Error", e);
             throw new StorageException(e);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("SQL Error", e);
             throw new StorageException(e);
         } finally {
@@ -1854,7 +1851,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             if (null != con) {
                 try {
                     cache.pushConnectionForContextAfterReading(context_id, con);
-                } catch (final PoolException e) {
+                } catch (PoolException e) {
                     log.error("Error pushing ox db write connection to pool!", e);
                 }
             }
@@ -1943,7 +1940,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                 log.debug("FATAL: this error must not happen", e);
             }
             log.error("Error while checking/updating schema", e);
-            throw new StorageException(e.toString(), e);
+            throw StorageException.wrapForRMI(e);
         }
     }
 
@@ -2021,7 +2018,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                 log.debug("FATAL: this error must not happen", e);
             }
             log.error("Error in checking/updating schema", e);
-            throw new StorageException(e.toString(), e);
+            throw StorageException.wrapForRMI(e);
         }
     }
 
@@ -2105,7 +2102,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                 log.debug("FATAL: this error must not happen", e);
             }
             log.error("Error in checking/updating schema", e);
-            throw new StorageException(e.toString(), e);
+            throw StorageException.wrapForRMI(e);
         }
 
         return Arrays.asList(needingUpdate, currentlyUpdating, outdatedUpdating);
@@ -2141,7 +2138,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             } else {
                 throw new SQLException("Unable to set features from bitfield for User: " + user.getId() + ", Context: " + ctx.getId());
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("SQL Error", e);
             throw new StorageException(e.toString());
         } finally {
@@ -2188,7 +2185,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             } else {
                 throw new SQLException("Unable to set features from bitfield for User: " + user.getId() + ", Context: " + ctx.getId());
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("SQL Error", e);
             throw new StorageException(e.toString());
         } finally {
@@ -2202,7 +2199,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             if (null != ps) {
                 ps.close();
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("Error closing prepared statement!", e);
         }
     }
@@ -2211,7 +2208,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         if (null != rs) {
             try {
                 rs.close();
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 log.error("Error closing resultset", e);
             }
         }
@@ -2221,7 +2218,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         final Connection con;
         try {
             con = cache.getReadConnectionForConfigDB();
-        } catch (final PoolException e) {
+        } catch (PoolException e) {
             log.error("", e);
             throw new StorageException(e);
         }
@@ -2242,7 +2239,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             Databases.closeSQLStuff(rs, stmt);
             try {
                 cache.pushReadConnectionForConfigDB(con);
-            } catch (final PoolException e) {
+            } catch (PoolException e) {
                 log.error("Error pushing ox db read connection to pool!", e);
             }
         }
@@ -2254,7 +2251,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         return null;
         //        ArrayList<Group> data = new ArrayList<Group>();
         //
-        //        if(data.size()==0){
+        //        if (data.size()==0){
         //            return null;
         //        }else{
         //            return data.toArray(new Group[data.size()]);
@@ -2358,10 +2355,10 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             if (rs.next()) {
                 retBool = true;
             }
-        } catch (final PoolException e) {
+        } catch (PoolException e) {
             log.error("Pool Error", e);
             throw new StorageException(e);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("SQL Error", e);
             throw new StorageException(e.toString());
         } finally {
@@ -2375,7 +2372,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                     } else {
                         cache.pushReadConnectionForConfigDB(con);
                     }
-                } catch (final PoolException e) {
+                } catch (PoolException e) {
                     log.error("Error pushing connection to pool!", e);
                 }
             }
@@ -2406,7 +2403,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             if (result.next()) {
                 retval = true;
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("SQL Error", e);
             throw new StorageException(e.toString(), e);
         } finally {
@@ -2446,10 +2443,10 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             if (rs.next()) {
                 retBool = true;
             }
-        } catch (final PoolException e) {
+        } catch (PoolException e) {
             log.error("Pool Error", e);
             throw new StorageException(e);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("SQL Error", e);
             throw new StorageException(e.toString());
         } finally {
@@ -2463,7 +2460,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                     } else {
                         cache.pushReadConnectionForConfigDB(con);
                     }
-                } catch (final PoolException e) {
+                } catch (PoolException e) {
                     log.error("Error pushing connection to pool!", e);
                 }
             }
@@ -2486,10 +2483,10 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             rs = prep_check.executeQuery();
 
             return rs.next();
-        } catch (final PoolException e) {
+        } catch (PoolException e) {
             log.error("Pool Error", e);
             throw new StorageException(e);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("SQL Error", e);
             throw new StorageException(e.toString());
         } finally {
@@ -2499,7 +2496,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             if (null != con) {
                 try {
                     cache.pushReadConnectionForConfigDB(con);
-                } catch (final PoolException e) {
+                } catch (PoolException e) {
                     log.error("Error pushing connection to pool!", e);
                 }
             }
@@ -2519,7 +2516,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             if (null != con) {
                 try {
                     cache.pushReadConnectionForConfigDB(con);
-                } catch (final PoolException e) {
+                } catch (PoolException e) {
                     log.error("Error pushing connection to pool!", e);
                 }
             }
@@ -2603,10 +2600,10 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                 throw new NoSuchContextException();
             }
             return !name.equalsIgnoreCase(foundName);
-        } catch (final PoolException e) {
+        } catch (PoolException e) {
             log.error("Pool Error", e);
             throw new StorageException(e);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("SQL Error", e);
             throw new StorageException(e.toString());
         } finally {
@@ -2616,7 +2613,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             if (null != con) {
                 try {
                     cache.pushReadConnectionForConfigDB(con);
-                } catch (final PoolException e) {
+                } catch (PoolException e) {
                     log.error("Error pushing connection to pool!", e);
                 }
             }
@@ -2639,10 +2636,10 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             rs = prep_check.executeQuery();
 
             return rs.next();
-        } catch (final PoolException e) {
+        } catch (PoolException e) {
             log.error("Pool Error", e);
             throw new StorageException(e);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("SQL Error", e);
             throw new StorageException(e.toString());
         } finally {
@@ -2652,7 +2649,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             if (null != con) {
                 try {
                     cache.pushReadConnectionForConfigDB(con);
-                } catch (final PoolException e) {
+                } catch (PoolException e) {
                     log.error("Error pushing connection to pool!", e);
                 }
             }
@@ -2682,10 +2679,10 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             rs = prep_check.executeQuery();
 
             return rs.next();
-        } catch (final PoolException e) {
+        } catch (PoolException e) {
             log.error("Pool Error", e);
             throw new StorageException(e);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("SQL Error", e);
             throw new StorageException(e.toString());
         } finally {
@@ -2695,7 +2692,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             if (null != con) {
                 try {
                     cache.pushConnectionForContextAfterReading(contextId, con);
-                } catch (final PoolException e) {
+                } catch (PoolException e) {
                     log.error("Error pushing connection to pool!", e);
                 }
             }
@@ -2726,10 +2723,10 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             rs = prep_check.executeQuery();
 
             return rs.next();
-        } catch (final PoolException e) {
+        } catch (PoolException e) {
             log.error("Pool Error", e);
             throw new StorageException(e);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("SQL Error", e);
             throw new StorageException(e.toString());
         } finally {
@@ -2739,7 +2736,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             if (null != con) {
                 try {
                     cache.pushConnectionForContextAfterReading(contextId, con);
-                } catch (final PoolException e) {
+                } catch (PoolException e) {
                     log.error("Error pushing connection to pool!", e);
                 }
             }
@@ -2767,22 +2764,22 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             rs = prep_check.executeQuery();
 
             return rs.next();
-        } catch (final PoolException e) {
+        } catch (PoolException e) {
             log.error("Pool Error", e);
             throw new StorageException(e);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("SQL Error", e);
             throw new StorageException(e.toString());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             log.error("Runtime Error", e);
-            throw new StorageException(e.toString());
+            throw StorageException.storageExceotionFor(e);
         } finally {
             closeRecordSet(rs);
             closePreparedStatement(prep_check);
 
             try {
                 cache.pushReadConnectionForConfigDB(con);
-            } catch (final PoolException e) {
+            } catch (PoolException e) {
                 log.error("Error pushing connection to pool!", e);
             }
         }
@@ -2984,16 +2981,23 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                         user.setLanguage(lang);
                         return;
                     }
-                } catch (final OXException e) {
-                    throw new InvalidDataException(e.getMessage(), e);
+                } catch (OXException e) {
+                    log.error("", e);
+                    throw new InvalidDataException(e.getMessage());
                 }
 
             }
             user.setLanguage(FALLBACK_LANGUAGE_CREATE + '_' + FALLBACK_COUNTRY_CREATE);
         } else {
-            if (lang.indexOf('_') < 0) {
+            /*
+             * Check if locale matches pattern like "en_US"
+             */
+            int underscoreIndex = lang.indexOf('_');
+            if (underscoreIndex < 0 || -1 != lang.indexOf('_', underscoreIndex + 1)) {
                 throw new InvalidDataException("language must contain an underscore, e.g. en_US");
             }
+            Locale locale = LocaleTools.getLocale(lang);
+            user.setLanguage(locale.toString());
         }
     }
 
@@ -3057,7 +3061,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                 if (null != con) {
                     try {
                         cache.pushReadConnectionForConfigDB(con);
-                    } catch (final PoolException e) {
+                    } catch (PoolException e) {
                         log.error("Error pushing COnfigDB connection to pool.", e);
                     }
                 }
@@ -3097,7 +3101,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                     try {
                         final Cache cache = cacheService.getCache("Capabilities");
                         cache.invalidateGroup(Integer.toString(cid));
-                    } catch (final OXException e) {
+                    } catch (OXException e) {
                         log.error("", e);
                     }
                 }
@@ -3112,7 +3116,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         } finally {
             try {
                 cache.pushConnectionForContextNoTimeout(cid, con);
-            } catch (final PoolException e) {
+            } catch (PoolException e) {
                 log.error("Error pushing context connection to pool.", e);
             }
         }
@@ -3239,11 +3243,6 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#isLastContextInSchema(com.openexchange.admin.rmi.dataobjects.Context)
-     */
     @Override
     public boolean isLastContextInSchema(Context context) throws StorageException, InvalidDataException {
         int contextId = context.getId().intValue();

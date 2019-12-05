@@ -51,7 +51,6 @@ package com.openexchange.ajax.chronos;
 
 import static org.junit.Assert.assertEquals;
 import java.util.Collections;
-import java.util.HashMap;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
@@ -59,8 +58,8 @@ import com.openexchange.ajax.chronos.factory.AlarmFactory;
 import com.openexchange.ajax.chronos.factory.EventFactory;
 import com.openexchange.junit.Assert;
 import com.openexchange.testing.httpclient.models.Alarm;
+import com.openexchange.testing.httpclient.models.AlarmExtendedProperties;
 import com.openexchange.testing.httpclient.models.EventData;
-import com.openexchange.testing.httpclient.models.ExtendedProperties;
 
 /**
  *
@@ -185,11 +184,11 @@ public class BasicAlarmTest extends AbstractAlarmTest {
             alarm.setUid(changedAlarm.getUid());
             alarm.setId(changedAlarm.getId());
             alarm.setAttendees(changedAlarm.getAttendees());
-            ExtendedProperties properties = new ExtendedProperties();
-            HashMap<String, String> map = new HashMap<>();
-            map.put("value", "SERVER");
-            properties.put("ALARM-AGENT", map);
-            alarm.setExtendedProperties(properties);
+            //HashMap<String, String> map = new HashMap<>();
+            //map.put("value", "SERVER");
+            AlarmExtendedProperties extendedProperty = new AlarmExtendedProperties();
+            extendedProperty.setValue("SERVER");
+            alarm.putExtendedPropertiesItem("ALARM-AGENT", extendedProperty);
             assertEquals("The created alarm does not match the expected one.", alarm, changedAlarm);
         }
 

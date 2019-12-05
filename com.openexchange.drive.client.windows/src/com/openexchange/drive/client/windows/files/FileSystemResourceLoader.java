@@ -58,9 +58,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import org.slf4j.Logger;
-import com.openexchange.config.PropertyEvent;
-import com.openexchange.config.PropertyEvent.Type;
-import com.openexchange.config.PropertyListener;
 import com.openexchange.drive.client.windows.service.UpdaterExceptionCodes;
 import com.openexchange.exception.OXException;
 
@@ -72,11 +69,11 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.1
  */
-public class FileSystemResourceLoader extends AbstractResourceLoader implements PropertyListener {
+public class FileSystemResourceLoader extends AbstractResourceLoader {
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(FileSystemResourceLoader.class);
 
-    private File parentDir = null;
+    private final File parentDir;
 
     public FileSystemResourceLoader(String path) {
         this.parentDir = new File(path);
@@ -113,18 +110,6 @@ public class FileSystemResourceLoader extends AbstractResourceLoader implements 
             return true;
         }
         return false;
-    }
-
-    @Override
-    public synchronized void onPropertyChange(PropertyEvent event) {
-        if (event == null) {
-            return;
-        }
-
-        String value = event.getValue();
-        if (event.getType() == Type.CHANGED && value != null) {
-            parentDir = new File(event.getValue());
-        }
     }
 
     @Override

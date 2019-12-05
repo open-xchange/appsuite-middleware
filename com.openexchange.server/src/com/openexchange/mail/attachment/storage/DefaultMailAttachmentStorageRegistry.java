@@ -107,9 +107,6 @@ public class DefaultMailAttachmentStorageRegistry implements MailAttachmentStora
         this.tracker = tracker;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mail.attachment.storage.MailAttachmentStorageRegistry#getService()
-     */
     @Override
     public MailAttachmentStorage getMailAttachmentStorage() {
         return tracker.getService();

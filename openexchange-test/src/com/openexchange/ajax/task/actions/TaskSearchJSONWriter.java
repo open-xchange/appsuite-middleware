@@ -37,6 +37,7 @@
 
 package com.openexchange.ajax.task.actions;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Date;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -48,7 +49,7 @@ import com.openexchange.groupware.tasks.TaskExceptionCode;
 
 /**
  * Writes task search object to a JSON.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class TaskSearchJSONWriter {
@@ -62,22 +63,23 @@ public class TaskSearchJSONWriter {
 
     /**
      * Writes a task search object as its JSON representation.
-     * 
+     *
      * @param search task search object.
      * @return a JSON representation of the task search object.
      * @throws OXException if the task search object contains invalid values.
      * @throws JSONException if writing json gives errors.
      */
+    @SuppressWarnings("deprecation")
     public static JSONObject write(final TaskSearchObject search) throws OXException, JSONException {
         final Date[] range = search.getRange();
         if (range != null && range.length != 2) {
-            throw TaskExceptionCode.WRONG_DATE_RANGE.create(range.length);
+            throw TaskExceptionCode.WRONG_DATE_RANGE.create(I(range.length));
         }
         final JSONObject json = new JSONObject();
         if (TaskSearchObject.NO_FOLDER != search.getFolder()) {
             json.put(AJAXServlet.PARAMETER_INFOLDER, search.getFolder());
         }
-        if (TaskSearchObject.NO_RANGE != range) {
+        if (range != null && TaskSearchObject.NO_RANGE != range) {
             json.put(AJAXServlet.PARAMETER_START, range[0]);
             json.put(AJAXServlet.PARAMETER_END, range[1]);
         }

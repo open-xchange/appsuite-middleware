@@ -122,7 +122,7 @@ public enum SuperCollator {
 	}
 
 	public static SuperCollator getByJavaLocale(String something) {
-		if(something == null) {
+		if (something == null) {
             return null;
         }
 

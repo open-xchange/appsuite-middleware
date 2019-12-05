@@ -54,6 +54,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
+import com.openexchange.i18n.LocaleTools;
 import com.openexchange.i18n.tools.TemplateReplacement;
 
 /**
@@ -104,7 +105,7 @@ public abstract class AbstractMultipleDateReplacement implements TemplateReplace
                 this.dates[i] = (Date) dates[i].clone();
             }
         }
-        this.dateFormat = locale == null ? DateFormat.getDateInstance(DateFormat.DEFAULT, Locale.ENGLISH) : DateFormat
+        this.dateFormat = locale == null ? DateFormat.getDateInstance(DateFormat.DEFAULT, LocaleTools.DEFAULT_LOCALE) : DateFormat
                 .getDateInstance(DateFormat.DEFAULT, locale);
         if (timeZone != null) {
             if (dateFormat instanceof SimpleDateFormat) {
@@ -258,5 +259,11 @@ public abstract class AbstractMultipleDateReplacement implements TemplateReplace
         }
         this.timeZone = timeZone;
         this.dateFormat.setTimeZone(timeZone);
+    }
+
+    @Override
+    public TemplateReplacement setDateFormat(DateFormat dateFormat) {
+        this.dateFormat = dateFormat;
+        return this;
     }
 }

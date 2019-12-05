@@ -1,6 +1,6 @@
 ---
 title: Mail Access via XOAuth2 or OAUTHBEARER
-icon: fa-drivers-license-o
+icon: fas fa-id-badge
 tags: Mail, Configuration, OAuth
 ---
 

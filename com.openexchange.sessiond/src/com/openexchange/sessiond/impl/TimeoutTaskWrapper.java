@@ -75,7 +75,7 @@ final class TimeoutTaskWrapper<V> extends AbstractTask<V> {
     static <V> void submit(Task<V> task) {
         try {
             ThreadPools.getThreadPool().submit(new TimeoutTaskWrapper<V>(task));
-        } catch (final RejectedExecutionException e) {
+        } catch (RejectedExecutionException e) {
             try {
                 ThreadPools.execute(task);
             } catch (Exception x) {

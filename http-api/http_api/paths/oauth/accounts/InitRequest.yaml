@@ -5,22 +5,31 @@
       - OAuth
     summary: Initializes the creation of an OAuth account.
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: serviceId
-        type: string
-        description: The service meta data identifier, e.g. "com.openexchange.oauth.twitter".
+        description: >-
+          The service meta data identifier, e.g.
+          "com.openexchange.oauth.twitter".
         required: true
+        schema:
+          type: string
       - in: query
         name: displayName
-        type: string
         description: The display name of the account.
         required: true
-      - $ref: "#/parameters/gblQueryParamScopes"
-    responses:
-      200:
-        description: |
-          A JSON object containing the resulting interaction providing information to complete account creation.
-          In case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).
         schema:
-          $ref: "#/definitions/OAuthAccountInteractionResponse"
+          type: string
+      - $ref: '#/components/parameters/gblQueryParamScopes'
+    responses:
+      '200':
+        description: >
+          A JSON object containing the resulting interaction providing
+          information to complete account creation.
+
+          In case of errors the responsible fields in the response are filled
+          (see [Error handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OAuthAccountInteractionResponse'

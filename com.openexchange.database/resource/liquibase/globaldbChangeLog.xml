@@ -273,121 +273,158 @@
     </changeSet>
     
     <!-- ******************************************************** -->
-    <!-- ****************** IP2Location table * ***************** -->
-    <!-- ******************************************************** -->
-	<changeSet id="7.10.2:ip2location:create" author="ioannis.chouklis@open-xchange.com">
-        <preConditions onFail="MARK_RAN">
-            <not>
-                <tableExists tableName="ip2location" />
-            </not>
-        </preConditions>
-        <comment>
-            Add table 'ip2location' to persist the ip2Location geolocation ip database
-        </comment>
-        <sql>
-            CREATE TABLE `ip2location`(
-    			`ip_from` INT(10) UNSIGNED,
-    			`ip_to` INT(10) UNSIGNED,
-    			`country_code` CHAR(2),
-    			`country_name` VARCHAR(64),
-    			`region_name` VARCHAR(128),
-    			`city_name` VARCHAR(128),
-    			`latitude` DOUBLE,
-    			`longitude` DOUBLE,
-    			`zip_code` VARCHAR(30),
-    			INDEX `idx_ip_from` (`ip_from`),
-    			INDEX `idx_ip_to` (`ip_to`),
-    			INDEX `idx_ip_from_to` (`ip_from`, `ip_to`)
-			)  ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-        </sql>
-        <rollback>
-            <dropTable tableName="ip2location"/>
-        </rollback>
-    </changeSet>
-    
-    <!-- ******************************************************** -->
-    <!-- ******************** MaxMind tables  ******************* -->
-    <!-- ******************************************************** -->
-	<changeSet id="7.10.2:ip_blocks:create" author="ioannis.chouklis@open-xchange.com">
-        <preConditions onFail="MARK_RAN">
-            <not>
-                <tableExists tableName="ip_blocks" />
-            </not>
-        </preConditions>
-        <comment>
-            Add table 'ip_blocks' to persist the MaxMind geolocation ip database
-        </comment>
-        <sql>
-            CREATE TABLE `ip_blocks` (
-  				`ip_from` INT UNSIGNED NOT NULL,
-  				`ip_to` INT UNSIGNED NOT NULL,
-  				`network` VARCHAR(32) NOT NULL,
-  				`geoname_id` INT UNSIGNED NOT NULL,
-  				`registered_country_geoname_id` INT UNSIGNED NOT NULL,
-  				`represented_country_geoname_id` INT UNSIGNED NOT NULL,
-  				`is_anonymous_proxy` TINYINT(1) NOT NULL,
-  				`is_satellite_provider` TINYINT(1) NOT NULL,
-  				`postal_code` VARCHAR(32) NOT NULL,
-  				`latitude` FLOAT(8,4) NOT NULL,
-  				`longitude` FLOAT(8,4) NOT NULL,
-  				`accuracy_radius` SMALLINT UNSIGNED NOT NULL,
-  				PRIMARY KEY `ip_to` (`ip_to`)
-			) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-        </sql>
-        <rollback>
-            <dropTable tableName="ip_blocks"/>
-        </rollback>
-    </changeSet>
-    
-    <changeSet id="7.10.2:ip_locations:create" author="ioannis.chouklis@open-xchange.com">
-        <preConditions onFail="MARK_RAN">
-            <not>
-                <tableExists tableName="ip_locations" />
-            </not>
-        </preConditions>
-        <comment>
-            Add table 'ip_locations' to persist the MaxMind geolocation ip database
-        </comment>
-        <sql>
-            CREATE TABLE `ip_locations` (
-  				`geoname_id` int unsigned NOT NULL,
-  				`locale_code` varchar(32) NOT NULL,
-  				`continent_code` char(2) NOT NULL,
-  				`continent_name` varchar(32) NOT NULL,
-  				`country_iso_code` char(2) NOT NULL,
-  				`country_name` varchar(64) NOT NULL,
-  				`subdivision_1_iso_code` varchar(3) NOT NULL,
-  				`subdivision_1_name` varchar(128) COLLATE 'utf8_unicode_ci' NOT NULL,
-  				`subdivision_2_iso_code` varchar(3) NOT NULL,
-  				`subdivision_2_name` varchar(128) COLLATE 'utf8_unicode_ci' NOT NULL,
-  				`city_name` varchar(128) COLLATE 'utf8_unicode_ci' NOT NULL,
-  				`metro_code` smallint unsigned NOT NULL,
-  				`time_zone` varchar(64) NOT NULL,
-  				PRIMARY KEY `geoname_id` (`geoname_id`)
-			) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-        </sql>
-        <rollback>
-            <dropTable tableName="ip_locations"/>
-        </rollback>
-    </changeSet>
-    
-    <!-- ******************************************************** -->
     <!-- ************** Release 7.10.3 starts here ************** -->
     <!-- ******************************************************** -->   
     <changeSet id="7.10.3:ip_blocks:drop" author="ioannis.chouklis@open-xchange.com" failOnError="false">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="ip_blocks" />
+        </preConditions>
          <dropTable tableName="ip_blocks"/>
         <comment>Drops the MaxMind's ip_blocks table</comment>
     </changeSet>
 	<changeSet id="7.10.3:ipv6_blocks:drop" author="ioannis.chouklis@open-xchange.com" failOnError="false">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="ipv6_blocks" />
+        </preConditions>
          <dropTable tableName="ipv6_blocks"/>
         <comment>Drops the MaxMind's ipv6_blocks table</comment>
     </changeSet>
     <changeSet id="7.10.3:ip_locations:drop" author="ioannis.chouklis@open-xchange.com" failOnError="false">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="ip_locations" />
+        </preConditions>
          <dropTable tableName="ip_locations"/>
         <comment>Drops the MaxMind's ip_locations table</comment>
     </changeSet>
     <changeSet id="7.10.3:ip2location:drop" author="ioannis.chouklis@open-xchange.com" failOnError="false">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="ip2location" />
+        </preConditions>
          <dropTable tableName="ip2location"/>
         <comment>Drops the Ip2Location's ip2location table</comment>
     </changeSet>
+
+    <changeSet id="7.10.3:dataExportTask:create" author="thorben.betten@open-xchange.com">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="dataExportTask" />
+            </not>
+        </preConditions>
+        <comment>
+            Add table 'dataExportTask' to manage requested data export tasks.
+        </comment>
+        <sql>
+            CREATE TABLE dataExportTask (
+                uuid binary(16) NOT NULL,
+                cid INT4 UNSIGNED NOT NULL,
+                user INT4 UNSIGNED NOT NULL,
+                timestamp BIGINT(20) DEFAULT NULL,
+                creationTime BIGINT(20) NOT NULL,
+                startTime BIGINT(20) DEFAULT NULL,
+                duration BIGINT(20) DEFAULT NULL,
+                notificationSent TINYINT(1) NOT NULL DEFAULT 0,
+                status VARCHAR(32) NOT NULL,
+                filestore INT(10) unsigned NOT NULL,
+                arguments TEXT DEFAULT NULL,
+                PRIMARY KEY (uuid),
+                UNIQUE KEY `user_key` (cid,user)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        </sql>
+        <rollback>
+            <dropTable tableName="dataExportTask" />
+        </rollback>
+    </changeSet>
+    <changeSet id="7.10.3:dataExportTaskWorklist:create" author="thorben.betten@open-xchange.com">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="dataExportTaskWorklist" />
+            </not>
+        </preConditions>
+        <comment>
+            Add table 'dataExportTaskWorklist' to manage task-associated work items.
+        </comment>
+        <sql>
+            CREATE TABLE dataExportTaskWorklist (
+                cid INT4 UNSIGNED NOT NULL,
+                uuid binary(16) NOT NULL,
+                taskId binary(16) NOT NULL,
+            	id VARCHAR(32) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
+            	status VARCHAR(32) NOT NULL,
+            	info TEXT DEFAULT NULL,
+            	savepoint TEXT DEFAULT NULL,
+            	filestoreLocation VARCHAR(255) DEFAULT NULL,
+            	failCount INT4 UNSIGNED NOT NULL DEFAULT 0,
+            	PRIMARY KEY (uuid),
+            	UNIQUE KEY `task_key` (taskId, id)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        </sql>
+        <rollback>
+            <dropTable tableName="dataExportTaskWorklist" />
+        </rollback>
+    </changeSet>
+    <changeSet id="7.10.3:dataExportFilestoreLocation:create" author="thorben.betten@open-xchange.com">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="dataExportFilestoreLocation" />
+            </not>
+        </preConditions>
+        <comment>
+            Add table 'dataExportFilestoreLocation' to store result files of completed data export tasks.
+        </comment>
+        <sql>
+            CREATE TABLE dataExportFilestoreLocation (
+                cid INT4 UNSIGNED NOT NULL,
+                taskId binary(16) NOT NULL,
+                num INT(10) unsigned NOT NULL,
+                filestoreLocation VARCHAR(255) NOT NULL,
+                size BIGINT(20) NOT NULL,
+                PRIMARY KEY (taskId, num)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        </sql>
+        <rollback>
+            <dropTable tableName="dataExportFilestoreLocation" />
+        </rollback>
+    </changeSet>
+    <changeSet id="7.10.3:dataExportReport:create" author="thorben.betten@open-xchange.com">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="dataExportReport" />
+            </not>
+        </preConditions>
+        <comment>
+            Add table 'dataExportReport' to store report of running/paused data export tasks.
+        </comment>
+        <sql>
+            CREATE TABLE dataExportReport (
+                cid INT4 UNSIGNED NOT NULL,
+                messageId binary(16) NOT NULL,
+                taskId binary(16) NOT NULL,
+                message TEXT NOT NULL,
+                timeStamp BIGINT(20) NOT NULL,
+                moduleId VARCHAR(32) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
+                PRIMARY KEY (messageId),
+                KEY `task_key` (taskId)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        </sql>
+        <rollback>
+            <dropTable tableName="dataExportReport" />
+        </rollback>
+    </changeSet>
+    <changeSet id="7.10.3:dataExportTaskWorklist:addFailCount" author="thorben.betten@open-xchange.com">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="dataExportTaskWorklist" columnName="failCount" />
+            </not>
+        </preConditions>
+        <comment>
+            Add column 'failCount' to table dataExportTaskWorklist.
+        </comment>
+        <sql>
+            ALTER TABLE dataExportTaskWorklist ADD failCount INT4 UNSIGNED NOT NULL DEFAULT 0;
+        </sql>
+        <rollback>
+            <dropColumn tableName="dataExportTaskWorklist" columnName="failCount" />
+        </rollback>
+    </changeSet>
+    
 </databaseChangeLog>

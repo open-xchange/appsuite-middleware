@@ -138,7 +138,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.infostore.InfostoreFacades;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.java.CallerRunsCompletionService;
@@ -171,6 +170,7 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.user.User;
 import gnu.trove.map.TObjectIntMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 
@@ -318,7 +318,7 @@ public final class OutlookFolderStorage implements FolderStorage, SubfolderListi
         TimeoutConcurrentMap<Key, Future<List<SortableId>>> tcm;
         try {
             tcm = new TimeoutConcurrentMap<Key, Future<List<SortableId>>>(10, true);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             tcm = null;
         }
@@ -377,7 +377,7 @@ public final class OutlookFolderStorage implements FolderStorage, SubfolderListi
                 session.setParameter(paramName, b);
             }
             return b.booleanValue();
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.warn("", e);
             return false;
         }
@@ -402,7 +402,7 @@ public final class OutlookFolderStorage implements FolderStorage, SubfolderListi
         if (null == id) {
             try {
                 id = Integer.toString(new OXFolderAccess(getContext(session)).getDefaultFolderID(session.getUserId(), FolderObject.INFOSTORE));
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 if (OXFolderExceptionCode.NO_DEFAULT_FOLDER_FOUND.equals(e)) {
                     id = "-1";
                 } else {
@@ -512,12 +512,12 @@ public final class OutlookFolderStorage implements FolderStorage, SubfolderListi
                                         // Unnecessary entry
                                         deleteFolder(treeId, folderId, storageParameters, true, memoryTable);
                                     }
-                                } catch (final Exception x) {
+                                } catch (Exception x) {
                                     // ignore
                                 }
                             }
                         }
-                    } catch (final OXException oxe) {
+                    } catch (OXException oxe) {
                         LOG.warn("Checking consistency failed for folder {} in tree {}", folderId, treeId, oxe);
                     }
                 }
@@ -525,12 +525,12 @@ public final class OutlookFolderStorage implements FolderStorage, SubfolderListi
                 for (final FolderStorage folderStorage : storages) {
                     folderStorage.commitTransaction(storageParameters);
                 }
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 for (final FolderStorage folderStorage : storages) {
                     folderStorage.rollback(storageParameters);
                 }
                 LOG.warn("Checking consistency failed in tree {}", treeId, e);
-            } catch (final RuntimeException e) {
+            } catch (RuntimeException e) {
                 for (final FolderStorage folderStorage : storages) {
                     folderStorage.rollback(storageParameters);
                 }
@@ -566,12 +566,12 @@ public final class OutlookFolderStorage implements FolderStorage, SubfolderListi
             }
 
             return ret;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (started) {
                 folderStorage.rollback(storageParameters);
             }
             throw e;
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             if (started) {
                 folderStorage.rollback(storageParameters);
             }
@@ -606,12 +606,12 @@ public final class OutlookFolderStorage implements FolderStorage, SubfolderListi
             }
 
             return ret;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (started) {
                 folderStorage.rollback(storageParameters);
             }
             throw e;
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             if (started) {
                 folderStorage.rollback(storageParameters);
             }
@@ -670,12 +670,12 @@ public final class OutlookFolderStorage implements FolderStorage, SubfolderListi
                 TCM.clear();
             }
             return preparedFolder;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (started) {
                 folderStorage.rollback(storageParameters);
             }
             throw e;
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             if (started) {
                 folderStorage.rollback(storageParameters);
             }
@@ -699,12 +699,12 @@ public final class OutlookFolderStorage implements FolderStorage, SubfolderListi
             if (started) {
                 folderStorage.commitTransaction(storageParameters);
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (started) {
                 folderStorage.rollback(storageParameters);
             }
             throw e;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             if (started) {
                 folderStorage.rollback(storageParameters);
             }
@@ -775,12 +775,12 @@ public final class OutlookFolderStorage implements FolderStorage, SubfolderListi
                 if (started) {
                     folderStorage.commitTransaction(storageParameters);
                 }
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 if (started) {
                     folderStorage.rollback(storageParameters);
                 }
                 throw e;
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 if (started) {
                     folderStorage.rollback(storageParameters);
                 }
@@ -893,12 +893,12 @@ public final class OutlookFolderStorage implements FolderStorage, SubfolderListi
                 byContentType.commitTransaction(storageParameters);
             }
             return defaultFolderID;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (started) {
                 byContentType.rollback(storageParameters);
             }
             throw e;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             if (started) {
                 byContentType.rollback(storageParameters);
             }
@@ -931,12 +931,12 @@ public final class OutlookFolderStorage implements FolderStorage, SubfolderListi
                 folderStorage.commitTransaction(storageParameters);
             }
             return retval;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (started) {
                 folderStorage.rollback(storageParameters);
             }
             throw e;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             if (started) {
                 folderStorage.rollback(storageParameters);
             }
@@ -965,12 +965,12 @@ public final class OutlookFolderStorage implements FolderStorage, SubfolderListi
                 folderStorage.commitTransaction(storageParameters);
             }
             return containsForeignObjects;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (started) {
                 folderStorage.rollback(storageParameters);
             }
             throw e;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             if (started) {
                 folderStorage.rollback(storageParameters);
             }
@@ -994,12 +994,12 @@ public final class OutlookFolderStorage implements FolderStorage, SubfolderListi
                 folderStorage.commitTransaction(storageParameters);
             }
             return isEmpty;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (started) {
                 folderStorage.rollback(storageParameters);
             }
             throw e;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             if (started) {
                 folderStorage.rollback(storageParameters);
             }
@@ -1052,12 +1052,12 @@ public final class OutlookFolderStorage implements FolderStorage, SubfolderListi
             if (started) {
                 folderStorage.commitTransaction(storageParameters);
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (started) {
                 folderStorage.rollback(storageParameters);
             }
             throw e;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             if (started) {
                 folderStorage.rollback(storageParameters);
             }
@@ -1115,12 +1115,12 @@ public final class OutlookFolderStorage implements FolderStorage, SubfolderListi
                     if (started) {
                         folderStorage.commitTransaction(storageParameters);
                     }
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     if (started) {
                         folderStorage.rollback(storageParameters);
                     }
                     throw e;
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     if (started) {
                         folderStorage.rollback(storageParameters);
                     }
@@ -1190,12 +1190,12 @@ public final class OutlookFolderStorage implements FolderStorage, SubfolderListi
                     if (started) {
                         folderStorage.commitTransaction(storageParameters);
                     }
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     if (started) {
                         folderStorage.rollback(storageParameters);
                     }
                     throw e;
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     if (started) {
                         folderStorage.rollback(storageParameters);
                     }
@@ -1227,10 +1227,10 @@ public final class OutlookFolderStorage implements FolderStorage, SubfolderListi
                     // Get folder
                     privateFolder = folderStorage.getFolder(realTreeId, folderId, storageParameters);
                     folderStorage.commitTransaction(storageParameters);
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     folderStorage.rollback(storageParameters);
                     throw e;
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     folderStorage.rollback(storageParameters);
                     throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
                 }
@@ -1269,7 +1269,7 @@ public final class OutlookFolderStorage implements FolderStorage, SubfolderListi
                     if (started) {
                         folderStorage.commitTransaction(storageParameters);
                     }
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     if (started) {
                         folderStorage.rollback(storageParameters);
                     }
@@ -1305,7 +1305,7 @@ public final class OutlookFolderStorage implements FolderStorage, SubfolderListi
                         }
                     }
                     throw e;
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     if (started) {
                         folderStorage.rollback(storageParameters);
                     }
@@ -1778,7 +1778,7 @@ public final class OutlookFolderStorage implements FolderStorage, SubfolderListi
                                     completionService.submit(task);
                                     taskCount++;
                                 }
-                            } catch (final OXException e) {
+                            } catch (OXException e) {
                                 LOG.error("", e);
                             }
                             for (int i = taskCount; i-- > 0;) {
@@ -1811,12 +1811,12 @@ public final class OutlookFolderStorage implements FolderStorage, SubfolderListi
                 if (started) {
                     folderStorage.commitTransaction(storageParameters);
                 }
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 if (started) {
                     folderStorage.rollback(storageParameters);
                 }
                 throw e;
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 if (started) {
                     folderStorage.rollback(storageParameters);
                 }
@@ -1918,10 +1918,10 @@ public final class OutlookFolderStorage implements FolderStorage, SubfolderListi
         try {
             final List<SortableId> sortedIDs = f.get();
             return sortedIDs.toArray(new SortableId[sortedIDs.size()]);
-        } catch (final InterruptedException e) {
+        } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (final ExecutionException e) {
+        } catch (ExecutionException e) {
             final Throwable cause = e.getCause();
             if (cause instanceof OXException) {
                 throw (OXException) cause;
@@ -2036,12 +2036,12 @@ public final class OutlookFolderStorage implements FolderStorage, SubfolderListi
                             }
                         }
                         return sortedIDs;
-                    } catch (final OXException e) {
+                    } catch (OXException e) {
                         if (started) {
                             folderStorage.rollback(storageParameters);
                         }
                         throw e;
-                    } catch (final Exception e) {
+                    } catch (Exception e) {
                         if (started) {
                             folderStorage.rollback(storageParameters);
                         }
@@ -2058,10 +2058,10 @@ public final class OutlookFolderStorage implements FolderStorage, SubfolderListi
         try {
             final List<SortableId> sortedIDs = f.get();
             return sortedIDs.isEmpty() ? new SortableId[0] : sortedIDs.toArray(new SortableId[sortedIDs.size()]);
-        } catch (final InterruptedException e) {
+        } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (final ExecutionException e) {
+        } catch (ExecutionException e) {
             final Throwable cause = e.getCause();
             if (cause instanceof OXException) {
                 throw (OXException) cause;
@@ -2106,12 +2106,12 @@ public final class OutlookFolderStorage implements FolderStorage, SubfolderListi
                 if (started) {
                     folderStorage.commitTransaction(storageParameters);
                 }
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 if (started) {
                     folderStorage.rollback(storageParameters);
                 }
                 throw e;
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 if (started) {
                     folderStorage.rollback(storageParameters);
                 }
@@ -2170,12 +2170,12 @@ public final class OutlookFolderStorage implements FolderStorage, SubfolderListi
                         folderStorage.commitTransaction(storageParameters);
                     }
                     return treeMap;
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     if (started) {
                         folderStorage.rollback(storageParameters);
                     }
                     throw e;
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     if (started) {
                         folderStorage.rollback(storageParameters);
                     }
@@ -2244,12 +2244,12 @@ public final class OutlookFolderStorage implements FolderStorage, SubfolderListi
                         folderStorage.commitTransaction(storageParameters);
                     }
                     return treeMap;
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     if (started) {
                         folderStorage.rollback(storageParameters);
                     }
                     throw e;
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     if (started) {
                         folderStorage.rollback(storageParameters);
                     }
@@ -2306,7 +2306,7 @@ public final class OutlookFolderStorage implements FolderStorage, SubfolderListi
                                             accountSubfolderIDs.add(MailFolderUtility.prepareFullname(mailAccount.getId(), MailFolder.DEFAULT_FOLDER_ID));
                                             unifiedMailIndex = accountSubfolderIDs.size() - 1;
                                         }
-                                    } catch (final OXException e) {
+                                    } catch (OXException e) {
                                         LOG.error("", e);
                                     }
                                 } else {
@@ -2342,12 +2342,12 @@ public final class OutlookFolderStorage implements FolderStorage, SubfolderListi
                              */
                             try {
                                 messagingAccounts.addAll(messagingService.getAccountManager().getAccounts(parameters.getSession()));
-                            } catch (final OXException e) {
+                            } catch (OXException e) {
                                 LOG.error("", e);
                             }
                         }
                     }
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     LOG.error("", e);
                 }
                 if (messagingAccounts.isEmpty()) {
@@ -2496,7 +2496,7 @@ public final class OutlookFolderStorage implements FolderStorage, SubfolderListi
                 try {
                     con = databaseService.getWritable(contextId);
                     con.setAutoCommit(false); // BEGIN
-                } catch (final SQLException e) {
+                } catch (SQLException e) {
                     throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
                 }
                 try {
@@ -2518,13 +2518,13 @@ public final class OutlookFolderStorage implements FolderStorage, SubfolderListi
                         memoryTable.initializeTree(tree, userId, contextId, con);
                     }
                     con.commit(); // COMMIT
-                } catch (final SQLException e) {
+                } catch (SQLException e) {
                     Databases.rollback(con); // ROLLBACK
                     throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     Databases.rollback(con); // ROLLBACK
                     throw e;
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     Databases.rollback(con); // ROLLBACK
                     throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
                 } finally {
@@ -2550,9 +2550,9 @@ public final class OutlookFolderStorage implements FolderStorage, SubfolderListi
                     if (null != memoryTable) {
                         memoryTable.initializeTree(tree, userId, contextId, wcon);
                     }
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     throw e;
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
                 }
             }
@@ -2603,7 +2603,7 @@ public final class OutlookFolderStorage implements FolderStorage, SubfolderListi
                             parameters.addWarning(warning);
                         }
                     }
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     if (MailExceptionCode.UNKNOWN_PROTOCOL.equals(e)) {
                         LOG.debug("", e);
                         parameters.addWarning(e);
@@ -2714,12 +2714,12 @@ public final class OutlookFolderStorage implements FolderStorage, SubfolderListi
                     realFolderStorage.commitTransaction(storageParameters);
                 }
                 return treeMap;
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 if (started) {
                     realFolderStorage.rollback(storageParameters);
                 }
                 throw e;
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 if (started) {
                     realFolderStorage.rollback(storageParameters);
                 }
@@ -2895,7 +2895,7 @@ public final class OutlookFolderStorage implements FolderStorage, SubfolderListi
             FolderID folderID = new FolderID(folder.getID());
             // FileStorage root full name has zero length
             return 0 == folderID.getFolderId().length() && folderID.getService().indexOf(SERVICE_INFOSTORE) < 0;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             /*
              * Parsing failed
              */
@@ -2916,7 +2916,7 @@ public final class OutlookFolderStorage implements FolderStorage, SubfolderListi
         try {
             final FullnameArgument arg = MailFolderUtility.prepareMailFolderParam(id);
             return (MailAccount.DEFAULT_ID == arg.getAccountId());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             /*
              * Parsing failed
              */
@@ -2932,7 +2932,7 @@ public final class OutlookFolderStorage implements FolderStorage, SubfolderListi
         try {
             final FullnameArgument arg = MailFolderUtility.prepareMailFolderParam(id);
             return MailFolder.DEFAULT_FOLDER_ID.equals(arg.getFullname()) && arg.getAccountId() != MailAccount.DEFAULT_ID;
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             /*
              * Parsing failed
              */

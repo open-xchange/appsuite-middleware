@@ -181,43 +181,91 @@ There are different statuses for each mechanism defined in their respective RFCs
 
 First things first, the existence of the `Authentication-Results` header(s) is checked. If no such header exists, then the message is marked as `neutral`. In case there are multiple `Authentication-Results` headers then all of them are evaluated (top to bottom).
 
-Then the existence and validation of the `authserv-id` takes place. It is possible to configure the middleware in a way that only certain `authserv-id`s are considered as safe for a specific setup. In the [Configuration](#configuration) section it is described how to configure that setting. If the `authserv-id` string is missing from the `Authentication-Results` header, then that header is being completely ignored from the evaluation. If it's the only `Authentication-Results` header in the message, then that message will be marked as `none`, otherwise the algorithm will process the next header.
+Then the existence and validation of the `authserv-id` takes place. It is possible to configure the middleware in a way that only certain `authserv-id`s are considered as safe for a specific setup. In the [Configuration](#Configuration) section it is described how to configure that setting. If the `authserv-id` string is missing from the `Authentication-Results` header, then that header is being completely ignored from the evaluation. If it's the only `Authentication-Results` header in the message, then that message will be marked as `neutral`, otherwise the algorithm will process the next header.
 
-Then the domain of the sender is extracted out of the `From` header of the e-mail message. The domain will be later used to verify whether it matches the domain attribute from the different mechanisms, i.e. for `SPF` the `smtp.mailfrom` attribute, for `DKIM` the `header.i` attribute and for `DMARC` the `header.from` attribute. If the domain extracted from the `From` header does not match domain attributes of all present mechanisms, then the mail will be marked either as `neutral` or `fail`, depending on the outcome of the individual mechanisms statuses.
+Then the domain of the sender is extracted out of the `From` header of the e-mail message. The domain will be later used to verify whether it matches the domain attribute from the different mechanisms, i.e. for `SPF` the `smtp.mailfrom` attribute, for `DKIM` the `header.i` attribute and for `DMARC` the `header.from` attribute.
 
 After that, the actual mechanism evaluation takes place. The core implementation takes into consideration the status of the `DMARC`, `DKIM` and `SPF` mechanisms, parses their attributes and based on a decision matrix (explained below) sets the overall status for every e-mail message. Unknown mechanisms found in the `Authentication-Results` header do not influence the end result, however their raw data is available for further processing from custom evaluation handlers.
 
 When all evaluation and parsing of the single mechanisms is done, the overall status is determined. If there are multiple results for a specific mechanism, the best result of that mechanism is picked and only that result for that specific mechanism contributes to the overall result. 
 
-If the `DMARC` status is `fail` then the overall result of the message is set to `fail`. If the `DMARC` status is `pass` and there is a domain match then the overall status is set to `pass` and no further evaluation takes place. If `DMARC` is not present or its status is set to other than `pass` and there is no domain match, then the `DKIM` mechanism is checked. 
+If the `DMARC` status is `fail` then its policy is examined and the overall result of the message is set accodingly: for a `reject` policy the result yields to `fail`, for a `quarantine` policy the result yields to `suspicious` and if the policy is missing then the result is retained to `neutral`. If the `DMARC` status is `pass` then the overall status is set to `pass` and no further evaluation takes place. If `DMARC` is not present or its status is set to other than `pass`, then the `DKIM` and `SPF` mechanisms are checked according to the following decision matrix.
 
-If the `DKIM` status is `pass` and there is a domain match, then the overall status is set to `pass`, or to `neutral` if there is no domain match. If the `DKIM` status is other than `pass` or `fail`, then that status is converted to their respective overall status.
+In case of a missing `DMARC` and an appropriate `DKIM` or `SPF` status (i.e. pass), then the domain from the `From` header is extracted along side the domain attribute of the previous mentioned mechanisms, and an extra flag, that of `domainMatch` is attached to the overall result. Note that the `domainMatch` does NOT influence the outcome of the overall result.
 
-Last, the `SPF` status is evaluated. Always depending on whether there is a domain match, the overall status is set to `pass` if the `SPF` status is also set to `pass`. Otherwise, it will be set to `neutral` or `fail` depending on whether the `DKIM` mechanism failed previously. An overall status of `neutral` or `fail` is also set when the status of `SPF` is neutral and there is or isn't a domain match respectively.
+The decision matrix distinguishes 12 blocks (marked from `A` through `F`) based on the `SPF` and `DKIM` combinations. For DMARC it is always checked whether its `pass`, `fail` (plus policy) or missing. The blocks are separated as follows:
 
-The decision algorithm for DKIM and SPF is summed up in the following table:
+ - Block `A` - `SPF`: <span style="color: green">pass</span>, `DKIM`: <span style="color: green">pass</span>
+ - Block `B` - `SPF`: <span style="color: green">pass</span>, `DKIM`: _missing_
+ - Block `C` - `SPF`: <span style="color: green">pass</span>, `DKIM`: <span style="color: red">fail</span>
+ - Block `D1` - `SPF`: <span style="color: blue">neutral</span>/missing, `DKIM`: <span style="color: green">pass</span>
+ - Block `D2` - `SPF`: <span style="color: blue">neutral</span>/missing, `DKIM`: _missing_
+ - Block `D3` - `SPF`: <span style="color: blue">neutral</span>/missing, `DKIM`: <span style="color: red">fail</span>
+ - Block `E1` - `SPF`: <span style="color: maroon">softfail</span>, `DKIM`: <span style="color: green">pass</span>
+ - Block `E2` - `SPF`: <span style="color: maroon">softfail</span>, `DKIM`: _missing_
+ - Block `E3` - `SPF`: <span style="color: maroon">softfail</span>, `DKIM`: <span style="color: red">fail</span>
+ - Block `F1` - `SPF`: <span style="color: red">fail</span>, `DKIM`: <span style="color: green">pass</span>
+ - Block `F2` - `SPF`: <span style="color: red">fail</span>, `DKIM`: _missing_
+ - Block `F3` - `SPF`: <span style="color: red">fail</span>, `DKIM`: <span style="color: red">fail</span>
 
- SPF                                       | DKIM                                       | Domain Match                                    | Result
--------------------------------------------|--------------------------------------------|:-----------------------------------------------:|---------------------------------------------
-<span style="color: green">pass</span>     | <span style="color: green">pass</span>     | <span style="color: green">Yes</span>           | <span style="color: green">pass</span>
-<span style="color: green">pass</span>     | <span style="color: green">pass</span>     | <span style="color: red">No</span>              | <span style="color: orange">neutral</span>
-<span style="color: green">pass</span>     | <span style="color: orange">neutral</span> | <span style="color: green">Yes</span>           | <span style="color: green">pass</span>
-<span style="color: green">pass</span>     | <span style="color: orange">neutral</span> | <span style="color: red">No</span>              | <span style="color: orange">neutral</span>
-<span style="color: green">pass</span>     | <span style="color: red">fail</span>       | <span style="color: green">Yes</span>           | <span style="color: orange">neutral</span>
-<span style="color: green">pass</span>     | <span style="color: red">fail</span>       | <span style="color: red">No</span>              | <span style="color: red">fail</span>
-<span style="color: orange">neutral</span> | <span style="color: green">pass</span>     | <span style="color: green">Yes</span>           | <span style="color: green">pass</span>
-<span style="color: orange">neutral</span> | <span style="color: green">pass</span>     | <span style="color: red">No</span>              | <span style="color: orange">neutral</span>
-<span style="color: orange">neutral</span> | <span style="color: orange">neutral</span> | <span style="color: green">Yes</span>           | <span style="color: orange">neutral</span>
-<span style="color: orange">neutral</span> | <span style="color: orange">neutral</span> | <span style="color: red">No</span>              | <span style="color: orange">neutral</span>
-<span style="color: orange">neutral</span> | <span style="color: red">fail</span>       | <span style="color: green">Yes</span>           | <span style="color: orange">neutral</span>
-<span style="color: orange">neutral</span> | <span style="color: red"> fail </span>     | <span style="color: red">No</span>              | <span style="color: red">fail</span>
-<span style="color: red">fail</span>       | <span style="color: green">pass</span>     | <span style="color: green">Yes</span>           | <span style="color: red">fail</span>
-<span style="color: red">fail</span>       | <span style="color: green">pass</span>     | <span style="color: red">No</span>              | <span style="color: red">fail</span>
-<span style="color: red">fail</span>       | <span style="color: orange">neutral</span> | <span style="color: green">Yes</span>           | <span style="color: red">fail</span>
-<span style="color: red">fail</span>       | <span style="color: orange">neutral</span> | <span style="color: red">No</span>              | <span style="color: red">fail</span>
-<span style="color: red">fail</span>       | <span style="color: red">fail</span>       | <span style="color: green">Yes</span>           | <span style="color: red">fail</span>
-<span style="color: red">fail</span>       | <span style="color: red"> fail </span>     | <span style="color: red">No</span>              | <span style="color: red">fail</span>
+The decision algorithm for DMARC, DKIM and SPF is summed up in the following table:
 
+   | SPF                                              | DKIM                                   | DMARC                                  | DMARC Policy |  Result
+---|--------------------------------------------------|----------------------------------------|:--------------------------------------:|:------------:|:--------------------------------------------
+ A | <span style="color: green">pass</span>           | <span style="color: green">pass</span> | <span style="color: green">pass</span> |    (any)     | <span style="color: green">pass</span>
+ A | <span style="color: green">pass</span>           | <span style="color: green">pass</span> | <span style="color: red">fail</span>   |    reject    | <span style="color: red">fail</span>
+ A | <span style="color: green">pass</span>           | <span style="color: green">pass</span> | <span style="color: red">fail</span>   |  quarantine  | <span style="color: orange">suspicious</span>
+ A | <span style="color: green">pass</span>           | <span style="color: green">pass</span> | <span style="color: red">fail</span>   |     none     | <span style="color: blue">neutral</span>
+ A | <span style="color: green">pass</span>           | <span style="color: green">pass</span> |               _missing_                |      -       | <span style="color: blue">neutral</span>
+ B | <span style="color: green">pass</span>           |              _missing_                 | <span style="color: green">pass</span> |    (any)     | <span style="color: green">pass</span>
+ B | <span style="color: green">pass</span>           |              _missing_                 | <span style="color: red">fail</span>   |    reject    | <span style="color: red">fail</span>
+ B | <span style="color: green">pass</span>           |              _missing_                 | <span style="color: red">fail</span>   |  quarantine  | <span style="color: orange">suspicious</span>
+ B | <span style="color: green">pass</span>           |              _missing_                 | <span style="color: red">fail</span>   |     none     | <span style="color: blue">neutral</span>
+ B | <span style="color: green">pass</span>           |              _missing_                 |               _missing_                |      -       | <span style="color: blue">neutral</span>
+ C | <span style="color: green">pass</span>           | <span style="color: red">fail</span>   | <span style="color: green">pass</span> |    (any)     | <span style="color: green">pass</span>
+ C | <span style="color: green">pass</span>           | <span style="color: red">fail</span>   | <span style="color: red">fail</span>   |    reject    | <span style="color: red">fail</span>
+ C | <span style="color: green">pass</span>           | <span style="color: red">fail</span>   | <span style="color: red">fail</span>   |  quarantine  | <span style="color: orange">suspicious</span>
+ C | <span style="color: green">pass</span>           | <span style="color: red">fail</span>   | <span style="color: red">fail</span>   |     none     | <span style="color: blue">neutral</span>
+ C | <span style="color: green">pass</span>           | <span style="color: red">fail</span>   |               _missing_                |      -       | <span style="color: blue">neutral</span>
+D1 | <span style="color: blue">neutral</span>/missing | <span style="color: green">pass</span> | <span style="color: green">pass</span> |    (any)     | <span style="color: green">pass</span>
+D1 | <span style="color: blue">neutral</span>/missing | <span style="color: green">pass</span> | <span style="color: red">fail</span>   |    reject    | <span style="color: red">fail</span>
+D1 | <span style="color: blue">neutral</span>/missing | <span style="color: green">pass</span> | <span style="color: red">fail</span>   |  quarantine  | <span style="color: orange">suspicious</span>
+D1 | <span style="color: blue">neutral</span>/missing | <span style="color: green">pass</span> | <span style="color: red">fail</span>   |     none     | <span style="color: blue">neutral</span>
+D1 | <span style="color: blue">neutral</span>/missing | <span style="color: green">pass</span> |              _missing_                 |      -       | <span style="color: blue">neutral</span>
+D2 | <span style="color: blue">neutral</span>/missing |              _missing_                 | <span style="color: red">fail</span>   |    reject    | <span style="color: red">fail</span>
+D2 | <span style="color: blue">neutral</span>/missing |              _missing_                 | <span style="color: red">fail</span>   |  quarantine  | <span style="color: orange">suspicious</span>
+D2 | <span style="color: blue">neutral</span>/missing |              _missing_                 | <span style="color: red">fail</span>   |     none     | <span style="color: blue">neutral</span>
+D2 | <span style="color: blue">neutral</span>/missing |              _missing_                 |              _missing_                 |      -       | <span style="color: blue">neutral</span>
+D3 | <span style="color: blue">neutral</span>/missing | <span style="color: red">fail</span>   | <span style="color: red">fail</span>   |    reject    | <span style="color: red">fail</span>
+D3 | <span style="color: blue">neutral</span>/missing | <span style="color: red">fail</span>   | <span style="color: red">fail</span>   |  quarantine  | <span style="color: orange">suspicious</span>
+D3 | <span style="color: blue">neutral</span>/missing | <span style="color: red">fail</span>   | <span style="color: red">fail</span>   |     none     | <span style="color: blue">neutral</span>
+D3 | <span style="color: blue">neutral</span>/missing | <span style="color: red">fail</span>   |              _missing_                 |      -       | <span style="color: blue">neutral</span>
+E1 | <span style="color: maroon">softfail</span>      | <span style="color: green">pass</span> | <span style="color: green">pass</span> |    (any)     | <span style="color: green">pass</span>
+E1 | <span style="color: maroon">softfail</span>      | <span style="color: green">pass</span> | <span style="color: red">fail</span>   |    reject    | <span style="color: red">fail</span>
+E1 | <span style="color: maroon">softfail</span>      | <span style="color: green">pass</span> | <span style="color: red">fail</span>   |  quarantine  | <span style="color: orange">suspicious</span>
+E1 | <span style="color: maroon">softfail</span>      | <span style="color: green">pass</span> | <span style="color: red">fail</span>   |     none     | <span style="color: blue">neutral</span>
+E1 | <span style="color: maroon">softfail</span>      | <span style="color: green">pass</span> |               _missing_                |      -       | <span style="color: blue">neutral</span>
+E2 | <span style="color: maroon">softfail</span>      |              _missing_                 | <span style="color: red">fail</span>   |    reject    | <span style="color: red">fail</span>
+E2 | <span style="color: maroon">softfail</span>      |              _missing_                 | <span style="color: red">fail</span>   |  quarantine  | <span style="color: orange">suspicious</span>
+E2 | <span style="color: maroon">softfail</span>      |              _missing_                 | <span style="color: red">fail</span>   |     none     | <span style="color: blue">neutral</span>
+E2 | <span style="color: maroon">softfail</span>      |              _missing_                 |               _missing_                |      -       | <span style="color: blue">neutral</span>
+E3 | <span style="color: maroon">softfail</span>      | <span style="color: red">fail</span>   | <span style="color: red">fail</span>   |    reject    | <span style="color: red">fail</span>
+E3 | <span style="color: maroon">softfail</span>      | <span style="color: red">fail</span>   | <span style="color: red">fail</span>   |  quarantine  | <span style="color: orange">suspicious</span>
+E3 | <span style="color: maroon">softfail</span>      | <span style="color: red">fail</span>   | <span style="color: red">fail</span>   |     none     | <span style="color: blue">neutral</span>
+E3 | <span style="color: maroon">softfail</span>      | <span style="color: red">fail</span>   |               _missing_                |      -       | <span style="color: orange">suspicious</span>
+F1 | <span style="color: red">fail</span>             | <span style="color: green">pass</span> | <span style="color: green">pass</span> |    (any)     | <span style="color: green">pass</span>
+F1 | <span style="color: red">fail</span>             | <span style="color: green">pass</span> | <span style="color: red">fail</span>   |    reject    | <span style="color: red">fail</span>
+F1 | <span style="color: red">fail</span>             | <span style="color: green">pass</span> | <span style="color: red">fail</span>   |  quarantine  | <span style="color: orange">suspicious</span>
+F1 | <span style="color: red">fail</span>             | <span style="color: green">pass</span> | <span style="color: red">fail</span>   |     none     | <span style="color: blue">neutral</span>
+F1 | <span style="color: red">fail</span>             | <span style="color: green">pass</span> |               _missing_                |      -       | <span style="color: blue">neutral</span>
+F2 | <span style="color: red">fail</span>             |              _missing_                 | <span style="color: red">fail</span>   |    reject    | <span style="color: red">fail</span>
+F2 | <span style="color: red">fail</span>             |              _missing_                 | <span style="color: red">fail</span>   |  quarantine  | <span style="color: orange">suspicious</span>
+F2 | <span style="color: red">fail</span>             |              _missing_                 | <span style="color: red">fail</span>   |     none     | <span style="color: blue">neutral</span>
+F2 | <span style="color: red">fail</span>             |              _missing_                 |               _missing_                |      -       | <span style="color: orange">suspicious</span>
+F3 | <span style="color: red">fail</span>             | <span style="color: red">fail</span>   | <span style="color: red">fail</span>   |    reject    | <span style="color: red">fail</span>
+F3 | <span style="color: red">fail</span>             | <span style="color: red">fail</span>   | <span style="color: red">fail</span>   |  quarantine  | <span style="color: orange">suspicious</span>
+F3 | <span style="color: red">fail</span>             | <span style="color: red">fail</span>   | <span style="color: red">fail</span>   |     none     | <span style="color: blue">neutral</span>
+F3 | <span style="color: red">fail</span>             | <span style="color: red">fail</span>   |               _missing_                |      -       | <span style="color: orange">suspicious</span>
 
 Please note that the headers of messages in the "Drafts" or "Sent" folder are not analysed. Furthermore, only messages of the primary account of a user are evaluated.
 
@@ -225,13 +273,13 @@ Please note that the headers of messages in the "Drafts" or "Sent" folder are no
 
 The response of the single mail fetch `mail?action=get` is now extended over a new field `authenticity` which is documented [here](https://documentation.open-xchange.com/components/middleware/http/develop/#!/Mail/getMail). The `authenticity` field is referenced in multi-mail fetch actions like `mail?action=all` with two column identifiers, 664 and 665, which reflect the light and heavy weighted versions of the `authenticity` field. The light weighted version includes the overall status of the e-mail, while the heavy weighted includes all the information.
 
-There are five statuses in total:
+There are four statuses in total:
 
- - `pass`: The e-mail has passed the authenticity validation (The green case)
- - `fail`: The e-mail has failed the authenticity validation (The red case)
- - `neutral`: One or more authenticity mechanisms failed, or the authserv-id is malformed or not existent (The yellow case)
+ - `pass`: The e-mail has passed the authenticity validation. Either dictated by DMARC and its policy (if present) or by the combination of the rest known authentication mechanisms (The green case)
+ - `fail`: The e-mail has failed the authenticity validation. Either dicated by DMARC and its policy (if present) or by the combination of the rest known authentication mechanisms (The red case)
+ - `suspicious`: The e-mail was marked as suspicious either dictated by the DMARC and its policy, or by the combination of certain elements of the mail authenticity which may have failed or were non existent (The yellow case)
+ - `neutral`: One or more authenticity mechanisms failed, or the authserv-id is malformed or not existent. Alternatively, the e-mail may have not been analysed either due to an error, or due to the configured `threshold` date. Finally, the e-mail had either no `Authentication-Results` header, or every (known) mechanism (`DMARC`, `DKIM`, `SPF`) yields a `none` status, or the `authserv-id` does not match any of the allowed `authserv-id`s defined via configuration. (The blue case)
  - `not-analyzed`: The e-mail was not analysed either due to an error, or due to the configured `threshold` date
- - `none`: The e-mail has either no `Authentication-Results` header, or every (known) mechanism (`DMARC`, `DKIM`, `SPF`) yields a `none` status, or the `authserv-id` does not match any of the allowed `authserv-id`s defined via configuration.
 
 If the feature is not enabled (either globally or via config-cascade for the user), then the `authenticity` field should not be present in the `mail?action=get` response and the corresponding column (if requested) in `mail?action=all` should be `null`.
 

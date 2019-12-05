@@ -559,7 +559,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 		if (isRelativePath) {
 			// workaround for FilenameUtils.normalize() returning null for relative paths like ../conf/liquibase.xml
 			String tempFile = FilenameUtils.concat(FilenameUtils.getFullPath(relativeBaseFileName), fileName);
-			if(tempFile != null && new File(tempFile).exists() == true) {
+			if (tempFile != null && new File(tempFile).exists() == true) {
 				fileName = tempFile;
 			} else {
 				fileName = FilenameUtils.getFullPath(relativeBaseFileName) + fileName;
@@ -836,7 +836,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
     static File extractZipFile(URL resource) throws IOException {
         String file = resource.getFile();
         String path = file.split("!")[0];
-        if(path.matches("file:\\/[A-Za-z]:\\/.*")) {
+        if (path.matches("file:\\/[A-Za-z]:\\/.*")) {
             path = path.replaceFirst("file:\\/", "");
         }else {
             path = path.replaceFirst("file:", "");

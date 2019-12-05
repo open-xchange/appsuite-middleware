@@ -342,7 +342,7 @@ public final class HTML2TextHandler implements HtmlHandler {
                         textBuilder.append(" [");
                         try {
                             textBuilder.append(checkURL(src));
-                        } catch (final Exception e) {
+                        } catch (Exception e) {
                             textBuilder.append(src);
                         }
                         textBuilder.append("] ");
@@ -515,7 +515,7 @@ public final class HTML2TextHandler implements HtmlHandler {
                 textBuilder.append(" [");
                 try {
                     textBuilder.append(checkURL(hrefContent));
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     textBuilder.append(hrefContent);
                 }
                 textBuilder.append("] ");

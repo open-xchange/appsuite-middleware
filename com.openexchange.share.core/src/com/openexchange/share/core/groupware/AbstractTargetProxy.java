@@ -56,6 +56,7 @@ import java.util.Iterator;
 import java.util.List;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
+import com.openexchange.i18n.Translator;
 import com.openexchange.share.groupware.TargetPermission;
 import com.openexchange.share.groupware.TargetProxy;
 
@@ -179,6 +180,12 @@ public abstract class AbstractTargetProxy implements TargetProxy {
         }
 
         return newPermissions;
+    }
+    
+   
+    @Override
+    public String getLocalizedTitle(Translator translator) {
+        return getTitle();
     }
 
 }

@@ -83,9 +83,9 @@ public class AppointmentParser extends CalendarParser {
     public void parse(final Appointment appointmentobject, final JSONObject jsonobject) throws OXException {
         try {
             parseElementAppointment(appointmentobject, jsonobject);
-        } catch (final OXException exc) {
+        } catch (OXException exc) {
             throw exc;
-        } catch (final Exception exc) {
+        } catch (Exception exc) {
             throw new OXException(exc);
         }
     }

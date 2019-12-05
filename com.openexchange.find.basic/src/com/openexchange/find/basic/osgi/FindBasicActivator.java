@@ -49,9 +49,7 @@
 
 package com.openexchange.find.basic.osgi;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-import org.osgi.framework.Constants;
+import static com.openexchange.osgi.Tools.withRanking;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.config.ConfigurationService;
@@ -106,21 +104,15 @@ public class FindBasicActivator extends HousekeepingActivator {
         Services.setServiceLookup(this);
         ConfigurationService configService = getService(ConfigurationService.class);
         boolean searchMailBody = configService.getBoolProperty("com.openexchange.find.basic.mail.searchmailbody", false);
-        registerService(ModuleSearchDriver.class, new BasicMailDriver(searchMailBody), defaultProperties());
-        registerService(ModuleSearchDriver.class, new BasicDriveDriver(), defaultProperties());
-        registerService(ModuleSearchDriver.class, new BasicContactsDriver(), defaultProperties());
-        registerService(ModuleSearchDriver.class, new BasicCalendarDriver(), defaultProperties());
-        registerService(ModuleSearchDriver.class, new BasicTasksDriver(), defaultProperties());
+        registerService(ModuleSearchDriver.class, new BasicMailDriver(searchMailBody), withRanking(0));
+        registerService(ModuleSearchDriver.class, new BasicDriveDriver(), withRanking(0));
+        registerService(ModuleSearchDriver.class, new BasicContactsDriver(), withRanking(0));
+        registerService(ModuleSearchDriver.class, new BasicCalendarDriver(), withRanking(0));
+        registerService(ModuleSearchDriver.class, new BasicTasksDriver(), withRanking(0));
         registerService(PreferencesItemService.class, AutocompleteFields.class.newInstance());
 
         // Register the 'showDepartment' jslob
         registerService(JSlobEntry.class, new ShowDepartmentJSlobEntry());
-    }
-
-    private Dictionary<String, Object> defaultProperties() {
-        Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
-        properties.put(Constants.SERVICE_RANKING, Integer.valueOf(0));
-        return properties;
     }
 
     @Override

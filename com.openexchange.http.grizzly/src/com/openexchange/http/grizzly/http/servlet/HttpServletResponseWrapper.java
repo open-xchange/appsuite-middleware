@@ -205,7 +205,7 @@ public class HttpServletResponseWrapper implements StatusKnowing {
     public void reset() {
         delegate.reset();
         //Don't reset the com.openexchange.servlet.echoHeaderName if present
-        if(Strings.isNotEmpty(echoHeaderValue)) {
+        if (Strings.isNotEmpty(echoHeaderValue)) {
             setHeader(echoHeaderName, echoHeaderValue);
         }
     }

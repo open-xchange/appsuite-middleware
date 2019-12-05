@@ -49,6 +49,7 @@
 
 package com.openexchange.contact.vcard.impl.mapping;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.net.URI;
@@ -104,6 +105,40 @@ public class AttachMapping extends AbstractMapping {
                 attachProperty.addParameter("SIZE", String.valueOf(metadata.getFilesize()));
                 attachProperty.addParameter("MANAGED-ID", String.valueOf(metadata.getId()));
                 vCard.addProperty(attachProperty);
+            }
+        }
+
+        List<IFileHolder> binaryAttachments = contact.getProperty(PROPERTY_BINARY_ATTACHMENTS);
+        if (null != binaryAttachments && !binaryAttachments.isEmpty()) {
+            for (IFileHolder attachment : binaryAttachments) {
+                try {
+                    // Encode to base64 string
+                    String value = java.util.Base64.getEncoder().encodeToString(Streams.stream2bytes(attachment.getStream()));
+                    RawProperty attachProperty = new RawProperty("ATTACH", value);
+
+                    // Add other properties
+                    attachProperty.addParameter("ENCODING", "BASE64");
+                    attachProperty.addParameter("VALUE", "BINARY");
+                    String fileName = attachment.getName();
+                    if (Strings.isNotEmpty(fileName)) {
+                        attachProperty.addParameter("FILENAME", fileName);
+                        attachProperty.addParameter("X-ORACLE-FILENAME", fileName);
+                        attachProperty.addParameter("X-APPLE-FILENAME", fileName);
+                    }
+                    String contentType = attachment.getContentType();
+                    if (Strings.isNotEmpty(contentType)) {
+                        attachProperty.addParameter("FMTTYPE", contentType);
+                    }
+                    long length = attachment.getLength();
+                    if (length >= 0) {
+                        attachProperty.addParameter("SIZE", String.valueOf(length));
+                    }
+                    vCard.addProperty(attachProperty);
+                } catch (IOException e) {
+                    addConversionWarning(warnings, e, "ATTACH", "Failed to read binary attachment");
+                } catch (OXException e) {
+                    addConversionWarning(warnings, e, "ATTACH", e.getMessage());
+                }
             }
         }
     }

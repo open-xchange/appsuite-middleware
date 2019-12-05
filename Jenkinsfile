@@ -3,8 +3,6 @@
 import com.openexchange.jenkins.Trigger
 
 String workspace // pwd()
-String coverityIntermediateDir = 'analyze-idir'
-String coverityBuildDir = 'build'
 
 pipeline {
     agent {
@@ -45,10 +43,14 @@ spec:
         timestamps()
     }
     triggers {
-        cron('H H(20-23) * * 1-5')
+        cron('develop' == env.BRANCH_NAME ? 'H H(20-23) * * 1-5' : '')
     }
     stages {
         stage('POT') {
+            when {
+                // Can be replaced with "triggeredBy('TimerTrigger')" once Pipeline: Declarative 1.3.4 is installed
+                expression { Trigger.isStartedByTrigger(currentBuild.buildCauses, Trigger.Triggers.BRANCH_INDEXING) }
+            }
             tools {
                 ant 'ant'
             }
@@ -100,12 +102,12 @@ spec:
                 allOf {
                     // Can be replaced with "triggeredBy('TimerTrigger')" once Pipeline: Declarative 1.3.4 is installed
                     expression { Trigger.isStartedByTrigger(currentBuild.buildCauses, Trigger.Triggers.TIMER, Trigger.Triggers.USER) }
-                    expression { null != version4ConfigDocProcessor(env.BRANCH_NAME) }
+                    expression { null != version4Documentation(env.BRANCH_NAME) }
                 }
             }
             steps {
                 script {
-                    def targetVersion = version4ConfigDocProcessor(env.BRANCH_NAME)
+                    def targetVersion = version4Documentation(env.BRANCH_NAME)
                     def targetDirectory
                     dir('config-doc-processor') {
                         // Need to do some file operation in directory otherwise it is not created.
@@ -120,7 +122,7 @@ spec:
                     dir('config-doc-processor') {
                         sshPublisher failOnError: true, publishers: [sshPublisherDesc(configName: 'documentation.open-xchange.com/var/www/documentation', transfers: [sshTransfer(cleanRemote: false, excludes: '', execCommand: '', execTimeout: 120000, flatten: false, makeEmptyDirs: false, noDefaultExcludes: false, patternSeparator: '[, ]+', remoteDirectory: "components/middleware/config/${targetVersion}", remoteDirectorySDF: false, removePrefix: '', sourceFiles: 'properties.json')], usePromotionTimestamp: false, useWorkspaceInPromotion: false, verbose: true)]
                     }
-                    build job: 'middleware/propertyDocumentationUI/master', parameters: [string(name: 'targetVersion', value: targetVersion)]
+                    build job: 'middleware/propertyDocumentationUI/master', parameters: [string(name: 'targetVersion', value: targetVersion), string(name: 'targetDirectory', value: 'middleware/config')]
                 }
             }
             post {
@@ -129,28 +131,25 @@ spec:
                 }
             }
         }
-        stage('Coverity Build') {
+        stage('Coverity') {
             when {
                 allOf {
                     branch 'develop'
-                    // Can be replaced with "triggeredBy('TimerTrigger')" once Pipeline: Declarative 1.3.4 is installed
-                    expression { com.openexchange.jenkins.Trigger.isStartedByTrigger(currentBuild.buildCauses, com.openexchange.jenkins.Trigger.Triggers.TIMER) }
+                    triggeredBy('Timertrigger')
                 }
+            }
+            environment {
+                coverityIntermediateDir = 'analyze-idir'
+                coverityBuildDir = 'build'
             }
             tools {
                 ant 'ant'
             }
             steps {
-                script {
-                    workspace = pwd()
-                    container('coverity') {
-                        dir('backend/build') {
-                            withEnv(['ANT_OPTS="-XX:MaxPermSize=256M"']) {
-                                sh "cov-build --dir ${workspace}/${coverityIntermediateDir} ant -f buildAll.xml -DprojectSets=backend-packages -DdestDir=${workspace}/${coverityBuildDir} buildLocally"
-                            }
-                        }
-                        dir('backend') {
-                            // sh "cov-build --dir ${workspace}/${coverityIntermediateDir} -no-command --fs-capture-search ."
+                container('coverity') {
+                    dir('backend/build') {
+                        withEnv(['ANT_OPTS="-XX:MaxPermSize=256M"']) {
+                            scanCoverity('backend', 'develop', "ant -f buildAll.xml -DprojectSets=backend-packages -DdestDir=${env.WORKSPACE}/${coverityBuildDir} buildLocally")
                         }
                     }
                 }
@@ -159,41 +158,57 @@ spec:
                 always {
                     archiveArtifacts(allowEmptyArchive: true, artifacts: "${coverityIntermediateDir}/build-log.txt")
                     archiveArtifacts(allowEmptyArchive: true, artifacts: "${coverityBuildDir}/**")
-                }
-            }
-        }
-        stage('Coverity Analyze') {
-            when {
-                allOf {
-                    branch 'develop'
-                    // Can be replaced with "triggeredBy('TimerTrigger')" once Pipeline: Declarative 1.3.4 is installed
-                    expression { com.openexchange.jenkins.Trigger.isStartedByTrigger(currentBuild.buildCauses, com.openexchange.jenkins.Trigger.Triggers.TIMER) }
-                }
-            }
-            steps {
-                container('coverity') {
-                    sh "cov-analyze --dir ${workspace}/${coverityIntermediateDir} --strip-path ${workspace}/backend/ --webapp-security --webapp-security-preview --all"
-                }
-            }
-            post {
-                always {
                     archiveArtifacts(allowEmptyArchive: true, artifacts: "${coverityIntermediateDir}/output/analysis-log.txt")
                     archiveArtifacts(allowEmptyArchive: true, artifacts: "${coverityIntermediateDir}/output/distributor.log")
                 }
             }
         }
-        stage('Coverity Commit') {
+        stage('Build Test Clients') {
+            environment {
+                artifactory = credentials('044a36e5-ec65-4319-8238-6cdf8e2db7f5')
+            }
+            steps {
+                dir('backend/http-api') {
+                    writeFile file: 'gradle.properties', text: """org.gradle.warning.mode=all
+                        artifactory_user=${artifactory_USR}
+                        artifactory_password=${artifactory_PSW}""".stripIndent()
+                    container('gradle') {
+                        sh 'gradle clean resolve validate http_api_client:build rest_api_client:build http_api_client:publish rest_api_client:publish'
+                    }
+                }
+            }
+            post {
+                always {
+                    sh 'rm -rf gradle.properties'
+                }
+            }
+        }
+        stage('HTTP API documentation') {
             when {
                 allOf {
-                    branch 'develop'
-                    // Can be replaced with "triggeredBy('TimerTrigger')" once Pipeline: Declarative 1.3.4 is installed
-                    expression { com.openexchange.jenkins.Trigger.isStartedByTrigger(currentBuild.buildCauses, com.openexchange.jenkins.Trigger.Triggers.TIMER) }
+                    expression { null != version4Documentation(env.BRANCH_NAME) }
+                    anyOf {
+                        triggeredBy 'TimerTrigger'
+                        triggeredBy cause: 'UserIdCause'
+                    }
                 }
             }
             steps {
-                container('coverity') {
-                    withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: '3b5aa8e5-031b-4363-99b6-c8465a430d7a', passwordVariable: 'COVERITY_PASSWORD', usernameVariable: 'COVERITY_LOGIN']]) {
-                        sh "cov-commit-defects --dir ${workspace}/${coverityIntermediateDir} --host coverity.open-xchange.com --https-port 8443 --user $COVERITY_LOGIN --password $COVERITY_PASSWORD --certs /opt/coverity.pem --stream OX-Middleware-develop"
+                script {
+                    def targetVersion = version4Documentation(env.BRANCH_NAME)
+                    container('gradle') {
+                        dir('backend/http-api') {
+                            sh 'gradle resolve insertMarkdown'
+                        }
+                    }
+                    dir('backend/documentation-generic/') {
+                        sshPublisher(publishers: [sshPublisherDesc(configName: 'documentation.open-xchange.com/var/www/documentation',
+                                transfers: [
+                                        sshTransfer(cleanRemote: true, excludes: '', execCommand: '', execTimeout: 120000, flatten: false, makeEmptyDirs: false, noDefaultExcludes: false, patternSeparator: '[, ]+', remoteDirectory: "components/middleware/http/${targetVersion}", remoteDirectorySDF: false, removePrefix: 'http_api/documents/html', sourceFiles: 'http_api/documents/html/**'),
+                                        sshTransfer(cleanRemote: true, excludes: '', execCommand: '', execTimeout: 120000, flatten: false, makeEmptyDirs: false, noDefaultExcludes: false, patternSeparator: '[, ]+', remoteDirectory: "components/middleware/drive/${targetVersion}", remoteDirectorySDF: false, removePrefix: 'drive_api/documents/html', sourceFiles: 'drive_api/documents/html/**'),
+                                        sshTransfer(cleanRemote: true, excludes: '', execCommand: '', execTimeout: 120000, flatten: false, makeEmptyDirs: false, noDefaultExcludes: false, patternSeparator: '[, ]+', remoteDirectory: "components/middleware/rest/${targetVersion}", remoteDirectorySDF: false, removePrefix: 'rest_api/documents/html', sourceFiles: 'rest_api/documents/html/**')],
+                                usePromotionTimestamp: false, useWorkspaceInPromotion: false, verbose: true)
+                        ])
                     }
                 }
             }
@@ -202,22 +217,20 @@ spec:
     post {
         failure {
             emailext attachLog: true,
-                body: "${env.BUILD_URL} failed.\\n\\nFull log at: ${env.BUILD_URL}console",
+                body: "${env.BUILD_URL} failed.\n\nFull log at: ${env.BUILD_URL}console\n\n",
                 subject: "${env.JOB_NAME} (#${env.BUILD_NUMBER}) - ${currentBuild.result}",
                 to: 'backend@open-xchange.com'
         }
     }
 }
 
-String version4ConfigDocProcessor(String branchName) {
+String version4Documentation(String branchName) {
     if ('develop' == branchName)
         return branchName
     if (branchName.startsWith('master-'))
         return branchName.substring(7)
     if (branchName.startsWith('release-'))
         return branchName.substring(8)
-    if ('master' == branchName)
-        return '7.10.2'
     return null
 }
 

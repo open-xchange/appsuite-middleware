@@ -59,7 +59,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.oauth.provider.authorizationserver.client.ClientManagement;
 import com.openexchange.oauth.provider.authorizationserver.grant.Grant;
@@ -68,6 +67,7 @@ import com.openexchange.oauth.provider.authorizationserver.spi.OAuthAuthorizatio
 import com.openexchange.oauth.provider.impl.OAuthProviderConstants;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 

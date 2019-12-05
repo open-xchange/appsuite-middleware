@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.api;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.mail.utils.ProviderUtility.toSocketAddrString;
 import java.util.Locale;
 import java.util.Map;
@@ -56,6 +57,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.idn.IDNA;
+import org.slf4j.Logger;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -68,7 +70,6 @@ import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
@@ -78,6 +79,7 @@ import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.config.MailReloadable;
 import com.openexchange.mail.mime.QuotedInternetAddress;
+import com.openexchange.mail.oauth.MailOAuthExceptionCodes;
 import com.openexchange.mail.oauth.MailOAuthService;
 import com.openexchange.mail.oauth.TokenInfo;
 import com.openexchange.mail.utils.ImmutableReference;
@@ -93,10 +95,12 @@ import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.MailAccounts;
 import com.openexchange.mailaccount.Password;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 import gnu.trove.iterator.TIntIterator;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
@@ -109,6 +113,11 @@ import gnu.trove.set.hash.TIntHashSet;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class MailConfig {
+
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(MailConfig.class);
+    }
 
     private static final class AuthTypeKey {
 
@@ -583,7 +592,7 @@ public abstract class MailConfig {
                 int[] retval = USER_ID_CACHE.get(userID);
                 remove = false;
                 return retval;
-            } catch (final ExecutionException e) {
+            } catch (ExecutionException e) {
                 ThreadPools.launderThrowable(e, OXException.class);
             } finally {
                 if (remove) {
@@ -765,7 +774,7 @@ public abstract class MailConfig {
         }
         try {
             return IDNA.toACE(login);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             return login;
         }
     }
@@ -875,6 +884,7 @@ public abstract class MailConfig {
                     mailConfig.password = sessionPassword;
                 }
             }
+
         } else {
             CredentialsProviderService credentialsProvider = CredentialsProviderRegistry.getInstance().optCredentialsProviderFor(forMailAccess, account.getId(), session);
             if (null == credentialsProvider) {
@@ -943,8 +953,7 @@ public abstract class MailConfig {
         int oAuthAccontId = assumeOauthFor(account, forMailAccess);
         if (oAuthAccontId >= 0) {
             // Do the OAuth dance...
-            MailOAuthService mailOAuthService = ServerServiceRegistry.getInstance().getService(MailOAuthService.class);
-            TokenInfo tokenInfo = mailOAuthService.getTokenFor(oAuthAccontId, session);
+            TokenInfo tokenInfo = getTokenFor(oAuthAccontId, session, login, account, forMailAccess);
             return new AuthInfo(login, tokenInfo.getToken(), AuthType.parse(tokenInfo.getAuthMechanism()), oAuthAccontId);
         }
 
@@ -958,6 +967,28 @@ public abstract class MailConfig {
         String server = forMailAccess ? ((MailAccount) account).getMailServer() : account.getTransportServer();
         String password = MailPasswordUtil.decrypt(mailAccountPassword, session, account.getId(), account.getLogin(), server);
         return new AuthInfo(login, password, AuthType.LOGIN, -1);
+    }
+
+    private static TokenInfo getTokenFor(int oAuthAccontId, Session session, String login, Account account, boolean forMailAccess) throws OXException {
+        MailOAuthService mailOAuthService = ServerServiceRegistry.getInstance().getService(MailOAuthService.class);
+        if (mailOAuthService == null) {
+            throw ServiceExceptionCode.absentService(MailOAuthService.class);
+        }
+        try {
+            return mailOAuthService.getTokenFor(oAuthAccontId, session);
+        } catch (OXException e) {
+            OXException toThrow = e;
+            if (MailOAuthExceptionCodes.NO_SUCH_MAIL_OAUTH_PROVIDER.equals(e)) {
+                if (forMailAccess) {
+                    MailAccount mailAccount = (MailAccount) account;
+                    toThrow = MailExceptionCode.UNSUPPORTED_OAUTH_MAIL_ACCESS.create(mailAccount.getMailServer(), login, I(session.getUserId()), I(session.getContextId()));
+                } else {
+                    toThrow = MailExceptionCode.UNSUPPORTED_OAUTH_TRANSPORT_ACCESS.create(account.getTransportServer(), login, I(session.getUserId()), I(session.getContextId()));
+                }
+                LoggerHolder.LOG.warn("{}. Apparently package \"{}\" is not installed.", e.getMessage(), "open-xchange-oauth", toThrow);
+            }
+            throw toThrow;
+        }
     }
 
     /**

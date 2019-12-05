@@ -49,6 +49,7 @@
 
 package com.openexchange.i18n.tools;
 
+import java.text.DateFormat;
 import java.util.Locale;
 import java.util.TimeZone;
 
@@ -126,6 +127,14 @@ public interface TemplateReplacement extends Cloneable {
      * @return This replacement with specified time zone applied
      */
     public TemplateReplacement setTimeZone(TimeZone timeZone);
+
+    /**
+     * 
+     *
+     * @param dateFormat
+     * @return
+     */
+    public TemplateReplacement setDateFormat(DateFormat dateFormat);
 
     /**
      * Should delegate to {@link java.lang.Object#clone()}

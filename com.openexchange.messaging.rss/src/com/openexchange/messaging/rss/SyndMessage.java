@@ -110,7 +110,7 @@ public class SyndMessage implements MessagingMessage {
         final List<SyndContent> contents = syndEntry.getContents();
         // For now we'll only use the first content element
 
-        if(contents.size() > 0) {
+        if (contents.size() > 0) {
             final SyndContent content = contents.get(0);
             setContent(content, sessionId);
         } else if (entry.getDescription() != null){
@@ -139,11 +139,11 @@ public class SyndMessage implements MessagingMessage {
 
     private void setContent(final SyndContent content, final String sessionId) throws OXException {
         String type = content.getType();
-        if(type == null) {
+        if (type == null) {
             type = "text/plain";
         }
-        if(knowsType(type)) {
-            if(!type.startsWith("text")) {
+        if (knowsType(type)) {
+            if (!type.startsWith("text")) {
                 type = "text/"+type;
             }
         }
@@ -228,7 +228,7 @@ public class SyndMessage implements MessagingMessage {
     @Override
     public Collection<String> getUserFlags() throws OXException {
         final List<?> categories = entry.getCategories();
-        if(categories == null) {
+        if (categories == null) {
             return null;
         }
         final List<String> strings = new LinkedList<String>();
@@ -260,7 +260,7 @@ public class SyndMessage implements MessagingMessage {
 
     @Override
     public MessagingHeader getFirstHeader(final String name) throws OXException {
-        if(headers.containsKey(name)) {
+        if (headers.containsKey(name)) {
             return headers.get(name).iterator().next();
         }
         return null;
@@ -268,7 +268,7 @@ public class SyndMessage implements MessagingMessage {
 
     @Override
     public Collection<MessagingHeader> getHeader(final String name) throws OXException {
-        if(headers.containsKey(name)) {
+        if (headers.containsKey(name)) {
             return headers.get(name);
         }
         return null;
@@ -310,13 +310,13 @@ public class SyndMessage implements MessagingMessage {
                         return null;
                     }
                     picUrl = proxyRegistry.register(new ProxyRegistration(imageUrl, sessionId, ImageContentTypeRestriction.getInstance())).toString();
-                } catch (final MalformedURLException e) {
+                } catch (MalformedURLException e) {
                     /*
                      * Not a valid URL
                      */
                     org.slf4j.LoggerFactory.getLogger(SyndMessage.class).warn("Not a valid image URL. Replacing image URL skipped.", e);
                     picUrl = null;
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     /*
                      * Not a valid URL
                      */
@@ -333,7 +333,7 @@ public class SyndMessage implements MessagingMessage {
 
     protected Object tryThese(final Object...objects) {
         for (final Object object : objects) {
-            if(object != null) {
+            if (object != null) {
                 return object;
             }
         }

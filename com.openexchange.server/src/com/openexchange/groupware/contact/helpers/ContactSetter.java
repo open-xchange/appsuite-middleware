@@ -71,10 +71,10 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("DisplayName");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -88,7 +88,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("SurName");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -102,7 +102,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("GivenName");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -116,7 +116,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("MiddleName");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -130,7 +130,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Suffix");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -144,7 +144,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Title");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -158,7 +158,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("StreetHome");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -172,7 +172,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("PostalCodeHome");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -186,7 +186,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("CityHome");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -200,7 +200,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("StateHome");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -214,7 +214,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("CountryHome");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -228,7 +228,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("MaritalStatus");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -242,7 +242,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("NumberOfChildren");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -256,7 +256,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Profession");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -270,7 +270,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Nickname");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -284,7 +284,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("SpouseName");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -298,7 +298,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Note");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -312,7 +312,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Company");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -326,7 +326,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Department");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -340,7 +340,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Position");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -354,7 +354,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("EmployeeType");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -368,7 +368,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("RoomNumber");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -382,7 +382,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("StreetBusiness");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -396,7 +396,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("PostalCodeBusiness");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -410,7 +410,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("CityBusiness");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -424,7 +424,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("StateBusiness");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -438,7 +438,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("CountryBusiness");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -452,7 +452,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("NumberOfEmployee");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -466,7 +466,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("SalesVolume");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -480,7 +480,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TaxID");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -494,7 +494,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("CommercialRegister");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -508,7 +508,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Branches");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -522,7 +522,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("BusinessCategory");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -536,7 +536,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Info");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -550,7 +550,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("ManagerName");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -564,7 +564,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("AssistantName");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -578,7 +578,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("StreetOther");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -592,7 +592,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("PostalCodeOther");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -606,7 +606,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("CityOther");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -620,7 +620,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("StateOther");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -634,7 +634,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("CountryOther");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -648,7 +648,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TelephoneAssistant");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -662,7 +662,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TelephoneBusiness1");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -676,7 +676,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TelephoneBusiness2");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -690,7 +690,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("FaxBusiness");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -704,7 +704,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TelephoneCallback");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -718,7 +718,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TelephoneCar");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -732,7 +732,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TelephoneCompany");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -746,7 +746,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TelephoneHome1");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -760,7 +760,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TelephoneHome2");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -774,7 +774,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("FaxHome");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -788,7 +788,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TelephoneISDN");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -802,7 +802,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("CellularTelephone1");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -816,7 +816,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("CellularTelephone2");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -830,7 +830,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TelephoneOther");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -844,7 +844,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("FaxOther");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -858,7 +858,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TelephonePager");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -872,7 +872,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TelephonePrimary");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -886,7 +886,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TelephoneRadio");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -900,7 +900,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TelephoneTelex");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -914,7 +914,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TelephoneTTYTTD");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -928,7 +928,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("InstantMessenger1");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -942,7 +942,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("InstantMessenger2");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -956,7 +956,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TelephoneIP");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -970,7 +970,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Email1");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -984,7 +984,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Email2");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -998,7 +998,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Email3");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -1012,7 +1012,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("URL");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -1026,7 +1026,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Categories");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -1040,7 +1040,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField01");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -1054,7 +1054,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField02");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -1068,7 +1068,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField03");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -1082,7 +1082,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField04");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -1096,7 +1096,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField05");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -1110,7 +1110,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField06");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -1124,7 +1124,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField07");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -1138,7 +1138,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField08");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -1152,7 +1152,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField09");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -1166,7 +1166,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField10");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -1180,7 +1180,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField11");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -1194,7 +1194,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField12");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -1208,7 +1208,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField13");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -1222,7 +1222,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField14");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -1236,7 +1236,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField15");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -1250,7 +1250,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField16");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -1264,7 +1264,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField17");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -1278,7 +1278,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField18");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -1292,7 +1292,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField19");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -1306,7 +1306,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField20");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -1320,7 +1320,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("ObjectID");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final int value = toInt(objects[1]);
@@ -1334,7 +1334,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("NumberOfDistributionLists");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final int value = toInt(objects[1]);
@@ -1348,7 +1348,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("DistributionList");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final DistributionListEntryObject[] value;
@@ -1377,7 +1377,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("ParentFolderID");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final int value = toInt(objects[1]);
@@ -1391,7 +1391,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("ContextId");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final int value = toInt(objects[1]);
@@ -1405,7 +1405,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("PrivateFlag");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final boolean value = b((Boolean) objects[1]);
@@ -1419,7 +1419,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("CreatedBy");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final int value = toInt(objects[1]);
@@ -1433,7 +1433,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("ModifiedBy");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final int value = toInt(objects[1]);
@@ -1447,7 +1447,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("CreationDate");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
 
@@ -1462,7 +1462,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("LastModified");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
 
@@ -1477,7 +1477,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Birthday");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final Date value = (Date) objects[1];
@@ -1491,7 +1491,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Anniversary");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final Date value = (Date) objects[1];
@@ -1505,7 +1505,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("ImageLastModified");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final Date value = (Date) objects[1];
@@ -1519,7 +1519,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("InternalUserId");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final int value = toInt(objects[1]);
@@ -1533,7 +1533,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Label");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final int value = toInt(objects[1]);
@@ -1547,7 +1547,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("FileAs");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -1561,7 +1561,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("DefaultAddress");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final int value = toInt(objects[1]);
@@ -1575,7 +1575,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("NumberOfAttachments");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final int value = toInt(objects[1]);
@@ -1606,7 +1606,7 @@ public class ContactSetter implements ContactSwitcher {
         Boolean value;
         try {
             value = (Boolean) value2;
-        } catch (final ClassCastException c) {
+        } catch (ClassCastException c) {
             value = Boolean.valueOf((String) value2);
         }
         contact.setMarkAsDistributionlist(b(value));
@@ -1619,7 +1619,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("NumberOfImages");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final int value = toInt(objects[1]);
@@ -1633,7 +1633,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Anniversary");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final Date value = (Date) objects[1];
@@ -1647,7 +1647,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UseCount");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final int value = toInt(objects[1]);
@@ -1661,7 +1661,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("MarkAsDistributionList");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final boolean value = b((Boolean) objects[1]);
@@ -1675,7 +1675,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("yomiFirstName");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -1689,7 +1689,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("yomiLastName");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -1703,7 +1703,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("yomiCompanyName");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -1717,7 +1717,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("image1_content_type");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -1731,7 +1731,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create(ContactField.HOME_ADDRESS.getReadableName());
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -1745,7 +1745,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create(ContactField.BUSINESS_ADDRESS.getReadableName());
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -1759,7 +1759,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create(ContactField.OTHER_ADDRESS.getReadableName());
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -1773,7 +1773,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create(ContactField.UID.getReadableName());
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final String value = (String) objects[1];
@@ -1787,7 +1787,7 @@ public class ContactSetter implements ContactSwitcher {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create(ContactField.IMAGE1.getReadableName());
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
         final byte[] value = (byte[])objects[1];
@@ -1797,11 +1797,11 @@ public class ContactSetter implements ContactSwitcher {
 
     @Override
     public boolean _unknownfield(final Contact contact, final String fieldname, final Object value, final Object... additionalObjects) {
-        if(fieldname == null || fieldname.equals("")) {
+        if (fieldname == null || fieldname.equals("")) {
             return false;
         }
 
-        if(isMatching(fieldname, ContactField.MARK_AS_DISTRIBUTIONLIST)) {
+        if (isMatching(fieldname, ContactField.MARK_AS_DISTRIBUTIONLIST)) {
             return markasdistributionlist(contact, value);
         }
 

@@ -85,6 +85,7 @@ import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.chronos.service.UpdateResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.pns.DefaultPushNotification;
+import com.openexchange.pns.KnownTopic;
 import com.openexchange.pns.PushNotification;
 import com.openexchange.pns.PushNotificationService;
 import com.openexchange.pns.PushNotifications;
@@ -146,7 +147,7 @@ public class PushCalendarHandler implements CalendarHandler {
             .contextId(contextId)
             .userId(userId)
             .sourceToken(pushToken)
-            .topic("ox:calendar:updates")
+            .topic(KnownTopic.CALENDAR_UPDATES.getName())
             .messageData(messageData)
         .build();
     }
@@ -189,6 +190,12 @@ public class PushCalendarHandler implements CalendarHandler {
             if (update.getUpdatedFields().contains(EventField.SEQUENCE)) {
                 /*
                  * sequence number has changed, so assume a "significant" change implicitly
+                 */
+                return true;
+            }
+            if (update.getUpdatedFields().contains(EventField.ATTENDEE_PRIVILEGES)) {
+                /*
+                 * permission-related update, assume "significant" change
                  */
                 return true;
             }

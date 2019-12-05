@@ -127,7 +127,7 @@ public class ContextFilestoreDataMover extends FilestoreDataMover {
                     listener.onBeforeContextDataMove(contextId, srcFullUri, dstFullUri);
                 }
             } catch (OXException e) {
-                throw new StorageException(e);
+                throw StorageException.wrapForRMI(e);
             }
 
             File fsDirectory = new File(srcFullUri);
@@ -247,7 +247,7 @@ public class ContextFilestoreDataMover extends FilestoreDataMover {
                     };
                 }
             } catch (OXException e) {
-                throw new StorageException(e);
+                throw StorageException.wrapForRMI(e);
             }
         }
 
@@ -268,8 +268,6 @@ public class ContextFilestoreDataMover extends FilestoreDataMover {
                 CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
                 Cache cache = cacheService.getCache("Filestore");
                 cache.clear();
-                Cache qfsCache = cacheService.getCache("QuotaFileStorages");
-                qfsCache.invalidateGroup(Integer.toString(contextId));
                 Cache contextCache = cacheService.getCache("Context");
                 contextCache.remove(ctx.getId());
             } catch (Exception e) {

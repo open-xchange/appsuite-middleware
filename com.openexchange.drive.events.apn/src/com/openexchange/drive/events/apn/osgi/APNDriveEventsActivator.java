@@ -179,7 +179,7 @@ public class APNDriveEventsActivator extends HousekeepingActivator {
                 // Assume file is given as resource identifier
                 try {
                     byte[] keystoreBytes = Streams.stream2bytes(loader.loadResource(keystore));
-                    if(keystoreBytes.length == 0) {
+                    if (keystoreBytes.length == 0) {
                         return null;
                     }
                     return new APNAccess(keystoreBytes, password, production);

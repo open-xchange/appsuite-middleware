@@ -109,7 +109,7 @@ public class OAuthProxyRequest {
 		analyzed = true;
 
 		JSONObject proxyRequest = (JSONObject) req.getData();
-		if(proxyRequest == null){
+		if (proxyRequest == null){
 			throw OAuthExceptionCodes.MISSING_BODY.create();
 		}
 
@@ -124,7 +124,7 @@ public class OAuthProxyRequest {
 
 		JSONObject paramsObj = proxyRequest.optJSONObject("params");
 		parameters = new TreeMap<String,String>();
-		if(paramsObj != null){
+		if (paramsObj != null){
 			for(Entry<String, Object> entry : paramsObj.entrySet()){
 				parameters.put(entry.getKey(), String.valueOf(entry.getValue()));
 			}
@@ -132,13 +132,13 @@ public class OAuthProxyRequest {
 
 		JSONObject headerObj = proxyRequest.optJSONObject("header");
 		headers = new TreeMap<String,String>();
-		if(headerObj != null){
+		if (headerObj != null){
 			for(Entry<String, Object> entry : headerObj.entrySet()){
 				headers.put(entry.getKey(), String.valueOf(entry.getValue()));
 			}
 		}
 
-		if(proxyRequest.hasAndNotNull("content-type")){
+		if (proxyRequest.hasAndNotNull("content-type")){
 			headers.put("Content-Type", String.valueOf(proxyRequest.opt("content-type")));
 		}
 
@@ -146,7 +146,7 @@ public class OAuthProxyRequest {
 			headers.put("Content-Type", "application/x-www-form-urlencoded");
 		}
 
-		if(proxyRequest.hasAndNotNull("accepts")){
+		if (proxyRequest.hasAndNotNull("accepts")){
 			headers.put("Accepts", String.valueOf(proxyRequest.opt("accepts")));
 		}
 
@@ -169,7 +169,7 @@ public class OAuthProxyRequest {
 
 		if (req.isSet("api")){
 		    OAuthAPIRegistry service = Services.getService(OAuthAPIRegistry.class);
-		    if(service == null){
+		    if (service == null){
 		        throw ServiceExceptionCode.absentService(OAuthAPIRegistry.class);
 		    }
 			String sApi = req.getParameter("api");
@@ -218,11 +218,11 @@ public class OAuthProxyRequest {
 	private void whitelist(String checkMe) throws OXException {
 		API proposedApi = getAccount().getAPI();
 		List<Pattern> patterns = whitelist.get(proposedApi.getServiceId());
-		if(patterns == null){
+		if (patterns == null){
 			throw OAuthExceptionCodes.NOT_A_WHITELISTED_URL.create(checkMe, proposedApi); //TODO: debatable
 		}
 		for(Pattern p: patterns){
-			if(p.matcher(checkMe).find()){
+			if (p.matcher(checkMe).find()){
 				return;
 			}
 		}

@@ -183,9 +183,9 @@ public class ImageUtils {
      * @return <code>true</code> if data appears to be an animated gif image; otherwise <code>false</code>
      * @throws IOException If an I/O error occurs
      */
-    public static boolean isAnimatedGif(final InputStream in) throws IOException {
+    public static boolean isAnimatedGif (final InputStream in) throws IOException {
         try {
-            return isAnimatedGif(in, null);
+            return isAnimatedGif (in, null);
         } finally {
             Streams.close(in);
         }
@@ -199,7 +199,7 @@ public class ImageUtils {
      * @return <code>true</code> if data appears to be an animated gif image; otherwise <code>false</code>
      * @throws IOException If an I/O error occurs
      */
-    public static boolean isAnimatedGif(final InputStream in, final AtomicReference<InputStream> newStreamRef) throws IOException {
+    public static boolean isAnimatedGif (final InputStream in, final AtomicReference<InputStream> newStreamRef) throws IOException {
         if (null == in) {
             return false;
         }

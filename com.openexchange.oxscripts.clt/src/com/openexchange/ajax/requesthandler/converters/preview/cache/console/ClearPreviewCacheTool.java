@@ -86,11 +86,6 @@ public final class ClearPreviewCacheTool extends AbstractRmiCLI<Void> {
         new ClearPreviewCacheTool().execute(args);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.cli.AbstractRmiCLI#administrativeAuth(java.lang.String, java.lang.String, org.apache.commons.cli.CommandLine, com.openexchange.auth.rmi.RemoteAuthenticator)
-     */
     @Override
     protected void administrativeAuth(String login, String password, CommandLine cmd, RemoteAuthenticator authenticator) throws RemoteException {
         if (contextId == null) {
@@ -100,11 +95,6 @@ public final class ClearPreviewCacheTool extends AbstractRmiCLI<Void> {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.cli.AbstractRmiCLI#addOptions(org.apache.commons.cli.Options)
-     */
     @Override
     protected void addOptions(Options options) {
         OptionGroup group = new OptionGroup();
@@ -113,11 +103,6 @@ public final class ClearPreviewCacheTool extends AbstractRmiCLI<Void> {
         options.addOptionGroup(group);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.cli.AbstractRmiCLI#invoke(org.apache.commons.cli.Options, org.apache.commons.cli.CommandLine, java.lang.String)
-     */
     @Override
     protected Void invoke(Options options, CommandLine cmd, String optRmiHostName) throws Exception {
         boolean error = true;
@@ -131,10 +116,10 @@ public final class ClearPreviewCacheTool extends AbstractRmiCLI<Void> {
                 System.out.println("All cache entries cleared for context " + contextId.intValue());
             }
             error = false;
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             final String errMsg = e.getMessage();
             System.out.println(errMsg == null ? "An error occurred." : errMsg);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             final String errMsg = e.getMessage();
             System.out.println(errMsg == null ? "An error occurred." : errMsg);
         } finally {
@@ -146,21 +131,11 @@ public final class ClearPreviewCacheTool extends AbstractRmiCLI<Void> {
 
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.cli.AbstractAdministrativeCLI#requiresAdministrativePermission()
-     */
     @Override
-    protected boolean requiresAdministrativePermission() {
-        return true;
+    protected Boolean requiresAdministrativePermission() {
+        return Boolean.TRUE;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.cli.AbstractCLI#checkOptions(org.apache.commons.cli.CommandLine)
-     */
     @Override
     protected void checkOptions(CommandLine cmd) {
         if (cmd.hasOption('a')) {
@@ -185,21 +160,11 @@ public final class ClearPreviewCacheTool extends AbstractRmiCLI<Void> {
         System.exit(1);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.cli.AbstractCLI#getFooter()
-     */
     @Override
     protected String getFooter() {
         return FOOTER;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.cli.AbstractCLI#getName()
-     */
     @Override
     protected String getName() {
         return SYNTAX;

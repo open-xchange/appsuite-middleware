@@ -92,7 +92,7 @@ public class ListDatabase extends DatabaseAbstraction {
             }
 
             sysexit(0);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             printErrors(null, ctxid, e, parser);
         }
 

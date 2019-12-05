@@ -179,7 +179,7 @@ public final class DirectoryService {
                     File propfile = null;
                     try {
                         propfile = ServerServiceRegistry.getInstance().getService(ConfigurationService.class).getFileByName("ldap.properties");
-                    } catch (final NullPointerException e) {
+                    } catch (NullPointerException e) {
                         LOG.error("Config file ldap.properties is not set in ComfireConfig.");
                     }
                     tmp = new Properties();
@@ -187,7 +187,7 @@ public final class DirectoryService {
                     try {
                         fis = new FileInputStream(propfile);
                         tmp.load(fis);
-                    } catch (final IOException e) {
+                    } catch (IOException e) {
                         LOG.error("Cannot load properties for ldap!", e);
                     } finally {
                         Streams.close(fis);
@@ -301,7 +301,7 @@ public final class DirectoryService {
                bindDN = confValues[4];
                bindPW = confValues[5];
             }
-         } catch (final IOException e) {
+         } catch (IOException e) {
             LOG.error("Error while reading writable directory service configuration.", e);
          }
       } else {
@@ -333,7 +333,7 @@ public final class DirectoryService {
                   }
                }
             }
-         } catch (final IOException e) {
+         } catch (IOException e) {
             LOG.error("Error while reading writable directory service configuration.", e);
          }
       } else {

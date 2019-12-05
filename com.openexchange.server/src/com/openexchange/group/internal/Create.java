@@ -64,11 +64,11 @@ import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.user.User;
 
 /**
  * This class contains the glue code to join all several operations to be done
@@ -147,16 +147,16 @@ public final class Create {
             con.setAutoCommit(false);
             insert(con);
             con.commit();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             Databases.rollback(con);
             throw GroupExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             Databases.rollback(con);
             throw e;
         } finally {
             try {
                 con.setAutoCommit(true);
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 LOG.error("Problem setting autocommit to true.", e);
             }
             DBPool.closeWriterSilent(ctx, con);
@@ -176,7 +176,7 @@ public final class Create {
             GroupStorage storage = ServerServiceRegistry.getServize(GroupStorage.class, true);
             storage.insertGroup(ctx, con, group);
             storage.insertMember(ctx, con, group, group.getMember());
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw GroupExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         }
     }

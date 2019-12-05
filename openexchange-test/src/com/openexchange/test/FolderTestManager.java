@@ -159,7 +159,7 @@ public class FolderTestManager implements TestManager {
             response = client.execute(request);
             setLastResponse(response);
             response.fillObject(folderToCreate);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             doExceptionHandling(e, "NewRequest");
         }
         createdItems.add(folderToCreate);
@@ -190,7 +190,7 @@ public class FolderTestManager implements TestManager {
         try {
             setLastResponse(client.execute(request));
             remember(folder);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             doExceptionHandling(e, "UpdateRequest");
         }
 
@@ -273,7 +273,7 @@ public class FolderTestManager implements TestManager {
             setLastResponse(response);
             returnedFolder = response.getFolder();
             setFailOnError(oldValue);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             doExceptionHandling(e, "GetRequest for folder with id " + folderID);
         }
         return returnedFolder;
@@ -294,7 +294,7 @@ public class FolderTestManager implements TestManager {
             response = client.execute(request);
             setLastResponse(response);
             returnedFolder = response.getFolder();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             doExceptionHandling(e, "GetRequest");
         }
         return returnedFolder;
@@ -321,7 +321,7 @@ public class FolderTestManager implements TestManager {
             setLastResponse(response);
             returnedFolder = response.getFolder();
             setFailOnError(oldValue);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             doExceptionHandling(e, "GetRequest for folder with id " + folderId);
         }
         return returnedFolder;
@@ -347,7 +347,7 @@ public class FolderTestManager implements TestManager {
                 }
 
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             doExceptionHandling(e, "clean-up");
         }
 
@@ -371,7 +371,7 @@ public class FolderTestManager implements TestManager {
                 allFolders.add(iterator.next());
             }
             setLastResponse(response);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             doExceptionHandling(e, "ListRequest");
         }
 
@@ -397,7 +397,7 @@ public class FolderTestManager implements TestManager {
             while (iterator.hasNext()) {
                 allFolders.add(iterator.next());
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             doExceptionHandling(e, "ListRequest");
         }
 
@@ -432,7 +432,7 @@ public class FolderTestManager implements TestManager {
             while (iterator.hasNext()) {
                 allFolders.add(iterator.next());
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             doExceptionHandling(e, "ListRequest for root folders");
         }
 
@@ -469,7 +469,7 @@ public class FolderTestManager implements TestManager {
                 allFolders.add(fo);
             }
             setLastResponse(response);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             doExceptionHandling(e, "AllRequest");
         }
 
@@ -519,7 +519,7 @@ public class FolderTestManager implements TestManager {
                 allFolders.add(tempFolder);
             }
             setLastResponse(response);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             doExceptionHandling(e, "AllRequest");
         }
         final FolderObject[] folderArray = new FolderObject[allFolders.size()];
@@ -531,23 +531,23 @@ public class FolderTestManager implements TestManager {
         try {
             lastException = exception;
             throw exception;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (getFailOnError()) {
                 fail("AjaxException occured during " + action + ": " + e.getMessage());
             }
-        } catch (final IOException e) {
+        } catch (IOException e) {
             if (getFailOnError()) {
                 fail("IOException occured during " + action + ": " + e.getMessage());
             }
-        } catch (final SAXException e) {
+        } catch (SAXException e) {
             if (getFailOnError()) {
                 fail("SAXException occured during " + action + ": " + e.getMessage());
             }
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             if (getFailOnError()) {
                 fail("JSONException occured during " + action + ": " + e.getMessage());
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             fail("Unexpected error occured during " + action + ": " + e.getMessage() + "\n" + ExceptionUtils.getStackTrace(e));
         }
     }

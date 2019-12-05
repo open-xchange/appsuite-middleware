@@ -72,10 +72,10 @@ import com.openexchange.groupware.infostore.webdav.InMemoryAliases;
 import com.openexchange.groupware.infostore.webdav.InfostoreWebdavFactory;
 import com.openexchange.groupware.infostore.webdav.PropertyStoreImpl;
 import com.openexchange.groupware.infostore.webdav.TouchInfoitemsWithExpiredLocksListener;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.SessionHolder;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.SessionHolder;
+import com.openexchange.user.User;
 import com.openexchange.webdav.action.AbstractAction;
 import com.openexchange.webdav.action.OXWebdavMaxUploadSizeAction;
 import com.openexchange.webdav.action.OXWebdavPutAction;
@@ -265,7 +265,7 @@ public final class InfostorePerformer implements SessionHolder {
         }
         try {
             registry.add(new UserAgentBehaviour("Microsoft Data Access Internet Publishing Provider DAV", new IgnoreLocksIfHeaderApply()));
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("Can't add default overrides", e);
         }
         registry.log();
@@ -330,9 +330,9 @@ public final class InfostorePerformer implements SessionHolder {
             BehaviourLookup.getInstance().setRequest(webdavRequest);
             LOG.debug("Executing {}", action);
             actions.get(action).perform(webdavRequest, webdavResponse);
-        } catch (final WebdavProtocolException x) {
+        } catch (WebdavProtocolException x) {
             resp.setStatus(x.getStatus());
-        } catch (final NullPointerException x) {
+        } catch (NullPointerException x) {
             LOG.error("Null reference detected.", x);
         } finally {
             BehaviourLookup.getInstance().unsetRequest();

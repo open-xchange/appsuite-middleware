@@ -96,7 +96,7 @@ public class RdbResourceCacheImpl extends AbstractResourceCache {
     private boolean save(final String id, final InputStream in, final String optName, final String optType, final int userId, final int contextId) throws OXException {
         try {
             return save(id, Streams.stream2bytes(in), optName, optType, userId, contextId);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw PreviewExceptionCodes.IO_ERROR.create(e, e.getMessage());
         }
     }
@@ -148,12 +148,12 @@ public class RdbResourceCacheImpl extends AbstractResourceCache {
             con.commit();
             committed = true;
             return true;
-        } catch (final DataTruncation e) {
+        } catch (DataTruncation e) {
             throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
         } catch (java.sql.SQLIntegrityConstraintViolationException e) {
             // Duplicate key conflict; just leave
             return false;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             // duplicate key conflict
             if (e.getErrorCode() == 1022) {
                 return false;
@@ -263,9 +263,9 @@ public class RdbResourceCacheImpl extends AbstractResourceCache {
             }
 
             return new CachedResource(Streams.stream2bytes(rs.getBinaryStream(1)), metadata.getFileName(), metadata.getFileType(), metadata.getSize());
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw PreviewExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -345,9 +345,9 @@ public class RdbResourceCacheImpl extends AbstractResourceCache {
 
             con.commit();
             committed = true;
-        } catch (final DataTruncation e) {
+        } catch (DataTruncation e) {
             throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
             if (!committed) {

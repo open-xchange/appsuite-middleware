@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.authenticity.impl.core;
 
+import static com.openexchange.java.Autoboxing.L;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -135,13 +136,12 @@ final class StringUtil {
     private static final Pattern REGEX_PAIR;
     static {
         String quotedString = "\"(?:(?:\\\\\\\")|[^\"])+?\"";
-        String token = "[[\\p{L}\\p{ASCII}]&&[^\\p{Cntrl}()<>@,;:\\\"/\\[\\]?={}\\p{Blank}]]+";
+        String token = "[[\\p{L}\\p{ASCII}]&&[^\\p{Cntrl}()<>,;:\\\"/\\[\\]?={}\\p{Blank}]]+";
         String comment = "\\([^)]*\\)";
 
         String VALUE = "(?:" + quotedString + "|" + token + ")(?: " + comment + ")?";
 
-        //REGEX_PAIR = Pattern.compile("([a-zA-Z0-9-._]+)=[\"]?(" + VALUE + ")[\"]?( |;|$)");
-          REGEX_PAIR = Pattern.compile("([a-zA-Z0-9-._]+)=(" + VALUE + ")(?:\r?\n)?( |;|$)");
+        REGEX_PAIR = Pattern.compile("([a-zA-Z0-9-._]+)=(" + VALUE + ")(?:\r?\n)?( |;|$)");
     }
 
     private static final int MAX_NUMBER_OF_ATTRIBUTES = 250;
@@ -151,12 +151,17 @@ final class StringUtil {
      *
      * @param element The element to parse
      * @return A {@link T} with the key/value attributes of the element
-     */
+     */     
     private static <T> T parseToCollector(CharSequence element, T collector) {
+        CollectorAdder collectorAdder = COLLECTOR_ADDERS.get(collector.getClass());
+        if (collectorAdder == null) {
+            throw new IllegalArgumentException("Unsupported collector type '" + collector.getClass() + "'");
+        }
+
         if (element.toString().indexOf('=') < 0) {
             // No pairs; return as a singleton collector with the line being both the key and the value
             String kv = element.toString();
-            add(kv, kv, collector);
+            collectorAdder.add(kv, kv, collector);
             return collector;
         }
 
@@ -165,28 +170,13 @@ final class StringUtil {
         while (maxAttrs-- > 0 && m.find()) {
             String key = m.group(1);
             String value = m.group(2);
-            add(key, value, collector);
+            collectorAdder.add(key, value, collector);
         }
         return collector;
     }
 
     /**
-     * Adds the specified key/value to the specified {@link T} collector
-     *
-     * @param key The key
-     * @param value The value
-     * @param collector The {@link T} collector
-     */
-    private static <T> void add(String key, String value, T collector) {
-        CollectorAdder collectorAdder = COLLECTOR_ADDERS.get(collector.getClass());
-        if (collectorAdder == null) {
-            throw new IllegalArgumentException("Unsupported collector type '" + collector.getClass() + "'");
-        }
-        collectorAdder.add(key, value, collector);
-    }
-
-    /**
-     * Splits the parametrised header to single elements using the semicolon (';')
+     * Splits the parameterized header to single elements using the semicolon (';')
      * as the split character
      *
      * @param header The header to split
@@ -221,6 +211,7 @@ final class StringUtil {
                         lineBuffer.setLength(0);
                         break;
                     }
+                    //$FALL-THROUGH$
                 default:
                     lineBuffer.append(c);
             }
@@ -229,7 +220,7 @@ final class StringUtil {
         if (lineBuffer.length() > 0) {
             split.add(lineBuffer.toString().trim());
         }
-        LOGGER.trace("Header '{}' split in {} msec.", header, System.currentTimeMillis() - start);
+        LOGGER.trace("Header '{}' split in {} msec.", header, L(System.currentTimeMillis() - start));
         return split;
     }
 }

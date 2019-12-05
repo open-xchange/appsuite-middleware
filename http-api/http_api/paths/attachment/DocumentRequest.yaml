@@ -1,0 +1,50 @@
+/attachment?action=document:
+  get:
+    operationId: getAttachmentDocument
+    tags:
+      - Attachments
+    summary: Gets an attachment's document/filedata.
+    description: >
+      It is possible to add a filename to the request's URI like
+      `/attachment/{filename}?action=document`.
+
+      The filename may be added to the customary attachment path to suggest a
+      filename to a Save-As dialog.
+    parameters:
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - $ref: '#/components/parameters/gblQueryParamAttached'
+      - $ref: '#/components/parameters/gblQueryParamAttachmentsFolder'
+      - $ref: '#/components/parameters/gblQueryParamAttachmentsModule'
+      - in: query
+        name: id
+        description: Object ID of the requested attachment.
+        required: true
+        schema:
+          type: string
+      - in: query
+        name: content_type
+        description: >-
+          If present the response declares the given `content_type` in the
+          Content-Type header and not the attachments file MIME type.
+        required: false
+        schema:
+          type: string
+      - in: query
+        name: scan
+        description: >
+          Flag to request an Anti-Virus scan for the specified attachment before
+          downloading it.
+        required: false
+        schema:
+          type: boolean
+    responses:
+      '200':
+        description: >-
+          The raw byte data of the document. The response type for the HTTP
+          request is set accordingly to the defined MIME type for this
+          attachment or the content_type given.
+        content:
+          application/octet-stream:
+            schema:
+              type: string
+              format: binary

@@ -147,9 +147,9 @@ public final class BounceAction extends AbstractMailAction {
                     try {
                         mm.setHeader("X-Ignore", "Ignore");
                         mm.removeHeader("X-Ignore");
-                    } catch (final javax.mail.IllegalWriteException e) {
+                    } catch (javax.mail.IllegalWriteException e) {
                         readOnly = true;
-                    } catch (final javax.mail.MessagingException e) {
+                    } catch (javax.mail.MessagingException e) {
                         throw MimeMailException.handleMessagingException(e);
                     }
                     if (readOnly) {
@@ -167,14 +167,14 @@ public final class BounceAction extends AbstractMailAction {
                     sentMail.setAccountId(mailInterface.getAccountID());
                 }
                 return sentMail;
-            } catch (final javax.mail.MessagingException e) {
+            } catch (javax.mail.MessagingException e) {
                 throw MimeMailException.handleMessagingException(e);
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
             } finally {
                 transport.close();
             }
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }

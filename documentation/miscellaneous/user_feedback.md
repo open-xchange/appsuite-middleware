@@ -1,6 +1,6 @@
 ---
 title: User Feedback
-icon: fa-commenting
+icon: fas fa-comment-dots
 tags: Feedback, Configuration
 ---
 

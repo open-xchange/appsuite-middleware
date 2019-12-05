@@ -64,10 +64,10 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.infostore.webdav.Lock;
 import com.openexchange.groupware.infostore.webdav.LockManagerImpl;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 public class FolderLockManagerImpl extends LockManagerImpl<FolderLock> implements
         FolderLockManager {
@@ -112,10 +112,10 @@ public class FolderLockManagerImpl extends LockManagerImpl<FolderLock> implement
             rs = stmt.executeQuery();
 
             List<FolderLock> locks = new ArrayList<FolderLock>();
-            while(rs.next()) {
+            while (rs.next()) {
                 final FolderLock lock = newLock();
                 fillLock(lock, rs);
-                if(lock.getTimeout()<1) {
+                if (lock.getTimeout()<1) {
                     removeLock(lock.getId(), ctx);
                     lockExpired(lock);
                 } else {
@@ -123,9 +123,9 @@ public class FolderLockManagerImpl extends LockManagerImpl<FolderLock> implement
                 }
             }
             return locks;
-        } catch (final SQLException x) {
+        } catch (SQLException x) {
             throw new OXException();
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
         } finally {
             close(stmt, rs);

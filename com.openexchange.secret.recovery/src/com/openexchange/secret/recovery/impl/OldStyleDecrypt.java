@@ -128,7 +128,7 @@ public final class OldStyleDecrypt {
              *
              */
             encrypted = org.apache.commons.codec.binary.Base64.decodeBase64(Strings.toAsciiBytes(encryptedPassword));
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             // Cannot occur
             LOG.error("", e);
             return null;
@@ -141,7 +141,7 @@ public final class OldStyleDecrypt {
 
         try {
             return new String(outputBytes, "UTF-8");
-        } catch (final UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             // Cannot occur
             throw new GeneralSecurityException("Failed to decypt encrypted password.", e);
         }
@@ -160,7 +160,7 @@ public final class OldStyleDecrypt {
         }
         try {
             return new SecretKeySpec(ensureLength(key.getBytes("UTF-8")), ALGORITHM_DES);
-        } catch (final UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             // Cannot occur
             throw new GeneralSecurityException("Failed to generate secret key.", e);
         }

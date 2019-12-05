@@ -201,6 +201,11 @@ public class SessiondTest {
             }
 
             @Override
+            public boolean isStaySignedIn() {
+                return false;
+            }
+
+            @Override
             public List<SessionEnhancement> getEnhancements() {
                 return null;
             }
@@ -277,6 +282,11 @@ public class SessiondTest {
 
             @Override
             public boolean isTransient() {
+                return false;
+            }
+
+            @Override
+            public boolean isStaySignedIn() {
                 return false;
             }
 
@@ -362,6 +372,11 @@ public class SessiondTest {
             }
 
             @Override
+            public boolean isStaySignedIn() {
+                return false;
+            }
+
+            @Override
             public List<SessionEnhancement> getEnhancements() {
                 return null;
             }
@@ -439,6 +454,11 @@ public class SessiondTest {
 
             @Override
             public boolean isTransient() {
+                return false;
+            }
+
+            @Override
+            public boolean isStaySignedIn() {
                 return false;
             }
 

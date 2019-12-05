@@ -1,0 +1,32 @@
+'/gdpr/dataexport/{id}':
+  get:
+    operationId: getDataExport
+    tags:
+      - DataExport
+    summary: Downloads the available result file package from user-associated data export task
+    parameters:
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - in: path
+        name: id
+        description: The ID of the composition space
+        required: true
+        schema:
+          type: string
+      - in: query
+        name: number
+        description: The number of the package
+        required: true
+        schema:
+          type: int
+    responses:
+      '200':
+        description: A ZIP archive.
+        content:
+          application/zip:
+            schema:
+              type: string
+              format: binary
+      '400':
+        description: 'Bad request, response contains error message.'
+      '401':
+        description: Not authorized

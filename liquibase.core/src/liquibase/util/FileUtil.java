@@ -57,7 +57,7 @@ public class FileUtil {
                     if (!file.delete()) {
                         throw new IOException("Cannot delete "+file.getAbsolutePath());
                     }
-                } catch (final IOException ioe) {
+                } catch (IOException ioe) {
                     exception = ioe;
                 }
             }

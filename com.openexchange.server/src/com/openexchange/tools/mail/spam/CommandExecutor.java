@@ -170,7 +170,7 @@ public final class CommandExecutor {
         public void run() {
             try {
                 buf.append(Streams.stream2string(is, Charsets.UTF_8_NAME));
-            } catch (final IOException ioe) {
+            } catch (IOException ioe) {
                 LOG.error("", ioe);
             }
         }

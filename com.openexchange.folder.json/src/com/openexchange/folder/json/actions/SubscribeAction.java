@@ -149,7 +149,7 @@ public final class SubscribeAction extends AbstractFolderAction {
              * Return
              */
             return new AJAXRequestResult();
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
     }

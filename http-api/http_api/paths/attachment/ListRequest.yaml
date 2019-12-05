@@ -1,0 +1,38 @@
+/attachment?action=list:
+  put:
+    operationId: getAttachmentList
+    tags:
+      - Attachments
+    summary: Gets a list of attachments.
+    parameters:
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - $ref: '#/components/parameters/gblQueryParamAttached'
+      - $ref: '#/components/parameters/gblQueryParamAttachmentsFolder'
+      - $ref: '#/components/parameters/gblQueryParamAttachmentsModule'
+      - $ref: '#/components/parameters/gblQueryParamAttachmentsColumns'
+    responses:
+      '200':
+        description: >
+          A JSON object containing an array with data for the requested
+          infoitems. Each array element describes one infoitem and
+
+          is itself an array. The elements of each array contain the information
+          specified by the corresponding
+
+          identifiers in the `columns` parameter. In case of errors the
+          responsible fields in the response are
+
+          filled (see [Error handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InfoItemsResponse'
+    requestBody:
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              type: integer
+      description: A JSON array with the identifiers of the requested attachments.
+      required: true

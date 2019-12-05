@@ -71,31 +71,16 @@ public class DtStampMapping extends ICalUtcMapping<VAvailability, Availability> 
         super(Property.DTSTAMP);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalUtcMapping#getValue(java.lang.Object)
-     */
     @Override
     protected Date getValue(Availability object) {
         return object.getLastModified();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalUtcMapping#setValue(java.lang.Object, java.util.Date)
-     */
     @Override
     protected void setValue(Availability object, Date value) {
         object.setLastModified(new Date(value.getTime()));
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalUtcMapping#createProperty()
-     */
     @Override
     protected UtcProperty createProperty() {
         return new DtStamp();

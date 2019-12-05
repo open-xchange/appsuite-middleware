@@ -269,9 +269,9 @@ public final class HtmlServiceImpl implements HtmlService {
             }
             targetBuilder.append(content.substring(lastMatch));
             return targetBuilder.toString();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("", e);
-        } catch (final StackOverflowError error) {
+        } catch (StackOverflowError error) {
             LOG.error(StackOverflowError.class.getName(), error);
         }
         return content;
@@ -327,9 +327,9 @@ public final class HtmlServiceImpl implements HtmlService {
             }
             targetBuilder.append(content.substring(lastMatch));
             return targetBuilder.toString();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("", e);
-        } catch (final StackOverflowError error) {
+        } catch (StackOverflowError error) {
             LOG.error(StackOverflowError.class.getName(), error);
         }
         return content;
@@ -361,7 +361,7 @@ public final class HtmlServiceImpl implements HtmlService {
             } else {
                 appendAnchor(url, builder);
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             /*
              * Append as-is
              */
@@ -378,7 +378,7 @@ public final class HtmlServiceImpl implements HtmlService {
                 builder.append("http://");
             }
             builder.append(checkedUrl).append("\" target=\"_blank\">").append(url).append("</a>");
-        } catch (final MalformedURLException e) {
+        } catch (MalformedURLException e) {
             LOG.debug("Malformed URL", e);
             // Append as-is
             builder.append(url);
@@ -732,7 +732,7 @@ public final class HtmlServiceImpl implements HtmlService {
             */
 
             return htmlSanitizeResult;
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             LOG.warn("HTML content will be returned un-sanitized.", e);
             return htmlSanitizeResult;
         }
@@ -1066,7 +1066,7 @@ public final class HtmlServiceImpl implements HtmlService {
     private String tikaHtml2Text(String htmlContent) {
         try {
             return extractFrom(Streams.newByteArrayInputStream(htmlContent.getBytes(Charsets.UTF_8)));
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("Error during html2text conversion.", e);
             return "";
         }
@@ -1078,9 +1078,9 @@ public final class HtmlServiceImpl implements HtmlService {
             metadata.set(Metadata.CONTENT_ENCODING, "UTF-8");
             metadata.set(Metadata.CONTENT_TYPE, "text/html");
             return tika.parseToString(inputStream, metadata);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw new OXException(e);
-        } catch (final TikaException e) {
+        } catch (TikaException e) {
             throw new OXException(e);
         } finally {
             IOUtils.closeQuietly(inputStream);
@@ -1490,7 +1490,7 @@ public final class HtmlServiceImpl implements HtmlService {
         }
         try {
             return Integer.parseInt(possibleNum, radix);
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             LOG.trace("", e);
             return -1;
         }
@@ -1515,15 +1515,15 @@ public final class HtmlServiceImpl implements HtmlService {
             final AllocatingStringWriter writer = new AllocatingStringWriter(htmlContent.length());
             newSerializer().write(htmlNode, writer, "UTF-8");
             return writer.toString();
-        } catch (final UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             // Cannot occur
             LOG.error("Unsupported encoding", e);
             return htmlContent;
-        } catch (final IOException e) {
+        } catch (IOException e) {
             // Cannot occur
             LOG.error("I/O error", e);
             return htmlContent;
-        } catch (final RuntimeException rte) {
+        } catch (RuntimeException rte) {
             /*
              * HtmlCleaner failed horribly...
              */
@@ -1697,7 +1697,7 @@ public final class HtmlServiceImpl implements HtmlService {
              */
             do {
                 final String attribute = m.group();
-                if(attribute.contains("<") && attribute.contains(">")) {
+                if (attribute.contains("<") && attribute.contains(">")) {
                     String replace = attribute;
                     replace = replace.replace("<", "&lt;");
                     replace = replace.replace(">", "&gt;");
@@ -1775,16 +1775,18 @@ public final class HtmlServiceImpl implements HtmlService {
                     // throw new OXException(); //TODO: set exceptioncode
                 } else {
                     final byte[] responseBody = get.getResponseBody();
-                    try {
-                        final String charSet = get.getResponseCharSet();
-                        css.append(new String(responseBody, null == charSet ? Charsets.ISO_8859_1 : Charsets.forName(charSet)));
-                    } catch (final UnsupportedCharsetException e) {
-                        css.append(new String(responseBody, Charsets.ISO_8859_1));
+                    if (null != responseBody && responseBody.length > 0) {
+                        try {
+                            final String charSet = get.getResponseCharSet();
+                            css.append(new String(responseBody, null == charSet ? Charsets.ISO_8859_1 : Charsets.forName(charSet)));
+                        } catch (UnsupportedCharsetException e) {
+                            css.append(new String(responseBody, Charsets.ISO_8859_1));
+                        }
                     }
                 }
-            } catch (final HttpException e) {
+            } catch (HttpException e) {
                 // throw new OXException(); //TODO: set exceptioncode
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 // throw new OXException(); //TODO: set exceptioncode
             } finally {
                 get.releaseConnection();
@@ -2274,7 +2276,7 @@ public final class HtmlServiceImpl implements HtmlService {
                 tmp.setLength(2);
                 tmp.append(Integer.parseInt(m.group(1), 16)).append(';');
                 mr.appendLiteralReplacement(builder, tmp.toString());
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 tmp.setLength(0);
                 tmp.append("&amp;#x").append(m.group(1)).append("&#59;");
                 mr.appendLiteralReplacement(builder, tmp.toString());
@@ -2308,7 +2310,7 @@ public final class HtmlServiceImpl implements HtmlService {
                     tmp.append("&#").append(codePoint).append(';');
                     mr.appendLiteralReplacement(builder, tmp.toString());
                 }
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 tmp.setLength(0);
                 tmp.append("&amp;#x").append(m.group(1)).append("&#59;");
                 tmp.append("&amp;#x").append(m.group(2)).append("&#59;");
@@ -2504,15 +2506,15 @@ public final class HtmlServiceImpl implements HtmlService {
             // Obey forbidden end tags
             result = obeyForbiddenEndTags(result);
             return result;
-        } catch (final UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             // Cannot occur
             LOG.error("HtmlCleaner library failed to pretty-print HTML content with an unsupported encoding", e);
             return htmlContent;
-        } catch (final IOException e) {
+        } catch (IOException e) {
             // Cannot occur
             LOG.error("HtmlCleaner library failed to pretty-print HTML content with I/O error", e);
             return htmlContent;
-        } catch (final RuntimeException rte) {
+        } catch (RuntimeException rte) {
             /*
              * HtmlCleaner failed horribly...
              */

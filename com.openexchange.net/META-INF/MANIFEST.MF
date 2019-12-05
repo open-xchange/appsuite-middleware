@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Network Utilities Bundle
 Bundle-SymbolicName: com.openexchange.net
-Bundle-Version: 7.10.2
+Bundle-Version: 7.10.3
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.google.common.annotations,
@@ -13,6 +13,11 @@ Import-Package: com.google.common.annotations,
  com.openexchange.java,
  com.openexchange.java.util,
  com.openexchange.log,
+ com.openexchange.logging,
+ com.openexchange.monitoring.sockets,
+ com.openexchange.monitoring.sockets.exceptions,
+ com.openexchange.osgi,
+ com.openexchange.server,
  com.sun.net,
  com.sun.net.ssl,
  javax.crypto,
@@ -26,6 +31,7 @@ Import-Package: com.google.common.annotations,
  javax.security.sasl,
  org.apache.commons.lang.math,
  org.apache.commons.validator.routines,
+ org.osgi.framework,
  org.slf4j,
  sun.misc
 Export-Package: com.googlecode.ipv6,
@@ -34,3 +40,4 @@ Export-Package: com.googlecode.ipv6,
  edazdarevic.commons.net
 Bundle-ClassPath: lib/java-ipv6-0.17-SNAPSHOT.jar,
  .
+Bundle-Activator: com.openexchange.net.osgi.NetSSLActivator

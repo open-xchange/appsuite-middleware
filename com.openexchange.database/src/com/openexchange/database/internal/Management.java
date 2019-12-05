@@ -103,11 +103,11 @@ public final class Management {
                 try {
                     final ObjectName objName = new ObjectName(ConnectionPoolMBean.DOMAIN, "name", name);
                     service.registerMBean(objName, pool);
-                } catch (final MalformedObjectNameException e) {
+                } catch (MalformedObjectNameException e) {
                     LOG.error("", e);
-                } catch (final NullPointerException e) {
+                } catch (NullPointerException e) {
                     LOG.error("", e);
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     LOG.error("", e);
                 }
             }
@@ -126,11 +126,11 @@ public final class Management {
             if (null != overview) {
                 managementService.registerMBean(new ObjectName(ConnectionPoolMBean.DOMAIN, "name", "Overview"), overview);
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
-        } catch (final MalformedObjectNameException e) {
+        } catch (MalformedObjectNameException e) {
             LOG.error("", e);
-        } catch (final NullPointerException e) {
+        } catch (NullPointerException e) {
             LOG.error("", e);
         }
     }
@@ -150,11 +150,11 @@ public final class Management {
                 try {
                     final ObjectName objName = new ObjectName(ConnectionPoolMBean.DOMAIN, "name", name);
                     service.unregisterMBean(objName);
-                } catch (final MalformedObjectNameException e) {
+                } catch (MalformedObjectNameException e) {
                     LOG.error("", e);
-                } catch (final NullPointerException e) {
+                } catch (NullPointerException e) {
                     LOG.error("", e);
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     LOG.error("", e);
                 }
             }
@@ -167,11 +167,11 @@ public final class Management {
         }
         try {
             managementService.unregisterMBean(new ObjectName(ConnectionPoolMBean.DOMAIN, "name", "Overview"));
-        } catch (final MalformedObjectNameException e) {
+        } catch (MalformedObjectNameException e) {
             LOG.error("", e);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
-        } catch (final NullPointerException e) {
+        } catch (NullPointerException e) {
             LOG.error("", e);
         }
     }

@@ -71,11 +71,6 @@ public class NotWriterImpl extends AbstractWriterImpl<NotTestArgument> {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.mail.filter.api.conversion.writer.JSONWriter#write(java.lang.Object, org.json.JSONObject)
-     */
     @Override
     public JSONObject write(Test<? extends TestArgument> type, JSONObject jsonObject) throws JSONException {
         final JSONObject jsonObj = new JSONObject();

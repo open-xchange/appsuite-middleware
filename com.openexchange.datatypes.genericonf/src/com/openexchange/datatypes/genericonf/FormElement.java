@@ -96,7 +96,7 @@ public class FormElement {
 
         public static Widget getWidgetByKeyword(String keyword) {
             for(Widget widget : values()) {
-                if(widget.getKeyword().equals(keyword)) {
+                if (widget.getKeyword().equals(keyword)) {
                     return widget;
                 }
             }
@@ -104,9 +104,9 @@ public class FormElement {
         }
 
         public static Widget chooseFromHTMLElement(Element inputElement) {
-            if("input".equalsIgnoreCase(inputElement.getTagName())) {
+            if ("input".equalsIgnoreCase(inputElement.getTagName())) {
                 String type = inputElement.getAttribute("type");
-                if("text".equalsIgnoreCase(type)) {
+                if ("text".equalsIgnoreCase(type)) {
                     return INPUT;
                 } else if ("password".equalsIgnoreCase(type)) {
                     return PASSWORD;

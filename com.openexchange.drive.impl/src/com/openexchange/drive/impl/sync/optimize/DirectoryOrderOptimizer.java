@@ -52,6 +52,7 @@ package com.openexchange.drive.impl.sync.optimize;
 import java.util.Collections;
 import java.util.List;
 import com.openexchange.drive.Action;
+import com.openexchange.drive.DefaultDirectoryVersion;
 import com.openexchange.drive.DirectoryVersion;
 import com.openexchange.drive.impl.DriveConstants;
 import com.openexchange.drive.impl.actions.AbstractAction;
@@ -61,7 +62,6 @@ import com.openexchange.drive.impl.actions.SyncDirectoryAction;
 import com.openexchange.drive.impl.comparison.VersionMapper;
 import com.openexchange.drive.impl.internal.SyncSession;
 import com.openexchange.drive.impl.sync.IntermediateSyncResult;
-import com.openexchange.drive.impl.sync.SimpleDirectoryVersion;
 
 
 /**
@@ -98,17 +98,17 @@ public class DirectoryOrderOptimizer extends DirectoryActionOptimizer {
                     if (Action.EDIT.equals(actions.get(j).getAction()) &&
                         actions.get(j).getVersion().getPath().startsWith(oldPath + DriveConstants.PATH_SEPARATOR)) {
                         String newOldPath = newPath + actions.get(j).getVersion().getPath().substring(oldPath.length());
-                        DirectoryVersion modifiedOldVersion = new SimpleDirectoryVersion(newOldPath, actions.get(j).getVersion().getChecksum());
+                        DirectoryVersion modifiedOldVersion = new DefaultDirectoryVersion(newOldPath, actions.get(j).getVersion().getChecksum());
                         actions.set(j, new EditDirectoryAction(modifiedOldVersion, actions.get(j).getNewVersion(), actions.get(j).getComparison()));
                     } else if (Action.REMOVE.equals(actions.get(j).getAction()) &&
                         actions.get(j).getVersion().getPath().startsWith(oldPath + DriveConstants.PATH_SEPARATOR)) {
                         String newOldPath = newPath + actions.get(j).getVersion().getPath().substring(oldPath.length());
-                        DirectoryVersion modifiedOldVersion = new SimpleDirectoryVersion(newOldPath, actions.get(j).getVersion().getChecksum());
+                        DirectoryVersion modifiedOldVersion = new DefaultDirectoryVersion(newOldPath, actions.get(j).getVersion().getChecksum());
                         actions.set(j, new RemoveDirectoryAction(modifiedOldVersion, actions.get(j).getComparison()));
                     } else if (Action.SYNC.equals(actions.get(j).getAction()) &&
                         actions.get(j).getVersion().getPath().startsWith(oldPath + DriveConstants.PATH_SEPARATOR)) {
                         String newOldPath = newPath + actions.get(j).getVersion().getPath().substring(oldPath.length());
-                        DirectoryVersion modifiedOldVersion = new SimpleDirectoryVersion(newOldPath, actions.get(j).getVersion().getChecksum());
+                        DirectoryVersion modifiedOldVersion = new DefaultDirectoryVersion(newOldPath, actions.get(j).getVersion().getChecksum());
                         actions.set(j, new SyncDirectoryAction(modifiedOldVersion, actions.get(j).getComparison()));
                     }
                 }

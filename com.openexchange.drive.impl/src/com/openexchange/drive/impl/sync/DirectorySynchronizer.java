@@ -219,9 +219,9 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion> {
                 return 1;
             } else {
                 /*
-                 * not allowed, let client synchronize the directory again, indicate as error without quarantine flag
+                 * not allowed, let client reset its checksums & synchronize the directory again, indicate as error without quarantine flag
                  */
-                result.addActionForClient(new SyncDirectoryAction(comparison.getServerVersion(), comparison));
+                result.addActionForClient(new SyncDirectoryAction(comparison.getServerVersion(), comparison, true));
                 OXException e = DriveExceptionCodes.NO_DELETE_DIRECTORY_PERMISSION.create(comparison.getServerVersion().getPath());
                 LOG.warn("Client change refused for {}", comparison.getServerVersion(), e);
                 result.addActionForClient(new ErrorDirectoryAction(

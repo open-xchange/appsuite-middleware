@@ -62,10 +62,12 @@ import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.chronos.ical.ImportedCalendar;
+import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.PreconditionException;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.java.util.TimeZones;
 import com.openexchange.webdav.protocol.WebdavPath;
 
 /**
@@ -92,21 +94,22 @@ public class CalDAVImport {
     /**
      * Initializes a new {@link CalDAVImport}.
      *
-     * @param parent The associated event resource
+     * @param resource The associated event resource
      * @param inputStream The input stream to deserialize
      */
     public CalDAVImport(EventResource resource, InputStream inputStream) throws OXException {
-        this(resource.getUrl(), importICal(resource, inputStream));
+        this(resource, importICal(resource, inputStream));
     }
 
     /**
      * Initializes a new {@link CalDAVImport}.
      *
-     * @param url The resource's WebDAV path
+     * @param resource The associated event resource
      * @param importedCalendar The imported calendar as sent by the client
      */
-    private CalDAVImport(WebdavPath url, ImportedCalendar importedCalendar) throws OXException {
+    private CalDAVImport(EventResource resource, ImportedCalendar importedCalendar) throws OXException {
         super();
+        WebdavPath url = resource.getUrl();
         /*
          * ensure there are events
          */
@@ -129,14 +132,31 @@ public class CalDAVImport {
                 LOG.debug("Skipping event marked with \"{}\": {}", Lightning.X_MOZ_FAKED_MASTER.getId(), importedEvent);
                 continue;
             }
-            if (null == uid) {
-                uid = importedEvent.getUid();
-            } else if (false == uid.equals(importedEvent.getUid())) {
-                throw new PreconditionException(DAVProtocol.CAL_NS.getURI(), "valid-calendar-object-resource", url, HttpServletResponse.SC_FORBIDDEN);
-            }
             if (looksLikeException(importedEvent)) {
+                /*
+                 * take over change exception event
+                 */
                 changeExceptions.add(importedEvent);
             } else {
+                /*
+                 * check against min-/max-date-time, if configured
+                 */
+                if (false == CalendarUtils.isInRange(importedEvent, resource.getParent().getMinDateTime(), null, TimeZones.UTC) && (
+                    null == importedEvent.getRecurrenceRule() || false == resource.getFactory().requireService(RecurrenceService.class).iterateEventOccurrences(
+                        importedEvent, resource.getParent().getMinDateTime(), null).hasNext())) {
+                    throw new PreconditionException(DAVProtocol.CAL_NS.getURI(), "min-date-time", url, HttpServletResponse.SC_FORBIDDEN);
+                }
+                if (false == CalendarUtils.isInRange(importedEvent, null, resource.getParent().getMaxDateTime(), TimeZones.UTC)) {
+                    throw new PreconditionException(DAVProtocol.CAL_NS.getURI(), "max-date-time", url, HttpServletResponse.SC_FORBIDDEN);
+                }
+                if (null == uid) {
+                    uid = importedEvent.getUid();
+                } else if (false == uid.equals(importedEvent.getUid())) {
+                    throw new PreconditionException(DAVProtocol.CAL_NS.getURI(), "valid-calendar-object-resource", url, HttpServletResponse.SC_FORBIDDEN);
+                }
+                /*
+                 * take over series master or non-recurring event
+                 */
                 if (null == event) {
                     event = importedEvent;
                 } else {

@@ -100,7 +100,7 @@ public class ReCaptchaServlet extends DataServlet {
             } else if (action.equalsIgnoreCase(ACTION_KEY)) {
                 doGetPublicKey(response);
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             response.setException(e);
         }

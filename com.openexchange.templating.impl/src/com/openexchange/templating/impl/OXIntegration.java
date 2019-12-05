@@ -149,7 +149,7 @@ public class OXIntegration implements OXFolderHelper, OXInfostoreHelper {
                     return child;
                 }
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw TemplateErrorMessage.SQLException.create(e);
         }
         return null;
@@ -202,10 +202,10 @@ public class OXIntegration implements OXFolderHelper, OXInfostoreHelper {
             }
             return builder.toString();
 
-        } catch (final UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             LOG.error("", e);
             return null;
-        } catch (final IOException e) {
+        } catch (IOException e) {
             LOG.error("", e);
             throw TemplateErrorMessage.IOException.create(e);
         } finally {

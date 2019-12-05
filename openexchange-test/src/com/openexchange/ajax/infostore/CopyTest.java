@@ -64,13 +64,12 @@ import com.google.common.collect.Iterables;
 import com.openexchange.ajax.InfostoreAJAXTest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.groupware.infostore.utils.Metadata;
-import com.openexchange.realtime.json.fields.ResourceIDField;
 import com.openexchange.test.OXTestToolkit;
 import com.openexchange.test.TestInit;
 
 public class CopyTest extends InfostoreAJAXTest {
 
-    private final Set<String> skipKeys = new HashSet<String>(Arrays.asList(Metadata.ID_LITERAL.getName(), Metadata.CREATION_DATE_LITERAL.getName(), Metadata.LAST_MODIFIED_LITERAL.getName(), Metadata.LAST_MODIFIED_UTC_LITERAL.getName(), Metadata.VERSION_LITERAL.getName(), Metadata.CURRENT_VERSION_LITERAL.getName(), Metadata.SEQUENCE_NUMBER_LITERAL.getName(), Metadata.CONTENT_LITERAL.getName(), new ResourceIDField().getColumnName()));
+    private final Set<String> skipKeys = new HashSet<String>(Arrays.asList(Metadata.ID_LITERAL.getName(), Metadata.CREATION_DATE_LITERAL.getName(), Metadata.LAST_MODIFIED_LITERAL.getName(), Metadata.LAST_MODIFIED_UTC_LITERAL.getName(), Metadata.VERSION_LITERAL.getName(), Metadata.CURRENT_VERSION_LITERAL.getName(), Metadata.SEQUENCE_NUMBER_LITERAL.getName(), Metadata.CONTENT_LITERAL.getName()));
 
     @Test
     public void testCopy() throws Exception {
@@ -193,7 +192,7 @@ public class CopyTest extends InfostoreAJAXTest {
             itm.copyAction(origId, Integer.toString(folderId), file);
             AbstractAJAXResponse resp = itm.getLastResponse();
             assertTrue(resp.hasError());
-        } catch (final JSONException x) {
+        } catch (JSONException x) {
             assertTrue(x.getMessage(), x.getMessage().contains("IFO-1700"));
         }
 

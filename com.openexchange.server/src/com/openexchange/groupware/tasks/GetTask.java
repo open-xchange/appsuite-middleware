@@ -61,8 +61,8 @@ import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.groupware.attach.impl.AttachmentBaseImpl;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.user.User;
 
 /**
  * This class collects all information for getting tasks. It is also able to
@@ -274,7 +274,7 @@ public final class GetTask {
         Date lastModifiedOfNewestAttachment = null;
         try {
             lastModifiedOfNewestAttachment = attachmentBase.getNewestCreationDate(ctx, Types.TASK, task.getObjectID());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
         }
         if (null != lastModifiedOfNewestAttachment) {

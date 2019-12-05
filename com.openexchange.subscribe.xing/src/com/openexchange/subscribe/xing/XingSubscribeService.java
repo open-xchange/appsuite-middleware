@@ -190,11 +190,6 @@ public class XingSubscribeService extends AbstractOAuthSubscribeService {
         this.services = services;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.subscribe.SubscribeService#getContent(com.openexchange.subscribe.Subscription)
-     */
     @Override
     public Collection<?> getContent(final Subscription subscription) throws OXException {
         try {
@@ -263,20 +258,15 @@ public class XingSubscribeService extends AbstractOAuthSubscribeService {
             });
             // Return first chunk with this thread
             return convert(chunk, loadingPhotoHandler, subscription, session);
-        } catch (final XingUnlinkedException e) {
+        } catch (XingUnlinkedException e) {
             throw XingExceptionCodes.UNLINKED_ERROR.create();
-        } catch (final XingException e) {
+        } catch (XingException e) {
             throw XingExceptionCodes.XING_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw XingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.subscribe.oauth.AbstractOAuthSubscribeService#modifyOutgoing(com.openexchange.subscribe.Subscription)
-     */
     @Override
     public void modifyOutgoing(final Subscription subscription) throws OXException {
         if (Strings.isNotEmpty(subscription.getSecret())) {
@@ -291,11 +281,6 @@ public class XingSubscribeService extends AbstractOAuthSubscribeService {
         super.modifyOutgoing(subscription);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.subscribe.oauth.AbstractOAuthSubscribeService#getKnownApi()
-     */
     @Override
     protected KnownApi getKnownApi() {
         return KnownApi.XING;
@@ -557,7 +542,7 @@ public class XingSubscribeService extends AbstractOAuthSubscribeService {
         if (null != optPhotoHandler) {
             try {
                 optPhotoHandler.handlePhoto(xingUser, oxContact, subscription, session);
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 LOG.warn("Could not handle photo from XING contact {} ({}).", xingUser.getDisplayName(), xingUser.getId());
             }
         }

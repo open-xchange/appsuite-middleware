@@ -149,7 +149,7 @@ public final class MIMEStructureParser {
             }
 
 
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -180,12 +180,12 @@ public final class MIMEStructureParser {
             final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(4096);
             mimeMessage.writeTo(out);
             return out.toByteArray();
-        } catch (final IOException e) {
+        } catch (IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         }
     }
@@ -322,9 +322,9 @@ public final class MIMEStructureParser {
             if (msgFlags != null) {
                 mimeMessage.setFlags(msgFlags, true);
             }
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         }
     }
@@ -357,7 +357,7 @@ public final class MIMEStructureParser {
             } else {
                 parseSimpleBodyBinary(jsonPart.getJSONObject("body"), mimePart, contentType);
             }
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
@@ -368,7 +368,7 @@ public final class MIMEStructureParser {
             parseMessage(jsonMessage, mimeMessage);
             MessageUtility.setContent(mimeMessage, mimePart);
             // mimePart.setContent(mimeMessage, "message/rfc822");
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         }
     }
@@ -384,9 +384,9 @@ public final class MIMEStructureParser {
             }
             MessageUtility.setContent(multipart, mimePart);
             // mimePart.setContent(multipart);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         }
     }
@@ -402,9 +402,9 @@ public final class MIMEStructureParser {
                 mimePart.setDataHandler(new DataHandler(new MessageDataSource(bytes, contentType.toString(true))));
                 mimePart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, contentType.toString(true));
             }
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         }
     }
@@ -414,11 +414,11 @@ public final class MIMEStructureParser {
             mimePart.setDataHandler(new DataHandler(new MessageDataSource(Base64.decodeBase64(jsonBody.getString("data").getBytes(
                 "US-ASCII")), contentType.getBaseType())));
             mimePart.setHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC, "base64");
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
-        } catch (final UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
         }
     }
@@ -492,14 +492,14 @@ public final class MIMEStructureParser {
                     }
                 }
             }
-        } catch (final UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             /*
              * Cannot occur
              */
             throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }

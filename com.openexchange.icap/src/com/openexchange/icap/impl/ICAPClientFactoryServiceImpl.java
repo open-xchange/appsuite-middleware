@@ -72,11 +72,6 @@ public class ICAPClientFactoryServiceImpl implements ICAPClientFactoryService {
         this.services = services;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.icap.ICAPClientFactoryService#createOrGetClientFor(java.lang.String, int, java.lang.String)
-     */
     @Override
     public ICAPClient getOrCreate() {
         if (cachedInstance == null) {

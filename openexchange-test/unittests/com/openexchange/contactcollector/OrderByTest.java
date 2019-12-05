@@ -184,7 +184,7 @@ public class OrderByTest {
         FolderObject fo = null;
         try {
             fo = access.getDefaultFolder(userId, FolderObject.CONTACT);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             e.printStackTrace();
             return null;
         }

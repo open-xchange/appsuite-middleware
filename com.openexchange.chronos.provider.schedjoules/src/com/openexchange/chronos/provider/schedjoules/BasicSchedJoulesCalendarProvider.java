@@ -88,11 +88,11 @@ import com.openexchange.chronos.schedjoules.exception.SchedJoulesAPIExceptionCod
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.user.User;
 
 /**
  * {@link BasicSchedJoulesCalendarProvider}
@@ -156,11 +156,6 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
         // nothing to do
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.provider.basic.BasicCalendarProvider#probe(com.openexchange.session.Session, com.openexchange.chronos.provider.basic.CalendarSettings, com.openexchange.chronos.service.CalendarParameters)
-     */
     @Override
     public CalendarSettings probe(Session session, CalendarSettings settings, CalendarParameters parameters) throws OXException {
         /*
@@ -196,12 +191,6 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
         return proposedSettings;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarProvider#configureAccountOpt(com.openexchange.session.Session, com.openexchange.chronos.provider.basic.CalendarSettings,
-     * com.openexchange.chronos.service.CalendarParameters)
-     */
     @Override
     protected JSONObject configureAccountOpt(Session session, CalendarSettings settings, CalendarParameters parameters) throws OXException {
         /*
@@ -243,12 +232,6 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
         return internalConfig;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarProvider#reconfigureAccountOpt(com.openexchange.session.Session, com.openexchange.chronos.provider.CalendarAccount,
-     * com.openexchange.chronos.provider.basic.CalendarSettings, com.openexchange.chronos.service.CalendarParameters)
-     */
     @Override
     protected JSONObject reconfigureAccountOpt(Session session, CalendarAccount account, CalendarSettings settings, CalendarParameters parameters) throws OXException {
         JSONObject internalConfig = null != account.getInternalConfiguration() ? new JSONObject(account.getInternalConfiguration()) : new JSONObject();
@@ -303,7 +286,7 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
             URL u = new URL(url);
             String path = u.getQuery();
             int startIndex = path.indexOf("l=");
-            int endIndex = path.indexOf("&", startIndex);
+            int endIndex = path.indexOf('&', startIndex);
             String l = path.substring(startIndex + 2, endIndex);
             if (false == l.equals(locale)) {
                 JSONObject item = fetchItem(session.getContextId(), getItemId(session, account, userConfig), locale);

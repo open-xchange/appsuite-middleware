@@ -92,7 +92,7 @@ public class ServletActivator extends AbstractSessionServletActivator {
             registerSessionServlet(dispatcherPrefixService.getPrefix() + SUBSCRIPTION_SOURCES_ALIAS_APPENDIX, new SubscriptionSourcesServlet());
             registerSessionServlet(dispatcherPrefixService.getPrefix() + SUBSCRIPTION_ALIAS_APPENDIX, new SubscriptionServlet());
             LOG.info("Registered Servlets for Subscriptions");
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("", e);
         }
     }

@@ -65,7 +65,7 @@ public class OXResellerTools {
     }
 
     public static HashSet<Restriction> array2HashSet(final Restriction[] rarr) {
-        if( rarr != null ) {
+        if ( rarr != null ) {
             HashSet<Restriction> ret = new HashSet<Restriction>();
             for(final Restriction r : rarr) {
                 ret.add(r);
@@ -90,8 +90,8 @@ public class OXResellerTools {
             if (null == rval) {
                 throw new InvalidDataException("Restriction value must be set");
             }
-            if( rname.equals(Restriction.SUBADMIN_CAN_CREATE_SUBADMINS) ) {
-                if( ! (rval.equals("true") || rval.equals("false")) ) {
+            if ( rname.equals(Restriction.SUBADMIN_CAN_CREATE_SUBADMINS) ) {
+                if ( ! (rval.equals("true") || rval.equals("false")) ) {
                     throw new InvalidDataException(rval + " is not a valid value for " + Restriction.SUBADMIN_CAN_CREATE_SUBADMINS);
                 }
             }

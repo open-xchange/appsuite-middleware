@@ -57,6 +57,7 @@ import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
+import com.openexchange.session.SessionAttributes;
 import com.openexchange.sessiond.AddSessionParameter;
 import com.openexchange.sessiond.SessionFilter;
 import com.openexchange.sessiond.SessionMatcher;
@@ -99,9 +100,9 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
             param.getClient(),
             param.getClientToken(),
             param.isTransient(),
+            param.isStaySignedIn(),
             param.getOrigin(),
             param.getEnhancements(),
-
             param.getUserAgent());
     }
 
@@ -122,18 +123,8 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
     }
 
     @Override
-    public void setClient(final String sessionId, final String client) throws OXException {
-        SessionHandler.setClient(getSession(sessionId), client);
-    }
-
-    @Override
-    public void setHash(final String sessionId, final String hash) throws OXException {
-        SessionHandler.setHash(getSession(sessionId), hash);
-    }
-
-    @Override
-    public void setLocalIp(final String sessionId, final String localIp) throws OXException {
-        SessionHandler.setLocalIp(getSession(sessionId), localIp);
+    public void setSessionAttributes(String sessionId, SessionAttributes attrs) throws OXException {
+        SessionHandler.setSessionAttributes(getSession(sessionId), attrs);
     }
 
     @Override

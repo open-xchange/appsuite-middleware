@@ -54,7 +54,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONException;
 import org.junit.Assert;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.UserTest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.Executor;
@@ -65,8 +64,8 @@ import com.openexchange.ajax.user.actions.SearchResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.ContactSearchObject;
+import com.openexchange.user.User;
 
 /**
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
@@ -80,7 +79,7 @@ public final class UserTools extends Assert {
         super();
     }
 
-    public static UserImpl4Test[] searchUser(AJAXClient client, String searchpattern) throws OXException, IOException, SAXException, JSONException {
+    public static UserImpl4Test[] searchUser(AJAXClient client, String searchpattern) throws OXException, IOException, JSONException {
         final ContactSearchObject search = new ContactSearchObject();
         search.setPattern(searchpattern);
         search.addFolder(FolderObject.SYSTEM_LDAP_FOLDER_ID);
@@ -90,7 +89,7 @@ public final class UserTools extends Assert {
         return response.getUser();
     }
 
-        public static Contact getUserContact(AJAXClient client, int userId) throws OXException, IOException, SAXException, JSONException {
+    public static Contact getUserContact(AJAXClient client, int userId) throws OXException, IOException, JSONException {
             GetRequest request = new GetRequest(userId, client.getValues().getTimeZone());
             GetResponse response = client.execute(request);
             return response.getContact();

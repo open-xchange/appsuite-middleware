@@ -71,6 +71,7 @@ import com.openexchange.folderstorage.FolderService;
 import com.openexchange.i18n.I18nServiceRegistry;
 import com.openexchange.jslob.JSlobEntry;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.regional.RegionalSettingsService;
 
 /**
  * {@link BirthdaysCalendarProviderActivator}
@@ -92,7 +93,8 @@ public class BirthdaysCalendarProviderActivator extends HousekeepingActivator {
         return new Class<?>[] {
             ContactService.class, RecurrenceService.class, CalendarUtilities.class, FolderService.class, CalendarStorageFactory.class,
             DatabaseService.class, ContextService.class, AdministrativeCalendarAccountService.class, ConversionService.class,
-            CapabilityService.class, CalendarAccountService.class, I18nServiceRegistry.class, CalendarEventNotificationService.class
+            CapabilityService.class, CalendarAccountService.class, I18nServiceRegistry.class, CalendarEventNotificationService.class,
+            RegionalSettingsService.class
         };
     }
 

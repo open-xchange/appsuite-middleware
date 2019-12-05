@@ -63,6 +63,7 @@ import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.calendar.json.compat.AppointmentParser;
 import com.openexchange.calendar.json.compat.CalendarDataObject;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.SchedulingControl;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.CalendarParameters;
@@ -106,8 +107,7 @@ public final class UpdateAction extends AppointmentAction {
         appointment.setContext(request.getSession().getContext());
         new AppointmentParser(request.getTimeZone()).parse(appointment, jsonObject);
         if (appointment.containsNotification()) {
-            session.set(CalendarParameters.PARAMETER_NOTIFICATION, Boolean.valueOf(appointment.getNotification()));
-            session.set(CalendarParameters.PARAMETER_SUPPRESS_ITIP, Boolean.valueOf(false == appointment.getNotification()));
+            session.set(CalendarParameters.PARAMETER_SCHEDULING, appointment.getNotification() ? SchedulingControl.ALL : SchedulingControl.NONE);
         }
         if (false == appointment.getIgnoreConflicts()) {
             session.set(CalendarParameters.PARAMETER_CHECK_CONFLICTS, Boolean.TRUE);

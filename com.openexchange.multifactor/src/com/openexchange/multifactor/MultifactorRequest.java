@@ -113,11 +113,11 @@ public class MultifactorRequest {
 
     @Override
     public boolean equals(Object obj) {
-        if(obj == this) {
+        if (obj == this) {
             return true;
         }
 
-        if(!(obj instanceof MultifactorRequest)) {
+        if (!(obj instanceof MultifactorRequest)) {
             return false;
         }
 

@@ -130,6 +130,36 @@ public class CalendarConfigImpl implements CalendarConfig {
     }
 
     @Override
+    public boolean isNotifyOnCreate(int userId) {
+        return getUserSettings(userId).isNotifyOnCreate();
+    }
+
+    @Override
+    public boolean isNotifyOnUpdate(int userId) {
+        return getUserSettings(userId).isNotifyOnUpdate();
+    }
+
+    @Override
+    public boolean isNotifyOnDelete(int userId) {
+        return getUserSettings(userId).isNotifyOnDelete();
+    }
+
+    @Override
+    public boolean isNotifyOnReply(int userId) {
+        return getUserSettings(userId).isNotifyOnReply();
+    }
+
+    @Override
+    public boolean isNotifyOnReplyAsAttendee(int userId) {
+        return getUserSettings(userId).isNotifyOnReplyAsAttendee();
+    }
+
+    @Override
+    public int getMsgFormat(int userId) {
+        return getUserSettings(userId).getMsgFormat();
+    }
+
+    @Override
     public boolean isResolveGroupAttendees() {
         return getConfigValue("com.openexchange.calendar.resolveGroupAttendees", Boolean.class, Boolean.FALSE).booleanValue();
     }

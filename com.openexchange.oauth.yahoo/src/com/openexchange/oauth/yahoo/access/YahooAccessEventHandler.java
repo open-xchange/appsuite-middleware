@@ -96,7 +96,7 @@ public final class YahooAccessEventHandler implements EventHandler {
             if (registry.removeIfLast(contextId.intValue(), userId.intValue())) {
                 LOG.debug("Yahoo session removed for user {} in context {}", userId, contextId);
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("Error while handling SessionD event \"{}\"", topic, e);
         }
     }

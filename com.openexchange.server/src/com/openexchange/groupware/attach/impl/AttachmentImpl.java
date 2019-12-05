@@ -78,6 +78,8 @@ public class AttachmentImpl implements AttachmentMetadata {
 
     private AttachmentBatch batch;
 
+    private String checksum;
+
 	public AttachmentImpl(final AttachmentMetadata a) {
 		AttachmentToolkit.copy(a,this);
 	}
@@ -223,6 +225,16 @@ public class AttachmentImpl implements AttachmentMetadata {
     @Override
     public AttachmentBatch getAttachmentBatch() {
         return batch;
+    }
+
+    @Override
+    public String getChecksum() {
+        return checksum;
+    }
+
+    @Override
+    public void setChecksum(String checksum ) {
+        this.checksum = checksum;
     }
 
 }

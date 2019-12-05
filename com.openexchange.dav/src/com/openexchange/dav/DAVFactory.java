@@ -49,15 +49,21 @@
 
 package com.openexchange.dav;
 
+import static com.openexchange.dav.DAVTools.getExternalPath;
+import static com.openexchange.dav.DAVTools.removePathPrefixFromPath;
+import static com.openexchange.dav.DAVTools.removePrefixFromPath;
+import static com.openexchange.dav.DAVTools.startsWithPrefix;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.session.SessionHolder;
 import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.tools.session.SessionHolder;
+import com.openexchange.user.User;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.helpers.AbstractWebdavFactory;
@@ -102,11 +108,11 @@ public abstract class DAVFactory extends AbstractWebdavFactory implements Sessio
 
     @Override
     public Session getSessionObject() {
-       return sessionHolder.getSessionObject();
+        return sessionHolder.getSessionObject();
     }
 
     public Session getSession() {
-       return getSessionObject();
+        return getSessionObject();
     }
 
     @Override
@@ -153,15 +159,38 @@ public abstract class DAVFactory extends AbstractWebdavFactory implements Sessio
      * @return The sanitized path
      */
     protected WebdavPath sanitize(WebdavPath url) {
-        WebdavPath prefixPath = new WebdavPath(getURLPrefix());
-        return 0 < prefixPath.size() && url.startsWith(prefixPath) ? url.subpath(1) : url;
+        ConfigViewFactory configViewFactory = getService(ConfigViewFactory.class);
+
+        /*
+         * Build relative URLs
+         */
+        String prefix = removePathPrefixFromPath(configViewFactory, getURLPrefix());
+        String urlPath = removePathPrefixFromPath(configViewFactory, url.toString());
+
+        /*
+         * Remove the path this factory is responsible for, if present
+         */
+        if (Strings.isNotEmpty(prefix) && false == prefix.equals("/") && startsWithPrefix(urlPath, prefix)) {
+            return new WebdavPath(removePrefixFromPath(prefix, urlPath));
+        }
+        return new WebdavPath(urlPath);
     }
 
     /**
      * Gets the URL prefix of the DAV servlet this factory is responsible for.
      *
-     * @return The (relative) URL prefix, e.g. <code>/principals/users/</code>
+     * @return The URL prefix, e.g. <code>/principals/users/</code>
      */
     public abstract String getURLPrefix();
+
+    /**
+     * Gets the full qualified path this factory is responsible for.
+     *
+     * @param path The relative path of factory is responsible for.
+     * @return The full qualified path considering configuration.
+     */
+    protected String getURLPrefix(String path) {
+        return getExternalPath(getService(ConfigViewFactory.class), path);
+    }
 
 }

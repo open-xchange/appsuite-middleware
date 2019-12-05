@@ -51,7 +51,7 @@ package com.openexchange.webdav.action;
 
 import static com.openexchange.java.Strings.isEmpty;
 import com.openexchange.groupware.infostore.utils.InfostoreConfigUtils;
-import com.openexchange.tools.session.SessionHolder;
+import com.openexchange.session.SessionHolder;
 
 /**
  * {@link OXWebdavMaxUploadSizeAction}

@@ -250,7 +250,7 @@ public class XingServerException extends XingException {
                 int loc = location.indexOf("://");
                 if (loc > -1) {
                     location = location.substring(loc+3);
-                    loc = location.indexOf("/");
+                    loc = location.indexOf('/');
                     if (loc > -1) {
                         location = location.substring(0, loc);
                         if (location.toLowerCase().contains("xing.com")) {

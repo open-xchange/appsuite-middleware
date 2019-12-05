@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.rmi.manager;
 
+import static com.openexchange.java.Autoboxing.B;
 import com.openexchange.admin.rmi.OXUtilInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
@@ -65,7 +66,7 @@ public class DatabaseManager extends AbstractManager {
 
     /**
      * Gets the instance of the {@link DatabaseManager}
-     * 
+     *
      * @param host
      * @param masterCredentials
      * @return
@@ -79,7 +80,7 @@ public class DatabaseManager extends AbstractManager {
 
     /**
      * Initialises a new {@link DatabaseManager}.
-     * 
+     *
      * @param rmiEndPointURL
      * @param masterCredentials
      */
@@ -89,21 +90,21 @@ public class DatabaseManager extends AbstractManager {
 
     /**
      * Registers the specified Database
-     * 
+     *
      * @param database The {@link Database} to register
      * @return The registered Database
      * @throws Exception if an error occurs during registration
      */
     public Database register(Database database, boolean createSchemata, Integer numberOfSchemata) throws Exception {
         OXUtilInterface utilInterface = getUtilInterface();
-        Database db = utilInterface.registerDatabase(database, createSchemata, numberOfSchemata, getMasterCredentials());
+        Database db = utilInterface.registerDatabase(database, B(createSchemata), numberOfSchemata, getMasterCredentials());
         managedObjects.put(db.getId(), db);
         return db;
     }
 
     /**
      * Unregisters the specified {@link Database}
-     * 
+     *
      * @param database The {@link Database} to unregister
      * @throws Exception if an error occurs
      */
@@ -114,7 +115,7 @@ public class DatabaseManager extends AbstractManager {
 
     /**
      * Changes the specified {@link Database}
-     * 
+     *
      * @param database The database to change
      * @throws Exception if an error occurs
      */
@@ -125,7 +126,7 @@ public class DatabaseManager extends AbstractManager {
 
     /**
      * Searches for databases with the specified search pattern
-     * 
+     *
      * @param searchPattern The search pattern
      * @return An array with all found {@link Database}s
      * @throws Exception if an error is occurred
@@ -137,7 +138,7 @@ public class DatabaseManager extends AbstractManager {
 
     /**
      * Lists all databases
-     * 
+     *
      * @param searchPattern The search pattern
      * @return An array with all found {@link Database}s
      * @throws Exception if an error is occurred
@@ -147,11 +148,6 @@ public class DatabaseManager extends AbstractManager {
         return utilInterface.listAllDatabase(getMasterCredentials());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.admin.rmi.manager.AbstractManager#clean(java.lang.Object)
-     */
     @Override
     void clean(Object object) throws Exception {
         unregister((Database) object);

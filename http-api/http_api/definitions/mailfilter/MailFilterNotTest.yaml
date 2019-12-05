@@ -1,4 +1,0 @@
-type: object
-description: A test object which result will be negated.
-properties:
-  $ref: ./RawMailFilterTest.yaml

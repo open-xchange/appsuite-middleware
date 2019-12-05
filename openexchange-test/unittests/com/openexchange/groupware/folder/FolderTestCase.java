@@ -12,7 +12,6 @@ import com.openexchange.groupware.Init;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
@@ -24,6 +23,7 @@ import com.openexchange.setuptools.TestConfig;
 import com.openexchange.setuptools.TestContextToolkit;
 import com.openexchange.test.AjaxInit;
 import com.openexchange.tools.oxfolder.OXFolderManager;
+import com.openexchange.user.User;
 
 public class FolderTestCase {
 

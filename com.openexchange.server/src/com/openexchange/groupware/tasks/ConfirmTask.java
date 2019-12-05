@@ -155,7 +155,7 @@ public final class ConfirmTask {
             partStor.updateInternal(ctx, con, taskId, changedParticipant, StorageType.ACTIVE);
             UpdateData.updateTask(ctx, con, changedTask, this.origTask.getLastModified(), CHANGED_ATTRIBUTES, null, null, null, null);
             con.commit();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             rollback(con);
             throw TaskExceptionCode.SQL_ERROR.create(e);
         } finally {

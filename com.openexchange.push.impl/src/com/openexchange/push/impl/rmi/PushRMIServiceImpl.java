@@ -79,11 +79,6 @@ public class PushRMIServiceImpl implements PushRMIService {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.push.rmi.PushRMIService#listPushUsers()
-     */
     @Override
     public List<List<String>> listPushUsers() throws RemoteException {
         try {
@@ -108,11 +103,6 @@ public class PushRMIServiceImpl implements PushRMIService {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.push.rmi.PushRMIService#listRegisteredPushUsers()
-     */
     @Override
     public List<List<String>> listClientRegistrations() throws RemoteException {
         try {
@@ -136,11 +126,6 @@ public class PushRMIServiceImpl implements PushRMIService {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.push.rmi.PushRMIService#unregisterPermanentListenerFor(int, int, java.lang.String)
-     */
     @Override
     public boolean unregisterPermanentListenerFor(int userId, int contextId, String clientId) throws RemoteException {
         try {

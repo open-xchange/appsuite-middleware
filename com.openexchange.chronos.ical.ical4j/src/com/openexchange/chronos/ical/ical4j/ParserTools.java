@@ -212,12 +212,12 @@ public final class ParserTools {
      * needed.
      */
     public static TimeZone findTzidBySimilarity(String tzidName) {
-    	if("Z".equals(tzidName)){
+    	if ("Z".equals(tzidName)){
     		return TimeZone.getTimeZone("Zulu");
     	}
     	//generate name variations of the outlook timezone name
     	List<String> candidates1 = new LinkedList<String>();
-    	if(tzidName.indexOf(',') >= 0){
+    	if (tzidName.indexOf(',') >= 0){
     		String[] split = tzidName.split(",");
     		for(String tmp: split) {
                 candidates1.add(tmp.trim());
@@ -230,16 +230,16 @@ public final class ParserTools {
     	List<TimeZone> candidates2 = new LinkedList<TimeZone>();
     	for(String javaId: availableIDs){
     		for(String idPart: candidates1){
-    			if(javaId.equals(idPart)){
+    			if (javaId.equals(idPart)){
     				candidates2.add(TimeZone.getTimeZone(javaId));
     			}
-    			if(javaId.equalsIgnoreCase(idPart)){
+    			if (javaId.equalsIgnoreCase(idPart)){
     				candidates2.add(TimeZone.getTimeZone(javaId));
     			}
-    			if(javaId.contains(idPart)){
+    			if (javaId.contains(idPart)){
     				candidates2.add(TimeZone.getTimeZone(javaId));
     			}
-    			if(javaId.toLowerCase().contains(idPart.toLowerCase())){
+    			if (javaId.toLowerCase().contains(idPart.toLowerCase())){
     				candidates2.add(TimeZone.getTimeZone(javaId));
     			}
     		}
@@ -261,9 +261,9 @@ public final class ParserTools {
     	int maxlength = Integer.MAX_VALUE;
     	TimeZone candidate = null;
     	for(TimeZone cand: candidates2){
-    		if(cand.getRawOffset() == mostCommonOffset.intValue()){
+    		if (cand.getRawOffset() == mostCommonOffset.intValue()){
     			int l2 = cand.getID().length();
-    			if(l2 < maxlength){
+    			if (l2 < maxlength){
     				candidate = cand;
     				maxlength = l2;
     			}
@@ -278,7 +278,7 @@ public final class ParserTools {
         || dateProperty.getParameter("TZID").getValue() == null){
                 return defaultTZ;
         }
-        if(dateProperty.isUtc()) {
+        if (dateProperty.isUtc()) {
         	tz = TimeZone.getTimeZone("UTC");
         }
         Parameter tzid = dateProperty.getParameter("TZID");
@@ -286,7 +286,7 @@ public final class ParserTools {
 		TimeZone inTZID = TimeZone.getTimeZone(tzidName);
 
         /* now, if the Java core devs had been smart, they'd made TimeZone.getTimeZone(name,fallback) public. But they did not, so have to do this: */
-		if(inTZID.getID().equals("GMT") && ! tzidName.equals("GMT")){
+		if (inTZID.getID().equals("GMT") && ! tzidName.equals("GMT")){
 			inTZID = ParserTools.findTzidBySimilarity(tzidName);
 		}
 

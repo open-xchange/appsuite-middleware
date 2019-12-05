@@ -161,7 +161,7 @@ public class SubscriptionSource {
     public Set<String> getPasswordFields() {
         Set<String> fields = new HashSet<String>();
         for (FormElement element : getFormDescription()) {
-            if(element.getWidget() == FormElement.Widget.PASSWORD) {
+            if (element.getWidget() == FormElement.Widget.PASSWORD) {
                 fields.add(element.getName());
             }
         }

@@ -52,7 +52,6 @@ package com.openexchange.ajax.task;
 import java.util.List;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.participant.ParticipantTools;
 import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.ajax.task.actions.GetRequest;
@@ -66,7 +65,7 @@ import com.openexchange.groupware.tasks.Task;
 
 /**
  * Tests problem described in bug #7380.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class Bug7380Test extends AbstractTaskTest {
@@ -80,7 +79,7 @@ public class Bug7380Test extends AbstractTaskTest {
 
     /**
      * Tests if bug #7380 appears again.
-     * 
+     *
      * @throws Throwable if this test fails.
      */
     @Test
@@ -89,15 +88,14 @@ public class Bug7380Test extends AbstractTaskTest {
         final Task task = new Task();
         task.setTitle("Test bug #7380");
         task.setParentFolderID(getPrivateFolder());
-        final AJAXSession session = getSession();
         final List<Participant> participants = ParticipantTools.getParticipants(getClient(), 1, true, client.getValues().getUserId());
         task.setParticipants(participants);
         final InsertResponse iResponse = client.execute(new InsertRequest(task, client.getValues().getTimeZone()));
         task.setObjectID(iResponse.getId());
-        final GetResponse gResponse = TaskTools.get(client, new GetRequest(getPrivateFolder(), task.getObjectID()));
+        final GetResponse gResponse = client.execute(new GetRequest(getPrivateFolder(), task.getObjectID()));
         task.setLastModified(gResponse.getTimestamp());
         task.setParticipants((Participant[]) null);
-        final UpdateResponse uResponse = TaskTools.update(client, new UpdateRequest(task, client.getValues().getTimeZone()));
+        final UpdateResponse uResponse = client.execute(new UpdateRequest(task, client.getValues().getTimeZone()));
         task.setLastModified(uResponse.getTimestamp());
         client.execute(new DeleteRequest(task));
     }

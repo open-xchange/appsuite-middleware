@@ -66,32 +66,17 @@ public class UserComparison extends AbstractComparison implements Comparison<Use
         super(MatchType.user);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.mail.filter.api.dao.comparison.Comparison#getMatchType()
-     */
     @Override
     public MatchType getMatchType() {
         return MatchType.user;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.mail.filter.api.dao.comparison.Comparison#setArgument(com.openexchange.ajax.mail.filter.api.dao.comparison.argument.ComparisonArgument, java.lang.Object)
-     */
     @SuppressWarnings("unused")
     @Override
     public void setArgument(UserComparisonArgument argument, Object value) {
         throw new UnsupportedOperationException("The '" + MatchType.user + "' comparison type can not have any arguments");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.mail.filter.api.dao.comparison.Comparison#getArgument(com.openexchange.ajax.mail.filter.api.dao.comparison.argument.ComparisonArgument)
-     */
     @SuppressWarnings("unused")
     @Override
     public Object getArgument(UserComparisonArgument argument) {

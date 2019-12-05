@@ -58,7 +58,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.json.JSONArray;
@@ -68,6 +67,7 @@ import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.Multiple;
 import com.openexchange.ajax.SessionUtility;
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
 import com.openexchange.ajax.writer.LoginWriter;
@@ -76,7 +76,6 @@ import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.authentication.ResultCode;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.impl.ConfigTree;
 import com.openexchange.groupware.settings.impl.SettingStorage;
@@ -88,18 +87,18 @@ import com.openexchange.login.LoginResult;
 import com.openexchange.login.multifactor.MultifactorChecker;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
-import com.openexchange.sessiond.impl.ThreadLocalSessionHolder;
+import com.openexchange.session.ThreadLocalSessionHolder;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
-import com.openexchange.tools.servlet.http.Cookies;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.servlet.ratelimit.Key;
 import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
 import com.openexchange.tools.servlet.ratelimit.RateLimiter;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.user.User;
 
 /**
  * {@link AbstractLoginRequestHandler}
@@ -262,12 +261,12 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
                 final ResultCode code = result.getCode();
                 if (null != code) {
                     switch (code) {
-                    case FAILED:
-                        return true;
-                    case REDIRECT:
-                        throw LoginExceptionCodes.REDIRECT.create(result.getRedirect());
-                    default:
-                        break;
+                        case FAILED:
+                            return true;
+                        case REDIRECT:
+                            throw LoginExceptionCodes.REDIRECT.create(result.getRedirect());
+                        default:
+                            break;
                     }
                 }
             }
@@ -366,7 +365,7 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
                 LOG.error("", e);
             }
             response.setException(e);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
             LOG.error("", oje);
             response.setException(oje);
@@ -374,17 +373,7 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
 
         try {
             if (response.hasError() || null == result) {
-                final Locale locale;
-                {
-                    final String sLocale = req.getParameter("language");
-                    if (null == sLocale) {
-                        locale = bestGuessLocale(result, req);
-                    } else {
-                        final Locale loc = LocaleTools.getLocale(sLocale);
-                        locale = null == loc ? bestGuessLocale(result, req) : loc;
-                    }
-                }
-                ResponseWriter.write(response, resp.getWriter(), locale);
+                ResponseWriter.write(response, resp.getWriter(), extractLocale(req, result));
                 return false;
             }
 
@@ -398,19 +387,11 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
 
             // Set cookies
             if (null == cookiesSetter) {
-                // Check for existent secret cookie if auto-login is disabled
-                if (false == conf.isSessiondAutoLogin(req.getServerName(), session)) {
-                    Map<String, Cookie> cookies = Cookies.cookieMapFor(req);
-                    String expectedSecretCookieName = LoginServlet.SECRET_PREFIX + session.getHash();
-                    Cookie cookie = cookies.get(expectedSecretCookieName);
-                    if (null != cookie && !session.getSecret().equals(cookie.getValue())) {
-                        // The same client already initiated a session, but performed another login. Drop the old session.
-                        SessionUtility.removeSessionBySecret(cookie.getValue(), session.getUserId(), session.getContextId());
-                    }
-                }
-
                 // Create/re-write secret cookie
                 LoginServlet.writeSecretCookie(req, resp, session, session.getHash(), req.isSecure(), req.getServerName(), conf);
+
+                // Create/re-write session cookie
+                LoginServlet.writeSessionCookie(resp, session, session.getHash(), req.isSecure(), req.getServerName());
             } else {
                 cookiesSetter.setLoginCookies(session, req, resp, conf);
             }
@@ -421,7 +402,7 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
             } else {
                 ((JSONObject) response.getData()).write(resp.getWriter());
             }
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             if (e.getCause() instanceof IOException) {
                 // Throw proper I/O error since a serious socket error could been occurred which prevents further communication. Just
                 // throwing a JSON error possibly hides this fact by trying to write to/read from a broken socket connection.
@@ -491,19 +472,41 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
         }
     }
 
-    private Locale bestGuessLocale(LoginResult result, final HttpServletRequest req) {
-        final Locale locale;
-        if (null == result) {
-            locale = Tools.getLocaleByAcceptLanguage(req, null);
-        } else {
-            final User user = result.getUser();
-            if (null == user) {
-                locale = Tools.getLocaleByAcceptLanguage(req, null);
-            } else {
-                locale = user.getLocale();
+    /**
+     * Extracts the locale from the specified request. First tries the {@link LoginFields#LANGUAGE_PARAM},
+     * then the {@link LoginFields#LOCALE_PARAM} and finally a best guess according to the <code>Accept-Language</code>
+     * header if set.
+     *
+     * @param req The request
+     * @param result The result
+     * @return The {@link Locale}
+     */
+    private Locale extractLocale(HttpServletRequest req, LoginResult result) {
+        String sLanguage = req.getParameter(LoginFields.LANGUAGE_PARAM);
+        if (null == sLanguage) {
+            sLanguage = req.getParameter(LoginFields.LOCALE_PARAM);
+            if (null == sLanguage) {
+                return bestGuessLocale(result, req);
             }
+            return LocaleTools.getLocale(sLanguage);
         }
-        return locale;
+        Locale loc = LocaleTools.getLocale(sLanguage);
+        return null == loc ? bestGuessLocale(result, req) : loc;
+    }
+
+    /**
+     * Tries to determine the {@link Locale} based on the <code>Accept-Language</code> header
+     *
+     * @param result the result
+     * @param req The request
+     * @return The {@link Locale}
+     */
+    private Locale bestGuessLocale(LoginResult result, final HttpServletRequest req) {
+        if (null == result) {
+            return Tools.getLocaleByAcceptLanguage(req, null);
+        }
+        User user = result.getUser();
+        return null == user ? Tools.getLocaleByAcceptLanguage(req, null) : user.getLocale();
     }
 
     /**
@@ -528,11 +531,11 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
                     final Setting setting = ConfigTree.getInstance().getSettingByPath(modules);
                     SettingStorage.getInstance(session).readValues(setting);
                     return convert2JS(setting);
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     logger.warn("Modules could not be added to login JSON response", e);
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     logger.warn("Modules could not be added to login JSON response", e);
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     logger.warn("Modules could not be added to login JSON response", e);
                 }
                 return null;

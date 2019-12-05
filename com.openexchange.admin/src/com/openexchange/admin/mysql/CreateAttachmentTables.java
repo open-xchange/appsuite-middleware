@@ -75,6 +75,7 @@ public class CreateAttachmentTables extends AbstractCreateTableImpl {
       + "`rtf_flag` boolean,"
       + "`comment` varchar(255),"
       + "`file_id` varchar(255) NOT NULL,"
+      + "`checksum` varchar(32) DEFAULT NULL,"
       + "PRIMARY KEY  (`cid`,`id`),"
       + "KEY `cid` (`cid`,`attached`,`module`)"
     + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
@@ -85,6 +86,7 @@ public class CreateAttachmentTables extends AbstractCreateTableImpl {
       + "`attached` INT4 UNSIGNED NOT NULL,"
       + "`module` INT4 UNSIGNED NOT NULL,"
       + "`del_date` INT8 NOT NULL,"
+      + "`checksum` varchar(32) DEFAULT NULL,"
       + "PRIMARY KEY  (`cid`,`id`),"
       + "KEY `cid` (`cid`,`attached`,`module`)"
     + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
@@ -96,25 +98,16 @@ public class CreateAttachmentTables extends AbstractCreateTableImpl {
         super();
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.database.CreateTableService#requiredTables()
-     */
     @Override
     public String[] requiredTables() {
         return NO_TABLES;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.database.CreateTableService#tablesToCreate()
-     */
     @Override
     public String[] tablesToCreate() {
         return new String[] { prgAttachmentTableName, delAttachmentTableName };
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.database.AbstractCreateTableImpl#getCreateStatements()
-     */
     @Override
     protected String[] getCreateStatements() {
         return new String[] { createPrgAttachmentTable, createDelAttachmentTable };

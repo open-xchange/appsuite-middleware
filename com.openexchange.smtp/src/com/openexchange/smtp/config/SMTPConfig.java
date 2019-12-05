@@ -138,7 +138,7 @@ public final class SMTPConfig extends TransportConfig implements TransportAuthSu
         final URI uri;
         try {
             uri = URIParser.parse(urlInfo.getServerURL(), URIDefaults.SMTP);
-        } catch (final URISyntaxException e) {
+        } catch (URISyntaxException e) {
             throw SMTPExceptionCode.URI_PARSE_FAILED.create(e, urlInfo.getServerURL());
         }
         secure = PROTOCOL_SMTP_SECURE.equals(uri.getScheme());
@@ -172,7 +172,7 @@ public final class SMTPConfig extends TransportConfig implements TransportAuthSu
         if (null == smtpServerAddress) {
             try {
                 smtpServerAddress = InetAddress.getByName(getServer());
-            } catch (final UnknownHostException e) {
+            } catch (UnknownHostException e) {
                 throw SMTPExceptionCode.IO_ERROR.create(e, e.getMessage());
             }
         }

@@ -19,7 +19,7 @@ properties:
         endpoint this client will communicate with.
       defaultValue: s3.amazonaws.com
       version: 
-      reloadable: false
+      reloadable: true
       configcascadeAware: false
       related: 
       file: filestore-s3.properties
@@ -35,7 +35,7 @@ properties:
         details. This property is required.
       defaultValue: 
       version: 
-      reloadable: false
+      reloadable: true
       configcascadeAware: false
       related: 
       file: filestore-s3.properties
@@ -60,7 +60,7 @@ properties:
         </ul>
       defaultValue: us-west-2
       version: 
-      reloadable: false
+      reloadable: true
       configcascadeAware: false
       related: 
       file: filestore-s3.properties
@@ -75,7 +75,7 @@ properties:
         details.
       defaultValue: true
       version: 
-      reloadable: false
+      reloadable: true
       configcascadeAware: false
       related: 
       file: filestore-s3.properties
@@ -84,24 +84,26 @@ properties:
 
     - key: com.openexchange.filestore.s3.[filestoreID].accessKey
       description: |
-        Configures the AWS access key to use. This property is required.
+        Configures the AWS access key to use.
+        This property is required provided that property "com.openexchange.filestore.s3.[filestoreID].credentialsSource" is set to "static".
       defaultValue: 
       version: 
-      reloadable: false
+      reloadable: true
       configcascadeAware: false
-      related: 
+      related: ["com.openexchange.filestore.s3.[filestoreID].credentialsSource"]
       file: filestore-s3.properties
       packageName: open-xchange-filestore-s3
       tags: ["Filestore"]
 
     - key: com.openexchange.filestore.s3.[filestoreID].secretKey
       description: |
-        Configures the AWS secret key to use. This property is required.
+        Configures the AWS secret key to use.
+        This property is required provided that property "com.openexchange.filestore.s3.[filestoreID].credentialsSource" is set to "static".
       defaultValue: 
       version: 
-      reloadable: false
+      reloadable: true
       configcascadeAware: false
-      related: 
+      related: ["com.openexchange.filestore.s3.[filestoreID].credentialsSource"]
       file: filestore-s3.properties
       packageName: open-xchange-filestore-s3
       tags: ["Filestore"]
@@ -122,7 +124,7 @@ properties:
         Policy Files" accordingly.
       defaultValue: none
       version: 
-      reloadable: false
+      reloadable: true
       configcascadeAware: false
       related: 
       file: filestore-s3.properties
@@ -137,7 +139,7 @@ properties:
         [[com.openexchange.filestore.s3.[filestoreID].encryption]] is set to <code>rsa</code>.
       defaultValue: 
       version: 
-      reloadable: false
+      reloadable: true
       configcascadeAware: false
       related: com.openexchange.filestore.s3.[filestoreID].encryption
       file: filestore-s3.properties
@@ -152,7 +154,7 @@ properties:
         [[com.openexchange.filestore.s3.[filestoreID].encryption]] is set to <code>rsa</code>.
       defaultValue: 
       version: 
-      reloadable: false
+      reloadable: true
       configcascadeAware: false
       related: com.openexchange.filestore.s3.[filestoreID].encryption
       file: filestore-s3.properties
@@ -174,7 +176,7 @@ properties:
         like Frankfurt or Beijing.
       defaultValue: S3SignerType
       version: 
-      reloadable: false
+      reloadable: true
       configcascadeAware: false
       related: 
       file: filestore-s3.properties
@@ -190,7 +192,7 @@ properties:
         5 MB.
       defaultValue: 5 MB
       version: 
-      reloadable: false
+      reloadable: true
       configcascadeAware: false
       related: 
       file: filestore-s3.properties
@@ -201,7 +203,7 @@ properties:
       description: Enables metric collection for the S3 storage
       defaultValue: false
       version: 7.10.0
-      reloadable: false
+      reloadable: true
       configcascadeAware: false
       related:
       file: filestore-s3.properties
@@ -213,7 +215,7 @@ properties:
         Defines the connect timeout in milliseconds when connecting to S3 end-point.
       defaultValue: 10000
       version: 7.10.2
-      reloadable: false
+      reloadable: true
       configcascadeAware: false
       related: 
       file: filestore-s3.properties
@@ -225,7 +227,7 @@ properties:
         Defines the socket read timeout in milliseconds when reading responses from to S3 end-point.
       defaultValue: 50000
       version: 7.10.2
-      reloadable: false
+      reloadable: true
       configcascadeAware: false
       related: 
       file: filestore-s3.properties
@@ -237,7 +239,26 @@ properties:
         Defines the maximum number of allowed open HTTP connections.
       defaultValue: 50
       version: 7.10.2
-      reloadable: false
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: filestore-s3.properties
+      packageName: open-xchange-filestore-s3
+      tags: ["Filestore"]
+
+    - key: com.openexchange.filestore.s3.[filestoreID].credentialsSource
+      description: |
+        Defines from what source to take credentials from, which are used to authenticate against S3 end-point.
+        Currently supported values are "static" and "iam".
+        
+        "static" refers to taking credentials from "com.openexchange.filestore.s3.[filestoreID].accessKey" property and
+        "com.openexchange.filestore.s3.[filestoreID].secretKey" property respectively.
+        
+        "iam" refers to using the integrated AWS Identity and Access Management (IAM); see also
+        https://docs.aws.amazon.com/IAM/latest/UserGuide/introduction.html
+      defaultValue: static
+      version: 7.10.3
+      reloadable: true
       configcascadeAware: false
       related: 
       file: filestore-s3.properties

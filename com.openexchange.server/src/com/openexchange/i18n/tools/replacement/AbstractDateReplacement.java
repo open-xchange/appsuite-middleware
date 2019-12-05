@@ -257,4 +257,10 @@ public abstract class AbstractDateReplacement implements TemplateReplacement {
         return format;
     }
 
+    @Override
+    public TemplateReplacement setDateFormat(DateFormat dateFormat) {
+        this.dateFormat = dateFormat;
+        return this;
+    }
+
 }

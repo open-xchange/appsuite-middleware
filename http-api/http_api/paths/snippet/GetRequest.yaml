@@ -5,16 +5,21 @@
       - Snippet
     summary: Gets a snippet.
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: id
-        type: string
         description: The identifier of the snippet.
         required: true
-    responses:
-      200:
-        description: |
-          A JSON object containing the data of the snippet. In case of errors the responsible fields in the response are
-          filled (see [Error handling](#error-handling)).
         schema:
-          $ref: "#/definitions/SnippetResponse"
+          type: string
+    responses:
+      '200':
+        description: >
+          A JSON object containing the data of the snippet. In case of errors
+          the responsible fields in the response are
+
+          filled (see [Error handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SnippetResponse'

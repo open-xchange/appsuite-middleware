@@ -223,14 +223,14 @@ public final class UpdateAction extends AbstractMailAction {
                         MailMessage mail = mailInterface.getMessage(sourceFolder, mailId, false);
                         triggerContactCollector(session, mail, true, false);
                     }
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     LOG.warn("Contact collector could not be triggered.", e);
                 }
             }
             return new AJAXRequestResult(new JSONObject(4).put(FolderChildFields.FOLDER_ID, folderId).put(DataFields.ID, mailId), "json");
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }

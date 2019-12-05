@@ -68,10 +68,10 @@ public class Bug17991VulTest extends AbstractSanitizing {
             "A=3Dfunction(){};A.prototype=3DB;return new A();" +
             "}function extend(C,A){for(var B in A){C[B]=3DA[B];}return C;}function =" +
             "forEach(B,D){for(var A=3D0;A<B.length;" +
-            "A++){var C=3DD(B[A],A);if(C){break;}}}function map(C,D){var B=3D[];for(var=" +
-            " A=3D0;A<C.length;A++){if(D){B.push(D(C[A],A));" +
+            "A++){var C=3DD(B[A],A);if (C){break;}}}function map(C,D){var B=3D[];for(var=" +
+            " A=3D0;A<C.length;A++){if (D){B.push(D(C[A],A));" +
             "}else{B.push(C[A]);}}return B;}function filter(B,D){var C=3D[];for(var =" +
-            "A=3D0;A<B.length;A++){if(D(B[A],A)){C.push(B[A]);" +
+            "A=3D0;A<B.length;A++){if (D(B[A],A)){C.push(B[A]);" +
             "}}return C;}function isArray(A){return A&&typeof =" +
             "A=3D=3D=3D\"object\"&&!(A.propertyIsEnumerable(\"length\"))&&typeof =" +
             "A.length=3D=3D=3D\"number\";" +
@@ -83,17 +83,17 @@ public class Bug17991VulTest extends AbstractSanitizing {
             "dows/.test(userAgent)};" +
             "function getAssoc(B,A){return B[\"_magicdom_\"+A];}function =" +
             "setAssoc(C,A,B){C[\"_magicdom_\"+A]=3DB;}function =" +
-            "binarySearch(A,E){if(A<1){return 0;" +
-            "}if(E(0)){return 0;}if(!E(A-1)){return A;}var D=3D0;var =" +
-            "B=3DA-1;while((B-D)>1){var C=3DMath.floor((D+B)/2);" +
-            "if(E(C)){B=3DC;}else{D=3DC;}}return B;}function =" +
-            "binarySearchInfinite(C,B){var A=3D0;while(!B(A)){A+=3DC;}return =" +
+            "binarySearch(A,E){if (A<1){return 0;" +
+            "}if (E(0)){return 0;}if (!E(A-1)){return A;}var D=3D0;var =" +
+            "B=3DA-1;while ((B-D)>1){var C=3DMath.floor((D+B)/2);" +
+            "if (E(C)){B=3DC;}else{D=3DC;}}return B;}function =" +
+            "binarySearchInfinite(C,B){var A=3D0;while (!B(A)){A+=3DC;}return =" +
             "binarySearch(A,B);" +
             "}function htmlPrettyEscape(A){return =" +
             "A.replace(/&/g,\"&amp;\").replace(/</g,\"&lt;\").replace(/>/g,\"&gt;\").replace(=\n" +
             "/\\r?\\n/g,\"\\\\n\");" +
             "}function newSkipList{var =" +
-            "H=3Dwindow.PROFILER;if(!H){H=3Dfunction(){return{start:G,mark:G,literal:G,=" +
+            "H=3Dwindow.PROFILER;if (!H){H=3Dfunction(){return{start:G,mark:G,literal:G,=" +
             "end:G,cancel:G};" +
             "};}function G(){}var =" +
             "B=3D{key:null,levels:1,upPtrs:[null],downPtrs:[null],downSkips:[1],downSki=" +

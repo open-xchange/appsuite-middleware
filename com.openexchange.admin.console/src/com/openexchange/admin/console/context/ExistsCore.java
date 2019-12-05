@@ -88,30 +88,30 @@ public abstract class ExistsCore extends ContextAbstraction {
 
                 successtext = nameOrIdSetInt(this.ctxid, this.contextname, "context");
 
-            } catch (final RuntimeException e) {
+            } catch (RuntimeException e) {
                 printError(null, null, e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
                 sysexit(1);
             }
             String ctxident;
-            if( null != ctx.getId() ) {
+            if ( null != ctx.getId() ) {
                 ctxident = String.valueOf(ctx.getId());
             } else {
                 ctxident = ctx.getName();
             }
-            if( maincall(parser, ctx, inServer, auth) ) {
+            if ( maincall(parser, ctx, inServer, auth) ) {
                 System.out.println("Context " + ctxident + " exists" + (inServer ? " in server" : ""));
                 sysexit(0);
             } else {
                 System.out.println("Context " + ctxident + " does not exist" + (inServer ? " in server" : ""));
                 sysexit(1);
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             printErrors(successtext, null, e, parser);
         }
         try {
             displayChangedMessage(successtext, null, parser);
             sysexit(0);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             printError(null, null, e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
             sysexit(1);
         }

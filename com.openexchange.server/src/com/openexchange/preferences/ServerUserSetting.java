@@ -484,7 +484,7 @@ public class ServerUserSetting {
             if (rs.next()) {
                 retval = attribute.getAttribute(rs);
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw SettingExceptionCodes.SQL_ERROR.create(e);
         } finally {
             closeSQLStuff(rs, stmt);
@@ -500,7 +500,7 @@ public class ServerUserSetting {
             stmt.setInt(2, contextId);
             stmt.setInt(3, userId);
             stmt.execute();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw SettingExceptionCodes.SQL_ERROR.create(e);
         } finally {
             closeSQLStuff(stmt);
@@ -551,7 +551,7 @@ public class ServerUserSetting {
             stmt.setBytes(pos, uuidBinary);
             LOG.debug("INSERTing user settings: {}", DBUtils.getStatementString(stmt));
             stmt.execute();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw SettingExceptionCodes.SQL_ERROR.create(e);
         } finally {
             closeSQLStuff(null, stmt);
@@ -566,7 +566,7 @@ public class ServerUserSetting {
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
             stmt.executeUpdate();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw SettingExceptionCodes.SQL_ERROR.create(e);
         } finally {
             closeSQLStuff(rs, stmt);
@@ -583,7 +583,7 @@ public class ServerUserSetting {
             stmt.setInt(2, userId);
             rs = stmt.executeQuery();
             retval = rs.next();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw SettingExceptionCodes.SQL_ERROR.create(e);
         } finally {
             closeSQLStuff(rs, stmt);

@@ -92,9 +92,9 @@ public class NewMailFilterAction extends AbstractMailFilterAction{
             final Rule rule = ruleParser.parse(getJSONBody(request.getData()), ServerSessionAdapter.valueOf(request.getSession()));
             int id = mailFilterService.createFilterRule(getCredentials(session, request), rule);
             return new AJAXRequestResult(I(id));
-        } catch (final SieveException e) {
+        } catch (SieveException e) {
             throw MailFilterExceptionCode.handleSieveException(e);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, e.getMessage());
         }
     }

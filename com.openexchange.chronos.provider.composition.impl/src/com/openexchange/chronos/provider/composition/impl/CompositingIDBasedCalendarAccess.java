@@ -296,9 +296,9 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
     }
 
     @Override
-    public Event resolveEvent(String eventId) throws OXException {
+    public Event resolveEvent(String eventId, Integer sequence) throws OXException {
         try {
-            Event event = getGroupwareAccess(DEFAULT_ACCOUNT).resolveEvent(eventId);
+            Event event = getGroupwareAccess(DEFAULT_ACCOUNT).resolveEvent(eventId, sequence);
             return null == event ? null : withUniqueID(event, DEFAULT_ACCOUNT.getAccountId());
         } catch (OXException e) {
             throw withUniqueIDs(e, DEFAULT_ACCOUNT.getAccountId());
@@ -815,12 +815,16 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
             return Collections.singletonList(getBasicCalendarFolder(account, CalendarExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage())));
         }
         /*
-         * check if provider is enabled by capability, falling back to a placeholder folder if not
+         * check if provider is enabled by capability, if not, skip auto-provisioned folders, and fall back to a placeholder folder otherwise
          */
         if (false == hasCapability(account.getProviderId())) {
             OXException error = CalendarExceptionCodes.MISSING_CAPABILITY.create(CalendarProviders.getCapabilityName(account.getProviderId()));
+            if (isAutoProvisioned(account)) {
+                warnings.add(error);
+                return Collections.emptyList();
+            }
             if (BasicCalendarAccess.class.isInstance(access)) {
-                return Collections.singletonList(getBasicCalendarFolder((BasicCalendarAccess) access, isAutoProvisioned(account), error));
+                return Collections.singletonList(getBasicCalendarFolder((BasicCalendarAccess) access, false, error));
             }
             return Collections.singletonList(getBasicCalendarFolder(account, error));
         }

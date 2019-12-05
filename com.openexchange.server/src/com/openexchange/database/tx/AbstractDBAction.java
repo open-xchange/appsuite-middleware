@@ -94,13 +94,13 @@ public abstract class AbstractDBAction extends AbstractUndoable implements Undoa
                 counter += current.performUpdate(writeCon);
                 current.close();
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             if (current != null) {
                 try {
                     current.close();
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     // Ignore
                 }
             }
@@ -111,7 +111,7 @@ public abstract class AbstractDBAction extends AbstractUndoable implements Undoa
         return counter;
     }
 
-    protected int doUpdates(final List<UpdateBlock> updates) throws OXException, OXException {
+    protected int doUpdates(final List<UpdateBlock> updates) throws OXException {
         return doUpdates(updates.toArray(new UpdateBlock[updates.size()]));
     }
 

@@ -50,13 +50,12 @@
 package com.openexchange.login.internal;
 
 import static com.openexchange.java.Autoboxing.I;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.security.auth.login.LoginException;
@@ -76,7 +75,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.upgrade.SegmentedUpdateService;
@@ -106,6 +104,7 @@ import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.behavior.CallerRunsBehavior;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 /**
@@ -194,8 +193,23 @@ public final class LoginPerformer {
      * @throws OXException If login fails
      */
     public LoginResult doLogin(LoginRequest request, Map<String, Object> properties, LoginMethodClosure loginMethod) throws OXException {
+        // Sanity check for given login request
         sanityChecks(request);
+
+        // Check needed service
+        SessiondService sessiondService = SessiondService.SERVICE_REFERENCE.get();
+        if (null == sessiondService) {
+            sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+            if (null == sessiondService) {
+                // Giving up...
+                throw ServiceExceptionCode.absentService(SessiondService.class);
+            }
+        }
+
+        // Look-up possible login listeners
         List<LoginListener> listeners = LoginListenerRegistryImpl.getInstance().getLoginListeners();
+
+        // Start login...
         LoginResultImpl retval = new LoginResultImpl();
         retval.setRequest(request);
         Cookie[] cookies = null;
@@ -214,8 +228,6 @@ public final class LoginPerformer {
             if (null != cookies) {
                 properties.put("cookies", cookies);
             }
-            String userLoginLanguage = request.getLanguage();
-            boolean storeLanguage = request.isStoreLanguage();
             final Authenticated authed = loginMethod.doAuthentication(retval);
             if (null == authed) {
                 return null;
@@ -267,56 +279,44 @@ public final class LoginPerformer {
                 // Authorize
                 authService.authorizeUser(ctx, user);
             }
-            if (storeLanguage && Strings.isNotEmpty(userLoginLanguage) && !userLoginLanguage.equals(user.getPreferredLanguage())) {
-                UserImpl impl = new UserImpl(user);
-                impl.setPreferredLanguage(userLoginLanguage);
-                UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class);
-                if (null != userService) {
-                    userService.updateUser(impl, ctx);
-                } else {
-                    LOG.warn("Unable to access user service, updating directly via storage.", ServiceExceptionCode.absentService(UserService.class));
-                    UserStorage.getInstance().updateUser(impl, ctx);
-                }
-                user = impl;
-            }
+
+            // Store locale if requested by client during login request
+            user = LoginPerformer.storeLanguageIfNeeded(request, user, ctx);
             retval.setContext(ctx);
             retval.setUser(user);
 
             // Check if indicated client is allowed to perform a login
             checkClient(request, user, ctx);
 
-            //Perform multi-factor authentication if enabled for the user and mark session
-            SessionEnhancement multifactor = null;
-            MultifactorChecker multifactorCheck = ServerServiceRegistry.getInstance().getService(MultifactorChecker.class);
-            if (multifactorCheck != null) {
-                multifactor = multifactorCheck.checkMultiFactorAuthentication(request, ctx, user);
+            // Compile parameters for adding a session
+            AddSessionParameterImpl addSessionParam = new AddSessionParameterImpl(authed.getUserInfo(), request, user, ctx);
+
+            // Add SessionEnhancement instance (if any)
+            if (SessionEnhancement.class.isInstance(authed)) {
+                addSessionParam.addEnhancement((SessionEnhancement) authed);
             }
 
-            // Check needed service
-            SessiondService sessiondService = SessiondService.SERVICE_REFERENCE.get();
-            if (null == sessiondService) {
-                sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
-                if (null == sessiondService) {
-                    // Giving up...
-                    throw ServiceExceptionCode.absentService(SessiondService.class);
+            // Perform multi-factor authentication if enabled for the user and mark session
+            {
+                MultifactorChecker multifactorCheck = ServerServiceRegistry.getInstance().getService(MultifactorChecker.class);
+                if (multifactorCheck != null) {
+                    Optional<SessionEnhancement> optionalEnhancement = multifactorCheck.checkMultiFactorAuthentication(request, ctx, user);
+                    if (optionalEnhancement.isPresent()) {
+                        addSessionParam.addEnhancement(optionalEnhancement.get());
+                    }
                 }
             }
-            AddSessionParameterImpl addSession = new AddSessionParameterImpl(authed.getUserInfo(), request, user, ctx);
-            if (SessionEnhancement.class.isInstance(authed)) {
-                addSession.addEnhancement((SessionEnhancement) authed);
-            }
-            if (multifactor != null) {
-                addSession.addEnhancement(multifactor);
-            }
-            Session session = sessiondService.addSession(addSession);
+
+            // Finally, add the session
+            Session session = sessiondService.addSession(addSessionParam);
             if (null == session) {
                 // Session could not be created
                 throw LoginExceptionCodes.UNKNOWN.create("Session could not be created.");
             }
+
             LogProperties.putSessionProperties(session);
             retval.setServerToken((String) session.getParameter(LoginFields.SERVER_TOKEN));
             retval.setSession(session);
-
 
             // Trigger registered login handlers
             triggerLoginHandlers(retval);
@@ -403,6 +403,35 @@ public final class LoginPerformer {
                 throw LoginExceptionCodes.CLIENT_DENIED.create(client);
             }
         }
+    }
+
+    /**
+     * Stores the user language supplied by the client during the login if explicitly requested via
+     * {@link LoginFields#STORE_LANGUAGE} / {@link LoginFields#STORE_LOCALE}.
+     *
+     * @param request The login request to get the parameters controlling the desired language from
+     * @param user The logged in user
+     * @param ctx The context
+     * @return The (possibly modified) user, or the passed user reference if not changed
+     */
+    public static User storeLanguageIfNeeded(LoginRequest request, User user, Context ctx) throws OXException {
+        if (false == request.isStoreLanguage()) {
+            return user;
+        }
+        String userLoginLanguage = request.getLanguage();
+        if (Strings.isNotEmpty(userLoginLanguage) && !userLoginLanguage.equals(user.getPreferredLanguage())) {
+            UserImpl impl = new UserImpl(user);
+            impl.setPreferredLanguage(userLoginLanguage);
+            UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class);
+            if (null != userService) {
+                userService.updateUser(impl, ctx);
+            } else {
+                LOG.warn("Unable to access user service, updating directly via storage.", ServiceExceptionCode.absentService(UserService.class));
+                UserStorage.getInstance().updateUser(impl, ctx);
+            }
+            return impl;
+        }
+        return user;
     }
 
     /**
@@ -583,7 +612,7 @@ public final class LoginPerformer {
                 for (int i = 0; i < blocking; i++) {
                     try {
                         completionService.take();
-                    } catch (final InterruptedException e) {
+                    } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
                     }
                 }
@@ -633,7 +662,7 @@ public final class LoginPerformer {
                 for (int i = 0; i < blocking; i++) {
                     try {
                         completionService.take();
-                    } catch (final InterruptedException e) {
+                    } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
                     }
                 }
@@ -658,7 +687,7 @@ public final class LoginPerformer {
             } else {
                 handler.handleLogout(login);
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             switch (e.getCategories().get(0).getLogLevel()) {
                 case TRACE:
                     LOG.trace("", e);
@@ -678,7 +707,7 @@ public final class LoginPerformer {
                 default:
                     break;
             }
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             LOG.error(e.getMessage(), e);
         }
     }

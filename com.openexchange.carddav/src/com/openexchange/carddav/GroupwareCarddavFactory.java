@@ -79,12 +79,12 @@ import com.openexchange.folderstorage.database.contentType.ContactContentType;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.SessionHolder;
 import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.tools.session.SessionHolder;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavCollection;
@@ -104,7 +104,7 @@ public class GroupwareCarddavFactory extends DAVFactory {
     private static final String OVERRIDE_NEXT_SYNC_TOKEN_PROPERTY = "com.openexchange.carddav.overridenextsynctoken";
     private static final String FOLDER_BLACKLIST_PROPERTY = "com.openexchange.carddav.ignoreFolders";
     private static final String FOLDER_TRRE_ID_PROPERTY = "com.openexchange.carddav.tree";
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GroupwareCarddavFactory.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GroupwareCarddavFactory.class);
 
     private final ThreadLocal<State> stateHolder;
 
@@ -122,7 +122,7 @@ public class GroupwareCarddavFactory extends DAVFactory {
 
     @Override
     public String getURLPrefix() {
-        return "/carddav/";
+        return getURLPrefix("/carddav/");
     }
 
     @Override
@@ -139,16 +139,17 @@ public class GroupwareCarddavFactory extends DAVFactory {
 
     @Override
     public WebdavCollection resolveCollection(WebdavPath url) throws WebdavProtocolException {
-        if (0 == url.size()) {
+        WebdavPath path  = sanitize(url);
+        if (0 == path.size()) {
             /*
              * this is the root collection
              */
             return mixin(new RootCollection(this));
-        } else if (1 == url.size()) {
+        } else if (1 == path.size()) {
             /*
              * get child collection from root by name
              */
-            return mixin(new RootCollection(this).getChild(url.name()));
+            return mixin(new RootCollection(this).getChild(path.name()));
         } else {
             throw WebdavProtocolException.Code.GENERAL_ERROR.create(url, HttpServletResponse.SC_NOT_FOUND);
         }
@@ -156,18 +157,18 @@ public class GroupwareCarddavFactory extends DAVFactory {
 
     @Override
     public WebdavResource resolveResource(WebdavPath url) throws WebdavProtocolException {
-        if (2 == url.size()) {
+        WebdavPath path = sanitize(url);
+        if (2 == path.size()) {
             /*
              * get child resource from parent collection by name
              */
-            AbstractResource child = new RootCollection(this).getChild(url.parent().name()).getChild(url.name());
+            AbstractResource child = new RootCollection(this).getChild(path.parent().name()).getChild(path.name());
             if (child == null) {
                 throw WebdavProtocolException.Code.GENERAL_ERROR.create(url, HttpServletResponse.SC_NOT_FOUND);
             }
             return mixin(child);
-        } else {
-            return resolveCollection(url);
         }
+        return resolveCollection(url);
     }
 
     public User resolveUser(int userID) throws OXException {
@@ -178,7 +179,7 @@ public class GroupwareCarddavFactory extends DAVFactory {
         return getService(FolderService.class);
     }
 
-    public ContactService getContactService() throws OXException {
+    public ContactService getContactService() {
         return getService(ContactService.class);
     }
 

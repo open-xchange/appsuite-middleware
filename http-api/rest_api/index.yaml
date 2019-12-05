@@ -1,14 +1,8 @@
-swagger: '2.0'
-# Document information
-info:
-  $ref: ./info/index.yaml
-# API host and basePath for testing requests
-host: example.com
-schemes:
-  - http
-  - https
-basePath: /
-# The list of modules and their short descriptions
+openapi: 3.0.0 
+
+info: 
+  $ref: ./info/index.yaml 
+
 tags:
   - name: Userfeedback
     description: The user feedback module
@@ -18,21 +12,30 @@ tags:
     description: Interface for provisioning and other administrative operations.
   - name: Health
     description: The health-check module
-# References to the definitions, "global" parameters and paths
-definitions:
-  $ref: ./definitions/index.yaml
-parameters:
-  $ref: ./parameters/index.yaml
-securityDefinitions:
-  basicAuth:
-    type: basic
-    description: HTTP Basic Authentication.
-  contextAdminAuth:
-    description: The API can be accessed via HTTP Basic Auth with context administrator credentials or reseller/master administrator credentials if MASTER_ACCOUNT_OVERRIDE is enabled.
-    type: basic
-  masterAdminAuth:
-    description: The API can be accessed via HTTP Basic Auth with reseller/master administrator credentials.
-    type: basic
-paths:
-  source: ./paths/
-  
+
+paths: 
+   source: ./paths/ 
+
+components: 
+  schemas: 
+   $ref: ./components/schemas/index.yaml 
+
+  parameters: 
+   $ref: ./components/parameters/index.yaml 
+
+  requestBodies: 
+   $ref: ./components/requestBodies/index.yaml
+
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+      description: HTTP Basic Authentication.
+    contextAdminAuth:
+      type: http
+      scheme: basic
+      description: The API can be accessed via HTTP Basic Auth with context administrator credentials or reseller/master administrator credentials if MASTER_ACCOUNT_OVERRIDE is enabled.
+    masterAdminAuth:
+      type: http
+      scheme: basic
+      description: The API can be accessed via HTTP Basic Auth with reseller/master administrator credentials.

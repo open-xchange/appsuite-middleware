@@ -96,7 +96,7 @@ public class ConfigReloadMBeanImpl extends StandardMBean implements ConfigReload
             if (null != configService) {
                 configService.reloadConfiguration();
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             logger.error("", e);
             final String message = e.getMessage();
             throw new MBeanException(new Exception(message), message);
@@ -147,7 +147,7 @@ public class ConfigReloadMBeanImpl extends StandardMBean implements ConfigReload
             }
 
             return map;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             logger.error("", e);
             final String message = e.getMessage();
             throw new MBeanException(new Exception(message), message);

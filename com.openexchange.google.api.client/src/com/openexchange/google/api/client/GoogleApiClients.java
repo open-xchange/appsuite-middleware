@@ -460,11 +460,6 @@ public class GoogleApiClients {
             super(Services.getServiceLookup(), session, cachedAccount);
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see com.openexchange.cluster.lock.ClusterTask#perform()
-         */
         @Override
         public Token reauthorize() throws OXException {
             final ServiceBuilder serviceBuilder = new ServiceBuilder().provider(Google2Api.class);

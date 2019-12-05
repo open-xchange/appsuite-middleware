@@ -1,0 +1,31 @@
+/mailfilter/v2?action=getscript:
+  put:
+    operationId: getScript_v2
+    tags:
+      - Mailfilter
+    summary: Gets the whole mail filter script.
+    description: >-
+      This call is only used as workaround for parsing errors in the backend, so
+      that the user is able to get the plaintext of a complete script.
+    parameters:
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - in: query
+        name: username
+        description: >-
+          Must contain the user name for **admin mode**. So the normal
+          credentials are taken for authentication but the mail filter of the
+          user with this username is being changed.
+        required: false
+        schema:
+          type: string
+    responses:
+      '200':
+        description: >
+          A JSON object with the text of the complete sieve script. In case of
+          errors the responsible fields
+
+          in the response are filled (see [Error handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MailFilterScriptResponse'

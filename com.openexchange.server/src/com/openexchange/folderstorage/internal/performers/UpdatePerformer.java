@@ -59,6 +59,7 @@ import java.util.Map;
 import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.composition.FilenameValidationUtils;
+import com.openexchange.folderstorage.CalculatePermission;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderField;
@@ -76,13 +77,11 @@ import com.openexchange.folderstorage.StorageParametersUtility;
 import com.openexchange.folderstorage.UpdateOperation;
 import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
 import com.openexchange.folderstorage.filestorage.contentType.FileStorageContentType;
-import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.folderstorage.mail.contentType.MailContentType;
 import com.openexchange.folderstorage.osgi.FolderStorageServices;
 import com.openexchange.folderstorage.tx.TransactionManager;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
 import com.openexchange.objectusecount.IncrementArguments;
 import com.openexchange.objectusecount.ObjectUseCountService;
@@ -91,6 +90,7 @@ import com.openexchange.share.GuestInfo;
 import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 /**
  * {@link UpdatePerformer} - Serves the <code>UPDATE</code> request.
@@ -200,7 +200,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
             final String newParentId = folder.getParentID();
             final boolean move = (null != newParentId && !newParentId.equals(oldParentId));
             final Folder destinationFolder;
-            if(move){
+            if (move){
                 destinationFolder = storage.getFolder(treeId, newParentId, storageParameters);
             } else {
                 destinationFolder = storageFolder;
@@ -366,9 +366,9 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                 }
             }
 
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             if (rollbackTransaction) {
@@ -569,7 +569,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
      */
     private void addjustPermissionType(Folder updated, Folder original) {
         for(Permission origPerm : original.getPermissions()) {
-            if(FolderPermissionType.LEGATOR.equals(origPerm.getType())) {
+            if (FolderPermissionType.LEGATOR.equals(origPerm.getType())) {
                 // Adjust type of existing permission
                 for(Permission updatedPerm: updated.getPermissions()) {
                     if (updatedPerm.getEntity() == origPerm.getEntity() && updatedPerm.isGroup() == origPerm.isGroup() && updatedPerm.getSystem() == origPerm.getSystem()) {
@@ -605,7 +605,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                         if (!FolderPermissionType.INHERITED.equals(tmp.getType())) {
                             tmp.setType(FolderPermissionType.INHERITED);
                         }
-                        if(perm.getType() == FolderPermissionType.LEGATOR) {
+                        if (perm.getType() == FolderPermissionType.LEGATOR) {
                             if (!parentId.equals(tmp.getPermissionLegator())) {
                                 tmp.setPermissionLegator(parentId);
                             }
@@ -621,7 +621,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                 if (!exists) {
                     Permission cloned = (Permission) perm.clone();
                     cloned.setType(FolderPermissionType.INHERITED);
-                    if(perm.getType() == FolderPermissionType.LEGATOR) {
+                    if (perm.getType() == FolderPermissionType.LEGATOR) {
                         cloned.setPermissionLegator(parentId);
                     }
                     result.add(cloned);

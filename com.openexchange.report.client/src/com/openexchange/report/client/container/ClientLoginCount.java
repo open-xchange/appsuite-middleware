@@ -129,10 +129,6 @@ public class ClientLoginCount {
         return usmeasYear;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see java.lang.Object#toString()
-     */
     @Override
     public String toString() {
         return "ClientLoginCount [usmeas=" + usmeas + ", usmeasYear=" + usmeasYear + ", olox2=" + olox2 + ", mobileapp=" + mobileapp + ", caldav=" + caldav + ", carddav=" + carddav + "]";

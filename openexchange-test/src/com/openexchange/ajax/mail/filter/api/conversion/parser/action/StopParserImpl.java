@@ -69,11 +69,6 @@ public class StopParserImpl implements ActionParser {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.mail.filter.api.conversion.parser.JSONParser#parse(org.json.JSONObject)
-     */
     @SuppressWarnings("unused")
     @Override
     public Action<StopActionArgument> parse(JSONObject jsonObject) throws JSONException {

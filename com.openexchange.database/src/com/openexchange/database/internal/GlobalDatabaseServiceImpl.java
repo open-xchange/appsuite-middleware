@@ -56,6 +56,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import org.osgi.framework.Bundle;
@@ -254,6 +255,18 @@ public class GlobalDatabaseServiceImpl implements GlobalDatabaseService {
     }
 
     @Override
+    public Set<String> getDistinctGroupsPerSchema() {
+        Set<String> addedSchemas = new HashSet<String>();
+        Set<String> distinctGroupsPerSchema = new HashSet<String>();
+        for (Entry<String, GlobalDbConfig> entry : globalDbConfigs.entrySet()) {
+            if (addedSchemas.add(entry.getValue().getSchema())) {
+                distinctGroupsPerSchema.add(entry.getKey());
+            }
+        }
+        return distinctGroupsPerSchema;
+    }
+
+    @Override
     public Connection getReadOnlyForGlobal(String group) throws OXException {
         return get(getAssignment(group), false, false);
     }
@@ -291,6 +304,16 @@ public class GlobalDatabaseServiceImpl implements GlobalDatabaseService {
     @Override
     public void backWritableForGlobal(int contextId, Connection connection) {
         back(connection, false);
+    }
+
+    @Override
+    public void backWritableForGlobalAfterReading(String group, Connection connection) {
+        back(connection, true);
+    }
+
+    @Override
+    public void backWritableForGlobalAfterReading(int contextId, Connection connection) {
+        back(connection, true);
     }
 
     private AssignmentImpl getAssignment(String group) throws OXException {

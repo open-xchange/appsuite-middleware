@@ -199,7 +199,7 @@ public abstract class MailPart implements Serializable, Cloneable {
             if (ct != null) {
                 try {
                     setContentType(new ContentType(ct));
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     LOG.error("", e);
                 }
             }
@@ -223,7 +223,7 @@ public abstract class MailPart implements Serializable, Cloneable {
             if (headers != null) {
                 headers.setHeader(MessageHeaders.HDR_CONTENT_TYPE, "text/plain; charset=us-ascii");
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             /*
              * Cannot occur
              */
@@ -264,7 +264,7 @@ public abstract class MailPart implements Serializable, Cloneable {
             if (disp != null) {
                 try {
                     setContentDisposition(new ContentDisposition(disp));
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     LOG.error("", e);
                 }
             }
@@ -708,7 +708,7 @@ public abstract class MailPart implements Serializable, Cloneable {
             b_msgref = true;
             try {
                 msgref = new MailPath(xMsgref);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.error("", e);
                 msgref = null;
             }
@@ -756,10 +756,10 @@ public abstract class MailPart implements Serializable, Cloneable {
                 clone.headers = new HeaderCollection(headers);
             }
             return clone;
-        } catch (final CloneNotSupportedException e) {
+        } catch (CloneNotSupportedException e) {
             LOG.error("", e);
             throw new InternalError(e.getMessage());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             throw new InternalError(e.getMessage());
         }
@@ -849,7 +849,7 @@ public abstract class MailPart implements Serializable, Cloneable {
             for (int count; (count = in.read(buf, 0, buflen)) > 0;) {
                 out.write(buf, 0, count);
             }
-        } catch (final IOException e) {
+        } catch (IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }

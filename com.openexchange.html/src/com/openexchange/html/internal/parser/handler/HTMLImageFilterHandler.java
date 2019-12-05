@@ -206,7 +206,7 @@ public class HTMLImageFilterHandler implements HtmlHandler {
         try {
             final URI uri = new URI(lcSrc);
             return (null == uri.getHost()) && uri.getPath().startsWith(PREFIX.get().getPrefix()+"image");
-        } catch (final URISyntaxException e) {
+        } catch (URISyntaxException e) {
             // Invalid image URI; return false
             return false;
         }
@@ -233,7 +233,7 @@ public class HTMLImageFilterHandler implements HtmlHandler {
                     attributes.put(BACKGROUND, BLANK);
                     imageURLFound = true;
                 }
-            } catch (final StackOverflowError e) {
+            } catch (StackOverflowError e) {
                 LOG.error("", e);
                 attributes.remove(BACKGROUND);
             }
@@ -255,7 +255,7 @@ public class HTMLImageFilterHandler implements HtmlHandler {
                         attributes.put(BACKGROUND, BLANK);
                         imageURLFound = true;
                     }
-                } catch (final StackOverflowError e) {
+                } catch (StackOverflowError e) {
                     LOG.error("", e);
                     attributes.remove(BACKGROUND);
                 }

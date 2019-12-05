@@ -153,7 +153,7 @@ public final class GetAction implements AJAXActionService {
             fileHolder.setDisposition(disposition);
 
             return new AJAXRequestResult(fileHolder, "file");
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw ManagedFileExceptionErrorMessage.IO_ERROR.create(e, e.getMessage());
         }
     }

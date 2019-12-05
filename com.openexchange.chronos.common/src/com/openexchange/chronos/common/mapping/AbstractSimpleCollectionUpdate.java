@@ -65,6 +65,7 @@ public abstract class AbstractSimpleCollectionUpdate<O> implements SimpleCollect
 
     protected final List<O> removedItems;
     protected final List<O> addedItems;
+    protected final List<O> retainedItems;
 
     /**
      * Initializes a new {@link AbstractSimpleCollectionUpdate}.
@@ -76,6 +77,7 @@ public abstract class AbstractSimpleCollectionUpdate<O> implements SimpleCollect
         super();
         if (null == originalItems || 0 == originalItems.size()) {
             removedItems = Collections.emptyList();
+            retainedItems = Collections.emptyList();
             if (null == newItems || 0 == newItems.size()) {
                 addedItems = Collections.emptyList();
             } else {
@@ -84,13 +86,17 @@ public abstract class AbstractSimpleCollectionUpdate<O> implements SimpleCollect
         } else if (null == newItems || 0 == newItems.size()) {
             removedItems = new ArrayList<O>(originalItems);
             addedItems = Collections.emptyList();
+            retainedItems = Collections.emptyList();
         } else {
             addedItems = new ArrayList<O>();
             removedItems = new ArrayList<O>();
+            retainedItems = new ArrayList<O>();
             for (O newItem : newItems) {
                 O originalItem = find(originalItems, newItem);
                 if (null == originalItem) {
                     addedItems.add(newItem);
+                } else {
+                    retainedItems.add(originalItem);
                 }
             }
             for (O originalItem : originalItems) {
@@ -119,6 +125,15 @@ public abstract class AbstractSimpleCollectionUpdate<O> implements SimpleCollect
     @Override
     public List<O> getRemovedItems() {
         return removedItems;
+    }
+
+    /**
+     * Gets the list of retained items, i.e. those items that are present in both collections.
+     *
+     * @return The retained items, or an empty list if there are none
+     */
+    public List<O> getRetainedItems() {
+        return retainedItems;
     }
 
     @Override

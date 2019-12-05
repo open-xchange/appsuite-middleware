@@ -640,6 +640,22 @@ public enum MailExceptionCode implements DisplayableOXExceptionCode {
      * %1$s protocol error occurred: %2$s
      */
     PROTOCOL_ERROR("%1$s protocol error occurred: %2$s", Category.CATEGORY_ERROR, 118),
+    /**
+     * Unsupported OAuth mail access to server %1$s with login %2$s (user=%3$s, context=%4$s)
+     */
+    UNSUPPORTED_OAUTH_MAIL_ACCESS("Unsupported OAuth mail access to server %1$s with login %2$s (user=%3$s, context=%4$s)", MailExceptionStrings.UNSUPPORTED_OAUTH_MAIL_ACCESS_MSG, Category.CATEGORY_CONFIGURATION, 119),
+    /**
+     * Unsupported OAuth transport access to server %1$s with login %2$s (user=%3$s, context=%4$s)
+     */
+    UNSUPPORTED_OAUTH_TRANSPORT_ACCESS("Unsupported OAuth transport access to server %1$s with login %2$s (user=%3$s, context=%4$s)", MailExceptionStrings.UNSUPPORTED_OAUTH_TRANSPORT_ACCESS_MSG, Category.CATEGORY_CONFIGURATION, 120),
+    /**
+     * Mail server %1$s denied connect attempt for login %2$s: %3$s
+     */
+    DENIED_CONNECT_ATTEMPT("Mail server %1$s denied connect attempt for login %2$s: %3$s", MailExceptionStrings.DENIED_CONNECT_ATTEMPT_MSG, Category.CATEGORY_PERMISSION_DENIED, 121),
+    /**
+     * As the original email %1$s no longer exists in folder %2$s, your email has been sent as a new one.
+     */
+    ORIGINAL_MAIL_NOT_FOUND("As the original email %1$s no longer exists in folder %2$s, your email has been sent as a new one.", MailExceptionStrings.ORIGINAL_MAIL_NOT_FOUND_MSG, Category.CATEGORY_USER_INPUT, 122)
     ;
 
     private static final String PREFIX = "MSG";

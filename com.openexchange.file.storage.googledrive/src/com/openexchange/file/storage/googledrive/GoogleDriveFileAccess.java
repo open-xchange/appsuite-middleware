@@ -538,7 +538,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                         } else {
                             trashFile(drive, id.getId());
                         }
-                    } catch (final IOException e) {
+                    } catch (IOException e) {
                         if (GoogleDriveConstants.SC_NOT_FOUND == GoogleDriveUtil.getStatusCode(e)) {
                             throw e;
                         }
@@ -701,7 +701,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
             }
 
             return new SearchIteratorAdapter<>(files.iterator(), files.size());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }

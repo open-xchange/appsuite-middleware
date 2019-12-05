@@ -84,7 +84,7 @@ public class TrackingProvider extends ServiceTracker<ConfigProviderService, Conf
     public static Filter createFilter(String scope, BundleContext context) {
         try {
             return context.createFilter("(& (objectclass="+ConfigProviderService.class.getName()+") (scope="+scope+"))");
-        } catch (final InvalidSyntaxException e) {
+        } catch (InvalidSyntaxException e) {
             LoggerFactory.getLogger(TrackingProvider.class).error("", e);
         }
         return null;

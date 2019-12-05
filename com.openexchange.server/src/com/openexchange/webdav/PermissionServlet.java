@@ -101,7 +101,7 @@ public abstract class PermissionServlet extends OXServlet {
                 resp.sendError(HttpServletResponse.SC_FORBIDDEN, "No Permission");
                 return;
             }
-        } catch (final OXException ce) {
+        } catch (OXException ce) {
             return;
         }
         super.service(req, resp);

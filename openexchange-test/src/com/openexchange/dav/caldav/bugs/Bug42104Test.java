@@ -55,6 +55,7 @@ import java.util.Date;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.junit.Assert;
 import org.junit.Test;
+import com.openexchange.dav.Config;
 import com.openexchange.dav.Headers;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.caldav.CalDAVTest;
@@ -105,7 +106,7 @@ public class Bug42104Test extends CalDAVTest {
          */
         GetMethod get = null;
         try {
-            String href = "/caldav/" + encodeFolderID(getDefaultFolderID()) + "/" + uid + ".ics";
+            String href = Config.getPathPrefix() + "/caldav/" + encodeFolderID(getDefaultFolderID()) + "/" + uid + ".ics";
             get = new GetMethod(getBaseUri() + href);
             get.addRequestHeader(Headers.IF_MATCH, originalETag);
             Assert.assertEquals("response code wrong", 304, getWebDAVClient().executeMethod(get));

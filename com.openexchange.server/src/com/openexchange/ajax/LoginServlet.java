@@ -92,7 +92,6 @@ import com.openexchange.ajax.login.TokenLogin;
 import com.openexchange.ajax.login.Tokens;
 import com.openexchange.ajax.writer.LoginWriter;
 import com.openexchange.ajax.writer.ResponseWriter;
-import com.openexchange.capabilities.Capability;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.configuration.CookieHashSource;
 import com.openexchange.configuration.ServerConfig;
@@ -100,7 +99,6 @@ import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.impl.ConfigTree;
@@ -113,7 +111,7 @@ import com.openexchange.login.LoginResult;
 import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.serverconfig.ServerConfigService;
+import com.openexchange.session.DefaultSessionAttributes;
 import com.openexchange.session.Reply;
 import com.openexchange.session.Session;
 import com.openexchange.session.SessionResult;
@@ -125,6 +123,7 @@ import com.openexchange.tools.servlet.http.Cookies;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 /**
  * Servlet doing the login and logout stuff.
@@ -177,10 +176,10 @@ public class LoginServlet extends AJAXServlet {
             " var referrer=document.referrer;\n" +
             " var redirect_url;\n" +
             " // If referrer already contains failed parameter, we don't add a 2nd one.\n" +
-            " if(referrer.indexOf(\"login=failed\")>=0){\n" +
+            " if (referrer.indexOf(\"login=failed\")>=0){\n" +
             "  redirect_url=referrer;\n" + " }else{\n" +
             "  // Check if referrer contains multiple parameter\n" +
-            "  if(referrer.indexOf(\"?\")<0){\n" +
+            "  if (referrer.indexOf(\"?\")<0){\n" +
             "   redirect_url=referrer+\"?login=failed\";\n" +
             "  }else{\n" +
             "   redirect_url=referrer+\"&login=failed\";\n" +
@@ -323,14 +322,10 @@ public class LoginServlet extends AJAXServlet {
 
             @Override
             public void handleRequest(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
-                try {
-                    doStore(req, resp);
-                } catch (final OXException e) {
-                    logAndSendException(resp, e);
-                } catch (final JSONException e) {
-                    log(RESPONSE_ERROR, e);
-                    sendError(resp);
-                }
+                LOG.debug("Deprecated action 'store' called by {}.", req.getParameter(PARAMETER_SESSION));
+                resp.setHeader("Deprecation", "version=\"v7.10.3\"");
+                resp.setStatus(200);
+                resp.flushBuffer();
             }
         });
         handlerMap.put(ACTION_REFRESH_SECRET, new LoginRequestHandler() {
@@ -339,9 +334,9 @@ public class LoginServlet extends AJAXServlet {
             public void handleRequest(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
                 try {
                     doRefreshSecret(req, resp);
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     logAndSendException(resp, e);
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     log(RESPONSE_ERROR, e);
                     sendError(resp);
                 }
@@ -455,7 +450,7 @@ public class LoginServlet extends AJAXServlet {
                                     String newIP = req.getRemoteAddr();
                                     if (!newIP.equals(oldIP)) {
                                         LOG.info("Changing IP of session {} with authID: {} from {} to {}.", session.getSessionID(), session.getAuthId(), oldIP, newIP);
-                                        sessiondService.setLocalIp(session.getSessionID(), newIP);
+                                        sessiondService.setSessionAttributes(session.getSessionID(), DefaultSessionAttributes.builder().withLocalIp(newIP).build());
                                     }
                                 }
                             } catch (OXException e) {
@@ -493,11 +488,11 @@ public class LoginServlet extends AJAXServlet {
                         resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                         return;
                     }
-                } catch (final UndeclaredThrowableException e) {
+                } catch (UndeclaredThrowableException e) {
                     LOG.info("Status code 403 (FORBIDDEN): Unexpected error occurred during login: {}", e.getMessage());
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     LOG.info("Status code 403 (FORBIDDEN): Couldn't resolve context/user by identifier: {}/{}", I(session.getContextId()), I(session.getUserId()));
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
@@ -517,7 +512,7 @@ public class LoginServlet extends AJAXServlet {
                     session.setHash(hash);
                 }
                 writeSecretCookie(req, resp, session, hash, req.isSecure(), req.getServerName(), conf);
-                resp.sendRedirect(LoginTools.generateRedirectURL(req.getParameter(LoginFields.UI_WEB_PATH_PARAM), req.getParameter("store"), session.getSessionID(), conf.getUiWebPath()));
+                resp.sendRedirect(LoginTools.generateRedirectURL(req.getParameter(LoginFields.UI_WEB_PATH_PARAM), session.getSessionID(), conf.getUiWebPath()));
             }
         });
         handlerMap.put(ACTION_CHANGEIP, new LoginRequestHandler() {
@@ -563,7 +558,7 @@ public class LoginServlet extends AJAXServlet {
                         LOG.info("There is no session associated with session identifier: {}", sessionId);
                         throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
                     }
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     LOG.debug("", e);
                     response.setException(e);
                 }
@@ -572,7 +567,7 @@ public class LoginServlet extends AJAXServlet {
                 resp.setStatus(HttpServletResponse.SC_OK);
                 try {
                     ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     log(RESPONSE_ERROR, e);
                     sendError(resp);
                 }
@@ -627,7 +622,7 @@ public class LoginServlet extends AJAXServlet {
                                     String newIP = req.getRemoteAddr();
                                     if (!newIP.equals(oldIP)) {
                                         LOG.info("Changing IP of session {} with authID: {} from {} to {}.", session.getSessionID(), session.getAuthId(), oldIP, newIP);
-                                        sessiondService.setLocalIp(session.getSessionID(), newIP);
+                                        sessiondService.setSessionAttributes(session.getSessionID(), DefaultSessionAttributes.builder().withLocalIp(newIP).build());
                                     }
                                 }
                             } catch (OXException e) {
@@ -665,11 +660,11 @@ public class LoginServlet extends AJAXServlet {
                         resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                         return;
                     }
-                } catch (final UndeclaredThrowableException e) {
+                } catch (UndeclaredThrowableException e) {
                     LOG.info("Status code 403 (FORBIDDEN): Unexpected error occurred during login: {}", e.getMessage());
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     LOG.info("Status code 403 (FORBIDDEN): Couldn't resolve context/user by identifier: {}/{}", I(session.getContextId()), I(session.getUserId()));
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
@@ -696,7 +691,7 @@ public class LoginServlet extends AJAXServlet {
                     // Append "config/modules"
                     appendModules(session, json, req);
                     json.write(resp.getWriter());
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     log(RESPONSE_ERROR, e);
                     sendError(resp);
                 }
@@ -709,11 +704,10 @@ public class LoginServlet extends AJAXServlet {
     public void init(final ServletConfig config) throws ServletException {
         super.init(config);
         String uiWebPath = config.getInitParameter(ServerConfig.Property.UI_WEB_PATH.getPropertyName());
-        boolean sessiondAutoLogin = Boolean.parseBoolean(config.getInitParameter(ConfigurationProperty.SESSIOND_AUTOLOGIN.getPropertyName()));
         CookieHashSource hashSource = CookieHashSource.parse(config.getInitParameter(Property.COOKIE_HASH.getPropertyName()));
         String httpAuthAutoLogin = config.getInitParameter(ConfigurationProperty.HTTP_AUTH_AUTOLOGIN.getPropertyName());
         String defaultClient = config.getInitParameter(ConfigurationProperty.HTTP_AUTH_CLIENT.getPropertyName());
-         String clientVersion = config.getInitParameter(ConfigurationProperty.HTTP_AUTH_VERSION.getPropertyName());
+        String clientVersion = config.getInitParameter(ConfigurationProperty.HTTP_AUTH_VERSION.getPropertyName());
         String templateFileLocation = config.getInitParameter(ConfigurationProperty.ERROR_PAGE_TEMPLATE.getPropertyName());
         String errorPageTemplate;
         if (null == templateFileLocation) {
@@ -723,7 +717,7 @@ public class LoginServlet extends AJAXServlet {
             try {
                 errorPageTemplate = IOTools.getFileContents(templateFile);
                 LOG.info("Found an error page template at {}", templateFileLocation);
-            } catch (final FileNotFoundException e) {
+            } catch (FileNotFoundException e) {
                 LOG.error("Could not find an error page template at {}, using default.", templateFileLocation);
                 errorPageTemplate = ERROR_PAGE_TEMPLATE;
             }
@@ -736,7 +730,7 @@ public class LoginServlet extends AJAXServlet {
         boolean formLoginWithoutAuthId = Boolean.parseBoolean(config.getInitParameter(ConfigurationProperty.FORM_LOGIN_WITHOUT_AUTHID.getPropertyName()));
         boolean isRandomTokenEnabled = Boolean.parseBoolean(config.getInitParameter(ConfigurationProperty.RANDOM_TOKEN.getPropertyName()));
         boolean checkPunyCodeLoginString = Boolean.parseBoolean(config.getInitParameter(ConfigurationProperty.CHECK_PUNY_CODE_LOGIN.getPropertyName()));
-        LoginConfiguration conf = new LoginConfiguration(uiWebPath, sessiondAutoLogin, hashSource, httpAuthAutoLogin, defaultClient, clientVersion, errorPageTemplate, cookieExpiry, cookieForceHTTPS, insecure, redirectIPChangeAllowed, disableTrimLogin, formLoginWithoutAuthId, isRandomTokenEnabled, checkPunyCodeLoginString);
+        LoginConfiguration conf = new LoginConfiguration(uiWebPath, hashSource, httpAuthAutoLogin, defaultClient, clientVersion, errorPageTemplate, cookieExpiry, cookieForceHTTPS, insecure, redirectIPChangeAllowed, disableTrimLogin, formLoginWithoutAuthId, isRandomTokenEnabled, checkPunyCodeLoginString);
         confReference.set(conf);
         ShareLoginConfiguration shareConf = initShareLoginConfig(config);
         shareConfReference.set(shareConf);
@@ -748,7 +742,7 @@ public class LoginServlet extends AJAXServlet {
         handlerMap.put(ACTION_AUTOLOGIN, new AutoLogin(conf, shareConf, rampUpServices));
         handlerMap.put(ACTION_LOGIN, new Login(conf, rampUpServices));
         handlerMap.put(ACTION_RAMPUP, new RampUp(rampUpServices));
-        handlerMap.put("hasAutologin", new HasAutoLogin(conf));
+        handlerMap.put("hasAutologin", HasAutoLogin.getInstance());
         handlerMap.put("/httpAuth", new HTTPAuthLogin(conf));
         handlerMap.put(ACTION_GUEST, new GuestLogin(shareConf, rampUpServices));
         handlerMap.put(ACTION_ANONYMOUS, new AnonymousLogin(shareConf, rampUpServices));
@@ -794,21 +788,6 @@ public class LoginServlet extends AJAXServlet {
         }
     }
 
-    private static final Capability CAPABILITY_AUTOLOGIN = new Capability("autologin");
-
-    /**
-     * Checks if auto-login is enabled for specified host name.
-     *
-     * @param hostName The host name to check for
-     * @return <code>true</code> if auto-login is enabled; otherwise <code>false</code>
-     * @throws OXException If server configuration cannot be obtained
-     */
-    public static boolean isAutologinActivated(String hostName) throws OXException {
-        ServerConfigService serverConfigService = ServerServiceRegistry.getInstance().getService(ServerConfigService.class);
-        com.openexchange.serverconfig.ServerConfig serverConfig = serverConfigService.getServerConfig(hostName, -1, -1);
-        return serverConfig.getCapabilities().contains(CAPABILITY_AUTOLOGIN);
-    }
-
     private void doJSONAuth(final HttpServletRequest req, final HttpServletResponse resp, final String action) throws IOException {
         if (null == action) {
             logAndSendException(resp, AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_ACTION));
@@ -845,9 +824,6 @@ public class LoginServlet extends AJAXServlet {
             throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
         }
         final LoginConfiguration conf = getLoginConfiguration(session);
-        if (!conf.isSessiondAutoLogin(req.getServerName(), session) && CookieType.SESSION == type) {
-            throw AjaxExceptionCodes.DISABLED_ACTION.create("store");
-        }
         try {
             SessionUtility.checkIP(session, req.getRemoteAddr());
             if (type == CookieType.SESSION) {
@@ -863,12 +839,6 @@ public class LoginServlet extends AJAXServlet {
         } finally {
             LogProperties.removeSessionProperties();
         }
-    }
-
-    protected void doStore(final HttpServletRequest req, final HttpServletResponse resp) throws OXException, JSONException, IOException {
-        Tools.disableCaching(resp);
-        resp.setContentType(CONTENTTYPE_JAVASCRIPT);
-        doCookieReWrite(req, resp, CookieType.SESSION);
     }
 
     protected void doRefreshSecret(final HttpServletRequest req, final HttpServletResponse resp) throws OXException, JSONException, IOException {
@@ -926,7 +896,8 @@ public class LoginServlet extends AJAXServlet {
     private static Cookie wrapCookie(final com.openexchange.authentication.Cookie cookie, LoginResult result) {
         Cookie servletCookie = new Cookie(cookie.getName(), cookie.getValue());
         LoginConfiguration loginConfig = getLoginConfiguration(result.getSession());
-        configureCookie(servletCookie, result.getRequest().isSecure(), result.getRequest().getServerName(), loginConfig);
+        Session session = result.getSession();
+        configureCookie(servletCookie, result.getRequest().isSecure(), result.getRequest().getServerName(), loginConfig, null != session && session.isStaySignedIn());
         return servletCookie;
     }
 
@@ -944,7 +915,7 @@ public class LoginServlet extends AJAXServlet {
                 final Setting setting = ConfigTree.getInstance().getSettingByPath(modules);
                 SettingStorage.getInstance(session).readValues(setting);
                 json.put(modules, convert2JS(setting));
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 LOG.warn("Modules could not be added to login JSON response", e);
             }
         }
@@ -972,7 +943,7 @@ public class LoginServlet extends AJAXServlet {
      * @param serverName The HTTP request's server name
      */
     public static void writeSessionCookie(final HttpServletResponse resp, final Session session, final String hash, final boolean secure, final String serverName) throws OXException {
-        resp.addCookie(configureCookie(new Cookie(SESSION_PREFIX + hash, session.getSessionID()), secure, serverName, getLoginConfiguration(session)));
+        resp.addCookie(configureCookie(new Cookie(SESSION_PREFIX + hash, session.getSessionID()), secure, serverName, getLoginConfiguration(session), session.isStaySignedIn()));
     }
 
     /**
@@ -985,7 +956,7 @@ public class LoginServlet extends AJAXServlet {
      * @param serverName The HTTP request's server name
      */
     public static void writeShardCookie(final HttpServletResponse resp, final Session session, final boolean secure, final String serverName) {
-        resp.addCookie(configureCookie(new Cookie(SHARD_COOKIE_NAME, SessionUtility.getShardCookieValue()), secure, serverName, getLoginConfiguration(session)));
+        resp.addCookie(configureCookie(new Cookie(SHARD_COOKIE_NAME, SessionUtility.getShardCookieValue()), secure, serverName, getLoginConfiguration(session), null != session && session.isStaySignedIn()));
     }
 
     /**
@@ -1001,7 +972,7 @@ public class LoginServlet extends AJAXServlet {
      * @param conf The login configuration
      */
     public static void writeSecretCookie(HttpServletRequest req, HttpServletResponse resp, Session session, String hash, boolean secure, String serverName, LoginConfiguration conf) {
-        resp.addCookie(configureCookie(new Cookie(SECRET_PREFIX + hash, session.getSecret()), secure, serverName, conf));
+        resp.addCookie(configureCookie(new Cookie(SECRET_PREFIX + hash, session.getSecret()), secure, serverName, conf, session.isStaySignedIn()));
         writePublicSessionCookie(req, resp, session, secure, serverName, conf);
         writeShardCookie(resp, session, secure, serverName);
         session.setParameter(Session.PARAM_COOKIE_REFRESH_TIMESTAMP, Long.valueOf(System.currentTimeMillis()));
@@ -1051,7 +1022,7 @@ public class LoginServlet extends AJAXServlet {
     private static boolean writePublicSessionCookie(final HttpServletRequest req, final HttpServletResponse resp, final Session session, final boolean secure, final String serverName, final LoginConfiguration conf) {
         final String altId = (String) session.getParameter(Session.PARAM_ALTERNATIVE_ID);
         if (null != altId) {
-            resp.addCookie(configureCookie(new Cookie(getPublicSessionCookieName(req, new String[] { String.valueOf(session.getContextId()), String.valueOf(session.getUserId()) }), altId), secure, serverName, conf));
+            resp.addCookie(configureCookie(new Cookie(getPublicSessionCookieName(req, new String[] { String.valueOf(session.getContextId()), String.valueOf(session.getUserId()) }), altId), secure, serverName, conf, session.isStaySignedIn()));
             return true;
         }
         return false;
@@ -1065,14 +1036,15 @@ public class LoginServlet extends AJAXServlet {
      * @param secure <code>true</code> to enforce the cookie's <code>secure</code>-flag, <code>false</code> to set the flag based on configuration
      * @param serverName The server name as extracted from the request
      * @param conf the login configuration
+     * @param staySignedIn <code>true</code> to persist cookie, <code>false</code> to delete cookie when web browser is closed
      * @return The cookie
      */
-    public static Cookie configureCookie(final Cookie cookie, final boolean secure, final String serverName, final LoginConfiguration conf) {
+    public static Cookie configureCookie(final Cookie cookie, final boolean secure, final String serverName, final LoginConfiguration conf, boolean staySignedIn) {
         cookie.setPath("/");
         if (secure || (conf.isCookieForceHTTPS() && !Cookies.isLocalLan(serverName))) {
             cookie.setSecure(true);
         }
-        if (conf.isSessiondAutoLogin(serverName) || conf.getCookieExpiry() < 0) {
+        if (staySignedIn && 0 < conf.getCookieExpiry()) {
             /*
              * A negative value means that the cookie is not stored persistently and will be deleted when the Web browser exits. A zero
              * value causes the cookie to be deleted.
@@ -1093,10 +1065,11 @@ public class LoginServlet extends AJAXServlet {
      * @param cookie The cookie to configure
      * @param request The underlying servlet request
      * @param loginConfig the login configuration
+     * @param staySignedIn <code>true</code> to persist cookie, <code>false</code> to delete cookie when web browser is closed
      * @return The cookie
      */
-    public static Cookie configureCookie(Cookie cookie, HttpServletRequest request, LoginConfiguration loginConfig) {
-        return configureCookie(cookie, request.isSecure(), request.getServerName(), loginConfig);
+    public static Cookie configureCookie(Cookie cookie, HttpServletRequest request, LoginConfiguration loginConfig, boolean staySignedIn) {
+        return configureCookie(cookie, request.isSecure(), request.getServerName(), loginConfig, staySignedIn);
     }
 
     private static String determineServerNameByLogProperty() {
@@ -1110,8 +1083,6 @@ public class LoginServlet extends AJAXServlet {
      * @return The initialized share login configuration
      */
     private static ShareLoginConfiguration initShareLoginConfig(ServletConfig config) {
-        String shareAutoLoginValue = config.getInitParameter(ShareLoginProperty.AUTO_LOGIN.getPropertyName());
-        Boolean shareAutoLogin = Strings.isEmpty(shareAutoLoginValue) ? null : Boolean.valueOf(shareAutoLoginValue);
         String shareClientName = config.getInitParameter(ShareLoginProperty.CLIENT_NAME.getPropertyName());
         String  shareClientVersion = config.getInitParameter(ShareLoginProperty.CLIENT_VERSION.getPropertyName());
         String shareCookieTTLValue = config.getInitParameter(ShareLoginProperty.COOKIE_TTL.getPropertyName());
@@ -1122,6 +1093,6 @@ public class LoginServlet extends AJAXServlet {
             shareCookieTTL = Strings.isEmpty(shareCookieTTLValue) ? null : Integer.valueOf(ConfigTools.parseTimespanSecs(shareCookieTTLValue));
         }
         boolean shareTransientSessions = Boolean.parseBoolean(config.getInitParameter(ShareLoginProperty.TRANSIENT_SESSIONS.getPropertyName()));
-        return new ShareLoginConfiguration(shareAutoLogin, shareClientName, shareClientVersion, shareCookieTTL, shareTransientSessions);
+        return new ShareLoginConfiguration(shareClientName, shareClientVersion, shareCookieTTL, shareTransientSessions);
     }
 }

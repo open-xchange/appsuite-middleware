@@ -104,21 +104,11 @@ public abstract class AbstractOAuthActivator extends HousekeepingActivator {
      */
     protected abstract OAuthScope[] getScopes();
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
-     */
     @Override
     protected Class<?>[] getNeededServices() {
         return NEEDED_SERVICES;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.osgi.DeferredActivator#startBundle()
-     */
     @Override
     protected void startBundle() throws Exception {
         OAuthServiceMetaData metadata = getOAuthServiceMetaData();
@@ -161,11 +151,6 @@ public abstract class AbstractOAuthActivator extends HousekeepingActivator {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.osgi.HousekeepingActivator#stopBundle()
-     */
     @Override
     protected void stopBundle() throws Exception {
         OAuthServiceMetaData metaData = getOAuthServiceMetaData();

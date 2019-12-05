@@ -1,0 +1,5 @@
+type: object
+properties:
+  $ref: ./RawMailFilterTest_v2.yaml
+  test:
+    $ref: '#/components/schemas/MailFilterNotTestv2'

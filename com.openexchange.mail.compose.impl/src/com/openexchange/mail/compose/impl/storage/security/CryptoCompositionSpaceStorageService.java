@@ -169,7 +169,17 @@ public class CryptoCompositionSpaceStorageService extends AbstractCryptoAware im
             if (needsEncryption(session)) {
                 List<CompositionSpace> spaces = new ArrayList<>(size);
                 for (CompositionSpace compositionSpace : compositionSpaces) {
-                    spaces.add(decryptCompositionSpace(compositionSpace, session));
+                    try {
+                        spaces.add(decryptCompositionSpace(compositionSpace, session));
+                    } catch (OXException e) {
+                        if (CompositionSpaceErrorCode.MISSING_KEY.equals(e)) {
+                            // Composition space is actually useless
+                            closeCompositionSpace(session, compositionSpace.getId());
+                            LoggerHolder.LOG.info("Dropped composition space {} since associated key for decrypting is missing", UUIDs.getUnformattedString(compositionSpace.getId()));
+                        } else {
+                            throw e;
+                        }
+                    }
                 }
                 compositionSpaces = spaces;
             } else {

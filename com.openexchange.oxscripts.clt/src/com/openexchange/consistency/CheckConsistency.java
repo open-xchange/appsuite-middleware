@@ -106,7 +106,7 @@ public class CheckConsistency extends AbstractRmiCLI<Void> {
      * Defines the policy for a 'repair' {@link Action}
      */
     private enum Policy {
-        missing_entry_for_file, missing_file_for_attachment, missing_file_for_infoitem, missing_file_for_snippet, missing_file_for_vcard, missing_attachment_file_for_mail_compose;
+        missing_entry_for_file, missing_file_for_attachment, missing_file_for_infoitem, missing_file_for_snippet, missing_file_for_vcard, missing_attachment_file_for_mail_compose, missing_file_for_preview;
     }
 
     /**
@@ -150,11 +150,6 @@ public class CheckConsistency extends AbstractRmiCLI<Void> {
         new CheckConsistency().execute(args);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.cli.AbstractMBeanCLI#addOptions(org.apache.commons.cli.Options)
-     */
     @Override
     protected void addOptions(Options options) {
         options.addOption(createArgumentOption("a", "action", "action", "Defines the action\nAccepted values are: " + prettyPrintEnum(Action.class), false));
@@ -164,21 +159,11 @@ public class CheckConsistency extends AbstractRmiCLI<Void> {
         options.addOption(createArgumentOption("i", "source-id", "sourceId", "Defines the source identifier.\nOnly considered if \"--source\" option is specified\nIf \"--source\" is set to \"all\" then this option is simply ignored", false));
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.cli.AbstractRmiCLI#administrativeAuth(java.lang.String, java.lang.String, org.apache.commons.cli.CommandLine, com.openexchange.auth.rmi.RemoteAuthenticator)
-     */
     @Override
     protected void administrativeAuth(String login, String password, CommandLine cmd, RemoteAuthenticator authenticator) throws RemoteException {
         authenticator.doAuthentication(login, password);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.cli.AbstractCLI#checkOptions(org.apache.commons.cli.CommandLine)
-     */
     @Override
     protected void checkOptions(CommandLine cmd) {
         action = checkAndSetOption(Action.class, cmd, 'a');
@@ -198,11 +183,6 @@ public class CheckConsistency extends AbstractRmiCLI<Void> {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.cli.AbstractRmiCLI#invoke(org.apache.commons.cli.Options, org.apache.commons.cli.CommandLine, java.lang.String)
-     */
     @Override
     protected Void invoke(Options options, CommandLine cmd, String optRmiHostName) throws Exception {
         String policyString = getPolicyString();
@@ -250,21 +230,11 @@ public class CheckConsistency extends AbstractRmiCLI<Void> {
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.cli.AbstractCLI#requiresAdministrativePermission()
-     */
     @Override
-    protected boolean requiresAdministrativePermission() {
-        return true;
+    protected Boolean requiresAdministrativePermission() {
+        return Boolean.TRUE;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.cli.AbstractCLI#getFooter()
-     */
     @Override
     protected String getFooter() {
         StringBuilder sb = new StringBuilder(1024);
@@ -307,15 +277,11 @@ public class CheckConsistency extends AbstractRmiCLI<Void> {
         sb.append("\n- \"-r ").append(Policy.missing_attachment_file_for_mail_compose.name()).append(" -y ").append(PolicyAction.delete.name()).append("\"\nSimply deletes the mail compose attachment item pointing to a non-existing file");
         sb.append("\n- \"-r ").append(Policy.missing_file_for_vcard.name()).append(" -y ").append(PolicyAction.create_dummy.name()).append("\"\nCreates a dummy file in storage and associates it with the vcard item");
         sb.append("\n- \"-r ").append(Policy.missing_file_for_vcard.name()).append(" -y ").append(PolicyAction.delete.name()).append("\"\nSimply deletes the vcard item pointing to a non-existing file");
+        sb.append("\n- \"-r ").append(Policy.missing_file_for_preview.name()).append(" -y ").append(PolicyAction.delete.name()).append("\"\nSimply deletes the preview item pointing to a non-existing file");
 
         return sb.toString();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.cli.AbstractCLI#getName()
-     */
     @Override
     protected String getName() {
         return "checkconsistency -a <action> -o <source> [-i <sourceId>] [-r <policy> -y <policyAction>] " + BASIC_MASTER_ADMIN_USAGE;

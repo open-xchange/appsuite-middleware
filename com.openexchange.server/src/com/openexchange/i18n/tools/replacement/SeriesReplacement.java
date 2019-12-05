@@ -58,6 +58,8 @@ import com.openexchange.groupware.i18n.Notifications;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.i18n.tools.TemplateReplacement;
 import com.openexchange.i18n.tools.TemplateToken;
+import com.openexchange.regional.RegionalSettingsService;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.TimeZoneUtils;
 
 /**
@@ -81,19 +83,24 @@ public final class SeriesReplacement extends LocalizedStringReplacement {
         Notifications.REC_FIRST, Notifications.REC_SECOND, Notifications.REC_THIRD, Notifications.REC_FOURTH, Notifications.REC_LAST };
 
     private CalendarObject calendarObject;
-
     private boolean isTask;
+    private int contextId;
+    private int userId;
 
     /**
      * Initializes a new {@link SeriesReplacement}
      *
      * @param calendarObject The calendar object
      * @param isTask <code>true</code> if calendar object denotes a task; otherwise <code>false</code> for an appointment
+     * @param contextId The user's context id
+     * @param userId The id of the user to use the {@link SeriesReplacement}
      */
-    public SeriesReplacement(final CalendarObject calendarObject, final boolean isTask) {
+    public SeriesReplacement(final CalendarObject calendarObject, final boolean isTask, int contextId, int userId) {
         super(TemplateToken.SERIES, null);
         this.calendarObject = calendarObject;
         this.isTask = isTask;
+        this.contextId = contextId;
+        this.userId = userId;
     }
 
     @Override
@@ -101,6 +108,8 @@ public final class SeriesReplacement extends LocalizedStringReplacement {
         final SeriesReplacement clone = (SeriesReplacement) super.clone();
         // Shallow copy
         clone.calendarObject = calendarObject;
+        clone.contextId = contextId;
+        clone.userId = userId;
         return clone;
     }
 
@@ -121,6 +130,8 @@ public final class SeriesReplacement extends LocalizedStringReplacement {
             final SeriesReplacement o = (SeriesReplacement) other;
             this.calendarObject = o.calendarObject;
             this.isTask = o.isTask;
+            this.contextId = o.contextId;
+            this.userId = o.userId;
         }
         return false;
     }
@@ -153,7 +164,7 @@ public final class SeriesReplacement extends LocalizedStringReplacement {
                 Integer.valueOf(calendarObject.getOccurrence()));
         } else if (!calendarObject.containsOccurrence() && calendarObject.containsUntil() && calendarObject.getUntil() != null) {
             // Ends on a certain date
-            appendix = String.format(stringHelper.getString(Notifications.REC_ENDS_UNTIL), getDateFormat(locale).format(
+            appendix = String.format(stringHelper.getString(Notifications.REC_ENDS_UNTIL), getDateFormat(locale, contextId, userId).format(
                 calendarObject.getUntil()));
         } else {
             // Ends never
@@ -293,10 +304,14 @@ public final class SeriesReplacement extends LocalizedStringReplacement {
         return sb.toString();
     }
 
-    private static DateFormat getDateFormat(final Locale locale) {
-        final DateFormat retval = locale == null ? DateFormat.getDateInstance(DateFormat.DEFAULT, Locale.ENGLISH) : DateFormat.getDateInstance(
-            DateFormat.DEFAULT,
-            locale);
+    private static DateFormat getDateFormat(final Locale locale, int contextId, int userId) {
+        RegionalSettingsService regionalSettingsService = ServerServiceRegistry.getInstance().getService(RegionalSettingsService.class);
+        DateFormat retval;
+        if (null != regionalSettingsService) {
+            retval = regionalSettingsService.getDateFormat(contextId, userId, null == locale ? Locale.ENGLISH : locale, DateFormat.DEFAULT);
+        } else {
+            retval = DateFormat.getDateInstance(DateFormat.DEFAULT, null == locale ? Locale.ENGLISH : locale);
+        }
         retval.setTimeZone(TimeZoneUtils.getTimeZone("UTC"));
         return retval;
     }

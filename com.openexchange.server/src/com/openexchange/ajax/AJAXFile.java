@@ -50,7 +50,6 @@
 package com.openexchange.ajax;
 
 import static com.openexchange.ajax.Mail.getSaveAsFileName;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -75,7 +74,6 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.helper.ParamContainer;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.configuration.ServerConfig;
-import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
@@ -114,10 +112,6 @@ public final class AJAXFile extends PermissionServlet {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
-     */
     @Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         resp.setContentType(CONTENTTYPE_JAVASCRIPT);
@@ -137,7 +131,7 @@ public final class AJAXFile extends PermissionServlet {
                 action == null ? STR_NULL : action).setAction(null));
             try {
                 ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
-            } catch (final JSONException e) {
+            } catch (JSONException e) {
                 LOG.error("", e);
                 final ServletException se = new ServletException(e.getMessage(), e);
                 se.initCause(e);
@@ -150,12 +144,12 @@ public final class AJAXFile extends PermissionServlet {
         ServerSession session = getSessionObject(req);
         try {
             ResponseWriter.write(actionKeepAlive(session, ParamContainer.getInstance(req, resp)), resp.getWriter(), localeFrom(session));
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             final Response response = new Response(session);
             response.setException(OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]));
             try {
                 ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
-            } catch (final JSONException e1) {
+            } catch (JSONException e1) {
                 LOG.error("", e1);
                 final ServletException se = new ServletException(e1.getMessage(), e1);
                 se.initCause(e1);
@@ -176,7 +170,7 @@ public final class AJAXFile extends PermissionServlet {
             final String id = paramContainer.checkStringParam(PARAMETER_ID);
             final ManagedFileManagement management = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
             management.getByID(id);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             response.setException(e);
         }
         /*
@@ -225,10 +219,9 @@ public final class AJAXFile extends PermissionServlet {
              */
             InputStream contentInputStream = null;
             /*
-             * Reset response header values since we are going to directly write into servlet's output stream and then some browsers do not
-             * allow header "Pragma"
+             * Handle caching headers
              */
-            Tools.removeCachingHeader(resp);
+            Tools.updateCachingHeaders(req, resp);
             final OutputStream out = resp.getOutputStream();
             try {
                 contentInputStream = new FileInputStream(file.getFile());
@@ -240,7 +233,7 @@ public final class AJAXFile extends PermissionServlet {
             } finally {
                 Streams.close(contentInputStream);
             }
-        } catch (final UploadException e) {
+        } catch (UploadException e) {
             LOG.error("", e);
             resp.setContentType(MIME_TEXT_HTML_CHARSET_UTF_8);
             Tools.disableCaching(resp);
@@ -249,14 +242,14 @@ public final class AJAXFile extends PermissionServlet {
                 final Response response = new Response(session);
                 response.setException(e);
                 responseObj = ResponseWriter.getJSON(response);
-            } catch (final JSONException e1) {
+            } catch (JSONException e1) {
                 LOG.error("", e1);
             }
 			throw new UploadServletException(resp, substituteJS(
 					responseObj == null ? STR_NULL : responseObj.toString(),
 					e.getAction() == null ? STR_NULL : e.getAction()),
 					e.getMessage(), e);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             resp.setStatus(HttpServletResponse.SC_OK);
             resp.setContentType(CONTENTTYPE_JAVASCRIPT);
@@ -265,7 +258,7 @@ public final class AJAXFile extends PermissionServlet {
             response.setException(e);
             try {
                 ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
-            } catch (final JSONException e1) {
+            } catch (JSONException e1) {
                 LOG.error("", e1);
                 final ServletException se = new ServletException(e1.getMessage(), e1);
                 se.initCause(e1);
@@ -274,10 +267,6 @@ public final class AJAXFile extends PermissionServlet {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.http.HttpServlet#doPost(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
-     */
     @Override
     protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         /*
@@ -294,7 +283,7 @@ public final class AJAXFile extends PermissionServlet {
                  * Set factory constraints
                  */
                 factory.setSizeThreshold(0);
-                factory.setRepository(new File(ServerConfig.getProperty(Property.UploadDirectory)));
+                factory.setRepository(ServerConfig.getTmpDir());
                 /*
                  * Create a new file upload handler
                  */
@@ -320,7 +309,7 @@ public final class AJAXFile extends PermissionServlet {
                  */
                 try {
                     action = getAction(req);
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     throw UploadException.UploadCode.UPLOAD_FAILED.create(e, e.getMessage()).setAction(action);
                 }
                 if (!ACTION_NEW.equalsIgnoreCase(action)) {
@@ -333,7 +322,7 @@ public final class AJAXFile extends PermissionServlet {
                 try {
                     final @SuppressWarnings("unchecked") List<FileItem> tmp = upload.parseRequest(req);
                     items = tmp;
-                } catch (final FileUploadException e) {
+                } catch (FileUploadException e) {
                     throw UploadException.UploadCode.UPLOAD_FAILED.create(e).setAction(action);
                 }
                 final int size = items.size();
@@ -356,9 +345,9 @@ public final class AJAXFile extends PermissionServlet {
                             jArray.put(processFileItem(fileItem, management));
                         }
                     }
-                } catch (final UploadException e) {
+                } catch (UploadException e) {
                     throw e;
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     throw UploadException.UploadCode.UPLOAD_FAILED.create(e).setAction(action);
                 }
                 /*
@@ -373,27 +362,27 @@ public final class AJAXFile extends PermissionServlet {
                 writer.flush();
 
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             JSONObject responseObj = null;
             try {
                 final Response response = new Response(session);
                 response.setException(e);
                 responseObj = ResponseWriter.getJSON(response);
-            } catch (final JSONException e1) {
+            } catch (JSONException e1) {
                 LOG.error("", e1);
             }
 			throw new UploadServletException(resp, substituteJS(
 					responseObj == null ? STR_NULL : responseObj.toString(),
 					STR_NULL),
 					e.getMessage(), e);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
             JSONObject responseObj = null;
             try {
                 final Response response = new Response(session);
                 response.setException(oje);
                 responseObj = ResponseWriter.getJSON(response);
-            } catch (final JSONException e1) {
+            } catch (JSONException e1) {
                 LOG.error("", e1);
             }
 			throw new UploadServletException(resp, substituteJS(
@@ -457,10 +446,6 @@ public final class AJAXFile extends PermissionServlet {
         return managedFile.getID();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.ajax.PermissionServlet#hasModulePermission(com.openexchange.sessiond.Session)
-     */
     @Override
     protected boolean hasModulePermission(final ServerSession session) {
         return true;

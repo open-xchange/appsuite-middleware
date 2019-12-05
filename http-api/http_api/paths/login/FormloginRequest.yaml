@@ -1,0 +1,120 @@
+/login?action=formlogin:
+  post:
+    operationId: doFormLogin
+    tags:
+      - Login
+    summary: Login to the web frontend using a simple HTML form.
+    description: >
+      This request implements a possible login to the web frontend by only using
+      a simple HTML form.
+
+      The response contains a redirect link to the Web-UI. See
+      [OXSessionFormLogin](http://oxpedia.org/wiki/index.php?title=OXSessionFormLogin)
+      for details.
+
+      An example for such a form can be found in the backend's documentation
+      folder
+
+      (/usr/share/doc/open-xchange-core) under examples/login.html.
+    parameters:
+      - in: query
+        name: authId
+        description: >
+          Identifier for tracing every single login request passed between
+          different systems in a cluster.
+
+          The value should be some token that is unique for every login request.
+          This parameter must be
+
+          given as URL parameter and not inside the body of the POST request.
+        required: true
+        schema:
+          type: string
+    responses:
+      '200':
+        description: >
+          A redirect to the web UI. The URL of the web UI is either taken from
+          the given parameter
+
+          or from the configured default of the backend.
+        content:
+          text/html:
+            schema:
+              type: string
+    requestBody:
+      content:
+        application/x-www-form-urlencoded:
+          schema:
+            type: object
+            title: doFormLoginBody
+            properties:
+              rampup:
+                description: >-
+                  Determines whether client specific rampup data should be
+                  returned with a successfull login request or not.
+                type: string
+              rampupFor:
+                description: >-
+                  Optional client identifier which is used to retrieve the
+                  rampup data.
+                type: string
+              login:
+                description: The login name.
+                type: string
+              password:
+                description: The password.
+                type: string
+                format: password
+              client:
+                description: >
+                  Identifier of the client using the HTTP/JSON interface. This
+                  is for statistic evaluations what clients
+
+                  are used with Open-Xchange. If the autologin request should
+                  work the client must be the same as
+
+                  the client sent by the UI in the normal login request.
+                type: string
+              version:
+                description: Used version of the HTTP/JSON interface client.
+                type: string
+              autologin:
+                description: >
+                  True or false. True tells the UI to issue a store request for
+                  the session cookie.
+
+                  This store request is necessary if you want the autologin
+                  request not to fail.
+                type: boolean
+                default: false
+              uiWebPath:
+                description: >
+                  Defines another path on the web server where the UI is
+                  located. If this parameter is not defined
+
+                  the configured default of the backend is used.
+                type: string
+              clientIP:
+                description: >
+                  IP address of the client host for that the session is created.
+                  If this parameter is not
+
+                  specified the IP address of the HTTP client doing this request
+                  is used.
+                type: string
+              clientUserAgent:
+                description: >
+                  Value of the User-Agent header of the client host for that the
+                  session is created.
+
+                  If this parameter is not specified the User-Agent of the
+                  current HTTP client doing
+
+                  this request is used.
+                type: string
+            required:
+              - login
+              - password
+              - client
+              - version
+              - autologin

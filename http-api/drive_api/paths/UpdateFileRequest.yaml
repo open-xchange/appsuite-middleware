@@ -4,47 +4,46 @@
     tags:
       - Drive
     summary: Updates a file's metadata.
-    description: |
-      Updates specific metadata of a synchronized file. This currently only includes the object permissions - which
+    description: >
+      Updates specific metadata of a synchronized file. This currently only
+      includes the object permissions - which
+
       in turn is only allowed for files marked as `shareable`.
-    consumes:
-      - application/json
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
-      - $ref: "#/parameters/gblQueryParamRoot"
-      - $ref: "#/parameters/gblQueryParamPath"
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - $ref: '#/components/parameters/gblQueryParamRoot'
+      - $ref: '#/components/parameters/gblQueryParamPath'
       - in: query
         name: name
-        type: string
         description: The name of the file version.
         required: true
+        schema:
+          type: string
       - in: query
         name: checksum
-        type: string
         description: The checksum of the directory to update.
         required: true
-      - in: body
-        name: body
-        description: |
-          A JSON object containing the fields `file` and `notification`. The JSON object in field `file` describes
-          the updated file metadata (currently only the property `object_permissions` is considered) and the JSON object `notification`
-          may include a message to notify added permission entities. To notify with a default message, an empty `notification`
-          object should still be added.
-        required: true
         schema:
-          $ref: "#/definitions/DriveFileUpdateBody"
+          type: string
     responses:
-      200:
-        description: |
-          An empty JSON object. Any transport warnings that occurred during sending the notifications are available in
-          the `warnings` field. In case of errors the responsible fields in the response are filled.
-        schema:
-          $ref: "#/definitions/DriveNotificationResponse"
-    x-ox-examples:      
-      - Example1:
+      '200':
+        description: >
+          An empty JSON object. Any transport warnings that occurred during
+          sending the notifications are available in
+
+          the `warnings` field. In case of errors the responsible fields in the
+          response are filled.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DriveNotificationResponse'
+    x-ox-examples:
+      - Example1: null
         description: Basic example
-        example: |
-          ==> PUT http://192.168.32.191/ajax/drive?action=updateFolder&session=35d55f0bd2284e78a8eb4dba99b1310b&root=9542&path=/test&checksum=d41d8cd98f00b204e9800998ecf8427e
+        example: >
+          ==> PUT
+          http://192.168.32.191/ajax/drive?action=updateFolder&session=35d55f0bd2284e78a8eb4dba99b1310b&root=9542&path=/test&checksum=d41d8cd98f00b204e9800998ecf8427e
+
           > Content:
             {
               "file": {
@@ -61,7 +60,25 @@
             }
 
           <== HTTP 200 OK (132.7421 ms elapsed, 11 bytes received)
+
           <   Content: 
               {
                 "data": {}
               }
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DriveFileUpdateBody'
+      description: >
+        A JSON object containing the fields `file` and `notification`. The JSON
+        object in field `file` describes
+
+        the updated file metadata (currently only the property
+        `object_permissions` is considered) and the JSON object `notification`
+
+        may include a message to notify added permission entities. To notify
+        with a default message, an empty `notification`
+
+        object should still be added.
+      required: true

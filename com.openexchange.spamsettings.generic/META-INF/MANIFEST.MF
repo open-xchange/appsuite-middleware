@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: General Spamsetting Backend Bundle
 Bundle-SymbolicName: com.openexchange.spamsettings.generic
-Bundle-Version: 7.10.2
+Bundle-Version: 7.10.3
 Bundle-Activator: com.openexchange.spamsettings.generic.osgi.Activator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
@@ -13,7 +13,7 @@ Import-Package: com.fasterxml.jackson.core,
  com.fasterxml.jackson.core.json,
  com.fasterxml.jackson.core.sym,
  com.fasterxml.jackson.core.type,
- com.fasterxml.jackson.core.util, 
+ com.fasterxml.jackson.core.util,
  com.openexchange.ajax,
  com.openexchange.ajax.container,
  com.openexchange.ajax.fields,
@@ -43,6 +43,7 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.tools.session,
  com.openexchange.tools.ssl,
  com.openexchange.tools.stream,
+ com.openexchange.user,
  javax.mail,
  javax.servlet,
  javax.servlet.http,

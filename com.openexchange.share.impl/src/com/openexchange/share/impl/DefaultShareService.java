@@ -80,8 +80,6 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapExceptionCode;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.guest.GuestService;
@@ -123,6 +121,8 @@ import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.InternalRecipient;
 import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.share.recipient.ShareRecipient;
+import com.openexchange.user.User;
+import com.openexchange.user.UserExceptionCode;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserPermissionService;
 
@@ -187,7 +187,7 @@ public class DefaultShareService implements ShareService {
                 guestUser = guestService.alignUserWithGuest(guestUser, contextID);
             }
         } catch (OXException e) {
-            if (UserExceptionCode.USER_NOT_FOUND.equals(e)) {
+            if (UserExceptionCode.USER_NOT_FOUND.equals(e) || e.equalsCode(2, "CTX")) {
                 LOG.debug("Guest user for share token {} not found, unable to resolve token.", shareToken, e);
                 return null;
             }
@@ -404,7 +404,7 @@ public class DefaultShareService implements ShareService {
                 guestUserUpdated = true;
             }
             if (linkUpdate.containsPassword()) {
-                if(updatePassword(connectionHelper, context, guest, linkUpdate.getPassword())){
+                if (updatePassword(connectionHelper, context, guest, linkUpdate.getPassword())){
                     guestUserUpdated = true;
                     passwordChanged = true;
                 }
@@ -506,7 +506,7 @@ public class DefaultShareService implements ShareService {
             for (TargetPermission permission : permissions) {
                 if (false == permission.isGroup() && LINK_PERMISSION_BITS == permission.getBits()) {
                     boolean includeSubfolders = false;
-                    if(permission instanceof SubfolderAwareTargetPermission) {
+                    if (permission instanceof SubfolderAwareTargetPermission) {
                         if (((SubfolderAwareTargetPermission) permission).getSystem() != 0) {
                             continue;
                         }
@@ -577,8 +577,8 @@ public class DefaultShareService implements ShareService {
 
     private boolean checkForLegatorPermission(List<TargetPermission> permissions, int guestId){
         for(TargetPermission perm: permissions) {
-            if(perm.isGroup() == false && perm.getBits() == LINK_PERMISSION_BITS && perm.getEntity() == guestId) {
-                if(perm instanceof SubfolderAwareTargetPermission) {
+            if (perm.isGroup() == false && perm.getBits() == LINK_PERMISSION_BITS && perm.getEntity() == guestId) {
+                if (perm instanceof SubfolderAwareTargetPermission) {
                     return ((SubfolderAwareTargetPermission) perm).getType() == FolderPermissionType.LEGATOR.getTypeNumber();
                 } else {
                     return false;

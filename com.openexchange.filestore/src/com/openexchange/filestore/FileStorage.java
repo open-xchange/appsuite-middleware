@@ -50,6 +50,7 @@
 package com.openexchange.filestore;
 
 import java.io.InputStream;
+import java.net.URI;
 import java.util.Set;
 import java.util.SortedSet;
 import com.openexchange.exception.OXException;
@@ -61,6 +62,13 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface FileStorage {
+
+    /**
+     * Gets the URI that fully qualifies this file storage.
+     *
+     * @return The URI
+     */
+    URI getUri();
 
     /**
      * Saves specified stream as a file.

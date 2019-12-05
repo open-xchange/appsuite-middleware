@@ -49,7 +49,9 @@
 
 package com.openexchange.dav.push.mixins;
 
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dav.push.DAVPushUtility;
+import com.openexchange.dav.push.osgi.Services;
 import com.openexchange.exception.OXException;
 import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavResource;
@@ -75,7 +77,7 @@ public class SubscribeURL extends SingleResourcePropertyMixin {
         if (null != DAVPushUtility.getPushKey(resource)) {
             String clientId = DAVPushUtility.getClientId(resource);
             if (null != clientId) {
-                String value = "<href xmlns='DAV:'>" + DAVPushUtility.getSubscriptionURL(clientId) + "</href>";
+                String value = "<href xmlns='DAV:'>" + DAVPushUtility.getSubscriptionURL(clientId, Services.requireService(ConfigViewFactory.class)) + "</href>";
                 WebdavProperty property = prepareProperty(true);
                 property.setValue(value);
                 return property;

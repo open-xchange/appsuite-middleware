@@ -92,6 +92,7 @@ import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.AttendeePrivileges;
+import com.openexchange.chronos.CalendarObjectResource;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Classification;
@@ -115,6 +116,7 @@ import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.EventConflict;
 import com.openexchange.chronos.service.EventID;
+import com.openexchange.chronos.service.EventUpdate;
 import com.openexchange.chronos.service.EventUpdates;
 import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.service.RecurrenceIterator;
@@ -204,16 +206,16 @@ public class CalendarUtils {
     }
 
     /**
-     * Looks up a specific calendar user in a collection of attendees, utilizing the {@link CalendarUtils#matches} routine.
+     * Looks up a specific calendar user in a collection of calendar users, utilizing the {@link CalendarUtils#matches} routine.
      *
-     * @param attendees The attendees to search
+     * @param calendarUsers The calendar users to search
      * @param calendarUser The calendar user to lookup
      * @return The matching calendar user, or <code>null</code> if not found
      * @see CalendarUtils#matches
      */
-    public static Attendee find(List<Attendee> attendees, CalendarUser calendarUser) {
-        if (null != attendees && 0 < attendees.size()) {
-            for (Attendee candidateAttendee : attendees) {
+    public static <T extends CalendarUser> T find(Collection<T> calendarUsers, CalendarUser calendarUser) {
+        if (null != calendarUsers && 0 < calendarUsers.size()) {
+            for (T candidateAttendee : calendarUsers) {
                 if (matches(calendarUser, candidateAttendee)) {
                     return candidateAttendee;
                 }
@@ -223,16 +225,16 @@ public class CalendarUtils {
     }
 
     /**
-     * Gets a value indicating whether a specific calendar user is present in a collection of attendees, utilizing the
+     * Gets a value indicating whether a specific calendar user is present in a collection of calendar users, utilizing the
      * {@link CalendarUtils#matches} routine.
      *
-     * @param attendees The attendees to search
+     * @param calendarUsers The calendar users to search
      * @param calendarUser The calendar user to lookup
      * @return <code>true</code> if the calendar user is contained in the collection of attendees, <code>false</code>, otherwise
      * @see CalendarUtils#matches
      */
-    public static boolean contains(List<Attendee> attendees, CalendarUser calendarUser) {
-        return null != find(attendees, calendarUser);
+    public static <T extends CalendarUser> boolean contains(Collection<T> calendarUsers, CalendarUser calendarUser) {
+        return null != find(calendarUsers, calendarUser);
     }
 
     /**
@@ -400,6 +402,25 @@ public class CalendarUtils {
     }
 
     /**
+     * Looks up a specific (managed) attachment within the attachments of multiple events based on its managed identifier.
+     *
+     * @param events The events to search
+     * @param managedId The managed identifier to lookup
+     * @return The matching attachment, or <code>null</code> if not found
+     */
+    public static Attachment findAttachment(Collection<Event> events, int managedId) {
+        if (null != events) {
+            for (Event event : events) {
+                Attachment attachment = findAttachment(event.getAttachments(), managedId);
+                if (null != attachment) {
+                    return attachment;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
      * Gets a value indicating whether an attendee represents an <i>internal</i> entity, i.e. an internal user, group or resource, or not.
      *
      * @param attendee The attendee to check
@@ -471,6 +492,17 @@ public class CalendarUtils {
      */
     public static boolean hasExternalOrganizer(Event event) {
         return null != event.getOrganizer() && 0 >= event.getOrganizer().getEntity();
+    }
+
+    /**
+     * Gets a value indicating whether a specific calendar resource is organized externally, i.e. no internal organizer entity is
+     * responsible.
+     *
+     * @param resource The resource to check
+     * @return <code>true</code> if the resource has an <i>external</i> organizer, <code>false</code>, otherwise
+     */
+    public static boolean hasExternalOrganizer(CalendarObjectResource resource) {
+        return hasExternalOrganizer(resource.getFirstEvent());
     }
 
     /**
@@ -877,7 +909,7 @@ public class CalendarUtils {
      * @see <a href="https://tools.ietf.org/html/rfc4791#section-9.9">RFC 4791, section 9.9</a>
      */
     public static boolean isInRange(Event event, Date from, Date until, TimeZone timeZone) {
-        if (null == event.getStartDate()) {
+        if (null == event.getStartDate() || (null == from && null == until)) {
             return true;
         }
         /*
@@ -917,24 +949,21 @@ public class CalendarUtils {
             // VEVENT has the DTEND property? Y
             // (start < DTEND AND end > DTSTART)
             return start < dtEnd && end > dtStart;
-        } else {
-            // VEVENT has the DTEND property? N
-            if (false == event.getStartDate().isAllDay()) {
-                // DTSTART property is a DATE-TIME value? Y
-                // (start <= DTSTART AND end > DTSTART)
-                return start <= dtStart && end > dtStart;
-            } else {
-                // DTSTART property is a DATE-TIME value? N
-                // (start < DTSTART+P1D AND end > DTSTART)
-                if (end > dtStart) {
-                    Calendar calendar = initCalendar(timeZone, dtStart);
-                    calendar.add(Calendar.DATE, 1);
-                    return start < calendar.getTimeInMillis();
-                } else {
-                    return false;
-                }
-            }
         }
+        // VEVENT has the DTEND property? N
+        if (false == event.getStartDate().isAllDay()) {
+            // DTSTART property is a DATE-TIME value? Y
+            // (start <= DTSTART AND end > DTSTART)
+            return start <= dtStart && end > dtStart;
+        }
+        // DTSTART property is a DATE-TIME value? N
+        // (start < DTSTART+P1D AND end > DTSTART)
+        if (end > dtStart) {
+            Calendar calendar = initCalendar(timeZone, dtStart);
+            calendar.add(Calendar.DATE, 1);
+            return start < calendar.getTimeInMillis();
+        }
+        return false;
     }
 
     /**
@@ -1197,6 +1226,56 @@ public class CalendarUtils {
     }
 
     /**
+     * Filters out those recurrence identifiers that are not produced by the recurrence set generated from the supplied recurrence data.
+     * 
+     * @param recurrenceIds The recurrence identifiers to filter the invalid ones
+     * @param recurrenceData The recurrence data to check against
+     * @param recurrenceService A reference to the recurrence service
+     * @return A new sorted set of recurrence identifiers that exist in the recurrence set, or an empty set if none were valid
+     */
+    public static SortedSet<RecurrenceId> removeInvalid(SortedSet<RecurrenceId> recurrenceIds, RecurrenceData recurrenceData, RecurrenceService recurrenceService) {
+        SortedSet<RecurrenceId> validRecurrenceIds = new TreeSet<RecurrenceId>();
+        if (null == recurrenceIds || recurrenceIds.isEmpty()) {
+            return validRecurrenceIds;
+        }
+        /*
+         * initialize recurrence iterator
+         */
+        RecurrenceIterator<RecurrenceId> iterator;
+        try {
+            iterator = recurrenceService.iterateRecurrenceIds(recurrenceData);
+        } catch (OXException e) {
+            getLogger(CalendarUtils.class).info("Error getting iterator for \"{}\", assuming all recurrence ids as invalid.", recurrenceData, e);
+            return validRecurrenceIds;
+        }
+        if (false == iterator.hasNext()) {
+            return validRecurrenceIds;
+        }
+        TimeZone timeZone = recurrenceData.getSeriesStart().getTimeZone();
+        RecurrenceId validRecurrenceId = iterator.next();
+        /*
+         * check each recurrence identifier, forwarding the iterator as needed
+         */
+        for (RecurrenceId recurrenceId : recurrenceIds) {
+            int comparison = validRecurrenceId.compareTo(recurrenceId, timeZone);
+            while (0 > comparison && iterator.hasNext()) {
+                /*
+                 * forward until this recurrence identifier is reached or passed, remembering the last compare result
+                 */
+                validRecurrenceId = iterator.next();
+                comparison = validRecurrenceId.compareTo(recurrenceId, timeZone);
+            }
+            /*
+             * consider as valid if recurrence identifiers match
+             */
+            if (0 == comparison) {
+                validRecurrenceIds.add(recurrenceId);
+            }
+        }
+        return validRecurrenceIds;
+    }
+
+    /**
      * Filters a list of attendees based on their calendaruser type, and whether they represent "internal" attendees or not.
      *
      * @param attendees The attendees to filter
@@ -1245,6 +1324,49 @@ public class CalendarUtils {
             }
         }
         return filteredAttendees;
+    }
+
+    /**
+     * Collects all attendees that attend at least one of the events of a calendar object resource. Attendees are matched based on the
+     * {@link CalendarUtils#matches} routine.
+     *
+     * @param resource The calendar object resource
+     * @param internal {@link Boolean#TRUE} to only consider internal entities, {@link Boolean#FALSE} for non-internal ones,
+     *            or <code>null</code> to consider both
+     * @param cuTypes The {@link CalendarUserType}s to consider, or <code>null</code> to consider any types
+     * @return The collected attendees, or an empty list if there are none
+     * @see CalendarUtils#matches
+     */
+    public static List<Attendee> collectAttendees(CalendarObjectResource resource, Boolean internal, CalendarUserType... cuTypes) {
+        List<Attendee> collectedAttendees = new ArrayList<Attendee>();
+        for (Event event : resource.getEvents()) {
+            for (Attendee attendee : filter(event.getAttendees(), internal, cuTypes)) {
+                if (false == contains(collectedAttendees, attendee)) {
+                    collectedAttendees.add(attendee);
+                }
+            }
+        }
+        return collectedAttendees;
+    }
+
+    /**
+     * Collects all events with a specific unique identifier (UID) from the given event collection.
+     *
+     * @param events The events to filter
+     * @param uid The UID to match
+     * @return The matching events, or an empty list if none were found
+     */
+    public static List<Event> filterByUid(Collection<Event> events, String uid) {
+        if (null != events && 0 < events.size()) {
+            List<Event> matchingEvents = new ArrayList<Event>();
+            for (Event event : events) {
+                if (uid.equals(event.getUid())) {
+                    matchingEvents.add(event);
+                }
+            }
+            return matchingEvents;
+        }
+        return Collections.emptyList();
     }
 
     /**
@@ -1690,6 +1812,19 @@ public class CalendarUtils {
     }
 
     /**
+     * Gets a value indicating whether a calendar object resource represents an <i>attendee scheduling object resource</i> or not, i.e.
+     * a group-scheduled event the calendar user attends, organized by a different entity.
+     *
+     * @param resource The resource to check
+     * @param calendarUserId The identifier of the calendar user representing the view on the event
+     * @return <code>true</code> if the resource is an attendee scheduling object resource, <code>false</code>, otherwise
+     * @see <a href="https://tools.ietf.org/html/rfc6638#section-3.1">RFC 6638, section 3.1</a>
+     */
+    public static boolean isAttendeeSchedulingResource(CalendarObjectResource resource, int calendarUserId) {
+        return isAttendeeSchedulingResource(resource.getFirstEvent(), calendarUserId);
+    }
+
+    /**
      * Gets a value indicating whether an event represents an <i>organizer scheduling object resource</i> or not, i.e. a group-scheduled
      * event where the calendar user matches the organizer.
      *
@@ -1700,6 +1835,19 @@ public class CalendarUtils {
      */
     public static boolean isOrganizerSchedulingResource(Event event, int calendarUserId) {
         return isGroupScheduled(event) && null != event.getOrganizer() && event.getOrganizer().getEntity() == calendarUserId;
+    }
+
+    /**
+     * Gets a value indicating whether a calendar object resource represents an <i>organizer scheduling object resource</i> or not, i.e.
+     * a group-scheduled event where the calendar user matches the organizer.
+     *
+     * @param resource The resource to check
+     * @param calendarUserId The identifier of the calendar user representing the view on the event
+     * @return <code>true</code> if the resource is an organizer scheduling object resource, <code>false</code>, otherwise
+     * @see <a href="https://tools.ietf.org/html/rfc6638#section-3.1">RFC 6638, section 3.1</a>
+     */
+    public static boolean isOrganizerSchedulingResource(CalendarObjectResource resource, int calendarUserId) {
+        return isOrganizerSchedulingResource(resource.getFirstEvent(), calendarUserId);
     }
 
     /**
@@ -1908,6 +2056,12 @@ public class CalendarUtils {
                 if (0 < item1.getManagedId() && 0 < item2.getManagedId()) {
                     return item1.getManagedId() == item2.getManagedId();
                 }
+                if (null != item1.getChecksum() && item1.getChecksum().equals(item2.getChecksum()) &&
+                    null != item1.getFilename() && item1.getFilename().equals(item2.getFilename()) &&
+                    null != item1.getFormatType() && item1.getFormatType().equals(item2.getFormatType()) &&
+                    0 < item1.getSize() && item1.getSize() == item2.getSize()) {
+                    return true;
+                }
                 return false;
             }
         };
@@ -1934,6 +2088,24 @@ public class CalendarUtils {
     }
 
     /**
+     * Initializes a new simple attendee collection update based on the supplied original and updated attendee lists, considering only
+     * the presence of the attendees in both collections, ignoring possibly changed properties within the attendee objects.
+     *
+     * @param originalAttendees The original attendees
+     * @param updatedAttendees The updated attendees
+     * @return The simple collection update
+     */
+    public static AbstractSimpleCollectionUpdate<Attendee> getSimpleAttendeeUpdates(List<Attendee> originalAttendees, List<Attendee> updatedAttendees) {
+        return new AbstractSimpleCollectionUpdate<Attendee>(originalAttendees, updatedAttendees) {
+
+            @Override
+            protected boolean matches(Attendee item1, Attendee item2) {
+                return CalendarUtils.matches(item1, item2);
+            }
+        };
+    }
+
+    /**
      * Initializes a new attendee collection update based on the supplied original and updated attendee lists.
      *
      * @param originalAttendees The original attendees
@@ -1952,7 +2124,6 @@ public class CalendarUtils {
      * @param considerUnset <code>true</code> to also consider comparison with not <i>set</i> fields of the original, <code>false</code>, otherwise
      * @param ignoredFields Fields to ignore when determining the differences between updated items
      * @return The collection update
-     * @throws OXException In case mapping fails
      */
     public static AbstractCollectionUpdate<Attendee, AttendeeField> getAttendeeUpdates(List<Attendee> originalAttendees, List<Attendee> updatedAttendees, boolean considerUnset, AttendeeField... ignoredFields) {
         return new AbstractCollectionUpdate<Attendee, AttendeeField>(AttendeeMapper.getInstance(), originalAttendees, updatedAttendees, considerUnset, ignoredFields) {
@@ -2004,6 +2175,20 @@ public class CalendarUtils {
                 }
             }
         };
+    }
+
+    /**
+     * Constructs a calendar object resource consisting of the <i>updated</i> events from the supplied event update collection.
+     * 
+     * @param eventUpdates The event updates to build the calendar object resource from
+     * @return The calendar object resource
+     */
+    public static CalendarObjectResource getUpdatedResource(List<EventUpdate> eventUpdates) {
+        List<Event> events = new ArrayList<Event>();
+        for (EventUpdate eventUpdate : eventUpdates) {
+            events.add(eventUpdate.getUpdate());
+        }
+        return new DefaultCalendarObjectResource(events);
     }
 
     /**

@@ -69,11 +69,6 @@ public class LastModifiedComparator extends AbstractComparator {
         super(Date.class, INDEX_POSITION);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.tools.console.comparators.AbstractComparator#innerCompare(java.util.List, java.util.List)
-     */
     @Override
     protected int innerCompare(Object o1, Object o2) {
         return ((Date) o1).compareTo((Date) o1);

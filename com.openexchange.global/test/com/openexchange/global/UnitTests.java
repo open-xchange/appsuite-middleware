@@ -55,6 +55,7 @@ import com.openexchange.exception.interception.Bug50893Test;
 import com.openexchange.exception.interception.OXExceptionInterceptorRegistrationTest;
 import com.openexchange.global.tools.id.IDManglerTest;
 import com.openexchange.global.tools.iterator.MergingSearchIteratorTest;
+import com.openexchange.i18n.I18nServiceRegistryTest;
 import com.openexchange.sessiond.SessionFilterTest;
 import com.openexchange.tools.filename.Bug53791Test;
 import com.openexchange.tools.filename.Bug55271Test;
@@ -75,6 +76,7 @@ import com.openexchange.tools.filename.Bug55271Test;
     Bug55271Test.class,
     com.openexchange.tools.filename.Bug56499Test.class,
     com.openexchange.tools.filename.Bug58052Test.class,
+    I18nServiceRegistryTest.class
 })
 public class UnitTests {
 }

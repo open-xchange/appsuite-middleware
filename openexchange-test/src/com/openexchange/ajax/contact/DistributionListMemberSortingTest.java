@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.contact;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.Assert;
@@ -59,6 +58,7 @@ import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.ContactData;
 import com.openexchange.testing.httpclient.models.ContactResponse;
 import com.openexchange.testing.httpclient.models.DistributionListMember;
+import com.openexchange.testing.httpclient.models.DistributionListMember.MailFieldEnum;
 
 /**
  * {@link DistributionListMemberSortingTest}
@@ -107,7 +107,7 @@ public class DistributionListMemberSortingTest extends AbstractApiClientContactT
         result.setFolderId(con.getFolderId());
         result.setId(con.getId());
         result.setMail(con.getEmail1());
-        result.setMailField(new BigDecimal(1));
+        result.setMailField(MailFieldEnum.NUMBER_1);
         return result;
     }
 

@@ -107,7 +107,7 @@ public final class MailRFC2231Test extends AbstractMailTest {
                 fail("Missing attachments although existence indicated through 'hasAttachments()'");
             }
 
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
@@ -144,7 +144,7 @@ public final class MailRFC2231Test extends AbstractMailTest {
                 fail("Missing attachments although existence indicated through 'hasAttachments()'");
             }
 
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }

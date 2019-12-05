@@ -114,7 +114,7 @@ public final class OSGiContextService extends AbstractOSGiDelegateService<Contex
     public void invalidateContexts(int[] contextIDs) throws OXException {
         try {
             getService().invalidateContexts(contextIDs);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
         }
     }

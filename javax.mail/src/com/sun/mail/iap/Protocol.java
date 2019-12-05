@@ -54,18 +54,16 @@ import java.net.UnknownHostException;
 import java.nio.channels.SocketChannel;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import javax.net.ssl.SSLSocket;
-
-import com.sun.mail.imap.CommandEvent;
-import com.sun.mail.imap.CommandListener;
-
 import org.slf4j.MDC;
-
+import com.sun.mail.imap.CommandExecutor;
 import com.sun.mail.imap.GreetingListener;
 import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.imap.ProtocolListener;
@@ -122,10 +120,10 @@ public class Protocol {
     static final AtomicInteger tagNum = new AtomicInteger();
 
     private static final byte[] CRLF = { (byte)'\r', (byte)'\n'};
-
+ 
     /**
      * Constructor. <p>
-     *
+     * 
      * Opens a connection to the given host at given port.
      *
      * @param host	host to connect to
@@ -160,8 +158,15 @@ public class Protocol {
 	    initStreams();
 
 	    // Read server greeting
-	    processGreeting(readResponse());
-
+	    {
+	        Optional<CommandExecutor> optionalCommandExecutor = IMAPStore.getMatchingCommandExecutor(this);
+	        if (optionalCommandExecutor.isPresent()) {
+	            processGreeting(optionalCommandExecutor.get().readResponse(this));
+	        } else {
+	            processGreeting(readResponse());
+	        }
+	    }
+	    
 	    // Call greeting listeners
 	    if (null != props) {
 	        Object value = props.get(prefix + ".greeting.listeners");
@@ -174,7 +179,7 @@ public class Protocol {
 	    }
 
 	    timestamp = System.currentTimeMillis();
-
+ 
 	    connected = true;	// must be last statement in constructor
 	} finally {
 	    /*
@@ -183,9 +188,8 @@ public class Protocol {
 	     * no one will be able to use because this object was never
 	     * completely constructed.
 	     */
-	    if (!connected) {
-            disconnect();
-        }
+	    if (!connected)
+		disconnect();
 	}
     }
 
@@ -208,15 +212,14 @@ public class Protocol {
     private String computePrefix(Properties props, String prefix) {
     // XXX - in case someone depends on the tag prefix
     if (PropUtil.getBooleanProperty(props,
-                    prefix + ".reusetagprefix", false)) {
+                    prefix + ".reusetagprefix", false))
         return "A";
-    }
     // tag prefix, wrap around after three letters
     int n = tagNum.getAndIncrement() % (26*26*26 + 26*26 + 26);
     String tagPrefix;
-    if (n < 26) {
+    if (n < 26)
         tagPrefix = new String(new char[] { (char)('A' + n) });
-    } else if (n < (26*26 + 26)) {
+    else if (n < (26*26 + 26)) {
         n -= 26;
         tagPrefix = new String(new char[] {
                 (char)('A' + n/26), (char)('A' + n%26) });
@@ -272,14 +275,14 @@ public class Protocol {
     public long getTimestamp() {
         return timestamp;
     }
-
+    
     /**
      * Clears response handlers.
      */
     public void clearHandlers() {
     handlers.clear();
     }
-
+    
     /**
      * Adds a response handler.
      *
@@ -320,9 +323,8 @@ public class Protocol {
     }
 
     protected void processGreeting(Response r) throws ProtocolException {
-        if (r.isBYE()) {
-            throw new ConnectionException(this, r);
-        }
+        if (r.isBYE())
+	        throw new ConnectionException(this, r);
 	    greeting = r.toString();
     }
 
@@ -354,7 +356,7 @@ public class Protocol {
 	return false;
     }
 
-    public Response readResponse()
+    public Response readResponse() 
 		throws IOException, ProtocolException {
 	return new Response(this);
     }
@@ -369,7 +371,7 @@ public class Protocol {
 	/*
 	 * XXX - Really should peek ahead in the buffer to see
 	 * if there's a *complete* response available, but if there
-	 * isn't who's going to read more data into the buffer
+	 * isn't who's going to read more data into the buffer 
 	 * until there is?
 	 */
 	try {
@@ -391,39 +393,11 @@ public class Protocol {
 	return null;
     }
 
-    public String writeCommand(String command, Argument args)
+    public String writeCommand(String command, Argument args) 
         throws IOException, ProtocolException {
-        return writeCommand(command, args, IMAPStore.getProtocolListeners());
-    }
-
-    protected String writeCommand(String command, Argument args, ProtocolListenerCollection optCommandListeners)
-		throws IOException, ProtocolException {
 	// assert Thread.holdsLock(this);
 	// can't assert because it's called from constructor
 	String tag = new StringBuilder(6).append('A').append(Integer.toString(tagCounter++, 10)).toString(); // unique tag
-
-	if (null != optCommandListeners) {
-	    Iterator<CommandListener> it = optCommandListeners.commandListeners();
-	    if (it.hasNext()) {
-	        CommandEvent commandEvent = CommandEvent.builder()
-                .setArgs(args)
-                .setCommand(command)
-                .setHost(host)
-                .setPort(port)
-                .setTag(tag)
-                .setUser(user)
-                .build();
-	        boolean applicable;
-	        do {
-	            CommandListener listener = it.next();
-                applicable = listener.onBeforeCommandIssued(commandEvent);
-	            if (false == applicable) {
-	                // Remove non-applicable listener from collection to prevent from calling it unnecessarily later on
-                    it.remove();
-                }
-            } while (it.hasNext());
-        }
-    }
 
 	output.writeBytes(tag + " " + command);
 
@@ -438,15 +412,38 @@ public class Protocol {
     }
 
     /**
+     * Send a command to the server possibly using a command executor.
+     * <p>
+     * Collect all responses until either the corresponding command
+     * completion response or a BYE response (indicating server failure).
+     * Return all the collected responses.
+     *
+     * @param   command the command
+     * @param   args    the arguments
+     * @return      array of Response objects returned by the server
+     */
+    public synchronized Response[] command(String command, Argument args) {
+        // Determine suitable executor
+        Optional<CommandExecutor> optionalCommandExecutor = IMAPStore.getMatchingCommandExecutor(this);
+        if (optionalCommandExecutor.isPresent()) {            
+            // Issue command using matching executor
+            return optionalCommandExecutor.get().executeCommand(command, args, this);
+        }
+
+        // No matching executor available
+        return executeCommand(command, args);
+    }
+
+    /**
      * Send a command to the server. Collect all responses until either
-     * the corresponding command completion response or a BYE response
+     * the corresponding command completion response or a BYE response 
      * (indicating server failure).  Return all the collected responses.
      *
      * @param	command	the command
      * @param	args	the arguments
      * @return		array of Response objects returned by the server
      */
-    public synchronized Response[] command(String command, Argument args) {
+    public synchronized Response[] executeCommand(String command, Argument args) {
 	commandStart(command);
 	List<Response> v = null;
 	boolean done = false;
@@ -458,7 +455,7 @@ public class Protocol {
 	boolean measure = null != protocolListeners || auditLogEnabled;
 	long start = measure ? System.currentTimeMillis() : 0L;
 	try {
-	    tag = writeCommand(command, args, protocolListeners);
+	    tag = writeCommand(command, args);
 	    v = new java.util.ArrayList<Response>(32);
 	} catch (LiteralException lex) {
 	    v = new java.util.ArrayList<Response>(1);
@@ -480,9 +477,8 @@ public class Protocol {
 	    try {
 		r = readResponse();
 	    } catch (IOException ioex) {
-		if (byeResp != null) {
-            break;
-        }
+		if (byeResp != null)	// connection closed after BYE was sent
+		    break;
 		// convert this into a BYE response
 		r = Response.byeResponse(ioex);
 	    } catch (ProtocolException pex) {
@@ -518,15 +514,13 @@ public class Protocol {
 	}
 
 	if (byeResp != null)
-     {
-        v.add(byeResp);	// must be last
-    }
+		v.add(byeResp);	// must be last
 	Response[] responses = v.toArray(new Response[v.size()]);
 	long end = System.currentTimeMillis();
         timestamp = end;
 	commandEnd();
 
-	if (measure) {
+	if (measure) {	    
 	    long executionMillis = end - start;
 	    if (auditLogEnabled) {
             com.sun.mail.imap.AuditLog.LOG.info("command='{}' time={} timestamp={} taggedResponse='{}'", (null == args ? command : command + " " + args.toString()), Long.valueOf(executionMillis), Long.valueOf(end), null == taggedResp ? "<none>" : taggedResp.toString());
@@ -543,7 +537,7 @@ public class Protocol {
                     .setResponses(responses)
                     .setTag(tag)
                     .setTerminatedTmestamp(end)
-                    .setStatusResponse(ResponseEvent.StatusResponse.statusResponseFor(responses[responses.length - 1]))
+                    .setStatusResponse(ResponseEvent.StatusResponse.statusResponseFor(responses))
                     .setUser(user)
                     .build();
 	            do {
@@ -568,13 +562,13 @@ public class Protocol {
      * @exception	ProtocolException	for protocol failures
      */
     public void handleResult(Response response) throws ProtocolException {
-	if (response.isOK()) {
-        return;
-    } else if (response.isNO()) {
-        throw new CommandFailedException(response);
-    } else if (response.isBAD()) {
-        throw new BadCommandException(response);
-    } else if (response.isBYE()) {
+	if (response.isOK())
+	    return;
+	else if (response.isNO())
+	    throw new CommandFailedException(response);
+	else if (response.isBAD())
+	    throw new BadCommandException(response);
+	else if (response.isBYE()) {
 	    disconnect();
 	    Exception byeException = response.byeException;
 	    if (null != byeException) {
@@ -618,9 +612,7 @@ public class Protocol {
     public synchronized void startTLS(String cmd)
 				throws IOException, ProtocolException {
 	if (socket instanceof SSLSocket)
-     {
-        return;	// nothing to do
-    }
+	    return;	// nothing to do
 	simpleCommand(cmd, null);
 	socket = SocketFetcher.startTLS(socket, host, props, prefix);
 	initStreams();
@@ -653,11 +645,10 @@ public class Protocol {
 	int strategy = PropUtil.getIntProperty(props,
 						prefix + ".compress.strategy",
 						java.util.zip.Deflater.DEFAULT_STRATEGY);
-	if (logger.isLoggable(Level.FINE)) {
-        logger.log(Level.FINE,
+	if (logger.isLoggable(Level.FINE))
+	    logger.log(Level.FINE,
 		"Creating Deflater with compression level {0} and strategy {1}",
 		new Object[] { level, strategy });
-    }
 	java.util.zip.Deflater def = new java.util.zip.Deflater(java.util.zip.Deflater.DEFAULT_COMPRESSION, true);
 	try {
 	    def.setLevel(level);
@@ -703,9 +694,8 @@ public class Protocol {
      */
     public SocketChannel getChannel() {
 	SocketChannel ret = socket.getChannel();
-	if (ret != null) {
-        return ret;
-    }
+	if (ret != null)
+	    return ret;
 
 	// XXX - Android is broken and SSL wrapped sockets don't delegate
 	// the getChannel method to the wrapped Socket
@@ -759,23 +749,20 @@ public class Protocol {
      */
     protected synchronized String getLocalHost() {
 	// get our hostname and cache it for future use
-	if (localHostName == null || localHostName.length() <= 0) {
-        localHostName =
+	if (localHostName == null || localHostName.length() <= 0)
+	    localHostName =
 		    props.getProperty(prefix + ".localhost");
-    }
-	if (localHostName == null || localHostName.length() <= 0) {
-        localHostName =
+	if (localHostName == null || localHostName.length() <= 0)
+	    localHostName =
 		    props.getProperty(prefix + ".localaddress");
-    }
 	try {
 	    if (localHostName == null || localHostName.length() <= 0) {
 		InetAddress localHost = InetAddress.getLocalHost();
 		localHostName = localHost.getCanonicalHostName();
 		// if we can't get our name, use local address literal
-		if (localHostName == null) {
-            // XXX - not correct for IPv6
+		if (localHostName == null)
+		    // XXX - not correct for IPv6
 		    localHostName = "[" + localHost.getHostAddress() + "]";
-        }
 	    }
 	} catch (UnknownHostException uhex) {
 	}
@@ -786,10 +773,9 @@ public class Protocol {
 		InetAddress localHost = socket.getLocalAddress();
 		localHostName = localHost.getCanonicalHostName();
 		// if we can't get our name, use local address literal
-		if (localHostName == null) {
-            // XXX - not correct for IPv6
+		if (localHostName == null)
+		    // XXX - not correct for IPv6
 		    localHostName = "[" + localHost.getHostAddress() + "]";
-        }
 	    }
 	}
 	return localHostName;
@@ -851,7 +837,7 @@ public class Protocol {
     public String getHost() {
         return host;
     }
-
+    
     /**
      * Gets the port
      *
@@ -860,17 +846,35 @@ public class Protocol {
     public int getPort() {
         return port;
     }
+    
+    /**
+     * Gets the user
+     *
+     * @return The user
+     */
+    public String getUser() {
+        return user;
+    }
+
+    /**
+     * Gets the properties used by this protocol.
+     *
+     * @return The properties
+     */
+    public Properties getProps() {
+        return props;
+    }
 
     /**
      * Gets the remote IP address of the end-point this instance is connected to, or <code>null</code> if it is unconnected.
-     *
+     * 
      * @return The remote IP address, or <code>null</code> if it is unconnected.
      */
     public java.net.InetAddress getRemoteAddress() {
     Socket socket = this.socket;
     return null == socket ? null : socket.getInetAddress();
     }
-
+    
     /**
      * Sets the specified read timeout and returns the previously applicable SO_TIMEOUT value.
      *
@@ -894,7 +898,7 @@ public class Protocol {
             throw new ProtocolException("can't set read timeout", ex);
         }
     }
-
+    
     private static char[] lowercases = { '\000', '\001', '\002', '\003', '\004', '\005', '\006', '\007', '\010', '\011', '\012', '\013', '\014', '\015', '\016', '\017', '\020', '\021', '\022', '\023', '\024', '\025', '\026', '\027', '\030', '\031', '\032', '\033', '\034', '\035', '\036', '\037', '\040', '\041', '\042', '\043', '\044', '\045', '\046', '\047', '\050', '\051', '\052', '\053', '\054', '\055', '\056', '\057', '\060', '\061', '\062', '\063', '\064', '\065', '\066', '\067', '\070', '\071', '\072', '\073', '\074', '\075', '\076', '\077', '\100', '\141', '\142', '\143', '\144', '\145', '\146', '\147', '\150', '\151', '\152', '\153', '\154', '\155', '\156', '\157', '\160', '\161', '\162', '\163', '\164', '\165', '\166', '\167', '\170', '\171', '\172', '\133', '\134', '\135', '\136', '\137', '\140', '\141', '\142', '\143', '\144', '\145', '\146', '\147', '\150', '\151', '\152', '\153', '\154', '\155', '\156', '\157', '\160', '\161', '\162', '\163', '\164', '\165', '\166', '\167', '\170', '\171', '\172', '\173', '\174', '\175', '\176', '\177' };
 
     /**
@@ -932,5 +936,5 @@ public class Protocol {
 
         return c == null ? s : new String(c);
     }
-
+    
 }

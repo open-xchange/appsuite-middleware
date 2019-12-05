@@ -49,35 +49,42 @@
 
 package com.openexchange.ajax.chronos.itip;
 
+import static com.openexchange.ajax.chronos.itip.ITipAssertion.assertAttendeePartStat;
+import static com.openexchange.ajax.chronos.itip.ITipAssertion.assertSingleEvent;
+import static com.openexchange.ajax.chronos.itip.ITipUtil.constructBody;
+import static com.openexchange.ajax.chronos.itip.ITipUtil.convertToAttendee;
+import static com.openexchange.ajax.chronos.itip.ITipUtil.parseICalAttachment;
+import static com.openexchange.ajax.chronos.itip.ITipUtil.receiveIMip;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.function.Function;
+import java.util.UUID;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 import com.openexchange.ajax.chronos.factory.EventFactory;
-import com.openexchange.ajax.chronos.factory.ICalFacotry;
-import com.openexchange.ajax.chronos.factory.ICalFacotry.PartStat;
-import com.openexchange.junit.Assert;
-import com.openexchange.testing.httpclient.invoker.ApiException;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.ical.ImportedCalendar;
+import com.openexchange.chronos.scheduling.SchedulingMethod;
 import com.openexchange.testing.httpclient.models.ActionResponse;
 import com.openexchange.testing.httpclient.models.Attendee;
 import com.openexchange.testing.httpclient.models.CalendarUser;
-import com.openexchange.testing.httpclient.models.ConversionDataSource;
 import com.openexchange.testing.httpclient.models.EventData;
-import com.openexchange.testing.httpclient.models.MailDestinationData;
+import com.openexchange.testing.httpclient.models.MailData;
 
 /**
  * {@link ITipRequestTests}
+ * 
+ * Creates an event as user B from context 2, sending a invite to user A from context 1.
+ * User A will accept, tentative or decline via iTIP.
+ * Afterwards the reply message within the organizers inbox will be checked
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
@@ -85,15 +92,21 @@ import com.openexchange.testing.httpclient.models.MailDestinationData;
 @RunWith(Parameterized.class)
 public class ITipRequestTests extends AbstractITipTest {
 
+    //@formatter:off
     @Parameters(name = "{0}")
     public static Iterable<Object[]> data() {
         return Arrays.asList(new Object[][] {
             // Attendees will be overwritten by setup, so '0' is fine
-            { "SingleTwoHourEvent", EventFactory.createSingleTwoHourEvent(0, "SingleTwoHourEvent") },
-            { "SeriesFiveOccurences", EventFactory.createSeriesEvent(0, "SeriesEventFiveOccurences", 5, null) },
-            { "MonthlySeriesFiveOccurences", EventFactory.createSeriesEvent(0, "SeriesEventFiveOccurences", 5, null, EventFactory.RecurringFrequency.MONTHLY) }
+            { "SingleTwoHourEvent", EventFactory.createSingleTwoHourEvent(0, null) },
+            { "SeriesEventFiveOccurences", EventFactory.createSeriesEvent(0, null, 5, null) },
+            { "MonthlySeriesEvent", EventFactory.createSeriesEvent(0, null, 5, null, EventFactory.RecurringFrequency.MONTHLY) }
         });
     }
+    //@formatter:on
+
+    private final String summary;
+
+    private final EventData event;
 
     /**
      * Initializes a new {@link ITipRequestTests}.
@@ -104,41 +117,22 @@ public class ITipRequestTests extends AbstractITipTest {
      */
     public ITipRequestTests(String identifier, EventData event) {
         super();
+        this.summary = identifier;
         this.event = event;
     }
 
-    public Map<PartStat, Function<ConversionDataSource, ActionResponse>> map = new HashMap<>(3);
-    {
-        map.put(PartStat.ACCEPTED, (ConversionDataSource body) -> {
-            try {
-                return accept(body);
-            } catch (ApiException e) {
-                throw new RuntimeException(e);
-            }
-        });
-        map.put(PartStat.TENTATIVE, (ConversionDataSource body) -> {
-            try {
-                return tentative(body);
-            } catch (ApiException e) {
-                throw new RuntimeException(e);
-            }
-        });
-        map.put(PartStat.DECLINED, (ConversionDataSource body) -> {
-            try {
-                return decline(body);
-            } catch (ApiException e) {
-                throw new RuntimeException(e);
-            }
-        });
-    }
+    private MailData mailData;
 
-    private MailDestinationData mailData;
-
-    private EventData updatedEvent;
-
-    private EventData event;
-
+    /** Organizer from context 2, user B */
     private Attendee organizer;
+
+    /** Attendee from context 1, user A */
+    private Attendee attendee;
+
+    /** The event managed by the organizer */
+    private EventData organizerInstance;
+
+    private String uniqueSummary;
 
     @Override
     public void setUp() throws Exception {
@@ -146,68 +140,77 @@ public class ITipRequestTests extends AbstractITipTest {
 
         List<Attendee> attendees = new LinkedList<>();
 
-        attendees.add(createAttendee(testUser, getApiClient()));
-        organizer = createAttendee(testUserC2, apiClientC2);
-        organizer.setPartStat(ICalFacotry.PartStat.ACCEPTED.toString());
+        attendee = convertToAttendee(testUser, Integer.valueOf(0));
+        attendee.uri("mailto:" + userResponseC1.getData().getEmail1());
+        attendee.email(userResponseC1.getData().getEmail1());
+        attendees.add(attendee);
+        organizer = convertToAttendee(testUserC2, apiClientC2.getUserId());
+        organizer.uri("mailto:" + userResponseC2.getData().getEmail1());
+        organizer.email(userResponseC2.getData().getEmail1());
+        organizer.setPartStat(PartStat.ACCEPTED.toString());
         attendees.add(organizer);
 
         event.setAttendees(attendees);
         CalendarUser c = new CalendarUser();
+        c.uri("mailto:" + userResponseC2.getData().getEmail1());
         c.cn(userResponseC2.getData().getDisplayName());
         c.email(userResponseC2.getData().getEmail1());
         c.entity(Integer.valueOf(userResponseC2.getData().getId()));
         event.setOrganizer(c);
+        event.setCalendarUser(c);
 
-        mailData = createMailInInbox(Collections.singletonList(event));
-        Assert.assertThat("No mail created.", mailData.getId(), notNullValue());
-    }
+        uniqueSummary = summary + UUID.randomUUID().toString();
+        event.setSummary(uniqueSummary);
 
-    @Override
-    public void tearDown() throws Exception {
-        try {
-            if (null != mailData) {
-                removeMail(mailData);
-            }
-            if (null != updatedEvent) {
-                deleteEvent(updatedEvent);
-            }
-        } finally {
-            super.tearDown();
-        }
+        organizerInstance = createEvent(apiClientC2, event, folderIdC2);
+        rememberForCleanup(apiClientC2, organizerInstance);
+
+        mailData = receiveIMip(apiClient, organizer.getEmail(), uniqueSummary, 0, SchedulingMethod.REQUEST);
+        rememberMail(mailData);
     }
 
     @Test
-    public void testAllRequest() {
-        for (Entry<PartStat, Function<ConversionDataSource, ActionResponse>> entry : map.entrySet()) {
-            validateEvent(entry.getValue().apply(constructBody(mailData.getId())), entry.getKey());
-        }
+    public void testAccept() throws Exception {
+        validate(accept(constructBody(mailData)), ParticipationStatus.ACCEPTED);
     }
 
     @Test
-    public void testChangeOnAcknowlegedRequest() {
-        int i = Math.random() <= 0.5 ? 1 : 2;
-        Iterator<Entry<PartStat, Function<ConversionDataSource, ActionResponse>>> iterator = map.entrySet().iterator();
-        Entry<PartStat, Function<ConversionDataSource, ActionResponse>> entry = iterator.next();
-        validateEvent(entry.getValue().apply(constructBody(mailData.getId())), entry.getKey());
-        for (int j = 0; j < i; j++) {
-            entry = iterator.next();
-        }
-        validateEvent(entry.getValue().apply(constructBody(mailData.getId())), entry.getKey());
+    public void testTenative() throws Exception {
+        validate(tentative(constructBody(mailData)), ParticipationStatus.TENTATIVE);
     }
 
-    private void validateEvent(ActionResponse response, PartStat partStat) {
-        Assert.assertThat("Only one object should have been returned", Integer.valueOf(response.getData().size()), is(Integer.valueOf(1)));
-        updatedEvent = response.getData().get(0);
-        Assert.assertThat("Should be the same start date", updatedEvent.getStartDate(), is(event.getStartDate()));
-        Assert.assertThat("Should be the same end date", updatedEvent.getEndDate(), is(event.getEndDate()));
+    @Test
+    public void testDecline() throws Exception {
+        validate(decline(constructBody(mailData)), ParticipationStatus.DECLINED);
+    }
 
-        Assert.assertThat("Should contain attendees", updatedEvent.getAttendees(), notNullValue());
-        Assert.assertThat("Should be same attendees", Integer.valueOf(updatedEvent.getAttendees().size()), is(Integer.valueOf(2)));
-        Assert.assertThat("Should be the same organizer", updatedEvent.getOrganizer().getEmail(), is(organizer.getEmail()));
+    private void validate(ActionResponse response, ParticipationStatus partStat) throws Exception {
+        /*
+         * Validate event from attendee perspective
+         */
+        EventData updatedEvent = assertSingleEvent(response);
+        rememberForCleanup(updatedEvent);
+        assertThat("Should be the same start date", updatedEvent.getStartDate(), is(event.getStartDate()));
+        assertThat("Should be the same end date", updatedEvent.getEndDate(), is(event.getEndDate()));
 
-        // Get acting user
-        Attendee attendee = updatedEvent.getAttendees().stream().filter(a -> null != a.getEmail() && false == a.getEmail().equals(organizer.getEmail())).findAny().get();
-        Assert.assertThat("Participants status didn't change!!", attendee.getPartStat().toUpperCase(), is(partStat.name().toUpperCase()));
+        assertThat("Should contain attendees", updatedEvent.getAttendees(), notNullValue());
+        assertThat("Should be same attendees", Integer.valueOf(updatedEvent.getAttendees().size()), is(Integer.valueOf(2)));
+        assertThat("Should be the same organizer", updatedEvent.getOrganizer().getEmail(), is(organizer.getEmail()));
+
+        assertAttendeePartStat(updatedEvent.getAttendees(), attendee.getEmail(), partStat.getValue());
+
+        /*
+         * Validate event from organizer perspective
+         */
+        MailData replyMail = receiveIMip(apiClientC2, attendee.getEmail(), uniqueSummary, 0, SchedulingMethod.REPLY);
+        assertNotNull(replyMail);
+        rememberMail(apiClientC2, replyMail);
+
+        ImportedCalendar iTipReply = parseICalAttachment(apiClientC2, replyMail);
+        assertEquals(SchedulingMethod.REPLY.name(), iTipReply.getMethod());
+        assertThat("Only one object should have been handled", Integer.valueOf(iTipReply.getEvents().size()), is(Integer.valueOf(1)));
+        Event replyEvent = iTipReply.getEvents().get(0);
+        assertAttendeePartStat(replyEvent.getAttendees(), attendee.getEmail(), partStat);
     }
 
 }

@@ -83,7 +83,7 @@ public class CurrentDateTestCommandParser extends AbstractDateTestCommandParser 
         boolean isNotMatcher = parseComparisonTag(argList, jsonObject, commandName);
         parseDatePart(argList, jsonObject, commandName);
 
-        if(isNotMatcher){
+        if (isNotMatcher){
             return NotTestCommandUtil.wrapTestCommand(new TestCommand(TestCommand.Commands.CURRENTDATE, argList, new ArrayList<TestCommand>()));
         }
         return new TestCommand(TestCommand.Commands.CURRENTDATE, argList, new ArrayList<TestCommand>());

@@ -49,6 +49,8 @@
 
 package com.openexchange.caldav.osgi;
 
+import static com.openexchange.dav.DAVTools.getExternalPath;
+import static com.openexchange.dav.DAVTools.getInternalPath;
 import org.osgi.service.http.HttpService;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.caldav.CalDAVURLField;
@@ -70,11 +72,11 @@ import com.openexchange.contact.ContactService;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.dav.WellKnownServlet;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.group.GroupService;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.ReadOnlyValue;
@@ -82,11 +84,13 @@ import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.jslob.ConfigTreeEquivalent;
+import com.openexchange.login.Interface;
 import com.openexchange.oauth.provider.resourceserver.scope.AbstractScopeProvider;
 import com.openexchange.oauth.provider.resourceserver.scope.OAuthScopeProvider;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.session.Session;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 import com.openexchange.webdav.DevNullServlet;
 import com.openexchange.webdav.protocol.helpers.PropertyMixin;
@@ -101,9 +105,9 @@ import com.openexchange.xml.jdom.JDOMParser;
  */
 public class CaldavActivator extends HousekeepingActivator {
 
-    private static final String SERVLET_PATH = "/servlet/dav/caldav";
+    private static final String SERVLET_PATH = "/caldav";
 
-    private static final String NULL_PATH = "/servlet/dav/dev/null";
+    private static final String NULL_PATH = "/dev/null";
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CaldavActivator.class);
 
@@ -131,14 +135,16 @@ public class CaldavActivator extends HousekeepingActivator {
             CaldavPerformer performer = new CaldavPerformer(this);
             final HttpService httpService = getService(HttpService.class);
 
-            httpService.registerServlet(SERVLET_PATH, new CalDAV(performer), null, null);
-            httpService.registerServlet(NULL_PATH, new DevNullServlet(), null, null);
+            ConfigViewFactory configViewFactory = getServiceSafe(ConfigViewFactory.class);
+            httpService.registerServlet(getInternalPath(configViewFactory, SERVLET_PATH), new CalDAV(performer), null, null);
+            httpService.registerServlet("/.well-known/caldav", new WellKnownServlet(getExternalPath(configViewFactory, SERVLET_PATH), Interface.CALDAV), null, null);
+            httpService.registerServlet(getInternalPath(configViewFactory, NULL_PATH), new DevNullServlet(), null, null);
 
             final OSGiPropertyMixin mixin = new OSGiPropertyMixin(context, performer);
             performer.setGlobalMixins(mixin);
             this.mixin = mixin;
-            registerService(PropertyMixin.class, new ScheduleOutboxURL());
-            registerService(PropertyMixin.class, new ScheduleInboxURL());
+            registerService(PropertyMixin.class, new ScheduleOutboxURL(this));
+            registerService(PropertyMixin.class, new ScheduleInboxURL(this));
             registerService(PropertyMixin.class, new DefaultAlarmVeventDate());
             registerService(PropertyMixin.class, new DefaultAlarmVeventDatetime());
             registerService(PreferencesItemService.class, new PreferencesItemService() {
@@ -216,7 +222,7 @@ public class CaldavActivator extends HousekeepingActivator {
             registerService(AdditionalFolderField.class, new CalDAVURLField(this));
 
             openTrackers();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("", e);
             throw e;
         }
@@ -226,8 +232,9 @@ public class CaldavActivator extends HousekeepingActivator {
     protected synchronized void stopBundle() throws Exception {
         final HttpService httpService = getService(HttpService.class);
         if (null != httpService) {
-            httpService.unregister(SERVLET_PATH);
-            httpService.unregister(NULL_PATH);
+            ConfigViewFactory configViewFactory = getService(ConfigViewFactory.class);
+            httpService.unregister(getInternalPath(configViewFactory, SERVLET_PATH));
+            httpService.unregister(getInternalPath(configViewFactory, NULL_PATH));
         }
         final OSGiPropertyMixin mixin = this.mixin;
         if (null != mixin) {

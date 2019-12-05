@@ -65,7 +65,6 @@ import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.objectusecount.IncrementArguments;
 import com.openexchange.objectusecount.ObjectUseCountService;
@@ -75,6 +74,7 @@ import com.openexchange.session.Session;
 import com.openexchange.tasks.json.TaskRequest;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
@@ -127,7 +127,7 @@ public abstract class TaskAction implements AJAXActionService {
                 taskRequest.setTimeZone(getTimeZone(sTimeZone));
             }
             return perform(taskRequest);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
     }
@@ -202,7 +202,7 @@ public abstract class TaskAction implements AJAXActionService {
                         continue;
                     }
                     participants[pos] = new UserParticipant(foundUser.getId());
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     //log.error(e); // ...and continue doing this for the remaining users
                 }
             }

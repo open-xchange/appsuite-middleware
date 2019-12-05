@@ -96,4 +96,12 @@ public interface AuthnRequestInfo {
      */
     String getClientID();
 
+    /**
+     * Gets the URI fragment that is later on passed back as part of the redirect URI,
+     * when the actual client session is created and returned.
+     *
+     * @return The fragment or <code>null</code>
+     */
+    String getUriFragment();
+
 }

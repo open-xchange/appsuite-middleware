@@ -1,0 +1,20 @@
+created:
+  type: array
+  description: The created events.
+  items:
+    $ref: "#/components/schemas/EventData"
+updated:
+  type: array
+  description: The updated events.
+  items:
+    $ref: "#/components/schemas/EventData"
+deleted:
+  type: array
+  description: The deleted events.
+  items:
+    $ref: "#/components/schemas/EventData"
+conflicts:
+  type: array
+  description: An array of conflicts.
+  items:
+    $ref: "#/components/schemas/ChronosConflictDataRaw"

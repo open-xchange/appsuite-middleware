@@ -69,11 +69,6 @@ public class NewSnippetParser extends AbstractAJAXParser<NewSnippetResponse> {
         super(failOnError);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.framework.AbstractAJAXParser#createResponse(com.openexchange.ajax.container.Response)
-     */
     @Override
     protected NewSnippetResponse createResponse(Response response) throws JSONException {
         return new NewSnippetResponse(response);

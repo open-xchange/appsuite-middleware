@@ -61,6 +61,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.drive.DriveAction;
 import com.openexchange.drive.DriveVersion;
+import com.openexchange.drive.events.subscribe.SubscriptionMode;
 import com.openexchange.drive.json.LongPollingListener;
 import com.openexchange.drive.json.internal.DefaultDriveSession;
 import com.openexchange.drive.json.internal.ListenerRegistrar;
@@ -127,11 +128,19 @@ public class ListenAction extends AbstractDriveAction {
             rootFolderIDs = Collections.singletonList(session.getRootFolderID());
         }
         /*
+         * get subscription mode if set
+         */
+        SubscriptionMode mode = extractSubscriptionMode(requestData);
+
+        //
+        mode = SubscriptionMode.SEPARATE;
+
+        /*
          * get or create a polling listener for this session and await result
          */
         AJAXRequestResult result = null;
         try {
-            LongPollingListener listener = ListenerRegistrar.getInstance().getOrCreate(session, rootFolderIDs);
+            LongPollingListener listener = ListenerRegistrar.getInstance().getOrCreate(session, rootFolderIDs, mode);
             result = listener.await(timeout);
         } catch (ExecutionException e) {
             Throwable cause = e.getCause();

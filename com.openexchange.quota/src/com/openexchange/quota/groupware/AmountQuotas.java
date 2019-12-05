@@ -133,7 +133,7 @@ public class AmountQuotas {
                         stmt.executeUpdate();
                     }
                 }
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 throw QuotaExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             } finally {
                 Databases.closeSQLStuff(rs, stmt);
@@ -219,7 +219,7 @@ public class AmountQuotas {
         }
         try {
             return Long.parseLong(property.get().trim());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             LOG.warn("Couldn't detect quota for {} (user={}, context={})", moduleID, I(session.getUserId()), I(session.getContextId()), e);
             return defaultValue;
         }
@@ -265,7 +265,7 @@ public class AmountQuotas {
         }
         try {
             return Long.parseLong(property.get().trim());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             LOG.warn("Couldn't detect quota from property {} (user={}, context={})", propName, I(session.getUserId()), I(session.getContextId()), e);
             return defaultValue;
         }
@@ -321,9 +321,9 @@ public class AmountQuotas {
                 return null;
             }
             return Long.valueOf(retval < 0 ? Quota.UNLIMITED : retval);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw QuotaExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw QuotaExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -357,9 +357,9 @@ public class AmountQuotas {
                 }
             } while (rs.next());
             return modules.toArray(new String[modules.size()]);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw QuotaExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw QuotaExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);

@@ -69,11 +69,6 @@ public class DiscardParserImpl implements ActionParser {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.mail.filter.api.conversion.parser.JSONParser#parse(org.json.JSONObject)
-     */
     @SuppressWarnings("unused")
     @Override
     public Action<DiscardActionArgument> parse(JSONObject jsonObject) throws JSONException {

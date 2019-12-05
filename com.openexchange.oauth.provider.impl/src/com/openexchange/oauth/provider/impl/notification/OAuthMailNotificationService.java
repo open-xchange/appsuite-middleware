@@ -60,7 +60,6 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.http.client.utils.URIBuilder;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
@@ -79,6 +78,7 @@ import com.openexchange.serverconfig.ServerConfig;
 import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 /**
  * {@link OAuthMailNotificationService}

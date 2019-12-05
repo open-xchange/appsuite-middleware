@@ -125,9 +125,6 @@ public class TransformImageClientAction extends TransformImageAction {
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.ajax.requesthandler.responseRenderers.actions.TransformImageAction#getCacheKey(com.openexchange.tools.session.ServerSession, com.openexchange.ajax.requesthandler.AJAXRequestData, com.openexchange.ajax.requesthandler.AJAXRequestResult)
-     */
     @Override
     protected String getCacheKey(@NonNull final ServerSession session, @NonNull final AJAXRequestData request, @NonNull final AJAXRequestResult result, @NonNull final IFileHolder repetitiveFile, @NonNull final TransformImageParameters xformParams) throws OXException {
         String cacheKey = null;
@@ -155,9 +152,6 @@ public class TransformImageClientAction extends TransformImageAction {
         return cacheKey;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.ajax.requesthandler.responseRenderers.actions.TransformImageAction#getCachedResource(com.openexchange.tools.session.ServerSession, java.lang.String)
-     */
     @Override
     protected IFileHolder getCachedResource(@NonNull final ServerSession session, @NonNull final String cacheKey, @NonNull final TransformImageParameters xformParams) throws OXException {
         IFileHolder ret = null;
@@ -184,9 +178,6 @@ public class TransformImageClientAction extends TransformImageAction {
         return ret;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.ajax.requesthandler.responseRenderers.actions.TransformImageAction#writeCachedResource(com.openexchange.tools.session.ServerSession, java.lang.String, java.lang.String, com.openexchange.imagetransformation.BasicTransformedImage, com.openexchange.ajax.container.ThresholdFileHolder, java.lang.String, long)
-     */
     @Override
     protected void writeCachedResource(final ServerSession session, final String cacheKey, final String targetMimeType, final BasicTransformedImage transformedImage, final ThresholdFileHolder transformedFile, final String fileName, final long size) throws OXException, IOException {
 
@@ -198,9 +189,6 @@ public class TransformImageClientAction extends TransformImageAction {
 
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.ajax.requesthandler.responseRenderers.actions.TransformImageAction#startTransformImage(com.openexchange.ajax.requesthandler.AJAXRequestData, com.openexchange.ajax.fileholder.IFileHolder, java.lang.String, java.lang.String, java.lang.String)
-     */
     @Override
     protected BasicTransformedImage performTransformImage(@NonNull final ServerSession session, @NonNull final IFileHolder file, @NonNull final TransformImageParameters xformParams, final String cacheKey, final String fileName)
         throws OXException, IOException {

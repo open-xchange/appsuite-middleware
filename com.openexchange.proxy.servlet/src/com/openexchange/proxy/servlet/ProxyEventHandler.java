@@ -85,12 +85,12 @@ public final class ProxyEventHandler implements EventHandler {
                 // For each session
                 final ProxyRegistryImpl registryImpl = ProxyRegistryImpl.getInstance();
                 for (final Session session : sessionContainer.values()) {
-                    if(!session.isTransient()) {
+                    if (!session.isTransient()) {
                         registryImpl.dropRegistrationsFor(session.getSessionID());
                     }
                 }
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("Error while handling SessionD event \"{}\"", topic, e);
         }
     }

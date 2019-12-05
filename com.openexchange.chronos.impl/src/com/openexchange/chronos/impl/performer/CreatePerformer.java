@@ -68,8 +68,9 @@ import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.TimeTransparency;
+import com.openexchange.chronos.common.DefaultCalendarObjectResource;
 import com.openexchange.chronos.common.mapping.EventMapper;
-import com.openexchange.chronos.impl.AttendeeHelper;
+import com.openexchange.chronos.impl.InternalAttendeeUpdates;
 import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.Consistency;
@@ -126,9 +127,8 @@ public class CreatePerformer extends AbstractUpdatePerformer {
             newEvent.setOrganizer(prepareOrganizer(session, folder, event.getOrganizer(), getResolvableEntities(session, folder, event)));
             newEvent.setSequence(event.containsSequence() ? event.getSequence() : 0);
             newEvent.setFolderId(PublicType.getInstance().equals(folder.getType()) ? folder.getId() : null);
-            Check.internalOrganizerIsAttendee(newEvent);
-            newEvent.setAttendeePrivileges(event.containsAttendeePrivileges() ? 
-                Check.attendeePrivilegesAreValid(event.getAttendeePrivileges(), folder, newEvent.getOrganizer()) : null);
+            Check.internalOrganizerIsAttendee(newEvent, folder);
+            newEvent.setAttendeePrivileges(event.containsAttendeePrivileges() ? Check.attendeePrivilegesAreValid(event.getAttendeePrivileges(), folder, newEvent.getOrganizer()) : null);
         }
         /*
          * check for conflicts & quota restrictions
@@ -166,9 +166,10 @@ public class CreatePerformer extends AbstractUpdatePerformer {
         }
         storage.getAlarmTriggerStorage().insertTriggers(createdEvent, alarmsPerUserId);
         /*
-         * track creation & return result
+         * track creation, prepare scheduling messages & return result
          */
         resultTracker.trackCreation(createdEvent);
+        schedulingHelper.trackCreation(new DefaultCalendarObjectResource(createdEvent));
         return resultTracker.getResult();
     }
 
@@ -199,7 +200,7 @@ public class CreatePerformer extends AbstractUpdatePerformer {
         /*
          * attendees, attachments
          */
-        event.setAttendees(Check.maxAttendees(getSelfProtection(), AttendeeHelper.onNewEvent(session, folder, eventData).getAddedItems()));
+        event.setAttendees(Check.maxAttendees(getSelfProtection(), InternalAttendeeUpdates.onNewEvent(session, folder, eventData).getAddedItems()));
         event.setAttachments(Check.attachmentsAreVisible(session, storage, eventData.getAttachments()));
         /*
          * classification, transparency, color, geo
@@ -233,5 +234,4 @@ public class CreatePerformer extends AbstractUpdatePerformer {
             EventField.RELATED_TO, EventField.STATUS, EventField.EXTENDED_PROPERTIES
         );
     }
-
 }

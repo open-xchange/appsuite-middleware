@@ -85,7 +85,6 @@ import com.openexchange.folderstorage.Permissions;
 import com.openexchange.folderstorage.filestorage.contentType.FileStorageContentType;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Streams;
@@ -108,6 +107,7 @@ import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tx.TransactionAware;
 import com.openexchange.tx.TransactionAwares;
+import com.openexchange.user.User;
 
 
 /**

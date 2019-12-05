@@ -58,3 +58,4 @@ deploy documentation:
     - master
     - /^master-.*$/
     - /^release-.*$/
+

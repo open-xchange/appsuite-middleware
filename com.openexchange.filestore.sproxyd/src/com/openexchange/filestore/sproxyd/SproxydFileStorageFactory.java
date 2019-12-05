@@ -57,23 +57,23 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.utils.URIBuilder;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
+import com.openexchange.config.Reloadables;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.DatabaseAccess;
 import com.openexchange.filestore.DatabaseAccessService;
-import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorageInfo;
 import com.openexchange.filestore.FileStorageInfoService;
 import com.openexchange.filestore.FileStorageProvider;
 import com.openexchange.filestore.FileStorages;
+import com.openexchange.filestore.InterestsAware;
 import com.openexchange.filestore.sproxyd.chunkstorage.ChunkStorage;
 import com.openexchange.filestore.sproxyd.chunkstorage.RdbChunkStorage;
 import com.openexchange.filestore.sproxyd.impl.EndpointPool;
@@ -92,7 +92,7 @@ import com.openexchange.timer.TimerService;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class SproxydFileStorageFactory implements FileStorageProvider {
+public class SproxydFileStorageFactory implements FileStorageProvider, InterestsAware {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SproxydFileStorageFactory.class);
 
@@ -107,8 +107,6 @@ public class SproxydFileStorageFactory implements FileStorageProvider {
     private static final int RANKING = 547;
 
     private final ServiceLookup services;
-    private final ConcurrentMap<URI, SproxydFileStorage> storages; // local cache may be removed with v7.8.0
-    private final ConcurrentMap<String, SproxydConfig> sproxydConfigs;
 
     /**
      * Initializes a new {@link SproxydFileStorageFactory}.
@@ -118,51 +116,45 @@ public class SproxydFileStorageFactory implements FileStorageProvider {
     public SproxydFileStorageFactory(ServiceLookup services) {
         super();
         this.services = services;
-        this.storages = new ConcurrentHashMap<URI, SproxydFileStorage>();
-        this.sproxydConfigs = new ConcurrentHashMap<String, SproxydConfig>();
     }
 
+    @Override
+    public Interests getInterests() {
+        return Reloadables.interestsForProperties("com.openexchange.filestore.sproxyd.*");
+    }
 
     @Override
     public SproxydFileStorage getFileStorage(URI uri) throws OXException {
-        SproxydFileStorage storage = storages.get(uri);
-        if (null == storage) {
-            LOG.debug("Initializing sproxyd file storage for {}", uri);
-            /*
-             * extract context and user from URI path
-             */
-            String filestoreID = extractFilestoreID(uri);
-            ExtractionResult extractionResult = extractFrom(uri);
+        LOG.debug("Initializing sproxyd file storage for {}", uri);
+        /*
+         * extract context and user from URI path
+         */
+        String filestoreID = extractFilestoreID(uri);
+        ExtractionResult extractionResult = extractFrom(uri);
 
-            DatabaseAccess databaseAccess;
-            int contextId;
-            int userId;
-            if (extractionResult.hasContextUserAssociation()) {
-                contextId = extractionResult.getContextId();
-                userId = extractionResult.getUserId();
-                databaseAccess = new DefaultDatabaseAccess(userId, contextId, services.getService(DatabaseService.class));
-                LOG.debug("Using \"{}\" as filestore ID, context ID of filestore is \"{}\", user ID is \"{}\".", filestoreID, I(contextId), I(userId));
-            } else {
-                contextId = 0;
-                userId = 0;
-                databaseAccess = lookUpDatabaseAccess(uri, extractionResult.getPrefix());
-            }
-
-            // Ensure required tables do exist
-            databaseAccess.createIfAbsent(RdbChunkStorage.getRequiredTables());
-
-            /*
-             * initialize file storage using dedicated client & chunk storage
-             */
-            SproxydClient client = initClient(filestoreID, extractionResult.getPrefix());
-            ChunkStorage chunkStorage = new RdbChunkStorage(databaseAccess, contextId, userId);
-            SproxydFileStorage newStorage = new SproxydFileStorage(client, chunkStorage);
-            storage = storages.putIfAbsent(uri, newStorage);
-            if (null == storage) {
-                storage = newStorage;
-            }
+        DatabaseAccess databaseAccess;
+        int contextId;
+        int userId;
+        if (extractionResult.hasContextUserAssociation()) {
+            contextId = extractionResult.getContextId();
+            userId = extractionResult.getUserId();
+            databaseAccess = new DefaultDatabaseAccess(userId, contextId, services.getService(DatabaseService.class));
+            LOG.debug("Using \"{}\" as filestore ID, context ID of filestore is \"{}\", user ID is \"{}\".", filestoreID, I(contextId), I(userId));
+        } else {
+            contextId = 0;
+            userId = 0;
+            databaseAccess = lookUpDatabaseAccess(uri, extractionResult.getPrefix());
         }
-        return storage;
+
+        // Ensure required tables do exist
+        databaseAccess.createIfAbsent(RdbChunkStorage.getRequiredTables());
+
+        /*
+         * initialize file storage using dedicated client & chunk storage
+         */
+        SproxydClient client = initClient(filestoreID, extractionResult.getPrefix());
+        ChunkStorage chunkStorage = new RdbChunkStorage(databaseAccess, contextId, userId);
+        return new SproxydFileStorage(uri, client, chunkStorage);
     }
 
     static DatabaseAccess lookUpDatabaseAccess(URI uri, String prefix) throws OXException {
@@ -176,11 +168,6 @@ public class SproxydFileStorageFactory implements FileStorageProvider {
         }
 
         return databaseAccess;
-    }
-
-    @Override
-    public FileStorage getInternalFileStorage(URI uri) throws OXException {
-        return getFileStorage(uri);
     }
 
     @Override
@@ -277,17 +264,7 @@ public class SproxydFileStorageFactory implements FileStorageProvider {
      * @return The client
      */
     private SproxydClient initClient(String filestoreID, String prefix) throws OXException {
-        SproxydConfig sproxydConfig = sproxydConfigs.get(filestoreID);
-        if (sproxydConfig == null) {
-            SproxydConfig newSproxydConfig = initSproxydConfig(filestoreID);
-            sproxydConfig = sproxydConfigs.putIfAbsent(filestoreID, newSproxydConfig);
-            if (sproxydConfig == null) {
-                sproxydConfig = newSproxydConfig;
-            } else {
-                newSproxydConfig.getEndpointPool().close();
-            }
-        }
-
+        SproxydConfig sproxydConfig = initSproxydConfig(filestoreID);
         return new SproxydClient(sproxydConfig, prefix);
     }
 

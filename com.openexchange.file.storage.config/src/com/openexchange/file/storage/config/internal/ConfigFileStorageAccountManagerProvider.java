@@ -103,7 +103,7 @@ public final class ConfigFileStorageAccountManagerProvider implements FileStorag
         if (null == fileStorageService) {
             try {
                 fileStorageService = Services.getService(FileStorageServiceRegistry.class).getFileStorageService(storageAccount.getServiceId());
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 if (FileStorageExceptionCodes.UNKNOWN_FILE_STORAGE_SERVICE.equals(e)) {
                     return null;
                 }

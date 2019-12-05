@@ -249,4 +249,13 @@ public final class MessageHeaders {
 
     public static final HeaderName X_OX_CUSTOM_HEADERS = HeaderName.valueOf(HDR_X_OX_CUSTOM_HEADERS);
 
+    /**
+     * "X-OX-NoReply-Personal"
+     * <p>
+     * The name of the special MIME header advertising a possible personal for the no-reply address.
+     */
+    public static final String HDR_X_OX_NO_REPLY_PERSONAL = "X-OX-NoReply-Personal";
+
+    public static final HeaderName X_OX_NO_REPLY_PERSONAL = HeaderName.valueOf(HDR_X_OX_NO_REPLY_PERSONAL);
+
 }

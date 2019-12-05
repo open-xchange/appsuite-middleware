@@ -70,41 +70,21 @@ public class DtEndMapping extends ICalDateTimeMapping<VAvailability, Availabilit
         super(Property.DTEND);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalDateTimeMapping#getValue(java.lang.Object)
-     */
     @Override
     protected org.dmfs.rfc5545.DateTime getValue(Availability object) {
         return object.getEndTime() == null || object.getEndTime().getTimestamp() == 0 ? null : object.getEndTime();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalDateTimeMapping#setValue(java.lang.Object, org.dmfs.rfc5545.DateTime)
-     */
     @Override
     protected void setValue(Availability object, org.dmfs.rfc5545.DateTime value) {
         object.setEndTime(value);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalDateTimeMapping#createProperty()
-     */
     @Override
     protected DateProperty createProperty() {
         return new DtEnd();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalDateTimeMapping#getProperty(net.fortuna.ical4j.model.Component)
-     */
     @Override
     protected DateProperty getProperty(VAvailability component) {
         return (DtEnd) component.getProperty(Property.DTEND);

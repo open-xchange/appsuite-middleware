@@ -117,7 +117,7 @@ public final class IMAPReloadable implements Reloadable {
                 imapProperties.resetProperties();
                 imapProperties.loadProperties();
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOGGER.warn("Failed to reload IMAP properties", e);
         }
 

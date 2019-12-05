@@ -153,7 +153,7 @@ final class CallbackInputStream extends InputStream implements FileRemovedListen
     public void removePerformed(final File file) {
         try {
             close0();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("", e);
         }
     }

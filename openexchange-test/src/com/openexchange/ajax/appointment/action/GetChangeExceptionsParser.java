@@ -63,11 +63,6 @@ public class GetChangeExceptionsParser extends AbstractColumnsParser<GetChangeEx
         super(failOnError, columns);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.framework.AbstractColumnsParser#instantiateResponse(com.openexchange.ajax.container.Response)
-     */
     @Override
     protected GetChangeExceptionsResponse instantiateResponse(Response response) {
         return new GetChangeExceptionsResponse(response);

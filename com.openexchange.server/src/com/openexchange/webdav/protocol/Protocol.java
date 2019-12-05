@@ -203,12 +203,12 @@ public class Protocol {
 	}
 
 	public Property get(String namespace, final String name) {
-		if(namespace == null) {
+		if (namespace == null) {
 			namespace = DEFAULT_NAMESPACE;
 		}
 		final List<Property> known = getKnownProperties();
 		for(final Property prop : known) {
-			if(prop.getNamespace().equals(namespace) && prop.getName().equals(name)) {
+			if (prop.getNamespace().equals(namespace) && prop.getName().equals(name)) {
 				return prop;
 			}
 		}
@@ -217,7 +217,7 @@ public class Protocol {
 
 	public boolean isProtected(final String namespaceURI, final String name) {
 		final Property p = get(namespaceURI, name);
-		if(p == null) {
+		if (p == null) {
 			return false;
 		}
 		switch(p.getId()) {

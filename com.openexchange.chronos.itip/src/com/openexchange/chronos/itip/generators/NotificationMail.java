@@ -65,6 +65,7 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.SchedulingControl;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.itip.ITipMessage;
 import com.openexchange.chronos.itip.ITipMethod;
@@ -429,7 +430,7 @@ public class NotificationMail {
         if (!recipientIsOrganizerAndHasNoAccess()) {
             return false;
         }
-        if (false == recipient.isExternal() && false == session.get(CalendarParameters.PARAMETER_NOTIFICATION, Boolean.class, Boolean.TRUE).booleanValue()) {
+        if (false == recipient.isExternal() && SchedulingControl.EXTERNAL_ONLY.matches(session.get(CalendarParameters.PARAMETER_SCHEDULING, SchedulingControl.class))) {
             // Don't send notification mails for internal users if the flag is set. See bug 62098.
             return false;
         }

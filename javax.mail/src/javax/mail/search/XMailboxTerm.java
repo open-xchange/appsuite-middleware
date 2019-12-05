@@ -42,6 +42,7 @@ package javax.mail.search;
 
 import javax.mail.Message;
 import com.sun.mail.imap.IMAPMessage;
+import com.sun.mail.imap.protocol.BASE64MailboxDecoder;
 
 /**
  * This class implements comparisons for the X-MAILBOX key.
@@ -77,6 +78,9 @@ public final class XMailboxTerm extends StringTerm {
             }
 
             String xMailbox = (String) ((IMAPMessage) msg).getItem("X-MAILBOX");
+            if (xMailbox != null) {
+                xMailbox = BASE64MailboxDecoder.decode(xMailbox);
+            }
             return null != xMailbox && super.match(xMailbox);
         } catch (Exception e) {
             return false;

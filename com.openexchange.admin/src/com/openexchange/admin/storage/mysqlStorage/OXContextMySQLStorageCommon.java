@@ -246,7 +246,7 @@ public class OXContextMySQLStorageCommon {
             if (oxdb_read != null) {
                 try {
                     cache.pushConnectionForContextAfterReading(context_id, oxdb_read);
-                } catch (final PoolException exp) {
+                } catch (PoolException exp) {
                     log.error("Pool Error pushing ox read connection to pool!", exp);
                 }
             }
@@ -299,8 +299,8 @@ public class OXContextMySQLStorageCommon {
         PipesAndFiltersService pnfService;
         try {
             pnfService = AdminServiceRegistry.getInstance().getService(PipesAndFiltersService.class, true);
-        } catch (final OXException e) {
-            throw new StorageException(e.getMessage(), e);
+        } catch (OXException e) {
+            throw StorageException.wrapForRMI(e);
         }
         DataSource<Context> output = pnfService.create(cids).addFilter(new ContextLoader(cache, failOnMissing));
         if (null != filters && !filters.isEmpty()) {
@@ -318,7 +318,7 @@ public class OXContextMySQLStorageCommon {
                     retval.put(context.getId(), context);
                 }
             }
-        } catch (final PipesAndFiltersException e) {
+        } catch (PipesAndFiltersException e) {
             final Throwable cause = e.getCause();
             if (cause instanceof StorageException) {
                 throw (StorageException) cause;
@@ -381,7 +381,7 @@ public class OXContextMySQLStorageCommon {
             autocommit(con);
             try {
                 cache.pushWriteConnectionForConfigDB(con);
-            } catch (final PoolException e) {
+            } catch (PoolException e) {
                 log.error("Error pushing configdb connection to pool!", e);
             }
         }
@@ -551,7 +551,7 @@ public class OXContextMySQLStorageCommon {
                 deleteContextFromConfigDB(configCon, contextId);
                 configCon.commit();
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("SQL Error removing/rollback entries from configdb for context {}", I(contextId), e);
         }
     }
@@ -562,7 +562,7 @@ public class OXContextMySQLStorageCommon {
                 con_write.rollback();
                 log.debug("Rollback of configdb write connection ok");
             }
-        } catch (final SQLException rexp) {
+        } catch (SQLException rexp) {
             log.error("SQL Error", rexp);
         }
         try {
@@ -570,7 +570,7 @@ public class OXContextMySQLStorageCommon {
                 write_ox_con.rollback();
                 log.debug("Rollback of ox db write connection ok");
             }
-        } catch (final SQLException rexp) {
+        } catch (SQLException rexp) {
             log.error("Error processing rollback of ox write connection!", rexp);
         }
     }
@@ -649,7 +649,7 @@ public class OXContextMySQLStorageCommon {
             }
             stmt.setLong(6, quota_max_temp);
             stmt.executeUpdate();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             if (Databases.isPrimaryKeyConflictInMySQL(e)) {
                 throw new ContextExistsException("Context " + ctx.getId().intValue() + " already exists!");
             }
@@ -708,7 +708,7 @@ public class OXContextMySQLStorageCommon {
             stmt = configdbCon.prepareStatement("UPDATE contexts_per_filestore SET count=count" + (increment ? '+' : '-') + "1 WHERE filestore_id=?");
             stmt.setInt(1, ctx.getFilestoreId().intValue());
             stmt.executeUpdate();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw new StorageException(e.getMessage(), e);
         } finally {
             Databases.closeSQLStuff(stmt);
@@ -761,7 +761,7 @@ public class OXContextMySQLStorageCommon {
             stmt = configdbCon.prepareStatement("UPDATE contexts_per_dbpool SET count=count" + (increment ? '+' : '-') + "1 WHERE db_pool_id=?");
             stmt.setInt(1, db.getId().intValue());
             stmt.executeUpdate();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw new StorageException(e.getMessage(), e);
         } finally {
             Databases.closeSQLStuff(stmt);
@@ -817,7 +817,7 @@ public class OXContextMySQLStorageCommon {
             stmt.setInt(1, db.getId().intValue());
             stmt.setString(2, schema);
             stmt.executeUpdate();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw new StorageException(e.getMessage(), e);
         } finally {
             Databases.closeSQLStuff(stmt);
@@ -840,7 +840,7 @@ public class OXContextMySQLStorageCommon {
             stmt.setInt(1, contextId);
             stmt.setString(2, mapping);
             stmt.executeUpdate();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             if (Databases.isPrimaryKeyConflictInMySQL(e)) {
                 throw new StorageException("Cannot map '" + mapping + "' to the newly created context. This mapping is already in use.", e);
             }

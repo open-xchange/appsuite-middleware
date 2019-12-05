@@ -223,7 +223,7 @@ public final class CachingFileStorageAccountStorage implements FileStorageAccoun
                 try {
                     accounts.add(getAccount(serviceId, id, session));
                     return true;
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     fsException = e;
                     return false;
                 }

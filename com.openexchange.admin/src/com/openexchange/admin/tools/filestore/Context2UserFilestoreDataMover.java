@@ -190,7 +190,7 @@ public class Context2UserFilestoreDataMover extends FilestoreDataMover {
                 };
             }
         } catch (OXException e) {
-            throw new StorageException(e);
+            throw StorageException.wrapForRMI(e);
         } catch (SQLException e) {
             throw new StorageException(e);
         }
@@ -216,8 +216,6 @@ public class Context2UserFilestoreDataMover extends FilestoreDataMover {
                 CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
                 Cache cache = cacheService.getCache("Filestore");
                 cache.clear();
-                Cache qfsCache = cacheService.getCache("QuotaFileStorages");
-                qfsCache.invalidateGroup(Integer.toString(contextId));
                 Cache userCache = cacheService.getCache("User");
                 userCache.remove(cacheService.newCacheKey(contextId, userId));
                 Cache contextCache = cacheService.getCache("Context");

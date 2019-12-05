@@ -74,7 +74,7 @@ public class FileTest {
 
             @Override
             public IDBasedFileAccess getFileAccess() {
-                if(files != null) {
+                if (files != null) {
                     return files;
                 }
                 if (fileAccessBuilder != null) {

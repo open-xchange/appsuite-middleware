@@ -56,6 +56,7 @@ import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.groupware.settings.PreferencesItemService;
@@ -64,15 +65,19 @@ import com.openexchange.jsieve.commands.TestCommand;
 import com.openexchange.jsieve.commands.TestCommand.Commands;
 import com.openexchange.jsieve.registry.ActionCommandRegistry;
 import com.openexchange.jsieve.registry.TestCommandRegistry;
+import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailfilter.MailFilterInterceptorRegistry;
 import com.openexchange.mailfilter.MailFilterService;
+import com.openexchange.mailfilter.internal.MailFilterCircuitBreakerReloadable;
 import com.openexchange.mailfilter.internal.MailFilterInterceptorRegistryImpl;
 import com.openexchange.mailfilter.internal.MailFilterPreferencesItem;
 import com.openexchange.mailfilter.internal.MailFilterServiceImpl;
 import com.openexchange.mailfilter.services.Services;
+import com.openexchange.metrics.MetricService;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.sessiond.SessiondEventConstants;
+import com.openexchange.user.UserService;
 
 public class MailFilterActivator extends HousekeepingActivator {
 
@@ -87,7 +92,8 @@ public class MailFilterActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, ConfigViewFactory.class, LeanConfigurationService.class };
+        return new Class<?>[] { ConfigurationService.class, ConfigViewFactory.class, LeanConfigurationService.class, UserService.class,
+            MailAccountStorageService.class };
     }
 
     @Override
@@ -95,8 +101,12 @@ public class MailFilterActivator extends HousekeepingActivator {
         try {
             Services.setServiceLookup(this);
 
+            MailFilterServiceImpl mailFilterService = new MailFilterServiceImpl(this);
+
             registerService(MailFilterInterceptorRegistry.class, new MailFilterInterceptorRegistryImpl());
             trackService(MailFilterInterceptorRegistry.class);
+
+            track(MetricService.class, new MetricServiceTracker(mailFilterService, context));
 
             trackService(SSLSocketFactoryProvider.class);
             openTrackers();
@@ -123,16 +133,16 @@ public class MailFilterActivator extends HousekeepingActivator {
                 dict.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.TOPIC_LAST_SESSION);
                 registerService(EventHandler.class, eventHandler, dict);
             }
-
             registerService(PreferencesItemService.class, new MailFilterPreferencesItem(), null);
-            registerService(MailFilterService.class, new MailFilterServiceImpl(this));
+            registerService(MailFilterService.class, mailFilterService);
+            registerService(Reloadable.class, new MailFilterCircuitBreakerReloadable(mailFilterService));
             registerTestCommandRegistry();
             registerActionCommandRegistry();
 
             Logger logger = org.slf4j.LoggerFactory.getLogger(MailFilterActivator.class);
             logger.info("Bundle successfully started: {}", context.getBundle().getSymbolicName());
 
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("", e);
             throw e;
         }
@@ -143,7 +153,7 @@ public class MailFilterActivator extends HousekeepingActivator {
         try {
             super.stopBundle();
             Services.setServiceLookup(null);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("", e);
             throw e;
         }

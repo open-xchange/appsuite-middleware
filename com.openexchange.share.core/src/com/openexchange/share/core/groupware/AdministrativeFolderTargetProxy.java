@@ -60,6 +60,7 @@ import com.openexchange.folderstorage.FolderPermissionType;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
+import com.openexchange.i18n.Translator;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.ShareTargetPath;
@@ -259,7 +260,7 @@ public class AdministrativeFolderTargetProxy extends AbstractTargetProxy {
             oclPermission.setGroupPermission(permission.isGroup());
             int[] bits = Permissions.parsePermissionBits(permission.getBits());
             oclPermission.setAllPermission(bits[0], bits[1], bits[2], bits[3]);
-            if(permission instanceof SubfolderAwareTargetPermission) {
+            if (permission instanceof SubfolderAwareTargetPermission) {
                 oclPermission.setType(FolderPermissionType.getType(((SubfolderAwareTargetPermission) permission).getType()));
                 oclPermission.setPermissionLegator(((SubfolderAwareTargetPermission) permission).getPermissionLegator());
             }
@@ -289,6 +290,14 @@ public class AdministrativeFolderTargetProxy extends AbstractTargetProxy {
 
     public List<OCLPermission> getRemovedPermissions() {
         return removedPermissions;
+    }
+
+    @Override
+    public String getLocalizedTitle(Translator translator) {
+        if (folder.isDefaultFolder() && null != translator) {
+            return translator.translate(getTitle());
+        }
+        return getTitle();
     }
 
 }

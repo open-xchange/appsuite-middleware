@@ -107,7 +107,7 @@ public final class TransportReloadable implements Reloadable {
                 transportProperties.resetProperties();
                 transportProperties.loadProperties();
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOGGER.warn("Failed to reload transport properties", e);
         }
 

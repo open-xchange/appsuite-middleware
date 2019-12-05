@@ -71,7 +71,7 @@ public class FormDescriptionWriterTest {
 
     private DynamicFormDescription form;
 
-    private final TestTranslator translator = new TestTranslator();
+    private final Translator translator = Translator.EMPTY;
 
     @Before
     public void setUp() throws Exception {
@@ -170,12 +170,4 @@ public class FormDescriptionWriterTest {
         assertValidates(assertion, object);
     }
 
-    private static final class TestTranslator implements Translator {
-
-        @Override
-        public String translate(String toTranslate) {
-            return toTranslate;
-        }
-
-    }
 }

@@ -222,7 +222,7 @@ public abstract class AbstractResource implements WebdavResource {
                 } else {
                     properties = mixin.getAllProperties();
                 }
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 if (e instanceof WebdavProtocolException) {
                     throw (WebdavProtocolException) e;
                 }
@@ -243,7 +243,7 @@ public abstract class AbstractResource implements WebdavResource {
                 } else {
                     property = mixin.getProperty(namespace, name);
                 }
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 if (e instanceof WebdavProtocolException) {
                     throw (WebdavProtocolException) e;
                 }

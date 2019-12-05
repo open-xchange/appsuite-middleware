@@ -92,7 +92,7 @@ public abstract class MailPartDataSource implements DataSource {
         try {
             mailAccess = MailAccess.getInstance(session, accountId);
             CryptographicAwareMailAccessFactory cryptoMailAccessFactory = Services.getServiceLookup().getOptionalService(CryptographicAwareMailAccessFactory.class);
-            if(cryptoMailAccessFactory != null) {
+            if (cryptoMailAccessFactory != null) {
                 mailAccess = cryptoMailAccessFactory.createAccess(
                     (MailAccess<IMailFolderStorage, IMailMessageStorage>) mailAccess,
                     session,
@@ -100,7 +100,7 @@ public abstract class MailPartDataSource implements DataSource {
             }
             mailAccess.connect();
             return loadPart(fullname, mailId, sequenceId, mailAccess);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if ((null != mailAccess) && shouldRetry(e)) {
                 // Re-connect
                 mailAccess = MailAccess.reconnect(mailAccess);

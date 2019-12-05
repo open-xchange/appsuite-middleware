@@ -99,7 +99,7 @@ public final class TNEF2ICalUtility {
         try {
             final String verifiedAddr = new QuotedInternetAddress(address, false).getAddress();
             return new StringBuilder(48).append("mailto:").append(verifiedAddr).toString();
-        } catch (final AddressException e) {
+        } catch (AddressException e) {
             // No valid email address
             return null;
         }

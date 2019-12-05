@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.plugin.hosting.rmi.impl;
 
+import static com.openexchange.admin.rmi.exceptions.RemoteExceptionUtils.convertException;
 import java.rmi.RemoteException;
 import com.openexchange.admin.plugin.hosting.services.AdminServiceRegistry;
 import com.openexchange.admin.plugin.hosting.storage.interfaces.OXContextGroupStorageInterface;
@@ -82,6 +83,8 @@ public class OXContextGroup implements OXContextGroupInterface {
             storage.deleteContextGroup(contextGroupId);
         } catch (OXException e) {
             throw StorageException.wrapForRMI(e);
+        } catch (RuntimeException e) {
+            throw convertException(e);
         }
     }
 

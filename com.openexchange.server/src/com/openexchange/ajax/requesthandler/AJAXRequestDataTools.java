@@ -376,7 +376,7 @@ public class AJAXRequestDataTools {
         }
         try {
             return Integer.parseInt(parameter);
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             return defaultInt;
         }
     }

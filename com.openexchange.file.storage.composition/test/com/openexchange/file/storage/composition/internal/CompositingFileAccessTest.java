@@ -373,67 +373,39 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         return this;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.file.storage.FileStorageService#getAccountManager()
-     */
     @Override
     public FileStorageAccountManager getAccountManager() {
         return this;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.file.storage.FileStorageService#getDisplayName()
-     */
     @Override
     public String getDisplayName() {
         // Nothing to do
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.file.storage.FileStorageService#getFormDescription()
-     */
     @Override
     public DynamicFormDescription getFormDescription() {
         // Nothing to do
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.file.storage.FileStorageService#getId()
-     */
     @Override
     public String getId() {
         return "someId";
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.file.storage.FileStorageService#getSecretProperties()
-     */
     @Override
     public Set<String> getSecretProperties() {
         // Nothing to do
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.file.storage.FileStorageAccountAccess#getAccountId()
-     */
     @Override
     public String getAccountId() {
         return "someAccount";
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.file.storage.FileStorageAccountAccess#getFileAccess()
-     */
     @Override
     public FileStorageFileAccess getFileAccess() throws OXException {
         if (files != null) {
@@ -442,131 +414,78 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         return files = fileAccess.getSim(FileStorageFileAccess.class, FileStorageVersionedFileAccess.class, FileStorageLockedFileAccess.class);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.file.storage.FileStorageAccountAccess#getFolderAccess()
-     */
     @Override
     public FileStorageFolderAccess getFolderAccess() throws OXException {
         // Nothing to do
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.file.storage.FileStorageAccountAccess#getRootFolder()
-     */
     @Override
     public FileStorageFolder getRootFolder() throws OXException {
         // Nothing to do
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.file.storage.FileStorageResource#cacheable()
-     */
     @Override
     public boolean cacheable() {
         // Nothing to do
         return false;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.file.storage.FileStorageResource#close()
-     */
     @Override
     public void close() {
         // Nothing to do
 
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.file.storage.FileStorageResource#connect()
-     */
     @Override
     public void connect() throws OXException {
         // Nothing to do
 
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.file.storage.FileStorageResource#isConnected()
-     */
     @Override
     public boolean isConnected() {
         // Nothing to do
         return false;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.file.storage.FileStorageResource#ping()
-     */
     @Override
     public boolean ping() throws OXException {
         // Nothing to do
         return false;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.file.storage.FileStorageAccountAccess#getService()
-     */
     @Override
     public FileStorageService getService() {
         // Nothing to do
         return this;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.file.storage.FileStorageAccountManager#addAccount(com.openexchange.file.storage.FileStorageAccount,
-     * com.openexchange.session.Session)
-     */
     @Override
     public String addAccount(final FileStorageAccount account, final Session session) throws OXException {
         // Nothing to do
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.file.storage.FileStorageAccountManager#hasEncryptedItems(com.openexchange.session.Session)
-     */
     @Override
     public boolean hasEncryptedItems(final Session session) throws OXException {
         // Nothing to do
         return false;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.file.storage.FileStorageAccountManager#deleteAccount(com.openexchange.file.storage.FileStorageAccount,
-     * com.openexchange.session.Session)
-     */
     @Override
     public void deleteAccount(final FileStorageAccount account, final Session session) throws OXException {
         // Nothing to do
 
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.file.storage.FileStorageAccountManager#getAccount(java.lang.String, com.openexchange.session.Session)
-     */
     @Override
     public FileStorageAccount getAccount(final String id, final Session session) throws OXException {
         // Nothing to do
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.file.storage.FileStorageAccountManager#getAccounts(com.openexchange.session.Session)
-     */
     @Override
     public List<FileStorageAccount> getAccounts(final Session session) throws OXException {
         final FileStorageAccount account = new FileStorageAccount() {

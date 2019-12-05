@@ -234,7 +234,7 @@ public class IfHeaderParserTest {
     private void assertException(final String ifHeader, final String errorMessage, final int column) {
         try {
             new IfHeaderParser().parse("([etag])");
-        } catch (final IfHeaderParseException x) {
+        } catch (IfHeaderParseException x) {
             assertTrue(x.getMessage().contains(errorMessage));
             assertEquals(column, x.getColumn());
         }

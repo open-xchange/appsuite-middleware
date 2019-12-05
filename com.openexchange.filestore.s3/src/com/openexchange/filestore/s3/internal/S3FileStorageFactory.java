@@ -63,6 +63,7 @@ import java.security.PublicKey;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Map;
@@ -71,8 +72,19 @@ import java.util.regex.Pattern;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.ClientConfiguration;
+import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.auth.policy.Policy;
+import com.amazonaws.auth.policy.Principal;
+import com.amazonaws.auth.policy.Resource;
+import com.amazonaws.auth.policy.Statement;
+import com.amazonaws.auth.policy.actions.S3Actions;
+import com.amazonaws.auth.policy.conditions.BooleanCondition;
+import com.amazonaws.auth.policy.conditions.StringCondition;
+import com.amazonaws.auth.policy.conditions.StringCondition.StringComparisonType;
+import com.amazonaws.auth.InstanceProfileCredentialsProvider;
 import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3Builder;
@@ -86,19 +98,13 @@ import com.amazonaws.services.s3.model.EncryptionMaterials;
 import com.amazonaws.services.s3.model.Region;
 import com.amazonaws.services.s3.model.SetBucketPolicyRequest;
 import com.amazonaws.services.s3.model.StaticEncryptionMaterialsProvider;
-import com.amazonaws.auth.policy.Policy;
-import com.amazonaws.auth.policy.Principal;
-import com.amazonaws.auth.policy.Resource;
-import com.amazonaws.auth.policy.Statement;
-import com.amazonaws.auth.policy.actions.S3Actions;
-import com.amazonaws.auth.policy.conditions.BooleanCondition;
-import com.amazonaws.auth.policy.conditions.StringCondition;
-import com.amazonaws.auth.policy.conditions.StringCondition.StringComparisonType;
 import com.openexchange.config.ConfigTools;
+import com.openexchange.config.Interests;
+import com.openexchange.config.Reloadables;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
-import com.openexchange.filestore.FileStorage;
+import com.openexchange.filestore.InterestsAware;
 import com.openexchange.filestore.FileStorageProvider;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
@@ -109,7 +115,7 @@ import com.openexchange.server.ServiceLookup;
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public class S3FileStorageFactory implements FileStorageProvider {
+public class S3FileStorageFactory implements FileStorageProvider, InterestsAware {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(S3FileStorageFactory.class);
 
@@ -150,6 +156,11 @@ public class S3FileStorageFactory implements FileStorageProvider {
     }
 
     @Override
+    public Interests getInterests() {
+        return Reloadables.interestsForProperties("com.openexchange.filestore.s3.*");
+    }
+
+    @Override
     public S3FileStorage getFileStorage(URI uri) throws OXException {
         try {
             LOG.debug("Initializing S3 client for {}", uri);
@@ -169,7 +180,7 @@ public class S3FileStorageFactory implements FileStorageProvider {
             AmazonS3Client client = clientInfo.client;
             String bucketName = initBucket(client, filestoreID, configService, s3EncryptionConfig);
             LOG.debug("Using \"{}\" as bucket name.", bucketName);
-            return new S3FileStorage(client, clientInfo.encrypted, s3EncryptionConfig.getServerSideEncryption() != null, bucketName, extractFilestorePrefix(uri), clientInfo.chunkSize);
+            return new S3FileStorage(uri, client, clientInfo.encrypted, s3EncryptionConfig.getServerSideEncryption() != null, bucketName, extractFilestorePrefix(uri), clientInfo.chunkSize);
         } catch (OXException ex) {
             Throwable cause = ex.getCause();
             if (cause instanceof AmazonS3Exception) {
@@ -182,11 +193,6 @@ public class S3FileStorageFactory implements FileStorageProvider {
 
             throw ex;
         }
-    }
-
-    @Override
-    public FileStorage getInternalFileStorage(URI uri) throws OXException {
-        return getFileStorage(uri);
     }
 
     @Override
@@ -210,13 +216,29 @@ public class S3FileStorageFactory implements FileStorageProvider {
      */
     private AmazonS3ClientInfo initClient(String filestoreID, LeanConfigurationService configService, S3EncryptionConfig encryptionConfig) throws OXException {
         /*
-         * prepare credentials
+         * prepare credentials provider
          */
-        Map<String, String> optional = getOptional(filestoreID);
-        String accessKey = getPropertySafe(S3Properties.ACCESS_KEY, configService, optional);
-        String secretKey = getPropertySafe(S3Properties.SECRET_KEY, configService, optional);
-
-        BasicAWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
+        Map<String, String> optionals = getOptional(filestoreID);
+        AWSCredentialsProvider credentialsProvider;
+        {
+            String property = configService.getProperty(S3Properties.CREDENTIALS_SOURCE, optionals);
+            if (Strings.isEmpty(property)) {
+                property = S3CredentialsSource.STATIC.getIdentifier();
+            }
+            S3CredentialsSource credentialsSource = S3CredentialsSource.credentialsSourceFor(property);
+            if (credentialsSource == null) {
+                LOG.warn("Invalid value specified for \"{}\" property: {}. Assuming \"{}\" instead. Known values are: {}", S3Properties.CREDENTIALS_SOURCE.getFQPropertyName(optionals), property, S3CredentialsSource.STATIC, Arrays.toString(S3CredentialsSource.values()));
+                credentialsSource = S3CredentialsSource.STATIC;
+            }
+            if (S3CredentialsSource.IAM == credentialsSource) {
+                credentialsProvider = InstanceProfileCredentialsProvider.getInstance();
+            } else {
+                String accessKey = getPropertySafe(S3Properties.ACCESS_KEY, configService, optionals);
+                String secretKey = getPropertySafe(S3Properties.SECRET_KEY, configService, optionals);
+                AWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
+                credentialsProvider = new AWSStaticCredentialsProvider(credentials);
+            }
+        }
         /*
          * instantiate client
          */
@@ -226,13 +248,13 @@ public class S3FileStorageFactory implements FileStorageProvider {
         {
             if (encryptionConfig.getClientEncryption() == null || encryptionConfig.getClientEncryption().equals(EncryptionType.NONE)) {
                 AmazonS3ClientBuilder builder = AmazonS3ClientBuilder.standard()
-                    .withCredentials(new AWSStaticCredentialsProvider(credentials))
+                    .withCredentials(credentialsProvider)
                     .withClientConfiguration(clientConfiguration);
                 clientBuilder = builder;
                 encrypted = false;
             } else {
                 AmazonS3EncryptionClientBuilder builder = AmazonS3EncryptionClientBuilder.standard()
-                    .withCredentials(new AWSStaticCredentialsProvider(credentials))
+                    .withCredentials(credentialsProvider)
                     .withClientConfiguration(clientConfiguration)
                     .withEncryptionMaterials(new StaticEncryptionMaterialsProvider(getEncryptionMaterials(filestoreID, encryptionConfig.getClientEncryption(), configService)))
                     .withCryptoConfiguration(new CryptoConfiguration());
@@ -243,24 +265,24 @@ public class S3FileStorageFactory implements FileStorageProvider {
         /*
          * configure client
          */
-        String endpoint = configService.getProperty(S3Properties.ENDPOINT, optional);
+        String endpoint = configService.getProperty(S3Properties.ENDPOINT, optionals);
 
         if (Strings.isNotEmpty(endpoint)) {
             clientBuilder.setEndpointConfiguration(new EndpointConfiguration(endpoint, null));
         } else {
-            String region = configService.getProperty(S3Properties.REGION, optional);
+            String region = configService.getProperty(S3Properties.REGION, optionals);
             try {
                 clientBuilder.withRegion(Regions.fromName(region));
             } catch (IllegalArgumentException e) {
                 throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, region);
             }
         }
-        if (configService.getBooleanProperty(S3Properties.PATH_STYLE_ACCESS, optional)) {
+        if (configService.getBooleanProperty(S3Properties.PATH_STYLE_ACCESS, optionals)) {
             clientBuilder.setPathStyleAccessEnabled(Boolean.TRUE);
         }
         clientBuilder.withRequestHandlers(ETagCorrectionHandler.getInstance());
         long chunkSize;
-        String chunkSizeValue = configService.getProperty(S3Properties.CHUNK_SIZE, optional);
+        String chunkSizeValue = configService.getProperty(S3Properties.CHUNK_SIZE, optionals);
         try {
             chunkSize = ConfigTools.parseBytes(chunkSizeValue);
         } catch (NumberFormatException e) {

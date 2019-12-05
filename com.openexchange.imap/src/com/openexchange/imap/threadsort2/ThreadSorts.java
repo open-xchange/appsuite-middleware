@@ -119,7 +119,7 @@ public final class ThreadSorts {
                 if (searchTerm != null) {
                     try {
                         args.append(new SearchSequence(p).generateSequence(searchTerm.getJavaMailSearchTerm(), "UTF-8"));
-                    } catch (final IOException ioex) {
+                    } catch (IOException ioex) {
                         // should never happen
                         throw new WrappingProtocolException("", new SearchException(ioex.toString()));
                     } catch (MessagingException e) {

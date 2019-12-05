@@ -169,9 +169,6 @@ public enum OXCachingExceptionCode implements DisplayableOXExceptionCode {
         return OXExceptionFactory.getInstance().create(this, cause, args);
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.exception.DisplayableOXExceptionCode#getDisplayMessage()
-     */
     @Override
     public String getDisplayMessage() {
         return displayMessage;

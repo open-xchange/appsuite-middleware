@@ -105,12 +105,12 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
     public WebdavPath getPathForDocument(final int relativeToFolder, final int documentId, ServerSession session) throws OXException {
         final TIntObjectMap<WebdavPath> cache = docPathCache.get();
         final Map<WebdavPath, Resolved> resCache = resolveCache.get();
-        if(cache.containsKey(documentId)) {
+        if (cache.containsKey(documentId)) {
             return relative(relativeToFolder, cache.get(documentId), session);
         }
 
         final DocumentMetadata dm = database.getDocumentMetadata(-1, documentId, InfostoreFacade.CURRENT_VERSION, session);
-        if(dm.getFileName() == null || dm.getFileName().equals("")) {
+        if (dm.getFileName() == null || dm.getFileName().equals("")) {
             throw InfostoreExceptionCodes.DOCUMENT_CONTAINS_NO_FILE.create(Integer.valueOf(documentId));
         }
         final WebdavPath path = getPathForFolder(FolderObject.SYSTEM_ROOT_FOLDER_ID, (int)dm.getFolderId(),session).dup().append(dm.getFileName());
@@ -123,24 +123,24 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
 
     @Override
     public WebdavPath getPathForFolder(final int relativeToFolder, final int folderId, ServerSession session) throws OXException {
-        if(folderId == FolderObject.SYSTEM_INFOSTORE_FOLDER_ID) {
+        if (folderId == FolderObject.SYSTEM_INFOSTORE_FOLDER_ID) {
             return new WebdavPath();
         }
-        if(folderId == relativeToFolder) {
+        if (folderId == relativeToFolder) {
             return new WebdavPath();
         }
 
         final Map<WebdavPath, Resolved> resCache = resolveCache.get();
         final TIntObjectMap<WebdavPath> cache = folderPathCache.get();
-        if(cache.containsKey(folderId)) {
+        if (cache.containsKey(folderId)) {
             return relative(relativeToFolder, cache.get(folderId), session);
         }
 
         final List<FolderObject> path = new ArrayList<FolderObject>();
         FolderObject folder = getFolder(folderId, session.getContext());
         path.add(folder);
-        while(folder != null) {
-            if(folder.getParentFolderID() == FolderObject.SYSTEM_ROOT_FOLDER_ID) {
+        while (folder != null) {
+            if (folder.getParentFolderID() == FolderObject.SYSTEM_ROOT_FOLDER_ID) {
                 folder = null;
             } else {
                 folder = getFolder(folder.getParentFolderID(), session.getContext());
@@ -154,9 +154,9 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
         for(int i = length-1; i > -1; i--) {
             folder = path.get(i);
             String folderName = folder.getFolderName();
-            if(aliases != null)  {
+            if (aliases != null)  {
                 final String alias = aliases.getAlias(folder.getObjectID());
-                if(alias != null) {
+                if (alias != null) {
                     folderName = alias;
                 }
             }
@@ -177,7 +177,7 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
 
         final WebdavPath absolutePath = absolute(relativeToFolder, path, session);
 
-        if(cache.containsKey(absolutePath)) {
+        if (cache.containsKey(absolutePath)) {
             return cache.get(absolutePath);
         }
 
@@ -201,12 +201,12 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
 
                 tryAlias(component, parentId, current, cache);
                 resolved = cache.get(current);
-                if(resolved != null) {
+                if (resolved != null) {
                     parentId = resolved.getId();
                 }
 
-                if(resolved == null) {
-                    if(con == null) {
+                if (resolved == null) {
+                    if (con == null) {
                         con = getReadConnection(session.getContext());
                     }
                     stmt = con.prepareStatement("SELECT folder.fuid, folder.fname FROM oxfolder_tree AS folder JOIN oxfolder_tree AS parent ON (folder.parent = parent.fuid AND folder.cid = parent.cid) WHERE folder.cid = ? and parent.fuid = ? and folder.fname = ?");
@@ -218,10 +218,10 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
                     rs = stmt.executeQuery();
                     boolean found = false;
                     int folderid = 0;
-                    while(rs.next()) {
+                    while (rs.next()) {
                         final String fname = rs.getString(2);
-                        if(fname.equals(component)) {
-                            if( found ) {
+                        if (fname.equals(component)) {
+                            if ( found ) {
                                 final OXException e = InfostoreExceptionCodes.DUPLICATE_SUBFOLDER.create(I(parentId), component, I(session.getContextId()));
                                 LOG.warn(e.toString(), e);
                             }
@@ -230,8 +230,8 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
                         }
                     }
                     stmt.close();
-                    if(!found) {
-                        if(last) {
+                    if (!found) {
+                        if (last) {
                             // Maybe infoitem?
                             stmt.close();
                             stmt = con.prepareStatement("SELECT info.id, doc.filename FROM infostore AS info JOIN infostore_document AS doc ON (info.cid = doc.cid AND info.id = doc.infostore_id AND doc.version_number = info.version) WHERE info.cid = ? AND info.folder_id = ? AND doc.filename = ?");
@@ -242,10 +242,10 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
                             rs = stmt.executeQuery();
                             found = false;
                             int id = 0;
-                            while(rs.next()) {
+                            while (rs.next()) {
                                 final String name = rs.getString(2);
-                                if(name.equals(component)) {
-                                    if(found) {
+                                if (name.equals(component)) {
+                                    if (found) {
                                         final OXException e = InfostoreExceptionCodes.DUPLICATE_SUBFOLDER.create(I(parentId), component, I(session.getContextId()));
                                         LOG.warn(e.toString(), e);
                                     }
@@ -253,7 +253,7 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
                                     id = rs.getInt(1);
                                 }
                             }
-                            if(found) {
+                            if (found) {
                                 resolved = new ResolvedImpl(current,id, true);
                                 cache.put(resolved.getPath(), resolved);
                                 return resolved;
@@ -269,7 +269,7 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
                 }
             }
             return new ResolvedImpl(current,parentId, false);
-        } catch (final SQLException x) {
+        } catch (SQLException x) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(x, stmt != null ? stmt.toString() : "");
         } finally {
             close(stmt,rs);
@@ -278,11 +278,11 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
     }
 
     private void tryAlias(final String component, final int parentId, final WebdavPath current, final Map<WebdavPath, Resolved> cache) {
-        if(aliases == null) {
+        if (aliases == null) {
             return;
         }
         final int aliasId = aliases.getId(component, parentId);
-        if(WebdavFolderAliases.NOT_REGISTERED == aliasId) {
+        if (WebdavFolderAliases.NOT_REGISTERED == aliasId) {
             return;
         }
         final Resolved res = new ResolvedImpl(current, aliasId, false);
@@ -293,7 +293,7 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
     public void invalidate(final WebdavPath url, final int id , final Type type) {
 
         resolveCache.get().remove(url);
-        switch(type) {
+        switch (type) {
         case COLLECTION :
             folderPathCache.get().remove(id);break;
         case RESOURCE : docPathCache.get().remove(id); break;
@@ -365,7 +365,7 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
                 } finally {
                     provider.releaseReadConnection(ctx, readCon);
                 }
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 MODE = new NORMAL_MODE();
                 return MODE.getFolder(folderid, ctx);
             }

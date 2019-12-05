@@ -79,7 +79,7 @@ public class TestFolderToolkit {
         FolderObject fo = null;
         try {
             fo = access.getDefaultFolder(user, FolderObject.CALENDAR);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             e.printStackTrace();
             return null;
         }
@@ -109,7 +109,7 @@ public class TestFolderToolkit {
             fo.setPermissions(permissions);
             fo = oxma.createFolder(fo, true, System.currentTimeMillis());
             return fo;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             e.printStackTrace();
             return null;
         } finally {
@@ -140,7 +140,7 @@ public class TestFolderToolkit {
             fo.setPermissions(permissions);
             fo = oxma.createFolder(fo, true, System.currentTimeMillis());
             return fo;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             e.printStackTrace();
             return null;
         } finally {
@@ -157,7 +157,7 @@ public class TestFolderToolkit {
             for (final FolderObject folder : cleanFolders) {
                 oxma.deleteFolder(folder, true, System.currentTimeMillis());
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             e.printStackTrace();
 
         }
@@ -224,7 +224,7 @@ public class TestFolderToolkit {
             writecon = DBPool.pickupWriteable(ctx);
             final OXFolderManager oxma = OXFolderManager.getInstance(session, writecon, writecon);
             oxma.updateFolder(fo, false, false, System.currentTimeMillis());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             e.printStackTrace();
         } finally {
             if (writecon != null) {

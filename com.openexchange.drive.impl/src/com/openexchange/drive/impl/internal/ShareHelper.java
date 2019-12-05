@@ -194,8 +194,9 @@ public class ShareHelper {
      * </ul>
      *
      * @param target The share to delete from the session users point of view
+     * @return The (possibly) updated share target
      */
-    public void deleteLink(DriveShareTarget driveTarget) throws OXException {
+    public DriveShareTarget deleteLink(DriveShareTarget driveTarget) throws OXException {
         if (driveTarget.isFolder()) {
             FileStorageFolder folder = session.getStorage().getFolder(driveTarget.getDrivePath());
             DirectoryChecksum directoryChecksum = ChecksumProvider.getChecksums(session, Collections.singletonList(folder.getId())).get(0);
@@ -205,17 +206,19 @@ public class ShareHelper {
             ShareTarget shareTarget = new ShareTarget(DriveConstants.FILES_MODULE, folder.getId());
             getShareService().deleteLink(session.getServerSession(), shareTarget, folder.getLastModifiedDate());
             session.getStorage().invalidateCache();
-        } else {
-            File file = session.getStorage().getFileByName(driveTarget.getDrivePath(), driveTarget.getName());
-            if (null == file) {
-                throw DriveExceptionCodes.FILE_NOT_FOUND.create(driveTarget.getName(), driveTarget.getDrivePath());
-            }
-            if (false == ChecksumProvider.matches(session, file, driveTarget.getChecksum())) {
-                throw DriveExceptionCodes.FILEVERSION_NOT_FOUND.create(driveTarget.getName(), driveTarget.getChecksum(), driveTarget.getDrivePath());
-            }
-            ShareTarget shareTarget = new ShareTarget(FolderObject.INFOSTORE, file.getFolderId(), file.getId());
-            getShareService().deleteLink(session.getServerSession(), shareTarget, new Date(file.getSequenceNumber()));
+            directoryChecksum = ChecksumProvider.getChecksums(session, Collections.singletonList(folder.getId())).get(0);
+            return new DriveShareTarget(new ShareTarget(DriveConstants.FILES_MODULE, folder.getId()), driveTarget.getDrivePath(), directoryChecksum.getChecksum());
         }
+        File file = session.getStorage().getFileByName(driveTarget.getDrivePath(), driveTarget.getName());
+        if (null == file) {
+            throw DriveExceptionCodes.FILE_NOT_FOUND.create(driveTarget.getName(), driveTarget.getDrivePath());
+        }
+        if (false == ChecksumProvider.matches(session, file, driveTarget.getChecksum())) {
+            throw DriveExceptionCodes.FILEVERSION_NOT_FOUND.create(driveTarget.getName(), driveTarget.getChecksum(), driveTarget.getDrivePath());
+        }
+        ShareTarget shareTarget = new ShareTarget(FolderObject.INFOSTORE, file.getFolderId(), file.getId());
+        getShareService().deleteLink(session.getServerSession(), shareTarget, new Date(file.getSequenceNumber()));
+        return driveTarget;
     }
 
     /**

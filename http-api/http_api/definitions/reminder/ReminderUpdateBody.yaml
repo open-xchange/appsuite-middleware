@@ -1,6 +1,0 @@
-type: object
-properties:
-  alarm:
-    type: integer
-    format: int64
-    description: The new time of the alarm.

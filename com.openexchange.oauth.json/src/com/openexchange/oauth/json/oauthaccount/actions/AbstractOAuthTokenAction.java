@@ -50,29 +50,7 @@
 package com.openexchange.oauth.json.oauthaccount.actions;
 
 import static com.openexchange.java.Strings.isEmpty;
-import static com.openexchange.oauth.OAuthConstants.OAUTH_PROBLEM_ACCESS_DENIED;
-import static com.openexchange.oauth.OAuthConstants.OAUTH_PROBLEM_ADDITIONAL_AUTHORIZATION_REQUIRED;
-import static com.openexchange.oauth.OAuthConstants.OAUTH_PROBLEM_CONSUMER_KEY_REFUSED;
-import static com.openexchange.oauth.OAuthConstants.OAUTH_PROBLEM_CONSUMER_KEY_REJECTED;
-import static com.openexchange.oauth.OAuthConstants.OAUTH_PROBLEM_CONSUMER_KEY_UNKNOWN;
-import static com.openexchange.oauth.OAuthConstants.OAUTH_PROBLEM_NONCE_USED;
-import static com.openexchange.oauth.OAuthConstants.OAUTH_PROBLEM_PARAMETER_ABSENT;
-import static com.openexchange.oauth.OAuthConstants.OAUTH_PROBLEM_PARAMETER_REJECTED;
-import static com.openexchange.oauth.OAuthConstants.OAUTH_PROBLEM_PERMISSION_DENIED;
-import static com.openexchange.oauth.OAuthConstants.OAUTH_PROBLEM_PERMISSION_UNKNOWN;
-import static com.openexchange.oauth.OAuthConstants.OAUTH_PROBLEM_SIGNATURE_INVALID;
-import static com.openexchange.oauth.OAuthConstants.OAUTH_PROBLEM_SIGNATURE_METHOD_REJECTED;
-import static com.openexchange.oauth.OAuthConstants.OAUTH_PROBLEM_TIMESTAMP_REFUSED;
-import static com.openexchange.oauth.OAuthConstants.OAUTH_PROBLEM_TOKEN_EXPIRED;
-import static com.openexchange.oauth.OAuthConstants.OAUTH_PROBLEM_TOKEN_REJECTED;
-import static com.openexchange.oauth.OAuthConstants.OAUTH_PROBLEM_TOKEN_REVOKED;
-import static com.openexchange.oauth.OAuthConstants.OAUTH_PROBLEM_TOKEN_USED;
-import static com.openexchange.oauth.OAuthConstants.OAUTH_PROBLEM_USER_REFUSED;
-import static com.openexchange.oauth.OAuthConstants.OAUTH_PROBLEM_VERIFIER_INVALID;
-import static com.openexchange.oauth.OAuthConstants.OAUTH_PROBLEM_VERSION_REJECTED;
-import static com.openexchange.oauth.OAuthConstants.URLPARAM_OAUTH_ACCEPTABLE_TIMESTAMPS;
-import static com.openexchange.oauth.OAuthConstants.URLPARAM_OAUTH_PARAMETERS_ABSENT;
-import static com.openexchange.oauth.OAuthConstants.URLPARAM_OAUTH_PARAMETERS_REJECTED;
+import static com.openexchange.oauth.OAuthConstants.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -364,21 +342,11 @@ public abstract class AbstractOAuthTokenAction extends AbstractOAuthAJAXActionSe
             taskName = builder.toString();
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see com.openexchange.cluster.lock.ClusterTask#getTaskName()
-         */
         @Override
         public String getTaskName() {
             return taskName;
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see com.openexchange.cluster.lock.ClusterTask#perform()
-         */
         @Override
         public Void perform() throws OXException {
             OAuthService oauthService = getOAuthService();
@@ -413,21 +381,11 @@ public abstract class AbstractOAuthTokenAction extends AbstractOAuthAJAXActionSe
             oauthService.updateAccount(session, Integer.parseInt(accountId), serviceId, OAuthInteractionType.CALLBACK, arguments, scopes);
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see com.openexchange.cluster.lock.ClusterTask#getContextId()
-         */
         @Override
         public int getContextId() {
             return session.getContextId();
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see com.openexchange.cluster.lock.ClusterTask#getUserId()
-         */
         @Override
         public int getUserId() {
             return session.getUserId();

@@ -263,63 +263,39 @@ public class MailSSLSocketFactory extends SSLSocketFactory {
 
     // SocketFactory methods
 
-    /* (non-Javadoc)
-     * @see javax.net.ssl.SSLSocketFactory#createSocket(java.net.Socket,
-     *						java.lang.String, int, boolean)
-     */
     @Override
     public synchronized Socket createSocket(Socket socket, String s, int i,
 				boolean flag) throws IOException {
 	return adapteeFactory.createSocket(socket, s, i, flag);
     }
 
-    /* (non-Javadoc)
-     * @see javax.net.ssl.SSLSocketFactory#getDefaultCipherSuites()
-     */
     @Override
     public synchronized String[] getDefaultCipherSuites() {
 	return adapteeFactory.getDefaultCipherSuites();
     }
 
-    /* (non-Javadoc)
-     * @see javax.net.ssl.SSLSocketFactory#getSupportedCipherSuites()
-     */
     @Override
     public synchronized String[] getSupportedCipherSuites() {
 	return adapteeFactory.getSupportedCipherSuites();
     }
 
-    /* (non-Javadoc)
-     * @see javax.net.SocketFactory#createSocket()
-     */
     @Override
     public synchronized Socket createSocket() throws IOException {
 	return adapteeFactory.createSocket();
     }
 
-    /* (non-Javadoc)
-     * @see javax.net.SocketFactory#createSocket(java.net.InetAddress, int,
-     *						java.net.InetAddress, int)
-     */
     @Override
     public synchronized Socket createSocket(InetAddress inetaddress, int i,
 			InetAddress inetaddress1, int j) throws IOException {
 	return adapteeFactory.createSocket(inetaddress, i, inetaddress1, j);
     }
 
-    /* (non-Javadoc)
-     * @see javax.net.SocketFactory#createSocket(java.net.InetAddress, int)
-     */
     @Override
     public synchronized Socket createSocket(InetAddress inetaddress, int i)
 				throws IOException {
 	return adapteeFactory.createSocket(inetaddress, i);
     }
 
-    /* (non-Javadoc)
-     * @see javax.net.SocketFactory#createSocket(java.lang.String, int,
-     *						java.net.InetAddress, int)
-     */
     @Override
     public synchronized Socket createSocket(String s, int i,
 				InetAddress inetaddress, int j)
@@ -327,9 +303,6 @@ public class MailSSLSocketFactory extends SSLSocketFactory {
 	return adapteeFactory.createSocket(s, i, inetaddress, j);
     }
 
-    /* (non-Javadoc)
-     * @see javax.net.SocketFactory#createSocket(java.lang.String, int)
-     */
     @Override
     public synchronized Socket createSocket(String s, int i)
 				throws IOException, UnknownHostException {
@@ -358,10 +331,6 @@ public class MailSSLSocketFactory extends SSLSocketFactory {
 	    adapteeTrustManager = (X509TrustManager)tmf.getTrustManagers()[0];
 	}
 
-	/* (non-Javadoc)
-	 * @see javax.net.ssl.X509TrustManager#checkClientTrusted(
-	 *		java.security.cert.X509Certificate[], java.lang.String)
-	 */
 	@Override
 	public void checkClientTrusted(X509Certificate[] certs, String authType)
 					throws CertificateException {
@@ -369,10 +338,6 @@ public class MailSSLSocketFactory extends SSLSocketFactory {
 		adapteeTrustManager.checkClientTrusted(certs, authType);
 	}
 
-	/* (non-Javadoc)
-	 * @see javax.net.ssl.X509TrustManager#checkServerTrusted(
-	 *		java.security.cert.X509Certificate[], java.lang.String)
-	 */
 	@Override
 	public void checkServerTrusted(X509Certificate[] certs, String authType)
 					throws CertificateException {
@@ -381,9 +346,6 @@ public class MailSSLSocketFactory extends SSLSocketFactory {
 		adapteeTrustManager.checkServerTrusted(certs, authType);
 	}
 
-	/* (non-Javadoc)
-	 * @see javax.net.ssl.X509TrustManager#getAcceptedIssuers()
-	 */
 	@Override
 	public X509Certificate[] getAcceptedIssuers() {
 	    return adapteeTrustManager.getAcceptedIssuers();

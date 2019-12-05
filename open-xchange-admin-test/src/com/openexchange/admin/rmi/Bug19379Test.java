@@ -142,7 +142,7 @@ public class Bug19379Test extends AbstractRMITest {
             try {
                 getContextManager().change(context1);
                 fail("A StorageException must be thrown!");
-            } catch (final StorageException e) {
+            } catch (StorageException e) {
                 // Found the duplicate login mapping
                 e.printStackTrace();
             }
@@ -192,7 +192,7 @@ public class Bug19379Test extends AbstractRMITest {
         Context context = new Context(I(contextID));
         try {
             getContextManager().delete(context);
-        } catch (final NoSuchContextException e) {
+        } catch (NoSuchContextException e) {
             // Ignore
         }
     }

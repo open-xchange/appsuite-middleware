@@ -81,18 +81,18 @@ public class SubscriptionJSONParser {
         if (object.has("id")) {
             subscription.setId(object.getInt("id"));
         }
-        if(object.has("folder")) {
+        if (object.has("folder")) {
             subscription.setFolderId(object.getString("folder"));
         }
-        if(object.has("enabled")) {
+        if (object.has("enabled")) {
             subscription.setEnabled(object.getBoolean("enabled"));
         }
-        if(object.has("source")) {
+        if (object.has("source")) {
             SubscriptionSource source = discovery.getSource(object.getString("source"));
             subscription.setSource(source);
-            if(source != null) {
+            if (source != null) {
                 JSONObject config = object.optJSONObject(subscription.getSource().getId());
-                if(config != null) {
+                if (config != null) {
                     Map<String, Object> configuration = FormContentParser.parse(config, source.getFormDescription());
                     subscription.setConfiguration(configuration);
                 }

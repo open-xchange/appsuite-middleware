@@ -92,7 +92,7 @@ public final class MessagingPermissions {
                 final UnmodifiableMessagingPermission clone = (UnmodifiableMessagingPermission) super.clone();
                 clone.delegate = (MessagingPermission) (null == delegate ? null : delegate.clone());
                 return clone;
-            } catch (final CloneNotSupportedException e) {
+            } catch (CloneNotSupportedException e) {
                 throw new InternalError(e.getMessage());
             }
         }

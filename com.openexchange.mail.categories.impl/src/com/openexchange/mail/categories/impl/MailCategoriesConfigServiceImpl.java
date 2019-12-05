@@ -574,10 +574,13 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
         if (reorganize.isReorganize()) {
             List<OXException> warnings = reorganize.getWarnings();
             try {
-                SearchTerm<?> searchTerm = getSearchTerm(newRule);
-                FullnameArgument fa = new FullnameArgument("INBOX");
-                if (searchTerm != null) {
-                    MailCategoriesOrganizer.organizeExistingMails(session, fa.getFullName(), searchTerm, flag, newRule.getFlagsToRemove());
+                boolean supported = ruleEngine.applyRule(session, newRule);
+                if (supported == false) {
+                    SearchTerm<?> searchTerm = getSearchTerm(newRule);
+                    FullnameArgument fa = new FullnameArgument("INBOX");
+                    if (searchTerm != null) {
+                        MailCategoriesOrganizer.organizeExistingMails(session, fa.getFullName(), searchTerm, flag, newRule.getFlagsToRemove());
+                    }
                 }
             } catch (OXException e) {
                 if (warnings.isEmpty()) {
@@ -732,8 +735,11 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
                 mailCategoriesService.getRuleEngine().initRuleEngineForUser(session, rules);
                 FullnameArgument fa = new FullnameArgument("INBOX");
                 for (MailCategoryRule rule : rules) {
-                    SearchTerm<?> searchTerm = mailCategoriesService.getSearchTerm(rule);
-                    MailCategoriesOrganizer.organizeExistingMails(session, fa.getFullname(), searchTerm, rule.getFlag(), null);
+                    boolean supported = mailCategoriesService.getRuleEngine().applyRule(session, rule);
+                    if (supported == false) {
+                        SearchTerm<?> searchTerm = mailCategoriesService.getSearchTerm(rule);
+                        MailCategoriesOrganizer.organizeExistingMails(session, fa.getFullname(), searchTerm, rule.getFlag(), null);
+                    }
                 }
 
                 success = true;

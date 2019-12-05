@@ -52,8 +52,8 @@ package com.openexchange.mail.filter.json.v2.actions;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.EnqueuableAJAXActionService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.mailfilter.Credentials;
@@ -61,6 +61,7 @@ import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link AbstractMailFilterAction}
@@ -68,7 +69,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.4
  */
-public abstract class AbstractMailFilterAction implements AJAXActionService{
+public abstract class AbstractMailFilterAction implements EnqueuableAJAXActionService {
 
     protected final ServiceLookup services;
     private static final String UserNameParameter = "username";
@@ -83,7 +84,7 @@ public abstract class AbstractMailFilterAction implements AJAXActionService{
 
     protected JSONObject getJSONBody(Object data) throws OXException {
 
-        if(!(data instanceof JSONObject)){
+        if (!(data instanceof JSONObject)){
             throw AjaxExceptionCodes.INVALID_REQUEST_BODY.create(JSONObject.class.getSimpleName(), data.getClass().getSimpleName());
         }
 
@@ -92,7 +93,7 @@ public abstract class AbstractMailFilterAction implements AJAXActionService{
 
     protected JSONArray getJSONArrayBody(Object data) throws OXException {
 
-        if(!(data instanceof JSONArray)){
+        if (!(data instanceof JSONArray)){
             throw AjaxExceptionCodes.INVALID_REQUEST_BODY.create(JSONObject.class.getSimpleName(), data.getClass().getSimpleName());
         }
 
@@ -103,7 +104,7 @@ public abstract class AbstractMailFilterAction implements AJAXActionService{
         if (json.has("id") && !json.isNull("id")) {
             try {
                 return Integer.valueOf(json.getInt("id"));
-            } catch (final JSONException e) {
+            } catch (JSONException e) {
                 throw MailFilterExceptionCode.ID_MISSING.create();
             }
         }
@@ -113,7 +114,7 @@ public abstract class AbstractMailFilterAction implements AJAXActionService{
     protected Credentials getCredentials(Session session, AJAXRequestData request) {
         Credentials credentials = new Credentials(session);
         String userName = getUserName(request);
-        if(Strings.isNotEmpty(userName)) {
+        if (Strings.isNotEmpty(userName)) {
             credentials.setUsername(userName);
         }
         return credentials;
@@ -121,6 +122,11 @@ public abstract class AbstractMailFilterAction implements AJAXActionService{
 
     private String getUserName(AJAXRequestData request) {
         return request.getParameter(UserNameParameter);
+    }
+
+    @Override
+    public Result isEnqueueable(AJAXRequestData request, ServerSession session) throws OXException {
+        return EnqueuableAJAXActionService.resultFor(false);
     }
 
 }

@@ -4,25 +4,30 @@
     tags:
       - Snippet
     summary: Deletes one or multiple snippets.
-    consumes:
-      - application/json
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: id
-        type: string
-        description: The identifier of the snippet. Otherwise provide one or more identifiers in the request body's JSON array.
-        required: false
-      - in: body
-        name: body
-        description: A JSON array containing the identifiers of the snippets to delete.
+        description: >-
+          The identifier of the snippet. Otherwise provide one or more
+          identifiers in the request body's JSON array.
         required: false
         schema:
-          type: array
-          items:
-            type: string
+          type: string
     responses:
-      200:
-        description: In case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).
-        schema:
-          $ref: "#/definitions/CommonResponse"
+      '200':
+        description: >-
+          In case of errors the responsible fields in the response are filled
+          (see [Error handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommonResponse'
+    requestBody:
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              type: string
+      description: A JSON array containing the identifiers of the snippets to delete.

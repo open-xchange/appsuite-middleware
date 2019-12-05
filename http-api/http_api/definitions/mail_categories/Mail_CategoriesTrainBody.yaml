@@ -1,7 +1,0 @@
-type: object
-properties:
-  from:
-    type: array
-    description: An array of email addresses
-    items:
-      type: string

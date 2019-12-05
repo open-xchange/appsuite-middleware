@@ -111,7 +111,7 @@ public final class ServiceHolderInit implements Initialization {
             }
             try {
                 in = new FileInputStream(sysPropFile);
-            } catch (final FileNotFoundException e) {
+            } catch (FileNotFoundException e) {
                 /*
                  * Cannot occur due to the above check
                  */
@@ -129,7 +129,7 @@ public final class ServiceHolderInit implements Initialization {
                     int serviceUsageTimeout = -1;
                     try {
                         serviceUsageTimeout = Integer.parseInt(serviceUsageTimeoutStr);
-                    } catch (final NumberFormatException e) {
+                    } catch (NumberFormatException e) {
                         LOG.error("Invalid property value for \"serviceUsageTimeout\": {}", serviceUsageTimeoutStr);
                         serviceUsageTimeout = Integer.parseInt(DEFAULT_TIMEOUT);
                     }
@@ -138,7 +138,7 @@ public final class ServiceHolderInit implements Initialization {
                 } else {
                     LOG.info("Service usage inspection not enabled");
                 }
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 throw ServiceExceptionCode.IO_ERROR.create();
             }
         } finally {

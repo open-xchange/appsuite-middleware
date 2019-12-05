@@ -85,7 +85,7 @@ public class List extends ListCoreExtended {
     @Override
     protected User[] maincall(final AdminParser parser, final OXUserInterface oxusr, final String search_pattern, final boolean ignoreCase, final Context ctx, final Credentials auth, final boolean includeGuests, final boolean excludeUsers) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         final User[] allusers = ignoreCase ? oxusr.listCaseInsensitive(ctx, search_pattern, auth, includeGuests, excludeUsers) : oxusr.list(ctx, search_pattern, auth, includeGuests, excludeUsers);
-        if( allusers.length == 0 ) {
+        if ( allusers.length == 0 ) {
             return new User[0];
         }
         return oxusr.getData(ctx, allusers, auth);

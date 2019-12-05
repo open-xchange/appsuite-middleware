@@ -108,7 +108,7 @@ public abstract class AbstractJumpAction implements AJAXActionService {
     public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
         try {
             return perform(new JumpRequest(requestData, session));
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e);
         }
     }

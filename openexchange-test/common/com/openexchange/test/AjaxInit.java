@@ -20,7 +20,7 @@ public class AjaxInit {
         ajaxProps = new Properties();
         try {
             ajaxProps.load(new FileInputStream(getFileName()));
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
         ajaxPropertiesLoaded = true;

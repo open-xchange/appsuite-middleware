@@ -84,7 +84,7 @@ public class HashingFileStorageTest extends AbstractHashingFileStorageTest {
         InputStream compare = IS(data);
 
         int i = 0;
-        while((i = file.read()) != -1) {
+        while ((i = file.read()) != -1) {
             assertEquals(i, compare.read());
         }
         assertEquals(-1, compare.read());

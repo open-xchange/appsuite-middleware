@@ -4,22 +4,24 @@
     tags:
       - Drive
     summary: Removes the given files and folders from trash.
-    consumes:
-      - application/json
-    description: |
-      Removes the given files and folders from trash. The files and folders will be deleted permanently.
+    description: >
+      Removes the given files and folders from trash. The files and folders will
+      be deleted permanently.
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
-      - $ref: "#/parameters/gblQueryParamRoot"
-      - in: body
-        name: body
-        description: A JSON object describing the target files- and directories to delete.
-        required: true
-        schema:
-          $ref: "#/definitions/TrashTargetsBody"
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - $ref: '#/components/parameters/gblQueryParamRoot'
     responses:
-      200:
+      '200':
         description: |
           If the operation is successfull, an empty response is returned.
-        schema:
-          $ref: "#/definitions/TrashFolderResponse"
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TrashFolderResponse'
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/TrashTargetsBody'
+      description: A JSON object describing the target files- and directories to delete.
+      required: true

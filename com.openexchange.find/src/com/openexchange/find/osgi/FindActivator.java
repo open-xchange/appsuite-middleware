@@ -110,7 +110,7 @@ public class FindActivator extends HousekeepingActivator {
             registerService(ConfigTreeEquivalent.class, availableModules);
 
             logger.info("Bundle successfully started: com.openexchange.find");
-        } catch (final Exception e) {
+        } catch (Exception e) {
             logger.error("Error while starting bundle: com.openexchange.find", e);
             throw e;
         }

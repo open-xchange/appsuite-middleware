@@ -132,7 +132,7 @@ public final class TwitterServiceImpl implements TwitterService {
         try {
             // Ensure presence of access token in authorization instance
             oAuthAuthorization.getOAuthAccessToken();
-        } catch (final twitter4j.TwitterException e) {
+        } catch (twitter4j.TwitterException e) {
             throw handleTwitterException(e);
         }
         return new TwitterAccessImpl(new OXTwitterImpl(configuration, oAuthAuthorization));
@@ -155,7 +155,7 @@ public final class TwitterServiceImpl implements TwitterService {
             final RequestToken requestToken;
             try {
                 requestToken = twitter.getOAuthRequestToken();
-            } catch (final twitter4j.TwitterException e) {
+            } catch (twitter4j.TwitterException e) {
                 /*
                  * Probably consumer-key/consumer-secret pair is invalid
                  */
@@ -179,7 +179,7 @@ public final class TwitterServiceImpl implements TwitterService {
              * PIN available
              */
             return new TwitterAccessTokenImpl(twitter.getOAuthAccessToken(requestToken, pin));
-        } catch (final twitter4j.TwitterException e) {
+        } catch (twitter4j.TwitterException e) {
             throw handleTwitterException(e);
         }
     }
@@ -267,11 +267,11 @@ public final class TwitterServiceImpl implements TwitterService {
              * Return PIN
              */
             return pin;
-        } catch (final FailingHttpStatusCodeException e) {
+        } catch (FailingHttpStatusCodeException e) {
             throw TwitterExceptionCodes.ACCESS_TOKEN_FAILED.create(e, twitterId);
-        } catch (final MalformedURLException e) {
+        } catch (MalformedURLException e) {
             throw TwitterExceptionCodes.ACCESS_TOKEN_FAILED.create(e, twitterId);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw TwitterExceptionCodes.ACCESS_TOKEN_FAILED.create(e, twitterId);
         }
     }

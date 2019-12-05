@@ -22,7 +22,6 @@ import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.infostore.paths.impl.PathResolverImpl;
 import com.openexchange.groupware.infostore.webdav.InMemoryAliases;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.setuptools.TestConfig;
@@ -31,6 +30,7 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionFactory;
+import com.openexchange.user.User;
 import com.openexchange.webdav.protocol.WebdavPath;
 
 public class PathResolverTest {
@@ -90,7 +90,7 @@ public class PathResolverTest {
             final TestContextToolkit tools = new TestContextToolkit();
             final String ctxName = config.getContextName();
             return null == ctxName || ctxName.trim().length() == 0 ? tools.getDefaultContext() : tools.getContextByName(ctxName);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             e.printStackTrace();
             return null;
         }
@@ -122,7 +122,7 @@ public class PathResolverTest {
             final String userName = config.getUser();
             final int pos = userName.indexOf('@');
             return pos == -1 ? userName : userName.substring(0, pos);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             e.printStackTrace();
             return null;
         }
@@ -172,7 +172,7 @@ public class PathResolverTest {
         try {
             pathResolver.resolve(root, new WebdavPath("/i/dont/exist"), session);
             fail("Expected OXObjectNotFoundException");
-        } catch (final OXException x) {
+        } catch (OXException x) {
             assertTrue(true);
         }
     }
@@ -183,13 +183,13 @@ public class PathResolverTest {
         try {
             pathResolver.resolve(root, new WebdavPath("/this/is/a/nice/path/DoCuMeNt.txt"), session);
             fail("Expected OXObjectNotFoundException");
-        } catch (final OXException x) {
+        } catch (OXException x) {
             assertTrue(true);
         }
         try {
             pathResolver.resolve(root, new WebdavPath("/this/is/a/nice/PaTh"), session);
             fail("Expected OXObjectNotFoundException");
-        } catch (final OXException x) {
+        } catch (OXException x) {
             assertTrue(true);
         }
     }
@@ -216,7 +216,7 @@ public class PathResolverTest {
         try {
             pathResolver.resolve(root, new WebdavPath("this/ALIAS!/a/nice"), session);
             fail("Expected OXObjectNotFoundException");
-        } catch (final OXException x) {
+        } catch (OXException x) {
             assertTrue(true);
         }
     }
@@ -276,7 +276,7 @@ public class PathResolverTest {
         try {
             database.saveDocument(m, new ByteArrayInputStream(new byte[10]), Long.MAX_VALUE, session);
             database.commit();
-        } catch (final Exception x) {
+        } catch (Exception x) {
             database.rollback();
             throw x;
         } finally {

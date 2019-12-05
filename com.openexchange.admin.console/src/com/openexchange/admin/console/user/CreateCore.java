@@ -57,9 +57,7 @@ import java.rmi.ConnectException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.text.ParseException;
-import au.com.bytecode.opencsv.CSVReader;
 import com.openexchange.admin.console.AdminParser;
-import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -71,12 +69,10 @@ import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import au.com.bytecode.opencsv.CSVReader;
 
 public abstract class CreateCore extends UserFilestoreAbstraction {
     
-    protected static final String OPT_DRIVE_FOLDER_MODE_LONG = "drive-user-folder-mode";
-    private CLIOption driveFolderModeOption;
-
     protected final void setOptions(final AdminParser parser) {
 
         parser.setExtendedOptions();
@@ -91,13 +87,7 @@ public abstract class CreateCore extends UserFilestoreAbstraction {
 
         setFurtherOptions(parser);
         
-        setUserFolderModeOptions(parser);
-
         parser.allowDynamicOptions();
-    }
-
-    private void setUserFolderModeOptions(AdminParser parser) {
-        this.driveFolderModeOption = setLongOpt(parser, OPT_DRIVE_FOLDER_MODE_LONG, "stringvalue", "The mode how the default drive folders should be created. 'default', 'normal', 'none'. If not selected, 'default' is applied.", true, false, true);
     }
 
     protected abstract void setFurtherOptions(final AdminParser parser);
@@ -133,10 +123,7 @@ public abstract class CreateCore extends UserFilestoreAbstraction {
 
             applyDynamicOptionsToUser(parser, usr);
             
-            String value = (String) parser.getOptionValue(driveFolderModeOption);
-            if (null != value) {
-                usr.setDriveFolderMode(value);
-            }
+            applyDriveFolderModeOption(parser, usr);
 
             final String filename = (String) parser.getOptionValue(parser.getCsvImportOption());
 
@@ -149,7 +136,7 @@ public abstract class CreateCore extends UserFilestoreAbstraction {
             }
 
             sysexit(0);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             printErrors(null, ctxid, e, parser);
         }
     }
@@ -185,23 +172,23 @@ public abstract class CreateCore extends UserFilestoreAbstraction {
                             }
                         }
                         System.out.println("User " + create.getId() + " successfully created in context " + context.getId());
-                    } catch (final RemoteException e) {
+                    } catch (RemoteException e) {
                         System.err.println("Failed to create user \"" + adminuser.getName() + "\" in context " + context.getId() + ": " + e);
-                    } catch (final StorageException e) {
+                    } catch (StorageException e) {
                         System.err.println("Failed to create user \"" + adminuser.getName() + "\" in context " + context.getId() + ": " + e);
-                    } catch (final InvalidCredentialsException e) {
+                    } catch (InvalidCredentialsException e) {
                         System.err.println("Failed to create user \"" + adminuser.getName() + "\" in context " + context.getId() + ": " + e);
-                    } catch (final NoSuchContextException e) {
+                    } catch (NoSuchContextException e) {
                         System.err.println("Failed to create user \"" + adminuser.getName() + "\" in context " + context.getId() + ": " + e);
-                    } catch (final InvalidDataException e) {
+                    } catch (InvalidDataException e) {
                         System.err.println("Failed to create user \"" + adminuser.getName() + "\" in context " + context.getId() + ": " + e);
-                    } catch (final DatabaseUpdateException e) {
+                    } catch (DatabaseUpdateException e) {
                         System.err.println("Failed to create user \"" + adminuser.getName() + "\" in context " + context.getId() + ": " + e);
                     }
-                } catch (final ParseException e1) {
+                } catch (ParseException e1) {
                     System.err.println("Failed to create user in context " + context.getId() + ": " + e1);
                 }
-            } catch (final ParseException e1) {
+            } catch (ParseException e1) {
                 System.err.println("Failed to create user in context in line" + linenumber + ": " + e1);
             }
             linenumber++;

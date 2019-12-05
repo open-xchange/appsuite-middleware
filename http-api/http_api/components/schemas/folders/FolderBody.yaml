@@ -1,0 +1,8 @@
+type: object
+required:
+  - folder
+properties:
+  folder:
+    $ref: '#/components/schemas/FolderData'
+  notification:
+    $ref: '#/components/schemas/FolderBodyNotification'

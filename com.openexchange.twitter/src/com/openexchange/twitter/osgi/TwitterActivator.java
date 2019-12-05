@@ -85,7 +85,7 @@ public final class TwitterActivator extends HousekeepingActivator {
              */
             registerService(TwitterService.class, new TwitterServiceImpl());
             registerService(Reloadable.class, TwitterConfiguration.getInstance());
-        } catch (final Exception e) {
+        } catch (Exception e) {
             log.error("Failed start-up of bundle com.openexchange.twitter", e);
             throw e;
         }

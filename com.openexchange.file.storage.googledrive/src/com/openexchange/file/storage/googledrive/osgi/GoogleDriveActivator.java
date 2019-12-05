@@ -61,9 +61,9 @@ import com.openexchange.oauth.OAuthAccountStorage;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.access.OAuthAccessRegistryService;
+import com.openexchange.session.SessionHolder;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.timer.TimerService;
-import com.openexchange.tools.session.SessionHolder;
 
 /**
  * {@link GoogleDriveActivator} - Activator for Google Drive bundle.
@@ -97,21 +97,11 @@ public final class GoogleDriveActivator extends AbstractCloudStorageActivator {
         Services.setServiceLookup(null);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.file.storage.oauth.osgi.AbstractCloudStorageActivator#getServiceRegisterer(org.osgi.framework.BundleContext)
-     */
     @Override
     protected ServiceTrackerCustomizer<OAuthServiceMetaData, OAuthServiceMetaData> getServiceRegisterer(BundleContext context) {
         return new OAuthServiceMetaDataRegisterer(context, this);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.file.storage.oauth.osgi.AbstractCloudStorageActivator#getAPI()
-     */
     @Override
     protected KnownApi getAPI() {
         return KnownApi.GOOGLE;

@@ -116,7 +116,7 @@ public class PeerServerListener {
 
             LOG.info(b.toString());
 
-        } catch (final Exception x) {
+        } catch (Exception x) {
             LOG.error("Unexpected exception.", x);
         }
     }
@@ -133,7 +133,7 @@ public class PeerServerListener {
             data = Charsets.toAsciiBytes(b2);
             final DatagramPacket datagramPackage = new DatagramPacket(data, data.length, remoteAddress, remotePort);
             mySocket.send(datagramPackage);
-        } catch (final UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             throw new IllegalStateException(e);
         }
     }
@@ -147,7 +147,7 @@ public class PeerServerListener {
 
         try {
             new PeerServerListener(remoteHost, remotePort, myHost, myPort).send(I(PushRequest.REMOTE_HOST_REGISTER),"fe80::223:32ff:fec8:2bc8", myPort);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("Unexpected exception.", e);
         }
     }

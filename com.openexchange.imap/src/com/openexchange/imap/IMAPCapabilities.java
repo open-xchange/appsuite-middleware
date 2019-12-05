@@ -138,6 +138,11 @@ public class IMAPCapabilities extends MailCapabilities {
      * CONDSTORE support according to <a href="https://tools.ietf.org/html/rfc7162">https://tools.ietf.org/html/rfc7162</a>
      */
     public static final String CAP_CONDSTORE = "CONDSTORE";
+    
+    /**
+     * Filters applicable to existing messages: <code>"FILTER=SIEVE"</code>
+     */
+    public static final String CAP_FILTER_SIEVE = "FILTER=SIEVE";
 
     /*-
      * IMAP bit constants
@@ -179,6 +184,9 @@ public class IMAPCapabilities extends MailCapabilities {
     private boolean hasFileNameSearch;
     private boolean hasAttachmentSearch;
     private boolean hasTextPreview;
+    private boolean hasMailFilterApplication;
+    private boolean hasPublicFolders;
+    private boolean hasSharedFolders;
 
     /**
      * Initializes a new {@link IMAPCapabilities}
@@ -361,6 +369,43 @@ public class IMAPCapabilities extends MailCapabilities {
 
     public void setAttachmentSearchEnabled(boolean enabled) {
         this.hasAttachmentSearch = enabled;
+    }
+
+    /**
+     * Sets if mail system supports public folders
+     *
+     * @param supported <code>true</code> if public folders are supported; otherwise <code>false</code>
+     */
+    public void setPublicFolders(boolean supported) {
+        this.hasPublicFolders = supported;
+    }
+
+    @Override
+    public boolean hasPublicFolders() {
+        return hasPublicFolders;
+    }
+
+    /**
+     * Sets if mail system supports shared folders
+     *
+     * @param supported <code>true</code> if shared folders are supported; otherwise <code>false</code>
+     */
+    public void setSharedFolders(boolean supported) {
+        this.hasSharedFolders = supported;
+    }
+
+    @Override
+    public boolean hasSharedFolders() {
+        return hasSharedFolders;
+    }
+
+    @Override
+    public boolean hasMailFilterApplication() {
+        return hasMailFilterApplication;
+    }
+
+    public void setMailFilterApplication(boolean enabled) {
+        this.hasMailFilterApplication = enabled;
     }
 
     @Override

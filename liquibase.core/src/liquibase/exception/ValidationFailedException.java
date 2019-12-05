@@ -71,14 +71,14 @@ public class ValidationFailedException extends MigrationFailedException {
                 message.append(StreamUtil.getLineSeparator());
             }
         }
-        if(setupExceptions.size() >0){
+        if (setupExceptions.size() >0){
             message.append("     ").append(setupExceptions.size()).append(" changes have failures").append(StreamUtil.getLineSeparator());
             for (SetupException invalid : setupExceptions) {
                 message.append("          ").append(invalid.toString());
                 message.append(StreamUtil.getLineSeparator());                
             }
         }
-        if(changeValidationExceptions.size() >0){
+        if (changeValidationExceptions.size() >0){
             message.append("     ").append(changeValidationExceptions.size()).append(" changes have validation errors").append(StreamUtil.getLineSeparator());
             for (Throwable invalid : changeValidationExceptions) {
                 LogFactory.getLogger().debug("validation exception", invalid);
@@ -86,7 +86,7 @@ public class ValidationFailedException extends MigrationFailedException {
                 message.append(StreamUtil.getLineSeparator());
             }
         }
-        if(validationErrors.hasErrors()){
+        if (validationErrors.hasErrors()){
             message.append("     ").append(validationErrors.getErrorMessages().size()).append(" changes have validation failures").append(StreamUtil.getLineSeparator());
             for (String invalid : validationErrors.getErrorMessages()) {
                 message.append("          ").append(invalid);
@@ -130,7 +130,7 @@ public class ValidationFailedException extends MigrationFailedException {
             }
         }
         
-        if(setupExceptions.size() >0) {
+        if (setupExceptions.size() >0) {
             out.println("     "+setupExceptions.size()+" changes had errors");
             for (SetupException setupEx : setupExceptions) {
                 out.println("          "+setupEx.getMessage());

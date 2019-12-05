@@ -100,7 +100,7 @@ public class AdministrativeRdbAlarmTriggerStorage implements AdministrativeAlarm
     }
 
     private Map<Pair<Integer, Integer>, List<AlarmTrigger>> getAndLockTriggers(Connection con, long until, long overdueTime, boolean lock, AlarmAction... actions) throws OXException {
-        if(actions == null || actions.length == 0) {
+        if (actions == null || actions.length == 0) {
             return Collections.emptyMap();
         }
         try {
@@ -148,7 +148,7 @@ public class AdministrativeRdbAlarmTriggerStorage implements AdministrativeAlarm
         stringBuilder.append(" (");
         boolean first = true;
         for(int x=0; x<actions.length; x++) {
-            if(first) {
+            if (first) {
                 stringBuilder.append("action=?");
                     first = false;
             } else {
@@ -210,7 +210,7 @@ public class AdministrativeRdbAlarmTriggerStorage implements AdministrativeAlarm
             stringBuilder.append(" cid=? AND account=? AND");
             addAlarmActions(stringBuilder, actions);
             stringBuilder.append("AND eventId=? AND processed=0");
-            if(lock) {
+            if (lock) {
                 stringBuilder.append(" FOR UPDATE;");
             } else {
                 stringBuilder.append(";");
@@ -228,7 +228,7 @@ public class AdministrativeRdbAlarmTriggerStorage implements AdministrativeAlarm
                     while (resultSet.next()) {
                         Pair<Integer, Integer> pair = new Pair<Integer, Integer>(I(resultSet.getInt(1)), I(resultSet.getInt(2)));
                         List<AlarmTrigger> list = result.get(pair);
-                        if(list == null) {
+                        if (list == null) {
                             list = new ArrayList<>();
                             result.put(pair, list);
                         }

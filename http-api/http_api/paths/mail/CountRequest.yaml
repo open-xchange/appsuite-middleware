@@ -5,12 +5,17 @@
       - Mail
     summary: Gets the mail count.
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
-      - $ref: "#/parameters/gblQueryParamMailFolder"
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - $ref: '#/components/parameters/gblQueryParamMailFolder'
     responses:
-      200:
-        description: |
-          'A JSON object containing an integer value representing the folder's mail count. Not IMAP: with timestamp. In case of errors the responsible fields in the
+      '200':
+        description: >
+          'A JSON object containing an integer value representing the folder's
+          mail count. Not IMAP: with timestamp. In case of errors the
+          responsible fields in the
+
           response are filled (see [Error handling](#error-handling)).'
-        schema:
-          $ref: "#/definitions/MailCountResponse"
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MailCountResponse'

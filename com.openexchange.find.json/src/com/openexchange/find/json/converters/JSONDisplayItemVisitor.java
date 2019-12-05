@@ -57,9 +57,9 @@ import com.openexchange.find.facet.DisplayItemVisitor;
 import com.openexchange.find.facet.FormattableDisplayItem;
 import com.openexchange.find.facet.NoDisplayItem;
 import com.openexchange.find.facet.SimpleDisplayItem;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.util.Pair;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 /**
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>

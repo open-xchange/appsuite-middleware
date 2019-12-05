@@ -74,11 +74,6 @@ public class AddFlagsParserImpl implements ActionParser {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.mail.filter.api.conversion.parser.JSONParser#parse(org.json.JSONObject)
-     */
     @Override
     public Action<AddFlagsActionArgument> parse(JSONObject jsonObject) throws JSONException {
         final JSONArray jsonArray = jsonObject.getJSONArray(AddFlagsActionArgument.flags.name());

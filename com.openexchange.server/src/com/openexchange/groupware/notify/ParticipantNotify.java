@@ -51,6 +51,7 @@ package com.openexchange.groupware.notify;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.io.UnsupportedEncodingException;
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -66,6 +67,7 @@ import java.util.TimeZone;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
 import javax.mail.Multipart;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.event.impl.TaskEventInterface2;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
@@ -80,7 +82,6 @@ import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.container.mail.MailObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.Notifications;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.notify.NotificationConfig.NotificationProperty;
 import com.openexchange.groupware.notify.State.Type;
@@ -113,6 +114,7 @@ import com.openexchange.i18n.tools.replacement.TaskStatusReplacement;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
+import com.openexchange.regional.RegionalSettingsService;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.storage.ResourceStorage;
 import com.openexchange.server.impl.EffectivePermission;
@@ -123,6 +125,7 @@ import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.user.User;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 
@@ -193,7 +196,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
         if (senderSource.equals("defaultSenderAddress")) {
             try {
                 fromAddr = getUserSettingMail(session.getUserId(), session.getContext()).getSendAddr();
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.error("", e);
                 fromAddr = sender.getMail();
             }
@@ -235,7 +238,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
 
         try {
             mail.send();
-        } catch (final OXException e) {
+        } catch (OXException e) {
             log(e);
         }
     }
@@ -341,7 +344,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
         /*
          * Send delete notification
          */
-        sendNotification(null, taskObj, session, new TaskState(new TaskActionReplacement(TaskActionReplacement.ACTION_DELETED), Notifications.TASK_DELETE_MAIL, State.Type.DELETED), NotificationConfig.getPropertyAsBoolean(NotificationProperty.NOTIFY_ON_DELETE, false), true, false);
+        sendNotification(null, taskObj, session, new TaskState(new TaskActionReplacement(TaskActionReplacement.ACTION_DELETED), Notifications.TASK_DELETE_MAIL, State.Type.DELETED), false, true, true);
     }
 
     /**
@@ -370,7 +373,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
         final ServerSession serverSession;
         try {
             serverSession = ServerSessionAdapter.valueOf(session);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             return;
         }
@@ -483,11 +486,12 @@ public class ParticipantNotify implements TaskEventInterface2 {
         TIntSet allUserIds = null;
         try {
             allUserIds = loadAllUsersSet(session.getContext());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             log(e);
             return Collections.emptyList();
         }
 
+        RegionalSettingsService regionalSettingsService = ServerServiceRegistry.getInstance().getService(RegionalSettingsService.class);
         final List<MailMessage> messages = new ArrayList<MailMessage>();
         for (final Map.Entry<Locale, List<EmailableParticipant>> entry : receivers.entrySet()) {
             final Locale locale = entry.getKey();
@@ -510,8 +514,12 @@ public class ParticipantNotify implements TaskEventInterface2 {
                     try {
                         sendMail = !p.ignoreNotification && state.sendMail(getUserSettingMail(p.id, session.getContext()), newObj.getCreatedBy(), p.id, session.getUserId()) && ((!newObj.containsNotification() || newObj.getNotification()) || (forceNotifyOthers && p.id != session.getUserId()));
                         tz = p.timeZone;
-                    } catch (final OXException e) {
+                    } catch (OXException e) {
                         log(e);
+                    }
+                    if (null != regionalSettingsService) {
+                        DateFormat df = regionalSettingsService.getDateFormat(p.cid, p.id, locale, DateFormat.DEFAULT);
+                        actionRepl.setDateFormat(df);
                     }
                 } else {
                     sendMail = !p.ignoreNotification && (!newObj.containsNotification() || newObj.getNotification()) || (newObj.getModifiedBy() != p.id && forceNotifyOthers);
@@ -552,7 +560,9 @@ public class ParticipantNotify implements TaskEventInterface2 {
                      */
                     state.addSpecial(newObj, oldObj, renderMap, p);
 
-                    if (isUpdate && EmailableParticipant.STATE_NONE == p.state) {
+                    ConfigurationService configService = ServerServiceRegistry.getServize(ConfigurationService.class);
+                    boolean usePool = configService != null && configService.getBoolProperty("com.openexchange.calendar.notify.poolenabled", true);
+                    if (usePool && isUpdate && EmailableParticipant.STATE_NONE == p.state) {
                         /*
                          * Add to pool
                          */
@@ -606,7 +616,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
             if (permission.canReadOwnObjects() && obj.getCreatedBy() == participant.id) {
                 return true;
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             log(e);
         }
 
@@ -626,7 +636,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
         if (folderName == null) {
             try {
                 folderName = access.getFolderName(folderId);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.error("", e);
                 folderName = "";
             }
@@ -878,7 +888,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
             if (0 != newObj.getCreatedBy()) {
                 try {
                     createdByDisplayName = resolveUsers(ctx, newObj.getCreatedBy())[0].getDisplayName();
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     createdByDisplayName = STR_UNKNOWN;
                     log(e);
                 }
@@ -886,7 +896,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
             String modifiedByDisplayName = STR_UNKNOWN;
             try {
                 modifiedByDisplayName = resolveUsers(ctx, session.getUserId())[0].getDisplayName();
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 modifiedByDisplayName = STR_UNKNOWN;
                 log(e);
             }
@@ -895,7 +905,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
             final OXFolderAccess oxfa = new OXFolderAccess(session.getContext());
             try {
                 onBehalfDisplayName = resolveUsers(ctx, oxfa.getFolderOwner(newObj.getParentFolderID()))[0].getDisplayName();
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 log(e);
             }
             renderMap.put(new StringReplacement(TemplateToken.CREATED_BY, createdByDisplayName));
@@ -972,13 +982,13 @@ public class ParticipantNotify implements TaskEventInterface2 {
         {
             final SeriesReplacement seriesRepl;
             if (newObj.containsRecurrenceType() || newObj.getRecurrenceType() != CalendarObject.NO_RECURRENCE) {
-                seriesRepl = new SeriesReplacement(newObj, (Types.TASK == module));
+                seriesRepl = new SeriesReplacement(newObj, (Types.TASK == module), session.getContextId(), session.getUserId());
                 seriesRepl.setChanged(isUpdate ? (oldObj == null ? false : !compareRecurrenceInformation(newObj, oldObj)) : false);
             } else if (oldObj != null && oldObj.containsRecurrenceType()) {
-                seriesRepl = new SeriesReplacement(oldObj, (Types.TASK == module));
+                seriesRepl = new SeriesReplacement(oldObj, (Types.TASK == module), session.getContextId(), session.getUserId());
                 seriesRepl.setChanged(false);
             } else {
-                seriesRepl = new SeriesReplacement(newObj, (Types.TASK == module));
+                seriesRepl = new SeriesReplacement(newObj, (Types.TASK == module), session.getContextId(), session.getUserId());
                 seriesRepl.setChanged(false);
             }
             renderMap.put(seriesRepl);
@@ -1067,7 +1077,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
                                     }
                                 }
                             }
-                        } catch (final OXException e) {
+                        } catch (OXException e) {
                             log(e);
                         }
                         break;
@@ -1216,7 +1226,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
                                 addSingleParticipant(p, participantSet, resourceSet, receivers, all, false);
                             }
                         }
-                    } catch (final OXException e) {
+                    } catch (OXException e) {
                         log(e);
                     }
                     break;
@@ -1274,7 +1284,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
                                 addSingleParticipant(p, participantSet, resourceSet, receivers, all, false);
                             }
                         }
-                    } catch (final OXException e) {
+                    } catch (OXException e) {
                         log(e);
                     }
                     break;
@@ -1321,7 +1331,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
             user = resolveUsers(session.getContext(), session.getUserId())[0];
             l = user.getLocale();
             tz = TimeZone.getTimeZone(user.getTimeZone());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             // Should not happen
             LOG.warn("Could not resolve user from session: UserId: {} in Context: {}", I(session.getUserId()), I(session.getContextId()), e);
             l = Locale.getDefault();
@@ -1358,7 +1368,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
                 // System.out.println("PERSONAL FOLDER ID FOR PARTICIPANT "+
                 // userParticipant.getIdentifier()+": "+folderId);
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             log(e);
         }
 
@@ -1387,7 +1397,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
             if (displayName == null) {
                 displayName = participant.getDisplayName();
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             log(e);
         }
 
@@ -1395,7 +1405,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
         try {
             final User user = resolveUsers(session.getContext(), session.getUserId())[0];
             l = user.getLocale();
-        } catch (final OXException e) {
+        } catch (OXException e) {
             // Should not happen
             LOG.warn("Could not resolve user from session: UserId: {} in Context: {}", I(session.getUserId()), I(session.getContextId()), e);
             l = Locale.getDefault();
@@ -1446,7 +1456,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
             final User user = resolveUsers(ctx, creatorId)[0];
             final EmailableParticipant emailable = new EmailableParticipant(ctx.getContextId(), Participant.USER, creatorId, user.getGroups(), user.getMail(), user.getDisplayName(), user.getLocale(), TimeZone.getTimeZone(user.getTimeZone()), 10, folderId, CalendarObject.NONE, null, false);
             addReceiver(emailable, receivers, all);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             log(e);
         }
     }

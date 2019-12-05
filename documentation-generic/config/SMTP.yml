@@ -25,7 +25,7 @@ properties:
       configcascadeAware: true
       related: 
       file: smtp.properties
-      packageName: open-xchange-imap
+      packageName: open-xchange-smtp
       tags: ["Mail","SMTP", "Host"]
     - key: com.openexchange.smtp.smtpAuthentication
       description: |
@@ -36,7 +36,7 @@ properties:
       configcascadeAware: true
       related: 
       file: smtp.properties
-      packageName: open-xchange-imap
+      packageName: open-xchange-smtp
       tags: ["Mail","SMTP"]
     - key: com.openexchange.smtp.smtpAuthEnc
       description: |
@@ -47,7 +47,7 @@ properties:
       configcascadeAware: true
       related: 
       file: smtp.properties
-      packageName: open-xchange-imap
+      packageName: open-xchange-smtp
       tags: ["Mail","SMTP"]
     - key: com.openexchange.smtp.setSMTPEnvelopeFrom
       description: |
@@ -60,7 +60,7 @@ properties:
       configcascadeAware: true
       related: 
       file: smtp.properties
-      packageName: open-xchange-imap
+      packageName: open-xchange-smtp
       tags: ["Mail","SMTP"]
     - key: com.openexchange.smtp.smtpTimeout
       description: |
@@ -72,7 +72,7 @@ properties:
       configcascadeAware: true
       related: mail.smtp.timeout
       file: smtp.properties
-      packageName: open-xchange-imap
+      packageName: open-xchange-smtp
       tags: ["Mail","SMTP", "Timeout"]
     - key: com.openexchange.smtp.smtpConnectionTimeout
       description: |
@@ -84,7 +84,7 @@ properties:
       configcascadeAware: true
       related: mail.smtp.connectiontimeout
       file: smtp.properties
-      packageName: open-xchange-imap
+      packageName: open-xchange-smtp
       tags: ["Mail","SMTP", "Timeout"]
     - key: com.openexchange.smtp.logTransport
       description: |
@@ -96,7 +96,7 @@ properties:
       configcascadeAware: true
       related: 
       file: smtp.properties
-      packageName: open-xchange-imap
+      packageName: open-xchange-smtp
       tags: ["Mail","SMTP"]
     - key: com.openexchange.smtp.ssl.protocols
       description: |
@@ -107,7 +107,7 @@ properties:
       configcascadeAware: true
       related: 
       file: smtp.properties
-      packageName: open-xchange-imap
+      packageName: open-xchange-smtp
       tags: ["Mail","SMTP"]
     - key: com.openexchange.smtp.ssl.ciphersuites
       description: |
@@ -122,7 +122,7 @@ properties:
       configcascadeAware: true
       related: 
       file: smtp.properties
-      packageName: open-xchange-imap
+      packageName: open-xchange-smtp
       tags: ["Mail","SMTP"]
     - key: com.openexchange.smtp.sendPartial
       description: |
@@ -133,7 +133,7 @@ properties:
       configcascadeAware: true
       related: 
       file: smtp.properties
-      packageName: open-xchange-imap
+      packageName: open-xchange-smtp
       tags: ["Mail","SMTP"]
 
     - key: com.openexchange.smtp.primary.smtpLocalhost
@@ -149,7 +149,7 @@ properties:
       configcascadeAware: true
       related: 
       file: smtp.properties
-      packageName: open-xchange-imap
+      packageName: open-xchange-smtp
       tags: ["Mail","SMTP", "Host"]
     - key: com.openexchange.smtp.primary.smtpAuthentication
       description: |
@@ -160,7 +160,7 @@ properties:
       configcascadeAware: true
       related: 
       file: smtp.properties
-      packageName: open-xchange-imap
+      packageName: open-xchange-smtp
       tags: ["Mail","SMTP"]
     - key: com.openexchange.smtp.primary.smtpAuthEnc
       description: |
@@ -171,7 +171,7 @@ properties:
       configcascadeAware: true
       related: 
       file: smtp.properties
-      packageName: open-xchange-imap
+      packageName: open-xchange-smtp
       tags: ["Mail","SMTP"]
     - key: com.openexchange.smtp.primary.smtpTimeout
       description: |
@@ -183,7 +183,7 @@ properties:
       configcascadeAware: true
       related: mail.smtp.timeout
       file: smtp.properties
-      packageName: open-xchange-imap
+      packageName: open-xchange-smtp
       tags: ["Mail","SMTP", "Timeout"]
     - key: com.openexchange.smtp.primary.smtpConnectionTimeout
       description: |
@@ -195,7 +195,7 @@ properties:
       configcascadeAware: true
       related: mail.smtp.connectiontimeout
       file: smtp.properties
-      packageName: open-xchange-imap
+      packageName: open-xchange-smtp
       tags: ["Mail","SMTP", "Timeout"]
     - key: com.openexchange.smtp.primary.ssl.protocols
       description: |
@@ -206,7 +206,7 @@ properties:
       configcascadeAware: true
       related: 
       file: smtp.properties
-      packageName: open-xchange-imap
+      packageName: open-xchange-smtp
       tags: ["Mail","SMTP"]
     - key: com.openexchange.smtp.primary.ssl.ciphersuites
       description: |
@@ -221,7 +221,7 @@ properties:
       configcascadeAware: true
       related: 
       file: smtp.properties
-      packageName: open-xchange-imap
+      packageName: open-xchange-smtp
       tags: ["Mail","SMTP"]
     - key: com.openexchange.smtp.primary.sendPartial
       description: |
@@ -232,7 +232,7 @@ properties:
       configcascadeAware: true
       related: 
       file: smtp.properties
-      packageName: open-xchange-imap
+      packageName: open-xchange-smtp
       tags: ["Mail","SMTP"]
     - key: com.openexchange.smtp.setPrimaryAddressHeader
       description: |
@@ -247,6 +247,6 @@ properties:
       configcascadeAware: true
       related: 
       file: smtp.properties
-      packageName: open-xchange-imap
+      packageName: open-xchange-smtp
       tags: ["Mail","SMTP"]
       

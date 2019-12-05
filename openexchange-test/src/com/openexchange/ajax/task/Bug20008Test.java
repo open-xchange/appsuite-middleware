@@ -22,7 +22,6 @@ import com.openexchange.groupware.tasks.Task;
 
 public class Bug20008Test extends AbstractAJAXSession {
 
-    @SuppressWarnings("hiding")
     private AJAXClient client;
     private Task task;
     private TimeZone tz;
@@ -31,6 +30,7 @@ public class Bug20008Test extends AbstractAJAXSession {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -48,6 +48,7 @@ public class Bug20008Test extends AbstractAJAXSession {
         response.fillTask(task);
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

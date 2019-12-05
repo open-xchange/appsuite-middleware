@@ -167,7 +167,7 @@ public class CardDAVOnboardingProvider implements OnboardingPlistProvider {
             throw OnboardingExceptionCodes.UNSUPPORTED_ACTION.create(request.getAction().getId());
         }
 
-        switch(scenario.getType()) {
+        switch (scenario.getType()) {
             case LINK:
                 throw OnboardingExceptionCodes.UNSUPPORTED_TYPE.create(identifier, scenario.getType().getId());
             case MANUAL:

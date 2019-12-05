@@ -125,7 +125,7 @@ public final class MailAccountSMTPProperties extends MailAccountTransportPropert
         if (null != smtpConTimeoutStr) {
             try {
                 return Integer.parseInt(smtpConTimeoutStr);
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 LOG.error("SMTP Connection Timeout: Invalid value.", e);
                 return SMTPProperties.getInstance().getSmtpConnectionTimeout();
             }
@@ -137,7 +137,7 @@ public final class MailAccountSMTPProperties extends MailAccountTransportPropert
 
                 try {
                     return Integer.parseInt(smtpConTimeoutStr);
-                } catch (final NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     LOG.error("SMTP Connection Timeout: Invalid value.", e);
                     return SMTPProperties.getInstance().getSmtpConnectionTimeout();
                 }
@@ -171,7 +171,7 @@ public final class MailAccountSMTPProperties extends MailAccountTransportPropert
         if (null != smtpTimeoutStr) {
             try {
                 return Integer.parseInt(smtpTimeoutStr.trim());
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 LOG.error("SMTP Timeout: Invalid value.", e);
                 return SMTPProperties.getInstance().getSmtpTimeout();
             }
@@ -182,7 +182,7 @@ public final class MailAccountSMTPProperties extends MailAccountTransportPropert
             if (null != smtpTimeoutStr) {
                 try {
                     return Integer.parseInt(smtpTimeoutStr.trim());
-                } catch (final NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     LOG.error("SMTP Timeout: Invalid value.", e);
                     return SMTPProperties.getInstance().getSmtpTimeout();
                 }

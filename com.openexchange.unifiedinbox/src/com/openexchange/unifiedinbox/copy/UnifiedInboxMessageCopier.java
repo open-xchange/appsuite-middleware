@@ -320,10 +320,10 @@ public final class UnifiedInboxMessageCopier {
             for (int k = 0; k < nCallables; k++) {
                 completionFuture.take().get();
             }
-        } catch (final InterruptedException e) {
+        } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw MailExceptionCode.INTERRUPT_ERROR.create(e);
-        } catch (final ExecutionException e) {
+        } catch (ExecutionException e) {
             throw ThreadPools.launderThrowable(e, OXException.class);
         }
     }

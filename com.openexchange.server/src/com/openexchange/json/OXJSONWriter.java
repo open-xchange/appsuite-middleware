@@ -149,10 +149,6 @@ public final class OXJSONWriter extends JSONWriter {
         pushArray(jsonArray);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.json.JSONWriter#array()
-     */
     @Override
     public JSONWriter array() throws JSONException {
         if (mode != MODE_INIT && mode != MODE_OBJ && mode != MODE_ARR) {
@@ -167,10 +163,6 @@ public final class OXJSONWriter extends JSONWriter {
         return this;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.json.JSONWriter#endArray()
-     */
     @Override
     public JSONWriter endArray() throws JSONException {
         if (mode != MODE_ARR) {
@@ -180,10 +172,6 @@ public final class OXJSONWriter extends JSONWriter {
         return this;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.json.JSONWriter#object()
-     */
     @Override
     public JSONWriter object() throws JSONException {
         if (mode != MODE_INIT && mode != MODE_OBJ && mode != MODE_ARR) {
@@ -199,10 +187,6 @@ public final class OXJSONWriter extends JSONWriter {
         return this;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.json.JSONWriter#endObject()
-     */
     @Override
     public JSONWriter endObject() throws JSONException {
         if (mode != MODE_KEY) {
@@ -212,10 +196,6 @@ public final class OXJSONWriter extends JSONWriter {
         return this;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.json.JSONWriter#key(java.lang.String)
-     */
     @Override
     public JSONWriter key(final String key) throws JSONException {
         if (key == null) {
@@ -229,37 +209,21 @@ public final class OXJSONWriter extends JSONWriter {
         return this;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.json.JSONWriter#value(boolean)
-     */
     @Override
     public JSONWriter value(final boolean b) throws JSONException {
         return append(Boolean.valueOf(b));
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.json.JSONWriter#value(double)
-     */
     @Override
     public JSONWriter value(final double d) throws JSONException {
         return this.value(Double.valueOf(d));
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.json.JSONWriter#value(long)
-     */
     @Override
     public JSONWriter value(final long l) throws JSONException {
         return append(Long.valueOf(l));
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.json.JSONWriter#value(java.lang.Object)
-     */
     @Override
     public JSONWriter value(final Object o) throws JSONException {
         return append(o);
@@ -341,10 +305,6 @@ public final class OXJSONWriter extends JSONWriter {
         key = null;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see java.lang.Object#toString()
-     */
     @Override
     public String toString() {
         return jsonValue == null ? "[empty]" : jsonValue.toString();

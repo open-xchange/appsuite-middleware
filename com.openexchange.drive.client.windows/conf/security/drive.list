@@ -1,0 +1,8 @@
+# File containing a list of properties that should be parsed by the security manager
+# Files and directories specified by these configuration settings will be allowed
+# Format is [file:]config[:RW] with bracketed as optional parameters
+# Default is for read only.  Add RW to allow write
+# File instructs Security manager to only allow the one object, not directory or recursive
+
+# Drive client
+com.openexchange.drive.updater.path

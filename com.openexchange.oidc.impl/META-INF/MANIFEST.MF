@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: OpenID Connect implementation
 Bundle-SymbolicName: com.openexchange.oidc.impl
-Bundle-Version: 7.10.2
+Bundle-Version: 7.10.3
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.fasterxml.jackson.core,
@@ -41,11 +41,12 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.hazelcast.serialization,
  com.openexchange.java,
  com.openexchange.java.util,
+ com.openexchange.lock,
  com.openexchange.log,
  com.openexchange.login,
  com.openexchange.login.internal,
- com.openexchange.mailmapping,
- com.openexchange.mailmapping.osgiservice,
+ com.openexchange.login.listener,
+ com.openexchange.mail.api,
  com.openexchange.oidc,
  com.openexchange.oidc.state,
  com.openexchange.oidc.tools,
@@ -55,6 +56,7 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.serverconfig,
  com.openexchange.session,
  com.openexchange.session.inspector,
+ com.openexchange.session.oauth,
  com.openexchange.session.reservation,
  com.openexchange.sessiond,
  com.openexchange.sessionstorage,
@@ -80,6 +82,7 @@ Import-Package: com.fasterxml.jackson.core,
  org.apache.commons.codec.net,
  org.apache.commons.httpclient,
  org.apache.commons.httpclient.util,
+ org.apache.commons.lang3;version="3.8.1",
  org.apache.commons.logging,
  org.apache.commons.text,
  org.apache.http,

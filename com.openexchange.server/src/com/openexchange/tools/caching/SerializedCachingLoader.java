@@ -94,7 +94,7 @@ public class SerializedCachingLoader {
                 return loader.load();
             }
             // Lock obtained
-        } catch (final InterruptedException e) {
+        } catch (InterruptedException e) {
             // Keep interrupted status
             Thread.currentThread().interrupt();
             return loader.load();
@@ -126,7 +126,7 @@ public class SerializedCachingLoader {
                 // Only other option is that the cache contains the delegate object.
                 retval = (T) tmp;
             }
-        } catch (final InterruptedException e) {
+        } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             LOG.error(e.getMessage(), e);
         } finally {
@@ -135,7 +135,7 @@ public class SerializedCachingLoader {
         if (null != cond) {
             try {
                 retval = loader.load();
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 remove(cache, groupName, key);
                 throw e;
             }

@@ -48,6 +48,8 @@
  */
 package com.openexchange.oidc;
 
+import com.openexchange.authentication.AuthenticationService;
+
 /**
  * Configuration of the OpenID Connect Feature.
  *
@@ -55,19 +57,28 @@ package com.openexchange.oidc;
  * @since v7.10.0
  */
 public interface OIDCConfig {
-    
+
     /**
      * Determine weather the OpenID feature is enabled or not.
-     * 
+     *
      * @return true or false
      */
     boolean isEnabled();
-    
+
     /**
      * Start the default core OIDC backend.
-     * 
+     *
      * @return true or false
      */
     boolean startDefaultBackend();
-    
+
+    /**
+     * Whether an {@link AuthenticationService} shall be registered, that
+     * handles username/password logins for the core login servlet by using the Resource Owner
+     * Password Credentials Grant {@link https://tools.ietf.org/html/rfc6749#section-4.3} to authenticate.
+     *
+     * @return true or false
+     */
+    boolean isPasswordGrantEnabled();
+
 }

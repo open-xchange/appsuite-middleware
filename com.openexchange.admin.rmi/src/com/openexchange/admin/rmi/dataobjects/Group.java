@@ -156,33 +156,21 @@ public class Group extends ExtendableDataObject implements NameAndIdObject {
         return nameset;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.admin.rmi.dataobjects.NameAndIdObject#getId()
-     */
     @Override
     public final Integer getId() {
         return id;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.admin.rmi.dataobjects.NameAndIdObject#setId(java.lang.Integer)
-     */
     @Override
     public final void setId(final Integer val) {
         this.id = val;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.admin.rmi.dataobjects.NameAndIdObject#getName()
-     */
     @Override
     public final String getName() {
         return name;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.admin.rmi.dataobjects.NameAndIdObject#setName(java.lang.String)
-     */
     @Override
     public final void setName(final String val) {
         nameset = true;
@@ -339,9 +327,6 @@ public class Group extends ExtendableDataObject implements NameAndIdObject {
     }
 
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#hashCode()
-     */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -357,9 +342,6 @@ public class Group extends ExtendableDataObject implements NameAndIdObject {
     }
 
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {

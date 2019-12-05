@@ -270,7 +270,7 @@ public class GetResponse extends AbstractAJAXResponse {
             /*
              * TODO: Parse attachments
              */
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MessagingExceptionCodes.JSON_ERROR.create(e.getMessage());
         }
     }
@@ -281,7 +281,7 @@ public class GetResponse extends AbstractAJAXResponse {
         }
         try {
             return InternetAddress.parse(addrStr, true)[0];
-        } catch (final AddressException e) {
+        } catch (AddressException e) {
             return null;
         }
     }
@@ -332,7 +332,7 @@ public class GetResponse extends AbstractAJAXResponse {
         }
         try {
             return InternetAddress.parse(value, false);
-        } catch (final javax.mail.internet.AddressException e) {
+        } catch (javax.mail.internet.AddressException e) {
             return new InternetAddress[] { new com.openexchange.mail.mime.PlainTextAddress(value) };
         }
     }

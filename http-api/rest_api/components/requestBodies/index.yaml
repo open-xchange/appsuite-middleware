@@ -1,0 +1,7 @@
+putAdvertisementByNameBody:
+  content:
+    application/json:
+      schema:
+        type: string
+  description: JSONObject describing the advertisement configuration
+  required: true

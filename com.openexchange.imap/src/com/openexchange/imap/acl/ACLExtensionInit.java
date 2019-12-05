@@ -120,11 +120,11 @@ public final class ACLExtensionInit implements Initialization {
                 }
                 ACLExtensionFactory.getInstance().setACLExtensionInstance(implementingClass.newInstance());
             }
-        } catch (final ClassNotFoundException e) {
+        } catch (ClassNotFoundException e) {
             throw new Entity2ACLException(Entity2ACLException.Code.CLASS_NOT_FOUND, e, EMPTY_ARGS);
-        } catch (final InstantiationException e) {
+        } catch (InstantiationException e) {
             throw new Entity2ACLException(Entity2ACLException.Code.INSTANTIATION_FAILED, e, EMPTY_ARGS);
-        } catch (final IllegalAccessException e) {
+        } catch (IllegalAccessException e) {
             throw new Entity2ACLException(Entity2ACLException.Code.INSTANTIATION_FAILED, e, EMPTY_ARGS);
         }
          */

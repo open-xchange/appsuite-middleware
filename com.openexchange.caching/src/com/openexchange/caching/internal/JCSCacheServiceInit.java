@@ -186,7 +186,7 @@ public final class JCSCacheServiceInit {
     private static Properties loadProperties(final String cacheConfigFile) throws OXException {
         try {
             return loadProperties(new FileInputStream(cacheConfigFile));
-        } catch (final FileNotFoundException e) {
+        } catch (FileNotFoundException e) {
             throw CacheExceptionCode.MISSING_CACHE_CONFIG_FILE.create(e, cacheConfigFile);
         }
     }
@@ -195,12 +195,12 @@ public final class JCSCacheServiceInit {
         final Properties props = new Properties();
         try {
             props.load(in);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw CacheExceptionCode.IO_ERROR.create(e, e.getMessage());
         } finally {
             try {
                 in.close();
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 LOG.error("", e);
             }
         }
@@ -388,7 +388,7 @@ public final class JCSCacheServiceInit {
     public void reconfigureByPropertyFile() {
         try {
             configureByPropertyFile(false, true);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             // Cannot occur
             LOG.error("", e);
         }
@@ -412,7 +412,7 @@ public final class JCSCacheServiceInit {
             initializeCompositeCacheManager(obtainMutex);
             configure(properties);
             defaultCacheRegions = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(ccmInstance.getCacheNames())));
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw CacheExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }

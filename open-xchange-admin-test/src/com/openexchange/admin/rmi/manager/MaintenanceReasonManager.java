@@ -122,11 +122,6 @@ public class MaintenanceReasonManager extends AbstractManager {
         utilInterface.deleteMaintenanceReason(new MaintenanceReason[] { maintenanceReason }, getMasterCredentials());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.admin.rmi.manager.AbstractManager#clean(java.lang.Object)
-     */
     @Override
     void clean(Object object) throws Exception {
         delete((MaintenanceReason) object);

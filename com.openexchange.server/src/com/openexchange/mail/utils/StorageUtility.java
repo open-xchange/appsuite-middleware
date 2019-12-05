@@ -156,7 +156,7 @@ public final class StorageUtility {
     public static Map<HeaderName, String> parseHeaders(final byte[] headers) {
         try {
             return parseHeaders(Charsets.toAsciiString(headers));
-        } catch (final UnsupportedCharsetException e) {
+        } catch (UnsupportedCharsetException e) {
             /*
              * Cannot occur
              */

@@ -50,6 +50,8 @@
 package com.openexchange.imageconverter.api;
 
 import java.io.Closeable;
+import com.openexchange.auth.Credentials;
+import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
 
 /**
@@ -58,12 +60,24 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:kai.ahrens@open-xchange.com">Kai Ahrens</a>
  * @since v7.10
  */
-public interface IImageClient extends IImageConverter, Closeable {
+public interface IImageClient extends IImageConverter, Reloadable, Closeable  {
 
     /**
-     * @return The status of the remote ImageServer
+     * @return The status of the remote ImageServer.
      */
     public String status() throws OXException;
 
+    /**
+     * @return <code>true</code> if the current client is connected to the server,
+     *  <code>false</code> otherwise.
+     * @throws OXException
+     */
     public boolean isConnected() throws OXException;
+
+    /**
+     * @param credentials The credentials to be used for requests,
+     *  requiring authentication.
+     * @throws OXException
+     */
+    public void setCredentials(Credentials credentials) throws OXException;
 }

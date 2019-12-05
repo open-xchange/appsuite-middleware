@@ -112,7 +112,7 @@ public final class FolderParser {
             if (jsonObj.hasAndNotNull(FolderFields.SUBSCRIBED)) {
                 try {
                     mailFolder.setSubscribed(jsonObj.getInt(FolderFields.SUBSCRIBED) > 0);
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     /*
                      * Not an integer value
                      */
@@ -134,7 +134,7 @@ public final class FolderParser {
                         int entity;
                         try {
                             entity = elem.getInt(FolderFields.ENTITY);
-                        } catch (final JSONException e) {
+                        } catch (JSONException e) {
                             final String entityStr = elem.getString(FolderFields.ENTITY);
                             entity = us.getUserId(entityStr, ContextStorage.getStorageContext(session.getContextId()));
                         }
@@ -161,7 +161,7 @@ public final class FolderParser {
                     mailFolder.addPermissions(mailPerms);
                 }
             }
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }

@@ -111,9 +111,9 @@ public class POTranslationsDiscoverer extends FileDiscoverer {
                     list.add(translations);
                     LOG.info("Parsed .po file \"{}\" for locale: {}", file, l);
                 }
-            } catch (final FileNotFoundException e) {
+            } catch (FileNotFoundException e) {
                 LOG.error("File disappeared?", e);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.error("Could not parse po file: ", e);
             } finally {
                 Streams.close(input);

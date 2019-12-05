@@ -1,0 +1,34 @@
+type: object
+properties:
+  items:
+    type: array
+    items:
+      type: object
+      properties:
+        item:
+          type: object
+          properties:
+            item_id:
+              type: integer
+              description: The item's unique identifier
+            name:
+              type: string
+              description: The item's name (localisable)
+            category_id:
+              type: integer
+              description: The item's category identifier
+            category:
+              type: string
+              description: The item's category name
+            country:
+              type: string
+              description: The country for which the item is valid for
+            icon:
+              type: string
+              description: The URL of the item's icon
+        item_class:
+          type: string
+          description: The item's class. Either 'page' or 'calendar'
+  name:
+    type: string
+    description: The section's name

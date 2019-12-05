@@ -121,7 +121,7 @@ public class MimeMessagingPart implements MessagingPart {
         public InputStream getInputStream() throws IOException {
             try {
                 return binaryContent.getData();
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 final Throwable cause = e.getCause();
                 if (cause instanceof IOException) {
                     throw (IOException) cause;
@@ -165,7 +165,7 @@ public class MimeMessagingPart implements MessagingPart {
         public InputStream getInputStream() throws IOException {
             try {
                 return fileContent.getData();
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 final Throwable cause = e.getCause();
                 if (cause instanceof IOException) {
                     throw (IOException) cause;
@@ -224,7 +224,7 @@ public class MimeMessagingPart implements MessagingPart {
         public void handleHeader(final Header header, final Collection<MessagingHeader> collection) throws OXException {
             try {
                 collection.addAll(MimeAddressMessagingHeader.parseRFC822(name, header.getValue()));
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 /*
                  * Could not be parsed to a RFC822 address
                  */
@@ -362,7 +362,7 @@ public class MimeMessagingPart implements MessagingPart {
             ContentType contentType = null;
             try {
                 contentType = getContentType();
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.debug("Content-Type header could not be requested.", e);
             }
             if (null != contentType) {
@@ -405,13 +405,13 @@ public class MimeMessagingPart implements MessagingPart {
     private <O extends Object> O getContentObject(final Class<O> clazz) {
         try {
             return clazz.cast(part.getContent());
-        } catch (final IOException e) {
+        } catch (IOException e) {
             LOG.debug("{} content could not be obtained.", clazz.getSimpleName(), e);
             return null;
-        } catch (final javax.mail.MessagingException e) {
+        } catch (javax.mail.MessagingException e) {
             LOG.debug("{} content could not be obtained.", clazz.getSimpleName(), e);
             return null;
-        } catch (final ClassCastException e) {
+        } catch (ClassCastException e) {
             LOG.debug("Content is not a {}.", clazz.getName(), e);
             return null;
         }
@@ -431,7 +431,7 @@ public class MimeMessagingPart implements MessagingPart {
                     }
                     cachedContentType = tmp = new MimeContentType(s[0]);
                     b_cachedContentType = true;
-                } catch (final javax.mail.MessagingException e) {
+                } catch (javax.mail.MessagingException e) {
                     throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
                 }
             }
@@ -444,7 +444,7 @@ public class MimeMessagingPart implements MessagingPart {
     public String getDisposition() throws OXException {
         try {
             return part.getDisposition();
-        } catch (final javax.mail.MessagingException e) {
+        } catch (javax.mail.MessagingException e) {
             throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
         }
     }
@@ -453,7 +453,7 @@ public class MimeMessagingPart implements MessagingPart {
     public String getFileName() throws OXException {
         try {
             return part.getFileName();
-        } catch (final javax.mail.MessagingException e) {
+        } catch (javax.mail.MessagingException e) {
             throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
         }
     }
@@ -468,7 +468,7 @@ public class MimeMessagingPart implements MessagingPart {
     public Collection<MessagingHeader> getHeader(final String name) throws OXException {
         try {
             return getHeaders().get(name);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
         }
     }
@@ -511,7 +511,7 @@ public class MimeMessagingPart implements MessagingPart {
                 }
                 tmp = Collections.unmodifiableMap(tmp);
                 headers = tmp;
-            } catch (final javax.mail.MessagingException e) {
+            } catch (javax.mail.MessagingException e) {
                 throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
             }
         }
@@ -540,7 +540,7 @@ public class MimeMessagingPart implements MessagingPart {
              */
             try {
                 return part.getSize();
-            } catch (final javax.mail.MessagingException e) {
+            } catch (javax.mail.MessagingException e) {
                 throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
             }
         }
@@ -560,7 +560,7 @@ public class MimeMessagingPart implements MessagingPart {
     public void writeTo(final OutputStream os) throws IOException, OXException {
         try {
             part.writeTo(os);
-        } catch (final javax.mail.MessagingException e) {
+        } catch (javax.mail.MessagingException e) {
             throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
         }
     }
@@ -598,9 +598,9 @@ public class MimeMessagingPart implements MessagingPart {
             headers = null;
             b_cachedContentType = false;
             cachedContentType = null;
-        } catch (final javax.mail.MessagingException e) {
+        } catch (javax.mail.MessagingException e) {
             throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
-        } catch (final IllegalStateException e) {
+        } catch (IllegalStateException e) {
             throw MessagingExceptionCodes.READ_ONLY.create(e, e.getMessage());
         }
     }
@@ -617,9 +617,9 @@ public class MimeMessagingPart implements MessagingPart {
             headers = null;
             b_cachedContentType = false;
             cachedContentType = null;
-        } catch (final javax.mail.MessagingException e) {
+        } catch (javax.mail.MessagingException e) {
             throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
-        } catch (final IllegalStateException e) {
+        } catch (IllegalStateException e) {
             throw MessagingExceptionCodes.READ_ONLY.create(e, e.getMessage());
         }
     }
@@ -636,9 +636,9 @@ public class MimeMessagingPart implements MessagingPart {
             headers = null;
             b_cachedContentType = false;
             cachedContentType = null;
-        } catch (final javax.mail.MessagingException e) {
+        } catch (javax.mail.MessagingException e) {
             throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
-        } catch (final IllegalStateException e) {
+        } catch (IllegalStateException e) {
             throw MessagingExceptionCodes.READ_ONLY.create(e, e.getMessage());
         }
     }
@@ -658,9 +658,9 @@ public class MimeMessagingPart implements MessagingPart {
             cachedContent = null;
             b_cachedContentType = false;
             cachedContentType = null;
-        } catch (final javax.mail.MessagingException e) {
+        } catch (javax.mail.MessagingException e) {
             throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
-        } catch (final IllegalStateException e) {
+        } catch (IllegalStateException e) {
             throw MessagingExceptionCodes.READ_ONLY.create(e, e.getMessage());
         }
     }
@@ -696,7 +696,7 @@ public class MimeMessagingPart implements MessagingPart {
                     if (data instanceof String) {
                         try {
                             part.setDataHandler(new DataHandler(new MessageDataSource(data.toString(), type)));
-                        } catch (final UnsupportedEncodingException e) {
+                        } catch (UnsupportedEncodingException e) {
                             throw new javax.mail.MessagingException("Unsupported encosing.", e);
                         }
                     } else {
@@ -711,9 +711,9 @@ public class MimeMessagingPart implements MessagingPart {
             cachedContent = null;
             b_cachedContentType = false;
             cachedContentType = null;
-        } catch (final javax.mail.MessagingException e) {
+        } catch (javax.mail.MessagingException e) {
             throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
-        } catch (final IllegalStateException e) {
+        } catch (IllegalStateException e) {
             throw MessagingExceptionCodes.READ_ONLY.create(e, e.getMessage());
         }
     }
@@ -728,9 +728,9 @@ public class MimeMessagingPart implements MessagingPart {
         try {
             part.setDisposition(disposition);
             headers = null;
-        } catch (final javax.mail.MessagingException e) {
+        } catch (javax.mail.MessagingException e) {
             throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
-        } catch (final IllegalStateException e) {
+        } catch (IllegalStateException e) {
             throw MessagingExceptionCodes.READ_ONLY.create(e, e.getMessage());
         }
     }
@@ -745,9 +745,9 @@ public class MimeMessagingPart implements MessagingPart {
         try {
             part.setFileName(filename);
             headers = null;
-        } catch (final javax.mail.MessagingException e) {
+        } catch (javax.mail.MessagingException e) {
             throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
-        } catch (final IllegalStateException e) {
+        } catch (IllegalStateException e) {
             throw MessagingExceptionCodes.READ_ONLY.create(e, e.getMessage());
         }
     }
@@ -766,9 +766,9 @@ public class MimeMessagingPart implements MessagingPart {
             for (final Enumeration<Header> allHeaders = part.getAllHeaders(); allHeaders.hasMoreElements();) {
                 part.removeHeader(allHeaders.nextElement().getName());
             }
-        } catch (final javax.mail.MessagingException e) {
+        } catch (javax.mail.MessagingException e) {
             throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
-        } catch (final IllegalStateException e) {
+        } catch (IllegalStateException e) {
             throw MessagingExceptionCodes.READ_ONLY.create(e, e.getMessage());
         }
         /*
@@ -797,9 +797,9 @@ public class MimeMessagingPart implements MessagingPart {
             headers = null;
             b_cachedContentType = false;
             cachedContentType = null;
-        } catch (final javax.mail.MessagingException e) {
+        } catch (javax.mail.MessagingException e) {
             throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
-        } catch (final IllegalStateException e) {
+        } catch (IllegalStateException e) {
             throw MessagingExceptionCodes.READ_ONLY.create(e, e.getMessage());
         }
     }
@@ -816,9 +816,9 @@ public class MimeMessagingPart implements MessagingPart {
             headers = null;
             b_cachedContentType = false;
             cachedContentType = null;
-        } catch (final javax.mail.MessagingException e) {
+        } catch (javax.mail.MessagingException e) {
             throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
-        } catch (final IllegalStateException e) {
+        } catch (IllegalStateException e) {
             throw MessagingExceptionCodes.READ_ONLY.create(e, e.getMessage());
         }
     }
@@ -871,9 +871,9 @@ public class MimeMessagingPart implements MessagingPart {
             cachedContent = null;
             b_cachedContentType = false;
             cachedContentType = null;
-        } catch (final javax.mail.MessagingException e) {
+        } catch (javax.mail.MessagingException e) {
             throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
-        } catch (final IllegalStateException e) {
+        } catch (IllegalStateException e) {
             throw MessagingExceptionCodes.READ_ONLY.create(e, e.getMessage());
         }
     }

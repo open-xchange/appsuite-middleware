@@ -54,6 +54,11 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
+ * This stream sits on top of an already existing output stream (the underlying output stream) which it uses as its basic sink of data.
+ * <p>
+ * Prior to passing bytes to the underlying output stream, the bytes to write are counted and checked against given max. number of bytes
+ * that may be written. If max. number of bytes is exceeded an {@link IOException} <code>"Maximum message size is exceeded."</code> is thrown.
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
@@ -101,13 +106,8 @@ public class CountingOutputStream extends FilterOutputStream {
      */
     @Override
     public void write(int idx) throws IOException {
-        try {
-            beforeWrite(1);
-            out.write(idx);
-            afterWrite(1);
-        } catch (IOException e) {
-            handleIOException(e);
-        }
+        beforeWrite(1);
+        out.write(idx);
     }
 
     /**
@@ -122,33 +122,27 @@ public class CountingOutputStream extends FilterOutputStream {
             return;
         }
 
-        try {
-            int len = bts.length;
-            beforeWrite(len);
-            out.write(bts);
-            afterWrite(len);
-        } catch (IOException e) {
-            handleIOException(e);
-        }
+        int len = bts.length;
+        beforeWrite(len);
+        out.write(bts);
     }
 
     /**
      * Invokes the delegate's <code>write(byte[])</code> method.
      *
      * @param bts the bytes to write
-     * @param st The start offset
-     * @param end The number of bytes to write
+     * @param off the start offset in the data
+     * @param len the number of bytes to write
      * @throws IOException if an I/O error occurs
      */
     @Override
-    public void write(byte[] bts, int st, int end) throws IOException {
-        try {
-            beforeWrite(end);
-            out.write(bts, st, end);
-            afterWrite(end);
-        } catch (IOException e) {
-            handleIOException(e);
+    public void write(byte[] bts, int off, int len) throws IOException {
+        if (null == bts) {
+            return;
         }
+
+        beforeWrite(len);
+        out.write(bts, off, len);
     }
 
     /**
@@ -158,11 +152,7 @@ public class CountingOutputStream extends FilterOutputStream {
      */
     @Override
     public void flush() throws IOException {
-        try {
-            out.flush();
-        } catch (IOException e) {
-            handleIOException(e);
-        }
+        out.flush();
     }
 
     /**
@@ -172,39 +162,7 @@ public class CountingOutputStream extends FilterOutputStream {
      */
     @Override
     public void close() throws IOException {
-        try {
-            out.close();
-        } catch (IOException e) {
-            handleIOException(e);
-        }
-    }
-
-    /**
-     * Invoked by the write methods after the proxied call has returned successfully. The number of bytes written (1 for the
-     * {@link #write(int)} method, buffer length for {@link #write(byte[])}, etc.) is given as an argument.
-     * <p>
-     * Subclasses can override this method to add common post-processing functionality without having to override all the write methods. The
-     * default implementation does nothing.
-     *
-     * @since 2.0
-     * @param n number of bytes written
-     * @throws IOException if the post-processing fails
-     */
-    protected void afterWrite(int n) throws IOException {
-        // Nothing
-    }
-
-    /**
-     * Handle any IOExceptions thrown.
-     * <p>
-     * This method provides a point to implement custom exception handling. The default behaviour is to re-throw the exception.
-     *
-     * @param e The IOException thrown
-     * @throws IOException if an I/O error occurs
-     * @since 2.0
-     */
-    protected void handleIOException(IOException e) throws IOException {
-        throw e;
+        out.close();
     }
 
 }

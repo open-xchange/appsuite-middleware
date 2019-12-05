@@ -50,6 +50,7 @@
 package com.openexchange.mailaccount;
 
 import java.util.Locale;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link Status} - Represents a status for a mail account.
@@ -73,5 +74,12 @@ public interface Status {
      * @return The human-readable message or <code>null</code>
      */
     String getMessage(Locale locale);
+
+    /**
+     * Gets an optional error providing further details in case an erroneous status is represented.
+     *
+     * @return The error, or <code>null</code> if not available
+     */
+    OXException getError();
 
 }

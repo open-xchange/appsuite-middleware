@@ -154,7 +154,7 @@ public class FileFieldSet extends AbstractFileFieldSwitcher {
     @Override
     public Object lastModified(final Object... args) {
         Date date = date(1, args);
-        if(date != null) {
+        if (date != null) {
             md(args).setLastModified(date);
         }
         return ret(args);
@@ -163,7 +163,7 @@ public class FileFieldSet extends AbstractFileFieldSwitcher {
     @Override
     public Object lastModifiedUtc(final Object... args) {
         Date date = date(1, args);
-        if(date != null) {
+        if (date != null) {
             md(args).setLastModified(date);
         }
         return ret(args);
@@ -222,7 +222,7 @@ public class FileFieldSet extends AbstractFileFieldSwitcher {
     @SuppressWarnings("unchecked")
     @Override
     public Object meta(Object... args) {
-        if(args[1] instanceof Map<?,?>) {
+        if (args[1] instanceof Map<?,?>) {
             md(args).setMeta((Map<String, Object>) args[1]);
         }
         return null;
@@ -231,7 +231,7 @@ public class FileFieldSet extends AbstractFileFieldSwitcher {
     @SuppressWarnings("unchecked")
     @Override
     public Object objectPermissions(Object... args) {
-        if(args[1] instanceof List<?>) {
+        if (args[1] instanceof List<?>) {
             md(args).setObjectPermissions((List<FileStorageObjectPermission>) args[1]);
         }
         return null;
@@ -247,7 +247,7 @@ public class FileFieldSet extends AbstractFileFieldSwitcher {
     public Object origin(Object... args) {
         if (args[1] instanceof FolderPath) {
             md(args).setOrigin((FolderPath) args[1]);
-        } else if(args[1] != null) {
+        } else if (args[1] != null) {
             md(args).setOrigin(FolderPath.parseFrom(args[1].toString()));
         } else {
             md(args).setOrigin(null);

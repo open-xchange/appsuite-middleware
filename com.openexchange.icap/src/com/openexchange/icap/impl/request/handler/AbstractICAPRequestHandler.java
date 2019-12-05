@@ -120,11 +120,6 @@ abstract class AbstractICAPRequestHandler implements ICAPRequestHandler {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.icap.request.handler.ICAPRequestHandler#handle(com.openexchange.icap.ICAPRequest, java.net.Socket)
-     */
     @Override
     public ICAPResponse handle(ICAPRequest request, Socket socket) throws IOException {
         try (DataInputStream inputStream = new DataInputStream(socket.getInputStream()); DataOutputStream outputStream = new DataOutputStream(socket.getOutputStream());) {

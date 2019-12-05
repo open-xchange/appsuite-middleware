@@ -148,7 +148,7 @@ public final class Select {
                 stmt.setString(pos, folderId);
                 rs = stmt.executeQuery();
                 return rs.next();
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
             } finally {
                 Databases.closeSQLStuff(rs, stmt);
@@ -211,7 +211,7 @@ public final class Select {
                         virtualFolder.setLastModified(new Date(date));
                     }
                 }
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 if (null != stmt) {
                     final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Select.class);
                     if (LOG.isDebugEnabled()) {
@@ -261,7 +261,7 @@ public final class Select {
                 } else {
                     virtualFolder.setPermissions(permissions.toArray(new Permission[permissions.size()]));
                 }
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 if (null != stmt) {
                     final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Select.class);
                     if (LOG.isDebugEnabled()) {
@@ -289,7 +289,7 @@ public final class Select {
                     subscribed = rs.getInt(pos) > 0;
                 }
                 virtualFolder.setSubscribed(subscribed);
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 if (null != stmt) {
                     final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Select.class);
                     if (LOG.isDebugEnabled()) {
@@ -385,7 +385,7 @@ public final class Select {
                 }
             }
             return subfolderIds.toArray(new String[subfolderIds.size()]);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             if (null != stmt) {
                 final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Select.class);
                 if (LOG.isDebugEnabled()) {

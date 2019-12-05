@@ -241,6 +241,17 @@ public abstract class MailCapabilities {
     }
 
     /**
+     * Indicates if mail system supports application of mail filters to existing mails.
+     * <p>
+     * Defaults to <code>false</code>
+     *
+     * @return <code>true</code> if mail system supports application of mail filters; otherwise <code>false</code>
+     */
+    public boolean hasMailFilterApplication() {
+        return false;
+    }
+
+    /**
      * Indicates if mail system supports retrieving folder validity information.
      * <p>
      * Defaults to <code>false</code>
@@ -248,6 +259,24 @@ public abstract class MailCapabilities {
      * @return <code>true</code> if mail system supports retrieving folder validity information; otherwise <code>false</code>
      */
     public boolean hasFolderValidity() {
+        return false;
+    }
+
+    /**
+     * Indicates if mail system supports shared folders
+     *
+     * @return <code>true</code> if shared folders are supported; otherwise <code>false</code>
+     */
+    public boolean hasSharedFolders() {
+        return false;
+    }
+
+    /**
+     * Indicates if mail system supports public folders
+     *
+     * @return <code>true</code> if public folders are supported; otherwise <code>false</code>
+     */
+    public boolean hasPublicFolders() {
         return false;
     }
 

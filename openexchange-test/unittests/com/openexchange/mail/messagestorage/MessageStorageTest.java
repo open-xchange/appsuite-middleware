@@ -74,7 +74,7 @@ public abstract class MessageStorageTest extends AbstractMailTest {
             InternetAddress.parse(MimeMessageUtility.decodeMultiEncodedHeader(addressStr), true);
             // Valid addresses
             return true;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             // No valid addresses
             return false;
         }

@@ -70,7 +70,7 @@ public class PropfindAllPropsMarshaller extends PropertiesMarshaller {
 		try {
 			final Iterable<WebdavProperty> iterable =  resource.getAllProps();
 			multistatus.addStatus(new WebdavStatusImpl<Iterable<WebdavProperty>>(HttpServletResponse.SC_OK, resource.getUrl(), iterable));
-		} catch (final OXException e) {
+		} catch (OXException e) {
 			LOG.debug("", e);
 		}
 		return multistatus;

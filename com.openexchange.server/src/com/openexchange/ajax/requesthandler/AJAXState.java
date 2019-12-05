@@ -176,7 +176,7 @@ public final class AJAXState {
         for (AJAXStateHandler handler; (handler = handlers.poll()) != null;) {
             try {
                 handler.cleanUp(this);
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 LoggerFactory.getLogger(AJAXState.class).error("Failed closing handler: {}", handler.getClass().getName(), e);
             }
         }

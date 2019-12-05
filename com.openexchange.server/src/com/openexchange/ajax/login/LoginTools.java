@@ -82,6 +82,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.log.LogProperties;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.DefaultSessionAttributes;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.share.GuestInfo;
@@ -114,7 +115,7 @@ public final class LoginTools {
     private static final Pattern PATTERN_CRLF = Pattern.compile("\r?\n|(?:%0[aA])?%0[dD]");
     private static final Pattern PATTERN_DSLASH = Pattern.compile("(?:/|%2[fF]){2}");
 
-    public static String generateRedirectURL(String uiWebPathParam, String shouldStore, String sessionId, String uiWebPath) {
+    public static String generateRedirectURL(String uiWebPathParam, String sessionId, String uiWebPath) {
         String retval = uiWebPathParam;
         if (null == retval) {
             retval = uiWebPath;
@@ -125,9 +126,6 @@ public final class LoginTools {
         // since it is interpreted by the Browser as "http://".
         retval = PATTERN_DSLASH.matcher(retval).replaceAll("/");
         retval = addFragmentParameter(retval, PARAMETER_SESSION, sessionId);
-        if (shouldStore != null) {
-            retval = addFragmentParameter(retval, "store", shouldStore);
-        }
         return retval;
     }
 
@@ -175,11 +173,20 @@ public final class LoginTools {
     }
 
     public static String parseLanguage(HttpServletRequest req) {
-        return parseParameter(req, LoginFields.LANGUAGE_PARAM, "");
+        return parseParameter(req, LoginFields.LANGUAGE_PARAM, parseLocale(req));
     }
 
     public static boolean parseStoreLanguage(HttpServletRequest req) {
         String value = req.getParameter(LoginFields.STORE_LANGUAGE);
+        return Strings.isEmpty(value) ? parseStoreLocale(req) : AJAXRequestDataTools.parseBoolParameter(value);
+    }
+
+    public static String parseLocale(HttpServletRequest req) {
+        return parseParameter(req, LoginFields.LOCALE_PARAM, "");
+    }
+
+    public static boolean parseStoreLocale(HttpServletRequest req) {
+        String value = req.getParameter(LoginFields.STORE_LOCALE);
         return AJAXRequestDataTools.parseBoolParameter(value);
     }
 
@@ -234,7 +241,7 @@ public final class LoginTools {
      * @throws OXException
      */
     public static LoginRequestImpl parseLogin(HttpServletRequest req, String login, String password, boolean strict, String defaultClient, boolean forceHTTPS, boolean requiredAuthId) throws OXException {
-        return parseLogin(req, login, password, strict, defaultClient, forceHTTPS, requiredAuthId, (String[])null);
+        return parseLogin(req, login, password, strict, defaultClient, forceHTTPS, requiredAuthId, (String[]) null);
     }
 
     /**
@@ -248,11 +255,11 @@ public final class LoginTools {
      * @param forceHTTPS
      * @param requiredAuthId <code>true</code> to fail on missing authId-parameter in the request, <code>false</code>, otherwise
      * @param additionalsForHash Additional values to include when calculating the client-specific hash for the cookie names, or
-     *                           <code>null</code> if not needed
+     *            <code>null</code> if not needed
      * @return The parsed login request
      * @throws OXException
      */
-    public static LoginRequestImpl parseLogin(HttpServletRequest req, String login, String password, boolean strict, String defaultClient, boolean forceHTTPS, boolean requiredAuthId, String...additionalsForHash) throws OXException {
+    public static LoginRequestImpl parseLogin(HttpServletRequest req, String login, String password, boolean strict, String defaultClient, boolean forceHTTPS, boolean requiredAuthId, String... additionalsForHash) throws OXException {
         final String authId = parseAuthId(req, requiredAuthId);
         final String client = parseClient(req, strict, defaultClient);
         final String version;
@@ -286,6 +293,7 @@ public final class LoginTools {
         b.cookies(cookies).secure(Tools.considerSecure(req, forceHTTPS));
         b.serverName(req.getServerName()).serverPort(req.getServerPort()).httpSessionID(httpSessionId);
         b.language(parseLanguage(req)).storeLanguage(parseStoreLanguage(req)).tranzient(parseTransient(req));
+        b.staySignedIn(parseStaySignedIn(req));
         return b.build();
     }
 
@@ -306,8 +314,9 @@ public final class LoginTools {
 
     /**
      * Updates session's IP address if different to specified IP address. This is only possible if the server is configured to be IP wise
-     * insecure. @See configuration property com.openexchange.ajax.login.insecure.
+     * insecure. See configuration property <code>"com.openexchange.ajax.login.insecure"</code>.
      *
+     * @param conf The login configuration to determine if insecure IP change is enabled
      * @param newIP The possibly new IP address
      * @param session The session to update if IP addresses differ
      */
@@ -319,7 +328,7 @@ public final class LoginTools {
                 SessiondService service = ServerServiceRegistry.getInstance().getService(SessiondService.class);
                 if (null != service) {
                     try {
-                        service.setLocalIp(session.getSessionID(), newIP);
+                        service.setSessionAttributes(session.getSessionID(), DefaultSessionAttributes.builder().withLocalIp(newIP).build());
                     } catch (OXException e) {
                         LOG.info("Failed to update session's IP address. authID: {}, sessionID: {}, old IP address: {}, new IP address: {}", session.getAuthId(), session.getSessionID(), oldIP, newIP, e);
                     }
@@ -345,7 +354,7 @@ public final class LoginTools {
         if (null == shareService) {
             return null;
         }
-        String [] result = new String[0];
+        String[] result = new String[0];
         GuestInfo guest = shareService.resolveGuest(token);
         if (null != guest) {
             int contextId = guest.getContextID();
@@ -412,6 +421,25 @@ public final class LoginTools {
     private static boolean containedInAllowedRedirectPaths(URI referrerUri, boolean defaultValue) {
         AllowedRedirectUris allowedRedirectUris = AllowedRedirectUris.getInstance();
         return allowedRedirectUris.isEmpty() ? defaultValue : allowedRedirectUris.isAllowed(referrerUri);
+    }
+
+    /**
+     * Parses staySignedIn parameter from login request
+     *
+     * @param req The request
+     * @return <code>true</code> if 'staySignedIn' parameter was set in login request,
+     *         <code>false</code> if not
+     */
+    public static boolean parseStaySignedIn(HttpServletRequest req) {
+        String staySignedIn = req.getParameter(LoginFields.STAY_SIGNED_IN);
+        if (Strings.isNotEmpty(staySignedIn)) {
+            return AJAXRequestDataTools.parseBoolParameter(staySignedIn);
+        }
+        String autologin = req.getParameter(LoginFields.AUTOLOGIN_PARAM);
+        if (Strings.isNotEmpty(autologin)) {
+            return AJAXRequestDataTools.parseBoolParameter(autologin);
+        }
+        return false;
     }
 
 }

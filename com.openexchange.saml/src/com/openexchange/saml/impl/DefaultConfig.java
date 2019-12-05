@@ -49,20 +49,7 @@
 
 package com.openexchange.saml.impl;
 
-import static com.openexchange.saml.SAMLProperties.ACS_URL;
-import static com.openexchange.saml.SAMLProperties.ALLOW_UNSOLICITED_RESPONSES;
-import static com.openexchange.saml.SAMLProperties.ENABLE_AUTO_LOGIN;
-import static com.openexchange.saml.SAMLProperties.ENABLE_METADATA_SERVICE;
-import static com.openexchange.saml.SAMLProperties.ENABLE_SESSION_INDEX_AUTO_LOGIN;
-import static com.openexchange.saml.SAMLProperties.ENABLE_SINGLE_LOGOUT;
-import static com.openexchange.saml.SAMLProperties.ENTITY_ID;
-import static com.openexchange.saml.SAMLProperties.IDP_ENTITY_ID;
-import static com.openexchange.saml.SAMLProperties.IDP_LOGIN_URL;
-import static com.openexchange.saml.SAMLProperties.IDP_LOGOUT_URL;
-import static com.openexchange.saml.SAMLProperties.LOGOUT_RESPONSE_BINDING;
-import static com.openexchange.saml.SAMLProperties.LOGOUT_RESPONSE_POST_TEMPLATE;
-import static com.openexchange.saml.SAMLProperties.PROVIDER_NAME;
-import static com.openexchange.saml.SAMLProperties.SLS_URL;
+import static com.openexchange.saml.SAMLProperties.*;
 import java.util.Set;
 import com.google.common.collect.ImmutableSet;
 import com.openexchange.config.ConfigurationService;

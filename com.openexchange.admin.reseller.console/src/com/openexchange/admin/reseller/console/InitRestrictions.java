@@ -91,7 +91,7 @@ public class InitRestrictions extends ResellerAbstraction {
             final OXResellerInterface rsi = getResellerInterface();
 
             rsi.initDatabaseRestrictions(auth);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             printErrors(null, null, e, parser);
             sysexit(1);
         }

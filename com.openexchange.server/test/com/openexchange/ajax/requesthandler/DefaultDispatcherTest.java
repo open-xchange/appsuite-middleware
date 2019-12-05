@@ -305,7 +305,7 @@ public class DefaultDispatcherTest {
         try {
             dispatcher.perform(requestData, null, null);
             fail("Should have produced an OXException");
-        } catch (final OXException x) {
+        } catch (OXException x) {
             // All Done
         }
 
@@ -326,7 +326,7 @@ public class DefaultDispatcherTest {
         try {
             dispatcher.perform(requestData, null, null);
             fail("Should have produced an OXException");
-        } catch (final OXException x) {
+        } catch (OXException x) {
             // All Done
         }
     }

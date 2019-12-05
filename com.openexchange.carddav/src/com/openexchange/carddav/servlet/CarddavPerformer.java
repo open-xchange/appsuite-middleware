@@ -126,7 +126,7 @@ public class CarddavPerformer extends DAVPerformer {
 
     @Override
     protected String getURLPrefix() {
-        return "/carddav/";
+        return factory.getURLPrefix();
     }
 
     @Override

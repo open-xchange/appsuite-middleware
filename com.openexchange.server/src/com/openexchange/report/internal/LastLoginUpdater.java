@@ -56,13 +56,13 @@ import com.google.common.collect.ImmutableSet;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.behavior.CallerRunsBehavior;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 /**
@@ -103,7 +103,7 @@ public final class LastLoginUpdater implements EventHandler {
             if (null == threadPool) {
                 try {
                     handleSessionTouched(session);
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     LOG.warn("Couldn''t check/update last-accessed time stamp for client \"{}\" of user {} in context {}", session.getClient(), session.getUserId(), session.getContextId(), e);
                 }
             } else {
@@ -113,7 +113,7 @@ public final class LastLoginUpdater implements EventHandler {
                     public Void call() throws Exception {
                         try {
                             handleSessionTouched(session);
-                        } catch (final Exception e) {
+                        } catch (Exception e) {
                             LOG.warn("Couldn''t check/update last-accessed time stamp for client \"{}\" of user {} in context {}", session.getClient(), session.getUserId(), session.getContextId(), e);
                         }
                         return null;
@@ -141,7 +141,7 @@ public final class LastLoginUpdater implements EventHandler {
                         // Need to update
                         LastLoginRecorder.updateLastLogin(userService, client, user, context);
                     }
-                } catch (final NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     // Continue...
                 }
             }

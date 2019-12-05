@@ -82,7 +82,7 @@ public class Quota extends SessionServlet {
 
             // response.setTimestamp(fsReq.getTimestamp());
             response.setData(responseObj);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             final Throwable cause = e.getCause();
             if (cause instanceof IOException) {
                 /*
@@ -94,7 +94,7 @@ public class Quota extends SessionServlet {
             final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
             LOG.error("", oje);
             response.setException(oje);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             response.setException(e);
         }

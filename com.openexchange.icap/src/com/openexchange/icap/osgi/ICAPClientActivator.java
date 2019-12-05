@@ -52,6 +52,8 @@ package com.openexchange.icap.osgi;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.icap.ICAPClientFactoryService;
 import com.openexchange.icap.impl.ICAPClientFactoryServiceImpl;
+import com.openexchange.monitoring.osgi.SocketLoggerBlackListServiceTracker;
+import com.openexchange.monitoring.sockets.SocketLoggerRegistryService;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -69,31 +71,18 @@ public class ICAPClientActivator extends HousekeepingActivator {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
-     */
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { LeanConfigurationService.class };
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.osgi.DeferredActivator#startBundle()
-     */
     @Override
     protected void startBundle() throws Exception {
         registerService(ICAPClientFactoryService.class, new ICAPClientFactoryServiceImpl(this));
+        track(SocketLoggerRegistryService.class, new SocketLoggerBlackListServiceTracker("com.openexchange.icap", context));
+        openTrackers();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.osgi.HousekeepingActivator#stopBundle()
-     */
     @Override
     protected void stopBundle() throws Exception {
         super.stopBundle();

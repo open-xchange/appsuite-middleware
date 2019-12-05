@@ -83,7 +83,7 @@ public class RemoteAuthenticatorImpl implements RemoteAuthenticator {
                 throw ServiceExceptionCode.absentService(Authenticator.class);
             }
             return authenticator.isMasterAuthenticationDisabled();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             logger.error("", e);
             final String message = e.getMessage();
             throw new RemoteException(message, new Exception(message));
@@ -99,7 +99,7 @@ public class RemoteAuthenticatorImpl implements RemoteAuthenticator {
                 throw ServiceExceptionCode.absentService(Authenticator.class);
             }
             return authenticator.isContextAuthenticationDisabled();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             logger.error("", e);
             final String message = e.getMessage();
             throw new RemoteException(message, new Exception(message));
@@ -115,7 +115,7 @@ public class RemoteAuthenticatorImpl implements RemoteAuthenticator {
                 throw ServiceExceptionCode.absentService(Authenticator.class);
             }
             authenticator.doAuthentication(new Credentials(login, password));
-        } catch (final Exception e) {
+        } catch (Exception e) {
             logger.error("", e);
             final String message = e.getMessage();
             throw new RemoteException(message, new Exception(message));
@@ -131,7 +131,7 @@ public class RemoteAuthenticatorImpl implements RemoteAuthenticator {
                 throw ServiceExceptionCode.absentService(Authenticator.class);
             }
             authenticator.doAuthentication(new Credentials(login, password), contextId);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             logger.error("", e);
             final String message = e.getMessage();
             throw new RemoteException(message, new Exception(message));
@@ -147,7 +147,7 @@ public class RemoteAuthenticatorImpl implements RemoteAuthenticator {
                 throw ServiceExceptionCode.absentService(Authenticator.class);
             }
             authenticator.doUserAuthentication(new Credentials(login, password), contextId);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             logger.error("", e);
             final String message = e.getMessage();
             throw new RemoteException(message, new Exception(message));

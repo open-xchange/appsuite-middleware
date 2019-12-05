@@ -67,7 +67,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.importexport.importers.TestCSVContactImporter;
-import com.openexchange.importexport.formats.Format;
+import com.openexchange.importexport.Format;
 
 public class OutlookCSVContactImportTest extends AbstractContactTest {
 
@@ -86,7 +86,7 @@ public class OutlookCSVContactImportTest extends AbstractContactTest {
         folderId = createTestFolder(FolderObject.CONTACT, sessObj, ctx, "csvContactTestFolder");
     }
 
-    protected void checkFirstResult(final int objectID) throws OXException, OXException, ParseException {
+    protected void checkFirstResult(final int objectID) throws OXException, ParseException {
         final Contact co = getEntry(objectID);
         assertEquals("Checking name", NAME1, co.getSurName());
         assertEquals("Checking e-Mail", EMAIL1, co.getEmail1());

@@ -97,7 +97,7 @@ public class MaxMindGeoLocationBinaryActivator extends HousekeepingActivator imp
         try {
             reinit(configService);
         } catch (Exception e) {
-            LOG.error("Failed to re-initialize MaxMind ge-location storage", e);
+            LOG.error("Failed to re-initialize MaxMind geo-location storage", e);
         }
     }
 
@@ -106,10 +106,14 @@ public class MaxMindGeoLocationBinaryActivator extends HousekeepingActivator imp
         return DefaultInterests.builder().propertiesOfInterest(DATABASE_PATH_PROPERTY).build();
     }
 
+    /**
+     * Re-initialises the configuration
+     * 
+     * @param configService The configuration service
+     * @throws Exception If the storage cannot be initialised
+     */
     private synchronized void reinit(ConfigurationService configService) throws Exception {
-        /*
-         * close & unregister a previously initialized storage
-         */
+        // Close & unregister a previously initialised storage
         MaxMindBinaryStorage storage = this.storage;
         if (null != storage) {
             storage.close();
@@ -120,18 +124,18 @@ public class MaxMindGeoLocationBinaryActivator extends HousekeepingActivator imp
             storageRegistration.unregister();
             this.storageRegistration = null;
         }
-        /*
-         * re-initialize storage service if configuration service is available
-         */
-        if (null != configService) {
-            String databasePath = configService.getProperty(DATABASE_PATH_PROPERTY);
-            if (Strings.isEmpty(databasePath)) {
-                LOG.warn("Property " + DATABASE_PATH_PROPERTY + " not configured, skipping storage registration.");
-            }
-            storage = new MaxMindBinaryStorage(databasePath);
-            this.storage = storage;
-            this.storageRegistration = context.registerService(GeoLocationStorageService.class, storage, null);
+        // Re-initialise storage service if configuration service is available
+        if (null == configService) {
+            LOG.warn("The configuration service is absent. Cannot reload configuration for MaxMindBinary Storage.");
+            return;
         }
+        String databasePath = configService.getProperty(DATABASE_PATH_PROPERTY);
+        if (Strings.isEmpty(databasePath)) {
+            LOG.warn("Property '{}' not configured, skipping storage registration.", DATABASE_PATH_PROPERTY);
+            return;
+        }
+        storage = new MaxMindBinaryStorage(databasePath);
+        this.storage = storage;
+        this.storageRegistration = context.registerService(GeoLocationStorageService.class, storage, null);
     }
-
 }

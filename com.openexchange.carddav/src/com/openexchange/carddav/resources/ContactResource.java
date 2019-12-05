@@ -65,6 +65,7 @@ import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.carddav.GroupwareCarddavFactory;
 import com.openexchange.carddav.Tools;
 import com.openexchange.carddav.photos.PhotoUtils;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.vcard.VCardExport;
 import com.openexchange.contact.vcard.VCardImport;
@@ -122,7 +123,7 @@ public class ContactResource extends CommonResource<Contact> {
      * @param object An existing groupware object represented by this resource, or <code>null</code> if a placeholder resource should be created
      * @param url The resource url
      */
-    public ContactResource(GroupwareCarddavFactory factory, CardDAVCollection parent, Contact object, WebdavPath url) throws OXException {
+    public ContactResource(GroupwareCarddavFactory factory, CardDAVCollection parent, Contact object, WebdavPath url) {
         super(parent, object, url);
         this.factory = factory;
         this.parent = parent;
@@ -137,7 +138,7 @@ public class ContactResource extends CommonResource<Contact> {
      * @param vCardImport The vCard import to apply
      * @return The new contact resource
      */
-    static ContactResource fromImport(GroupwareCarddavFactory factory, CardDAVCollection parent, WebdavPath url, VCardImport vCardImport) throws OXException {
+    static ContactResource fromImport(GroupwareCarddavFactory factory, CardDAVCollection parent, WebdavPath url, VCardImport vCardImport) {
         ContactResource contactResource = new ContactResource(factory, parent, null, url);
         contactResource.vCardImport = vCardImport;
         return contactResource;
@@ -381,7 +382,7 @@ public class ContactResource extends CommonResource<Contact> {
                 Date lastModified = contact.getLastModified();
                 int objectID = contact.getObjectID();
                 String vCardID = contact.getVCardId();
-                contact.setProperty("com.openexchange.contact.vcard.photo.uri", PhotoUtils.buildURI(getHostData(), contact));
+                contact.setProperty("com.openexchange.contact.vcard.photo.uri", PhotoUtils.buildURI(factory.getServiceSafe(ConfigViewFactory.class), getHostData(), contact));
                 contact.setProperty("com.openexchange.contact.vcard.photo.contentType", contact.getImageContentType());
                 vCardImport = factory.requireService(VCardService.class).importVCard(inputStream, contact, parameters);
                 if (null == vCardImport || null == vCardImport.getContact()) {
@@ -445,7 +446,7 @@ public class ContactResource extends CommonResource<Contact> {
             /*
              * image problem, handle by create without image
              */
-            if(object!=null){
+            if (object!=null){
                 LOG.warn("{}: {} - removing image and trying again.", getUrl(), e.getMessage());
                 object.removeImage1();
             }
@@ -537,7 +538,7 @@ public class ContactResource extends CommonResource<Contact> {
             factory.getSession(), String.valueOf(object.getParentFolderID()), String.valueOf(object.getObjectID()), contactFields);
         applyAttachments(contact);
         if (isExportPhotoAsURI() && 0 < contact.getNumberOfImages()) {
-            contact.setProperty("com.openexchange.contact.vcard.photo.uri", PhotoUtils.buildURI(getHostData(), contact));
+            contact.setProperty("com.openexchange.contact.vcard.photo.uri", PhotoUtils.buildURI(factory.getServiceSafe(ConfigViewFactory.class), getHostData(), contact));
             contact.setProperty("com.openexchange.contact.vcard.photo.contentType", contact.getImageContentType());
         }
         /*

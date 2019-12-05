@@ -4,26 +4,30 @@
     tags:
       - Mail
     summary: Copies a mail to another folder.
-    consumes:
-      - application/json
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: id
-        type: string
         description: Object ID of the requested mail that shall be copied.
         required: true
-      - $ref: "#/parameters/gblQueryParamMailFolder"
-      - in: body
-        name: body
-        description: A JSON object containing the id of the destination folder.
-        required: true
         schema:
-          $ref: "#/definitions/MailDestinationBody"
+          type: string
+      - $ref: '#/components/parameters/gblQueryParamMailFolder'
     responses:
-      200:
-        description: |
-          A JSON object containing the object ID and the folder ID of the copied mail. In case of errors the responsible fields in the
+      '200':
+        description: >
+          A JSON object containing the object ID and the folder ID of the copied
+          mail. In case of errors the responsible fields in the
+
           response are filled (see [Error handling](#error-handling)).
-        schema:
-          $ref: "#/definitions/MailDestinationResponse"
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MailDestinationResponse'
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MailDestinationBody'
+      description: A JSON object containing the id of the destination folder.
+      required: true

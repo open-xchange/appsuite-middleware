@@ -84,7 +84,7 @@ public final class SessionMailCache {
         SessionMailCache mailCache = null;
         try {
             mailCache = (SessionMailCache) mailSessionCache.getParameter(accountId, key);
-        } catch (final ClassCastException e) {
+        } catch (ClassCastException e) {
             /*
              * Class version does not match; just renew session cache.
              */
@@ -107,7 +107,7 @@ public final class SessionMailCache {
         SessionMailCache mailCache = null;
         try {
             mailCache = (SessionMailCache) mailSessionCache.getParameter(accountId, key);
-        } catch (final ClassCastException e) {
+        } catch (ClassCastException e) {
             /*
              * Class version does not match; just renew session cache.
              */
@@ -136,7 +136,7 @@ public final class SessionMailCache {
                     SessionMailCache.getInstance(session, mailAccount.getId()).clear();
                 }
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             // SWALLOW
            LoggerFactory.getLogger(SessionMailCache.class).warn("", e);
         }

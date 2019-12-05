@@ -93,9 +93,9 @@ public class MailComposeJSONActivator extends AJAXModuleActivator {
             public void added(final ServiceReference<HttpService> ref, final HttpService service) {
                 try {
                     service.registerServlet(prefix + "mail/compose", new MailComposeRestServlet(prefix), null, null);
-                } catch (final ServletException e) {
+                } catch (ServletException e) {
                     log.error("Servlet registration failed: {}", MailComposeRestServlet.class.getName(), e);
-                } catch (final NamespaceException e) {
+                } catch (NamespaceException e) {
                     log.error("Servlet registration failed: {}", MailComposeRestServlet.class.getName(), e);
                 }
             }

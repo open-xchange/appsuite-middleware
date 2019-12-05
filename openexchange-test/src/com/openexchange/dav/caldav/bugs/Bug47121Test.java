@@ -56,6 +56,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import com.openexchange.dav.Config;
 import com.openexchange.dav.caldav.CalDAVTest;
 import com.openexchange.dav.caldav.UserAgents;
 import com.openexchange.groupware.container.FolderObject;
@@ -127,7 +128,7 @@ public class Bug47121Test extends CalDAVTest {
          */
         DeleteMethod delete = null;
         try {
-            String href = "/caldav/" + encodeFolderID(sharedFolderID);
+            String href = Config.getPathPrefix() + "/caldav/" + encodeFolderID(sharedFolderID);
             delete = new DeleteMethod(getBaseUri() + href + "/");
             Assert.assertEquals("response code wrong", HttpServletResponse.SC_NO_CONTENT, getWebDAVClient().executeMethod(delete));
         } finally {

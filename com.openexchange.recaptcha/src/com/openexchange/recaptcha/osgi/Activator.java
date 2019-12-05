@@ -99,7 +99,7 @@ public class Activator extends HousekeepingActivator {
                 this.alias = alias;
                 this.servlet = servlet;
                 LOG.info("reCAPTCHA Servlet registered.");
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 LOG.error("", e);
             }
         }

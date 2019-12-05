@@ -1,0 +1,28 @@
+/attachment?action=get:
+  get:
+    operationId: getAttachment
+    tags:
+      - Attachments
+    summary: Gets an attachment.
+    parameters:
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - in: query
+        name: id
+        description: Object ID of the requested infoitem.
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/gblQueryParamAttached'
+      - $ref: '#/components/parameters/gblQueryParamAttachmentsFolder'
+      - $ref: '#/components/parameters/gblQueryParamAttachmentsModule'
+    responses:
+      '200':
+        description: >
+          A JSON object containing all data of the requested attachment. In case
+          of errors the responsible fields in the response are
+
+          filled (see [Error handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AttachmentResponse'

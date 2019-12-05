@@ -127,14 +127,14 @@ public class DefaultBodyParser implements BodyParser {
                 if ('[' == c || '{' == c) {
                     try {
                         retval.setData(JSONObject.parse(reader));
-                    } catch (final JSONException e) {
+                    } catch (JSONException e) {
                         throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create(e, new Object[0]);
                     }
                 } else {
                     retval.setData(AJAXServlet.readFrom(reader));
                 }
             }
-        } catch (final IOException x) {
+        } catch (IOException x) {
             hookHandleIOException(x);
         } finally {
             Streams.close(reader);
@@ -179,7 +179,7 @@ public class DefaultBodyParser implements BodyParser {
                 } else {
                     requestData.setData(data);
                 }
-            } catch (final JSONException e) {
+            } catch (JSONException e) {
                 requestData.setData(data);
             }
         }

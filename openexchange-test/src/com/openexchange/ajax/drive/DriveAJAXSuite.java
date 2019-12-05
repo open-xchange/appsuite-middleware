@@ -52,6 +52,7 @@ package com.openexchange.ajax.drive;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import com.openexchange.ajax.drive.apiclient.test.TrashTests;
+import com.openexchange.ajax.drive.test.Bug67685Test;
 import com.openexchange.ajax.drive.test.DeleteLinkTest;
 import com.openexchange.ajax.drive.test.GetLinkTest;
 import com.openexchange.ajax.drive.test.QuotaForSyncTest;
@@ -72,6 +73,7 @@ import com.openexchange.test.concurrent.ParallelSuite;
     DeleteLinkTest.class,
     UpdaterXMLTest.class,
     QuotaForSyncTest.class,
+    Bug67685Test.class,
     TrashTests.class
 })
 public class DriveAJAXSuite  {

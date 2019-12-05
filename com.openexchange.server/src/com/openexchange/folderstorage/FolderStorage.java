@@ -52,7 +52,7 @@ package com.openexchange.folderstorage;
 import java.util.Date;
 import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
+import com.openexchange.user.User;
 
 /**
  * {@link FolderStorage} - A folder storage bound to a certain folder source (e.g database, email, etc).

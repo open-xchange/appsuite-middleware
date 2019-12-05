@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.rmi.impl;
 
+import static com.openexchange.admin.rmi.exceptions.RemoteExceptionUtils.convertException;
 import java.rmi.RemoteException;
 import java.util.concurrent.ExecutionException;
 import com.openexchange.admin.daemons.ClientAdminThread;
@@ -97,18 +98,21 @@ public class OXTaskMgmtImpl extends OXCommonImpl implements OXTaskMgmtInterface 
                 contextcheck(ctx);
                 TaskManager.getInstance().deleteJob(id, ctx.getId());
             }
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             log.error("", e);
             throw e;
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             log.error("", e);
             throw e;
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             log.error("", e);
             throw e;
-        } catch (final TaskManagerException e) {
+        } catch (TaskManagerException e) {
             log.error("", e);
             throw e;
+        } catch (RuntimeException e) {
+            log.error("", e);
+            throw convertException(e);
         }
     }
 
@@ -122,18 +126,21 @@ public class OXTaskMgmtImpl extends OXCommonImpl implements OXTaskMgmtInterface 
                 contextcheck(ctx);
                 TaskManager.getInstance().flush(ctx.getId());
             }
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             log.error("", e);
             throw e;
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             log.error("", e);
             throw e;
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             log.error("", e);
             throw e;
-        } catch (final TaskManagerException e) {
+        } catch (TaskManagerException e) {
             log.error("", e);
             throw e;
+        } catch (RuntimeException e) {
+            log.error("", e);
+            throw convertException(e);
         }
     }
 
@@ -147,15 +154,18 @@ public class OXTaskMgmtImpl extends OXCommonImpl implements OXTaskMgmtInterface 
 
             contextcheck(ctx);
             return TaskManager.getInstance().getJobList(ctx.getId());
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             log.error("", e);
             throw e;
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             log.error("", e);
             throw e;
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             log.error("", e);
             throw e;
+        } catch (RuntimeException e) {
+            log.error("", e);
+            throw convertException(e);
         }
     }
 
@@ -169,21 +179,24 @@ public class OXTaskMgmtImpl extends OXCommonImpl implements OXTaskMgmtInterface 
 
             contextcheck(ctx);
             return getTaskResults(id, ctx.getId());
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             log.error("", e);
             throw e;
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             log.error("", e);
             throw e;
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             log.error("", e);
             throw e;
-        } catch (final InterruptedException e) {
+        } catch (InterruptedException e) {
             log.error("", e);
             throw e;
         } catch (TaskManagerException e) {
             log.error("", e);
             throw new InvalidDataException(e.getMessage());
+        } catch (RuntimeException e) {
+            log.error("", e);
+            throw convertException(e);
         }
     }
 

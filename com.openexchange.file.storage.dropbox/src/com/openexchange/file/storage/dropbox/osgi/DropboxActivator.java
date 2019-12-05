@@ -104,27 +104,17 @@ public final class DropboxActivator extends AbstractCloudStorageActivator {
             super.stopBundle();
             cleanUp();
             DropboxServices.setServices(null);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             org.slf4j.LoggerFactory.getLogger(DropboxActivator.class).error("", e);
             throw e;
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.file.storage.oauth.osgi.AbstractCloudStorageActivator#getServiceRegisterer(org.osgi.framework.BundleContext)
-     */
     @Override
     protected ServiceTrackerCustomizer<OAuthServiceMetaData, OAuthServiceMetaData> getServiceRegisterer(BundleContext context) {
         return new OAuthServiceMetaDataRegisterer(context, this);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.file.storage.oauth.osgi.AbstractCloudStorageActivator#getAPI()
-     */
     @Override
     protected KnownApi getAPI() {
         return KnownApi.DROPBOX;

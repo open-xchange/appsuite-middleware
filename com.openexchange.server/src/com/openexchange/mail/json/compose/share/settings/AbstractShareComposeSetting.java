@@ -52,7 +52,6 @@ package com.openexchange.mail.json.compose.share.settings;
 import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.ReadOnlyValue;
@@ -63,6 +62,7 @@ import com.openexchange.jslob.ConfigTreeEquivalent;
 import com.openexchange.mail.json.compose.Utilities;
 import com.openexchange.mail.json.compose.share.ShareComposeHandler;
 import com.openexchange.session.Session;
+import com.openexchange.user.User;
 
 /**
  * {@link AbstractShareComposeSetting}

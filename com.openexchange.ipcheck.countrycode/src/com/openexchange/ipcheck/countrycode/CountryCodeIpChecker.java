@@ -160,11 +160,6 @@ public class CountryCodeIpChecker implements IPChecker, MetricAware<IPCheckMetri
         return "countrycode";
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.management.MetricAware#getMetricsObject()
-     */
     @Override
     public IPCheckMetricCollector getMetricsObject() {
         return metricCollector;

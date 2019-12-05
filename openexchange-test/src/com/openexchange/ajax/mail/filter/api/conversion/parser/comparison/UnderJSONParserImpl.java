@@ -67,11 +67,6 @@ public class UnderJSONParserImpl implements ComparisonParser {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.mail.filter.api.conversion.parser.JSONParser#parse(org.json.JSONObject)
-     */
     @Override
     public UnderComparison parse(JSONObject jsonObject) throws JSONException {
         int size = jsonObject.getInt("size");

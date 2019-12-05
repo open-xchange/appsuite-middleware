@@ -119,7 +119,7 @@ public final class POP3MessageStorage extends MailMessageStorage implements ISim
                     MailAccountStorageService.class,
                     true);
                 mailAccount = storageService.getMailAccount(accountId, session.getUserId(), session.getContextId());
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 throw e;
             }
         }

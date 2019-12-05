@@ -68,10 +68,10 @@ public abstract class AbstractAttachmentAction extends AbstractDBAction
 		int i = 1;
 		for(final AttachmentField field : queryCatalog.getFields()) {
 			Object value = field.doSwitch(get);
-			if(isDateField(field)) {
+			if (isDateField(field)) {
 				value = Long.valueOf(((Date)value).getTime());
 			}
-			if(field.equals(AttachmentField.RTF_FLAG_LITERAL)) {
+			if (field.equals(AttachmentField.RTF_FLAG_LITERAL)) {
 				value = Integer.valueOf((attachment.getRtfFlag() ) ? 1 : 0);
 			}
 			stmt.setObject(i++,value);

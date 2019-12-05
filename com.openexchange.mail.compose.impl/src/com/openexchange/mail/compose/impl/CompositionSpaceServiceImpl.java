@@ -66,6 +66,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -87,6 +88,7 @@ import org.slf4j.Logger;
 import com.google.common.base.CharMatcher;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.crypto.CryptographicServiceAuthenticationFactory;
@@ -258,7 +260,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
     }
 
     @Override
-    public MailPath transportCompositionSpace(UUID compositionSpaceId, UserSettingMail mailSettings, AJAXRequestData request, List<OXException> warnings, boolean deleteAfterTransport, Session ses) throws OXException {
+    public MailPath transportCompositionSpace(UUID compositionSpaceId, Optional<StreamedUploadFileIterator> optionalUploadedAttachments, UserSettingMail mailSettings, AJAXRequestData request, List<OXException> warnings, boolean deleteAfterTransport, Session ses) throws OXException {
         CompositionSpace compositionSpace = getCompositionSpace(compositionSpaceId, ses);
 
         Message m = compositionSpace.getMessage();
@@ -281,7 +283,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
         try {
             InternetAddress fromAddresss = toMimeAddress(m.getFrom());
             accountId = MimeMessageFiller.resolveFrom2Account(session, fromAddresss, true, true);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (MailExceptionCode.NO_TRANSPORT_SUPPORT.equals(e) || MailExceptionCode.INVALID_SENDER.equals(e)) {
                 // Re-throw
                 throw e;
@@ -300,9 +302,9 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
         }
         if (TEXT_HTML == m.getContentType()) {
             // An HTML message...
-            if (attachments != null && !attachments.isEmpty()) {
+            if ((attachments != null && !attachments.isEmpty())) {
                 // ... with attachments
-                Map<UUID, Attachment> fileAttachments = new LinkedHashMap<>(attachments.size());
+                Map<UUID, Attachment> fileAttachments = new LinkedHashMap<>();
                 for (Attachment attachment : attachments) {
                     fileAttachments.put(attachment.getId(), attachment);
                 }
@@ -372,6 +374,9 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
             }
         }
 
+        // Sent date
+        sourceMessage.setSentDate(new Date());
+
         // Read receipt
         if (m.isRequestReadReceipt()) {
             sourceMessage.setDispositionNotification(toMimeAddress(m.getFrom()));
@@ -424,10 +429,26 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
 
         // Collect parts
         List<MailPart> parts;
-        if (attachments != null && !attachments.isEmpty()) {
-            parts = new ArrayList<MailPart>(attachments.size());
-            for (Attachment attachment : attachments) {
-                parts.add(new AttachmentMailPart(attachment));
+        if ((attachments != null && !attachments.isEmpty()) || optionalUploadedAttachments.isPresent()) {
+            parts = new ArrayList<MailPart>();
+            if (attachments != null) {
+                for (Attachment attachment : attachments) {
+                    parts.add(new AttachmentMailPart(attachment));
+                }
+            }
+            if (optionalUploadedAttachments.isPresent()) {
+                StreamedUploadFileIterator uploadedAttachments = optionalUploadedAttachments.get();
+                if (uploadedAttachments.hasNext()) {
+                    try {
+                        do {
+                            StreamedUploadFile uploadFile = uploadedAttachments.next();
+                            AttachmentDescription attachmentDescription = AttachmentStorages.createUploadFileAttachmentDescriptionFor(uploadFile, com.openexchange.mail.compose.Attachment.ContentDisposition.ATTACHMENT.getId(), compositionSpaceId);
+                            parts.add(new StreamedAttachmentMailPart(attachmentDescription, uploadFile.getStream()));
+                        } while (uploadedAttachments.hasNext());
+                    } catch (IOException e) {
+                        throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+                    }
+                }
             }
         } else {
             parts = Collections.emptyList();
@@ -530,14 +551,25 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
 
             // Reply or (inline) forward?
             Meta meta = m.getMeta();
+            Optional<MailMessage> originalMail = null;
             {
                 MetaType metaType = meta.getType();
                 if (metaType == MetaType.REPLY || metaType == MetaType.REPLY_ALL) {
-                    MailMessage originalMail = requireMailMessage(meta.getReplyFor(), mailInterface);
-                    setReplyHeaders(originalMail, sourceMessage);
+                    MailPath replyFor = meta.getReplyFor();
+                    originalMail = optionalMailMessage(replyFor, mailInterface);
+                    if (originalMail.isPresent()) {
+                        setReplyHeaders(originalMail.get(), sourceMessage);
+                    } else {
+                        warnings.add(MailExceptionCode.ORIGINAL_MAIL_NOT_FOUND.create(replyFor.getMailID(), replyFor.getFolder()));
+                    }
                 } else if (metaType == MetaType.FORWARD_INLINE) {
-                    MailMessage originalMail = requireMailMessage(meta.getForwardsFor().get(0), mailInterface);
-                    setReplyHeaders(originalMail, sourceMessage);
+                    MailPath forwardFor = meta.getForwardsFor().get(0);
+                    originalMail = optionalMailMessage(forwardFor, mailInterface);
+                    if (originalMail.isPresent()) {
+                        setReplyHeaders(originalMail.get(), sourceMessage);
+                    } else {
+                        warnings.add(MailExceptionCode.ORIGINAL_MAIL_NOT_FOUND.create(forwardFor.getMailID(), forwardFor.getFolder()));
+                    }
                 }
             }
 
@@ -565,18 +597,24 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
             {
                 MetaType metaType = meta.getType();
                 if (metaType == MetaType.REPLY || metaType == MetaType.REPLY_ALL) {
-                    MailPath replyFor = meta.getReplyFor();
-                    try {
-                        mailInterface.updateMessageFlags(replyFor.getFolderArgument(), new String[] { replyFor.getMailID() }, MailMessage.FLAG_ANSWERED, null, true);
-                    } catch (Exception e) {
-                        LoggerHolder.LOG.warn("Failed to mark original mail '{}' as answered", replyFor, e);
+                    if (originalMail == null || originalMail.isPresent()) {
+                        MailPath replyFor = meta.getReplyFor();
+                        try {
+                            mailInterface.updateMessageFlags(replyFor.getFolderArgument(), new String[] { replyFor.getMailID() }, MailMessage.FLAG_ANSWERED, null, true);
+                        } catch (Exception e) {
+                            LoggerHolder.LOG.warn("Failed to mark original mail '{}' as answered", replyFor, e);
+                            warnings.add(MailExceptionCode.FLAG_FAIL.create());
+                        }
                     }
                 } else if (metaType == MetaType.FORWARD_INLINE) {
-                    MailPath forwardFor = meta.getForwardsFor().get(0);
-                    try {
-                        mailInterface.updateMessageFlags(forwardFor.getFolderArgument(), new String[] { forwardFor.getMailID() }, MailMessage.FLAG_FORWARDED, null, true);
-                    } catch (Exception e) {
-                        LoggerHolder.LOG.warn("Failed to mark original mail '{}' as forwarded", forwardFor, e);
+                    if (originalMail == null || originalMail.isPresent()) {
+                        MailPath forwardFor = meta.getForwardsFor().get(0);
+                        try {
+                            mailInterface.updateMessageFlags(forwardFor.getFolderArgument(), new String[] { forwardFor.getMailID() }, MailMessage.FLAG_FORWARDED, null, true);
+                        } catch (Exception e) {
+                            LoggerHolder.LOG.warn("Failed to mark original mail '{}' as forwarded", forwardFor, e);
+                            warnings.add(MailExceptionCode.FLAG_FAIL.create());
+                        }
                     }
                 }
                 MailPath editFor = meta.getEditFor();
@@ -676,7 +714,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
     }
 
     @Override
-    public MailPath saveCompositionSpaceToDraftMail(UUID compositionSpaceId, boolean deleteAfterSave, Session session) throws OXException {
+    public MailPath saveCompositionSpaceToDraftMail(UUID compositionSpaceId, Optional<StreamedUploadFileIterator> optionalUploadedAttachments, boolean deleteAfterSave, Session session) throws OXException {
         CompositionSpace compositionSpace = getCompositionSpace(compositionSpaceId, session);
 
         Message m = compositionSpace.getMessage();
@@ -695,7 +733,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                     try {
                         InternetAddress fromAddresss = toMimeAddress(m.getFrom());
                         accountId = MimeMessageFiller.resolveFrom2Account(ServerSessionAdapter.valueOf(session), fromAddresss, true, true);
-                    } catch (final OXException e) {
+                    } catch (OXException e) {
                         if (MailExceptionCode.NO_TRANSPORT_SUPPORT.equals(e) || MailExceptionCode.INVALID_SENDER.equals(e)) {
                             // Re-throw
                             throw e;
@@ -771,16 +809,21 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
             List<Attachment> attachments = m.getAttachments();
             boolean isHtml = TEXT_HTML == m.getContentType();
 
-            if (attachments == null || attachments.isEmpty()) {
+            if ((attachments != null && !attachments.isEmpty()) || optionalUploadedAttachments.isPresent()) {
+                // With attachments
+                Map<UUID, Attachment> attachmentId2inlineAttachments;
+                if (attachments != null && !attachments.isEmpty()) {
+                    attachmentId2inlineAttachments = new LinkedHashMap<>(attachments.size());
+                    for (Attachment attachment : attachments) {
+                        attachmentId2inlineAttachments.put(attachment.getId(), attachment);
+                    }
+                } else {
+                    attachmentId2inlineAttachments = Collections.emptyMap();
+                }
+                fillMessageWithAttachments(compositionSpaceId, m, mimeMessage, attachmentId2inlineAttachments, optionalUploadedAttachments, charset, isHtml, session);
+            } else {
                 // No attachments
                 fillMessageWithoutAttachments(m, mimeMessage, charset, isHtml);
-            } else {
-                // With attachments
-                Map<UUID, Attachment> attachmentId2inlineAttachments = new LinkedHashMap<>(attachments.size());
-                for (Attachment attachment : attachments) {
-                    attachmentId2inlineAttachments.put(attachment.getId(), attachment);
-                }
-                fillMessageWithAttachments(m, mimeMessage, attachmentId2inlineAttachments, charset, isHtml, session);
             }
 
             ContentAwareComposedMailMessage mailMessage = new ContentAwareComposedMailMessage(mimeMessage, session, session.getContextId());
@@ -860,7 +903,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
         }
     }
 
-    private void fillMessageWithAttachments(Message m, MimeMessage mimeMessage, Map<UUID, Attachment> fileAttachments, String charset, boolean isHtml, Session session) throws OXException, MessagingException {
+    private void fillMessageWithAttachments(UUID compositionSpaceId, Message m, MimeMessage mimeMessage, Map<UUID, Attachment> fileAttachments, Optional<StreamedUploadFileIterator> optionalUploadedAttachments, String charset, boolean isHtml, Session session) throws OXException, MessagingException {
         if (isHtml) {
             // An HTML message
             Map<String, Attachment> contentId2InlineAttachment;
@@ -873,15 +916,22 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                 content = htmlService.getConformHTML(HTML_SPACE, charset).replace(HTML_SPACE, "");
             } else {
                 int numOfAttachments = fileAttachments.size();
-                contentId2InlineAttachment = new HashMap<>(numOfAttachments);
-                Map<String, Attachment> attachmentId2inlineAttachments = new HashMap<>(numOfAttachments);
+                Map<String, Attachment> attachmentId2inlineAttachments;
+                if (numOfAttachments > 0) {
+                    contentId2InlineAttachment = new HashMap<>(numOfAttachments);
+                    attachmentId2inlineAttachments = new HashMap<>(numOfAttachments);
 
-                for (Attachment attachment : fileAttachments.values()) {
-                    if (INLINE == attachment.getContentDisposition() && null != attachment.getContentId() && new ContentType(attachment.getMimeType()).startsWith("image/")) {
-                        attachmentId2inlineAttachments.put(getUnformattedString(attachment.getId()), attachment);
-                        contentId2InlineAttachment.put(attachment.getContentId(), attachment);
+                    for (Attachment attachment : fileAttachments.values()) {
+                        if (INLINE == attachment.getContentDisposition() && null != attachment.getContentId() && new ContentType(attachment.getMimeType()).startsWith("image/")) {
+                            attachmentId2inlineAttachments.put(getUnformattedString(attachment.getId()), attachment);
+                            contentId2InlineAttachment.put(attachment.getContentId(), attachment);
+                        }
                     }
+                } else {
+                    contentId2InlineAttachment = Collections.emptyMap();
+                    attachmentId2inlineAttachments = Collections.emptyMap();
                 }
+
                 content = CompositionSpaces.replaceLinkedInlineImages(content, attachmentId2inlineAttachments, contentId2InlineAttachment, fileAttachments);
                 HtmlService htmlService = services.getService(HtmlService.class);
                 content = htmlService.getConformHTML(content, charset);
@@ -898,6 +948,18 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                 // Add attachments
                 for (Attachment attachment : fileAttachments.values()) {
                     addAttachment(attachment, primaryMultipart, session);
+                }
+
+                // Add uploaded attachments
+                if (optionalUploadedAttachments.isPresent()) {
+                    StreamedUploadFileIterator uploadedAttachments = optionalUploadedAttachments.get();
+                    if (uploadedAttachments.hasNext()) {
+                        do {
+                            StreamedUploadFile uploadFile = uploadedAttachments.next();
+                            AttachmentDescription attachmentDescription = AttachmentStorages.createUploadFileAttachmentDescriptionFor(uploadFile, com.openexchange.mail.compose.Attachment.ContentDisposition.ATTACHMENT.getId(), compositionSpaceId);
+                            addAttachment(attachmentDescription, uploadFile, primaryMultipart, session);
+                        } while (uploadedAttachments.hasNext());
+                    }
                 }
             } else {
                 if (fileAttachments.isEmpty()) {
@@ -1015,6 +1077,77 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
         mp.addBodyPart(messageBodyPart);
     }
 
+    private void addAttachment(AttachmentDescription attachmentDescription, StreamedUploadFile uploadFile, Multipart mp, Session session) throws MessagingException, OXException {
+        ContentType ct = new ContentType(attachmentDescription.getMimeType());
+        if (ct.startsWith(MimeTypes.MIME_MESSAGE_RFC822)) {
+            addNestedMessage(attachmentDescription, uploadFile, mp);
+            return;
+        }
+
+        // A non-message attachment
+        String fileName = attachmentDescription.getName();
+        if (fileName != null && (ct.startsWith(MimeTypes.MIME_APPL_OCTET) || ct.startsWith(MimeTypes.MIME_MULTIPART_OCTET))) {
+            // Only "allowed" for certain files
+            if (!octetExtensions().contains(extensionFor(fileName))) {
+                // Try to determine MIME type
+                String ct2 = MimeType2ExtMap.getContentType(fileName);
+                int pos = ct2.indexOf('/');
+                ct.setPrimaryType(ct2.substring(0, pos));
+                ct.setSubType(ct2.substring(pos + 1));
+            }
+        }
+
+        // Create MIME body part and set its content
+        try {
+            MimeBodyPart messageBodyPart = new MimeBodyPart();
+            messageBodyPart.setDataHandler(new DataHandler(new AttachmentDescriptionDataSource(attachmentDescription, uploadFile.getStream())));
+
+            if (fileName != null && !ct.containsNameParameter()) {
+                ct.setNameParameter(fileName);
+            }
+            messageBodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(ct.toString()));
+
+            if (INLINE != attachmentDescription.getContentDisposition()) {
+                // Force base64 encoding to keep data as it is
+                messageBodyPart.setHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC, "base64");
+            }
+
+            // Disposition
+            String disposition = messageBodyPart.getHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, null);
+            ContentDisposition cd;
+            if (disposition == null) {
+                cd = new ContentDisposition(attachmentDescription.getContentDisposition().getId());
+            } else {
+                cd = new ContentDisposition(disposition);
+                cd.setDisposition(attachmentDescription.getContentDisposition().getId());
+            }
+            if (fileName != null && !cd.containsFilenameParameter()) {
+                cd.setFilenameParameter(fileName);
+            }
+            messageBodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MimeMessageUtility.foldContentDisposition(cd.toString()));
+
+            // Content-ID
+            String contentId = attachmentDescription.getContentId();
+            if (contentId != null) {
+                if (contentId.charAt(0) == '<') {
+                    messageBodyPart.setContentID(contentId);
+                } else {
+                    messageBodyPart.setContentID(new StringBuilder(contentId.length() + 2).append('<').append(contentId).append('>').toString());
+                }
+            }
+
+            // vCard
+            if (AttachmentOrigin.VCARD == attachmentDescription.getOrigin()) {
+                messageBodyPart.setHeader(MessageHeaders.HDR_X_OX_VCARD, new StringBuilder(16).append(session.getUserId()).append('@').append(session.getContextId()).toString());
+            }
+
+            // Add to parental multipart
+            mp.addBodyPart(messageBodyPart);
+        } catch (IOException e) {
+            throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        }
+    }
+
     private void addNestedMessage(Attachment attachment, Multipart mp) throws MessagingException, OXException {
         String fn;
         if (null == attachment.getName()) {
@@ -1063,6 +1196,74 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
         mp.addBodyPart(origMsgPart);
     }
 
+    private void addNestedMessage(AttachmentDescription attachmentDescription, StreamedUploadFile uploadFile, Multipart mp) throws MessagingException, OXException {
+        InputStream input = null;
+        Optional<ThresholdFileHolder> optionalFileHolder = Optional.empty();
+        boolean error = true;
+        try {
+            input = uploadFile.getStream();
+            String fn;
+            if (null == attachmentDescription.getName()) {
+                ThresholdFileHolder fileHolder = new ThresholdFileHolder();
+                optionalFileHolder = Optional.of(fileHolder);
+                fileHolder.write(input);
+
+                InputStream data = fileHolder.getStream();
+                try {
+                    String subject = MimeMessageUtility.checkNonAscii(new InternetHeaders(data).getHeader(MessageHeaders.HDR_SUBJECT, null));
+                    if (null == subject || subject.length() == 0) {
+                        fn = "part.eml";
+                    } else {
+                        subject = MimeMessageUtility.decodeMultiEncodedHeader(MimeMessageUtility.unfold(subject));
+                        fn = subject.replaceAll("\\p{Blank}+", "_") + ".eml";
+                    }
+                } finally {
+                    Streams.close(data);
+                }
+            } else {
+                fn = attachmentDescription.getName();
+            }
+
+            //Create MIME body part and set its content
+            MimeBodyPart origMsgPart = new MimeBodyPart();
+            origMsgPart.setDataHandler(new DataHandler(new AttachmentDescriptionDataSource(attachmentDescription, optionalFileHolder.isPresent() ? optionalFileHolder.get().getStream() : input, MimeTypes.MIME_MESSAGE_RFC822)));
+
+            // Content-Type
+            ContentType ct = new ContentType(MimeTypes.MIME_MESSAGE_RFC822);
+            if (null != fn) {
+                ct.setNameParameter(fn);
+            }
+            origMsgPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(ct.toString()));
+
+            // Content-Disposition
+            String disposition = origMsgPart.getHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, null);
+            final ContentDisposition cd;
+            if (disposition == null) {
+                cd = new ContentDisposition(attachmentDescription.getContentDisposition().getId());
+            } else {
+                cd = new ContentDisposition(disposition);
+                cd.setDisposition(attachmentDescription.getContentDisposition().getId());
+            }
+            if (null != fn && !cd.containsFilenameParameter()) {
+                cd.setFilenameParameter(fn);
+            }
+            origMsgPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MimeMessageUtility.foldContentDisposition(cd.toString()));
+
+            // Add to parental multipart
+            mp.addBodyPart(origMsgPart);
+            error = false;
+        } catch (IOException e) {
+            throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } finally {
+            if (error) {
+                Streams.close(input);
+                if (optionalFileHolder.isPresent()) {
+                    Streams.close(optionalFileHolder.get());
+                }
+            }
+        }
+    }
+
     private static final String HTML_SPACE = "&#160;";
 
     /**
@@ -1088,7 +1289,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
             html.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
             html.setHeader(MessageHeaders.HDR_CONTENT_TYPE, contentType);
             return html;
-        } catch (final UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             throw new MessagingException("Unsupported encoding.", e);
         }
     }
@@ -2022,11 +2223,27 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
      * @throws OXException If mail cannot be returned
      */
     private MailMessage requireMailMessage(MailPath mailPath, MailServletInterface mailInterface) throws OXException {
-        MailMessage mailMessage = mailInterface.getMessage(mailPath.getFolderArgument(), mailPath.getMailID(), false);
-        if (null == mailMessage) {
+        Optional<MailMessage> optionalMailMessage = optionalMailMessage(mailPath, mailInterface);
+        if (!optionalMailMessage.isPresent()) {
             throw MailExceptionCode.MAIL_NOT_FOUND.create(mailPath.getMailID(), mailPath.getFolderArgument());
         }
-        return mailMessage;
+        return optionalMailMessage.get();
+    }
+
+    /**
+     * Gets the optional referenced mail
+     *
+     * @param mailPath The mail path for the mail
+     * @param mailInterface The service to use
+     * @return The optional mail
+     * @throws OXException If mail cannot be returned
+     */
+    private Optional<MailMessage> optionalMailMessage(MailPath mailPath, MailServletInterface mailInterface) throws OXException {
+        MailMessage mailMessage = mailInterface.getMessage(mailPath.getFolderArgument(), mailPath.getMailID(), false);
+        if (null == mailMessage) {
+            return Optional.empty();
+        }
+        return Optional.of(mailMessage);
     }
 
     // -------------------------------------------------------------------------------------------------------------------------------------

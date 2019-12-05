@@ -58,6 +58,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult.ResultType;
 import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.events.DriveEvent;
+import com.openexchange.drive.events.subscribe.SubscriptionMode;
 import com.openexchange.drive.json.DefaultLongPollingListener;
 import com.openexchange.exception.OXException;
 
@@ -82,9 +83,10 @@ public class CometListener extends DefaultLongPollingListener {
      * @param session The session
      * @param cometContext The comet context
      * @param rootFolderIDs The root folder IDs to listen for changes in
+     * @param mode The subscription mode
      */
-    public CometListener(DriveSession session, CometContext<DriveEvent> cometContext, List<String> rootFolderIDs) {
-        super(session, rootFolderIDs);
+    public CometListener(DriveSession session, CometContext<DriveEvent> cometContext, List<String> rootFolderIDs, SubscriptionMode mode) {
+        super(session, rootFolderIDs, mode);
         this.cometContext = cometContext;
         this.lock = new ReentrantLock();
     }
@@ -98,7 +100,7 @@ public class CometListener extends DefaultLongPollingListener {
                  * wait for event inside comet handler
                  */
                 LOG.debug("Registering new comet handler for {} ...", driveSession);
-                cometHandler = new DriveCometHandler(driveSession, rootFolderIDs);
+                cometHandler = new DriveCometHandler(driveSession, rootFolderIDs, mode);
                 cometContext.addCometHandler(cometHandler);
                 /*
                  * return placeholder result for now
@@ -150,7 +152,7 @@ public class CometListener extends DefaultLongPollingListener {
 
     @Override
     public String toString() {
-        return "CometListener [driveSession=" + driveSession + ", rootFolderIDs=" + rootFolderIDs + "]";
+        return "CometListener [driveSession=" + driveSession + ", rootFolderIDs=" + rootFolderIDs + ", mode=" + mode + "]";
     }
 
 }

@@ -340,11 +340,6 @@ public class DbFileStorage2EntitiesResolver implements FileStorage2EntitiesResol
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.filestore.FileStorage2UsersResolver#getIdsOfUsersUsing(int)
-     */
     @Override
     public Map<Integer, List<Integer>> getIdsOfUsersUsing(int fileStorageId) throws OXException {
         DatabaseService databaseService = Services.requireService(DatabaseService.class);
@@ -363,11 +358,6 @@ public class DbFileStorage2EntitiesResolver implements FileStorage2EntitiesResol
         return users;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.filestore.FileStorage2UsersResolver#getFileStoragesUsedBy(int, int, boolean)
-     */
     @Override
     public FileStorage getFileStorageUsedBy(int contextId, int userId, boolean quotaAware) throws OXException {
         DatabaseService databaseService = Services.requireService(DatabaseService.class);

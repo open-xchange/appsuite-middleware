@@ -97,7 +97,7 @@ public abstract class ContextStorage {
                         tmp = CachingContextStorage.parent = new CachingContextStorage(new RdbContextStorage());
                         tmp.startUp();
                         impl = tmp;
-                    } catch (final OXException e) {
+                    } catch (OXException e) {
                         // Cannot occur
                         LOG.warn("", e);
                     }

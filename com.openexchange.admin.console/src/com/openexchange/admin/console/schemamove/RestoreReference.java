@@ -140,7 +140,7 @@ public class RestoreReference extends AbstractSchemaRMIToolkit {
             String rmiHost = (String) parser.getOptionValue(optRMIHost);
 
             SchemaMoveRemote smr = null;
-            if(Strings.isEmpty(rmiHost)) {
+            if (Strings.isEmpty(rmiHost)) {
                 smr = getSchemaMoveRemoteInterface();
             } else {
                 smr = getSchemaMoveRemoteInterface(rmiHost);

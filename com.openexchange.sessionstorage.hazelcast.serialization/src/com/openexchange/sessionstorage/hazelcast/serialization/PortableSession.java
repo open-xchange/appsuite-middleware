@@ -92,7 +92,7 @@ public class PortableSession extends StoredSession implements CustomPortable, Ve
      * This number should be incremented whenever fields are added;
      * see <a href="http://docs.hazelcast.org/docs/latest-development/manual/html/Serialization/Implementing_Portable_Serialization/Versioning_for_Portable_Serialization.html">here</a> for reference.
      */
-    public static final int CLASS_VERSION = 4;
+    public static final int CLASS_VERSION = 5;
 
     public static final String PARAMETER_LOGIN_NAME = "loginName";
     public static final String PARAMETER_PASSWORD = "password";
@@ -113,6 +113,7 @@ public class PortableSession extends StoredSession implements CustomPortable, Ve
     public static final String PARAMETER_LOCAL_LAST_ACTIVE = "localLastActive";
     public static final String PARAMETER_REMOTE_PARAMETERS = "remoteParameters";
     public static final String PARAMETER_ORIGIN = "origin";
+    public static final String PARAMETER_STAY_SIGNED_IN = "staySignedIn";
 
     /** The class definition for PortableSession */
     public static ClassDefinition CLASS_DEFINITION = new ClassDefinitionBuilder(FACTORY_ID, CLASS_ID, CLASS_VERSION)
@@ -135,6 +136,7 @@ public class PortableSession extends StoredSession implements CustomPortable, Ve
         .addLongField(PARAMETER_LOCAL_LAST_ACTIVE)
         .addUTFField(PARAMETER_REMOTE_PARAMETERS)
         .addUTFField(PARAMETER_ORIGIN)
+        .addBooleanField(PARAMETER_STAY_SIGNED_IN)
         .build();
 
     // -------------------------------------------------------------------------------------------------
@@ -284,6 +286,7 @@ public class PortableSession extends StoredSession implements CustomPortable, Ve
             }
         }
         writer.writeUTF(PARAMETER_ORIGIN, null == origin ? "" : origin.name());
+        writer.writeBoolean(PARAMETER_STAY_SIGNED_IN, staySignedIn);
     }
 
     @Override
@@ -350,6 +353,7 @@ public class PortableSession extends StoredSession implements CustomPortable, Ve
             String sOrigin = reader.readUTF(PARAMETER_ORIGIN);
             origin = Strings.isEmpty(sOrigin) ? null : Origin.originFor(sOrigin);
         }
+        staySignedIn = reader.readBoolean(PARAMETER_STAY_SIGNED_IN);
     }
 
     private static final String POJO_PACKAGE = "java.lang.";

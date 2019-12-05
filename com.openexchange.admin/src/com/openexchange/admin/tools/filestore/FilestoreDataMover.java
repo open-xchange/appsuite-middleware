@@ -267,7 +267,7 @@ public abstract class FilestoreDataMover implements Callable<Void> {
             throw e;
         } catch (RuntimeException e) {
             LOGGER.error("", e);
-            throw new StorageException(e.toString(), e);
+            throw StorageException.storageExceotionFor(e);
         }
         return null;
     }
@@ -332,7 +332,8 @@ public abstract class FilestoreDataMover implements Callable<Void> {
         } catch (URISyntaxException e) {
             thrown = e; throw new StorageException(e.getMessage(), e);
         } catch (RuntimeException e) {
-            thrown = e; throw new StorageException(e.getMessage(), e);
+            LOGGER.error("", e);
+            thrown = e; throw StorageException.storageExceotionFor(e);
         } catch (Error x) {
             thrown = x; throw x;
         } catch (Throwable t) {
@@ -465,7 +466,7 @@ public abstract class FilestoreDataMover implements Callable<Void> {
 
             return new CopyResult(prevFileName2newFileName, reverter);
         } catch (OXException e) {
-            throw new StorageException(e);
+            throw StorageException.wrapForRMI(e);
         }
     }
 

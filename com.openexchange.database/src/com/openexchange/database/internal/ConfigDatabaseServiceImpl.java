@@ -97,7 +97,7 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
      * @param migrationService The database migration service
      * @return The scheduled migration
      */
-    public DBMigrationState scheduleMigrations(DBMigrationExecutorService migrationService) throws OXException {
+    public DBMigrationState scheduleMigrations(DBMigrationExecutorService migrationService) {
         /*
          * use appropriate connection provider fro config database & a local resource accessor for the changeset file
          */

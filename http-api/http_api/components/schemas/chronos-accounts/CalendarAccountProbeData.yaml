@@ -1,0 +1,12 @@
+type: object
+properties:
+  com.openexchange.calendar.extendedProperties:
+    $ref: "#/components/schemas/CalendarAccountProbeExtendedProperties"
+  com.openexchange.calendar.config:
+    $ref: "#/components/schemas/CalendarAccountProbeConfig"
+  com.openexchange.calendar.provider:
+    type: string
+    description: Denotes the identifier of the underlying calendar provider.
+  title:
+    type: string
+    description: The title of the calendar

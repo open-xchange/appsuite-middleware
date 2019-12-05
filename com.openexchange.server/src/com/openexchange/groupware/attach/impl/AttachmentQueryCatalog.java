@@ -67,7 +67,8 @@ public class AttachmentQueryCatalog {
         AttachmentField.RTF_FLAG_LITERAL,
         AttachmentField.ID_LITERAL,
         AttachmentField.COMMENT_LITERAL,
-        AttachmentField.FILE_ID_LITERAL
+        AttachmentField.FILE_ID_LITERAL,
+        AttachmentField.CHECKSUM_LITERAL
     };
 
     private static final String REMEMBER_DEL = "INSERT INTO del_attachment (id, del_date, cid, attached, module) VALUES (?,?,?,?,?)";

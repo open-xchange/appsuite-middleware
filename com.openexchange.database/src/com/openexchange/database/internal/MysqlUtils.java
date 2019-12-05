@@ -84,7 +84,7 @@ public class MysqlUtils {
             try {
                 m = com.mysql.jdbc.MysqlIO.class.getDeclaredMethod("getLastPacketReceivedTimeMs", new Class<?>[0]);
                 m.setAccessible(true);
-            } catch (final SecurityException e) {
+            } catch (SecurityException e) {
                 m = null;
             } catch (NoSuchMethodException e) {
                 m = null;
@@ -94,7 +94,7 @@ public class MysqlUtils {
             try {
                 m = com.mysql.jdbc.MysqlIO.class.getDeclaredMethod("getLastPacketSentTimeMs", new Class<?>[0]);
                 m.setAccessible(true);
-            } catch (final SecurityException e) {
+            } catch (SecurityException e) {
                 m = null;
             } catch (NoSuchMethodException e) {
                 m = null;
@@ -234,9 +234,9 @@ public class MysqlUtils {
             try {
                 f = com.mysql.jdbc.MysqlIO.class.getDeclaredField("mysqlConnection");
                 f.setAccessible(true);
-            } catch (final SecurityException e) {
+            } catch (SecurityException e) {
                 f = null;
-            } catch (final NoSuchFieldException e) {
+            } catch (NoSuchFieldException e) {
                 f = null;
             }
             mysqlConnectionField = f;

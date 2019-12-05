@@ -114,7 +114,6 @@ import com.openexchange.file.storage.parse.FileMetadataParserService;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.i18n.MailStrings;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.tools.StringHelper;
@@ -189,6 +188,7 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
+import com.openexchange.user.User;
 
 /**
  * {@link Mail} - The servlet to handle mail requests.
@@ -233,7 +233,7 @@ public class Mail extends PermissionServlet {
     private static PrintWriter writerFrom(final HttpServletResponse resp) throws IOException {
         try {
             return resp.getWriter();
-        } catch (final IllegalStateException ise) {
+        } catch (IllegalStateException ise) {
             // The getOutputStream() method has already been called for given HttpServletResponse
             return new PrintWriter(new BufferedWriter(new OutputStreamWriter(resp.getOutputStream(), com.openexchange.java.Charsets.UTF_8)));
         }
@@ -321,7 +321,7 @@ public class Mail extends PermissionServlet {
         Tools.disableCaching(resp);
         try {
             actionGet(req, resp);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("doGet", e);
             writeError(e.toString(), new JSONWriter(writerFrom(resp)));
         }
@@ -336,7 +336,7 @@ public class Mail extends PermissionServlet {
         Tools.disableCaching(resp);
         try {
             actionPut(req, resp);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("doPut", e);
             writeError(e.toString(), new JSONWriter(writerFrom(resp)));
         }
@@ -347,7 +347,7 @@ public class Mail extends PermissionServlet {
             startResponse(jsonWriter);
             jsonWriter.value(STR_EMPTY);
             endResponse(jsonWriter, null, error);
-        } catch (final Exception exc) {
+        } catch (Exception exc) {
             LOG.error("writeError", exc);
         }
     }
@@ -428,14 +428,14 @@ public class Mail extends PermissionServlet {
         final ServerSession session = getSessionObject(req);
         try {
             ResponseWriter.write(actionGetUpdates(session, ParamContainer.getInstance(req, resp), null), resp.getWriter(), localeFrom(session));
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             final OXException oxe = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
             LOG.error("", oxe);
             final Response response = new Response(session);
             response.setException(oxe);
             try {
                 ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
-            } catch (final JSONException e1) {
+            } catch (JSONException e1) {
                 LOG.error(RESPONSE_ERROR, e1);
                 sendError(resp);
             }
@@ -505,10 +505,10 @@ public class Mail extends PermissionServlet {
                     }
                 }
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             response.setException(e);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             final OXException wrapper = getWrappingOXException(e);
             LOG.error("", wrapper);
             response.setException(wrapper);
@@ -530,14 +530,14 @@ public class Mail extends PermissionServlet {
         final ServerSession session = getSessionObject(req);
         try {
             ResponseWriter.write(actionGetMailCount(session, ParamContainer.getInstance(req, resp), null), resp.getWriter(), localeFrom(session));
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             final OXException oxe = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
             LOG.error("", oxe);
             final Response response = new Response(session);
             response.setException(oxe);
             try {
                 ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
-            } catch (final JSONException e1) {
+            } catch (JSONException e1) {
                 LOG.error(RESPONSE_ERROR, e1);
                 sendError(resp);
             }
@@ -551,7 +551,7 @@ public class Mail extends PermissionServlet {
         final Response response;
         try {
             response = new Response(session);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             return new Response().setException(e);
         }
         /*
@@ -573,12 +573,12 @@ public class Mail extends PermissionServlet {
                     mailInterface.close(true);
                 }
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             if (!e.getCategory().equals(Category.CATEGORY_PERMISSION_DENIED)) {
                 response.setException(e);
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             final OXException wrapper = getWrappingOXException(e);
             LOG.error("", wrapper);
             response.setException(wrapper);
@@ -599,14 +599,14 @@ public class Mail extends PermissionServlet {
         final ServerSession session = getSessionObject(req);
         try {
             ResponseWriter.write(actionGetAllMails(session, ParamContainer.getInstance(req, resp), null), resp.getWriter(), localeFrom(session));
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             final OXException oxe = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
             LOG.error("", oxe);
             final Response response = new Response(session);
             response.setException(oxe);
             try {
                 ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
-            } catch (final JSONException e1) {
+            } catch (JSONException e1) {
                 LOG.error(RESPONSE_ERROR, e1);
                 sendError(resp);
             }
@@ -719,10 +719,10 @@ public class Mail extends PermissionServlet {
                     mailInterface.close(true);
                 }
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             response.setException(e);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             final OXException wrapper = getWrappingOXException(e);
             LOG.error("", wrapper);
             response.setException(wrapper);
@@ -748,14 +748,14 @@ public class Mail extends PermissionServlet {
         final ServerSession session = getSessionObject(req);
         try {
             ResponseWriter.write(actionGetReply(session, reply2all, ParamContainer.getInstance(req, resp), null), resp.getWriter(), localeFrom(session));
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             final OXException oxe = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
             LOG.error("", oxe);
             final Response response = new Response(session);
             response.setException(oxe);
             try {
                 ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
-            } catch (final JSONException e1) {
+            } catch (JSONException e1) {
                 LOG.error(RESPONSE_ERROR, e1);
                 sendError(resp);
             }
@@ -804,10 +804,10 @@ public class Mail extends PermissionServlet {
                     mailInterface.close(true);
                 }
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             response.setException(e);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             final OXException wrapper = getWrappingOXException(e);
             LOG.error("", wrapper);
             response.setException(wrapper);
@@ -831,14 +831,14 @@ public class Mail extends PermissionServlet {
         final ServerSession session = getSessionObject(req);
         try {
             ResponseWriter.write(actionGetForward(session, ParamContainer.getInstance(req, resp), null), resp.getWriter(), localeFrom(session));
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             final OXException oxe = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
             LOG.error("", oxe);
             final Response response = new Response(session);
             response.setException(oxe);
             try {
                 ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
-            } catch (final JSONException e1) {
+            } catch (JSONException e1) {
                 LOG.error(RESPONSE_ERROR, e1);
                 sendError(resp);
             }
@@ -888,10 +888,10 @@ public class Mail extends PermissionServlet {
                     mailInterface.close(true);
                 }
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             response.setException(e);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             final OXException wrapper = getWrappingOXException(e);
             LOG.error("", wrapper);
             response.setException(wrapper);
@@ -921,14 +921,14 @@ public class Mail extends PermissionServlet {
             if (null != response) {
                 ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
             }
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             final OXException oxe = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
             LOG.error("", oxe);
             final Response response = new Response(session);
             response.setException(oxe);
             try {
                 ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
-            } catch (final JSONException e1) {
+            } catch (JSONException e1) {
                 LOG.error(RESPONSE_ERROR, e1);
                 sendError(resp);
             }
@@ -963,7 +963,7 @@ public class Mail extends PermissionServlet {
                     long l = -1;
                     try {
                         l = Long.parseLong(tmp.trim());
-                    } catch (final NumberFormatException e) {
+                    } catch (NumberFormatException e) {
                         l = -1;
                     }
                     maxSize = l;
@@ -1019,7 +1019,7 @@ public class Mail extends PermissionServlet {
                         if (setting.isContactCollectOnMailAccess(contextId, userId).booleanValue()) {
                             triggerContactCollector(session, mail, false);
                         }
-                    } catch (final OXException e) {
+                    } catch (OXException e) {
                         LOG.warn("Contact collector could not be triggered.", e);
                     }
                 }
@@ -1030,10 +1030,10 @@ public class Mail extends PermissionServlet {
                 }
             }
 
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             response.setException(e);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             final OXException wrapper = getWrappingOXException(e);
             LOG.error("", wrapper);
             response.setException(wrapper);
@@ -1060,14 +1060,14 @@ public class Mail extends PermissionServlet {
             if (null != response) {
                 ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
             }
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             final OXException oxe = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
             LOG.error("", oxe);
             final Response response = new Response(session);
             response.setException(oxe);
             try {
                 ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
-            } catch (final JSONException e1) {
+            } catch (JSONException e1) {
                 LOG.error(RESPONSE_ERROR, e1);
                 sendError(resp);
             }
@@ -1130,7 +1130,7 @@ public class Mail extends PermissionServlet {
                     mailInterface.close(true);
                 }
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (MailExceptionCode.MAIL_NOT_FOUND.equals(e)) {
                 LOG.warn("Requested mail could not be found. Most likely this is caused by concurrent access of multiple clients while one performed a delete on affected mail.", e);
             } else {
@@ -1146,11 +1146,11 @@ public class Mail extends PermissionServlet {
                     writer.write(jsResponse);
                     writer.flush();
                     return null;
-                } catch (final Exception exc) {
+                } catch (Exception exc) {
                     throw new JSONException(exc);
                 }
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             final OXException wrapper = getWrappingOXException(e);
             LOG.error("", wrapper);
             response.setException(wrapper);
@@ -1163,7 +1163,7 @@ public class Mail extends PermissionServlet {
                     writer.write(jsResponse);
                     writer.flush();
                     return null;
-                } catch (final Exception exc) {
+                } catch (Exception exc) {
                     throw new JSONException(exc);
                 }
             }
@@ -1234,7 +1234,7 @@ public class Mail extends PermissionServlet {
                 final ByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream();
                 try {
                     mail.writeTo(baos);
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     if (!MailExceptionCode.NO_CONTENT.equals(e)) {
                         throw e;
                     }
@@ -1272,7 +1272,7 @@ public class Mail extends PermissionServlet {
                         if (setting.isContactCollectOnMailAccess(contextId, userId).booleanValue()) {
                             triggerContactCollector(session, mail, false);
                         }
-                    } catch (final OXException e) {
+                    } catch (OXException e) {
                         LOG.warn("Contact collector could not be triggered.", e);
                     }
                 }
@@ -1336,14 +1336,14 @@ public class Mail extends PermissionServlet {
                         if (setting.isContactCollectOnMailAccess(contextId, userId).booleanValue()) {
                             triggerContactCollector(session, mail, false);
                         }
-                    } catch (final OXException e) {
+                    } catch (OXException e) {
                         LOG.warn("Contact collector could not be triggered.", e);
                     }
                 }
             } else {
                 data = MailConverter.getInstance().convertSingle4Get(mail, paramContainer, warnings, session, mailInterface);
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (MailExceptionCode.MAIL_NOT_FOUND.equals(e)) {
                 LOG.warn("Requested mail could not be found. Most likely this is caused by concurrent access of multiple clients while one performed a delete on affected mail.", e);
             } else {
@@ -1359,11 +1359,11 @@ public class Mail extends PermissionServlet {
                     writer.write(jsResponse);
                     writer.flush();
                     return null;
-                } catch (final Exception exc) {
+                } catch (Exception exc) {
                     throw new JSONException(exc);
                 }
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             final OXException wrapper = getWrappingOXException(e);
             LOG.error("", wrapper);
             response.setException(wrapper);
@@ -1376,7 +1376,7 @@ public class Mail extends PermissionServlet {
                     writer.write(jsResponse);
                     writer.flush();
                     return null;
-                } catch (final Exception exc) {
+                } catch (Exception exc) {
                     throw new JSONException(exc);
                 }
             }
@@ -1450,14 +1450,14 @@ public class Mail extends PermissionServlet {
         final ServerSession session = getSessionObject(req);
         try {
             ResponseWriter.write(actionGetNew(session, ParamContainer.getInstance(req, resp), null), resp.getWriter(), localeFrom(session));
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             final OXException oxe = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
             LOG.error("", oxe);
             final Response response = new Response(session);
             response.setException(oxe);
             try {
                 ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
-            } catch (final JSONException e1) {
+            } catch (JSONException e1) {
                 LOG.error(RESPONSE_ERROR, e1);
                 sendError(resp);
             }
@@ -1534,10 +1534,10 @@ public class Mail extends PermissionServlet {
                     mailInterface.close(true);
                 }
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             response.setException(e);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             final OXException wrapper = getWrappingOXException(e);
             LOG.error("", wrapper);
             response.setException(wrapper);
@@ -1563,14 +1563,14 @@ public class Mail extends PermissionServlet {
         final ServerSession session = getSessionObject(req);
         try {
             actionGetSaveVersit(session, resp.getWriter(), ParamContainer.getInstance(req, resp), null);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             final OXException oxe = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
             LOG.error("", oxe);
             final Response response = new Response(session);
             response.setException(oxe);
             try {
                 ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
-            } catch (final JSONException e1) {
+            } catch (JSONException e1) {
                 LOG.error(RESPONSE_ERROR, e1);
                 sendError(resp);
             }
@@ -1638,10 +1638,10 @@ public class Mail extends PermissionServlet {
                     mailInterface.close(true);
                 }
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             response.setException(e);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             final OXException wrapper = getWrappingOXException(e);
             LOG.error("", wrapper);
             response.setException(wrapper);
@@ -1702,10 +1702,9 @@ public class Mail extends PermissionServlet {
                 resp.setContentType(contentType.toString());
                 resp.setHeader("Content-disposition", getAttachmentDispositionValue(fileName, null, req.getHeader("user-agent")));
                 /*
-                 * Reset response header values since we are going to directly write into servlet's output stream and then some browsers do
-                 * not allow header "Pragma"
+                 * Handle caching headers
                  */
-                Tools.removeCachingHeader(resp);
+                Tools.updateCachingHeaders(req, resp);
                 final OutputStream out = resp.getOutputStream();
                 outSelected = true;
                 /*
@@ -1730,10 +1729,10 @@ public class Mail extends PermissionServlet {
                     mf = null;
                 }
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             callbackError(resp, outSelected, session, e);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             final OXException exc = getWrappingOXException(e);
             LOG.error("", exc);
             callbackError(resp, outSelected, session, exc);
@@ -1779,10 +1778,9 @@ public class Mail extends PermissionServlet {
                 resp.setContentType(contentType.toString());
                 resp.setHeader("Content-disposition", getAttachmentDispositionValue(fileName, null, req.getHeader("user-agent")));
                 /*
-                 * Reset response header values since we are going to directly write into servlet's output stream and then some browsers do
-                 * not allow header "Pragma"
+                 * Handle caching headers
                  */
-                Tools.removeCachingHeader(resp);
+                Tools.updateCachingHeaders(req, resp);
                 final OutputStream out = resp.getOutputStream();
                 outSelected = true;
                 /*
@@ -1807,10 +1805,10 @@ public class Mail extends PermissionServlet {
                     mf = null;
                 }
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             callbackError(resp, outSelected, session, e);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             final OXException exc = getWrappingOXException(e);
             LOG.error("", exc);
             callbackError(resp, outSelected, session, exc);
@@ -1825,14 +1823,14 @@ public class Mail extends PermissionServlet {
         final ServerSession session = getSessionObject(req);
         try {
             ResponseWriter.write(actionGetAttachmentToken(session, ParamContainer.getInstance(req, resp), null), resp.getWriter(), localeFrom(session));
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             final OXException oxe = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
             LOG.error("", oxe);
             final Response response = new Response();
             response.setException(oxe);
             try {
                 ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
-            } catch (final JSONException e1) {
+            } catch (JSONException e1) {
                 LOG.error(RESPONSE_ERROR, e1);
                 sendError(resp);
             }
@@ -1865,7 +1863,7 @@ public class Mail extends PermissionServlet {
                 final String tmp = paramContainer.getStringParam("ttlMillis");
                 try {
                     ttlMillis = (tmp == null ? -1 : Integer.parseInt(tmp.trim()));
-                } catch (final NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     ttlMillis = -1;
                 }
             }
@@ -1901,10 +1899,10 @@ public class Mail extends PermissionServlet {
                     mailInterface.close(true);
                 }
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             response.setException(e);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             final OXException wrapper = getWrappingOXException(e);
             LOG.error("", wrapper);
             response.setException(wrapper);
@@ -2008,10 +2006,9 @@ public class Mail extends PermissionServlet {
                     attachmentInputStream = checkedDownload.getInputStream();
                 }
                 /*
-                 * Reset response header values since we are going to directly write into servlet's output stream and then some browsers do
-                 * not allow header "Pragma"
+                 * Handle caching headers
                  */
-                Tools.removeCachingHeader(resp);
+                Tools.updateCachingHeaders(req, resp);
                 final OutputStream out = resp.getOutputStream();
                 outSelected = true;
                 /*
@@ -2032,10 +2029,10 @@ public class Mail extends PermissionServlet {
                     mailInterface.close(true);
                 }
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             callbackError(resp, outSelected, session, e);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             final OXException exc = getWrappingOXException(e);
             LOG.error("", exc);
             callbackError(resp, outSelected, session, exc);
@@ -2064,16 +2061,16 @@ public class Mail extends PermissionServlet {
             response.setException(e);
             writer.write(substituteJS(ResponseWriter.getJSON(response).toString(), "error"));
             writer.flush();
-        } catch (final UnsupportedEncodingException uee) {
+        } catch (UnsupportedEncodingException uee) {
             uee.initCause(e);
             LOG.error("", uee);
-        } catch (final IOException ioe) {
+        } catch (IOException ioe) {
             ioe.initCause(e);
             LOG.error("", ioe);
-        } catch (final IllegalStateException ise) {
+        } catch (IllegalStateException ise) {
             ise.initCause(e);
             LOG.error("", ise);
-        } catch (final JSONException je) {
+        } catch (JSONException je) {
             je.initCause(e);
             LOG.error("", je);
         }
@@ -2103,7 +2100,7 @@ public class Mail extends PermissionServlet {
         } else {
             try {
                 tmp.append(Helper.encodeFilename(fileName, STR_UTF8, internetExplorer));
-            } catch (final UnsupportedEncodingException e) {
+            } catch (UnsupportedEncodingException e) {
                 LOG.error("Unsupported encoding in a message detected and monitored: \"{}\"", STR_UTF8, e);
                 MailServletInterface.mailInterfaceMonitor.addUnsupportedEncodingExceptions(STR_UTF8);
                 return fileName;
@@ -2175,14 +2172,14 @@ public class Mail extends PermissionServlet {
         final ServerSession session = getSessionObject(req);
         try {
             ResponseWriter.write(actionPutForwardMultiple(session, getBody(req), ParamContainer.getInstance(req, resp), null), resp.getWriter(), localeFrom(session));
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             final OXException oxe = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
             LOG.error("", oxe);
             final Response response = new Response(session);
             response.setException(oxe);
             try {
                 ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
-            } catch (final JSONException e1) {
+            } catch (JSONException e1) {
                 LOG.error(RESPONSE_ERROR, e1);
                 sendError(resp);
             }
@@ -2253,10 +2250,10 @@ public class Mail extends PermissionServlet {
                     mailInterface.close(true);
                 }
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             response.setException(e);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             final OXException wrapper = getWrappingOXException(e);
             LOG.error("", wrapper);
             response.setException(wrapper);
@@ -2280,14 +2277,14 @@ public class Mail extends PermissionServlet {
         final ServerSession session = getSessionObject(req);
         try {
             ResponseWriter.write(actionPutReply(session, getBody(req), ParamContainer.getInstance(req, resp), replyAll, null), resp.getWriter(), localeFrom(session));
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             final OXException oxe = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
             LOG.error("", oxe);
             final Response response = new Response(session);
             response.setException(oxe);
             try {
                 ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
-            } catch (final JSONException e1) {
+            } catch (JSONException e1) {
                 LOG.error(RESPONSE_ERROR, e1);
                 sendError(resp);
             }
@@ -2307,7 +2304,7 @@ public class Mail extends PermissionServlet {
         for (final String name : paramContainer.getParameterNames()) {
             try {
                 map.put(name, paramContainer.getStringParam(name));
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.warn("", e);
             }
         }
@@ -2340,14 +2337,14 @@ public class Mail extends PermissionServlet {
                 response.setException(MailExceptionCode.UNEXPECTED_ERROR.create("Unable to get response."));
             }
             ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             final OXException oxe = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
             LOG.error("", oxe);
             final Response response = new Response(session);
             response.setException(oxe);
             try {
                 ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
-            } catch (final JSONException e1) {
+            } catch (JSONException e1) {
                 LOG.error(RESPONSE_ERROR, e1);
                 sendError(resp);
             }
@@ -2395,7 +2392,7 @@ public class Mail extends PermissionServlet {
                 map.put(PARAMETER_UNSEEN, tmp);
             }
             tmp = null;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             final Response response = new Response(session);
             response.setException(e);
             return response;
@@ -2414,14 +2411,14 @@ public class Mail extends PermissionServlet {
         final ServerSession session = getSessionObject(req);
         try {
             ResponseWriter.write(actionPutAutosave(session, getBody(req), null), resp.getWriter(), localeFrom(session));
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             final OXException oxe = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
             LOG.error("", oxe);
             final Response response = new Response(session);
             response.setException(oxe);
             try {
                 ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
-            } catch (final JSONException e1) {
+            } catch (JSONException e1) {
                 LOG.error(RESPONSE_ERROR, e1);
                 sendError(resp);
             }
@@ -2497,7 +2494,7 @@ public class Mail extends PermissionServlet {
                     mailInterface.close(true);
                 }
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (MimeMailExceptionCode.INVALID_EMAIL_ADDRESS.equals(e)) {
                 e.setCategory(Category.CATEGORY_USER_INPUT);
                 LOG.warn("", e);
@@ -2505,7 +2502,7 @@ public class Mail extends PermissionServlet {
                 LOG.error("", e);
             }
             response.setException(e);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             final OXException wrapper = getWrappingOXException(e);
             LOG.error("", wrapper);
             response.setException(wrapper);
@@ -2525,14 +2522,14 @@ public class Mail extends PermissionServlet {
         final ServerSession session = getSessionObject(req);
         try {
             ResponseWriter.write(actionPutClear(session, getBody(req), null), resp.getWriter(), localeFrom(session));
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             final OXException oxe = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
             LOG.error("", oxe);
             final Response response = new Response(session);
             response.setException(oxe);
             try {
                 ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
-            } catch (final JSONException e1) {
+            } catch (JSONException e1) {
                 LOG.error(RESPONSE_ERROR, e1);
                 sendError(resp);
             }
@@ -2581,10 +2578,10 @@ public class Mail extends PermissionServlet {
                     }
                 }
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             response.setException(e);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             final OXException wrapper = getWrappingOXException(e);
             LOG.error("", wrapper);
             response.setException(wrapper);
@@ -2606,14 +2603,14 @@ public class Mail extends PermissionServlet {
         final ServerSession session = getSessionObject(req);
         try {
             ResponseWriter.write(actionPutMailSearch(session, getBody(req), ParamContainer.getInstance(req, resp), null), resp.getWriter(), localeFrom(session));
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             final OXException oxe = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
             LOG.error("", oxe);
             final Response response = new Response(session);
             response.setException(oxe);
             try {
                 ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
-            } catch (final JSONException e1) {
+            } catch (JSONException e1) {
                 LOG.error(RESPONSE_ERROR, e1);
                 sendError(resp);
             }
@@ -2775,10 +2772,10 @@ public class Mail extends PermissionServlet {
                     }
                 }
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             response.setException(e);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             final OXException wrapper = getWrappingOXException(e);
             LOG.error("", wrapper);
             response.setException(wrapper);
@@ -2804,14 +2801,14 @@ public class Mail extends PermissionServlet {
         final ServerSession session = getSessionObject(req);
         try {
             ResponseWriter.write(actionPutMailList(session, getBody(req), ParamContainer.getInstance(req, resp), null), resp.getWriter(), localeFrom(session));
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             final OXException oxe = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
             LOG.error("", oxe);
             final Response response = new Response(session);
             response.setException(oxe);
             try {
                 ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
-            } catch (final JSONException e1) {
+            } catch (JSONException e1) {
                 LOG.error(RESPONSE_ERROR, e1);
                 sendError(resp);
             }
@@ -2893,10 +2890,10 @@ public class Mail extends PermissionServlet {
                     mailInterface.close(true);
                 }
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             response.setException(e);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             final OXException wrapper = getWrappingOXException(e);
             LOG.error("", wrapper);
             response.setException(wrapper);
@@ -2964,14 +2961,14 @@ public class Mail extends PermissionServlet {
         final ServerSession session = getSessionObject(req);
         try {
             ResponseWriter.write(actionPutDeleteMails(session, getBody(req), ParamContainer.getInstance(req, resp), null), resp.getWriter(), localeFrom(session));
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             final OXException oxe = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
             LOG.error("", oxe);
             final Response response = new Response(session);
             response.setException(oxe);
             try {
                 ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
-            } catch (final JSONException e1) {
+            } catch (JSONException e1) {
                 LOG.error(RESPONSE_ERROR, e1);
                 sendError(resp);
             }
@@ -3033,10 +3030,10 @@ public class Mail extends PermissionServlet {
                     mailInterface.close(true);
                 }
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             response.setException(e);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             final OXException wrapper = getWrappingOXException(e);
             LOG.error("", wrapper);
             response.setException(wrapper);
@@ -3058,14 +3055,14 @@ public class Mail extends PermissionServlet {
         final ServerSession session = getSessionObject(req);
         try {
             ResponseWriter.write(actionPutUpdateMail(session, getBody(req), ParamContainer.getInstance(req, resp), null), resp.getWriter(), localeFrom(session));
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             final OXException oxe = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
             LOG.error("", oxe);
             final Response response = new Response(session);
             response.setException(oxe);
             try {
                 ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
-            } catch (final JSONException e1) {
+            } catch (JSONException e1) {
                 LOG.error(RESPONSE_ERROR, e1);
                 sendError(resp);
             }
@@ -3162,10 +3159,10 @@ public class Mail extends PermissionServlet {
                     mailInterface.close(true);
                 }
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             response.setException(e);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             final OXException wrapper = getWrappingOXException(e);
             LOG.error("", wrapper);
             response.setException(wrapper);
@@ -3183,14 +3180,14 @@ public class Mail extends PermissionServlet {
         final ServerSession session = getSessionObject(req);
         try {
             ResponseWriter.write(actionPutNewMail(session, req, ParamContainer.getInstance(req, resp)), resp.getWriter(), localeFrom(session));
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             final OXException oxe = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
             LOG.error("", oxe);
             final Response response = new Response(session);
             response.setException(oxe);
             try {
                 ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
-            } catch (final JSONException e1) {
+            } catch (JSONException e1) {
                 LOG.error(RESPONSE_ERROR, e1);
                 sendError(resp);
             }
@@ -3239,7 +3236,7 @@ public class Mail extends PermissionServlet {
                         if (null != in) {
                             try {
                                 in.close();
-                            } catch (final Exception e) {
+                            } catch (Exception e) {
                                 LOG.error("Closing stream failed.", e);
                             }
                         }
@@ -3294,10 +3291,10 @@ public class Mail extends PermissionServlet {
                 responseObj.put(DataFields.ID, ids[0]);
                 responseData = responseObj;
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             response.setException(e);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             final OXException wrapper = getWrappingOXException(e);
             LOG.error("", wrapper);
             response.setException(wrapper);
@@ -3305,7 +3302,7 @@ public class Mail extends PermissionServlet {
             if (null != managedMimeMessage) {
                 try {
                     managedMimeMessage.cleanUp();
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     // Ignore
                 }
             }
@@ -3324,14 +3321,14 @@ public class Mail extends PermissionServlet {
         final ServerSession session = getSessionObject(req);
         try {
             ResponseWriter.write(actionPutTransportMail(session, getBody(req), ParamContainer.getInstance(req, resp), null), resp.getWriter(), localeFrom(session));
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             final OXException oxe = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
             LOG.error("", oxe);
             final Response response = new Response(session);
             response.setException(oxe);
             try {
                 ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
-            } catch (final JSONException e1) {
+            } catch (JSONException e1) {
                 LOG.error(RESPONSE_ERROR, e1);
                 sendError(resp);
             }
@@ -3371,7 +3368,7 @@ public class Mail extends PermissionServlet {
                 try {
                     final InternetAddress[] fromAddrs = composedMail.getFrom();
                     accountId = resolveFrom2Account(session, fromAddrs != null && fromAddrs.length > 0 ? fromAddrs[0] : null, true, true);
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     if (MailExceptionCode.NO_TRANSPORT_SUPPORT.equals(e)) {
                         // Re-throw
                         throw e;
@@ -3406,7 +3403,7 @@ public class Mail extends PermissionServlet {
                     if (setting.isContactCollectOnMailTransport(contextId, userId).booleanValue()) {
                         triggerContactCollector(session, composedMail, true);
                     }
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     LOG.warn("Contact collector could not be triggered.", e);
                 }
             } finally {
@@ -3414,10 +3411,10 @@ public class Mail extends PermissionServlet {
                     mailInterface.close(true);
                 }
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             response.setException(e);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             final OXException wrapper = getWrappingOXException(e);
             LOG.error("", wrapper);
             response.setException(wrapper);
@@ -3433,7 +3430,7 @@ public class Mail extends PermissionServlet {
      */
     protected static final MimeMessage POISON = new MimeMessage(MimeDefaultSession.getDefaultSession());
 
-    private JSONObject appendDraft(final ServerSession session, final int flags, final boolean force, final InternetAddress from, final MimeMessage m) throws OXException, OXException, JSONException {
+    private JSONObject appendDraft(final ServerSession session, final int flags, final boolean force, final InternetAddress from, final MimeMessage m) throws OXException, JSONException {
         /*
          * Determine the account to transport with
          */
@@ -3442,7 +3439,7 @@ public class Mail extends PermissionServlet {
             int accId;
             try {
                 accId = resolveFrom2Account(session, from, true, !force);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 if (MailExceptionCode.NO_TRANSPORT_SUPPORT.equals(e)) {
                     // Re-throw
                     throw e;
@@ -3542,10 +3539,10 @@ public class Mail extends PermissionServlet {
                              * Update cache
                              */
                             MailMessageCache.getInstance().removeFolderMessages(accountId, sentFullname, session.getUserId(), session.getContext().getContextId());
-                        } catch (final OXException e) {
+                        } catch (OXException e) {
                             LOG.error("", e);
                         }
-                    } catch (final OXException e) {
+                    } catch (OXException e) {
                         if (e.getMessage().indexOf("quota") != -1) {
                             throw MailExceptionCode.COPY_TO_SENT_FOLDER_FAILED_QUOTA.create(e, new Object[0]);
                         }
@@ -3573,9 +3570,9 @@ public class Mail extends PermissionServlet {
                 throw oxError;
             }
             return responseData;
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
@@ -3622,7 +3619,7 @@ public class Mail extends PermissionServlet {
                  */
                 MailMessageCache.getInstance().updateCachedMessages(uids, mailAccess.getAccountId(), fullname, userId, contextId, FIELDS_FLAGS, new Object[] { Integer.valueOf(MailMessage.FLAG_ANSWERED) });
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
         }
     }
@@ -3635,14 +3632,14 @@ public class Mail extends PermissionServlet {
         final ServerSession session = getSessionObject(req);
         try {
             ResponseWriter.write(actionPutCopyMail(session, getBody(req), ParamContainer.getInstance(req, resp), null), resp.getWriter(), localeFrom(session));
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             final OXException oxe = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
             LOG.error("", oxe);
             final Response response = new Response(session);
             response.setException(oxe);
             try {
                 ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
-            } catch (final JSONException e1) {
+            } catch (JSONException e1) {
                 LOG.error(RESPONSE_ERROR, e1);
                 sendError(resp);
             }
@@ -3678,10 +3675,10 @@ public class Mail extends PermissionServlet {
                     mailInterface.close(true);
                 }
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             response.setException(e);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             final OXException wrapper = getWrappingOXException(e);
             LOG.error("", wrapper);
             response.setException(wrapper);
@@ -3736,7 +3733,7 @@ public class Mail extends PermissionServlet {
                     mailInterface.close(true);
                 }
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             OXException oxException = e;
             if (MailExceptionCode.COPY_TO_SENT_FOLDER_FAILED_QUOTA.equals(e)) {
                 oxException = MailExceptionCode.UNABLE_TO_SAVE_MAIL_QUOTA.create();
@@ -3750,7 +3747,7 @@ public class Mail extends PermissionServlet {
                 response.setTimestamp(null);
                 ResponseWriter.write(response, writer, localeFrom(session));
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             final OXException wrapper = getWrappingOXException(e);
             LOG.error("", wrapper);
             final Response response = new Response(session);
@@ -3823,7 +3820,7 @@ public class Mail extends PermissionServlet {
                     mailInterface.close(true);
                 }
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             final Response response = new Response(session);
             for(int x=0; x<mailIDs.length; x++) {
@@ -3833,7 +3830,7 @@ public class Mail extends PermissionServlet {
                 response.setTimestamp(null);
                 ResponseWriter.write(response, writer, localeFrom(session));
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             final OXException wrapper = getWrappingOXException(e);
             LOG.error("", wrapper);
             final Response response = new Response(session);
@@ -3876,7 +3873,7 @@ public class Mail extends PermissionServlet {
                                 }
                             }
                         }
-                    } catch (final OXException e) {
+                    } catch (OXException e) {
                         LOG.warn("Contact collector could not be triggered.", e);
                     }
                 }
@@ -3897,7 +3894,7 @@ public class Mail extends PermissionServlet {
                     mailInterface.close(true);
                 }
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             final Response response = new Response(session);
             for(int x=0; x<mailIDs.length; x++) {
@@ -3907,7 +3904,7 @@ public class Mail extends PermissionServlet {
                 response.setTimestamp(null);
                 ResponseWriter.write(response, writer, localeFrom(session));
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             final OXException wrapper = getWrappingOXException(e);
             LOG.error("", wrapper);
             final Response response = new Response(session);
@@ -3947,7 +3944,7 @@ public class Mail extends PermissionServlet {
                     mailInterface.close(true);
                 }
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             final Response response = new Response(session);
             for(int x=0; x<mailIDs.length; x++) {
@@ -3957,7 +3954,7 @@ public class Mail extends PermissionServlet {
                 response.setTimestamp(null);
                 ResponseWriter.write(response, writer, localeFrom(session));
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             final OXException wrapper = getWrappingOXException(e);
             LOG.error("", wrapper);
             final Response response = new Response(session);
@@ -3979,14 +3976,14 @@ public class Mail extends PermissionServlet {
         final ServerSession session = getSessionObject(req);
         try {
             ResponseWriter.write(actionPutAttachment(session, getBody(req), ParamContainer.getInstance(req, resp), null), resp.getWriter(), localeFrom(session));
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             final OXException oxe = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
             LOG.error("", oxe);
             final Response response = new Response(session);
             response.setException(oxe);
             try {
                 ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
-            } catch (final JSONException e1) {
+            } catch (JSONException e1) {
                 LOG.error(RESPONSE_ERROR, e1);
                 sendError(resp);
             }
@@ -4055,7 +4052,7 @@ public class Mail extends PermissionServlet {
                 performRollback = true;
                 fileAccess.saveDocument(file, mailPart.getInputStream(), System.currentTimeMillis(), fields);
                 fileAccess.commit();
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 if (performRollback) {
                     fileAccess.rollback();
                 }
@@ -4068,10 +4065,10 @@ public class Mail extends PermissionServlet {
                     fileAccess.finish();
                 }
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             response.setException(e);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             final OXException wrapper = getWrappingOXException(e);
             LOG.error("", wrapper);
             response.setException(wrapper);
@@ -4093,14 +4090,14 @@ public class Mail extends PermissionServlet {
         final ServerSession session = getSessionObject(req);
         try {
             ResponseWriter.write(actionPutReceiptAck(session, getBody(req), null), resp.getWriter(), localeFrom(session));
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             final OXException oxe = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
             LOG.error("", oxe);
             final Response response = new Response(session);
             response.setException(oxe);
             try {
                 ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
-            } catch (final JSONException e1) {
+            } catch (JSONException e1) {
                 LOG.error(RESPONSE_ERROR, e1);
                 sendError(resp);
             }
@@ -4139,10 +4136,10 @@ public class Mail extends PermissionServlet {
                     mailInterface.close(true);
                 }
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             response.setException(e);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             final OXException wrapper = getWrappingOXException(e);
             LOG.error("", wrapper);
             response.setException(wrapper);
@@ -4189,7 +4186,7 @@ public class Mail extends PermissionServlet {
         return storageService.getDefaultMailAccount(session.getUserId(), session.getContextId()).getPrimaryAddress();
     }
 
-    private static int resolveFrom2Account(final ServerSession session, final InternetAddress from, final boolean checkTransportSupport, final boolean checkFrom) throws OXException, OXException {
+    private static int resolveFrom2Account(final ServerSession session, final InternetAddress from, final boolean checkTransportSupport, final boolean checkFrom) throws OXException {
         /*
          * Resolve "From" to proper mail account to select right transport server
          */
@@ -4244,7 +4241,7 @@ public class Mail extends PermissionServlet {
                     if (!validAddrs.contains(from)) {
                         throw MailExceptionCode.INVALID_SENDER.create(from.toString());
                     }
-                } catch (final AddressException e) {
+                } catch (AddressException e) {
                     throw MimeMailException.handleMessagingException(e);
                 }
             }

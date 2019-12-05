@@ -164,7 +164,7 @@ public class OutlookFolderStorageActivator extends HousekeepingActivator {
 
                             try {
                                 Update.updateIds(session.getContextId(), tree, session.getUserId(), newId, oldId, delim);
-                            } catch (final Exception e) {
+                            } catch (Exception e) {
                                 logger.error("", e);
                             }
 
@@ -172,7 +172,7 @@ public class OutlookFolderStorageActivator extends HousekeepingActivator {
                             if (null != memoryTable) {
                                 try {
                                     memoryTable.initializeTree(tree, session.getUserId(), session.getContextId());
-                                } catch (final Exception e) {
+                                } catch (Exception e) {
                                     logger.error("", e);
                                 }
                             }
@@ -204,7 +204,7 @@ public class OutlookFolderStorageActivator extends HousekeepingActivator {
                 dict.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.TOPIC_LAST_SESSION);
                 registerService(EventHandler.class.getName(), sessionEventHandler, dict);
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             logger.error("", e);
             throw e;
         }

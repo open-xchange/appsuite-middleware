@@ -61,6 +61,8 @@ public class CalendarExceptionMessages implements LocalizableStrings {
 
     public static final String EVENT_NOT_FOUND_MSG = "The requested appointment was not found.";
 
+    public static final String EVENT_SEQUENCE_NOT_FOUND_MSG = "The requested version of the appointment was not found.";
+
     public static final String FOLDER_NOT_FOUND_MSG = "The requested folder was not found.";
 
     public static final String ATTENDEE_NOT_FOUND_MSG = "The requested participant was not found.";
@@ -68,6 +70,8 @@ public class CalendarExceptionMessages implements LocalizableStrings {
     public static final String ACCOUNT_NOT_FOUND_MSG = "The requested calendar account was not found.";
 
     public static final String PROVIDER_NOT_AVAILABLE_MSG = "The calendar provider \"%1$s\" is not available.";
+
+    public static final String STORAGE_NOT_AVAILABLE_MSG = "The calendar storage is temporarily not available. Please try again later.";
 
     public static final String ACCOUNT_DISABLED_MSG = "The requested calendar account is currently disabled. Please enable the account and try again.";
 
@@ -160,6 +164,8 @@ public class CalendarExceptionMessages implements LocalizableStrings {
     public static final String TOO_MANY_ATTENDEES_MSG = "The appointment contains too many participants.";
 
     public static final String TOO_MANY_ALARMS_MSG = "The appointment contains too many reminders.";
+    
+    public static final String UNSUPPORTED_METHOD_MSG = "The method \"%1$s\" is not supported.";
     
     /**
      * Initializes a new {@link CalendarExceptionMessages}.

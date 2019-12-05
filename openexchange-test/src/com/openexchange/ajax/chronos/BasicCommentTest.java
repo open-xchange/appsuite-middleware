@@ -70,14 +70,14 @@ import com.openexchange.testing.httpclient.models.Attendee.CuTypeEnum;
 import com.openexchange.testing.httpclient.models.CalendarUser;
 import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
 import com.openexchange.testing.httpclient.models.ChronosMultipleCalendarResultResponse;
-import com.openexchange.testing.httpclient.models.DeleteBody;
+import com.openexchange.testing.httpclient.models.DeleteEventBody;
 import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventId;
 import com.openexchange.testing.httpclient.models.MailAttachment;
 import com.openexchange.testing.httpclient.models.MailData;
 import com.openexchange.testing.httpclient.models.MailResponse;
 import com.openexchange.testing.httpclient.models.MailsResponse;
-import com.openexchange.testing.httpclient.models.UpdateBody;
+import com.openexchange.testing.httpclient.models.UpdateEventBody;
 import com.openexchange.testing.httpclient.models.UserData;
 import com.openexchange.testing.httpclient.models.UserResponse;
 import com.openexchange.testing.httpclient.modules.MailApi;
@@ -112,7 +112,7 @@ public class BasicCommentTest extends AbstractChronosTest {
     @Override
     public void tearDown() throws Exception {
         if (null != eventData) {
-            eventManager.deleteEvent(getEventId());
+            eventManager.deleteEvent(getEventId(), System.currentTimeMillis(), false);
         }
         super.tearDown();
     }
@@ -125,11 +125,11 @@ public class BasicCommentTest extends AbstractChronosTest {
         setAttendees();
 
         eventData = eventManager.createEvent(eventData, true);
-        UpdateBody body = new UpdateBody();
+        UpdateEventBody body = new UpdateEventBody();
         body.setEvent(eventData);
         body.setComment(UPDATE);
         eventData.setDescription("Description got updated.");
-        ChronosCalendarResultResponse response = chronosApi.updateEvent(apiClient.getSession(), getFolderId(), eventData.getId(), body, Long.valueOf(System.currentTimeMillis()), null, null, Boolean.FALSE, Boolean.TRUE, Boolean.FALSE, null, null, null, Boolean.FALSE, null);
+        ChronosCalendarResultResponse response = chronosApi.updateEvent(apiClient.getSession(), getFolderId(), eventData.getId(), Long.valueOf(System.currentTimeMillis()), body, null, null, Boolean.FALSE, null, Boolean.FALSE, null, null, null, null, Boolean.FALSE, null);
         Assert.assertThat(response.getErrorDesc(), response.getError(), nullValue());
 
         validateMailInSecondUsersInbox("Appointment changed: " + summary, UPDATE);
@@ -159,11 +159,11 @@ public class BasicCommentTest extends AbstractChronosTest {
 
         eventData = eventManager.createEvent(eventData, true);
 
-        DeleteBody body = new DeleteBody();
+        DeleteEventBody body = new DeleteEventBody();
         body.setComment(DELETE);
         body.setEvents(Collections.singletonList(getEventId()));
 
-        ChronosMultipleCalendarResultResponse response = chronosApi.deleteEvent(apiClient.getSession(), Long.valueOf(System.currentTimeMillis()), body, null, null, Boolean.FALSE, Boolean.FALSE, null, null);
+        ChronosMultipleCalendarResultResponse response = chronosApi.deleteEvent(apiClient.getSession(), Long.valueOf(System.currentTimeMillis()), body, null, null, Boolean.FALSE, Boolean.FALSE, null, null, null);
         Assert.assertThat(response.getErrorDesc(), response.getError(), nullValue());
         eventData = null;
 

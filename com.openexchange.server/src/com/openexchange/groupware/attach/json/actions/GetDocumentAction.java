@@ -62,13 +62,13 @@ import com.openexchange.antivirus.exceptions.AntiVirusServiceExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 /**
  * {@link GetDocumentAction}
@@ -176,7 +176,7 @@ public final class GetDocumentAction extends AbstractAttachmentAction {
             }
             try {
                 ATTACHMENT_BASE.finish();
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 LOG.debug("", e);
             }
         }

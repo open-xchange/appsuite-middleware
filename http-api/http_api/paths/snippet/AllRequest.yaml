@@ -5,16 +5,21 @@
       - Snippet
     summary: Gets all snippets.
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: type
-        type: string
-        description: A list of comma-separated types to filter, e.g. "signature".
+        description: 'A list of comma-separated types to filter, e.g. "signature".'
         required: false
-    responses:
-      200:
-        description: |
-          A JSON object containing an array with data for all snippets. In case of errors the responsible fields in the response are
-          filled (see [Error handling](#error-handling)).
         schema:
-          $ref: "#/definitions/SnippetsResponse"
+          type: string
+    responses:
+      '200':
+        description: >
+          A JSON object containing an array with data for all snippets. In case
+          of errors the responsible fields in the response are
+
+          filled (see [Error handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SnippetsResponse'

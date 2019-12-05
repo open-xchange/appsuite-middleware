@@ -57,6 +57,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.impl.performer.ConflictCheckPerformer;
 import com.openexchange.chronos.impl.performer.FreeBusyPerformer;
 import com.openexchange.chronos.impl.performer.HasPerformer;
+import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventConflict;
 import com.openexchange.chronos.service.FreeBusyResult;
@@ -103,13 +104,19 @@ public class FreeBusyServiceImpl implements FreeBusyService {
 
     @Override
     public List<EventConflict> checkForConflicts(CalendarSession session, final Event event, final List<Attendee> attendees) throws OXException {
-        return new InternalCalendarStorageOperation<List<EventConflict>>(session) {
+        Boolean oldCheckConflicts = session.get(CalendarParameters.PARAMETER_CHECK_CONFLICTS, Boolean.class);
+        try {
+            session.set(CalendarParameters.PARAMETER_CHECK_CONFLICTS, Boolean.TRUE);
+            return new InternalCalendarStorageOperation<List<EventConflict>>(session) {
 
-            @Override
-            protected List<EventConflict> execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return new ConflictCheckPerformer(session, storage).perform(event, attendees);
-            }
-        }.executeQuery();
+                @Override
+                protected List<EventConflict> execute(CalendarSession session, CalendarStorage storage) throws OXException {
+                    return new ConflictCheckPerformer(session, storage).perform(event, attendees);
+                }
+            }.executeQuery();
+        } finally {
+            session.set(CalendarParameters.PARAMETER_CHECK_CONFLICTS, oldCheckConflicts);
+        }
     }
 
 }

@@ -103,6 +103,9 @@ public enum DataHandlers {
 
     /** The identifier of the data handler to convert from an {@link Event} to its iCalendar representation. */
     public static final String EVENT2ICAL = "com.openexchange.chronos.event2ical";
+    
+    /** The identifier of the data handler to convert from an {@link Event} to its {@link org.json.JSONObject} representation. */
+    public static final String EVENT2JSON = "com.openexchange.chronos.event2json";
 
     /** The identifier of the data handler to convert from an event's iCalendar representation to an {@link Event}. */
     public static final String ICAL2EVENT = "com.openexchange.chronos.ical2event";

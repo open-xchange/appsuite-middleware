@@ -1,0 +1,4 @@
+requests: 
+  - DevicesRequest.yaml
+  - Passwd-changesRequest.yaml
+  - Device-idRequest.yaml

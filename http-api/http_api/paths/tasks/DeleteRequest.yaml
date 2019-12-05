@@ -4,28 +4,26 @@
     tags:
       - Tasks
     summary: Deletes tasks.
-    consumes:
-      - application/json
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: timestamp
-        type: integer
-        format: int64
         description: Timestamp of the last update of the deleted tasks.
         required: true
-      - in: body
-        name: body
-        description: A JSON array of JSON objects with the id and folder of the tasks.
-        required: true
         schema:
-          type: array
-          items:
-            $ref: "#/definitions/TaskListElement"
+          type: integer
+          format: int64
     responses:
-      200:
-        description: |
-          A JSON array with object IDs of tasks which were modified after the specified timestamp and were therefore not deleted. In case of errors the responsible fields in the response are
+      '200':
+        description: >
+          A JSON array with object IDs of tasks which were modified after the
+          specified timestamp and were therefore not deleted. In case of errors
+          the responsible fields in the response are
+
           filled (see [Error handling](#error-handling)).
-        schema:
-          $ref: "#/definitions/TaskDeletionsResponse"
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskDeletionsResponse'
+    requestBody:
+      $ref: '#/components/requestBodies/TaskListElementArray'

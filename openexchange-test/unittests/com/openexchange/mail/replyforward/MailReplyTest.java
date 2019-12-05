@@ -66,7 +66,6 @@ import org.junit.Test;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.i18n.MailStrings;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.mail.AbstractMailTest;
@@ -74,6 +73,7 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.user.User;
 
 /**
  * {@link MailReplyTest}
@@ -157,7 +157,7 @@ public final class MailReplyTest extends AbstractMailTest {
                 mailAccess.close(false);
             }
 
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
@@ -239,7 +239,7 @@ public final class MailReplyTest extends AbstractMailTest {
                 mailAccess.close(false);
             }
 
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
@@ -303,9 +303,9 @@ public final class MailReplyTest extends AbstractMailTest {
                 }
 
                 /*-
-                 * > 
+                 * >
                  * > On April 2, 2008 at 7:41 AM "Kraft, Manuel" <manuel.kraft@open-xchange.com> wrote:
-                 * > 
+                 * >
                  */
 
                 final int pos = text.indexOf(replyPrefix);
@@ -332,7 +332,7 @@ public final class MailReplyTest extends AbstractMailTest {
                 mailAccess.close(false);
             }
 
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }

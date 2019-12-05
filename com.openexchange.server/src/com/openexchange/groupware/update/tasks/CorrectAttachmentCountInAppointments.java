@@ -49,6 +49,9 @@
 
 package com.openexchange.groupware.update.tasks;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import com.openexchange.database.Databases;
 import com.openexchange.groupware.update.SimpleStatementsUpdateTask;
 
 
@@ -58,6 +61,11 @@ import com.openexchange.groupware.update.SimpleStatementsUpdateTask;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class CorrectAttachmentCountInAppointments extends SimpleStatementsUpdateTask {
+
+    @Override
+    protected boolean shouldRun(Connection con) throws SQLException {
+        return Databases.tableExists(con, "prg_dates");
+    }
 
     @Override
     protected void statements() {

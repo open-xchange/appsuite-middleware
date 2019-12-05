@@ -104,7 +104,7 @@ public final class CompositeLoginFormatter implements LoginFormatter {
                 }
             }
             return formatters;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             logger.warn("Parsing format string failed. Using default format.", e);
             return null;
         }

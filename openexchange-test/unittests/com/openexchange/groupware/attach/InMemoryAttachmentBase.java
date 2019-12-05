@@ -60,11 +60,11 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
+import com.openexchange.user.User;
 import gnu.trove.map.TIntObjectMap;
 
 /**

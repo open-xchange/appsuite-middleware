@@ -20,13 +20,13 @@ public class HsqlDatabase extends AbstractJdbcDatabase {
     private static String SEP_CONCAT = ", ";
 
     public HsqlDatabase() {
-    	super.unquotedObjectsAreUppercased=true;
+    	super.unquotedObjectsAreUppercased=Boolean.TRUE;
         super.setCurrentDateTimeFunction("NOW");
         super.sequenceNextValueFunction = "NEXT VALUE FOR %s";
     	super.defaultAutoIncrementStartWith = BigInteger.ZERO;
         super.sequenceCurrentValueFunction = "CURRVAL('%s')";
     }
-    
+
     @Override
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
         return "HSQL Database Engine".equalsIgnoreCase(conn.getDatabaseProductName());
@@ -122,10 +122,10 @@ public class HsqlDatabase extends AbstractJdbcDatabase {
     @Override
     public Date parseDate(String dateAsString) throws DateParseException {
         try {
-            if (dateAsString.indexOf(" ") > 0) {
+            if (dateAsString.indexOf(' ') > 0) {
                 return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").parse(dateAsString);
             } else {
-                if (dateAsString.indexOf(":") > 0) {
+                if (dateAsString.indexOf(':') > 0) {
                     return new SimpleDateFormat("HH:mm:ss").parse(dateAsString);
                 } else {
                     return new SimpleDateFormat("yyyy-MM-dd").parse(dateAsString);

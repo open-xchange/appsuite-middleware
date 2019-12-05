@@ -1,4 +1,5 @@
 %define configfiles configfiles.list
+%define manlist manfiles.list
 %define __jar_repack %{nil}
 
 Name:          open-xchange-core
@@ -16,8 +17,9 @@ BuildRequires: java-1_8_0-openjdk-devel
 %else
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
+BuildRequires: pandoc >= 2.0.0
 Version:       @OXVERSION@
-%define        ox_release 18
+%define        ox_release 3
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -70,12 +72,18 @@ mkdir -p %{buildroot}/var/spool/open-xchange/uploads
 rm -f %{configfiles}
 find %{buildroot}/opt/open-xchange/etc \
      %{buildroot}/opt/open-xchange/importCSV \
+        \( -path %{buildroot}/opt/open-xchange/etc/security/policies.policy -o ! -path "%{buildroot}/opt/open-xchange/etc/security*" \) \
+        ! -path %{buildroot}/opt/open-xchange/etc/all.policy \
         -type f \
         -printf "%%%config(noreplace) %p\n" > %{configfiles}
 perl -pi -e 's;%{buildroot};;' %{configfiles}
 perl -pi -e 's;^(.*?)\s+(.*/paths.perfMap)$;$2;' %{configfiles}
 perl -pi -e 's;(^.*?)\s+(.*/(autoconfig|mail|configdb|server|filestorage|management|secret|sessiond)\.properties)$;$1 %%%attr(640,root,open-xchange) $2;' %{configfiles}
 perl -pi -e 's;(^.*?)\s+(.*/(secrets|tokenlogin-secrets))$;$1 %%%attr(640,root,open-xchange) $2;' %{configfiles}
+rm -f %{manlist} && touch %{manlist}
+test -d %{buildroot}%{_mandir} && find %{buildroot}%{_mandir}/man1 -type f -printf "%%%doc %p.*\n" >> %{manlist}
+sed -i -e 's;%{buildroot};;' %{manlist}
+cat %{manlist} >> %{configfiles}
 
 %post
 . /opt/open-xchange/lib/oxfunctions.sh
@@ -135,9 +143,6 @@ if [ ${1:-0} -eq 2 ]; then
 
     # SoftwareChange_Request-2662
     ox_add_property com.openexchange.file.storage.numberOfPregeneratedPreviews 20 /opt/open-xchange/etc/filestorage.properties
-
-    # SoftwareChange_Request-2665
-    ox_add_property com.openexchange.calendar.notify.poolenabled true /opt/open-xchange/etc/notification.properties
 
     # SoftwareChange_Request-2672
     ox_add_property com.openexchange.connector.shutdownFast false /opt/open-xchange/etc/server.properties
@@ -344,17 +349,6 @@ d
     cat <<EOF | /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o $TMPFILE -x /configuration/logger -d @name -m -
 <configuration>
     <logger name="com.hazelcast.internal.monitors" level="INFO"/>
-</configuration>
-EOF
-    if [ -e $TMPFILE ]; then
-      cat $TMPFILE > /opt/open-xchange/etc/logback.xml
-      rm -f $TMPFILE
-    fi
-    # Bug #53993: Zap duplicate loggers
-    rm -f $TMPFILE
-    cat <<EOF | /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o $TMPFILE -x /configuration/logger -d @name -z -r -
-<configuration>
-    <logger name="com.hazelcast.internal.diagnostics" level="INFO"/>
 </configuration>
 EOF
     if [ -e $TMPFILE ]; then
@@ -662,7 +656,7 @@ EOF
 
     # SCR-426
     if ! contains "Allow users to configure the showContactImage setting" /opt/open-xchange/etc/settings/ui.properties; then
-        cat <<EOF | (cd /opt/open-xchange/etc && patch -p3 -N -r -)
+        cat <<EOF | (cd /opt/open-xchange/etc && patch --strip=3 --forward --no-backup-if-mismatch --reject-file=- --fuzz=3 >/dev/null)
 diff --git a/com.openexchange.groupware.settings.extensions/conf/settings/ui.properties b/com.openexchange.groupware.settings.extensions/conf/settings/ui.properties
 index 3ce3af8146f..61ee86367b8 100644
 --- a/com.openexchange.groupware.settings.extensions/conf/settings/ui.properties
@@ -701,6 +695,99 @@ EOF
     if ! contains "onmouseleave" /opt/open-xchange/etc/globaleventhandlers.list; then
       sed -i "s/onmounseleave/onmouseleave/" /opt/open-xchange/etc/globaleventhandlers.list
   fi
+
+  SCR=SCR-480
+  ox_scr_todo ${SCR} && {
+    set -e
+    TMPFILE=$(mktemp)
+    rm -f $TMPFILE
+    /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -s 480 -o $TMPFILE
+    if [ -e $TMPFILE ]; then
+      cat $TMPFILE > /opt/open-xchange/etc/logback.xml
+      rm -f $TMPFILE
+    fi
+    set +e
+    ox_scr_done ${SCR}
+  }
+
+  SCR=SCR-481
+  ox_scr_todo ${SCR} && {
+    pfile=/opt/open-xchange/etc/hazelcast.properties
+    pkey=com.openexchange.hazelcast.group.password
+    comment="# - ${pkey}"
+
+    if contains "${comment}" ${pfile}
+    then
+      sed -i -e "/^# If this is a single-node installation/,/^# - com.openexchange.hazelcast.network.interfaces/{
+        /${comment}/d
+      }" ${pfile}
+    fi
+
+    ox_remove_property ${pkey} ${pfile}
+    ox_scr_done ${SCR}
+  }
+
+    SCR=SCR-489
+    ox_scr_todo ${SCR} && {
+      pfile_sessiond=/opt/open-xchange/etc/sessiond.properties
+      pkey_sessiond=com.openexchange.sessiond.autologin
+      pfile_share=/opt/open-xchange/etc/share.properties
+      pkey_share=com.openexchange.share.autoLogin
+
+      ox_remove_property ${pkey_sessiond} ${pfile_sessiond}
+      ox_remove_property ${pkey_share} ${pfile_share}
+
+      ox_scr_done ${SCR}
+    }
+
+    SCR=SCR-502
+    ox_scr_todo ${SCR} && {
+      scriptconf=/opt/open-xchange/etc/ox-scriptconf.sh
+      contains JAVA_OPTS_SECURITY= ${scriptconf}  || {
+        sed -i -e '/^JAVA_OPTS_SERVER=.*$/a #JAVA_OPTS_SECURITY="-Dorg.osgi.framework.security=osgi -Djava.security.policy=/opt/open-xchange/etc/all.policy -Dopenexchange.security.policy=/opt/open-xchange/etc/security/policies.policy -Duser.dir=/opt/open-xchange/bundles -Djna.platform.library.path=/usr/lib/x86_64-linux-gnu:/usr/lib64"' ${scriptconf}
+      }
+      ox_scr_done ${SCR}
+    }
+
+    # obsoletes SoftwareChange_Request-2665
+    SCR=SCR-548
+    ox_scr_todo ${SCR} && {
+      pfile=/opt/open-xchange/etc/notification.properties
+
+      ox_remove_property imipForInternalUsers ${pfile}
+      ox_remove_property notify_participants_on_delete ${pfile}
+      ox_remove_property com.openexchange.calendar.notify.poolenabled ${pfile}
+
+      ox_scr_done ${SCR}
+    }
+
+    # SCR-522
+    if ! contains "of other nodes via multicast) or \"dns\" to consult a DNS server to resolve the" /opt/open-xchange/etc/hazelcast.properties; then
+      cat <<EOF | (cd /opt/open-xchange/etc && patch --strip=1 --forward --no-backup-if-mismatch --reject-file=- --fuzz=3 >/dev/null)
+diff --git a/hazelcast.properties b/hazelcast.properties
+index d56a04f3e1f..1214fd369fe 100644
+--- a/hazelcast.properties
++++ b/hazelcast.properties
+@@ -44,10 +44,11 @@ com.openexchange.hazelcast.group.name=
+
+# Specifies which mechanism is used to discover other backend nodes in the
+# cluster. Possible values are "empty" (no discovery for single-node setups),
+-# "static" (fixed set of cluster member nodes) or "multicast" (automatic
+-# discovery of other nodes via multicast). Defaults to "empty". Depending on
+-# the specified value, further configuration might be needed, see "Networking"
+-# section below.
++# "static" (fixed set of cluster member nodes), "multicast" (automatic discovery
++# of other nodes via multicast) or "dns" to consult a DNS server to resolve the
++# domain names to the most recent set of IP addresses of all service nodes.
++# Defaults to "empty". Depending on the specified value, further configuration
++# might be needed; see "Networking" section below.
+com.openexchange.hazelcast.network.join=empty
+
+# Configures a comma-separated list of IP addresses / hostnames of possible
+EOF
+  fi
+  ox_add_property com.openexchange.hazelcast.network.join.dns.domainNames "" /opt/open-xchange/etc/hazelcast.properties
+
 fi
 
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
@@ -726,8 +813,11 @@ exit 0
 %dir /opt/open-xchange/documentation/etc
 /opt/open-xchange/documentation/etc/*.yml
 %dir /opt/open-xchange/etc
+/opt/open-xchange/etc/all.policy
 %dir /opt/open-xchange/etc/contextSets
 %dir /opt/open-xchange/etc/meta
+%dir /opt/open-xchange/etc/security
+/opt/open-xchange/etc/security/*.list
 %dir /opt/open-xchange/etc/settings
 %dir /opt/open-xchange/i18n/
 %dir /opt/open-xchange/importCSV/
@@ -750,34 +840,14 @@ exit 0
 %doc com.openexchange.database/doc/examples
 
 %changelog
-* Tue Nov 19 2019 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2019-11-25 (5484)
-* Mon Nov 04 2019 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2019-11-11 (5473)
-* Sat Nov 02 2019 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2019-11-11 (5473)
-* Tue Oct 22 2019 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2019-10-28 (5461)
-* Thu Oct 10 2019 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2019-10-14 (5439)
-* Mon Sep 23 2019 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2019-09-30 (5420)
-* Mon Sep 02 2019 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2019-09-09 (5397)
-* Mon Aug 19 2019 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2019-08-26 (5374)
-* Fri Aug 09 2019 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2019-08-12 (5359)
-* Mon Jul 22 2019 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2019-07-29 (5341)
-* Tue Jul 09 2019 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2019-07-15 (5310)
-* Thu Jun 27 2019 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2019-07-01 (5291)
-* Wed Jun 26 2019 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2019-06-27 (5299)
-* Thu Jun 06 2019 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2019-06-11 (5261)
+* Thu Nov 28 2019 Marcus Klein <marcus.klein@open-xchange.com>
+Second candidate for 7.10.3 release
+* Thu Nov 21 2019 Marcus Klein <marcus.klein@open-xchange.com>
+First candidate for 7.10.3 release
+* Thu Oct 17 2019 Marcus Klein <marcus.klein@open-xchange.com>
+First preview for 7.10.3 release
+* Mon Jun 17 2019 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.10.3 release
 * Fri May 10 2019 Marcus Klein <marcus.klein@open-xchange.com>
 Second candidate for 7.10.2 release
 * Fri May 10 2019 Marcus Klein <marcus.klein@open-xchange.com>

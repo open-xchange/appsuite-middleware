@@ -100,7 +100,7 @@ public final class MALPollDBUtility {
             final StringBuilder sb = new StringBuilder(CHUNK_SIZE * 16).append(SQL_INSERT_PREFIX);
             insert0(cid, hash, mailIds, CHUNK_SIZE, sb, writableConnection);
             writableConnection.commit(); // COMMIT
-        } catch (final Exception e) {
+        } catch (Exception e) {
             rollback(writableConnection);
             throw PushExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
@@ -205,7 +205,7 @@ public final class MALPollDBUtility {
             insert0(cid, hash, newIds, CHUNK_SIZE, sb, writableConnection);
 
             writableConnection.commit(); // COMMIT
-        } catch (final Exception e) {
+        } catch (Exception e) {
             rollback(writableConnection);
             throw PushExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
@@ -230,7 +230,7 @@ public final class MALPollDBUtility {
             deleteEntries(cid, con, uuids);
             deleteUserData(cid, con, user);
             con.commit(); // COMMIT
-        } catch (final Exception e) {
+        } catch (Exception e) {
             rollback(con);
             throw PushExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
@@ -295,7 +295,7 @@ public final class MALPollDBUtility {
             deleteUserData(cid, con, user);
             con.commit(); // COMMIT
             rollback = false;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw PushExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             if (rollback) {
@@ -336,7 +336,7 @@ public final class MALPollDBUtility {
             deleteContextData(cid, con);
             con.commit(); // COMMIT
             rollback = false;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw PushExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             if (rollback) {
@@ -385,7 +385,7 @@ public final class MALPollDBUtility {
                     ids.add(rs.getString(1));
                 }
                 return ids;
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 throw PushExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             } finally {
                 MALPollDBUtility.closeSQLStuff(rs);
@@ -426,7 +426,7 @@ public final class MALPollDBUtility {
                     return null;
                 }
                 return toUUID(rs.getBytes(1));
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 LOG.error("", e);
                 return null;
             } finally {
@@ -472,7 +472,7 @@ public final class MALPollDBUtility {
                     throw e;
                 }
                 return hash;
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 throw PushExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             } finally {
                 MALPollDBUtility.closeSQLStuff(stmt);
@@ -531,7 +531,7 @@ public final class MALPollDBUtility {
             final Connection writableConnection = databaseService.getWritable(cid);
             writableConnection.setAutoCommit(false); // BEGIN
             return writableConnection;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw PushExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
@@ -551,7 +551,7 @@ public final class MALPollDBUtility {
         }
         try {
             con.rollback();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             LOG.error("", e);
         }
     }
@@ -567,7 +567,7 @@ public final class MALPollDBUtility {
         }
         try {
             con.setAutoCommit(true);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             LOG.error("", e);
         }
     }
@@ -581,7 +581,7 @@ public final class MALPollDBUtility {
         if (result != null) {
             try {
                 result.close();
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 LOG.error("", e);
             }
         }
@@ -596,7 +596,7 @@ public final class MALPollDBUtility {
         if (null != stmt) {
             try {
                 stmt.close();
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 LOG.error("", e);
             }
         }

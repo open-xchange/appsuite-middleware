@@ -250,7 +250,7 @@ public class NetsolGetResponse extends AbstractAJAXResponse {
             /*
              * TODO: Parse attachments
              */
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create();
         }
     }
@@ -261,7 +261,7 @@ public class NetsolGetResponse extends AbstractAJAXResponse {
         }
         try {
             return InternetAddress.parse(addrStr, true)[0];
-        } catch (final AddressException e) {
+        } catch (AddressException e) {
             return null;
         }
     }
@@ -312,7 +312,7 @@ public class NetsolGetResponse extends AbstractAJAXResponse {
         }
         try {
             return InternetAddress.parse(value, false);
-        } catch (final javax.mail.internet.AddressException e) {
+        } catch (javax.mail.internet.AddressException e) {
             return new InternetAddress[] { new com.openexchange.mail.mime.PlainTextAddress(value) };
         }
     }

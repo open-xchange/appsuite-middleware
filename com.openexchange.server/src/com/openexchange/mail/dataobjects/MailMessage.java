@@ -284,7 +284,7 @@ public abstract class MailMessage extends MailPart {
         }
         try {
             return Integer.parseInt(cl.substring(cl.charAt(0) == '$' ? COLOR_LABEL_PREFIX.length() : COLOR_LABEL_PREFIX_OLD.length()));
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             throw MailExceptionCode.UNKNOWN_COLOR_LABEL.create(e, cl);
         }
     }
@@ -321,7 +321,7 @@ public abstract class MailMessage extends MailPart {
     public static int parseColorLabel(final String cl, final int defaultValue) {
         try {
             return Integer.parseInt(cl.substring('$' == cl.charAt(0) ? COLOR_LABEL_PREFIX.length() : COLOR_LABEL_PREFIX_OLD.length()));
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             LOG.debug("Invalid color label: {}", cl, e);
             return defaultValue;
         }
@@ -673,7 +673,7 @@ public abstract class MailMessage extends MailPart {
             }
             try {
                 addFrom(QuotedInternetAddress.parse(fromStr, true));
-            } catch (final AddressException e) {
+            } catch (AddressException e) {
                 LOG.debug("", e);
                 addFrom(new PlainTextAddress(fromStr));
             }
@@ -763,7 +763,7 @@ public abstract class MailMessage extends MailPart {
             }
             try {
                 addTo(QuotedInternetAddress.parse(toStr, true));
-            } catch (final AddressException e) {
+            } catch (AddressException e) {
                 LOG.debug("", e);
                 addTo(new PlainTextAddress(toStr));
             }
@@ -853,7 +853,7 @@ public abstract class MailMessage extends MailPart {
             }
             try {
                 addCc(QuotedInternetAddress.parse(ccStr, true));
-            } catch (final AddressException e) {
+            } catch (AddressException e) {
                 LOG.debug("", e);
                 addCc(new PlainTextAddress(ccStr));
             }
@@ -943,7 +943,7 @@ public abstract class MailMessage extends MailPart {
             }
             try {
                 addBcc(QuotedInternetAddress.parse(bccStr, true));
-            } catch (final AddressException e) {
+            } catch (AddressException e) {
                 LOG.debug("", e);
                 addBcc(new PlainTextAddress(bccStr));
             }
@@ -1047,7 +1047,7 @@ public abstract class MailMessage extends MailPart {
             }
             try {
                 addReplyTo(QuotedInternetAddress.parse(replyToStr, true));
-            } catch (final AddressException e) {
+            } catch (AddressException e) {
                 LOG.debug("", e);
                 addReplyTo(new PlainTextAddress(replyToStr));
             }
@@ -1339,7 +1339,7 @@ public abstract class MailMessage extends MailPart {
                         if (null != parsedDate) {
                             setSentDate(parsedDate);
                         }
-                    } catch (final java.text.ParseException e) {
+                    } catch (java.text.ParseException e) {
                         LOG.warn("Date string could not be parsed: {}", sentDateStr, e);
                     }
                 }
@@ -1598,7 +1598,7 @@ public abstract class MailMessage extends MailPart {
             if (dispNotTo != null) {
                 try {
                     setDispositionNotification(new QuotedInternetAddress(dispNotTo, false));
-                } catch (final AddressException e) {
+                } catch (AddressException e) {
                     LOG.debug("", e);
                     setDispositionNotification(new PlainTextAddress(dispNotTo));
                 }

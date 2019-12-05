@@ -81,11 +81,6 @@ public class IncludeStackTraceCLT extends AbstractLogbackConfigurationAdministra
         super(SYNTAX, FOOTER);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractRmiCLI#addOptions(org.apache.commons.cli.Options)
-     */
     @Override
     protected void addOptions(Options options) {
         Option enable = createSwitch("e", "enable", "Flag to enable to include stack traces in HTTP-API JSON responses", true);
@@ -99,11 +94,6 @@ public class IncludeStackTraceCLT extends AbstractLogbackConfigurationAdministra
         options.addOptionGroup(og);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractRmiCLI#invoke(org.apache.commons.cli.Options, org.apache.commons.cli.CommandLine, java.lang.String)
-     */
     @Override
     protected Void invoke(Options options, CommandLine cmd, String optRmiHostName) throws Exception {
         boolean enable = cmd.hasOption("e");
@@ -121,11 +111,6 @@ public class IncludeStackTraceCLT extends AbstractLogbackConfigurationAdministra
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractCLI#checkOptions(org.apache.commons.cli.CommandLine)
-     */
     @Override
     protected void checkOptions(CommandLine cmd) {
         // nothing to check

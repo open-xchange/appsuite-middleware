@@ -172,9 +172,9 @@ public class MetadataResultConverter implements ResultConverter {
             } finally {
                 Streams.close(bufferedStream, stream);
             }
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             Streams.close(fileHolder);

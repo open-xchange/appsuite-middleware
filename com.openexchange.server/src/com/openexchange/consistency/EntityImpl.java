@@ -52,7 +52,7 @@ package com.openexchange.consistency;
 import static com.openexchange.java.Autoboxing.I;
 import org.apache.commons.collections.keyvalue.MultiKey;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
+import com.openexchange.user.User;
 
 /**
  * {@link EntityImpl}
@@ -111,51 +111,26 @@ public class EntityImpl implements Entity {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.groupware.Entity#getId()
-     */
     @Override
     public MultiKey getId() {
         return identifier;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.groupware.Entity#getType()
-     */
     @Override
     public EntityType getType() {
         return type;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.consistency.Entity#getContext()
-     */
     @Override
     public Context getContext() {
         return context;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.consistency.Entity#getUser()
-     */
     @Override
     public User getUser() {
         return user;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#toString()
-     */
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();

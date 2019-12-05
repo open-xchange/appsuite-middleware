@@ -80,7 +80,7 @@ public class Duration<T extends CalendarComponent, U extends CalendarObject> ext
     @Override
     public void parse(final int index, final T component, final U cObj, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) {
        final net.fortuna.ical4j.model.property.Duration duration = (net.fortuna.ical4j.model.property.Duration) component.getProperty("Duration");
-        if(duration == null) {
+        if (duration == null) {
             return;
         }
         final Date endDate = duration.getDuration().getTime(cObj.getStartDate());

@@ -170,11 +170,6 @@ public class ResourceManager extends AbstractManager {
         resourceInterface.delete(context, resource, contextAdminCredentials);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.admin.rmi.manager.AbstractManager#clean(java.lang.Object)
-     */
     @Override
     void clean(Object object) {
         // Nothing to do, the resource will be implicitly deleted when the context is deleted.

@@ -82,11 +82,6 @@ public class Comparators {
             super();
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
-         */
         @Override
         public int compare(Available o1, Available o2) {
             if (o1.getStartTime().before(o2.getStartTime())) {
@@ -113,11 +108,6 @@ public class Comparators {
             super();
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
-         */
         @Override
         public int compare(Availability o1, Availability o2) {
             if (o1.getStartTime().before(o2.getStartTime())) {
@@ -145,11 +135,6 @@ public class Comparators {
             super();
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
-         */
         @Override
         public int compare(Availability o1, Availability o2) {
             // Use '10' for '0' as '0' has a lower priority than '9'
@@ -182,11 +167,6 @@ public class Comparators {
             super();
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
-         */
         @Override
         public int compare(FreeBusyTime o1, FreeBusyTime o2) {
             if (o1.getStartTime().before(o2.getStartTime())) {

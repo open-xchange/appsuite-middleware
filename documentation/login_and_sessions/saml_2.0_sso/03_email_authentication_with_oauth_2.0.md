@@ -1,11 +1,11 @@
 ---
 title: E-Mail Authentication with OAuth 2.0
-icon: fa-envelope-o
+icon: far fa-envelope
 tags: SAML, OAuth, Authentication, Mail, Configuration
 ---
 
-With version 7.8.4 the middleware supports OAuth authentication for the primary mail account via SAML Bearer Assertion Authorization Grant.
-This document describes how to configure the middleware to use an rfc6749 compliant token endpoint to gain oauth token pairs.
+Since version 7.8.4 the middleware supports OAuth authentication for the primary mail account via SAML Bearer Assertion Authorization Grant.
+This document describes how to configure the middleware to use an RFC6749 compliant token endpoint to gain oauth token pairs.
 Furthermore this document describes how to extend a custom SAML implementation to support OAuth authentication.
 
 

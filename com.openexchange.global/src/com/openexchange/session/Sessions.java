@@ -49,7 +49,16 @@
 
 package com.openexchange.session;
 
+import static com.openexchange.java.Autoboxing.I;
+import java.util.Collection;
+import java.util.Optional;
 import java.util.concurrent.locks.Lock;
+import org.slf4j.Logger;
+import com.openexchange.framework.request.RequestContext;
+import com.openexchange.framework.request.RequestContextHolder;
+import com.openexchange.log.LogProperties;
+import com.openexchange.sessiond.SessionFilter;
+import com.openexchange.sessiond.SessiondService;
 
 
 /**
@@ -60,11 +69,111 @@ import java.util.concurrent.locks.Lock;
  */
 public final class Sessions {
 
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(Sessions.class);
+    }
+
     /**
      * Initializes a new {@link Sessions}.
      */
     private Sessions() {
         super();
+    }
+
+    /**
+     * Gets the optional sessions associated with specified user.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The optional sessions; <code>Optional</code> provides a value if and only if wrapped <code>Collection</code> is <b>not</b> empty
+     */
+    public static Optional<Collection<String>> getSessionsOfUser(int userId, int contextId) {
+        SessiondService sessiondService = SessiondService.SERVICE_REFERENCE.get();
+        return getSessionsOfUser(userId, contextId, sessiondService);
+    }
+
+    /**
+     * Gets the optional sessions associated with specified user.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param sessiondService The SessionD service reference to use
+     * @return The optional sessions; <code>Optional</code> provides a value if and only if wrapped <code>Collection</code> is <b>not</b> empty
+     */
+    public static Optional<Collection<String>> getSessionsOfUser(int userId, int contextId, SessiondService sessiondService) {
+        if (sessiondService == null) {
+            return Optional.empty();
+        }
+
+        SessionFilter sessionFilter;
+        {
+            StringBuilder sb = new StringBuilder(32);
+            sb.append("(&");
+            sb.append('(').append(SessionFilter.CONTEXT_ID).append('=').append(contextId).append(')');
+            sb.append('(').append(SessionFilter.USER_ID).append('=').append(userId).append(')');
+            sb.append(')');
+            sessionFilter = SessionFilter.create(sb.toString());
+            sb = null;
+        }
+
+        Collection<String> foundSessions;
+        try {
+            foundSessions = sessiondService.findSessions(sessionFilter);
+        } catch (Exception e) {
+            LoggerHolder.LOG.debug("Failed to find sessions for user {} in context {}", I(userId), I(contextId), e);
+            foundSessions = java.util.Collections.emptyList();
+        }
+        return foundSessions.isEmpty() ? Optional.empty() : Optional.of(foundSessions);
+    }
+
+    /**
+     * Gets the optional session for current thread and validates (if available) that it is associated with given user.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The optional validated session
+     */
+    public static Optional<Session> getValidatedSessionForCurrentThread(int userId, int contextId) {
+        Optional<Session> optionalSession = getSessionForCurrentThread();
+        if (!optionalSession.isPresent()) {
+            return optionalSession;
+        }
+
+        Session session = optionalSession.get();
+        return userId == session.getUserId() && contextId == session.getContextId() ? optionalSession : Optional.empty();
+    }
+
+    /**
+     * Gets the optional session for current thread.
+     *
+     * @return The optional session
+     */
+    public static Optional<Session> getSessionForCurrentThread() {
+        Session session = ThreadLocalSessionHolder.getInstance().getSessionObject();
+        if (null != session) {
+            return Optional.of(session);
+        }
+
+        RequestContext requestContext = RequestContextHolder.get();
+        if (requestContext != null) {
+            session = requestContext.getSession();
+            if (null != session) {
+                return Optional.of(session);
+            }
+        }
+
+        String sessionId = LogProperties.getLogProperty(LogProperties.Name.SESSION_SESSION_ID);
+        if (sessionId == null) {
+            return Optional.empty();
+        }
+
+        SessiondService sessiondService = SessiondService.SERVICE_REFERENCE.get();
+        if (sessiondService == null) {
+            return Optional.empty();
+        }
+
+        return Optional.ofNullable(sessiondService.getSession(sessionId));
     }
 
     /**

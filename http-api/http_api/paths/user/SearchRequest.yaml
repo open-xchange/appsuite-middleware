@@ -4,32 +4,47 @@
     tags:
       - User
     summary: Search for users.
-    consumes:
-      - application/json
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
-      - $ref: "#/parameters/gblQueryParamUserColumns"
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - $ref: '#/components/parameters/gblQueryParamUserColumns'
       - in: query
         name: sort
-        type: string
-        description: The identifier of a column which determines the sort order of the response. If this parameter is specified , then the parameter order must be also specified.
+        description: >-
+          The identifier of a column which determines the sort order of the
+          response. If this parameter is specified , then the parameter order
+          must be also specified.
         required: false
+        schema:
+          type: string
       - in: query
         name: order
-        type: string
-        description: '"asc" if the response entires should be sorted in the ascending order, "desc" if the response entries should be sorted in the descending order. If this parameter is specified, then the parameter sort must be also specified.'
+        description: >-
+          "asc" if the response entires should be sorted in the ascending order,
+          "desc" if the response entries should be sorted in the descending
+          order. If this parameter is specified, then the parameter sort must be
+          also specified.
         required: false
-      - in: body
-        name: body
-        description: A JSON object containing search parameters.
-        required: true
         schema:
-          $ref: "#/definitions/UserSearchBody"
+          type: string
     responses:
-      200:
-        description: |
-          A JSON object containing an array with matching users. Users are represented by arrays. The elements of each array contain the
-          information specified by the corresponding identifiers in the `columns` parameter. In case of errors the
-          responsible fields in the response are filled (see [Error handling](#error-handling)).
-        schema:
-          $ref: "#/definitions/UsersResponse"
+      '200':
+        description: >
+          A JSON object containing an array with matching users. Users are
+          represented by arrays. The elements of each array contain the
+
+          information specified by the corresponding identifiers in the
+          `columns` parameter. In case of errors the
+
+          responsible fields in the response are filled (see [Error
+          handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UsersResponse'
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserSearchBody'
+      description: A JSON object containing search parameters.
+      required: true

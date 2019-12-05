@@ -4,36 +4,48 @@
     tags:
       - OAuth
     summary: Creates an OAuth account.
-    description: |
-      This action is typically called by provided call-back URL and is only intended for manual invocation if
-      "outOfBand" interaction is returned by preceeding [/oauth/account?action=init](#operation--oauth-accounts-action-init-get) step.
+    description: >
+      This action is typically called by provided call-back URL and is only
+      intended for manual invocation if
+
+      "outOfBand" interaction is returned by preceeding
+      [/oauth/account?action=init](#operation--oauth-accounts-action-init-get)
+      step.
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: oauth_token
-        type: string
         description: The request token from preceeding OAuth interaction.
         required: true
+        schema:
+          type: string
       - in: query
         name: uuid
-        type: string
         description: The UUID of the preceeding OAuth interaction.
         required: true
+        schema:
+          type: string
       - in: query
         name: displayName
-        type: string
         description: The display name for the new account.
         required: true
+        schema:
+          type: string
       - in: query
         name: oauth_verifier
-        type: string
         description: The verifier string which confirms that user granted access.
         required: false
-      - $ref: "#/parameters/gblQueryParamScopes"
-    responses:
-      200:
-        description: |
-          A JSON object containing the newly created OAuth account. In case of errors the responsible fields in the response are
-          filled (see [Error handling](#error-handling)).
         schema:
-          $ref: "#/definitions/OAuthAccountResponse"
+          type: string
+      - $ref: '#/components/parameters/gblQueryParamScopes'
+    responses:
+      '200':
+        description: >
+          A JSON object containing the newly created OAuth account. In case of
+          errors the responsible fields in the response are
+
+          filled (see [Error handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OAuthAccountResponse'

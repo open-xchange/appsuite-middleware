@@ -78,9 +78,9 @@ public class PropertyHandlerExtended extends PropertyHandler {
         configfile.append("contextrestore.properties");
         try {
             addpropsfromfile(configfile.toString());
-        } catch (final FileNotFoundException e) {
+        } catch (FileNotFoundException e) {
             log.error("Unable to read file: {}", configfile);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             log.error("Problems reading file: {}", configfile);
         }
     }

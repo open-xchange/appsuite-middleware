@@ -123,16 +123,16 @@ public class DummyCollection extends DummyResource implements WebdavCollection {
 		for(final WebdavResource res : copy) {
 			try {
 				res.delete();
-			} catch (final WebdavProtocolException x) {
+			} catch (WebdavProtocolException x) {
 				exceptions.add(x);
 			}
 		}
 		try {
 			super.delete();
-		} catch (final WebdavProtocolException x) {
+		} catch (WebdavProtocolException x) {
 			exceptions.add(x);
 		}
-		if(exceptions.size() > 0) {
+		if (exceptions.size() > 0) {
 			throw WebdavMultistatusException.create(getUrl(), exceptions);
 		}
 	}
@@ -147,16 +147,16 @@ public class DummyCollection extends DummyResource implements WebdavCollection {
     public WebdavResource copy(final WebdavPath dest, final boolean noroot, final boolean overwrite) throws WebdavProtocolException {
 		try {
             checkParentExists(dest);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw new WebdavProtocolException(getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
         }
 		final List<WebdavProtocolException> exceptions = new ArrayList<WebdavProtocolException>();
 		try {
 			WebdavResource copy = null;
-			if(!noroot) {
+			if (!noroot) {
 				try {
                     copy = super.copy(dest,noroot, overwrite);
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     throw new WebdavProtocolException(getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
                 }
 			} else {
@@ -167,15 +167,15 @@ public class DummyCollection extends DummyResource implements WebdavCollection {
 			for(final WebdavResource res : tmpList) {
 				try {
 					res.copy(dest.dup().append(res.getUrl().name()));
-				} catch (final WebdavProtocolException x) {
+				} catch (WebdavProtocolException x) {
 					exceptions.add(x);
 				}
 			}
 			return copy;
-		} catch (final WebdavProtocolException x) {
+		} catch (WebdavProtocolException x) {
 			exceptions.add(x);
 		}
-		if(exceptions.size() > 0) {
+		if (exceptions.size() > 0) {
 			throw WebdavMultistatusException.create(getUrl(),exceptions);
 		}
 		throw new IllegalStateException("Impossible");
@@ -245,8 +245,8 @@ public class DummyCollection extends DummyResource implements WebdavCollection {
 
 		@Override
         public boolean hasNext() {
-			if(subIterator != null) {
-				if(subIterator.hasNext()) {
+			if (subIterator != null) {
+				if (subIterator.hasNext()) {
 					return true;
 				}
 				subIterator = null;
@@ -256,11 +256,11 @@ public class DummyCollection extends DummyResource implements WebdavCollection {
 
 		@Override
         public WebdavResource next() {
-			if(subIterator != null && subIterator.hasNext()) {
+			if (subIterator != null && subIterator.hasNext()) {
 				return subIterator.next();
 			}
 			final WebdavResource res = childIterator.next();
-			if(res.isCollection()) {
+			if (res.isCollection()) {
 				subIterator = res.toCollection().iterator();
 			}
 			return res;

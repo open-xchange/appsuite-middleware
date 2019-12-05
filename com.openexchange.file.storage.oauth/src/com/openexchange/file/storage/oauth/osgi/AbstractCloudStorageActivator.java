@@ -88,7 +88,7 @@ public abstract class AbstractCloudStorageActivator extends HousekeepingActivato
             Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
             serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.TOPIC_LAST_SESSION);
             registerService(EventHandler.class, new OAuthFileStorageAccountEventHandler(this, getAPI()), serviceProperties);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LoggerFactory.getLogger(AbstractCloudStorageActivator.class).error("", e);
             throw e;
         }

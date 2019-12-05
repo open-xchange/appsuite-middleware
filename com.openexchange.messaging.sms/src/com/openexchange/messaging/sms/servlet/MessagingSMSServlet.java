@@ -120,13 +120,13 @@ public final class MessagingSMSServlet extends PermissionServlet {
 
                 obj.put("display_string", userConfig.getDisplayString());
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("Missing or wrong field action in JSON request", e);
             response.setException(e);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             LOG.error(e.getLocalizedMessage(), e);
             response.setException(OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e));
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             final OXException create = SMSMessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             LOG.error("", create);
             response.setException(create);
@@ -139,7 +139,7 @@ public final class MessagingSMSServlet extends PermissionServlet {
          */
         try {
             ResponseWriter.write(response, resp.getWriter(), localeFrom(getSessionObject(req)));
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             LOG.error(e.getLocalizedMessage(), e);
         }
     }
@@ -184,14 +184,14 @@ public final class MessagingSMSServlet extends PermissionServlet {
         } catch (OXException e) {
             LOG.error("Missing or wrong field action in JSON request", e);
             response.setException(e);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             LOG.error(e.getLocalizedMessage(), e);
             response.setException(OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e));
         }
         // Close response and flush print writer
         try {
             ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             LOG.error(e.getLocalizedMessage(), e);
         }
     }

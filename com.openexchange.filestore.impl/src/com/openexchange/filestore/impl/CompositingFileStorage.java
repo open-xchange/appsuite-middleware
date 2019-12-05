@@ -50,6 +50,7 @@
 package com.openexchange.filestore.impl;
 
 import java.io.InputStream;
+import java.net.URI;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -88,6 +89,11 @@ public class CompositingFileStorage implements FileStorage {
     }
 
     @Override
+    public URI getUri() {
+        return standardFS.getUri();
+    }
+
+    @Override
     public boolean deleteFile(String identifier) throws OXException {
         ImmutablePreparedName prepared = prepareName(identifier);
         return prepared.fs.deleteFile(prepared.name);
@@ -102,13 +108,13 @@ public class CompositingFileStorage implements FileStorage {
             ImmutablePreparedName preparedName = prepareName(name);
 
             List<String> list = partitions.get(preparedName.fs);
-            if(list == null) {
+            if (list == null) {
                 list = new LinkedList<String>();
                 partitions.put(preparedName.fs, list);
             }
 
             list.add(preparedName.name);
-            if(preparedName.prefix != null) {
+            if (preparedName.prefix != null) {
                 prefixes.put(preparedName.fs, preparedName.prefix);
             }
         }
@@ -119,7 +125,7 @@ public class CompositingFileStorage implements FileStorage {
 
             Set<String> files = fileStorage.deleteFiles(ids.toArray(new String[ids.size()]));
             String prefix = prefixes.get(fileStorage);
-            if(prefix == null) {
+            if (prefix == null) {
                 notDeleted.addAll(files);
             } else {
                 for(String file: files) {

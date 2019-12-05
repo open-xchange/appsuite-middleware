@@ -1,0 +1,26 @@
+/contacts?action=getuser:
+  get:
+    operationId: getContactByUser
+    tags:
+      - Contacts
+    summary: Gets a contact by user ID.
+    parameters:
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - in: query
+        name: id
+        description: User ID (not Object ID) of the requested user.
+        required: true
+        schema:
+          type: integer
+    responses:
+      '200':
+        description: >
+          An object containing all data of the requested contact. In case of
+          errors the
+
+          responsible fields in the response are filled (see [Error
+          handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContactResponse'

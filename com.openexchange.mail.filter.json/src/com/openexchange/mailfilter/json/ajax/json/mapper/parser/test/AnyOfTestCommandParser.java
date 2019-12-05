@@ -71,21 +71,11 @@ public class AnyOfTestCommandParser extends AbstractAllAnyOfTestCommandParser {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser#parse(org.json.JSONObject)
-     */
     @Override
     public TestCommand parse(JSONObject jsonObject, ServerSession session) throws JSONException, SieveException, OXException {
         return parse(jsonObject, Commands.ANYOF, session);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser#parse(org.json.JSONObject, java.lang.Object)
-     */
     @Override
     public void parse(JSONObject jsonObject, TestCommand command) throws JSONException, OXException {
         parse(jsonObject, command, Commands.ANYOF);

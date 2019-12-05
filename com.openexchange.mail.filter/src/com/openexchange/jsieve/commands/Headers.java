@@ -92,7 +92,7 @@ public enum Headers {
     }
 
     public boolean isValid(Set<String> capabilities){
-        if(neededCapabilities==null){
+        if (neededCapabilities==null){
             return true;
         }
         return Arrays.asList(neededCapabilities).containsAll(capabilities);

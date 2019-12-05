@@ -64,8 +64,8 @@ import com.openexchange.dav.DAVFactory;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.DAVUserAgent;
 import com.openexchange.dav.PreconditionException;
+import com.openexchange.dav.Tools;
 import com.openexchange.dav.internal.FolderUpdate;
-import com.openexchange.dav.internal.Tools;
 import com.openexchange.dav.mixins.ACL;
 import com.openexchange.dav.mixins.ACLRestrictions;
 import com.openexchange.dav.mixins.CTag;
@@ -88,7 +88,7 @@ import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.ldap.User;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
@@ -120,10 +120,11 @@ public abstract class FolderCollection<T> extends DAVCollection {
         this.factory = factory;
         this.folder = folder;
         if (null != folder) {
+            ConfigViewFactory configViewFactory = factory.getService(ConfigViewFactory.class);
             includeProperties(new CTag(this), new com.openexchange.dav.mixins.SyncToken(this), 
-                new ACL(folder.getPermissions()), new ACLRestrictions(), new SupportedPrivilegeSet(), new Principal(getOwner()));
+                new ACL(folder.getPermissions(), configViewFactory), new ACLRestrictions(), new SupportedPrivilegeSet(), new Principal(getOwner(), configViewFactory));
             if (supportsPermissions(folder)) {
-                includeProperties(new ShareAccess(this), new Invite(this), new ShareResourceURI(this));
+                includeProperties(new ShareAccess(this), new Invite(this), new ShareResourceURI(this, factory.getServiceSafe(ConfigViewFactory.class)));
             }
         }
     }
@@ -243,9 +244,10 @@ public abstract class FolderCollection<T> extends DAVCollection {
      * Gets an updated {@link SyncStatus} based on the supplied sync token for this collection.
      *
      * @param token The last sync token as supplied by the client, or <code>null</code> for the initial synchronization
+     * @param limit The maximum number of items to return in the response, or <code>-1</code> if unlimited
      * @return The sync status
      */
-    public SyncStatus<WebdavResource> getSyncStatus(String token) throws WebdavProtocolException {
+    public SyncStatus<WebdavResource> getSyncStatus(String token, int limit) throws WebdavProtocolException {
         /*
          * parse & check provided token
          */
@@ -264,7 +266,7 @@ public abstract class FolderCollection<T> extends DAVCollection {
          * get & return sync-status
          */
         try {
-            return getSyncStatus(syncToken);
+            return 0 < limit ? getSyncStatus(syncToken, limit) : getSyncStatus(syncToken);
         } catch (OXException e) {
             throw protocolException(getUrl(), e);
         }
@@ -418,6 +420,23 @@ public abstract class FolderCollection<T> extends DAVCollection {
      * @return The sync status
      */
     protected abstract SyncStatus<WebdavResource> getSyncStatus(SyncToken syncToken) throws OXException;
+
+    /**
+     * Create a 'sync-status' multistatus report considering all changes since the supplied time.
+     * <p/>
+     * The default implementation delegates to {@link #getSyncStatus(Date)} if no limit is specified and throws an exception otherwise.
+     * Override if applicable.
+     *
+     * @param syncToken The requested sync-token to generate the sync-status for
+     * @param limit The maximum number of items to return in the response, or <code>-1</code> if unlimited
+     * @return The sync status
+     */
+    protected SyncStatus<WebdavResource> getSyncStatus(SyncToken syncToken, int limit) throws OXException {
+        if (0 < limit) {
+            throw new PreconditionException(DAVProtocol.DAV_NS.getURI(), "number-of-matches-within-limits", getUrl(), DAVProtocol.SC_INSUFFICIENT_STORAGE);
+        }
+        return getSyncStatus(syncToken);
+    }
 
     /**
      * Gets a new folder with "settable" properties to apply any property changes. The actual {@link #save()}-operation that is called

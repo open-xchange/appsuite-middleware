@@ -67,6 +67,7 @@ public class DefaultSyncResult<T extends DriveVersion> implements SyncResult<T> 
     private final List<DriveAction<T>> actionsForClient;
     private final String diagnosticsLog;
     private final DriveQuota quota;
+    private final String pathToRoot;
 
     /**
      * 
@@ -76,7 +77,7 @@ public class DefaultSyncResult<T extends DriveVersion> implements SyncResult<T> 
      * @param diagnosticsLog The diagnostics log
      */
     public DefaultSyncResult(List<AbstractAction<T>> actionsForClient, String diagnosticsLog) {
-        this(actionsForClient, diagnosticsLog, null);
+        this(actionsForClient, diagnosticsLog, null, null);
     }
 
     /**
@@ -85,8 +86,9 @@ public class DefaultSyncResult<T extends DriveVersion> implements SyncResult<T> 
      * @param actionsForClient The resulting actions for the client
      * @param diagnosticsLog The diagnostics log
      * @param quota The quota information
+     * @param pathToRoot The sync'ed root folder's path to the internal root folder
      */
-    public DefaultSyncResult(List<AbstractAction<T>> actionsForClient, String diagnosticsLog, DriveQuota quota) {
+    public DefaultSyncResult(List<AbstractAction<T>> actionsForClient, String diagnosticsLog, DriveQuota quota, String pathToRoot) {
         super();
         this.actionsForClient = new ArrayList<DriveAction<T>>(actionsForClient.size());
         for (DriveAction<? extends T> driveAction : actionsForClient) {
@@ -94,34 +96,27 @@ public class DefaultSyncResult<T extends DriveVersion> implements SyncResult<T> 
         }
         this.diagnosticsLog = diagnosticsLog;
         this.quota = quota;
+        this.pathToRoot = pathToRoot;
     }
 
-    /**
-     * Gets the resulting actions for the client.
-     *
-     * @return The resulting actions for the client
-     */
     @Override
     public List<DriveAction<T>> getActionsForClient() {
         return actionsForClient;
     }
 
-    /**
-     * Gets the diagnostics log.
-     *
-     * @return The diagnostics log, or <code>null</code> if not available
-     */
     @Override
     public String getDiagnostics() {
         return diagnosticsLog;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public DriveQuota getQuota() {
         return quota;
+    }
+
+    @Override
+    public String getPathToRoot() {
+        return pathToRoot;
     }
 
     @Override

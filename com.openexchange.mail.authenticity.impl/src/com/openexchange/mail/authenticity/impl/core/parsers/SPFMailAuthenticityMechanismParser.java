@@ -56,6 +56,7 @@ import com.openexchange.mail.authenticity.mechanism.AuthenticityMechanismResult;
 import com.openexchange.mail.authenticity.mechanism.DefaultMailAuthenticityMechanism;
 import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanismResult;
 import com.openexchange.mail.authenticity.mechanism.spf.SPFAuthMechResult;
+import com.openexchange.mail.authenticity.mechanism.spf.SPFProperty;
 import com.openexchange.mail.authenticity.mechanism.spf.SPFResult;
 import com.openexchange.mail.authenticity.mechanism.spf.SPFResultHeader;
 
@@ -73,11 +74,6 @@ public class SPFMailAuthenticityMechanismParser extends AbstractMailAuthenticity
         super(DefaultMailAuthenticityMechanism.SPF, SPFResultHeader.SMTP_MAILFROM, SPFResultHeader.SMTP_HELO);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.mail.authenticity.impl.core.AbstractMailAuthenticityMechanismParser#parseMechanismResult(java.lang.String)
-     */
     @Override
     AuthenticityMechanismResult parseMechanismResult(String value) {
         try {
@@ -87,19 +83,14 @@ public class SPFMailAuthenticityMechanismParser extends AbstractMailAuthenticity
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.mail.authenticity.impl.core.AbstractMailAuthenticityMechanismParser#createResult(java.lang.String, com.openexchange.mail.authenticity.mechanism.AuthenticityMechanismResult, java.lang.String, boolean, java.util.Map)
-     */
     @Override
     MailAuthenticityMechanismResult createResult(String domain, AuthenticityMechanismResult mechResult, String mechanismName, boolean domainMatch, Map<String, String> attributes) {
         SPFAuthMechResult result = new SPFAuthMechResult(domain, (SPFResult) mechResult);
         result.setDomainMatch(domainMatch);
-        result.addProperty("mail_from", result.getDomain());
+        result.addProperty(SPFProperty.MAIL_FROM, result.getDomain());
         String reason;
         if (Strings.isNotEmpty(result.getClientIP())) {
-            result.addProperty("client_ip", result.getClientIP());
+            result.addProperty(SPFProperty.CLIENT_IP, result.getClientIP());
             reason = compileReasonPhrase(mechResult, MailAuthenticityFragmentPhrases.WITH_IP, result.getClientIP());
         } else {
             reason = compileReasonPhrase(mechResult, MailAuthenticityFragmentPhrases.WITH_DOMAIN, result.getDomain());

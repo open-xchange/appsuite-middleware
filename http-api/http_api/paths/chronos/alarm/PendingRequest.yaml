@@ -1,0 +1,37 @@
+/chronos/alarm?action=pending:
+  get:
+    operationId: getAlarmTrigger
+    tags:
+      - Chronos
+    summary: Retrieves not acknowledged alarm triggers.
+    parameters:
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - in: query
+        name: rangeEnd
+        description: >
+          Upper exclusive limit of the queried range as a utc date-time value as
+          specified in rfc 5545 chapter 3.3.5. E.g. "20170708T220000Z". Only
+          events which should trigger before this date are returned.
+        required: true
+        schema:
+          type: string
+      - in: query
+        name: actions
+        description: >
+          A comma separated list of alarm actions. Only this actions will be
+          returned.
+        required: false
+        schema:
+          type: string
+          default: 'DISPLAY, AUDIO'
+    responses:
+      '200':
+        description: >
+          An array of alarm trigger objects. In case of errors the
+
+          responsible fields in the response are filled (see [Error
+          handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AlarmTriggerResponse'

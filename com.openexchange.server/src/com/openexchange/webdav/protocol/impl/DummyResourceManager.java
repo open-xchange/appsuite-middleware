@@ -70,7 +70,7 @@ public final class DummyResourceManager implements WebdavFactory {
 	private DummyResourceManager(){
 		try {
 			resolveCollection("/").create();
-		} catch (final WebdavProtocolException e) {
+		} catch (WebdavProtocolException e) {
 			LOG.error("Can't resolve root", e);
         }
 	}
@@ -82,8 +82,8 @@ public final class DummyResourceManager implements WebdavFactory {
 
     @Override
     public WebdavResource resolveResource(final WebdavPath url) {
-        if(!resources.containsKey(url)) {
-			if(lockNullResources.containsKey(url)) {
+        if (!resources.containsKey(url)) {
+			if (lockNullResources.containsKey(url)) {
 				final DummyLockNull lockNull = lockNullResources.get(url);
 				lockNull.setRealResource(new DummyResource(this,url)); // FIXME Multithreading?
 				return lockNull;
@@ -95,8 +95,8 @@ public final class DummyResourceManager implements WebdavFactory {
 
     @Override
     public WebdavCollection resolveCollection(final WebdavPath url) {
-        if(!resources.containsKey(url)) {
-			if(lockNullResources.containsKey(url)) {
+        if (!resources.containsKey(url)) {
+			if (lockNullResources.containsKey(url)) {
 				final DummyLockNull lockNull = lockNullResources.get(url);
 				lockNull.setRealResource(new DummyCollection(this,url)); // FIXME Multithreading?
 				return lockNull;
@@ -132,7 +132,7 @@ public final class DummyResourceManager implements WebdavFactory {
 	}
 
 	private String normalize(String url) {
-		while(url.contains("//")){
+		while (url.contains("//")){
 			url = url.replaceAll("//","/");
 		}
 		return url;

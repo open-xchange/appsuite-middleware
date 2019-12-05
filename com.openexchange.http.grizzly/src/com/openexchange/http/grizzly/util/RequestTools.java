@@ -95,10 +95,9 @@ public final class RequestTools {
             synchronized (RequestTools.class) {
                 tmp = driveUri;
                 if (null == tmp) {
-                    String defaultPrefix = DispatcherPrefixService.DEFAULT_PREFIX;
                     DispatcherPrefixService service = Services.optService(DispatcherPrefixService.class);
                     if (null == service) {
-                        return defaultPrefix;
+                        return new StringBuilder(DispatcherPrefixService.DEFAULT_PREFIX).append("drive").toString();
                     }
                     tmp = new StringBuilder(service.getPrefix()).append("drive").toString();
                     driveUri = tmp;
@@ -209,7 +208,7 @@ public final class RequestTools {
             if (Base64.isBase64(encodedBytes)) {
                 return Base64.decodeBase64(encodedBytes);
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.warn("Could not check for EAS base64-encoded query string", e);
         }
 

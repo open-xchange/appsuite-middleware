@@ -156,7 +156,7 @@ public class SubscriptionCopyTask implements CopyUserTaskService {
                 exchangeSubscriptionIds(subscriptions, dstCon, dstCtx, folderMapping);
                 writeSubscriptionsToDB(subscriptions, dstCon, i(dstUsrId), i(dstCtxId));
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         }
 
@@ -187,7 +187,7 @@ public class SubscriptionCopyTask implements CopyUserTaskService {
             }
 
             stmt.executeBatch();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
             Databases.closeSQLStuff(stmt);
@@ -209,10 +209,10 @@ public class SubscriptionCopyTask implements CopyUserTaskService {
                         final FolderObject destinationFolder = folderMapping.getDestination(sourceFolder);
                         subscription.setFolderId(String.valueOf(destinationFolder.getObjectID()));
                     }
-                } catch (final NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     // Keep the old folder
                 }
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
             }
         }
@@ -229,7 +229,7 @@ public class SubscriptionCopyTask implements CopyUserTaskService {
                         if (newId != null) {
                             attribute.setValue(String.valueOf(newId));
                         }
-                    } catch (final NumberFormatException e) {
+                    } catch (NumberFormatException e) {
                         // Skip this one
                     }
 
@@ -264,7 +264,7 @@ public class SubscriptionCopyTask implements CopyUserTaskService {
 
                 subscriptions.put(I(id), subscription);
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
             Databases.closeSQLStuff(rs, stmt);

@@ -1,0 +1,67 @@
+/calendar?action=newappointments:
+  get:
+    operationId: getNewAppointments
+    tags:
+      - Calendar
+    summary: Gets new appointments.
+    parameters:
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - $ref: '#/components/parameters/gblQueryParamCalendarColumns'
+      - in: query
+        name: start
+        description: >-
+          Lower inclusive limit of the queried range as a Date. Only
+          appointments which end on or after this date are returned.
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - in: query
+        name: end
+        description: >-
+          Upper exclusive limit of the queried range as a Date. Only
+          appointments which start before this date are returned.
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - in: query
+        name: limit
+        description: Limits the number of returned objects to the given value.
+        required: true
+        schema:
+          type: string
+      - in: query
+        name: sort
+        description: >-
+          The identifier of a column which determines the sort order of the
+          response. If this parameter is specified and holds a column number,
+          then the parameter order must be also specified.
+        required: false
+        schema:
+          type: string
+      - in: query
+        name: order
+        description: >-
+          "asc" if the response entires should be sorted in the ascending order,
+          "desc" if the response entries should be sorted in the descending
+          order. If this parameter is specified, then the parameter sort must be
+          also specified.
+        required: false
+        schema:
+          type: string
+    responses:
+      '200':
+        description: >
+          A JSON object containing an array with appointment data. Appointments
+          are represented by arrays. The elements of each array contain the
+
+          information specified by the corresponding identifiers in the
+          `columns` parameter. In case of errors the
+
+          responsible fields in the response are filled (see [Error
+          handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AppointmentsResponse'

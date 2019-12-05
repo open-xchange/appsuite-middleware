@@ -80,6 +80,8 @@ import com.sun.mail.iap.Response;
 import com.sun.mail.imap.ACL;
 import com.sun.mail.imap.AppendUID;
 import com.sun.mail.imap.CopyUID;
+import com.sun.mail.imap.Filter;
+import com.sun.mail.imap.Filter.FilterSpec;
 import com.sun.mail.imap.ResyncData;
 import com.sun.mail.imap.Rights;
 import com.sun.mail.imap.SortTerm;
@@ -520,6 +522,8 @@ public class IMAPProtocol extends Protocol {
 	IMAPResponse r = new IMAPResponse(this);
 	if (r.keyEquals("FETCH"))
 	    r = new FetchResponse(r, getFetchItems());
+	else if (r.keyEquals("FILTERED"))
+	    r = new FilteredResponse(r);
 	return r;
     }
 
@@ -879,7 +883,7 @@ public class IMAPProtocol extends Protocol {
                 
 		    tag = writeCommand("AUTHENTICATE PLAIN " + ASCIIUtility.toString(bos.toByteArray()), null);
 		    bos.reset(); // reset buffer
-	    } catch (final Exception ex) {
+	    } catch (Exception ex) {
 		    // Convert this into a BYE response
 		    r = Response.byeResponse(ex);
 		    done = true;
@@ -887,7 +891,7 @@ public class IMAPProtocol extends Protocol {
 	} else {
 	    try {
 		    tag = writeCommand("AUTHENTICATE PLAIN", null);
-	    } catch (final Exception ex) {
+	    } catch (Exception ex) {
 		    // Convert this into a BYE response
 		    r = Response.byeResponse(ex);
 		    done = true;
@@ -2663,6 +2667,64 @@ public class IMAPProtocol extends Protocol {
     }
     }
 
+    public Response[] filter(Filter filter, SearchTerm sterm, boolean uid) throws ProtocolException, SearchException {
+    if (!hasCapability("FILTER=SIEVE")) 
+        throw new BadCommandException("FILTER=SIEVE not supported");
+    
+    final Argument args = new Argument();
+    // filter criteria
+    {        
+        args.writeAtom("SIEVE");
+        
+        FilterSpec filterSpec = filter.getSpec();
+        args.writeAtom(filterSpec.getName());
+
+        switch (filterSpec) {   
+            case DELIVERY:
+                // nothing
+                break;
+            case GLOBAL:
+                // expect script name
+                args.writeString(filter.getScriptName(), StandardCharsets.UTF_8);
+                break;
+            case PERSONAL:
+                // expect script name
+                args.writeString(filter.getScriptName(), StandardCharsets.UTF_8);
+                break;
+            case SCRIPT:
+                // expect script
+                args.writeBytes(filter.getScript().getBytes(StandardCharsets.UTF_8));
+                break;
+            default:
+                break;
+        }
+    }
+
+    // charset specification
+    args.writeAtom("CHARSET");
+    args.writeAtom("UTF-8");
+
+    if (sterm != null) {
+        try {
+        args.append(getSearchSequence().generateSequence(sterm, "UTF-8"));
+        } catch (IOException ioex) {
+        // should never happen
+        throw new SearchException(ioex.toString());
+        }
+    } else {
+        args.writeAtom("ALL");
+    }
+
+    Response[] r = command(uid ? "UID FILTER" : "FILTER", args);
+    Response response = r[r.length-1];
+
+    // dispatch remaining untagged responses
+    notifyResponseHandlers(r);
+    if (!response.isNO()) // don't handle NO response
+        handleResult(response);
+    return r;
+    }
+
     /**
      * COPY command.
      *
@@ -3160,7 +3222,7 @@ public class IMAPProtocol extends Protocol {
 	if (sterm != null) {
 	    try {
 		args.append(getSearchSequence().generateSequence(sterm, "UTF-8"));
-	    } catch (final IOException ioex) {
+	    } catch (IOException ioex) {
 		// should never happen
 		throw new SearchException(ioex.toString());
 	    }
@@ -3876,5 +3938,41 @@ public class IMAPProtocol extends Protocol {
         }
 
         return c == null ? chars : new String(c);
+    }
+
+    /**
+     * Replaces all occurrences of the specified sequence in string with given replacement.
+     *
+     * @param s The string to replace in
+     * @param sequence The sequence to replace
+     * @param replacement The replacement
+     * @return The string with all occurrences replaced
+     */
+    private static String replaceSequenceWith(String s, String sequence, String replacement) {
+        if ((null == s) || (null == sequence) || (null == replacement)) {
+            return s;
+        }
+
+        int length = s.length();
+        StringBuilder sb = null;
+        int pos = 0;
+        int prev = 0;
+        while (prev < length && (pos = s.indexOf(sequence, prev)) >= 0) {
+            if (null == sb) {
+                sb = new StringBuilder(length);
+                if (pos > 0) {
+                    sb.append(s, 0, pos);
+                }
+            } else {
+                sb.append(s, prev, pos);
+            }
+            sb.append(replacement);
+            prev = pos + sequence.length();
+        }
+        
+        if (prev > 0) {
+            sb.append(s.substring(prev, s.length()));
+        }
+        return null == sb ? s : sb.toString();
     }
 }

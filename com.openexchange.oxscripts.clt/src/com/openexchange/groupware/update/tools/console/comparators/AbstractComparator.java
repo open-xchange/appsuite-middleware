@@ -74,11 +74,6 @@ abstract class AbstractComparator implements Comparator<List<Object>>, Serializa
         this.indexPosition = indexPosition;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
-     */
     @Override
     public int compare(List<Object> o1, List<Object> o2) {
         Object object1 = o1.get(indexPosition);

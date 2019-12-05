@@ -1,0 +1,13 @@
+type: object
+properties:
+  $ref: ./CommonResponseData.yaml
+  data:
+    type: array
+    description: >-
+      An array containing the actions the client should execute for
+      synchronization.
+      
+      For the case that diagnostics parameter is true another schema definition is needed.
+      This case is currently not realizable with OpenAPI.
+    items:
+      $ref: '#/components/schemas/DriveAction'

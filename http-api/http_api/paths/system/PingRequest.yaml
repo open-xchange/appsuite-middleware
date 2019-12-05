@@ -1,0 +1,17 @@
+/system?action=ping:
+  get:
+    operationId: ping
+    tags:
+      - System
+    summary: Simple API call to check whether the server is still 
+             running or not
+    responses:
+      '200':
+        description: >
+          A JSON object containing the value "TRUE". This indicates 
+          that the server is still running and ready to handle more 
+          requests
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PingResponse'

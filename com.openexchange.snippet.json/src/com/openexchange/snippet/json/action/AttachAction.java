@@ -208,7 +208,7 @@ public final class AttachAction extends SnippetAction {
 
     private static long sysconfMaxUpload() {
         final String sizeS = ServerConfig.getProperty(com.openexchange.configuration.ServerConfig.Property.MAX_UPLOAD_SIZE);
-        if(null == sizeS) {
+        if (null == sizeS) {
             return 0;
         }
         return Long.parseLong(sizeS);

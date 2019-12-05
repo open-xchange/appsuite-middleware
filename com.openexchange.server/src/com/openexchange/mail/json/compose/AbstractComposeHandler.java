@@ -673,7 +673,7 @@ public abstract class AbstractComposeHandler<T extends ComposeContext, D extends
         try {
             mailAccess = context.getConnectedMailAccess(parentMsgRef.getAccountId());
             CryptographicAwareMailAccessFactory cryptoMailAccessFactory = MailJSONActivator.SERVICES.get().getOptionalService(CryptographicAwareMailAccessFactory.class);
-            if(cryptoMailAccessFactory != null) {
+            if (cryptoMailAccessFactory != null) {
                 mailAccess = cryptoMailAccessFactory.createAccess(
                     (MailAccess<IMailFolderStorage, IMailMessageStorage>) mailAccess,
                     context.getSession(),

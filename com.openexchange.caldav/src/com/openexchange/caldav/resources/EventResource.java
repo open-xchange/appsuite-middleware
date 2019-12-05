@@ -83,10 +83,10 @@ import com.openexchange.dav.resources.DAVCollection;
 import com.openexchange.dav.resources.DAVObjectResource;
 import com.openexchange.dav.resources.FolderCollection;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProperty;
@@ -102,7 +102,6 @@ import com.openexchange.webdav.protocol.WebdavResource;
 public class EventResource extends DAVObjectResource<Event> {
 
     private static final String CONTENT_TYPE = "text/calendar; charset=UTF-8";
-    private static final int MAX_RETRIES = 3;
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(EventResource.class);
 
     private final EventCollection parent;
@@ -118,7 +117,7 @@ public class EventResource extends DAVObjectResource<Event> {
      * @param event The represented event
      * @param url The WebDAV path to the resource
      */
-    public EventResource(EventCollection parent, Event event, WebdavPath url) throws OXException {
+    public EventResource(EventCollection parent, Event event, WebdavPath url) {
         super(parent, event, url);
         this.parent = parent;
         this.object = event;
@@ -349,7 +348,7 @@ public class EventResource extends DAVObjectResource<Event> {
                 }
                 StringBuilder stringBuilder = new StringBuilder();
                 if (null != calendarUser) {
-                    stringBuilder.append("<D:href>mailto:").append(calendarUser.getUri()).append("</D:href>");
+                    stringBuilder.append("<D:href>").append(calendarUser.getUri()).append("</D:href>");
                     if (CalendarUtils.isInternal(calendarUser, CalendarUserType.INDIVIDUAL)) {
                         try {
                             User user = factory.getService(UserService.class).getUser(calendarUser.getEntity(), factory.getContext());
@@ -402,65 +401,29 @@ public class EventResource extends DAVObjectResource<Event> {
 
     @Override
     public void create() throws WebdavProtocolException {
-        int retryCount = 0;
-        do {
-            try {
-                createEvent(caldavImport);
-                return;
-            } catch (OXException e) {
-                if (++retryCount < MAX_RETRIES) {
-                    Boolean handled = handleOnCreate(caldavImport, e);
-                    if (Boolean.TRUE.equals(handled)) {
-                        continue;
-                    } else if (Boolean.FALSE.equals(handled)) {
-                        return;
-                    }
-                }
-                throw getProtocolException(e);
-            }
-        } while (true);
+        try {
+            createEvent(caldavImport);
+        } catch (OXException e) {
+            throw getProtocolException(e);
+        }
     }
 
     @Override
     public void delete() throws WebdavProtocolException {
-        int retryCount = 0;
-        do {
-            try {
-                deleteEvent(object);
-                return;
-            } catch (OXException e) {
-                if (++retryCount < MAX_RETRIES) {
-                    Boolean handled = handleOnDelete(object, e);
-                    if (Boolean.TRUE.equals(handled)) {
-                        continue;
-                    } else if (Boolean.FALSE.equals(handled)) {
-                        return;
-                    }
-                }
-                throw getProtocolException(e);
-            }
-        } while (true);
+        try {
+            deleteEvent(object);
+        } catch (OXException e) {
+            throw getProtocolException(e);
+        }
     }
 
     @Override
     public void save() throws WebdavProtocolException {
-        int retryCount = 0;
-        do {
-            try {
-                updateEvent(caldavImport);
-                return;
-            } catch (OXException e) {
-                if (++retryCount < MAX_RETRIES) {
-                    Boolean handled = handleOnUpdate(caldavImport, e);
-                    if (Boolean.TRUE.equals(handled)) {
-                        continue;
-                    } else if (Boolean.FALSE.equals(handled)) {
-                        return;
-                    }
-                }
-                throw getProtocolException(e);
-            }
-        } while (true);
+        try {
+            updateEvent(caldavImport);
+        } catch (OXException e) {
+            throw getProtocolException(e);
+        }
     }
 
     private void deleteEvent(Event event) throws OXException {
@@ -564,87 +527,6 @@ public class EventResource extends DAVObjectResource<Event> {
                 return createdEvent;
             }
         }.execute(factory.getSession());
-    }
-
-    /**
-     * Tries to handle a {@link WebdavProtocolException} that occurred during resource deletion automatically.
-     *
-     * @param event The event being deleted
-     * @param e The exception
-     * @return {@link Boolean#TRUE} if the delete operation should be tried again, {@link Boolean#FALSE} if the problem was handled
-     *         successfully and the delete operation should not be tried again, or <code>null</code> if not recoverable at all
-     */
-    private Boolean handleOnDelete(Event event, OXException e) {
-        return null;
-    }
-
-    /**
-     * Tries to handle a {@link WebdavProtocolException} that occurred during resource update automatically.
-     *
-     * @param caldavImport The CalDAV import the event should be updated from
-     * @param e The exception
-     * @return {@link Boolean#TRUE} if the update operation should be tried again, {@link Boolean#FALSE} if the problem was handled
-     *         successfully and the update operation should not be tried again, or <code>null</code> if not recoverable at all
-     */
-    private Boolean handleOnUpdate(CalDAVImport caldavImport, OXException e) {
-        return null;
-    }
-
-    /**
-     * Tries to handle a {@link WebdavProtocolException} that occurred during resource creation automatically.
-     *
-     * @param caldavImport The CalDAV import the event shoudl be created from
-     * @param e The exception
-     * @return {@link Boolean#TRUE} if the create operation should be tried again, {@link Boolean#FALSE} if the problem was handled
-     *         successfully and the create operation should not be tried again, or <code>null</code> if not recoverable at all
-     */
-    private Boolean handleOnCreate(CalDAVImport caldavImport, OXException e) {
-        try {
-            switch (e.getErrorCode()) {
-                case "CAL-4090": // UID conflict [uid %1$s, conflicting id %2$d]
-                    return handleUIDConflict(caldavImport, e);
-            }
-        } catch (Exception x) {
-            LOG.warn("Error during automatic handling of {}", e.getErrorCode(), x);
-        }
-        return null;
-    }
-
-    /**
-     * Handles an UID conflict during a create operation by attempting to perform an update of the existing event data instead.
-     *
-     * @param caldavImport The calendar data to import
-     * @param e The exception that occurred
-     * @return {@link Boolean#FALSE} if successfully handled and there's no need to try again, <code>null</code>, otherwise
-     */
-    private Boolean handleUIDConflict(CalDAVImport caldavImport, OXException e) throws Exception {
-        /*
-         * get identifier of conflicting event
-         */
-        String conflictingId = null;
-        if (null != e.getLogArgs() && 1 < e.getLogArgs().length && null != e.getLogArgs()[1] && String.class.isInstance(e.getLogArgs()[1])) {
-            conflictingId = (String) e.getLogArgs()[1];
-        }
-        if (null != conflictingId) {
-            /*
-             * try to perform an update of the existing event with the imported data from the client
-             */
-            LOG.info("Event {} already exists (id {}), trying again as update.", caldavImport.getUID(), conflictingId);
-            long clientTimestamp = CalendarUtils.DISTANT_FUTURE; //TODO timestamp from where?
-            EventID eventID = new EventID(parent.folderID, conflictingId);
-            CalendarResult result = new CalendarAccessOperation<CalendarResult>(factory) {
-
-                @Override
-                protected CalendarResult perform(IDBasedCalendarAccess access) throws OXException {
-                    return access.updateEvent(eventID, caldavImport.getEvent(), clientTimestamp);
-                }
-            }.execute(factory.getSession());
-            if (0 < result.getCreations().size()) {
-                // event is "created" afterwards from user's point of view
-                return Boolean.FALSE;
-            }
-        }
-        return null;
     }
 
     /**

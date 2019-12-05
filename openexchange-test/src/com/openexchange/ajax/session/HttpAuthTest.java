@@ -85,9 +85,9 @@ public class HttpAuthTest {
     @Before
     public void setUp() throws Exception {
         ProvisioningSetup.init();
-        
+
         testContext = TestContextPool.acquireContext(this.getClass().getCanonicalName());
-        
+
         protocol = AJAXConfig.getProperty(Property.PROTOCOL);
         hostname = AJAXConfig.getProperty(Property.HOSTNAME);
         TestUser testUser = testContext.acquireUser();
@@ -96,7 +96,7 @@ public class HttpAuthTest {
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         TestContextPool.backContext(testContext);
     }
 
@@ -118,7 +118,7 @@ public class HttpAuthTest {
             String location = response.getLocation();
             assertNotNull("Location is missing in response.", location);
             int sessionStart = location.indexOf("session=");
-            String sessionId = location.substring(sessionStart + 8, location.indexOf('&', sessionStart + 8));
+            String sessionId = location.substring(sessionStart + 8);
             session.setId(sessionId);
         } finally {
             myClient.logout();

@@ -70,11 +70,6 @@ public class RejectParserImpl implements ActionParser {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.mail.filter.api.conversion.parser.JSONParser#parse(org.json.JSONObject)
-     */
     @Override
     public Action<RejectActionArgument> parse(JSONObject jsonObject) throws JSONException {
         Reject reject = new Reject();

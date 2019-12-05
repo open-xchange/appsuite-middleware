@@ -50,6 +50,8 @@
 package com.openexchange.consistency.osgi;
 
 import java.rmi.Remote;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import org.slf4j.Logger;
 import com.openexchange.consistency.ConsistencyService;
 import com.openexchange.consistency.internal.ConsistencyServiceImpl;
@@ -78,7 +80,9 @@ public final class ConsistencyActivator extends HousekeepingActivator {
         LOG.info("starting bundle: com.openexchange.consistency");
         ConsistencyServiceLookup.set(this);
         registerService(ConsistencyService.class, new ConsistencyServiceImpl(this));
-        registerService(Remote.class, new ConsistencyRMIServiceImpl(this));
+        Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
+        serviceProperties.put("RMI_NAME", ConsistencyRMIServiceImpl.RMI_NAME);
+        registerService(Remote.class, new ConsistencyRMIServiceImpl(this), serviceProperties);
 
         trackService(VCardStorageMetadataStore.class);
         trackService(DatabaseService.class);

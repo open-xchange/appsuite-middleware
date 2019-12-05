@@ -101,13 +101,13 @@ import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreFolderPath;
 import com.openexchange.groupware.infostore.InfostoreSearchEngine;
 import com.openexchange.groupware.infostore.utils.Metadata;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.java.Streams;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.TIntObjectMap;
@@ -193,7 +193,7 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
     public boolean exists(final String folderId, final String id, final String version) throws OXException {
         try {
             return getInfostore(folderId).exists(ID(id), null == version ? -1 : Utils.parseUnsignedInt(version), session);
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(e, id, folderId);
         }
     }
@@ -202,7 +202,7 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
     public InputStream getDocument(final String folderId, final String id, final String version) throws OXException {
         try {
             return getInfostore(folderId).getDocument(ID(id), null == version ? -1 : Utils.parseUnsignedInt(version), session);
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(e, id, folderId);
         }
     }
@@ -211,7 +211,7 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
     public InputStream getDocument(String folderId, String id, String version, long offset, long length) throws OXException {
         try {
             return getInfostore(folderId).getDocument(ID(id), null == version ? -1 : Utils.parseUnsignedInt(version), offset, length, session);
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(e, id, folderId);
         }
     }
@@ -229,7 +229,7 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
                 }
             }
             return new InfostoreFile(metadata);
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(e, id, folderId);
         }
     }
@@ -262,7 +262,7 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
     public void lock(final String folderId, final String id, final long diff) throws OXException {
         try {
             getInfostore(folderId).lock(ID(id), diff, session);
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(e, id, folderId);
         }
     }
@@ -644,7 +644,7 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
         try {
             TimedResult<DocumentMetadata> documents = getInfostore(null).getDocuments(ids, FieldMapping.getMatching(fields), session);
             return new InfostoreTimedResult(documents);
-        } catch (final IllegalAccessException e) {
+        } catch (IllegalAccessException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
@@ -706,7 +706,7 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
             for (final String folderId : folderIds) {
                 try {
                     fids.add(Utils.parseUnsignedInt(folderId));
-                } catch (final NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     throw FileStorageExceptionCodes.INVALID_FOLDER_IDENTIFIER.create(e, folderId);
                 }
             }
@@ -948,7 +948,7 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
                         originPaths.put(metadata.getId(), originPath);
                     }
                 }
-            } catch (final IllegalAccessException e) {
+            } catch (IllegalAccessException e) {
                 throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             } finally {
                 SearchIterators.close(iterator);

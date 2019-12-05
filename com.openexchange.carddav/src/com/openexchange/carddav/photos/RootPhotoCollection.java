@@ -53,6 +53,7 @@ import static com.openexchange.dav.DAVProtocol.protocolException;
 import java.util.Collections;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.ContactService;
 import com.openexchange.dav.DAVFactory;
 import com.openexchange.dav.mixins.AddressbookHomeSet;
@@ -87,7 +88,8 @@ public class RootPhotoCollection extends DAVRootCollection {
      */
     public RootPhotoCollection(PhotoFactory factory) {
         super(factory, "Photos");
-        includeProperties(new CurrentUserPrincipal(factory), new PrincipalCollectionSet(), new CalendarHomeSet(), new AddressbookHomeSet());
+        ConfigViewFactory configViewFactory = factory.getService(ConfigViewFactory.class);
+        includeProperties(new CurrentUserPrincipal(factory), new PrincipalCollectionSet(configViewFactory), new CalendarHomeSet(configViewFactory), new AddressbookHomeSet(configViewFactory));
     }
 
     @Override

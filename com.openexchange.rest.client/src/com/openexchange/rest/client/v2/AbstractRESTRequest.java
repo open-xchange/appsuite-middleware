@@ -115,11 +115,6 @@ public abstract class AbstractRESTRequest implements RESTRequest {
         queryParameters.put(name, value);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.rest.client.v2.RESTRequest#getQueryParameters()
-     */
     @Override
     public Map<String, String> getQueryParameters() {
         return Collections.unmodifiableMap(queryParameters);
@@ -129,11 +124,6 @@ public abstract class AbstractRESTRequest implements RESTRequest {
         headers.put(name, value);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.rest.client.v2.RESTRequest#getHeaders()
-     */
     @Override
     public Map<String, String> getHeaders() {
         return Collections.unmodifiableMap(headers);
@@ -146,11 +136,6 @@ public abstract class AbstractRESTRequest implements RESTRequest {
         this.entity = entity;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.rest.client.v2.RESTRequest#getBodyEntity()
-     */
     @Override
     public RESTBodyEntity getBodyEntity() {
         return entity;

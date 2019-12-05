@@ -3,41 +3,45 @@
     operationId: getFileMetadata
     tags:
       - Drive
-    summary: Gets file metadata (**deprecated, available until API version 2**).
+    summary: 'Gets file metadata (**deprecated, available until API version 2**).'
     description: Additional metadata of synchronized files is made available.
-    consumes:
-      - application/json
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
-      - $ref: "#/parameters/gblQueryParamRoot"
-      - $ref: "#/parameters/gblQueryParamPath"
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - $ref: '#/components/parameters/gblQueryParamRoot'
+      - $ref: '#/components/parameters/gblQueryParamPath'
       - in: query
         name: columns
-        type: string
-        description: A comma-separated list of numeric column identifiers representing additional metadata that is relevant for the client. See [File metadata](#file-metadata).
+        description: >-
+          A comma-separated list of numeric column identifiers representing
+          additional metadata that is relevant for the client. See [File
+          metadata](#file-metadata).
         required: true
-      - in: body
-        name: body
-        description: A JSON array containing JSON objects representing the file versions to get metadata for. Each object in the array needs to be present in the referenced path.
-        required: false
         schema:
-          type: array
-          items:
-            $ref: "#/definitions/DriveFileVersion"
+          type: string
     responses:
-      200:
-        description: |
-          A JSON object containing an array with file metadata in the order of the requested file versions. Each array
-          element describes one file metadata and is itself an array. The elements of each array contain the information
-          specified by the corresponding identifiers in the `columns` parameter. In case of errors the responsible fields
+      '200':
+        description: >
+          A JSON object containing an array with file metadata in the order of
+          the requested file versions. Each array
+
+          element describes one file metadata and is itself an array. The
+          elements of each array contain the information
+
+          specified by the corresponding identifiers in the `columns` parameter.
+          In case of errors the responsible fields
+
           in the response are filled.
-        schema:
-          $ref: "#/definitions/DriveFileMetadataResponse"
-    x-ox-examples:      
-      - Example1:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DriveFileMetadataResponse'
+    x-ox-examples:
+      - Example1: null
         description: Basic example
-        example: |
-          ==> PUT http://192.168.32.191/ajax/drive?action=fileMetadata&root=97974&path=%2f&columns=702%2c708%2c752%2c750%2c753&session=43aca91a80de42559ff0c2493dd973d0
+        example: >
+          ==> PUT
+          http://192.168.32.191/ajax/drive?action=fileMetadata&root=97974&path=%2f&columns=702%2c708%2c752%2c750%2c753&session=43aca91a80de42559ff0c2493dd973d0
+
           > Content:
             [
               {
@@ -56,6 +60,7 @@
             ]  
 
           <== HTTP 200 OK (6.0004 ms elapsed, 140 bytes received)
+
           <   Content:
               [
                 ["image.jpg", "2b04df3ecc1d94afddff082d139c6f15", "https://192.168.32.191/ox6/index.html#m=infostore&f=97974&i=179629", "https://192.168.32.191/ajax/files?action=document&folder=97974&id=179629&version=1&delivery=download&scaleType=contain&width=128&height=90", "m=infostore&f=97974&i=179629"], 
@@ -63,3 +68,14 @@
                 ["test1.txt", "7e36f409a042f06ecb88606a97a88c8f", "https://192.168.32.191/ox6/index.html#m=infostore&f=97974&i=179626", null, "m=infostore&f=97974&i=179626"], 
                 ["test3.txt", "703bc9aabff33faf07cf121dcda12ec8", "https://192.168.32.191/ox6/index.html#m=infostore&f=97974&i=179624", null, "m=infostore&f=97974&i=179624"]
               ]
+    requestBody:
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/DriveFileVersion'
+      description: >-
+        A JSON array containing JSON objects representing the file versions to
+        get metadata for. Each object in the array needs to be present in the
+        referenced path.

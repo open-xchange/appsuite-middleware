@@ -140,7 +140,7 @@ public class CalendarParser extends CommonParser {
         }
 
         if (jsonobject.has(CalendarFields.UNTIL) && jsonobject.has(CalendarFields.OCCURRENCES)) {
-            if(jsonobject.isNull(CalendarFields.UNTIL) != (jsonobject.isNull(CalendarFields.OCCURRENCES) || Integer.parseInt(jsonobject.getString(CalendarFields.OCCURRENCES)) == 0)) {
+            if (jsonobject.isNull(CalendarFields.UNTIL) != (jsonobject.isNull(CalendarFields.OCCURRENCES) || Integer.parseInt(jsonobject.getString(CalendarFields.OCCURRENCES)) == 0)) {
                 throw OXJSONExceptionCodes.JSON_READ_ERROR.create("Illegal combination of until and occurrences value.");
             }
         }
@@ -225,7 +225,7 @@ public class CalendarParser extends CommonParser {
             int id;
             try {
                 id = jparticipant.getInt(ParticipantsFields.ID);
-            } catch (final JSONException e) {
+            } catch (JSONException e) {
                 id = Participant.NO_ID;
             }
             Participant p = null;
@@ -323,7 +323,7 @@ public class CalendarParser extends CommonParser {
         for (final FieldParser<CalendarObject> parser : PARSERS) {
             try {
                 parser.parse(parseAlles, obj, tz, json);
-            } catch (final JSONException e) {
+            } catch (JSONException e) {
                 throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, e.getMessage());
             }
         }

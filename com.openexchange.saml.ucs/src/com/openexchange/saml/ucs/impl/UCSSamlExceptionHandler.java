@@ -83,20 +83,40 @@ public class UCSSamlExceptionHandler implements ExceptionHandler {
     }
 
     @Override
+    public void handleSessionReservationExpired(HttpServletRequest httpRequest, HttpServletResponse httpResponse, String token) {
+        sendRedirect(httpResponse, "session reservation is expired", redirectUri);
+    }
+
+    @Override
+    public void handleContextDisabled(HttpServletRequest httpRequest, HttpServletResponse httpResponse, int contextId) {
+        sendRedirect(httpResponse, "context is disabled", redirectUri);
+    }
+
+    @Override
+    public void handleUpdateTasksRunningOrPending(HttpServletRequest httpRequest, HttpServletResponse httpResponse, int contextId) {
+        sendRedirect(httpResponse, "update tasks are running or pending", redirectUri);
+    }
+
+    @Override
+    public void handleUserDisabled(HttpServletRequest httpRequest, HttpServletResponse httpResponse, int userId, int contextId) {
+        sendRedirect(httpResponse, "user is disabled", redirectUri);
+    }
+
+    @Override
     public void handleAuthnResponseFailed(HttpServletRequest httpRequest, HttpServletResponse httpResponse, OXException exception) {
-        sendRedirect(httpResponse, exception, redirectUri);
+        sendRedirect(httpResponse, exception.getMessage(), redirectUri);
     }
 
     @Override
     public void handleLogoutResponseFailed(HttpServletRequest httpRequest, HttpServletResponse httpResponse, OXException exception) {
-        sendRedirect(httpResponse, exception, failureLogoutRedirectUrl);
+        sendRedirect(httpResponse, exception.getMessage(), failureLogoutRedirectUrl);
     }
 
-    private void sendRedirect(HttpServletResponse httpResponse, OXException exception, String redirectUri) {
+    private void sendRedirect(HttpServletResponse httpResponse, String reason, String redirectUri) {
         Tools.disableCaching(httpResponse);
         try {
             httpResponse.sendRedirect(redirectUri);
-            LOG.debug("Sent redirect to {} due to {}", redirectUri, exception.getMessage());
+            LOG.debug("Sent redirect to {} due to {}", redirectUri, reason);
         } catch (IOException e) {
             LOG.error("Caught error while trying to send redirect", e);
             try {

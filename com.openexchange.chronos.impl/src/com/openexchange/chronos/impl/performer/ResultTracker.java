@@ -88,6 +88,8 @@ import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.impl.InternalCalendarResult;
 import com.openexchange.chronos.impl.InternalCalendarStorageOperation;
 import com.openexchange.chronos.impl.Utils;
+import com.openexchange.chronos.scheduling.ChangeNotification;
+import com.openexchange.chronos.scheduling.SchedulingMessage;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.storage.CalendarStorage;
@@ -118,6 +120,7 @@ public class ResultTracker {
      * @param session The calendar session
      * @param folder The calendar folder representing the current view on the events
      * @param timestamp The timestamp to apply for the result
+     * @param protection The {@link SelfProtection}
      */
     public ResultTracker(CalendarStorage storage, CalendarSession session, CalendarFolder folder, long timestamp, SelfProtection protection) {
         super();
@@ -317,6 +320,24 @@ public class ResultTracker {
         } else {
             trackUserizedDeletion(folder, deletedEvent);
         }
+    }
+
+    /**
+     * Track a scheduling message.
+     * 
+     * @param message The scheduling message to track
+     */
+    public void trackSchedulingMessage(SchedulingMessage message) {
+        result.addSchedulingMessage(message);
+    }
+
+    /**
+     * Track a change notification.
+     * 
+     * @param message The scheduling message to track
+     */
+    public void trackChangeNotification(ChangeNotification notification) {
+        result.addChangeNotification(notification);
     }
 
     /**

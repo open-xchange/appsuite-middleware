@@ -273,7 +273,7 @@ public class TaskRequest extends CalendarRequest {
 
             return jsonResponseArray;
         } finally {
-            if(it!=null) {
+            if (it!=null) {
                 it.close();
             }
         }
@@ -332,7 +332,7 @@ public class TaskRequest extends CalendarRequest {
 
             return jsonResponseArray;
         } finally {
-            if(it!=null) {
+            if (it!=null) {
                 it.close();
             }
         }
@@ -382,7 +382,7 @@ public class TaskRequest extends CalendarRequest {
 
             return jsonResponseArray;
         } finally {
-            if(it!=null) {
+            if (it!=null) {
                 it.close();
             }
         }

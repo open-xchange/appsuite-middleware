@@ -68,8 +68,10 @@ import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.java.Strings;
 import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.DefaultSessionAttributes;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
@@ -124,15 +126,21 @@ public final class Tokens implements LoginRequestHandler {
 
         // Update client, which is necessary for hash calculation. OXNotifier must not know which client will be used - maybe
         // com.openexchange.ox.gui.dhtml or open-xchange-appsuite.
-        SessiondService service = ServerServiceRegistry.getInstance().getService(SessiondService.class);
-        if (null != service) {
-            service.setClient(session.getSessionID(), client);
-        }
+        DefaultSessionAttributes.Builder sessionAttrs = DefaultSessionAttributes.builder();
+        sessionAttrs.withClient(client);
 
         // Update hash if the property com.openexchange.cookie.hash is configured to remember.
         String hash = HashCalculator.getInstance().getHash(req, userAgent, client);
-        if (null != service) {
-            service.setHash(session.getSessionID(), hash);
+        sessionAttrs.withHash(hash);
+
+        // Update User-Agent
+        if (Strings.isNotEmpty(userAgent)) {
+            sessionAttrs.withUserAgent(userAgent);
+        }
+
+        SessiondService service = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+        if (service != null) {
+            service.setSessionAttributes(session.getSessionID(), sessionAttrs.build());
         }
 
         Locale locale;

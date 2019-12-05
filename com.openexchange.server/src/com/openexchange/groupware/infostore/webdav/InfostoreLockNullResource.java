@@ -66,7 +66,7 @@ import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.infostore.webdav.URLCache.Type;
-import com.openexchange.tools.session.SessionHolder;
+import com.openexchange.session.SessionHolder;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.WebdavFactory;
@@ -121,24 +121,24 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 			stmt.setString(1,url.toEscapedString());
 			stmt.setInt(2, ctx.getContextId());
 			rs = stmt.executeQuery();
-			if(rs.next()) {
+			if (rs.next()) {
 				return rs.getInt(1);
 			}
 			return -1;
-		} catch (final SQLException x) {
+		} catch (SQLException x) {
 			throw WebdavProtocolException.generalError(url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		} finally {
-			if(stmt != null) {
+			if (stmt != null) {
 				try {
 					stmt.close();
-				} catch (final SQLException e1) {
+				} catch (SQLException e1) {
 					LOG.debug("",e1);
 				}
 			}
-			if(rs != null) {
+			if (rs != null) {
 				try {
 					rs.close();
-				} catch (final SQLException e) {
+				} catch (SQLException e) {
 					LOG.debug("",e);
 				}
 			}
@@ -218,22 +218,22 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 			writeCon.commit();
 			exists = false;
 			factory.invalidate(getUrl(), getId()	, ((resource.isCollection()) ? Type.COLLECTION : Type.RESOURCE));
-		} catch (final SQLException x) {
+		} catch (SQLException x) {
 		    rollback(writeCon);
             throw WebdavProtocolException.generalError(getUrl(),HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-		} catch (final OXException e) {
+		} catch (OXException e) {
 		    rollback(writeCon);
 			throw WebdavProtocolException.generalError(getUrl(),HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		} finally {
 			if (stmt != null) {
 				try {
 					stmt.close();
-				} catch (final SQLException e) {
+				} catch (SQLException e) {
 					LOG.debug("",e);
 				}
 			}
 			autocommit(writeCon);
-			if(writeCon != null) {
+			if (writeCon != null) {
 				provider.releaseWriteConnection(ctx, writeCon);
 			}
 		}
@@ -287,7 +287,7 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 	@Override
     public WebdavLock getLock(final String token) throws WebdavProtocolException {
 		final WebdavLock lock = lockHelper.getLock(token);
-		if(lock != null) {
+		if (lock != null) {
 			return lock;
 		}
 		return findParentLock(token);
@@ -326,7 +326,7 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 			dumpToDB();
 			lockHelper.addLock(lock);
 			lockHelper.dumpLocksToDB();
-		} catch (final Exception e) {
+		} catch (Exception e) {
 			throw WebdavProtocolException.generalError(getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 	}
@@ -379,7 +379,7 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 	@Override
     public void unlock(final String token) throws WebdavProtocolException {
 		lockHelper.removeLock(token);
-		if(getOwnLocks().isEmpty()) {
+		if (getOwnLocks().isEmpty()) {
 			delete();
 		}
 	}
@@ -390,7 +390,7 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 	}
 
 	private void dumpToDB() throws SQLException, OXException {
-		if(exists) {
+		if (exists) {
 			return;
 		}
 		final Context ctx = sessionHolder.getContext();
@@ -407,10 +407,10 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 			stmt.executeUpdate();
 			setId(id);
 			writeCon.commit();
-		} catch (final SQLException x) {
+		} catch (SQLException x) {
 		    rollback(writeCon);
 			throw x;
-		} catch (final OXException e) {
+		} catch (OXException e) {
 		    rollback(writeCon);
 			throw e;
 		} finally {
@@ -418,7 +418,7 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 				stmt.close();
 			}
 			autocommit(writeCon);
-			if(writeCon != null) {
+			if (writeCon != null) {
 				provider.releaseWriteConnection(ctx, writeCon);
 			}
 		}

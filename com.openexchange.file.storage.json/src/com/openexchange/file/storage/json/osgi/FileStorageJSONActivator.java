@@ -72,12 +72,12 @@ import com.openexchange.file.storage.parse.FileMetadataParserService;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.attach.AttachmentBase;
-import com.openexchange.i18n.I18nService;
 import com.openexchange.preview.PreviewService;
 import com.openexchange.rdiff.RdiffService;
 import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.startup.ThreadControlService;
 import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.uploaddir.UploadDirService;
 
 /**
  * {@link FileStorageJSONActivator}
@@ -99,7 +99,6 @@ public class FileStorageJSONActivator extends AJAXModuleActivator {
     protected void startBundle() throws Exception {
         try {
             Services.setServiceLookup(this);
-            rememberTracker(new ServiceTracker<>(context, I18nService.class.getName(), new I18nServiceCustomizer(context)));
             OSGiFileFieldCollector fieldCollector = new OSGiFileFieldCollector(context);
             Services.setFieldCollector(fieldCollector);
             rememberTracker(new ServiceTracker<>(context, AdditionalFileField.class.getName(), fieldCollector));
@@ -111,6 +110,7 @@ public class FileStorageJSONActivator extends AJAXModuleActivator {
             trackService(CryptographicServiceAuthenticationFactory.class);
             trackService(AntiVirusService.class);
             trackService(AntiVirusResultEvaluatorService.class);
+            trackService(UploadDirService.class);
             openTrackers();
             // registerModule(AccountActionFactory.INSTANCE, "infostore");
             registerModule(FileActionFactory.INSTANCE, "infostore");
@@ -119,7 +119,7 @@ public class FileStorageJSONActivator extends AJAXModuleActivator {
             registerModule(new ServiceActionFactory(getService(FileStorageServiceRegistry.class)), "fileservice");
             registerService(FileMetadataParserService.class, FileMetadataParser.getInstance(), null);
             registerService(ResultConverter.class, new FileConverter(fieldCollector));
-        } catch (final Exception x) {
+        } catch (Exception x) {
             org.slf4j.LoggerFactory.getLogger(FileStorageJSONActivator.class).error("", x);
             throw x;
         }

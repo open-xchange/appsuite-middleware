@@ -162,7 +162,7 @@ public class SearchTermParser {
         try {
             Integer.parseInt(s);
             return true;
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             return false;
         }
     }
@@ -171,7 +171,7 @@ public class SearchTermParser {
         try {
             Long.parseLong(s);
             return true;
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             return false;
         }
     }
@@ -191,7 +191,7 @@ public class SearchTermParser {
         final String operation;
         try {
             operation = jsonArray.getString(0);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw SearchExceptionMessages.PARSING_FAILED_MISSING_OPERATION.create(e, new Object[0]);
         }
 

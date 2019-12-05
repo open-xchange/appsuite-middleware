@@ -109,11 +109,11 @@ public class AttachmentConfig extends AbstractConfig implements Initialization {
 
     public static String getProperty(final String key) {
     	AttachmentConfig singleton = _singleton;
-        if(!loaded || singleton == null) {
+        if (!loaded || singleton == null) {
 			try {
 			    singleton = getInstance();
 			    singleton.start();
-			} catch (final OXException e) {
+			} catch (OXException e) {
 				LOG.error("Can't init config",e);
 			}
 		}
@@ -128,7 +128,7 @@ public class AttachmentConfig extends AbstractConfig implements Initialization {
         long size;
         try {
             size = Long.parseLong(sizeS.trim());
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             LOG.warn("{} is not a number: {}. Fall-back to system upload limitation.", AttachmentProperty.MAX_UPLOAD_SIZE.name(), sizeS);
             size = -1;
         }
@@ -140,7 +140,7 @@ public class AttachmentConfig extends AbstractConfig implements Initialization {
 
 	private static long sysconfMaxUpload() {
 		final String sizeS = ServerConfig.getProperty(com.openexchange.configuration.ServerConfig.Property.MAX_UPLOAD_SIZE);
-		if(null == sizeS) {
+		if (null == sizeS) {
 			return 0;
 		}
 		return Long.parseLong(sizeS);
@@ -148,7 +148,7 @@ public class AttachmentConfig extends AbstractConfig implements Initialization {
 
     @Override
     public void start() throws OXException {
-        if(!loaded || _singleton == null) {
+        if (!loaded || _singleton == null) {
             INIT_LOCK.lock();
             try {
                 getInstance().loadPropertiesInternal();

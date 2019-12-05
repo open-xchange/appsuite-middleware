@@ -73,7 +73,7 @@ public interface ITipAnalyzer {
      * 
      * @param message The {@link ITipMessage} to analyze
      * @param header Mail header key-value pairs. Can influence the analyzer to use, if special handling for some clients are necessary, etc.
-     * @param format The format to use. <code>html</code> for a {@link com.openexchange.chronos.itip.generators.HTMLWrapper}, else a {@link com.openexchange.chronos.itip.generators.changes.PassthroughWrapper} is used
+     * @param format The format to use. <code>html</code> for a {@link com.openexchange.chronos.itip.generators.HTMLWrapper}, else a {@link com.openexchange.chronos.itip.generators.PassthroughWrapper} is used
      * @param session The {@link CalendarSession}
      * @return An {@link ITipAnalysis} for the given message
      * @throws OXException Various

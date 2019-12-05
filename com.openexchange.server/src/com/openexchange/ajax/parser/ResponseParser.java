@@ -257,7 +257,7 @@ public final class ResponseParser {
         if (pos != -1) {
             try {
                 return Integer.parseInt(code.substring(pos + 1));
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 return 0;
             }
         }

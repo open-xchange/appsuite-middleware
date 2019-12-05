@@ -119,7 +119,7 @@ public final class HeaderTerm extends SearchTerm<String[]> {
         final String[] val;
         try {
             val = msg.getHeader(hdr[0]);
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             org.slf4j.LoggerFactory.getLogger(HeaderTerm.class).warn("Error during search.", e);
             return false;
         }

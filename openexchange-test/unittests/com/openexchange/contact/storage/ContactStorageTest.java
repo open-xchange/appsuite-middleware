@@ -42,7 +42,7 @@ public class ContactStorageTest {
             user = (pos = user.indexOf('@')) > -1 ? user.substring(0, pos) : user;
             final UserStorage uStorage = UserStorage.getInstance();
             return uStorage.getUserId(user, ctx);
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             t.printStackTrace();
             return -1;
         }
@@ -76,7 +76,7 @@ public class ContactStorageTest {
             for (final Contact contact : rememberedContacts) {
                 try {
                     this.getStorage().delete(getSession(), Integer.toString(contact.getParentFolderID()), Integer.toString(contact.getObjectID()), new Date());
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     LOG.error("error cleaning up contact", e);
                 }
             }

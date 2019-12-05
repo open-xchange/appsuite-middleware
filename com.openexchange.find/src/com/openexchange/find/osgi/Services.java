@@ -104,7 +104,7 @@ public class Services {
     public static <T> T optService(Class<T> clazz) {
         try {
             return getServiceLookup().getService(clazz);
-        } catch (final IllegalStateException e) {
+        } catch (IllegalStateException e) {
             return null;
         }
     }

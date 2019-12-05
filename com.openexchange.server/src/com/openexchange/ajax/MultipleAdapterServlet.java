@@ -63,7 +63,6 @@ import org.json.JSONTokener;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.java.UnsynchronizedPushbackReader;
@@ -73,6 +72,7 @@ import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 
 /**
@@ -128,9 +128,9 @@ public abstract class MultipleAdapterServlet extends PermissionServlet {
             final Object response = handler.performRequest(action, request, session, Tools.considerSecure(req));
             final Date timestamp = handler.getTimestamp();
             writeResponseSafely(response, null == user ? localeFrom(session) : user.getLocale(), timestamp, handler.getWarnings(), resp, session);
-        } catch (final OXException x) {
+        } catch (OXException x) {
             writeException(x, null == user ? localeFrom(session) : user.getLocale(), resp, session);
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             writeException(wrap(t), null == user ? localeFrom(session) : user.getLocale(), resp, session);
         }
     }
@@ -146,7 +146,7 @@ public abstract class MultipleAdapterServlet extends PermissionServlet {
     private void writeResponseSafely(final Object data, final Locale locale, final Date timestamp, final Collection<OXException> warnings, final HttpServletResponse resp, Session session) {
         final Response response = new Response(locale);
         response.setData(data);
-        if(null != timestamp) {
+        if (null != timestamp) {
             response.setTimestamp(timestamp);
         }
         if (null != warnings && !warnings.isEmpty()) {
@@ -154,7 +154,7 @@ public abstract class MultipleAdapterServlet extends PermissionServlet {
         }
         try {
             writeResponse(response, resp, session);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             LOG.error("", e);
         }
     }
@@ -183,7 +183,7 @@ public abstract class MultipleAdapterServlet extends PermissionServlet {
         response.setException(e);
         try {
             writeResponse(response, resp, session);
-        } catch (final IOException ioe) {
+        } catch (IOException ioe) {
             LOG.error("", ioe);
         }
     }
@@ -191,12 +191,12 @@ public abstract class MultipleAdapterServlet extends PermissionServlet {
     private JSONObject toJSON(final HttpServletRequest req, final String action) throws JSONException, IOException {
         final JSONObject request = new JSONObject();
         final Enumeration parameterNames = req.getParameterNames();
-        while(parameterNames.hasMoreElements()) {
+        while (parameterNames.hasMoreElements()) {
             final String parameterName = (String) parameterNames.nextElement();
             final String parameter = req.getParameter(parameterName);
             request.put(parameterName, parameter);
         }
-        if(requiresBody(action)) {
+        if (requiresBody(action)) {
             request.put(ResponseFields.DATA, toJSONConformantValue(req));
         }
         return modify(req, action, request);
@@ -222,7 +222,7 @@ public abstract class MultipleAdapterServlet extends PermissionServlet {
             if ('[' == c || '{' == c) {
                 try {
                     return JSONObject.parse(reader);
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     return new JSONTokener(AJAXServlet.readFrom(reader)).nextValue();
                 }
             }

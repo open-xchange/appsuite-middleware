@@ -72,31 +72,16 @@ public class DropwizardTimer implements Timer {
         this.delegate = timer;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.types.Timer#update(long, java.util.concurrent.TimeUnit)
-     */
     @Override
     public void update(long duration, TimeUnit timeUnit) {
         delegate.update(duration, timeUnit);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.types.Timer#time(java.util.concurrent.Callable)
-     */
     @Override
     public <T> T time(Callable<T> event) throws Exception {
         return delegate.time(event);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.metrics.types.Timer#time(com.openexchange.metrics.types.Timeable)
-     */
     @SuppressWarnings("unchecked")
     @Override
     public <T, E extends Exception> T time(Timeable<T, E> timeable) throws E {
@@ -109,71 +94,36 @@ public class DropwizardTimer implements Timer {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.types.Timer#timeSupplier(java.util.function.Supplier)
-     */
     @Override
     public <T> T timeSupplier(Supplier<T> event) {
         return delegate.timeSupplier(event);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.types.Timer#time(java.lang.Runnable)
-     */
     @Override
     public void time(Runnable event) {
         delegate.time(event);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.types.Timer#getCount()
-     */
     @Override
     public long getCount() {
         return delegate.getCount();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.types.Timer#getFifteenMinuteRate()
-     */
     @Override
     public double getFifteenMinuteRate() {
         return delegate.getFifteenMinuteRate();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.types.Timer#getFiveMinuteRate()
-     */
     @Override
     public double getFiveMinuteRate() {
         return delegate.getFiveMinuteRate();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.types.Timer#getMeanRate()
-     */
     @Override
     public double getMeanRate() {
         return delegate.getMeanRate();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.types.Timer#getOneMinuteRate()
-     */
     @Override
     public double getOneMinuteRate() {
         return delegate.getOneMinuteRate();

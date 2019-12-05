@@ -67,7 +67,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.login.LoginResult;
 import com.openexchange.login.internal.LoginPerformer;
@@ -82,6 +81,7 @@ import com.openexchange.sessiond.SessiondService;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareService;
 import com.openexchange.tools.servlet.http.Cookies;
+import com.openexchange.user.User;
 
 /**
  * {@link AutoLoginTools}
@@ -152,34 +152,32 @@ public class AutoLoginTools {
      * @return The login result if a valid session was found, or <code>null</code>, otherwise
      */
     public static LoginResult tryAutologin(LoginConfiguration loginConfig, HttpServletRequest request, HttpServletResponse response, String hash) throws OXException {
-        if (loginConfig.isSessiondAutoLogin(request.getServerName())) {
-            Map<String, Cookie> cookies = Cookies.cookieMapFor(request);
-            if (null != cookies) {
-                // Extract session & secret from supplied cookies
-                String expectedSessionCookieName = LoginServlet.SESSION_PREFIX + hash;
-                String sessionID = optCookieValue(expectedSessionCookieName, cookies);
-                String secret = optCookieValue(LoginServlet.SECRET_PREFIX + hash, cookies);
+        Map<String, Cookie> cookies = Cookies.cookieMapFor(request);
+        if (null != cookies) {
+            // Extract session & secret from supplied cookies
+            String expectedSessionCookieName = LoginServlet.SESSION_PREFIX + hash;
+            String sessionID = optCookieValue(expectedSessionCookieName, cookies);
+            String secret = optCookieValue(LoginServlet.SECRET_PREFIX + hash, cookies);
 
-                // Try to auto-login once matching session- and secret cookies found
-                try {
-                    if (null != sessionID && null != secret) {
-                        LOG.debug("Successfully looked up session- & secret-cookie pair for hash {}, continuing auto-login procedure.", hash);
-                        return tryAutoLogin(loginConfig, request, response, sessionID, secret);
-                    }
-
-                    LOG.debug("No session- & secret-cookie pair for hash {} found, aborting auto-login procedure.", hash);
-                } catch (OXException e) {
-                    if (SessionExceptionCodes.SESSION_EXPIRED.equals(e)) {
-                        /*
-                         * session explicitly marked as absent -> discard session (if not yet performed) & cancel auto-login,
-                         * invalidate session-cookie (public- and secret-cookies are re-written later)
-                         */
-                        SessionUtility.removeOXCookies(request, response, Collections.singletonList(expectedSessionCookieName));
-                        tryLogout(sessionID);
-                        return null;
-                    }
-                    throw e;
+            // Try to auto-login once matching session- and secret cookies found
+            try {
+                if (null != sessionID && null != secret) {
+                    LOG.debug("Successfully looked up session- & secret-cookie pair for hash {}, continuing auto-login procedure.", hash);
+                    return tryAutoLogin(loginConfig, request, response, sessionID, secret);
                 }
+
+                LOG.debug("No session- & secret-cookie pair for hash {} found, aborting auto-login procedure.", hash);
+            } catch (OXException e) {
+                if (SessionExceptionCodes.SESSION_EXPIRED.equals(e)) {
+                    /*
+                     * session explicitly marked as absent -> discard session (if not yet performed) & cancel auto-login,
+                     * invalidate session-cookie (public- and secret-cookies are re-written later)
+                     */
+                    SessionUtility.removeOXCookies(request, response, Collections.singletonList(expectedSessionCookieName));
+                    tryLogout(sessionID);
+                    return null;
+                }
+                throw e;
             }
         }
         return null;
@@ -213,7 +211,7 @@ public class AutoLoginTools {
      */
     public static LoginResult tryGuestAutologin(LoginConfiguration loginConfig, HttpServletRequest request, HttpServletResponse response) throws OXException {
         Cookie[] cookies = request.getCookies();
-        if (loginConfig.isSessiondAutoLogin(request.getServerName()) && null != cookies && 0 < cookies.length) {
+        if (null != cookies && 0 < cookies.length) {
             /*
              * extract share token from supplied cookies, based on the "plain" request hash
              */

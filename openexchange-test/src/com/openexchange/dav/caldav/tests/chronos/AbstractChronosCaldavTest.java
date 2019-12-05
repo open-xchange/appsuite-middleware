@@ -163,7 +163,7 @@ public abstract class AbstractChronosCaldavTest extends AbstractChronosTest {
             AJAXConfig.init();
             DavPropertyNameSet props = new DavPropertyNameSet();
             props.add(PropertyNames.CURRENT_USER_PRINCIPAL);
-            propFind = new PropFindMethod(Config.getBaseUri() + "/", DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
+            propFind = new PropFindMethod(Config.getBaseUri() + Config.getPathPrefix() + "/", DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
             if (HttpServletResponse.SC_UNAUTHORIZED == new HttpClient().executeMethod(propFind)) {
                 for (Header header : propFind.getResponseHeaders("WWW-Authenticate")) {
                     if (header.getValue().startsWith("Bearer")) {
@@ -343,7 +343,7 @@ public abstract class AbstractChronosCaldavTest extends AbstractChronosTest {
     
     private String getCaldavFolder(){
         String defaultFolderID = getDefaultFolderID();
-        if(defaultFolderID.indexOf("/")!=-1){
+        if (defaultFolderID.indexOf('/')!=-1){
             defaultFolderID = defaultFolderID.substring(defaultFolderID.lastIndexOf("/")+1, defaultFolderID.length());
         }
         return defaultFolderID;
@@ -351,7 +351,7 @@ public abstract class AbstractChronosCaldavTest extends AbstractChronosTest {
     
     protected String getCaldavFolder(String folderId) {
         String result = folderId;
-        if (result.indexOf("/") != -1) {
+        if (result.indexOf('/') != -1) {
             result = result.substring(result.lastIndexOf("/") + 1, result.length());
         }
         return result;

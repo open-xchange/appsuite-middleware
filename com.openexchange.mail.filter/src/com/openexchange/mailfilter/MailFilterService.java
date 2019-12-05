@@ -213,4 +213,14 @@ public interface MailFilterService {
      */
     public Set<String> getStaticCapabilities(Credentials credentials) throws OXException;
 
+    /**
+     * Converts a rule to its textual representation
+     *
+     * @param credentials The credentials
+     * @param rule The rule to convert
+     * @return The textual representation
+     * @throws OXException
+     */
+    public String convertToString(Credentials credentials, Rule rule) throws OXException;
+
 }

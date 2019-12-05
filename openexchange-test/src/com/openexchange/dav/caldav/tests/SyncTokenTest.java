@@ -55,6 +55,7 @@ import org.apache.jackrabbit.webdav.client.methods.ReportMethod;
 import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
 import org.apache.jackrabbit.webdav.version.report.ReportInfo;
 import org.junit.Test;
+import com.openexchange.dav.Config;
 import com.openexchange.dav.PropertyNames;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.caldav.CalDAVTest;
@@ -104,7 +105,7 @@ public class SyncTokenTest extends CalDAVTest {
     }
 
     protected MultiStatusResponse[] syncCollection(String syncToken, int expectedResponse) throws Exception {
-        String uri = getBaseUri() + "/caldav/" + encodeFolderID(getDefaultFolderID());
+        String uri = getBaseUri() + Config.getPathPrefix() + "/caldav/" + encodeFolderID(getDefaultFolderID());
         DavPropertyNameSet props = new DavPropertyNameSet();
         props.add(PropertyNames.GETETAG);
         ReportInfo reportInfo = new SyncCollectionReportInfo(syncToken, props);

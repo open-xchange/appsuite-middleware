@@ -152,9 +152,9 @@ public final class TokenLoginActivator extends HousekeepingActivator implements 
                             serviceImpl.setToken2sessionIdMapNameHzMapName(token2sessionIdMapName);
                             serviceImpl.changeBackingMapToHz();
                             return hazelcastInstance;
-                        } catch (final OXException e) {
+                        } catch (OXException e) {
                             LOG.warn("Couldn't initialize distributed token-login map.", e);
-                        } catch (final RuntimeException e) {
+                        } catch (RuntimeException e) {
                             LOG.warn("Couldn't initialize distributed token-login map.", e);
                         }
                         context.ungetService(reference);

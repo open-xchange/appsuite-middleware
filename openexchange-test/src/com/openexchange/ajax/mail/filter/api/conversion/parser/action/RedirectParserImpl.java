@@ -70,11 +70,6 @@ public class RedirectParserImpl implements ActionParser {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.mail.filter.api.conversion.parser.JSONParser#parse(org.json.JSONObject)
-     */
     @Override
     public Action<RedirectActionArgument> parse(JSONObject jsonObject) throws JSONException {
         String to = jsonObject.getString(RedirectActionArgument.to.name());

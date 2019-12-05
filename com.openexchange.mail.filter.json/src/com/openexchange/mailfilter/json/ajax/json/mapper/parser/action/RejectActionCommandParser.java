@@ -77,22 +77,12 @@ public class RejectActionCommandParser implements CommandParser<ActionCommand> {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.ActionCommandParser#parse(org.json.JSONObject)
-     */
     @Override
     public ActionCommand parse(JSONObject jsonObject, ServerSession session) throws JSONException, SieveException, OXException {
         String stringParam = CommandParserJSONUtil.getString(jsonObject, RejectActionField.text.name(), Commands.REJECT.getCommandName());
         return new ActionCommand(Commands.REJECT, CommandParserJSONUtil.createArrayOfArrays(stringParam));
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.ActionCommandParser#parse(org.json.JSONObject, com.openexchange.jsieve.commands.ActionCommand)
-     */
     @SuppressWarnings("unchecked")
     @Override
     public void parse(JSONObject jsonObject, ActionCommand actionCommand) throws JSONException, OXException {

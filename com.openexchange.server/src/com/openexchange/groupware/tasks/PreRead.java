@@ -162,7 +162,7 @@ final class PreRead<T> {
                 LOG.trace("Waiting for state.");
                 try {
                     waitForPreReader.await();
-                } catch (final InterruptedException e) {
+                } catch (InterruptedException e) {
                     // Nothing to do. Continue with normal work.
                     // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
                     Thread.currentThread().interrupt();

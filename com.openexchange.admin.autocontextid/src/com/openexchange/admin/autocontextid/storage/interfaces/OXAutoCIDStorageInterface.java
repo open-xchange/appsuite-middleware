@@ -85,7 +85,7 @@ public abstract class OXAutoCIDStorageInterface {
                     if (null != className) {
                         try {
                             implementingClass = Class.forName(className).asSubclass(OXAutoCIDStorageInterface.class);
-                        } catch (final ClassNotFoundException e) {
+                        } catch (ClassNotFoundException e) {
                             log.error("", e);
                             throw new StorageException(e);
                         }
@@ -100,22 +100,22 @@ public abstract class OXAutoCIDStorageInterface {
                         cons = implementingClass.getConstructor(new Class[] {});
                         inst = cons.newInstance(new Object[] {});
                         instance = inst;
-                    } catch (final SecurityException e) {
+                    } catch (SecurityException e) {
                         log.error("", e);
                         throw new StorageException(e);
-                    } catch (final NoSuchMethodException e) {
+                    } catch (NoSuchMethodException e) {
                         log.error("", e);
                         throw new StorageException(e);
-                    } catch (final IllegalArgumentException e) {
+                    } catch (IllegalArgumentException e) {
                         log.error("", e);
                         throw new StorageException(e);
-                    } catch (final InstantiationException e) {
+                    } catch (InstantiationException e) {
                         log.error("", e);
                         throw new StorageException(e);
-                    } catch (final IllegalAccessException e) {
+                    } catch (IllegalAccessException e) {
                         log.error("", e);
                         throw new StorageException(e);
-                    } catch (final InvocationTargetException e) {
+                    } catch (InvocationTargetException e) {
                         log.error("", e);
                         throw new StorageException(e);
                     }

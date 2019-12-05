@@ -53,13 +53,12 @@ import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.SearchStrings.lengthWithoutWildcards;
 import static com.openexchange.tools.arrays.Arrays.contains;
 import java.util.Collection;
-import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.SortedSet;
 import java.util.TimeZone;
+import java.util.TreeSet;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.chronos.Alarm;
@@ -139,8 +138,12 @@ public class Check {
      */
     public static SortedSet<RecurrenceId> recurrenceIdsExist(RecurrenceService recurrenceService, Event seriesMaster, SortedSet<RecurrenceId> recurrenceIDs) throws OXException {
         if (null != recurrenceIDs) {
+            RecurrenceData recurrenceData = new DefaultRecurrenceData(seriesMaster.getRecurrenceRule(), seriesMaster.getStartDate(), null);
+            SortedSet<RecurrenceId> validRecurrenceIds = CalendarUtils.removeInvalid(recurrenceIDs, recurrenceData, recurrenceService);
             for (RecurrenceId recurrenceID : recurrenceIDs) {
-                recurrenceIdExists(recurrenceService, seriesMaster, recurrenceID);
+                if (false == validRecurrenceIds.contains(recurrenceID)) {
+                    throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create(String.valueOf(recurrenceID), recurrenceData);
+                }
             }
         }
         return recurrenceIDs;
@@ -157,15 +160,9 @@ public class Check {
      * @throws OXException {@link CalendarExceptionCodes#INVALID_RECURRENCE_ID}
      */
     public static RecurrenceId recurrenceIdExists(RecurrenceService recurrenceService, Event seriesMaster, RecurrenceId recurrenceID) throws OXException {
-        RecurrenceData recurrenceData = new DefaultRecurrenceData(seriesMaster.getRecurrenceRule(), seriesMaster.getStartDate(), null);
-        if (null == recurrenceID) {
-            throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create(String.valueOf(recurrenceID), recurrenceData);
-        }
-        Iterator<RecurrenceId> iterator = recurrenceService.iterateRecurrenceIds(recurrenceData, new Date(recurrenceID.getValue().getTimestamp()), null);
-        if (false == iterator.hasNext()) {
-            throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create(String.valueOf(recurrenceID), recurrenceData);
-        }
-        return recurrenceID;
+        SortedSet<RecurrenceId> recurrenceIds = new TreeSet<RecurrenceId>();
+        recurrenceIds.add(recurrenceID);
+        return recurrenceIdsExist(recurrenceService, seriesMaster, recurrenceIds).first();
     }
 
     /**
@@ -284,12 +281,12 @@ public class Check {
                 throw CalendarExceptionCodes.MANDATORY_FIELD.create(AlarmField.DESCRIPTION.toString());
             }
         }
-        if( AlarmAction.SMS.equals(alarm.getAction())) {
-            if(!alarm.containsAttendees()) {
+        if ( AlarmAction.SMS.equals(alarm.getAction())) {
+            if (!alarm.containsAttendees()) {
                 throw CalendarExceptionCodes.MANDATORY_FIELD.create(AlarmField.ATTENDEES.toString());
             }
             for(Attendee att : alarm.getAttendees()) {
-                if(!att.containsUri() || !att.getUri().toLowerCase().contains("tel:")) {
+                if (!att.containsUri() || !att.getUri().toLowerCase().contains("tel:")) {
                     throw CalendarExceptionCodes.INVALID_ALARM.create(alarm);
                 }
             }

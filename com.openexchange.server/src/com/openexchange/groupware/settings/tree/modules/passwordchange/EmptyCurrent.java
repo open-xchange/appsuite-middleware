@@ -52,7 +52,6 @@ package com.openexchange.groupware.settings.tree.modules.passwordchange;
 import static com.openexchange.java.Autoboxing.B;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.ReadOnlyValue;
@@ -63,6 +62,7 @@ import com.openexchange.session.Session;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareService;
+import com.openexchange.user.User;
 
 /**
  * {@link EmptyCurrent}

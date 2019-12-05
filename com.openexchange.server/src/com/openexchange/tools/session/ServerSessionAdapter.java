@@ -56,7 +56,6 @@ import com.openexchange.annotation.Nullable;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.mail.usersetting.UserSettingMail;
@@ -67,6 +66,7 @@ import com.openexchange.session.Origin;
 import com.openexchange.session.PutIfAbsent;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserConfigurationService;
 import com.openexchange.userconf.UserPermissionService;
@@ -476,6 +476,11 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
     @Override
     public boolean isTransient() {
         return session().isTransient();
+    }
+
+    @Override
+    public boolean isStaySignedIn() {
+        return session().isStaySignedIn();
     }
 
     @Override

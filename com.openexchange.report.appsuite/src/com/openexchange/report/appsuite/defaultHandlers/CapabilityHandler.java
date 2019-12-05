@@ -79,7 +79,6 @@ import com.openexchange.filestore.Info;
 import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.report.InfostoreInformationService;
 import com.openexchange.report.LoginCounterService;
 import com.openexchange.report.appsuite.ContextReport;
@@ -97,6 +96,7 @@ import com.openexchange.report.appsuite.serialization.Report.JsonObjectType;
 import com.openexchange.report.appsuite.storage.ChunkingUtilities;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.user.User;
 
 /**
  * The {@link CapabilityHandler} analyzes a users capabilities and filestore quota. It sums up unique combinations of capabilities and quota and gives counts for
@@ -192,7 +192,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
                 userReport.set(Report.MACDETAIL, Report.MAILADMIN, Boolean.FALSE);
             }
             HashMap<String, Long> userLogins = (HashMap<String, Long>) getUserLoginsForPastYear(userReport.getContext().getContextId(), userReport.getUser().getId());
-            
+
             userReport.set(Report.MACDETAIL, Report.USER_LOGINS, userLogins);
         }
     }
@@ -345,7 +345,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
                     macdetail.put(currentCapS.getKey(), new HashMap<>());
                     compositionCapSList = new ArrayList<>(Arrays.asList(compositionCapS.split(",")));
                 }
-                addDriveMetricsToCapS((Map<String, Object>) macdetail.get(currentCapS.getKey()), (Map<Integer, List<Integer>>) currentCapS.getValue(), new Date(report.getConsideredTimeframeStart()), new Date(report.getConsideredTimeframeEnd()), report, compositionCapSList);
+                addDriveMetricsToCapS((Map<String, Object>) macdetail.get(currentCapS.getKey()), (Map<Integer, List<Integer>>) currentCapS.getValue(), new Date(report.getConsideredTimeframeStart().longValue()), new Date(report.getConsideredTimeframeEnd().longValue()), report, compositionCapSList);
             }
         }
         // calculate correct drive average values
@@ -464,7 +464,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
             if (driveTotalMap.get("file-count-in-timerange-total") != null) {
                 driveTotalMap.put("file-count-in-timerange-avg", L(l(driveTotalMap.get("file-count-in-timerange-total")) / l(totalDriveUsers)));
             }
-            if (driveTotalMap.get("quota-usage-percent-sum") != null && driveTotalMap.get("quota-usage-percent-total") != null && driveTotalMap.get("quota-usage-percent-total") != 0) {
+            if (driveTotalMap.get("quota-usage-percent-sum") != null && driveTotalMap.get("quota-usage-percent-total") != null && driveTotalMap.get("quota-usage-percent-total").longValue() != 0) {
                 driveTotalMap.put("quota-usage-percent-avg", L(l(driveTotalMap.get("quota-usage-percent-sum")) / l(driveTotalMap.get("quota-usage-percent-total"))));
             }
             driveTotalMap.remove("quota-usage-percent-total");
@@ -521,7 +521,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
             for (Entry<String, Integer> quotaUsage : informationService.getQuotaUsageMetrics(usersInContext).entrySet()) {
                 driveUserMetrics.put("quota-usage-percent-" + quotaUsage.getKey(), quotaUsage.getValue());
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             LOG.error("Unable to execute SQL for drive metric gathering.", e);
         } catch (OXException e) {
             LOG.error("Unable to gather drive metrics.", e);

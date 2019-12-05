@@ -57,9 +57,9 @@ import com.openexchange.drive.impl.internal.SyncSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.share.ShareInfo;
+import com.openexchange.user.User;
 
 /**
  * {@link AbstractJsonMetadata}

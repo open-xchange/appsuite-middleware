@@ -74,33 +74,21 @@ public class MultifactorProvidersResultConverter implements ResultConverter {
     public static final String INPUT_FORMAT = "multifactor_providers";
     private static final String OUTPUT_FORMAT = "json";
 
-    /* (non-Javadoc)
-     * @see com.openexchange.ajax.requesthandler.ResultConverter#getInputFormat()
-     */
     @Override
     public String getInputFormat() {
         return INPUT_FORMAT;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.ajax.requesthandler.ResultConverter#getOutputFormat()
-     */
     @Override
     public String getOutputFormat() {
         return OUTPUT_FORMAT;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.ajax.requesthandler.ResultConverter#getQuality()
-     */
     @Override
     public Quality getQuality() {
         return Quality.GOOD;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.ajax.requesthandler.ResultConverter#convert(com.openexchange.ajax.requesthandler.AJAXRequestData, com.openexchange.ajax.requesthandler.AJAXRequestResult, com.openexchange.tools.session.ServerSession, com.openexchange.ajax.requesthandler.Converter)
-     */
     @Override
     public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
         Object resultObject = result.getResultObject();

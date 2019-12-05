@@ -79,25 +79,16 @@ public class MultifactorDeviceMapper extends DefaultJsonMapper<MultifactorDevice
        return INSTANCE;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.tools.mappings.Factory#newInstance()
-     */
     @Override
     public MultifactorDevice newInstance() {
         return new DefaultMultifactorDevice();
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.tools.mappings.ArrayFactory#newArray(int)
-     */
     @Override
     public MultifactorDeviceField[] newArray(int size) {
         return new MultifactorDeviceField[size];
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.tools.mappings.json.DefaultJsonMapper#createMappings()
-     */
     @Override
     protected EnumMap<MultifactorDeviceField, ? extends JsonMapping<? extends Object, MultifactorDevice>> createMappings() {
         EnumMap<MultifactorDeviceField, JsonMapping<? extends Object, MultifactorDevice>> mappings =

@@ -71,7 +71,6 @@ import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.session.actions.EmptyHttpAuthRequest;
 import com.openexchange.ajax.session.actions.HttpAuthRequest;
 import com.openexchange.ajax.session.actions.HttpAuthResponse;
-import com.openexchange.ajax.session.actions.StoreRequest;
 
 /**
  * no autologin with httpauth
@@ -82,6 +81,7 @@ public class Bug34928Test extends AbstractAJAXSession {
 
     private AJAXClient client;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -92,9 +92,9 @@ public class Bug34928Test extends AbstractAJAXSession {
     @Test
     public void testAutoHttpAuthLogin() throws Exception {
         /*
-         * perform initial HTTP Auth login & store session cookie
+         * perform initial HTTP Auth login
          */
-        String firstSessionID = firstHttpAuthLogin(true);
+        String firstSessionID = firstHttpAuthLogin();
         /*
          * perform second HTTP Auth login (without providing authorization headers)
          */
@@ -113,9 +113,9 @@ public class Bug34928Test extends AbstractAJAXSession {
     @Test
     public void testAutoHttpLoginWithWrongSecretCookie() throws Exception {
         /*
-         * perform initial HTTP Auth login & store session cookie
+         * perform initial HTTP Auth login
          */
-        String firstSessionID = firstHttpAuthLogin(true);
+        String firstSessionID = firstHttpAuthLogin();
         /*
          * perform second HTTP Auth login with wrong secret cookie
          */
@@ -135,9 +135,9 @@ public class Bug34928Test extends AbstractAJAXSession {
     @Test
     public void testAutoHttpLoginWithWrongSessionCookie() throws Exception {
         /*
-         * perform initial HTTP Auth login & store session cookie
+         * perform initial HTTP Auth login
          */
-        String firstSessionID = firstHttpAuthLogin(true);
+        String firstSessionID = firstHttpAuthLogin();
         /*
          * perform second HTTP Auth login with wrong secret cookie
          */
@@ -154,31 +154,10 @@ public class Bug34928Test extends AbstractAJAXSession {
         cookie.setValue(correctSession);
     }
 
-    @Test
-    public void testAutoHttpLoginWithoutStore() throws Exception {
-        /*
-         * perform initial HTTP Auth login, don't store session cookie
-         */
-        String firstSessionID = firstHttpAuthLogin(false);
-        /*
-         * perform second HTTP Auth login
-         */
-        client.getSession().setId(null);
-        HttpAuthResponse httpAuthResponse = client.execute(new EmptyHttpAuthRequest(false, false, false));
-        assertEquals("Wrong response code", HttpServletResponse.SC_UNAUTHORIZED, httpAuthResponse.getStatusCode());
-        /*
-         * re-enable first session for logout in tearDown
-         */
-        client.getSession().setId(firstSessionID);
-    }
-
-    private String firstHttpAuthLogin(boolean store) throws Exception {
+    private String firstHttpAuthLogin() throws Exception {
         HttpAuthResponse httpAuthResponse = client.execute(new HttpAuthRequest(testUser.getLogin(), testUser.getPassword()));
         String sessionID = extractSessionID(httpAuthResponse);
         client.getSession().setId(sessionID);
-        if (store) {
-            client.execute(new StoreRequest(sessionID));
-        }
         return sessionID;
     }
 
@@ -198,6 +177,6 @@ public class Bug34928Test extends AbstractAJAXSession {
         assertNotNull("Location is missing in response", location);
         int sessionStart = location.indexOf("session=");
         assertTrue("No session ID", 0 <= sessionStart);
-        return location.substring(sessionStart + 8, location.indexOf('&', sessionStart + 8));
+        return location.substring(sessionStart + 8);
     }
 }

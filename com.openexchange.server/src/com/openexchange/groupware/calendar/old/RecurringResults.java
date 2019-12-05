@@ -73,9 +73,6 @@ public final class RecurringResults implements RecurringResultsInterface {
         recurringResults = new RecurringResult[DEFAULT_SIZE];
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.calendar.RecurringResultsInterface#add(com.openexchange.calendar.RecurringResult)
-     */
     @Override
     public void add(final RecurringResultInterface rr) {
         // CalendarCommonCollection.debugRecurringResult(rr); // uncomment this
@@ -88,9 +85,6 @@ public final class RecurringResults implements RecurringResultsInterface {
         recurringResults[counter++] = rr;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.calendar.RecurringResultsInterface#getRecurringResultByPosition(int)
-     */
     @Override
     public RecurringResultInterface getRecurringResultByPosition(final int recurrencePosition) {
         final int internalPosition = recurrencePosition - 1;
@@ -107,9 +101,6 @@ public final class RecurringResults implements RecurringResultsInterface {
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.calendar.RecurringResultsInterface#getRecurringResult(int)
-     */
     @Override
     public RecurringResultInterface getRecurringResult(final int position) {
         if (position <= counter && position >= 0) {
@@ -118,17 +109,11 @@ public final class RecurringResults implements RecurringResultsInterface {
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.calendar.RecurringResultsInterface#size()
-     */
     @Override
     public int size() {
         return counter;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.calendar.RecurringResultsInterface#getPositionByLong(long)
-     */
     @Override
     public int getPositionByLong(final long normalizedTime) {
         for (int a = 0; a < counter; a++) {

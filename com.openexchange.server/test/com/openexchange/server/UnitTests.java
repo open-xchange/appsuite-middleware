@@ -53,6 +53,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 import com.openexchange.ajax.requesthandler.oauth.OAuthDispatcherServletTest;
+import com.openexchange.lock.impl.AccessControlImplTest;
 
 /**
  * Suite for integrated unit tests of the com.openexchange.server bundle.
@@ -94,7 +95,7 @@ import com.openexchange.ajax.requesthandler.oauth.OAuthDispatcherServletTest;
     com.openexchange.groupware.upload.quotachecker.MailUploadQuotaCheckerTest.class,
     com.openexchange.mail.text.TextProcessingTest.class,
     com.openexchange.login.internal.format.CompositeLoginFormatterTest.class,
-    com.openexchange.user.UserServiceInterceptorRegistryTest.class,
+    com.openexchange.user.interceptor.UserServiceInterceptorRegistryTest.class,
     com.openexchange.groupware.infostore.search.impl.ToMySqlQueryVisitorTest.class,
     com.openexchange.mail.text.HtmlProcessingTest.class,
     com.openexchange.mailaccount.json.actions.ValidateActionTest.class,
@@ -112,7 +113,8 @@ import com.openexchange.ajax.requesthandler.oauth.OAuthDispatcherServletTest;
     com.openexchange.groupware.contact.Bug59522Test.class,
     com.openexchange.folderstorage.internal.performers.UserSharedFoldersPerformerTest.class,
     com.openexchange.folderstorage.database.DatabaseFolderTest.class,
-    com.openexchange.config.admin.internal.HideAdminServiceImplTest.class
+    com.openexchange.config.admin.internal.HideAdminServiceImplTest.class,
+    AccessControlImplTest.class
 })
 public class UnitTests {
 

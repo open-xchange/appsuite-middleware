@@ -75,31 +75,16 @@ public class CreateClusterLockTable extends AbstractCreateTableImpl {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.database.CreateTableService#requiredTables()
-     */
     @Override
     public String[] requiredTables() {
         return new String[] {};
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.database.CreateTableService#tablesToCreate()
-     */
     @Override
     public String[] tablesToCreate() {
         return new String[] { "clusterLock" };
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.database.AbstractCreateTableImpl#getCreateStatements()
-     */
     @Override
     protected String[] getCreateStatements() {
         return new String[] { CREATE_TABLE_STATEMENT };

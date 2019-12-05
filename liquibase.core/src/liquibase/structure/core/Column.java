@@ -189,7 +189,7 @@ public class Column extends AbstractDatabaseObject {
     }
 
     public Column setCertainDataType(boolean certainDataType) {
-        setAttribute("certainDataType", certainDataType);
+        setAttribute("certainDataType", certainDataType ? Boolean.TRUE : Boolean.FALSE);
 
         return this;
     }
@@ -209,7 +209,7 @@ public class Column extends AbstractDatabaseObject {
         private final BigInteger incrementBy;
 
         public AutoIncrementInformation() {
-            this(1,1);
+            this(Integer.valueOf(1),Integer.valueOf(1));
         }
 
         public AutoIncrementInformation(Number startWith, Number incrementBy) {

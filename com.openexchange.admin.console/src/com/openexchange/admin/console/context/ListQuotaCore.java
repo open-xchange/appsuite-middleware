@@ -83,7 +83,7 @@ public abstract class ListQuotaCore extends ContextAbstraction {
                 parser.ownparse(args);
                 ctx = contextparsing(parser);
                 auth = credentialsparsing(parser);
-            } catch (final RuntimeException e) {
+            } catch (RuntimeException e) {
                 printError(null, null, e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
                 sysexit(1);
             }
@@ -103,10 +103,10 @@ public abstract class ListQuotaCore extends ContextAbstraction {
                     sysoutOutput(quotas);
                 }
             }
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             printError(null, null, "Invalid data : " + e.getMessage(), parser);
             sysexit(1);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             printError(null, null, e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
             sysexit(1);
         }

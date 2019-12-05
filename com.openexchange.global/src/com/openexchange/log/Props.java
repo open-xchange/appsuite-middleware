@@ -149,7 +149,7 @@ public final class Props {
         }
         try {
             return (V) MDC.get(name.toString());
-        } catch (final ClassCastException e) {
+        } catch (ClassCastException e) {
             LOG.warn("Type mismatch", e);
             return null;
         }
@@ -168,7 +168,7 @@ public final class Props {
         }
         try {
             return (V) MDC.get(name.toString());
-        } catch (final ClassCastException e) {
+        } catch (ClassCastException e) {
             LOG.warn("Type mismatch", e);
             return null;
         }

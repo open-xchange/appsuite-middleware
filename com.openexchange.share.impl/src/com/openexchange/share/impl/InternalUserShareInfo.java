@@ -52,7 +52,6 @@ package com.openexchange.share.impl;
 import java.util.Date;
 import java.util.Locale;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
@@ -60,6 +59,7 @@ import com.openexchange.share.ShareTarget;
 import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.core.tools.ShareLinks;
 import com.openexchange.share.recipient.RecipientType;
+import com.openexchange.user.User;
 
 /**
  * {@link InternalUserShareInfo}

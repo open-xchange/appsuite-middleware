@@ -1,0 +1,68 @@
+/chronos/alarm?action=updateAlarms:
+  put:
+    operationId: updateAlarms
+    tags:
+      - Chronos
+    summary: Updates the personal alarms of an event.
+    parameters:
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - $ref: '#/components/parameters/QueryParamChronosFolder'
+      - $ref: '#/components/parameters/QueryParamChronosID'
+      - $ref: '#/components/parameters/QueryParamChronosRecurrenceID'
+      - $ref: '#/components/parameters/QueryParamChronosExtendedEntities'
+      - $ref: '#/components/parameters/QueryParamChronosPushToken'
+      - $ref: '#/components/parameters/QueryParamChronosFields'
+      - in: query
+        name: timestamp
+        description: Timestamp of the last update of the event.
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - $ref: '#/components/parameters/QueryParamChronosExpand'
+      - $ref: '#/components/parameters/QueryParamChronosScheduling'
+      - in: query
+        name: rangeStart
+        description: >
+          If expand is set to 'true' this parameter defines a lower inclusive
+          limit as a utc date-time value as specified in rfc 5545 chapter 3.3.5.
+          E.g. "20170708T220000Z". 
+
+          Only events which start on or after this date are returned.
+        required: false
+        schema:
+          type: string
+      - in: query
+        name: rangeEnd
+        description: >
+          If expand is set to 'true' this parameter defines a upper exclusive
+          limit as a utc date-time value as specified in rfc 5545 chapter 3.3.5.
+          E.g. "20170708T220000Z". 
+
+          Only events which end before this date are returned.
+        required: false
+        schema:
+          type: string
+
+    responses:
+      '200':
+        description: >
+          A JSON object containing containing the result of the update. In case
+          of errors the
+
+          responsible fields in the response are filled (see [Error
+          handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChronosCalendarResultResponse'
+    requestBody:
+      content:
+        application/json:
+          schema:
+            type: array
+            title: Alarms
+            items:
+              $ref: '#/components/schemas/Alarm'
+      description: A JSON array containing the alarms.
+      required: true

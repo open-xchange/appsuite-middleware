@@ -55,6 +55,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import com.google.common.collect.ImmutableSet;
+import com.openexchange.java.Strings;
 
 
 /**
@@ -90,6 +91,7 @@ public class TimeSpanParser  implements StringParser {
      *
      * @param span The span string
      * @return The parsed <tt>long</tt> value
+     * @throws IllegalArgumentException If a unit identifier is unknown
      */
     public static Long parseTimespan(final String span) {
         return Long.valueOf(parseTimespanToPrimitive(span));
@@ -110,6 +112,7 @@ public class TimeSpanParser  implements StringParser {
      *
      * @param span The span string
      * @return The parsed <tt>long</tt> value
+     * @throws IllegalArgumentException If a unit identifier is unknown
      */
     public static long parseTimespanToPrimitive(final String span) {
         if (span == null) {
@@ -124,14 +127,14 @@ public class TimeSpanParser  implements StringParser {
         final int length = span.length();
         for (int i = 0; i < length; i++) {
             final char c = span.charAt(i);
-            if (Character.isDigit(c)) {
+            if (Strings.isDigit(c)) {
                 if (mode == 0) {
                     numberBuilder.append(c);
                 } else {
                     final String unit = 0 == unitBuilder.length() ? "MS" : unitBuilder.toString().toUpperCase();
                     final Long factor = UNITS.get(unit);
                     if (factor == null) {
-                        throw new IllegalArgumentException("I don't know unit " + unit);
+                        throw new IllegalArgumentException("Unknown unit: " + unit);
                     }
                     tally += Long.parseLong(numberBuilder.toString()) * factor.longValue();
                     numberBuilder.setLength(0);
@@ -139,7 +142,7 @@ public class TimeSpanParser  implements StringParser {
                     mode = 0;
                     numberBuilder.append(c);
                 }
-            } else if (Character.isLetter(c)) {
+            } else if (Strings.isAsciiLetter(c)) {
                 mode = 1;
                 unitBuilder.append(c);
             } else {
@@ -168,7 +171,7 @@ public class TimeSpanParser  implements StringParser {
         long timespan;
         try {
             timespan = parseTimespanToPrimitive(s);
-        } catch (final IllegalArgumentException x) {
+        } catch (IllegalArgumentException x) {
             return null;
         }
 

@@ -107,7 +107,7 @@ public class OXError {
         try {
             final OXException exception = (OXException) t;
             return matches(new OXError(exception.getPrefix(), exception.getCode()));
-        } catch (final ClassCastException e) {
+        } catch (ClassCastException e) {
             return false;
         }
     }

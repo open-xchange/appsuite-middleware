@@ -90,7 +90,7 @@ public final class GetAttachmentAction extends SnippetAction implements ETagAwar
                 fn = null == sContentType ? null : new ContentType(sContentType).getNameParameter();
             }
             return fn;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             return null;
         }
     }
@@ -130,7 +130,7 @@ public final class GetAttachmentAction extends SnippetAction implements ETagAwar
             final String saveParam = snippetRequest.getParameter(Mail.PARAMETER_SAVE, String.class, true);
             try {
                 saveToDisk = ((saveParam == null || saveParam.length() == 0) ? false : ((Integer.parseInt(saveParam)) > 0));
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 saveToDisk = "true".equalsIgnoreCase(saveParam) || "yes".equalsIgnoreCase(saveParam) || "on".equalsIgnoreCase(saveParam);
             }
         }
@@ -176,7 +176,7 @@ public final class GetAttachmentAction extends SnippetAction implements ETagAwar
             setETag(UUID.randomUUID().toString(), AJAXRequestResult.YEAR_IN_MILLIS * 50, result);
             error = false;
             return result;
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw SnippetExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
             if (error) {

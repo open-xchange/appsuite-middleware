@@ -93,7 +93,7 @@ public class OSGiSubscriptionSourceDiscoveryCollector implements ServiceTrackerC
     @Override
     public SubscriptionSourceDiscoveryService addingService(final ServiceReference<SubscriptionSourceDiscoveryService> reference) {
         final SubscriptionSourceDiscoveryService service = context.getService(reference);
-        if(service.getClass() == getClass()) {
+        if (service.getClass() == getClass()) {
             context.ungetService(reference);
             return service;
         }

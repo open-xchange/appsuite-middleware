@@ -84,10 +84,10 @@ import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
+import com.openexchange.user.User;
 
 /**
  * {@link UpdateITipAnalyzer}
@@ -137,7 +137,7 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
             }
             throw e;
         }
-        
+
         if (null == update) {
             if (null == original) {
                 if (message.numberOfExceptions() > 0) {
@@ -159,6 +159,7 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
         if (original != null) {
             // TODO: Needs to be removed, when we handle external resources.
             addResourcesToUpdate(original, update);
+            update = adjustOrganizer(message, original, update);
             if (isOutdated(update, original) || isForeignCopy(session, original)) {
                 analysis.addAnnotation(new ITipAnnotation(Messages.OLD_UPDATE, locale));
                 analysis.recommendAction(ITipAction.IGNORE);
@@ -204,6 +205,7 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
         if (differ && message.getEvent() != null) {
             Event event = session.getUtilities().copyEvent(message.getEvent(), (EventField[]) null);
             event = handleMicrosoft(message, analysis, original, event);
+            event = restoreAttachments(original, event);
             ensureParticipant(original, event, session, owner);
             if (original != null) {
                 event.setFolderId(original.getFolderId());
@@ -410,6 +412,17 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
     }
 
     /**
+     * Gets a value indicating whether the message contains a {@link ITipMethod#COUNTER}
+     * send by a Microsoft made client, see {@link ITipSpecialHandling#MICROSOFT}
+     *
+     * @param message The {@link ITipMessage}
+     * @return <code>true</code> if the message is about a counter from a Microsoft client, <code>false</code> otherwise
+     */
+    private boolean isMicrosoftCounter(ITipMessage message) {
+        return message.getMethod() == ITipMethod.COUNTER && message.hasFeature(ITipSpecialHandling.MICROSOFT);
+    }
+
+    /**
      * Fields that are adopted on a COUNTER of a Microsoft client. See {@link #handleMicrosoft(ITipMessage, ITipAnalysis, Event, Event)} for further details
      */
     private final static EventField[] MICROSOFT_COUNTER_FIELDS = new EventField[] { EventField.START_DATE, EventField.END_DATE, EventField.EXTENDED_PROPERTIES };
@@ -437,7 +450,7 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
      * @throws OXException If original event can't be copied
      */
     private Event handleMicrosoft(ITipMessage message, ITipAnalysis analysis, Event original, Event update) throws OXException {
-        if (message.getMethod() == ITipMethod.COUNTER && message.hasFeature(ITipSpecialHandling.MICROSOFT)) {
+        if (isMicrosoftCounter(message)) {
             if (null == original || null == update || null == original.getAttendees() || null == update.getAttendees() || update.getAttendees().size() != 1) {
                 LOGGER.debug("Microsoft special handling unnecessary");
                 return update;
@@ -467,6 +480,26 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
             copy = EventMapper.getInstance().copy(update, copy, MICROSOFT_COUNTER_FIELDS);
 
             return copy;
+        }
+        return update;
+    }
+
+    /**
+     * Adjusts organizer for Microsoft special COUNTER method..
+     *
+     * @param message The {@link ITipMessage}
+     * @param original The original {@link Event}
+     * @param update The {@link Event} with the updates
+     * @return An updated event that ensures that the organizer is set if {@link #isMicrosoftCounter(ITipMessage)} is <code>true</code>
+     * @throws OXException
+     */
+    private Event adjustOrganizer(ITipMessage message, Event original, Event update) throws OXException {
+        if (isMicrosoftCounter(message)) {
+            if (null == update.getOrganizer() && null != original.getOrganizer()) {
+                Event copy = EventMapper.getInstance().copy(update, null, (EventField[]) null);
+                copy = EventMapper.getInstance().copy(original, copy, EventField.ORGANIZER);
+                return copy;
+            }
         }
         return update;
     }

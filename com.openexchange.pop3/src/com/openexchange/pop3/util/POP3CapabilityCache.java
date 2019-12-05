@@ -380,7 +380,7 @@ public final class POP3CapabilityCache {
                          */
                         s.setSoTimeout(timeout);
                     }
-                } catch (final IOException e) {
+                } catch (IOException e) {
                     throw e;
                 }
                 final InputStream in = s.getInputStream();
@@ -471,7 +471,7 @@ public final class POP3CapabilityCache {
                         while (true) {
                             try {
                                 i = in.read();
-                            } catch (final java.net.SocketTimeoutException e) {
+                            } catch (java.net.SocketTimeoutException e) {
                                 // Orderly failed reading next byte. Seems CAPA response isn't terminated with '.' character.
                                 break;
                             }
@@ -520,10 +520,10 @@ public final class POP3CapabilityCache {
                  * Create new object
                  */
                 return new Capabilities(capabilities);
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 LOG.warn("Failed reading capabilities from POP3 server \"{}\". Read so far:{}", key.getHostName(), sb);
                 throw e;
-            } catch (final RuntimeException e) {
+            } catch (RuntimeException e) {
                 LOG.warn("Fatally failed reading capabilities from POP3 server \"{}\". Read so far:{}", key.getHostName(), sb);
                 final IOException ioException = new IOException(e.getMessage());
                 ioException.initCause(e);
@@ -532,7 +532,7 @@ public final class POP3CapabilityCache {
                 if (s != null) {
                     try {
                         s.close();
-                    } catch (final IOException e) {
+                    } catch (IOException e) {
                         LOG.error("", e);
                     }
                 }

@@ -74,6 +74,7 @@ public class SessionDescription implements PutIfAbsent {
     private String hash;
     private String client;
     private boolean tranzient;
+    private boolean staySignedIn;
     private Origin origin;
     private final Map<String, Object> parameters;
     private String alternativeId;
@@ -281,6 +282,24 @@ public class SessionDescription implements PutIfAbsent {
      */
     public void setTransient(boolean tranzient) {
         this.tranzient = tranzient;
+    }
+
+    /**
+     * Sets whether session should be annotated with "stay signed in".
+     *
+     * @param staySignedIn <code>true</code> to annotate with "stay signed in"; otherwise <code>false</code>
+     */
+    public void setStaySignedIn(boolean staySignedIn) {
+        this.staySignedIn = staySignedIn;
+    }
+
+    /**
+     * Checks whether session should be annotated with "stay signed in".
+     *
+     * @return <code>true</code> to annotate with "stay signed in"; otherwise <code>false</code>
+     */
+    public boolean isStaySignedIn() {
+        return staySignedIn;
     }
 
     @Override

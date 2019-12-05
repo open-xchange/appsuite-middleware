@@ -1,0 +1,38 @@
+/account?action=validate:
+  put:
+    operationId: validateAccount
+    tags:
+      - Mailaccount
+    summary: Validates a mail account which shall be created.
+    parameters:
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - in: query
+        name: tree
+        description: >
+          Indicates whether on successful validation the folder tree shall be
+          returned (or `null`on failure) or
+
+          if set to `false` or missing only a boolean is returned which
+          indicates validation result.
+        required: false
+        schema:
+          type: boolean
+    responses:
+      '200':
+        description: >
+          A JSON object that contains a value representing the validation result
+          (may be a boolean or a folder tree object).
+
+          If the validation fails then the error fields are filled and an
+          additional `warnings` field might be added.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MailAccountValidationResponse'
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MailAccountData'
+      description: A JSON object describing the account to validate.
+      required: true

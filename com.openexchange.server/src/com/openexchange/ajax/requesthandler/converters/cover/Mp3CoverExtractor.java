@@ -207,19 +207,19 @@ public final class Mp3CoverExtractor implements CoverExtractor {
                 }
             }
             throw AjaxExceptionCodes.BAD_REQUEST.create();
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } catch (final TagException e) {
+        } catch (TagException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (final ReadOnlyFileException e) {
+        } catch (ReadOnlyFileException e) {
             throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } catch (final CannotReadException e) {
+        } catch (CannotReadException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } catch (final InvalidAudioFrameException e) {
+        } catch (InvalidAudioFrameException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (final NoClassDefFoundError e) {
+        } catch (NoClassDefFoundError e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             managedFile.delete();

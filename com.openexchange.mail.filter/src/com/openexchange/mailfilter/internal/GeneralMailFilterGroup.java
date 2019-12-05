@@ -79,7 +79,7 @@ public class GeneralMailFilterGroup implements MailFilterGroup {
         for (int i = 0; i < userOrder.length; i++) {
             int uniqueid = userOrder[i];
             RuleAndPosition rightRule = getRightRuleForUniqueId(result, uniqueid);
-            if(rightRule == null) {
+            if (rightRule == null) {
                 // skip unknown rules
                 continue;
             }

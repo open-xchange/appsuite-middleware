@@ -270,7 +270,7 @@ public class BasicPermission implements Permission, Cloneable {
         result = prime * result + (group ? 1231 : 1237);
         result = prime * result + readPermission;
         result = prime * result + system;
-        result = prime * result + type.getTypeNumber();
+        result = prime * result + (null != type ? type : FolderPermissionType.NORMAL).getTypeNumber();
         result = prime * result + (legator == null ? 0 : legator.hashCode());
         result = prime * result + writePermission;
         return result;
@@ -312,6 +312,9 @@ public class BasicPermission implements Permission, Cloneable {
             return false;
         }
         if (type != other.getType()) {
+            return false;
+        }
+        if ((null != type ? type : FolderPermissionType.NORMAL) != (null != other.getType() ? other.getType() : FolderPermissionType.NORMAL)) {
             return false;
         }
         if ((legator==null && other.getPermissionLegator()!=null) || (legator!=null && !legator.equals(other.getPermissionLegator()))) {

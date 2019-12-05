@@ -184,7 +184,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                     com.box.sdk.BoxFile file = new com.box.sdk.BoxFile(boxClient, id);
                     checkFileValidity(file.getInfo("trashed_at"));
                     return Boolean.TRUE;
-                } catch (final BoxAPIException e) {
+                } catch (BoxAPIException e) {
                     if (SC_NOT_FOUND == e.getResponseCode()) {
                         return Boolean.FALSE;
                     }
@@ -211,7 +211,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
 
                     com.openexchange.file.storage.boxcom.BoxFile boxFile = new com.openexchange.file.storage.boxcom.BoxFile(folderId, id, userId, rootFolderId).parseBoxFile(fileInfo);
                     return boxFile;
-                } catch (final BoxAPIException e) {
+                } catch (BoxAPIException e) {
                     if (SC_UNAUTHORIZED == e.getResponseCode()) {
                         throw e;
                     }
@@ -280,7 +280,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                         }
 
                         return new IDTuple(file.getFolderId(), boxFile.getID());
-                    } catch (final BoxAPIException e) {
+                    } catch (BoxAPIException e) {
                         if (SC_UNAUTHORIZED == e.getResponseCode()) {
                             throw e;
                         }
@@ -332,7 +332,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                     } while (null == copiedFile);
 
                     return new IDTuple(destFolder, copiedFile.getID());
-                } catch (final BoxAPIException e) {
+                } catch (BoxAPIException e) {
                     if (SC_UNAUTHORIZED == e.getResponseCode()) {
                         throw e;
                     }
@@ -377,7 +377,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                     } while (null == movedFile);
 
                     return new IDTuple(destFolder, movedFile.getID());
-                } catch (final BoxAPIException e) {
+                } catch (BoxAPIException e) {
                     if (SC_UNAUTHORIZED == e.getResponseCode()) {
                         throw e;
                     }
@@ -464,7 +464,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                     byte[] thumbnail = boxFile.getThumbnail(com.box.sdk.BoxFile.ThumbnailFileType.PNG, 64, 64, 128, 128);
 
                     return new ByteArrayInputStream(thumbnail);
-                } catch (final BoxAPIException e) {
+                } catch (BoxAPIException e) {
                     if (SC_UNAUTHORIZED == e.getResponseCode()) {
                         throw e;
                     }

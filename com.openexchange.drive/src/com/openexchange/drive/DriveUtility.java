@@ -224,8 +224,9 @@ public interface DriveUtility {
      *
      * @param session The session
      * @param target The target
+     * @return The (possibly) updated share target
      */
-    void deleteLink(DriveSession session, DriveShareTarget target) throws OXException;
+    DriveShareTarget deleteLink(DriveSession session, DriveShareTarget target) throws OXException;
 
     /**
      * (Re-)Sends a notification message tom one or more existing entities of a shared file or folder.

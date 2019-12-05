@@ -101,6 +101,8 @@ public class RemoteSession implements PutIfAbsent {
         session.userLogin = (String) map.get("__userLogin");
         Boolean booleanObject = (Boolean) map.get("__tranzient");
         session.tranzient = null != booleanObject ? booleanObject.booleanValue() : false;
+        booleanObject = (Boolean) map.get("__staySignedIn");
+        session.staySignedIn = null != booleanObject ? booleanObject.booleanValue() : false;
         session.origin = Origin.originFor((String) map.get("__origin"));
         Serializable serializable = map.get("__paramAlternativeId");
         if (null != serializable) {
@@ -135,6 +137,7 @@ public class RemoteSession implements PutIfAbsent {
         map.put("__client", session.getClient());
         map.put("__userLogin", session.getUserlogin());
         map.put("__tranzient", Boolean.valueOf(session.isTransient()));
+        map.put("__staySignedIn", Boolean.valueOf(session.isStaySignedIn()));
         map.put("__origin", session.getOrigin() == null ? "" : session.getOrigin().name());
         Object obj = session.getParameter(PARAM_ALTERNATIVE_ID);
         if (null != obj && Serializable.class.isInstance(obj)) {
@@ -161,6 +164,7 @@ public class RemoteSession implements PutIfAbsent {
     private String client;
     private String userLogin;
     private boolean tranzient;
+    private boolean staySignedIn;
     private Origin origin;
     private final ConcurrentMap<String, Object> parameters;
 
@@ -270,6 +274,11 @@ public class RemoteSession implements PutIfAbsent {
     @Override
     public boolean isTransient() {
         return tranzient;
+    }
+
+    @Override
+    public boolean isStaySignedIn() {
+        return staySignedIn;
     }
 
     @Override

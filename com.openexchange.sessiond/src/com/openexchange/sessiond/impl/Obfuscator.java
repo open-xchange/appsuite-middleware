@@ -197,7 +197,7 @@ public class Obfuscator implements ObfuscatorService {
         }
 
         // Instantiate & return appropriate stored session
-        return new StoredSession(session.getSessionID(), session.getLoginName(), obfuscate(session.getPassword()), session.getContextId(), session.getUserId(), session.getSecret(), session.getLogin(), session.getRandomToken(), session.getLocalIp(), session.getAuthId(), session.getHash(), session.getClient(), session.getOrigin(), parameters);
+        return new StoredSession(session.getSessionID(), session.getLoginName(), obfuscate(session.getPassword()), session.getContextId(), session.getUserId(), session.getSecret(), session.getLogin(), session.getRandomToken(), session.getLocalIp(), session.getAuthId(), session.getHash(), session.getClient(), session.isStaySignedIn(), session.getOrigin(), parameters);
     }
 
     /**
@@ -212,7 +212,7 @@ public class Obfuscator implements ObfuscatorService {
         }
 
         // Instantiate session
-        SessionImpl sessionImpl = new SessionImpl(session.getUserId(), session.getLoginName(), unobfuscate(session.getPassword()), session.getContextId(), session.getSessionID(), session.getSecret(), session.getRandomToken(), session.getLocalIp(), session.getLogin(), session.getAuthId(), session.getHash(), session.getClient(), false, session.getOrigin());
+        SessionImpl sessionImpl = new SessionImpl(session.getUserId(), session.getLoginName(), unobfuscate(session.getPassword()), session.getContextId(), session.getSessionID(), session.getSecret(), session.getRandomToken(), session.getLocalIp(), session.getLogin(), session.getAuthId(), session.getHash(), session.getClient(), false, session.isStaySignedIn(), session.getOrigin());
         for (String name : session.getParameterNames()) {
             Object value = session.getParameter(name);
             sessionImpl.setParameter(name, value);
@@ -233,7 +233,7 @@ public class Obfuscator implements ObfuscatorService {
         if (null != obfuscationKey) {
             try {
                 return Services.getService(CryptoService.class).encrypt(string, obfuscationKey);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.error("Could not obfuscate string", e);
                 return string;
             }
@@ -242,7 +242,7 @@ public class Obfuscator implements ObfuscatorService {
         char[] key = getCharsFromBuffer();
         try {
             return Services.getService(CryptoService.class).encrypt(string, new String(key));
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("Could not obfuscate string", e);
             return string;
         } finally {
@@ -262,8 +262,8 @@ public class Obfuscator implements ObfuscatorService {
         if (null != obfuscationKey) {
             try {
                 return Services.getService(CryptoService.class).decrypt(string, obfuscationKey);
-            } catch (final OXException e) {
-                LOG.error("Could not obfuscate string", e);
+            } catch (OXException e) {
+                LOG.error("Could not unobfuscate string", e);
                 return string;
             }
         }
@@ -271,7 +271,7 @@ public class Obfuscator implements ObfuscatorService {
         char[] key = getCharsFromBuffer();
         try {
             return Services.getService(CryptoService.class).decrypt(string, new String(key));
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("Could not unobfuscate string", e);
             return string;
         } finally {

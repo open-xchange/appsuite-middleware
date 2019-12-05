@@ -1,0 +1,57 @@
+type: object
+properties:
+  $ref: ../common/CommonResponseData.yaml
+  data:
+    type: array
+    title: Analysis
+    description: An analysis array.
+    items:
+      type: object
+      title: Analysis
+      description: A single analysis.
+      properties:
+        actions:
+          type: array
+          description: Possible actions to be performed based on this analysis.
+          items:
+            type: string
+            title: Types
+            description: The change type.
+            enum:
+              - accept
+              - decline
+              - tentative
+              - delegate
+              - counter
+              - accept_and_ignore_conflicts
+              - delete
+              - ignore
+              - accept_and_replace
+              - refresh
+              - send_appointment
+              - accept_party_crasher
+              - update
+              - declinecounter
+              - create
+        annotations:
+          type: array
+          description: Annotations to be displayed to the user.
+          items:
+            type: object
+            title: Annotations
+            description: An array of annotations.
+            properties:
+               message:
+                  type: string
+                  description: A string describing the current situation
+               event:
+                  type: array
+                  description: Additional events, set e.g. if an new exception is created but master can't be found.
+                  items:
+                      $ref: ../chronos/EventData.yaml
+        changes:
+          type: array
+          title: Changes
+          description: An array of changes.
+          items:
+            $ref: '#/components/schemas/AnalysisChange'

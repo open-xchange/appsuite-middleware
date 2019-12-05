@@ -63,7 +63,7 @@ public class DBPoolProvider implements DBProvider {
     public Connection getReadConnection(final Context ctx) throws OXException {
         try {
             return DBPool.pickup(ctx);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             throw e;
         }

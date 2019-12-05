@@ -148,7 +148,7 @@ public final class SystemConfig extends AbstractConfig implements Initialization
         try {
             stop();
             start();
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.warn("Could not reload system configuration.", e);
         }
     }

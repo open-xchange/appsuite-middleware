@@ -1,0 +1,24 @@
+/fileservice?action=get:
+  get:
+    operationId: getFileService
+    tags:
+      - Filestorage
+    summary: Gets a file storage service.
+    parameters:
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - in: query
+        name: id
+        description: The ID of the file storage service to load.
+        required: true
+        schema:
+          type: string
+    responses:
+      '200':
+        description: >-
+          A JSON object containing the data of the file storage service. In case
+          of errors the responsible fields in the response are filled (see
+          [Error handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FileServiceResponse'

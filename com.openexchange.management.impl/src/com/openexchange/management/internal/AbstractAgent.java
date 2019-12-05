@@ -82,6 +82,7 @@ import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXPrincipal;
 import javax.management.remote.JMXServiceURL;
 import javax.security.auth.Subject;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementExceptionCode;
 import com.openexchange.management.services.ManagementServiceRegistry;
@@ -164,7 +165,9 @@ public abstract class AbstractAgent {
              */
             final String username = creds[0];
             final String password = creds[1];
-            String hashAlgorithm = creds.length > 2 && creds[2] != null ? creds[2] : "SHA";
+
+            ConfigurationService configurationService = ManagementServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
+            String hashAlgorithm = configurationService.getProperty("JMXPasswordHashAlgorithm", "SHA");
 
             PasswordMechRegistry passwordMechRegistry = ManagementServiceRegistry.getServiceRegistry().getService(PasswordMechRegistry.class);
             PasswordMech passwordMech = passwordMechRegistry.get(hashAlgorithm);
@@ -228,7 +231,7 @@ public abstract class AbstractAgent {
     public void registerMBean(final String name, final Object mbean) throws OXException {
         try {
             registerMBean(new ObjectName(name), mbean);
-        } catch (final MalformedObjectNameException e) {
+        } catch (MalformedObjectNameException e) {
             throw ManagementExceptionCode.MALFORMED_OBJECT_NAME.create(e, name);
         }
     }
@@ -242,7 +245,7 @@ public abstract class AbstractAgent {
     public void unregisterMBean(final String name) throws OXException {
         try {
             unregisterMBean(new ObjectName(name));
-        } catch (final MalformedObjectNameException e) {
+        } catch (MalformedObjectNameException e) {
             throw ManagementExceptionCode.MALFORMED_OBJECT_NAME.create(e, name);
         }
     }
@@ -261,11 +264,11 @@ public abstract class AbstractAgent {
         }
         try {
             mbs.registerMBean(mbean, objectName);
-        } catch (final InstanceAlreadyExistsException e) {
+        } catch (InstanceAlreadyExistsException e) {
             throw ManagementExceptionCode.ALREADY_EXISTS.create(e, mbean.getClass().getName());
-        } catch (final MBeanRegistrationException e) {
+        } catch (MBeanRegistrationException e) {
             throw ManagementExceptionCode.MBEAN_REGISTRATION.create(e, mbean.getClass().getName());
-        } catch (final NotCompliantMBeanException e) {
+        } catch (NotCompliantMBeanException e) {
             throw ManagementExceptionCode.NOT_COMPLIANT_MBEAN.create(e, mbean.getClass().getName());
         }
         LOG.debug("{} registered", objectName.getCanonicalName());
@@ -281,9 +284,9 @@ public abstract class AbstractAgent {
         if (mbs.isRegistered(objectName)) {
             try {
                 mbs.unregisterMBean(objectName);
-            } catch (final InstanceNotFoundException e) {
+            } catch (InstanceNotFoundException e) {
                 throw ManagementExceptionCode.NOT_FOUND.create(e, objectName);
-            } catch (final MBeanRegistrationException e) {
+            } catch (MBeanRegistrationException e) {
                 throw ManagementExceptionCode.MBEAN_REGISTRATION.create(e, objectName);
             }
             LOG.debug("{} unregistered", objectName.getCanonicalName());
@@ -313,13 +316,13 @@ public abstract class AbstractAgent {
                 gm = gaugeMonitorRef.get();
                 try {
                     mbs.registerMBean(gm, new ObjectName("Services:type=GaugeMonitor"));
-                } catch (final InstanceAlreadyExistsException e) {
+                } catch (InstanceAlreadyExistsException e) {
                     throw ManagementExceptionCode.ALREADY_EXISTS.create(e, gm.getClass().getName());
-                } catch (final MBeanRegistrationException e) {
+                } catch (MBeanRegistrationException e) {
                     throw ManagementExceptionCode.MBEAN_REGISTRATION.create(e, gm.getClass().getName());
-                } catch (final NotCompliantMBeanException e) {
+                } catch (NotCompliantMBeanException e) {
                     throw ManagementExceptionCode.NOT_COMPLIANT_MBEAN.create(e, gm.getClass().getName());
-                } catch (final MalformedObjectNameException e) {
+                } catch (MalformedObjectNameException e) {
                     throw ManagementExceptionCode.MALFORMED_OBJECT_NAME.create(e, "Services:type=GaugeMonitor");
                 }
                 gm.start();
@@ -359,9 +362,9 @@ public abstract class AbstractAgent {
             Registry registry = LocateRegistry.createRegistry(port, null, rmiSocketFactory);
             registries.put(Integer.valueOf(port), registry);
             LOG.info("RMI registry created on port {} and bind address {}", I(port), bindAddr);
-        } catch (final UnknownHostException e) {
+        } catch (UnknownHostException e) {
             throw ManagementExceptionCode.UNKNOWN_HOST_ERROR.create(e, e.getMessage());
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             throw ManagementExceptionCode.REMOTE_ERROR.create(e, e.getMessage());
         }
     }
@@ -387,14 +390,13 @@ public abstract class AbstractAgent {
      * @param urlstr The JMX URL as a string
      * @param jmxLogin The JMX login or <code>null</code> to use no authentication for connecting to specified JMX URL
      * @param jmxPassword The JMX password (only needed if previous parameter is not <code>null</code>)
-     * @param jmxPasswordHashAlgorithm The JMX password hash algorithm (only needed if previous parameter is not <code>null</code>)
      * @return The {@link JMXServiceURL} to which the connector is bound
      * @throws OXException If connector cannot be added
      */
-    protected final JMXServiceURL addConnectorServer(final String urlstr, final String jmxLogin, final String jmxPassword, String jmxPasswordHashAlgorithm) throws OXException {
+    protected final JMXServiceURL addConnectorServer(final String urlstr, final String jmxLogin, final String jmxPassword) throws OXException {
         try {
-            return addConnectorServer(new JMXServiceURL(urlstr), jmxLogin, jmxPassword, jmxPasswordHashAlgorithm);
-        } catch (final MalformedURLException e) {
+            return addConnectorServer(new JMXServiceURL(urlstr), jmxLogin, jmxPassword);
+        } catch (MalformedURLException e) {
             throw ManagementExceptionCode.MALFORMED_URL.create(e, urlstr);
         }
     }
@@ -405,11 +407,10 @@ public abstract class AbstractAgent {
      * @param url The JMX URL
      * @param jmxLogin The JMX login or <code>null</code> to use no authentication for connecting to specified JMX URL
      * @param jmxPassword The JMX password (only needed if previous parameter is not <code>null</code>)
-     * @param jmxPasswordHashAlgorithm The JMX password hash algorithm (only needed if jmxLogin is not <code>null</code>)
      * @return The {@link JMXServiceURL} to which the connector is bound
      * @throws OXException If connector cannot be added
      */
-    protected final JMXServiceURL addConnectorServer(final JMXServiceURL url, final String jmxLogin, final String jmxPassword, String jmxPasswordHashAlgorithm) throws OXException {
+    protected final JMXServiceURL addConnectorServer(final JMXServiceURL url, final String jmxLogin, final String jmxPassword) throws OXException {
         if (connectors.containsKey(url)) {
             throw ManagementExceptionCode.JMX_URL_ALREADY_BOUND.create(url);
         }
@@ -423,14 +424,14 @@ public abstract class AbstractAgent {
                 environment = null;
             } else {
                 environment = new HashMap<String, Object>(1);
-                environment.put(JMXConnectorServer.AUTHENTICATOR, new AbstractAgentJMXAuthenticator(new String[] { jmxLogin, jmxPassword, jmxPasswordHashAlgorithm }));
+                environment.put(JMXConnectorServer.AUTHENTICATOR, new AbstractAgentJMXAuthenticator(new String[] { jmxLogin, jmxPassword }));
             }
             final JMXConnectorServer cs = JMXConnectorServerFactory.newJMXConnectorServer(url, environment, mbs);
             cs.start();
             connectors.put(url, cs);
             LOG.info("JMX connector server on {} started", url);
             return url;
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw ManagementExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }
@@ -448,7 +449,7 @@ public abstract class AbstractAgent {
         try {
             connector.stop();
             LOG.info("JMX connector server on {} stopped", url);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             LOG.error("JMX connector server on {} could not be stopped", url, e);
             return;
         }
@@ -491,7 +492,7 @@ public abstract class AbstractAgent {
                 serverSocket = new ServerSocket(0);
                 freePort = serverSocket.getLocalPort();
                 portFound = true;
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 /*
                  * Squelch the exception
                  */
@@ -507,7 +508,7 @@ public abstract class AbstractAgent {
                             throw new Exception("local exception ...");
                         }
                     }
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     /*
                      * Squelch the exception
                      */

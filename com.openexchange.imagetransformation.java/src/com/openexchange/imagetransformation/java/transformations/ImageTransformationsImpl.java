@@ -508,7 +508,7 @@ public class ImageTransformationsImpl implements ImageTransformations {
     private BufferedImage read(InputStream inputStream, String formatName, ImageTransformationSignaler signaler) throws IOException {
         try {
             return imageIoRead(inputStream, signaler);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             LOG.debug("error reading image from stream for {}", formatName, e);
             return null;
         } finally {

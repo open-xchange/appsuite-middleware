@@ -1,0 +1,41 @@
+/chronos/alarm?action=snooze:
+  get:
+    operationId: snoozeAlarm
+    tags:
+      - Chronos
+    summary: Snoozes an alarm by the given duration.
+    parameters:
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - $ref: '#/components/parameters/QueryParamChronosID'
+      - $ref: '#/components/parameters/QueryParamChronosFolder'
+      - $ref: '#/components/parameters/QueryParamChronosExtendedEntities'
+      - $ref: '#/components/parameters/QueryParamChronosPushToken'
+      - $ref: '#/components/parameters/QueryParamChronosFields'
+      - in: query
+        name: alarmId
+        description: |
+          The id of the alarm which shall be snoozed.
+        required: true
+        schema:
+          type: integer
+      - in: query
+        name: snoozeTime
+        description: >
+          The duration in milliseconds the alarm should be snoozed by. E.g.
+          300000 for 5 minutes.
+        required: true
+        schema:
+          type: integer
+          format: int64
+    responses:
+      '200':
+        description: >
+          A JSON object containing containing the result of the snooze
+          operation. In case of errors the
+
+          responsible fields in the response are filled (see [Error
+          handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChronosCalendarResultResponse'

@@ -79,31 +79,16 @@ public class ProblemJSONWriter implements MessageBodyWriter<JSONValue> {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.ws.rs.ext.MessageBodyWriter#isWriteable(java.lang.Class, java.lang.reflect.Type, java.lang.annotation.Annotation[], javax.ws.rs.core.MediaType)
-     */
     @Override
     public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
         return JSONParserUtil.isApplicable(type, mediaType, CommonMediaType.APPLICATION_PROBLEM_JSON_TYPE);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.ws.rs.ext.MessageBodyWriter#getSize(java.lang.Object, java.lang.Class, java.lang.reflect.Type, java.lang.annotation.Annotation[], javax.ws.rs.core.MediaType)
-     */
     @Override
     public long getSize(JSONValue t, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
         return -1;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.ws.rs.ext.MessageBodyWriter#writeTo(java.lang.Object, java.lang.Class, java.lang.reflect.Type, java.lang.annotation.Annotation[], javax.ws.rs.core.MediaType, javax.ws.rs.core.MultivaluedMap, java.io.OutputStream)
-     */
     @Override
     public void writeTo(JSONValue t, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType, MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream) throws IOException, WebApplicationException {
         JSONParserUtil.writeTo(t, CommonMediaType.APPLICATION_PROBLEM_JSON, httpHeaders, entityStream);

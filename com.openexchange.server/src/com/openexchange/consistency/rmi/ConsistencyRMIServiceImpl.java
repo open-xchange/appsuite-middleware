@@ -82,11 +82,6 @@ public class ConsistencyRMIServiceImpl implements ConsistencyRMIService {
         this.services = services;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.consistency.rmi.ConsistencyCheckRMIService#checkOrRepairConfigDB(boolean)
-     */
     @Override
     public List<String> checkOrRepairConfigDB(boolean repair) throws RemoteException {
         return handle((service) -> {
@@ -95,11 +90,6 @@ public class ConsistencyRMIServiceImpl implements ConsistencyRMIService {
         });
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.consistency.rmi.ConsistencyCheckRMIService#listMissingFilesInContext(int)
-     */
     @Override
     public List<String> listMissingFilesInContext(int contextId) throws RemoteException {
         return handle((service) -> {
@@ -108,11 +98,6 @@ public class ConsistencyRMIServiceImpl implements ConsistencyRMIService {
         });
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.consistency.rmi.ConsistencyCheckRMIService#listMissingFilesInFilestore(int)
-     */
     @Override
     public Map<ConsistencyEntity, List<String>> listMissingFilesInFilestore(int filestoreId) throws RemoteException {
         return handle((service) -> {
@@ -121,11 +106,6 @@ public class ConsistencyRMIServiceImpl implements ConsistencyRMIService {
         });
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.consistency.rmi.ConsistencyCheckRMIService#listMissingFilesInDatabase(int)
-     */
     @Override
     public Map<ConsistencyEntity, List<String>> listMissingFilesInDatabase(int databaseId) throws RemoteException {
         return handle((service) -> {
@@ -134,11 +114,6 @@ public class ConsistencyRMIServiceImpl implements ConsistencyRMIService {
         });
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.consistency.rmi.ConsistencyCheckRMIService#listAllMissingFiles()
-     */
     @Override
     public Map<ConsistencyEntity, List<String>> listAllMissingFiles() throws RemoteException {
         return handle((service) -> {
@@ -147,11 +122,6 @@ public class ConsistencyRMIServiceImpl implements ConsistencyRMIService {
         });
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.consistency.rmi.ConsistencyCheckRMIService#listUnassignedFilesInContext(int)
-     */
     @Override
     public List<String> listUnassignedFilesInContext(int contextId) throws RemoteException {
         return handle((service) -> {
@@ -160,11 +130,6 @@ public class ConsistencyRMIServiceImpl implements ConsistencyRMIService {
         });
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.consistency.rmi.ConsistencyCheckRMIService#listUnassignedFilesInFilestore(int)
-     */
     @Override
     public Map<ConsistencyEntity, List<String>> listUnassignedFilesInFilestore(int filestoreId) throws RemoteException {
         return handle((service) -> {
@@ -173,11 +138,6 @@ public class ConsistencyRMIServiceImpl implements ConsistencyRMIService {
         });
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.consistency.rmi.ConsistencyCheckRMIService#listUnassignedFilesInDatabase(int)
-     */
     @Override
     public Map<ConsistencyEntity, List<String>> listUnassignedFilesInDatabase(int databaseId) throws RemoteException {
         return handle((service) -> {
@@ -186,11 +146,6 @@ public class ConsistencyRMIServiceImpl implements ConsistencyRMIService {
         });
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.consistency.rmi.ConsistencyCheckRMIService#listAllUnassignedFiles()
-     */
     @Override
     public Map<ConsistencyEntity, List<String>> listAllUnassignedFiles() throws RemoteException {
         return handle((service) -> {
@@ -199,11 +154,6 @@ public class ConsistencyRMIServiceImpl implements ConsistencyRMIService {
         });
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.consistency.rmi.ConsistencyRMIService#repairFilesInContext(int, java.lang.String, java.lang.String)
-     */
     @Override
     public void repairFilesInContext(int contextId, String repairPolicy, String repairAction) throws RemoteException {
         handle((service) -> {
@@ -213,11 +163,6 @@ public class ConsistencyRMIServiceImpl implements ConsistencyRMIService {
         });
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.consistency.rmi.ConsistencyRMIService#repairFilesInFilestore(int, java.lang.String, java.lang.String)
-     */
     @Override
     public void repairFilesInFilestore(int filestoreId, String repairPolicy, String repairAction) throws RemoteException {
         handle((service) -> {
@@ -227,11 +172,6 @@ public class ConsistencyRMIServiceImpl implements ConsistencyRMIService {
         });
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.consistency.rmi.ConsistencyRMIService#repairFilesInDatabase(int, java.lang.String, java.lang.String)
-     */
     @Override
     public void repairFilesInDatabase(int databaseId, String repairPolicy, String repairAction) throws RemoteException {
         handle((service) -> {
@@ -241,11 +181,6 @@ public class ConsistencyRMIServiceImpl implements ConsistencyRMIService {
         });
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.consistency.rmi.ConsistencyRMIService#repairAllFiles(java.lang.String, java.lang.String)
-     */
     @Override
     public void repairAllFiles(String repairPolicy, String repairAction) throws RemoteException {
         handle((service) -> {
@@ -294,7 +229,7 @@ public class ConsistencyRMIServiceImpl implements ConsistencyRMIService {
     private <T> T handle(ConsistencyPerformer<T> performer) throws RemoteException {
         try {
             return performer.perform(services.getServiceSafe(ConsistencyService.class));
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             final Exception wrapMe = new Exception(e.getMessage());
             throw new RemoteException(e.getMessage(), wrapMe);

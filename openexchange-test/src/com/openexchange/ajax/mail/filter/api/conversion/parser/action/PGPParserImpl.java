@@ -72,11 +72,6 @@ public class PGPParserImpl implements ActionParser {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.mail.filter.api.conversion.parser.JSONParser#parse(org.json.JSONObject)
-     */
     @Override
     public Action<PGPActionArgument> parse(JSONObject jsonObject) throws JSONException {
         JSONArray keys = jsonObject.optJSONArray(PGPActionArgument.keys.name());

@@ -95,21 +95,11 @@ public class AttachSnippetRequest extends AbstractSnippetRequest<AttachSnippetRe
         this(body, sid, true);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
-     */
     @Override
     public Method getMethod() {
         return Method.POST;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
-     */
     @Override
     public Parameter[] getParameters() throws IOException, JSONException {
         List<Parameter> params = new LinkedList<Parameter>();
@@ -120,21 +110,11 @@ public class AttachSnippetRequest extends AbstractSnippetRequest<AttachSnippetRe
         return params.toArray(new Parameter[params.size()]);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
-     */
     @Override
     public AbstractAJAXParser<? extends AttachSnippetResponse> getParser() {
         return new AttachSnippetParser(failOnError);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
-     */
     @Override
     public Object getBody() throws IOException, JSONException {
         return null;

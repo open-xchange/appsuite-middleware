@@ -132,11 +132,6 @@ public class DropboxFolder extends DefaultFileStorageFolder implements TypeAware
         b_rootFolder = true;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.TypeAware#getType()
-     */
     @Override
     public FileStorageFolderType getType() {
         return type;
@@ -153,11 +148,6 @@ public class DropboxFolder extends DefaultFileStorageFolder implements TypeAware
         return this;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#toString()
-     */
     @Override
     public String toString() {
         return id == null ? super.toString() : id;

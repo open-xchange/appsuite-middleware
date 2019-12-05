@@ -124,7 +124,7 @@ public final class GmailSendProperties extends AbstractProtocolProperties implem
                 logBuilder.append("    Gmail Send Timeout: {}{}");
                 args.add(I(timeout));
                 args.add(lineSeparator);
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 timeout = 5000;
                 logBuilder.append("    Gmail Send Timeout: Invalid value \"{}\". Setting to fallback {}{}");
                 args.add(timeoutStr);
@@ -141,7 +141,7 @@ public final class GmailSendProperties extends AbstractProtocolProperties implem
                 logBuilder.append("    Gmail Send Connection Timeout: {}{}");
                 args.add(I(connectionTimeout));
                 args.add(lineSeparator);
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 connectionTimeout = 3000;
                 logBuilder.append("    Gmail Send Connection Timeout: Invalid value \"{}\". Setting to fallback {}{}");
                 args.add(conTimeoutStr);

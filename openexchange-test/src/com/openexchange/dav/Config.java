@@ -53,6 +53,7 @@ import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 
 /**
  * {@link Config}
@@ -85,5 +86,13 @@ public final class Config {
             throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(Property.PROTOCOL.getPropertyName());
         }
         return hostname;
+    }
+
+    public static String getPathPrefix() {
+        String pathPrefix = AJAXConfig.getProperty(Property.PATH_PREFIX);
+        if (Strings.isEmpty(pathPrefix)) {
+            return "";
+        }
+        return pathPrefix;
     }
 }

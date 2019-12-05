@@ -87,7 +87,7 @@ public class QuartzActivator extends HousekeepingActivator {
             quartzServiceImpl = new QuartzServiceImpl(getService(ConfigurationService.class));
             quartzServiceRegistration = context.registerService(QuartzService.class, quartzServiceImpl, null);
             log.info("Bundle successfully started: org.quartz");
-        } catch (final Exception e) {
+        } catch (Exception e) {
             log.error("Failed starting bundle: org.quartz", e);
             throw e;
         }
@@ -108,7 +108,7 @@ public class QuartzActivator extends HousekeepingActivator {
                 quartzServiceImpl.shutdown();
             }
             log.info("Bundle successfully stopped: org.quartz");
-        } catch (final Exception e) {
+        } catch (Exception e) {
             log.error("Failed stopping bundle: org.quartz", e);
             throw e;
         }

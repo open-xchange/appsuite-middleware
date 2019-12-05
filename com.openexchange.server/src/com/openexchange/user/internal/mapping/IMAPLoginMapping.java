@@ -49,9 +49,9 @@
 
 package com.openexchange.user.internal.mapping;
 
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.groupware.tools.mappings.database.VarCharMapping;
+import com.openexchange.user.User;
 
 /**
  * {@link IMAPLoginMapping}

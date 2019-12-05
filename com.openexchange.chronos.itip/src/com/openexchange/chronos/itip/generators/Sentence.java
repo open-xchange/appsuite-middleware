@@ -59,7 +59,6 @@ import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.compat.ShownAsTransparency;
 import com.openexchange.chronos.itip.ContextSensitiveMessages;
-import com.openexchange.chronos.itip.generators.changes.PassthroughWrapper;
 import com.openexchange.i18n.tools.StringHelper;
 
 /**

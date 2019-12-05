@@ -4,30 +4,48 @@
     tags:
       - Login
     summary: Accesses a session that was previously created with the token login.
-    description: |
-      This request allows clients to access a session created with the `/login?action=tokenLogin` request.
-      When accessing the session its life time is extended equally to every other session.
-    parameters:
-      - in: formData
-        name: serverToken
-        type: string
-        description: The login name.
-        required: true
-      - in: formData
-        name: clientToken
-        type: string
-        description: The password (MUST be placed in the request body, otherwise the login request will be denied).
-        required: true
-      - in: formData
-        name: client
-        type: string
-        description: Identifier of the client using the HTTP/JSON interface. This is for statistic evaluations what clients are used with Open-Xchange.
-        required: true
+    description: >
+      This request allows clients to access a session created with the
+      `/login?action=tokenLogin` request.
+
+      When accessing the session its life time is extended equally to every
+      other session.
     responses:
-      200:
-        description: |
-          A JSON object conform to the normal response body containing the session identifier, the login, the identifier
-          and the locale of the user.  In case of errors the responsible fields in the response are filled
+      '200':
+        description: >
+          A JSON object conform to the normal response body containing the
+          session identifier, the login, the identifier
+
+          and the locale of the user.  In case of errors the responsible fields
+          in the response are filled
+
           (see [Error handling](#error-handling)).
-        schema:
-          $ref: "#/definitions/TokensResponse"
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokensResponse'
+    requestBody:
+      content:
+        application/x-www-form-urlencoded:
+          schema:
+            type: object
+            title: accessSessionBody
+            properties:
+              serverToken:
+                description: The login name.
+                type: string
+              clientToken:
+                description: >-
+                  The password (MUST be placed in the request body, otherwise
+                  the login request will be denied).
+                type: string
+              client:
+                description: >-
+                  Identifier of the client using the HTTP/JSON interface. This
+                  is for statistic evaluations what clients are used with
+                  Open-Xchange.
+                type: string
+            required:
+              - serverToken
+              - clientToken
+              - client

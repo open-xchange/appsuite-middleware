@@ -73,21 +73,11 @@ public class MicrosoftGraphRESTResponseParser extends AbstractRESTResponseParser
         responseBodyParsers.put(RESTMimeType.IMAGE, new ImageRESTResponseBodyParser());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.rest.client.AbstractRESTResponseParser#getRemoveServiceName()
-     */
     @Override
     protected String getRemoveServiceName() {
         return REMOTE_SERVICE;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.rest.client.v2.parser.AbstractRESTResponseParser#assertStatusCode(org.apache.http.HttpResponse)
-     */
     @Override
     protected int assertStatusCode(HttpResponse httpResponse) throws OXException {
         // No assertion of the status code, we will check the response body later

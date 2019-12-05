@@ -58,19 +58,30 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.Version;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.ConfigLoader;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.config.MapIndexConfig;
+import com.hazelcast.config.MemcacheProtocolConfig;
 import com.hazelcast.config.MultiMapConfig;
 import com.hazelcast.config.QueueConfig;
+import com.hazelcast.config.RestApiConfig;
 import com.hazelcast.config.SSLConfig;
 import com.hazelcast.config.SemaphoreConfig;
 import com.hazelcast.config.SymmetricEncryptionConfig;
+import com.hazelcast.config.TcpIpConfig;
 import com.hazelcast.config.TopicConfig;
+import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.nio.serialization.ClassDefinition;
 import com.hazelcast.spi.properties.GroupProperty;
 import com.openexchange.config.ConfigurationService;
@@ -78,9 +89,17 @@ import com.openexchange.config.WildcardNamePropertyFilter;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
+import com.openexchange.hazelcast.configuration.KnownNetworkJoin;
+import com.openexchange.hazelcast.configuration.osgi.Services;
+import com.openexchange.hazelcast.dns.HazelcastDnsResolver;
+import com.openexchange.hazelcast.dns.HazelcastDnsResolverConfig;
+import com.openexchange.hazelcast.dns.HazelcastDnsService;
 import com.openexchange.hazelcast.serialization.DynamicPortableFactory;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.timer.ScheduledTimerTask;
+import com.openexchange.timer.TimerService;
 import com.openexchange.tools.strings.StringParser;
 import com.openexchange.tools.strings.TimeSpanParser;
 
@@ -92,13 +111,8 @@ import com.openexchange.tools.strings.TimeSpanParser;
  */
 public class HazelcastConfigurationServiceImpl implements HazelcastConfigurationService {
 
-    private static final String NETWORK_JOIN_EMPTY = "empty";
-    private static final String NETWORK_JOIN_STATIC = "static";
-    private static final String NETWORK_JOIN_MULTICAST = "multicast";
-    private static final String NETWORK_JOIN_AWS = "aws";
-
     /** Named logger instance */
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HazelcastConfigurationServiceImpl.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HazelcastConfigurationServiceImpl.class);
 
     /** Name of the subdirectory containing the hazelcast data structure properties */
     private static final String DIRECTORY_NAME = "hazelcast";
@@ -107,6 +121,9 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
 
     /** The Hazelcast configuration instance */
     private volatile Config config;
+
+    /** The timer task for DNS resolver */
+    private volatile ScheduledTimerTask dnsResolverTimerTask;
 
     /**
      * Initializes a new {@link HazelcastConfigurationServiceImpl}.
@@ -133,7 +150,7 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
             synchronized (this) {
                 config = this.config;
                 if (null == config) {
-                    config = loadConfig();
+                    config = loadConfig(this);
                     this.config = config;
                 }
             }
@@ -167,6 +184,99 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
         return config;
     }
 
+    /**
+     * (Re-)Initializes the DNS look-up to feed TCP/IP network configuration with.
+     *
+     * @param config The active Hazelcast configuration
+     * @param configService The configuration service providing up-to-date properties
+     * @throws OXException If initialization fails
+     */
+    public void reinitializeDnsLookUp(Config config, ConfigurationService configService) throws OXException {
+        if (null == config) {
+            return;
+        }
+
+        // Acquire needed services
+        HazelcastDnsService dnsService = Services.optService(HazelcastDnsService.class);
+        if (dnsService == null) {
+            throw ServiceExceptionCode.absentService(HazelcastDnsService.class);
+        }
+        TimerService timerService = Services.optService(TimerService.class);
+        if (timerService == null) {
+            throw ServiceExceptionCode.absentService(TimerService.class);
+        }
+
+        // Stop possibly running timer task
+        if (stopDnsResolverTimerTask()) {
+            timerService.purge();
+        }
+
+        // Disable other network join alternatives
+        config.getNetworkConfig().getJoin().getAwsConfig().setEnabled(false);
+        config.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(false);
+
+        // Obtain config options
+        Collection<String> domainNames;
+        {
+
+            String[] domNames = Strings.splitByComma(configService.getProperty("com.openexchange.hazelcast.network.join.dns.domainNames"));
+            if (domNames == null || domNames.length == 0) {
+                throw ConfigurationExceptionCodes.PROPERTY_MISSING.create("com.openexchange.hazelcast.network.join.dns.domainNames");
+            }
+            domainNames = new ArrayList<>(domNames.length);
+            for (String domainName : domNames) {
+                if (Strings.isNotEmpty(domainName)) {
+                    domainNames.add(domainName);
+                }
+            }
+            if (domainNames.isEmpty()) {
+                throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("com.openexchange.hazelcast.network.join.dns.domainNames");
+            }
+        }
+        String resolverHost = configService.getProperty("com.openexchange.hazelcast.network.join.dns.resolverHost");
+        int resolverPort = configService.getIntProperty("com.openexchange.hazelcast.network.join.dns.resolverPort", -1);
+        long refreshMillis = configService.getIntProperty("com.openexchange.hazelcast.network.join.dns.refreshMillis", 60000);
+
+        // Initialize DNS resolver
+        HazelcastDnsResolver dnsResolver = dnsService.createResolver(HazelcastDnsResolverConfig.builder().withResolverHost(resolverHost).withResolverPort(resolverPort).build());
+
+        // Query host addresses for domain names
+        List<String> hostAddresses = dnsResolver.resolveByName(domainNames);
+
+        // Apply addresses to TCP/IP network configuration
+        TcpIpConfig tcpIpConfig = config.getNetworkConfig().getJoin().getTcpIpConfig();
+        tcpIpConfig.setEnabled(true);
+        tcpIpConfig.setConnectionTimeoutSeconds(configService.getIntProperty("com.openexchange.hazelcast.network.join.static.connectionTimeout", 10));
+        if (!hostAddresses.isEmpty()) {
+            for (String hostAddress : hostAddresses) {
+                if (Strings.isNotEmpty(hostAddress)) {
+                    tcpIpConfig.addMember(hostAddress);
+                }
+            }
+        }
+
+        // Initialize timer task
+        Runnable task = new HazelcastApplyResolvedMembersTask(domainNames, dnsResolver, new LinkedHashSet<>(hostAddresses), config);
+        dnsResolverTimerTask = timerService.scheduleAtFixedRate(task, refreshMillis, refreshMillis);
+    }
+
+    /**
+     * Performs shut-down operations.
+     */
+    public void shutDown() {
+        stopDnsResolverTimerTask();
+    }
+
+    private boolean stopDnsResolverTimerTask() {
+        ScheduledTimerTask dnsResolverTimerTask = this.dnsResolverTimerTask;
+        if (dnsResolverTimerTask == null) {
+            return false;
+        }
+        this.dnsResolverTimerTask = null;
+        dnsResolverTimerTask.cancel(true);
+        return true;
+    }
+
     // -----------------------------------------------------------------------------------------------------------------------------------
 
     /**
@@ -174,7 +284,7 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
      *
      * @return The config
      */
-    private static Config loadConfig() throws OXException {
+    private static Config loadConfig(HazelcastConfigurationServiceImpl hazelcastConfig) throws OXException {
         /*
          * Load or create default config
          */
@@ -193,80 +303,95 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
         if (Strings.isNotEmpty(licenseKey)) {
             config.setLicenseKey(licenseKey);
         }
-        String join = configService.getProperty("com.openexchange.hazelcast.network.join", NETWORK_JOIN_EMPTY);
+        KnownNetworkJoin join;
+        {
+            String sJoin = configService.getProperty("com.openexchange.hazelcast.network.join", KnownNetworkJoin.EMPTY.getIdentifier()).trim();
+            config.setProperty("com.openexchange.hazelcast.network.join", sJoin);
+            join = KnownNetworkJoin.networkJoinFor(sJoin);
+            if (join == null) {
+                throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("com.openexchange.hazelcast.network.join");
+            }
+        }
         String groupName = configService.getProperty("com.openexchange.hazelcast.group.name");
         if (Strings.isNotEmpty(groupName)) {
+            Bundle bundle = FrameworkUtil.getBundle(HazelcastInstance.class);
+            if (null == bundle) {
+                LOG.warn("Bundle for {} not found, unable to append version to group name.", HazelcastInstance.class);
+            } else {
+                groupName = buildGroupName(groupName, bundle.getVersion(), null != config.getLicenseKey());
+            }
             config.getGroupConfig().setName(groupName);
-        } else if (false == NETWORK_JOIN_EMPTY.equalsIgnoreCase(join)) {
+        } else if (join != KnownNetworkJoin.EMPTY) {
             throw ConfigurationExceptionCodes.PROPERTY_MISSING.create("com.openexchange.hazelcast.group.name");
         }
-        String groupPassword = configService.getProperty("com.openexchange.hazelcast.group.password");
-        if (Strings.isNotEmpty(groupPassword)) {
-            if ("wtV6$VQk8#+3ds!a".equalsIgnoreCase(groupPassword)) {
-                LOG.warn("The value 'wtV6$VQk8#+3ds!a' for 'com.openexchange.hazelcast.group.password' has not been changed from its "
-                    + "default. Please do so to restrict access to your cluster.");
-            }
-            config.getGroupConfig().setPassword(groupPassword);
+        if (Strings.isNotEmpty(configService.getProperty("com.openexchange.hazelcast.group.password"))) {
+            LOG.info("The configured value for 'com.openexchange.hazelcast.group.password' is no longer used and should be removed.");
         }
         config.setLiteMember(configService.getBoolProperty("com.openexchange.hazelcast.liteMember", config.isLiteMember()));
-        /*
-         * Network Join
-         */
-        if (NETWORK_JOIN_EMPTY.equalsIgnoreCase(join)) {
-            config.getNetworkConfig().getJoin().getAwsConfig().setEnabled(false);
-            config.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(false);
-            config.getNetworkConfig().getJoin().getTcpIpConfig().setEnabled(false);
-        } else if (NETWORK_JOIN_STATIC.equalsIgnoreCase(join)) {
-            config.getNetworkConfig().getJoin().getAwsConfig().setEnabled(false);
-            config.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(false);
-            config.getNetworkConfig().getJoin().getTcpIpConfig().setEnabled(true);
-            config.getNetworkConfig().getJoin().getTcpIpConfig().setConnectionTimeoutSeconds(
-                configService.getIntProperty("com.openexchange.hazelcast.network.join.static.connectionTimeout", 10));
-            String[] members = Strings.splitByComma(
-                configService.getProperty("com.openexchange.hazelcast.network.join.static.nodes"));
-            if (null != members && 0 < members.length) {
-                for (String member : members) {
-                    if (Strings.isNotEmpty(member)) {
-                        try {
-                            config.getNetworkConfig().getJoin().getTcpIpConfig().addMember(InetAddress.getByName(member).getHostAddress());
-                        } catch (UnknownHostException e) {
-                            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(
-                                e, "com.openexchange.hazelcast.network.join.static.nodes");
+        switch (join) {
+            case EMPTY:
+                config.getNetworkConfig().getJoin().getAwsConfig().setEnabled(false);
+                config.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(false);
+                config.getNetworkConfig().getJoin().getTcpIpConfig().setEnabled(false);
+                break;
+            case STATIC:
+                config.getNetworkConfig().getJoin().getAwsConfig().setEnabled(false);
+                config.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(false);
+                config.getNetworkConfig().getJoin().getTcpIpConfig().setEnabled(true);
+                config.getNetworkConfig().getJoin().getTcpIpConfig().setConnectionTimeoutSeconds(
+                    configService.getIntProperty("com.openexchange.hazelcast.network.join.static.connectionTimeout", 10));
+                String[] members = Strings.splitByComma(
+                    configService.getProperty("com.openexchange.hazelcast.network.join.static.nodes"));
+                if (null != members && 0 < members.length) {
+                    for (String member : members) {
+                        if (Strings.isNotEmpty(member)) {
+                            try {
+                                config.getNetworkConfig().getJoin().getTcpIpConfig().addMember(InetAddress.getByName(member).getHostAddress());
+                            } catch (UnknownHostException e) {
+                                throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(
+                                    e, "com.openexchange.hazelcast.network.join.static.nodes");
+                            }
                         }
                     }
                 }
-            }
-        } else if (NETWORK_JOIN_MULTICAST.equalsIgnoreCase(join)) {
-            config.getNetworkConfig().getJoin().getAwsConfig().setEnabled(false);
-            config.getNetworkConfig().getJoin().getTcpIpConfig().setEnabled(false);
-            config.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(true);
-            String group = configService.getProperty("com.openexchange.hazelcast.network.join.multicast.group", "224.2.2.3");
-            int port = configService.getIntProperty("com.openexchange.hazelcast.network.join.multicast.group", 54327);
-            config.getNetworkConfig().getJoin().getMulticastConfig().setMulticastGroup(group).setMulticastPort(port);
-        } else if (NETWORK_JOIN_AWS.equalsIgnoreCase(join)) {
-            config.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(false);
-            config.getNetworkConfig().getJoin().getTcpIpConfig().setEnabled(false);
-            config.getNetworkConfig().getJoin().getAwsConfig().setEnabled(true);
-            String accessKey = configService.getProperty("com.openexchange.hazelcast.network.join.aws.accessKey");
-            if (Strings.isEmpty(accessKey)) {
-                throw ConfigurationExceptionCodes.PROPERTY_MISSING.create("com.openexchange.hazelcast.network.join.aws.accessKey");
-            }
-            config.getNetworkConfig().getJoin().getAwsConfig().setAccessKey(accessKey);
-            String secretKey = configService.getProperty("com.openexchange.hazelcast.network.join.aws.secretKey");
-            if (Strings.isEmpty(secretKey)) {
-                throw ConfigurationExceptionCodes.PROPERTY_MISSING.create("com.openexchange.hazelcast.network.join.aws.secretKey");
-            }
-            config.getNetworkConfig().getJoin().getAwsConfig().setSecretKey(secretKey);
-            String region = configService.getProperty("com.openexchange.hazelcast.network.join.aws.region", "us-west-1");
-            config.getNetworkConfig().getJoin().getAwsConfig().setRegion(region);
-            String hostHeader = configService.getProperty("com.openexchange.hazelcast.network.join.aws.hostHeader", "ec2.amazonaws.com");
-            config.getNetworkConfig().getJoin().getAwsConfig().setHostHeader(hostHeader);
-            String tagKey = configService.getProperty("com.openexchange.hazelcast.network.join.aws.tagKey", "type");
-            config.getNetworkConfig().getJoin().getAwsConfig().setTagKey(tagKey);
-            String tagValue = configService.getProperty("com.openexchange.hazelcast.network.join.aws.tagValue", "hz-nodes");
-            config.getNetworkConfig().getJoin().getAwsConfig().setTagValue(tagValue);
-        } else {
-            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("com.openexchange.hazelcast.network.join");
+                break;
+            case MULTICAST:
+                config.getNetworkConfig().getJoin().getAwsConfig().setEnabled(false);
+                config.getNetworkConfig().getJoin().getTcpIpConfig().setEnabled(false);
+                config.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(true);
+                String group = configService.getProperty("com.openexchange.hazelcast.network.join.multicast.group", "224.2.2.3");
+                int port = configService.getIntProperty("com.openexchange.hazelcast.network.join.multicast.port", 54327);
+                config.getNetworkConfig().getJoin().getMulticastConfig().setMulticastGroup(group).setMulticastPort(port);
+                break;
+            case AWS:
+                config.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(false);
+                config.getNetworkConfig().getJoin().getTcpIpConfig().setEnabled(false);
+                config.getNetworkConfig().getJoin().getAwsConfig().setEnabled(true);
+                String accessKey = configService.getProperty("com.openexchange.hazelcast.network.join.aws.accessKey");
+                if (Strings.isEmpty(accessKey)) {
+                    throw ConfigurationExceptionCodes.PROPERTY_MISSING.create("com.openexchange.hazelcast.network.join.aws.accessKey");
+                }
+                config.getNetworkConfig().getJoin().getAwsConfig().setAccessKey(accessKey);
+                String secretKey = configService.getProperty("com.openexchange.hazelcast.network.join.aws.secretKey");
+                if (Strings.isEmpty(secretKey)) {
+                    throw ConfigurationExceptionCodes.PROPERTY_MISSING.create("com.openexchange.hazelcast.network.join.aws.secretKey");
+                }
+                config.getNetworkConfig().getJoin().getAwsConfig().setSecretKey(secretKey);
+                String region = configService.getProperty("com.openexchange.hazelcast.network.join.aws.region", "us-west-1");
+                config.getNetworkConfig().getJoin().getAwsConfig().setRegion(region);
+                String hostHeader = configService.getProperty("com.openexchange.hazelcast.network.join.aws.hostHeader", "ec2.amazonaws.com");
+                config.getNetworkConfig().getJoin().getAwsConfig().setHostHeader(hostHeader);
+                String tagKey = configService.getProperty("com.openexchange.hazelcast.network.join.aws.tagKey", "type");
+                config.getNetworkConfig().getJoin().getAwsConfig().setTagKey(tagKey);
+                String tagValue = configService.getProperty("com.openexchange.hazelcast.network.join.aws.tagValue", "hz-nodes");
+                config.getNetworkConfig().getJoin().getAwsConfig().setTagValue(tagValue);
+                break;
+            case DNS:
+                // Initialize DNS look-up
+                hazelcastConfig.reinitializeDnsLookUp(config, configService);
+                break;
+            default:
+                throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("com.openexchange.hazelcast.network.join");
         }
         String mergeFirstRunDelay = configService.getProperty("com.openexchange.hazelcast.merge.firstRunDelay", "120s");
         config.setProperty(GroupProperty.MERGE_FIRST_RUN_DELAY_SECONDS.getName(),
@@ -331,8 +456,19 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
         config.setProperty(GroupProperty.HEALTH_MONITORING_LEVEL.getName(), configService.getProperty("com.openexchange.hazelcast.healthMonitorLevel", "silent").toUpperCase());
         config.setProperty(GroupProperty.OPERATION_CALL_TIMEOUT_MILLIS.getName(), configService.getProperty("com.openexchange.hazelcast.maxOperationTimeout", "30000"));
         config.setProperty(GroupProperty.ENABLE_JMX.getName(), configService.getProperty("com.openexchange.hazelcast.jmx", "true"));
-        config.setProperty(GroupProperty.MEMCACHE_ENABLED.getName(), configService.getProperty("com.openexchange.hazelcast.memcache.enabled", "false"));
-        config.setProperty(GroupProperty.REST_ENABLED.getName(), configService.getProperty("com.openexchange.hazelcast.rest.enabled", "false"));
+        MemcacheProtocolConfig memcacheProtocolConfig = config.getNetworkConfig().getMemcacheProtocolConfig();
+        if (memcacheProtocolConfig == null) {
+            memcacheProtocolConfig = new MemcacheProtocolConfig();
+        }
+        memcacheProtocolConfig.setEnabled(configService.getBoolProperty("com.openexchange.hazelcast.memcache.enabled", false));
+        config.getNetworkConfig().setMemcacheProtocolConfig(memcacheProtocolConfig);
+
+        RestApiConfig restApiConfig = config.getNetworkConfig().getRestApiConfig();
+        if (restApiConfig == null) {
+            restApiConfig = new RestApiConfig();
+        }
+        restApiConfig.setEnabled(configService.getBoolProperty("com.openexchange.hazelcast.rest.enabled", false));
+        config.getNetworkConfig().setRestApiConfig(restApiConfig);
         /*
          * Arbitrary Hazelcast properties
          */
@@ -511,6 +647,25 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
             }
         }
         return null;
+    }
+
+    /**
+     * Constructs the effective group name to use in the cluster group configuration for Hazelcast. The full group name is constructed
+     * based on the configured group name prefix, optionally appended with a version identifier string of the underlying Hazelcast library.
+     * <p/>
+     * This needs to be done to form separate Hazelcast clusters during rolling upgrades of the nodes with incompatible Hazelcast
+     * libraries.
+     *
+     * @param groupName The configured cluster group name
+     * @param version The version of the Hazelcast library
+     * @param enterprise <code>true</code> if enterprise features are available for rolling upgrades, <code>false</code>, otherwise
+     * @return The full cluster group name
+     */
+    private static String buildGroupName(String groupName, Version version, boolean enterprise) {
+        if (enterprise) {
+            return groupName;
+        }
+        return new StringBuilder(20).append(groupName).append('-').append(version.getMajor()).append('.').append(version.getMinor()).toString();
     }
 
 }

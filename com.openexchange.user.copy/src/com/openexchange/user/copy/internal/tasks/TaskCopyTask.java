@@ -68,7 +68,6 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.tasks.ExternalParticipant;
 import com.openexchange.groupware.tasks.Folder;
@@ -79,6 +78,7 @@ import com.openexchange.groupware.tasks.StorageType;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TaskIterator;
 import com.openexchange.groupware.tasks.TaskStorage;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 import com.openexchange.user.copy.CopyUserTaskService;
 import com.openexchange.user.copy.ObjectMapping;
@@ -173,7 +173,7 @@ public class TaskCopyTask implements CopyUserTaskService {
                     }
                 }
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw UserCopyExceptionCodes.UNKNOWN_PROBLEM.create(e);
         }
 
@@ -307,7 +307,7 @@ public class TaskCopyTask implements CopyUserTaskService {
                     }
                 }
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         }
     }

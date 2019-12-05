@@ -75,7 +75,6 @@ import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.provider.DatabaseServiceDBProvider;
 import com.openexchange.exception.OXException;
-import com.openexchange.filestore.FileStorageService;
 import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.filestore.FileLocationHandler;
@@ -145,9 +144,9 @@ public class CompositionSpaceActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class, QuotaFileStorageService.class, FileStorageService.class, CapabilityService.class,
-            HtmlService.class, ConfigurationService.class, ContextService.class, UserService.class, ComposeHandlerRegistry.class,
-            ObfuscatorService.class, ConfigViewFactory.class, CryptoService.class, MailAccountStorageService.class };
+        return new Class<?>[] { DatabaseService.class, QuotaFileStorageService.class, CapabilityService.class, HtmlService.class,
+            ConfigurationService.class, ContextService.class, UserService.class, ComposeHandlerRegistry.class, ObfuscatorService.class,
+            ConfigViewFactory.class, CryptoService.class, MailAccountStorageService.class };
     }
 
     @Override
@@ -331,7 +330,9 @@ public class CompositionSpaceActivator extends HousekeepingActivator {
         ));
         registerService(DeleteListener.class, new CompositionSpaceDeleteListener(this));
 
-        registerService(Remote.class, new RemoteCompositionSpaceServiceImpl(this));
+        Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
+        serviceProperties.put("RMI_NAME", RemoteCompositionSpaceServiceImpl.RMI_NAME);
+        registerService(Remote.class, new RemoteCompositionSpaceServiceImpl(this), serviceProperties);
     }
 
     @Override

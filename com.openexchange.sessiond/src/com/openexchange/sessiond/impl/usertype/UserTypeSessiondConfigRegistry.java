@@ -57,10 +57,10 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
 import com.openexchange.session.UserAndContext;
 import com.openexchange.sessiond.osgi.Services;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 /**
@@ -135,10 +135,8 @@ public class UserTypeSessiondConfigRegistry {
                 return fallbackConfig;
             }
             User user = userService.getUser(userId, contextId);
-            if (isAnonymousGuest(user)) {
-                userType = UserType.ANONYMOUS;
-            } else if (user.isGuest()) {
-                userType = UserType.GUEST;
+            if (user.isGuest()) {
+                userType = Strings.isEmpty(user.getMail()) ? UserType.ANONYMOUS : UserType.GUEST;
             } else {
                 userType = UserType.USER;
             }
@@ -153,7 +151,13 @@ public class UserTypeSessiondConfigRegistry {
         return userConfig;
     }
 
-    private static boolean isAnonymousGuest(User user) {
+    /**
+     * Checks if specified user is an anonymous guest.
+     *
+     * @param user The user to check
+     * @return <code>true</code> if user is an anonymous guest; otherwise <code>false</code>
+     */
+    public static boolean isAnonymousGuest(User user) {
         return user.isGuest() && Strings.isEmpty(user.getMail());
     }
 }

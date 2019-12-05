@@ -1,0 +1,53 @@
+/advertisement/v1/config/package:
+  put:
+    operationId: putAdvertisementByResellerAndPackage
+    tags:
+      - Advertisement
+    summary: Sets an advertisement configuration for a package of a reseller
+    parameters:
+      - name: reseller
+        in: query
+        description: The reseller name
+        required: true
+        schema:
+          type: string
+      - name: package
+        in: query
+        description: The package name
+        required: true
+        schema:
+          type: string
+    responses:
+      '200':
+        description: The configuration result
+      '400':
+        description: 'Bad request, response contains error message.'
+      '401':
+        description: Not authorized
+    requestBody:
+      $ref: '#/components/requestBodies/putAdvertisementByNameBody'
+  delete:
+    operationId: deleteAdvertisementByResellerAndPackage
+    tags:
+      - Advertisement
+    summary: Remove the current configuration for a package of a reseller
+    parameters:
+      - name: reseller
+        in: query
+        description: The reseller name
+        required: true
+        schema:
+          type: string
+      - name: package
+        in: query
+        description: The package name
+        required: true
+        schema:
+          type: string
+    responses:
+      '200':
+        description: The configuration result
+      '400':
+        description: 'Bad request, response contains error message.'
+      '401':
+        description: Not authorized

@@ -188,7 +188,7 @@ public class RankingAwareTurboFilterList extends TurboFilter {
             try {
                 final TurboFilter tf = list.get(0);
                 return tf.decide(marker, logger, level, format, params, t);
-            } catch (final IndexOutOfBoundsException iobe) {
+            } catch (IndexOutOfBoundsException iobe) {
                 return FilterReply.NEUTRAL;
             }
         }

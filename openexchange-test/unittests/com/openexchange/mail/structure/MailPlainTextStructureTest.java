@@ -107,7 +107,7 @@ public class MailPlainTextStructureTest extends AbstractMailTest {
             final JSONObject parameterJsonObject = contentTypeJsonObject.getJSONObject("params");
             assertEquals("Unexpected charset.", "utf-8", parameterJsonObject.getString("charset").toLowerCase());
 
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }

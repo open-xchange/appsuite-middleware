@@ -81,31 +81,16 @@ public class LinearRetryPolicy implements RetryPolicy {
         this.sleepTime = sleepTime;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.policy.retry.RetryPolicy#getMaxTries()
-     */
     @Override
     public int getMaxTries() {
         return maxTries;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.policy.retry.RetryPolicy#retryCount()
-     */
     @Override
     public int retryCount() {
         return retryCount;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.policy.retry.RetryPolicy#isRetryAllowed()
-     */
     @Override
     public boolean isRetryAllowed() {
         retryCount++;

@@ -165,7 +165,7 @@ public class InMemoryCompositionSpaceStorageService implements NonCryptoComposit
                     // Leave if poisoned
                     return;
                 }
-            } catch (final Exception exc) {
+            } catch (Exception exc) {
                 LoggerHolder.LOG.error("", exc);
             }
         }

@@ -217,6 +217,20 @@ public final class OXExceptions {
         return new OXException(1, OXExceptionStrings.MESSAGE_CONFLICT).setCategory(CATEGORY_CONFLICT).setPrefix(PREFIX_GENERAL).setGeneric(Generic.CONFLICT);
     }
 
+    /**
+     * Creates a general database exception.
+     *
+     * @param cause The cause, usually the underlying SQL exception
+     * @return A general database exception
+     */
+    public static OXException database(Throwable cause) {
+        return new OXException(CODE_DEFAULT, OXExceptionStrings.SQL_ERROR_MSG, cause)
+            .setLogMessage(null != cause ? cause.getMessage() : null)
+            .setCategory(CATEGORY_ERROR)
+            .setPrefix(PREFIX_GENERAL)
+        ;
+    }
+
     // -----------------------------------------------------------------------------------------------------------------------------------
 
 }

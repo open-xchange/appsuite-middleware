@@ -96,7 +96,7 @@ public class JsonCacheCreateTableTask extends UpdateTaskAdapter {
                     stmt = con.prepareStatement(createStmts[i]);
                     stmt.executeUpdate();
                     closeSQLStuff(stmt);
-                } catch (final SQLException e) {
+                } catch (SQLException e) {
                     throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
                 }
             }

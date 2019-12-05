@@ -265,7 +265,7 @@ public final class OAuthUtil {
     private static String urlEncode(final String s) {
         try {
             return URLEncoder.encode(s, "ISO-8859-1");
-        } catch (final UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             return s;
         }
     }

@@ -95,7 +95,7 @@ public final class StringFileHolder implements IFileHolder {
             this.bytes = string.getBytes(Charsets.forName(encoding));
             contentType = "application/octet-stream";
             tasks = new LinkedList<Runnable>();
-        } catch (final UnsupportedCharsetException e) {
+        } catch (UnsupportedCharsetException e) {
             throw new IllegalStateException(e);
         }
     }

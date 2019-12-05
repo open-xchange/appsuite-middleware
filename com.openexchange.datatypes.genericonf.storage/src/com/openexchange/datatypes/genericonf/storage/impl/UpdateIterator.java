@@ -87,8 +87,8 @@ public class UpdateIterator implements MapIterator<String, Object> {
     @Override
     public void handle(String name, Object value) throws IterationBreak {
         try {
-            if(original.containsKey(name)) {
-                if(value != null) {
+            if (original.containsKey(name)) {
+                if (value != null) {
                     PreparedStatement update = updateStatements.get(value.getClass());
                     update.setObject(1, value);
                     update.setString(4, name);
@@ -97,12 +97,12 @@ public class UpdateIterator implements MapIterator<String, Object> {
                     for(PreparedStatement delete : deleteStatements) {
                         delete.setString(3, name);
                         delete.execute();
-                        if(delete.getUpdateCount() > 0) {
+                        if (delete.getUpdateCount() > 0) {
                             break;
                         }
                     }
                 }
-            } else if(value != null){
+            } else if (value != null){
                 insertIterator.handle(name, value);
             }
         } catch (SQLException x) {
@@ -145,7 +145,7 @@ public class UpdateIterator implements MapIterator<String, Object> {
 
     public void throwException() throws SQLException {
         insertIterator.throwException();
-        if(null != exception) {
+        if (null != exception) {
             throw exception;
         }
     }

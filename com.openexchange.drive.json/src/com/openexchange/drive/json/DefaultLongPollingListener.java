@@ -61,6 +61,7 @@ import com.openexchange.drive.DriveAction;
 import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.DriveVersion;
 import com.openexchange.drive.events.DriveEvent;
+import com.openexchange.drive.events.subscribe.SubscriptionMode;
 import com.openexchange.drive.json.json.JsonDriveAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
@@ -76,17 +77,20 @@ public abstract class DefaultLongPollingListener implements LongPollingListener 
 
     protected final DriveSession driveSession;
     protected final List<String> rootFolderIDs;
+    protected final SubscriptionMode mode;
 
     /**
      * Initializes a new {@link DefaultLongPollingListener}.
      *
      * @param driveSession The drive session
      * @param rootFolderIDs The root folder IDs to listen for changes in
+     * @param mode The subscription mode
      */
-    protected DefaultLongPollingListener(DriveSession driveSession, List<String> rootFolderIDs) {
+    protected DefaultLongPollingListener(DriveSession driveSession, List<String> rootFolderIDs, SubscriptionMode mode) {
         super();
         this.driveSession = driveSession;
         this.rootFolderIDs = rootFolderIDs;
+        this.mode = mode;
     }
 
     @Override
@@ -105,6 +109,11 @@ public abstract class DefaultLongPollingListener implements LongPollingListener 
         return rootFolderIDs;
     }
 
+    @Override
+    public SubscriptionMode getSubscriptionMode() {
+        return mode;
+    }
+
     /**
      * Creates an AJAX request result containing the sync actions for the client based on the supplied drive event.
      *
@@ -115,7 +124,7 @@ public abstract class DefaultLongPollingListener implements LongPollingListener 
         /*
          * create and return resulting actions if available
          */
-        List<DriveAction<? extends DriveVersion>> actions = null != event ? event.getActions(rootFolderIDs) :
+        List<DriveAction<? extends DriveVersion>> actions = null != event ? event.getActions(rootFolderIDs, SubscriptionMode.SEPARATE.equals(mode)) :
             Collections.<DriveAction<? extends DriveVersion>>emptyList();
         try {
             return new AJAXRequestResult(JsonDriveAction.serialize(actions, Locale.US), "json");

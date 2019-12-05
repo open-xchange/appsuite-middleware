@@ -181,10 +181,14 @@ public class DovecotPushRESTService {
 
     private OXException handleExecutionError(ExecutionException e) {
         Throwable cause = e.getCause();
-        if (cause instanceof RuntimeException || cause instanceof Error) {
-            return PushExceptionCodes.UNEXPECTED_ERROR.create(cause, cause.getMessage());
+        if (cause != null) {
+            if (cause instanceof RuntimeException || cause instanceof Error) {
+                return PushExceptionCodes.UNEXPECTED_ERROR.create(cause, cause.getMessage());
+            }
+            String message = cause.getMessage();
+            return PushExceptionCodes.UNEXPECTED_ERROR.create(new IllegalStateException("Not unchecked", cause), message == null ? "Not unchecked" : message);
         }
-        return PushExceptionCodes.UNEXPECTED_ERROR.create(new IllegalStateException("Not unchecked", cause), cause.getMessage());
+        return PushExceptionCodes.UNEXPECTED_ERROR.create(new IllegalStateException("Not unchecked", e), e.getMessage());
     }
 
     private void sendViaNotificationService(int userId, int contextId, long uid, String folder, JSONObject data, PushNotificationService pushNotificationService) throws OXException {

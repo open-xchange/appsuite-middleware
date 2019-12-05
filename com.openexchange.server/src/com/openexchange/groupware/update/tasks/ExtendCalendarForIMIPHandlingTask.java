@@ -101,7 +101,7 @@ public class ExtendCalendarForIMIPHandlingTask extends UpdateTaskAdapter {
 
     @Override
     public String[] getDependencies() {
-        return new String[] { "com.openexchange.groupware.update.tasks.AddAppointmentParticipantsIndexTask" };
+        return new String[0];
     }
 
     @Override
@@ -109,6 +109,9 @@ public class ExtendCalendarForIMIPHandlingTask extends UpdateTaskAdapter {
         Connection con = params.getConnection();
         int rollback = 0;
         try {
+            if (false == Databases.tablesExist(con, "prg_dates", "del_dates")) {
+                return;
+            }
             con.setAutoCommit(false);
             rollback = 1;
             innerPerform(con);

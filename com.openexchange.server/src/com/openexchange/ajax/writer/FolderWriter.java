@@ -71,7 +71,6 @@ import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
@@ -81,6 +80,7 @@ import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.user.User;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 
@@ -404,11 +404,11 @@ public final class FolderWriter extends DataWriter {
             } finally {
                 jsonwriter.endObject();
             }
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw OXFolderExceptionCode.JSON_ERROR.create(e, e.getMessage());
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
         }
     }
@@ -447,11 +447,11 @@ public final class FolderWriter extends DataWriter {
             } finally {
                 jsonwriter.endArray();
             }
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw OXFolderExceptionCode.JSON_ERROR.create(e, e.getMessage());
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
         }
     }
@@ -586,7 +586,7 @@ public final class FolderWriter extends DataWriter {
                                     if (FolderCacheManager.isEnabled()) {
                                         FolderCacheManager.getInstance().putFolderObject(fo, ctx);
                                     }
-                                } catch (final SQLException e) {
+                                } catch (SQLException e) {
                                     throw OXFolderExceptionCode.MISSING_FOLDER_ATTRIBUTE.create(e,
                                         FolderFields.OWN_RIGHTS,
                                         Integer.valueOf(fo.getObjectID()),
@@ -617,7 +617,7 @@ public final class FolderWriter extends DataWriter {
                                     if (FolderCacheManager.isEnabled()) {
                                         FolderCacheManager.getInstance().putFolderObject(fo, ctx);
                                     }
-                                } catch (final SQLException e) {
+                                } catch (SQLException e) {
                                     throw OXFolderExceptionCode.MISSING_PARAMETER.create(e, FolderFields.PERMISSIONS);
                                 }
                             }
@@ -650,7 +650,7 @@ public final class FolderWriter extends DataWriter {
                                             ja.put(jo);
                                         }
                                     }
-                                } catch (final RuntimeException e) {
+                                } catch (RuntimeException e) {
                                     throw OXFolderExceptionCode.RUNTIME_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
                                 }
                             }
@@ -725,7 +725,7 @@ public final class FolderWriter extends DataWriter {
                 } else {
                     try {
                         retval += mapping[permission[i]] << shiftVal;
-                    } catch (final Exception e) {
+                    } catch (Exception e) {
                         throw OXFolderExceptionCode.MAP_PERMISSION_FAILED.create(e, Integer.valueOf(permission[i]));
                     }
                 }

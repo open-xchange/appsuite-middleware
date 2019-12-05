@@ -61,10 +61,10 @@ import java.util.Date;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.reminder.ReminderExceptionCode;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.groupware.reminder.ReminderStorage;
+import com.openexchange.user.User;
 
 /**
  * {@link RdbReminderStorage}
@@ -118,7 +118,7 @@ public class RdbReminderStorage extends ReminderStorage {
             if (deleted == 0) {
                 throw ReminderExceptionCode.NOT_FOUND.create(I(reminderId), I(ctxId));
             }
-        } catch (final SQLException exc) {
+        } catch (SQLException exc) {
             throw ReminderExceptionCode.DELETE_EXCEPTION.create(exc);
         } finally {
             closeSQLStuff(stmt);

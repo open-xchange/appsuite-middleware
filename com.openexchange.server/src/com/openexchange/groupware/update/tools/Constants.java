@@ -75,9 +75,9 @@ public final class Constants {
         ObjectName retval = null;
         try {
             retval = new ObjectName("com.openexchange.updatetasktoolkit", "name", "Update Task Toolkit");
-        } catch (final MalformedObjectNameException e) {
+        } catch (MalformedObjectNameException e) {
             org.slf4j.LoggerFactory.getLogger(Constants.class).error("", e);
-        } catch (final NullPointerException e) {
+        } catch (NullPointerException e) {
             org.slf4j.LoggerFactory.getLogger(Constants.class).error("", e);
         }
         return retval;

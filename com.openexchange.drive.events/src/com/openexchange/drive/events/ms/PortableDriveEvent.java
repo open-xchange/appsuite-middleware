@@ -50,15 +50,19 @@
 package com.openexchange.drive.events.ms;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
-import com.hazelcast.nio.ObjectDataInput;
-import com.hazelcast.nio.ObjectDataOutput;
+import com.hazelcast.nio.serialization.ClassDefinition;
+import com.hazelcast.nio.serialization.ClassDefinitionBuilder;
 import com.hazelcast.nio.serialization.PortableReader;
 import com.hazelcast.nio.serialization.PortableWriter;
+import com.hazelcast.nio.serialization.VersionedPortable;
 import com.openexchange.drive.events.DriveEvent;
+import com.openexchange.drive.events.DriveContentChange;
 import com.openexchange.drive.events.internal.DriveEventImpl;
-import com.openexchange.hazelcast.serialization.AbstractCustomPortable;
+import com.openexchange.hazelcast.serialization.CustomPortable;
 
 
 /**
@@ -66,15 +70,43 @@ import com.openexchange.hazelcast.serialization.AbstractCustomPortable;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class PortableDriveEvent extends AbstractCustomPortable {
+public class PortableDriveEvent implements CustomPortable, VersionedPortable {
 
     /** The unique portable class ID of the {@link PortableDriveEvent} */
-    public static final int CLASS_ID = 2;
+    static final int CLASS_ID = 2;
 
+    /**
+     * The class version for {@link PortableDriveEvent}.
+     * <p>
+     * This number should be incremented whenever fields are added;
+     * see <a href="http://docs.hazelcast.org/docs/latest-development/manual/html/Serialization/Implementing_Portable_Serialization/Versioning_for_Portable_Serialization.html">here</a> for reference.
+     */
+    static final int CLASS_VERSION = 2;
+
+    private static final String PARAMETER_CONTEXT_ID = "c";
+    private static final String PARAMETER_PUSH_TOKEN = "p";
+    private static final String PARAMETER_FOLDER_IDS = "f";
+    private static final String PARAMETER_CONTENT_CHANGES = "cc";
+    private static final String PARAMETER_CONTENT_CHANGES_ONLY = "cco";
+
+    /** The class definition for PortableDriveEvent */
+    static ClassDefinition CLASS_DEFINITION = new ClassDefinitionBuilder(FACTORY_ID, CLASS_ID, CLASS_VERSION)
+        .addIntField(PARAMETER_CONTEXT_ID)
+        .addUTFField(PARAMETER_PUSH_TOKEN)
+        .addUTFArrayField(PARAMETER_FOLDER_IDS)
+        .addPortableArrayField(PARAMETER_CONTENT_CHANGES, PortableFolderContentChange.CLASS_DEFINITION)
+        .addBooleanField(PARAMETER_CONTENT_CHANGES_ONLY)
+    .build();
+    
     private Set<String> folderIDs;
     private int contextID;
     private String pushToken;
+    private List<DriveContentChange> contentChanges;
+    private boolean contentChangesOnly;
 
+    /**
+     * Initializes a new {@link PortableDriveEvent}.
+     */
     public PortableDriveEvent() {
         super();
     }
@@ -85,33 +117,29 @@ public class PortableDriveEvent extends AbstractCustomPortable {
     }
 
     @Override
-    public void writePortable(PortableWriter writer) throws IOException {
-        writer.writeInt("c", contextID);
-        writer.writeUTF("p", pushToken);
-        if (null == folderIDs || 0 == folderIDs.size()) {
-            writer.writeInt("f", 0);
-        } else {
-            writer.writeInt("f", folderIDs.size());
-            ObjectDataOutput out = writer.getRawDataOutput();
-            for (String folderID : folderIDs) {
-                out.writeUTF(folderID);
-            }
-        }
+    public int getClassVersion() {
+        return CLASS_VERSION;
+    }
 
+    @Override
+    public void writePortable(PortableWriter writer) throws IOException {
+        writer.writeInt(PARAMETER_CONTEXT_ID, contextID);
+        writer.writeUTF(PARAMETER_PUSH_TOKEN, pushToken);
+        String[] value = null != folderIDs ? folderIDs.toArray(new String[folderIDs.size()]) : null;
+        writer.writeUTFArray(PARAMETER_FOLDER_IDS, value);
+        writer.writePortableArray(PARAMETER_CONTENT_CHANGES, PortableFolderContentChange.wrap(contentChanges));
+        writer.writeBoolean(PARAMETER_CONTENT_CHANGES_ONLY, contentChangesOnly);
     }
 
     @Override
     public void readPortable(PortableReader reader) throws IOException {
-        contextID = reader.readInt("c");
-        pushToken = reader.readUTF("p");
-        int size = reader.readInt("f");
-        folderIDs = new HashSet<String>(size);
-        ObjectDataInput in = reader.getRawDataInput();
-        for (int i = 0; i < size; i++) {
-            folderIDs.add(in.readUTF());
-        }
+        contextID = reader.readInt(PARAMETER_CONTEXT_ID);
+        pushToken = reader.readUTF(PARAMETER_PUSH_TOKEN);
+        String[] value = reader.readUTFArray(PARAMETER_FOLDER_IDS);
+        folderIDs = null != value ? new HashSet<String>(Arrays.asList(value)) : null;
+        contentChanges = PortableFolderContentChange.unwrap(reader.readPortableArray(PARAMETER_CONTENT_CHANGES));
+        contentChangesOnly = reader.readBoolean(PARAMETER_CONTENT_CHANGES_ONLY);
     }
-
 
     public static PortableDriveEvent wrap(DriveEvent driveEvent) {
         if (null == driveEvent) {
@@ -119,55 +147,15 @@ public class PortableDriveEvent extends AbstractCustomPortable {
         }
         PortableDriveEvent portableEvent = new PortableDriveEvent();
         portableEvent.contextID = driveEvent.getContextID();
-        portableEvent.folderIDs = driveEvent.getFolderIDs();
         portableEvent.pushToken = driveEvent.getPushTokenReference();
+        portableEvent.folderIDs = driveEvent.getFolderIDs();
+        portableEvent.contentChanges = driveEvent.getContentChanges();
+        portableEvent.contentChangesOnly = driveEvent.isContentChangesOnly();
         return portableEvent;
     }
 
     public static DriveEvent unwrap(PortableDriveEvent portableEvent) {
-        return new DriveEventImpl(portableEvent.contextID, portableEvent.folderIDs, true, portableEvent.pushToken);
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + contextID;
-        result = prime * result + ((folderIDs == null) ? 0 : folderIDs.hashCode());
-        result = prime * result + ((pushToken == null) ? 0 : pushToken.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (!(obj instanceof PortableDriveEvent)) {
-            return false;
-        }
-        PortableDriveEvent other = (PortableDriveEvent) obj;
-        if (contextID != other.contextID) {
-            return false;
-        }
-        if (folderIDs == null) {
-            if (other.folderIDs != null) {
-                return false;
-            }
-        } else if (!folderIDs.equals(other.folderIDs)) {
-            return false;
-        }
-        if (pushToken == null) {
-            if (other.pushToken != null) {
-                return false;
-            }
-        } else if (!pushToken.equals(other.pushToken)) {
-            return false;
-        }
-        return true;
+        return new DriveEventImpl(portableEvent.contextID, portableEvent.folderIDs, portableEvent.contentChanges, portableEvent.contentChangesOnly, true, portableEvent.pushToken);
     }
 
 }

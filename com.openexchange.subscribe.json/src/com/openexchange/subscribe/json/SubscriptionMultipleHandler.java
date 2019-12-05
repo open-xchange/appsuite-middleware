@@ -152,9 +152,9 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
                 UNKNOWN_ACTION.create(action);
                 return null;
             }
-        } catch (final JSONException x) {
+        } catch (JSONException x) {
             throw x;
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             throw wrapThrowable(t);
         }
     }
@@ -177,7 +177,7 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
 
                 @Override
                 public int compare(final Subscription o1, final Subscription o2) {
-                    if(o1.getLastUpdate() == o2.getLastUpdate()) {
+                    if (o1.getLastUpdate() == o2.getLastUpdate()) {
                         return o2.getId() - o1.getId();
                     }
                     return (int) (o2.getLastUpdate() - o1.getLastUpdate());
@@ -208,7 +208,7 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
         for (int i = 0, size = ids.length(); i < size; i++) {
             final int id = ids.getInt(i);
             final SubscriptionSource source = getDiscovery(session).getSource(context, id);
-            if(source != null) {
+            if (source != null) {
                 final SubscribeService subscribeService = source.getSubscribeService();
                 final Subscription subscription = subscribeService.loadSubscription(context, id, secretService.getSecret(session));
                 if (subscription != null) {
@@ -338,7 +338,7 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
         final int id = request.getInt("id");
         final String source = request.optString("source");
         final Subscription subscription = loadSubscription(id, session, source, secretService.getSecret(session));
-        if(subscription == null) {
+        if (subscription == null) {
             throw SubscriptionErrorMessage.SubscriptionNotFound.create();
         }
         String sTimeZone = request.optString("timezone");
@@ -361,13 +361,13 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
         SubscribeService service = null;
         if (source != null && !source.equals("")) {
             final SubscriptionSource s = getDiscovery(session).getSource(source);
-            if(s == null) {
+            if (s == null) {
                 return null;
             }
             service = s.getSubscribeService();
         } else {
             final SubscriptionSource s = getDiscovery(session).getSource(session.getContext(), id);
-            if(s == null) {
+            if (s == null) {
                 return null;
             }
             service = s.getSubscribeService();
@@ -381,7 +381,7 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
         for (int i = 0, size = ids.length(); i < size; i++) {
             final int id = ids.getInt(i);
             final SubscriptionSource s = getDiscovery(session).getSource(context, id);
-            if(s == null) {
+            if (s == null) {
                 continue;
             }
             final SubscribeService subscribeService = s.getSubscribeService();

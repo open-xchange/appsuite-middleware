@@ -68,51 +68,26 @@ public class DropwizardCounter implements Counter {
         this.delegate = counter;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.types.Counter#incement()
-     */
     @Override
     public void incement() {
         delegate.inc();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.types.Counter#incrementBy(long)
-     */
     @Override
     public void incrementBy(long n) {
         delegate.inc(n);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.types.Counter#decrement()
-     */
     @Override
     public void decrement() {
         delegate.dec();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.types.Counter#decrementBy(long)
-     */
     @Override
     public void decrementBy(long n) {
         delegate.dec(n);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.types.Counter#getCount()
-     */
     @Override
     public long getCount() {
         return delegate.getCount();

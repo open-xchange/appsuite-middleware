@@ -479,7 +479,7 @@ public class DefaultMailSenderService implements MailSenderService {
             htmlPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
             htmlPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, contentType);
             return htmlPart;
-        } catch (final UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             throw new MessagingException("Unsupported encoding", e);
         }
     }

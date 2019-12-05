@@ -88,11 +88,6 @@ public class ClusterLockServiceDatabaseImpl extends AbstractClusterLockServiceIm
         super(services);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.cluster.lock.ClusterLockService#acquireClusterLock(com.openexchange.cluster.lock.ClusterTask)
-     */
     @Override
     public <T> boolean acquireClusterLock(ClusterTask<T> clusterTask) throws OXException {
         int contextId = clusterTask.getContextId();
@@ -122,31 +117,16 @@ public class ClusterLockServiceDatabaseImpl extends AbstractClusterLockServiceIm
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.cluster.lock.ClusterLockService#releaseClusterLock(com.openexchange.cluster.lock.ClusterTask)
-     */
     @Override
     public <T> void releaseClusterLock(ClusterTask<T> clusterTask) throws OXException {
         deleteTimestamp(clusterTask);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.cluster.lock.ClusterLockService#runClusterTask(com.openexchange.cluster.lock.ClusterTask)
-     */
     @Override
     public <T> T runClusterTask(ClusterTask<T> clusterTask) throws OXException {
         return runClusterTask(clusterTask, new RunOnceRetryPolicy());
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.cluster.lock.ClusterLockService#runClusterTask(com.openexchange.cluster.lock.ClusterTask, com.openexchange.cluster.lock.policies.RetryPolicy)
-     */
     @Override
     public <T> T runClusterTask(ClusterTask<T> clusterTask, RetryPolicy retryPolicy) throws OXException {
         return runClusterTask(clusterTask, retryPolicy, new RefreshLockTask<T>(clusterTask));
@@ -172,11 +152,6 @@ public class ClusterLockServiceDatabaseImpl extends AbstractClusterLockServiceIm
             this.clusterTask = clusterTask;
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.lang.Runnable#run()
-         */
         @Override
         public void run() {
             int contextId = clusterTask.getContextId();

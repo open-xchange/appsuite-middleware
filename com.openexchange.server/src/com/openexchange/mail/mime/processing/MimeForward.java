@@ -72,7 +72,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.i18n.MailStrings;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.html.HtmlService;
 import com.openexchange.image.ImageLocation;
@@ -109,6 +108,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.regex.MatcherReplacer;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 /**
  * {@link MimeForward} - MIME message forward.
@@ -343,9 +343,9 @@ public final class MimeForward extends AbstractMimeProcessing {
                 }
             }
             return asInlineForward(originalMsg, session, ctx, usm, forwardMsg);
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
@@ -537,7 +537,7 @@ public final class MimeForward extends AbstractMimeProcessing {
                         public InputStream getInputStream() throws IOException {
                             try {
                                 return originalMsg.getInputStream();
-                            } catch (final OXException e) {
+                            } catch (OXException e) {
                                 final IOException io = new IOException(e.getMessage());
                                 io.initCause(e);
                                 throw io;
@@ -784,7 +784,7 @@ public final class MimeForward extends AbstractMimeProcessing {
      * @return The forward text
      */
     static String generateForwardText(String firstSeenText, LocaleAndTimeZone ltz, MailMessage msg, boolean html, Session session) {
-        String forwardPrefix = generatePrefixText(MailStrings.FORWARD_PREFIX, ltz, msg);
+        String forwardPrefix = generatePrefixText(MailStrings.FORWARD_PREFIX, ltz, msg, session);
         if (html) {
             forwardPrefix = HtmlProcessing.htmlFormat(forwardPrefix);
         }

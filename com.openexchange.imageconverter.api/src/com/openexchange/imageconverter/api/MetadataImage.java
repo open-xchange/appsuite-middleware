@@ -88,9 +88,6 @@ public class MetadataImage implements Closeable {
 
     // - Closeable -------------------------------------------------------------
 
-    /* (non-Javadoc)
-     * @see java.io.Closeable#close()
-     */
     @Override
     public void close() throws IOException {
         if (m_isCloseableOwner.get() && (null != m_imageStm)) {

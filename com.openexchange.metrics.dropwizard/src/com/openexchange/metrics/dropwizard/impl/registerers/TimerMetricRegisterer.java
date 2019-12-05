@@ -62,7 +62,7 @@ import com.openexchange.metrics.types.Metric;
  */
 public class TimerMetricRegisterer implements MetricRegisterer {
 
-    private MetricRegistry registry;
+    private final MetricRegistry registry;
 
     /**
      * Initialises a new {@link TimerMetricRegisterer}.
@@ -72,24 +72,14 @@ public class TimerMetricRegisterer implements MetricRegisterer {
         this.registry = registry;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.MetricRegisterer#register(com.openexchange.metrics.MetricDescriptor)
-     */
     @Override
     public Metric register(MetricDescriptor descriptor) {
-        return new DropwizardTimer(registry.timer(MetricRegistry.name(descriptor.getGroup(), descriptor.getName())));
+        return new DropwizardTimer(registry.timer(getNameFor(descriptor)));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.MetricRegisterer#unregister(com.openexchange.metrics.MetricDescriptor)
-     */
     @Override
     public void unregister(MetricDescriptor descriptor) {
-        registry.remove(MetricRegistry.name(descriptor.getGroup(), descriptor.getName()));
+        registry.remove(getNameFor(descriptor));
     }
 
 }

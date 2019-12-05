@@ -134,7 +134,7 @@ public class CaldavPerformer extends DAVPerformer {
 
     @Override
     protected String getURLPrefix() {
-        return "/caldav/";
+        return factory.getURLPrefix();
     }
 
     @Override

@@ -99,7 +99,7 @@ public class StringResponseRenderer implements ResponseRenderer {
         try {
             final Object resultObject = result.getResultObject();
             resp.getWriter().write(resultObject == null ? "" : resultObject.toString());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             LOG.error("", e);
         }
     }

@@ -89,41 +89,21 @@ abstract class AbstractUpdateTasksCLT<R> extends AbstractRmiCLI<R> {
         this.footer = footer;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractAdministrativeCLI#requiresAdministrativePermission()
-     */
     @Override
-    protected boolean requiresAdministrativePermission() {
-        return true;
+    protected Boolean requiresAdministrativePermission() {
+        return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractRmiCLI#administrativeAuth(java.lang.String, java.lang.String, org.apache.commons.cli.CommandLine, com.openexchange.auth.rmi.RemoteAuthenticator)
-     */
     @Override
     protected void administrativeAuth(String login, String password, CommandLine cmd, RemoteAuthenticator authenticator) throws RemoteException {
         authenticator.doAuthentication(login, password);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractCLI#getName()
-     */
     @Override
     protected String getName() {
         return name;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractCLI#getFooter()
-     */
     @Override
     protected String getFooter() {
         return footer;
@@ -131,7 +111,7 @@ abstract class AbstractUpdateTasksCLT<R> extends AbstractRmiCLI<R> {
 
     /**
      * Writes the specified composite list to the console
-     * 
+     *
      * @param compositeList The composite list to write
      * @param columns The column names
      * @param formats The formatting of the columns
@@ -142,7 +122,7 @@ abstract class AbstractUpdateTasksCLT<R> extends AbstractRmiCLI<R> {
 
     /**
      * Writes the specified composite list to the console
-     * 
+     *
      * @param compositeList The composite list to write
      * @param columns The column names
      * @param formats The formatting of the columns
@@ -164,7 +144,7 @@ abstract class AbstractUpdateTasksCLT<R> extends AbstractRmiCLI<R> {
 
     /**
      * Prepare the header row
-     * 
+     *
      * @param columns The header columns
      * @return A {@link List} with the header columns
      */
@@ -178,7 +158,7 @@ abstract class AbstractUpdateTasksCLT<R> extends AbstractRmiCLI<R> {
 
     /**
      * Prepares the table data
-     * 
+     *
      * @param compositeList The composite list to read the data from
      * @param columns The column names
      * @return The prepared data
@@ -193,7 +173,7 @@ abstract class AbstractUpdateTasksCLT<R> extends AbstractRmiCLI<R> {
 
     /**
      * Prepares a row for the table data
-     * 
+     *
      * @param columns The columns
      * @param executedTask The executed task metadata
      * @return A {@link List} with the row data

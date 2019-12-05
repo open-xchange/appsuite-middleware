@@ -94,8 +94,10 @@ public class ImageFormat implements Comparable<ImageFormat> {
             m_shortName = shortName;
         }
 
-        /* (non-Javadoc)
-         * @see java.lang.Enum#toString()
+        /**
+         * Gets the short name for this image type; e.g. <code>"jpg"</code>.
+         *
+         * @return The short name
          */
         public String getShortName() {
             return m_shortName;
@@ -152,9 +154,6 @@ public class ImageFormat implements Comparable<ImageFormat> {
         m_imageType = imageType;
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Enum#toString()
-     */
     @Override
     public String toString() {
         return new StringBuilder("ImageFormat").
@@ -169,9 +168,6 @@ public class ImageFormat implements Comparable<ImageFormat> {
             append(']').toString();
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Comparable#compareTo(java.lang.Object)
-     */
     @Override
     public int compareTo(ImageFormat other) {
         int ret = 1;

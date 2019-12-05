@@ -73,44 +73,24 @@ public class MockOAuthService implements OAuthService {
 
     private String token, tokenSecret;
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.OAuthService#createAccount(java.lang.String, java.util.Map, int, int)
-     */
     @Override
     public OAuthAccount createAccount(Session session, final String serviceMetaData, Set<OAuthScope> scopes, final Map<String, Object> arguments) throws OXException {
         // Nothing to do
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.OAuthService#createAccount(java.lang.String, com.openexchange.oauth.OAuthInteractionType, java.util.Map, int, int)
-     */
     @Override
     public OAuthAccount createAccount(Session session, final String serviceMetaData, Set<OAuthScope> scopes, final OAuthInteractionType type, final Map<String, Object> arguments) throws OXException {
         // Nothing to do
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.OAuthService#deleteAccount(int, int, int)
-     */
     @Override
     public void deleteAccount(Session session, final int accountId) throws OXException {
         // Nothing to do
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.OAuthService#getAccount(int, java.lang.String, int, int)
-     */
     @Override
     public OAuthAccount getAccount(final Session session, final int accountId) throws OXException {
         return new OAuthAccount() {
@@ -164,44 +144,24 @@ public class MockOAuthService implements OAuthService {
         };
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.OAuthService#getMetaDataRegistry()
-     */
     @Override
     public OAuthServiceMetaDataRegistry getMetaDataRegistry() {
         // Nothing to do
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.OAuthService#initOAuth(java.lang.String, java.lang.String)
-     */
     @Override
     public OAuthInteraction initOAuth(Session session, final String serviceMetaData, final String callbackUrl, HostInfo currentHost, Set<OAuthScope> scopes) throws OXException {
         // Nothing to do
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.OAuthService#updateAccount(int, java.util.Map, int, int)
-     */
     @Override
     public void updateAccount(Session session, final int accountId, final Map<String, Object> arguments) throws OXException {
         // Nothing to do
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.OAuthService#updateAccount(int, java.lang.String, com.openexchange.oauth.OAuthInteractionType, java.util.Map, int, int)
-     */
     @Override
     public OAuthAccount updateAccount(Session session, final int accountId, final String serviceMetaData, final OAuthInteractionType type, final Map<String, Object> arguments, Set<OAuthScope> scopes) throws OXException {
         // Nothing to do
@@ -222,33 +182,18 @@ public class MockOAuthService implements OAuthService {
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.OAuthService#upsertAccount(java.lang.String, com.openexchange.oauth.OAuthInteractionType, java.util.Map, int, int, java.util.Set)
-     */
     @Override
     public OAuthAccount upsertAccount(Session session, String serviceMetaData, int accountId, OAuthInteractionType type, Map<String, Object> arguments, Set<OAuthScope> scopes) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.OAuthService#getAccounts(com.openexchange.session.Session)
-     */
     @Override
     public List<OAuthAccount> getAccounts(Session session) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.OAuthService#getAccounts(com.openexchange.session.Session, java.lang.String)
-     */
     @Override
     public List<OAuthAccount> getAccounts(Session session, String serviceMetaData) throws OXException {
         // TODO Auto-generated method stub

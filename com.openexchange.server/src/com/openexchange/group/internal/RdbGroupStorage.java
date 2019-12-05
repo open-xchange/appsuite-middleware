@@ -106,7 +106,7 @@ public class RdbGroupStorage implements GroupStorage {
             stmt.setLong(pos++, group.getLastModified().getTime());
             stmt.setInt(pos++, 65534);
             stmt.execute();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw GroupExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
@@ -132,7 +132,7 @@ public class RdbGroupStorage implements GroupStorage {
             if (1 != rows) {
                 throw GroupExceptionCodes.MODIFIED.create();
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw GroupExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
@@ -157,7 +157,7 @@ public class RdbGroupStorage implements GroupStorage {
                 stmt.addBatch();
             }
             stmt.executeBatch();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw GroupExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
@@ -182,7 +182,7 @@ public class RdbGroupStorage implements GroupStorage {
                 stmt.setInt(pos++, member);
             }
             stmt.execute();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw GroupExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
@@ -204,7 +204,7 @@ public class RdbGroupStorage implements GroupStorage {
             if (1 != rows) {
                 throw GroupExceptionCodes.MODIFIED.create();
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw GroupExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
@@ -263,7 +263,7 @@ public class RdbGroupStorage implements GroupStorage {
                 }
                 groups.put(group.getIdentifier(), group);
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("GRP");
         } finally {
             closeSQLStuff(result, stmt);
@@ -296,7 +296,7 @@ public class RdbGroupStorage implements GroupStorage {
         final Connection con;
         try {
             con = DBPool.pickup(context);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw LdapExceptionCode.NO_CONNECTION.create(e).setPrefix("GRP");
         }
         PreparedStatement stmt = null;
@@ -318,7 +318,7 @@ public class RdbGroupStorage implements GroupStorage {
                 tmp.add(group);
             }
             return tmp.toArray(new Group[tmp.size()]);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("GRP");
         } finally {
             closeSQLStuff(result, stmt);
@@ -337,7 +337,7 @@ public class RdbGroupStorage implements GroupStorage {
         final Connection con;
         try {
             con = DBPool.pickup(context);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw GroupExceptionCodes.NO_CONNECTION.create(e);
         }
         PreparedStatement stmt = null;
@@ -363,7 +363,7 @@ public class RdbGroupStorage implements GroupStorage {
                 groups.add(group);
             }
             return groups.toArray(new Group[groups.size()]);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw GroupExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
@@ -379,7 +379,7 @@ public class RdbGroupStorage implements GroupStorage {
         final Connection con;
         try {
             con = DBPool.pickup(context);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw LdapExceptionCode.NO_CONNECTION.create(e).setPrefix("GRP");
         }
         PreparedStatement stmt = null;
@@ -403,7 +403,7 @@ public class RdbGroupStorage implements GroupStorage {
                 tmp.add(group);
             }
             groups = tmp.toArray(new Group[tmp.size()]);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("GRP");
         } finally {
             closeSQLStuff(result, stmt);

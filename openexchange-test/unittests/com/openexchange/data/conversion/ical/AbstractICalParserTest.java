@@ -64,9 +64,9 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.ldap.MockUserLookup;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.resource.Resource;
+import com.openexchange.user.User;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -129,7 +129,7 @@ public abstract class AbstractICalParserTest {
             };
 
             @Override
-            public List<Resource> find(final List<String> names, final Context ctx) throws OXException, OXException {
+            public List<Resource> find(final List<String> names, final Context ctx) throws OXException {
                 final List<Resource> retval = new ArrayList<Resource>();
                 for (final String name : names) {
                     for (final Resource resource : resources) {
@@ -142,7 +142,7 @@ public abstract class AbstractICalParserTest {
             }
 
             @Override
-            public Resource load(final int resourceId, final Context ctx) throws OXException, OXException {
+            public Resource load(final int resourceId, final Context ctx) throws OXException {
                 return null;
             }
         };
@@ -153,7 +153,7 @@ public abstract class AbstractICalParserTest {
         for (final int i : ids) {
             try {
                 found.add(users.getUser(i));
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 //IGNORE
             }
         }

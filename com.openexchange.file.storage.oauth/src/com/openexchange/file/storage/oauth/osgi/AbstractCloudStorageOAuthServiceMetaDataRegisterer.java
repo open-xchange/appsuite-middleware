@@ -87,11 +87,6 @@ public abstract class AbstractCloudStorageOAuthServiceMetaDataRegisterer impleme
      */
     protected abstract ServiceTrackerCustomizer<FileStorageAccountManagerProvider, FileStorageAccountManagerProvider> getRegisterer();
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
-     */
     @Override
     public OAuthServiceMetaData addingService(ServiceReference<OAuthServiceMetaData> reference) {
         OAuthServiceMetaData oAuthServiceMetaData = getContext().getService(reference);
@@ -106,21 +101,11 @@ public abstract class AbstractCloudStorageOAuthServiceMetaDataRegisterer impleme
         return oAuthServiceMetaData;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#modifiedService(org.osgi.framework.ServiceReference, java.lang.Object)
-     */
     @Override
     public void modifiedService(ServiceReference<OAuthServiceMetaData> reference, OAuthServiceMetaData service) {
         // nothing
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(org.osgi.framework.ServiceReference, java.lang.Object)
-     */
     @Override
     public void removedService(ServiceReference<OAuthServiceMetaData> reference, OAuthServiceMetaData service) {
         if (null == service) {

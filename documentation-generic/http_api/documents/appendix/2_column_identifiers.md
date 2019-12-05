@@ -6,6 +6,8 @@ specific field data of single or multiple objects.
 
 ## Common object data
 
+<div class="simpleTable">
+
 | ID | Name | Type | Value |
 |:----|:------|:------|:-------|
 | 1 | id |String|Object ID|
@@ -20,8 +22,11 @@ specific field data of single or multiple objects.
 | 104 | number_of_attachments |Number|Number of attachments|
 | 105 | lastModifiedOfNewestAttachmentUTC |Time|Date and time of the newest attachment written with UTC time zone.|
 
+</div>
 
 ## Permission object
+
+<div class="simpleTable">
 
 | Name | Type | Value |
 |:------|:------|:-------|
@@ -37,8 +42,11 @@ specific field data of single or multiple objects.
 |contact_folder| String | The folder identifier of the corresponding contact entry if the recipient was chosen from the address book (for type "guest", required if "contact_id" is set).|
 |expiry_date| Time | The end date / expiration time after which the share link is no longer accessible (for type "anonymous", optional).|
 
+</div>
 
 ## Extended permission object
+
+<div class="simpleTable">
 
 | Name | Type | Value |
 |:------|:------|:-------|
@@ -51,8 +59,11 @@ specific field data of single or multiple objects.
 |password| String | The optionally set password for "anonymous" entities.|
 |expiry_date| Date | The optionally set expiry date for "anonymous" entities.|
 
+</div>
 
 ## Common folder data
+
+<div class="simpleTable">
 
 | ID | Name | Type | Value |
 |:----|:------|:------|:-------|
@@ -64,7 +75,11 @@ specific field data of single or multiple objects.
 | 6 | last_modified_utc |Timestamp|Timestamp of the last modification. Note that the type is Timestamp, not Time. See [Date and time](#date-and-time) for details. (added 2008-10-17, with SP5, temporary workaround)|
 | 20 | folder_id |String|Object ID of the parent folder.|
 
+</div>
+
 ## Detailed folder data
+
+<div class="simpleTable">
 
 | ID | Name | Type | Value |
 |:----|:------|:------|:-------|
@@ -98,7 +113,11 @@ specific field data of single or multiple objects.
 | 3205 | com.openexchange.calendar.config |Object|A json object containing configuration data for the calendar account.|
 | 3220 | com.openexchange.caldav.url |String| The caldav url to this calendar folder.|
 
+</div>
+
 ### Type of folder
+
+<div class="simpleTable">
 
 |Number|Type|
 |:-----|:---|
@@ -114,7 +133,11 @@ specific field data of single or multiple objects.
 |23| videos|
 |24| templates|
 
+</div>
+
 ## Detailed task and appointment data
+
+<div class="simpleTable">
 
 |ID   | Name  | Type  | Value  |
 |:----|:------|:------|:-------|
@@ -142,7 +165,11 @@ specific field data of single or multiple objects.
 |229 | principalId| Number | Contains the userId of the appointment principal if it is an internal user. Not implemented for tasks. (Introduced with 6.20.1)|
 |401 | full_time| Boolean | True if the event is a whole day appointment or task, false otherwise.|
 
+</div>
+
 ### Task sequence type
+
+<div class="simpleTable">
 
 |Number | Description|
 |:------|:-----------|
@@ -152,16 +179,23 @@ specific field data of single or multiple objects.
 |3 | monthly|
 |4 | yearly|
 
+<div>
 
 ### Participant identifier
+
+<div class="simpleTable">
+
 |Name | Type | Value|
 |:----|:-----|:-----|
 |id | Number | User ID|
 |type | Number | See [Participant types](#participant-types)|
 |mail | String | mail address of an external participant|
 
+</div>
 
 ### Participant types
+
+<div class="simpleTable">
 
 |Number | Type |
 |:------|:-----|
@@ -171,8 +205,11 @@ specific field data of single or multiple objects.
 |4 | resource group|
 |5 | external user|
 
+</div>
 
 ### User participant object
+
+<div class="simpleTable">
 
 |Name | Type | Value|
 |:----|:-----|:-----|
@@ -181,7 +218,11 @@ specific field data of single or multiple objects.
 |confirmation | Number | See [Confirmation status](#confirmation-status) |
 |confirmmessage | String | Confirm Message of the participant|
 
+</div>
+
 ### Confirmation status
+
+<div class="simpleTable">
 
 |Number | Status |
 |:------|:-------|
@@ -190,7 +231,11 @@ specific field data of single or multiple objects.
 |2 | declined|
 |3 | tentative|
 
+</div>
+
 ### Confirming participant
+
+<div class="simpleTable">
 
 |Name | Type | Value|
 |:----|:-----|:-----|
@@ -200,7 +245,11 @@ specific field data of single or multiple objects.
 |status | Number | See [Confirmation status](#confirmation-status)|
 |message | String | Confirm Message of the participant|
 
+</div>
+
 ## Detailed task data
+
+<div class="simpleTable">
 
 |ID   | Name  | Type  | Value  |
 |:----|:------|:------|:-------|
@@ -220,7 +269,11 @@ specific field data of single or multiple objects.
 |316 | start_time| Date or Time | Inclusive start as Date for whole day tasks and Time for normal tasks.|
 |317 | end_time| Date or Time | Exclusive end as Date for whole day tasks and as Time for normal tasks.|
 
+</div>
+
 ### Task status
+
+<div class="simpleTable">
 
 |Number | Status |
 |:------|:-------|
@@ -230,7 +283,11 @@ specific field data of single or multiple objects.
 |4 | waiting|
 |5 | deferred|
 
+</div>
+
 ## Detailed contact data
+
+<div class="simpleTable">
 
 |ID  | Displayed name | Name | Type | Description | 
 |:---|:---------------|:-----|:-----|:------------|
@@ -344,9 +401,12 @@ specific field data of single or multiple objects.
 |620 || addressBusiness | String | Support for Outlook 'business' address field. (since 6.20.1)|
 |621 || addressOther | String | Support for Outlook 'other' address field. (since 6.20.1)|
 
-
+</div>
 
 ### Distribution list member
+
+<div class="simpleTable">
+
 | Name | Type | Value |
 |:-----|:-----|:------|
 | id | String | Object ID of the member's contact if the member is an existing contact. |
@@ -355,7 +415,11 @@ specific field data of single or multiple objects.
 | mail | String | Email address (mandatory before 6.22, afterwards optional if you are referring to an internal contact) |
 | mail_field | Number | Which email field of an existing contact (if any) is used for the mail field. See [Mail fields](#mail-fields). |
 
+</div>
+
 ### Mail fields
+
+<div class="simpleTable">
 
 |Number|Field|
 |:-----|:----|
@@ -364,7 +428,11 @@ specific field data of single or multiple objects.
 |2 | second email field (email2) |
 |3 | third email field (email3) |
 
+</div>
+
 ## Detailed appointment data
+
+<div class="simpleTable">
 
 |ID | Name | Type | Value |
 |:--|:-------|:------|:------|
@@ -379,7 +447,11 @@ specific field data of single or multiple objects.
 |410 | recurrence_start | Date | Start of a sequence without time |
 ||ignore_conflicts | Boolean | Ignore soft conflicts for the new or modified appointment. This flag is valid for the current change only, i. e. it is not stored in the database and is never sent by the server to the client. |
 
+</div>
+
 ### Appointment availability
+
+<div class="simpleTable">
 
 |Number|Value|
 |:-----|:----|
@@ -388,7 +460,11 @@ specific field data of single or multiple objects.
 |3 | absent|
 |4 | free|
 
+</div>
+
 ## Detailed mail data
+
+<div class="simpleTable">
 
 |ID   | Name  | Type  | Value  |
 |:----|:------|:------|:-------|
@@ -432,7 +508,11 @@ specific field data of single or multiple objects.
 |664 | authenticity | JSON | The light-weighted version of the authenticity status result, i.e. the status string.|
 |665 | authenticity | JSON | The heavy-weighted version of the authenticity status results as described in MailData.|
 
+</div>
+
 ### Mail system flags
+
+<div class="simpleTable">
 
 |Number | Description |
 |:------|:------------|
@@ -445,8 +525,13 @@ specific field data of single or multiple objects.
 |64 | user |
 |128 | spam |
 |256 | forwarded |
+|512 | read acknowledged |
+
+</div>
 
 ### X-Priority header
+
+<div class="simpleTable">
 
 |Number | Description |
 |:------|:------------|
@@ -457,7 +542,11 @@ specific field data of single or multiple objects.
 |2 | High |
 |1 | Very High |
 
+</div>
+
 ### Attachment
+
+<div class="simpleTable">
 
 |Name | Type | Value |
 |:----|:-----|:------|
@@ -468,8 +557,11 @@ specific field data of single or multiple objects.
 |size | Number | Size of the attachment in bytes. |
 |disp | String | Attachment's disposition: null, inline, attachment or alternative. |
 
+</div>
 
 ## Detailed infoitem data
+
+<div class="simpleTable">
 
 |ID   | Name  | Type  | Value  |
 |:----|:------|:------|:-------|
@@ -507,8 +599,11 @@ specific field data of single or multiple objects.
 |7030 | com.openexchange.file.storage.mail.mailMetadata | Object | Additional metadata for items in the mail file storage. Read Only. |
 |7040 | com.openexchange.file.sanitizedFilename | String | A sanitized version of the filename. Which prevents end users from being confused by special characters, e.g. RTLO (0x202E). Read Only. |
 
+</div>
 
 ### Object Permission object
+
+<div class="simpleTable">
 
 |Name | Type | Value |
 |:----|:-----|:------|
@@ -523,7 +618,11 @@ specific field data of single or multiple objects.
 | contact_folder | String | The folder identifier of the corresponding contact entry if the recipient was chosen from the address book (for type "guest", required if "contact_id" is set).|
 | expiry_date | Time | The end date / expiration time after which the share link is no longer accessible (for type "anonymous", optional).|
 
+</div>
+
 ### Extended object permission object
+
+<div class="simpleTable">
 
 |Name | Type | Value |
 |:----|:-----|:------|
@@ -536,14 +635,23 @@ specific field data of single or multiple objects.
 |password | String | The optionally set password for "anonymous" entities. |
 |expiry_date | Date | The optionally set expiry date for "anonymous" entities. |
 
+</div>
+
 ### Object permission flags
 
+<div class="simpleTable">
+
 |Bits | Value |
+|:----|:-----|
 |0    |The numerical value indicating no object permissions.|
 |1    | The numerical value indicating read object permissions.|
 |2    | The numerical value indicating write object permissions. This implicitly includes the “read” permission (this is no bitmask).|
 
+</div>
+
 ## Attachment object
+
+<div class="simpleTable">
 
 |ID   |Name   | Type  | Description|
 |:----|:------|:------|:-----------|
@@ -555,7 +663,11 @@ specific field data of single or multiple objects.
 |805 |file_mimetype | String | The MIME-Type of the attached file|
 |806 |rft_flag | Boolean | If the attachment is a RTF Attachment of Outlook. (Outlook descriptions can be stored as RTF Documents).|
 
+</div>
+
 ### Attachment module
+
+<div class="simpleTable">
 
 |Number | Name |
 |:------|:-----|
@@ -564,7 +676,11 @@ specific field data of single or multiple objects.
 |7 | Contact |
 |137 | Infostore |
 
+</div>
+
 ## Mail account data
+
+<div class="simpleTable">
 
 |ID   |Name   | Type  | Value |
 |:----|:------|:------|:-----------|
@@ -617,7 +733,11 @@ specific field data of single or multiple objects.
 | 1047 | mail_oauth | Integer | Available since v7.8.3 Specifies the identifier of the associated OAuth account for mail access |
 | 1048 | transport_oauth | Integer | Available since v7.8.3 Specifies the identifier of the associated OAuth account for mail transport |
 
+</div>
+
 ### Credential source
+
+<div class="simpleTable">
 
 |Value | Description |
 |:-----|:------------|
@@ -625,7 +745,11 @@ specific field data of single or multiple objects.
 | custom | Signals that individual credentials are supposed to be used (fields "transport_login" and "transport_password" are considered). |
 | none | Means the mail transport does not support any authentication mechanism (rare case!) |
 
+</div>
+
 ## Detailed user data
+
+<div class="simpleTable">
 
 |ID | Displayed name | Name | Type | Value |
 |:--|:---------------|:-----|:-----|:------|
@@ -637,7 +761,11 @@ specific field data of single or multiple objects.
 |615 | Login info | login_info | String | The user's login information |
 |616 | Guest Created By | guest_created_by | Number | The ID of the user who has created this guest in case this user represents a guest user; it is 0 for regular users (preliminary, available with v7.8.0) |
 
+</div>
+
 ## Messaging message columns
+
+<div class="simpleTable">
 
 |Name | Description |
 |:----|:------------|
@@ -662,8 +790,11 @@ specific field data of single or multiple objects.
 |headers | The headers attribute|
 |picture | The url to the message picture.|
 
+</div>
 
 ## Group data
+
+<div class="simpleTable">
 
 | ID | Name | Type | Value |
 |:----|:------|:------|:-------|
@@ -673,3 +804,4 @@ specific field data of single or multiple objects.
 | 701 | display_name | String | The display name of the group.|
 | 702 | members | String | A comma separated list of user ids.|
 
+</div>

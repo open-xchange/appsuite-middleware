@@ -77,7 +77,7 @@ public abstract class DataServlet extends PermissionServlet {
             final String parameter = httpServletRequest.getParameter(name);
             try {
                 return Integer.parseInt(parameter);
-            } catch (final NumberFormatException exc) {
+            } catch (NumberFormatException exc) {
                 throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(name, parameter);
             }
         }
@@ -89,7 +89,7 @@ public abstract class DataServlet extends PermissionServlet {
             final String parameter = httpServletRequest.getParameter(name);
             try {
                 return new Date(Long.parseLong(httpServletRequest.getParameter(name)));
-            } catch (final NumberFormatException exc) {
+            } catch (NumberFormatException exc) {
                 throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(name, parameter);
             }
         }

@@ -96,7 +96,7 @@ public class PushMulticastSocket implements Runnable {
             } else {
                 LOG.info("Multicast Socket is disabled");
             }
-        } catch (final Exception exc) {
+        } catch (Exception exc) {
             LOG.error("MultiCastPushSocket", exc);
         }
     }
@@ -114,11 +114,11 @@ public class PushMulticastSocket implements Runnable {
                 } else {
                     LOG.warn("recieved empty multicast package: {}", datagramPacket);
                 }
-            } catch (final SocketException e) {
+            } catch (SocketException e) {
                 if (running) {
                     LOG.error("", e);
                 }
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 LOG.error("", e);
             }
         }
@@ -133,11 +133,11 @@ public class PushMulticastSocket implements Runnable {
         if (null != thread) {
             try {
                 thread.get();
-            } catch (final InterruptedException e) {
+            } catch (InterruptedException e) {
                 // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
                 Thread.currentThread().interrupt();
                 LOG.error("", e);
-            } catch (final ExecutionException e) {
+            } catch (ExecutionException e) {
                 final Throwable cause = e.getCause();
                 LOG.error("", cause);
             }

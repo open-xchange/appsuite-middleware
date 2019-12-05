@@ -54,7 +54,6 @@ import java.util.Date;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.dav.mixins.CurrentUserPrincipal;
-import com.openexchange.dav.osgi.Services;
 import com.openexchange.dav.principals.PrincipalFactory;
 import com.openexchange.dav.resources.DAVCollection;
 import com.openexchange.exception.OXException;
@@ -109,7 +108,7 @@ public class GroupPrincipalCollection extends DAVCollection {
     @Override
     public List<WebdavResource> getChildren() throws WebdavProtocolException {
         try {
-            Group[] groups = Services.getService(GroupService.class).getGroups(factory.getContext(), false);
+            Group[] groups = factory.getServiceSafe(GroupService.class).getGroups(factory.getContext(), false);
             List<WebdavResource> children = new ArrayList<WebdavResource>(groups.length);
             for (Group group : groups) {
                 children.add(createGroupResource(group));
@@ -142,14 +141,14 @@ public class GroupPrincipalCollection extends DAVCollection {
         }
         try {
             int id = Integer.parseInt(name);
-            return createGroupResource(Services.getService(GroupService.class).getGroup(factory.getContext(), id));
+            return createGroupResource(factory.getServiceSafe(GroupService.class).getGroup(factory.getContext(), id));
         } catch (OXException | NumberFormatException e) {
             throw WebdavProtocolException.generalError(e, getUrl(), HttpServletResponse.SC_NOT_FOUND);
         }
     }
 
     private GroupPrincipalResource createGroupResource(Group group) {
-        return new GroupPrincipalResource(factory, group);
+        return new GroupPrincipalResource(factory, group, constructPathForChildResource(String.valueOf(group.getIdentifier())));
     }
 
 }

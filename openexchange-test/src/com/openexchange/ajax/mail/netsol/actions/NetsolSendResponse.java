@@ -91,7 +91,7 @@ public final class NetsolSendResponse extends AbstractAJAXResponse {
                     return new String[] { mp.getFolder(), mp.toString() };
                 }
                 return new String[] { mp.getFolder(), String.valueOf(mp.getMailID()) };
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.error("", e);
                 return null;
             }

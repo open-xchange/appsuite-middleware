@@ -192,7 +192,7 @@ public class Alarm<T extends CalendarComponent, U extends CalendarObject> extend
     }
 
     private void emitTaskAlarm(final Task task, final VToDo component, final List<ConversionWarning> warnings) {
-        if(task.getAlarm() == null) {
+        if (task.getAlarm() == null) {
             return;
         }
         final VAlarm alarm = new VAlarm();
@@ -203,7 +203,7 @@ public class Alarm<T extends CalendarComponent, U extends CalendarObject> extend
         alarm.getProperties().add(action);
 
         String note = task.getNote();
-        if(note == null) { note = "Open-XChange"; }
+        if (note == null) { note = "Open-XChange"; }
 
         final Description description = new Description(note);
         alarm.getProperties().add(description);

@@ -91,11 +91,6 @@ public class CassandraClusterMBeanImpl extends AnnotatedDynamicStandardMBean imp
         super(services, CassandraClusterMBean.NAME, CassandraClusterMBean.class);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.nosql.cassandra.beans.AbstractCassandraMBean#refresh()
-     */
     @Override
     protected void refresh() {
         try {
@@ -109,11 +104,6 @@ public class CassandraClusterMBeanImpl extends AnnotatedDynamicStandardMBean imp
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getHosts()
-     */
     @Override
     public Set<String> getNodes() {
         Set<String> hosts = new HashSet<>();
@@ -123,11 +113,6 @@ public class CassandraClusterMBeanImpl extends AnnotatedDynamicStandardMBean imp
         return hosts;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#geTokenRanges()
-     */
     @Override
     public Set<String> getTokenRanges() {
         Set<TokenRange> tokenRanges = cluster.getMetadata().getTokenRanges();
@@ -147,301 +132,151 @@ public class CassandraClusterMBeanImpl extends AnnotatedDynamicStandardMBean imp
         return tr;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getClusterName()
-     */
     @Override
     public String getClusterName() {
         return clusterName;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getOpenConnections()
-     */
     @Override
     public int getOpenConnections() {
         return metrics.getOpenConnections().getValue().intValue();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getTrashedConnections()
-     */
     @Override
     public int getTrashedConnections() {
         return metrics.getTrashedConnections().getValue().intValue();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getQueuedTasks()
-     */
     @Override
     public int getQueuedTasks() {
         return metrics.getExecutorQueueDepth().getValue().intValue();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getBlockingExecutorQueueTasks()
-     */
     @Override
     public int getBlockingExecutorQueueTasks() {
         return metrics.getBlockingExecutorQueueDepth().getValue().intValue();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getSchedulerQueueSize()
-     */
     @Override
     public int getSchedulerQueueSize() {
         return metrics.getTaskSchedulerQueueSize().getValue().intValue();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getReconnectionSchedulerQueueSize()
-     */
     @Override
     public int getReconnectionSchedulerQueueSize() {
         return metrics.getReconnectionSchedulerQueueSize().getValue().intValue();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getConnectedNodes()
-     */
     @Override
     public int getConnectedNodes() {
         return metrics.getConnectedToHosts().getValue().intValue();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getAuthenticationErrors()
-     */
     @Override
     public long getAuthenticationErrors() {
         return errors.getAuthenticationErrors().getCount();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getClientTimeouts()
-     */
     @Override
     public long getClientTimeouts() {
         return errors.getClientTimeouts().getCount();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getConnectionErrors()
-     */
     @Override
     public long getConnectionErrors() {
         return errors.getConnectionErrors().getCount();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getIgnores()
-     */
     @Override
     public long getIgnores() {
         return errors.getIgnores().getCount();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getIgnoresOnClientTimeout()
-     */
     @Override
     public long getIgnoresOnClientTimeout() {
         return errors.getIgnoresOnClientTimeout().getCount();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getIgnoresOnConnectionError()
-     */
     @Override
     public long getIgnoresOnConnectionError() {
         return errors.getIgnoresOnConnectionError().getCount();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getIgnoresOnOtherErrors()
-     */
     @Override
     public long getIgnoresOnOtherErrors() {
         return errors.getIgnoresOnOtherErrors().getCount();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getIgnoresOnReadTimeout()
-     */
     @Override
     public long getIgnoresOnReadTimeout() {
         return errors.getIgnoresOnReadTimeout().getCount();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getIgnoresOnUnavailable()
-     */
     @Override
     public long getIgnoresOnUnavailable() {
         return errors.getIgnoresOnUnavailable().getCount();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getIgnoresOnWriteTimeout()
-     */
     @Override
     public long getIgnoresOnWriteTimeout() {
         return errors.getIgnoresOnWriteTimeout().getCount();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getOthers()
-     */
     @Override
     public long getOthers() {
         return errors.getOthers().getCount();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getReadTimeouts()
-     */
     @Override
     public long getReadTimeouts() {
         return errors.getReadTimeouts().getCount();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getRetries()
-     */
     @Override
     public long getRetries() {
         return errors.getRetries().getCount();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getRetriesOnClientTimeout()
-     */
     @Override
     public long getRetriesOnClientTimeout() {
         return errors.getRetriesOnClientTimeout().getCount();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getRetriesOnConnectionTimeout()
-     */
     @Override
     public long getRetriesOnConnectionError() {
         return errors.getRetriesOnConnectionError().getCount();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getRetriesOnOtherErrors()
-     */
     @Override
     public long getRetriesOnOtherErrors() {
         return errors.getRetriesOnOtherErrors().getCount();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getRetriesOnReadTimeout()
-     */
     @Override
     public long getRetriesOnReadTimeout() {
         return errors.getRetriesOnReadTimeout().getCount();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getRetriesOnUnaavailable()
-     */
     @Override
     public long getRetriesOnUnavailable() {
         return errors.getRetriesOnUnavailable().getCount();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getRetriesOnWriteTimeout()
-     */
     @Override
     public long getRetriesOnWriteTimeout() {
         return errors.getRetriesOnWriteTimeout().getCount();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getSpeculativeExecutions()
-     */
     @Override
     public long getSpeculativeExecutions() {
         return errors.getSpeculativeExecutions().getCount();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getUnavailables()
-     */
     @Override
     public long getUnavailables() {
         return errors.getUnavailables().getCount();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getWriteTimeouts()
-     */
     @Override
     public long getWriteTimeouts() {
         return errors.getWriteTimeouts().getCount();

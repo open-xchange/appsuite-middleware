@@ -50,11 +50,9 @@
 
 package com.openexchange.subscribe.osgi;
 
+import static com.openexchange.osgi.Tools.withRanking;
 import java.util.ArrayList;
-import java.util.Dictionary;
-import java.util.Hashtable;
 import java.util.List;
-import org.osgi.framework.Constants;
 import com.openexchange.context.osgi.WhiteboardContextService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.provider.DBProvider;
@@ -65,7 +63,6 @@ import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.generic.FolderUpdaterRegistry;
 import com.openexchange.groupware.generic.FolderUpdaterService;
 import com.openexchange.groupware.infostore.InfostoreFacade;
-import com.openexchange.groupware.tasks.Task;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.secret.SecretEncryptionFactoryService;
 import com.openexchange.secret.recovery.EncryptedItemCleanUpService;
@@ -75,13 +72,10 @@ import com.openexchange.subscribe.AbstractSubscribeService;
 import com.openexchange.subscribe.SubscriptionExecutionService;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
 import com.openexchange.subscribe.database.SubscriptionUserDeleteListener;
-import com.openexchange.subscribe.helpers.DocumentMetadataHolder;
 import com.openexchange.subscribe.internal.ContactFolderMultipleUpdaterStrategy;
 import com.openexchange.subscribe.internal.ContactFolderUpdaterStrategy;
-import com.openexchange.subscribe.internal.DocumentMetadataHolderFolderUpdaterStrategy;
 import com.openexchange.subscribe.internal.StrategyFolderUpdaterService;
 import com.openexchange.subscribe.internal.SubscriptionExecutionServiceImpl;
-import com.openexchange.subscribe.internal.TaskFolderUpdaterStrategy;
 import com.openexchange.subscribe.secret.SubscriptionSecretHandling;
 import com.openexchange.subscribe.sql.SubscriptionSQLStorage;
 import com.openexchange.user.UserService;
@@ -102,27 +96,17 @@ public class DiscoveryActivator extends HousekeepingActivator {
         this.collector = collector;
         final WhiteboardContextService contextService = new WhiteboardContextService(context);
         this.contextService = contextService;
-        final UserService users = getService(UserService.class);
         final UserPermissionService userPermissions = getService(UserPermissionService.class);
-        final InfostoreFacade infostore = getService(InfostoreFacade.class);
         final FolderService folders = getService(FolderService.class);
-
-        final Dictionary<String, Object> discoveryDict = new Hashtable<String, Object>();
-        discoveryDict.put(Constants.SERVICE_RANKING, Integer.valueOf(256));
 
         final OSGiSubscriptionSourceDiscoveryCollector discoveryCollector = new OSGiSubscriptionSourceDiscoveryCollector(context);
         discoveryCollector.addSubscriptionSourceDiscoveryService(collector);
         AutoUpdateActivator.setCollector(discoveryCollector);
-        registerService(SubscriptionSourceDiscoveryService.class, discoveryCollector, discoveryDict);
+        registerService(SubscriptionSourceDiscoveryService.class, discoveryCollector, withRanking(256));
 
         final List<FolderUpdaterService<?>> folderUpdaters = new ArrayList<FolderUpdaterService<?>>(5);
         folderUpdaters.add(new StrategyFolderUpdaterService<Contact>(new ContactFolderUpdaterStrategy()));
         folderUpdaters.add(new StrategyFolderUpdaterService<Contact>(new ContactFolderMultipleUpdaterStrategy(), true));
-        folderUpdaters.add(new StrategyFolderUpdaterService<Task>(new TaskFolderUpdaterStrategy()));
-        folderUpdaters.add(new StrategyFolderUpdaterService<DocumentMetadataHolder>(new DocumentMetadataHolderFolderUpdaterStrategy(
-            users,
-            userPermissions,
-            infostore)));
 
         final SubscriptionExecutionServiceImpl executor = new SubscriptionExecutionServiceImpl(collector, folderUpdaters, contextService);
         registerService(SubscriptionExecutionService.class, executor);

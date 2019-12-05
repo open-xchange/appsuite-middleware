@@ -67,13 +67,13 @@ import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.InfostoreFolderPath;
 import com.openexchange.groupware.infostore.utils.GetSwitch;
 import com.openexchange.groupware.infostore.utils.Metadata;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.GeoLocation;
 import com.openexchange.session.Session;
 import com.openexchange.tools.exceptions.SimpleIncorrectStringAttribute;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 public abstract class AbstractInfostoreAction extends AbstractDBAction {
 
@@ -299,7 +299,7 @@ public abstract class AbstractInfostoreAction extends AbstractDBAction {
                     JSONValue jValue = (JSONValue) coerced;
                     stmt.setBinaryStream(parameterIndex, jValue.getStream(true)); // meta
                 }
-            } catch (final JSONException e) {
+            } catch (JSONException e) {
                 throw new SQLException("Meta information could not be coerced to a JSON equivalent.", e);
             }
         }

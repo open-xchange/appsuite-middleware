@@ -49,11 +49,10 @@
 
 package com.openexchange.contactcollector.osgi;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
+import static com.openexchange.osgi.Tools.withRanking;
 import org.osgi.framework.BundleActivator;
-import org.osgi.framework.Constants;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.contactcollector.folder.ContactCollectorFolderCreator;
@@ -95,7 +94,8 @@ public class ContactCollectorActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
             ContextService.class, UserService.class, UserConfigurationService.class, ContactService.class,
-            ThreadPoolService.class, DatabaseService.class, ConfigurationService.class, UserPermissionService.class };
+            ThreadPoolService.class, DatabaseService.class, ConfigurationService.class, UserPermissionService.class,
+            ConfigViewFactory.class };
     }
 
     @Override
@@ -120,12 +120,11 @@ public class ContactCollectorActivator extends HousekeepingActivator {
         final ContactCollectorServiceImpl collectorInstance = new ContactCollectorServiceImpl(this);
         collectorInstance.start();
         this.collectorInstance = collectorInstance;
-        Dictionary<String, Object> props = new Hashtable<String, Object>(2);
-        props.put(Constants.SERVICE_RANKING, ContactCollectorServiceImpl.RANKING); //Default
+         //Default
 
         // Register services
         registerService(LoginHandlerService.class, new ContactCollectorFolderCreator(this));
-        registerService(ContactCollectorService.class, collectorInstance, props);
+        registerService(ContactCollectorService.class, collectorInstance, withRanking(ContactCollectorServiceImpl.RANKING));
         registerPreferenceItems();
     }
 

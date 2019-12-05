@@ -65,6 +65,9 @@ import com.openexchange.chronos.impl.rmi.ChronosRMIServiceImpl;
 import com.openexchange.chronos.impl.session.DefaultCalendarUtilities;
 import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
 import com.openexchange.chronos.rmi.ChronosRMIService;
+import com.openexchange.chronos.scheduling.SchedulingBroker;
+import com.openexchange.chronos.scheduling.changes.DescriptionService;
+import com.openexchange.chronos.scheduling.changes.SchedulingChangeService;
 import com.openexchange.chronos.service.CalendarAvailabilityService;
 import com.openexchange.chronos.service.CalendarEventNotificationService;
 import com.openexchange.chronos.service.CalendarHandler;
@@ -89,6 +92,7 @@ import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceSet;
 import com.openexchange.principalusecount.PrincipalUseCountService;
 import com.openexchange.quota.QuotaService;
+import com.openexchange.regional.RegionalSettingsService;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.user.UserService;
@@ -121,7 +125,9 @@ public class ChronosActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getOptionalServices() {
-        return new Class<?>[] { FreeBusyService.class, ContactCollectorService.class, ObjectUseCountService.class, CalendarAvailabilityService.class, PrincipalUseCountService.class };
+        return new Class<?>[] { FreeBusyService.class, ContactCollectorService.class, ObjectUseCountService.class, CalendarAvailabilityService.class,
+            PrincipalUseCountService.class, CalendarEventNotificationService.class, SchedulingBroker.class, SchedulingChangeService.class, DescriptionService.class,
+            RegionalSettingsService.class };
     }
 
     @Override
@@ -145,7 +151,7 @@ public class ChronosActivator extends HousekeepingActivator {
                 props.put("RMIName", ChronosRMIService.RMI_NAME);
                 registerService(Remote.class, new ChronosRMIServiceImpl(calendarUtilities), props);
             }
-            registerService(CalendarService.class, new CalendarServiceImpl(notificationService));
+            registerService(CalendarService.class, new CalendarServiceImpl(this));
             registerService(FreeBusyService.class, new FreeBusyServiceImpl());
             registerService(CalendarUtilities.class, calendarUtilities);
             // Availability disabled until further notice

@@ -55,6 +55,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.drive.DriveQuota;
+import com.openexchange.drive.DriveService;
 import com.openexchange.drive.DriveSettings;
 import com.openexchange.drive.json.internal.DefaultDriveSession;
 import com.openexchange.exception.OXException;
@@ -82,13 +83,15 @@ public class SettingsAction extends AbstractDriveAction {
         /*
          * get settings
          */
-        DriveSettings settings = getDriveService().getSettings(session);
+        DriveService driveService = getDriveService();
+        DriveSettings settings = driveService.getSettings(session);
         /*
          * return json result
          */
         JSONObject jsonObject = new JSONObject();
-        if (null != settings) {
-            try {
+        try {
+            if (null != settings) {
+                jsonObject.put("pathToRoot", settings.getPathToRoot());
                 jsonObject.put("helpLink", settings.getHelpLink());
                 DriveQuota driveQuota = settings.getQuota();
                 if (null != driveQuota) {
@@ -115,9 +118,9 @@ public class SettingsAction extends AbstractDriveAction {
                 jsonObject.put("capabilities", settings.getCapabilities());
                 jsonObject.put("minSearchChars", settings.getMinSearchChars());
                 jsonObject.put("hasTrashFolder", settings.hasTrashFolder());
-            } catch (JSONException e) {
-                throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
             }
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
         return new AJAXRequestResult(jsonObject, "json");
     }

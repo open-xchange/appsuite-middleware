@@ -50,14 +50,17 @@
 package com.openexchange.drive.events.apn2.internal;
 
 import static com.openexchange.java.Autoboxing.I;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import com.openexchange.drive.events.DriveContentChange;
 import com.openexchange.drive.events.DriveEvent;
 import com.openexchange.drive.events.DriveEventPublisher;
 import com.openexchange.drive.events.apn2.ApnsHttp2Options;
 import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
 import com.openexchange.drive.events.subscribe.Subscription;
+import com.openexchange.drive.events.subscribe.SubscriptionMode;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.threadpool.AbstractTask;
@@ -242,12 +245,24 @@ public abstract class ApnsHttp2DriveEventPublisher implements DriveEventPublishe
         if (null != pushTokenReference && subscription.matches(pushTokenReference)) {
             return null;
         }
-        return new ApnsHttp2Notification.Builder(subscription.getToken(), options.getTopic())
+        ApnsHttp2Notification.Builder builder = new ApnsHttp2Notification.Builder(subscription.getToken(), options.getTopic())
             .withCustomField("root", subscription.getRootFolderID())
             .withCustomField("action", "sync")
             .withContentAvailable(true)
             .withExpiration(TimeUnit.DAYS.toMillis(1L))
-        .build();
+        ;
+        if (event.isContentChangesOnly() && SubscriptionMode.SEPARATE.equals(subscription.getMode())) {
+            List<String> folderIds = new ArrayList<String>();
+            for (DriveContentChange contentChange : event.getContentChanges()) {
+                if (contentChange.isSubfolderOf(subscription.getRootFolderID())) {
+                    folderIds.add(contentChange.getFolderId());
+                }
+            }
+            if (false == folderIds.isEmpty()) {
+                builder.withCustomField("folderIds", folderIds);
+            }
+        }
+        return builder.build();
     }
 
     static boolean removeSubscription(Subscription subscription, DriveSubscriptionStore subscriptionStore) {

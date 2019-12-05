@@ -1,0 +1,16 @@
+/system?action=time:
+  get:
+    operationId: time
+    tags:
+      - System
+    summary: Simple API call to obtain the systems time in milliseconds
+    responses:
+      '200':
+        description: >
+          A JSON object containing the time value as long. The time is 
+          measured in milliseconds and is the difference between the 
+          current time and midnight, January 1, 1970 UTC
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TimeResponse'

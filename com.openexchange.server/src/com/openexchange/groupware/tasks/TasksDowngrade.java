@@ -58,12 +58,12 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.downgrade.DowngradeEvent;
 import com.openexchange.groupware.downgrade.DowngradeListener;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
+import com.openexchange.user.User;
 
 /**
  * This class implements the methods to delete tasks if a user loses
@@ -98,14 +98,14 @@ public class TasksDowngrade implements DowngradeListener {
             // - All tasks in public folders that can be only edited by this user.
             try {
                 removeTasks(session, ctx, permissionBits.getUserId(), con);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 throw e;
             }
         } else if (!permissionBits.canDelegateTasks()) {
             // Remove all delegations of tasks that the user created.
             try {
                 removeDelegations(session, ctx, permissionBits.getUserId(), permissionBits, con);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 throw e;
             }
         }
@@ -294,7 +294,7 @@ public class TasksDowngrade implements DowngradeListener {
                     update.sentEvent(session);
                     try {
                         update.updateReminder();
-                    } catch (final OXException e) {
+                    } catch (OXException e) {
                         LOG.error("Problem while updating reminder for a task.",
                             e);
                     }

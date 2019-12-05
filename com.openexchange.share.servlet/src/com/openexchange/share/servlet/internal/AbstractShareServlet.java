@@ -75,20 +75,17 @@ public class AbstractShareServlet extends HttpServlet {
      * @return The locale
      */
     public static Locale determineLocale(HttpServletRequest request, GuestInfo guestInfo) {
-        String langParam = request.getParameter("language");
-        if (Strings.isNotEmpty(langParam)) {
-            return new Locale(langParam);
+        Locale locale = null;
+        if (Strings.isNotEmpty(request.getParameter("language"))) {
+            locale = LocaleTools.getLocale(request.getParameter("language"));
         }
-
-        if (guestInfo != null) {
-            return guestInfo.getLocale();
+        if (null == locale && null != guestInfo) {
+            locale = guestInfo.getLocale();
         }
-
-        if (Strings.isNotEmpty(request.getHeader("Accept-Language"))) {
-            return request.getLocale();
+        if (null == locale && Strings.isNotEmpty(request.getHeader("Accept-Language"))) {
+            locale = request.getLocale();
         }
-
-        return LocaleTools.DEFAULT_LOCALE;
+        return null != locale ? locale : LocaleTools.DEFAULT_LOCALE;
     }
 
 }

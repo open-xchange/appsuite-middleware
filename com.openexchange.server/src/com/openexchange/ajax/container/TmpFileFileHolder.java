@@ -191,9 +191,9 @@ public final class TmpFileFileHolder implements IFileHolder {
                 out.write(buffer, 0, len);
             }
             out.flush();
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             Streams.close(in);
@@ -241,9 +241,9 @@ public final class TmpFileFileHolder implements IFileHolder {
     public InputStream getStream() throws OXException {
         try {
             return new FileInputStream(tmpFile);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
@@ -313,21 +313,6 @@ public final class TmpFileFileHolder implements IFileHolder {
         this.disposition = disposition;
     }
 
-    private static volatile File uploadDirectory;
-    private static File uploadDirectory() {
-        File tmp = uploadDirectory;
-        if (null == tmp) {
-            synchronized (TmpFileFileHolder.class) {
-                tmp = uploadDirectory;
-                if (null == tmp) {
-                    tmp = new File(ServerConfig.getProperty(ServerConfig.Property.UploadDirectory));
-                    uploadDirectory = tmp;
-                }
-            }
-        }
-        return tmp;
-    }
-
     /**
      * Creates a new empty file. If this method returns successfully then it is guaranteed that:
      * <ol>
@@ -374,7 +359,7 @@ public final class TmpFileFileHolder implements IFileHolder {
      */
     public static File newTempFile(String prefix, boolean autoManaged) throws OXException {
         try {
-            File tmpFile = File.createTempFile(null == prefix ? "open-xchange-tmpfile-" : prefix, ".tmp", uploadDirectory());
+            File tmpFile = File.createTempFile(null == prefix ? "open-xchange-tmpfile-" : prefix, ".tmp", ServerConfig.getTmpDir());
             tmpFile.deleteOnExit();
             if (autoManaged) {
                 LogProperties.addTempFile(tmpFile);

@@ -49,11 +49,13 @@
 
 package com.openexchange.dav.mixins;
 
+import static com.openexchange.dav.DAVTools.getExternalPath;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.openexchange.chronos.CalendarUserType;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
@@ -69,39 +71,43 @@ public class PrincipalURL extends SingleXMLPropertyMixin {
      * Gets the principal URL value.
      *
      * @param userID The identifier of the user to get the principal URL for
+     * @param configViewFactory The configuration view
      * @return The principal URL
      */
-    public static String forUser(int userID) {
-        return "/principals/users/" + userID;
+    public static String forUser(int userID, ConfigViewFactory configViewFactory) {
+        return getExternalPath(configViewFactory, "/principals/users/" + userID);
     }
 
     /**
      * Gets the principal URL value.
      *
      * @param groupID The identifier of the group to get the principal URL for
+     * @param configViewFactory The configuration view
      * @return The principal URL
      */
-    public static String forGroup(int groupID) {
-        return "/principals/groups/" + groupID;
+    public static String forGroup(int groupID, ConfigViewFactory configViewFactory) {
+        return getExternalPath(configViewFactory, "/principals/groups/" + groupID);
     }
 
     /**
      * Gets the principal URL value.
      *
      * @param resourceID The identifier of the resource to get the principal URL for
+     * @param configViewFactory The configuration view
      * @return The principal URL
      */
-    public static String forResource(int resourceID) {
-        return "/principals/resources/" + resourceID;
+    public static String forResource(int resourceID, ConfigViewFactory configViewFactory) {
+        return getExternalPath(configViewFactory, "/principals/resources/" + resourceID);
     }
 
     /**
      * Extracts the calendar user type along with the principal identifier from the supplied string representation of a principal URL.
      *
      * @param principalURL The principal URL to parse
+     * @param configViewFactory The configuration view
      * @return The parsed principal URL, or <code>null</code> if the URL couldn't be parsed
      */
-    public static PrincipalURL parse(String principalURL) {
+    public static PrincipalURL parse(String principalURL, ConfigViewFactory configViewFactory) {
         if (null != principalURL) {
             if (false == principalURL.startsWith("/")) {
                 try {
@@ -110,45 +116,51 @@ public class PrincipalURL extends SingleXMLPropertyMixin {
                     // ignore
                 }
             }
-            if (principalURL.startsWith("/principals/")) {
-                Matcher matcher = URL_PATTERN.matcher(principalURL);
-                if (matcher.find() && 2 == matcher.groupCount()) {
-                    try {
-                        switch (matcher.group(1)) {
-                            case "resources":
-                                return new PrincipalURL(Integer.parseInt(matcher.group(2)), CalendarUserType.RESOURCE);
-                            case "groups":
-                                return new PrincipalURL(Integer.parseInt(matcher.group(2)), CalendarUserType.GROUP);
-                            case "users":
-                                return new PrincipalURL(Integer.parseInt(matcher.group(2)), CalendarUserType.INDIVIDUAL);
-                            default:
-                                throw new IllegalArgumentException(matcher.group(1));
-                        }
-                    } catch (IllegalArgumentException e) {
-                        org.slf4j.LoggerFactory.getLogger(PrincipalURL.class).debug("Error parsing principal URL", e);
+            String path = getExternalPath(configViewFactory, "/principals/");
+            if (principalURL.startsWith(path)) {
+                principalURL = principalURL.substring(path.length());
+            }
+            Matcher matcher = URL_PATTERN.matcher(principalURL);
+            if (matcher.find() && 2 == matcher.groupCount()) {
+                try {
+                    switch (matcher.group(1)) {
+                        case "resources":
+                            return new PrincipalURL(Integer.parseInt(matcher.group(2)), CalendarUserType.RESOURCE, configViewFactory);
+                        case "groups":
+                            return new PrincipalURL(Integer.parseInt(matcher.group(2)), CalendarUserType.GROUP, configViewFactory);
+                        case "users":
+                            return new PrincipalURL(Integer.parseInt(matcher.group(2)), CalendarUserType.INDIVIDUAL, configViewFactory);
+                        default:
+                            throw new IllegalArgumentException(matcher.group(1));
                     }
+                } catch (IllegalArgumentException e) {
+                    org.slf4j.LoggerFactory.getLogger(PrincipalURL.class).debug("Error parsing principal URL", e);
                 }
             }
         }
         return null;
     }
 
-    private static final Pattern URL_PATTERN = Pattern.compile("/principals/(resources|users|groups)/(\\d+)/?");
+    private static final Pattern URL_PATTERN = Pattern.compile("(resources|users|groups)/(\\d+)/?");
     private static final String PROPERTY_NAME = "principal-URL";
 
     private final int principalID;
     private final CalendarUserType type;
+
+    private final ConfigViewFactory configViewFactory;
 
     /**
      * Initializes a new {@link PrincipalURL}.
      *
      * @param principalID The identifier of the principal
      * @param type The calendar user type of the principal
+     * @param configViewFactory The configuration view
      */
-    public PrincipalURL(int principalID, CalendarUserType type) {
+    public PrincipalURL(int principalID, CalendarUserType type, ConfigViewFactory configViewFactory) {
         super(Protocol.DAV_NS.getURI(), PROPERTY_NAME);
         this.principalID = principalID;
         this.type = type;
+        this.configViewFactory = configViewFactory;
     }
 
     /**
@@ -173,11 +185,11 @@ public class PrincipalURL extends SingleXMLPropertyMixin {
     protected String getValue() {
         String url;
         if (CalendarUserType.INDIVIDUAL.equals(type)) {
-            url = forUser(principalID);
+            url = forUser(principalID, configViewFactory);
         } else if (CalendarUserType.GROUP.equals(type)) {
-            url = forGroup(principalID);
+            url = forGroup(principalID, configViewFactory);
         } else if (CalendarUserType.RESOURCE.equals(type)) {
-            url = forResource(principalID);
+            url = forResource(principalID, configViewFactory);
         } else {
             throw new IllegalArgumentException(type.toString());
         }

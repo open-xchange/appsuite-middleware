@@ -103,7 +103,7 @@ public class ExtendedFormDescriptionsWriter extends FormDescriptionWriter {
         }
 
         final Map<Integer, String> options = formElement.getOptionsNew();
-        if(options != null && !options.isEmpty()) {
+        if (options != null && !options.isEmpty()) {
             final JSONObject jsonOptions = new JSONObject();
 
             final JSONArray keys = new JSONArray();

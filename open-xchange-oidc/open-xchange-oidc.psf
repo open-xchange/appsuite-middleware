@@ -3,6 +3,5 @@
 <provider id="org.eclipse.egit.core.GitProvider">
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.oidc"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.oidc.impl"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.nimbus"/>
 </provider>
 </psf>

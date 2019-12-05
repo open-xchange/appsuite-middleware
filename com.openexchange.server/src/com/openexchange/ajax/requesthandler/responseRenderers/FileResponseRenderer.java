@@ -52,13 +52,11 @@ package com.openexchange.ajax.requesthandler.responseRenderers;
 import static com.openexchange.java.Streams.close;
 import static com.openexchange.java.Strings.isEmpty;
 import java.io.Closeable;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.httpclient.HttpStatus;
@@ -70,17 +68,15 @@ import com.openexchange.ajax.fileholder.Readable;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.responseRenderers.actions.CheckParametersAction;
+import com.openexchange.ajax.requesthandler.responseRenderers.actions.CopyHeaderAction;
 import com.openexchange.ajax.requesthandler.responseRenderers.actions.IDataWrapper;
 import com.openexchange.ajax.requesthandler.responseRenderers.actions.IFileResponseRendererAction;
+import com.openexchange.ajax.requesthandler.responseRenderers.actions.ModifyCachingHeaderHeaderAction;
 import com.openexchange.ajax.requesthandler.responseRenderers.actions.OutputBinaryContentAction;
 import com.openexchange.ajax.requesthandler.responseRenderers.actions.PrepareResponseHeaderAction;
-import com.openexchange.ajax.requesthandler.responseRenderers.actions.RemovePragmaHeaderAction;
 import com.openexchange.ajax.requesthandler.responseRenderers.actions.SetBinaryInputStreamAction;
 import com.openexchange.ajax.requesthandler.responseRenderers.actions.TransformImageClientAction;
 import com.openexchange.ajax.requesthandler.responseRenderers.actions.UpdateETagHeaderAction;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.PropertyEvent;
-import com.openexchange.config.PropertyListener;
 import com.openexchange.exception.OXException;
 import com.openexchange.imageconverter.api.IImageClient;
 import com.openexchange.imagetransformation.ImageTransformationDeniedIOException;
@@ -88,7 +84,6 @@ import com.openexchange.imagetransformation.ImageTransformationService;
 import com.openexchange.imagetransformation.ScaleType;
 import com.openexchange.java.Streams;
 import com.openexchange.mail.mime.MimeType2ExtMap;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 
@@ -117,7 +112,6 @@ public class FileResponseRenderer extends AbstractListenerCollectingResponseRend
 
     // -------------------------------------------------------------------------------------------------------------------------------
 
-    protected final AtomicReference<File> tmpDirRef = new AtomicReference<>();
     private final TransformImageClientAction imageClientAction = new TransformImageClientAction();
     private final List<IFileResponseRendererAction> registeredActions;
 
@@ -131,35 +125,15 @@ public class FileResponseRenderer extends AbstractListenerCollectingResponseRend
         ImmutableList.Builder<IFileResponseRendererAction> registeredActions = ImmutableList.builder();
         registeredActions.add(new CheckParametersAction());
         registeredActions.add(imageClientAction);
+        registeredActions.add(new CopyHeaderAction());
         registeredActions.add(new SetBinaryInputStreamAction());
         registeredActions.add(new PrepareResponseHeaderAction());
-        registeredActions.add(new RemovePragmaHeaderAction());
+        registeredActions.add(new ModifyCachingHeaderHeaderAction());
         registeredActions.add(new UpdateETagHeaderAction());
         registeredActions.add(new OutputBinaryContentAction());
         this.registeredActions = registeredActions.build();
-
-        // Initialize rest
-        final ServerServiceRegistry registry = ServerServiceRegistry.getInstance();
-        // Get configuration service
-        final ConfigurationService cs = registry.getService(ConfigurationService.class);
-        if (null == cs) {
-            throw new IllegalStateException("Missing configuration service");
-        }
-        String path = cs.getProperty("UPLOAD_DIRECTORY", new PropertyListener() {
-
-            @Override
-            public void onPropertyChange(final PropertyEvent event) {
-                if (PropertyEvent.Type.CHANGED.equals(event.getType())) {
-                    tmpDirRef.set(getTmpDirByPath(event.getValue()));
-                }
-            }
-        });
-        tmpDirRef.set(getTmpDirByPath(path));
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.ajax.requesthandler.ResponseRenderer#getRanking()
-     */
     @Override
     public int getRanking() {
         return 0;
@@ -257,7 +231,7 @@ public class FileResponseRenderer extends AbstractListenerCollectingResponseRend
         final long length = fileHolder.getLength();
         final List<Closeable> closeables = new LinkedList<>();
         final String fileContentType = fileHolder.getContentType();
-        IDataWrapper data = new DataWrapper().setContentTypeByParameter(Boolean.FALSE).setLength(length).setFile(fileHolder).setRequest(req).setFileContentType(fileContentType).setFileName(fileName).setRequestData(requestData).setResponse(resp).setCloseAbles(closeables).setResult(result).setTmpDirReference(tmpDirRef);
+        IDataWrapper data = new DataWrapper().setContentTypeByParameter(Boolean.FALSE).setLength(length).setFile(fileHolder).setRequest(req).setFileContentType(fileContentType).setFileName(fileName).setRequestData(requestData).setResponse(resp).setCloseAbles(closeables).setResult(result);
 
         try {
             data.setUserAgent(AJAXUtility.sanitizeParam(req.getHeader("user-agent")));
@@ -273,7 +247,7 @@ public class FileResponseRenderer extends AbstractListenerCollectingResponseRend
             }
             return;
         } catch (OXException e) {
-            String message = "Exception while trying to output file";
+            String message = MSG_OUTPUT_EXCEPTION;
             LOG.error(message, e);
             if (AjaxExceptionCodes.BAD_REQUEST.equals(e)) {
                 Throwable cause = e;
@@ -296,8 +270,8 @@ public class FileResponseRenderer extends AbstractListenerCollectingResponseRend
             LOG.error("Exception while trying to output image", e);
             sendErrorSafe(HttpServletResponse.SC_NOT_ACCEPTABLE, e.getMessage(), resp);
         } catch (Exception e) {
-            String message = "Exception while trying to output file";
-            LOG.error("Exception while trying to output file", e);
+            String message = MSG_OUTPUT_EXCEPTION;
+            LOG.error(message, e);
             sendErrorSafe(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, message, resp);
         } finally {
             close(data.getDocumentData(), data.getFile());
@@ -383,29 +357,6 @@ public class FileResponseRenderer extends AbstractListenerCollectingResponseRend
     }
 
     /**
-     * Gets the appropriate directory to save to.
-     *
-     * @param path The path as indicated by configuration
-     * @return The directory
-     */
-    static File getTmpDirByPath(final String path) {
-        if (null == path) {
-            throw new IllegalArgumentException("Path is null. Probably property \"UPLOAD_DIRECTORY\" is not set.");
-        }
-        final File tmpDir = new File(path);
-        if (!tmpDir.exists()) {
-            if (!tmpDir.mkdirs()) {
-                throw new IllegalArgumentException("Directory " + path + " does not exist and cannot be created.");
-            }
-            LOG.info("Directory {} did not exist, but could be created.", path);
-        }
-        if (!tmpDir.isDirectory()) {
-            throw new IllegalArgumentException(path + " is not a directory.");
-        }
-        return tmpDir;
-    }
-
-    /**
      * {@link DataWrapper}
      *
      * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
@@ -427,7 +378,6 @@ public class FileResponseRenderer extends AbstractListenerCollectingResponseRend
         private AJAXRequestData requestData;
         private AJAXRequestResult result;
         private List<Closeable> closeables;
-        private AtomicReference<File> localTmpDirRef;
 
         /**
          * Initializes a new {@link DataWrapper}.
@@ -612,16 +562,6 @@ public class FileResponseRenderer extends AbstractListenerCollectingResponseRend
             return this;
         }
 
-        @Override
-        public AtomicReference<File> getTmpDirReference() {
-            return localTmpDirRef;
-        }
-
-        @Override
-        public IDataWrapper setTmpDirReference(AtomicReference<File> tmpDirReference) {
-            this.localTmpDirRef = tmpDirReference;
-            return this;
-        }
     } // End of class DataWrapper
 
     /**
@@ -650,4 +590,5 @@ public class FileResponseRenderer extends AbstractListenerCollectingResponseRend
             this.message = message;
         }
     } // End of class FileResponseRendererActionException
+
 }

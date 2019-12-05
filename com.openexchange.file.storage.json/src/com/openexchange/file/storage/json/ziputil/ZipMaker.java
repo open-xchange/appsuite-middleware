@@ -187,7 +187,7 @@ public class ZipMaker {
                             entry = new ZipArchiveEntry(path);
                             zipOutput.putArchiveEntry(entry);
                             break;
-                        } catch (final java.util.zip.ZipException e) {
+                        } catch (java.util.zip.ZipException e) {
                             final String message = e.getMessage();
                             if (message == null || !message.startsWith("duplicate entry")) {
                                 throw e;
@@ -246,7 +246,7 @@ public class ZipMaker {
                     }
                     zipOutput.putArchiveEntry(entry);
                     break;
-                } catch (final java.util.zip.ZipException e) {
+                } catch (java.util.zip.ZipException e) {
                     final String message = e.getMessage();
                     if (message == null || !message.startsWith("duplicate entry")) {
                         throw e;

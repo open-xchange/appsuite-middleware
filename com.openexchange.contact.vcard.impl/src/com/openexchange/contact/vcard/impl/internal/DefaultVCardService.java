@@ -180,7 +180,7 @@ public class DefaultVCardService implements VCardService {
         ChainingTextWriter writerChain = Ezvcard.write(vCards);
         applyOptions(getParametersOrDefault(parameters), writerChain);
         try {
-            if(parameters.isEnforceUtf8()) {
+            if (parameters.isEnforceUtf8()) {
                 writerChain.go(IOUtils.utf8Writer(fileHolder.asOutputStream()));
             } else {
                 writerChain.go(fileHolder.asOutputStream());

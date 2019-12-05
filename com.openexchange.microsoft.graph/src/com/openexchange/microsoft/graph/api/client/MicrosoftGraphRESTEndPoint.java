@@ -68,11 +68,6 @@ public enum MicrosoftGraphRESTEndPoint implements RESTEndPoint {
      */
     drive;
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.rest.client.RESTEndPoint#getEndPoint()
-     */
     @Override
     public String getEndPoint() {
         return name();

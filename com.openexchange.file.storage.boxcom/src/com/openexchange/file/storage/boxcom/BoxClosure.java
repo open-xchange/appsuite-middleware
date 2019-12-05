@@ -117,7 +117,7 @@ public abstract class BoxClosure<R> {
                 throw handleRestError(e);
             }
             throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", statusCode + " " + e.getResponse());
-        } catch (final UnsupportedEncodingException | RuntimeException e) {
+        } catch (UnsupportedEncodingException | RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }

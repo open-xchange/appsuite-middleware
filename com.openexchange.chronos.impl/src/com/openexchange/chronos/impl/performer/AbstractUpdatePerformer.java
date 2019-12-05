@@ -50,18 +50,7 @@
 package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.AlarmUtils.filterRelativeTriggers;
-import static com.openexchange.chronos.common.CalendarUtils.find;
-import static com.openexchange.chronos.common.CalendarUtils.getAlarmIDs;
-import static com.openexchange.chronos.common.CalendarUtils.getExceptionDates;
-import static com.openexchange.chronos.common.CalendarUtils.getFolderView;
-import static com.openexchange.chronos.common.CalendarUtils.getRecurrenceIds;
-import static com.openexchange.chronos.common.CalendarUtils.hasAttendeePrivileges;
-import static com.openexchange.chronos.common.CalendarUtils.hasExternalOrganizer;
-import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
-import static com.openexchange.chronos.common.CalendarUtils.isLastNonHiddenUserAttendee;
-import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
-import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
-import static com.openexchange.chronos.common.CalendarUtils.matches;
+import static com.openexchange.chronos.common.CalendarUtils.*;
 import static com.openexchange.chronos.impl.Check.classificationAllowsUpdate;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Utils.getCalendarUser;
@@ -108,16 +97,21 @@ import com.openexchange.chronos.common.AlarmUtils;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.common.mapping.AlarmMapper;
+import com.openexchange.chronos.common.mapping.AttendeeEventUpdate;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.Consistency;
+import com.openexchange.chronos.impl.JSONPrintableEvent;
 import com.openexchange.chronos.impl.Role;
 import com.openexchange.chronos.impl.Utils;
+import com.openexchange.chronos.impl.osgi.Services;
+import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.CollectionUpdate;
+import com.openexchange.chronos.service.EventUpdate;
 import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.storage.CalendarStorage;
@@ -140,6 +134,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
     protected final CalendarFolder folder;
     protected final Date timestamp;
     protected final ResultTracker resultTracker;
+    protected final SchedulingHelper schedulingHelper;
     protected EnumSet<Role> roles;
 
     /**
@@ -157,6 +152,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         this.calendarUserId = calendarUser.getEntity();
         this.timestamp = new Date();
         this.resultTracker = new ResultTracker(storage, session, folder, timestamp.getTime(), getSelfProtection());
+        this.schedulingHelper = new SchedulingHelper(Services.getServiceLookup(), session, folder, resultTracker);
         this.roles = roles;
     }
 
@@ -183,25 +179,38 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         this.calendarUserId = updatePerformer.calendarUserId;
         this.timestamp = updatePerformer.timestamp;
         this.resultTracker = updatePerformer.resultTracker;
+        this.schedulingHelper = updatePerformer.schedulingHelper;
         this.roles = updatePerformer.roles;
+    }
+
+    /**
+     * Prepares a new change exception for a recurring event series. A new object identifier is acquired from the storage implicitly.
+     *
+     * @param originalMasterEvent The original master event
+     * @param recurrenceId The recurrence identifier
+     * @return The prepared exception event
+     */
+    protected Event prepareException(Event originalMasterEvent, RecurrenceId recurrenceId) throws OXException {
+        return prepareException(originalMasterEvent, recurrenceId, storage.getEventStorage().nextId());
     }
 
     /**
      * Prepares a new change exception for a recurring event series.
      *
      * @param originalMasterEvent The original master event
-     * @param recurrenceID The recurrence identifier
+     * @param recurrenceId The recurrence identifier
+     * @param objectId The object identifier to take over for the prepared exception
      * @return The prepared exception event
      */
-    protected Event prepareException(Event originalMasterEvent, RecurrenceId recurrenceID) throws OXException {
+    protected Event prepareException(Event originalMasterEvent, RecurrenceId recurrenceId, String objectId) throws OXException {
         Event exceptionEvent = EventMapper.getInstance().copy(originalMasterEvent, new Event(), true, (EventField[]) null);
-        exceptionEvent.setId(storage.getEventStorage().nextId());
-        exceptionEvent.setRecurrenceId(recurrenceID);
+        exceptionEvent.setId(objectId);
+        exceptionEvent.setRecurrenceId(recurrenceId);
         exceptionEvent.setRecurrenceRule(null);
         exceptionEvent.setDeleteExceptionDates(null);
-        exceptionEvent.setChangeExceptionDates(new TreeSet<RecurrenceId>(Collections.singleton(recurrenceID)));
-        exceptionEvent.setStartDate(CalendarUtils.calculateStart(originalMasterEvent, recurrenceID));
-        exceptionEvent.setEndDate(CalendarUtils.calculateEnd(originalMasterEvent, recurrenceID));
+        exceptionEvent.setChangeExceptionDates(new TreeSet<RecurrenceId>(Collections.singleton(recurrenceId)));
+        exceptionEvent.setStartDate(CalendarUtils.calculateStart(originalMasterEvent, recurrenceId));
+        exceptionEvent.setEndDate(CalendarUtils.calculateEnd(originalMasterEvent, recurrenceId));
         Consistency.setCreated(timestamp, exceptionEvent, originalMasterEvent.getCreatedBy());
         Consistency.setModified(session, timestamp, exceptionEvent, session.getUserId());
         return exceptionEvent;
@@ -274,14 +283,16 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
      * </ul>
      *
      * @param originalEvent The original event to delete
+     * @return The deleted event(s), possibly more than one in case overridden instances were deleted along with the series master
      */
-    protected void delete(Event originalEvent) throws OXException {
+    protected List<Event> delete(Event originalEvent) throws OXException {
         /*
          * recursively delete any existing event exceptions
          */
+        List<Event> deletedEvents = new ArrayList<Event>();
         if (isSeriesMaster(originalEvent)) {
             for (Event changeException : loadExceptionData(originalEvent)) {
-                delete(changeException);
+                deletedEvents.addAll(delete(changeException));
             }
         }
         /*
@@ -293,15 +304,17 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         tombstone.setAttendees(storage.getUtilities().getTombstones(originalEvent.getAttendees()));
         storage.getEventStorage().insertEventTombstone(tombstone);
         storage.getAttendeeStorage().insertAttendeeTombstones(id, tombstone.getAttendees());
-        storage.getAlarmStorage().deleteAlarms(id);
         storage.getAttachmentStorage().deleteAttachments(session.getSession(), folder.getId(), id, originalEvent.getAttachments());
-        storage.getEventStorage().deleteEvent(id);
-        storage.getAttendeeStorage().deleteAttendees(id);
         storage.getAlarmTriggerStorage().deleteTriggers(id);
+        storage.getAlarmStorage().deleteAlarms(id);
+        storage.getAttendeeStorage().deleteAttendees(id);
+        storage.getEventStorage().deleteEvent(id);
         /*
-         * track deletion in result
+         * track deletion in result & return deleted events
          */
         resultTracker.trackDeletion(originalEvent);
+        deletedEvents.add(originalEvent);
+        return deletedEvents;
     }
 
     /**
@@ -322,14 +335,17 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
      *
      * @param originalEvent The original event to delete
      * @param originalAttendee The original attendee to delete
+     * @return The performed event updates as {@link AttendeeEventUpdate}; possibly more than one in case the attendee was removed from
+     *         additional overridden instances along with the series master
      */
-    protected void delete(Event originalEvent, Attendee originalAttendee) throws OXException {
+    protected List<EventUpdate> delete(Event originalEvent, Attendee originalAttendee) throws OXException {
         /*
          * recursively delete any existing event exceptions for this attendee
          */
+        List<EventUpdate> attendeeEventUpdates = new ArrayList<EventUpdate>();
         int userId = originalAttendee.getEntity();
         if (isSeriesMaster(originalEvent)) {
-            deleteExceptions(originalEvent, originalEvent.getChangeExceptionDates(), userId);
+            attendeeEventUpdates.addAll(deleteExceptions(originalEvent, originalEvent.getChangeExceptionDates(), userId));
         }
         /*
          * mark event as deleted for this attendee & insert appropriate tombstone record
@@ -343,6 +359,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         updatedAttendee.setHidden(true);
         updatedAttendee.setPartStat(ParticipationStatus.DECLINED);
         updatedAttendee.setTransp(TimeTransparency.TRANSPARENT);
+        updatedAttendee.setComment(session.get(CalendarParameters.PARAMETER_COMMENT, String.class));
         storage.getAttendeeStorage().updateAttendee(id, updatedAttendee);
         storage.getAlarmStorage().deleteAlarms(id, userId);
         /*
@@ -351,11 +368,13 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         touch(id);
         Event updatedEvent = loadEventData(id);
         resultTracker.trackUpdate(originalEvent, updatedEvent);
+        attendeeEventUpdates.add(new AttendeeEventUpdate(originalEvent, originalAttendee, updatedAttendee));
 
         // Update alarm trigger
         Map<Integer, List<Alarm>> alarms = storage.getAlarmStorage().loadAlarms(updatedEvent);
         storage.getAlarmTriggerStorage().deleteTriggers(updatedEvent.getId());
         storage.getAlarmTriggerStorage().insertTriggers(updatedEvent, alarms);
+        return attendeeEventUpdates;
     }
 
     /**
@@ -368,25 +387,31 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
      * @param seriesMaster The series master event to delete the exceptions from
      * @param exceptionDates The recurrence identifiers of the change exceptions to delete
      * @param userID The identifier of the user attendee to delete
+     * @return The performed event updates as {@link AttendeeEventUpdate}; possibly more than one in case the attendee was removed from
+     *         additional overridden instances along with the series master
      */
-    protected void deleteExceptions(Event seriesMaster, Collection<RecurrenceId> exceptionDates, int userID) throws OXException {
+    protected List<EventUpdate> deleteExceptions(Event seriesMaster, Collection<RecurrenceId> exceptionDates, int userID) throws OXException {
+        List<EventUpdate> attendeeEventUpdates = new ArrayList<EventUpdate>();
         for (Event originalExceptionEvent : loadExceptionData(seriesMaster, exceptionDates)) {
             Attendee originalUserAttendee = find(originalExceptionEvent.getAttendees(), userID);
             if (null != originalUserAttendee) {
-                delete(originalExceptionEvent, originalUserAttendee);
+                attendeeEventUpdates.addAll(delete(originalExceptionEvent, originalUserAttendee));
             }
         }
+        return attendeeEventUpdates;
     }
 
     /**
      * Virtually deletes a specific internal user attendee from a specific occurrence of a series event that does not yet exist as change
      * exception by setting the <i>hidden</i>-flag and participation status accordingly.
      *
-     * @param originalMasterEvent The original series master event
+     * @param originalSeriesMaster The original series master event
      * @param recurrenceId The recurrence identifier of the occurrence to remove the attendee for
      * @param originalAttendee The original attendee to delete from the recurrence
+     * @return A list containing the performed update of the change exception as {@link AttendeeEventUpdate}
+     * @return The newly created change exception event
      */
-    protected void deleteFromRecurrence(Event originalSeriesMaster, RecurrenceId recurrenceId, Attendee originalAttendee) throws OXException {
+    protected List<EventUpdate> deleteFromRecurrence(Event originalSeriesMaster, RecurrenceId recurrenceId, Attendee originalAttendee) throws OXException {
         /*
          * prepare & insert a plain exception first, based on the original data from the master, marking the attendee as deleted
          */
@@ -418,6 +443,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         addChangeExceptionDate(originalSeriesMaster, recurrenceId, false);
         Event updatedMasterEvent = loadEventData(originalSeriesMaster.getId());
         resultTracker.trackUpdate(originalSeriesMaster, updatedMasterEvent);
+        AttendeeEventUpdate attendeeEventUpdate = new AttendeeEventUpdate(newExceptionEvent, originalAttendee, updatedAttendee);
         /*
          * reset alarm triggers for series master event and new change exception
          */
@@ -425,6 +451,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         storage.getAlarmTriggerStorage().insertTriggers(updatedMasterEvent, seriesMasterAlarms);
         storage.getAlarmTriggerStorage().deleteTriggers(updatedExceptionEvent.getId());
         storage.getAlarmTriggerStorage().insertTriggers(updatedExceptionEvent, storage.getAlarmStorage().loadAlarms(updatedExceptionEvent));
+        return Collections.singletonList(attendeeEventUpdate);
     }
 
     /**
@@ -1058,6 +1085,16 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
             }
             throw e;
         }
+    }
+    
+    /**
+     * If <code>TRACE</code> logging is enabled, the original and the updated event
+     * will be logged as JSON
+     *
+     * @param update The event update to log
+     */
+    protected void logPerform(EventUpdate update) {
+        LOG.trace("Original: >\n{}\nUpdated: >\n{}", new JSONPrintableEvent(session, update.getOriginal()), new JSONPrintableEvent(session, update.getUpdate()));
     }
 
 }

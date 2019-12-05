@@ -56,12 +56,12 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.text.ParseException;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.locks.Lock;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -103,11 +103,11 @@ import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.ajax.login.LoginTools;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.LoginExceptionCodes;
+import com.openexchange.authentication.LoginInfo;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
@@ -126,9 +126,15 @@ import com.openexchange.oidc.OIDCExceptionCode;
 import com.openexchange.oidc.OIDCExceptionHandler;
 import com.openexchange.oidc.impl.OIDCBackendConfigImpl;
 import com.openexchange.oidc.impl.OIDCConfigImpl;
+import com.openexchange.oidc.impl.OIDCTokenRefresher;
 import com.openexchange.oidc.osgi.Services;
 import com.openexchange.oidc.tools.OIDCTools;
 import com.openexchange.session.Session;
+import com.openexchange.session.SessionDescription;
+import com.openexchange.session.oauth.OAuthTokens;
+import com.openexchange.session.oauth.RefreshResult;
+import com.openexchange.session.oauth.SessionOAuthTokenService;
+import com.openexchange.session.oauth.TokenRefreshConfig;
 import com.openexchange.session.reservation.EnhancedAuthenticated;
 import com.openexchange.session.reservation.Reservation;
 import com.openexchange.session.reservation.SessionReservationService;
@@ -138,6 +144,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Cookies;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 /**
@@ -206,7 +213,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
     public JWSAlgorithm getJWSAlgorithm() throws OXException {
         JWSAlgorithm algorithm = JWSAlgorithm.RS256;
         String algorithmString = this.getBackendConfig().getJWSAlgortihm();
-        if (algorithmString != null && !algorithmString.isEmpty()) {
+        if (algorithmString != null && Strings.isNotEmpty(algorithmString)) {
             algorithm = this.getAlgorithmFromString(algorithmString);
         }
         LOG.trace("getJWSAlgorithm() result: {}", algorithm.getName());
@@ -227,13 +234,13 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
     }
 
     @Override
-    public IDTokenClaimsSet validateIdToken(JWT idToken, String nounce) throws OXException {
-        LOG.trace("IDTokenClaimsSet validateIdToken(JWT idToken: {},String nounce: {})", idToken.getParsedString(), nounce);
+    public IDTokenClaimsSet validateIdToken(JWT idToken, String nonce) throws OXException {
+        LOG.trace("IDTokenClaimsSet validateIdToken(JWT idToken: {},String nonce: {})", idToken.getParsedString(), nonce);
         IDTokenClaimsSet result = null;
         JWSAlgorithm expectedJWSAlg = this.getJWSAlgorithm();
         try {
             IDTokenValidator idTokenValidator = new IDTokenValidator(new Issuer(this.getBackendConfig().getOpIssuer()), new ClientID(this.getBackendConfig().getClientID()), expectedJWSAlg, new URL(this.getBackendConfig().getOpJwkSetEndpoint()));
-            result = idTokenValidator.validate(idToken, new Nonce(nounce));
+            result = idTokenValidator.validate(idToken, Strings.isEmpty(nonce) ? null : new Nonce(nonce));
         } catch (BadJOSEException e) {
             throw OIDCExceptionCode.IDTOKEN_VALIDATON_FAILED_CONTENT.create(e, e.getMessage());
         } catch (JOSEException e) {
@@ -285,105 +292,140 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
     @Override
     public void finishLogout(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String afterLogoutURI = this.getBackendConfig().getRpRedirectURILogout();
-        if (!afterLogoutURI.isEmpty() && !response.isCommitted()) {
+        if (Strings.isNotEmpty(afterLogoutURI) && !response.isCommitted()) {
             response.sendRedirect(afterLogoutURI);
         }
     }
 
     @Override
     public AuthenticationInfo resolveAuthenticationResponse(HttpServletRequest request, OIDCTokenResponse tokenResponse) throws OXException {
+        return resolveAuthenticationResponse(tokenResponse);
+    }
+
+    @Override
+    public AuthenticationInfo resolveAuthenticationResponse(LoginInfo loginInfo, OIDCTokenResponse tokenResponse) throws OXException {
+        return resolveAuthenticationResponse(tokenResponse);
+    }
+
+    private AuthenticationInfo resolveAuthenticationResponse(OIDCTokenResponse tokenResponse) throws OXException {
         JWT idToken = tokenResponse.getOIDCTokens().getIDToken();
         if (null == idToken) {
-            throw OXException.general("Missing IDToken");
+            throw OIDCExceptionCode.UNABLE_TO_LOAD_USERINFO.create("Missing IDToken");
         }
 
-        String subject = "";
+        LOG.debug("Trying to resolve user for ID token: {}", idToken.serialize());
+        OIDCBackendConfig config = getBackendConfig();
+        String contextClaim;
+        String userClaim;
         try {
             JWTClaimsSet jwtClaimsSet = idToken.getJWTClaimsSet();
             if (null == jwtClaimsSet) {
                 throw OIDCExceptionCode.UNABLE_TO_LOAD_USERINFO.create("Failed to get the JWTClaimSet from idToken.");
             }
-            subject = jwtClaimsSet.getSubject();
+
+            contextClaim = jwtClaimsSet.getStringClaim(config.getContextLookupClaim());
+            if (Strings.isEmpty(contextClaim)) {
+                throw OIDCExceptionCode.UNABLE_TO_LOAD_USERINFO.create("Unable to get a valid context claim: " + config.getContextLookupClaim());
+            }
+
+            userClaim = jwtClaimsSet.getStringClaim(config.getUserLookupClaim());
+            if (Strings.isEmpty(userClaim)) {
+                throw OIDCExceptionCode.UNABLE_TO_LOAD_USERINFO.create("Unable to get a valid user claim: " + config.getUserLookupClaim());
+            }
         } catch (java.text.ParseException e) {
-            throw OIDCExceptionCode.UNABLE_TO_LOAD_USERINFO.create(e, "Failed to get the JWTClaimSet from idToken.");
+            throw OIDCExceptionCode.UNABLE_TO_LOAD_USERINFO.create(e, "Failed to parse claim from idToken.");
         }
 
-        if (Strings.isEmpty(subject)) {
-            throw OIDCExceptionCode.UNABLE_TO_LOAD_USERINFO.create("unable to get a valid subject.");
-        }
-        AuthenticationInfo resultInfo = this.loadUserFromServer(subject);
+        String contextName = config.getContextLookupNamePart().getFrom(contextClaim, Authenticated.DEFAULT_CONTEXT_INFO);
+        String userName = config.getUserLookupNamePart().getFrom(userClaim, userClaim);
+
+        AuthenticationInfo resultInfo = this.loadUserFromServer(contextName, userName);
         resultInfo.setProperty(AUTH_RESPONSE, tokenResponse.toJSONObject().toJSONString());
         return resultInfo;
     }
 
-    private AuthenticationInfo loadUserFromServer(String subject) throws OXException {
-        LOG.trace("loadUserFromServer(String subject: {})", subject);
+    private AuthenticationInfo loadUserFromServer(String contextInfo, String userName) throws OXException {
+        LOG.trace("loadUserFromServer(String contextName: {}, String userName: {})", contextInfo, userName);
         ContextService contextService = Services.getService(ContextService.class);
         UserService userService = Services.getService(UserService.class);
-        String[] userData = subject.split("@");
-        if (userData.length != 2) {
-            throw OIDCExceptionCode.BAD_SUBJECT.create(subject);
+        int contextId = contextService.getContextId(contextInfo);
+        if (contextId < 0) {
+            LOG.debug("Unknown context for login mapping '{}'", contextInfo);
+            throw LoginExceptionCodes.INVALID_CREDENTIALS_MISSING_CONTEXT_MAPPING.create(contextInfo);
         }
-        int contextId = contextService.getContextId(userData[1]);
-        int userId = userService.getUserId(userData[0], contextService.getContext(contextId));
-        return new AuthenticationInfo(contextId, userId);
+
+        int userId = userService.getUserId(userName, contextService.getContext(contextId));
+        AuthenticationInfo authInfo = new AuthenticationInfo(contextId, userId);
+        authInfo.setProperty(OIDCTools.CONTEXT_LOGIN_INFO, contextInfo);
+        authInfo.setProperty(OIDCTools.USER_LOGIN_INFO, userName);
+        return authInfo;
     }
 
     @Override
     public void updateSession(Session session, Map<String, String> tokenMap) throws OXException {
         LOG.trace("updateSession(Session session: {}, Map<String, String> tokenMap.size(): {})", session.getSessionID(), I(tokenMap.size()));
-        Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
-        if (lock == null) {
-            lock = Session.EMPTY_LOCK;
-        }
-        lock.lock();
-        try {
-            OIDCTools.addParameterToSession(session, tokenMap, OIDCTools.IDTOKEN, OIDCTools.IDTOKEN);
-            OIDCTools.addParameterToSession(session, tokenMap, OIDCTools.ACCESS_TOKEN, Session.PARAM_OAUTH_ACCESS_TOKEN);
-            OIDCTools.addParameterToSession(session, tokenMap, OIDCTools.REFRESH_TOKEN, Session.PARAM_OAUTH_REFRESH_TOKEN);
-            OIDCTools.addParameterToSession(session, tokenMap, OIDCTools.ACCESS_TOKEN_EXPIRY, Session.PARAM_OAUTH_ACCESS_TOKEN_EXPIRY_DATE);
-
-            SessionStorageService sessionStorageService = Services.getService(SessionStorageService.class);
-            if (sessionStorageService != null) {
-                sessionStorageService.addSession(session);
-            } else {
-                SessiondService sessiondService = Services.getService(SessiondService.class);
-                sessiondService.storeSession(session.getSessionID());
+        Optional<OAuthTokens> tokens = OIDCTools.convertTokenMap(tokenMap);
+        if (tokens.isPresent()) {
+            SessionOAuthTokenService tokenService = Services.getService(SessionOAuthTokenService.class);
+            try {
+                tokenService.setInSessionAtomic(session, tokens.get());
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw OXException.general("Interrupted", e);
             }
-        } finally {
-            lock.unlock();
+        }
+
+        OIDCTools.addParameterToSession(session, tokenMap, OIDCTools.IDTOKEN, OIDCTools.IDTOKEN);
+        String backendPath = tokenMap.get(OIDCTools.BACKEND_PATH);
+        if (backendPath != null) {
+            session.setParameter(OIDCTools.BACKEND_PATH, backendPath);
+        }
+
+        SessionStorageService sessionStorageService = Services.getService(SessionStorageService.class);
+        if (sessionStorageService != null) {
+            sessionStorageService.addSession(session);
+        } else {
+            SessiondService sessiondService = Services.getService(SessiondService.class);
+            sessiondService.storeSession(session.getSessionID());
         }
     }
 
+    /**
+     * @deprecated Use {@link SessionOAuthTokenService} and {@link OIDCTokenRefresher}
+     */
+    @Deprecated
     @Override
     public boolean updateOauthTokens(Session session) throws OXException {
         LOG.trace("updateOauthTokens(Session session: {})", session.getSessionID());
-        AccessTokenResponse accessToken = null;
+        SessionOAuthTokenService tokenService = Services.getService(SessionOAuthTokenService.class);
         try {
-        	accessToken = this.loadAccessToken(session);
-        } catch (OXException e) {
-        	if (e.getCode() == OIDCExceptionCode.UNABLE_TO_RELOAD_ACCESSTOKEN.getNumber()) {
-        		LOG.info(e.getMessage());
-			} else {
-				throw e;
-			}
-        }
-        
-        if (accessToken == null || accessToken.getTokens() == null || accessToken.getTokens().getAccessToken() == null || accessToken.getTokens().getRefreshToken() == null) {
+            OIDCTokenRefresher refresher = new OIDCTokenRefresher(this, session);
+            TokenRefreshConfig refreshConfig = OIDCTools.getTokenRefreshConfig(getBackendConfig());
+            RefreshResult result = tokenService.checkOrRefreshTokens(session, refresher, refreshConfig);
+            if (result.isSuccess()) {
+                return true;
+            }
+
+            if (result.hasException()) {
+                LOG.warn("Error while refreshing oauth tokens for session '{}': {}", session.getSessionID(), result.getErrorDesc(), result.getException());
+            } else {
+                LOG.warn("Error while refreshing oauth tokens for session '{}': {}", session.getSessionID(), result.getErrorDesc());
+            }
+
             return false;
+        } catch (InterruptedException e) {
+            LOG.warn("Thread was interrupted while checking session oauth tokens");
+            // keep interrupted state
+            Thread.currentThread().interrupt();
+            throw OXException.general("Interrupted", e);
         }
-        
-        Map<String, String> tokenMap = new HashMap<>();
-        tokenMap.put(OIDCTools.ACCESS_TOKEN, accessToken.getTokens().getAccessToken().getValue());
-        tokenMap.put(OIDCTools.REFRESH_TOKEN, accessToken.getTokens().getRefreshToken().getValue());
-        long expiryDate = new Date().getTime();
-        expiryDate += accessToken.getTokens().getAccessToken().getLifetime() * 1000;
-        tokenMap.put(OIDCTools.ACCESS_TOKEN_EXPIRY, String.valueOf(expiryDate));
-        this.updateSession(session, tokenMap);
-        return true;
     }
 
-    private AccessTokenResponse loadAccessToken(Session session) throws OXException {
+    /**
+     * @deprecated Use {@link SessionOAuthTokenService} and {@link OIDCTokenRefresher}
+     */
+    @Deprecated
+    protected AccessTokenResponse loadAccessToken(Session session) throws OXException {
         LOG.trace("loadAccessToken(Session session: {})", session.getSessionID());
         RefreshToken refreshToken = new RefreshToken((String) session.getParameter(Session.PARAM_OAUTH_REFRESH_TOKEN));
         AuthorizationGrant refreshTokenGrant = new RefreshTokenGrant(refreshToken);
@@ -403,22 +445,25 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
             }
             return (AccessTokenResponse) response;
         } catch (com.nimbusds.oauth2.sdk.ParseException | IOException e) {
-            throw OIDCExceptionCode.UNABLE_TO_RELOAD_ACCESSTOKEN.create(e);
+            throw OIDCExceptionCode.UNABLE_TO_RELOAD_ACCESSTOKEN.create(e, e.getMessage());
         }
     }
 
     @Override
     public boolean isTokenExpired(Session session) throws OXException {
         LOG.trace("isTokenExpired(Session session: {})", session.getSessionID());
-        long oauthRefreshTime = this.getBackendConfig().getOauthRefreshTime();
-        if (!session.containsParameter(Session.PARAM_OAUTH_ACCESS_TOKEN_EXPIRY_DATE)) {
-            return false;
-        }
+        SessionOAuthTokenService tokenService = Services.getService(SessionOAuthTokenService.class);
         try {
-            long expiryDate = Long.parseLong((String) session.getParameter(Session.PARAM_OAUTH_ACCESS_TOKEN_EXPIRY_DATE));
-            return System.currentTimeMillis() >= (expiryDate - oauthRefreshTime);
-        } catch (@SuppressWarnings("unused") NumberFormatException e) {
-            return true;
+            Optional<OAuthTokens> optTokens = tokenService.getFromSessionAtomic(session);
+            if (!optTokens.isPresent()) {
+                return false;
+            }
+
+            return optTokens.get().accessExpiresWithin(this.getBackendConfig().getOauthRefreshTime(), TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+         // keep interrupted state
+            Thread.currentThread().interrupt();
+            throw OXException.general("Interrupted", e);
         }
     }
 
@@ -441,7 +486,9 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
         SessionUtility.removeJSESSIONID(request, response);
         if (this.getBackendConfig().isAutologinEnabled()) {
             Cookie autologinCookie = OIDCTools.loadAutologinCookie(request, getLoginConfiguration());
-            SessionUtility.removeCookie(autologinCookie, "", autologinCookie.getDomain(), response);
+            if (autologinCookie != null) {
+                SessionUtility.removeCookie(autologinCookie, "", autologinCookie.getDomain(), response);
+            }
         }
     }
 
@@ -586,41 +633,26 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
 
             @Override
             public Authenticated doAuthentication(LoginResultImpl loginResult) throws OXException {
-                Authenticated authenticated = enhanceAuthenticated(getDefaultAuthenticated(context, user), state);
+                Authenticated authenticated = enhanceAuthenticated(OIDCTools.getDefaultAuthenticated(context, user, state), state);
 
                 return new EnhancedAuthenticated(authenticated) {
 
                     @Override
-                    protected void doEnhanceSession(Session session) {
-                        LOG.trace("doEnhanceSession(Session session: {})", session.getSessionID());
+                    protected void doEnhanceSession(Session ses) {
+                        LOG.trace("doEnhanceSession(Session session: {})", ses.getSessionID());
+                        SessionDescription session = (SessionDescription) ses;
+                        session.setStaySignedIn(false);
                         if (oidcAutologinCookieValue != null) {
                             session.setParameter(OIDCTools.SESSION_COOKIE, oidcAutologinCookieValue);
                         }
-                        session.setParameter(OIDCTools.IDTOKEN, state.get(OIDCTools.IDTOKEN));
-                        OIDCTools.addParameterToSession(session, state, OIDCTools.ACCESS_TOKEN, Session.PARAM_OAUTH_ACCESS_TOKEN);
-                        OIDCTools.addParameterToSession(session, state, OIDCTools.REFRESH_TOKEN, Session.PARAM_OAUTH_REFRESH_TOKEN);
-                        OIDCTools.addParameterToSession(session, state, OIDCTools.ACCESS_TOKEN_EXPIRY, Session.PARAM_OAUTH_ACCESS_TOKEN_EXPIRY_DATE);
-                        session.setParameter(OIDCTools.BACKEND_PATH, getPath());
+
+                        Map<String, String> params = new HashMap<>(state);
+                        params.put(OIDCTools.BACKEND_PATH, getPath());
+                        OIDCTools.setSessionParameters(session, params);
                     }
                 };
             }
         });
-    }
-
-    Authenticated getDefaultAuthenticated(final Context context, final User user) {
-        LOG.trace("getDefaultAuthenticated(final Context context: {}, final User user: {})", I(context.getContextId()), I(user.getId()));
-        return new Authenticated() {
-
-            @Override
-            public String getUserInfo() {
-                return user.getLoginInfo();
-            }
-
-            @Override
-            public String getContextInfo() {
-                return context.getLoginInfo()[0];
-            }
-        };
     }
 
     private Session performSessionAdditions(LoginResult loginResult, HttpServletRequest request, HttpServletResponse response, String idToken) throws OXException {

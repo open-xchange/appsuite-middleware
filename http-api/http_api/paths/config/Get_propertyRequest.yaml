@@ -1,0 +1,24 @@
+/config?action=get_property:
+  get:
+    operationId: getConfigProperty
+    tags:
+      - Config
+    summary: Gets a property of the configuration.
+    parameters:
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - in: query
+        name: name
+        description: The name of the property to return.
+        required: true
+        schema:
+          type: string
+    responses:
+      '200':
+        description: >-
+          A JSON response providing the property's name and its value. In case
+          of errors the responsible fields in the response are filled (see
+          [Error handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfigPropertyResponse'

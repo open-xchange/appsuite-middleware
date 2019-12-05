@@ -65,4 +65,30 @@ properties:
     related: 
     file: spamhandler_cloudmark.properties
     packageName: open-xchange-spamhandler-cloudmark
-    tags: ["Spam Handler", "Cloudmark"] 
+    tags: ["Spam Handler", "Cloudmark"]
+  - key: com.openexchange.spamhandler.cloudmark.spam.subjectForWrappingMessage
+    description: |
+      Specifies an optional subject for the message, which holds the spam message
+      as a nested message. Thus this options is only effective if
+      "com.openexchange.spamhandler.cloudmark.wrapMessage" is set to "true".
+    defaultValue: empty
+    version: 
+    reloadable: true
+    configcascadeAware: true
+    related: 
+    file: spamhandler_cloudmark.properties
+    packageName: open-xchange-spamhandler-cloudmark
+    tags: ["Spam Handler", "Cloudmark"]
+  - key: com.openexchange.spamhandler.cloudmark.ham.subjectForWrappingMessage
+    description: |
+      Specifies an optional subject for the message, which holds the ham message
+      as a nested message. Thus this options is only effective if
+      "com.openexchange.spamhandler.cloudmark.wrapMessage" is set to "true".
+    defaultValue: empty
+    version: 
+    reloadable: true
+    configcascadeAware: true
+    related: 
+    file: spamhandler_cloudmark.properties
+    packageName: open-xchange-spamhandler-cloudmark
+    tags: ["Spam Handler", "Cloudmark"]

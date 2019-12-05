@@ -65,11 +65,11 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.arrays.Arrays;
+import com.openexchange.user.User;
+import com.openexchange.user.UserExceptionCode;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 
@@ -101,7 +101,7 @@ public class Tools {
             while (result.next()) {
                 retval.add(Integer.valueOf(result.getInt(1)));
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw ContextExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
@@ -150,7 +150,7 @@ public class Tools {
                     closeSQLStuff(result, stmt);
                 }
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UserExceptionCode.LOAD_FAILED.create(e, e.getMessage());
         } finally {
             dbService.backReadOnly(contextId, readOnly);
@@ -176,7 +176,7 @@ public class Tools {
             if (result.next()) {
                 return result.getInt(TOTAL);
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UserExceptionCode.LOAD_FAILED.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
@@ -204,7 +204,7 @@ public class Tools {
             if (result.next()) {
                 return result.getInt(TOTAL);
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UserExceptionCode.LOAD_FAILED.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
@@ -232,7 +232,7 @@ public class Tools {
             if (result.next()) {
                 return result.getInt(TOTAL);
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UserExceptionCode.LOAD_FAILED.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
@@ -256,7 +256,7 @@ public class Tools {
                 tmp.add(result.getInt(1));
             }
             users = tmp.toArray();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);

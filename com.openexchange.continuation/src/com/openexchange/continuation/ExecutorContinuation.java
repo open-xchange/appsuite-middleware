@@ -270,7 +270,7 @@ public class ExecutorContinuation<V> implements Continuation<Collection<V>> {
                 for (final V value : collection) {
                     retval.add(value);
                 }
-            } catch (final ExecutionException e) {
+            } catch (ExecutionException e) {
                 final Throwable cause = e.getCause();
                 if (cause instanceof OXException) {
                     throw (OXException) cause;

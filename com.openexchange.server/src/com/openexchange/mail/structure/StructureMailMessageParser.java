@@ -298,7 +298,7 @@ public final class StructureMailMessageParser {
              * Mark end of parsing
              */
             handler.handleEnd(mm);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw MailExceptionCode.UNREADBALE_PART_CONTENT.create(e, Long.valueOf(mm.getMailId()), mm.getFolder());
         }
     }
@@ -545,7 +545,7 @@ public final class StructureMailMessageParser {
                         }
                         net.freeutils.tnef.mime.TNEFMimeMessage convertResult = new ContactConverter().convert(message, new net.freeutils.tnef.mime.TNEFMimeMessage(MimeDefaultSession.getDefaultSession()));
                         mp = (Multipart) convertResult.getContent();
-                    } catch (final RuntimeException e) {
+                    } catch (RuntimeException e) {
                         LOG.error("Invalid TNEF contact", e);
                         return;
                     }
@@ -563,7 +563,7 @@ public final class StructureMailMessageParser {
                     try {
                         net.freeutils.tnef.mime.TNEFMimeMessage convertResult = new ReadReceiptConverter().convert(message, new net.freeutils.tnef.mime.TNEFMimeMessage(MimeDefaultSession.getDefaultSession()));
                         mp = (Multipart) convertResult.getContent();
-                    } catch (final RuntimeException e) {
+                    } catch (RuntimeException e) {
                         LOG.warn("Invalid TNEF read receipt", e);
                         return;
                     }
@@ -782,7 +782,7 @@ public final class StructureMailMessageParser {
                         parseMailContent(MimeMessageConverter.convertPart(bodyPart), handler, prefix, partCount++);
                     }
                 }
-            } catch (final IOException tnefExc) {
+            } catch (IOException tnefExc) {
                 LOG.warn("", tnefExc);
                 if (!mailPart.containsSequenceId()) {
                     mailPart.setSequenceId(getSequenceId(prefix, partCount));
@@ -791,7 +791,7 @@ public final class StructureMailMessageParser {
                     stop = true;
                     return;
                 }
-            } catch (final MessagingException e) {
+            } catch (MessagingException e) {
                 LOG.error("", e);
                 if (!mailPart.containsSequenceId()) {
                     mailPart.setSequenceId(getSequenceId(prefix, partCount));
@@ -952,7 +952,7 @@ public final class StructureMailMessageParser {
                 return MessageUtility.simpleHtmlDuplicateRemoval(html);
             }
             return MessageUtility.readMailPart(mailPart, charset, false, -1);
-        } catch (final java.io.CharConversionException e) {
+        } catch (java.io.CharConversionException e) {
             // Obviously charset was wrong or bogus implementation of character conversion
             final String fallback = "US-ASCII";
             LOG.warn("Character conversion exception while reading content with charset \"{}\". Using fallback charset \"{}\" instead.", charset, fallback, e);

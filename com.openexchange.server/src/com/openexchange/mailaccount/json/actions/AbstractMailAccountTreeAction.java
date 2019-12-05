@@ -92,7 +92,7 @@ public abstract class AbstractMailAccountTreeAction extends AbstractValidateMail
                 mailAccess.getMailConfig(),
                 session);
             return root;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.debug("Composing mail account's folder tree failed.", e);
             // TODO: How to indicate error if folder tree requested?
             return null;

@@ -12,7 +12,7 @@ public final class PreparedStatementFactory {
     private final JdbcConnection con;
 
     public PreparedStatementFactory(JdbcConnection con) {
-        if(con == null) throw new IllegalArgumentException("connection must not be null");
+        if (con == null) throw new IllegalArgumentException("connection must not be null");
         this.con = con;
     }
 

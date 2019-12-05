@@ -54,7 +54,6 @@ import java.util.Collections;
 import java.util.LinkedList;
 import com.openexchange.exception.OXException;
 import com.openexchange.gmail.send.services.Services;
-import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.TransportAccount;
 import com.openexchange.oauth.association.OAuthAccountAssociation;

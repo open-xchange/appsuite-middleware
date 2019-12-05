@@ -51,6 +51,7 @@ package com.openexchange.framework.request;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import com.openexchange.groupware.notify.hostname.HostData;
+import com.openexchange.session.UserContextSession;
 
 /**
  * A {@link RequestContext} holds contextual information about the current HTTP request.
@@ -78,5 +79,12 @@ public interface RequestContext {
      * @return The user agent
      */
     String getUserAgent();
+
+    /**
+     * Gets the session associated with this request context.
+     *
+     * @return The session
+     */
+    UserContextSession getSession();
 
 }

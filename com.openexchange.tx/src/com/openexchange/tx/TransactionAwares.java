@@ -72,7 +72,7 @@ public class TransactionAwares {
         if (null != transaction) {
             try {
                 transaction.finish();
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 // Ignore
             }
         }
@@ -87,7 +87,7 @@ public class TransactionAwares {
         if (null != transaction) {
             try {
                 transaction.rollback();
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 // Ignore
             }
         }

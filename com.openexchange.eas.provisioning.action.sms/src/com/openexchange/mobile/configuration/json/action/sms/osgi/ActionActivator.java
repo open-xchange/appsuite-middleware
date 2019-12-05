@@ -77,7 +77,7 @@ public class ActionActivator extends HousekeepingActivator {
 	        final Hashtable<String, ActionTypes> ht = new Hashtable<String, ActionTypes>();
 	        ht.put("action", ActionTypes.TELEPHONE);
 	        registerService(ActionService.class, new ActionSMS(this), ht);
-		} catch (final Throwable t) {
+		} catch (Throwable t) {
 			LOG.error("", t);
 			throw t instanceof Exception ? (Exception) t : new Exception(t);
 		}

@@ -73,7 +73,7 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
  * auth.setLogin("myuser");
  * auth.setPassword("secret");
  *
- * try{
+ * try {
  * User account_data = iface.login2User(ctx,auth);
  *  // Do something after user logged in successfully.
  * }catch(InvalidCredentialsException ice){

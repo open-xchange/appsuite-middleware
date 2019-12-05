@@ -65,6 +65,8 @@ import com.openexchange.chronos.common.DefaultCalendarEvent;
 import com.openexchange.chronos.common.DefaultCalendarResult;
 import com.openexchange.chronos.common.DeleteResultImpl;
 import com.openexchange.chronos.common.UpdateResultImpl;
+import com.openexchange.chronos.scheduling.ChangeNotification;
+import com.openexchange.chronos.scheduling.SchedulingMessage;
 import com.openexchange.chronos.service.CalendarEvent;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CalendarSession;
@@ -92,6 +94,8 @@ public class InternalCalendarResult {
     private List<UpdateResult> userizedUpdates;
     private List<DeleteResult> deletions;
     private List<DeleteResult> userizedDeletions;
+    private List<SchedulingMessage> schedulingMessages;
+    private List<ChangeNotification> changeNotifications;
 
     /**
      * Initializes a new {@link InternalCalendarResult}.
@@ -307,6 +311,35 @@ public class InternalCalendarResult {
         }
         userizedUpdates.add(new UpdateResultImpl(originalEvent, updatedEvent));
         return this;
+    }
+    
+    public InternalCalendarResult addSchedulingMessage(SchedulingMessage message) {
+        if (null == schedulingMessages) {
+            schedulingMessages = new ArrayList<SchedulingMessage>();
+        }
+        schedulingMessages.add(message);
+        return this;
+    }
+
+    public InternalCalendarResult addChangeNotification(ChangeNotification notification) {
+        if (null == changeNotifications) {
+            changeNotifications = new ArrayList<ChangeNotification>();
+        }
+        this.changeNotifications.add(notification);
+        return this;
+    }
+
+    /**
+     * Get a {@link List} of {@link SchedulingMessage}
+     *
+     * @return The messages that needs to be scheduled
+     */
+    public List<SchedulingMessage> getSchedulingMessages() {
+        return this.schedulingMessages;
+    }
+    
+    public List<ChangeNotification> getChangeNotifications() {
+        return changeNotifications;
     }
 
     /**

@@ -100,7 +100,7 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
                 try {
                     ResponseWriter.writeException(e, new JSONWriter(
                         response.getWriter()).object());
-                } catch (final JSONException jsonError) {
+                } catch (JSONException jsonError) {
                     LOG.error(e.getLocalizedMessage(), jsonError);
                     response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 }

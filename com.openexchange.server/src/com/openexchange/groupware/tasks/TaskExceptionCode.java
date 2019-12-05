@@ -342,7 +342,7 @@ public enum TaskExceptionCode implements DisplayableOXExceptionCode {
     }
 
     private OXException specials(OXException exc) {
-        switch(this) {
+        switch (this) {
         case TASK_NOT_FOUND:
             exc.setGeneric(Generic.NOT_FOUND);
             break;

@@ -75,7 +75,7 @@ public class AttachmentWriter extends TimedWriter<AttachmentMetadata> {
 
     @Override
     protected void fillArray(final SearchIterator iterator, final Object[] columns, final TimeZone tz) throws OXException, JSONException {
-        while(iterator.hasNext()) {
+        while (iterator.hasNext()) {
             jsonWriter.array();
             final AttachmentMetadata attachment = (AttachmentMetadata) iterator.next();
             final GetSwitch get = new GetSwitch(attachment);
@@ -89,7 +89,7 @@ public class AttachmentWriter extends TimedWriter<AttachmentMetadata> {
     }
 
     private Object jsonCompat(final Object o, final AttachmentField column, final TimeZone tz) {
-        if(column.getId() == AttachmentField.CREATION_DATE) {
+        if (column.getId() == AttachmentField.CREATION_DATE) {
             final long time = ((Date)o).getTime();
             final int offset = tz.getOffset(time);
             return Long.valueOf(time + offset);

@@ -487,7 +487,7 @@ public class AlarmUtils extends CalendarUtils {
             if (null == triggerTime) {
                 return null;
             }
-            if(triggerTime.getTime() < startDate.getTime()) {
+            if (triggerTime.getTime() < startDate.getTime()) {
                 continue;
             }
             if (null == alarm.getAcknowledged() || alarm.getAcknowledged().before(triggerTime)) {

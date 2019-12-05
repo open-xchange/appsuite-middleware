@@ -92,7 +92,7 @@ public class ContactStorageActivator extends HousekeepingActivator {
              * register services
              */
             super.registerService(ContactStorageRegistry.class, registry);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("error starting \"com.openexchange.contact.storage\"", e);
             throw e;
         }

@@ -190,7 +190,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
                     }
                 }
             }
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
@@ -305,7 +305,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
             // }
             getAttachmentsArr().put(jsonObject);
             return true;
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
@@ -314,7 +314,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
     public boolean handleBccRecipient(final InternetAddress[] recipientAddrs) throws OXException {
         try {
             jsonObject.put(MailJSONField.RECIPIENT_BCC.getKey(), MessageWriter.getAddressesAsArray(recipientAddrs));
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
         return true;
@@ -324,7 +324,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
     public boolean handleCcRecipient(final InternetAddress[] recipientAddrs) throws OXException {
         try {
             jsonObject.put(MailJSONField.RECIPIENT_CC.getKey(), MessageWriter.getAddressesAsArray(recipientAddrs));
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
         return true;
@@ -334,7 +334,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
     public boolean handleColorLabel(final int colorLabel) throws OXException {
         try {
             jsonObject.put(MailJSONField.COLOR_LABEL.getKey(), colorLabel);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
         return true;
@@ -344,7 +344,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
     public boolean handleContentId(final String contentId) throws OXException {
         try {
             jsonObject.put(MailJSONField.CID.getKey(), contentId);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
         return true;
@@ -354,7 +354,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
     public boolean handleFrom(final InternetAddress[] fromAddrs) throws OXException {
         try {
             jsonObject.put(MailJSONField.FROM.getKey(), MessageWriter.getAddressesAsArray(fromAddrs));
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
         return true;
@@ -431,7 +431,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
             }
             jsonObject.put(MailJSONField.HEADERS.getKey(), hdrObject);
             return true;
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
@@ -552,7 +552,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
             try {
                 final Locale locale = Locale.ENGLISH;
                 contentType = MimeType2ExtMap.getContentType(new File(filename.toLowerCase(locale)).getName()).toLowerCase(locale);
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 final Throwable t =
                     new Throwable(
                         new StringBuilder("Unable to fetch content/type for '").append(filename).append("': ").append(e).toString());
@@ -586,7 +586,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
             }
             getAttachmentsArr().put(jsonObject);
             return true;
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
@@ -608,7 +608,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
                 if (null != mailPath) {
                     jsonObject.put(MailJSONField.MSGREF.getKey(), mailPath.toString());
                 }
-            } catch (final JSONException e) {
+            } catch (JSONException e) {
                 // Cannot occur
                 LOG.error("", e);
             }
@@ -643,7 +643,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
                 try {
                     nestedMail =
                         MimeMessageConverter.convertMessage(new MimeMessage(MimeDefaultSession.getDefaultSession(), (InputStream) content));
-                } catch (final MessagingException e) {
+                } catch (MessagingException e) {
                     throw MimeMailException.handleMessagingException(e);
                 }
             } else {
@@ -677,7 +677,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
             }
             getNestedMsgsArr().put(nestedObject);
             return true;
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
@@ -687,7 +687,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
         try {
             jsonObject.put(MailJSONField.PRIORITY.getKey(), priority);
             return true;
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
@@ -697,7 +697,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
         try {
             jsonObject.put(MailJSONField.MSGREF.getKey(), msgRef);
             return true;
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
@@ -709,7 +709,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
                 jsonObject.put(MailJSONField.DISPOSITION_NOTIFICATION_TO.getKey(), dispositionNotificationTo.toUnicodeString());
             }
             return true;
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
@@ -721,7 +721,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
                 MailJSONField.RECEIVED_DATE.getKey(),
                 receivedDate == null ? JSONObject.NULL : Long.valueOf(receivedDate.getTime()));
             return true;
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
@@ -731,7 +731,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
         try {
             jsonObject.put(MailJSONField.SENT_DATE.getKey(), sentDate == null ? JSONObject.NULL : Long.valueOf(sentDate.getTime()));
             return true;
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
@@ -752,7 +752,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
                     part.getSize(),
                     fileName,
                     id);
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 throw new OXException(OXException.Code.IO_ERROR, e, e.getMessage());
             }
         }
@@ -769,7 +769,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
         try {
             jsonObject.put(MailJSONField.SUBJECT.getKey(), subject == null ? JSONObject.NULL : subject.trim());
             return true;
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
@@ -784,7 +784,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
                 jsonObject.put(MailJSONField.FLAGS.getKey(), flags);
             }
             return true;
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
@@ -794,7 +794,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
         try {
             jsonObject.put(MailJSONField.RECIPIENT_TO.getKey(), MessageWriter.getAddressesAsArray(recipientAddrs));
             return true;
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
@@ -829,7 +829,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
             }
             jsonObject.put(MailJSONField.USER.getKey(), userFlagsArr);
             return true;
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
@@ -863,7 +863,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
                 }
             }
             return false;
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
@@ -891,7 +891,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
             jsonObject.put(MailJSONField.CONTENT.getKey(), null == content ? JSONObject.NULL : content);
             jsonObject.put(MailJSONField.ATTACHMENT_FILE_NAME.getKey(), filename);
             getBodyArr().put(jsonObject);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
@@ -932,7 +932,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
                 jsonObject.put(MailJSONField.CONTENT.getKey(), optContent);
             }
             getAttachmentsArr().put(jsonObject);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
@@ -954,7 +954,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
             }
 
             bodyArr.put(i, jsonObject);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }

@@ -43,7 +43,7 @@ public class MkcolTest extends ActionTestCase {
         try {
             action.perform(req, res);
             fail("Expected 409 CONFLICT or 412 PRECONDITION FAILED");
-        } catch (final WebdavProtocolException e) {
+        } catch (WebdavProtocolException e) {
             assertTrue("" + e.getStatus(), HttpServletResponse.SC_CONFLICT == e.getStatus() || HttpServletResponse.SC_PRECONDITION_FAILED == e.getStatus());
         }
 

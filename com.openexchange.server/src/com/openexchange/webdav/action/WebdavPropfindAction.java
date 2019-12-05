@@ -56,6 +56,7 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.Namespace;
+import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 import com.openexchange.webdav.loader.LoadingHints;
 import com.openexchange.webdav.protocol.Protocol;
@@ -74,8 +75,6 @@ public class WebdavPropfindAction extends AbstractAction {
 	protected static final Namespace DAV_NS = Protocol.DAV_NS;
 
 	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(WebdavPropfindAction.class);
-
-	protected final XMLOutputter outputter = new XMLOutputter();
 
     protected Protocol protocol;
 
@@ -101,11 +100,11 @@ public class WebdavPropfindAction extends AbstractAction {
 		Document requestBody = null;
 		try {
 			requestBody = req.getBodyAsDocument();
-		} catch (final JDOMException e1) {
+		} catch (JDOMException e1) {
 
 			forceAllProp = true; //Assume All Prop, if all else fails
 
-		} catch (final IOException e1) {
+		} catch (IOException e1) {
 			throw WebdavProtocolException.Code.GENERAL_ERROR.create(new WebdavPath(), HttpServletResponse.SC_BAD_REQUEST);
 		}
 
@@ -113,7 +112,7 @@ public class WebdavPropfindAction extends AbstractAction {
         ResourceMarshaller marshaller;
         if (null != req.getHeader("Depth")) {
             int depth = 0;
-            if(req.getHeader("depth").trim().equalsIgnoreCase("infinity")) {
+            if (req.getHeader("depth").trim().equalsIgnoreCase("infinity")) {
                 depth = WebdavCollection.INFINITY;
             } else {
                 depth = Integer.parseInt(req.getHeader("Depth"));
@@ -134,8 +133,8 @@ public class WebdavPropfindAction extends AbstractAction {
 		try {
 			res.setStatus(Protocol.SC_MULTISTATUS);
 			res.setContentType("text/xml; charset=UTF-8");
-			outputter.output(responseBody, res.getOutputStream());
-		} catch (final IOException e) {
+            new XMLOutputter(Format.getPrettyFormat()).output(responseBody, res.getOutputStream());
+		} catch (IOException e) {
 			LOG.debug("Client gone?", e);
 		}
 	}
@@ -155,7 +154,7 @@ public class WebdavPropfindAction extends AbstractAction {
             loadingHints.setProps(LoadingHints.Property.ALL);
 		}
 
-		if(null != requestBody && null != requestBody.getRootElement().getChild("allprop", DAV_NS) || forceAllProp) {
+		if (null != requestBody && null != requestBody.getRootElement().getChild("allprop", DAV_NS) || forceAllProp) {
 			marshaller = new PropfindAllPropsMarshaller(req.getURLPrefix(), req.getCharset());
 			loadingHints.setProps(LoadingHints.Property.ALL);
 		}

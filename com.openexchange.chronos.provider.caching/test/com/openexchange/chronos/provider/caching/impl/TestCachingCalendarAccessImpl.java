@@ -70,7 +70,7 @@ public class TestCachingCalendarAccessImpl extends BasicCachingCalendarAccess {
     private boolean configSaved = false;
 
     public TestCachingCalendarAccessImpl(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        super(session, account, parameters, null);
+        super(session, account, parameters);
     }
 
     boolean cacheUpdated = false;
@@ -84,32 +84,17 @@ public class TestCachingCalendarAccessImpl extends BasicCachingCalendarAccess {
         return cacheUpdated;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.provider.CalendarAccess#close()
-     */
     @Override
     public void close() {
         // TODO Auto-generated method stub
 
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.provider.caching.CachingCalendarAccess#getRefreshInterval()
-     */
     @Override
     public long getRefreshInterval() {
         return 60;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.provider.caching.CachingCalendarAccess#getEvents(java.lang.String)
-     */
     @Override
     public ExternalCalendarResult getAllEvents() {
         return new ExternalCalendarResult(false, Collections.emptyList());

@@ -49,6 +49,7 @@
 
 package com.openexchange.threadpool.osgi;
 
+import static com.openexchange.osgi.Tools.withRanking;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Map;
@@ -156,8 +157,7 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
             REF_THREAD_POOL.set(threadPool);
             registerService(ThreadPoolService.class, threadPool);
             {
-                final Dictionary<String, Object> dict = new Hashtable<String, Object>(4);
-                dict.put(Constants.SERVICE_RANKING, Integer.valueOf(Integer.MAX_VALUE));
+                final Dictionary<String, Object> dict = withRanking(Integer.valueOf(Integer.MAX_VALUE));
                 dict.put(Constants.SERVICE_DESCRIPTION, "The Open-Xchange ExecutorService");
                 dict.put(Constants.SERVICE_VENDOR, "OX Software GmbH");
                 registerService(ExecutorService.class, threadPool.getExecutor(), dict);
@@ -204,7 +204,7 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
                             public Void call() throws Exception {
                                 try {
                                     doHandleEvent(event);
-                                } catch (final Exception e) {
+                                } catch (Exception e) {
                                     LOG.warn("Handling event {} failed.", event.getTopic(), e);
                                 }
                                 return null;
@@ -251,7 +251,7 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
              * Open service trackers
              */
             openTrackers();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("Failed start-up of bundle com.openexchange.threadpool", e);
             throw e;
         }
@@ -283,13 +283,13 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
                 try {
                     threadPool.shutdownNow();
                     threadPool.awaitTermination(10000L);
-                } catch (final InterruptedException e) {
+                } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 } finally {
                     this.threadPool = null;
                 }
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("Failed shut-down of bundle com.openexchange.threadpool", e);
             throw e;
         }

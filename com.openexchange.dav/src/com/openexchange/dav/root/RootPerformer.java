@@ -104,7 +104,7 @@ public class RootPerformer extends DAVPerformer {
 
     @Override
     protected String getURLPrefix() {
-        return "/";
+        return factory.getURLPrefix();
     }
 
     @Override

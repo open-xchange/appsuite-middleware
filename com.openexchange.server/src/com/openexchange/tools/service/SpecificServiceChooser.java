@@ -88,12 +88,12 @@ public class SpecificServiceChooser<T> {
     }
 
     private void remove(final SortedSet<WeightedRegistration<T>> set, final T serviceInstance) {
-        if(set == null) {
+        if (set == null) {
             return;
         }
         final Set<WeightedRegistration<T>> remove = new HashSet<WeightedRegistration<T>>();
         for (final WeightedRegistration<T> weightedRegistration : set) {
-            if(weightedRegistration.payload.equals(serviceInstance)) {
+            if (weightedRegistration.payload.equals(serviceInstance)) {
                 remove.add(weightedRegistration);
             }
         }
@@ -104,13 +104,13 @@ public class SpecificServiceChooser<T> {
         notNull(serviceInstance);
         final WeightedRegistration<T> newRegistration = new WeightedRegistration<T>(ranking);
         newRegistration.payload = serviceInstance;
-        if(!set.add(newRegistration)) {
+        if (!set.add(newRegistration)) {
             throw new ServicePriorityConflictException();
         }
     }
 
     private void notNull(final T serviceInstance) {
-        if(serviceInstance == null) {
+        if (serviceInstance == null) {
             LOG.error("Trying to register Null Service!");
             throw new NullPointerException("Service Instance may not be null!");
         }
@@ -152,7 +152,7 @@ public class SpecificServiceChooser<T> {
 
     public synchronized void removeForContextAndFolder(final T serviceInstance, final int cid, final String folderId) {
         final Map<String, SortedSet<WeightedRegistration<T>>> folderSpecific = contextAndFolderSpecific.get(cid);
-        if(folderSpecific == null) {
+        if (folderSpecific == null) {
             return;
         }
         final SortedSet<WeightedRegistration<T>> registeredServices = folderSpecific.get(folderId);

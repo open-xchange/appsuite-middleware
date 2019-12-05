@@ -1,0 +1,25 @@
+type: object
+properties:
+  id:
+    type: integer
+    description: >-
+      User ID. Confirming for other users only works for appointments and not
+      for tasks.
+  display_name:
+    type: string
+    description: Displayable name of the participant.
+  confirm:
+    type: integer
+    description: |
+      * 0 (none),<br> 
+      * 1 (accepted),<br>  
+      * 2 (declined),<br> 
+      * 3 (tentative)
+    enum:
+      - 0
+      - 1 
+      - 2
+      - 3
+  confirmmessage:
+    type: string
+    description: Confirm message of the participant.

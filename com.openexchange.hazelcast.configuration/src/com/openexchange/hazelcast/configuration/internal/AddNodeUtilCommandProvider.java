@@ -96,7 +96,7 @@ public class AddNodeUtilCommandProvider implements CommandProvider {
             InetAddress address = null;
             try {
                 address = InetAddress.getByName(ip);
-            } catch (final UnknownHostException e) {
+            } catch (UnknownHostException e) {
                 commandInterpreter.println("Couldn't resolve address: " + ip);
             }
             if (null != address) {

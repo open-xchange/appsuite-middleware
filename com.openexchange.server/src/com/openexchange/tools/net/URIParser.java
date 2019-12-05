@@ -122,14 +122,14 @@ public final class URIParser {
             try {
                 new URI(input);
                 return true;
-            } catch (final URISyntaxException e) {
+            } catch (URISyntaxException e) {
                 return false;
             }
         }
         int port;
         try {
             port = Integer.parseInt(matcher.group(3));
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             return false;
         }
         if (port < 0 || port > 65535) {
@@ -138,7 +138,7 @@ public final class URIParser {
         try {
             new URI(matcher.group(1), null, matcher.group(2), port, null, null, null);
             return true;
-        } catch (final URISyntaxException e) {
+        } catch (URISyntaxException e) {
             return false;
         }
     }
@@ -173,10 +173,10 @@ public final class URIParser {
             final String usedScheme = applyDefault(scheme, port, defs);
             try {
                 return new URI(usedScheme, null, matcher.group(2), usedPort, null, null, null);
-            } catch (final URISyntaxException e) {
+            } catch (URISyntaxException e) {
                 return new URI(usedScheme, null, "localhost", usedPort, null, null, null);
             }
-        } catch (final URISyntaxException e) {
+        } catch (URISyntaxException e) {
             /*
              * Cannot sanitize
              */
@@ -202,7 +202,7 @@ public final class URIParser {
                 return defaults.getPort();
             }
             return iPort;
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             if (URIDefaults.NULL.equals(defaults)) {
                 throw new URISyntaxException(input, e.getMessage());
             }

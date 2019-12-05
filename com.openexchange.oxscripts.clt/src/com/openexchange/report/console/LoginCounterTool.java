@@ -92,35 +92,20 @@ public final class LoginCounterTool extends AbstractMBeanCLI<Void> {
         new LoginCounterTool().execute(args);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractMBeanCLI#administrativeAuth(java.lang.String, java.lang.String, org.apache.commons.cli.CommandLine, com.openexchange.auth.mbean.AuthenticatorMBean)
-     */
     @Override
     protected void administrativeAuth(String login, String password, CommandLine cmd, AuthenticatorMBean authenticator) throws MBeanException {
         authenticator.doAuthentication(login, password);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractMBeanCLI#addOptions(org.apache.commons.cli.Options)
-     */
     @Override
     protected void addOptions(Options options) {
-        options.addOption(createArgumentOption("t", "start", "startDate", "Required. Sets the start date for the detecting range. Example: 2009-12-31 00:00:00", true));
-        options.addOption(createArgumentOption("e", "end", "endDate", "Required. Sets the end date for the detecting range. Example: 2010-01-1 23:59:59", true));
+        options.addOption(createArgumentOption("t", "start", "startDate", "Required. Sets the start date for the detecting range. Example: 2009-12-31T00:00:00", true));
+        options.addOption(createArgumentOption("e", "end", "endDate", "Required. Sets the end date for the detecting range. Example: 2010-01-1T23:59:59", true));
         options.addOption(createArgumentOption("r", "regex", "regex", "Optional. Limits the counter to login devices that match regex.", false));
         options.addOption(createSwitch("a", "aggregate", "Optional. Aggregates the counts by users. Only the total number of logins without duplicate counts (caused by multiple clients per user) is returned.", false));
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractMBeanCLI#invoke(org.apache.commons.cli.Options, org.apache.commons.cli.CommandLine, javax.management.MBeanServerConnection)
-     */
     @Override
     protected Void invoke(Options option, CommandLine cmd, MBeanServerConnection mbsc) throws Exception {
         boolean error = true;
@@ -135,21 +120,11 @@ public final class LoginCounterTool extends AbstractMBeanCLI<Void> {
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractAdministrativeCLI#requiresAdministrativePermission()
-     */
     @Override
-    protected boolean requiresAdministrativePermission() {
-        return false;
+    protected Boolean requiresAdministrativePermission() {
+        return Boolean.FALSE;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractCLI#checkOptions(org.apache.commons.cli.CommandLine)
-     */
     @Override
     protected void checkOptions(CommandLine cmd) {
         if (!cmd.hasOption('t') || !cmd.hasOption('e')) {
@@ -185,21 +160,11 @@ public final class LoginCounterTool extends AbstractMBeanCLI<Void> {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractCLI#getFooter()
-     */
     @Override
     protected String getFooter() {
         return FOOTER;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractCLI#getName()
-     */
     @Override
     protected String getName() {
         return SYNTAX;

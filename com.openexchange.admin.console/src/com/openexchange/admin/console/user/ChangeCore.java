@@ -135,7 +135,7 @@ public abstract class ChangeCore extends UserFilestoreAbstraction {
             // apply rights from commandline
             boolean changed = setModuleAccessOptions(parser, access);
 
-            if(changed) {
+            if (changed) {
                 // apply changes in module access on server
                 oxusr.changeModuleAccess(ctx, usr, access, auth);
             }
@@ -153,7 +153,7 @@ public abstract class ChangeCore extends UserFilestoreAbstraction {
 
             displayChangedMessage(successtext, ctx.getId(), parser);
             sysexit(0);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             printErrors(successtext, ctxid, e, parser);
             sysexit(1);
         }

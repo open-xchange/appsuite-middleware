@@ -589,7 +589,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                 // Wait for one, re-checking state upon interruption
                 try {
                     return workQueue.take();
-                } catch (final InterruptedException ignore) {
+                } catch (InterruptedException ignore) {
                     LOG.debug("", ignore);
                 }
                 break;
@@ -842,7 +842,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                     ran = true;
                     afterExecute(task, null);
                     completedTasks.incrementAndGet();
-                } catch (final RuntimeException ex) {
+                } catch (RuntimeException ex) {
                     if (!ran) {
                         afterExecute(task, ex);
                     }
@@ -868,9 +868,9 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                     runTask(task);
                     task = null; // unnecessary but can help GC
                 }
-            } catch (final InterruptedException ie) {
+            } catch (InterruptedException ie) {
                 // fall through
-            } catch (final RuntimeException re) {
+            } catch (RuntimeException re) {
                 // Task execution failed horribly
                 LOG.error("Task execution failed unexpectedly", re);
             } finally {
@@ -1070,7 +1070,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                     final Runnable command;
                     try {
                         command = getDelayedWorkQueue().take();
-                    } catch (final InterruptedException e) {
+                    } catch (InterruptedException e) {
                         // Ignore
                         continue;
                     }
@@ -1119,7 +1119,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                              */
                             try {
                                 command.run();
-                            } catch (final Exception e) {
+                            } catch (Exception e) {
                                 LOG.error("", e);
                             }
                             // rejectCustom(command);
@@ -1128,7 +1128,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                         // else retry
                     }
                 }
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 LOG.error("{} thread aborted execution due to an exception! TimerService is no more active!", currentThread.getName(), e);
             }
         }
@@ -1330,7 +1330,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                                     while (tasks.isEmpty()) {
                                         notEmpty.await();
                                     }
-                                } catch (final InterruptedException ie) {
+                                } catch (InterruptedException ie) {
                                     notEmpty.signal(); // propagate to non-interrupted thread
                                     throw ie;
                                 }
@@ -1407,11 +1407,11 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                         }
                     } catch (InterruptedException e) {
                         LOG.debug("Watcher run interrupted", e);
-                    } catch (final Exception e) {
+                    } catch (Exception e) {
                         LOG.error("Watcher run aborted due to an exception!", e);
                     }
                 }
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 LOG.error("Watcher aborted execution due to an exception! Watcher is no more active!", e);
             }
         }
@@ -1827,7 +1827,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                 try {
                     workQueue.put(mdcCommand);
                     acquired = true;
-                } catch (final InterruptedException e) {
+                } catch (InterruptedException e) {
                     /*
                      * wait forever!
                      */
@@ -1908,7 +1908,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                     for (final Worker w : workerSet) {
                         w.interruptIfIdle();
                     }
-                } catch (final SecurityException se) {
+                } catch (SecurityException se) {
                     // If SecurityManager allows above checks, but
                     // then unexpectedly throws exception when
                     // interrupting threads (which it ought not do),
@@ -1973,7 +1973,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                     for (final Worker w : workerSet) {
                         w.interruptNow();
                     }
-                } catch (final SecurityException se) {
+                } catch (SecurityException se) {
                     runState = state; // back out;
                     throw se;
                 }
@@ -2181,7 +2181,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                     }
                 }
             }
-        } catch (final ConcurrentModificationException ex) {
+        } catch (ConcurrentModificationException ex) {
             return;
         }
     }

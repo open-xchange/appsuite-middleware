@@ -141,10 +141,10 @@ public final class BodyTerm extends SearchTerm<String> {
                 return toRegex(pattern).matcher(text).find();
             }
             return (Strings.asciiLowerCase(text).indexOf(Strings.asciiLowerCase(pattern)) > -1);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             org.slf4j.LoggerFactory.getLogger(FromTerm.class).warn("Error during search.", e);
             return false;
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             org.slf4j.LoggerFactory.getLogger(FromTerm.class).warn("Error during search.", e);
             return false;
         }
@@ -251,7 +251,7 @@ public final class BodyTerm extends SearchTerm<String> {
                 return htmlService.extractText(MessageUtility.readMailPart(mailPart, charset));
             }
             return MessageUtility.readMailPart(mailPart, charset);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
@@ -284,12 +284,12 @@ public final class BodyTerm extends SearchTerm<String> {
                 return  htmlService.extractText(MessageUtility.readMimePart(part, charset));
             }
             return MessageUtility.readMimePart(part, charset);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         }
     }

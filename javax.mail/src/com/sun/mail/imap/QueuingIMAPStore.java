@@ -352,11 +352,11 @@ public class QueuingIMAPStore extends IMAPStore {
                     }
                     q.addTrackingInfo(protocol);
                     return protocol;
-                } catch (final DeprecatedQueueException e) {
+                } catch (DeprecatedQueueException e) {
                     // Retry
                 }
             }
-        } catch (final InterruptedException e) {
+        } catch (InterruptedException e) {
             // Keep interrupted status
             Thread.currentThread().interrupt();
             throw new ProtocolException("Interrupted.", e);
@@ -399,7 +399,7 @@ public class QueuingIMAPStore extends IMAPStore {
                     return null;
                 }
             });
-        } catch (final PrivilegedActionException e) {
+        } catch (PrivilegedActionException e) {
             handlePrivilegedActionException(e);
         }
     }
@@ -559,7 +559,7 @@ public class QueuingIMAPStore extends IMAPStore {
             try {
                 x.realLogout(); // Implicitly triggers #decrementNewCount() through QueuedIMAPProtocol#authenticatedStatusChanging()
                 loggedOut = true;
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 // Ignore
             } finally {
                 if (!loggedOut) {
@@ -610,7 +610,7 @@ public class QueuingIMAPStore extends IMAPStore {
                         // Await until a connection is released
                         nanos = notEmpty.awaitNanos(nanos);
                     }
-                } catch (final InterruptedException ie) {
+                } catch (InterruptedException ie) {
                     notEmpty.signal(); // propagate to non-interrupted thread
                     throw ie;
                 }
@@ -769,7 +769,7 @@ public class QueuingIMAPStore extends IMAPStore {
                     while (q.size() == 0) {
                         notEmpty.await();
                     }
-                } catch (final InterruptedException ie) {
+                } catch (InterruptedException ie) {
                     notEmpty.signal(); // propagate to non-interrupted thread
                     throw ie;
                 }
@@ -800,7 +800,7 @@ public class QueuingIMAPStore extends IMAPStore {
                     }
                     try {
                         nanos = notEmpty.awaitNanos(nanos);
-                    } catch (final InterruptedException ie) {
+                    } catch (InterruptedException ie) {
                         notEmpty.signal(); // propagate to non-interrupted thread
                         throw ie;
                     }

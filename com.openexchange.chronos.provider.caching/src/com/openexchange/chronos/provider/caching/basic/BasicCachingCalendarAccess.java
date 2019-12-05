@@ -61,6 +61,7 @@ import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_
 import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
+import static com.openexchange.java.Autoboxing.b;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -159,6 +160,7 @@ import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
 import com.openexchange.search.internal.operands.ColumnFieldOperand;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
@@ -183,9 +185,6 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
     protected CalendarAccount account;
     protected Session session;
 
-    private final CalendarUtilities                calendarUtilities;
-    private final CalendarEventNotificationService notificationService;
-
     private final List<OXException> warnings = new ArrayList<>();
 
     /**
@@ -194,15 +193,11 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
      * @param session The session
      * @param account The underlying calendar account
      * @param parameters Additional calendar parameters
-     * @param optCalendarUtilities optional {@link CalendarUtilities}. This is required for implementations which also implement {@link PersonalAlarmAware}.
-     * @throws OXException
      */
-    protected BasicCachingCalendarAccess(Session session, CalendarAccount account, CalendarParameters parameters, CalendarUtilities optCalendarUtilities) {
+    protected BasicCachingCalendarAccess(Session session, CalendarAccount account, CalendarParameters parameters) {
         this.session = session;
         this.account = account;
         this.parameters = parameters;
-        this.calendarUtilities = optCalendarUtilities;
-        this.notificationService = Services.getService(CalendarEventNotificationService.class);
     }
 
     public Session getSession() {
@@ -247,29 +242,67 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
     @Override
     public Event getEvent(String eventId, RecurrenceId recurrenceId) throws OXException {
         updateCacheIfNeeded();
-        containsError();
+        throwAccountErrorIfSet();
         return new SingleEventResponseGenerator(this, eventId, recurrenceId).generate();
     }
 
     @Override
     public List<Event> getEvents(List<EventID> eventIDs) throws OXException {
         updateCacheIfNeeded();
-        containsError();
+        throwAccountErrorIfSet();
         return new DedicatedEventsResponseGenerator(this, eventIDs).generate();
     }
 
     @Override
     public List<Event> getEvents() throws OXException {
         updateCacheIfNeeded();
-        containsError();
+        throwAccountErrorIfSet();
         return new AccountResponseGenerator(this).generate();
     }
 
     @Override
     public final List<Event> getChangeExceptions(String seriesId) throws OXException {
         updateCacheIfNeeded();
-        containsError();
+        throwAccountErrorIfSet();
         return new ChangeExceptionsResponseGenerator(this, seriesId).generate();
+    }
+
+    @Override
+    public List<Event> searchEvents(List<SearchFilter> filters, List<String> queries) throws OXException {
+        if ((null == filters || filters.isEmpty()) && (null == queries || queries.isEmpty())) {
+            return getEvents();
+        }
+        updateCacheIfNeeded();
+        throwAccountErrorIfSet();
+        return new SearchHandler(session, account, parameters).searchEvents(filters, queries);
+    }
+
+    @Override
+    public UpdatesResult getUpdatedEvents(long updatedSince) throws OXException {
+        updateCacheIfNeeded();
+        throwAccountErrorIfSet();
+        return new SyncHandler(session, account, parameters).getUpdatedEvents(updatedSince);
+    }
+
+    @Override
+    public long getSequenceNumber() throws OXException {
+        updateCacheIfNeeded();
+        throwAccountErrorIfSet();
+        return new SyncHandler(session, account, parameters).getSequenceNumber();
+    }
+
+    @Override
+    public List<Event> resolveResource(String resourceName) throws OXException {
+        updateCacheIfNeeded();
+        throwAccountErrorIfSet();
+        return new SyncHandler(session, account, parameters).resolveResource(resourceName);
+    }
+
+    @Override
+    public Map<String, EventsResult> resolveResources(List<String> resourceNames) throws OXException {
+        updateCacheIfNeeded();
+        throwAccountErrorIfSet();
+        return new SyncHandler(session, account, parameters).resolveResources(resourceNames);
     }
 
     @Override
@@ -282,7 +315,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
      *
      * @throws OXException
      */
-    private void containsError() throws OXException {
+    private void throwAccountErrorIfSet() throws OXException {
         OXException accountError = optAccountError();
         if (null != accountError) {
             throw accountError;
@@ -317,20 +350,18 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
     }
 
     protected void updateCacheIfNeeded() throws OXException {
-        JSONObject internalConfiguration = account.getInternalConfiguration();
-        if (internalConfiguration == null || internalConfiguration.optJSONObject(CachingCalendarAccessConstants.CACHING) == null) {
-            update();
-            return;
-        }
-        final JSONObject caching = internalConfiguration.optJSONObject(CachingCalendarAccessConstants.CACHING);
+        final JSONObject caching = getCachingConfiguration();
         Number lastUpdate = caching.optNumber(CachingCalendarAccessConstants.LAST_UPDATE);
-        long currentTimeMillis = System.currentTimeMillis();
-        long cascadedRefreshInterval = getCascadedRefreshInterval();
-        if (lastUpdate == null || lastUpdate.longValue() <= 0 || (TimeUnit.MINUTES.toMillis(cascadedRefreshInterval) < currentTimeMillis - lastUpdate.longValue() + TimeUnit.MINUTES.toMillis(1)) || this.parameters.contains(CalendarParameters.PARAMETER_UPDATE_CACHE) && this.parameters.get(CalendarParameters.PARAMETER_UPDATE_CACHE, Boolean.class, Boolean.FALSE).booleanValue()) {
-            if (lastUpdate != null && lastUpdate.longValue() > 0 && lastUpdate.longValue() + TimeUnit.MINUTES.toMillis(1) > currentTimeMillis) {
+        long now = System.currentTimeMillis();
+        long refreshInterval = TimeUnit.MINUTES.toMillis(getCascadedRefreshInterval());
+        if (lastUpdate == null || lastUpdate.longValue() <= 0 || 
+            (refreshInterval < now - lastUpdate.longValue() + TimeUnit.MINUTES.toMillis(1)) ||
+            b(parameters.get(CalendarParameters.PARAMETER_UPDATE_CACHE, Boolean.class, Boolean.FALSE))) {
+            if (lastUpdate != null && lastUpdate.longValue() > 0 && lastUpdate.longValue() + TimeUnit.MINUTES.toMillis(1) > now) {
                 throw BasicCachingCalendarExceptionCodes.ALREADY_UP_TO_DATE.create(I(account.getAccountId()), I(session.getUserId()), I(session.getContextId()));
             }
-            LOG.debug("Try to update cache for account {} with refresh interval {} (used server time: {}, last update: {}) and current cache configuration '{}'", I(account.getAccountId()), L(cascadedRefreshInterval), L(currentTimeMillis), lastUpdate != null ? L(lastUpdate.longValue()) : "never", caching.toString());
+            LOG.debug("Try to update cache for account {} with refresh interval {} (used server time: {}, last update: {}) and current cache configuration '{}'", 
+                I(account.getAccountId()), L(refreshInterval), L(now), lastUpdate != null ? lastUpdate : "never", caching);
             update();
         }
     }
@@ -384,7 +415,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
      */
     protected void addWarnings(Collection<OXException> warnings) {
         if (null != warnings && 0 < warnings.size()) {
-            warnings.addAll(warnings);
+            this.warnings.addAll(warnings);
         }
     }
 
@@ -394,7 +425,20 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
     }
 
     protected JSONObject getCachingConfiguration() {
-        JSONObject internalConfig = this.getAccount().getInternalConfiguration();
+        JSONObject internalConfig = account.getInternalConfiguration();
+        if (null == internalConfig) {
+            /*
+             * inconsistent configuration, try and restore in account
+             */
+            internalConfig = new JSONObject().putSafe(CachingCalendarAccessConstants.CACHING, new JSONObject());
+            try {
+                AdministrativeCalendarAccountService accountService = Services.getService(AdministrativeCalendarAccountService.class);
+                account = accountService.updateAccount(
+                    session.getContextId(), session.getUserId(), account.getAccountId(), internalConfig, null, account.getLastModified().getTime());
+            } catch (Exception e) {
+                LOG.warn("Error initializing configuration in account {}", account, e);
+            }
+        }
         JSONObject caching = internalConfig.optJSONObject(CachingCalendarAccessConstants.CACHING);
         if (caching == null) {
             caching = new JSONObject();
@@ -441,9 +485,10 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
              */
             throw CalendarExceptionCodes.DB_NOT_MODIFIED.create();
         }
-        delete(storage, diff);
-        create(storage, diff, existingEvents);
-        update(storage, diff);
+        List<DeleteResult> deletions = delete(storage, diff);
+        List<CreateResult> creations = create(storage, diff, existingEvents);
+        List<UpdateResult> updates = update(storage, diff);
+        notifyHandlers(creations, updates, deletions);
     }
 
     private List<Event> getExistingEvents() throws OXException {
@@ -462,7 +507,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
     private static final EventField[] FIELDS_TO_IGNORE = new EventField[] { EventField.CREATED_BY, EventField.FOLDER_ID, EventField.ID, EventField.CALENDAR_USER, EventField.CREATED, EventField.MODIFIED_BY, EventField.EXTENDED_PROPERTIES, EventField.TIMESTAMP };
     private static final EventField[] EQUALS_IDENTIFIER = new EventField[] { EventField.UID, EventField.RECURRENCE_ID };
 
-    private EventUpdates generateEventDiff(List<Event> persistedEvents, List<Event> updatedEvents) throws OXException {
+    private EventUpdates generateEventDiff(List<Event> persistedEvents, List<Event> updatedEvents) {
         return CalendarUtils.getEventUpdates(persistedEvents, updatedEvents, true, FIELDS_TO_IGNORE, EQUALS_IDENTIFIER);
     }
 
@@ -470,34 +515,41 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
      * Deletes all removed events and their exceptions
      *
      * @param calendarStorage The {@link CalendarStorage} to use
-     * @param diff The {@link EventUpdates}
-     * @throws OXException
+     * @param diff The event updates from which to process the deleted items
+     * @return The list of delete results
      */
-    private void delete(CalendarStorage calendarStorage, EventUpdates diff) throws OXException {
-        if (diff.getRemovedItems().isEmpty()) {
-            return;
+    private List<DeleteResult> delete(CalendarStorage calendarStorage, EventUpdates diff) throws OXException {
+        List<Event> removedItems = diff.getRemovedItems();
+        if (removedItems.isEmpty()) {
+            return Collections.emptyList();
         }
-        List<Event> removedItems = new ArrayList<>(diff.getRemovedItems().size());
-        for (Event event : diff.getRemovedItems()) {
-            removedItems.addAll(delete(calendarStorage, event));
-            removedItems.add(event);
+        Date timestamp = new Date();
+        List<DeleteResult> deleteResults = new ArrayList<DeleteResult>(removedItems.size());
+        for (Event removedEvent : removedItems) {
+            for (Event deletedEvent : delete(calendarStorage, removedEvent)) {
+                deleteResults.add(new DeleteResultImpl(timestamp.getTime(), deletedEvent));
+            }
         }
-
-        notificationService.notifyHandlers(getDeleteEvent(removedItems));
+        return deleteResults;
     }
 
     /**
-     * Delete the given event and all exceptions
+     * Delete the given event, including all exceptions in case a series master event is deleted.
      *
      * @param calendarStorage The {@link CalendarStorage} to use
      * @param originalEvent The event to delete
-     * @return A list of deleted exceptions
-     * @throws OXException
+     * @return A list of deleted events
      */
     protected List<Event> delete(CalendarStorage calendarStorage, Event originalEvent) throws OXException {
-        // List<Event> result = null;
+        List<Event> result = new ArrayList<Event>();
+        /*
+         * recursively delete any change exceptions
+         */
         if (isSeriesMaster(originalEvent)) {
-            deleteExceptions(calendarStorage, originalEvent.getSeriesId(), getChangeExceptionDates(calendarStorage, originalEvent.getSeriesId()));
+            SortedSet<RecurrenceId> changeExceptionDates = getChangeExceptionDates(calendarStorage, originalEvent.getSeriesId());
+            for (Event originalExceptionEvent : loadExceptionData(calendarStorage, originalEvent.getSeriesId(), changeExceptionDates)) {
+                result.addAll(delete(calendarStorage, originalExceptionEvent));
+            }
         }
         /*
          * delete event data from storage
@@ -509,8 +561,8 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         calendarStorage.getAlarmTriggerStorage().deleteTriggers(id);
         calendarStorage.getEventStorage().deleteEvent(id);
         calendarStorage.getAttendeeStorage().deleteAttendees(id, originalEvent.getAttendees());
-        // 'result' can only be null here: return result == null ? Collections.emptyList() : result;
-        return Collections.emptyList();
+        result.add(originalEvent);
+        return result;
     }
 
     /**
@@ -525,23 +577,6 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND).addSearchTerm(CalendarUtils.getSearchTerm(EventField.SERIES_ID, SingleOperation.EQUALS, seriesId)).addSearchTerm(CalendarUtils.getSearchTerm(EventField.ID, SingleOperation.NOT_EQUALS, new ColumnFieldOperand<EventField>(EventField.SERIES_ID)));
         List<Event> changeExceptions = calendarStorage.getEventStorage().searchEvents(searchTerm, null, new EventField[] { EventField.RECURRENCE_ID });
         return CalendarUtils.getRecurrenceIds(changeExceptions);
-    }
-
-    /**
-     * Deletes all exceptions for the given event series
-     *
-     * @param calendarStorage The {@link CalendarStorage} to use
-     * @param seriesID The event series id
-     * @param exceptionDates The exceptions dates
-     * @return A list of deleted event exceptions
-     * @throws OXException
-     */
-    protected List<Event> deleteExceptions(CalendarStorage calendarStorage, String seriesID, Collection<RecurrenceId> exceptionDates) throws OXException {
-        List<Event> exceptions = loadExceptionData(calendarStorage, seriesID, exceptionDates);
-        for (Event originalExceptionEvent : exceptions) {
-            delete(calendarStorage, originalExceptionEvent);
-        }
-        return exceptions;
     }
 
     /**
@@ -568,36 +603,23 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
     }
 
     /**
-     * Creates events for all added items
-     *
-     * @param calendarStorage The {@link CalendarStorage} to use
-     * @param diff The {@link EventUpdates}
-     * @param existingEvents A list of existing events
-     * @throws OXException
-     */
-    private void create(CalendarStorage calendarStorage, EventUpdates diff, List<Event> existingEvents) throws OXException {
-        if (diff.getAddedItems().isEmpty()) {
-            return;
-        }
-        create(calendarStorage, diff.getAddedItems(), existingEvents);
-    }
-
-    /**
      * Performs updates for the given updated items
      *
      * @param calendarStorage The {@link CalendarStorage} to use
-     * @param diff The {@link EventUpdates} containing the updates
-     * @throws OXException
+     * @param diff The event updates from which to process the updated items
+     * @return The list of update results
      */
-    private void update(CalendarStorage calendarStorage, EventUpdates diff) throws OXException {
-        if (diff.getUpdatedItems().isEmpty()) {
-            return;
+    private List<UpdateResult> update(CalendarStorage calendarStorage, EventUpdates diff) throws OXException {
+        List<EventUpdate> updatedItems = diff.getUpdatedItems();
+        if (updatedItems.isEmpty()) {
+            return Collections.emptyList();
         }
-
-        for (EventUpdate eventUpdate : diff.getUpdatedItems()) {
+        List<UpdateResult> updateResults = new ArrayList<UpdateResult>(updatedItems.size());
+        for (EventUpdate eventUpdate : updatedItems) {
             update(calendarStorage, eventUpdate);
+            updateResults.add(new UpdateResultImpl(eventUpdate.getOriginal(), eventUpdate.getUpdate()));
         }
-        notificationService.notifyHandlers(getUpdateEvent(diff.getUpdatedItems()));
+        return updateResults;
     }
 
     /**
@@ -863,84 +885,37 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.provider.extensions.BasicSearchAware#searchEvents(java.util.List, java.util.List)
-     */
-    @Override
-    public List<Event> searchEvents(List<SearchFilter> filters, List<String> queries) throws OXException {
-        if ((null == filters || filters.isEmpty()) && (null == queries || queries.isEmpty())) {
-            return getEvents();
-        }
-        updateCacheIfNeeded();
-        return new SearchHandler(session, account, parameters).searchEvents(filters, queries);
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.provider.extensions.BasicSyncAware#getUpdatedEvents(long)
-     */
-    @Override
-    public UpdatesResult getUpdatedEvents(long updatedSince) throws OXException {
-        updateCacheIfNeeded();
-        return new SyncHandler(session, account, parameters).getUpdatedEvents(updatedSince);
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.provider.extensions.BasicSyncAware#getSequenceNumber()
-     */
-    @Override
-    public long getSequenceNumber() throws OXException {
-        updateCacheIfNeeded();
-        return new SyncHandler(session, account, parameters).getSequenceNumber();
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.provider.extensions.BasicSyncAware#resolveResource(java.lang.String)
-     */
-    @Override
-    public List<Event> resolveResource(String resourceName) throws OXException {
-        updateCacheIfNeeded();
-        return new SyncHandler(session, account, parameters).resolveResource(resourceName);
-    }
-
-    @Override
-    public Map<String, EventsResult> resolveResources(List<String> resourceNames) throws OXException {
-        updateCacheIfNeeded();
-        return new SyncHandler(session, account, parameters).resolveResources(resourceNames);
-    }
-
     /**
      * Creates the given events
      *
      * @param calendarStorage The {@link CalendarStorage} to use
-     * @param externalEvents A list of external events
+     * @param diff The event updates from which to process the added items
      * @param existingEvents A list of existing events
-     * @throws OXException
+     * @return The list of create results
      */
-    protected void create(CalendarStorage calendarStorage, List<Event> externalEvents, List<Event> existingEvents) throws OXException {
-        if (!externalEvents.isEmpty()) {
-            Map<String, List<Event>> originalEventsByUID = CalendarUtils.getEventsByUID(existingEvents, false);
-            Date now = new Date();
-            Map<String, List<Event>> extEventsByUID = getEventsByUID(externalEvents, true);
-            for (Entry<String, List<Event>> entry : extEventsByUID.entrySet()) {
-                List<Event> originalEventGroup = sortSeriesMasterFirst(originalEventsByUID.get(entry.getKey()));
-                if (null != originalEventGroup && 0 < originalEventGroup.size() && isSeriesMaster(originalEventGroup.get(0))) {
-                    insertEvents(calendarStorage, now, sortSeriesMasterFirst(entry.getValue()), originalEventGroup.get(0));
-                } else {
-                    insertEvents(calendarStorage, now, sortSeriesMasterFirst(entry.getValue()), null);
-                }
-            }
-            setDefaultFolder(externalEvents);
-            getAlarmHelper().insertDefaultAlarms(calendarStorage, externalEvents);
-            notificationService.notifyHandlers(getCreateEvent(externalEvents));
+    protected List<CreateResult> create(CalendarStorage calendarStorage, EventUpdates diff, List<Event> existingEvents) throws OXException {
+        List<Event> addedItems = diff.getAddedItems();
+        if (addedItems.isEmpty()) {
+            return Collections.emptyList();
         }
+        List<CreateResult> createResults = new ArrayList<CreateResult>(addedItems.size());
+        Map<String, List<Event>> originalEventsByUID = CalendarUtils.getEventsByUID(existingEvents, false);
+        Date now = new Date();
+        Map<String, List<Event>> extEventsByUID = getEventsByUID(addedItems, true);
+        for (Entry<String, List<Event>> entry : extEventsByUID.entrySet()) {
+            List<Event> originalEventGroup = sortSeriesMasterFirst(originalEventsByUID.get(entry.getKey()));
+            if (null != originalEventGroup && 0 < originalEventGroup.size() && isSeriesMaster(originalEventGroup.get(0))) {
+                insertEvents(calendarStorage, now, sortSeriesMasterFirst(entry.getValue()), originalEventGroup.get(0));
+            } else {
+                insertEvents(calendarStorage, now, sortSeriesMasterFirst(entry.getValue()), null);
+            }
+            for (Event createdEvent : entry.getValue()) {
+                createResults.add(new CreateResultImpl(createdEvent));
+            }
+        }
+        setDefaultFolder(addedItems);
+        getAlarmHelper().insertDefaultAlarms(calendarStorage, addedItems);
+        return createResults;
     }
 
     /**
@@ -1052,11 +1027,14 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
      * @return The timestamp of the last update, or <code>null</code> if unknown
      */
     protected Long optLastUpdate() {
-        JSONObject cachingConfig = account.getInternalConfiguration().optJSONObject(CachingCalendarAccessConstants.CACHING);
-        if (null != cachingConfig) {
-            long value = cachingConfig.optLong(CachingCalendarAccessConstants.LAST_UPDATE, 0L);
-            if (0 < value) {
-                return Long.valueOf(value);
+        JSONObject internalConfig = account.getInternalConfiguration();
+        if (null != internalConfig) {
+            JSONObject cachingConfig = internalConfig.optJSONObject(CachingCalendarAccessConstants.CACHING);
+            if (null != cachingConfig) {
+                long value = cachingConfig.optLong(CachingCalendarAccessConstants.LAST_UPDATE, 0L);
+                if (0 < value) {
+                    return Long.valueOf(value);
+                }
             }
         }
         return null;
@@ -1110,80 +1088,6 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
     }
 
     /**
-     * Constructs a {@link CalendarEvent} for the given deleted events
-     *
-     * @param events The events
-     * @return A {@link CalendarEvent} for this change
-     */
-    CalendarEvent getDeleteEvent(List<Event> events) {
-        Date now = new Date();
-        List<DeleteResult> deletions = new ArrayList<>(events.size());
-        for (Event eve : events) {
-            deletions.add(new DeleteResultImpl(now.getTime(), eve));
-        }
-
-        return new DefaultCalendarEvent(session.getContextId(),
-            account.getAccountId(),
-            account.getUserId(),
-            Collections.singletonMap(I(account.getUserId()), Collections.singletonList(BasicCalendarAccess.FOLDER_ID)),
-            null,
-            null,
-            deletions,
-            null,
-            null,
-            null);
-    }
-
-    /**
-     * Constructs a {@link CalendarEvent} for the given created events
-     *
-     * @param events A list of created events
-     * @return The {@link CalendarEvent}
-     */
-    private CalendarEvent getCreateEvent(List<Event> events) {
-        List<CreateResult> creations = new ArrayList<>(events.size());
-        for(Event eve: events) {
-            creations.add(new CreateResultImpl(eve));
-        }
-
-        return new DefaultCalendarEvent(session.getContextId(),
-            account.getAccountId(),
-            account.getUserId(),
-            Collections.singletonMap(I(account.getUserId()), Collections.singletonList(BasicCalendarAccess.FOLDER_ID)),
-            creations,
-            null,
-            null,
-            null,
-            null,
-            null);
-    }
-
-    /**
-     * Creates a {@link CalendarEvent} for the given event updates
-     *
-     * @param updatedItems A list of {@link EventUpdate}s
-     * @return The {@link CalendarEvent}
-     * @throws OXException
-     */
-    private CalendarEvent getUpdateEvent(List<EventUpdate> updatedItems) throws OXException {
-        List<UpdateResult> updates = new ArrayList<>(updatedItems.size());
-        for(EventUpdate update: updatedItems) {
-            updates.add(new UpdateResultImpl(update.getOriginal(), update.getUpdate()));
-        }
-
-        return new DefaultCalendarEvent(session.getContextId(),
-            account.getAccountId(),
-            account.getUserId(),
-            Collections.singletonMap(I(account.getUserId()), Collections.singletonList(BasicCalendarAccess.FOLDER_ID)),
-            null,
-            updates,
-            null,
-            null,
-            null,
-            null);
-    }
-
-    /**
      * The fields to check for an alarm change
      */
     private static final Set<EventField> ALARM_CHANGE;
@@ -1206,37 +1110,47 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
      * @param eventID The event ID
      * @param alarms A list of {@link Alarm}s
      * @param clientTimestamp The client timestamp
+     * @param calendarUtilities A reference to the calendar utilities
      * @return A {@link CalendarResult}
      * @throws OXException
      */
-    protected CalendarResult updateAlarmsInternal(EventID eventID, List<Alarm> alarms, long clientTimestamp) throws OXException {
+    protected CalendarResult updateAlarmsInternal(EventID eventID, List<Alarm> alarms, long clientTimestamp, CalendarUtilities calendarUtilities) throws OXException {
         Event originalEvent = getEvent(eventID.getObjectID(), eventID.getRecurrenceID());
         originalEvent.setFolderId(eventID.getFolderID());
         AlarmPreparator.getInstance().prepareEMailAlarms(session, calendarUtilities, alarms);
         setDefaultFolder(Collections.singleton(originalEvent));
         UpdateResult updateResult = getAlarmHelper().updateAlarms(originalEvent, alarms, true);
-        DefaultCalendarResult result = new DefaultCalendarResult(session, session.getUserId(), FOLDER_ID, null, null == updateResult ? null : Collections.singletonList(updateResult), null);
-        return notifyHandlers(result);
+        if (null != updateResult) {
+            notifyHandlers(null, Collections.singletonList(updateResult), null);
+        }
+        return new DefaultCalendarResult(session, session.getUserId(), FOLDER_ID, null, null == updateResult ? null : Collections.singletonList(updateResult), null);
     }
 
     /**
-     * Notifies all CalendarHandler
+     * Notifies all registered handlers about changes in the stored events.
      *
-     * @param result The {@link DefaultCalendarResult}
-     * @return the result
+     * @param creations The create results, or <code>null</code> if there are none
+     * @param deletions The delete results, or <code>null</code> if there are none
+     * @param updates The update results, or <code>null</code> if there are none
      */
-    private DefaultCalendarResult notifyHandlers(DefaultCalendarResult result) {
-        notificationService.notifyHandlers(new DefaultCalendarEvent(    session.getContextId(),
-                                                                        account.getAccountId(),
-                                                                        session.getUserId(),
-                                                                        Collections.singletonMap(I(session.getUserId()), Collections.singletonList(BasicCalendarAccess.FOLDER_ID)),
-                                                                        result.getCreations(),
-                                                                        result.getUpdates(),
-                                                                        result.getDeletions(),
-                                                                        session,
-                                                                        null,
-                                                                        parameters));
-        return result;
+    protected void notifyHandlers(List<CreateResult> creations, List<UpdateResult> updates, List<DeleteResult> deletions) {
+        Map<Integer, List<String>> affectedFoldersPerUser = Collections.singletonMap(I(account.getUserId()), Collections.singletonList(BasicCalendarAccess.FOLDER_ID));
+        notifyHandlers(new DefaultCalendarEvent(
+            session.getContextId(), account.getAccountId(), account.getUserId(), affectedFoldersPerUser, creations, updates, deletions, null, null, null));
+    }
+
+    /**
+     * Notifies all registered handlers about a calendar event.
+     *
+     * @param event The event to notify the handlers about
+     */
+    protected void notifyHandlers(CalendarEvent event) {
+        CalendarEventNotificationService notificationService = Services.getService(CalendarEventNotificationService.class);
+        if (null == notificationService) {
+            LOG.warn("Unable to notify handlers", ServiceExceptionCode.absentService(CalendarEventNotificationService.class));
+            return;
+        }
+        notificationService.notifyHandlers(event);
     }
 
     /**
@@ -1323,11 +1237,12 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
     public void updateDefaultAlarms() throws OXException {
         final List<Event> existingEvents = getExistingEvents();
         setDefaultFolder(existingEvents);
+        AlarmHelper alarmHelper = getAlarmHelper();
         new OSGiCalendarStorageOperation<Void>(Services.getServiceLookup(), session.getContextId(), account.getAccountId(), getParameters()) {
 
             @Override
             protected Void call(CalendarStorage storage) throws OXException {
-                getAlarmHelper().changeDefaultAlarms(storage, existingEvents);
+                alarmHelper.changeDefaultAlarms(storage, existingEvents);
                 addWarnings(collectWarnings(storage));
                 return null;
             }

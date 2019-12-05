@@ -207,17 +207,11 @@ public class CreateSequencesTables extends AbstractCreateTableImpl {
         super();
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.database.CreateTableService#requiredTables()
-     */
     @Override
     public String[] requiredTables() {
         return NO_TABLES;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.database.CreateTableService#tablesToCreate()
-     */
     @Override
     public String[] tablesToCreate() {
         return new String[] { sequenceIdTableName, sequencePrincipalTableName, sequenceResourceTableName,
@@ -228,9 +222,6 @@ public class CreateSequencesTables extends AbstractCreateTableImpl {
             sequenceMailServiceTableName };
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.database.AbstractCreateTableImpl#getCreateStatements()
-     */
     @Override
     protected String[] getCreateStatements() {
         return new String[] { createSequenceIdTable, createSequencePrincipalTable, createSequenceResourceTable,

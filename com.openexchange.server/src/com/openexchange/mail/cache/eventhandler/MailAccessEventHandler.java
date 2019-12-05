@@ -76,40 +76,24 @@ public final class MailAccessEventHandler implements ElementEventHandler {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.cache.ElementEventHandlerWrapper#onExceededIdletimeBackground(org.apache.jcs.engine.control.event.ElementEvent)
-     */
     @Override
     public void onExceededIdletimeBackground(final ElementEvent event) {
         final CacheElement cacheElem = (CacheElement) event.getSource();
         close((MailAccess<?, ?>) cacheElem.getVal());
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.cache.ElementEventHandlerWrapper#onExceededMaxlifeBackground(org.apache.jcs.engine.control.event.ElementEvent)
-     */
     @Override
     public void onExceededMaxlifeBackground(final ElementEvent event) {
         final CacheElement cacheElem = (CacheElement) event.getSource();
         close((MailAccess<?, ?>) cacheElem.getVal());
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.cache.ElementEventHandlerWrapper#onSpooledDiskNotAvailable(org.apache.jcs.engine.control.event.ElementEvent)
-     */
     @Override
     public void onSpooledDiskNotAvailable(final ElementEvent event) {
         final CacheElement cacheElem = (CacheElement) event.getSource();
         close((MailAccess<?, ?>) cacheElem.getVal());
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.cache.ElementEventHandlerWrapper#onSpooledNotAllowed(org.apache.jcs.engine.control.event.ElementEvent)
-     */
     @Override
     public void onSpooledNotAllowed(final ElementEvent event) {
         final CacheElement cacheElem = (CacheElement) event.getSource();

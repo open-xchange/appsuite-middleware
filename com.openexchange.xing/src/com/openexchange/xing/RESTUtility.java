@@ -429,9 +429,9 @@ public class RESTUtility {
                     checkForError(result.toObject());
                 }
             }
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw new XingIOException(e);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             if (XingServerException.isValidWithNullBody(response)) {
                 // We have something from Xing, but it's an error with no reason
                 throw new XingServerException(response);
@@ -503,7 +503,7 @@ public class RESTUtility {
                 result.put(parts[0], parts[1]);
             }
             return result;
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw new XingIOException(e);
         } finally {
             Streams.close(contentStream, scanner);
@@ -566,7 +566,7 @@ public class RESTUtility {
                  */
                 try {
                     response = client.execute(req);
-                } catch (final NullPointerException e) {
+                } catch (NullPointerException e) {
                     // Leave 'response' as null. This is handled below.
                 }
 
@@ -587,9 +587,9 @@ public class RESTUtility {
                 parseAsJSON(response, expectedStatusCode);
             }
             return response;
-        } catch (final SSLException e) {
+        } catch (SSLException e) {
             throw new XingSSLException(e);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             // Quite common for network going up & down or the request being
             // cancelled, so don't worry about logging this
             throw new XingIOException(e);
@@ -642,7 +642,7 @@ public class RESTUtility {
 
             // These substitutions must be made to keep OAuth happy.
             trgt = trgt.replace("+", "%20").replace("*", "%2A");
-        } catch (final UnsupportedEncodingException uce) {
+        } catch (UnsupportedEncodingException uce) {
             return null;
         }
 
@@ -660,7 +660,7 @@ public class RESTUtility {
             synchronized (dateFormat) {
                 return dateFormat.parse(date);
             }
-        } catch (final java.text.ParseException e) {
+        } catch (java.text.ParseException e) {
             return null;
         }
     }
@@ -694,7 +694,7 @@ public class RESTUtility {
                 }
             }
             return result.toString().replace("*", "%2A");
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             return null;
         }
     }

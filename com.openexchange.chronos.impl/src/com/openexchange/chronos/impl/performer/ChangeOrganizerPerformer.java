@@ -51,11 +51,14 @@ package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.EventField.ORGANIZER;
 import static com.openexchange.chronos.impl.Check.requireUpToDateTimestamp;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Map.Entry;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.CalendarObjectResource;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
@@ -63,6 +66,8 @@ import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.RecurrenceRange;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.DefaultCalendarObjectResource;
+import com.openexchange.chronos.common.mapping.DefaultEventUpdate;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.impl.Check;
@@ -165,7 +170,8 @@ public class ChangeOrganizerPerformer extends AbstractUpdatePerformer {
             if (CalendarUtils.isSeriesException(originalEvent)) {
                 throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(eventId, ORGANIZER);
             }
-            updateEvent(originalEvent, organizer);
+            Event updatedEvent = updateEvent(originalEvent, organizer);
+            schedulingHelper.trackUpdate(new DefaultCalendarObjectResource(updatedEvent), new DefaultEventUpdate(originalEvent, updatedEvent));
             return resultTracker.getResult();
         }
 
@@ -176,7 +182,10 @@ public class ChangeOrganizerPerformer extends AbstractUpdatePerformer {
             if (CalendarUtils.isSeriesException(originalEvent)) {
                 throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(eventId, ORGANIZER);
             }
-            updateSeries(originalEvent, organizer);
+            Event updatedEvent = updateEvent(originalEvent, organizer);
+            List<Event> updatedChangeExceptions = updateExceptions(updatedEvent, organizer);
+            CalendarObjectResource updatedResource = new DefaultCalendarObjectResource(updatedEvent, updatedChangeExceptions);
+            schedulingHelper.trackUpdate(updatedResource, new DefaultEventUpdate(originalEvent, updatedEvent));
             return resultTracker.getResult();
         }
 
@@ -184,13 +193,18 @@ public class ChangeOrganizerPerformer extends AbstractUpdatePerformer {
          * update "this and future" recurrences; first split the series at this recurrence
          */
         Check.recurrenceRangeMatches(recurrenceId, RecurrenceRange.THISANDFUTURE);
-        new SplitPerformer(this).perform(originalEvent.getSeriesId(), recurrenceId.getValue(), null, originalEvent.getTimestamp());
-
-        /*
-         * reload the (now splitted) series event & apply the update, taking over a new recurrence rule as needed
-         */
-        updateSeries(loadEventData(originalEvent.getId()), organizer);
-
+        Entry<CalendarObjectResource, CalendarObjectResource> splitResult = new SplitPerformer(this).split(originalEvent, recurrenceId.getValue(), null);
+        if (null != splitResult.getKey()) {
+            schedulingHelper.trackCreation(splitResult.getKey());
+        }
+        Event updatedSeriesMaster = splitResult.getValue().getSeriesMaster();
+        if (null == updatedSeriesMaster) {
+            throw CalendarExceptionCodes.UNEXPECTED_ERROR.create("Unable to track update. Reason: Nothing was changed.");
+        }
+        updatedSeriesMaster = updateEvent(updatedSeriesMaster, organizer);
+        List<Event> updatedChangeExceptions = updateExceptions(updatedSeriesMaster, organizer);
+        CalendarObjectResource updatedResource = new DefaultCalendarObjectResource(updatedSeriesMaster, updatedChangeExceptions);
+        schedulingHelper.trackUpdate(updatedResource, new DefaultEventUpdate(originalEvent, updatedSeriesMaster));
         return resultTracker.getResult();
     }
 
@@ -231,24 +245,10 @@ public class ChangeOrganizerPerformer extends AbstractUpdatePerformer {
     }
 
     /**
-     * Applies the new organizer to a series master and all its change exceptions.
-     * Results will be tracked.
-     *
-     * @param organizer The new organizer
-     * @param originalEvent The original event
-     * @param lastModified The date to set the {@link Event#getLastModified()} to
-     * @throws OXException If update fails
-     */
-    private void updateSeries(Event originalEvent, Organizer organizer) throws OXException {
-        Event updatedEvent = updateEvent(originalEvent, organizer);
-        updateExceptions(originalEvent, updatedEvent, organizer);
-    }
-
-    /**
      * Update the organizer for a single event.
      *
-     * @param organizer The new organizer
      * @param originalEvent The original event
+     * @param organizer The new organizer
      * @return The updated {@link Event}
      * @param lastModified The date to set the {@link Event#getLastModified()} to
      * @throws OXException If updating fails
@@ -266,18 +266,22 @@ public class ChangeOrganizerPerformer extends AbstractUpdatePerformer {
      * Loads series exceptions and applies the new organizer to them.
      * Results will be tracked.
      *
-     * @param originalEvent The original event
      * @param updatedEvent The updated series master
      * @param organizer The new organizer
      * @param lastModified The date to set the {@link Event#getLastModified()} to
+     * @return The updated change exceptions, or an empty list if there are none
      * @throws OXException If updating fails
      */
-    private void updateExceptions(Event originalEvent, Event updatedEvent, Organizer organizer) throws OXException {
+    private List<Event> updateExceptions(Event updatedEvent, Organizer organizer) throws OXException {
+        List<Event> updatedChangeExceptions = new ArrayList<Event>();
         for (Event e : loadExceptionData(updatedEvent)) {
             storage.getEventStorage().updateEvent(prepareChanges(e, organizer));
             insertOrganizerAsAttendee(e, organizer);
-            resultTracker.trackUpdate(e, loadEventData(e.getId()));
+            Event updatedChangeException = loadEventData(e.getId());
+            updatedChangeExceptions.add(updatedChangeException);
+            resultTracker.trackUpdate(e, updatedChangeException);
         }
+        return updatedChangeExceptions;
     }
 
     /**

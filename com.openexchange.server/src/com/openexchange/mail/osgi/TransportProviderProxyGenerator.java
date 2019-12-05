@@ -111,9 +111,9 @@ public final class TransportProviderProxyGenerator {
                 } finally {
                     context.ungetService(transportProviderServiceReference);
                 }
-            } catch (final InvocationTargetException e) {
+            } catch (InvocationTargetException e) {
                 throw e.getTargetException();
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 throw new RuntimeException("unexpected invocation exception: " + e.getMessage(), e);
             }
             return result;

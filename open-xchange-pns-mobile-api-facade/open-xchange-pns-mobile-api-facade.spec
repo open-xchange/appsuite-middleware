@@ -14,7 +14,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 18
+%define        ox_release 3
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -60,34 +60,14 @@ GLOBIGNORE='*'
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
-* Tue Nov 19 2019 Thorben Betten <thorben.betten@open-xchange.com>
-Build for patch 2019-11-25 (5484)
-* Mon Nov 04 2019 Thorben Betten <thorben.betten@open-xchange.com>
-Build for patch 2019-11-11 (5473)
-* Sat Nov 02 2019 Thorben Betten <thorben.betten@open-xchange.com>
-Build for patch 2019-11-11 (5473)
-* Tue Oct 22 2019 Thorben Betten <thorben.betten@open-xchange.com>
-Build for patch 2019-10-28 (5461)
-* Thu Oct 10 2019 Thorben Betten <thorben.betten@open-xchange.com>
-Build for patch 2019-10-14 (5439)
-* Mon Sep 23 2019 Thorben Betten <thorben.betten@open-xchange.com>
-Build for patch 2019-09-30 (5420)
-* Mon Sep 02 2019 Thorben Betten <thorben.betten@open-xchange.com>
-Build for patch 2019-09-09 (5397)
-* Mon Aug 19 2019 Thorben Betten <thorben.betten@open-xchange.com>
-Build for patch 2019-08-26 (5374)
-* Fri Aug 09 2019 Thorben Betten <thorben.betten@open-xchange.com>
-Build for patch 2019-08-12 (5359)
-* Mon Jul 22 2019 Thorben Betten <thorben.betten@open-xchange.com>
-Build for patch 2019-07-29 (5341)
-* Tue Jul 09 2019 Thorben Betten <thorben.betten@open-xchange.com>
-Build for patch 2019-07-15 (5310)
-* Thu Jun 27 2019 Thorben Betten <thorben.betten@open-xchange.com>
-Build for patch 2019-07-01 (5291)
-* Wed Jun 26 2019 Thorben Betten <thorben.betten@open-xchange.com>
-Build for patch 2019-06-27 (5299)
-* Thu Jun 06 2019 Thorben Betten <thorben.betten@open-xchange.com>
-Build for patch 2019-06-11 (5261)
+* Thu Nov 28 2019 Thorben Betten <thorben.betten@open-xchange.com>
+Second candidate for 7.10.3 release
+* Thu Nov 21 2019 Thorben Betten <thorben.betten@open-xchange.com>
+First candidate for 7.10.3 release
+* Thu Oct 17 2019 Thorben Betten <thorben.betten@open-xchange.com>
+First preview for 7.10.3 release
+* Mon Jun 17 2019 Thorben Betten <thorben.betten@open-xchange.com>
+prepare for 7.10.3 release
 * Fri May 10 2019 Thorben Betten <thorben.betten@open-xchange.com>
 Second candidate for 7.10.2 release
 * Fri May 10 2019 Thorben Betten <thorben.betten@open-xchange.com>

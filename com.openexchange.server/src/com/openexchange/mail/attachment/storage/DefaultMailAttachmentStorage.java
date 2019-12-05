@@ -275,7 +275,7 @@ public class DefaultMailAttachmentStorage implements MailAttachmentStorage {
                 }
                 {
                     final Date date = (Date) storeProps.get("date");
-                    final String repl = date == null ? "" : com.openexchange.java.Strings.quoteReplacement(MimeProcessingUtility.getFormattedDate(date, DateFormat.LONG, locale, TimeZone.getDefault()));
+                    final String repl = date == null ? "" : com.openexchange.java.Strings.quoteReplacement(MimeProcessingUtility.getFormattedDate(date, DateFormat.LONG, locale, TimeZone.getDefault(), null));
                     desc = Strings.replaceSequenceWith(desc, "#DATE#", repl);
                 }
                 {
@@ -292,9 +292,9 @@ public class DefaultMailAttachmentStorage implements MailAttachmentStorage {
         IDBasedFileAccess fileAccess = fileAccessFactory.createAccess(session);
         //Check for encryption
         final boolean encrypt = null == storeProps ? false : storeProps.containsKey("encrypt") && (boolean) storeProps.get("encrypt");
-        if(encrypt) {
+        if (encrypt) {
             CryptographicAwareIDBasedFileAccessFactory cryptoFileAccessFactory = this.serviceLookup.getOptionalService(CryptographicAwareIDBasedFileAccessFactory.class);
-            if(cryptoFileAccessFactory != null) {
+            if (cryptoFileAccessFactory != null) {
                 //encrypt the mail attachment
                 EnumSet<CryptographyMode> encryptMode = EnumSet.of(CryptographyMode.ENCRYPT);
                 fileAccess = cryptoFileAccessFactory.createAccess(fileAccess, encryptMode, session);
@@ -323,7 +323,7 @@ public class DefaultMailAttachmentStorage implements MailAttachmentStorage {
                     fileAccess.commit();
                     rollbackNeeded = false;
                     retry = false;
-                } catch (final OXException x) {
+                } catch (OXException x) {
                     fileAccess.rollback();
                     rollbackNeeded = false;
                     if (!x.isPrefix("IFO")) {
@@ -345,7 +345,7 @@ public class DefaultMailAttachmentStorage implements MailAttachmentStorage {
                     }
                     file.setFileName(newName);
                     file.setTitle(newName);
-                } catch (final RuntimeException e) {
+                } catch (RuntimeException e) {
                     throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
                 } finally {
                     if (rollbackNeeded) {
@@ -440,7 +440,7 @@ public class DefaultMailAttachmentStorage implements MailAttachmentStorage {
         try {
             fileAccess.removeDocument(Collections.singletonList(id), timestamp);
             fileAccess.commit();
-        } catch (final OXException x) {
+        } catch (OXException x) {
             fileAccess.rollback();
             throw x;
         } finally {
@@ -460,13 +460,13 @@ public class DefaultMailAttachmentStorage implements MailAttachmentStorage {
             try {
                 fileAccess.removeDocument(Collections.singletonList(id), timestamp);
                 fileAccess.commit();
-            } catch (final OXException x) {
+            } catch (OXException x) {
                 fileAccess.rollback();
                 throw x;
             } finally {
                 finishSafe(fileAccess);
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("Transaction error while deleting file with ID \"{}\" failed.", id, e);
         }
     }
@@ -549,7 +549,7 @@ public class DefaultMailAttachmentStorage implements MailAttachmentStorage {
         if (fileAccess != null) {
             try {
                 fileAccess.finish();
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 // IGNORE
             }
         }

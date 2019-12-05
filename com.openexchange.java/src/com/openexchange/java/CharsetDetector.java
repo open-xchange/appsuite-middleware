@@ -93,14 +93,14 @@ public final class CharsetDetector {
     public static boolean isValid(final String charset) {
         try {
             return (null != charset && checkName(charset) && Charset.isSupported(charset));
-        } catch (final RuntimeException rte) {
+        } catch (RuntimeException rte) {
             LOG.warn("RuntimeException while checking charset: {}", charset, rte);
             return false;
-        } catch (final Error e) {
+        } catch (Error e) {
             handleThrowable(e);
             LOG.warn("Error while checking charset: {}", charset, e);
             return false;
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             handleThrowable(t);
             LOG.warn("Unexpected error while checking charset: {}", charset, t);
             return false;

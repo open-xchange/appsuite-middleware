@@ -177,11 +177,6 @@ public class Rule {
         this.errormsg = errormsg;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#toString()
-     */
     @Override
     public String toString() {
         return "Rule [position=" + position + ", id=" + id + ", name=" + name + "]";

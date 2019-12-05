@@ -82,7 +82,6 @@ import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.upload.impl.UploadListener;
@@ -97,6 +96,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.CountingHttpServletRequest;
 import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 /**
  * This is a super class of all AJAX servlets providing common methods.
@@ -228,6 +228,11 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
     public static final String ACTION_LOGIN = "login";
 
+    /**
+     * @deprecated
+     * Since v7.10.3, not needed anymore. Use 'staySignedIn' parameter instead during login
+     */
+    @Deprecated
     public static final String ACTION_STORE = "store";
 
     public static final String ACTION_RAMPUP = "rampup";

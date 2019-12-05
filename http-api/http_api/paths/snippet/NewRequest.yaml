@@ -4,20 +4,25 @@
     tags:
       - Snippet
     summary: Creates a snippet.
-    consumes:
-      - application/json
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
-      - in: body
-        name: body
-        description: A JSON object describing the snippet excluding its attachment(s). For adding attachments see `/snippet?action=attach` request.
-        required: true
-        schema:
-          $ref: "#/definitions/SnippetData"
+      - $ref: '#/components/parameters/gblQueryParamSession'
     responses:
-      200:
-        description: |
-          A JSON object containing the ID of the newly created snippet. In case of errors the responsible fields in the response are
+      '200':
+        description: >
+          A JSON object containing the ID of the newly created snippet. In case
+          of errors the responsible fields in the response are
+
           filled (see [Error handling](#error-handling)).
-        schema:
-          $ref: "#/definitions/SnippetUpdateResponse"
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SnippetUpdateResponse'
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SnippetData'
+      description: >-
+        A JSON object describing the snippet excluding its attachment(s). For
+        adding attachments see `/snippet?action=attach` request.
+      required: true

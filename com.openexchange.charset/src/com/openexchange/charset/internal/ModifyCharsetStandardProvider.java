@@ -77,7 +77,7 @@ public final class ModifyCharsetStandardProvider {
      * @return An array of {@link CharsetProvider} of length <code>2</code>; the first index is occupied by replaced {@link CharsetProvider}
      *         instance, the second with new instance
      */
-    public static CharsetProvider[] modifyCharsetExtendedProvider() throws NoSuchFieldException, IllegalAccessException {
+    public static CharsetProvider[] modifyCharsetStandardProvider() throws NoSuchFieldException, IllegalAccessException {
         /*
          * Modify java.nio.charset.Charset class
          */
@@ -94,7 +94,7 @@ public final class ModifyCharsetStandardProvider {
         CharsetProvider charsetProvider = null;
         try {
             charsetProvider = new AsianReplacementCharsetProvider(backupCharsetProvider);
-        } catch (final UnsupportedCharsetException e) {
+        } catch (UnsupportedCharsetException e) {
             /*
              * Leave unchanged since fall-back charset "CP50220" is not support by JVM
              */
@@ -104,7 +104,7 @@ public final class ModifyCharsetStandardProvider {
         }
         try {
             charsetProvider = new ASCIIReplacementCharsetProvider(null == charsetProvider ? backupCharsetProvider : charsetProvider);
-        } catch (final UnsupportedCharsetException e) {
+        } catch (UnsupportedCharsetException e) {
             /*
              * Leave unchanged since fall-back charset "WINDOWS-1252" is not support by JVM
              */

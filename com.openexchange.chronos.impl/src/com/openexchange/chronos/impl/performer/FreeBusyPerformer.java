@@ -67,6 +67,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import org.dmfs.rfc5545.DateTime;
+import org.dmfs.rfc5545.Duration;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Availability;
 import com.openexchange.chronos.Available;
@@ -100,6 +101,7 @@ import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Autoboxing;
+import com.openexchange.java.util.TimeZones;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
@@ -249,7 +251,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
          * prepare & filter internal attendees for lookup
          */
         Check.hasFreeBusy(ServerSessionAdapter.valueOf(session.getSession()));
-        attendees = session.getEntityResolver().prepare(attendees);
+        attendees = session.getEntityResolver().prepare(attendees, true);
         attendees = filter(attendees, Boolean.TRUE, CalendarUserType.INDIVIDUAL, CalendarUserType.RESOURCE, CalendarUserType.GROUP);
         if (0 == attendees.size()) {
             return Collections.emptyMap();
@@ -282,7 +284,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
                      * include if attendee does attend
                      */
                     Attendee eventAttendee = find(eventInPeriod.getAttendees(), attendee);
-                    if (null == eventAttendee || ParticipationStatus.DECLINED.equals(eventAttendee.getPartStat())) {
+                    if (null == eventAttendee || eventAttendee.isHidden() || ParticipationStatus.DECLINED.equals(eventAttendee.getPartStat())) {
                         continue;
                     }
                     folderID = CalendarUserType.INDIVIDUAL.equals(eventAttendee.getCuType()) ? chooseFolderID(eventInPeriod) : null;
@@ -290,18 +292,29 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
                     /*
                      * include if attendee matches event owner
                      */
-                    if (matches(eventInPeriod.getCreatedBy(), attendee.getEntity())) {
+                    if (false == matches(eventInPeriod.getCalendarUser(), attendee.getEntity())) {
                         continue;
                     }
                     folderID = eventInPeriod.getFolderId();
                 }
                 if (isSeriesMaster(eventInPeriod)) {
-                    Iterator<RecurrenceId> iterator = getRecurrenceIterator(session, eventInPeriod, from, until);
+                    /*
+                     * expand & add all (non overridden) instances of event series in period, expanded by the actual event duration
+                     */
+                    Date iteratorFrom = from;
+                    if (null != eventInPeriod.getEndDate()) {
+                        Duration duration = CalendarUtils.getDuration(eventInPeriod.getEndDate(), eventInPeriod.getStartDate());
+                        iteratorFrom = new Date(duration.addTo(TimeZones.UTC, from.getTime()));
+                    }
+                    Iterator<RecurrenceId> iterator = getRecurrenceIterator(session, eventInPeriod, iteratorFrom, until);
                     while (iterator.hasNext()) {
                         put(eventsPerAttendee, attendee, getResultingOccurrence(eventInPeriod, iterator.next(), folderID));
                         getSelfProtection().checkEventCollection(eventsPerAttendee.get(attendee));
                     }
                 } else {
+                    /*
+                     * add event in period
+                     */
                     put(eventsPerAttendee, attendee, getResultingEvent(eventInPeriod, folderID));
                     getSelfProtection().checkEventCollection(eventsPerAttendee.get(attendee));
                 }
@@ -724,16 +737,16 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
             }
         }
 
-        if(Transp.TRANSPARENT.equals(transp.getValue())) {
+        if (Transp.TRANSPARENT.equals(transp.getValue())) {
             return FbType.FREE;
         }
-        if(event.getStatus() == null) {
+        if (event.getStatus() == null) {
             return FbType.BUSY;
         }
-        if(EventStatus.TENTATIVE.equals(event.getStatus())) {
+        if (EventStatus.TENTATIVE.equals(event.getStatus())) {
             return FbType.BUSY_TENTATIVE;
         }
-        if(EventStatus.CANCELLED.equals(event.getStatus())) {
+        if (EventStatus.CANCELLED.equals(event.getStatus())) {
             return FbType.FREE;
         }
         return FbType.BUSY;

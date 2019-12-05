@@ -51,6 +51,7 @@ package com.openexchange.mail.oauth.internal;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.autoconfig.Autoconfig;
+import com.openexchange.mail.oauth.MailOAuthExceptionCodes;
 import com.openexchange.mail.oauth.MailOAuthProvider;
 import com.openexchange.mail.oauth.MailOAuthService;
 import com.openexchange.mail.oauth.TokenInfo;
@@ -115,8 +116,12 @@ public class MailOAuthServiceImpl implements MailOAuthService {
         OAuthAccount oAuthAccount = oAuthService.getAccount(session, oauthAccountId);
         checkOAuthAccount(oAuthAccount, session);
 
-        MailOAuthProvider provider = registry.getProviderFor(oAuthAccount.getMetaData().getId());
-        return null == provider ? null : provider.getTokenFor(oAuthAccount, session);
+        String oauthServiceId = oAuthAccount.getMetaData().getId();
+        MailOAuthProvider provider = registry.getProviderFor(oauthServiceId);
+        if (provider == null) {
+            throw MailOAuthExceptionCodes.NO_SUCH_MAIL_OAUTH_PROVIDER.create(oauthServiceId);
+        }
+        return provider.getTokenFor(oAuthAccount, session);
     }
 
 }

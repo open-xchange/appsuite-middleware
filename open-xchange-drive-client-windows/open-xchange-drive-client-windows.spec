@@ -1,4 +1,5 @@
 %define __jar_repack %{nil}
+%define manlist manfiles.list
 
 Name:          open-xchange-drive-client-windows
 BuildArch:     noarch
@@ -14,8 +15,9 @@ BuildRequires: java-1.8.0-openjdk-devel
 %endif
 BuildRequires: open-xchange-admin
 BuildRequires: open-xchange-core >= @OXVERSION@, open-xchange-client-onboarding >= @OXVERSION@, open-xchange-drive >= @OXVERSION@
+BuildRequires: pandoc >= 2.0.0
 Version:       @OXVERSION@
-%define        ox_release 18
+%define        ox_release 3
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -43,54 +45,38 @@ Authors:
 %install
 export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
+rm -f %{manlist} && touch %{manlist}
+test -d %{buildroot}%{_mandir} && find %{buildroot}%{_mandir}/man1 -type f -printf "%%%doc %p.*\n" >> %{manlist}
+sed -i -e 's;%{buildroot};;' %{manlist}
 
 %clean
 %{__rm} -rf %{buildroot}
 
-%files
+%files -f %{manlist}
 %defattr(-,root,root)
 %dir /opt/open-xchange/bundles/
 /opt/open-xchange/bundles/*
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
 %dir /opt/open-xchange/etc/
-%config(noreplace) /opt/open-xchange/etc/*
+%config(noreplace) /opt/open-xchange/etc/drive-client-windows.properties
 %dir /opt/open-xchange/templates/
 /opt/open-xchange/templates/*
 %dir /opt/open-xchange/lib/
 /opt/open-xchange/lib/*
 %dir /opt/open-xchange/sbin/
 /opt/open-xchange/sbin/*
+/opt/open-xchange/etc/security/drive.list
 
 %changelog
-* Tue Nov 19 2019 Kevin Ruthmann <kevin.ruthmann@open-xchange.com>
-Build for patch 2019-11-25 (5484)
-* Mon Nov 04 2019 Kevin Ruthmann <kevin.ruthmann@open-xchange.com>
-Build for patch 2019-11-11 (5473)
-* Sat Nov 02 2019 Kevin Ruthmann <kevin.ruthmann@open-xchange.com>
-Build for patch 2019-11-11 (5473)
-* Tue Oct 22 2019 Kevin Ruthmann <kevin.ruthmann@open-xchange.com>
-Build for patch 2019-10-28 (5461)
-* Thu Oct 10 2019 Kevin Ruthmann <kevin.ruthmann@open-xchange.com>
-Build for patch 2019-10-14 (5439)
-* Mon Sep 23 2019 Kevin Ruthmann <kevin.ruthmann@open-xchange.com>
-Build for patch 2019-09-30 (5420)
-* Mon Sep 02 2019 Kevin Ruthmann <kevin.ruthmann@open-xchange.com>
-Build for patch 2019-09-09 (5397)
-* Mon Aug 19 2019 Kevin Ruthmann <kevin.ruthmann@open-xchange.com>
-Build for patch 2019-08-26 (5374)
-* Fri Aug 09 2019 Kevin Ruthmann <kevin.ruthmann@open-xchange.com>
-Build for patch 2019-08-12 (5359)
-* Mon Jul 22 2019 Kevin Ruthmann <kevin.ruthmann@open-xchange.com>
-Build for patch 2019-07-29 (5341)
-* Tue Jul 09 2019 Kevin Ruthmann <kevin.ruthmann@open-xchange.com>
-Build for patch 2019-07-15 (5310)
-* Thu Jun 27 2019 Kevin Ruthmann <kevin.ruthmann@open-xchange.com>
-Build for patch 2019-07-01 (5291)
-* Wed Jun 26 2019 Kevin Ruthmann <kevin.ruthmann@open-xchange.com>
-Build for patch 2019-06-27 (5299)
-* Thu Jun 06 2019 Kevin Ruthmann <kevin.ruthmann@open-xchange.com>
-Build for patch 2019-06-11 (5261)
+* Thu Nov 28 2019 Kevin Ruthmann <kevin.ruthmann@open-xchange.com>
+Second candidate for 7.10.3 release
+* Thu Nov 21 2019 Kevin Ruthmann <kevin.ruthmann@open-xchange.com>
+First candidate for 7.10.3 release
+* Thu Oct 17 2019 Kevin Ruthmann <kevin.ruthmann@open-xchange.com>
+First preview for 7.10.3 release
+* Mon Jun 17 2019 Kevin Ruthmann <kevin.ruthmann@open-xchange.com>
+prepare for 7.10.3 release
 * Fri May 10 2019 Kevin Ruthmann <kevin.ruthmann@open-xchange.com>
 Second candidate for 7.10.2 release
 * Fri May 10 2019 Kevin Ruthmann <kevin.ruthmann@open-xchange.com>

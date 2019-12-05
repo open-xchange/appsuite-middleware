@@ -351,7 +351,7 @@ public class EffectivePermission extends OCLPermission {
                 }
                 folderModule = folderAccess.getFolderModule(fuid);
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             return userConfigIsValid;
         }

@@ -67,12 +67,13 @@ import com.openexchange.chronos.alarm.message.AlarmNotificationService;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.ratelimit.Rate;
+import com.openexchange.regional.RegionalSettingsService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.sms.SMSServiceSPI;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 /**
@@ -108,11 +109,11 @@ public class SMSNotificationService implements AlarmNotificationService {
     public void send(Event event, Alarm alarm, int contextId, int accountId, int userId, long trigger) throws OXException {
         User user = userService.getUser(userId, contextId);
         String phoneNumber = getPhoneNumber(alarm, user.getLocale());
-        if(phoneNumber == null) {
+        if (phoneNumber == null) {
             LOG.warn("Unable to send sms alarm for user {} in context {} because of a missing or invalid telephone number.", I(userId), I(contextId));
             return;
         }
-        serviceLookup.getServiceSafe(SMSServiceSPI.class).sendMessage(new String[] { phoneNumber }, generateSMS(event, user), userId, contextId);
+        serviceLookup.getServiceSafe(SMSServiceSPI.class).sendMessage(new String[] { phoneNumber }, generateSMS(event, user, contextId), userId, contextId);
     }
 
     /**
@@ -137,13 +138,20 @@ public class SMSNotificationService implements AlarmNotificationService {
         return null;
     }
 
-    private String generateSMS(Event event, User user) {
+    private String generateSMS(Event event, User user, int contextId) {
         Locale locale = user.getLocale();
         if (locale == null) {
             locale = Locale.getDefault();
         }
+        RegionalSettingsService regionalSettingsService = serviceLookup.getService(RegionalSettingsService.class);
         Translator translator = translatorFactory.translatorFor(locale);
-        DateFormat df = CalendarUtils.isAllDay(event) ? DateFormat.getDateInstance(DateFormat.LONG, locale) : DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.SHORT, locale);
+        DateFormat df;
+        if (null == regionalSettingsService) {
+            df = CalendarUtils.isAllDay(event) ? DateFormat.getDateInstance(DateFormat.LONG, locale) : DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.SHORT, locale);
+        } else {
+            df = CalendarUtils.isAllDay(event) ?
+                regionalSettingsService.getDateFormat(contextId, user.getId(), locale, DateFormat.LONG) : regionalSettingsService.getDateTimeFormat(contextId, user.getId(), locale, DateFormat.LONG, DateFormat.SHORT);
+        }
 
         String timezone = null;
         if (!TimeZone.getTimeZone(user.getTimeZone()).equals(event.getStartDate().getTimeZone())) {

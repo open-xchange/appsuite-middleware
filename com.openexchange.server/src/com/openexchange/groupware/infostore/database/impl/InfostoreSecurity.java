@@ -57,10 +57,10 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.EffectiveInfostoreFolderPermission;
 import com.openexchange.groupware.infostore.EffectiveInfostorePermission;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.tools.collections.Injector;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 public interface InfostoreSecurity {
 

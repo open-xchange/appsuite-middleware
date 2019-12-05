@@ -215,7 +215,7 @@ public class RESTExecutor {
 
                 // These substitutions must be made to keep OAuth happy.
                 trgt = trgt.replace("+", "%20").replace("*", "%2A");
-            } catch (final UnsupportedEncodingException uce) {
+            } catch (UnsupportedEncodingException uce) {
                 return null;
             }
         }
@@ -257,7 +257,7 @@ public class RESTExecutor {
                  */
                 try {
                     response = client.execute(req);
-                } catch (final NullPointerException e) {
+                } catch (NullPointerException e) {
                     // Leave 'response' as null. This is handled below.
                 }
 
@@ -280,9 +280,9 @@ public class RESTExecutor {
             }
 
             return response;
-        } catch (final SSLException e) {
+        } catch (SSLException e) {
             throw RESTExceptionCodes.SSL_EXCEPTION.create(e.getMessage());
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw RESTExceptionCodes.IO_EXCEPTION.create(e.getMessage());
         }
     }
@@ -314,9 +314,9 @@ public class RESTExecutor {
                 bin.mark(16384);
                 result = JSONObject.parse(bin);
             }
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw RESTExceptionCodes.IO_EXCEPTION.create(e);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             if (RESTExceptionCodes.isValidWithNullBody(response)) {
                 // We have something from the server, but it's an error with no reason
                 throw RESTExceptionCodes.ERROR.create(response);
@@ -429,7 +429,7 @@ public class RESTExecutor {
                 }
             }
             return result.toString().replace("*", "%2A");
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             return null;
         }
     }

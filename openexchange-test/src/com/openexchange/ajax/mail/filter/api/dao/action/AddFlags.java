@@ -67,31 +67,16 @@ public class AddFlags extends AbstractAction implements Action<AddFlagsActionArg
         super(ActionCommand.addflags);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.mail.filter.api.dao.action.Action#getArgument(com.openexchange.ajax.mail.filter.api.dao.action.ActionArgument)
-     */
     @Override
     public Object getArgument(AddFlagsActionArgument argument) {
         return getArguments().get(argument);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.mail.filter.api.dao.action.Action#setArgument(com.openexchange.ajax.mail.filter.api.dao.action.ActionArgument, java.lang.Object)
-     */
     @Override
     public void setArgument(AddFlagsActionArgument argument, Object value) {
         addArgument(argument, value);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.mail.filter.api.dao.action.Action#getActionCommand()
-     */
     @Override
     public ActionCommand getActionCommand() {
         return ActionCommand.addflags;

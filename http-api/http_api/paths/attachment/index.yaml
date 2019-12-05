@@ -1,0 +1,9 @@
+requests: 
+  - AllRequest.yaml
+  - AttachRequest.yaml
+  - DetachRequest.yaml
+  - DocumentRequest.yaml
+  - GetRequest.yaml
+  - ListRequest.yaml
+  - UpdatesRequest.yaml
+  - ZipDocumentsRequest.yaml

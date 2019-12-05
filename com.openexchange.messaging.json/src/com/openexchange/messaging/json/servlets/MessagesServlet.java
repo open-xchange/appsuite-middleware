@@ -98,7 +98,7 @@ public class MessagesServlet extends MultipleAdapterServletNew {
 
     @Override
     protected boolean handleIndividually(final String action, final HttpServletRequest req, final HttpServletResponse resp) throws IOException, ServletException, OXException {
-        if(RESOLVE.equals(action)) {
+        if (RESOLVE.equals(action)) {
             final ServerSession session = getSessionObject(req);
             final AJAXRequestData requestData = parseRequest(req, false, FileUploadBase.isMultipartContent(new ServletRequestContext(req)), session, resp);
             final MessagingRequestData request = MessagingActionFactory.INSTANCE.wrapRequest(requestData, session);
@@ -110,13 +110,13 @@ public class MessagesServlet extends MultipleAdapterServletNew {
 
                 //TODO: Set Content-Type Header
                 for(final MessagingContentDumper dumper : dumpers) {
-                    if(dumper.handles(content)) {
+                    if (dumper.handles(content)) {
                         dumper.dump(content, resp.getOutputStream());
                     }
                 }
 
 
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 throw new ServletException(e);
             }
 

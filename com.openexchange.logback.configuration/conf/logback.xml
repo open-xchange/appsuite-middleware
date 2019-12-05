@@ -101,8 +101,6 @@
     <logger name="com.sun" level="INFO"/>
     <logger name="javax.management" level="INFO"/>
     <logger name="javax.jmdns" level="WARN"/>
-    <logger name="com.hazelcast" level="WARN"/>
-    <logger name="com.hazelcast.internal.diagnostics" level="INFO"/>
     <logger name="org.glassfish.grizzly" level="WARN"/>
     <logger name="liquibase.ext.logging.slf4j.Slf4jLogger" level="WARN"/>
 

@@ -75,7 +75,7 @@ import com.openexchange.testing.httpclient.models.Trigger.RelatedEnum;
 /**
  * {@link AlarmPropagationTests}
  *
- * @author <a href="mailto:firstname.lastname@open-xchange.com">Firstname Lastname</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.2
  */
 public class AlarmPropagationTests extends AbstractAlarmTest {
@@ -101,6 +101,7 @@ public class AlarmPropagationTests extends AbstractAlarmTest {
         Calendar cal = Calendar.getInstance(timeZone);
         cal.setTime(parseDateTime);
         exceptionRecurrenceId = eventsByUid.get(1).getRecurrenceId();
+        eventManager.setIgnoreConflicts(true);
         CalendarResult response = eventManager.shiftEvent(series.getId(), exceptionRecurrenceId, eventData, cal, TimeUnit.HOURS, 1, null);
         assertFalse("Exception not updated", response.getCreated().isEmpty());
         assertEquals(1, response.getCreated().size());
@@ -221,17 +222,17 @@ public class AlarmPropagationTests extends AbstractAlarmTest {
         
         for(Alarm alarm: event.getAlarms()) {
             String duration = alarm.getTrigger().getDuration();
-            if(duration != null) {
-                if(duration.equals(PT15M)) {
+            if (duration != null) {
+                if (duration.equals(PT15M)) {
                     found[0]=true;
                     continue;
                 }
-                if(duration.equals(PT30M)) {
+                if (duration.equals(PT30M)) {
                     found[1]=true;
                     continue;
                 }
             } else {
-                if(alarm.getTrigger().getDateTime() != null) {
+                if (alarm.getTrigger().getDateTime() != null) {
                     found[2]=true;
                     continue;
                 }

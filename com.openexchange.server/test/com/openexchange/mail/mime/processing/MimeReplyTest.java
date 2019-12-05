@@ -186,7 +186,7 @@ public final class MimeReplyTest {
             }
 
             assertEquals("Unexpected reply text", 4, cnt);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
@@ -368,7 +368,7 @@ public final class MimeReplyTest {
 
             assertTrue("Missing sub-text in composed reply text", replyTextBuilder.indexOf("AUTO ZENTRUM") > 0);
             assertTrue("Missing sub-text in composed reply text", replyTextBuilder.indexOf("AVAST Software") > 0);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }

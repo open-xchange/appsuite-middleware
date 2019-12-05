@@ -85,7 +85,7 @@ public final class JCharsetActivator implements BundleActivator {
              */
             serviceRegistration = context.registerService(CharsetProvider.class, charsetProvider, null);
             log.info("JCharset charset providers registered");
-        } catch (final Exception e) {
+        } catch (Exception e) {
             log.error("Error while starting bundle: com.openexchange.freecharset", e);
         }
     }
@@ -100,7 +100,7 @@ public final class JCharsetActivator implements BundleActivator {
             serviceRegistration.unregister();
             log.info("JCharset charset providers unregistered");
             log.info("Stopped bundle: com.openexchange.freecharset");
-        } catch (final Exception e) {
+        } catch (Exception e) {
             log.error("Error while stopping bundle: com.openexchange.freecharset", e);
         }
     }

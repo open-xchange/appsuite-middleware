@@ -379,7 +379,7 @@ public final class MailProperties implements IMailProperties {
         {
             try {
                 params.maxToCcBcc = ConfigViews.getDefinedIntPropertyFrom("com.openexchange.mail.maxToCcBcc", 0, view);
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 LOG.debug("", e);
                 params.maxToCcBcc = 0;
             }
@@ -392,7 +392,7 @@ public final class MailProperties implements IMailProperties {
         {
             try {
                 params.maxDriveAttachments = ConfigViews.getDefinedIntPropertyFrom("com.openexchange.mail.maxDriveAttachments", 20, view);
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 LOG.debug("", e);
                 params.maxDriveAttachments = 20;
             }
@@ -426,7 +426,7 @@ public final class MailProperties implements IMailProperties {
         {
             try {
                 params.rateLimit = ConfigViews.getDefinedIntPropertyFrom("com.openexchange.mail.rateLimit", 0, view);
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 LOG.debug("", e);
                 params.rateLimit = 0;
             }
@@ -452,7 +452,7 @@ public final class MailProperties implements IMailProperties {
         {
             try {
                 params.defaultArchiveDays = ConfigViews.getDefinedIntPropertyFrom("com.openexchange.mail.archive.defaultDays", 90, view);
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 LOG.debug("", e);
                 params.defaultArchiveDays = 90;
             }
@@ -525,7 +525,7 @@ public final class MailProperties implements IMailProperties {
         {
             try {
                 params.maxForwardCount = ConfigViews.getDefinedIntPropertyFrom("com.openexchange.mail.maxForwardCount", 8, view);
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 LOG.debug("", e);
                 params.maxForwardCount = 8;
             }
@@ -538,7 +538,7 @@ public final class MailProperties implements IMailProperties {
         {
             try {
                 params.mailFetchLimit = ConfigViews.getDefinedIntPropertyFrom("com.openexchange.mail.mailFetchLimit", 1000, view);
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 LOG.debug("", e);
                 params.mailFetchLimit = 1000;
             }
@@ -855,7 +855,7 @@ public final class MailProperties implements IMailProperties {
                 logBuilder.append("\tMail Fetch Limit: {}{}");
                 args.add(Integer.valueOf(mailFetchLimit));
                 args.add(Strings.getLineSeparator());
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 LOG.debug("", e);
                 mailFetchLimit = 1000;
                 logBuilder.append("\tMail Fetch Limit: Non parseable value \"{}\". Setting to fallback: {}{}");
@@ -872,7 +872,7 @@ public final class MailProperties implements IMailProperties {
                 logBuilder.append("\tBody Display Size Limit: {}{}");
                 args.add(Integer.valueOf(bodyDisplaySize));
                 args.add(Strings.getLineSeparator());
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 LOG.debug("", e);
                 bodyDisplaySize = 10485760;
                 logBuilder.append("\tBody Display Size Limit: Non parseable value \"{}\". Setting to fallback: {}{}");
@@ -889,7 +889,7 @@ public final class MailProperties implements IMailProperties {
                 logBuilder.append("\tMail Access Cache shrinker-interval seconds: {}{}");
                 args.add(Integer.valueOf(mailAccessCacheShrinkerSeconds));
                 args.add(Strings.getLineSeparator());
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 LOG.debug("", e);
                 mailAccessCacheShrinkerSeconds = 3;
                 logBuilder.append("\tMail Access Cache shrinker-interval seconds: Non parseable value \"{}\". Setting to fallback: {}{}");
@@ -906,7 +906,7 @@ public final class MailProperties implements IMailProperties {
                 logBuilder.append("\tMail Access Cache idle seconds: {}{}");
                 args.add(Integer.valueOf(mailAccessCacheIdleSeconds));
                 args.add(Strings.getLineSeparator());
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 LOG.debug("", e);
                 mailAccessCacheIdleSeconds = 4;
                 logBuilder.append("\tMail Access Cache idle seconds: Non parseable value \"{}\". Setting to fallback: {}{}");
@@ -951,7 +951,7 @@ public final class MailProperties implements IMailProperties {
                 logBuilder.append("\tDefault MIME Charset: {}{}");
                 args.add(defaultMimeCharset);
                 args.add(Strings.getLineSeparator());
-            } catch (final Throwable t) {
+            } catch (Throwable t) {
                 ExceptionUtils.handleThrowable(t);
                 LOG.debug("", t);
                 defaultMimeCharset = "UTF-8";
@@ -1096,7 +1096,7 @@ public final class MailProperties implements IMailProperties {
                 logBuilder.append("\tWatcher Time: {}{}");
                 args.add(Integer.valueOf(watcherTime));
                 args.add(Strings.getLineSeparator());
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 LOG.debug("", e);
                 watcherTime = 60000;
                 logBuilder.append("\tWatcher Time: Invalid value \"{}\". Setting to fallback: {}{}");
@@ -1113,7 +1113,7 @@ public final class MailProperties implements IMailProperties {
                 logBuilder.append("\tWatcher Frequency: {}{}");
                 args.add(Integer.valueOf(watcherFrequency));
                 args.add(Strings.getLineSeparator());
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 LOG.debug("", e);
                 watcherFrequency = 10000;
                 logBuilder.append("\tWatcher Frequency: Invalid value \"{}\". Setting to fallback: {}{}");
@@ -1155,7 +1155,7 @@ public final class MailProperties implements IMailProperties {
                 logBuilder.append("\tSent Rate limit: {}{}");
                 args.add(Integer.valueOf(rateLimit));
                 args.add(Strings.getLineSeparator());
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 LOG.debug("", e);
                 rateLimit = 0;
                 logBuilder.append("\tSend Rate limit: Invalid value \"{}\". Setting to fallback {}{}");
@@ -1185,7 +1185,7 @@ public final class MailProperties implements IMailProperties {
                 logBuilder.append("\tDefault archive days: {}{}");
                 args.add(Integer.valueOf(defaultArchiveDays));
                 args.add(Strings.getLineSeparator());
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 LOG.debug("", e);
                 defaultArchiveDays = 90;
                 logBuilder.append("\tDefault archive days: Invalid value \"{}\". Setting to fallback {}{}");
@@ -1203,7 +1203,7 @@ public final class MailProperties implements IMailProperties {
                 logBuilder.append("\tmaxToCcBcc: {}{}");
                 args.add(Integer.valueOf(maxToCcBcc));
                 args.add(Strings.getLineSeparator());
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 LOG.debug("", e);
                 maxToCcBcc = 0;
                 logBuilder.append("\tmaxToCcBcc: Invalid value \"{}\". Setting to fallback {}{}");
@@ -1221,7 +1221,7 @@ public final class MailProperties implements IMailProperties {
                 logBuilder.append("\tmaxDriveAttachments: {}{}");
                 args.add(Integer.valueOf(maxDriveAttachments));
                 args.add(Strings.getLineSeparator());
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 LOG.debug("", e);
                 maxDriveAttachments = 20;
                 logBuilder.append("\tmaxDriveAttachments: Invalid value \"{}\". Setting to fallback {}{}");
@@ -1242,7 +1242,7 @@ public final class MailProperties implements IMailProperties {
                     if (javaMailProperties.size() == 0) {
                         javaMailProperties = null;
                     }
-                } catch (final FileNotFoundException e) {
+                } catch (FileNotFoundException e) {
                     LOG.debug("", e);
                     javaMailProperties = null;
                 }
@@ -1291,7 +1291,7 @@ public final class MailProperties implements IMailProperties {
         final FileInputStream fis;
         try {
             fis = new FileInputStream(new File(propFile));
-        } catch (final FileNotFoundException e) {
+        } catch (FileNotFoundException e) {
             throw MailConfigException.create(
                 new StringBuilder(256).append("Properties not found at location: ").append(propFile).toString(),
                 e);
@@ -1299,7 +1299,7 @@ public final class MailProperties implements IMailProperties {
         try {
             properties.load(fis);
             return properties;
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw MailConfigException.create(
                 new StringBuilder(256).append("I/O error while reading properties from file \"").append(propFile).append(
                     "\": ").append(e.getMessage()).toString(),
@@ -1321,7 +1321,7 @@ public final class MailProperties implements IMailProperties {
         try {
             properties.load(in);
             return properties;
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw MailConfigException.create(new StringBuilder(256).append("I/O error: ").append(e.getMessage()).toString(), e);
         } finally {
             Streams.close(in);

@@ -161,7 +161,7 @@ public final class FolderCacheManager {
                     if (null != cacheService) {
                         try {
                             cacheService.freeCache(REGION_NAME);
-                        } catch (final OXException e) {
+                        } catch (OXException e) {
                             LOG.error("", e);
                         }
                     }
@@ -250,7 +250,7 @@ public final class FolderCacheManager {
                     con = null;
                     // Continue
                     removeFolderObjects(folderIds.toArray(), ctx);
-                } catch (final Exception x) {
+                } catch (Exception x) {
                     // Ignore
                 } finally {
                     Databases.closeSQLStuff(rs, stmt);
@@ -398,7 +398,7 @@ public final class FolderCacheManager {
                             final Cache globalCache = cacheService.getCache("GlobalFolderCache");
                             final CacheKey cacheKey = cacheService.newCacheKey(1, FolderStorage.REAL_TREE_ID, String.valueOf(folderId));
                             globalCache.removeFromGroup(cacheKey, String.valueOf(ctx.getContextId()));
-                        } catch (final OXException e) {
+                        } catch (OXException e) {
                             LOG.warn("", e);
                         }
                     }
@@ -555,7 +555,7 @@ public final class FolderCacheManager {
                             final Cache globalCache = cacheService.getCache("GlobalFolderCache");
                             final CacheKey cacheKey = cacheService.newCacheKey(1, FolderStorage.REAL_TREE_ID, String.valueOf(folderProvider.getObjectID()));
                             globalCache.removeFromGroup(cacheKey, String.valueOf(ctx.getContextId()));
-                        } catch (final OXException e) {
+                        } catch (OXException e) {
                             LOG.warn("", e);
                         }
                     }
@@ -615,17 +615,17 @@ public final class FolderCacheManager {
             } finally {
                 lock.unlock();
             }
-        }
 
-        // Dirty hack
-        CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
-        if (null != cacheService) {
-            try {
-                Cache globalCache = cacheService.getCache("GlobalFolderCache");
-                CacheKey cacheKey = cacheService.newCacheKey(1, FolderStorage.REAL_TREE_ID, String.valueOf(folderId));
-                globalCache.removeFromGroup(cacheKey, String.valueOf(ctx.getContextId()));
-            } catch (final OXException e) {
-                LOG.warn("", e);
+            // Dirty hack
+            CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+            if (null != cacheService) {
+                try {
+                    Cache globalCache = cacheService.getCache("GlobalFolderCache");
+                    cacheKey = cacheService.newCacheKey(1, FolderStorage.REAL_TREE_ID, String.valueOf(folderId));
+                    globalCache.removeFromGroup(cacheKey, String.valueOf(ctx.getContextId()));
+                } catch (OXException e) {
+                    LOG.warn("", e);
+                }
             }
         }
     }

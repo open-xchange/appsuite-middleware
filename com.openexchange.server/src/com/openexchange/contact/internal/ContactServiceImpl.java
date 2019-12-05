@@ -86,8 +86,8 @@ import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.user.UserService;
-import com.openexchange.user.UserServiceInterceptor;
-import com.openexchange.user.UserServiceInterceptorRegistry;
+import com.openexchange.user.interceptor.UserServiceInterceptor;
+import com.openexchange.user.interceptor.UserServiceInterceptorRegistry;
 
 /**
  * {@link ContactServiceImpl}
@@ -260,7 +260,7 @@ public class ContactServiceImpl extends DefaultContactService {
             ContactMapper.getInstance().mergeDifferences(contact, updatedContact);
             try {
                 sourceStorage.delete(session, sourceFolderId, objectID, lastRead);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.warn("error deleting contact from source folder, rolling back move operation", e);
                 // TODO: simple rollback for now
                 targetStorage.delete(session, targetFolderId, Integer.toString(storedContact.getObjectID()),

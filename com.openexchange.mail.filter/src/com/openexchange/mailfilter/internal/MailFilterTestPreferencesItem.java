@@ -113,7 +113,7 @@
 //                    }
 //                    try {
 //                        sieve_port = Integer.parseInt(config.getProperty(MailFilterProperties.Values.SIEVE_PORT.property));
-//                    } catch (final RuntimeException e) {
+//                    } catch (RuntimeException e) {
 //                        throw new OXException(Code.PROPERTY_ERROR, e, MailFilterProperties.Values.SIEVE_PORT.property);
 //                    }
 //                    shandler = new SieveHandler(null, null, sieve_server, sieve_port);
@@ -137,21 +137,21 @@
 //                            setting.addMultiValue(object);
 //                        }
 //                    }
-//                } catch (final OXException e) {
+//                } catch (OXException e) {
 //                    throw new OXException(e);
-//                } catch (final UnknownHostException e) {
+//                } catch (UnknownHostException e) {
 //                    throw new OXException(com.openexchange.groupware.settings.OXException.Code.INIT, e);
-//                } catch (final IOException e) {
+//                } catch (IOException e) {
 //                    throw new OXException(com.openexchange.groupware.settings.OXException.Code.INIT, e);
-//                } catch (final JSONException e) {
+//                } catch (JSONException e) {
 //                    throw new OXException(com.openexchange.groupware.settings.OXException.Code.JSON_WRITE_ERROR, e);
 //                } finally {
 //                    if (null != shandler) {
 //                        try {
 //                            shandler.close();
-//                        } catch (final UnsupportedEncodingException e) {
+//                        } catch (UnsupportedEncodingException e) {
 //                            throw new OXException(com.openexchange.groupware.settings.OXException.Code.INIT, e);
-//                        } catch (final IOException e) {
+//                        } catch (IOException e) {
 //                            throw new OXException(com.openexchange.groupware.settings.OXException.Code.INIT, e);
 //                        }
 //                    }

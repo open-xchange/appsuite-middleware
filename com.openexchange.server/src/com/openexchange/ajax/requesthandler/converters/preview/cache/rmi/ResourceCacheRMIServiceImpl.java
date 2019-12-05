@@ -61,7 +61,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.requesthandler.cache.ResourceCache;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
@@ -98,11 +97,6 @@ public class ResourceCacheRMIServiceImpl implements ResourceCacheRMIService {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.requesthandler.converters.preview.cache.rmi.ResourceCacheRMIService#clear()
-     */
     @Override
     public void clear() throws RemoteException {
         ResourceCache resourceCache = CACHE_REF.get();
@@ -134,11 +128,6 @@ public class ResourceCacheRMIServiceImpl implements ResourceCacheRMIService {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.requesthandler.converters.preview.cache.rmi.ResourceCacheRMIService#clearFor(int)
-     */
     @Override
     public void clearFor(int contextId) throws RemoteException {
         ResourceCache resourceCache = CACHE_REF.get();
@@ -154,11 +143,6 @@ public class ResourceCacheRMIServiceImpl implements ResourceCacheRMIService {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.requesthandler.converters.preview.cache.rmi.ResourceCacheRMIService#sanitizeMimeTypesInDatabaseFor(int, java.lang.String)
-     */
     @Override
     public String sanitizeMimeTypesInDatabaseFor(int contextId, String invalids) throws RemoteException {
         try {

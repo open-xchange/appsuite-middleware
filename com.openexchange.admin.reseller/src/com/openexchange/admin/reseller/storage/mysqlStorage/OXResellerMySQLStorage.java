@@ -199,20 +199,20 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
 
             oxcon.commit();
             rollback = false;
-        } catch (final DataTruncation dt) {
+        } catch (DataTruncation dt) {
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             throw AdminCache.parseDataTruncation(dt);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             log.error("", e);
-            throw e;
-        } catch (final PoolException e) {
+            throw StorageException.storageExceotionFor(e);
+        } catch (PoolException e) {
             log.error("", e);
             // no Rollback needed as the connection is null at this moment
             throw new StorageException(e.getMessage());
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("", e);
             throw new StorageException(e.getMessage());
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             log.error("", e);
             throw new StorageException(e.getMessage());
         } finally {
@@ -270,16 +270,16 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
 
             adm.setId(I(adm_id));
             return adm;
-        } catch (final DataTruncation dt) {
+        } catch (DataTruncation dt) {
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             throw AdminCache.parseDataTruncation(dt);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             log.error("", e);
-            throw e;
-        } catch (final PoolException e) {
+            throw StorageException.storageExceotionFor(e);
+        } catch (PoolException e) {
             log.error("", e);
             throw new StorageException(e.getMessage());
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("", e);
             throw new StorageException(e.getMessage());
         } finally {
@@ -317,16 +317,16 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
 
             oxcon.commit();
             rollback = false;
-        } catch (final DataTruncation dt) {
+        } catch (DataTruncation dt) {
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             throw AdminCache.parseDataTruncation(dt);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             log.error("", e);
-            throw e;
-        } catch (final PoolException e) {
+            throw StorageException.storageExceotionFor(e);
+        } catch (PoolException e) {
             log.error("", e);
             throw new StorageException(e.getMessage());
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("", e);
             throw new StorageException(e.getMessage());
         } finally {
@@ -374,10 +374,10 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 ret.add(adm);
             }
             return ret.toArray(new ResellerAdmin[ret.size()]);
-        } catch (final PoolException e) {
+        } catch (PoolException e) {
             log.error("", e);
             throw new StorageException(e.getMessage());
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("", e);
             throw new StorageException(e.getMessage());
         } finally {
@@ -483,13 +483,13 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 ret.add(newadm);
             }
             return ret.toArray(new ResellerAdmin[ret.size()]);
-        } catch (final PoolException e) {
+        } catch (PoolException e) {
             log.error("", e);
             throw new StorageException(e.getMessage());
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("", e);
             throw new StorageException(e.getMessage());
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             log.error("", e);
             throw new StorageException(e.getMessage());
         } finally {
@@ -558,13 +558,13 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 prep.close();
             }
             return true;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("", e);
             throw new StorageException(e.getMessage());
-        } catch (final PoolException e) {
+        } catch (PoolException e) {
             log.error("", e);
             throw new StorageException(e.getMessage());
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             log.error("", e);
             throw new StorageException(e.getMessage());
         } finally {
@@ -618,17 +618,17 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                     prep = null;
                 }
             }
-        } catch (final DataTruncation dt) {
+        } catch (DataTruncation dt) {
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             throw AdminCache.parseDataTruncation(dt);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             log.error("", e);
-            throw e;
-        } catch (final PoolException e) {
+            throw StorageException.storageExceotionFor(e);
+        } catch (PoolException e) {
             log.error("", e);
             // no Rollback needed as the connection is null at this moment
             throw new StorageException(e.getMessage());
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("", e);
             throw new StorageException(e.getMessage());
         } finally {
@@ -662,20 +662,20 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
 
             oxcon.commit();
             rollback = false;
-        } catch (final DataTruncation dt) {
+        } catch (DataTruncation dt) {
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             throw AdminCache.parseDataTruncation(dt);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             log.error("", e);
-            throw e;
-        } catch (final PoolException e) {
+            throw StorageException.storageExceotionFor(e);
+        } catch (PoolException e) {
             log.error("", e);
             // no Rollback needed as the connection is null at this moment
             throw new StorageException(e.getMessage());
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("", e);
             throw new StorageException(e.getMessage());
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             log.error("", e);
             throw new StorageException(e.getMessage());
         } finally {
@@ -691,9 +691,9 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         try {
             final ResellerAdmin adm = getData(new ResellerAdmin[] { new ResellerAdmin(creds.getLogin(), creds.getPassword()) })[0];
             return unownContextFromAdmin(ctx, adm);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             log.error("", e);
-            throw e;
+            throw StorageException.storageExceotionFor(e);
         }
     }
 
@@ -727,20 +727,20 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             rollback = false;
 
             return subadminId;
-        } catch (final DataTruncation dt) {
+        } catch (DataTruncation dt) {
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             throw AdminCache.parseDataTruncation(dt);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             log.error("", e);
-            throw e;
-        } catch (final PoolException e) {
+            throw StorageException.storageExceotionFor(e);
+        } catch (PoolException e) {
             log.error("", e);
             // no Rollback needed as the connection is null at this moment
             throw new StorageException(e.getMessage());
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("", e);
             throw new StorageException(e.getMessage());
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             log.error("", e);
             throw new StorageException(e.getMessage());
         } finally {
@@ -769,19 +769,19 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 return masteradmin;
             }
             return getData(new ResellerAdmin[] { new ResellerAdmin(rs.getInt("sid")) })[0];
-        } catch (final DataTruncation dt) {
+        } catch (DataTruncation dt) {
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             throw AdminCache.parseDataTruncation(dt);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             log.error("", e);
-            throw e;
-        } catch (final PoolException e) {
-            log.error("", e);
-            throw new StorageException(e.getMessage());
-        } catch (final SQLException e) {
+            throw StorageException.storageExceotionFor(e);
+        } catch (PoolException e) {
             log.error("", e);
             throw new StorageException(e.getMessage());
-        } catch (final InvalidDataException e) {
+        } catch (SQLException e) {
+            log.error("", e);
+            throw new StorageException(e.getMessage());
+        } catch (InvalidDataException e) {
             log.error("", e);
             throw new StorageException(e.getMessage());
         } finally {
@@ -817,16 +817,16 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 return false;
             }
             return true;
-        } catch (final DataTruncation dt) {
+        } catch (DataTruncation dt) {
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             throw AdminCache.parseDataTruncation(dt);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             log.error("", e);
-            throw e;
-        } catch (final PoolException e) {
+            throw StorageException.storageExceotionFor(e);
+        } catch (PoolException e) {
             log.error("", e);
             throw new StorageException(e.getMessage());
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("", e);
             throw new StorageException(e.getMessage());
         } finally {
@@ -874,16 +874,16 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 return false;
             }
             return true;
-        } catch (final DataTruncation dt) {
+        } catch (DataTruncation dt) {
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             throw AdminCache.parseDataTruncation(dt);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             log.error("", e);
-            throw e;
-        } catch (final PoolException e) {
+            throw StorageException.storageExceotionFor(e);
+        } catch (PoolException e) {
             log.error("", e);
             throw new StorageException(e.getMessage());
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("", e);
             throw new StorageException(e.getMessage());
         } finally {
@@ -924,23 +924,23 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             if (null == firstExtensionByName) {
                 try {
                     ctx.addExtension(new OXContextExtensionImpl(sid));
-                } catch (final DuplicateExtensionException e) {
+                } catch (DuplicateExtensionException e) {
                     throw new StorageException(e);
                 }
             } else {
                 firstExtensionByName.setSid(sid);
             }
             return true;
-        } catch (final DataTruncation dt) {
+        } catch (DataTruncation dt) {
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             throw AdminCache.parseDataTruncation(dt);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             log.error("", e);
-            throw e;
-        } catch (final PoolException e) {
+            throw StorageException.storageExceotionFor(e);
+        } catch (PoolException e) {
             log.error("", e);
             throw new StorageException(e.getMessage());
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("", e);
             throw new StorageException(e.getMessage());
         } finally {
@@ -968,12 +968,15 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 ret.put(name, new Restriction(Integer.valueOf(rs.getInt(DATABASE_COLUMN_ID)), rs.getString(DATABASE_COLUMN_NAME)));
             }
             return ret;
-        } catch (final PoolException e) {
+        } catch (PoolException e) {
             log.error("", e);
             throw new StorageException(e.getMessage());
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("", e);
             throw new StorageException(e.getMessage());
+        } catch (RuntimeException e) {
+            log.error("", e);
+            throw StorageException.storageExceotionFor(e);
         } finally {
             cache.closeReadConfigDBSqlStuff(con, prep, rs);
         }
@@ -1007,9 +1010,12 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             if (rs.getInt("COUNT(cid)") >= maxvalue) {
                 throw new OXResellerException(Code.MAXIMUM_NUMBER_CONTEXT_REACHED, String.valueOf(maxvalue));
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("", e);
             throw e;
+        } catch (RuntimeException e) {
+            log.error("", e);
+            throw StorageException.storageExceotionFor(e);
         } finally {
             cache.closeConfigDBSqlStuff(prep, rs);
         }
@@ -1056,10 +1062,10 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             if (qused >= maxvalue) {
                 throw new OXResellerException(Code.MAXIMUM_OVERALL_CONTEXT_QUOTA, String.valueOf(maxvalue));
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("", e);
             throw e;
-        } catch (final PoolException e) {
+        } catch (PoolException e) {
             log.error("", e);
             throw e;
         } finally {
@@ -1101,10 +1107,10 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             if (count > maxvalue) {
                 throw new OXResellerException(Code.MAXIMUM_OVERALL_NUMBER_OF_CONTEXT_REACHED, String.valueOf(maxvalue));
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("", e);
             throw e;
-        } catch (final PoolException e) {
+        } catch (PoolException e) {
             log.error("", e);
             throw e;
         } finally {
@@ -1127,7 +1133,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                     throw new OXResellerException(Code.MAXIMUM_NUMBER_OF_SUBADMIN_PER_SUBADMIN_REACHED, String.valueOf(maxvalue));
                 }
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("", e);
             throw e;
         } finally {
@@ -1170,10 +1176,10 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 throw new StorageException("unable to count number of users by module access");
             }
             return ret;
-        } catch (final SQLException sqle) {
+        } catch (SQLException sqle) {
             log.error("SQL Error ", sqle);
             throw new StorageException(sqle.toString());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             log.error("DBPool error", e);
             throw new StorageException(e);
         }
@@ -1208,13 +1214,13 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                     }
                 }
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("", e);
             throw e;
-        } catch (final ClassNotFoundException e) {
+        } catch (ClassNotFoundException e) {
             log.error("", e);
             throw e;
-        } catch (final OXGenericException e) {
+        } catch (OXGenericException e) {
             log.error("", e);
             throw e;
         } finally {
@@ -1247,10 +1253,10 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             if (rs.getInt(1) > maxvalue) {
                 throw new OXResellerException(Code.MAXIMUM_NUMBER_OF_USERS_PER_CONTEXT_REACHED, String.valueOf(maxvalue));
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("", e);
             throw e;
-        } catch (final PoolException e) {
+        } catch (PoolException e) {
             log.error("", e);
             throw e;
         } finally {
@@ -1282,10 +1288,10 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 }
 
             }
-        } catch (final ClassNotFoundException e) {
+        } catch (ClassNotFoundException e) {
             log.error("", e);
             throw e;
-        } catch (final OXGenericException e) {
+        } catch (OXGenericException e) {
             log.error("", e);
             throw e;
         }
@@ -1347,22 +1353,22 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                         }
                     }
                 }
-            } catch (final RuntimeException e) {
+            } catch (RuntimeException e) {
+                log.error("", e);
+                throw StorageException.storageExceotionFor(e);
+            } catch (PoolException e) {
                 log.error("", e);
                 throw new StorageException(e.getMessage());
-            } catch (final PoolException e) {
+            } catch (OXResellerException e) {
                 log.error("", e);
                 throw new StorageException(e.getMessage());
-            } catch (final OXResellerException e) {
+            } catch (SQLException e) {
                 log.error("", e);
                 throw new StorageException(e.getMessage());
-            } catch (final SQLException e) {
+            } catch (ClassNotFoundException e) {
                 log.error("", e);
                 throw new StorageException(e.getMessage());
-            } catch (final ClassNotFoundException e) {
-                log.error("", e);
-                throw new StorageException(e.getMessage());
-            } catch (final OXGenericException e) {
+            } catch (OXGenericException e) {
                 log.error("", e);
                 throw new StorageException(e.getMessage());
             } finally {
@@ -1417,24 +1423,27 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                     }
                 }
             }
-        } catch (final PoolException e) {
+        } catch (PoolException e) {
             log.error("", e);
             throw new StorageException(e.getMessage());
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("", e);
             throw new StorageException(e.getMessage());
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             log.error("", e);
             throw new StorageException(e.getMessage());
-        } catch (final OXResellerException e) {
+        } catch (OXResellerException e) {
             log.error("", e);
             throw new StorageException(e.getMessage());
-        } catch (final ClassNotFoundException e) {
+        } catch (ClassNotFoundException e) {
             log.error("", e);
             throw new StorageException(e.getMessage());
-        } catch (final OXGenericException e) {
+        } catch (OXGenericException e) {
             log.error("", e);
             throw new StorageException(e.getMessage());
+        } catch (RuntimeException e) {
+            log.error("", e);
+            throw StorageException.storageExceotionFor(e);
         } finally {
             cache.closeReadConfigDBSqlStuff(con, null);
         }
@@ -1459,10 +1468,10 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 throw new StorageException("unable to determine owner of Context " + ctx.getId());
             }
             return getData(new ResellerAdmin[] { new ResellerAdmin(rs.getInt(1)) })[0];
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("", e);
             throw e;
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             log.error("", e);
             throw e;
         } finally {
@@ -1519,16 +1528,16 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
 
             oxcon.commit();
             rollback = false;
-        } catch (final DataTruncation dt) {
+        } catch (DataTruncation dt) {
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             throw AdminCache.parseDataTruncation(dt);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             log.error("", e);
-            throw e;
-        } catch (final PoolException e) {
+            throw StorageException.storageExceotionFor(e);
+        } catch (PoolException e) {
             log.error("", e);
             throw new StorageException(e.getMessage());
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("", e);
             throw new StorageException(e.getMessage());
         } finally {
@@ -1548,7 +1557,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         try {
             con = cache.getReadConnectionForConfigDB();
             return getRestrictionsFromContext(ctx, con);
-        } catch (final PoolException e) {
+        } catch (PoolException e) {
             log.error("", e);
             throw new StorageException(e.getMessage());
         } finally {
@@ -1575,7 +1584,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 res.add(new Restriction(I(rs.getInt(DATABASE_COLUMN_ID)), rs.getString(DATABASE_COLUMN_NAME), rs.getString(DATABASE_COLUMN_VALUE)));
             }
             return res.size() > 0 ? res.toArray(new Restriction[res.size()]) : null;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("", e);
             throw new StorageException(e.getMessage());
         } finally {
@@ -1617,18 +1626,21 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
 
             con.commit();
             rollback = true;
-        } catch (final PoolException e) {
+        } catch (PoolException e) {
             log.error("", e);
             throw new StorageException(e.getMessage());
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("", e);
             throw new StorageException(e.getMessage());
-        } catch (final ClassNotFoundException e) {
+        } catch (ClassNotFoundException e) {
             log.error("", e);
             throw new StorageException(e.getMessage());
-        } catch (final OXGenericException e) {
+        } catch (OXGenericException e) {
             log.error("", e);
             throw new StorageException(e.getMessage());
+        } catch (RuntimeException e) {
+            log.error("", e);
+            throw StorageException.storageExceotionFor(e);
         } finally {
             if (rollback) {
                 doRollback(con);
@@ -1653,12 +1665,15 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
 
             con.commit();
             rollback = false;
-        } catch (final PoolException e) {
+        } catch (PoolException e) {
             log.error("", e);
             throw new StorageException(e.getMessage());
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("", e);
             throw new StorageException(e.getMessage());
+        } catch (RuntimeException e) {
+            log.error("", e);
+            throw StorageException.storageExceotionFor(e);
         } finally {
             if (rollback) {
                 doRollback(con);
@@ -1682,12 +1697,15 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 return null;
             }
             return rs.getString(1);
-        } catch (final PoolException e) {
+        } catch (PoolException e) {
             log.error("", e);
             throw new StorageException(e.getMessage());
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("", e);
             throw new StorageException(e.getMessage());
+        } catch (RuntimeException e) {
+            log.error("", e);
+            throw StorageException.storageExceotionFor(e);
         } finally {
             cache.closeReadConfigDBSqlStuff(con, prep, rs);
         }
@@ -1723,12 +1741,15 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 }
                 prep.executeUpdate();
                 prep.close();
-            } catch (final PoolException e) {
+            } catch (PoolException e) {
                 log.error("", e);
                 throw new StorageException(e.getMessage());
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 log.error("", e);
                 throw new StorageException(e.getMessage());
+            } catch (RuntimeException e) {
+                log.error("", e);
+                throw StorageException.storageExceotionFor(e);
             } finally {
                 cache.closeWriteConfigDBSqlStuff(con, prep, rs);
             }
@@ -1766,12 +1787,15 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             prep = null;
 
             return dropped.toArray(new CustomField[dropped.size()]);
-        } catch (final PoolException e) {
+        } catch (PoolException e) {
             log.error("", e);
             throw new StorageException(e.getMessage());
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("", e);
             throw new StorageException(e.getMessage());
+        } catch (RuntimeException e) {
+            log.error("", e);
+            throw StorageException.storageExceotionFor(e);
         } finally {
             cache.closeWriteConfigDBSqlStuff(con, prep, rs);
         }
@@ -1792,12 +1816,15 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             prep.setLong(3, ctime);
             prep.executeUpdate();
             prep.close();
-        } catch (final PoolException e) {
+        } catch (PoolException e) {
             log.error("", e);
             throw new StorageException(e.getMessage());
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("", e);
             throw new StorageException(e.getMessage());
+        } catch (RuntimeException e) {
+            log.error("", e);
+            throw StorageException.storageExceotionFor(e);
         } finally {
             cache.closeWriteConfigDBSqlStuff(con, prep, rs);
         }
@@ -1825,12 +1852,15 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 prep.executeUpdate();
                 prep.close();
             }
-        } catch (final PoolException e) {
+        } catch (PoolException e) {
             log.error("", e);
             throw new StorageException(e.getMessage());
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("", e);
             throw new StorageException(e.getMessage());
+        } catch (RuntimeException e) {
+            log.error("", e);
+            throw StorageException.storageExceotionFor(e);
         } finally {
             cache.closeWriteConfigDBSqlStuff(con, prep, rs);
         }
@@ -1934,19 +1964,22 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
 
             con.commit();
             rollback = false;
-        } catch (final PoolException e) {
+        } catch (PoolException e) {
             log.error("", e);
             // no Rollback needed as the connection is null at this moment
             throw new StorageException(e.getMessage());
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("", e);
             throw new StorageException(e.getMessage());
-        } catch (final ClassNotFoundException e) {
+        } catch (ClassNotFoundException e) {
             log.error("", e);
             throw new StorageException(e.getMessage());
-        } catch (final OXGenericException e) {
+        } catch (OXGenericException e) {
             log.error("", e);
             throw new StorageException(e.getMessage());
+        } catch (RuntimeException e) {
+            log.error("", e);
+            throw StorageException.storageExceotionFor(e);
         } finally {
             if (rollback) {
                 doRollback(con);
@@ -1959,7 +1992,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         if (null != con) {
             try {
                 con.rollback();
-            } catch (final SQLException e2) {
+            } catch (SQLException e2) {
                 log.error("Error doing rollback", e2);
             }
         }
@@ -1996,12 +2029,15 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
 
                 con.commit();
                 rollback = false;
-            } catch (final PoolException e) {
+            } catch (PoolException e) {
                 log.error("", e);
                 throw new StorageException(e.getMessage());
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 log.error("", e);
                 throw new StorageException(e.getMessage());
+            } catch (RuntimeException e) {
+                log.error("", e);
+                throw StorageException.storageExceotionFor(e);
             } finally {
                 if (rollback) {
                     doRollback(con);

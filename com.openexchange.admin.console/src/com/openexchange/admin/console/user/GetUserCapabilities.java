@@ -129,7 +129,7 @@ public class GetUserCapabilities extends UserAbstraction {
             System.out.println(sb.toString());
 
             sysexit(0);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             printErrors(userString, ctxid, e, parser);
             sysexit(SYSEXIT_COMMUNICATION_ERROR);
         }

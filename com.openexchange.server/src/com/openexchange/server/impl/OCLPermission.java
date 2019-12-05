@@ -695,7 +695,7 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
     public OCLPermission deepClone() {
         try {
             return ((OCLPermission) super.clone());
-        } catch (final CloneNotSupportedException e) {
+        } catch (CloneNotSupportedException e) {
             LOG.error("", e);
             return null;
         }

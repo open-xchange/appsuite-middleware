@@ -109,7 +109,7 @@ public abstract class AbstractConsoleHandler extends AbstractJMXHandler {
                 }
 
                 initJMX(jmxHost, jmxPort, jmxLogin, jmxPassword);
-            } catch (final Exception exc) {
+            } catch (Exception exc) {
                 throw new ConsoleException(exc);
             }
         }

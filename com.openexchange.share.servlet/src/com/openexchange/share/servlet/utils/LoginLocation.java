@@ -52,9 +52,12 @@ package com.openexchange.share.servlet.utils;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.Function;
+import com.openexchange.i18n.Translator;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
 import com.openexchange.share.AuthenticationMode;
@@ -86,16 +89,17 @@ public class LoginLocation {
      * @param token The token
      * @param location The associated login location
      * @param allowedAttributes Specifies those attributes kept in given <code>LoginLocation</code> instance that are allowed to be passed to client
+     * @param translator The translator to use to translate locale-sensitive strings, or <code>null</code> to fall back to the untranslated version
      * @return The redirect location
      */
-    public static String buildRedirectWith(String token, LoginLocation location, Collection<String> allowedAttributes) {
+    public static String buildRedirectWith(String token, LoginLocation location, Collection<String> allowedAttributes, Translator translator) {
         StringBuilder sb = new StringBuilder(96);
         sb.append(ShareRedirectUtils.getLoginLink()).append("#!");
         sb.append("&token=").append(token);
 
         // Add attributes
         if (null != allowedAttributes) {
-            Map<String, String> attributes = location.asMap();
+            Map<String, String> attributes = location.asMap(translator);
             for (String allowedAttribute : allowedAttributes) {
                 if (Strings.isNotEmpty(allowedAttribute)) {
                     String value = attributes.get(allowedAttribute);
@@ -113,6 +117,8 @@ public class LoginLocation {
     // ----------------------------------------------------------------------------------------------------------------------------
 
     private final Map<String, String> parameters;
+
+    private Function<Translator, String> translatingMessage;
 
     /**
      * Initializes a new {@link LoginLocation}
@@ -186,12 +192,12 @@ public class LoginLocation {
      * Appends a message to pass to the client along with the redirect location.
      *
      * @param type The message type
-     * @param message The message
+     * @param translatingMessage The function that yields the translated message using the supplied translator instance
      * @return The builder
      */
-    public LoginLocation message(MessageType type, String message) {
+    public LoginLocation message(MessageType type, Function<Translator, String> translatingMessage) {
         parameter("message_type", type.toString());
-        parameter("message", message);
+        this.translatingMessage = translatingMessage;
         return this;
     }
 
@@ -221,10 +227,31 @@ public class LoginLocation {
     /**
      * Gets the map view for this login location
      *
+     * @param translator The translator to use to translate locale-sensitive strings, or <code>null</code> to fall back to the untranslated version
      * @return The parameters map
      */
-    public Map<String, String> asMap() {
-        return parameters;
+    public Map<String, String> asMap(Translator translator) {
+        if (null == translatingMessage) {
+            return Collections.unmodifiableMap(parameters);
+        }
+        Map<String, String> map = new HashMap<String, String>(parameters);
+        map.put("message", translatingMessage.apply(null == translator ? Translator.EMPTY : translator));
+        return map;
+    }
+
+    /**
+     * Builds and returns the relative redirect location, ready to use in the <code>Location</code> header of a HTTP response.
+     *
+     * @param translator The translator to use to translate locale-sensitive strings, or <code>null</code> to fall back to the untranslated version
+     * @return The built redirect URL
+     */
+    public String toString(Translator translator) {
+        StringBuilder sb = new StringBuilder(128);
+        sb.append(ShareRedirectUtils.getLoginLink()).append("#!");
+        for (Entry<String, String> entry : asMap(translator).entrySet()) {
+            sb.append('&').append(entry.getKey()).append('=').append(URLCoder.encode(entry.getValue(), Charsets.UTF_8));
+        }
+        return sb.toString();
     }
 
     /**
@@ -234,12 +261,7 @@ public class LoginLocation {
      */
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder(128);
-        sb.append(ShareRedirectUtils.getLoginLink()).append("#!");
-        for (Entry<String, String> entry : parameters.entrySet()) {
-            sb.append('&').append(entry.getKey()).append('=').append(URLCoder.encode(entry.getValue(), Charsets.UTF_8));
-        }
-        return sb.toString();
+        return toString(Translator.EMPTY);
     }
 
 }

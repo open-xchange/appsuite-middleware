@@ -74,13 +74,13 @@ public abstract class AbstractTransport implements Transport {
             session = sessionManager.getSession(sessionId);
         }
 
-        if(session == null) {
+        if (session == null) {
             return createConnection(sessionManager.createSession());
         }
 
         TransportConnection activeConnection = session.getConnection();
 
-        if(activeConnection.getTransport() == this) {
+        if (activeConnection.getTransport() == this) {
             return activeConnection;
         }
 

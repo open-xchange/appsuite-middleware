@@ -274,7 +274,7 @@ public final class ConcurrentHashSet<E> extends AbstractSet<E> implements Clonea
             @SuppressWarnings("unchecked") final ConcurrentHashSet<E> newSet = (ConcurrentHashSet<E>) super.clone();
             newSet.map.putAll(map);
             return newSet;
-        } catch (final CloneNotSupportedException e) {
+        } catch (CloneNotSupportedException e) {
             throw new InternalError("Clone fialed although Cloneable is implemented.");
         }
     }

@@ -90,7 +90,6 @@ import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapExceptionCode;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.imagetransformation.ImageTransformationService;
 import com.openexchange.imagetransformation.ImageTransformations;
@@ -136,7 +135,7 @@ import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tx.TransactionAwares;
-import com.openexchange.user.UserService;
+import com.openexchange.user.User;
 
 /**
  * {@link ShareComposeHandler}
@@ -474,7 +473,7 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
         User user = null;
         try {
             user = UserStorage.getInstance().searchUser(IDNA.toIDN(address.getAddress()), ctx);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             /*
              * Unfortunately UserService.searchUser() throws an exception if no user could be found matching given email address.
              * Therefore check for this special error code and throw an exception if it is not equal.

@@ -53,6 +53,7 @@ import java.util.Collection;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
+import com.openexchange.session.SessionAttributes;
 
 /**
  * {@link TestSessionStorageService}
@@ -248,30 +249,8 @@ public class TestSessionStorageService implements SessionStorageService {
 
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void setLocalIp(String sessionId, String localIp) throws OXException {
-        // TODO Auto-generated method stub
-
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-
-    @Override
-    public void setClient(String sessionId, String client) throws OXException {
-        // TODO Auto-generated method stub
-
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void setHash(String sessionId, String hash) throws OXException {
+    public void setSessionAttributes(String sessionId, SessionAttributes attrs) throws OXException {
         // TODO Auto-generated method stub
 
     }

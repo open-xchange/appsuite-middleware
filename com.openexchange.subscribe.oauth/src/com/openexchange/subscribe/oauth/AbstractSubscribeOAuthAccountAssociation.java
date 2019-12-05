@@ -72,41 +72,21 @@ public abstract class AbstractSubscribeOAuthAccountAssociation extends AbstractO
         this.subscription = subscription;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.association.OAuthAccountAssociation#getServiceId()
-     */
     @Override
     public String getServiceId() {
         return subscription.getSource().getId();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.association.OAuthAccountAssociation#getId()
-     */
     @Override
     public String getId() {
         return Integer.toString(subscription.getId());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.association.OAuthAccountAssociation#getDisplayName()
-     */
     @Override
     public String getDisplayName() {
         return displayName;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.association.OAuthAccountAssociation#optFolder()
-     */
     @Override
     public String getFolder() {
         return subscription.getFolderId();

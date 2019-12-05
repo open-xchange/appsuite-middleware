@@ -2,19 +2,7 @@
 package com.openexchange.groupware.container;
 
 import static com.openexchange.groupware.container.CalendarObject.ALARM;
-import static com.openexchange.groupware.tasks.Task.ACTUAL_COSTS;
-import static com.openexchange.groupware.tasks.Task.ACTUAL_DURATION;
-import static com.openexchange.groupware.tasks.Task.BILLING_INFORMATION;
-import static com.openexchange.groupware.tasks.Task.COMPANIES;
-import static com.openexchange.groupware.tasks.Task.CURRENCY;
-import static com.openexchange.groupware.tasks.Task.DATE_COMPLETED;
-import static com.openexchange.groupware.tasks.Task.PERCENT_COMPLETED;
-import static com.openexchange.groupware.tasks.Task.PRIORITY;
-import static com.openexchange.groupware.tasks.Task.PROJECT_ID;
-import static com.openexchange.groupware.tasks.Task.STATUS;
-import static com.openexchange.groupware.tasks.Task.TARGET_COSTS;
-import static com.openexchange.groupware.tasks.Task.TARGET_DURATION;
-import static com.openexchange.groupware.tasks.Task.TRIP_METER;
+import static com.openexchange.groupware.tasks.Task.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;

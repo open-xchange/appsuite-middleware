@@ -56,7 +56,6 @@ import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.text.ParseException;
-import au.com.bytecode.opencsv.CSVReader;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.context.extensioninterfaces.ContextConsoleCreateInterface;
@@ -72,6 +71,7 @@ import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import au.com.bytecode.opencsv.CSVReader;
 
 public abstract class CreateCore extends ContextAbstraction {
 
@@ -81,13 +81,12 @@ public abstract class CreateCore extends ContextAbstraction {
         setContextNameOption(parser, NeededQuadState.notneeded);
         setMandatoryOptions(parser);
 
-        setLanguageOption(parser);
-        setTimezoneOption(parser);
-
         setContextQuotaOption(parser, true);
 
         setFurtherOptions(parser);
+        setExtendedOptions(parser);
         setPrimaryAccountOption(parser);
+        setOptionalOptions(parser);
 
         parser.allowDynamicOptions();
     }
@@ -115,24 +114,25 @@ public abstract class CreateCore extends ContextAbstraction {
                 // fill user obj with mandatory values from console
                 parseAndSetMandatoryOptionsinUser(parser, usr);
                 parseAndSetPrimaryAccountName(parser, usr);
-                // fill user obj with mandatory values from console
-                final String tz = (String) parser.getOptionValue(this.timezoneOption);
-                if (null != tz) {
-                    usr.setTimezone(tz);
-                }
+                
+                // fill user obj with optional values from console
+                parseAndSetOptionalOptionsinUser(parser, usr);
 
-                final String languageoptionvalue = (String) parser.getOptionValue(this.languageOption);
-                if (languageoptionvalue != null) {
-                    usr.setLanguage(languageoptionvalue);
-                }
+                applyExtendedOptionsToUser(parser, usr);
 
+                applyDynamicOptionsToUser(parser, usr);
+                
+                applyDriveFolderModeOption(parser, usr);
+                
+                // Fill ctx obj with additional values from console
+                
                 parseAndSetContextQuota(parser, ctx);
 
                 parseAndSetExtensions(parser, ctx, auth);
 
                 // Dynamic Options
                 applyDynamicOptionsToContext(parser, ctx);
-            } catch (final RuntimeException e) {
+            } catch (RuntimeException e) {
                 printError(null, null, e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
                 sysexit(1);
             }
@@ -146,13 +146,13 @@ public abstract class CreateCore extends ContextAbstraction {
             } else {
                 ctxid = maincall(parser, ctx, usr, auth, schemaSelectStrategy).getId();
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             printErrors((null != ctxid) ? String.valueOf(ctxid) : null, null, e, parser);
         }
 
         try {
             displayCreatedMessage((null != ctxid) ? String.valueOf(ctxid) : null, null, parser);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             printError(null, null, e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
             sysexit(1);
         }
@@ -203,19 +203,19 @@ public abstract class CreateCore extends ContextAbstraction {
                             }
                         }
                         System.out.println("Context " + createdCtx.getId() + " successfully created");
-                    } catch (final OXConsolePluginException e1) {
+                    } catch (OXConsolePluginException e1) {
                         System.err.println("Failed to create context: Error while processing extension options: " + e1.getClass().getSimpleName() + ": " + e1.getMessage());
-                    } catch (final StorageException e) {
+                    } catch (StorageException e) {
                         System.err.println("Failed to create context " + getContextIdOrLine(context, lineNumber) + ": " + e);
-                    } catch (final RemoteException e) {
+                    } catch (RemoteException e) {
                         System.err.println("Failed to create context " + getContextIdOrLine(context, lineNumber) + ": " + e);
-                    } catch (final InvalidCredentialsException e) {
+                    } catch (InvalidCredentialsException e) {
                         System.err.println("Failed to create context " + getContextIdOrLine(context, lineNumber) + ": " + e);
-                    } catch (final InvalidDataException e) {
+                    } catch (InvalidDataException e) {
                         System.err.println("Failed to create context " + getContextIdOrLine(context, lineNumber) + ": " + e);
-                    } catch (final ContextExistsException e) {
+                    } catch (ContextExistsException e) {
                         System.err.println("Failed to create context " + getContextIdOrLine(context, lineNumber) + ": " + e);
-                    } catch (final ParseException e) {
+                    } catch (ParseException e) {
                         System.err.println("Failed to create context " + getContextIdOrLine(context, lineNumber) + ": " + e);
                     }
                 } catch (ParseException e2) {
@@ -228,7 +228,7 @@ public abstract class CreateCore extends ContextAbstraction {
         } finally {
             try {
                 reader.close();
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 // Ignore
             }
         }

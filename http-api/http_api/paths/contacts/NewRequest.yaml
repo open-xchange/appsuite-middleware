@@ -7,51 +7,70 @@
     description: |
       Creates a new contact. This request cannot add contact images. Therefor it
       is necessary to use the `POST` method.
-    consumes:
-      - application/json
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
-      - in: body
-        name: body
-        description: A JSON object containing the contact's data. The field id is not included.
-        required: true
-        schema:
-          $ref: "#/definitions/ContactData"
+      - $ref: '#/components/parameters/gblQueryParamSession'
     responses:
-      200:
-        description: |
-          A JSON object containing the ID of the newly created contact. In case of errors the responsible fields in the response are
+      '200':
+        description: >
+          A JSON object containing the ID of the newly created contact. In case
+          of errors the responsible fields in the response are
+
           filled (see [Error handling](#error-handling)).
-        schema:
-          $ref: "#/definitions/ContactUpdateResponse"
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContactUpdateResponse'
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ContactData'
+      description: >-
+        A JSON object containing the contact's data. The field id is not
+        included.
+      required: true
   post:
     operationId: createContactAdvanced
     tags:
       - Contacts
     summary: Creates a contact.
-    description: |
-      Creates a new contact with contact images. The normal request body must be placed as form-data using the
-      content-type `multipart/form-data`. The form field `json` contains the contact's data while the image file
-      must be placed in a file field named `file` (see also [File uploads](#file-uploads)).
-    consumes:
-      - multipart/form-data
-    produces:
-      - text/html
+    description: >
+      Creates a new contact with contact images. The normal request body must be
+      placed as form-data using the
+
+      content-type `multipart/form-data`. The form field `json` contains the
+      contact's data while the image file
+
+      must be placed in a file field named `file` (see also [File
+      uploads](#file-uploads)).
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
-      - in: formData
-        name: json
-        type: string
-        description: Represents the normal request body as JSON string containing the contact data as described in the ContactData (see [createContact](#/Contacts/createContact) model.
-        required: true
-      - in: formData
-        name: file
-        type: file
-        description: The image file.
-        required: true
+      - $ref: '#/components/parameters/gblQueryParamSession'
     responses:
-      200:
-        description: |
-          A HTML page as described in [File uploads](#file-uploads) containing the object ID of the contact or errors if some occurred.
-        schema:
-          type: string
+      '200':
+        description: >
+          A HTML page as described in [File uploads](#file-uploads) containing
+          the object ID of the contact or errors if some occurred.
+        content:
+          text/html:
+            schema:
+              type: string
+    requestBody:
+      content:
+        multipart/form-data:
+          schema:
+            type: object
+            title: createContactAdvancedBody
+            properties:
+              json:
+                description: >-
+                  Represents the normal request body as JSON string containing
+                  the contact data as described in the ContactData (see
+                  [createContact](#/Contacts/createContact) model.
+                type: string
+              file:
+                description: The image file.
+                type: string
+                format: binary
+            required:
+              - json
+              - file

@@ -140,7 +140,7 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
         if (driverName != null && driverName.toLowerCase().contains("embedded")) {
             try {
                 if (url.contains(";")) {
-                    url = url.substring(0, url.indexOf(";")) + ";shutdown=true";
+                    url = url.substring(0, url.indexOf(';')) + ";shutdown=true";
                 } else {
                     url += ";shutdown=true";
                 }
@@ -207,14 +207,14 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
             if (prepareCall != null) {
                 try {
                     prepareCall.close();
-                } catch (final SQLException e) {
+                } catch (SQLException e) {
                     LogFactory.getLogger().warning("", e);
                 }
             }
             if (resultSet != null) {
                 try {
                     resultSet.close();
-                } catch (final SQLException e) {
+                } catch (SQLException e) {
                     LogFactory.getLogger().warning("", e);
                 }
             }

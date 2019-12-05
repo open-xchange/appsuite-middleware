@@ -54,23 +54,23 @@ public class OXUtilServicePortTypeImpl implements OXUtilServicePortType {
         final OXUtilInterface utilInterface = getUtilInterface();
         try {
             return server2Soap(utilInterface.registerServer(soap2Server(srv), soap2Credentials(auth)));
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             com.openexchange.admin.soap.util.soap.RemoteException fd = new com.openexchange.admin.soap.util.soap.RemoteException();
             com.openexchange.admin.soap.util.rmi.RemoteException value = new com.openexchange.admin.soap.util.rmi.RemoteException();
             value.setMessage(e.getMessage());
             fd.setRemoteException(value);
             throw new RemoteException_Exception(e.getMessage(), fd, e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             com.openexchange.admin.soap.util.soap.InvalidCredentialsException fd = new com.openexchange.admin.soap.util.soap.InvalidCredentialsException();
             com.openexchange.admin.soap.util.exceptions.InvalidCredentialsException value = new com.openexchange.admin.soap.util.exceptions.InvalidCredentialsException();
             fd.setInvalidCredentialsException(value);
             throw new InvalidCredentialsException_Exception(e.getMessage(), fd, e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             com.openexchange.admin.soap.util.soap.StorageException fd = new com.openexchange.admin.soap.util.soap.StorageException();
             com.openexchange.admin.soap.util.exceptions.StorageException value = new com.openexchange.admin.soap.util.exceptions.StorageException();
             fd.setStorageException(value);
             throw new StorageException_Exception(e.getMessage(), fd, e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             com.openexchange.admin.soap.util.soap.InvalidDataException fd = new com.openexchange.admin.soap.util.soap.InvalidDataException();
             com.openexchange.admin.soap.util.exceptions.InvalidDataException value = new com.openexchange.admin.soap.util.exceptions.InvalidDataException();
             fd.setInvalidDataException(value);
@@ -83,23 +83,23 @@ public class OXUtilServicePortTypeImpl implements OXUtilServicePortType {
         final OXUtilInterface utilInterface = getUtilInterface();
         try {
             utilInterface.changeDatabase(soap2Database(parameters.db), soap2Credentials(parameters.auth));
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             com.openexchange.admin.soap.util.soap.RemoteException fd = new com.openexchange.admin.soap.util.soap.RemoteException();
             com.openexchange.admin.soap.util.rmi.RemoteException value = new com.openexchange.admin.soap.util.rmi.RemoteException();
             value.setMessage(e.getMessage());
             fd.setRemoteException(value);
             throw new RemoteException_Exception(e.getMessage(), fd, e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             com.openexchange.admin.soap.util.soap.InvalidCredentialsException fd = new com.openexchange.admin.soap.util.soap.InvalidCredentialsException();
             com.openexchange.admin.soap.util.exceptions.InvalidCredentialsException value = new com.openexchange.admin.soap.util.exceptions.InvalidCredentialsException();
             fd.setInvalidCredentialsException(value);
             throw new InvalidCredentialsException_Exception(e.getMessage(), fd, e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             com.openexchange.admin.soap.util.soap.StorageException fd = new com.openexchange.admin.soap.util.soap.StorageException();
             com.openexchange.admin.soap.util.exceptions.StorageException value = new com.openexchange.admin.soap.util.exceptions.StorageException();
             fd.setStorageException(value);
             throw new StorageException_Exception(e.getMessage(), fd, e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             com.openexchange.admin.soap.util.soap.InvalidDataException fd = new com.openexchange.admin.soap.util.soap.InvalidDataException();
             com.openexchange.admin.soap.util.exceptions.InvalidDataException value = new com.openexchange.admin.soap.util.exceptions.InvalidDataException();
             fd.setInvalidDataException(value);
@@ -121,23 +121,23 @@ public class OXUtilServicePortTypeImpl implements OXUtilServicePortType {
                list.add(database2Soap(databases[i]));
             }
             return list;
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             com.openexchange.admin.soap.util.soap.RemoteException fd = new com.openexchange.admin.soap.util.soap.RemoteException();
             com.openexchange.admin.soap.util.rmi.RemoteException value = new com.openexchange.admin.soap.util.rmi.RemoteException();
             value.setMessage(e.getMessage());
             fd.setRemoteException(value);
             throw new RemoteException_Exception(e.getMessage(), fd, e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             com.openexchange.admin.soap.util.soap.InvalidCredentialsException fd = new com.openexchange.admin.soap.util.soap.InvalidCredentialsException();
             com.openexchange.admin.soap.util.exceptions.InvalidCredentialsException value = new com.openexchange.admin.soap.util.exceptions.InvalidCredentialsException();
             fd.setInvalidCredentialsException(value);
             throw new InvalidCredentialsException_Exception(e.getMessage(), fd, e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             com.openexchange.admin.soap.util.soap.StorageException fd = new com.openexchange.admin.soap.util.soap.StorageException();
             com.openexchange.admin.soap.util.exceptions.StorageException value = new com.openexchange.admin.soap.util.exceptions.StorageException();
             fd.setStorageException(value);
             throw new StorageException_Exception(e.getMessage(), fd, e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             com.openexchange.admin.soap.util.soap.InvalidDataException fd = new com.openexchange.admin.soap.util.soap.InvalidDataException();
             com.openexchange.admin.soap.util.exceptions.InvalidDataException value = new com.openexchange.admin.soap.util.exceptions.InvalidDataException();
             fd.setInvalidDataException(value);
@@ -155,23 +155,23 @@ public class OXUtilServicePortTypeImpl implements OXUtilServicePortType {
                 reasons[i] = soap2Reason(list.get(i));
             }
             utilInterface.deleteMaintenanceReason(reasons, soap2Credentials(parameters.auth));
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             com.openexchange.admin.soap.util.soap.RemoteException fd = new com.openexchange.admin.soap.util.soap.RemoteException();
             com.openexchange.admin.soap.util.rmi.RemoteException value = new com.openexchange.admin.soap.util.rmi.RemoteException();
             value.setMessage(e.getMessage());
             fd.setRemoteException(value);
             throw new RemoteException_Exception(e.getMessage(), fd, e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             com.openexchange.admin.soap.util.soap.InvalidCredentialsException fd = new com.openexchange.admin.soap.util.soap.InvalidCredentialsException();
             com.openexchange.admin.soap.util.exceptions.InvalidCredentialsException value = new com.openexchange.admin.soap.util.exceptions.InvalidCredentialsException();
             fd.setInvalidCredentialsException(value);
             throw new InvalidCredentialsException_Exception(e.getMessage(), fd, e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             com.openexchange.admin.soap.util.soap.StorageException fd = new com.openexchange.admin.soap.util.soap.StorageException();
             com.openexchange.admin.soap.util.exceptions.StorageException value = new com.openexchange.admin.soap.util.exceptions.StorageException();
             fd.setStorageException(value);
             throw new StorageException_Exception(e.getMessage(), fd, e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             com.openexchange.admin.soap.util.soap.InvalidDataException fd = new com.openexchange.admin.soap.util.soap.InvalidDataException();
             com.openexchange.admin.soap.util.exceptions.InvalidDataException value = new com.openexchange.admin.soap.util.exceptions.InvalidDataException();
             fd.setInvalidDataException(value);
@@ -193,23 +193,23 @@ public class OXUtilServicePortTypeImpl implements OXUtilServicePortType {
                list.add(server2Soap(servers[i]));
             }
             return list;
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             com.openexchange.admin.soap.util.soap.RemoteException fd = new com.openexchange.admin.soap.util.soap.RemoteException();
             com.openexchange.admin.soap.util.rmi.RemoteException value = new com.openexchange.admin.soap.util.rmi.RemoteException();
             value.setMessage(e.getMessage());
             fd.setRemoteException(value);
             throw new RemoteException_Exception(e.getMessage(), fd, e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             com.openexchange.admin.soap.util.soap.InvalidCredentialsException fd = new com.openexchange.admin.soap.util.soap.InvalidCredentialsException();
             com.openexchange.admin.soap.util.exceptions.InvalidCredentialsException value = new com.openexchange.admin.soap.util.exceptions.InvalidCredentialsException();
             fd.setInvalidCredentialsException(value);
             throw new InvalidCredentialsException_Exception(e.getMessage(), fd, e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             com.openexchange.admin.soap.util.soap.StorageException fd = new com.openexchange.admin.soap.util.soap.StorageException();
             com.openexchange.admin.soap.util.exceptions.StorageException value = new com.openexchange.admin.soap.util.exceptions.StorageException();
             fd.setStorageException(value);
             throw new StorageException_Exception(e.getMessage(), fd, e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             com.openexchange.admin.soap.util.soap.InvalidDataException fd = new com.openexchange.admin.soap.util.soap.InvalidDataException();
             com.openexchange.admin.soap.util.exceptions.InvalidDataException value = new com.openexchange.admin.soap.util.exceptions.InvalidDataException();
             fd.setInvalidDataException(value);
@@ -231,23 +231,23 @@ public class OXUtilServicePortTypeImpl implements OXUtilServicePortType {
                list.add(reason2Soap(reasons[i]));
             }
             return list;
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             com.openexchange.admin.soap.util.soap.RemoteException fd = new com.openexchange.admin.soap.util.soap.RemoteException();
             com.openexchange.admin.soap.util.rmi.RemoteException value = new com.openexchange.admin.soap.util.rmi.RemoteException();
             value.setMessage(e.getMessage());
             fd.setRemoteException(value);
             throw new RemoteException_Exception(e.getMessage(), fd, e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             com.openexchange.admin.soap.util.soap.InvalidCredentialsException fd = new com.openexchange.admin.soap.util.soap.InvalidCredentialsException();
             com.openexchange.admin.soap.util.exceptions.InvalidCredentialsException value = new com.openexchange.admin.soap.util.exceptions.InvalidCredentialsException();
             fd.setInvalidCredentialsException(value);
             throw new InvalidCredentialsException_Exception(e.getMessage(), fd, e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             com.openexchange.admin.soap.util.soap.StorageException fd = new com.openexchange.admin.soap.util.soap.StorageException();
             com.openexchange.admin.soap.util.exceptions.StorageException value = new com.openexchange.admin.soap.util.exceptions.StorageException();
             fd.setStorageException(value);
             throw new StorageException_Exception(e.getMessage(), fd, e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             com.openexchange.admin.soap.util.soap.InvalidDataException fd = new com.openexchange.admin.soap.util.soap.InvalidDataException();
             com.openexchange.admin.soap.util.exceptions.InvalidDataException value = new com.openexchange.admin.soap.util.exceptions.InvalidDataException();
             fd.setInvalidDataException(value);
@@ -260,23 +260,23 @@ public class OXUtilServicePortTypeImpl implements OXUtilServicePortType {
         final OXUtilInterface utilInterface = getUtilInterface();
         try {
             utilInterface.unregisterServer(soap2Server(parameters.serv), soap2Credentials(parameters.auth));
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             com.openexchange.admin.soap.util.soap.RemoteException fd = new com.openexchange.admin.soap.util.soap.RemoteException();
             com.openexchange.admin.soap.util.rmi.RemoteException value = new com.openexchange.admin.soap.util.rmi.RemoteException();
             value.setMessage(e.getMessage());
             fd.setRemoteException(value);
             throw new RemoteException_Exception(e.getMessage(), fd, e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             com.openexchange.admin.soap.util.soap.InvalidCredentialsException fd = new com.openexchange.admin.soap.util.soap.InvalidCredentialsException();
             com.openexchange.admin.soap.util.exceptions.InvalidCredentialsException value = new com.openexchange.admin.soap.util.exceptions.InvalidCredentialsException();
             fd.setInvalidCredentialsException(value);
             throw new InvalidCredentialsException_Exception(e.getMessage(), fd, e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             com.openexchange.admin.soap.util.soap.StorageException fd = new com.openexchange.admin.soap.util.soap.StorageException();
             com.openexchange.admin.soap.util.exceptions.StorageException value = new com.openexchange.admin.soap.util.exceptions.StorageException();
             fd.setStorageException(value);
             throw new StorageException_Exception(e.getMessage(), fd, e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             com.openexchange.admin.soap.util.soap.InvalidDataException fd = new com.openexchange.admin.soap.util.soap.InvalidDataException();
             com.openexchange.admin.soap.util.exceptions.InvalidDataException value = new com.openexchange.admin.soap.util.exceptions.InvalidDataException();
             fd.setInvalidDataException(value);
@@ -298,23 +298,23 @@ public class OXUtilServicePortTypeImpl implements OXUtilServicePortType {
                list.add(server2Soap(servers[i]));
             }
             return list;
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             com.openexchange.admin.soap.util.soap.RemoteException fd = new com.openexchange.admin.soap.util.soap.RemoteException();
             com.openexchange.admin.soap.util.rmi.RemoteException value = new com.openexchange.admin.soap.util.rmi.RemoteException();
             value.setMessage(e.getMessage());
             fd.setRemoteException(value);
             throw new RemoteException_Exception(e.getMessage(), fd, e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             com.openexchange.admin.soap.util.soap.InvalidCredentialsException fd = new com.openexchange.admin.soap.util.soap.InvalidCredentialsException();
             com.openexchange.admin.soap.util.exceptions.InvalidCredentialsException value = new com.openexchange.admin.soap.util.exceptions.InvalidCredentialsException();
             fd.setInvalidCredentialsException(value);
             throw new InvalidCredentialsException_Exception(e.getMessage(), fd, e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             com.openexchange.admin.soap.util.soap.StorageException fd = new com.openexchange.admin.soap.util.soap.StorageException();
             com.openexchange.admin.soap.util.exceptions.StorageException value = new com.openexchange.admin.soap.util.exceptions.StorageException();
             fd.setStorageException(value);
             throw new StorageException_Exception(e.getMessage(), fd, e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             com.openexchange.admin.soap.util.soap.InvalidDataException fd = new com.openexchange.admin.soap.util.soap.InvalidDataException();
             com.openexchange.admin.soap.util.exceptions.InvalidDataException value = new com.openexchange.admin.soap.util.exceptions.InvalidDataException();
             fd.setInvalidDataException(value);
@@ -336,23 +336,23 @@ public class OXUtilServicePortTypeImpl implements OXUtilServicePortType {
                list.add(database2Soap(databases[i]));
             }
             return list;
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             com.openexchange.admin.soap.util.soap.RemoteException fd = new com.openexchange.admin.soap.util.soap.RemoteException();
             com.openexchange.admin.soap.util.rmi.RemoteException value = new com.openexchange.admin.soap.util.rmi.RemoteException();
             value.setMessage(e.getMessage());
             fd.setRemoteException(value);
             throw new RemoteException_Exception(e.getMessage(), fd, e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             com.openexchange.admin.soap.util.soap.InvalidCredentialsException fd = new com.openexchange.admin.soap.util.soap.InvalidCredentialsException();
             com.openexchange.admin.soap.util.exceptions.InvalidCredentialsException value = new com.openexchange.admin.soap.util.exceptions.InvalidCredentialsException();
             fd.setInvalidCredentialsException(value);
             throw new InvalidCredentialsException_Exception(e.getMessage(), fd, e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             com.openexchange.admin.soap.util.soap.StorageException fd = new com.openexchange.admin.soap.util.soap.StorageException();
             com.openexchange.admin.soap.util.exceptions.StorageException value = new com.openexchange.admin.soap.util.exceptions.StorageException();
             fd.setStorageException(value);
             throw new StorageException_Exception(e.getMessage(), fd, e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             com.openexchange.admin.soap.util.soap.InvalidDataException fd = new com.openexchange.admin.soap.util.soap.InvalidDataException();
             com.openexchange.admin.soap.util.exceptions.InvalidDataException value = new com.openexchange.admin.soap.util.exceptions.InvalidDataException();
             fd.setInvalidDataException(value);
@@ -400,23 +400,23 @@ public class OXUtilServicePortTypeImpl implements OXUtilServicePortType {
             }
 
             return ret;
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             com.openexchange.admin.soap.util.soap.RemoteException fd = new com.openexchange.admin.soap.util.soap.RemoteException();
             com.openexchange.admin.soap.util.rmi.RemoteException value = new com.openexchange.admin.soap.util.rmi.RemoteException();
             value.setMessage(e.getMessage());
             fd.setRemoteException(value);
             throw new RemoteException_Exception(e.getMessage(), fd, e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             com.openexchange.admin.soap.util.soap.InvalidCredentialsException fd = new com.openexchange.admin.soap.util.soap.InvalidCredentialsException();
             com.openexchange.admin.soap.util.exceptions.InvalidCredentialsException value = new com.openexchange.admin.soap.util.exceptions.InvalidCredentialsException();
             fd.setInvalidCredentialsException(value);
             throw new InvalidCredentialsException_Exception(e.getMessage(), fd, e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             com.openexchange.admin.soap.util.soap.StorageException fd = new com.openexchange.admin.soap.util.soap.StorageException();
             com.openexchange.admin.soap.util.exceptions.StorageException value = new com.openexchange.admin.soap.util.exceptions.StorageException();
             fd.setStorageException(value);
             throw new StorageException_Exception(e.getMessage(), fd, e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             com.openexchange.admin.soap.util.soap.InvalidDataException fd = new com.openexchange.admin.soap.util.soap.InvalidDataException();
             com.openexchange.admin.soap.util.exceptions.InvalidDataException value = new com.openexchange.admin.soap.util.exceptions.InvalidDataException();
             fd.setInvalidDataException(value);
@@ -438,28 +438,28 @@ public class OXUtilServicePortTypeImpl implements OXUtilServicePortType {
                list.add(database2Soap(databases[i]));
             }
             return list;
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             com.openexchange.admin.soap.util.soap.RemoteException fd = new com.openexchange.admin.soap.util.soap.RemoteException();
             com.openexchange.admin.soap.util.rmi.RemoteException value = new com.openexchange.admin.soap.util.rmi.RemoteException();
             value.setMessage(e.getMessage());
             fd.setRemoteException(value);
             throw new RemoteException_Exception(e.getMessage(), fd, e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             com.openexchange.admin.soap.util.soap.InvalidCredentialsException fd = new com.openexchange.admin.soap.util.soap.InvalidCredentialsException();
             com.openexchange.admin.soap.util.exceptions.InvalidCredentialsException value = new com.openexchange.admin.soap.util.exceptions.InvalidCredentialsException();
             fd.setInvalidCredentialsException(value);
             throw new InvalidCredentialsException_Exception(e.getMessage(), fd, e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             com.openexchange.admin.soap.util.soap.StorageException fd = new com.openexchange.admin.soap.util.soap.StorageException();
             com.openexchange.admin.soap.util.exceptions.StorageException value = new com.openexchange.admin.soap.util.exceptions.StorageException();
             fd.setStorageException(value);
             throw new StorageException_Exception(e.getMessage(), fd, e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             com.openexchange.admin.soap.util.soap.InvalidDataException fd = new com.openexchange.admin.soap.util.soap.InvalidDataException();
             com.openexchange.admin.soap.util.exceptions.InvalidDataException value = new com.openexchange.admin.soap.util.exceptions.InvalidDataException();
             fd.setInvalidDataException(value);
             throw new InvalidDataException_Exception(e.getMessage(), fd, e);
-        } catch (final NoSuchDatabaseException e) {
+        } catch (NoSuchDatabaseException e) {
             com.openexchange.admin.soap.util.soap.InvalidDataException fd = new com.openexchange.admin.soap.util.soap.InvalidDataException();
             com.openexchange.admin.soap.util.exceptions.InvalidDataException value = new com.openexchange.admin.soap.util.exceptions.InvalidDataException();
             fd.setInvalidDataException(value);
@@ -472,23 +472,23 @@ public class OXUtilServicePortTypeImpl implements OXUtilServicePortType {
         final OXUtilInterface utilInterface = getUtilInterface();
         try {
             return reason2Soap(utilInterface.createMaintenanceReason(soap2Reason(reason), soap2Credentials(auth)));
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             com.openexchange.admin.soap.util.soap.RemoteException fd = new com.openexchange.admin.soap.util.soap.RemoteException();
             com.openexchange.admin.soap.util.rmi.RemoteException value = new com.openexchange.admin.soap.util.rmi.RemoteException();
             value.setMessage(e.getMessage());
             fd.setRemoteException(value);
             throw new RemoteException_Exception(e.getMessage(), fd, e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             com.openexchange.admin.soap.util.soap.InvalidCredentialsException fd = new com.openexchange.admin.soap.util.soap.InvalidCredentialsException();
             com.openexchange.admin.soap.util.exceptions.InvalidCredentialsException value = new com.openexchange.admin.soap.util.exceptions.InvalidCredentialsException();
             fd.setInvalidCredentialsException(value);
             throw new InvalidCredentialsException_Exception(e.getMessage(), fd, e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             com.openexchange.admin.soap.util.soap.StorageException fd = new com.openexchange.admin.soap.util.soap.StorageException();
             com.openexchange.admin.soap.util.exceptions.StorageException value = new com.openexchange.admin.soap.util.exceptions.StorageException();
             fd.setStorageException(value);
             throw new StorageException_Exception(e.getMessage(), fd, e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             com.openexchange.admin.soap.util.soap.InvalidDataException fd = new com.openexchange.admin.soap.util.soap.InvalidDataException();
             com.openexchange.admin.soap.util.exceptions.InvalidDataException value = new com.openexchange.admin.soap.util.exceptions.InvalidDataException();
             fd.setInvalidDataException(value);
@@ -501,23 +501,23 @@ public class OXUtilServicePortTypeImpl implements OXUtilServicePortType {
         final OXUtilInterface utilInterface = getUtilInterface();
         try {
             return database2Soap(utilInterface.registerDatabase(soap2Database(db), createSchemas, optNumberOfSchemas, soap2Credentials(auth)));
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             com.openexchange.admin.soap.util.soap.RemoteException fd = new com.openexchange.admin.soap.util.soap.RemoteException();
             com.openexchange.admin.soap.util.rmi.RemoteException value = new com.openexchange.admin.soap.util.rmi.RemoteException();
             value.setMessage(e.getMessage());
             fd.setRemoteException(value);
             throw new RemoteException_Exception(e.getMessage(), fd, e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             com.openexchange.admin.soap.util.soap.InvalidCredentialsException fd = new com.openexchange.admin.soap.util.soap.InvalidCredentialsException();
             com.openexchange.admin.soap.util.exceptions.InvalidCredentialsException value = new com.openexchange.admin.soap.util.exceptions.InvalidCredentialsException();
             fd.setInvalidCredentialsException(value);
             throw new InvalidCredentialsException_Exception(e.getMessage(), fd, e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             com.openexchange.admin.soap.util.soap.StorageException fd = new com.openexchange.admin.soap.util.soap.StorageException();
             com.openexchange.admin.soap.util.exceptions.StorageException value = new com.openexchange.admin.soap.util.exceptions.StorageException();
             fd.setStorageException(value);
             throw new StorageException_Exception(e.getMessage(), fd, e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             com.openexchange.admin.soap.util.soap.InvalidDataException fd = new com.openexchange.admin.soap.util.soap.InvalidDataException();
             com.openexchange.admin.soap.util.exceptions.InvalidDataException value = new com.openexchange.admin.soap.util.exceptions.InvalidDataException();
             fd.setInvalidDataException(value);
@@ -539,23 +539,23 @@ public class OXUtilServicePortTypeImpl implements OXUtilServicePortType {
                list.add(reason2Soap(reasons[i]));
             }
             return list;
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             com.openexchange.admin.soap.util.soap.RemoteException fd = new com.openexchange.admin.soap.util.soap.RemoteException();
             com.openexchange.admin.soap.util.rmi.RemoteException value = new com.openexchange.admin.soap.util.rmi.RemoteException();
             value.setMessage(e.getMessage());
             fd.setRemoteException(value);
             throw new RemoteException_Exception(e.getMessage(), fd, e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             com.openexchange.admin.soap.util.soap.InvalidCredentialsException fd = new com.openexchange.admin.soap.util.soap.InvalidCredentialsException();
             com.openexchange.admin.soap.util.exceptions.InvalidCredentialsException value = new com.openexchange.admin.soap.util.exceptions.InvalidCredentialsException();
             fd.setInvalidCredentialsException(value);
             throw new InvalidCredentialsException_Exception(e.getMessage(), fd, e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             com.openexchange.admin.soap.util.soap.StorageException fd = new com.openexchange.admin.soap.util.soap.StorageException();
             com.openexchange.admin.soap.util.exceptions.StorageException value = new com.openexchange.admin.soap.util.exceptions.StorageException();
             fd.setStorageException(value);
             throw new StorageException_Exception(e.getMessage(), fd, e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             com.openexchange.admin.soap.util.soap.InvalidDataException fd = new com.openexchange.admin.soap.util.soap.InvalidDataException();
             com.openexchange.admin.soap.util.exceptions.InvalidDataException value = new com.openexchange.admin.soap.util.exceptions.InvalidDataException();
             fd.setInvalidDataException(value);
@@ -568,23 +568,23 @@ public class OXUtilServicePortTypeImpl implements OXUtilServicePortType {
         final OXUtilInterface utilInterface = getUtilInterface();
         try {
             return filestore2Soap(utilInterface.registerFilestore(soap2Filestore(fstore), soap2Credentials(auth)));
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             com.openexchange.admin.soap.util.soap.RemoteException fd = new com.openexchange.admin.soap.util.soap.RemoteException();
             com.openexchange.admin.soap.util.rmi.RemoteException value = new com.openexchange.admin.soap.util.rmi.RemoteException();
             value.setMessage(e.getMessage());
             fd.setRemoteException(value);
             throw new RemoteException_Exception(e.getMessage(), fd, e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             com.openexchange.admin.soap.util.soap.InvalidCredentialsException fd = new com.openexchange.admin.soap.util.soap.InvalidCredentialsException();
             com.openexchange.admin.soap.util.exceptions.InvalidCredentialsException value = new com.openexchange.admin.soap.util.exceptions.InvalidCredentialsException();
             fd.setInvalidCredentialsException(value);
             throw new InvalidCredentialsException_Exception(e.getMessage(), fd, e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             com.openexchange.admin.soap.util.soap.StorageException fd = new com.openexchange.admin.soap.util.soap.StorageException();
             com.openexchange.admin.soap.util.exceptions.StorageException value = new com.openexchange.admin.soap.util.exceptions.StorageException();
             fd.setStorageException(value);
             throw new StorageException_Exception(e.getMessage(), fd, e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             com.openexchange.admin.soap.util.soap.InvalidDataException fd = new com.openexchange.admin.soap.util.soap.InvalidDataException();
             com.openexchange.admin.soap.util.exceptions.InvalidDataException value = new com.openexchange.admin.soap.util.exceptions.InvalidDataException();
             fd.setInvalidDataException(value);
@@ -597,23 +597,23 @@ public class OXUtilServicePortTypeImpl implements OXUtilServicePortType {
         final OXUtilInterface utilInterface = getUtilInterface();
         try {
             utilInterface.unregisterFilestore(soap2Filestore(parameters.store), soap2Credentials(parameters.auth));
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             com.openexchange.admin.soap.util.soap.RemoteException fd = new com.openexchange.admin.soap.util.soap.RemoteException();
             com.openexchange.admin.soap.util.rmi.RemoteException value = new com.openexchange.admin.soap.util.rmi.RemoteException();
             value.setMessage(e.getMessage());
             fd.setRemoteException(value);
             throw new RemoteException_Exception(e.getMessage(), fd, e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             com.openexchange.admin.soap.util.soap.InvalidCredentialsException fd = new com.openexchange.admin.soap.util.soap.InvalidCredentialsException();
             com.openexchange.admin.soap.util.exceptions.InvalidCredentialsException value = new com.openexchange.admin.soap.util.exceptions.InvalidCredentialsException();
             fd.setInvalidCredentialsException(value);
             throw new InvalidCredentialsException_Exception(e.getMessage(), fd, e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             com.openexchange.admin.soap.util.soap.StorageException fd = new com.openexchange.admin.soap.util.soap.StorageException();
             com.openexchange.admin.soap.util.exceptions.StorageException value = new com.openexchange.admin.soap.util.exceptions.StorageException();
             fd.setStorageException(value);
             throw new StorageException_Exception(e.getMessage(), fd, e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             com.openexchange.admin.soap.util.soap.InvalidDataException fd = new com.openexchange.admin.soap.util.soap.InvalidDataException();
             com.openexchange.admin.soap.util.exceptions.InvalidDataException value = new com.openexchange.admin.soap.util.exceptions.InvalidDataException();
             fd.setInvalidDataException(value);
@@ -635,23 +635,23 @@ public class OXUtilServicePortTypeImpl implements OXUtilServicePortType {
                list.add(filestore2Soap(filestores[i]));
             }
             return list;
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             com.openexchange.admin.soap.util.soap.RemoteException fd = new com.openexchange.admin.soap.util.soap.RemoteException();
             com.openexchange.admin.soap.util.rmi.RemoteException value = new com.openexchange.admin.soap.util.rmi.RemoteException();
             value.setMessage(e.getMessage());
             fd.setRemoteException(value);
             throw new RemoteException_Exception(e.getMessage(), fd, e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             com.openexchange.admin.soap.util.soap.InvalidCredentialsException fd = new com.openexchange.admin.soap.util.soap.InvalidCredentialsException();
             com.openexchange.admin.soap.util.exceptions.InvalidCredentialsException value = new com.openexchange.admin.soap.util.exceptions.InvalidCredentialsException();
             fd.setInvalidCredentialsException(value);
             throw new InvalidCredentialsException_Exception(e.getMessage(), fd, e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             com.openexchange.admin.soap.util.soap.StorageException fd = new com.openexchange.admin.soap.util.soap.StorageException();
             com.openexchange.admin.soap.util.exceptions.StorageException value = new com.openexchange.admin.soap.util.exceptions.StorageException();
             fd.setStorageException(value);
             throw new StorageException_Exception(e.getMessage(), fd, e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             com.openexchange.admin.soap.util.soap.InvalidDataException fd = new com.openexchange.admin.soap.util.soap.InvalidDataException();
             com.openexchange.admin.soap.util.exceptions.InvalidDataException value = new com.openexchange.admin.soap.util.exceptions.InvalidDataException();
             fd.setInvalidDataException(value);
@@ -664,23 +664,23 @@ public class OXUtilServicePortTypeImpl implements OXUtilServicePortType {
         final OXUtilInterface utilInterface = getUtilInterface();
         try {
             utilInterface.changeFilestore(soap2Filestore(parameters.fstore), soap2Credentials(parameters.auth));
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             com.openexchange.admin.soap.util.soap.RemoteException fd = new com.openexchange.admin.soap.util.soap.RemoteException();
             com.openexchange.admin.soap.util.rmi.RemoteException value = new com.openexchange.admin.soap.util.rmi.RemoteException();
             value.setMessage(e.getMessage());
             fd.setRemoteException(value);
             throw new RemoteException_Exception(e.getMessage(), fd, e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             com.openexchange.admin.soap.util.soap.InvalidCredentialsException fd = new com.openexchange.admin.soap.util.soap.InvalidCredentialsException();
             com.openexchange.admin.soap.util.exceptions.InvalidCredentialsException value = new com.openexchange.admin.soap.util.exceptions.InvalidCredentialsException();
             fd.setInvalidCredentialsException(value);
             throw new InvalidCredentialsException_Exception(e.getMessage(), fd, e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             com.openexchange.admin.soap.util.soap.StorageException fd = new com.openexchange.admin.soap.util.soap.StorageException();
             com.openexchange.admin.soap.util.exceptions.StorageException value = new com.openexchange.admin.soap.util.exceptions.StorageException();
             fd.setStorageException(value);
             throw new StorageException_Exception(e.getMessage(), fd, e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             com.openexchange.admin.soap.util.soap.InvalidDataException fd = new com.openexchange.admin.soap.util.soap.InvalidDataException();
             com.openexchange.admin.soap.util.exceptions.InvalidDataException value = new com.openexchange.admin.soap.util.exceptions.InvalidDataException();
             fd.setInvalidDataException(value);
@@ -702,23 +702,23 @@ public class OXUtilServicePortTypeImpl implements OXUtilServicePortType {
                list.add(filestore2Soap(filestores[i]));
             }
             return list;
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             com.openexchange.admin.soap.util.soap.RemoteException fd = new com.openexchange.admin.soap.util.soap.RemoteException();
             com.openexchange.admin.soap.util.rmi.RemoteException value = new com.openexchange.admin.soap.util.rmi.RemoteException();
             value.setMessage(e.getMessage());
             fd.setRemoteException(value);
             throw new RemoteException_Exception(e.getMessage(), fd, e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             com.openexchange.admin.soap.util.soap.InvalidCredentialsException fd = new com.openexchange.admin.soap.util.soap.InvalidCredentialsException();
             com.openexchange.admin.soap.util.exceptions.InvalidCredentialsException value = new com.openexchange.admin.soap.util.exceptions.InvalidCredentialsException();
             fd.setInvalidCredentialsException(value);
             throw new InvalidCredentialsException_Exception(e.getMessage(), fd, e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             com.openexchange.admin.soap.util.soap.StorageException fd = new com.openexchange.admin.soap.util.soap.StorageException();
             com.openexchange.admin.soap.util.exceptions.StorageException value = new com.openexchange.admin.soap.util.exceptions.StorageException();
             fd.setStorageException(value);
             throw new StorageException_Exception(e.getMessage(), fd, e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             com.openexchange.admin.soap.util.soap.InvalidDataException fd = new com.openexchange.admin.soap.util.soap.InvalidDataException();
             com.openexchange.admin.soap.util.exceptions.InvalidDataException value = new com.openexchange.admin.soap.util.exceptions.InvalidDataException();
             fd.setInvalidDataException(value);
@@ -731,23 +731,23 @@ public class OXUtilServicePortTypeImpl implements OXUtilServicePortType {
         final OXUtilInterface utilInterface = getUtilInterface();
         try {
             utilInterface.unregisterDatabase(soap2Database(parameters.dbhandle), soap2Credentials(parameters.auth));
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             com.openexchange.admin.soap.util.soap.RemoteException fd = new com.openexchange.admin.soap.util.soap.RemoteException();
             com.openexchange.admin.soap.util.rmi.RemoteException value = new com.openexchange.admin.soap.util.rmi.RemoteException();
             value.setMessage(e.getMessage());
             fd.setRemoteException(value);
             throw new RemoteException_Exception(e.getMessage(), fd, e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             com.openexchange.admin.soap.util.soap.InvalidCredentialsException fd = new com.openexchange.admin.soap.util.soap.InvalidCredentialsException();
             com.openexchange.admin.soap.util.exceptions.InvalidCredentialsException value = new com.openexchange.admin.soap.util.exceptions.InvalidCredentialsException();
             fd.setInvalidCredentialsException(value);
             throw new InvalidCredentialsException_Exception(e.getMessage(), fd, e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             com.openexchange.admin.soap.util.soap.StorageException fd = new com.openexchange.admin.soap.util.soap.StorageException();
             com.openexchange.admin.soap.util.exceptions.StorageException value = new com.openexchange.admin.soap.util.exceptions.StorageException();
             fd.setStorageException(value);
             throw new StorageException_Exception(e.getMessage(), fd, e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             com.openexchange.admin.soap.util.soap.InvalidDataException fd = new com.openexchange.admin.soap.util.soap.InvalidDataException();
             com.openexchange.admin.soap.util.exceptions.InvalidDataException value = new com.openexchange.admin.soap.util.exceptions.InvalidDataException();
             fd.setInvalidDataException(value);
@@ -988,27 +988,24 @@ public class OXUtilServicePortTypeImpl implements OXUtilServicePortType {
         return soapDatabase;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.admin.soap.util.soap.OXUtilServicePortType#createScheme(com.openexchange.admin.soap.util.dataobjects.Credentials)
-     */
     @Override
     public Database createSchema(Credentials auth, Integer optDBId) throws StorageException_Exception, InvalidCredentialsException_Exception, RemoteException_Exception {
         com.openexchange.admin.rmi.dataobjects.Database result;
         try {
             result = getUtilInterface().createSchema(soap2Credentials(auth), optDBId);
             return database2Soap(result);
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             com.openexchange.admin.soap.util.soap.RemoteException fd = new com.openexchange.admin.soap.util.soap.RemoteException();
             com.openexchange.admin.soap.util.rmi.RemoteException value = new com.openexchange.admin.soap.util.rmi.RemoteException();
             value.setMessage(e.getMessage());
             fd.setRemoteException(value);
             throw new RemoteException_Exception(e.getMessage(), fd, e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             com.openexchange.admin.soap.util.soap.InvalidCredentialsException fd = new com.openexchange.admin.soap.util.soap.InvalidCredentialsException();
             com.openexchange.admin.soap.util.exceptions.InvalidCredentialsException value = new com.openexchange.admin.soap.util.exceptions.InvalidCredentialsException();
             fd.setInvalidCredentialsException(value);
             throw new InvalidCredentialsException_Exception(e.getMessage(), fd, e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             com.openexchange.admin.soap.util.soap.StorageException fd = new com.openexchange.admin.soap.util.soap.StorageException();
             com.openexchange.admin.soap.util.exceptions.StorageException value = new com.openexchange.admin.soap.util.exceptions.StorageException();
             fd.setStorageException(value);

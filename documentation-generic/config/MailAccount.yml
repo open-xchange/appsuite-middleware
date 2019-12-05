@@ -31,3 +31,15 @@ properties:
       file: mailaccount.properties
       packageName: open-xchange-core
       tags: ["Mail Account"]
+    - key: com.openexchange.mailaccount.failedAuth.aggregationSpan
+      description: |
+        Specifies the time span of shortly successive failed login attempts that are supposed to be collapsed/aggregated.
+        The value accepts known time span syntax like <code>1W</code> or <code>5m</code>.
+      defaultValue: 3000
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: true
+      related: com.openexchange.mailaccount.failedAuth.limit
+      file: mailaccount.properties
+      packageName: open-xchange-core
+      tags: ["Mail Account"]

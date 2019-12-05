@@ -150,7 +150,7 @@ public class FastSecretInconsistencyDetector implements SecretInconsistencyDetec
         SecretEncryptionService<UserAndContext> encryptionService = secretEncryptionFactory.createService(this);
         try {
             return TEST_STRING.equals(encryptionService.decrypt(session, encryptedToken, new UserAndContext(session.getUserId(), session.getContext())));
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.debug("Could not decrypt fast-crypt token from user's attributes.", e);
             return false;
         }
@@ -161,7 +161,7 @@ public class FastSecretInconsistencyDetector implements SecretInconsistencyDetec
             SecretEncryptionService<UserAndContext> encryptionService = secretEncryptionFactory.createService(this);
             String encrypted = encryptionService.encrypt(session, TEST_STRING);
             doSaveNewToken(encrypted, session.getUserId(), session.getContext());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
         }
     }
@@ -170,7 +170,7 @@ public class FastSecretInconsistencyDetector implements SecretInconsistencyDetec
         try {
             String newEncryptedToken = cryptoService.encrypt(TEST_STRING, secret);
             doSaveNewToken(newEncryptedToken, session.getUserId(), session.getContext());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
         }
     }

@@ -51,6 +51,7 @@ package com.openexchange.sessionstorage;
 
 import java.util.List;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.annotation.Service;
 
 /**
  * {@link SessionStorageParameterNamesProvider} - Provides a listing of names for parameters that
@@ -63,6 +64,7 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.4
  */
+@Service
 public interface SessionStorageParameterNamesProvider {
 
     /**

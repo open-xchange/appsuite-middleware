@@ -50,6 +50,7 @@
 package com.openexchange.filestore.impl;
 
 import java.io.InputStream;
+import java.net.URI;
 import java.util.Set;
 import java.util.SortedSet;
 import com.openexchange.exception.OXException;
@@ -75,6 +76,11 @@ public class CloseableTrackingFileStorage implements FileStorage {
     public CloseableTrackingFileStorage(FileStorage delegate) {
         super();
         this.delegate = delegate;
+    }
+
+    @Override
+    public URI getUri() {
+        return delegate.getUri();
     }
 
     @Override

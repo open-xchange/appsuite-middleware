@@ -57,6 +57,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -64,6 +65,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.LockSupport;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.cascade.ConfigViews;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.UpdateStatus;
@@ -567,32 +570,44 @@ public final class PushManagerRegistry implements PushListenerService {
 
         if (inserted) {
             // Start for push user
-            PermanentListenerRescheduler rescheduler = reschedulerRef.get();
+            boolean rescheduleOnRegistration = isRescheduleOnRegistration(userId, contextId);
+            Optional<PermanentListenerRescheduler> optionalRescheduler = rescheduleOnRegistration ? Optional.ofNullable(reschedulerRef.get()) : Optional.empty();
             boolean allowPermanentPush = isPermanentPushAllowed();
             Collection<PushUser> toStart = Collections.singletonList(new PushUser(userId, contextId));
-            if (null == rescheduler) {
-                for (PushManagerExtendedService extendedService : getExtendedPushManagers()) {
-                    startPermanentListenersFor(toStart, extendedService, allowPermanentPush);
-                }
-            } else {
+            if (optionalRescheduler.isPresent()) {
                 for (Iterator<PushManagerExtendedService> it = getExtendedPushManagers().iterator(); useThisInstanceToReschedule == null && it.hasNext();) {
                     PushManagerExtendedService extendedService = it.next();
                     if (extendedService.supportsPermanentListeners()) {
-                        useThisInstanceToReschedule = rescheduler;
+                        useThisInstanceToReschedule = optionalRescheduler.get();
                     }
+                }
+            } else {
+                for (PushManagerExtendedService extendedService : getExtendedPushManagers()) {
+                    startPermanentListenersFor(toStart, extendedService, allowPermanentPush);
                 }
             }
         }
 
         if (null != useThisInstanceToReschedule) {
             try {
-                useThisInstanceToReschedule.planReschedule(true);
+                useThisInstanceToReschedule.planReschedule(true, new StringBuilder("Permanent listener registered for client ").append(clientId).append(" from user ").append(userId).append(" in context ").append(contextId).toString());
             } catch (OXException e) {
                 LOG.error("Failed to plan rescheduling", e);
             }
         }
 
         return inserted;
+    }
+
+    private boolean isRescheduleOnRegistration(int userId, int contextId) throws OXException {
+        boolean defaultValue = false;
+
+        ConfigViewFactory configViewFactory = services.getOptionalService(ConfigViewFactory.class);
+        if (configViewFactory == null) {
+            return defaultValue;
+        }
+
+        return ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.push.rescheduleOnRegistration", defaultValue, configViewFactory.getView(userId, contextId));
     }
 
     @Override

@@ -70,7 +70,7 @@ import com.openexchange.authentication.Authenticated;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
@@ -85,6 +85,7 @@ import com.openexchange.saml.spi.SAMLBackend;
 import com.openexchange.saml.tools.SAMLLoginTools;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.session.SessionDescription;
 import com.openexchange.session.reservation.EnhancedAuthenticated;
 import com.openexchange.session.reservation.Reservation;
 import com.openexchange.session.reservation.SessionReservationService;
@@ -93,6 +94,7 @@ import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.servlet.http.Cookies;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 
@@ -134,29 +136,49 @@ public class SAMLLoginRequestHandler implements LoginRequestHandler {
     private void doSsoLogin(HttpServletRequest req, HttpServletResponse resp, LoginConfiguration conf) throws OXException, IOException {
         String token = req.getParameter(SAMLLoginTools.PARAM_TOKEN);
         if (Strings.isEmpty(token)) {
+            LOG.warn("SAML login requested without session reservation token: {}", token);
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
 
-        SessionReservationService sessionReservationService = services.getService(SessionReservationService.class);
-        Reservation reservation = sessionReservationService.removeReservation(token);
-        if (null == reservation) {
-            resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-            return;
+        Reservation reservation;
+        {
+            SessionReservationService sessionReservationService = services.getServiceSafe(SessionReservationService.class);
+            reservation = sessionReservationService.removeReservation(token);
+            if (null == reservation) {
+                LOG.warn("SAML login requested with invalid or expired session reservation token: {}", token);
+                backend.getExceptionHandler().handleSessionReservationExpired(req, resp, token);
+                return;
+            }
         }
 
-        ContextService contextService = services.getService(ContextService.class);
-        Context context = contextService.getContext(reservation.getContextId());
-        if (!context.isEnabled()) {
-            resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-            return;
+        Context context;
+        try {
+            ContextService contextService = services.getServiceSafe(ContextService.class);
+            context = contextService.getContext(reservation.getContextId());
+            if (!context.isEnabled()) {
+                LOG.info("Declining SAML login for user {} of context {}: Context is disabled.", I(reservation.getUserId()), I(reservation.getContextId()));
+                backend.getExceptionHandler().handleContextDisabled(req, resp, reservation.getContextId());
+                return;
+            }
+        } catch (OXException e) {
+            if (ContextExceptionCodes.UPDATE.equals(e) || ContextExceptionCodes.UPDATE_NEEDED.equals(e)) {
+                LOG.info("Declining SAML login for user {} of context {}: Running or pending update tasks.", I(reservation.getUserId()), I(reservation.getContextId()));
+                backend.getExceptionHandler().handleUpdateTasksRunningOrPending(req, resp, reservation.getContextId());
+                return;
+            }
+            throw e;
         }
 
-        UserService userService = services.getService(UserService.class);
-        User user = userService.getUser(reservation.getUserId(), context);
-        if (!user.isMailEnabled()) {
-            resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-            return;
+        User user;
+        {
+            UserService userService = services.getServiceSafe(UserService.class);
+            user = userService.getUser(reservation.getUserId(), context);
+            if (!user.isMailEnabled()) {
+                LOG.info("Declining SAML login for user {} of context {}: User is disabled.", I(reservation.getUserId()), I(reservation.getContextId()));
+                backend.getExceptionHandler().handleUserDisabled(req, resp, reservation.getUserId(), reservation.getContextId());
+                return;
+            }
         }
 
         {
@@ -177,13 +199,8 @@ public class SAMLLoginRequestHandler implements LoginRequestHandler {
             }
         }
 
-        // If SAML autologin is enabled we need to set another cookie
-        final String samlCookieValue;
-        if (backend.getConfig().isAutoLoginEnabled()) {
-            samlCookieValue = UUIDs.getUnformattedString(UUID.randomUUID());
-        } else {
-            samlCookieValue = null;
-        }
+        // open-xchange-saml-<hash> cookie Value to lookup related session
+        String samlCookieValue = UUIDs.getUnformattedString(UUID.randomUUID());
 
         // Do the login
         LoginResult result = login(req, context, user, reservation.getState(), conf, samlCookieValue);
@@ -201,20 +218,9 @@ public class SAMLLoginRequestHandler implements LoginRequestHandler {
         SessionUtility.rememberSession(req, new ServerSessionAdapter(session));
         LoginServlet.writeSecretCookie(req, resp, session, session.getHash(), req.isSecure(), req.getServerName(), conf);
 
-        // Set auto login cookie if desired
-        if (samlCookieValue != null) {
-            boolean isHttps = Tools.considerSecure(req);
-            String hostName = SAMLLoginTools.getHostName(services.getOptionalService(HostnameService.class), req);
-            Cookie samlSessionCookie = new Cookie(SAMLLoginTools.AUTO_LOGIN_COOKIE_PREFIX + session.getHash(), samlCookieValue);
-            samlSessionCookie.setPath("/");
-            samlSessionCookie.setSecure(isHttps);
-            samlSessionCookie.setMaxAge(-1);
-            String cookieDomain = Cookies.getDomainValue(hostName);
-            if (cookieDomain != null) {
-                samlSessionCookie.setDomain(cookieDomain);
-            }
-            resp.addCookie(samlSessionCookie);
-        }
+        // Set SAML cookie
+        Cookie samlSessionCookie = configureSAMLCookie(req, samlCookieValue, session);
+        resp.addCookie(samlSessionCookie);
 
         // Send redirect
         String uiWebPath = req.getParameter(SAMLLoginTools.PARAM_LOGIN_PATH);
@@ -222,7 +228,22 @@ public class SAMLLoginRequestHandler implements LoginRequestHandler {
             uiWebPath = conf.getUiWebPath();
         }
 
-        resp.sendRedirect(SAMLLoginTools.buildFrontendRedirectLocation(session, uiWebPath));
+        String uriFragment = req.getParameter(SAMLLoginTools.PARAM_URI_FRAGMENT);
+        resp.sendRedirect(SAMLLoginTools.buildFrontendRedirectLocation(session, uiWebPath, uriFragment));
+    }
+
+    private Cookie configureSAMLCookie(HttpServletRequest req, String samlCookieValue, Session session) {
+        boolean isHttps = Tools.considerSecure(req);
+        String hostName = SAMLLoginTools.getHostName(services.getOptionalService(HostnameService.class), req);
+        Cookie samlSessionCookie = new Cookie(SAMLLoginTools.AUTO_LOGIN_COOKIE_PREFIX + session.getHash(), samlCookieValue);
+        samlSessionCookie.setPath("/");
+        samlSessionCookie.setSecure(isHttps);
+        samlSessionCookie.setMaxAge(-1);
+        String cookieDomain = Cookies.getDomainValue(hostName);
+        if (cookieDomain != null) {
+            samlSessionCookie.setDomain(cookieDomain);
+        }
+        return samlSessionCookie;
     }
 
     private LoginResult login(HttpServletRequest httpRequest, final Context context, final User user, final Map<String, String> optState, LoginConfiguration loginConfiguration, final String samlCookieValue) throws OXException {
@@ -256,7 +277,9 @@ public class SAMLLoginRequestHandler implements LoginRequestHandler {
 
                 EnhancedAuthenticated wrapped = new EnhancedAuthenticated(enhanced) {
                     @Override
-                    protected void doEnhanceSession(Session session) {
+                    protected void doEnhanceSession(Session ses) {
+                        SessionDescription session = (SessionDescription) ses;
+                        session.setStaySignedIn(false);
                         session.setParameter(SAMLSessionParameters.AUTHENTICATED, Boolean.TRUE.toString());
                         String subjectID = reservationState.get(SAMLSessionParameters.SUBJECT_ID);
                         if (subjectID != null) {
@@ -338,47 +361,40 @@ public class SAMLLoginRequestHandler implements LoginRequestHandler {
     }
 
     private String tryAutoLogin(HttpServletRequest httpRequest, HttpServletResponse httpResponse, Reservation reservation, SAMLBackend samlBackend) throws OXException {
-        Cookie samlCookie = null;
         if (samlBackend.getConfig().isAutoLoginEnabled()) {
             LoginConfiguration loginConfiguration = loginConfigurationLookup.getLoginConfiguration();
-            String hash = HashCalculator.getInstance().getHash(httpRequest, LoginTools.parseUserAgent(httpRequest), LoginTools.parseClient(httpRequest, false, loginConfiguration.getDefaultClient()));
-            Map<String, Cookie> cookies = Cookies.cookieMapFor(httpRequest);
-            samlCookie = cookies.get(SAMLLoginTools.AUTO_LOGIN_COOKIE_PREFIX + hash);
-            if (samlCookie != null) {
-                SessiondService sessiondService = services.getService(SessiondService.class);
-                Collection<String> sessions = sessiondService.findSessions(SessionFilter.create("(" + SAMLSessionParameters.SESSION_COOKIE + "=" + samlCookie.getValue() + ")"));
-                if (sessions.size() > 0) {
-                    Session session = sessiondService.getSession(sessions.iterator().next());
-                    if (session == null) {
-                        LOG.debug("Found no session for SAML auto-login cookie '{}' with value '{}'", samlCookie.getName(), samlCookie.getValue());
-                    } else {
-                        try {
-                            LOG.debug("Found session '{}' for SAML auto-login cookie '{}' with value '{}'", session.getSessionID(), samlCookie.getName(), samlCookie.getValue());
-                            SAMLLoginTools.validateSession(httpRequest, session, hash, loginConfiguration);
-                            // compare against authInfo
-                            if (session.getContextId() == reservation.getContextId() && session.getUserId() == reservation.getUserId()) {
-                                String uiWebPath = httpRequest.getParameter(SAMLLoginTools.PARAM_LOGIN_PATH);
-                                if (Strings.isEmpty(uiWebPath)) {
-                                    uiWebPath = loginConfiguration.getUiWebPath();
-                                }
-                                return SAMLLoginTools.buildAbsoluteFrontendRedirectLocation(httpRequest, session, uiWebPath, services.getOptionalService(HostnameService.class));
-                            }
-                            LOG.debug("Session in SAML auto-login cookie is different to authInfo user and context");
-                        } catch (OXException e) {
-                            LOG.debug("Ignoring SAML auto-login attempt due to failed IP or secret check", e);
-                        }
-                    }
-                } else {
-                    LOG.debug("Found no session for SAML auto-login cookie '{}' with value '{}'", samlCookie.getName(), samlCookie.getValue());
-                }
+            Cookie samlCookie = SAMLLoginTools.getSAMLCookie(httpRequest, loginConfiguration);
+            if (samlCookie == null) {
+                return null;
             }
-        }
 
-        if (samlCookie != null) {
-            // cookie exists but no according session was found => remove it
-            Cookie toRemove = (Cookie) samlCookie.clone();
-            toRemove.setMaxAge(0);
-            httpResponse.addCookie(toRemove);
+            Session session = SAMLLoginTools.getLocalSessionForSAMLCookie(samlCookie, services.getService(SessiondService.class));
+            if (session == null) {
+                // cookie exists but no according session was found => remove it
+                Cookie toRemove = (Cookie) samlCookie.clone();
+                toRemove.setMaxAge(0);
+                httpResponse.addCookie(toRemove);
+
+                LOG.debug("Found no session for SAML auto-login cookie '{}' with value '{}'", samlCookie.getName(), samlCookie.getValue());
+                return null;
+            }
+
+            try {
+                LOG.debug("Found session '{}' for SAML auto-login cookie '{}' with value '{}'", session.getSessionID(), samlCookie.getName(), samlCookie.getValue());
+                String hash = HashCalculator.getInstance().getHash(httpRequest, LoginTools.parseUserAgent(httpRequest), LoginTools.parseClient(httpRequest, false, loginConfiguration.getDefaultClient()));
+                SAMLLoginTools.validateSession(httpRequest, session, hash, loginConfiguration);
+                // compare against authInfo
+                if (session.getContextId() == reservation.getContextId() && session.getUserId() == reservation.getUserId()) {
+                    String uiWebPath = httpRequest.getParameter(SAMLLoginTools.PARAM_LOGIN_PATH);
+                    if (Strings.isEmpty(uiWebPath)) {
+                        uiWebPath = loginConfiguration.getUiWebPath();
+                    }
+                    return SAMLLoginTools.buildAbsoluteFrontendRedirectLocation(httpRequest, session, uiWebPath, services.getOptionalService(HostnameService.class));
+                }
+                LOG.debug("Session in SAML auto-login cookie is different to authInfo user and context");
+            } catch (OXException e) {
+                LOG.debug("Ignoring SAML auto-login attempt due to failed IP or secret check", e);
+            }
         }
 
         return null;

@@ -10,6 +10,7 @@ JAVA_OPTS_MEM="-XX:MaxHeapSize=512M -XX:MaxPermSize=256M -XX:+UseTLAB"
 JAVA_OPTS_NET="-Dsun.net.inetaddr.ttl=3600 -Dnetworkaddress.cache.ttl=3600 -Dnetworkaddress.cache.negative.ttl=10"
 JAVA_OPTS_OSGI="-Dosgi.compatibility.bootdelegation=false"
 JAVA_OPTS_SERVER="-server -Djava.awt.headless=true"
+#JAVA_OPTS_SECURITY="-Dorg.osgi.framework.security=osgi -Djava.security.policy=/opt/open-xchange/etc/all.policy -Dopenexchange.security.policy=/opt/open-xchange/etc/security/policies.policy -Duser.dir=/opt/open-xchange/bundles -Djna.platform.library.path=/usr/lib/x86_64-linux-gnu:/usr/lib64"
 
 JAVA_OPTS_OTHER=""
 

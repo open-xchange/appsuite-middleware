@@ -49,6 +49,7 @@
 
 package com.openexchange.webdav.action;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -158,9 +159,9 @@ public class WebdavLogAction extends AbstractAction {
             }
         } catch (WebdavProtocolException e) {
             if (HttpServletResponse.SC_INTERNAL_SERVER_ERROR == e.getStatus()) {
-                LOG.error("HTTP {} ({}) for request {}", e.getStatus(), e.getMessage(), request.getUrl(), e);
+                LOG.error("HTTP {} ({}) for request {}", I(e.getStatus()), e.getMessage(), request.getUrl(), e);
             } else {
-                LOG.debug("HTTP {} ({}) for request {}", e.getStatus(), e.getMessage(), request.getUrl(), e);
+                LOG.debug("HTTP {} ({}) for request {}", I(e.getStatus()), e.getMessage(), request.getUrl(), e);
             }
             throw e;
         } catch (RuntimeException e) {
@@ -180,7 +181,7 @@ public class WebdavLogAction extends AbstractAction {
                 b.append(lineSeparator);
             }
             LOG.trace(b.toString(), lineSeparator);
-        } catch (final IOException x) {
+        } catch (IOException x) {
             LOG.debug("", x);
         } finally {
             Streams.close(reader);

@@ -93,7 +93,7 @@ public final class ServerUserSettingLoader  {
     public Map<String,Object> loadForSafe(final int userId, final int contextId) {
         try {
             return loadFor(userId, contextId);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             final Logger logger = org.slf4j.LoggerFactory.getLogger(ServerUserSettingLoader.class);
             logger.error("", e);
             return null;
@@ -182,7 +182,7 @@ public final class ServerUserSettingLoader  {
             } while (rs.next());
 
             return newMap;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UserConfigurationCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);

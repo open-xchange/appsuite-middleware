@@ -131,7 +131,7 @@ public class DelegationPreviewService implements Delegating, SimpleRegistryListe
                 throw PreviewExceptionCodes.NO_PREVIEW_SERVICE2.create(null == mimeType ? "" :  mimeType, null == name ? "<unknown>" : name);
             }
             return previewService.getPreviewFor(arg, output, session, pages);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw PreviewExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
             Streams.close(is);

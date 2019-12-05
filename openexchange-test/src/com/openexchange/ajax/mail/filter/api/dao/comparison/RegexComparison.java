@@ -67,32 +67,17 @@ public class RegexComparison extends AbstractComparison implements Comparison<Re
         super(MatchType.regex);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.mail.filter.api.dao.comparison.Comparison#getMatchType()
-     */
     @Override
     public MatchType getMatchType() {
         return MatchType.regex;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.mail.filter.api.dao.comparison.Comparison#setArgument(com.openexchange.ajax.mail.filter.api.dao.comparison.argument.ComparisonArgument, java.lang.Object)
-     */
     @SuppressWarnings("unused")
     @Override
     public void setArgument(RegexComparisonArgument argument, Object value) {
         throw new UnsupportedOperationException("The '" + MatchType.regex + "' comparison type can not have any arguments");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.mail.filter.api.dao.comparison.Comparison#getArgument(com.openexchange.ajax.mail.filter.api.dao.comparison.argument.ComparisonArgument)
-     */
     @SuppressWarnings("unused")
     @Override
     public Object getArgument(RegexComparisonArgument argument) {

@@ -51,8 +51,6 @@ package com.openexchange.saml.http;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Collection;
-import java.util.Map;
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -67,16 +65,13 @@ import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
 import com.openexchange.saml.SAMLConfig;
-import com.openexchange.saml.SAMLSessionParameters;
 import com.openexchange.saml.SAMLWebSSOProvider;
 import com.openexchange.saml.impl.LoginConfigurationLookup;
 import com.openexchange.saml.spi.ExceptionHandler;
 import com.openexchange.saml.tools.SAMLLoginTools;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
-import com.openexchange.sessiond.SessionFilter;
 import com.openexchange.sessiond.SessiondService;
-import com.openexchange.tools.servlet.http.Cookies;
 import com.openexchange.tools.servlet.http.Tools;
 
 
@@ -181,43 +176,36 @@ public class InitService extends SAMLServlet {
     }
 
     private String tryAutoLogin(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws OXException {
-        Cookie samlCookie = null;
         if (config.isAutoLoginEnabled()) {
             LoginConfiguration loginConfiguration = loginConfigurationLookup.getLoginConfiguration();
-            String hash = HashCalculator.getInstance().getHash(httpRequest, LoginTools.parseUserAgent(httpRequest), LoginTools.parseClient(httpRequest, false, loginConfiguration.getDefaultClient()));
-            Map<String, Cookie> cookies = Cookies.cookieMapFor(httpRequest);
-            samlCookie = cookies.get(SAMLLoginTools.AUTO_LOGIN_COOKIE_PREFIX + hash);
-            if (samlCookie != null) {
-                SessiondService sessiondService = services.getService(SessiondService.class);
-                Collection<String> sessions = sessiondService.findSessions(SessionFilter.create("(" + SAMLSessionParameters.SESSION_COOKIE + "=" + samlCookie.getValue() + ")"));
-                if (sessions.size() > 0) {
-                    Session session = sessiondService.getSession(sessions.iterator().next());
-                    if (session == null) {
-                        LOG.debug("Found no session for SAML auto-login cookie '{}' with value '{}'", samlCookie.getName(), samlCookie.getValue());
-                    } else {
-                        try {
-                            LOG.debug("Found session '{}' for SAML auto-login cookie '{}' with value '{}'", session.getSessionID(), samlCookie.getName(), samlCookie.getValue());
-                            SAMLLoginTools.validateSession(httpRequest, session, hash, loginConfiguration);
-                            String uiWebPath = httpRequest.getParameter(SAMLLoginTools.PARAM_LOGIN_PATH);
-                            if (Strings.isEmpty(uiWebPath)) {
-                                uiWebPath = loginConfiguration.getUiWebPath();
-                            }
-                            return SAMLLoginTools.buildAbsoluteFrontendRedirectLocation(httpRequest, session, uiWebPath, services.getOptionalService(HostnameService.class));
-                        } catch (OXException e) {
-                            LOG.debug("Ignoring SAML auto-login attempt due to failed IP or secret check", e);
-                        }
-                    }
-                } else {
-                    LOG.debug("Found no session for SAML auto-login cookie '{}' with value '{}'", samlCookie.getName(), samlCookie.getValue());
-                }
+            Cookie samlCookie = SAMLLoginTools.getSAMLCookie(httpRequest, loginConfiguration);
+            if (samlCookie == null) {
+                return null;
             }
-        }
 
-        if (samlCookie != null) {
-            // cookie exists but no according session was found => remove it
-            Cookie toRemove = (Cookie) samlCookie.clone();
-            toRemove.setMaxAge(0);
-            httpResponse.addCookie(toRemove);
+            Session session = SAMLLoginTools.getLocalSessionForSAMLCookie(samlCookie, services.getService(SessiondService.class));
+            if (session == null) {
+                // cookie exists but no according session was found => remove it
+                Cookie toRemove = (Cookie) samlCookie.clone();
+                toRemove.setMaxAge(0);
+                httpResponse.addCookie(toRemove);
+
+                LOG.debug("Found no session for SAML auto-login cookie '{}' with value '{}'", samlCookie.getName(), samlCookie.getValue());
+                return null;
+            }
+
+            try {
+                LOG.debug("Found session '{}' for SAML auto-login cookie '{}' with value '{}'", session.getSessionID(), samlCookie.getName(), samlCookie.getValue());
+                String hash = HashCalculator.getInstance().getHash(httpRequest, LoginTools.parseUserAgent(httpRequest), LoginTools.parseClient(httpRequest, false, loginConfiguration.getDefaultClient()));
+                SAMLLoginTools.validateSession(httpRequest, session, hash, loginConfiguration);
+                String uiWebPath = httpRequest.getParameter(SAMLLoginTools.PARAM_LOGIN_PATH);
+                if (Strings.isEmpty(uiWebPath)) {
+                    uiWebPath = loginConfiguration.getUiWebPath();
+                }
+                return SAMLLoginTools.buildAbsoluteFrontendRedirectLocation(httpRequest, session, uiWebPath, services.getOptionalService(HostnameService.class));
+            } catch (OXException e) {
+                LOG.debug("Ignoring SAML auto-login attempt due to failed IP or secret check", e);
+            }
         }
 
         return null;

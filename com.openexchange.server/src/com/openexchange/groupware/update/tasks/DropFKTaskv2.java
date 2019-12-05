@@ -108,9 +108,9 @@ public final class DropFKTaskv2 extends UpdateTaskAdapter {
 
             con.commit();
             rollback = 2;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
             if (rollback > 0) {
@@ -133,11 +133,17 @@ public final class DropFKTaskv2 extends UpdateTaskAdapter {
         // Check for >>CONSTRAINT `pop3_storage_ids_ibfk_2` FOREIGN KEY (`cid`, `user`, `id`) REFERENCES `user_mail_account` (`cid`, `user`, `id`)<<
         dropForeignKeySafe("pop3_storage_ids_ibfk_2", "pop3_storage_ids", con);
 
-        // Check "uid" column in prg_dates
-        enlargeVarcharColumn("uid", 1024, "prg_dates", con);
+        try {
+            if (Databases.tablesExist(con, "prg_dates", "del_dates")) {
+                // Check "uid" column in prg_dates
+                enlargeVarcharColumn("uid", 1024, "prg_dates", con);
 
-        // Check "uid" column in del_dates
-        enlargeVarcharColumn("uid", 1024, "del_dates", con);
+                // Check "uid" column in del_dates
+                enlargeVarcharColumn("uid", 1024, "del_dates", con);
+            }
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        }
     }
 
     private boolean enlargeVarcharColumn(final String colName, final int newSize, final String tableName, final Connection con) throws OXException {
@@ -163,9 +169,9 @@ public final class DropFKTaskv2 extends UpdateTaskAdapter {
                 com.openexchange.tools.update.Tools.modifyColumns(con, tableName, new Column(colName, "VARCHAR("+newSize+")"));
                 return true;
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rsColumns);
@@ -198,7 +204,7 @@ public final class DropFKTaskv2 extends UpdateTaskAdapter {
             } finally {
                 Databases.closeSQLStuff(null, stmt);
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             // Ignore
         }
         return modified;

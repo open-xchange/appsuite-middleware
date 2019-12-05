@@ -77,61 +77,31 @@ public class UserCanManageOwnCertificatesJSLobEntry implements JSlobEntry {
         this.userAwareSSLConfigurationService = userAwareSSLConfigurationService;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.jslob.JSlobEntry#getKey()
-     */
     @Override
     public String getKey() {
         return JSlobKeys.CORE;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.jslob.JSlobEntry#getPath()
-     */
     @Override
     public String getPath() {
         return LOB_PATH;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.jslob.JSlobEntry#isWritable(com.openexchange.session.Session)
-     */
     @Override
     public boolean isWritable(Session session) throws OXException {
         return false;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.jslob.JSlobEntry#getValue(com.openexchange.session.Session)
-     */
     @Override
     public Object getValue(Session session) throws OXException {
         return B(userAwareSSLConfigurationService.canManageCertificates(session.getUserId(), session.getContextId()));
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.jslob.JSlobEntry#setValue(java.lang.Object, com.openexchange.session.Session)
-     */
     @Override
     public void setValue(Object value, Session sessiond) throws OXException {
         // no-op, read-only
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.jslob.JSlobEntry#metadata(com.openexchange.session.Session)
-     */
     @Override
     public Map<String, Object> metadata(Session session) throws OXException {
         // no-op

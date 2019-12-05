@@ -149,8 +149,9 @@ public class QuotedPrintableCodec implements BinaryEncoder, BinaryDecoder, Strin
         if (bytes == null) {
             return null;
         }
-        if (printable == null) {
-            printable = PRINTABLE_CHARS;
+        BitSet bitSet = printable;
+        if (bitSet == null) {
+            bitSet = PRINTABLE_CHARS;
         }
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         for (byte c : bytes) {
@@ -158,7 +159,7 @@ public class QuotedPrintableCodec implements BinaryEncoder, BinaryDecoder, Strin
             if (b < 0) {
                 b = 256 + b;
             }
-            if (printable.get(b)) {
+            if (bitSet.get(b)) {
                 buffer.write(b);
             } else {
                 encodeQuotedPrintable(b, buffer);

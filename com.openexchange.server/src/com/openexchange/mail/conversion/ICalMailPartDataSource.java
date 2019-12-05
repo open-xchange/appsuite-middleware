@@ -162,9 +162,9 @@ public final class ICalMailPartDataSource extends MailPartDataSource {
         MailAccess<?, ?> mailAccess = null;
         try {
             mailAccess = MailAccess.getInstance(session, accountId);
-            if(serviceLookup != null) {
+            if (serviceLookup != null) {
                 CryptographicAwareMailAccessFactory cryptoMailAccessFactory = serviceLookup.getOptionalService(CryptographicAwareMailAccessFactory.class);
-                if(cryptoMailAccessFactory != null) {
+                if (cryptoMailAccessFactory != null) {
                     mailAccess = cryptoMailAccessFactory.createAccess(
                         (MailAccess<IMailFolderStorage, IMailMessageStorage>) mailAccess,
                         session,

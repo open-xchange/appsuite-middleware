@@ -49,22 +49,7 @@
 
 package com.openexchange.chronos.impl.performer;
 
-import static com.openexchange.chronos.common.CalendarUtils.add;
-import static com.openexchange.chronos.common.CalendarUtils.calculateEnd;
-import static com.openexchange.chronos.common.CalendarUtils.calculateStart;
-import static com.openexchange.chronos.common.CalendarUtils.find;
-import static com.openexchange.chronos.common.CalendarUtils.getFields;
-import static com.openexchange.chronos.common.CalendarUtils.isAttendee;
-import static com.openexchange.chronos.common.CalendarUtils.isFloating;
-import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
-import static com.openexchange.chronos.common.CalendarUtils.isInRange;
-import static com.openexchange.chronos.common.CalendarUtils.isInternal;
-import static com.openexchange.chronos.common.CalendarUtils.isOpaqueTransparency;
-import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
-import static com.openexchange.chronos.common.CalendarUtils.isPublicClassification;
-import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
-import static com.openexchange.chronos.common.CalendarUtils.matches;
-import static com.openexchange.chronos.common.CalendarUtils.truncateTime;
+import static com.openexchange.chronos.common.CalendarUtils.*;
 import static com.openexchange.chronos.impl.Utils.isCheckConflicts;
 import java.util.ArrayList;
 import java.util.Calendar;

@@ -59,7 +59,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.crypto.CryptographicServiceAuthenticationFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.rest.services.annotation.Role;
 import com.openexchange.rest.services.annotation.RoleAllowed;
 import com.openexchange.server.ServiceExceptionCode;
@@ -70,6 +69,7 @@ import com.openexchange.sessiond.SessiondServiceExtended;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.user.User;
 
 /**
  *
@@ -94,24 +94,25 @@ public class SessionRESTService {
     }
 
     /**
-     * Checks if the given session is a guest-session
+     * Checks if the given session is a guest session.
      *
      * @param session The session
-     * @return True, if the session is a guest session, false otherwise
-     * @throws OXException
+     * @return <code>true</code> if the session is a guest session, <code>false</code> otherwise
+     * @throws OXExceptionIf checking for a guest session fails
      */
     private boolean isGuest(Session session) throws OXException {
-        if (session != null) {
+        if (session == null) {
+            return false;
+        }
 
-            if (Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST))) {
-                return true;
-            }
+        if (Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST))) {
+            return true;
+        }
 
-            ServerSession serverSession = ServerSessionAdapter.valueOf(session);
-            if (serverSession != null) {
-                User user = serverSession.getUser();
-                return user != null && user.isGuest();
-            }
+        ServerSession serverSession = ServerSessionAdapter.valueOf(session);
+        if (serverSession != null) {
+            User user = serverSession.getUser();
+            return user != null && user.isGuest();
         }
         return false;
     }

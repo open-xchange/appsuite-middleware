@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.task;
 
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertTrue;
 import java.util.Date;
 import java.util.HashSet;
@@ -123,7 +124,7 @@ public class UpdatesTest extends AbstractTaskTest {
             task.setTitle("UpdatedTask " + (i + 1));
             final InsertResponse insertR = mInsert.getResponse(i);
             task.setObjectID(insertR.getId());
-            expectedUpdatedTaskIds.add(insertR.getId());
+            expectedUpdatedTaskIds.add(I(insertR.getId()));
             task.setParentFolderID(folderId);
             task.setLastModified(insertR.getTimestamp());
             updates[i] = new UpdateRequest(task, timeZone);
@@ -135,7 +136,7 @@ public class UpdatesTest extends AbstractTaskTest {
         for (int i = 0; i < deletes.length; i++) {
             final InsertResponse insertR = mInsert.getResponse(total - (i + 1));
             deletes[i] = new DeleteRequest(folderId, insertR.getId(), insertR.getTimestamp());
-            expectedDeletedTaskIds.add(insertR.getId());
+            expectedDeletedTaskIds.add(I(insertR.getId()));
         }
         client.execute(MultipleRequest.create(deletes));
 

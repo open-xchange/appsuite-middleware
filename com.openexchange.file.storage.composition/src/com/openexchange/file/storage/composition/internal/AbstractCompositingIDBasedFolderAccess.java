@@ -585,7 +585,7 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
             return Collections.emptyMap();
         }
 
-        if(folderAccess instanceof FileStorageRestoringFolderAccess) {
+        if (folderAccess instanceof FileStorageRestoringFolderAccess) {
             Map<String,FolderID[]> sourcePathFolders = getFolderPaths(folderIds, folderAccess);
             Map<String, FileStorageFolder[]> restoreFolderFromTrash = ((FileStorageRestoringFolderAccess) folderAccess).restoreFolderFromTrash(folderIds, defaultDestFolderId);
             Map<String,FolderID[]> targetPathFolders = getFolderPaths(folderIds, folderAccess);

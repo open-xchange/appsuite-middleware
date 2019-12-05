@@ -150,12 +150,12 @@ public final class CheckPermissionOnUpdate extends CheckPermission {
                         if (FolderQueryCacheManager.isInitialized()) {
                             FolderQueryCacheManager.getInstance().invalidateContextQueries(session);
                         }
-                    } catch (final OXException e) {
+                    } catch (OXException e) {
                         LOG.error("", e);
                     }
                 }
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
     }
@@ -176,7 +176,7 @@ public final class CheckPermissionOnUpdate extends CheckPermission {
         return false;
     }
 
-    private void ensureParentVisibility(final int parent, final int entity, final boolean isGroup, final TIntObjectMap<ToDoPermission> map, TIntObjectMap<TIntSet> alreadyCheckedParents) throws OXException, OXException, SQLException {
+    private void ensureParentVisibility(final int parent, final int entity, final boolean isGroup, final TIntObjectMap<ToDoPermission> map, TIntObjectMap<TIntSet> alreadyCheckedParents) throws OXException, SQLException {
         if (parent < FolderObject.MIN_FOLDER_ID) {
             /*
              * We reached a context-created folder

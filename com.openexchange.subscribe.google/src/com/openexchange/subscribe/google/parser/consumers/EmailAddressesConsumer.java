@@ -72,11 +72,6 @@ public class EmailAddressesConsumer implements BiConsumer<ContactEntry, Contact>
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.util.function.BiConsumer#accept(java.lang.Object, java.lang.Object)
-     */
     @Override
     public void accept(ContactEntry t, Contact u) {
         if (!t.hasEmailAddresses()) {

@@ -49,12 +49,15 @@
 
 package com.openexchange.imap.util;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 import javax.mail.MessagingException;
 import javax.mail.Store;
 import com.sun.mail.iap.Argument;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
+import com.sun.mail.imap.protocol.BASE64MailboxEncoder;
+import com.sun.mail.imap.protocol.IMAPProtocol;
 
 /**
  * {@link ImapUtility} - IMAP utility class.
@@ -222,6 +225,24 @@ public final class ImapUtility {
 
     private static String surroundWithSingleQuotes(String imapCommand) {
         return new StringBuilder(imapCommand.length() + 2).append('\'').append(imapCommand).append('\'').toString();
+    }
+    
+    /**
+     * Encodes a full folder name. When encoding, capabilities of the protocol are taken into consideration.
+     * <p>
+     * If the protocol supports <code>UTF8</code> encoded names, folder name will be added as <code>UTF8</code>.
+     * If not the folder name will be encoded as per RFC2060, with <code>Base64</code>
+     *
+     * @param fullFolderName The full name of the folder to encode
+     * @param protocol The {@link IMAPProtocol} to get capabilities from
+     * @return The encoded folder name written to an {@link Argument}
+     * @see com.sun.mail.imap.protocol.IMAPProtocol#writeMailboxName(Argument, String)
+     */
+    public static Argument encodeFolderName(String fullFolderName, IMAPProtocol protocol) {
+        if (null != protocol && protocol.supportsUtf8()) {
+            return new Argument().writeString(fullFolderName, StandardCharsets.UTF_8);
+        }
+        return new Argument().writeString(BASE64MailboxEncoder.encode(fullFolderName));
     }
 
 }

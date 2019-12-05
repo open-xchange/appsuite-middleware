@@ -53,6 +53,7 @@ import java.rmi.Remote;
 import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import org.eclipse.osgi.framework.console.CommandProvider;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.ManagedService;
@@ -62,9 +63,9 @@ import com.openexchange.config.Reloadable;
 import com.openexchange.config.cascade.ConfigProviderService;
 import com.openexchange.config.internal.ConfigProviderServiceImpl;
 import com.openexchange.config.internal.ConfigurationImpl;
-import com.openexchange.config.internal.filewatcher.FileWatcher;
 import com.openexchange.config.mbean.ConfigReloadMBean;
 import com.openexchange.config.mbean.ConfigReloadMBeanImpl;
+import com.openexchange.config.osgi.console.ReloadConfigurationCommandProvider;
 import com.openexchange.config.rmi.RemoteConfigurationService;
 import com.openexchange.config.rmi.impl.RemoteConfigurationServiceImpl;
 import com.openexchange.management.ManagementService;
@@ -134,6 +135,9 @@ public final class ConfigActivator extends HousekeepingActivator {
             props.put("RMIName", RemoteConfigurationService.RMI_NAME);
             registerService(Remote.class, new RemoteConfigurationServiceImpl(configService), props);
 
+            // Register shell command
+            registerService(CommandProvider.class, new ReloadConfigurationCommandProvider(configService));
+
             // Add & open service trackers
             track(Reloadable.class, new ReloadableServiceTracker(context, configService));
             track(ForcedReloadable.class, new ForcedReloadableServiceTracker(context, configService));
@@ -159,7 +163,6 @@ public final class ConfigActivator extends HousekeepingActivator {
             }
 
             super.stopBundle();
-            FileWatcher.dropTimer();
             ConfigurationImpl.setConfigReference(null);
         } catch (Throwable t) {
             logger.error("", t);

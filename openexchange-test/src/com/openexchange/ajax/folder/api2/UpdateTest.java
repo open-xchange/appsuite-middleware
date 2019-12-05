@@ -138,7 +138,7 @@ public class UpdateTest extends AbstractAJAXSession {
                 try {
                     final DeleteRequest deleteRequest = new DeleteRequest(EnumAPI.OUTLOOK, fo);
                     getClient().execute(deleteRequest);
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }

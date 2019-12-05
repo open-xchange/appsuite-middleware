@@ -280,22 +280,6 @@ properties:
       packageName: open-xchange-core
       tags: ["Share", "Session"]
 
-    - key: com.openexchange.share.autoLogin
-      description: |
-        Enables/disables the auto-login functionality for guest sessions. A value of 
-        <code>true</code> will instruct the client to store an additional cookie, which is then 
-        considered to lookup an existing session when the client is reloaded. 
-        Possible values are <code>true</code>, <code>false</code>, or an empty value to 
-        inherit from [[com.openexchange.sessiond.autologin]].
-      defaultValue: 
-      version: 
-      reloadable: true
-      configcascadeAware: false
-      related: 
-      file: share.properties
-      packageName: open-xchange-core
-      tags: ["Share"]
-
     - key: com.openexchange.share.cookieTTL
       description: |
         Configures the target time-to-live value for the session, secret and share 

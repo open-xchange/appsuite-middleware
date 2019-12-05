@@ -162,14 +162,14 @@ public class MimeFilter {
                 mimeMessage.setHeader(MESSAGE_ID, messageId);
             }
             return mimeMessage;
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
@@ -255,7 +255,7 @@ public class MimeFilter {
     private static String getSubType(final String contentType, final String defaultType) {
         try {
             return new ContentType(contentType).getSubType();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             return defaultType;
         }
     }

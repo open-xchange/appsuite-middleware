@@ -1,0 +1,6 @@
+type: object
+properties:
+  datasource:
+    $ref: '#/components/schemas/ConversionDataSource'
+  datahandler:
+    $ref: '#/components/schemas/ConversionDataHandler'

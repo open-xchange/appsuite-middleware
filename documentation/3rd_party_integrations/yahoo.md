@@ -1,6 +1,6 @@
 ---
 title: Yahoo
-icon: fa-yahoo
+icon: fab fa-yahoo
 tags: 3rd Party, Yahoo, Installation, Configuration, Contacts
 ---
 

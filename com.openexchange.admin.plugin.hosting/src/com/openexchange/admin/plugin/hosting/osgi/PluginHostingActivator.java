@@ -68,7 +68,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.i18n.I18nService;
+import com.openexchange.i18n.I18nServiceRegistry;
 import com.openexchange.java.Strings;
 import com.openexchange.management.ManagementService;
 import com.openexchange.management.osgi.HousekeepingManagementTracker;
@@ -116,12 +116,12 @@ public class PluginHostingActivator extends HousekeepingActivator {
         AdminServiceRegistry.getInstance().addService(ConfigViewFactory.class, configViewFactory);
         track(ThreadPoolService.class, new RegistryServiceTrackerCustomizer<>(context, AdminServiceRegistry.getInstance(), ThreadPoolService.class));
         track(ContextService.class, new RegistryServiceTrackerCustomizer<>(context, AdminServiceRegistry.getInstance(), ContextService.class));
-        track(I18nService.class, new I18nServiceCustomizer(context));
         track(ManagementService.class, new HousekeepingManagementTracker(context, MonitorMBean.MBEAN_NAME, MonitorMBean.MBEAN_DOMAIN, new Monitor()));
         track(PipesAndFiltersService.class, new RegistryServiceTrackerCustomizer<>(context, AdminServiceRegistry.getInstance(), PipesAndFiltersService.class));
         track(CacheService.class, new RegistryServiceTrackerCustomizer<>(context, AdminServiceRegistry.getInstance(), CacheService.class));
         track(DatabaseService.class, new RegistryServiceTrackerCustomizer<>(context, AdminServiceRegistry.getInstance(), DatabaseService.class));
         track(SessiondService.class, new RegistryServiceTrackerCustomizer<>(context, AdminServiceRegistry.getInstance(), SessiondService.class));
+        track(I18nServiceRegistry.class, new RegistryServiceTrackerCustomizer<>(context, AdminServiceRegistry.getInstance(), I18nServiceRegistry.class));
 
         // Register and track
         registerService(OXContextGroupStorageInterface.class, new OXContextGroupMySQLStorage());
@@ -157,7 +157,7 @@ public class PluginHostingActivator extends HousekeepingActivator {
         this.starter = new PluginStarter();
         try {
             this.starter.start(context);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("", e);
             throw e;
         }
@@ -177,4 +177,5 @@ public class PluginHostingActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { ConfigurationService.class, AdminDaemonService.class, ConfigViewFactory.class };
     }
+    
 }

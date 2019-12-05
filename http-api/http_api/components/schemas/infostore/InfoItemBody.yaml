@@ -1,0 +1,8 @@
+type: object
+required:
+  - file
+properties:
+  file:
+    $ref: '#/components/schemas/InfoItemData'
+  notification:
+    $ref: '#/components/schemas/InfoItemBodyNotification'

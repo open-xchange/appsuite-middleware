@@ -112,7 +112,7 @@ public class SubscribeRequest extends AbstractFolderRequest<SubscribeResponse> {
                 jArray.put(jObject);
             }
             return jArray;
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             return new JSONArray();
         }
     }

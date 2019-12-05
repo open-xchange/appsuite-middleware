@@ -64,7 +64,6 @@ import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.Autoboxing;
@@ -89,6 +88,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserPermissionService;
 
@@ -226,6 +226,12 @@ public class ModuleSupportImpl implements ModuleSupport {
                 return true;
             }
             if (FolderExceptionErrorMessage.NOT_FOUND.equals(e)) {
+                return false;
+            }
+            if (FolderExceptionErrorMessage.INVALID_FOLDER_ID.equals(e)) {
+                return false;
+            }
+            if (FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.equals(e)) {
                 return false;
             }
             throw e;

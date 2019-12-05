@@ -61,6 +61,7 @@ import java.util.UUID;
 import org.apache.commons.httpclient.methods.EntityEnclosingMethod;
 import org.apache.commons.httpclient.methods.RequestEntity;
 import org.junit.Test;
+import com.openexchange.dav.Config;
 import com.openexchange.dav.caldav.CalDAVTest;
 
 /**
@@ -74,7 +75,7 @@ public class Bug30359Test extends CalDAVTest {
 
     @Test
     public void testExternalEntities() throws Exception {
-        String uri = getBaseUri() + "/caldav/" + encodeFolderID(getDefaultFolderID()) + "/";
+        String uri = getBaseUri() + Config.getPathPrefix() + "/caldav/" + encodeFolderID(getDefaultFolderID()) + "/";
         EntityEnclosingMethod m = new EntityEnclosingMethod(uri) {
 
             @Override

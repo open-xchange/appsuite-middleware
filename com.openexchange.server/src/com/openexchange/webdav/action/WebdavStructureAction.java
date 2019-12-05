@@ -67,7 +67,7 @@ public abstract class WebdavStructureAction extends AbstractAction {
 
 	// Returns the status for a successful move/copy
 	protected void checkOverwrite(final WebdavRequest req) throws WebdavProtocolException{
-		if(req.getHeader("Overwrite") != null && "F".equals(req.getHeader("Overwrite"))){
+		if (req.getHeader("Overwrite") != null && "F".equals(req.getHeader("Overwrite"))){
 			final LoadingHints loadingHints = new LoadingHints();
 			loadingHints.setUrl(req.getDestinationUrl());
 			loadingHints.setDepth(WebdavCollection.INFINITY);
@@ -76,11 +76,11 @@ public abstract class WebdavStructureAction extends AbstractAction {
 
 			final WebdavResource dest = req.getDestination();
 
-			if(dest==null || !dest.exists()) {
+			if (dest==null || !dest.exists()) {
 				return;
 			}
 
-			if(dest.isCollection()) {
+			if (dest.isCollection()) {
 				final int depth = req.getDepth(WebdavCollection.INFINITY);
 
 				final int sourceUrlLength = req.getUrl().size();
@@ -108,7 +108,7 @@ public abstract class WebdavStructureAction extends AbstractAction {
 	}
 
 	protected void checkSame(final WebdavRequest req) throws WebdavProtocolException {
-		if(req.getUrl().equals(req.getDestinationUrl())) {
+		if (req.getUrl().equals(req.getDestinationUrl())) {
 			throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), HttpServletResponse.SC_FORBIDDEN);
 		}
 	}

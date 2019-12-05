@@ -128,7 +128,7 @@ public final class GETAction extends AbstractConfigAction {
                 } else {
                     try {
                         retval = new JSONObject(singleValue.toString());
-                    } catch (final JSONException e) {
+                    } catch (JSONException e) {
                         retval = singleValue;
                     }
                 }

@@ -235,7 +235,7 @@ public class GroupRequest {
         final List<Field> fields = new LinkedList<Field>();
         for(final int column: columns){
         	final Field field = Group.Field.getByColumnNumber(column);
-        	if(field == Group.Field.MEMBERS){
+        	if (field == Group.Field.MEMBERS){
         		loadMembers = true;
         	}
         	fields.add(field);

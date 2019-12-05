@@ -49,10 +49,12 @@
 
 package com.openexchange.chronos.impl.performer;
 
+import static com.openexchange.chronos.common.CalendarUtils.filterByUid;
 import static com.openexchange.chronos.common.CalendarUtils.getEventID;
 import static com.openexchange.chronos.common.CalendarUtils.getEventsByUID;
 import static com.openexchange.chronos.common.CalendarUtils.getFields;
 import static com.openexchange.chronos.common.CalendarUtils.getObjectIDs;
+import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.common.CalendarUtils.sortSeriesMasterFirst;
 import static com.openexchange.chronos.common.SearchUtils.getSearchTerm;
@@ -64,8 +66,7 @@ import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.READ_ALL_OBJECTS;
 import static com.openexchange.folderstorage.Permission.READ_FOLDER;
 import static com.openexchange.folderstorage.Permission.READ_OWN_OBJECTS;
-import java.util.ArrayList;
-import java.util.Collection;
+import static com.openexchange.java.Autoboxing.i;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -76,6 +77,7 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultEventsResult;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
@@ -117,14 +119,15 @@ public class ResolvePerformer extends AbstractQueryPerformer {
      * Performs the resolve by id operation.
      *
      * @param eventId The identifier of the event to resolve
+     * @param sequence The expected sequence number to match, or <code>null</code> to resolve independently of the event's sequence number
      * @return The resolved event, or <code>null</code> if not found
      */
-    public Event resolveById(String eventId) throws OXException {
+    public Event resolveById(String eventId, Integer sequence) throws OXException {
         /*
          * load event data, check permissions & apply folder identifier
          */
         Event event = storage.getEventStorage().loadEvent(eventId, null);
-        if (null == event) {
+        if (null == event || null != sequence && i(sequence) != event.getSequence()) {
             return null;
         }
         int calendarUserId = session.getUserId();
@@ -161,7 +164,7 @@ public class ResolvePerformer extends AbstractQueryPerformer {
         /*
          * search for an event matching the UID & verify equality via String#equals
          */
-        List<Event> events = findEventsByUid(storage.getEventStorage().searchEvents(searchTerm, null, new EventField[] { EventField.ID, EventField.UID }), uid);
+        List<Event> events = filterByUid(storage.getEventStorage().searchEvents(searchTerm, null, new EventField[] { EventField.ID, EventField.UID }), uid);
         if (1 < events.size()) {
             String conflictingIds = events.stream().map(Event::getId).collect(Collectors.joining(", "));
             Exception cause = new IllegalStateException("UID \"" + uid + "\" resolves to multiple events [" + conflictingIds + ']');
@@ -179,29 +182,57 @@ public class ResolvePerformer extends AbstractQueryPerformer {
      * @return The identifier of the resolved event, or <code>null</code> if not found
      */
     public EventID resolveByUid(String uid, int calendarUserId) throws OXException {
+        return resolveByUid(uid, null, calendarUserId);
+    }
+
+    /**
+     * Resolves an unique identifier and optional recurrence identifier pair within the scope of a specific calendar user, i.e. the unique
+     * identifier is resolved to events residing in the user's <i>personal</i>, as well as <i>public</i> calendar folders.
+     *
+     * @param uid The unique identifier to resolve
+     * @param recurrenceId The recurrence identifier to match, or <code>null</code> to resolve to non-recurring or series master events only
+     * @param calendarUserId The identifier of the calendar user the unique identifier should be resolved for
+     * @return The identifier of the resolved event, or <code>null</code> if not found
+     */
+    public EventID resolveByUid(String uid, RecurrenceId recurrenceId, int calendarUserId) throws OXException {
         /*
          * construct search term & lookup matching events in storage
          */
-        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
-            .addSearchTerm(getSearchTerm(EventField.UID, SingleOperation.EQUALS, uid))
-            .addSearchTerm(new CompositeSearchTerm(CompositeOperation.OR)
-                .addSearchTerm(getSearchTerm(EventField.SERIES_ID, SingleOperation.ISNULL))
-                .addSearchTerm(getSearchTerm(EventField.ID, SingleOperation.EQUALS, new ColumnFieldOperand<EventField>(EventField.SERIES_ID)))
-            )
-        ;
-        EventField[] fields = new EventField[] { EventField.ID, EventField.SERIES_ID, EventField.RECURRENCE_ID, EventField.FOLDER_ID, EventField.UID, EventField.CALENDAR_USER };
-        List<Event> events = findEventsByUid(storage.getEventStorage().searchEvents(searchTerm, null, fields), uid);
+        CompositeSearchTerm searchTerm;
+        if (null == recurrenceId) {            
+            searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
+                .addSearchTerm(getSearchTerm(EventField.UID, SingleOperation.EQUALS, uid))
+                .addSearchTerm(new CompositeSearchTerm(CompositeOperation.OR)
+                    .addSearchTerm(getSearchTerm(EventField.SERIES_ID, SingleOperation.ISNULL))
+                    .addSearchTerm(getSearchTerm(EventField.ID, SingleOperation.EQUALS, new ColumnFieldOperand<EventField>(EventField.SERIES_ID)))
+                );
+        } else {
+            searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
+                .addSearchTerm(getSearchTerm(EventField.UID, SingleOperation.EQUALS, uid))
+                .addSearchTerm(new CompositeSearchTerm(CompositeOperation.OR)
+                    .addSearchTerm(new CompositeSearchTerm(CompositeOperation.NOT).addSearchTerm(getSearchTerm(EventField.SERIES_ID, SingleOperation.ISNULL)))
+                    .addSearchTerm(getSearchTerm(EventField.ID, SingleOperation.NOT_EQUALS, new ColumnFieldOperand<EventField>(EventField.SERIES_ID)))
+                );
+        }        
+        EventField[] fields = { EventField.ID, EventField.SERIES_ID, EventField.RECURRENCE_ID, EventField.FOLDER_ID, EventField.UID, EventField.CALENDAR_USER };
+        List<Event> events = filterByUid(storage.getEventStorage().searchEvents(searchTerm, null, fields), uid);
         /*
          * load calendar user's attendee data for found events and resolve to first matching event for this folder's calendar user
          */
         Map<String, Attendee> attendeePerEvent = storage.getAttendeeStorage().loadAttendee(
             getObjectIDs(events), session.getEntityResolver().prepareUserAttendee(calendarUserId), (AttendeeField[]) null);
         for (Event event : events) {
+            /*
+             * match recurrence if specified
+             */
+            if (null != recurrenceId && false == recurrenceId.equals(event.getRecurrenceId()) || null == recurrenceId && isSeriesException(event)) {
+                continue;
+            }
             if (null != event.getFolderId()) {
                 /*
-                 * common folder identifier is assigned, consider 'resolved' in public in private folder
+                 * common folder identifier is assigned, consider 'resolved' in non-shared folder
                  */
-                CalendarFolder folder = Utils.getFolder(session, event.getFolderId(), false);
+                CalendarFolder folder = getFolder(session, event.getFolderId(), false);
                 if (false == SharedType.getInstance().equals(folder.getType())) {
                     return getEventID(event);
                 }
@@ -353,18 +384,6 @@ public class ResolvePerformer extends AbstractQueryPerformer {
         } catch (OXException e) {
             return new DefaultEventsResult(e);
         }
-    }
-
-    private static List<Event> findEventsByUid(Collection<Event> events, String uid) {
-        List<Event> matchingEvents = new ArrayList<Event>();
-        if (null != events) {
-            for (Event event : events) {
-                if (uid.equals(event.getUid())) {
-                    matchingEvents.add(event);
-                }
-            }
-        }
-        return matchingEvents;
     }
 
 }

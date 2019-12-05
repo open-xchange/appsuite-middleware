@@ -91,7 +91,7 @@ final class Sanitizer {
         public boolean execute(final int accountId) {
             try {
                 storageService.invalidateMailAccount(accountId, user, contextId);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 // Swallow
                 org.slf4j.LoggerFactory.getLogger(Sanitizer.class).error("", e);
             }
@@ -122,7 +122,7 @@ final class Sanitizer {
                 stmt.setInt(4, accountId);
                 stmt.addBatch();
                 return true;
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 throw new IllegalStateException(e);
             }
         }
@@ -160,7 +160,7 @@ final class Sanitizer {
         try {
             con = Database.get(contextId, true);
             con.setAutoCommit(false);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         }
         /*
@@ -208,17 +208,17 @@ final class Sanitizer {
              * Commit possible changes
              */
             con.commit();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             Databases.rollback(con);
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (final IllegalStateException e) {
+        } catch (IllegalStateException e) {
             Databases.rollback(con);
             final Throwable cause = e.getCause();
             if (null != cause) {
                 throw MailAccountExceptionCodes.SQL_ERROR.create(cause, cause.getMessage());
             }
             throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             Databases.rollback(con);
             throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {

@@ -82,31 +82,16 @@ public class YahooContactsOAuthAccountAssociation extends AbstractSubscribeOAuth
         super(accountId, userId, contextId, displayName, subscription);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.association.OAuthAccountAssociation#getModule()
-     */
     @Override
     public String getModule() {
         return Module.CONTACTS.getModuleName();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.association.OAuthAccountAssociation#getScopes()
-     */
     @Override
     public List<OAuthScope> getScopes() {
         return Collections.singletonList(YahooOAuthScope.contacts_ro);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.association.AbstractOAuthAccountAssociation#newAccess(com.openexchange.session.Session)
-     */
     @Override
     protected AbstractOAuthAccess newAccess(Session session) throws OXException {
         return new YahooOAuthAccess(session, getOAuthAccountId());

@@ -53,12 +53,87 @@ import java.util.Map;
 import com.google.common.collect.ImmutableMap;
 
 /**
- * {@link ResponseCode} - An enumeration of IMAP response code as outlined in <a href="https://tools.ietf.org/html/rfc5530">RFC 5530</a>.
+ * {@link ResponseCode} - An enumeration of IMAP response code as outlined in
+ * <a href="https://tools.ietf.org/html/rfc3501#section-7.1">RFC 350; section 7.1</a> and
+ * <a href="https://tools.ietf.org/html/rfc5530">RFC 5530</a>.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
 public enum ResponseCode {
+
+    // ----------------------------------------------------- RFC 3501 -----------------------------------------------------------------
+
+    /**
+     * The human-readable text contains a special alert that MUST be
+     * presented to the user in a fashion that calls the user's
+     * attention to the message.
+     */
+    ALERT("ALERT"),
+    /**
+     * Optionally followed by a parenthesized list of charsets.  A
+     * SEARCH failed because the given charset is not supported by
+     * this implementation.  If the optional list of charsets is
+     * given, this lists the charsets that are supported by this
+     * implementation.
+     */
+    BADCHARSET("BADCHARSET"),
+    /**
+     * Followed by a list of capabilities.  This can appear in the
+     * initial OK or PREAUTH response to transmit an initial
+     * capabilities list.  This makes it unnecessary for a client to
+     * send a separate CAPABILITY command if it recognizes this
+     * response.
+     */
+    CAPABILITY("CAPABILITY"),
+    /**
+     * The human-readable text represents an error in parsing the
+     * [RFC-2822] header or [MIME-IMB] headers of a message in the
+     * mailbox.
+     *
+     * @see https://tools.ietf.org/html/rfc2822
+     */
+    PARSE("PARSE"),
+    /**
+     * Followed by a parenthesized list of flags, indicates which of
+     * the known flags the client can change permanently.  Any flags
+     * that are in the FLAGS untagged response, but not the
+     * PERMANENTFLAGS list, can not be set permanently.  If the client
+     * attempts to STORE a flag that is not in the PERMANENTFLAGS
+     * list, the server will either ignore the change or store the
+     * state change for the remainder of the current session only.
+     * The PERMANENTFLAGS list can also include the special flag \*,
+     * which indicates that it is possible to create new keywords by
+     * attempting to store those flags in the mailbox.
+     */
+    PERMANENTFLAGS("PERMANENTFLAGS"),
+    /**
+     * The mailbox is selected read-only, or its access while selected
+     * has changed from read-write to read-only.
+     */
+    READ_ONLY("READ-ONLY"),
+    /**
+     * The mailbox is selected read-write, or its access while
+     * selected has changed from read-only to read-write.
+     */
+    READ_WRITE("READ-WRITE"),
+    /**
+     * Followed by a decimal number, indicates the next unique
+     * identifier value.
+     */
+    UIDNEXT("UIDNEXT"),
+    /**
+     * Followed by a decimal number, indicates the unique identifier
+     * validity value.
+     */
+    UIDVALIDITY("UIDVALIDITY"),
+    /**
+     * Followed by a decimal number, indicates the number of the first
+     * message without the \Seen flag set.
+     */
+    UNSEEN("UNSEEN"),
+
+    // ----------------------------------------------------- RFC 5530 -----------------------------------------------------------------
 
     /**
      * Temporary failure because a subsystem is down. For example, an
@@ -137,7 +212,6 @@ public enum ResponseCode {
      * </pre>
      */
     PRIVACYREQUIRED("PRIVACYREQUIRED"),
-
     /**
      *
      * The user should contact the system administrator or support

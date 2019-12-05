@@ -68,7 +68,6 @@ import com.openexchange.group.Group;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.ObjectPermission;
 import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.CustomizableDelta;
 import com.openexchange.groupware.results.CustomizableTimedResult;
 import com.openexchange.groupware.results.Delta;
@@ -76,6 +75,7 @@ import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.tools.iterator.CustomizableSearchIterator;
 import com.openexchange.tools.iterator.FilteringSearchIterator;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 /**

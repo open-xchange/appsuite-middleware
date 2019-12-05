@@ -148,7 +148,6 @@ import com.openexchange.groupware.container.FolderPathObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.infostore.InfostoreFacades;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
@@ -177,6 +176,7 @@ import com.openexchange.tools.oxfolder.OXFolderSQL;
 import com.openexchange.tools.oxfolder.UpdatedFolderHandler;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.user.User;
 import gnu.trove.ConcurrentTIntObjectHashMap;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
@@ -410,7 +410,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
         final ConnectionMode con;
         try {
             con = optParameter(ConnectionMode.class, PARAM_CONNECTION, params);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.warn("Storage already committed:\n{}", params.getCommittedTrace(), e);
             return;
         }
@@ -422,7 +422,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
             if (WRITEES.contains(con.readWrite)) {
                 try {
                     con.connection.commit();
-                } catch (final SQLException e) {
+                } catch (SQLException e) {
                     throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
                 } finally {
                     Databases.autocommit(con.connection);
@@ -460,9 +460,9 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
              * From backup to working table
              */
             OXFolderSQL.restore(folderId, context, null);
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             throw FolderExceptionErrorMessage.INVALID_FOLDER_ID.create(folderIdentifier);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } finally {
             provider.close();
@@ -593,7 +593,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
                                     continue; // don't inherit anonymous share links
                                 }
                             }
-                            if(permission.getType() == FolderPermissionType.LEGATOR){
+                            if (permission.getType() == FolderPermissionType.LEGATOR){
                                 OCLPermission tmp = permission.deepClone();
                                 tmp.setType(FolderPermissionType.INHERITED);
                                 tmp.setPermissionLegator(String.valueOf(parent.getObjectID()));
@@ -674,7 +674,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
      * @throws OXException
      * @throws OXException
      */
-    private static int getFolderType(int module, final int parentId, final Context ctx, final Connection con) throws OXException, OXException {
+    private static int getFolderType(int module, final int parentId, final Context ctx, final Connection con) throws OXException {
         int type = -1;
         int pid = parentId;
         /*
@@ -791,7 +791,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
                 throw FolderExceptionErrorMessage.NO_DEFAULT_FOLDER.create(contentType, treeId);
             }
             return String.valueOf(folderId);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } finally {
             provider.close();
@@ -944,7 +944,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
                 throw FolderExceptionErrorMessage.CONCURRENT_MODIFICATION.create();
             }
             OXFolderSQL.updateLastModified(folderId, lastModified, storageParameters.getUserId(), con, ctx);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } finally {
             provider.close();
@@ -1133,7 +1133,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
         if (owner != storageParameters.getUserId() && PrivateType.getInstance().equals(folder.getType())) {
             try {
                 return getFolder(treeId, folder.getID(), StorageType.WORKING, storageParameters);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 if (OXFolderExceptionCode.NOT_EXISTS.equals(e) || FolderExceptionErrorMessage.NOT_FOUND.equals(e)) {
                     return getFolder(treeId, folder.getID(), StorageType.BACKUP, storageParameters);
                 }
@@ -1253,7 +1253,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
                 }
             }
             return ret;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
         } finally {
             if (null != provider) {
@@ -1307,7 +1307,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
                             list.add(gab);
                         }
                     }
-                } catch (final RuntimeException e) {
+                } catch (RuntimeException e) {
                     throw OXFolderExceptionCode.RUNTIME_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
                 }
             }
@@ -1523,7 +1523,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
                                 completionService.submit(task);
                                 taskCount++;
                             }
-                        } catch (final OXException e) {
+                        } catch (OXException e) {
                             LOG.error("", e);
                         }
                         for (int i = taskCount; i-- > 0;) {
@@ -1681,7 +1681,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
         final ConnectionMode con;
         try {
             con = optParameter(ConnectionMode.class, PARAM_CONNECTION, params);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             return;
         }
@@ -1739,7 +1739,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
                     if (connectionMode.isWritable()) {
                         try {
                             connectionMode.connection.commit();
-                        } catch (final Exception e) {
+                        } catch (Exception e) {
                             // Ignore
                             Databases.rollback(connectionMode.connection);
                         }
@@ -1791,7 +1791,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
             }
 
             return true;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         }
     }
@@ -2013,7 +2013,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
             return false;
         }
         int parentId = Integer.parseInt(folderParentId);
-        while(parentId > 0) {
+        while (parentId > 0) {
             if (parentId == FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID || parentId == FolderObject.SYSTEM_PUBLIC_FOLDER_ID) {
                 return true;
             }
@@ -2108,7 +2108,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
                 }
             }
             return retval;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } finally {
             provider.close();
@@ -2248,7 +2248,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
         }
         try {
             return clazz.cast(obj);
-        } catch (final ClassCastException e) {
+        } catch (ClassCastException e) {
             throw OXFolderExceptionCode.MISSING_PARAMETER.create(e, name);
         }
     }
@@ -2694,7 +2694,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
                         for (Permission p : lastParentPermissions) {
                             if (p.getEntity() != storageParameters.getUserId()) {
                                 OCLPermission newOCLPermission = newOCLPermissionFor(p);
-                                if(newOCLPermission.getType().equals(FolderPermissionType.LEGATOR)) {
+                                if (newOCLPermission.getType().equals(FolderPermissionType.LEGATOR)) {
                                     // Change LEGATOR permissions to inherited permissions
                                     newOCLPermission.setType(FolderPermissionType.INHERITED);
                                     newOCLPermission.setPermissionLegator(String.valueOf(folderId));
@@ -2719,7 +2719,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
             }
 
             return result;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } finally {
             provider.close();

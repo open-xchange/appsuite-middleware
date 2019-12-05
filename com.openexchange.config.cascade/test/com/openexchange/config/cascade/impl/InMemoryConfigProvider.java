@@ -95,9 +95,9 @@ public class InMemoryConfigProvider implements ConfigProviderService{
 
             private ConcurrentHashMap<String, String> getMetadata() {
                 ConcurrentHashMap<String, String> retval = metadata.get(property);
-                if(retval == null) {
+                if (retval == null) {
                     retval = metadata.putIfAbsent(property, new ConcurrentHashMap<String, String>());
-                    if(retval == null) {
+                    if (retval == null) {
                         retval = metadata.get(property);
                     }
                 }

@@ -230,11 +230,6 @@ public class GroupManager extends AbstractManager {
         groupInterface.delete(context, Group, contextAdminCredentials);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.admin.rmi.manager.AbstractManager#clean(java.lang.Object)
-     */
     @Override
     void clean(Object object) {
         // Nothing to do, the group will be implicitly deleted when the context is deleted.

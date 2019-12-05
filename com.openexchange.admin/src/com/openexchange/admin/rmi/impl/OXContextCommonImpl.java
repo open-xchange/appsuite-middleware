@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.rmi.impl;
 
+import com.openexchange.admin.plugins.ContextDbLookupPluginInterface;
 import com.openexchange.admin.plugins.OXContextPluginInterface;
 import com.openexchange.admin.plugins.PluginException;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -97,9 +98,9 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
                     throw new InvalidDataException("Mandatory fields in context not set: " + ctx.getUnsetMembers());
                 }
             }
-        } catch (final EnforceableDataObjectException e) {
+        } catch (EnforceableDataObjectException e) {
             throw new InvalidDataException(e.getMessage());
-        } catch (final PluginException e) {
+        } catch (PluginException e) {
             throw StorageException.wrapForRMI(e);
         }
 
@@ -107,7 +108,7 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
             if (!admin_user.mandatoryCreateMembersSet()) {
                 throw new InvalidDataException("Mandatory fields in admin user not set: " + admin_user.getUnsetMembers());
             }
-        } catch (final EnforceableDataObjectException e) {
+        } catch (EnforceableDataObjectException e) {
             throw new InvalidDataException(e.getMessage());
         }
 
@@ -123,7 +124,7 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
     protected Context createcommon(final Context ctx, final User admin_user, final Database db, final UserModuleAccess access, final Credentials auth, SchemaSelectStrategy schemaSelectStrategy) throws InvalidCredentialsException, ContextExistsException, InvalidDataException, StorageException {
         try {
             doNullCheck(ctx, admin_user);
-        } catch (final InvalidDataException e1) {
+        } catch (InvalidDataException e1) {
             final InvalidDataException invalidDataException = new InvalidDataException("Context or user not correct");
             LOGGER.error("", invalidDataException);
             throw invalidDataException;
@@ -136,6 +137,7 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
         try {
             final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
             Context ret = ctx;
+            callBeforeDbLookupPluginMethods(new Context[] { ret }, auth);
             if (isAnyPluginLoaded()) {
                 final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
                 if (null != pluginInterfaces) {
@@ -170,14 +172,15 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
             }
 
             final Context retval = createmaincall(ret, admin_user, db, access, auth, schemaSelectStrategy);
+            callAfterDbLookupPluginMethods(new Context[] { retval }, auth);
             if (retval.getName() == null) {
                 retval.setName(String.valueOf(retval.getId()));
             }
             return retval;
-        } catch (final ContextExistsException e) {
+        } catch (ContextExistsException e) {
             LOGGER.error("", e);
             throw e;
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             LOGGER.error("", e);
             throw e;
         } catch (StorageException e) {
@@ -194,4 +197,65 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
         final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
         return null != pluginInterfaces && false == pluginInterfaces.getContextPlugins().getServiceList().isEmpty();
     }
+
+    /**
+     * Execute <i>beforeContextDbLookup</i> method of plugins registered for {@link ContextDbLookupPluginInterface}
+     *
+     * @param ctxs The context's
+     * @param credentials The admin credentials
+     * @throws StorageException When plugin exceptions occurred
+     */
+    protected void callBeforeDbLookupPluginMethods(final Context[] ctxs, final Credentials credentials) throws StorageException {
+        final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+        if (null == pluginInterfaces) {
+            return;
+        }
+        for (final ContextDbLookupPluginInterface dbLookupPlugin : pluginInterfaces.getDBLookupPlugins().getServiceList()) {
+            try {
+                LOGGER.debug("Calling beforeDBLookup for plugin: {}", dbLookupPlugin.getClass().getName());
+                dbLookupPlugin.beforeContextDbLookup(credentials, ctxs);
+            } catch (PluginException e) {
+                LOGGER.error("Error while calling beforeDBLookup of plugin {}", dbLookupPlugin.getClass().getName(), e);
+                throw StorageException.wrapForRMI(e);
+            }
+        }
+    }
+
+    protected void callAfterDbLookupPluginMethods(final Context[] ctxs, final Credentials auth) throws StorageException {
+        final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+        if (null == pluginInterfaces) {
+            return;
+        }
+        for (final ContextDbLookupPluginInterface dbLookupPlugin : pluginInterfaces.getDBLookupPlugins().getServiceList()) {
+            try {
+                LOGGER.debug("Calling afterContextDBLookup for plugin: {}", dbLookupPlugin.getClass().getName());
+                dbLookupPlugin.afterContextDbLookup(auth, ctxs);
+            } catch (PluginException e) {
+                LOGGER.error("Error while calling afterContextDBLookup of plugin {}", dbLookupPlugin.getClass().getName(), e);
+                throw StorageException.wrapForRMI(e);
+            }
+        }
+    }
+
+    protected String callSearchDbLookupPluginMethods(String search_pattern, Credentials auth) throws StorageException {
+        final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+        if (null == pluginInterfaces) {
+            return search_pattern;
+        }
+
+        for (ContextDbLookupPluginInterface dblu : pluginInterfaces.getDBLookupPlugins().getServiceList()) {
+            LOGGER.debug("Calling searchTermDBLookup for plugin: {}", dblu.getClass().getName());
+            try {
+                String new_search_pattern = dblu.searchPatternDbLookup(auth, search_pattern);
+                if (null != new_search_pattern) {
+                    search_pattern = new_search_pattern;
+                }
+            } catch (PluginException e) {
+                LOGGER.error("Error while calling method searchTermDBLookup of plugin {}", dblu.getClass().getName(), e);
+                throw StorageException.wrapForRMI(e);
+            }
+        }
+        return search_pattern;
+    }
+
 }

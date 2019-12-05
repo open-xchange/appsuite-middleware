@@ -64,7 +64,7 @@ public class UpdateAttachmentAction extends AttachmentListQueryAction {
         }
         try {
             doUpdates(getQueryCatalog().getUpdate(), oldAttachments, true);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
         }
     }
@@ -76,7 +76,7 @@ public class UpdateAttachmentAction extends AttachmentListQueryAction {
         }
         try {
             doUpdates(getQueryCatalog().getUpdate(), getAttachments(), true);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
         }
     }

@@ -93,6 +93,8 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.arrays.Arrays;
 import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.user.User;
+import com.openexchange.user.UserExceptionCode;
 import com.openexchange.user.internal.mapping.UserField;
 import com.openexchange.user.internal.mapping.UserMapper;
 import gnu.trove.iterator.TIntIterator;
@@ -136,7 +138,7 @@ public class RdbUserStorage extends UserStorage {
         Connection con = null;
         try {
             con = DBPool.pickup(context);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw LdapExceptionCode.NO_CONNECTION.create(e).setPrefix("USR");
         }
         PreparedStatement stmt = null;
@@ -160,7 +162,7 @@ public class RdbUserStorage extends UserStorage {
         Connection con = null;
         try {
             con = DBPool.pickup(context);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw LdapExceptionCode.NO_CONNECTION.create(e).setPrefix("USR");
         }
         PreparedStatement stmt = null;
@@ -265,7 +267,7 @@ public class RdbUserStorage extends UserStorage {
             writeUserAttributes(con, user.getAttributes(), context, userId);
             writeUserAliases(con, user.getAliases(), context, userId);
             return userId;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
@@ -587,7 +589,7 @@ public class RdbUserStorage extends UserStorage {
                     closeSQLStuff(result, stmt);
                 }
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UserExceptionCode.LOAD_FAILED.create(e, e.getMessage());
         }
         for (final int userId : userIds) {
@@ -687,7 +689,7 @@ public class RdbUserStorage extends UserStorage {
                     closeSQLStuff(result, stmt);
                 }
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
     }
@@ -721,7 +723,7 @@ public class RdbUserStorage extends UserStorage {
                     closeSQLStuff(result, stmt);
                 }
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
     }
@@ -759,7 +761,7 @@ public class RdbUserStorage extends UserStorage {
                     closeSQLStuff(result, stmt);
                 }
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
         for (final UserImpl user : users.valueCollection()) {
@@ -846,7 +848,7 @@ public class RdbUserStorage extends UserStorage {
                 do {
                     try {
                         con = DBPool.pickupWriteable(context);
-                    } catch (final OXException e) {
+                    } catch (OXException e) {
                         throw LdapExceptionCode.NO_CONNECTION.create(e).setPrefix("USR");
                     }
                     condition.resetTransactionRollbackException();
@@ -859,7 +861,7 @@ public class RdbUserStorage extends UserStorage {
 
                         con.commit();
                         rollback = 2;
-                    } catch (final SQLException e) {
+                    } catch (SQLException e) {
                         if (!condition.isFailedTransactionRollback(e)) {
                             throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("USR");
                         }
@@ -1104,9 +1106,9 @@ public class RdbUserStorage extends UserStorage {
         try {
             final String attrName = new StringBuilder("attr_").append(name).toString();
             return getAttribute(context.getContextId(), con, userId, attrName);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("USR");
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw LdapExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage()).setPrefix("USR");
         } finally {
             DBPool.closeReaderSilent(context, con);
@@ -1312,7 +1314,7 @@ public class RdbUserStorage extends UserStorage {
                     while (result.next()) {
                         userIds.add(result.getInt(1));
                     }
-                } catch (final SQLException e) {
+                } catch (SQLException e) {
                     throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("USR");
                 } finally {
                     closeSQLStuff(result, stmt);
@@ -1327,7 +1329,7 @@ public class RdbUserStorage extends UserStorage {
                         while (result.next()) {
                             userIds.add(result.getInt(1));
                         }
-                    } catch (final SQLException e) {
+                    } catch (SQLException e) {
                         throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("USR");
                     } finally {
                         closeSQLStuff(result, stmt);
@@ -1343,7 +1345,7 @@ public class RdbUserStorage extends UserStorage {
                         while (result.next()) {
                             userIds.add(result.getInt(1));
                         }
-                    } catch (final SQLException e) {
+                    } catch (SQLException e) {
                         throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("USR");
                     } finally {
                         closeSQLStuff(result, stmt);
@@ -1395,7 +1397,7 @@ public class RdbUserStorage extends UserStorage {
                 if (result.next()) {
                     userId = result.getInt(1);
                 }
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("USR");
             } finally {
                 closeSQLStuff(result, stmt);
@@ -1423,7 +1425,7 @@ public class RdbUserStorage extends UserStorage {
                 }
                 return user;
             } catch (OXException e) {
-                if (com.openexchange.groupware.ldap.UserExceptionCode.USER_NOT_FOUND.equals(e)) {
+                if (com.openexchange.user.UserExceptionCode.USER_NOT_FOUND.equals(e)) {
                     //FIXME: javadoc claims to return null if not found...
                     throw LdapExceptionCode.NO_USER_BY_MAIL.create(email).setPrefix("USR");
                 }
@@ -1453,7 +1455,7 @@ public class RdbUserStorage extends UserStorage {
                 userIds.add(result.getInt(1));
             }
             return getUser(context, userIds.toArray());
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("USR");
         } finally {
             closeSQLStuff(result, stmt);
@@ -1466,7 +1468,7 @@ public class RdbUserStorage extends UserStorage {
         Connection con = null;
         try {
             con = DBPool.pickup(context);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw LdapExceptionCode.NO_CONNECTION.create(e).setPrefix("USR");
         }
         final String sql = "SELECT id FROM user LEFT JOIN prg_contacts ON (user.cid=prg_contacts.cid AND user.contactId=prg_contacts.intfield01) WHERE cid=? AND changing_date>=?";
@@ -1486,7 +1488,7 @@ public class RdbUserStorage extends UserStorage {
             for (int i = 0; i < users.length; i++) {
                 users[i] = tmp.get(i).intValue();
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("USR");
         } finally {
             closeSQLStuff(result, stmt);
@@ -1503,7 +1505,7 @@ public class RdbUserStorage extends UserStorage {
             try {
                 closeCon = true;
                 con = DBPool.pickup(context);
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 throw UserExceptionCode.NO_CONNECTION.create(e);
             }
         }
@@ -1526,7 +1528,7 @@ public class RdbUserStorage extends UserStorage {
                 closeCon = true;
                 databaseService = ServerServiceRegistry.getServize(DatabaseService.class, true);
                 con = databaseService.getReadOnly(contextID);
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 throw UserExceptionCode.NO_CONNECTION.create(e);
             }
         }
@@ -1566,7 +1568,7 @@ public class RdbUserStorage extends UserStorage {
                 tmp.add(result.getInt(1));
             }
             users = tmp.toArray();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
@@ -1579,7 +1581,7 @@ public class RdbUserStorage extends UserStorage {
         Connection con = null;
         try {
             con = DBPool.pickup(context);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw UserExceptionCode.NO_CONNECTION.create(e);
         }
         final int[] users;
@@ -1600,7 +1602,7 @@ public class RdbUserStorage extends UserStorage {
                 throw UserExceptionCode.USER_NOT_FOUND.create(imapLogin, I(cid));
             }
             users = sia.toArray();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);

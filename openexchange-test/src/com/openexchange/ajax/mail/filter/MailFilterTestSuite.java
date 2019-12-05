@@ -51,6 +51,7 @@ package com.openexchange.ajax.mail.filter;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
+import com.openexchange.ajax.mail.filter.apiclient.ApplyMailFilterTest;
 import com.openexchange.ajax.mail.filter.tests.api.AdminListTest;
 import com.openexchange.ajax.mail.filter.tests.api.AuxiliaryAPITest;
 import com.openexchange.ajax.mail.filter.tests.api.ConfigTest;
@@ -89,6 +90,9 @@ import com.openexchange.test.concurrent.ParallelSuite;
     // PGPTest.class,
     ReorderTest.class,
     AuxiliaryAPITest.class,
+
+    // new apiclient tests ---------
+    ApplyMailFilterTest.class
 
 })
 public final class MailFilterTestSuite {

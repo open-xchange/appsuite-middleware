@@ -74,11 +74,6 @@ public abstract class AbstractActionCommandParser extends AbstractCommandParser<
         super(services, actionCommand);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.mail.filter.json.v2.json.mapper.parser.AbstractCommandParser#getCommandRegistry()
-     */
     @SuppressWarnings("unchecked")
     @Override
     protected <T> CommandRegistry<T> getCommandRegistry() {

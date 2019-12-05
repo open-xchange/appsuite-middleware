@@ -283,7 +283,7 @@ public final class SMSMessagingMessage implements MessagingMessage {
     }
 
     public void addAttachment(String attachmentId) {
-        if(headers.containsKey(MessagingPart.ATTACHMENT)) {
+        if (headers.containsKey(MessagingPart.ATTACHMENT)) {
             headers.get(MessagingPart.ATTACHMENT).add(new StringMessageHeader(MessagingPart.ATTACHMENT, attachmentId));
         } else {
             List<MessagingHeader> list = new ArrayList<MessagingHeader>();

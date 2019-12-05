@@ -60,12 +60,12 @@ public class ShutDownRuntimeException extends RuntimeException {
     private static final long serialVersionUID = -8818954753984880228L;
 
     /**
-     * Throws a <code>ShutDownRuntimeException</code> if specified reference is <code>null</code>
+     * Throws a <code>ShutDownRuntimeException</code> if specified service reference is <code>null</code>
      *
-     * @param object The reference to check
+     * @param service The service to check
      */
-    public static <O> void throwShutDownRuntimeExceptionIfNull(O object) {
-        if (null == object) {
+    public static <S> void throwShutDownRuntimeExceptionIfNull(S service) {
+        if (null == service) {
             throw new ShutDownRuntimeException();
         }
     }

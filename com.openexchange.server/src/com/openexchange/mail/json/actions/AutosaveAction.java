@@ -150,9 +150,9 @@ public final class AutosaveAction extends AbstractMailAction {
             final AJAXRequestResult result = new AJAXRequestResult(msgIdentifier, "string");
             result.addWarnings(warnings);
             return result;
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (final OXException e){
+        } catch (OXException e){
             if (MailExceptionCode.COPY_TO_SENT_FOLDER_FAILED_QUOTA.equals(e)) {
                 throw MailExceptionCode.UNABLE_TO_SAVE_DRAFT_QUOTA.create();
             }

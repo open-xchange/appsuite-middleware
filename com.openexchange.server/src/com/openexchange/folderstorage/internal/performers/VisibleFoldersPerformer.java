@@ -62,6 +62,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import com.openexchange.concurrent.CallerRunsCompletionService;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.CalculatePermission;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
@@ -73,14 +74,13 @@ import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 
@@ -196,7 +196,7 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
             final List<SortableId> allSubfolderIds;
             try {
                 allSubfolderIds = Arrays.asList(folderStorage.getVisibleFolders(rootFolderId, treeId, contentType, type, storageParameters));
-            } catch (final UnsupportedOperationException e) {
+            } catch (UnsupportedOperationException e) {
                 LOG.warn("Operation is not supported for folder storage {} (content-type={})", folderStorage.getClass().getSimpleName(), contentType, e);
                 return new UserizedFolder[0];
             }
@@ -269,7 +269,7 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
                                 if (!warnings.isEmpty()) {
                                     addWarning(warnings.iterator().next());
                                 }
-                            } catch (final OXException e) {
+                            } catch (OXException e) {
                                 log.warn("Batch loading of folder failed. Fall-back to one-by-one loading.", e);
                                 folders = null;
                             }
@@ -285,7 +285,7 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
                                     final Folder subfolder;
                                     try {
                                         subfolder = tmp.getFolder(treeId, id, newParameters);
-                                    } catch (final OXException e) {
+                                    } catch (OXException e) {
                                         log.warn("The folder with ID \"{}\" in tree \"{}\" could not be fetched from storage \"{}\"", id, treeId, tmp.getClass().getSimpleName(), e);
                                         addWarning(e);
                                         continue NextIndex;
@@ -330,12 +330,12 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
                                 fs.commitTransaction(newParameters);
                             }
                             return null;
-                        } catch (final OXException e) {
+                        } catch (OXException e) {
                             for (final FolderStorage fs : openedStorages) {
                                 fs.rollback(newParameters);
                             }
                             throw e;
-                        } catch (final RuntimeException e) {
+                        } catch (RuntimeException e) {
                             for (final FolderStorage fs : openedStorages) {
                                 fs.rollback(newParameters);
                             }
@@ -373,7 +373,7 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
                 folderStorage.commitTransaction(storageParameters);
             }
             return ret;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (started) {
                 folderStorage.rollback(storageParameters);
             }
@@ -382,7 +382,7 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
                 return new UserizedFolder[0];
             }
             throw e;
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             if (started) {
                 folderStorage.rollback(storageParameters);
             }

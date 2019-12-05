@@ -153,7 +153,7 @@ public final class UpdateAction extends AbstractFolderAction implements Enqueuab
             } else {
                 try {
                     timestamp = new Date(Long.parseLong(timestampStr));
-                } catch (final NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("timestamp", timestampStr);
                 }
             }

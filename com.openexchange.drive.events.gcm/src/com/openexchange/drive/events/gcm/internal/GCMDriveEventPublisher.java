@@ -52,22 +52,19 @@ package com.openexchange.drive.events.gcm.internal;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.osgi.Tools.requireService;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import com.google.android.gcm.Constants;
 import com.google.android.gcm.Message;
-import com.google.android.gcm.MulticastResult;
 import com.google.android.gcm.Result;
 import com.google.android.gcm.Sender;
-import com.google.common.collect.Lists;
 import com.openexchange.config.lean.LeanConfigurationService;
+import com.openexchange.drive.events.DriveContentChange;
 import com.openexchange.drive.events.DriveEvent;
 import com.openexchange.drive.events.DriveEventPublisher;
 import com.openexchange.drive.events.gcm.GCMKeyProvider;
 import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
 import com.openexchange.drive.events.subscribe.Subscription;
+import com.openexchange.drive.events.subscribe.SubscriptionMode;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
@@ -79,7 +76,6 @@ import com.openexchange.server.ServiceLookup;
  */
 public class GCMDriveEventPublisher implements DriveEventPublisher {
 
-    private static final int MULTICAST_LIMIT = 1000;
     private static final String SERIVCE_ID = "gcm";
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GCMDriveEventPublisher.class);
 
@@ -117,10 +113,9 @@ public class GCMDriveEventPublisher implements DriveEventPublisher {
             return;
         }
         /*
-         * associate subscriptions per API key
+         * send notification to each subscriber with associated GCM key
          */
         String pushTokenReference = event.getPushTokenReference();
-        Map<String, List<String>> registrationsByKey = new HashMap<String, List<String>>();
         for (Subscription subscription : subscriptions) {
             if (null != pushTokenReference && subscription.matches(pushTokenReference)) {
                 LOG.trace("Skipping push notification for subscription: {}", subscription);
@@ -131,99 +126,69 @@ public class GCMDriveEventPublisher implements DriveEventPublisher {
                 LOG.debug("No API key available for push via FCM for subscription {}, skipping notification.", subscription);
                 continue;
             }
-            com.openexchange.tools.arrays.Collections.put(registrationsByKey, key, subscription.getToken());
-        }
-        /*
-         * send push messages in chunks per API key & process results
-         */
-        Message message = getMessage(event);
-        for (Entry<String, List<String>> entry : registrationsByKey.entrySet()) {
-            Sender sender = new Sender(entry.getKey());
-            for (List<String> registrationIDs : Lists.partition(entry.getValue(), MULTICAST_LIMIT)) {
-                MulticastResult result = null;
-                try {
-                    result = sender.sendNoRetry(message, registrationIDs);
-                } catch (IOException e) {
-                    LOG.warn("error publishing drive event", e);
-                }
-                if (null != result) {
-                    LOG.debug("{}", result);
-                }
-                /*
-                 * process results
-                 */
-                processResult(subscriptionStore, event.getContextID(), registrationIDs, result);
+            /*
+             * generate & send push message using the associated API key & process result
+             */
+            Message message = getMessage(event, subscription);
+            Result result;
+            try {
+                result = new Sender(key).sendNoRetry(message, subscription.getToken());
+            } catch (IOException e) {
+                LOG.warn("error publishing drive event", e);
+                continue;
             }
+            /*
+             * process result
+             */
+            LOG.debug("{}", result != null ? result : "");
+            processResult(subscriptionStore, event.getContextID(), subscription.getToken(), result);
         }
     }
 
     /*
      * http://developer.android.com/google/gcm/http.html#success
      */
-    private void processResult(DriveSubscriptionStore subscriptionStore, int contextID, List<String> registrationIDs, MulticastResult multicastResult) {
-        if (null == registrationIDs || null == multicastResult) {
-            LOG.warn("Unable to process empty results");
+    private void processResult(DriveSubscriptionStore subscriptionStore, int contextID, String registrationID, Result result) {
+        if (null == result) {
             return;
         }
-        /*
-         * If the value of failure and canonical_ids is 0, it's not necessary to parse the remainder of the response.
-         */
-        if (0 == multicastResult.getFailure() && 0 == multicastResult.getCanonicalIds()) {
-            return;
-        }
-        /*
-         * Otherwise, we recommend that you iterate through the results field...
-         */
-        List<Result> results = multicastResult.getResults();
-        if (null != results && 0 < results.size()) {
-            if (results.size() != registrationIDs.size()) {
-                LOG.warn("Number of multicast results different from used regsitrations IDs, unable to process results");
-            }
+        if (null != result.getMessageId()) {
             /*
-             *  ...and do the following for each object in that list:
+             * If message_id is set, check for registration_id:
              */
-            for (int i = 0; i < results.size(); i++) {
-                Result result = results.get(i);
-                String registrationID = registrationIDs.get(i);
-                if (null != result.getMessageId()) {
-                    /*
-                     * If message_id is set, check for registration_id:
-                     */
-                    if (null != result.getCanonicalRegistrationId()) {
-                        /*
-                         * If registration_id is set, replace the original ID with the new value (canonical ID) in your server database.
-                         * Note that the original ID is not part of the result, so you need to obtain it from the list of
-                         * code>registration_ids passed in the request (using the same index).
-                         */
-                        updateRegistrationIDs(subscriptionStore, contextID, registrationID, result.getCanonicalRegistrationId());
-                    }
-                } else {
-                    /*
-                     * Otherwise, get the value of error:
-                     */
-                    String error = result.getErrorCodeName();
-                    if (Constants.ERROR_UNAVAILABLE.equals(error)) {
-                        /*
-                         * If it is Unavailable, you could retry to send it in another request.
-                         */
-                        LOG.warn("Push message could not be sent because the GCM servers were not available.");
-                    } else if (Constants.ERROR_NOT_REGISTERED.equals(error)) {
-                        /*
-                         * If it is NotRegistered, you should remove the registration ID from your server database because the application
-                         * was uninstalled from the device or it does not have a broadcast receiver configured to receive
-                         * com.google.android.c2dm.intent.RECEIVE intents.
-                         */
-                        removeRegistrations(subscriptionStore, contextID, registrationID);
-                    } else {
-                        /*
-                         * Otherwise, there is something wrong in the registration ID passed in the request; it is probably a non-
-                         * recoverable error that will also require removing the registration from the server database. See Interpreting
-                         * an error response for all possible error values.
-                         */
-                        LOG.warn("Received error {} when sending push message to {}, removing registration ID.", error, registrationID);
-                        removeRegistrations(subscriptionStore, contextID, registrationID);
-                    }
-                }
+            if (null != result.getCanonicalRegistrationId()) {
+                /*
+                 * If registration_id is set, replace the original ID with the new value (canonical ID) in your server database.
+                 * Note that the original ID is not part of the result, so you need to obtain it from the list of
+                 * code>registration_ids passed in the request (using the same index).
+                 */
+                updateRegistrationIDs(subscriptionStore, contextID, registrationID, result.getCanonicalRegistrationId());
+            }
+        } else {
+            /*
+             * Otherwise, get the value of error:
+             */
+            String error = result.getErrorCodeName();
+            if (Constants.ERROR_UNAVAILABLE.equals(error)) {
+                /*
+                 * If it is Unavailable, you could retry to send it in another request.
+                 */
+                LOG.warn("Push message could not be sent because the GCM servers were not available.");
+            } else if (Constants.ERROR_NOT_REGISTERED.equals(error)) {
+                /*
+                 * If it is NotRegistered, you should remove the registration ID from your server database because the application
+                 * was uninstalled from the device or it does not have a broadcast receiver configured to receive
+                 * com.google.android.c2dm.intent.RECEIVE intents.
+                 */
+                removeRegistrations(subscriptionStore, contextID, registrationID);
+            } else {
+                /*
+                 * Otherwise, there is something wrong in the registration ID passed in the request; it is probably a non-
+                 * recoverable error that will also require removing the registration from the server database. See Interpreting
+                 * an error response for all possible error values.
+                 */
+                LOG.warn("Received error {} when sending push message to {}, removing registration ID.", error, registrationID);
+                removeRegistrations(subscriptionStore, contextID, registrationID);
             }
         }
     }
@@ -258,12 +223,21 @@ public class GCMDriveEventPublisher implements DriveEventPublisher {
         }
     }
 
-    private static Message getMessage(DriveEvent event) {
-        return new Message.Builder()
+    private static Message getMessage(DriveEvent event, Subscription subscription) {
+        Message.Builder builder = new Message.Builder()
             .collapseKey("TRIGGER_SYNC")
             .addData("action", "sync")
-//            .addData("folders", event.getFolderIDs().toString())
-        .build();
+        ;
+        if (event.isContentChangesOnly() && SubscriptionMode.SEPARATE.equals(subscription.getMode())) {
+            int index = 0;
+            for (DriveContentChange contentChange : event.getContentChanges()) {
+                if (contentChange.isSubfolderOf(subscription.getRootFolderID())) {
+                    builder.addData("path_" + index, contentChange.getPath(subscription.getRootFolderID()));
+                    index++;
+                }
+            }
+        }
+        return builder.build();
     }
     
     /**

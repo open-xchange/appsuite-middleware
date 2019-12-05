@@ -49,16 +49,18 @@
 package com.openexchange.report.appsuite.storage;
 
 import static com.openexchange.database.Databases.closeSQLStuff;
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.report.appsuite.internal.Services;
+import com.openexchange.user.UserExceptionCode;
 
 /**
  * The {@link ContextLoader} class is used to load data from the database, that is needed
@@ -69,41 +71,52 @@ import com.openexchange.report.appsuite.internal.Services;
  */
 public class ContextLoader {
 
-    DatabaseService dbService;
-
-    public ContextLoader() {
+    /**
+     * Initializes a new {@link ContextLoader}.
+     */
+    private ContextLoader() {
         super();
-        this.dbService = Services.getService(DatabaseService.class);
     }
 
     /**
-     * Loads all context-ids that are in the same schema, as the given cid. The given cid
+     * Loads all context identifiers that are in the same schema, as the given context identifier. The given context identifier
      * will be also returned in the list.
-     * 
-     * @param cid
-     * @return a list with all context ids in the same schema
-     * @throws SQLException
-     * @throws OXException
+     *
+     * @param cid The context identifier
+     * @return A list with all context identifiers in the same schema
+     * @throws OXException If listing cannot be returned
      */
-    public List<Integer> getAllContextIdsInSameSchema(int cid) throws SQLException, OXException {
-        ArrayList<Integer> result = new ArrayList<>();
+    public static List<Integer> getAllContextIdsInSameSchema(int cid) throws OXException {
+        DatabaseService dbService = Services.getService(DatabaseService.class);
+        Connection con = dbService.getReadOnly();
+        try {
+            return getAllContextIdsInSameSchema(cid, con);
+        } finally {
+            dbService.backReadOnly(con);
+        }
+    }
+
+    private static List<Integer> getAllContextIdsInSameSchema(int cid, Connection con) throws OXException {
         PreparedStatement stmt = null;
         ResultSet sqlResult = null;
-        Connection currentConnection = this.dbService.getReadOnly();
         try {
-            stmt = currentConnection.prepareStatement("SELECT cid FROM context_server2db_pool WHERE db_schema = (SELECT db_schema FROM context_server2db_pool where cid =?)");
+            stmt = con.prepareStatement("SELECT t2.cid FROM context_server2db_pool AS t1 JOIN context_server2db_pool AS t2 ON t1.db_schema=t2.db_schema WHERE t1.cid=?");
             stmt.setInt(1, cid);
             sqlResult = stmt.executeQuery();
-            while (sqlResult.next()) {
-                result.add(sqlResult.getInt(1));
+            if (!sqlResult.next()) {
+                return Collections.emptyList();
             }
+
+            List<Integer> result = new ArrayList<>();
+            do {
+                result.add(I(sqlResult.getInt(1)));
+            } while (sqlResult.next());
+            return result;
         } catch (SQLException e) {
             throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(sqlResult, stmt);
-            dbService.backReadOnly(currentConnection);
         }
-        return result;
     }
 
 }

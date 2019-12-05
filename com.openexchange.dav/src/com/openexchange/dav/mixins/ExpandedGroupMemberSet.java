@@ -49,6 +49,7 @@
 
 package com.openexchange.dav.mixins;
 
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
@@ -61,22 +62,25 @@ import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 public class ExpandedGroupMemberSet extends SingleXMLPropertyMixin {
 
     private final int[] members;
+    private final ConfigViewFactory configViewFactory;
 
     /**
      * Initializes a new {@link ExpandedGroupMemberSet}.
      *
      * @param members The group members
+     * @param configViewFactory The configuration view
      */
-    public ExpandedGroupMemberSet(int[] members) {
+    public ExpandedGroupMemberSet(int[] members, ConfigViewFactory configViewFactory) {
         super(DAVProtocol.CALENDARSERVER_NS.getURI(), "expanded-group-member-set");
         this.members = members;
+        this.configViewFactory = configViewFactory;
     }
 
     @Override
     protected String getValue() {
         StringBuilder stringBuilder = new StringBuilder();
         for (int member : members) {
-            stringBuilder.append("<D:href>").append(PrincipalURL.forUser(member)).append("</D:href>");
+            stringBuilder.append("<D:href>").append(PrincipalURL.forUser(member, configViewFactory)).append("</D:href>");
         }
         return stringBuilder.toString();
     }

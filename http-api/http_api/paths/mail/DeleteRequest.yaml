@@ -4,29 +4,35 @@
     tags:
       - Mail
     summary: Deletes mails.
-    consumes:
-      - application/json
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: timestamp
-        type: integer
-        format: int64
         description: 'Not IMAP: timestamp of the last update of the deleted mails.'
         required: false
-      - in: body
-        name: body
-        description: A JSON array of JSON objects with the id and folder of the mails.
-        required: true
         schema:
-          type: array
-          items:
-            $ref: "#/definitions/MailListElement"
+          type: integer
+          format: int64
     responses:
-      200:
-        description: |
-          Not IMAP: A JSON array with object IDs of mails which were modified after the specified timestamp and
-          were therefore not deleted. In case of errors the responsible fields in the response are
+      '200':
+        description: >
+          Not IMAP: A JSON array with object IDs of mails which were modified
+          after the specified timestamp and
+
+          were therefore not deleted. In case of errors the responsible fields
+          in the response are
+
           filled (see [Error handling](#error-handling)).
-        schema:
-          $ref: "#/definitions/MailsCleanUpResponse"
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MailsCleanUpResponse'
+    requestBody:
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/MailListElement'
+      description: A JSON array of JSON objects with the id and folder of the mails.
+      required: true

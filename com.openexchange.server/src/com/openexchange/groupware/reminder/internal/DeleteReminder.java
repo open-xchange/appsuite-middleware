@@ -85,9 +85,9 @@ public class DeleteReminder {
             con.setAutoCommit(false);
             delete(con);
             con.commit();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw ReminderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             rollback(con);
             throw e;
         } finally {

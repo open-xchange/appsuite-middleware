@@ -94,7 +94,7 @@ public class UpdateRequest extends AbstractContactRequest<UpdateResponse> {
         if (withImage) {
             try {
                 fieldContent = convert(contactObj).toString();
-            } catch (final JSONException e) {
+            } catch (JSONException e) {
                 throw new IllegalArgumentException(e);
             }
         }

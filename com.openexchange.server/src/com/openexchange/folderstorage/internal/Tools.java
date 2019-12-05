@@ -119,17 +119,17 @@ public final class Tools {
         }
         try {
             return future.get();
-        } catch (final InterruptedException e) {
+        } catch (InterruptedException e) {
             // Keep interrupted status
             Thread.currentThread().interrupt();
             final IllegalStateException ise = new IllegalStateException(e.getMessage());
             ise.initCause(e);
             throw ise;
-        } catch (final CancellationException e) {
+        } catch (CancellationException e) {
             final IllegalStateException ise = new IllegalStateException(e.getMessage());
             ise.initCause(e);
             throw ise;
-        } catch (final ExecutionException e) {
+        } catch (ExecutionException e) {
             final Throwable cause = e.getCause();
             if (cause instanceof Exception) {
                 final IllegalStateException ise = new IllegalStateException(e.getMessage());

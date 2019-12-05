@@ -65,9 +65,8 @@ import com.openexchange.folderstorage.cache.CacheFolderStorage;
 import com.openexchange.folderstorage.internal.StorageParametersImpl;
 import com.openexchange.folderstorage.mail.MailFolderType;
 import com.openexchange.log.LogProperties;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
-import com.openexchange.sessiond.SessiondService;
+import com.openexchange.session.Sessions;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.behavior.AbortBehavior;
 import com.openexchange.tools.session.ServerSession;
@@ -227,33 +226,25 @@ public final class FolderMap {
 
     private void reloadFolder(final String folderId, final String treeId, final boolean loadSubfolders, final Session ses) {
         try {
-            final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
-            if (null == sessiondService) {
-                return;
-            }
-            final ServerSession session = ServerSessionAdapter.valueOf(null == ses ? sessiondService.getAnyActiveSessionForUser(userId, contextId) : ses);
+            final ServerSession session = ServerSessionAdapter.valueOf(null == ses ? Sessions.getValidatedSessionForCurrentThread(userId, contextId).orElse(null) : ses);
             if (null == session) {
                 return;
             }
             ThreadPools.getThreadPool().submit(ThreadPools.trackableTask(new RunnableImpl(folderId, treeId, loadSubfolders, this, session)), AbortBehavior.getInstance());
-        } catch (final Exception e) {
+        } catch (Exception e) {
             // Ignore
         }
     }
 
     private void loadSubolders(final Folder folder, final String treeId, final Session ses) {
         try {
-            final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
-            if (null == sessiondService) {
-                return;
-            }
-            final ServerSession session = ServerSessionAdapter.valueOf(null == ses ? sessiondService.getAnyActiveSessionForUser(userId, contextId) : ses);
+            final ServerSession session = ServerSessionAdapter.valueOf(null == ses ? Sessions.getValidatedSessionForCurrentThread(userId, contextId).orElse(null) : ses);
             if (null == session) {
                 return;
             }
             LogProperties.putSessionProperties(session);
             ThreadPools.getThreadPool().submit(ThreadPools.trackableTask(new LoadSubfolders(folder, treeId, this, session)), AbortBehavior.getInstance());
-        } catch (final Exception e) {
+        } catch (Exception e) {
             // Ignore
             folder.setSubfolderIDs(null);
         }

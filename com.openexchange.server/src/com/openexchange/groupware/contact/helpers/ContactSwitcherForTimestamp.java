@@ -77,10 +77,10 @@ public class ContactSwitcherForTimestamp extends AbstractContactSwitcherWithDele
         try {
             try {
                 return delegate.creationdate(makeDate(objects));
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 return delegate.creationdate(objects);
             }
-        } catch (final ClassCastException e) {
+        } catch (ClassCastException e) {
             throw ContactExceptionCodes.CONV_OBJ_2_DATE_FAILED.create(e, objects[1], "CreationDate");
         }
     }
@@ -90,10 +90,10 @@ public class ContactSwitcherForTimestamp extends AbstractContactSwitcherWithDele
         try {
             try {
                 return delegate.anniversary(makeDate(objects));
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 return delegate.anniversary(objects);
             }
-        } catch (final ClassCastException e) {
+        } catch (ClassCastException e) {
             throw ContactExceptionCodes.CONV_OBJ_2_DATE_FAILED.create(e, objects[1], "Anniversary");
         }
     }
@@ -103,10 +103,10 @@ public class ContactSwitcherForTimestamp extends AbstractContactSwitcherWithDele
         try {
             try {
                 return delegate.birthday(makeDate(objects));
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 return delegate.birthday(objects);
             }
-        } catch (final ClassCastException e) {
+        } catch (ClassCastException e) {
             throw ContactExceptionCodes.CONV_OBJ_2_DATE_FAILED.create(e, objects[1], "Birthday");
         }
     }
@@ -116,10 +116,10 @@ public class ContactSwitcherForTimestamp extends AbstractContactSwitcherWithDele
         try {
             try {
                 return delegate.imagelastmodified(makeDate(objects));
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 return delegate.imagelastmodified(objects);
             }
-        } catch (final ClassCastException e) {
+        } catch (ClassCastException e) {
             throw ContactExceptionCodes.CONV_OBJ_2_DATE_FAILED.create(e, objects[1], "ImageLastModified");
         }
     }
@@ -129,10 +129,10 @@ public class ContactSwitcherForTimestamp extends AbstractContactSwitcherWithDele
         try {
             try {
                 return delegate.lastmodified(makeDate(objects));
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 return delegate.lastmodified(objects);
             }
-        } catch (final ClassCastException e) {
+        } catch (ClassCastException e) {
             throw ContactExceptionCodes.CONV_OBJ_2_DATE_FAILED.create(e, objects[1], "LastModified");
         }
     }

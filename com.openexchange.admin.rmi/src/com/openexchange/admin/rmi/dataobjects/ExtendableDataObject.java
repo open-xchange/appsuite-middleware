@@ -147,7 +147,7 @@ public abstract class ExtendableDataObject extends EnforceableDataObject impleme
     @Override
     protected Object clone() throws CloneNotSupportedException {
         final ExtendableDataObject object = (ExtendableDataObject) super.clone();
-        if( this.extensions != null ) {
+        if ( this.extensions != null ) {
             object.extensions = new Hashtable<String, OXCommonExtensionInterface>(this.extensions);
         }
         return object;
@@ -169,9 +169,6 @@ public abstract class ExtendableDataObject extends EnforceableDataObject impleme
         return ret.toString();
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#hashCode()
-     */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -181,9 +178,6 @@ public abstract class ExtendableDataObject extends EnforceableDataObject impleme
         return result;
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {

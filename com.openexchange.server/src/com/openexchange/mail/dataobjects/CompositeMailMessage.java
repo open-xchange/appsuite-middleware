@@ -211,37 +211,21 @@ public final class CompositeMailMessage extends MailMessage {
         return additionalParts.remove(index);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.dataobjects.MailPart#getContent()
-     */
     @Override
     public Object getContent() throws OXException {
         return delegate.getContent();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.dataobjects.MailPart#getDataHandler()
-     */
     @Override
     public DataHandler getDataHandler() throws OXException {
         return delegate.getDataHandler();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.dataobjects.MailPart#getEnclosedCount()
-     */
     @Override
     public int getEnclosedCount() throws OXException {
         return delegateEnclosedCount + additionalParts.size();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.dataobjects.MailPart#getEnclosedMailPart(int)
-     */
     @Override
     public MailPart getEnclosedMailPart(final int index) throws OXException {
         if (delegateEnclosedCount > 0) {
@@ -251,7 +235,7 @@ public final class CompositeMailMessage extends MailMessage {
             if (index >= delegateEnclosedCount) {
                 try {
                     return additionalParts.get(index - delegateEnclosedCount);
-                } catch (final IndexOutOfBoundsException e) {
+                } catch (IndexOutOfBoundsException e) {
                     return null;
                 }
             }
@@ -259,33 +243,21 @@ public final class CompositeMailMessage extends MailMessage {
         }
         try {
             return additionalParts.get(index);
-        } catch (final IndexOutOfBoundsException e) {
+        } catch (IndexOutOfBoundsException e) {
             throw new IndexOutOfBoundsException("No mail part at index " + index);
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.dataobjects.MailPart#getInputStream()
-     */
     @Override
     public InputStream getInputStream() throws OXException {
         return delegate.getInputStream();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.dataobjects.MailPart#loadContent()
-     */
     @Override
     public void loadContent() throws OXException {
         delegate.loadContent();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.dataobjects.MailPart#prepareForCaching()
-     */
     @Override
     public void prepareForCaching() {
         delegate.prepareForCaching();
@@ -372,7 +344,7 @@ public final class CompositeMailMessage extends MailMessage {
                         public InputStream getInputStream() throws IOException {
                             try {
                                 return mp.getInputStream();
-                            } catch (final OXException e) {
+                            } catch (OXException e) {
                                 final IOException io = new IOException(e.getMessage());
                                 io.initCause(e);
                                 throw io;
@@ -417,7 +389,7 @@ public final class CompositeMailMessage extends MailMessage {
                         public InputStream getInputStream() throws IOException {
                             try {
                                 return mp.getInputStream();
-                            } catch (final OXException e) {
+                            } catch (OXException e) {
                                 final IOException io = new IOException(e.getMessage());
                                 io.initCause(e);
                                 throw io;
@@ -453,9 +425,9 @@ public final class CompositeMailMessage extends MailMessage {
             MessageUtility.setContent(mimeMultipart, mimeMessage);
             // mimeMessage.setContent(mimeMultipart);
             mimeMessage.writeTo(out);
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }

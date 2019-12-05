@@ -60,6 +60,8 @@ public class SAMLSessionParameters {
 
     /**
      * com.openexchange.saml.Authenticated
+     * <p>
+     * See also <code>com.openexchange.saml.oauth.OAuthFailedAuthenticationHandler.AUTHENTICATED</code>.
      */
     public static final String AUTHENTICATED = "com.openexchange.saml.Authenticated";
 
@@ -102,4 +104,6 @@ public class SAMLSessionParameters {
      * com.openexchange.saml.SingleLogout
      */
     public static final String SINGLE_LOGOUT = "com.openexchange.saml.SingleLogout";
+
+    // In case of adding new constants here; see SAMLSessionStorageParameterNamesProvider!
 }

@@ -86,8 +86,6 @@ import com.openexchange.oauth.access.OAuthAccessRegistryService;
 import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
-import com.openexchange.sessiond.SessiondService;
-import com.openexchange.tools.session.SessionHolder;
 
 /**
  * {@link AbstractOAuthFileStorageService}
@@ -172,7 +170,7 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
         }
         try {
             return newInstanceFor(compositeAccountManager.getAccountManagerFor(getId()));
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.warn("{}", e.getMessage(), e);
             return getAccountManager0();
         }
@@ -229,22 +227,12 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
         return getAccounts0(session, true);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageAccountDeleteListener#onBeforeFileStorageAccountDeletion(int, java.util.Map, int, int, java.sql.Connection)
-     */
     @Override
     public void onBeforeFileStorageAccountDeletion(Session session, int id, Map<String, Object> eventProps, Connection con) throws OXException {
         // nothing to do
 
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageAccountDeleteListener#onAfterFileStorageAccountDeletion(int, java.util.Map, int, int, java.sql.Connection)
-     */
     @Override
     public void onAfterFileStorageAccountDeletion(Session session, int id, Map<String, Object> eventProps, Connection con) throws OXException {
         if (!updateScopes(session)) {
@@ -418,29 +406,6 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
         }
         FileStorageAccountManagerLookupService lookupService = services.getService(FileStorageAccountManagerLookupService.class);
         return lookupService.getAccountManagerFor(getId());
-    }
-
-    /**
-     * Retrieves a {@link Session} for the specified user in the specified context
-     *
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @return The {@link Session} or <code>null</code> if none exists
-     */
-    private Session getUserSession(final int userId, final int contextId) {
-        // Firstly let's see if the currently active session matches the one we need here and prefer that one.
-        final SessionHolder sessionHolder = services.getService(SessionHolder.class);
-        if (sessionHolder != null) {
-            final Session session = sessionHolder.getSessionObject();
-            if (session != null && session.getUserId() == userId && session.getContextId() == contextId) {
-                return session;
-            }
-        }
-        final SessiondService service = services.getService(SessiondService.class);
-        if (null == service) {
-            return null;
-        }
-        return service.getAnyActiveSessionForUser(userId, contextId);
     }
 
     /**

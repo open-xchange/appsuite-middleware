@@ -201,7 +201,7 @@ public final class SpamHandlerRegistry {
             if (null != handler) {
                 return handler;
             }
-        } catch (final ClassCastException e) {
+        } catch (ClassCastException e) {
             // Probably caused by bundle update(s)
             LOG.debug("Failed to cast spam handler. Continuing with regular look-up.", e);
         }

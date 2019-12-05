@@ -85,7 +85,7 @@ public abstract class TokenLoginAction implements AJAXActionService {
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         try {
             return perform(new TokenLoginRequest(requestData, session));
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e);
         }
     }

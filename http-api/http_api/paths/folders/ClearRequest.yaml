@@ -4,30 +4,30 @@
     tags:
       - Folders
     summary: Clears the content of a list of folders.
-    consumes:
-      - application/json
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
-      - $ref: "#/parameters/gblQueryParamFolderTree"
-      - $ref: "#/parameters/gblQueryParamAllowedModules"
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - $ref: '#/components/parameters/gblQueryParamFolderTree'
+      - $ref: '#/components/parameters/gblQueryParamAllowedModules'
       - in: query
         name: pushToken
-        type: string
         description: The client's push token to restrict the generated drive event
         required: false
-      - in: body
-        name: body
-        description: A JSON array with object IDs of the folders.
-        required: true
         schema:
-          type: array
-          items:
-            type: string
+          type: string
     responses:
-      200:
-        description: |
-          A JSON array containing the IDs of folders that could not be cleared due to a concurrent modification.
-          Meaning you receive an empty JSON array if everything worked well. In case of errors the responsible
-          fields in the response are filled (see [Error handling](#error-handling)).
-        schema:
-          $ref: "#/definitions/FoldersCleanUpResponse"
+      '200':
+        description: >
+          A JSON array containing the IDs of folders that could not be cleared
+          due to a concurrent modification.
+
+          Meaning you receive an empty JSON array if everything worked well. In
+          case of errors the responsible
+
+          fields in the response are filled (see [Error
+          handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FoldersCleanUpResponse'
+    requestBody:
+      $ref: '#/components/requestBodies/deleteFoldersBody'

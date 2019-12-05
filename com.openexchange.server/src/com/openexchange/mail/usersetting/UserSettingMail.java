@@ -90,7 +90,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
                 clone.id = id;
                 clone.signature = signature;
                 return clone;
-            } catch (final CloneNotSupportedException e) {
+            } catch (CloneNotSupportedException e) {
                 /*
                  * Cannot occur since we are cloneable
                  */
@@ -361,7 +361,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
                 }
             }
             return clone;
-        } catch (final CloneNotSupportedException e) {
+        } catch (CloneNotSupportedException e) {
             LoggerHolder.LOG.error("", e);
             final InternalError error = new InternalError(e.getMessage());
             error.initCause(e);

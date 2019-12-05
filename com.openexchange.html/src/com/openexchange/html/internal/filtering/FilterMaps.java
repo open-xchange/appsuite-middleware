@@ -529,7 +529,7 @@ public final class FilterMaps {
                             }
                         }
                         mapStr = sb.toString();
-                    } catch (final Exception e) {
+                    } catch (Exception e) {
                         LOG.warn("Using default white list", e);
                         mapStr = new String(DEFAULT_WHITELIST);
                     } finally {

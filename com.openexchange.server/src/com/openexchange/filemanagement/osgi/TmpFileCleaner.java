@@ -51,10 +51,10 @@ package com.openexchange.filemanagement.osgi;
 
 import java.io.File;
 import java.io.FileFilter;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.configuration.ServerConfig;
 
 /**
  * {@link TmpFileCleaner}
@@ -63,43 +63,39 @@ import com.openexchange.config.ConfigurationService;
  */
 public final class TmpFileCleaner implements ServiceTrackerCustomizer<ConfigurationService, ConfigurationService> {
 
-    private final BundleContext context;
-
-    public TmpFileCleaner(BundleContext context) {
+    /**
+     * Initializes a new {@link TmpFileCleaner}.
+     */
+    public TmpFileCleaner() {
         super();
-        this.context = context;
     }
 
     @Override
     public ConfigurationService addingService(ServiceReference<ConfigurationService> reference) {
-        ConfigurationService service = context.getService(reference);
-        final String directory = service.getProperty("UPLOAD_DIRECTORY");
-        if (null != directory) {
-            final File dir = new File(directory);
-            if (dir.isDirectory() && dir.canWrite()) {
-                // List files starting with either "open-xchange-" or "openexchange" prefix
-                File[] tmpFiles = dir.listFiles(new FileFilter() {
+        File dir = ServerConfig.getTmpDir();
+        if (dir.isDirectory() && dir.canWrite()) {
+            // List files starting with either "open-xchange-" or "openexchange" prefix
+            File[] tmpFiles = dir.listFiles(new FileFilter() {
 
-                    @Override
-                    public boolean accept(File pathname) {
-                        String name = pathname.getName();
-                        return name.startsWith("open-xchange-") || name.startsWith("openexchange");
-                    }
-                });
+                @Override
+                public boolean accept(File pathname) {
+                    String name = pathname.getName();
+                    return name.startsWith("open-xchange-") || name.startsWith("openexchange");
+                }
+            });
 
-                // Delete those remnants
-                if (null != tmpFiles) {
-                    for (File file : tmpFiles) {
-                        try {
-                            file.delete();
-                        } catch (final Exception x) {
-                            // Ignore
-                        }
+            // Delete those remnants
+            if (null != tmpFiles) {
+                for (File file : tmpFiles) {
+                    try {
+                        file.delete();
+                    } catch (Exception x) {
+                        // Ignore
                     }
                 }
             }
         }
-        context.ungetService(reference);
+
         return null;
     }
 

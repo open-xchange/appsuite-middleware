@@ -123,7 +123,7 @@ public class SnippetJSONResultConverter implements ResultConverter {
                 jArray.put(convertSnippet(snippet, requestData.getSession()));
             }
             result.setResultObject(jArray, "json");
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
     }
@@ -218,7 +218,7 @@ public class SnippetJSONResultConverter implements ResultConverter {
                 fn = null == sContentType ? null : new ContentType(sContentType).getNameParameter();
             }
             return fn;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             return null;
         }
     }

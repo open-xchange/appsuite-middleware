@@ -174,7 +174,7 @@ public class ICalMailPartImportTest extends AbstractConversionTest {
                 final FolderAndID mailPath = new FolderAndID(mailFolderAndMailID[0], mailFolderAndMailID[1]);
                 Executor.execute(getSession(), new NetsolDeleteRequest(new FolderAndID[] { mailPath }, true));
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }

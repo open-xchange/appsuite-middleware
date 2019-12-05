@@ -90,17 +90,17 @@ public class InfostoreDowngrade implements DowngradeListener {
             infostore.removeDocument(folderId, Long.MAX_VALUE, session);
 
             infostore.commit();
-        } catch (final OXException e) {
+        } catch (OXException e) {
             try {
                 infostore.rollback();
-            } catch (final OXException e1) {
+            } catch (OXException e1) {
                 //IGNORE
             }
             throw e;
         } finally {
             try {
                 infostore.finish();
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 //IGNORE
             }
         }

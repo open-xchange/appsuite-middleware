@@ -101,7 +101,7 @@ public abstract class AbstractSessionServletActivator extends AbstractServletAct
 
             // Register Servlet instance using HttpService
             registerServlet(alias, servlet, initParams, getService(HttpService.class));
-        } catch (final IllegalStateException e) {
+        } catch (IllegalStateException e) {
             LOG.error("", e);
         }
     }

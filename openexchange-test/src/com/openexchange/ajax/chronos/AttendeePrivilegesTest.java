@@ -63,7 +63,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
 import com.openexchange.ajax.chronos.factory.AttendeeFactory;
 import com.openexchange.ajax.chronos.factory.EventFactory;
-import com.openexchange.ajax.chronos.factory.ICalFacotry;
 import com.openexchange.ajax.chronos.manager.ChronosApiException;
 import com.openexchange.ajax.chronos.manager.EventManager;
 import com.openexchange.testing.httpclient.invoker.ApiException;
@@ -72,7 +71,7 @@ import com.openexchange.testing.httpclient.models.CalendarUser;
 import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
 import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventId;
-import com.openexchange.testing.httpclient.models.UpdateBody;
+import com.openexchange.testing.httpclient.models.UpdateEventBody;
 
 /**
  * {@link AttendeePrivilegesTest}
@@ -128,7 +127,7 @@ public class AttendeePrivilegesTest extends AbstractOrganizerTest {
         // Create event
         event = createEvent();
 
-        addExternalAttendee(event, false);
+        addExternalAttendee(eventManager2.getEvent(null, event.getId()), false);
 
         // Re-check as organizer
         EventData data = eventManager.getEvent(event.getFolder(), event.getId());
@@ -165,7 +164,7 @@ public class AttendeePrivilegesTest extends AbstractOrganizerTest {
         assertThat("Attendee should not have been removed", Integer.valueOf(data.getAttendees().size()), is(Integer.valueOf(2)));
         Attendee hiden = data.getAttendees().stream().filter(a -> a.getEntity() == actingAttendee.getEntity()).findFirst().orElse(null);
         assertThat("Attendee is missing!", hiden, notNullValue());
-        assertThat("Attendee status should be 'declined' from the organizer view", hiden.getPartStat(), is(ICalFacotry.PartStat.DECLINED.toString()));
+        assertThat("Attendee status should be 'declined' from the organizer view", hiden.getPartStat(), is("DECLINED"));
     }
 
     @Test(expected = ChronosApiException.class)
@@ -186,7 +185,7 @@ public class AttendeePrivilegesTest extends AbstractOrganizerTest {
 
         // Create event
         event = createEvent();
-
+        event = eventManager2.getEvent(null, event.getId());
         String summary = "AttendeePrivilegesTest: Modify summary";
         EventData eventUpdate = prepareEventUpdate(event);
         eventUpdate.setSummary(summary);
@@ -222,7 +221,7 @@ public class AttendeePrivilegesTest extends AbstractOrganizerTest {
         assertThat("Attendee should not have been removed", Integer.valueOf(data.getAttendees().size()), is(Integer.valueOf(2)));
         Attendee hiden = data.getAttendees().stream().filter(a -> a.getEntity() == actingAttendee.getEntity()).findFirst().orElse(null);
         assertThat("Attendee is missing!", hiden, notNullValue());
-        assertThat("Attendee status should be 'declined' from the organizer view", hiden.getPartStat(), is(ICalFacotry.PartStat.DECLINED.toString()));
+        assertThat("Attendee status should be 'declined' from the organizer view", hiden.getPartStat(), is("DECLINED"));
     }
 
     @Test
@@ -350,9 +349,9 @@ public class AttendeePrivilegesTest extends AbstractOrganizerTest {
         setAttendeePrivileges(masterUpdate);
         masterUpdate.setChangeExceptionDates(master.getChangeExceptionDates());
 
-        UpdateBody body = new UpdateBody();
+        UpdateEventBody body = new UpdateEventBody();
         body.setEvent(masterUpdate);
-        ChronosCalendarResultResponse updateResponse = defaultUserApi.getChronosApi().updateEvent(defaultUserApi.getSession(), defaultFolderId, masterUpdate.getId(), body, masterUpdate.getLastModified(), null, null, Boolean.FALSE, Boolean.FALSE, Boolean.FALSE, null, null, null, Boolean.FALSE, null);
+        ChronosCalendarResultResponse updateResponse = defaultUserApi.getChronosApi().updateEvent(defaultUserApi.getSession(), defaultFolderId, masterUpdate.getId(), masterUpdate.getLastModified(), body, null, null, Boolean.FALSE, null, Boolean.FALSE, null, null, null, null, Boolean.FALSE, null);
         assertThat(Integer.valueOf(updateResponse.getData().getUpdated().size()), is(Integer.valueOf(2)));
 
         master = updateResponse.getData().getUpdated().stream().filter(e -> e.getId().equals(e.getSeriesId())).findAny().orElse(null);

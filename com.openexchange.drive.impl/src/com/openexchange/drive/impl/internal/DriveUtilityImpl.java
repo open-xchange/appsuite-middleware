@@ -97,6 +97,7 @@ import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FolderPath;
 import com.openexchange.file.storage.OriginAwareFileStorageFolder;
 import com.openexchange.file.storage.composition.FilenameValidationUtils;
+import com.openexchange.file.storage.composition.IDBasedFolderAccess;
 import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
@@ -562,8 +563,8 @@ public class DriveUtilityImpl implements DriveUtility {
     }
 
     @Override
-    public void deleteLink(DriveSession session, DriveShareTarget target) throws OXException {
-        new ShareHelper(new SyncSession(session)).deleteLink(target);
+    public DriveShareTarget deleteLink(DriveSession session, DriveShareTarget target) throws OXException {
+        return new ShareHelper(new SyncSession(session)).deleteLink(target);
     }
 
     @Override
@@ -607,7 +608,7 @@ public class DriveUtilityImpl implements DriveUtility {
             SearchIterator<File> files = trashContent.getFiles();
             if (files != null) {
                 JSONArray fileArray = loadFiles(syncSession, files);
-                if(fileArray.length() > 0) {
+                if (fileArray.length() > 0) {
                     result.put(FILES, filterUnwantedFields(fileArray));
                 }
             }

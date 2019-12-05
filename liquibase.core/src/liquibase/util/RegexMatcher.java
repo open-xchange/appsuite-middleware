@@ -33,7 +33,7 @@ public class RegexMatcher {
         int index=0;
         for(Pattern p:patterns) {
             Matcher m=p.matcher(text.substring(index));
-            if(!m.find())
+            if (!m.find())
                 return false;
             else
                 index+=m.end();

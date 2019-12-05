@@ -125,7 +125,7 @@ public final class GetReplyAllAction extends AbstractMailAction {
 
             // ... and fake a GET request
             return performGet(new MailRequest(requestData, req.getSession()));
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
@@ -195,13 +195,13 @@ public final class GetReplyAllAction extends AbstractMailAction {
             }
 
             return new AJAXRequestResult(mail, "mail");
-        } catch (final OXException e) {
+        } catch (OXException e) {
             final String uid = getUidFromException(e);
             if (MailExceptionCode.MAIL_NOT_FOUND.equals(e) && "undefined".equalsIgnoreCase(uid)) {
                 throw MailExceptionCode.PROCESSING_ERROR.create(e, new Object[0]);
             }
             throw e;
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }

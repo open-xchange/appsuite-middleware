@@ -119,7 +119,7 @@ public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrate
             score += 5;
         }
 
-        if( score < threshhold && original.equalsContentwise(candidate)) { //the score check is only to speed the process up
+        if ( score < threshhold && original.equalsContentwise(candidate)) { //the score check is only to speed the process up
             score += threshhold + 1;
         }
         return score;
@@ -138,7 +138,7 @@ public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrate
 
     @Override
     public void closeSession(final Object session) {
-        if(session instanceof Map<?,?>) {
+        if (session instanceof Map<?,?>) {
             @SuppressWarnings("unchecked") Map<Integer, Object> userInfo = (Map<Integer, Object>) session;
             Session ses = (Session) userInfo.get(I(SESSION));
             ses.setParameter(Session.PARAM_SUBSCRIPTION_ADMIN, null);
@@ -254,7 +254,7 @@ public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrate
 
             try {
                 contactService.updateContact(targetFolderSession, folderId, contactId, origContact, origContact.getLastModified());
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 if (!ContactExceptionCodes.OBJECT_HAS_CHANGED.equals(e) || retry <= 0) {
                     throw e;
                 }

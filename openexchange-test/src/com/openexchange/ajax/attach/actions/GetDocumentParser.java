@@ -80,11 +80,6 @@ public class GetDocumentParser extends AbstractAJAXParser<GetDocumentResponse> {
         super(failOnError);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.framework.AbstractAJAXParser#parse(java.lang.String)
-     */
     @Override
     public GetDocumentResponse parse(final String body) throws JSONException {
         final boolean isJSON = body.startsWith("{");
@@ -96,11 +91,6 @@ public class GetDocumentParser extends AbstractAJAXParser<GetDocumentResponse> {
         return super.parse(json.toString());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.framework.AbstractAJAXParser#checkResponse(org.apache.http.HttpResponse, org.apache.http.HttpRequest)
-     */
     @Override
     public String checkResponse(HttpResponse response, HttpRequest request) throws ParseException, IOException {
         httpResponse = response;

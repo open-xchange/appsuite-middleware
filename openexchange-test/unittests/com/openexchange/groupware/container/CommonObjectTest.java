@@ -5,6 +5,8 @@ import static com.openexchange.groupware.container.CommonObject.CATEGORIES;
 import static com.openexchange.groupware.container.CommonObject.COLOR_LABEL;
 import static com.openexchange.groupware.container.CommonObject.NUMBER_OF_ATTACHMENTS;
 import static com.openexchange.groupware.container.CommonObject.PRIVATE_FLAG;
+import static com.openexchange.java.Autoboxing.B;
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -12,6 +14,7 @@ import org.junit.Test;
 
 public class CommonObjectTest extends FolderChildObjectTest {
 
+    @Override
     @Test
     public void testAttrAccessors() {
 
@@ -56,9 +59,9 @@ public class CommonObjectTest extends FolderChildObjectTest {
         object.setNumberOfAttachments(-12);
         assertTrue(object.contains(NUMBER_OF_ATTACHMENTS));
         assertTrue(object.containsNumberOfAttachments());
-        assertEquals(-12, object.get(NUMBER_OF_ATTACHMENTS));
+        assertEquals(I(-12), object.get(NUMBER_OF_ATTACHMENTS));
 
-        object.set(NUMBER_OF_ATTACHMENTS, 12);
+        object.set(NUMBER_OF_ATTACHMENTS, I(12));
         assertEquals(12, object.getNumberOfAttachments());
 
         object.remove(NUMBER_OF_ATTACHMENTS);
@@ -72,10 +75,10 @@ public class CommonObjectTest extends FolderChildObjectTest {
         object.setPrivateFlag(false);
         assertTrue(object.contains(PRIVATE_FLAG));
         assertTrue(object.containsPrivateFlag());
-        assertEquals(false, object.get(PRIVATE_FLAG));
+        assertEquals(Boolean.FALSE, object.get(PRIVATE_FLAG));
 
-        object.set(PRIVATE_FLAG, true);
-        assertEquals(true, object.getPrivateFlag());
+        object.set(PRIVATE_FLAG, Boolean.TRUE);
+        assertEquals(Boolean.TRUE, B(object.getPrivateFlag()));
 
         object.remove(PRIVATE_FLAG);
         assertFalse(object.contains(PRIVATE_FLAG));

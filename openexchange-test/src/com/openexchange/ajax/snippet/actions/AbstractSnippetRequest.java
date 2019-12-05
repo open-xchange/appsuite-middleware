@@ -71,21 +71,11 @@ public abstract class AbstractSnippetRequest<T extends AbstractAJAXResponse> imp
         this.failOnError = failOnError;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.framework.AJAXRequest#getServletPath()
-     */
     @Override
     public String getServletPath() {
         return "/ajax/snippet";
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.framework.AJAXRequest#getHeaders()
-     */
     @Override
     public Header[] getHeaders() {
         return NO_HEADER;

@@ -50,6 +50,7 @@
 package com.openexchange.admin.tools;
 
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.mail.internet.AddressException;
 import com.openexchange.admin.rmi.dataobjects.PasswordMechObject;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
@@ -93,7 +94,7 @@ public class GenericChecks {
         try {
             new QuotedInternetAddress(address);
             return true;
-        } catch (final AddressException e) {
+        } catch (AddressException e) {
             return false;
         }
     }
@@ -146,11 +147,12 @@ public class GenericChecks {
             PasswordMechRegistry mechFactory = AdminServiceRegistry.getInstance().getService(PasswordMechRegistry.class, true);
             List<String> identifiers = mechFactory.getIdentifiers();
             for (String identifier : identifiers) {
-                if (identifier.equalsIgnoreCase(mech)) {
+                if (identifier.equalsIgnoreCase(mech) || identifier.equalsIgnoreCase("{"+mech+"}")) {
                     return;
                 }
             }
-            throw new InvalidDataException("Invalid PasswordMech: " + mech + ". Use one of the following: " + String.join(",", mechFactory.getIdentifiers()));
+            String ids = identifiers.stream().map(i -> i.replaceAll("\\{", "")).map(i -> i.replaceAll("\\}", "")).collect(Collectors.joining(", ", "", ""));
+            throw new InvalidDataException("Invalid PasswordMech: " + mech + ". Use one of the following: " + ids);
         } catch (OXException e) {
             throw new InvalidDataException("PasswordMechFactory not available. Did the server start properly?");
         }

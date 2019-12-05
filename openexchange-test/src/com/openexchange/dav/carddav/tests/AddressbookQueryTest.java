@@ -57,6 +57,7 @@ import org.apache.jackrabbit.webdav.MultiStatusResponse;
 import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
 import org.apache.jackrabbit.webdav.version.report.ReportInfo;
 import org.junit.Test;
+import com.openexchange.dav.Config;
 import com.openexchange.dav.PropertyNames;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.carddav.CardDAVTest;
@@ -258,7 +259,7 @@ public class AddressbookQueryTest extends CardDAVTest {
         props.add(PropertyNames.GETETAG);
         props.add(PropertyNames.ADDRESS_DATA);
         ReportInfo reportInfo = new AddressbookQueryReportInfo(filters, props, filterTest);
-        MultiStatusResponse[] responses = getWebDAVClient().doReport(reportInfo, getBaseUri() + "/carddav/" + folderID + '/');
+        MultiStatusResponse[] responses = getWebDAVClient().doReport(reportInfo, getBaseUri() + Config.getPathPrefix() + "/carddav/" + folderID + '/');
         List<VCardResource> addressData = new ArrayList<VCardResource>();
         for (MultiStatusResponse response : responses) {
             if (response.getProperties(StatusCodes.SC_OK).contains(PropertyNames.GETETAG)) {

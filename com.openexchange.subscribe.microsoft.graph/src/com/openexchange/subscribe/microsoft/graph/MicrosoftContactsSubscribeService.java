@@ -87,24 +87,14 @@ public class MicrosoftContactsSubscribeService extends AbstractOAuthSubscribeSer
      * Initialises a new {@link MicrosoftContactsSubscribeService}.
      */
     public MicrosoftContactsSubscribeService(OAuthServiceMetaData metadata, ServiceLookup services) {
-        super(metadata, SOURCE_ID, FolderObject.CONTACT, "Microsoft Graph", services);
+        super(metadata, SOURCE_ID, FolderObject.CONTACT, "Outlook.com", services);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.subscribe.oauth.AbstractOAuthSubscribeService#getKnownApi()
-     */
     @Override
     protected KnownApi getKnownApi() {
         return KnownApi.MICROSOFT_GRAPH;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.subscribe.SubscribeService#getContent(com.openexchange.subscribe.Subscription)
-     */
     @Override
     public Collection<?> getContent(Subscription subscription) throws OXException {
         Session session = subscription.getSession();

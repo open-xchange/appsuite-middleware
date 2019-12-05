@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Totp provider for multifactor authentication
 Bundle-SymbolicName: com.openexchange.multifactor.provider.totp
 Automatic-Module-Name: com.openexchange.multifactor.provider.totp
-Bundle-Version: 7.10.2
+Bundle-Version: 7.10.3
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Activator: com.openexchange.multifactor.provider.totp.osgi.TotpProviderActivator

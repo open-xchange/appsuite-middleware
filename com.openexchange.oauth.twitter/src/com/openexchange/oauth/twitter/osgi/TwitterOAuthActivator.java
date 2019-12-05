@@ -82,27 +82,17 @@ public final class TwitterOAuthActivator extends AbstractOAuthActivator {
             super.stopBundle();
             //Clear service registry
             TwitterOAuthServiceRegistry.setServiceLookup(null);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             org.slf4j.LoggerFactory.getLogger(TwitterOAuthActivator.class).error("", e);
             throw e;
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.common.osgi.AbstractOAuthActivator#getOAuthServiceMetaData()
-     */
     @Override
     protected OAuthServiceMetaData getOAuthServiceMetaData() {
         return new TwitterOAuthServiceMetaData(this);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.common.osgi.AbstractOAuthActivator#getScopes()
-     */
     @Override
     protected OAuthScope[] getScopes() {
         return TwitterOAuthScope.values();

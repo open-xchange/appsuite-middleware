@@ -1,0 +1,31 @@
+type: object
+description: Contains the extended properties for calendar folders
+properties:
+  description:
+    type: object
+    description: The description of the folder
+    properties:
+      value:
+        type: string
+  usedForSync:
+    type: object
+    description: >-
+      Indicates whether the folder should be considered for synchronization
+      with external clients or not.
+    properties:
+      value:
+        type: string
+  color:
+    type: object
+    description: Indicates the color the folder should be displayed with
+    properties:
+      value:
+        type: string
+  scheduleTransp:
+    type: object
+    description: >-
+      Indicates whether the calendar object resources in a calendar
+      collection will affect the owner's busy time information or not
+    properties:
+      value:
+        type: string

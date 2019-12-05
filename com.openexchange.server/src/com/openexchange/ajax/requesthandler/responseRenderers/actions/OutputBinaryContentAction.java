@@ -114,7 +114,7 @@ public class OutputBinaryContentAction implements IFileResponseRendererAction {
                             if (ifRangeTime != -1 && ifRangeTime < data.getResult().getExpires()) {
                                 full = true;
                             }
-                        } catch (final IllegalArgumentException ignore) {
+                        } catch (IllegalArgumentException ignore) {
                             full = true;
                         }
                     }
@@ -198,7 +198,7 @@ public class OutputBinaryContentAction implements IFileResponseRendererAction {
                     try {
                         data.getResponse().setHeader("Content-Length", Long.toString(amount));
                         copy(data.getDocumentData(), outputStream, off, amount);
-                    } catch (final OffsetOutOfRangeIOException e) {
+                    } catch (OffsetOutOfRangeIOException e) {
                         setHeaderSafe("Content-Range", "bytes */" + e.getAvailable(), data.getResponse()); // Required in 416.
                         data.getResponse().sendError(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
                         return;
@@ -209,7 +209,7 @@ public class OutputBinaryContentAction implements IFileResponseRendererAction {
                 }
             }
             outputStream.flush();
-        } catch (final java.net.SocketException e) {
+        } catch (java.net.SocketException e) {
             final String lmsg = com.openexchange.java.Strings.toLowerCase(e.getMessage());
             if ("broken pipe".equals(lmsg) || "connection reset".equals(lmsg)) {
                 // Assume client-initiated connection closure
@@ -217,9 +217,9 @@ public class OutputBinaryContentAction implements IFileResponseRendererAction {
             } else {
                 LOG.warn("Lost connection to client while trying to output file", e);
             }
-        } catch (final com.sun.mail.util.MessageRemovedIOException e) {
+        } catch (com.sun.mail.util.MessageRemovedIOException e) {
             sendErrorSafe(HttpServletResponse.SC_NOT_FOUND, "Message not found.", data.getResponse());
-        } catch (final IOException e) {
+        } catch (IOException e) {
             if (IOs.isConnectionReset(e)) {
                 /*-
                  * The client side has abruptly aborted the connection.
@@ -255,7 +255,7 @@ public class OutputBinaryContentAction implements IFileResponseRendererAction {
     private void setHeaderSafe(final String name, final String value, final HttpServletResponse resp) {
         try {
             resp.setHeader(name, value);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             // Ignore
         }
     }
@@ -263,7 +263,7 @@ public class OutputBinaryContentAction implements IFileResponseRendererAction {
     private void sendErrorSafe(int sc, String msg, final HttpServletResponse resp) {
         try {
             resp.sendError(sc, msg);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             // Ignore
         }
     }

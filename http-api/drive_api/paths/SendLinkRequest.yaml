@@ -5,31 +5,28 @@
       - Drive
     summary: Sends a share link
     description: Sends a notification message for a share link to one or more recipients.
-    consumes:
-      - application/json
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
-      - $ref: "#/parameters/gblQueryParamRoot"
-      - in: body
-        name: body
-        description: |
-          A JSON object describing the target file- or directory version to send the link for. The recipients are listed
-          in field `recipients` and an optionally custom notification message may be specified in a `message` field.
-        required: true
-        schema:
-          $ref: "#/definitions/DriveShareLinkNotificationBody"
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - $ref: '#/components/parameters/gblQueryParamRoot'
     responses:
-      200:
-        description: |
-          An empty JSON object. Any transport warnings that occurred during sending the notifications are available in
-          the `warnings` field. In case of errors the responsible fields in the response are filled.
-        schema:
-          $ref: "#/definitions/DriveNotificationResponse"
-    x-ox-examples:      
-      - Example1:
+      '200':
+        description: >
+          An empty JSON object. Any transport warnings that occurred during
+          sending the notifications are available in
+
+          the `warnings` field. In case of errors the responsible fields in the
+          response are filled.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DriveNotificationResponse'
+    x-ox-examples:
+      - Example1: null
         description: Basic example
-        example: |
-          ==> PUT http://192.168.32.191/ajax/drive?action=sendLink&session=35d55f0bd2284e78a8eb4dba99b1310b&root=9542
+        example: >
+          ==> PUT
+          http://192.168.32.191/ajax/drive?action=sendLink&session=35d55f0bd2284e78a8eb4dba99b1310b&root=9542
+
           > Content:
             {
               "path": "/",
@@ -42,7 +39,20 @@
             }
 
           <== HTTP 200 OK (260.9242 ms elapsed, 11 bytes received)
+
           <   Content: 
               {
                 "data": {}
               }
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DriveShareLinkNotificationBody'
+      description: >
+        A JSON object describing the target file- or directory version to send
+        the link for. The recipients are listed
+
+        in field `recipients` and an optionally custom notification message may
+        be specified in a `message` field.
+      required: true

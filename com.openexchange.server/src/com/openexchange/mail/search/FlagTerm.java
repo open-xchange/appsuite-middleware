@@ -115,7 +115,7 @@ public final class FlagTerm extends SearchTerm<Integer> {
         final Flags msgFlags;
         try {
             msgFlags = msg.getFlags();
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             org.slf4j.LoggerFactory.getLogger(FlagTerm.class).warn("Error during search.", e);
             return false;
         }

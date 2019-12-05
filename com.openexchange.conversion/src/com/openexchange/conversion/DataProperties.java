@@ -208,7 +208,7 @@ public final class DataProperties implements Cloneable {
             clone.map = new HashMap<String, String>(map.size());
             clone.map.putAll(map);
             return clone;
-        } catch (final CloneNotSupportedException e) {
+        } catch (CloneNotSupportedException e) {
             // Cannot occur
             throw new InternalError("CloneNotSupportedException although Cloneable is implemented");
         }

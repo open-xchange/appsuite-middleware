@@ -122,7 +122,7 @@ public final class RemindAgainAction extends AbstractReminderAction {
         }
         final ReminderWriter reminderWriter = new ReminderWriter(timeZone);
 
-        if(longId > Integer.MAX_VALUE){
+        if (longId > Integer.MAX_VALUE){
 
             // reminder is an event reminder
             int alarmId = (int) (longId >> 32);
@@ -130,7 +130,7 @@ public final class RemindAgainAction extends AbstractReminderAction {
             CalendarService calendarService = ServerServiceRegistry.getInstance().getService(CalendarService.class);
             CalendarSession calendarSession = calendarService.init(req.getSession());
             CalendarServiceUtilities calendarServiceUtilities = calendarService.getUtilities();
-            Event event = calendarServiceUtilities.resolveByID(calendarSession, String.valueOf(eventIdInt));
+            Event event = calendarServiceUtilities.resolveByID(calendarSession, String.valueOf(eventIdInt), null);
             List<Alarm> alarms = event.getAlarms();
             Alarm alarmToSnooze = null;
             for (Alarm alarm : alarms) {
@@ -176,7 +176,7 @@ public final class RemindAgainAction extends AbstractReminderAction {
 
             CalendarResult updateAlarms = calendarService.updateAlarms(calendarSession, eventId, alarms, event.getTimestamp());
             Alarm result = snoozeAlarm;
-            if(updateAlarms.getUpdates() != null && updateAlarms.getUpdates().size() == 1){
+            if (updateAlarms.getUpdates() != null && updateAlarms.getUpdates().size() == 1){
                 result = updateAlarms.getUpdates().get(0).getAlarmUpdates().getUpdatedItems().get(0).getUpdate();
             }
             return new AJAXRequestResult(this.createResponse(reminder.getDate(), event, result, calendarService, calendarSession, reminderWriter), event.getLastModified(), "json");

@@ -273,7 +273,6 @@ public class StatisticTools extends AbstractJMXTools {
             System.out.print(getStats(mbc, "com.openexchange.usm.session", "name", "com.openexchange.usm.session.impl.USMSessionInformation"));
             System.out.print(showEventAdminData(mbc));
             System.out.print(showNioBufferData(mbc));
-            System.out.println(showRtData(mbc));
             System.out.println(showPnsData(mbc));
             System.out.println(showWebSocketData(mbc));
             count++;
@@ -341,10 +340,6 @@ public class StatisticTools extends AbstractJMXTools {
             System.out.print(showNioBufferData(mbc));
             count++;
         }
-        if (null != parser.getOptionValue(this.rtstats) && 0 == count) {
-            System.out.print(showRtData(mbc));
-            count++;
-        }
         if (0 == count) {
             System.err.println(new StringBuilder("No option selected (").append(OPT_STATS_LONG).append(", ").append(
                 OPT_RUNTIME_STATS_LONG).append(", ").append(OPT_OS_STATS_LONG).append(", ").append(OPT_THREADING_STATS_LONG).append(
@@ -376,7 +371,7 @@ public class StatisticTools extends AbstractJMXTools {
                 "getThreadAllocatedBytes",
                 new Object[] { allThreadIds },
                 new String[] { "[J" });
-        } catch (final javax.management.ReflectionException e) {
+        } catch (javax.management.ReflectionException e) {
             System.err.println("AllocatedBytes is not supported on this JVM");
             // Simple set to an array of 0
             allocatedBytes = new long[threadInfo.length];
@@ -385,7 +380,7 @@ public class StatisticTools extends AbstractJMXTools {
         // First try the new method every time, if not available use the old iteration approach
         try {
             cpuTime = (long[]) mbc.invoke(srvThrdName, "getThreadCpuTime", new Object[] { allThreadIds }, new String[] { "[J" });
-        } catch (final javax.management.ReflectionException e) {
+        } catch (javax.management.ReflectionException e) {
             cpuTime = new long[threadInfo.length];
             for (int i = 0; i < allThreadIds.length; i++) {
                 cpuTime[i] = threadBean.getThreadCpuTime(allThreadIds[i]);
@@ -397,7 +392,7 @@ public class StatisticTools extends AbstractJMXTools {
                 "getThreadUserTime",
                 new Object[] { allThreadIds },
                 new String[] { "[J" });
-        } catch (final javax.management.ReflectionException e) {
+        } catch (javax.management.ReflectionException e) {
             userTime = new long[threadInfo.length];
             for (int i = 0; i < allThreadIds.length; i++) {
                 userTime[i] = threadBean.getThreadUserTime(allThreadIds[i]);
@@ -606,7 +601,6 @@ public class StatisticTools extends AbstractJMXTools {
             "shows the NIO buffer stats",
             false,
             NeededQuadState.notneeded);
-        this.rtstats = setShortLongOpt(parser, OPT_RT_BUFFER_STATS_SHORT, OPT_RT_BUFFER_STATS_LONG, "shows stats for the realtime component", false, NeededQuadState.notneeded);
 
 
     }
@@ -719,7 +713,7 @@ public class StatisticTools extends AbstractJMXTools {
                         sb.append(" = ");
                         try {
                             sb.append(mbc.getAttribute(objectName, attributeInfo.getName()));
-                        } catch (final Exception e) {
+                        } catch (Exception e) {
                             sb.append('[');
                             sb.append(e.getMessage());
                             sb.append(']');
@@ -797,7 +791,7 @@ public class StatisticTools extends AbstractJMXTools {
                     sb.append(" = ");
                     try {
                         sb.append(mbeanServerConnection.getAttribute(objectName, attribute));
-                    } catch (final Exception e) {
+                    } catch (Exception e) {
                         sb.append('[');
                         sb.append(e.getMessage());
                         sb.append(']');
@@ -947,35 +941,6 @@ public class StatisticTools extends AbstractJMXTools {
         return getStats(mbeanServerConnection, "java.nio:type=BufferPool,name=direct")
         .append(getStats(mbeanServerConnection, "java.nio:type=BufferPool,name=mapped"))
         .toString();
-    }
-
-    static String showRtData(final MBeanServerConnection mbeanServerConnection) {
-        String runLoopFillSum = "RunLoopFillSum";
-        StringBuilder sb = new StringBuilder();
-        try {
-            final ObjectName objectName = new ObjectName("com.openexchange.realtime:name=RunLoopManager");
-            Object fillSum = mbeanServerConnection.getAttribute(objectName, runLoopFillSum);
-            if (fillSum instanceof Map) {
-                Map<?, ?> fillSums = Map.class.cast(fillSum);
-                for (Entry<?, ?> entry : fillSums.entrySet()) {
-                    sb.append(objectName);
-                    sb.append(',');
-                    sb.append(runLoopFillSum);
-                    sb.append(',');
-                    sb.append(entry.getKey());
-                    sb.append(" = ");
-                    sb.append(entry.getValue());
-                    sb.append(LINE_SEPARATOR);
-                }
-            }
-        } catch (final Exception e) {
-            sb.append("com.openexchange.realtime");
-            sb.append(" = ");
-            sb.append('[');
-            sb.append(e.toString());
-            sb.append(']');
-        }
-        return sb.toString();
     }
 
     private static String extractTextInBrackets(final String value, final int startIdx) {

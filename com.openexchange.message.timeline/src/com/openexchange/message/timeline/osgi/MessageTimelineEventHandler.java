@@ -83,7 +83,7 @@ public final class MessageTimelineEventHandler implements EventHandler {
                         MessageTimelineManagement.getInstance().dropFor(userId.intValue(), contextId.intValue());
                     }
                 }
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 LOG.error("Error while handling SessionD event \"{}\"", topic, e);
             }
         }

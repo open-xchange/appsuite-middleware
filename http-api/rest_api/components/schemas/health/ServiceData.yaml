@@ -1,0 +1,23 @@
+type: object
+properties:
+  name:
+    type: string
+    description: The name
+  version:
+    type: string
+    description: The middleware version running on this node
+  buildDate:
+    type: string
+    description: The build date of the middleware running on this node
+  date:
+    type: string
+    description: The date the health-check was executed
+  timeZone:
+    type: string
+    description: The node's default time zone
+  locale:
+    type: string
+    description: The node's default locale
+  charset:
+    type: string
+    description: The node's default charset

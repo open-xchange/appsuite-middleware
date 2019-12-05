@@ -83,52 +83,27 @@ public class ConfigDiffCLT extends AbstractCLI<Void, Void> {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractCLI#invoke(org.apache.commons.cli.Options, org.apache.commons.cli.CommandLine, java.lang.Object)
-     */
     @Override
     protected Void invoke(Options option, CommandLine cmd, Void context) throws Exception {
         executeDiff(cmd.getOptionValue("f"));
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractCLI#addOptions(org.apache.commons.cli.Options)
-     */
     @Override
     protected void addOptions(Options options) {
         options.addOption(createArgumentOption("f", "file", "filename", "Export diff to file", false));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractCLI#checkOptions(org.apache.commons.cli.CommandLine)
-     */
     @Override
     protected void checkOptions(CommandLine cmd) {
         // no-op
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractCLI#getFooter()
-     */
     @Override
     protected String getFooter() {
         return FOOTER;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractCLI#getName()
-     */
     @Override
     protected String getName() {
         return SYNTAX;
@@ -156,11 +131,6 @@ public class ConfigDiffCLT extends AbstractCLI<Void, Void> {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractCLI#getContext()
-     */
     @Override
     protected Void getContext() {
         return null;

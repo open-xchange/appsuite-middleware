@@ -49,23 +49,23 @@
 
 package com.openexchange.chronos.itip.osgi;
 
+import static com.openexchange.osgi.Tools.withRanking;
 import java.util.Dictionary;
-import java.util.Hashtable;
-import org.osgi.framework.Constants;
 import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.chronos.itip.CalendarITipIntegrationUtility;
 import com.openexchange.chronos.itip.EventNotificationPool;
 import com.openexchange.chronos.itip.ITipActionPerformerFactoryService;
 import com.openexchange.chronos.itip.ITipAnalyzerService;
 import com.openexchange.chronos.itip.analyzers.DefaultITipAnalyzerService;
-import com.openexchange.chronos.itip.generators.ITipNotificationParticipantResolver;
 import com.openexchange.chronos.itip.generators.ITipMailGeneratorFactory;
 import com.openexchange.chronos.itip.generators.ITipNotificationMailGeneratorFactory;
+import com.openexchange.chronos.itip.generators.ITipNotificationParticipantResolver;
 import com.openexchange.chronos.itip.handler.ITipHandler;
 import com.openexchange.chronos.itip.performers.DefaultITipActionPerformerFactoryService;
 import com.openexchange.chronos.itip.sender.DefaultMailSenderService;
 import com.openexchange.chronos.itip.sender.MailSenderService;
 import com.openexchange.chronos.itip.sender.PoolingMailSenderService;
+import com.openexchange.chronos.scheduling.changes.DescriptionService;
 import com.openexchange.chronos.service.CalendarHandler;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarUtilities;
@@ -73,10 +73,12 @@ import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
+import com.openexchange.folderstorage.FolderService;
 import com.openexchange.group.GroupService;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.regional.RegionalSettingsService;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.timer.TimerService;
@@ -94,12 +96,12 @@ public class Activator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { ConfigurationService.class, TimerService.class, ContextService.class, CalendarStorageFactory.class, RecurrenceService.class, UserService.class, ResourceService.class, ICalService.class, CalendarService.class,
-            HtmlService.class, TemplateService.class, CalendarUtilities.class, GroupService.class };
+            HtmlService.class, TemplateService.class, CalendarUtilities.class, GroupService.class, RegionalSettingsService.class, FolderService.class };
     }
 
     @Override
     protected Class<?>[] getOptionalServices() {
-        return new Class<?>[] { HostnameService.class };
+        return new Class<?>[] { HostnameService.class, DescriptionService.class };
     }
 
     @Override
@@ -124,11 +126,9 @@ public class Activator extends HousekeepingActivator {
             sender = new PoolingMailSenderService(pool, sender);
         }
 
-        Dictionary<String, Object> analyzerProps = new Hashtable<>();
-        analyzerProps.put(Constants.SERVICE_RANKING, DefaultITipAnalyzerService.RANKING); // Default
+        Dictionary<String, Object> analyzerProps = withRanking(DefaultITipAnalyzerService.RANKING); // Default
         registerService(ITipAnalyzerService.class, new DefaultITipAnalyzerService(util), analyzerProps);
-        Dictionary<String, Object> factoryProps = new Hashtable<>();
-        factoryProps.put(Constants.SERVICE_RANKING, DefaultITipActionPerformerFactoryService.RANKING); // Default
+        Dictionary<String, Object> factoryProps = withRanking(DefaultITipActionPerformerFactoryService.RANKING); // Default
         registerService(ITipActionPerformerFactoryService.class, new DefaultITipActionPerformerFactoryService(util, sender, generatorFactory), factoryProps);
 
         registerService(ITipMailGeneratorFactory.class, generatorFactory);

@@ -115,7 +115,7 @@ public abstract class SystemObject implements Serializable {
         }
         try {
             return (V) map.get(name);
-        } catch (final ClassCastException e) {
+        } catch (ClassCastException e) {
             return null;
         }
     }
@@ -136,7 +136,7 @@ public abstract class SystemObject implements Serializable {
         }
         try {
             return (V) map.remove(name);
-        } catch (final ClassCastException e) {
+        } catch (ClassCastException e) {
             return null;
         }
     }

@@ -66,7 +66,7 @@ public enum SHACrypt {
     /**
      * SHA-1 algorithm.
      *
-     * @deprecated Use SHA256 to generate new password instead
+     * @deprecated Use SHA-256 to generate new password instead
      */
     @Deprecated
     SHA1("{SHA}", "SHA"),
@@ -76,7 +76,7 @@ public enum SHACrypt {
     SHA256("{SHA-256}", "SHA-256"),
     /**
      * SHA-512 algorithm.
-     * Note: Might not run will all JVMs.
+     * Note: Might not run on all JVMs.
      *
      * @see <a href="https://docs.oracle.com/javase/8/docs/api/java/security/MessageDigest.html">MessageDigest</a>
      *

@@ -53,13 +53,13 @@ public class OXServerServicePortTypeImpl implements OXServerServicePortType {
         try {
             final OXLoginInterface loginInterface = getLoginInterface();
             loginInterface.login(soap2Credentials(auth));
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             throw new RemoteException_Exception(e.getMessage(), e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             throw new StorageException_Exception(e.getMessage(), e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             throw new InvalidCredentialsException_Exception(e.getMessage(), e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             throw new InvalidDataException_Exception(e.getMessage(), e);
         }
         try {
@@ -69,17 +69,17 @@ public class OXServerServicePortTypeImpl implements OXServerServicePortType {
                 return Collections.emptyList();
             }
             return Arrays.asList(bundles);
-        } catch (final MalformedObjectNameException e) {
+        } catch (MalformedObjectNameException e) {
             throw new RemoteException_Exception(e.getMessage(), e);
-        } catch (final InstanceNotFoundException e) {
+        } catch (InstanceNotFoundException e) {
             throw new RemoteException_Exception(e.getMessage(), e);
-        } catch (final NullPointerException e) {
+        } catch (NullPointerException e) {
             throw new RemoteException_Exception(e.getMessage(), e);
-        } catch (final MBeanException e) {
+        } catch (MBeanException e) {
             throw new RemoteException_Exception(e.getMessage(), e);
-        } catch (final ReflectionException e) {
+        } catch (ReflectionException e) {
             throw new RemoteException_Exception(e.getMessage(), e);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw new RemoteException_Exception(e.getMessage(), e);
         }
     }
@@ -89,29 +89,29 @@ public class OXServerServicePortTypeImpl implements OXServerServicePortType {
         try {
             final OXLoginInterface loginInterface = getLoginInterface();
             loginInterface.login(soap2Credentials(auth));
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             throw new RemoteException_Exception(e.getMessage(), e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             throw new StorageException_Exception(e.getMessage(), e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             throw new InvalidCredentialsException_Exception(e.getMessage(), e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             throw new InvalidDataException_Exception(e.getMessage(), e);
         }
         try {
             final JMXHelper jmxHelper = new JMXHelper();
             return jmxHelper.getServerVersion();
-        } catch (final MalformedObjectNameException e) {
+        } catch (MalformedObjectNameException e) {
             throw new RemoteException_Exception(e.getMessage(), e);
-        } catch (final InstanceNotFoundException e) {
+        } catch (InstanceNotFoundException e) {
             throw new RemoteException_Exception(e.getMessage(), e);
-        } catch (final NullPointerException e) {
+        } catch (NullPointerException e) {
             throw new RemoteException_Exception(e.getMessage(), e);
-        } catch (final MBeanException e) {
+        } catch (MBeanException e) {
             throw new RemoteException_Exception(e.getMessage(), e);
-        } catch (final ReflectionException e) {
+        } catch (ReflectionException e) {
             throw new RemoteException_Exception(e.getMessage(), e);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw new RemoteException_Exception(e.getMessage(), e);
         }
     }

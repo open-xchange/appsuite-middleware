@@ -122,7 +122,7 @@ public class StartsOrEndsWithMatcherUtil {
      */
     public static MatchType checkMatchType(MatchType matchType, List<String> values){
 
-        if(matchType == null || !matchType.equals(MatchType.matches)){
+        if (matchType == null || !matchType.equals(MatchType.matches)){
             return matchType;
         }
 
@@ -130,7 +130,7 @@ public class StartsOrEndsWithMatcherUtil {
        boolean endswith = false;
 
         for(String value: values){
-            if(value.startsWith(WILDCARD) && startswith==false){
+            if (value.startsWith(WILDCARD) && startswith==false){
                 endswith=true;
             } else if (value.endsWith(WILDCARD) && endswith==false) {
                 startswith=true;
@@ -150,11 +150,11 @@ public class StartsOrEndsWithMatcherUtil {
      * @return The adjusted values
      */
     public static List<String> retrieveListForMatchType(List<String> values, MatchType matchType){
-        if(matchType==null){
+        if (matchType==null){
             return values;
         }
         List<String> result;
-        switch(matchType){
+        switch (matchType){
             case startswith:
                 result = new ArrayList<>(values.size());
                 for (String str : values) {

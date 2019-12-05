@@ -79,7 +79,7 @@ public class ReportConfiguration {
             }
             try {
                 in = new FileInputStream(licensePropFile);
-            } catch (final FileNotFoundException e) {
+            } catch (FileNotFoundException e) {
                 throw new IOException(new StringBuilder("Property file \"").append(propDir).append("/").append(propFile).append("\" couldn't be found").toString());
             }
         }

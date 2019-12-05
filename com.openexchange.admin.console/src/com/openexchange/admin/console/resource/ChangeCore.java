@@ -106,7 +106,7 @@ public abstract class ChangeCore extends ResourceAbstraction {
 
             displayChangedMessage(successtext, ctxid, parser);
             sysexit(0);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             printErrors(successtext, ctxid, e, parser);
             sysexit(1);
         }

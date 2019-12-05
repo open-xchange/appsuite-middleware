@@ -50,6 +50,8 @@
 package com.openexchange.share.impl.osgi;
 
 import java.rmi.Remote;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.concurrent.ExecutorService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -192,7 +194,11 @@ public class ShareActivator extends HousekeepingActivator {
         registerService(ModuleSupport.class, new ModuleSupportImpl(this, folderHandlerRegistry, accessibleModulesTracker, handlerRegistry, adjusterRegistry));
         registerService(QuotaProvider.class, new ShareLinksQuotaProvider(this));
         registerService(QuotaProvider.class, new InviteGuestsQuotaProvider(this));
-        registerService(Remote.class, new ShareRMIServiceImpl(shareService));
+        {
+            Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
+            serviceProperties.put("RMI_NAME", ShareRMIServiceImpl.RMI_NAME);
+            registerService(Remote.class, new ShareRMIServiceImpl(shareService), serviceProperties);
+        }
 
         trackService(ModuleSupport.class);
         trackService(IDBasedFileAccessFactory.class);

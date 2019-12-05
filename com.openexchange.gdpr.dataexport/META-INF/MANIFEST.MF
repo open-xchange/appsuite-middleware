@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange GDPR Data Export Bundle
+Bundle-SymbolicName: com.openexchange.gdpr.dataexport
+Bundle-Version: 7.10.3
+Bundle-Vendor: OX Software GmbH
+Automatic-Module-Name: com.openexchange.gdpr.dataexport
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: com.google.common.base,
+ com.google.common.collect,
+ com.openexchange.exception,
+ com.openexchange.i18n,
+ com.openexchange.java,
+ com.openexchange.java.util,
+ com.openexchange.osgi.annotation,
+ com.openexchange.session,
+ org.json
+Export-Package: com.openexchange.gdpr.dataexport,
+ com.openexchange.gdpr.dataexport.rmi

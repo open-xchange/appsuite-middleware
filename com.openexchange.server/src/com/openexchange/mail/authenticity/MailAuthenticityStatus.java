@@ -65,17 +65,24 @@ public enum MailAuthenticityStatus {
      */
     FAIL("Fail", "fail"),
     /**
-     * Cannot determine status, or temporary errors occurred
+     * Suspicious content
+     */
+    SUSPICIOUS("Suspicious", "suspicious"),
+    /**
+     * The authentication result was analysed but either no status
+     * could be determined, or temporary errors have occurred.
      */
     NEUTRAL("Neutral", "neutral"),
     /**
-     * Nothing has been analyzed (Used in case of an error or
-     * for e-mails before the defined cut-off-date)
-     * 
+     * Nothing has been analysed (Used in case of an error
+     * before the actual analysis (e.g. IMAP down) or for
+     * e-mails before the defined cut-off-date)
      */
     NOT_ANALYZED("Not Analyzed", "not-analyzed"),
     /**
-     * None
+     * None. No mechanism result was defined in the authentication result.
+     * Note that this is an internal status and is not meant to be used
+     * for the clients. 
      */
     NONE("None", "none"),
     /**

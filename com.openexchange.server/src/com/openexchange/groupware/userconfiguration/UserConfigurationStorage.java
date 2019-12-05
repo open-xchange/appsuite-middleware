@@ -51,8 +51,8 @@ package com.openexchange.groupware.userconfiguration;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.session.Session;
+import com.openexchange.user.User;
 import com.openexchange.userconf.UserConfigurationService;
 
 /**
@@ -151,7 +151,7 @@ public abstract class UserConfigurationStorage {
     public final UserConfiguration getUserConfigurationSafe(final int userId, final int[] groups, final Context ctx) {
         try {
             return UserConfigurationStorage.getInstance().getUserConfiguration(userId, groups, ctx);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             return null;
         }

@@ -63,7 +63,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.container.ThresholdFileHolder;
-import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.Attachment;
@@ -94,7 +93,7 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * 
+ *
  * {@link ActionPerformerAction}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
@@ -102,7 +101,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class ActionPerformerAction extends AbstractITipAction {
 
-    private RankingAwareNearRegistryServiceTracker<ITipActionPerformerFactoryService> factoryListing;
+    private final RankingAwareNearRegistryServiceTracker<ITipActionPerformerFactoryService> factoryListing;
 
     public ActionPerformerAction(ServiceLookup services, RankingAwareNearRegistryServiceTracker<ITipAnalyzerService> analyzerListing, RankingAwareNearRegistryServiceTracker<ITipActionPerformerFactoryService> factoryListing) {
         super(services, analyzerListing);
@@ -149,7 +148,7 @@ public class ActionPerformerAction extends AbstractITipAction {
 
     /**
      * Adds the actual data to the attachments
-     * 
+     *
      * @param analysisToProcess The analysis already made
      * @param session The {@link CalendarSession}
      */
@@ -164,7 +163,7 @@ public class ActionPerformerAction extends AbstractITipAction {
                         if (Strings.isEmpty(attachment.getUri())) {
                             continue;
                         }
-                        IFileHolder attachmentData = optAttachmentData(request, getContentId(attachment.getUri()));
+                        ThresholdFileHolder attachmentData = optAttachmentData(request, getContentId(attachment.getUri()));
                         if (null == attachmentData) {
                             attachmentData = optAttachmentData(request, prepareUri(attachment.getUri()));
                             if (null == attachmentData) {
@@ -174,6 +173,7 @@ public class ActionPerformerAction extends AbstractITipAction {
                             }
                         }
                         attachment.setData(attachmentData);
+                        attachment.setChecksum(attachmentData.getMD5());
                         attachment.setUri(null);
                         if (Strings.isNotEmpty(attachmentData.getName())) {
                             attachment.setFilename(attachmentData.getName());
@@ -257,42 +257,48 @@ public class ActionPerformerAction extends AbstractITipAction {
      * @param contentId The content identifier of the attachment to retrieve
      * @return The attachment data loaded into a file holder, or <code>null</code> if not found
      */
-    private IFileHolder optAttachmentData(AJAXRequestData requestData, String contentId) throws OXException {
+    private ThresholdFileHolder optAttachmentData(AJAXRequestData requestData, String contentId) throws OXException {
         ConversionService conversionEngine = services.getServiceSafe(ConversionService.class);
         DataSource dataSource = conversionEngine.getDataSource("com.openexchange.mail.attachment");
         if (null == dataSource) {
-            LOG.warn("Data source \"com.openexchange.mail.attachment\" not available, unable to access mail attachement data.");
+            LOG.warn("Data source \"com.openexchange.mail.attachment\" not available. Unable to access mail attachment data.");
             return null;
         }
-        DataArguments dataArguments = getDataSource(requestData);
-        dataArguments.put("com.openexchange.mail.conversion.cid", contentId);
+
         ThresholdFileHolder fileHolder = null;
         InputStream inputStream = null;
         try {
+            DataArguments dataArguments = getDataSource(requestData);
+            dataArguments.put("com.openexchange.mail.conversion.cid", contentId);
             Data<InputStream> data = dataSource.getData(InputStream.class, dataArguments, requestData.getSession());
             if (null != data) {
                 inputStream = data.getData();
-                fileHolder = new ThresholdFileHolder().write(inputStream);
+                fileHolder = new ThresholdFileHolder();
+                fileHolder.write(inputStream);
                 if (null != data.getDataProperties()) {
                     fileHolder.setContentType(data.getDataProperties().get("com.openexchange.conversion.content-type"));
                     fileHolder.setName(data.getDataProperties().get("com.openexchange.conversion.name"));
                 }
+                ThresholdFileHolder retval = fileHolder;
+                fileHolder = null;
+                return retval;
             }
         } catch (OXException e) {
-            if ("MSG-0049".equals(e.getErrorCode())) {
-                // attachment not found
+            if (e.equalsCode(49, "MSG")) {
+                // Attachment not found
                 return null;
             }
             throw e;
         } finally {
-            Streams.close(inputStream);
+            Streams.close(inputStream, fileHolder);
         }
-        return fileHolder;
+
+        return null;
     }
 
     /**
      * Converts a "cid" URL to its corresponding <code>Content-ID</code> message header,
-     * 
+     *
      * @param cidUrl The "cid" URL to convert
      * @return The corresponding contentId, or the passed value as-is if not possible
      */

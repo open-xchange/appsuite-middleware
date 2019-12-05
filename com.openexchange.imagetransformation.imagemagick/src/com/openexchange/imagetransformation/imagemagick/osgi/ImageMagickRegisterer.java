@@ -49,10 +49,8 @@
 
 package com.openexchange.imagetransformation.imagemagick.osgi;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
+import static com.openexchange.osgi.Tools.withRanking;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
@@ -160,9 +158,7 @@ public class ImageMagickRegisterer implements Reloadable {
         if (null == provider) {
             provider = new ImageMagickImageTransformationProvider(services.getService(TransformedImageCreator.class), searchPath, useGraphicsMagick, numThreads, timeoutSecs);
 
-            Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
-            properties.put(Constants.SERVICE_RANKING, Integer.valueOf(10));
-            registration = context.registerService(ImageTransformationProvider.class, provider, properties);
+            registration = context.registerService(ImageTransformationProvider.class, provider, withRanking(10));
             LOG.info("ImageMagick-based image transformation provider successfully registered using search path {} with GraphicsMagick utilization set to {}", searchPath, Boolean.valueOf(useGraphicsMagick));
         } else {
             provider.setSearchPath(searchPath);

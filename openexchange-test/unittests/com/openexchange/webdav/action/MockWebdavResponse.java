@@ -19,7 +19,7 @@ public class MockWebdavResponse implements WebdavResponse {
     public String getResponseBodyAsString() {
         try {
             return new String(out.toByteArray(), "UTF-8");
-        } catch (final UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
             return e.toString();
         }

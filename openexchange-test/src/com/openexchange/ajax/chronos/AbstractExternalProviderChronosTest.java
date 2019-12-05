@@ -59,8 +59,6 @@ import java.util.Collections;
 import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.runner.RunWith;
-import org.junit.runners.BlockJUnit4ClassRunner;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -68,19 +66,17 @@ import com.openexchange.ajax.chronos.manager.ChronosApiException;
 import com.openexchange.ajax.proxy.ClearRequest;
 import com.openexchange.ajax.proxy.MockRequest;
 import com.openexchange.ajax.proxy.MockRequestMethod;
-import com.openexchange.ajax.proxy.StartMockServerRequest;
 import com.openexchange.exception.OXException;
 import com.openexchange.testing.httpclient.invoker.ApiException;
+import com.openexchange.testing.httpclient.models.FolderCalendarConfig;
+import com.openexchange.testing.httpclient.models.FolderCalendarExtendedProperties;
 import com.openexchange.testing.httpclient.models.FolderData;
-import com.openexchange.testing.httpclient.models.FolderDataComOpenexchangeCalendarConfig;
-import com.openexchange.testing.httpclient.models.FolderDataComOpenexchangeCalendarExtendedProperties;
 
 /**
  * {@link AbstractExternalProviderChronosTest}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-@RunWith(BlockJUnit4ClassRunner.class)
 public abstract class AbstractExternalProviderChronosTest extends AbstractChronosTest {
 
     private final String providerId;
@@ -97,7 +93,6 @@ public abstract class AbstractExternalProviderChronosTest extends AbstractChrono
     public void setUp() throws Exception {
         super.setUp();
         setUpConfiguration();
-        getClient().execute(new StartMockServerRequest());
     }
     
     protected void clear(String uri) throws OXException, IOException, JSONException {
@@ -208,8 +203,8 @@ public abstract class AbstractExternalProviderChronosTest extends AbstractChrono
         assertNotNull("The calendar configuration is 'null'", actualFolderData.getComOpenexchangeCalendarConfig());
 
         ObjectMapper objectMapper = new ObjectMapper();
-        FolderDataComOpenexchangeCalendarConfig expectedConfig = objectMapper.readValue(config.toString(), FolderDataComOpenexchangeCalendarConfig.class);
-        FolderDataComOpenexchangeCalendarExtendedProperties expectedProperties = objectMapper.readValue(extProperties.toString(), FolderDataComOpenexchangeCalendarExtendedProperties.class);
+        FolderCalendarConfig expectedConfig = objectMapper.readValue(config.toString(), FolderCalendarConfig.class);
+        FolderCalendarExtendedProperties expectedProperties = objectMapper.readValue(extProperties.toString(), FolderCalendarExtendedProperties.class);
         assertEquals(expectedConfig, actualFolderData.getComOpenexchangeCalendarConfig());
         assertEquals(expectedProperties, actualFolderData.getComOpenexchangeCalendarExtendedProperties());
         return actualFolderData;

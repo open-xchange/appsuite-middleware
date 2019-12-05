@@ -70,8 +70,8 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.importexport.Format;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
-import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.osgi.ImportExportServices;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
@@ -114,14 +114,14 @@ public class VCardImporter extends ContactImporter implements OXExceptionConstan
             int folderId = 0;
             try {
                 folderId = Integer.parseInt(folder);
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 throw ImportExportExceptionCodes.NUMBER_FAILED.create(e, folder);
             }
 
             FolderObject fo;
             try {
                 fo = folderAccess.getFolderObject(folderId);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 return false;
             }
 
@@ -137,9 +137,9 @@ public class VCardImporter extends ContactImporter implements OXExceptionConstan
             EffectivePermission perm;
             try {
                 perm = fo.getEffectiveUserPermission(session.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext()));
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 throw ImportExportExceptionCodes.NO_DATABASE_CONNECTION.create(e);
-            } catch (final RuntimeException e) {
+            } catch (RuntimeException e) {
                 throw ImportExportExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
             }
 
@@ -164,7 +164,7 @@ public class VCardImporter extends ContactImporter implements OXExceptionConstan
             FolderObject fo;
             try {
                 fo = folderAccess.getFolderObject(folderId);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 throw ImportExportExceptionCodes.LOADING_FOLDER_FAILED.create(folder);
             }
 
@@ -209,7 +209,7 @@ public class VCardImporter extends ContactImporter implements OXExceptionConstan
                         }
                         Contact contactObj = vCardImport.getContact();
                         contactObj.setParentFolderID(contactFolderId);
-                        if(maxSimilarity!=null){
+                        if (maxSimilarity!=null){
                             Contact duplicate = checkSimilarity(session, contactObj, Float.parseFloat(maxSimilarity));
                             if (duplicate != null) {
                                 importResult.setException(ImportExportExceptionCodes.CONTACT_TOO_SIMILAR.create(contactObj.getUid(), duplicate.getUid(), I(duplicate.getParentFolderID())));
@@ -221,7 +221,7 @@ public class VCardImporter extends ContactImporter implements OXExceptionConstan
                         try {
                             super.createContact(session, contactObj, Integer.toString(contactFolderId), vCardImport.getVCard());
                             count++;
-                        } catch (final OXException oxEx) {
+                        } catch (OXException oxEx) {
                             if (CATEGORY_USER_INPUT.equals(oxEx.getCategory())) {
                                 LOG.debug("", oxEx);
                             } else {
@@ -241,10 +241,10 @@ public class VCardImporter extends ContactImporter implements OXExceptionConstan
                     break;
                 }
             }
-        } catch (final UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             LOG.error("", e);
             throw ImportExportExceptionCodes.UTF8_ENCODE_FAILED.create(e);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             LOG.error("", e);
             throw ImportExportExceptionCodes.VCARD_PARSING_PROBLEM.create(e, e.getMessage());
         } finally {

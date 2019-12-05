@@ -91,9 +91,12 @@ public final class ICalUtils {
             if (null != tzid) {
                 dateFormat.setTimeZone(TimeZone.getTimeZone(tzid));
                 dateFormat.applyPattern("yyyyMMdd'T'HHmmss");
-            } else {
+            } else if (property.getValue().endsWith("Z")) {
                 dateFormat.applyPattern("yyyyMMdd'T'HHmmss'Z'");
                 dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+            } else {
+                dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+                dateFormat.applyPattern("yyyyMMdd'T'HHmmss");
             }
         }
         return dateFormat.parse(property.getValue());

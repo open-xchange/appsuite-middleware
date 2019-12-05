@@ -118,7 +118,7 @@ public class RedeemLoginLocationTokenServlet extends AbstractShareServlet {
                 return;
             }
 
-            Map<String, String> loginLocationParameters = location.asMap();
+            Map<String, String> loginLocationParameters = location.asMap(translator);
             JSONObject jLoginLocation = new JSONObject(loginLocationParameters.size());
             for (Entry<String, String> loginLocationParameter : loginLocationParameters.entrySet()) {
                 jLoginLocation.put(loginLocationParameter.getKey(), loginLocationParameter.getValue());
@@ -141,7 +141,7 @@ public class RedeemLoginLocationTokenServlet extends AbstractShareServlet {
             LOG.error("", e);
             try {
                 response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "A JSON error occurred");
-            } catch (final IOException ioe) {
+            } catch (IOException ioe) {
                 LOG.error("", ioe);
             }
         }

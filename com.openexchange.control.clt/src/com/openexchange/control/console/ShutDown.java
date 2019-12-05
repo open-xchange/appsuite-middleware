@@ -81,7 +81,7 @@ public final class ShutDown extends AbstractConsoleHandler {
                 }
             }
             completed = shutdown(waitForExit) || !waitForExit;
-        } catch (final Exception exc) {
+        } catch (Exception exc) {
             final Throwable cause = exc.getCause();
             if (cause != null) {
                 if (cause instanceof BundleNotFoundException) {
@@ -96,7 +96,7 @@ public final class ShutDown extends AbstractConsoleHandler {
         } finally {
             try {
                 close();
-            } catch (final Exception exc) {
+            } catch (Exception exc) {
                 // Ignore. If the backend terminates successfully exception may appear here.
             }
         }

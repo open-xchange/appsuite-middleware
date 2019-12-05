@@ -110,7 +110,7 @@ public class AttachmentMailPart extends MailPart implements ComposedMailPart {
         }
         {
             final ContentType contentType = getContentType();
-            if (contentType.startsWith("text/") && "GB18030".equalsIgnoreCase(contentType.getCharsetParameter())) {
+            if (contentType.startsWith(TEXT) && "GB18030".equalsIgnoreCase(contentType.getCharsetParameter())) {
                 InputStream in = null;
                 try {
                     in = attachment.getData();

@@ -74,11 +74,6 @@ public class LdapConvertUtf8ToUtf8mb4Task extends SimpleConvertUtf8ToUtf8mb4Upda
         //@formatter:on
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask#before(com.openexchange.groupware.update.PerformParameters, java.sql.Connection)
-     */
     @Override
     protected void before(PerformParameters params, Connection connection) throws SQLException {
         recreateKey(connection, "user", new String[] { "cid", "mail" }, new int[] { -1, 191 });

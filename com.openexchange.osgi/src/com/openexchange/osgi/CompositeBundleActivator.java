@@ -82,7 +82,7 @@ public abstract class CompositeBundleActivator implements BundleActivator {
             try {
                 activator.start(context);
                 activated.push(activator);
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 if (null == first) {
                     first = e;
                 }
@@ -101,7 +101,7 @@ public abstract class CompositeBundleActivator implements BundleActivator {
             final BundleActivator activator = activated.pop();
             try {
                 activator.stop(context);
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 if (null == first) {
                     first = e;
                 }

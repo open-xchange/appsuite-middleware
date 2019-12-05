@@ -149,7 +149,7 @@ public class FileResponseRendererTest {
             assertTrue("Unexpected Content-Length: " + contentLength + ", but should be less than " + length, length > contentLength);
             final int size = servletOutputStream.size();
             assertEquals("Unexpected Content-Length.", size, contentLength);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
@@ -210,7 +210,7 @@ public class FileResponseRendererTest {
             assertTrue("HTTP header \"cache-control\" is missing", Strings.isNotEmpty(sCacheControl));
 
             assertTrue("Invalid HTTP header \"cache-control\"", sCacheControl.indexOf("max-age=3600") > 0);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
@@ -237,7 +237,7 @@ public class FileResponseRendererTest {
             fileResponseRenderer.setScaler(new TestableImageTransformationService(IOUtils.toByteArray(fileHolder.getStream()), ImageTransformations.HIGH_EXPENSE));
             fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
             assertFalse("Got an error status: " + resp.getStatus(), resp.getStatus() >= 400);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
@@ -267,7 +267,38 @@ public class FileResponseRendererTest {
             final String expectedContentType = "image/png";
             final String currentContentType = resp.getContentType();
             assertEquals("Unexpected content-type.", expectedContentType, currentContentType);
-        } catch (final Exception e) {
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testContentTypeByFileName_Bug67097() {
+        try {
+            ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder("67097.png", "image/png", Delivery.view, Disposition.inline, "oxout.html");
+            final AJAXRequestData requestData = new AJAXRequestData();
+            {
+                requestData.setSession(new SimServerSession(1, 1));
+            }
+            final AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
+            final SimHttpServletRequest req = new SimHttpServletRequest();
+            final SimHttpServletResponse resp = new SimHttpServletResponse();
+            final ByteArrayServletOutputStream servletOutputStream = new ByteArrayServletOutputStream();
+            resp.setOutputStream(servletOutputStream);
+
+            MimeType2ExtMap.addMimeType("image/png", "png");
+
+            final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
+            fileResponseRenderer.setScaler(new TestableImageTransformationService(IOUtils.toByteArray(fileHolder.getStream()), ImageTransformations.HIGH_EXPENSE));
+            fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
+            final String expectedContentType = "image/png";
+            final String currentContentType = resp.getContentType();
+            assertEquals("Unexpected content-type.", expectedContentType, currentContentType);
+            final String expectedFileName = "oxout.png";
+            final String currentContentDisposition = resp.getHeader("Content-Disposition");
+            assertTrue("Unexpected content-disposition: " + currentContentDisposition, currentContentDisposition.indexOf(expectedFileName) > 0);
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
@@ -298,7 +329,7 @@ public class FileResponseRendererTest {
             assertTrue("HTTP header \"content-range\" is missing", resp.containsHeader("content-range"));
             assertEquals("bytes", resp.getHeaders().get("accept-ranges"));
             assertEquals("bytes 0-50/3852226", resp.getHeaders().get("content-range"));
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
@@ -638,7 +669,7 @@ public class FileResponseRendererTest {
             fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
             final long contentLength = resp.getContentLength();
             assertTrue("Content-Length should be -1", contentLength == -1);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
@@ -684,7 +715,7 @@ public class FileResponseRendererTest {
                 assertEquals("Unexpected number of written bytes.", 256, writtenBytes.length);
                 assertEquals("Unexpected starting byte.", 120, writtenBytes[0]);
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
@@ -711,7 +742,7 @@ public class FileResponseRendererTest {
 
             assertEquals("Unexpected status code.", 416, resp.getStatus());
             assertEquals("Unexpected 'Content-Range' header.", "bytes */2048", resp.getHeaders().get("content-range"));
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }

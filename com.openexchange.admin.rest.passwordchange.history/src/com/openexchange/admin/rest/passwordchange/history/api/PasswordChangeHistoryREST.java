@@ -75,7 +75,6 @@ import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
-import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.java.Strings;
 import com.openexchange.osgi.Tools;
 import com.openexchange.passwordchange.history.PasswordChangeClients;
@@ -89,6 +88,7 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.http.Authorization;
 import com.openexchange.tools.servlet.http.Authorization.Credentials;
+import com.openexchange.user.UserExceptionCode;
 import com.openexchange.user.UserService;
 
 /**

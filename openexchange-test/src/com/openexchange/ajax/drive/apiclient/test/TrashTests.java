@@ -63,7 +63,7 @@ import com.openexchange.ajax.folder.manager.FolderManager;
 import com.openexchange.ajax.framework.AbstractAPIClientSession;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
-import com.openexchange.testing.httpclient.models.DriveActionsResponse;
+import com.openexchange.testing.httpclient.models.DriveUploadResponse;
 import com.openexchange.testing.httpclient.models.FoldersResponse;
 import com.openexchange.testing.httpclient.models.TrashContent;
 import com.openexchange.testing.httpclient.models.TrashFolderResponse;
@@ -101,7 +101,7 @@ public class TrashTests extends AbstractAPIClientSession {
         driveApi = new DriveApi(client);
         driveApi.emptyTrash(folderApi.getSession(), rootId);
         byte[] body = new byte[4];
-        DriveActionsResponse uploadFile = driveApi.uploadFile(folderApi.getSession(), trashId, "/", "test.txt", getChecksum(body), body, null, null, I(1), "text/plain", L(0), new Long(4), null, null, null, null, null);
+        DriveUploadResponse uploadFile = driveApi.uploadFile(folderApi.getSession(), trashId, "/", "test.txt", getChecksum(body), body, I(1), null, null, "text/plain", L(0), new Long(4), null, null, null, null, null);
         assertNull(uploadFile.getErrorDesc(), uploadFile.getError());
 
         folderManager.createFolder(trashId, "trashedFolder", "infostore");
@@ -119,7 +119,7 @@ public class TrashTests extends AbstractAPIClientSession {
         @SuppressWarnings("unchecked") ArrayList<ArrayList<Object>> rootFolderArray = (ArrayList<ArrayList<Object>>) data;
         String Id = null;
         for(ArrayList<Object> obj : rootFolderArray) {
-            if(obj.get(1).equals(name)) {
+            if (obj.get(1).equals(name)) {
                 Id = (String) obj.get(0);
                 break;
             }

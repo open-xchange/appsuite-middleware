@@ -4,27 +4,37 @@
     tags:
       - JSlob
     summary: Updates a JSlob.
-    consumes:
-      - application/json
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: id
-        type: string
         description: The JSlob indentifier.
+        schema:
+          type: string
       - in: query
         name: serviceId
-        type: string
-        description: The identifier for the JSlob service, default is "com.openexchange.jslob.config".
+        description: >-
+          The identifier for the JSlob service, default is
+          "com.openexchange.jslob.config".
         required: false
-      - in: body
-        name: body
-        description: The JSON object containing the updated JSON configuration to store. Fields that are not included are thus not affected and survive the change. Use `/jslob?action=set` to delete fields or entire JSlob.
-        required: true
         schema:
-          type: object
+          type: string
     responses:
-      200:
-        description: In case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).
-        schema:
-          $ref: "#/definitions/CommonResponse"
+      '200':
+        description: >-
+          In case of errors the responsible fields in the response are filled
+          (see [Error handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommonResponse'
+    requestBody:
+      content:
+        application/json:
+          schema:
+            type: object
+      description: >-
+        The JSON object containing the updated JSON configuration to store.
+        Fields that are not included are thus not affected and survive the
+        change. Use `/jslob?action=set` to delete fields or entire JSlob.
+      required: true

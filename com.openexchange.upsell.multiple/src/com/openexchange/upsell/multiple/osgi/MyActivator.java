@@ -120,7 +120,7 @@ public class MyActivator extends HousekeepingActivator {
                 return;
             }
         }
-        rememberTracker(new HTTPServletRegistration(context, alias, new MyServlet()));
+        rememberTracker(new HTTPServletRegistration(context, new MyServlet(), alias));
         rememberTracker(new ServiceTracker<UpsellURLService,UpsellURLService>(context, UpsellURLService.class, new UrlServiceInstallationServiceListener(context)));
 
         // track Remote instances

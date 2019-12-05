@@ -65,6 +65,7 @@ import com.openexchange.drive.DriveClientVersion;
 import com.openexchange.drive.DriveService;
 import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
+import com.openexchange.drive.events.subscribe.SubscriptionMode;
 import com.openexchange.drive.json.DriveShareJSONParser;
 import com.openexchange.drive.json.internal.DefaultDriveSession;
 import com.openexchange.drive.json.internal.Services;
@@ -74,6 +75,7 @@ import com.openexchange.framework.request.RequestContextHolder;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.i18n.LocaleTools;
+import com.openexchange.java.Enums;
 import com.openexchange.java.Strings;
 import com.openexchange.share.ShareService;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -189,6 +191,13 @@ public abstract class AbstractDriveAction implements AJAXActionService {
             driveSession.setDiagnostics(Boolean.valueOf(diagnostics));
         }
         /*
+         * extract quota parameter if present
+         */
+        String quota = requestData.getParameter("quota");
+        if (Strings.isNotEmpty(quota)) {
+            driveSession.setIncludeQuota(Boolean.parseBoolean(quota));
+        }
+        /*
          * extract columns parameter to fields if present
          */
         String columnsValue = requestData.getParameter("columns");
@@ -262,6 +271,24 @@ public abstract class AbstractDriveAction implements AJAXActionService {
     }
 
     /**
+     * Extracts and parses a possible subscription mode from the supplied request data.
+     *
+     * @param requestData The request data
+     * @return The subscription mode, or <code>null</code> if not set
+     */
+    protected static SubscriptionMode extractSubscriptionMode(AJAXRequestData requestData) throws OXException {
+        String mode = requestData.getParameter("mode");
+        if (Strings.isNotEmpty(mode)) {
+            try {
+                return Enums.parse(SubscriptionMode.class, mode);
+            } catch (IllegalArgumentException e) {
+                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, "mode", mode);
+            }
+        }
+        return null;
+    }
+
+    /**
      * Extracts host data from the supplied request and session.
      *
      * @param requestData The AJAX request data
@@ -287,7 +314,8 @@ public abstract class AbstractDriveAction implements AJAXActionService {
         final boolean secure = requestData.isSecure();
         final String httpSessionID = requestData.getRoute();
         final String route = Tools.extractRoute(httpSessionID);
-        final int port = null != requestData.optHttpServletRequest() ? requestData.optHttpServletRequest().getServerPort() : -1;
+        HttpServletRequest servletRequest = requestData.optHttpServletRequest();
+        final int port = null != servletRequest ? servletRequest.getServerPort() : -1;
         final String host = determineHost(requestData, session);
         final String prefix = Services.getService(DispatcherPrefixService.class, true).getPrefix();
         return new HostData() {

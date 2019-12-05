@@ -55,6 +55,8 @@ import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.PreconditionException;
 import com.openexchange.dav.actions.PROPFINDAction;
 import com.openexchange.dav.resources.FolderCollection;
+import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.webdav.action.WebdavRequest;
 import com.openexchange.webdav.action.WebdavResponse;
 import com.openexchange.webdav.protocol.Protocol;
@@ -86,20 +88,28 @@ public class SyncCollection extends PROPFINDAction {
     @Override
     public void perform(WebdavRequest request, WebdavResponse response) throws WebdavProtocolException {
         /*
-         * extract client sync-token
+         * extract client sync-token & limit if defined
          */
         Element rootElement = requireRootElement(request, Protocol.DAV_NS, "sync-collection");
         Element syncTokenElement = rootElement.getChild("sync-token", DAVProtocol.DAV_NS);
         String syncToken = null != syncTokenElement ? syncTokenElement.getText() : null;
+        int limit = -1;
         Element limitElement = rootElement.getChild("limit", DAVProtocol.DAV_NS);
         if (null != limitElement) {
-            throw new PreconditionException(DAVProtocol.DAV_NS.getURI(), "number-of-matches-within-limits", request.getUrl(), DAVProtocol.SC_INSUFFICIENT_STORAGE);
+            String nResults = limitElement.getChildText("nresults", DAVProtocol.DAV_NS);
+            if (Strings.isNotEmpty(nResults)) {
+                try {
+                    limit = Integer.parseInt(nResults);
+                } catch (NumberFormatException e) {
+                    throw new PreconditionException(new OXException(e), DAVProtocol.DAV_NS.getURI(), "number-of-matches-within-limits", request.getUrl(), DAVProtocol.SC_INSUFFICIENT_STORAGE);
+                }
+            }
         }
         /*
          * query sync status from targeted folder collection
          */
         FolderCollection<?> folderCollection = requireResource(request, FolderCollection.class);
-        SyncStatus<WebdavResource> syncStatus = folderCollection.getSyncStatus(syncToken);
+        SyncStatus<WebdavResource> syncStatus = folderCollection.getSyncStatus(syncToken, limit);
         if (null == syncStatus) {
             throw new PreconditionException(DAVProtocol.DAV_NS.getURI(), "supported-report", request.getUrl(), HttpServletResponse.SC_FORBIDDEN);
         }

@@ -129,11 +129,6 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
         this.contextService = contextService;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.OAuthStorage#createAccount(com.openexchange.session.Session, com.openexchange.oauth.OAuthAccount)
-     */
     @Override
     public int storeAccount(Session session, OAuthAccount account) throws OXException {
         int contextId = session.getContextId();
@@ -153,11 +148,6 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
         return account.getId();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.OAuthStorage#getAccount(com.openexchange.session.Session, int)
-     */
     @Override
     public OAuthAccount getAccount(Session session, int accountId) throws OXException {
         Connection connection = (Connection) session.getParameter("__file.storage.delete.connection");
@@ -174,18 +164,13 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
         connection = getConnection(true, context);
         try {
             return getAccount(session, accountId, connection);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             provider.releaseReadConnection(context, connection);
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.OAuthStorage#deleteAccount(com.openexchange.session.Session, int)
-     */
     @Override
     public void deleteAccount(Session session, int accountId) throws OXException {
         int userId = session.getUserId();
@@ -215,11 +200,11 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
             con.commit(); // COMMIT
             rollback = 2;
             LOG.info("Deleted OAuth account with id '{}' for user '{}' in context '{}'", I(accountId), I(userId), I(contextId));
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw OAuthExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);
@@ -233,11 +218,6 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.OAuthStorage#updateAccount(com.openexchange.session.Session, com.openexchange.oauth.OAuthAccount)
-     */
     @Override
     public void updateAccount(Session session, OAuthAccount account) throws OXException {
         // Crypt tokens
@@ -305,11 +285,6 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.OAuthAccountStorage#updateAccount(com.openexchange.session.Session, int, java.util.Map)
-     */
     @Override
     public void updateAccount(Session session, int accountId, Map<String, Object> arguments) throws OXException {
         final List<Setter> list = setterFrom(arguments, accountId);
@@ -330,18 +305,13 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
         connection = getConnection(false, context);
         try {
             updateAccount(session, accountId, list, connection);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             provider.releaseReadConnection(context, connection);
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.OAuthAccountStorage#findByUserIdentity(com.openexchange.session.Session, java.lang.String, java.lang.String)
-     */
     @Override
     public OAuthAccount findByUserIdentity(Session session, String userIdentity, String serviceId) throws OXException {
         final SecretEncryptionService<PWUpdate> encryptionService = Services.getService(SecretEncryptionFactoryService.class).createService(this);
@@ -386,7 +356,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
             account.setEnabledScopes(enabledScopes);
             account.setUserIdentity(rs.getString(7));
             return account;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
@@ -394,21 +364,11 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.OAuthAccountStorage#hasUserIdentity(com.openexchange.session.Session, int, java.lang.String)
-     */
     @Override
     public boolean hasUserIdentity(Session session, int accountId, String serviceId) throws OXException {
         return Strings.isNotEmpty(getUserIdentity(session, serviceId, accountId, null));
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.OAuthStorage#getAccounts(com.openexchange.session.Session)
-     */
     @Override
     public List<OAuthAccount> getAccounts(Session session) throws OXException {
         final SecretEncryptionService<PWUpdate> encryptionService = Services.getService(SecretEncryptionFactoryService.class).createService(this);
@@ -438,9 +398,9 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
                     try {
                         account.setToken(encryptionService.decrypt(session, rs.getString(3), new PWUpdate("accessToken", contextId, account.getId())));
                         account.setSecret(encryptionService.decrypt(session, rs.getString(4), new PWUpdate("accessSecret", contextId, account.getId())));
-                    } catch (final OXException e) {
+                    } catch (OXException e) {
                         // Log for debug purposes and ignore...
-                        LOG.debug("{}", e.getMessage(), e);
+                        LOG.debug("", e);
                     }
                     String scopes = rs.getString(6);
                     if (Strings.isNotEmpty(scopes)) {
@@ -449,7 +409,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
                     }
                     account.setUserIdentity(rs.getString(7));
                     accounts.add(account);
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     if (!OAuthExceptionCodes.UNKNOWN_OAUTH_SERVICE_META_DATA.equals(e)) {
                         throw e;
                     }
@@ -458,7 +418,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
                 }
             } while (rs.next());
             return accounts;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -466,11 +426,6 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.OAuthStorage#getAccounts(com.openexchange.session.Session, java.lang.String)
-     */
     @Override
     public List<OAuthAccount> getAccounts(Session session, String serviceMetaData) throws OXException {
         final SecretEncryptionService<PWUpdate> encryptionService = Services.getService(SecretEncryptionFactoryService.class).createService(this);
@@ -500,7 +455,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
                     try {
                         account.setToken(encryptionService.decrypt(session, rs.getString(3), new PWUpdate("accessToken", contextId, account.getId())));
                         account.setSecret(encryptionService.decrypt(session, rs.getString(4), new PWUpdate("accessSecret", contextId, account.getId())));
-                    } catch (final OXException x) {
+                    } catch (OXException x) {
                         // Log for debug purposes and ignore...
                         LOG.debug("{}", x.getMessage(), x);
                     }
@@ -510,7 +465,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
                     account.setEnabledScopes(enabledScopes);
                     account.setUserIdentity(rs.getString(6));
                     accounts.add(account);
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     if (!OAuthExceptionCodes.UNKNOWN_OAUTH_SERVICE_META_DATA.equals(e)) {
                         throw e;
                     }
@@ -519,7 +474,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
                 }
             } while (rs.next());
             return accounts;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
@@ -527,11 +482,6 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.secret.SecretEncryptionStrategy#update(java.lang.String, java.lang.Object)
-     */
     @Override
     public void update(String recrypted, PWUpdate customizationNote) throws OXException {
         final StringBuilder b = new StringBuilder();
@@ -547,7 +497,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
             stmt.setInt(2, customizationNote.cid);
             stmt.setInt(3, customizationNote.id);
             stmt.executeUpdate();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw OAuthExceptionCodes.SQL_ERROR.create(e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);
@@ -555,11 +505,6 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.secret.recovery.EncryptedItemDetectorService#hasEncryptedItems(com.openexchange.tools.session.ServerSession)
-     */
     @Override
     public boolean hasEncryptedItems(ServerSession session) throws OXException {
         final int contextId = session.getContextId();
@@ -571,7 +516,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
             stmt.setInt(1, contextId);
             stmt.setInt(2, session.getUserId());
             return stmt.executeQuery().next();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
@@ -579,11 +524,6 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.secret.recovery.SecretMigrator#migrate(java.lang.String, java.lang.String, com.openexchange.tools.session.ServerSession)
-     */
     @Override
     public void migrate(String oldSecret, String newSecret, ServerSession session) throws OXException {
         final CryptoService cryptoService = Services.getService(CryptoService.class);
@@ -612,7 +552,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
                     if (Strings.isNotEmpty(accessSecret)) {
                         cryptoService.decrypt(accessSecret, newSecret);
                     }
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     // Needs migration
                     final DefaultOAuthAccount account = new DefaultOAuthAccount();
                     account.setId(rs.getInt(1));
@@ -638,7 +578,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
                 stmt.addBatch();
             }
             stmt.executeBatch();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
@@ -646,11 +586,6 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.secret.recovery.EncryptedItemCleanUpService#cleanUpEncryptedItems(java.lang.String, com.openexchange.tools.session.ServerSession)
-     */
     @Override
     public void cleanUpEncryptedItems(String secret, ServerSession session) throws OXException {
         final CryptoService cryptoService = Services.getService(CryptoService.class);
@@ -680,7 +615,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
                     if (Strings.isNotEmpty(accessSecret)) {
                         cryptoService.decrypt(accessSecret, secret);
                     }
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     // Clean-up
                     accounts.add(Integer.valueOf(rs.getInt(1)));
                 }
@@ -709,7 +644,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
             stmt.executeBatch();
             con.commit();
             committed = Boolean.TRUE;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             if (null != committed && !committed.booleanValue()) {
@@ -720,11 +655,6 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.secret.recovery.EncryptedItemCleanUpService#removeUnrecoverableItems(java.lang.String, com.openexchange.tools.session.ServerSession)
-     */
     @Override
     public void removeUnrecoverableItems(String secret, ServerSession session) throws OXException {
         final CryptoService cryptoService = Services.getService(CryptoService.class);
@@ -754,7 +684,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
                     if (Strings.isNotEmpty(accessSecret)) {
                         cryptoService.decrypt(accessSecret, secret);
                     }
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     // Clean-up
                     accounts.add(Integer.valueOf(rs.getInt(1)));
                 }
@@ -781,7 +711,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
             stmt.executeBatch();
             con.commit();
             committed = Boolean.TRUE;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             if (null != committed && !committed.booleanValue()) {
@@ -804,16 +734,29 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
      * @throws OXException
      */
     private void updateAccount(Session session, int accountId, List<Setter> list, Connection connection) throws SQLException, OXException {
-        final StringBuilder stmtBuilder = new StringBuilder(128).append("UPDATE oauthAccounts SET ");
-        final int size = list.size();
-        list.get(0).appendTo(stmtBuilder);
-        for (int i = 1; i < size; i++) {
-            stmtBuilder.append(", ");
-            list.get(i).appendTo(stmtBuilder);
+        // Compile SQL UPDATE statement
+        StringBuilder stmtBuilder = new StringBuilder(128);
+        {
+            stmtBuilder.append("UPDATE oauthAccounts SET ");
+            int size = list.size();
+            list.get(0).appendTo(stmtBuilder);
+            for (int i = 1; i < size; i++) {
+                stmtBuilder.append(", ");
+                list.get(i).appendTo(stmtBuilder);
+            }
+            stmtBuilder.append(" WHERE cid = ? AND user = ? and id = ?");
         }
+
         PreparedStatement stmt = null;
         try {
-            stmt = connection.prepareStatement(stmtBuilder.append(" WHERE cid = ? AND user = ? and id = ?").toString());
+            boolean signalReauthorization = false;
+            {
+                String sql = stmtBuilder.toString();
+                stmtBuilder = null;
+                stmt = connection.prepareStatement(sql);
+                signalReauthorization = sql.indexOf("accessToken") >= 0 || sql.indexOf("accessSecret") >= 0;
+            }
+
             int pos = 1;
             for (final Setter setter : list) {
                 pos = setter.set(pos, stmt);
@@ -826,6 +769,13 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
             final int rows = stmt.executeUpdate();
             if (rows <= 0) {
                 throw OAuthExceptionCodes.ACCOUNT_NOT_FOUND.create(I(accountId), I(userId), I(contextId));
+            }
+            /*
+             * Signal re-authorized event
+             */
+            if (signalReauthorization) {
+                Map<String, Object> properties = Collections.<String, Object> emptyMap();
+                ReauthorizeListenerRegistry.getInstance().onAfterOAuthAccountReauthorized(accountId, properties, userId, contextId, connection);
             }
         } finally {
             closeSQLStuff(stmt);
@@ -920,7 +870,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
                 return null;
             }
             return rs.getString(1);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
@@ -940,7 +890,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
     private Context getContext(final int contextId) throws OXException {
         try {
             return contextService.getContext(contextId);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
         }
     }

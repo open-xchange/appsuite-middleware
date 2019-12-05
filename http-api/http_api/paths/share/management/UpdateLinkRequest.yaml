@@ -1,0 +1,38 @@
+/share/management?action=updateLink:
+  put:
+    operationId: updateShareLink
+    tags:
+      - Share/Management
+    summary: Updates a share link.
+    parameters:
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - in: query
+        name: timestamp
+        description: >-
+          The timestamp of the last modification of the link. Used to detect
+          concurrent modifications.
+        required: true
+        schema:
+          type: integer
+          format: int64
+    responses:
+      '200':
+        description: >
+          An empty json object in case of success. In case of errors the
+          responsible fields in the response are
+
+          filled (see [Error handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommonResponse'
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ShareLinkUpdateBody'
+      description: >-
+        A JSON object containing the share target and share link properties of
+        the link to update. Only modified fields should be set but at least the
+        share target ones.
+      required: true

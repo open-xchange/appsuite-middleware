@@ -165,7 +165,7 @@ public final class TrustAllSSLSocketFactory extends SSLSocketFactory {
         if (somethingAdded) {
             try {
                 sslSocket.setEnabledProtocols(enabledProtocols.toArray(new String[enabledProtocols.size()]));
-            } catch (final IllegalArgumentException e) {
+            } catch (IllegalArgumentException e) {
                 // Unable to add specified protocols
             }
         }
@@ -178,9 +178,9 @@ public final class TrustAllSSLSocketFactory extends SSLSocketFactory {
             final SSLContext context = SSLContext.getInstance("TLS");
             context.init(null, new TrustManager[] { new TrustAllManager() }, new SecureRandom());
             return context;
-        } catch (final NoSuchAlgorithmException e) {
+        } catch (NoSuchAlgorithmException e) {
             throw new IllegalStateException(e.getMessage(), e);
-        } catch (final KeyManagementException e) {
+        } catch (KeyManagementException e) {
             throw new IllegalStateException(e.getMessage(), e);
         }
     }

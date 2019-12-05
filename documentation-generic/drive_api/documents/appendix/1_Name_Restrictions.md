@@ -12,6 +12,8 @@ There are some filenames that are invalid or ignored and therefore not synchroni
 
 * If it contains one of the following reserved characters:  
 
+<div class="simpleTable">
+
 |Character | Description |
 |:---------|:------------|
 |<|less than|
@@ -23,6 +25,8 @@ There are some filenames that are invalid or ignored and therefore not synchroni
 |\||vertical bar or pipe|
 |?| question mark|
 |\*| asterisk |
+
+</div>
 
 * It contains a character whose integer representations is in the range from 0 through 31
 * The last character is a . (dot) or ' ' (space)
@@ -46,6 +50,8 @@ There are also similar restrictions regarding invalid directory names. Any try t
 
 * If it contains one or of the following reserved characters:
 
+<div class="simpleTable">
+
 |Character | Description |
 |:---------|:------------|
 |<|less than|
@@ -56,6 +62,8 @@ There are also similar restrictions regarding invalid directory names. Any try t
 |\||vertical bar or pipe|
 |?| question mark|
 |\*| asterisk |
+
+</div>
 
 * It contains a character whose integer representations is in the range from 0 through 31
 * The last character of any subpath (i.e. the last part of the whole path or the part preceding the spearator character /) is a . (dot) or ' ' (space)

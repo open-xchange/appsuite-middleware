@@ -49,9 +49,8 @@
 
 package com.openexchange.snippet.rdb.osgi;
 
+import static com.openexchange.osgi.Tools.withRanking;
 import java.util.Dictionary;
-import java.util.Hashtable;
-import org.osgi.framework.Constants;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
@@ -127,13 +126,11 @@ public class RdbSnippetActivator extends HousekeepingActivator {
             RdbSnippetQuotaProvider quotaProvider = new RdbSnippetQuotaProvider();
             RdbSnippetService snippetService = new RdbSnippetService(quotaProvider, this);
 
-            Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
-            properties.put(Constants.SERVICE_RANKING, Integer.valueOf(0));
-            registerService(SnippetService.class, snippetService, properties);
+            registerService(SnippetService.class, snippetService, withRanking(0));
 
             quotaProvider.setSnippetService(snippetService);
             registerService(QuotaProvider.class, quotaProvider);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             logger.error("Error starting bundle: com.openexchange.snippet.rdb", e);
             throw e;
         }

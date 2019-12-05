@@ -54,11 +54,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -92,16 +94,19 @@ public class SwiftFileStorage implements FileStorage {
     private final SwiftClient client;
     private final ChunkStorage chunkStorage;
     private final AtomicReference<Future<Void>> containerCreatedTask;
+    private final URI uri;
 
     /**
      * Initializes a new {@link SwiftFileStorage}.
      *
+     * @param uri The URI that fully qualifies this file storage
      * @param services A service lookup reference
      * @param client The spoxyd client to use
      * @param chunkStorage The underlying chunk storage
      */
-    public SwiftFileStorage(SwiftClient client, ChunkStorage chunkStorage) {
+    public SwiftFileStorage(URI uri, SwiftClient client, ChunkStorage chunkStorage) {
         super();
+        this.uri = uri;
         this.client = client;
         this.chunkStorage = chunkStorage;
         containerCreatedTask = new AtomicReference<Future<Void>>(null);
@@ -148,6 +153,11 @@ public class SwiftFileStorage implements FileStorage {
     }
 
     @Override
+    public URI getUri() {
+        return uri;
+    }
+
+    @Override
     public String saveNewFile(InputStream file) throws OXException {
         File tmpFile = null;
         try {
@@ -155,8 +165,9 @@ public class SwiftFileStorage implements FileStorage {
              * spool to file
              */
             if (!(file instanceof FileInputStream)) {
-                tmpFile = TempFileHelper.getInstance().newTempFile();
-                if (tmpFile != null) {
+                Optional<File> optionalTempFile = TempFileHelper.getInstance().newTempFile();
+                if (optionalTempFile.isPresent()) {
+                    tmpFile = optionalTempFile.get();
                     file = Streams.transferToFileAndCreateStream(file, tmpFile);
                 }
             }
@@ -297,8 +308,9 @@ public class SwiftFileStorage implements FileStorage {
              * spool to file
              */
             if (!(file instanceof FileInputStream)) {
-                tmpFile = TempFileHelper.getInstance().newTempFile();
-                if (tmpFile != null) {
+                Optional<File> optionalTempFile = TempFileHelper.getInstance().newTempFile();
+                if (optionalTempFile.isPresent()) {
+                    tmpFile = optionalTempFile.get();
                     file = Streams.transferToFileAndCreateStream(file, tmpFile);
                 }
             }

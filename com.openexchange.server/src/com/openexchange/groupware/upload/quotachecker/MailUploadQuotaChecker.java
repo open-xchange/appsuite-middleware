@@ -91,7 +91,7 @@ public final class MailUploadQuotaChecker extends UploadQuotaChecker {
             Long globalQuota;
             try {
                 globalQuota = ServerConfig.getLong(Property.MAX_UPLOAD_SIZE);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.error("", e);
                 globalQuota = Long.valueOf(0);
             }

@@ -58,11 +58,11 @@ import com.openexchange.group.Group;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.ObjectPermission;
 import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.user.User;
 
 /**
  * {@link HideAdminService}

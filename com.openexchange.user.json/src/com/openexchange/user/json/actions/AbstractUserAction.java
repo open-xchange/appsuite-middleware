@@ -65,7 +65,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.i18n.Users;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
@@ -73,6 +72,7 @@ import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 import com.openexchange.user.json.filter.DoNothingUserCensorship;
 import com.openexchange.user.json.filter.NoGlobalAdressBookUserCensorship;
 import com.openexchange.user.json.filter.UserCensorship;
@@ -157,7 +157,7 @@ public abstract class AbstractUserAction implements AJAXActionService {
         tmp = tmp.trim();
         try {
             return Long.valueOf(tmp);
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create( parameterName, tmp);
         }
     }
@@ -178,7 +178,7 @@ public abstract class AbstractUserAction implements AJAXActionService {
         tmp = tmp.trim();
         try {
             return Long.parseLong(tmp);
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create( parameterName, tmp);
         }
     }
@@ -199,7 +199,7 @@ public abstract class AbstractUserAction implements AJAXActionService {
         tmp = tmp.trim();
         try {
             return Integer.parseInt(tmp);
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create( parameterName, tmp);
         }
     }
@@ -220,7 +220,7 @@ public abstract class AbstractUserAction implements AJAXActionService {
         tmp = tmp.trim();
         try {
             return Integer.parseInt(tmp);
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create( parameterName, tmp);
         }
     }
@@ -319,7 +319,7 @@ public abstract class AbstractUserAction implements AJAXActionService {
     protected static void censor(final ServerSession session, final User[] user) throws OXException {
         final UserCensorship censorship = getUserCensorship(session);
         for(int i = 0; i < user.length; i++) {
-            if(user[i].getId() == session.getUserId()) {
+            if (user[i].getId() == session.getUserId()) {
                 continue;
             }
             user[i] = censorship.censor(user[i]);
@@ -327,7 +327,7 @@ public abstract class AbstractUserAction implements AJAXActionService {
     }
 
     protected static User censor(final ServerSession session, final User user) throws OXException {
-        if(user.getId() == session.getUserId()) {
+        if (user.getId() == session.getUserId()) {
             return user;
         }
         final UserCensorship censorship = getUserCensorship(session);

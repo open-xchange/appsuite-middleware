@@ -67,7 +67,6 @@ import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.infostore.search.impl.SearchEngineImpl;
 import com.openexchange.groupware.infostore.utils.Metadata;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.setuptools.TestConfig;
 import com.openexchange.test.TestInit;
@@ -76,6 +75,7 @@ import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionFactory;
+import com.openexchange.user.User;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -126,7 +126,7 @@ public class SearchEngineTest {
     // Bug 11569
 
     @Test
-    public void testSearchForPercent() throws OXException, OXException {
+    public void testSearchForPercent() throws OXException {
         final DocumentMetadata doc1 = createWithTitle("100%");
         createWithTitle("Hallo");
 
@@ -154,17 +154,17 @@ public class SearchEngineTest {
             infostore.saveDocumentMetadata(metadata, InfostoreFacade.NEW, session);
             infostore.commit();
             clean.add(metadata);
-        } catch (final OXException x) {
+        } catch (OXException x) {
             try {
                 infostore.rollback();
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 e.printStackTrace();
             }
             throw x;
         } finally {
             try {
                 infostore.finish();
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 e.printStackTrace();
             }
         }
@@ -176,7 +176,7 @@ public class SearchEngineTest {
         List<Integer> folderIDs = Collections.<Integer> singletonList(Integer.valueOf(folderId));
         try {
             searchEngine.search(session, "*", folderIDs, Collections.<Integer> emptyList(), metadata, metadata[0], InfostoreSearchEngine.ASC, 0, 10);
-        } catch (final Exception x) {
+        } catch (Exception x) {
             fail(x.getMessage());
             x.printStackTrace();
         }

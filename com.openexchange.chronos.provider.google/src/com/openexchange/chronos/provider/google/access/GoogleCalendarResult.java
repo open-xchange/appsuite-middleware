@@ -128,7 +128,7 @@ public class GoogleCalendarResult extends ExternalCalendarResult implements Diff
         try {
             currentResult = access.getEventsInFolder(folderId, token, true);
         } catch (OXException e) {
-            if(isSynTokenInvalidException(e)) {
+            if (isSynTokenInvalidException(e)) {
                 currentResult = access.getEventsInFolder(folderId, null, false);
             } else {
                 throw e;
@@ -137,7 +137,7 @@ public class GoogleCalendarResult extends ExternalCalendarResult implements Diff
     }
 
     private String getFolder() throws OXException {
-        if(folderId !=null) {
+        if (folderId !=null) {
             return folderId;
         }
         JSONObject internalConfiguration = access.getAccount().getInternalConfiguration();

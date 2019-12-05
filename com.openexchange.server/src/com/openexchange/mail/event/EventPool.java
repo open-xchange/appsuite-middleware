@@ -80,7 +80,10 @@ import com.openexchange.timer.TimerService;
  */
 public final class EventPool implements Runnable {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(EventPool.class);
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(EventPool.class);
+    }
 
     /**
      * The delay for a pooled event. TODO: Make configurable
@@ -102,8 +105,8 @@ public final class EventPool implements Runnable {
             try {
                 instance = new EventPool();
                 instance.startup();
-            } catch (final OXException e) {
-                LOG.error("", e);
+            } catch (OXException e) {
+                LoggerHolder.LOG.error("", e);
             }
         }
     }
@@ -139,8 +142,6 @@ public final class EventPool implements Runnable {
 
     private final DelayQueue<PooledEvent> queue;
 
-    private final EventAdmin eventAdmin;
-
     /**
      * Initializes a new {@link EventPool}.
      *
@@ -151,7 +152,6 @@ public final class EventPool implements Runnable {
         map = new ConcurrentHashMap<PooledEvent, PooledEvent>(1024);
         queue = new DelayQueue<PooledEvent>();
         blocker = new ConcurrentBlocker();
-        eventAdmin = ServerServiceRegistry.getInstance().getService(EventAdmin.class, true);
     }
 
     /**
@@ -265,8 +265,8 @@ public final class EventPool implements Runnable {
                     broadcastEvent(pooledEvent);
                 } while ((pooledEvent = queue.poll()) != null);
             }
-        } catch (final Throwable t) {
-            org.slf4j.LoggerFactory.getLogger(EventPool.class).error("", t);
+        } catch (Throwable t) {
+            LoggerHolder.LOG.error("", t);
         } finally {
             blocker.unblock();
         }
@@ -282,6 +282,25 @@ public final class EventPool implements Runnable {
         CommonEvent.PUBLISH_MARKER);
 
     private void broadcastEvent(final PooledEvent pooledEvent) {
+        /*
+         * Determine event topic
+         */
+        String topic = pooledEvent.getTopic();
+        if (topic == null) {
+            topic = PushEventConstants.TOPIC;
+        }
+        /*
+         * Check presence of EventAdmin service
+         */
+        EventAdmin eventAdmin = ServerServiceRegistry.getInstance().getService(EventAdmin.class);
+        if (eventAdmin == null) {
+            // EventAdmin unavailable. Probably due to shut-down...
+            LoggerHolder.LOG.info("Cannot broadcast mail event with topic {} due to server shut-down", topic);
+            return;
+        }
+        /*
+         * Compile event properties
+         */
         final Dictionary<String, Object> properties = new Hashtable<String, Object>(6);
         properties.put(PushEventConstants.PROPERTY_CONTEXT, Integer.valueOf(pooledEvent.getContextId()));
         properties.put(PushEventConstants.PROPERTY_USER, Integer.valueOf(pooledEvent.getUserId()));
@@ -307,8 +326,7 @@ public final class EventPool implements Runnable {
         /*
          * Create event with push topic
          */
-        final String topic = pooledEvent.getTopic();
-        final Event event = new Event(null == topic ? PushEventConstants.TOPIC : topic, properties);
+        final Event event = new Event(topic, properties);
         /*
          * Finally deliver it
          */
@@ -317,7 +335,7 @@ public final class EventPool implements Runnable {
         } else {
             eventAdmin.sendEvent(event);
         }
-        LOG.debug("{}Notified {}-wise changed folder \"{}\" in account {} of user {} in context {}", pooledEvent.isRemote() ? "(Remotely) " : "", pooledEvent.isContentRelated() ? "content-related" : "hierarchical", pooledEvent.getFullname(), I(pooledEvent.getAccountId()), I(pooledEvent.getUserId()), I(pooledEvent.getContextId()));
+        LoggerHolder.LOG.debug("{}Notified {}-wise changed folder \"{}\" in account {} of user {} in context {}", pooledEvent.isRemote() ? "(Remotely) " : "", pooledEvent.isContentRelated() ? "content-related" : "hierarchical", pooledEvent.getFullname(), I(pooledEvent.getAccountId()), I(pooledEvent.getUserId()), I(pooledEvent.getContextId()));
     }
 
 }

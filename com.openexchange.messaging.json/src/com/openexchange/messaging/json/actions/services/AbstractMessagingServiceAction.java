@@ -55,11 +55,12 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.i18n.I18nService;
+import com.openexchange.i18n.I18nServiceRegistry;
 import com.openexchange.i18n.I18nTranslator;
 import com.openexchange.i18n.Translator;
 import com.openexchange.messaging.MessagingExceptionCodes;
-import com.openexchange.messaging.json.I18nServices;
 import com.openexchange.messaging.json.MessagingServiceWriter;
+import com.openexchange.messaging.json.Services;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
 
@@ -83,7 +84,7 @@ public abstract class AbstractMessagingServiceAction implements AJAXActionServic
     public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
         try {
             return doIt(requestData, session);
-        } catch (final JSONException x) {
+        } catch (JSONException x) {
             throw MessagingExceptionCodes.JSON_ERROR.create(x, x.getMessage());
         }
     }
@@ -91,7 +92,12 @@ public abstract class AbstractMessagingServiceAction implements AJAXActionServic
     protected abstract AJAXRequestResult doIt(AJAXRequestData request, ServerSession session) throws JSONException, OXException;
 
     protected final MessagingServiceWriter getWriter(final ServerSession session) {
-        final I18nService service = I18nServices.getInstance().getService(session.getUser().getLocale());
+        I18nServiceRegistry registry = Services.optService(I18nServiceRegistry.class);
+        if (registry == null) {
+            return  new MessagingServiceWriter(Translator.EMPTY);
+        }
+
+        I18nService service = registry.getI18nService(session.getUser().getLocale());
         return new MessagingServiceWriter(null == service ? Translator.EMPTY : new I18nTranslator(service));
     }
 }

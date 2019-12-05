@@ -93,7 +93,7 @@ public abstract class GuestStorage {
                         tmp = new RdbGuestStorage();
                         tmp.startUp();
                         impl = tmp;
-                    } catch (final OXException e) {
+                    } catch (OXException e) {
                         // Cannot occur
                         LOG.warn("", e);
                     }

@@ -1,0 +1,31 @@
+/attachment?action=detach:
+  put:
+    operationId: deleteAttachments
+    tags:
+      - Attachments
+    summary: Deletes attachments.
+    parameters:
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - $ref: '#/components/parameters/gblQueryParamAttached'
+      - $ref: '#/components/parameters/gblQueryParamAttachmentsFolder'
+      - $ref: '#/components/parameters/gblQueryParamAttachmentsModule'
+    responses:
+      '200':
+        description: >
+          In case of errors the responsible fields in the response are filled
+          (see [Error handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommonResponse'
+    requestBody:
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              type: string
+      description: >-
+        A JSON array with the identifiers of the attachments that shall be
+        deleted.
+      required: true

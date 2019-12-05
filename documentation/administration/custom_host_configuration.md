@@ -80,15 +80,6 @@ In the first part of the file the admin can set default values for certain prope
 
 The second part holds all custom host configuration and addresses each host by the <code>host</code> property. If this property is missing, the following custom configurations will not be applied. This parameter also accepts wildcards, to apply certain features by default to a group of hosts. For more information see the [Wildcards](#Wildcards) chapter for more information on this topic.
 
-### Autologin
-If the admin wants a custom autologin handling for each tenant on the system, **the server has to enable this feature per default**. This way the admin can disable it via custom configuration inside the <code>as-config.yml</code>. The <code>com.openexchange.sessiond.autologin</code> property should therefore be set to false, for this host. 
-
-**example**
-
-	example.host.com:
-	    host: example.host.com
-	    com.openexchange.sessiond.autologin: false
-
 ### Sharding subdomains
 
 For request distribution purposes, the administrator can configure an array of sharding subdomains. If set up correctly, those subdomains will primarily be used to load image previews in drive. This way, requests needed to keep the UI under full functionality are detached from those requests. Those subdomains have to be registered inside the apache configuration. Example:

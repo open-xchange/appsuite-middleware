@@ -1,6 +1,6 @@
 ---
 title: Context Provisioning
-icon: fa-connectdevelop
+icon: fab fa-connectdevelop
 tags: Administration, Provisioning
 ---
 

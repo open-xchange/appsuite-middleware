@@ -75,28 +75,28 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 	protected abstract String generateSql(List<ColumnConfig> cols);
 	
 	private void applyColumnParameter(PreparedStatement stmt, int i, ColumnConfig col) throws SQLException, DatabaseException {
-		if(col.getValue() != null) {
+		if (col.getValue() != null) {
 		    stmt.setString(i, col.getValue());
-		} else if(col.getValueBoolean() != null) {
+		} else if (col.getValueBoolean() != null) {
 		    stmt.setBoolean(i, col.getValueBoolean());
-		} else if(col.getValueNumeric() != null) {
+		} else if (col.getValueNumeric() != null) {
 		    Number number = col.getValueNumeric();
-		    if(number instanceof Long) {
+		    if (number instanceof Long) {
 		        stmt.setLong(i, number.longValue());
-		    } else if(number instanceof Integer) {
+		    } else if (number instanceof Integer) {
 		        stmt.setInt(i, number.intValue());
-		    } else if(number instanceof Double) {
+		    } else if (number instanceof Double) {
 		        stmt.setDouble(i, number.doubleValue());
-		    } else if(number instanceof Float) {
+		    } else if (number instanceof Float) {
 		        stmt.setFloat(i, number.floatValue());
-		    } else if(number instanceof BigDecimal) {
+		    } else if (number instanceof BigDecimal) {
 		        stmt.setBigDecimal(i, (BigDecimal)number);
-		    } else if(number instanceof BigInteger) {
+		    } else if (number instanceof BigInteger) {
 		        stmt.setInt(i, number.intValue());
 		    }
-		} else if(col.getValueDate() != null) {
+		} else if (col.getValueDate() != null) {
 		    stmt.setDate(i, new java.sql.Date(col.getValueDate().getTime()));
-		} else if(col.getValueBlobFile() != null) {
+		} else if (col.getValueBlobFile() != null) {
 		    try {
                 // Add change log base path if file path is relative.
 		    	String filePath = getAbsolutePath(col.getValueBlobFile());
@@ -105,7 +105,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 		    } catch (FileNotFoundException e) {
 		        throw new DatabaseException(e.getMessage(), e); // wrap
 		    }
-		} else if(col.getValueClobFile() != null) {
+		} else if (col.getValueClobFile() != null) {
 		    try {
                 // Add change log base path if file path is relative.
 		    	String filePath = getAbsolutePath(col.getValueClobFile());

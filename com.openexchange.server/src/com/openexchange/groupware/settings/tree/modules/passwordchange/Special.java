@@ -49,10 +49,11 @@
 
 package com.openexchange.groupware.settings.tree.modules.passwordchange;
 
-import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.cascade.ConfigViews;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.ReadOnlyValue;
@@ -60,6 +61,7 @@ import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.user.User;
 
 /**
  * {@link Special}
@@ -79,9 +81,10 @@ public class Special implements PreferencesItemService {
 
             @Override
             public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
-                ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-                String property = service.getProperty("com.openexchange.passwordchange.special", "$, _, or %");
-                setting.setSingleValue(property);
+                ConfigViewFactory service = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class, true);
+                ConfigView view = service.getView(user.getId(), ctx.getContextId());
+                String special = ConfigViews.getDefinedStringPropertyFrom("com.openexchange.passwordchange.special", "$, _, or %", view);
+                setting.setSingleValue(special);
             }
 
             @Override

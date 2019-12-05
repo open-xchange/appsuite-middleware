@@ -62,6 +62,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.session.Session;
+import com.openexchange.session.SessionAttributes;
 import com.openexchange.session.SimSession;
 
 /**
@@ -271,26 +272,21 @@ public class SimSessiondService implements SessiondService {
     }
 
     @Override
-    public void setLocalIp(String sessionId, String localIp) throws OXException {
+    public void setSessionAttributes(String sessionId, SessionAttributes attrs) throws OXException {
         SimSession session = sessionsById.get(sessionId);
         if (session != null) {
-            session.setLocalIp(localIp);
-        }
-    }
-
-    @Override
-    public void setClient(String sessionId, String client) throws OXException {
-        SimSession session = sessionsById.get(sessionId);
-        if (session != null) {
-            session.setClient(client);
-        }
-    }
-
-    @Override
-    public void setHash(String sessionId, String hash) throws OXException {
-        SimSession session = sessionsById.get(sessionId);
-        if (session != null) {
-            session.setHash(hash);
+            if (attrs.getLocalIp().isSet()) {
+                session.setLocalIp(attrs.getLocalIp().get());
+            }
+            if (attrs.getClient().isSet()) {
+                session.setClient(attrs.getClient().get());
+            }
+            if (attrs.getHash().isSet()) {
+                session.setHash(attrs.getHash().get());
+            }
+            if (attrs.getUserAgent().isSet()) {
+                session.setParameter(Session.PARAM_USER_AGENT, attrs.getUserAgent().get());
+            }
         }
     }
 

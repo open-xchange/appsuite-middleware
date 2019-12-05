@@ -85,7 +85,7 @@ public final class FilestoreTools {
                 uri.getPath() + '/' + context.getFilestoreName(),
                 uri.getQuery(),
                 uri.getFragment());
-        } catch (final URISyntaxException e) {
+        } catch (URISyntaxException e) {
             throw FilestoreExceptionCodes.URI_CREATION_FAILED.create(e, uri.toString() + '/' + context.getFilestoreName());
         }
     }

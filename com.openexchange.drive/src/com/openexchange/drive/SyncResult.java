@@ -80,4 +80,11 @@ public interface SyncResult<T extends DriveVersion> {
      */
     DriveQuota getQuota();
 
+    /**
+     * Gets the path from driveRootFolder to internal 'real' root folder
+     *
+     * @return The path
+     */
+    String getPathToRoot();
+
 }

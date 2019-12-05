@@ -82,21 +82,11 @@ public class ICAPInputStream extends FilterInputStream {
         this.socket = socket;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.io.FilterInputStream#read()
-     */
     @Override
     public int read() throws IOException {
         return super.read();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.io.FilterInputStream#read(byte[], int, int)
-     */
     @Override
     public int read(byte[] b, int off, int len) throws IOException {
         if (b == null) {
@@ -155,21 +145,11 @@ public class ICAPInputStream extends FilterInputStream {
         return eofReached ? - 1 : off;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.io.FilterInputStream#read(byte[])
-     */
     @Override
     public int read(byte[] b) throws IOException {
         return read(b, 0, b.length);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.io.FilterInputStream#close()
-     */
     @Override
     public void close() throws IOException {
         if (socket == null) {

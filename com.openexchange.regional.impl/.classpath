@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
+	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="test"/>
+	<classpathentry kind="lib" path="/com.openexchange.test/testlib/junit-4.12.jar" sourcepath="/com.openexchange.test/testlib/source/junit-4.12-sources.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.test/testlib/junit-addons-1.4.jar" sourcepath="/com.openexchange.test/testlib/source/junit-addons-1.4-src.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.test/testlib/powermock-api-mockito-common-1.7.5.jar" sourcepath="/com.openexchange.test/testlib/source/powermock-api-mockito-common-1.7.5-sources.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.test/testlib/powermock-api-mockito2-2.0.0-beta.10.jar" sourcepath="/com.openexchange.test/testlib/source/powermock-api-mockito2-2.0.0-beta.10-sources.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.test/testlib/powermock-api-support-2.0.0-beta.10.jar" sourcepath="/com.openexchange.test/testlib/source/powermock-api-support-2.0.0-beta.10-sources.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.test/testlib/powermock-classloading-objenesis-2.0.0-beta.10.jar" sourcepath="/com.openexchange.test/testlib/source/powermock-classloading-objenesis-2.0.0-beta.10-sources.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.test/testlib/powermock-core-2.0.0-beta.10.jar" sourcepath="/com.openexchange.test/testlib/source/powermock-core-2.0.0-beta.10-sources.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.test/testlib/powermock-module-junit4-2.0.0-beta.10.jar" sourcepath="/com.openexchange.test/testlib/source/powermock-module-junit4-2.0.0-beta.10-sources.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.test/testlib/powermock-module-junit4-common-2.0.0-beta.10.jar" sourcepath="/com.openexchange.test/testlib/source/powermock-module-junit4-common-2.0.0-beta.10-sources.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.test/testlib/powermock-reflect-2.0.0-beta.10.jar" sourcepath="/com.openexchange.test/testlib/source/powermock-reflect-2.0.0-beta.10-sources.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.test/testlib/mockito-core-2.18.6.jar" sourcepath="/com.openexchange.test/testlib/source/mockito-core-2.18.6-sources.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

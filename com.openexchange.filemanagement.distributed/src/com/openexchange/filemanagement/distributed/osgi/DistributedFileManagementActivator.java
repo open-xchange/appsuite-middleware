@@ -82,7 +82,7 @@ public class DistributedFileManagementActivator extends HousekeepingActivator {
                     DistributedFileManagementImpl.setHazelcastInstance(null);
 
                     DistributedFileManagementImpl distributedFileManagement = this.distributedFileManagement;
-                    if(distributedFileManagement != null) {
+                    if (distributedFileManagement != null) {
                         this.distributedFileManagement = null;
                         unregisterService(distributedFileManagement);
                         distributedFileManagement.cleanUp();

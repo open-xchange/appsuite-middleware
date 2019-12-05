@@ -193,7 +193,7 @@ public class Utils {
             if (null != reader) {
                 try {
                     reader.dispose();
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     // Ignore
                 }
             }

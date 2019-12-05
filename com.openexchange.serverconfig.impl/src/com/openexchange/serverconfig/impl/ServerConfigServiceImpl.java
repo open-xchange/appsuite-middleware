@@ -81,7 +81,7 @@ import com.openexchange.serverconfig.ServerConfig;
 import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.serverconfig.ServerConfigServicesLookup;
 import com.openexchange.session.Session;
-import com.openexchange.tools.session.SessionHolder;
+import com.openexchange.session.SessionHolder;
 
 
 /**
@@ -256,7 +256,7 @@ public class ServerConfigServiceImpl implements ServerConfigService {
 
                         // Not applicable according to hostRegex check
                         LOG.debug("Host-Regex '{}' does not match {}", hostRegex, hostName);
-                    } catch (final PatternSyntaxException e) {
+                    } catch (PatternSyntaxException e) {
                         // Ignore. Treat as absent.
                         LOG.debug("Invalid regex pattern for {}: {}", keyHostRegex, hostRegex, e);
                     }

@@ -141,7 +141,7 @@ public class EMailFixtureFactory implements FixtureFactory<MailMessage> {
                     throw new FixtureException(e);
                 }
 
-                final String from = values.get("from").substring(values.get("from").indexOf(":") + 1);
+                final String from = values.get("from").substring(values.get("from").indexOf(':') + 1);
                 final Contact contact = fixtureLoader.getFixtures("users", SimpleCredentials.class).getEntry(from).getEntry().asContact();
 
                 final String displayName;
@@ -217,7 +217,7 @@ public class EMailFixtureFactory implements FixtureFactory<MailMessage> {
                 if (null != in) {
                     try {
                         in.close();
-                    } catch (final IOException e) {
+                    } catch (IOException e) {
                         e.printStackTrace();
                     }
                 }
@@ -245,7 +245,7 @@ public class EMailFixtureFactory implements FixtureFactory<MailMessage> {
                 if (null != in) {
                     try {
                         in.close();
-                    } catch (final IOException e) {
+                    } catch (IOException e) {
                         e.printStackTrace();
                     }
                 }

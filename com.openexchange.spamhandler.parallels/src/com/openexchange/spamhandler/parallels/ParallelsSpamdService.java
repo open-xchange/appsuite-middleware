@@ -73,12 +73,12 @@ import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.spamhandler.spamassassin.api.SpamdProvider;
 import com.openexchange.spamhandler.spamassassin.api.SpamdService;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 public class ParallelsSpamdService implements SpamdService {
@@ -251,7 +251,7 @@ public class ParallelsSpamdService implements SpamdService {
 
 
             // check if contains a "faultcode" part, if no, parse for data
-            if(!xml_rpc_response.contains("<name>faultCode</name>")){
+            if (!xml_rpc_response.contains("<name>faultCode</name>")){
 
                 final DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
                 final DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
@@ -268,7 +268,7 @@ public class ParallelsSpamdService implements SpamdService {
 
 
                     final Node firstMemberNode = listOfMembers.item(s);
-                    if(firstMemberNode.getNodeType() == Node.ELEMENT_NODE){
+                    if (firstMemberNode.getNodeType() == Node.ELEMENT_NODE){
 
 
                         final Element firstMemberElement = (Element)firstMemberNode;
@@ -283,7 +283,7 @@ public class ParallelsSpamdService implements SpamdService {
                         final Element firstNameElement_ = (Element)firstMemberList_.item(0);
                         final NodeList textFNList_ = firstNameElement_.getChildNodes();
 
-                        if((textFNList.item(0)).getNodeValue().trim().equals("server")){
+                        if ((textFNList.item(0)).getNodeValue().trim().equals("server")){
                             // server ip ==
                             response_server = (textFNList_.item(0)).getNodeValue().trim();
                                 LOG.debug("Returning {} as host to spamhandler", response_server);
@@ -304,30 +304,30 @@ public class ParallelsSpamdService implements SpamdService {
             LOG.error("got error response from xml-rpc service for primary mail {}", xml_rpc_prim_email);
             LOG.error(xml_rpc_response);
             throw MailExceptionCode.SPAM_HANDLER_INIT_FAILED.create("got error response from xml-rpc service for primary mail "+xml_rpc_prim_email);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("error loading user object from session", e);
             throw MailExceptionCode.SPAM_HANDLER_INIT_FAILED.create(e,"error loading user object from session");
-        } catch (final URIException e) {
+        } catch (URIException e) {
             LOG.error("error sending request to xmlrpc service",e);
             throw MailExceptionCode.SPAM_HANDLER_INIT_FAILED.create(e,"error loading user object from session");
-        } catch (final HttpException e) {
+        } catch (HttpException e) {
             LOG.error("error sending request to xmlrpc service",e);
             throw MailExceptionCode.SPAM_HANDLER_INIT_FAILED.create(e,"error loading user object from session");
-        } catch (final IOException e) {
+        } catch (IOException e) {
             LOG.error("error sending request to xmlrpc service",e);
             throw MailExceptionCode.SPAM_HANDLER_INIT_FAILED.create(e,"error loading user object from session");
-        } catch (final ParserConfigurationException e) {
+        } catch (ParserConfigurationException e) {
             LOG.error("error parsing response from xmlrpc service",e);
             throw MailExceptionCode.SPAM_HANDLER_INIT_FAILED.create(e,"error loading user object from session");
-        } catch (final SAXException e) {
+        } catch (SAXException e) {
             LOG.error("error parsing response from xmlrpc service",e);
             throw MailExceptionCode.SPAM_HANDLER_INIT_FAILED.create(e,"error loading user object from session");
-        } catch (final URISyntaxException e) {
+        } catch (URISyntaxException e) {
             LOG.error("error parsing users smtp server as xmlrpc host",e);
             throw MailExceptionCode.SPAM_HANDLER_INIT_FAILED.create(e,"error loading user object from session");
-        }finally{
+        } finally {
             // free http client
-            if(http_client!=null){
+            if (http_client!=null){
                 http_client = null;
             }
         }

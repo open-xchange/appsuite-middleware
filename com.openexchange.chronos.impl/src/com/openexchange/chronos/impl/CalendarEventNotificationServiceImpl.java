@@ -84,7 +84,7 @@ public class CalendarEventNotificationServiceImpl implements CalendarEventNotifi
 
     @Override
     public void notifyHandlers(CalendarEvent event, boolean asynch) {
-        if(asynch) {
+        if (asynch) {
             Runnable notifyRunnable = () -> {
                 notifyHandlersInternal(event);
             };

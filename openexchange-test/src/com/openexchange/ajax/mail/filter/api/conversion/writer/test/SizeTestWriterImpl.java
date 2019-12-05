@@ -76,11 +76,6 @@ public class SizeTestWriterImpl extends AbstractWriterImpl<SizeTestArgument> {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.mail.filter.api.conversion.writer.JSONWriter#write(java.lang.Object, org.json.JSONObject)
-     */
     @Override
     public JSONObject write(Test<? extends TestArgument> test, JSONObject jsonObject) throws JSONException {
         jsonObject.put(CommonTestArgument.id.name(), test.getTestCommand().name().toLowerCase());

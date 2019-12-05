@@ -50,9 +50,7 @@
 package com.openexchange.ajax.requesthandler.responseRenderers.actions;
 
 import java.io.Closeable;
-import java.io.File;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.fileholder.IFileHolder;
@@ -82,7 +80,7 @@ public interface IDataWrapper {
      *
      * @return The delivery type
      */
-    public String getDelivery();
+    String getDelivery();
 
     /**
      * Sets the delivery type
@@ -90,14 +88,14 @@ public interface IDataWrapper {
      * @param delivery The delivery type to set
      * @return This object
      */
-    public IDataWrapper setDelivery(String delivery);
+    IDataWrapper setDelivery(String delivery);
 
     /**
      * Gets the content type.
      *
      * @return The content type
      */
-    public String getContentType();
+    String getContentType();
 
     /**
      * Sets the content type
@@ -105,14 +103,14 @@ public interface IDataWrapper {
      * @param contentType The content type to set
      * @return This object
      */
-    public IDataWrapper setContentType(String contentType);
+    IDataWrapper setContentType(String contentType);
 
     /**
      * Gets the content disposition
      *
      * @return The content disposition
      */
-    public String getContentDisposition();
+    String getContentDisposition();
 
     /**
      * Sets the content disposition
@@ -120,14 +118,14 @@ public interface IDataWrapper {
      * @param contentDisposition The content disposition to set
      * @return This object
      */
-    public IDataWrapper setContentDisposition(String contentDisposition);
+    IDataWrapper setContentDisposition(String contentDisposition);
 
     /**
      * Returns contentTypeByParameter flag
      *
      * @return The contentTypeByParameter flag
      */
-    public Boolean getContentTypeByParameter();
+    Boolean getContentTypeByParameter();
 
     /**
      * Sets the contentTypeByParameter flag
@@ -135,14 +133,14 @@ public interface IDataWrapper {
      * @param contentTypeByParameter The flag value to set
      * @return This object
      */
-    public IDataWrapper setContentTypeByParameter(Boolean contentTypeByParameter);
+    IDataWrapper setContentTypeByParameter(Boolean contentTypeByParameter);
 
     /**
      * Gets the data as a {@link Readable}
      *
      * @return The data
      */
-    public Readable getDocumentData();
+    Readable getDocumentData();
 
     /**
      * Sets the data
@@ -150,18 +148,18 @@ public interface IDataWrapper {
      * @param documentData The data as a {@link Readable}
      * @return This object
      */
-    public IDataWrapper setDocumentData(Readable documentData);
+    IDataWrapper setDocumentData(Readable documentData);
 
     /**
      * Gets the length of the data
-     * 
+     *
      * @return The length in bytes
      */
     public long getLength();
 
     /**
      * Sets the length of the data
-     * 
+     *
      * @param length The length in bytes
      * @return This object
      */
@@ -169,159 +167,144 @@ public interface IDataWrapper {
 
     /**
      * Gets the file
-     * 
+     *
      * @return The file as a {@link IFileHolder}
      */
     public IFileHolder getFile();
 
     /**
      * Sets the file
-     * 
+     *
      * @param file The file as a {@link IFileHolder}
      * @return This object
      */
-    public IDataWrapper setFile(IFileHolder file);
+    IDataWrapper setFile(IFileHolder file);
 
     /**
      * Gets the request
-     * 
+     *
      * @return The {@link HttpServletRequest}
      */
-    public HttpServletRequest getRequest();
+    HttpServletRequest getRequest();
 
     /**
      * Sets the request
-     * 
+     *
      * @param req The {@link HttpServletRequest}
      * @return This object
      */
-    public IDataWrapper setRequest(HttpServletRequest req);
+    IDataWrapper setRequest(HttpServletRequest req);
 
     /**
      * Gets the content type of the file
-     * 
+     *
      * @return The content type of the file
      */
-    public String getFileContentType();
+    String getFileContentType();
 
     /**
      * Sets the content type of the file
-     * 
+     *
      * @param fileContentType The content type of the file
      * @return This object
      */
-    public IDataWrapper setFileContentType(String fileContentType);
+    IDataWrapper setFileContentType(String fileContentType);
 
     /**
      * Gets the name of the file
-     * 
+     *
      * @return The file name
      */
-    public String getFileName();
+    String getFileName();
 
     /**
      * Sets the name of the file
-     * 
+     *
      * @param fileName The file name
      * @return This object
      */
-    public IDataWrapper setFileName(String fileName);
+    IDataWrapper setFileName(String fileName);
 
     /**
      * Gets the request data
-     * 
+     *
      * @return The {@link AJAXRequestData}
      */
-    public AJAXRequestData getRequestData();
+    AJAXRequestData getRequestData();
 
     /**
      * Sets the request data
-     * 
+     *
      * @param data The {@link AJAXRequestData}
      * @return This object
      */
-    public IDataWrapper setRequestData(AJAXRequestData data);
+    IDataWrapper setRequestData(AJAXRequestData data);
 
     /**
      * Gets the response object
-     * 
+     *
      * @return The {@link HttpServletResponse}
      */
-    public HttpServletResponse getResponse();
+    HttpServletResponse getResponse();
 
     /**
      * Sets the response object
-     * 
+     *
      * @param response The {@link HttpServletResponse}
      * @return This object
      */
-    public IDataWrapper setResponse(HttpServletResponse response);
+    IDataWrapper setResponse(HttpServletResponse response);
 
     /**
      * Gets the user agent of the client
-     * 
+     *
      * @return The user agent of the client
      */
-    public String getUserAgent();
+    String getUserAgent();
 
     /**
      * Sets the user agent of the client
-     * 
+     *
      * @param userAgent The user agent of the client
      * @return This object
      */
-    public IDataWrapper setUserAgent(String userAgent);
+    IDataWrapper setUserAgent(String userAgent);
 
     /**
      * Adds a {@link Closeable} to this wrapper
-     * 
+     *
      * @param closeable A {@link Closeable}
      */
-    public void addCloseable(Closeable closeable);
+    void addCloseable(Closeable closeable);
 
     /**
      * Sets the list of {@link Closeable}s to the given list.
-     * 
+     *
      * @param closeables A list of {@link Closeable}s
      * @return This object
      */
-    public IDataWrapper setCloseAbles(List<Closeable> closeables);
+    IDataWrapper setCloseAbles(List<Closeable> closeables);
 
     /**
      * Gets the list of {@link Closeable}s
-     * 
+     *
      * @return The list of {@link Closeable}s
      */
-    public List<Closeable> getCloseables();
+    List<Closeable> getCloseables();
 
     /**
      * Gets the {@link AJAXRequestResult}
-     * 
+     *
      * @return The {@link AJAXRequestResult}
      */
-    public AJAXRequestResult getResult();
+    AJAXRequestResult getResult();
 
     /**
      * Set the {@link AJAXRequestResult}
-     * 
+     *
      * @param result The {@link AJAXRequestResult}
      * @return This object
      */
-    public IDataWrapper setResult(AJAXRequestResult result);
-
-    /**
-     * Gets an {@link AtomicReference} to the temporal directory.
-     * 
-     * @return The {@link AtomicReference}
-     */
-    public AtomicReference<File> getTmpDirReference();
-
-    /**
-     * Sets the temporal directory
-     * 
-     * @param tmpDirReference The {@link AtomicReference}
-     * @return This object
-     */
-    public IDataWrapper setTmpDirReference(AtomicReference<File> tmpDirReference);
+    IDataWrapper setResult(AJAXRequestResult result);
 
 }

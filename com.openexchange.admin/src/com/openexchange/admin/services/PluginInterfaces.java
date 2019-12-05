@@ -51,6 +51,7 @@ package com.openexchange.admin.services;
 
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.admin.plugins.BasicAuthenticatorPluginInterface;
+import com.openexchange.admin.plugins.ContextDbLookupPluginInterface;
 import com.openexchange.admin.plugins.OXContextPluginInterface;
 import com.openexchange.admin.plugins.OXGroupPluginInterface;
 import com.openexchange.admin.plugins.OXResourcePluginInterface;
@@ -97,6 +98,7 @@ public final class PluginInterfaces {
         ServiceListing<OXUserPluginInterface> userPlugins;
         ServiceListing<OXGroupPluginInterface> groupPlugins;
         ServiceListing<OXResourcePluginInterface> resourcePlugins;
+        ServiceListing<ContextDbLookupPluginInterface> dbLookupPlugins;
 
         public Builder() {
             super();
@@ -127,6 +129,11 @@ public final class PluginInterfaces {
             return this;
         }
 
+        public Builder dbLookupPlugins(ServiceListing<ContextDbLookupPluginInterface> serviceListing) {
+            this.dbLookupPlugins = serviceListing;
+            return this;
+        }
+
         public PluginInterfaces build() {
             return new PluginInterfaces(this);
         }
@@ -139,6 +146,7 @@ public final class PluginInterfaces {
     private final ServiceListing<OXUserPluginInterface> userPlugins;
     private final ServiceListing<OXGroupPluginInterface> groupPlugins;
     private final ServiceListing<OXResourcePluginInterface> resourcePlugins;
+    private final ServiceListing<ContextDbLookupPluginInterface> dbLookupPlugins;
 
     /**
      * Initializes a new {@link PluginInterfaces}.
@@ -150,6 +158,7 @@ public final class PluginInterfaces {
         this.userPlugins = null == builder.userPlugins ? ServiceListings.<OXUserPluginInterface> emptyList() : builder.userPlugins;
         this.groupPlugins = null == builder.groupPlugins ? ServiceListings.<OXGroupPluginInterface> emptyList() : builder.groupPlugins;
         this.resourcePlugins = null == builder.resourcePlugins ? ServiceListings.<OXResourcePluginInterface> emptyList() : builder.resourcePlugins;
+        this.dbLookupPlugins = null == builder.dbLookupPlugins ? ServiceListings.<ContextDbLookupPluginInterface> emptyList() : builder.dbLookupPlugins;
     }
 
     /**
@@ -197,4 +206,12 @@ public final class PluginInterfaces {
         return resourcePlugins;
     }
 
+    /**
+     * Gets the rank-wise sorted dblookup plugins.
+     *
+     * @return The dblookup plugins
+     */
+    public ServiceListing<ContextDbLookupPluginInterface> getDBLookupPlugins() {
+        return dbLookupPlugins;
+    }
 }

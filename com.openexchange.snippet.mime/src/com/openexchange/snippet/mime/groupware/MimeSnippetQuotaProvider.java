@@ -227,7 +227,7 @@ public class MimeSnippetQuotaProvider implements QuotaProvider {
                         currentUsage += size;
                     }
                 } while (rs.next());
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 throw SnippetExceptionCodes.SQL_ERROR.create(e, e.getMessage());
             } finally {
                 Databases.closeSQLStuff(rs, stmt);
@@ -263,7 +263,7 @@ public class MimeSnippetQuotaProvider implements QuotaProvider {
                 }
 
                 stmt.executeBatch();
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 throw SnippetExceptionCodes.SQL_ERROR.create(e, e.getMessage());
             } finally {
                 Databases.closeSQLStuff(stmt);
@@ -295,7 +295,7 @@ public class MimeSnippetQuotaProvider implements QuotaProvider {
             stmt.setInt(++pos, session.getUserId());
             rs = stmt.executeQuery();
             return rs.next() ? rs.getInt(1) : 0;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw SnippetExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);

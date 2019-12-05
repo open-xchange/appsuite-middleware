@@ -53,11 +53,14 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -78,11 +81,14 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpUpgradeHandler;
 import javax.servlet.http.Part;
 import org.glassfish.grizzly.http.server.OXRequest;
+import org.glassfish.grizzly.http.server.util.SimpleDateFormats;
+import org.glassfish.grizzly.http.util.FastHttpDateFormat;
 import org.glassfish.grizzly.servlet.ServletUtils;
 import com.google.common.collect.ImmutableMap;
+import com.openexchange.dispatcher.Headerizable;
 import com.openexchange.dispatcher.Parameterizable;
 
-public class HttpServletRequestWrapper implements HttpServletRequest, Parameterizable {
+public class HttpServletRequestWrapper implements HttpServletRequest, Parameterizable, Headerizable {
 
     private static final String ABSENT = new String(new char[] {'_','_','a', 'b', 's', 'e', 'n', 't'});
 
@@ -98,6 +104,7 @@ public class HttpServletRequestWrapper implements HttpServletRequest, Parameteri
     private final boolean isSecure;
     private final String remoteAddress;
     private final ConcurrentMap<String, String> additionalParams;
+    private final ConcurrentMap<String, String> additionalHeaders;
 
     /**
      * Initializes a new {@link HttpServletRequestWrapper}.
@@ -123,6 +130,7 @@ public class HttpServletRequestWrapper implements HttpServletRequest, Parameteri
         this.serverPort = serverPort;
         this.delegate = httpServletRequest;
         this.additionalParams = new ConcurrentHashMap<>(6, 0.9F, 1);
+        this.additionalHeaders = new ConcurrentHashMap<>(6, 0.9F, 1);
 
         OXRequest internalRequest = (OXRequest) ServletUtils.getInternalRequest(httpServletRequest);
         internalRequest.setXForwardPort(serverPort);
@@ -147,6 +155,7 @@ public class HttpServletRequestWrapper implements HttpServletRequest, Parameteri
         this.serverPort = httpServletRequest.getServerPort();
         this.remoteAddress = httpServletRequest.getRemoteAddr();
         this.additionalParams = new ConcurrentHashMap<>(6, 0.9F, 1);
+        this.additionalHeaders = new ConcurrentHashMap<>(6, 0.9F, 1);
     }
 
     @Override
@@ -190,22 +199,93 @@ public class HttpServletRequestWrapper implements HttpServletRequest, Parameteri
     }
 
     @Override
+    public void setHeader(String name, String value) {
+        if (null == name) {
+            throw new NullPointerException("name is null");
+        }
+
+        additionalHeaders.put(name, null == value ? ABSENT : value);
+    }
+
+    @Override
     public long getDateHeader(String name) {
-        return null == name || 0 == name.length() ? -1L : delegate.getDateHeader(name);
+        if (name == null || 0 == name.length()) {
+            return -1L;
+        }
+
+        String value = additionalHeaders.get(name);
+        if (null != value) {
+            if (ABSENT == value) {
+                // Explicitly removed
+                return -1L;
+            }
+
+            SimpleDateFormats formats = SimpleDateFormats.create();
+            try {
+                // Attempt to convert the date header in a variety of formats
+                long result = FastHttpDateFormat.parseDate(value, formats.getFormats());
+                if (result != (-1L)) {
+                    return result;
+                }
+                throw new IllegalArgumentException(value);
+            } finally {
+                formats.recycle();
+            }
+        }
+
+        return delegate.getDateHeader(name);
     }
 
     @Override
     public String getHeader(String name) {
-        return null == name || 0 == name.length() ? null : delegate.getHeader(name);
+        if (name == null || 0 == name.length()) {
+            return null;
+        }
+
+        String value = additionalHeaders.get(name);
+        if (null != value) {
+            return ABSENT == value ? null /*Explicitly removed*/ : value;
+        }
+
+        return delegate.getHeader(name);
     }
 
     @Override
     public Enumeration<String> getHeaderNames() {
-        return delegate.getHeaderNames();
+        if (additionalParams.isEmpty()) {
+            return delegate.getHeaderNames();
+        }
+
+        // Create copy from request's parameters
+        List<String> headerNames = new ArrayList<String>();
+        for (Enumeration<String> e = delegate.getHeaderNames(); e.hasMoreElements();) {
+            headerNames.add(e.nextElement());
+        }
+
+        // Overwrite/clean by the ones from additional parameters
+        for (Map.Entry<String,String> entry : additionalHeaders.entrySet()) {
+            String value = entry.getValue();
+            if (ABSENT == value) {
+                headerNames.remove(entry.getKey());
+            } else {
+                headerNames.add(entry.getKey());
+            }
+        }
+
+        return new IteratorEnumeration<String>(headerNames.iterator());
     }
 
     @Override
     public Enumeration<String> getHeaders(String name) {
+        if (additionalParams.isEmpty()) {
+            return delegate.getHeaders(name);
+        }
+
+        String value = additionalHeaders.get(name);
+        if (null != value) {
+            return ABSENT == value ? null /*Explicitly removed*/ : new IteratorEnumeration<String>(Collections.singletonList(value).iterator());
+        }
+
         return delegate.getHeaders(name);
     }
 
@@ -216,7 +296,21 @@ public class HttpServletRequestWrapper implements HttpServletRequest, Parameteri
 
     @Override
     public int getIntHeader(String name) {
-        return null == name || 0 == name.length() ? -1 : delegate.getIntHeader(name);
+        if (name == null || 0 == name.length()) {
+            return -1;
+        }
+
+        String value = additionalHeaders.get(name);
+        if (null != value) {
+            if (ABSENT == value) {
+                // Explicitly removed
+                return -1;
+            }
+
+            return Integer.parseInt(value);
+        }
+
+        return delegate.getIntHeader(name);
     }
 
     @Override

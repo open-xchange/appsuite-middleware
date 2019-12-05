@@ -73,7 +73,7 @@ public class SessiondSessionSpecificRetrievalService implements SessionSpecificC
         if (containers.containsKey(name)) {
             return (SessionScopedContainer<T>) containers.get(name);
         }
-        if(lifecycle == null) {
+        if (lifecycle == null) {
             lifecycle = DEFAULT_LIFECYCLE;
         }
         SessionScopedContainerImpl<T> newValue = new SessionScopedContainerImpl<T>(name, lifecycle, initial, cleanUp, this);
@@ -99,7 +99,7 @@ public class SessiondSessionSpecificRetrievalService implements SessionSpecificC
             }
         }
         for(RandomTokenContainerImpl<?> container : randomTokenContainer.values()) {
-            if(container.getLifecycle().includes(newLifecycle)) {
+            if (container.getLifecycle().includes(newLifecycle)) {
                 container.removeForSession(session);
             }
         }
@@ -110,12 +110,12 @@ public class SessiondSessionSpecificRetrievalService implements SessionSpecificC
         if (randomTokenContainer.containsKey(name)) {
             return (RandomTokenContainer<T>) randomTokenContainer.get(name);
         }
-        if(lifecycle == null) {
+        if (lifecycle == null) {
             lifecycle = DEFAULT_LIFECYCLE;
         }
         RandomTokenContainerImpl<T> container = new RandomTokenContainerImpl<T>(name, lifecycle, cleanUp);
         RandomTokenContainerImpl<?> other = randomTokenContainer.putIfAbsent(name, container);
-        if(other != null) {
+        if (other != null) {
             return (RandomTokenContainer<T>) other;
         }
         return container;

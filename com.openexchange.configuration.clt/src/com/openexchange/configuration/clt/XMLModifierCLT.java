@@ -120,11 +120,6 @@ public class XMLModifierCLT extends AbstractCLI<Integer, Void> {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractCLI#invoke(org.apache.commons.cli.Options, org.apache.commons.cli.CommandLine, java.lang.Object)
-     */
     @Override
     protected Integer invoke(Options option, CommandLine cmd, Void context) throws Exception {
         Transformer transformer;
@@ -148,6 +143,9 @@ public class XMLModifierCLT extends AbstractCLI<Integer, Void> {
                 String scr = cmd.getOptionValue('s');
                 scr = scr == null ? "" : scr.trim();
                 switch (scr) {
+                    case "480":
+                        scr_480(document);
+                        break;
                     case "4249":
                         scr_4249(document);
                         break;
@@ -213,11 +211,6 @@ public class XMLModifierCLT extends AbstractCLI<Integer, Void> {
         return Integer.valueOf(0);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractCLI#addOptions(org.apache.commons.cli.Options)
-     */
     @Override
     protected void addOptions(Options options) {
         options.addOption(createArgumentOption("i", "in", "input", "XML document is read from this file.", false));
@@ -231,51 +224,26 @@ public class XMLModifierCLT extends AbstractCLI<Integer, Void> {
         options.addOption(createArgumentOption("s", "scr", "scr", "Specifies which scr should be executed on the xml document selected via -i", false));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractCLI#checkOptions(org.apache.commons.cli.CommandLine)
-     */
     @Override
     protected void checkOptions(CommandLine cmd) {
         // nothing to check
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractCLI#getHeader()
-     */
     @Override
     protected String getHeader() {
         return HEADER;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractCLI#getFooter()
-     */
     @Override
     protected String getFooter() {
         return "";
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractCLI#getName()
-     */
     @Override
     protected String getName() {
         return SYNTAX;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractCLI#getContext()
-     */
     @Override
     protected Void getContext() {
         return null;
@@ -668,7 +636,38 @@ public class XMLModifierCLT extends AbstractCLI<Integer, Void> {
                 }
             }
         } catch (Exception e) {
-            throw new SCRException(e);
+            throw new SCRException("SCR 4249", e);
+        }
+    }
+    
+    /**
+     * Apply SCR 480: Revert com.hazelcast logger to default INFO level if still set to WARN
+     * and drop then superfluous diagnostics logger if still set to INFO
+     * 
+     * <logger level="WARN" name="com.hazelcast"/>
+     * <logger level="INFO" name="com.hazelcast.internal.diagnostics"/>
+     *
+     * @param doc The document to which the SCR should be applied
+     * @throws SCRException if applying the Software Change Request fails
+     */
+    static void scr_480(Document doc) throws SCRException {
+        try {
+            XPath path = xf.newXPath();
+            XPathExpression HZ_WARN = path.compile("/configuration/logger[(@name='com.hazelcast') and (@level='WARN')]");
+            XPathExpression HZID_INFO = path.compile("/configuration/logger[(@name='com.hazelcast.internal.diagnostics') and (@level='INFO')]");
+            
+            NodeList hzwarnList = (NodeList) HZ_WARN.evaluate(doc, XPathConstants.NODESET);
+            int hz_removed = Logback.removeNodeList(hzwarnList);
+            if (hz_removed > 0) {
+            	System.out.println("Removed com.hazelcast WARN logger config from logback.xml based on Software Change Request 480");
+            	NodeList hzidList = (NodeList) HZID_INFO.evaluate(doc, XPathConstants.NODESET);
+            	int hzid_removed = Logback.removeNodeList(hzidList);
+            	if (hzid_removed > 0) {
+            		System.out.println("Removed com.hazelcast.internal.diagnostics INFO logger config from logback.xml based on Software Change Request 480");
+            	}
+            }
+        } catch (Exception e) {
+            throw new SCRException("SCR-480", e);
         }
     }
 }

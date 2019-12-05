@@ -90,28 +90,28 @@ public class DeleteAttachmentSolver implements ProblemSolver {
                 if (numbers[1] == 1) {
                     LOG.info(MessageFormat.format("Removed attachment database entry for: {0}", identifier));
                 }
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.debug("{}", e.getMessage(), e);
                 try {
                     attachments.rollback();
                     return;
-                } catch (final OXException e1) {
+                } catch (OXException e1) {
                     LOG.debug("{}", e1.getMessage(), e1);
                 }
                 return;
-            } catch (final RuntimeException e) {
+            } catch (RuntimeException e) {
                 LOG.error("{}", e.getMessage(), e);
                 try {
                     attachments.rollback();
                     return;
-                } catch (final OXException e1) {
+                } catch (OXException e1) {
                     LOG.debug("{}", e1.getMessage(), e1);
                 }
                 return;
             } finally {
                 try {
                     attachments.finish();
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     LOG.debug("{}", e.getMessage(), e);
                 }
             }

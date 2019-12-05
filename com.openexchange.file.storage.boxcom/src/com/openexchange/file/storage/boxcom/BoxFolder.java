@@ -159,7 +159,7 @@ public final class BoxFolder extends DefaultFileStorageFolder implements TypeAwa
 
                 setSubfolders(hasSubfolders);
                 setSubscribedSubfolders(hasSubfolders);
-            } catch (final RuntimeException e) {
+            } catch (RuntimeException e) {
                 throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
         }

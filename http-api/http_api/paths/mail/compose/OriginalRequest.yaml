@@ -1,0 +1,25 @@
+'/mail/compose/{id}/attachments/original':
+  post:
+    operationId: postAttachmentsOriginal
+    tags:
+      - MailCompose
+    summary: Add all original attachments (useful for replies).
+    parameters:
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - in: path
+        name: id
+        description: The ID of the composition space
+        required: true
+        schema:
+          type: string
+    responses:
+      '200':
+        description: A JSON array containing the added attachments to concat.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MailComposeAttachmentPostResponse'
+      '400':
+        description: 'Bad request, response contains error message.'
+      '401':
+        description: Not authorized

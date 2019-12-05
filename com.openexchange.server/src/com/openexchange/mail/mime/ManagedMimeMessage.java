@@ -183,7 +183,7 @@ public final class ManagedMimeMessage extends MimeMessage implements MimeCleanUp
         if (null != file) {
             try {
                 file.delete();
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 // Ignore
             } finally {
                 this.file = null;

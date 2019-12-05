@@ -55,7 +55,6 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.idn.IDNA;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.image.ImageDataSource;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
@@ -63,6 +62,7 @@ import com.openexchange.mail.mime.filler.MimeMessageFiller.ImageProvider;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 

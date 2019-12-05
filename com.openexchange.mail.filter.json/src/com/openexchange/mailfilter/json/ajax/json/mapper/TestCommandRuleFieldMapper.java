@@ -78,37 +78,22 @@ public class TestCommandRuleFieldMapper implements RuleFieldMapper {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.mailfilter.json.ajax.json.RuleFieldMapper#getAttributeName()
-     */
     @Override
     public RuleField getAttributeName() {
         return RuleField.test;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.mailfilter.json.ajax.json.RuleFieldMapper#isNull(com.openexchange.jsieve.commands.Rule)
-     */
     @Override
     public boolean isNull(Rule rule) {
         return rule.getTestCommand() == null;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.mailfilter.json.ajax.json.RuleFieldMapper#getAttribute(com.openexchange.jsieve.commands.Rule)
-     */
     @Override
     public Object getAttribute(Rule rule) throws JSONException, OXException {
         JSONObject object = new JSONObject();
         if (!isNull(rule)) {
             TestCommand testCommand = rule.getTestCommand();
-            if(testCommand!=null){
+            if (testCommand!=null){
                 String commandName = testCommand.getCommand().getCommandName();
                 CommandParserRegistry<TestCommand> parserRegistry = Services.getService(TestCommandParserRegistry.class);
                 CommandParser<TestCommand> parser = parserRegistry.get(commandName);
@@ -118,11 +103,6 @@ public class TestCommandRuleFieldMapper implements RuleFieldMapper {
         return object;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.mailfilter.json.ajax.json.RuleFieldMapper#setAttribute(com.openexchange.jsieve.commands.Rule, java.lang.Object)
-     */
     @Override
     public void setAttribute(Rule rule, Object attribute, ServerSession session) throws JSONException, SieveException, OXException {
         JSONObject object = (JSONObject) attribute;

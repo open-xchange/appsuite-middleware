@@ -52,7 +52,6 @@ package com.openexchange.groupware.contact.helpers;
 import java.util.Locale;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.contact.ContactProperty;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.i18n.ContactDisplayNameFormat;
@@ -146,11 +145,7 @@ public class ContactDisplayNameHelper {
     private static String getTemplate(I18nServiceRegistry i18nServices, Locale locale, boolean hasDepartment) {
         I18nService i18nService = null;
         if (null != i18nServices) {
-            try {
-                i18nService = i18nServices.getI18nService(locale);
-            } catch (OXException e) {
-                LOGGER.debug("An error occurred while gettting the i18n service for locale '{}': {}", locale, e.getMessage(), e);
-            }
+            i18nService = i18nServices.getI18nService(locale);
         } else {
             LOGGER.debug("No such service: {}. Falling back default template for display name format", I18nServiceRegistry.class);
         }

@@ -235,11 +235,11 @@ public final class NewAction extends AbstractMailAction implements EnqueuableAJA
                 return performWithUploads(req, request);
             }
             return performWithoutUploads(req);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
@@ -274,14 +274,14 @@ public final class NewAction extends AbstractMailAction implements EnqueuableAJA
             try {
                 final InternetAddress[] fromAddresses = MessageParser.parseAddressKey(FROM, jMail, true);
                 from = null == fromAddresses || 0 == fromAddresses.length ? null : fromAddresses[0];
-            } catch (final AddressException e) {
+            } catch (AddressException e) {
                 throw MimeMailException.handleMessagingException(e);
             }
 
             int accountId;
             try {
                 accountId = resolveFrom2Account(session, from, true, true);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 if (MailExceptionCode.NO_TRANSPORT_SUPPORT.equals(e) || MailExceptionCode.INVALID_SENDER.equals(e)) {
                     // Re-throw
                     throw e;
@@ -734,7 +734,7 @@ public final class NewAction extends AbstractMailAction implements EnqueuableAJA
             int accId;
             try {
                 accId = resolveFrom2Account(session, from, true, !force);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 if (MailExceptionCode.NO_TRANSPORT_SUPPORT.equals(e)) {
                     // Re-throw
                     throw e;
@@ -867,10 +867,10 @@ public final class NewAction extends AbstractMailAction implements EnqueuableAJA
                                 sentFullname,
                                 session.getUserId(),
                                 session.getContext().getContextId());
-                        } catch (final OXException e) {
+                        } catch (OXException e) {
                             LOG.error("", e);
                         }
-                    } catch (final OXException e) {
+                    } catch (OXException e) {
                         if (e.getMessage().indexOf("quota") != -1) {
                             throw MailExceptionCode.COPY_TO_SENT_FOLDER_FAILED_QUOTA.create(e, new Object[0]);
                         }

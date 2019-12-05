@@ -163,7 +163,7 @@ public final class UserFlagTerm extends SearchTerm<String[]> {
             Flags msgFlags;
             try {
                 msgFlags = msg.getFlags();
-            } catch (final MessagingException e) {
+            } catch (MessagingException e) {
                 org.slf4j.LoggerFactory.getLogger(UserFlagTerm.class).warn("Error during search.", e);
                 return false;
             }
@@ -180,7 +180,7 @@ public final class UserFlagTerm extends SearchTerm<String[]> {
             Flags msgFlags;
             try {
                 msgFlags = msg.getFlags();
-            } catch (final MessagingException e) {
+            } catch (MessagingException e) {
                 org.slf4j.LoggerFactory.getLogger(UserFlagTerm.class).warn("Error during search.", e);
                 return false;
             }

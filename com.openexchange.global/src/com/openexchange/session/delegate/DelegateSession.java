@@ -195,6 +195,11 @@ public class DelegateSession implements SetableSession {
     }
 
     @Override
+    public boolean isStaySignedIn() {
+        return session.isStaySignedIn();
+    }
+
+    @Override
     public Set<String> getParameterNames() {
         return session.getParameterNames();
     }

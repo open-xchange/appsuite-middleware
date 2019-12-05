@@ -85,7 +85,7 @@ public class GetConfigAction extends AbstractMessagingAccountAction {
     @Override
     protected AJAXRequestResult doIt(final AJAXRequestData request, final ServerSession session) throws OXException, JSONException {
         final List<String> missingParameters = request.getMissingParameters("messagingService", "id");
-        if(!missingParameters.isEmpty()) {
+        if (!missingParameters.isEmpty()) {
             throw MessagingExceptionCodes.MISSING_PARAMETER.create(missingParameters.toString());
         }
         /*
@@ -99,7 +99,7 @@ public class GetConfigAction extends AbstractMessagingAccountAction {
         final String idS = request.getParameter("id");
         try {
             id = Integer.parseInt(idS);
-        } catch (final NumberFormatException x) {
+        } catch (NumberFormatException x) {
             throw MessagingExceptionCodes.INVALID_PARAMETER.create("id", idS);
         }
         /*

@@ -1,0 +1,27 @@
+type: object
+properties:
+  $ref: ../common/CommonResponseData.yaml
+  data:
+    type: object
+    properties:
+      random:
+        type: string
+        description: The random token
+      session:
+        type: string
+        description: The session identifier
+      user:
+        type: string
+        description: The user
+      user_id:
+        type: string
+        description: The user identifier
+      context_id:
+        type: string
+        description: The context identifier
+      requires_multifactor:
+        type: boolean
+        description: An value indicating whether multifactor has been enabled or not
+      locale:
+        type: string
+        description: The locale of the user

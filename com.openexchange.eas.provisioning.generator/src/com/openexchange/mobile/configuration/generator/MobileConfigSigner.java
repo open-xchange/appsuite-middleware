@@ -143,7 +143,7 @@ public class MobileConfigSigner extends Writer {
                 final int waitFor;
                 try {
                     waitFor = process.waitFor();
-                } catch (final InterruptedException e) {
+                } catch (InterruptedException e) {
                     // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
                     Thread.currentThread().interrupt();
                     throw new IOException("openssl process was interrupted");
@@ -162,16 +162,16 @@ public class MobileConfigSigner extends Writer {
             } else {
                 submit.get(property.intValue(), TimeUnit.MILLISECONDS);
             }
-        } catch (final InterruptedException e) {
+        } catch (InterruptedException e) {
             // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
             Thread.currentThread().interrupt();
             throw new IOException("openssl process was interrupted");
-        } catch (final ExecutionException e) {
+        } catch (ExecutionException e) {
             throw new IOException(e.getCause().getMessage());
-        } catch (final TimeoutException e) {
+        } catch (TimeoutException e) {
             this.process.destroy();
             throw new IOException(OPENSSL_DIDN_T_RETURN_IN_A_TIMELY_MANNER_KILLED_PROCESS);
-        } catch (final ConfigurationException e) {
+        } catch (ConfigurationException e) {
             throw new IOException("An configuration error occured: " + e.getMessage());
         }
         final byte[] buf = new byte[1024];

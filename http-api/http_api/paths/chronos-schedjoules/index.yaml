@@ -1,5 +1,0 @@
-requests:
- - BrowseRequest.yaml
- - CountriesRequest.yaml
- - LanguagesRequest.yaml
- - SearchRequest.yaml

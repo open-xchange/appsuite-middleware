@@ -152,7 +152,7 @@ public final class IPAddressUtil {
             default:
                 return null;
             }
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             return null;
         }
         return res;

@@ -53,11 +53,13 @@ import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
+import com.openexchange.chronos.json.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link GetAttachment}
@@ -86,7 +88,12 @@ public class GetAttachment extends ChronosAction {
         IFileHolder fileHolder = null;
         try {
             fileHolder = calendarAccess.getAttachment(eventId, managedId);
-            boolean scanned = scan(requestData, fileHolder, getUniqueId(requestData, eventId, Integer.toString(managedId)));
+            ServerSession session = requestData.getSession();
+            if(session == null) {
+                throw CalendarExceptionCodes.UNEXPECTED_ERROR.create("Missing user session!");
+            }
+            int contextId = session.getContextId();
+            boolean scanned = scan(requestData, fileHolder, getUniqueId(contextId, eventId, Integer.toString(managedId)));
             if (scanned && false == fileHolder.repetitive()) {
                 fileHolder = calendarAccess.getAttachment(eventId, managedId);
             }

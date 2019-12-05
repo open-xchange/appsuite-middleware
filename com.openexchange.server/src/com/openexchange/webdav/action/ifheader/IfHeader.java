@@ -67,7 +67,7 @@ public class IfHeader {
 
 	public List<IfHeaderList> getRelevant(final String url) {
 		final List<IfHeaderList> retval = new ArrayList<IfHeaderList>(untagged);
-		if(tagged.containsKey(url)) {
+		if (tagged.containsKey(url)) {
 			retval.addAll(tagged.get(url));
 		}
 		return retval;
@@ -78,10 +78,10 @@ public class IfHeader {
 	}
 
 	public void addList(final IfHeaderList list) {
-		if(list.isTagged()) {
+		if (list.isTagged()) {
 			final String tag = list.getTag();
 			List<IfHeaderList> taggedList = tagged.get(tag);
-			if(null == taggedList) {
+			if (null == taggedList) {
 				taggedList = new ArrayList<IfHeaderList>();
 				tagged.put(tag, taggedList);
 			}

@@ -112,7 +112,7 @@ public class ICalExportRequest extends AbstractExportRequest<ICalExportResponse>
         List<Parameter> list = Arrays.asList(parameters);
         List<Parameter> newList = new ArrayList<Parameter>();
         for(Parameter param : list){
-            if(!param.getName().equals(parameter)){
+            if (!param.getName().equals(parameter)){
                 newList.add(param);
             }
         }

@@ -169,7 +169,7 @@ public abstract class AbstractOwnerCapableEntity2ACL extends Entity2ACL {
         }
         try {
             return MailConfig.getMailLogin(storageService.getMailAccount(accountId, userId, ctx.getContextId()), userLoginInfo, userId, ctx.getContextId());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw Entity2ACLExceptionCode.UNKNOWN_USER.create(e,
                 Integer.valueOf(userId),
                 Integer.valueOf(ctx.getContextId()),

@@ -125,7 +125,7 @@ public final class MailBugfixTest extends AbstractMailTest {
                  */
                 mailAccess.close(false);
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }

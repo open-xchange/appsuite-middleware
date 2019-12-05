@@ -88,7 +88,7 @@ public class Bug27640_StructureTest extends AbstractMailTest {
             final String expectedSubject = "Ufersicherungen an Seeschifffahrts- und Binnenschifffahrtsstrassen";
             assertEquals("Unexpected subject in JSON MIME structure.", expectedSubject, jsonSubject);
 
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }

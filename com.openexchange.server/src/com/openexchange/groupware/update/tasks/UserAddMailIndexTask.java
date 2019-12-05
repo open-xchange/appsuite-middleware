@@ -92,9 +92,9 @@ public final class UserAddMailIndexTask extends UpdateTaskAdapter {
             createMailIndex(con, tables);
             con.commit();
             rollback = 2;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw createSQLError(e);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
             if (rollback > 0) {
@@ -125,7 +125,7 @@ public final class UserAddMailIndexTask extends UpdateTaskAdapter {
                 } else {
                     log.info("New index named \"{}\" with columns (cid, mail) already exists on table {}.", indexName, table);
                 }
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 log.error("Problem adding index \"{}\" on table {}.", name, table, e);
                 throw createSQLError(e);
             }

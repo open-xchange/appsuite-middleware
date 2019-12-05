@@ -243,15 +243,15 @@ public class LDAPHostnameService implements HostnameService {
             }
             LOG.debug("Using hostnames for context {} from cache", Integer.valueOf(contextId));
             return hostnamesFromCache[index];
-        } catch (final InvalidNameException e) {
+        } catch (InvalidNameException e) {
             LOG.error("Failed to fetch hostnames for context id {}:", Integer.valueOf(contextId), e);
-        } catch (final AuthenticationException e) {
+        } catch (AuthenticationException e) {
             LOG.error("Failed to fetch hostnames for context id {}:", Integer.valueOf(contextId), e);
-        } catch (final NamingException e) {
+        } catch (NamingException e) {
             LOG.error("Failed to fetch hostnames for context id {}:", Integer.valueOf(contextId), e);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("Failed to fetch hostnames for context id {}:", Integer.valueOf(contextId), e);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             LOG.error("Failed to fetch hostnames for context id {}:", Integer.valueOf(contextId), e);
         }
         return null;

@@ -62,13 +62,10 @@ import java.util.TimeZone;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.alarm.mail.impl.MailAlarmMailStrings;
 import com.openexchange.chronos.common.CalendarUtils;
-import com.openexchange.chronos.compat.ShownAsTransparency;
 import com.openexchange.chronos.itip.ITipRole;
 import com.openexchange.chronos.itip.generators.DateHelper;
-import com.openexchange.chronos.itip.generators.HTMLWrapper;
 import com.openexchange.chronos.itip.generators.LabelHelper;
 import com.openexchange.chronos.itip.generators.NotificationMail;
 import com.openexchange.chronos.itip.generators.NotificationParticipant;
@@ -77,17 +74,19 @@ import com.openexchange.chronos.itip.generators.TypeWrapper;
 import com.openexchange.chronos.provider.composition.IDMangling;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.notify.State;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.java.Strings;
+import com.openexchange.regional.RegionalSettings;
+import com.openexchange.regional.RegionalSettingsService;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.templating.OXTemplate;
 import com.openexchange.templating.TemplateService;
+import com.openexchange.user.User;
 
 /**
  *
@@ -187,6 +186,7 @@ public class MailAlarmNotificationGenerator {
 
     private String generateSubject() throws OXException {
         TranslatorFactory translatorFactory = requireService(TranslatorFactory.class, services);
+        RegionalSettingsService regionalSettingsService = requireService(RegionalSettingsService.class, services);
         Locale locale = user.getLocale();
         if (locale == null) {
             locale = Locale.getDefault();
@@ -196,7 +196,13 @@ public class MailAlarmNotificationGenerator {
         if (summary.length() > 40) {
             summary = summary.substring(0, 36).concat("...");
         }
-        DateFormat df = CalendarUtils.isAllDay(event) ? DateFormat.getDateInstance(DateFormat.LONG, user.getLocale()) : DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.SHORT, user.getLocale());
+        DateFormat df;
+        if (null == regionalSettingsService) {
+            df = CalendarUtils.isAllDay(event) ? DateFormat.getDateInstance(DateFormat.LONG, locale) : DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.SHORT, locale);
+        } else {
+            df = CalendarUtils.isAllDay(event) ? regionalSettingsService.getDateFormat(ctx.getContextId(), user.getId(), locale, DateFormat.LONG) :
+                                                 regionalSettingsService.getDateTimeFormat(ctx.getContextId(), user.getId(), locale, DateFormat.LONG, DateFormat.SHORT);
+        }
         String formattedStartDate = df.format(new Date(event.getStartDate().getTimestamp()));
 
         return translator.translate(MailAlarmMailStrings.REMINDER).concat(": ").concat(summary).concat(" - ").concat(formattedStartDate);
@@ -217,7 +223,7 @@ public class MailAlarmNotificationGenerator {
 
         final Map<String, Object> env = new HashMap<String, Object>();
 
-        TypeWrapper wrapper = new PassthroughWrapper();
+        TypeWrapper wrapper = TypeWrapper.WRAPPER.get("text");
         env.put("mail", mail);
         env.put("templating", templateService.createHelper(env, null, false));
         env.put("formatters", dateHelperFor(mail.getRecipient()));
@@ -228,7 +234,7 @@ public class MailAlarmNotificationGenerator {
         textTemplate.process(env, writer);
         mail.setText(writer.toString());
 
-        wrapper = new HTMLWrapper();
+        wrapper = TypeWrapper.WRAPPER.get("html");
         env.put("labels", getLabelHelper(mail, wrapper, participant));
         writer = new AllocatingStringWriter();
         htmlTemplate.process(env, writer);
@@ -241,67 +247,10 @@ public class MailAlarmNotificationGenerator {
         return new LabelHelper(dateHelperFor(participant), participant.getTimeZone(), mail, participant.getLocale(), ctx, wrapper, services);
     }
 
-    private DateHelper dateHelperFor(final NotificationParticipant participant) {
-        return new DateHelper(event, participant.getLocale(), participant.getTimeZone());
-    }
-
-    private static class PassthroughWrapper implements TypeWrapper {
-
-        /**
-         * Initializes a new {@link PassthroughWrapper}.
-         */
-        public PassthroughWrapper() {
-            super();
-        }
-
-        @Override
-        public String none(final Object argument) {
-            if (argument != null) {
-                return argument.toString();
-            }
-            return "";
-        }
-
-        @Override
-        public String original(final Object argument) {
-            return none(argument);
-        }
-
-        @Override
-        public String participant(final Object argument) {
-            return none(argument);
-        }
-
-        @Override
-        public String state(final Object argument, final ParticipationStatus status) {
-            return none(argument);
-        }
-
-        @Override
-        public String updated(final Object argument) {
-            return none(argument);
-        }
-
-        @Override
-        public String emphasiszed(final Object argument) {
-            return none(argument);
-        }
-
-        @Override
-        public String reference(final Object argument) {
-            return none(argument);
-        }
-
-        @Override
-        public String shownAs(final Object argument, final ShownAsTransparency shownAs) {
-            return none(argument);
-        }
-
-        @Override
-        public String italic(Object argument) {
-            return none(argument);
-        }
-
+    private DateHelper dateHelperFor(final NotificationParticipant participant) throws OXException {
+        RegionalSettingsService regionalSettingsService = requireService(RegionalSettingsService.class, services);
+        RegionalSettings regionalSettings = regionalSettingsService.get(participant.getContext().getContextId(), participant.getUser().getId());
+        return new DateHelper(event, participant.getLocale(), participant.getTimeZone(), regionalSettings);
     }
 
     private static List<NotificationParticipant> getResources(ServiceLookup services, Event event, Context ctx, User user) throws OXException {

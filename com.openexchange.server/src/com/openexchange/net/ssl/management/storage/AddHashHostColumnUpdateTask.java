@@ -88,11 +88,6 @@ public class AddHashHostColumnUpdateTask extends UpdateTaskAdapter {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.groupware.update.UpdateTaskV2#perform(com.openexchange.groupware.update.PerformParameters)
-     */
     @Override
     public void perform(PerformParameters params) throws OXException {
         Connection connection = params.getConnection();
@@ -167,11 +162,6 @@ public class AddHashHostColumnUpdateTask extends UpdateTaskAdapter {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.groupware.update.UpdateTaskV2#getDependencies()
-     */
     @Override
     public String[] getDependencies() {
         return new String[] { CreateSSLCertificateManagementTableTask.class.getName() };

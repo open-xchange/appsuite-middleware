@@ -52,6 +52,7 @@ package com.openexchange.ajax.chronos;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -107,13 +108,15 @@ public abstract class AbstractAlarmTriggerTest extends AbstractAlarmTest {
      * @return The {@link AlarmTriggerData}
      * @throws ApiException
      */
-    AlarmTriggerData getAndCheckAlarmTrigger(long until, String actions, int expected, String filter) throws ApiException {
-        AlarmTriggerData triggers = eventManager.getAlarmTrigger(until, actions);
-        AlarmTriggerData result = triggers;
-        if(filter != null) {
-            result = new AlarmTriggerData();
+    List<AlarmTrigger> getAndCheckAlarmTrigger(long until, String actions, int expected, String filter) throws ApiException {
+        //AlarmTriggerData triggers = eventManager.getAlarmTrigger(until, actions);
+        List<AlarmTrigger> triggers = eventManager.getAlarmTrigger(until, actions);
+        //AlarmTriggerData result = triggers;
+        List<AlarmTrigger> result = null;
+        if (filter != null) {
+            result = new ArrayList<>();
             for(AlarmTrigger trigger: triggers) {
-                if(trigger.getEventId().equals(filter)) {
+                if (trigger.getEventId().equals(filter)) {
                     result.add(trigger);
                 }
             }
@@ -130,8 +133,8 @@ public abstract class AbstractAlarmTriggerTest extends AbstractAlarmTest {
      * @return The {@link AlarmTriggerData}
      * @throws ApiException
      */
-    AlarmTriggerData getAndCheckAlarmTrigger(long until, int min) throws ApiException {
-        AlarmTriggerData triggers = eventManager.getAlarmTrigger(until);
+    List<AlarmTrigger> getAndCheckAlarmTrigger(long until, int min) throws ApiException {
+    	List<AlarmTrigger> triggers = eventManager.getAlarmTrigger(until);
         assertTrue(min <= triggers.size());
         return triggers;
     }
@@ -144,7 +147,7 @@ public abstract class AbstractAlarmTriggerTest extends AbstractAlarmTest {
      * @return The {@link AlarmTriggerData}
      * @throws ApiException
      */
-    AlarmTriggerData getAndCheckAlarmTrigger(int min) throws ApiException {
+    List<AlarmTrigger> getAndCheckAlarmTrigger(int min) throws ApiException {
         return getAndCheckAlarmTrigger(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(2), min);
     }
 
@@ -154,7 +157,7 @@ public abstract class AbstractAlarmTriggerTest extends AbstractAlarmTest {
      * @return The {@link AlarmTriggerData}
      * @throws ApiException
      */
-    AlarmTriggerData getAlarmTriggers() throws ApiException {
+    List<AlarmTrigger> getAlarmTriggers() throws ApiException {
         return eventManager.getAlarmTrigger(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(2));
     }
 
@@ -172,7 +175,8 @@ public abstract class AbstractAlarmTriggerTest extends AbstractAlarmTest {
         assertEquals("The alarm trigger time is different than expected.", expectedTime, parsedTime.getTime());
     }
 
-    protected boolean containsAlarm(AlarmTriggerData data, String folder, String alarmId, String eventId) {
+    //protected boolean containsAlarm(AlarmTriggerData data, String folder, String alarmId, String eventId) {
+    protected boolean containsAlarm(List<AlarmTrigger> data, String folder, String alarmId, String eventId) {
         for (AlarmTrigger trigger : data) {
             if ((folder == null || trigger.getFolder() == folder) &&
                 (alarmId == null || trigger.getAlarmId() == alarmId) &&

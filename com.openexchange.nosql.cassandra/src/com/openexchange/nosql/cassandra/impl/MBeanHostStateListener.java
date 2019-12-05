@@ -86,11 +86,6 @@ public class MBeanHostStateListener implements StateListener {
         hosts = new HashSet<>();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.datastax.driver.core.Host.StateListener#onAdd(com.datastax.driver.core.Host)
-     */
     @Override
     public void onAdd(Host host) {
         String hostAddress = host.getAddress().getHostAddress();
@@ -107,31 +102,16 @@ public class MBeanHostStateListener implements StateListener {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.datastax.driver.core.Host.StateListener#onUp(com.datastax.driver.core.Host)
-     */
     @Override
     public void onUp(Host host) {
         //nothing yet
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.datastax.driver.core.Host.StateListener#onDown(com.datastax.driver.core.Host)
-     */
     @Override
     public void onDown(Host host) {
         //nothing yet
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.datastax.driver.core.Host.StateListener#onRemove(com.datastax.driver.core.Host)
-     */
     @Override
     public void onRemove(Host host) {
         String hostAddress = host.getAddress().getHostAddress();
@@ -148,21 +128,11 @@ public class MBeanHostStateListener implements StateListener {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.datastax.driver.core.Host.StateListener#onRegister(com.datastax.driver.core.Cluster)
-     */
     @Override
     public void onRegister(Cluster cluster) {
         //nothing yet
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.datastax.driver.core.Host.StateListener#onUnregister(com.datastax.driver.core.Cluster)
-     */
     @Override
     public void onUnregister(Cluster cluster) {
         for (Host host : hosts) {

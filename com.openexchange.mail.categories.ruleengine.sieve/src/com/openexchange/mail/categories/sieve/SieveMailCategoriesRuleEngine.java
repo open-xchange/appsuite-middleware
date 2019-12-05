@@ -69,6 +69,11 @@ import com.openexchange.jsieve.commands.Rule;
 import com.openexchange.jsieve.commands.RuleComment;
 import com.openexchange.jsieve.commands.TestCommand;
 import com.openexchange.jsieve.commands.TestCommand.Commands;
+import com.openexchange.mail.FullnameArgument;
+import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailMessageStorage;
+import com.openexchange.mail.api.IMailMessageStorageMailFilterApplication;
+import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.categories.MailCategoriesConstants;
 import com.openexchange.mail.categories.MailCategoriesExceptionCodes;
 import com.openexchange.mail.categories.ruleengine.MailCategoriesRuleEngine;
@@ -497,6 +502,42 @@ public class SieveMailCategoriesRuleEngine implements MailCategoriesRuleEngine {
         }
 
         mailFilterService.deleteFilterRules(creds, uidList.toArray());
+    }
+
+    @Override
+    public boolean applyRule(Session session, MailCategoryRule rule) throws OXException {
+        MailFilterService mailFilterService = services.getService(MailFilterService.class);
+        if (mailFilterService == null) {
+            throw MailCategoriesExceptionCodes.SERVICE_UNAVAILABLE.create(MailFilterService.class);
+        }
+        try {
+            MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
+            try {
+                FullnameArgument fa = new FullnameArgument("INBOX");
+                mailAccess = MailAccess.getInstance(session, fa.getAccountId());
+                mailAccess.connect();
+                IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
+
+                IMailMessageStorageMailFilterApplication mailFilterMessageStorage = messageStorage.supports(IMailMessageStorageMailFilterApplication.class);
+                if (null == mailFilterMessageStorage) {
+                    return false;
+                }
+
+                if (!mailFilterMessageStorage.isMailFilterApplicationSupported()) {
+                    return false;
+                }
+                Rule sieveRule = mailCategoryRule2SieveRule(rule, RuleType.CATEGORY);
+                String filter = mailFilterService.convertToString(new Credentials(session), sieveRule);
+                mailFilterMessageStorage.applyMailFilterScript(fa.getFullName(), filter, null, false); // As filter results are of no interest, discard OK results
+            } finally {
+                if (mailAccess != null) {
+                    mailAccess.close();
+                }
+            }
+        } catch (SieveException e) {
+            throw MailCategoriesRuleEngineExceptionCodes.UNABLE_TO_SET_RULE.create(e.getMessage());
+        }
+        return true;
     }
 
 }

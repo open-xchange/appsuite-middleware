@@ -63,7 +63,7 @@ public class JerseyConfiguration implements ApplicationConfiguration {
 
     @Override
     public Map<String, Object> getProperties() {
-        return Collections.<String, Object> singletonMap(ServerProperties.RESPONSE_SET_STATUS_OVER_SEND_ERROR, true);
+        return Collections.<String, Object> singletonMap(ServerProperties.RESPONSE_SET_STATUS_OVER_SEND_ERROR, Boolean.TRUE);
     }
 
 }

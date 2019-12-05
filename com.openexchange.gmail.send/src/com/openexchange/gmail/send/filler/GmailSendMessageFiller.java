@@ -54,6 +54,7 @@ import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import com.openexchange.exception.OXException;
 import com.openexchange.gmail.send.config.IGmailSendProperties;
+import com.openexchange.gmail.send.dataobjects.GmailSendMailMessage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;

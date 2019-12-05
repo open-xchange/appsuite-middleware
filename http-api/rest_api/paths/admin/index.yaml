@@ -1,7 +1,0 @@
-requests:
-  - PasswdChanges.yaml
-  - CloseSessionsByContext.yaml
-  - CloseSessionsById.yaml
-  - CloseSessionsByUser.yaml
-  - MultifactorDevice.yaml
-  - MultifactorDevices.yaml

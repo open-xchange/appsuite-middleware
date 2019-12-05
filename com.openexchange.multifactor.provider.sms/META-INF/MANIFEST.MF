@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Message factor authentication provider
 Bundle-SymbolicName: com.openexchange.multifactor.provider.sms
 Automatic-Module-Name: com.openexchange.multifactor.provider.sms
-Bundle-Version: 7.10.2
+Bundle-Version: 7.10.3
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.hazelcast.core,

@@ -49,6 +49,7 @@
 
 package com.openexchange.pns.loader.osgi;
 
+import static com.openexchange.osgi.Tools.withRanking;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.KeyStore;
@@ -59,12 +60,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -154,7 +153,7 @@ public class PushSecretsRegisterer implements ServiceTrackerCustomizer<ClientIde
             }
 
             DefaultApnOptionsProvider apnOptionsProvider = new DefaultApnOptionsProvider(Collections.singletonMap(client, apnOptions));
-            registration = context.registerService(ApnOptionsProvider.class, apnOptionsProvider, createServiceDictionary());
+            registration = context.registerService(ApnOptionsProvider.class, apnOptionsProvider, withRanking(1000));
             rememberRegistration(client, registration);
             registration = null; // Everything went fine
             LOG.info("Loaded APN push certificates for client identifier {}", client);
@@ -177,7 +176,7 @@ public class PushSecretsRegisterer implements ServiceTrackerCustomizer<ClientIde
 
             GcmOptions options = new GcmOptions(key);
             DefaultGcmOptionsProvider gcmOptionsProvider = new DefaultGcmOptionsProvider(Collections.singletonMap(client, options));
-            registration = context.registerService(GcmOptionsProvider.class, gcmOptionsProvider, createServiceDictionary());
+            registration = context.registerService(GcmOptionsProvider.class, gcmOptionsProvider, withRanking(1000));
             rememberRegistration(client, registration);
             registration = null; // Everything went fine
             LOG.info("Loaded GCM secret key for client identifier {}", client);
@@ -198,12 +197,6 @@ public class PushSecretsRegisterer implements ServiceTrackerCustomizer<ClientIde
             }
         }
         list.add(registration);
-    }
-
-    private static Dictionary<String, Object> createServiceDictionary() {
-        Dictionary<String, Object> dictionary = new Hashtable<>(1);
-        dictionary.put(Constants.SERVICE_RANKING, Integer.valueOf(1000));
-        return dictionary;
     }
 
     /**

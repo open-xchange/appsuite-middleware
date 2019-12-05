@@ -264,7 +264,7 @@ public class PropertyHelper {
     private static boolean isArray(String key) {
         if (key == null || key.length() < 3 || !key.endsWith("]"))
             return false;
-        int i = key.indexOf("[");
+        int i = key.indexOf('[');
         if (i == -1 || i != key.lastIndexOf("["))
             return false;
         String index = key.substring(i + 1, key.length() - 1);
@@ -278,7 +278,7 @@ public class PropertyHelper {
     }
 
     private static String removeArray(String key) {
-        int i = key.indexOf("[");
+        int i = key.indexOf('[');
         return key.substring(0, i);
     }
 

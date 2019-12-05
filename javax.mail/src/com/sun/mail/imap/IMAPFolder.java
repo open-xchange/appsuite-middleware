@@ -84,6 +84,7 @@ import com.sun.mail.iap.ResponseHandler;
 import com.sun.mail.imap.protocol.FLAGS;
 import com.sun.mail.imap.protocol.FetchItem;
 import com.sun.mail.imap.protocol.FetchResponse;
+import com.sun.mail.imap.protocol.FilteredResponse;
 import com.sun.mail.imap.protocol.IMAPProtocol;
 import com.sun.mail.imap.protocol.IMAPResponse;
 import com.sun.mail.imap.protocol.Item;
@@ -1611,6 +1612,108 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	    }
 
 	} // Release messageCacheLock
+    }
+
+    /**
+     * Applies the specified filter to this folder's messages
+     *
+     * @param filter The filter to apply
+     * @param sterm The optional search term to filter by
+     * @param acceptOkFilterResults <code>true</code> in case OK filter results should be kept; otherwise <code>false</code> to discard them
+     *                              (and only return filter result which is either ERRORS or WARNINGS)
+     * @return The filter results
+     * @throws MessagingException
+     */
+    public FilterResult[] filter(Filter filter, SearchTerm sterm, boolean acceptOkFilterResults) throws MessagingException {
+        synchronized (messageCacheLock) {
+            checkOpened();
+
+            Response[] r = null;
+            try {
+            r = getProtocol().filter(filter, sterm, true);
+            } catch (ConnectionException cex) {
+            throw new FolderClosedException(this, cex.getMessage(), cex);
+            } catch (CommandFailedException cfx) {
+            // Ignore these, as per RFC 2180
+            } catch (ProtocolException pex) {
+            throw new MessagingException(pex.getMessage(), pex);
+            }
+
+            if (r == null)
+                return new FilterResult[0];
+
+            // to collect FILTERED responses
+            List<FilterResult> filteredResponses = new ArrayList<FilterResult>(r.length);
+            
+            // to collect non-FETCH responses & unsolicited FETCH FLAG responses 
+            List<Response> v = null;
+
+            for (int k = r.length, i = 0; k-- > 0; i++) {
+                if (r[i] == null)
+                    continue;
+                
+                if (r[i] instanceof FilteredResponse) {
+                    if (acceptOkFilterResults) {                        
+                        filteredResponses.add(((FilteredResponse) r[i]).getFilterResult());
+                    } else {
+                        FilterResult filterResult = ((FilteredResponse) r[i]).getFilterResult();
+                        if (filterResult.hasErrors() || filterResult.hasWarnings()) {
+                            filteredResponses.add(filterResult);
+                        }
+                    }
+                    continue;
+                }
+                
+                if (!(r[i] instanceof FetchResponse)) {
+                    if (v == null) {
+                        v = new ArrayList<Response>(r.length >> 1);
+                    }
+                    v.add(r[i]); // Unsolicited Non-FILTERED response
+                    continue;
+                }
+
+                // Got a FetchResponse.
+                FetchResponse f = (FetchResponse) r[i];
+                // Get the corresponding message.
+                IMAPMessage msg = getMessageBySeqNumber(f.getNumber());
+
+                int count = f.getItemCount();
+                boolean unsolicitedFlags = false;
+
+                for (int j = 0; j < count; j++) {
+                    Item item = f.getItem(j);
+                    // Check for the FLAGS item
+                    if (item instanceof Flags && (msg == null)) {
+                        // Ok, Unsolicited FLAGS update.
+                        unsolicitedFlags = true;
+                    } else if (msg != null)
+                        msg.handleFetchItem(item, null, false);
+                }
+                if (msg != null) {
+                    msg.handleExtensionFetchItems(f.getExtensionItems());
+                }
+
+                // If this response contains any unsolicited FLAGS
+                // add it to the unsolicited response vector
+                if (unsolicitedFlags) {
+                    if (v == null) {
+                        v = new ArrayList<Response>(r.length >> 1);
+                    }
+                    v.add(f);
+                }
+            }
+
+            // Dispatch any unsolicited responses
+            if (v != null) {
+            Response[] responses = new Response[v.size()];
+            v.toArray(responses);
+            handleResponses(responses);
+            }
+            
+            FilterResult[] retval = new FilterResult[filteredResponses.size()];
+            filteredResponses.toArray(retval);
+            return retval;
+        } // Release messageCacheLock
     }
 
     /**

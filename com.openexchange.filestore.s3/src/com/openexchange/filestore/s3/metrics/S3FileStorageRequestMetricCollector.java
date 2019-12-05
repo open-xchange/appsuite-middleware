@@ -82,11 +82,6 @@ public class S3FileStorageRequestMetricCollector extends RequestMetricCollector 
         metricDescriptorCache = new MetricDescriptorCache(metricService, "s3");
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.amazonaws.metrics.RequestMetricCollector#collectMetrics(com.amazonaws.Request, com.amazonaws.Response)
-     */
     @Override
     public void collectMetrics(Request<?> request, Response<?> response) {
         timeRequest(request);

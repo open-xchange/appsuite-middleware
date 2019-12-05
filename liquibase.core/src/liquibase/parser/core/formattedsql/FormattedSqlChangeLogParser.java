@@ -136,14 +136,14 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                     String dbms = parseString(dbmsPatternMatcher);
 
                     changeSet = new ChangeSet(changeSetPatternMatcher.group(2), changeSetPatternMatcher.group(1), runAlways, runOnChange, physicalChangeLogLocation, context, dbms, runInTransaction, changeLog.getObjectQuotingStrategy(), changeLog);
-                    changeSet.setFailOnError(failOnError);
+                    changeSet.setFailOnError(failOnError ? Boolean.TRUE : Boolean.FALSE);
                     changeLog.addChangeSet(changeSet);
 
                     change = new RawSQLChange();
                     change.setSql(finalCurrentSql);
                     change.setResourceAccessor(resourceAccessor);
-                    change.setSplitStatements(splitStatements);
-                    change.setStripComments(stripComments);
+                    change.setSplitStatements(splitStatements ? Boolean.TRUE : Boolean.FALSE);
+                    change.setStripComments(stripComments ? Boolean.TRUE : Boolean.FALSE);
                     change.setEndDelimiter(endDelimiter);
                     changeSet.addChange(change);
 

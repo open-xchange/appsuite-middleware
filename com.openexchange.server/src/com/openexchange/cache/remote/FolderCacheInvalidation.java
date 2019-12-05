@@ -81,7 +81,7 @@ public class FolderCacheInvalidation implements GenericCacheInvalidationInterfac
 	    if (FolderCacheManager.isEnabled() && FolderCacheManager.isInitialized()) {
 			try {
 				FolderCacheManager.getInstance().removeFolderObject(objectId, ContextStorage.getInstance().getContext(contextId));
-			} catch (final OXException e) {
+			} catch (OXException e) {
 				throw new RemoteException(ERR, e);
 			}
 		}

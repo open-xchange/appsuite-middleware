@@ -73,11 +73,6 @@ public class UnstructuredPostalAddressConsumer implements BiConsumer<ContactEntr
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.util.function.BiConsumer#accept(java.lang.Object, java.lang.Object)
-     */
     @Override
     public void accept(ContactEntry t, Contact u) {
         if (!t.hasPostalAddresses()) {

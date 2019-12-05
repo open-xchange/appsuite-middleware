@@ -65,7 +65,7 @@ public abstract class DataProviderRegistry {
     public DataProvider getProvider(final String id) throws OXException {
         final List<DataProvider> providers = getProviders();
         for (final DataProvider dataProvider : providers) {
-            if(dataProvider.getId().equals(id)) {
+            if (dataProvider.getId().equals(id)) {
                 return dataProvider;
             }
         }

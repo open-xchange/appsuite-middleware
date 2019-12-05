@@ -80,11 +80,6 @@ public class ConfigParser extends AbstractAJAXParser<ConfigResponse> {
         super(failOnError);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.framework.AbstractAJAXParser#createResponse(com.openexchange.ajax.container.Response)
-     */
     @Override
     protected ConfigResponse createResponse(final Response response) throws JSONException {
         final JSONObject jsonObj = (JSONObject) response.getData();

@@ -114,7 +114,7 @@ public final class GetAction extends AbstractContinuationAction {
             }
 
             return new AJAXRequestResult(cr.getValue(), cr.getTimeStamp(), cr.getFormat()).setContinuationUuid(completed ? null : uuid);
-        } catch (final InterruptedException e) {
+        } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e);
         }

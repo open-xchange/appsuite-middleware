@@ -51,8 +51,8 @@ package com.openexchange.mail.mime.processing;
 
 import java.util.Locale;
 import java.util.TimeZone;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.TimeZoneUtils;
+import com.openexchange.user.User;
 
 /**
  * {@link LocaleAndTimeZone} - Helper class to pack up {@link Locale} and {@link TimeZone} combination.

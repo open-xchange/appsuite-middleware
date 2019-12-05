@@ -991,7 +991,7 @@ public class Spamc {
             commaSeparatedHosts.append(host);
             try {
                 addresses.addAll(Arrays.asList(InetAddress.getAllByName(host)));
-            } catch (final UnknownHostException e) {
+            } catch (UnknownHostException e) {
                 System.err.println(InetAddress.class.getName() + ".getAllByName(" + host + ") failed");
             }
         }
@@ -1049,7 +1049,7 @@ public class Spamc {
                     attempt.setSoTimeout((int) getTimeout() * MILLIS_PER_SECOND);
                     socket = attempt;
                     attempt = null;
-                } catch (final IOException e) {
+                } catch (IOException e) {
                     lastException = e;
                     retryCount++;
                     System.err.println(Socket.class.getName() + ".connect(SocketAddress, int) to spamd at " + address + " failed, retrying (#" + retryCount + " of " + getConnectRetries() + ")");
@@ -1060,7 +1060,7 @@ public class Spamc {
                     }
                     try {
                         Thread.sleep(getTimeout() * MILLIS_PER_SECOND);
-                    } catch (final InterruptedException e1) {
+                    } catch (InterruptedException e1) {
                         // this should not occur, but if it does there is
                         // nothing we can do about it
                         // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
@@ -1393,14 +1393,14 @@ public class Spamc {
                 status = response.getResponseCode();
             }
             System.exit(status);
-        } catch (final UsageException e) {
+        } catch (UsageException e) {
             System.err.println("invalid usage");
             System.err.println(e.getMessage());
-        } catch (final UnknownHostException e) {
+        } catch (UnknownHostException e) {
             System.err.println(e.getLocalizedMessage());
-        } catch (final IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
-        } catch (final ConfigurationException e) {
+        } catch (ConfigurationException e) {
             e.printStackTrace();
         } finally {
             if ((response == null) && ((flags & SafeFallbackOption.FLAG) > 0) && (message != null) && ((flags & CheckOption.FLAG) == 0)) {
@@ -1454,7 +1454,7 @@ public class Spamc {
             String tokens[];
             while (reader.ready()) {
                 line = reader.readLine();
-                if(line == null) {
+                if (line == null) {
                     break;
                 }
                 if (line.length() > 0 && (line.charAt(0) == '#' || line.charAt(0) == '\r' || line.charAt(0) == '\n')) {
@@ -1465,7 +1465,7 @@ public class Spamc {
                     combined.add(tokens[i]);
                 }
             }
-        } catch (final IOException e) {
+        } catch (IOException e) {
             if (userDefinedConfigFile) {
                 throw new ConfigurationException("Failed to open config file: " + configFile.getPath());
             }
@@ -1499,7 +1499,7 @@ public class Spamc {
             // try to load the package
             Class.forName(SSL_PACKAGE_NAME + ".SSLContext");
             sslPackage = Package.getPackage(SSL_PACKAGE_NAME);
-        } catch (final ClassNotFoundException e) {
+        } catch (ClassNotFoundException e) {
             // SSL is not available
         }
     }

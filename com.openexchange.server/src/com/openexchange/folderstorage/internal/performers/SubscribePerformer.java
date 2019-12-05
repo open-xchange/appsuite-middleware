@@ -55,20 +55,20 @@ import java.util.List;
 import java.util.Set;
 import com.google.common.collect.ImmutableSet;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.CalculatePermission;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 /**
  * {@link SubscribePerformer} - Serves the <code>SUBSCRIBE</code> action.
@@ -237,12 +237,12 @@ public final class SubscribePerformer extends AbstractPerformer {
                 }
             }
 
-        } catch (final OXException e) {
+        } catch (OXException e) {
             for (final FolderStorage fs : openedStorages) {
                 fs.rollback(storageParameters);
             }
             throw e;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             for (final FolderStorage fs : openedStorages) {
                 fs.rollback(storageParameters);
             }

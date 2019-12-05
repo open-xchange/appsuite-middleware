@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Global
 Bundle-SymbolicName: com.openexchange.global
-Bundle-Version: 7.10.2
+Bundle-Version: 7.10.3
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: com.openexchange.ajax.fileholder,
@@ -56,7 +56,9 @@ Export-Package: com.openexchange.ajax.fileholder,
  com.openexchange.tools.iterator,
  com.openexchange.tools.stream,
  com.openexchange.tools.strings,
- com.openexchange.tools.validate
+ com.openexchange.tools.validate,
+ com.openexchange.user,
+ com.openexchange.uploaddir
 Import-Package: ch.qos.logback.classic,
  ch.qos.logback.classic.boolex,
  ch.qos.logback.classic.db,
@@ -126,9 +128,11 @@ Import-Package: ch.qos.logback.classic,
  com.google.common.annotations,
  com.google.common.base,
  com.google.common.collect,
+ com.openexchange.annotation,
  com.openexchange.exception,
  com.openexchange.java,
  com.openexchange.java.util,
+ com.openexchange.logback.extensions;version="1.3.16",
  gnu.trove,
  gnu.trove.decorator,
  gnu.trove.function,

@@ -187,8 +187,8 @@ public class Bug40142Test extends InfostoreApiClientTest {
         assertNull(response.getErrorDesc(), response.getError());
         assertNotNull(response.getData());
         Object trashId = response.getData();
-        final String id1 = trashId.toString() + "/" + oldId.substring(oldId.indexOf("/") + 1, oldId.length());
-        final String id2 = trashId.toString() + "/" + actual.getId().substring(actual.getId().indexOf("/") + 1, actual.getId().length());
+        final String id1 = trashId.toString() + "/" + oldId.substring(oldId.indexOf('/') + 1, oldId.length());
+        final String id2 = trashId.toString() + "/" + actual.getId().substring(actual.getId().indexOf('/') + 1, actual.getId().length());
 
         InfoItemData deleted = getItem(id2);
         assertEquals("Name should be the same", "name.name (1).txt.pgp", deleted.getFilename());

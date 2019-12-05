@@ -141,7 +141,7 @@ public class VCardTokenizer {
                     currentChunk = new VCardFileToken();
                 }
             }
-        } catch (final IOException e) {
+        } catch (IOException e) {
             LOG.error("I/O error while trying to tokenize stream that was a vCard (supposedly)", e);
             Streams.close(vcard);
         }

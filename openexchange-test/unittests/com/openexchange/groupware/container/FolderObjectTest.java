@@ -6,6 +6,8 @@ import static com.openexchange.groupware.container.FolderObject.MODULE;
 import static com.openexchange.groupware.container.FolderObject.PERMISSIONS_BITS;
 import static com.openexchange.groupware.container.FolderObject.SUBFOLDERS;
 import static com.openexchange.groupware.container.FolderObject.TYPE;
+import static com.openexchange.java.Autoboxing.B;
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -52,7 +54,7 @@ public class FolderObjectTest extends FolderChildObjectTest {
         object.setSubfolderFlag(true);
         assertTrue(object.contains(SUBFOLDERS));
         assertTrue(object.containsSubfolderFlag());
-        assertEquals(true, object.get(SUBFOLDERS));
+        assertEquals(B(true), object.get(SUBFOLDERS));
 
         object.remove(SUBFOLDERS);
         assertFalse(object.contains(SUBFOLDERS));
@@ -70,9 +72,9 @@ public class FolderObjectTest extends FolderChildObjectTest {
         object.setType(-12);
         assertTrue(object.contains(TYPE));
         assertTrue(object.containsType());
-        assertEquals(-12, object.get(TYPE));
+        assertEquals(I(-12), object.get(TYPE));
 
-        object.set(TYPE, 12);
+        object.set(TYPE, I(12));
         assertEquals(12, object.getType());
 
         object.remove(TYPE);
@@ -112,9 +114,9 @@ public class FolderObjectTest extends FolderChildObjectTest {
         object.setModule(-12);
         assertTrue(object.contains(MODULE));
         assertTrue(object.containsModule());
-        assertEquals(-12, object.get(MODULE));
+        assertEquals(I(-12), object.get(MODULE));
 
-        object.set(MODULE, 12);
+        object.set(MODULE, I(12));
         assertEquals(12, object.getModule());
 
         object.remove(MODULE);

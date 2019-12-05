@@ -92,7 +92,7 @@ public class GroupDeleteListener implements DeleteListener {
             stmt.addBatch("DELETE FROM groups WHERE cid=" + ctx.getContextId());
 
             stmt.executeBatch();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);

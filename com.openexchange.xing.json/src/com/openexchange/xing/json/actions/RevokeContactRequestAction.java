@@ -78,10 +78,6 @@ public class RevokeContactRequestAction extends AbstractXingAction {
 		super(services);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see com.openexchange.xing.json.actions.AbstractXingAction#perform(com.openexchange.xing.json.XingRequest)
-	 */
 	@Override
 	protected AJAXRequestResult perform(XingRequest req) throws OXException, JSONException, XingException {
 		String email = getMandatoryStringParameter(req, "email");

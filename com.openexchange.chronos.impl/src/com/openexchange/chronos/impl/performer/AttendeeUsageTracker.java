@@ -70,9 +70,9 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.objectusecount.BatchIncrementArguments;
 import com.openexchange.objectusecount.BatchIncrementArguments.Builder;
-import com.openexchange.principalusecount.PrincipalUseCountService;
 import com.openexchange.objectusecount.IncrementArguments;
 import com.openexchange.objectusecount.ObjectUseCountService;
+import com.openexchange.principalusecount.PrincipalUseCountService;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSessionAdapter;
 

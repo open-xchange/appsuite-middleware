@@ -76,8 +76,6 @@ public class PasswordMechRegistryImpl implements PasswordMechRegistry, Reloadabl
 
     private final Map<String, PasswordMech> registeredPasswordMechs = new ConcurrentSkipListMap<String, PasswordMech>(String.CASE_INSENSITIVE_ORDER);
 
-    private static final String COM_OPENEXCHANGE_PASSWORD_MECHANISM_ENHANCED_ENABLED = "com.openexchange.password.mechanism.enhanced.enabled";
-
     // -----------------------------------------------------------------------------------
 
     /**
@@ -90,14 +88,10 @@ public class PasswordMechRegistryImpl implements PasswordMechRegistry, Reloadabl
         register(
             StockPasswordMechs.BCRYPT.getPasswordMech(),
             StockPasswordMechs.CRYPT.getPasswordMech(),
-            StockPasswordMechs.SHA1.getPasswordMech()
+            StockPasswordMechs.SHA1.getPasswordMech(),
+            StockPasswordMechs.SHA256.getPasswordMech(),
+            StockPasswordMechs.SHA512.getPasswordMech()
         );
-        if (configurationService.getBoolProperty(COM_OPENEXCHANGE_PASSWORD_MECHANISM_ENHANCED_ENABLED, false)) {
-            register(
-                StockPasswordMechs.SHA256.getPasswordMech(),
-                StockPasswordMechs.SHA512.getPasswordMech()
-            );
-        }
         setDefaultMech(configurationService.getProperty(DEFAULT_MECH));
     }
 
@@ -117,7 +111,7 @@ public class PasswordMechRegistryImpl implements PasswordMechRegistry, Reloadabl
         return registeredPasswordMechs.get(id);
     }
 
-    private volatile PasswordMech defaultMech = StockPasswordMechs.SHA1.getPasswordMech();
+    private volatile PasswordMech defaultMech = StockPasswordMechs.SHA256.getPasswordMech();
 
     @Override
     public PasswordMech getDefault() {
@@ -133,7 +127,7 @@ public class PasswordMechRegistryImpl implements PasswordMechRegistry, Reloadabl
                 return;
             }
         }
-        PasswordMech passwordMech = StockPasswordMechs.SHA1.getPasswordMech();
+        PasswordMech passwordMech = StockPasswordMechs.SHA256.getPasswordMech();
         LOG.warn("Unable to find a registered implementation for the provided password mechanism '{}'. Falling back to {}. Available password mechanisms are: {}", identifier, passwordMech.getIdentifier(), String.join(",", getIdentifiers()));
         defaultMech = passwordMech;
     }
@@ -145,6 +139,9 @@ public class PasswordMechRegistryImpl implements PasswordMechRegistry, Reloadabl
      * @return the expected identifier that looks like {UPPER_CASE_MECHANISM}
      */
     private static String adaptIdentifier(String identifier) {
+        if (Strings.isEmpty(identifier)) {
+            return identifier;
+        }
         String id = Strings.toUpperCase(identifier);
         if (!id.startsWith("{")) {
             id = new StringBuilder(id.length() + 1).append('{').append(id).toString();

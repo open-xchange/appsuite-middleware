@@ -49,7 +49,7 @@
 
 package com.openexchange.report.appsuite.internal;
 
-import java.sql.SQLException;
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -82,6 +82,7 @@ import com.openexchange.report.appsuite.serialization.Report;
 import com.openexchange.report.appsuite.serialization.ReportConfigs;
 import com.openexchange.report.appsuite.storage.ChunkingUtilities;
 import com.openexchange.report.appsuite.storage.ContextLoader;
+import com.openexchange.user.UserExceptionCode;
 
 /**
  * {@link LocalReportService}
@@ -93,7 +94,9 @@ import com.openexchange.report.appsuite.storage.ContextLoader;
 public class LocalReportService extends AbstractReportService {
 
     //--------------------Class Attributes--------------------
-    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(LocalReportService.class);
+
+    /** The logger constant */
+    static final Logger LOG = org.slf4j.LoggerFactory.getLogger(LocalReportService.class);
 
     /**
      * Cache has concurrency level 20 as 20 threads will be able to update the cache concurrently.
@@ -106,7 +109,7 @@ public class LocalReportService extends AbstractReportService {
 
     private static AtomicReference<ExecutorService> EXECUTOR_SERVICE_REF = new AtomicReference<>();
 
-    private final AtomicInteger threadNumber = new AtomicInteger();
+    final AtomicInteger threadNumber = new AtomicInteger();
 
     //--------------------Public override methods--------------------
     /**
@@ -144,7 +147,7 @@ public class LocalReportService extends AbstractReportService {
         Map<String, Report> pendingReports = reportCache.asMap().get(PENDING_REPORTS_PRE_KEY + reportType);
         pendingReports.remove(uuid);
         List<Runnable> shutdownNow = EXECUTOR_SERVICE_REF.get().shutdownNow();
-        LOG.info("Report generation for report type {} with UUID {} canceled. Canceled {} planned threads.", reportType, uuid, shutdownNow.size());
+        LOG.info("Report generation for report type {} with UUID {} canceled. Canceled {} planned threads.", reportType, uuid, I(shutdownNow.size()));
     }
 
     /**
@@ -267,9 +270,10 @@ public class LocalReportService extends AbstractReportService {
         return uuid;
     }
 
-    //--------------------Private helper methods--------------------
-    private void setUpContextAnalyzer(final List<Integer> allContextIds, final Report report) throws OXException {
-        LOG.info("Setup context analyzer to prozess all contexts for report with uuid: {}", report.getUUID());
+    //---------------------------------------------- Private helper methods -------------------------------------------------------
+
+    private void setUpContextAnalyzer(final List<Integer> allContextIds, final Report report) {
+        LOG.info("Setup context analyzer to process all contexts for report with uuid: {}", report.getUUID());
         new Thread() {
 
             @Override
@@ -286,29 +290,31 @@ public class LocalReportService extends AbstractReportService {
         }.start();
     }
 
-    private List<List<Integer>> getContextsInSameSchemas(List<Integer> allContextIds) throws OXException {
+    List<List<Integer>> getContextsInSameSchemas(List<Integer> allContextIds) throws OXException {
         List<List<Integer>> contextsInSchemas = new ArrayList<>();
-        ContextLoader dataloaderMySQL = new ContextLoader();
         try {
             while (!allContextIds.isEmpty()) {
                 List<Integer> currentSchemaIds;
-                int firstContextId = allContextIds.get(0).intValue();
+                Integer firstContextId = allContextIds.get(0);
 
-                currentSchemaIds = dataloaderMySQL.getAllContextIdsInSameSchema(firstContextId);
+                currentSchemaIds = ContextLoader.getAllContextIdsInSameSchema(firstContextId.intValue());
                 if (currentSchemaIds.isEmpty()) {
                     currentSchemaIds.add(firstContextId);
                 }
                 contextsInSchemas.add(currentSchemaIds);
                 allContextIds.removeAll(currentSchemaIds);
             }
-        } catch (SQLException e) {
-            throw ReportExceptionCodes.UNABLE_TO_RETRIEVE_ALL_CONTEXT_IDS.create(e);
+        } catch (OXException e) {
+            if (UserExceptionCode.SQL_ERROR.equals(e)) {
+                throw ReportExceptionCodes.UNABLE_TO_RETRIEVE_ALL_CONTEXT_IDS.create(e.getCause());
+            }
+            throw e;
         }
         return contextsInSchemas;
     }
 
-    private void processAllContexts(Report report, List<List<Integer>> contextsInSchemas) throws OXException {
-        LOG.info("Start processing all contexts of all schemas. schemas in total: {} report uuid: {}", contextsInSchemas.size(), report.getUUID());
+    void processAllContexts(Report report, List<List<Integer>> contextsInSchemas) throws OXException {
+        LOG.info("Start processing all contexts of all schemas. schemas in total: {} report uuid: {}", I(contextsInSchemas.size()), report.getUUID());
         ExecutorService reportSchemaThreadPool = Executors.newFixedThreadPool(ReportProperties.getMaxThreadPoolSize(), new ThreadFactory() {
 
             @Override
@@ -339,7 +345,7 @@ public class LocalReportService extends AbstractReportService {
                 Future<Integer> finishedContexts = schemaProcessor.take();
                 Integer finishedAmount = finishedContexts.get();
                 LOG.debug("Context processing finished for another schema and report: {} contexts processed: {}", report.getUUID(), finishedAmount);
-                report.setTaskState(report.getNumberOfTasks(), report.getNumberOfPendingTasks() - finishedAmount);
+                report.setTaskState(report.getNumberOfTasks(), report.getNumberOfPendingTasks() - finishedAmount.intValue());
                 if (report.getNumberOfPendingTasks() <= 0) {
                     finishUpReport(report);
                 }
@@ -351,7 +357,7 @@ public class LocalReportService extends AbstractReportService {
         }
     }
 
-    private static String getThreadName(int threadNumber) {
+    static String getThreadName(int threadNumber) {
         return LocalReportService.class.getSimpleName() + "-" + threadNumber;
     }
 

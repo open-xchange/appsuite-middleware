@@ -94,14 +94,14 @@ public class RdbFilestoreStorage extends FilestoreStorage {
             try {
                 tmp = result.getString("uri");
                 filestore.setUri(new URI(tmp));
-            } catch (final URISyntaxException e) {
+            } catch (URISyntaxException e) {
                 throw FilestoreExceptionCodes.URI_CREATION_FAILED.create(e, tmp);
             }
 
             filestore.setSize(result.getLong("size"));
             filestore.setMaxContext(result.getLong("max_context"));
             return filestore;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw FilestoreExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(result, stmt);
@@ -147,14 +147,14 @@ public class RdbFilestoreStorage extends FilestoreStorage {
             try {
                 tmp = result.getString("uri");
                 filestore.setUri(new URI(tmp));
-            } catch (final URISyntaxException e) {
+            } catch (URISyntaxException e) {
                 throw FilestoreExceptionCodes.URI_CREATION_FAILED.create(e, tmp);
             }
 
             filestore.setSize(result.getLong("size"));
             filestore.setMaxContext(result.getLong("max_context"));
             return filestore;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw FilestoreExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(result, stmt);

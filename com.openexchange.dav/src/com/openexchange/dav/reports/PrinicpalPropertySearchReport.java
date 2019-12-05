@@ -49,6 +49,7 @@
 
 package com.openexchange.dav.reports;
 
+import static com.openexchange.dav.DAVProtocol.CALENDARSERVER_NS;
 import static com.openexchange.webdav.protocol.Protocol.DAV_NS;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -61,6 +62,7 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.ResourceId;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.SortOptions;
@@ -68,7 +70,6 @@ import com.openexchange.dav.DAVFactory;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.actions.PROPFINDAction;
 import com.openexchange.dav.mixins.PrincipalURL;
-import com.openexchange.dav.osgi.Services;
 import com.openexchange.dav.principals.groups.GroupPrincipalCollection;
 import com.openexchange.dav.principals.groups.GroupPrincipalResource;
 import com.openexchange.dav.principals.resources.ResourcePrincipalCollection;
@@ -80,7 +81,6 @@ import com.openexchange.group.Group;
 import com.openexchange.group.GroupService;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceService;
@@ -91,12 +91,14 @@ import com.openexchange.search.SingleSearchTerm.SingleOperation;
 import com.openexchange.search.internal.operands.ConstantOperand;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 import com.openexchange.webdav.action.WebdavRequest;
 import com.openexchange.webdav.action.WebdavResponse;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.xml.resources.ResourceMarshaller;
+
 /**
  * {@link PrinicpalPropertySearchReport}
  *
@@ -112,9 +114,7 @@ public class PrinicpalPropertySearchReport extends PROPFINDAction {
     /**
      * Pattern to check for valid e-mail addresses (needed for the Max OS client)
      */
-    private static final Pattern RFC_2822_SIMPLIFIED_PATTERN = Pattern.compile(
-        "[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?",
-        Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+    private static final Pattern RFC_2822_SIMPLIFIED_PATTERN = Pattern.compile("[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?", Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
 
     /**
      * Initializes a new {@link PrinicpalPropertySearchReport}.
@@ -141,7 +141,7 @@ public class PrinicpalPropertySearchReport extends PROPFINDAction {
          * search matching users
          */
         Set<User> users = new HashSet<User>();
-        if (null != applyToPrincipalCollectionSet || UserPrincipalCollection.NAME.equals(request.getUrl().name()) || 0 == request.getUrl().size()) {
+        if (applyData(applyToPrincipalCollectionSet, UserPrincipalCollection.NAME, request)) {
             /*
              * prepare composite search term
              */
@@ -183,7 +183,7 @@ public class PrinicpalPropertySearchReport extends PROPFINDAction {
                             }
                             orTerm.addSearchTerm(emailTerm);
                         } else if ("calendar-user-address-set".equals(element.getName()) && DAVProtocol.CAL_NS.equals(element.getNamespace())) {
-                            int userID = extractPrincipalID(pattern, CalendarUserType.INDIVIDUAL);
+                            int userID = extractPrincipalID(pattern, CalendarUserType.INDIVIDUAL, factory);
                             if (-1 != userID) {
                                 SingleSearchTerm term = new SingleSearchTerm(SingleOperation.EQUALS);
                                 term.addOperand(new ContactFieldOperand(ContactField.INTERNAL_USERID));
@@ -205,8 +205,7 @@ public class PrinicpalPropertySearchReport extends PROPFINDAction {
             if (null != orTerm.getOperands() && 0 < orTerm.getOperands().length) {
                 SearchIterator<Contact> searchIterator = null;
                 try {
-                    searchIterator = factory.requireService(ContactService.class).searchUsers(factory.getSessionObject(), orTerm,
-                        new ContactField[] { ContactField.INTERNAL_USERID, ContactField.CONTEXTID }, SortOptions.EMPTY);
+                    searchIterator = factory.requireService(ContactService.class).searchUsers(factory.getSessionObject(), orTerm, new ContactField[] { ContactField.INTERNAL_USERID, ContactField.CONTEXTID }, SortOptions.EMPTY);
                     while (searchIterator.hasNext()) {
                         try {
                             Contact contact = searchIterator.next();
@@ -226,7 +225,7 @@ public class PrinicpalPropertySearchReport extends PROPFINDAction {
          * search matching groups
          */
         Set<Group> groups = new HashSet<Group>();
-        if (null != applyToPrincipalCollectionSet || GroupPrincipalCollection.NAME.equals(request.getUrl().name()) || 0 == request.getUrl().size()) {
+        if (applyData(applyToPrincipalCollectionSet, GroupPrincipalCollection.NAME, request)) {
             for (Element propertySearch : propertySearches) {
                 Element matchElement = propertySearch.getChild("match", DAV_NS);
                 if (null == matchElement || Strings.isEmpty(matchElement.getText())) {
@@ -241,7 +240,7 @@ public class PrinicpalPropertySearchReport extends PROPFINDAction {
                          */
                         if ("displayname".equals(element.getName()) && DAV_NS.equals(element.getNamespace())) {
                             try {
-                                Group[] foundGroups = Services.getService(GroupService.class).search(factory.getContext(), pattern, false);
+                                Group[] foundGroups = factory.getServiceSafe(GroupService.class).search(factory.getContext(), pattern, false);
                                 if (null != foundGroups) {
                                     groups.addAll(Arrays.asList(foundGroups));
                                 }
@@ -249,10 +248,10 @@ public class PrinicpalPropertySearchReport extends PROPFINDAction {
                                 LOG.warn("error searching groups", e);
                             }
                         } else if ("calendar-user-address-set".equals(element.getName()) && DAVProtocol.CAL_NS.equals(element.getNamespace())) {
-                            int groupID = extractPrincipalID(pattern, CalendarUserType.GROUP);
+                            int groupID = extractPrincipalID(pattern, CalendarUserType.GROUP, factory);
                             if (-1 != groupID) {
                                 try {
-                                    Group group = Services.getService(GroupService.class).getGroup(factory.getContext(), groupID);
+                                    Group group = factory.getServiceSafe(GroupService.class).getGroup(factory.getContext(), groupID);
                                     if (null != group) {
                                         groups.add(group);
                                     }
@@ -269,7 +268,7 @@ public class PrinicpalPropertySearchReport extends PROPFINDAction {
          * search matching resources
          */
         Set<Resource> resources = new HashSet<Resource>();
-        if (null != applyToPrincipalCollectionSet || ResourcePrincipalCollection.NAME.equals(request.getUrl().name()) || 0 == request.getUrl().size()) {
+        if (applyData(applyToPrincipalCollectionSet, ResourcePrincipalCollection.NAME, request)) {
             for (Element propertySearch : propertySearches) {
                 Element matchElement = propertySearch.getChild("match", DAV_NS);
                 if (null == matchElement || Strings.isEmpty(matchElement.getText())) {
@@ -277,7 +276,7 @@ public class PrinicpalPropertySearchReport extends PROPFINDAction {
                 }
                 String pattern = getPattern(matchElement);
                 Element prop = propertySearch.getChild("prop", DAV_NS);
-                if(prop == null) {
+                if (prop == null) {
                     continue;
                 }
                 for (Element element : prop.getChildren()) {
@@ -293,7 +292,7 @@ public class PrinicpalPropertySearchReport extends PROPFINDAction {
                         } catch (OXException e) {
                             LOG.warn("error searching resources", e);
                         }
-                    } else if ("email-address-set".equals(element.getName()) && DAV_NS.equals(element.getNamespace())) {
+                    } else if ("email-address-set".equals(element.getName()) && CALENDARSERVER_NS.equals(element.getNamespace())) {
                         try {
                             Resource[] foundResources = factory.requireService(ResourceService.class).searchResourcesByMail(pattern, factory.getContext());
                             if (null != foundResources && 0 < foundResources.length) {
@@ -303,12 +302,21 @@ public class PrinicpalPropertySearchReport extends PROPFINDAction {
                             LOG.warn("error searching resources", e);
                         }
                     } else if ("calendar-user-address-set".equals(element.getName()) && DAVProtocol.CAL_NS.equals(element.getNamespace())) {
-                        int resourceID = extractPrincipalID(pattern, CalendarUserType.RESOURCE);
+                        int resourceID = extractPrincipalID(pattern, CalendarUserType.RESOURCE, factory);
                         if (-1 != resourceID) {
                             try {
                                 Resource resource = factory.requireService(ResourceService.class).getResource(resourceID, factory.getContext());
                                 if (null != resource) {
                                     resources.add(resource);
+                                }
+                            } catch (OXException e) {
+                                LOG.warn("error searching resources", e);
+                            }
+                        } else {
+                            try {
+                                Resource[] foundResources = factory.requireService(ResourceService.class).searchResourcesByMail(pattern, factory.getContext());
+                                if (null != foundResources && 0 < foundResources.length) {
+                                    resources.addAll(Arrays.asList(foundResources));
                                 }
                             } catch (OXException e) {
                                 LOG.warn("error searching resources", e);
@@ -321,6 +329,12 @@ public class PrinicpalPropertySearchReport extends PROPFINDAction {
         /*
          * marshal response
          */
+        ConfigViewFactory configViewFactory;
+        try {
+            configViewFactory = factory.requireService(ConfigViewFactory.class);
+        } catch (OXException e) {
+            throw DAVProtocol.protocolException(request.getUrl(), e);
+        }
         Element multistatusElement = prepareMultistatusElement();
         ResourceMarshaller marshaller = getMarshaller(request, requestBody, new WebdavPath().toString());
         for (User user : users) {
@@ -328,15 +342,22 @@ public class PrinicpalPropertySearchReport extends PROPFINDAction {
                 // skip, since the Mac OS client gets into trouble when the TLD is missing in the mail address
                 continue;
             }
-            multistatusElement.addContent(marshaller.marshal(new UserPrincipalResource(factory, user)));
+            WebdavPath url = new WebdavPath(PrincipalURL.forUser(user.getId(), configViewFactory));
+            multistatusElement.addContent(marshaller.marshal(new UserPrincipalResource(factory, user, url)));
         }
         for (Group group : groups) {
-            multistatusElement.addContent(marshaller.marshal(new GroupPrincipalResource(factory, group)));
+            WebdavPath url = new WebdavPath(PrincipalURL.forGroup(group.getIdentifier(), configViewFactory));
+            multistatusElement.addContent(marshaller.marshal(new GroupPrincipalResource(factory, group, url)));
         }
         for (Resource resource : resources) {
-            multistatusElement.addContent(marshaller.marshal(new ResourcePrincipalResource(factory, resource)));
+            WebdavPath url = new WebdavPath(PrincipalURL.forResource(resource.getIdentifier(), configViewFactory));
+            multistatusElement.addContent(marshaller.marshal(new ResourcePrincipalResource(factory, resource, url)));
         }
         sendMultistatusResponse(response, multistatusElement);
+    }
+
+    private boolean applyData(Element applyToPrincipalCollectionSet, String collectionName, WebdavRequest request) {
+        return null != applyToPrincipalCollectionSet || collectionName.equals(request.getUrl().name()) || 0 == request.getUrl().size();
     }
 
     /**
@@ -371,12 +392,12 @@ public class PrinicpalPropertySearchReport extends PROPFINDAction {
      * @param cuType The calendar user type to match
      * @return The principal identifier, or <code>-1</code> if none could be extracted
      */
-    private static int extractPrincipalID(String pattern, CalendarUserType cuType) {
+    private static int extractPrincipalID(String pattern, CalendarUserType cuType, DAVFactory factory) {
         String trimmedPattern = Strings.trimStart(Strings.trimEnd(pattern, '*'), '*');
         /*
          * try principal URL
          */
-        PrincipalURL principalURL = PrincipalURL.parse(trimmedPattern);
+        PrincipalURL principalURL = PrincipalURL.parse(trimmedPattern, factory.getService(ConfigViewFactory.class));
         if (null != principalURL && cuType.equals(principalURL.getType())) {
             return principalURL.getPrincipalID();
         }

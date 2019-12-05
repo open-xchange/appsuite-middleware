@@ -94,7 +94,7 @@ public class Conversation {
                     Date d;
                     try {
                         d = dateFormat.parse(conversationInformation.getString("updated_at"));
-                    } catch (final ParseException e) {
+                    } catch (ParseException e) {
                         d = null;
                     }
                     this.updatedAt = d;
@@ -123,7 +123,7 @@ public class Conversation {
             } else {
                 latestMessages = Collections.emptyList();
             }
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw new XingException(e);
         }
     }

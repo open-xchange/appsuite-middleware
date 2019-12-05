@@ -1,15 +1,15 @@
-requests:
-  - RootRequest.yaml
-  - ListRequest.yaml
-  - PathRequest.yaml
-  - UpdatesRequest.yaml
-  - GetRequest.yaml
-  - UpdateRequest.yaml
-  - NewRequest.yaml
-  - DeleteRequest.yaml
-  - ClearRequest.yaml
+requests: 
   - AllVisibleRequest.yaml
-  - SharesRequest.yaml
+  - ChecklimitsRequest.yaml
+  - ClearRequest.yaml
+  - DeleteRequest.yaml
+  - GetRequest.yaml
+  - ListRequest.yaml
+  - NewRequest.yaml
   - NotifyRequest.yaml
+  - PathRequest.yaml
   - RestoreRequest.yaml
-  - CheckLimitsRequest.yaml
+  - RootRequest.yaml
+  - SharesRequest.yaml
+  - UpdateRequest.yaml
+  - UpdatesRequest.yaml

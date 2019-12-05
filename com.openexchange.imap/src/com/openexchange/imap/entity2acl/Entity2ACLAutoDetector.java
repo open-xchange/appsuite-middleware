@@ -128,13 +128,13 @@ public final class Entity2ACLAutoDetector {
         }
         try {
             return cached.get();
-        } catch (final InterruptedException e) {
+        } catch (InterruptedException e) {
             // Keep interrupted status
             Thread.currentThread().interrupt();
             throw new IOException(e.getMessage());
-        } catch (final CancellationException e) {
+        } catch (CancellationException e) {
             throw new IOException(e.getMessage());
-        } catch (final ExecutionException e) {
+        } catch (ExecutionException e) {
             final Throwable cause = e.getCause();
             if (cause instanceof OXException) {
                 throw ((OXException) cause);
@@ -222,7 +222,7 @@ public final class Entity2ACLAutoDetector {
         final InetSocketAddress socketAddress;
         try {
             socketAddress = imapConfig.getImapServerSocketAddress();
-        } catch (final IMAPException e) {
+        } catch (IMAPException e) {
             throw Entity2ACLExceptionCode.UNKNOWN_IMAP_SERVER.create(e, info);
         }
         IMAPServer imapServer = CACHE.get(socketAddress);
@@ -259,10 +259,10 @@ public final class Entity2ACLAutoDetector {
                 }
                 CACHE.put(socketAddress, IMAPServer.UNKNOWN);
                 throw Entity2ACLExceptionCode.UNKNOWN_IMAP_SERVER.create(info);
-            } catch (final MessagingException e) {
+            } catch (MessagingException e) {
                 CACHE.put(socketAddress, IMAPServer.UNKNOWN);
                 throw Entity2ACLExceptionCode.UNKNOWN_IMAP_SERVER.create(e, info);
-            } catch (final RuntimeException e) {
+            } catch (RuntimeException e) {
                 CACHE.put(socketAddress, IMAPServer.UNKNOWN);
                 throw Entity2ACLExceptionCode.UNKNOWN_IMAP_SERVER.create(e, info);
             }

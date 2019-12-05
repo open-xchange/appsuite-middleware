@@ -55,8 +55,8 @@ import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.ReinitializableFolderStorage;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 /**
  * {@link ReinitializePerformer} - Serves the <code>REINITIALIZE</code> request.
@@ -123,12 +123,12 @@ public final class ReinitializePerformer extends AbstractPerformer {
                     if (started) {
                         folderStorage.commitTransaction(storageParameters);
                     }
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     if (started) {
                         folderStorage.rollback(storageParameters);
                     }
                     throw e;
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     if (started) {
                         folderStorage.rollback(storageParameters);
                     }

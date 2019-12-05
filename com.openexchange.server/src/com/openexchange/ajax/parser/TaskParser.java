@@ -61,7 +61,9 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tasks.Mapping;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TaskExceptionCode;
-import com.openexchange.server.services.I18nServices;
+import com.openexchange.i18n.I18nService;
+import com.openexchange.i18n.I18nServiceRegistry;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**
@@ -83,9 +85,9 @@ public class TaskParser extends CalendarParser {
         throws OXException {
         try {
             parseElementTask(taskobject, jsonobject, locale);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, e.getMessage());
         }
     }
@@ -180,6 +182,8 @@ public class TaskParser extends CalendarParser {
     }
 
     private static String translate(Locale locale, String attributeName) {
-        return I18nServices.getInstance().translate(locale, attributeName);
+        I18nServiceRegistry service = ServerServiceRegistry.getServize(I18nServiceRegistry.class);
+        I18nService i18nService = service.getI18nService(locale);
+        return i18nService.getLocalized(attributeName);
     }
 }

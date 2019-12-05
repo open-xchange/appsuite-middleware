@@ -1,0 +1,11 @@
+type: object
+properties:
+  private:
+    type: object
+    description: Array of private folders. Each folder is described as an array itself.
+  public:
+    type: object
+    description: Array of public folders. Each folder is described as an array itself.
+  shared:
+    type: object
+    description: Array of shared folders. Each folder is described as an array itself.

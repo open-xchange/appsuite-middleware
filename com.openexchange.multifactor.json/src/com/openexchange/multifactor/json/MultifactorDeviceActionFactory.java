@@ -91,13 +91,10 @@ public class MultifactorDeviceActionFactory implements AJAXActionServiceFactory 
         actions.put("rename", new RenameMultifactorAction(serviceLookup));
         actions.put("delete", new DeleteMultifactorRegistrationAction(serviceLookup));
     }
-    /* (non-Javadoc)
-     * @see com.openexchange.ajax.requesthandler.AJAXActionServiceFactory#createActionService(java.lang.String)
-     */
     @Override
     public AJAXActionService createActionService(String action) throws OXException {
         AJAXActionService actionService = actions.get(action);
-        if(actionService == null) {
+        if (actionService == null) {
             throw AjaxExceptionCodes.UNKNOWN_ACTION_IN_MODULE.create(action, MODULE);
         }
         return actionService;

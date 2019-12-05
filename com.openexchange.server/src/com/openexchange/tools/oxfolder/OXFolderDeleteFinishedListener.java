@@ -91,7 +91,7 @@ public class OXFolderDeleteFinishedListener implements DeleteFinishedListener {
         try {
             FolderCacheManager.getInstance().removeFolderObject(FolderObject.SYSTEM_SHARED_FOLDER_ID, ctx);
             FolderCacheManager.getInstance().removeFolderObject(FolderObject.SYSTEM_LDAP_FOLDER_ID, ctx);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
         }
     }

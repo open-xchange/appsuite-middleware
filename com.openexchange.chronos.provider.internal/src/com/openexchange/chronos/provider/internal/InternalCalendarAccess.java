@@ -298,8 +298,8 @@ public class InternalCalendarAccess implements FolderCalendarAccess, SubscribeAw
     }
 
     @Override
-    public Event resolveEvent(String eventId) throws OXException {
-        return getCalendarService().getUtilities().resolveByID(session, eventId);
+    public Event resolveEvent(String eventId, Integer sequence) throws OXException {
+        return getCalendarService().getUtilities().resolveByID(session, eventId, sequence);
     }
 
     @Override

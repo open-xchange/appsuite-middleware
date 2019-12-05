@@ -103,7 +103,7 @@ public class CompositeResourceAccessor implements ResourceAccessor {
                 ClassLoader classLoader = (ClassLoader) classLoader1;
                 try {
                     Class classe=classLoader.loadClass(name);
-                    if(resolve) {
+                    if (resolve) {
                         resolveClass(classe);
                     }
                     return classe;
@@ -118,7 +118,7 @@ public class CompositeResourceAccessor implements ResourceAccessor {
             ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
             if (contextClassLoader != null) {
                 Class classe=contextClassLoader.loadClass(name);
-                if(resolve) {
+                if (resolve) {
                     resolveClass(classe);
                 }
                 return classe;

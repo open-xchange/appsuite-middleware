@@ -117,7 +117,7 @@ public class FunctionTests extends AbstractAJAXSession {
     }
 
     @Test
-    public void testInsertUpdateFolder() throws OXException, IOException, JSONException, OXException, OXException {
+    public void testInsertUpdateFolder() throws OXException, IOException, JSONException {
         FolderObject toDelete = null;
         int userId1 = client.getValues().getUserId();
         int userId2 = client2.getValues().getUserId();
@@ -145,7 +145,7 @@ public class FunctionTests extends AbstractAJAXSession {
     }
 
     @Test
-    public void testFailDeleteFolder() throws OXException, IOException, JSONException, OXException, OXException {
+    public void testFailDeleteFolder() throws OXException, IOException, JSONException {
         int userId = client.getValues().getUserId();
         int secId = client2.getValues().getUserId();
         FolderObject parent = null;

@@ -60,6 +60,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.context.ContextService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.update.Attributes;
@@ -196,6 +197,13 @@ public class ChronosStorageMigrationTask extends UpdateTaskAdapter {
      */
     private static boolean needsMigration(Connection connection) throws OXException {
         try {
+            /*
+             * check if source storage exists
+             */
+            if (false == Databases.tableExists(connection, "prg_dates")) {
+                LOG.info("Source calendar storage in schema {} not found, migration is not needed.", connection.getCatalog());
+                return false;
+            }
             /*
              * check for any data in the source storage
              */

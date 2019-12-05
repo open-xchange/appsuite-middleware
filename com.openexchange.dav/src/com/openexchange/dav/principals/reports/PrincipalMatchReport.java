@@ -52,13 +52,17 @@ package com.openexchange.dav.principals.reports;
 import static com.openexchange.webdav.protocol.Protocol.DAV_NS;
 import javax.servlet.http.HttpServletResponse;
 import org.jdom2.Element;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.actions.PROPFINDAction;
+import com.openexchange.dav.mixins.PrincipalURL;
 import com.openexchange.dav.principals.PrincipalFactory;
 import com.openexchange.dav.principals.users.UserPrincipalResource;
-import com.openexchange.groupware.ldap.User;
+import com.openexchange.exception.OXException;
+import com.openexchange.user.User;
 import com.openexchange.webdav.action.WebdavRequest;
 import com.openexchange.webdav.action.WebdavResponse;
+import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.xml.resources.ResourceMarshaller;
 
@@ -92,7 +96,13 @@ public class PrincipalMatchReport extends PROPFINDAction {
          */
         PrincipalFactory factory = (PrincipalFactory) request.getFactory();
         User user = factory.getUser();
-        UserPrincipalResource resource = new UserPrincipalResource(factory, user);
+        WebdavPath url;
+        try {
+            url = new WebdavPath(PrincipalURL.forUser(user.getId(), factory.requireService(ConfigViewFactory.class)));
+        } catch (OXException e) {
+            throw DAVProtocol.protocolException(request.getUrl(), e);
+        }
+        UserPrincipalResource resource = new UserPrincipalResource(factory, user, url);
         Element multistatusElement = prepareMultistatusElement();
         ResourceMarshaller marshaller = getMarshaller(request, optRequestBody(request));
         multistatusElement.addContent(marshaller.marshal(resource));

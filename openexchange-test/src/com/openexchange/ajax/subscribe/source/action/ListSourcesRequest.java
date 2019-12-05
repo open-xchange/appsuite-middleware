@@ -81,21 +81,11 @@ public class ListSourcesRequest extends AbstractSubscriptionSourceRequest<ListSo
         return columns;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
-     */
     @Override
     public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
         return Method.GET;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
-     */
     @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
         List<Parameter> params = new LinkedList<Parameter>();
@@ -109,11 +99,6 @@ public class ListSourcesRequest extends AbstractSubscriptionSourceRequest<ListSo
         return params.toArray(new Parameter[] {});
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
-     */
     @Override
     public AbstractAJAXParser<? extends ListSourcesResponse> getParser() {
         return new AbstractAJAXParser<ListSourcesResponse>(getFailOnError()) {
@@ -125,11 +110,6 @@ public class ListSourcesRequest extends AbstractSubscriptionSourceRequest<ListSo
         };
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
-     */
     @Override
     public Object getBody() throws IOException, JSONException {
         // TODO Auto-generated method stub

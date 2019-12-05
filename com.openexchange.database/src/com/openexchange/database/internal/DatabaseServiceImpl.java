@@ -54,6 +54,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Map;
+import java.util.Set;
 import com.openexchange.database.Assignment;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.DatabaseService;
@@ -109,7 +110,7 @@ public final class DatabaseServiceImpl implements DatabaseService {
         }
         try {
             con.close();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             final OXException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
             LOG.error("", e1);
         }
@@ -127,7 +128,7 @@ public final class DatabaseServiceImpl implements DatabaseService {
                 ((JDBC4ConnectionReturner) con).setUsedAsRead(true);
             }
             con.close();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             final OXException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
             LOG.error("", e1);
         }
@@ -290,6 +291,11 @@ public final class DatabaseServiceImpl implements DatabaseService {
     }
 
     @Override
+    public Set<String> getDistinctGroupsPerSchema() {
+        return globalDatabaseService.getDistinctGroupsPerSchema();
+    }
+
+    @Override
     public Connection getReadOnlyForGlobal(String group) throws OXException {
         Connection connection = globalDatabaseService.getReadOnlyForGlobal(group);
         setSchemaLogProperty(connection);
@@ -337,6 +343,16 @@ public final class DatabaseServiceImpl implements DatabaseService {
         globalDatabaseService.backWritableForGlobal(contextId, connection);
     }
 
+    @Override
+    public void backWritableForGlobalAfterReading(int contextId, Connection connection) {
+        globalDatabaseService.backWritableForGlobalAfterReading(contextId, connection);
+    }
+
+    @Override
+    public void backWritableForGlobalAfterReading(String group, Connection connection) {
+        globalDatabaseService.backWritableForGlobalAfterReading(group, connection);
+    }
+
     // Implemented database service methods.
 
     @Override
@@ -370,18 +386,18 @@ public final class DatabaseServiceImpl implements DatabaseService {
         Connection con;
         try {
             con = pools.getPool(poolId).get();
-        } catch (final PoolingException e) {
+        } catch (PoolingException e) {
             throw DBPoolingExceptionCodes.NO_CONNECTION.create(e, I(poolId));
         }
         try {
             if (null != schema && !con.getCatalog().equals(schema)) {
                 con.setCatalog(schema);
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             try {
                 pools.getPool(poolId).back(con);
                 con = null;
-            } catch (final PoolingException e1) {
+            } catch (PoolingException e1) {
                 LOG.error(e1.getMessage(), e1);
             } finally {
                 // Something went wrong while trying to put back into pool if con is not null
@@ -398,18 +414,18 @@ public final class DatabaseServiceImpl implements DatabaseService {
         Connection con;
         try {
             con = pools.getPool(poolId).getWithoutTimeout();
-        } catch (final PoolingException e) {
+        } catch (PoolingException e) {
             throw DBPoolingExceptionCodes.NO_CONNECTION.create(e, I(poolId));
         }
         try {
             if (null != schema && !con.getCatalog().equals(schema)) {
                 con.setCatalog(schema);
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             try {
                 pools.getPool(poolId).back(con);
                 con = null;
-            } catch (final PoolingException e1) {
+            } catch (PoolingException e1) {
                 LOG.error(e1.getMessage(), e1);
             } finally {
                 // Something went wrong while trying to put back into pool if con is not null
@@ -486,10 +502,10 @@ public final class DatabaseServiceImpl implements DatabaseService {
         try {
             pools.getPool(poolId).back(con);
             con = null;
-        } catch (final PoolingException e) {
+        } catch (PoolingException e) {
             final OXException e2 = DBPoolingExceptionCodes.RETURN_FAILED.create(e, con.toString());
             LOG.error("", e2);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
         } finally {
             // Something went wrong while trying to put back into pool if con is not null
@@ -503,7 +519,7 @@ public final class DatabaseServiceImpl implements DatabaseService {
         try {
             pools.getPool(poolId).backWithoutTimeout(con);
             con = null;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
         } finally {
             // Something went wrong while trying to put back into pool if con is not null

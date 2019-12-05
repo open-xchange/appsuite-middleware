@@ -100,7 +100,7 @@ public abstract class AbstractQuotaAction implements AJAXActionService {
                 ajaxRequest.setTimeZone(getTimeZone(sTimeZone));
             }
             return perform(ajaxRequest);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
     }

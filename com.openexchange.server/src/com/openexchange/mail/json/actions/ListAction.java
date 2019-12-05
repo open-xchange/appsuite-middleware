@@ -128,9 +128,9 @@ public final class ListAction extends AbstractMailAction {
             AJAXRequestResult result = new AJAXRequestResult(list, "mail");
             result.addWarnings(mailInterface.getWarnings());
             return result;
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }

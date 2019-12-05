@@ -84,7 +84,7 @@ public class SearchIterator implements MapIterator<String, Object> {
     @Override
     public void handle(String key, Object object) throws IterationBreak {
 
-        if(!stringsIncluded && object.getClass() == String.class) {
+        if (!stringsIncluded && object.getClass() == String.class) {
             stringTable();
         } else if (!boolsIncluded && object.getClass() == Boolean.class) {
             boolTable();
@@ -100,7 +100,7 @@ public class SearchIterator implements MapIterator<String, Object> {
 
 
     public String getWhere() {
-        if(queryReplacements.isEmpty()) {
+        if (queryReplacements.isEmpty()) {
             return "1";
         }
         where.setLength(where.length()-4);
@@ -124,10 +124,10 @@ public class SearchIterator implements MapIterator<String, Object> {
 
 
     private void stringTable() {
-        if(stringsIncluded) {
+        if (stringsIncluded) {
             return;
         }
-        if(firstTable) {
+        if (firstTable) {
             from.append("genconf_attributes_strings AS p ");
             registerAlias(String.class, "p");
             firstTable = false;
@@ -139,10 +139,10 @@ public class SearchIterator implements MapIterator<String, Object> {
     }
 
     private void boolTable() {
-        if(boolsIncluded) {
+        if (boolsIncluded) {
             return;
         }
-        if(firstTable) {
+        if (firstTable) {
             from.append("genconf_attributes_bools AS p ");
             registerAlias(Boolean.class, "p");
             firstTable = false;

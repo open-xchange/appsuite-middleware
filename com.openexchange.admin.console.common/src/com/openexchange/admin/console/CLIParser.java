@@ -451,15 +451,15 @@ public class CLIParser {
                     handleOption(opt, shortForm, locale, sp);
                 }
             }
-        } catch (final UnrecognizedOptionException e) {
+        } catch (UnrecognizedOptionException e) {
             throw new CLIUnknownOptionException(extractOption(e.getMessage()), e);
-        } catch (final MissingArgumentException e) {
+        } catch (MissingArgumentException e) {
             final String optName = extractOption(e.getMessage());
             throw new CLIUnknownOptionException(
                 optName,
                 new StringBuilder(32).append("Missing argument for option '").append(optName).append('\'').toString(),
                 e);
-        } catch (final ParseException e) {
+        } catch (ParseException e) {
             throw new CLIParseException(argv, e);
         }
     }

@@ -109,7 +109,7 @@ public class RdbResourceStorage implements UsecountAwareResourceStorage {
         final Connection con;
         try {
             con = DBPool.pickup(context);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw LdapExceptionCode.NO_CONNECTION.create(e).setPrefix("RES");
         }
         final List<ResourceGroup> groups = new ArrayList<ResourceGroup>();
@@ -129,7 +129,7 @@ public class RdbResourceStorage implements UsecountAwareResourceStorage {
                 group.setMember(getMember(con, group.getId(), context));
                 groups.add(group);
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("RES");
         } finally {
             closeSQLStuff(result, stmt);
@@ -154,7 +154,7 @@ public class RdbResourceStorage implements UsecountAwareResourceStorage {
         final Connection con;
         try {
             con = DBPool.pickup(context);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw LdapExceptionCode.NO_CONNECTION.create(e).setPrefix("RES");
         }
         final StringBuilder ids = new StringBuilder(16);
@@ -180,7 +180,7 @@ public class RdbResourceStorage implements UsecountAwareResourceStorage {
                 group.setMember(getMember(con, group.getId(), context));
                 groups.add(group);
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("RES");
         } finally {
             closeSQLStuff(result, stmt);
@@ -252,7 +252,7 @@ public class RdbResourceStorage implements UsecountAwareResourceStorage {
         Connection con = null;
         try {
             con = DBPool.pickup(context);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw LdapExceptionCode.NO_CONNECTION.create(e).setPrefix("RES");
         }
         final StringBuilder ids = new StringBuilder(16);
@@ -271,7 +271,7 @@ public class RdbResourceStorage implements UsecountAwareResourceStorage {
             while (result.next()) {
                 resources.add(createResourceFromEntry(result));
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("RES");
         } finally {
             closeSQLStuff(result, stmt);
@@ -287,7 +287,7 @@ public class RdbResourceStorage implements UsecountAwareResourceStorage {
         final Connection con;
         try {
             con = DBPool.pickup(context);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw LdapExceptionCode.NO_CONNECTION.create(e).setPrefix("RES");
         }
         final List<ResourceGroup> groups = new ArrayList<ResourceGroup>();
@@ -308,7 +308,7 @@ public class RdbResourceStorage implements UsecountAwareResourceStorage {
                 group.setMember(getMember(con, group.getId(), context));
                 groups.add(group);
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("RES");
         } finally {
             closeSQLStuff(result, stmt);
@@ -327,7 +327,7 @@ public class RdbResourceStorage implements UsecountAwareResourceStorage {
         final Connection con;
         try {
             con = DBPool.pickup(context);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw LdapExceptionCode.NO_CONNECTION.create(e).setPrefix("RES");
         }
         PreparedStatement stmt = null;
@@ -343,7 +343,7 @@ public class RdbResourceStorage implements UsecountAwareResourceStorage {
                 resources.add(createResourceFromEntry(result));
             }
             return resources.toArray(new Resource[resources.size()]);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("RES");
         } finally {
             closeSQLStuff(result, stmt);
@@ -379,7 +379,7 @@ public class RdbResourceStorage implements UsecountAwareResourceStorage {
         final Connection con;
         try {
             con = DBPool.pickup(context);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw LdapExceptionCode.NO_CONNECTION.create(e).setPrefix("RES");
         }
         PreparedStatement stmt = null;
@@ -397,7 +397,7 @@ public class RdbResourceStorage implements UsecountAwareResourceStorage {
                 resources.add(createResourceFromEntry(result));
             }
             return resources.toArray(new Resource[resources.size()]);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("RES");
         } finally {
             closeSQLStuff(result, stmt);
@@ -413,7 +413,7 @@ public class RdbResourceStorage implements UsecountAwareResourceStorage {
         final Connection con;
         try {
             con = DBPool.pickup(context);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw LdapExceptionCode.NO_CONNECTION.create(e).setPrefix("RES");
         }
         PreparedStatement stmt = null;
@@ -430,7 +430,7 @@ public class RdbResourceStorage implements UsecountAwareResourceStorage {
                 resources.add(createResourceFromEntry(result));
             }
             return resources.toArray(new Resource[resources.size()]);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("RES");
         } finally {
             closeSQLStuff(result, stmt);
@@ -448,7 +448,7 @@ public class RdbResourceStorage implements UsecountAwareResourceStorage {
         Connection con = null;
         try {
             con = DBPool.pickup(context);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw LdapExceptionCode.NO_CONNECTION.create(e).setPrefix("RES");
         }
         PreparedStatement stmt = null;
@@ -463,7 +463,7 @@ public class RdbResourceStorage implements UsecountAwareResourceStorage {
                 resources.add(createResourceFromEntry(result));
             }
             return resources.toArray(new Resource[resources.size()]);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("RES");
         } finally {
             closeSQLStuff(result, stmt);
@@ -488,7 +488,7 @@ public class RdbResourceStorage implements UsecountAwareResourceStorage {
         Connection con = null;
         try {
             con = DBPool.pickup(context);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw LdapExceptionCode.NO_CONNECTION.create(e).setPrefix("RES");
         }
         final List<Resource> resources = new ArrayList<Resource>();
@@ -502,7 +502,7 @@ public class RdbResourceStorage implements UsecountAwareResourceStorage {
             while (result.next()) {
                 resources.add(createResourceFromEntry(result));
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("RES");
         } finally {
             closeSQLStuff(result, stmt);
@@ -572,7 +572,7 @@ public class RdbResourceStorage implements UsecountAwareResourceStorage {
             stmt.setLong(pos++, lastModified);// lastModified
             stmt.executeUpdate();
             resource.setLastModified(lastModified);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw ResourceExceptionCode.SQL_ERROR.create(e);
         } finally {
             Databases.closeSQLStuff(null, stmt);
@@ -606,7 +606,7 @@ public class RdbResourceStorage implements UsecountAwareResourceStorage {
             stmt.setInt(pos++, resource.getIdentifier()); // id
             stmt.executeUpdate();
             resource.setLastModified(lastModified);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw ResourceExceptionCode.SQL_ERROR.create(e);
         } finally {
             Databases.closeSQLStuff(null, stmt);
@@ -624,7 +624,7 @@ public class RdbResourceStorage implements UsecountAwareResourceStorage {
             stmt.setInt(pos++, ctx.getContextId()); // cid
             stmt.setInt(pos++, resourceId); // id
             stmt.executeUpdate();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw ResourceExceptionCode.SQL_ERROR.create(e);
         } finally {
             Databases.closeSQLStuff(null, stmt);

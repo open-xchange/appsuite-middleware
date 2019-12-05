@@ -100,7 +100,7 @@ public class LabelHelper {
         String fbHostname;
         try {
             fbHostname = InetAddress.getLocalHost().getCanonicalHostName();
-        } catch (final UnknownHostException e) {
+        } catch (UnknownHostException e) {
             fbHostname = "localhost";
         }
         fallbackHostname = fbHostname;

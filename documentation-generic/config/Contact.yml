@@ -410,3 +410,32 @@ properties:
     file: contactcollector.properties
     packageName: open-xchange-core
     tags: ["Contact"]
+  - key: com.openexchange.contactcollector.cleanupUnusedAfter
+    description: |
+      Specifies the cleanup threshold time span for unused collected contacts. Collected contacts having a last-modified time stamp longer
+      in the past than the time span given by this threshold are considered for cleanup.
+      
+      Accepts units of measurement
+      - ms for milliseconds
+      - s for seconds
+      - m for minutes
+      - h for hours
+      - D for days
+      - W for weeks
+      E.g. "4W" for four weeks.
+
+      In addition to the cleanup threshold, a collected contact is only rated as unused if it has only the initial fields set and has a
+      use-count value of less than 2.
+      
+      Cleanup takes place for a certain user whenever the contact collector is triggered for that user; meaning there is no periodic
+      back-ground task.
+      
+      A value of less than or equal to 0 (zero) disables the cleanup.
+    defaultValue: 0
+    version: 7.10.3
+    reloadable: true
+    configcascadeAware: true
+    related: 
+    file: contactcollector.properties
+    packageName: open-xchange-core
+    tags: ["Contact"]

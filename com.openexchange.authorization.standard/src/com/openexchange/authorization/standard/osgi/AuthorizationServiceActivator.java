@@ -70,7 +70,7 @@ public class AuthorizationServiceActivator extends HousekeepingActivator {
         try {
             logger.info("starting bundle: com.openexchange.authorization.standard");
             registerService(AuthorizationService.class, DefaultAuthorizationImpl.getInstance(), null);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             logger.error("", e);
             throw e;
         }

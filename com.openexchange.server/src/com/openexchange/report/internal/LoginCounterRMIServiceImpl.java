@@ -72,11 +72,6 @@ public class LoginCounterRMIServiceImpl implements LoginCounterRMIService {
         this.counterService = counterService;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.report.internal.LoginCounterRMIService#getLastLoginTimeStamp(int, int, java.lang.String)
-     */
     @Override
     public List<Object[]> getLastLoginTimeStamp(int userId, int contextId, String client) throws RemoteException {
         try {

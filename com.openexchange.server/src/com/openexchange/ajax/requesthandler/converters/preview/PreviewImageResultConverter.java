@@ -373,7 +373,7 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
                         task.call();
                         ran = true;
                         task.afterExecute(null);
-                    } catch (final Exception ex) {
+                    } catch (Exception ex) {
                         if (!ran) {
                             task.afterExecute(ex);
                         }
@@ -389,9 +389,9 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
             // Set response object
             final FileHolder responseFileHolder = new FileHolder(thumbnail, size, "image/jpeg", fileName);
             result.setResultObject(responseFileHolder, "file");
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }

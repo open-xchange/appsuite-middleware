@@ -256,7 +256,7 @@ public final class MailAttachmentTest extends MessageStorageTest {
 				mailAcc.close(false);
 			}
 
-		} catch (final Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
@@ -306,7 +306,7 @@ public final class MailAttachmentTest extends MessageStorageTest {
 				fail("Missing attachments although existence indicated through 'hasAttachments()'");
 			}
 
-		} catch (final Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			fail(e.getMessage());
 		}

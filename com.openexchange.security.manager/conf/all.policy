@@ -1,0 +1,11 @@
+// This file is required when using any security manager for OSGI, as declared
+// in the java startup parameters.  Security must be set to AllPermissions for OSGI
+// to properly start up.
+// This file should be referenced in the parameter -Djava.security.policy
+// Restrictions are made in the policies.policy file
+
+// Do not change this file
+
+grant {
+    permission java.security.AllPermission;
+};

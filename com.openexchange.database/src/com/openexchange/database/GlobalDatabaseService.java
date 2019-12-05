@@ -50,6 +50,7 @@
 package com.openexchange.database;
 
 import java.sql.Connection;
+import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.annotation.SingletonService;
 
@@ -63,7 +64,7 @@ public interface GlobalDatabaseService {
 
     /**
      * Gets a value indicating whether at least one global database is available.
-     * 
+     *
      * @return <code>true</code> if a global database is available, <code>false</code>, otherwise
      */
     boolean isGlobalDatabaseAvailable();
@@ -83,6 +84,14 @@ public interface GlobalDatabaseService {
      * @return <code>true</code> if a global database is available, <code>false</code>, otherwise
      */
     boolean isGlobalDatabaseAvailable(int contextId) throws OXException;
+
+    /**
+     * Gets a collection of exactly one (exemplary) context group per global database schema. Useful when iterating over all available
+     * global database schemas.
+     *
+     * @return A listing of distinct context groups per schema, or an empty set if there are none
+     */
+    Set<String> getDistinctGroupsPerSchema();
 
     /**
      * Gets a connection for read-only access to the global database of a specific context group.
@@ -147,4 +156,33 @@ public interface GlobalDatabaseService {
      * @param connection The connection to return
      */
     void backWritableForGlobal(int contextId, Connection connection);
+
+    /**
+     * Returns a read/write connection only used to the global database of a specific context group to the pool.
+     * <p>
+     * It should be used to return a writable connection if it was only used for reading information from database server.
+     * <p>
+     * When this connection is returned the replication monitor will not increase the replication counter. Therefore the database pooling
+     * component can not determine when written information will be available on the slave.
+     * This allows to reduce the write I/O load on the database servers but keep in mind that reading from the master does not scale out.
+     *
+     * @param group The group to back the connection for
+     * @param connection The connection to return
+     */
+    void backWritableForGlobalAfterReading(String group, Connection connection);
+
+    /**
+     * Returns a read/write connection to the global database of a specific group a context is associated with.
+     * <p>
+     * It should be used to return a writable connection if it was only used for reading information from database server.
+     * <p>
+     * When this connection is returned the replication monitor will not increase the replication counter. Therefore the database pooling
+     * component can not determine when written information will be available on the slave.
+     * This allows to reduce the write I/O load on the database servers but keep in mind that reading from the master does not scale out.
+     *
+     * @param contextId The identifier of the context to back the connection for
+     * @param connection The connection to return
+     */
+    void backWritableForGlobalAfterReading(int contextId, Connection connection);
+
 }

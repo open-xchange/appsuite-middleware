@@ -4,6 +4,5 @@ description: |
 contact:
   name: Open-Xchange GmbH
   email: info@open-xchange.com
-  url: https://www.open-xchange.com/
-version:
-  $ref: '../../version'
+  url: 'https://www.open-xchange.com/'
+version: 7.10.3
