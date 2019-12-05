@@ -582,7 +582,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                 try {
                     sentMailPath = MailPath.getMailPathFor(msgIdentifier);
                 } catch (Exception x) {
-                    LoggerHolder.LOG.warn("Failed toi parse mail path from {}", msgIdentifier, x);
+                    LoggerHolder.LOG.warn("Failed to parse mail path from {}", msgIdentifier, x);
                 }
             }
 
