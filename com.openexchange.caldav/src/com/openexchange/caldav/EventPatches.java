@@ -870,13 +870,13 @@ public class EventPatches {
          * @param exceptions The event exceptions
          */
         private void restoreParticipantStatus(EventResource resource, Event event) {
-            if (false == resource.exists() || false == DAVUserAgent.MAC_CALENDAR.equals(resource.getUserAgent())) {
-                return;
-            }
-            try {
-                restoreParticipantStatus(event, resource.getEvent().getFolderId(), resource.getEvent().getId());
-            } catch (OXException e) {
-                LOG.warn("Error restoring the participant status", e);
+            DAVUserAgent userAgent = resource.getUserAgent();
+            if (resource.exists() && (DAVUserAgent.MAC_CALENDAR.equals(userAgent) || DAVUserAgent.IOS.equals(userAgent))) {
+                try {
+                    restoreParticipantStatus(event, resource.getEvent().getFolderId(), resource.getEvent().getId());
+                } catch (OXException e) {
+                    LOG.warn("Error restoring the participant status", e);
+                }
             }
         }
 
