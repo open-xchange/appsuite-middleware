@@ -1,0 +1,13 @@
+Source: open-xchange-file-storage-webdav
+Section: web
+Priority: optional
+Maintainer: Marcus Klein <marcus.klein@open-xchange.com>
+Build-Depends: debhelper (>= 4.0.0), ant (>= 1.7.0), ant-optional (>= 1.7.0), openjdk-8-jdk-headless | adoptopenjdk-8-hotspot, open-xchange-core (>= @OXVERSION@)
+Standards-Version: 3.9.8
+Homepage: http://www.open-xchange.com
+
+Package: open-xchange-file-storage-webdav
+Architecture: all
+Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
+Description: The Open Xchange backend webdav file storage extension
+ Adds the feature to use webdav filestorages services like ownCloud in the backend installation.

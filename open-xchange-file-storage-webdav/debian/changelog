@@ -1,0 +1,5 @@
+open-xchange-file-storage-webdav (7.10.3-3) unstable; urgency=medium
+
+  * first candidate for 7.10.4
+
+ -- Kevin Ruthmann <kevin.ruthmann@open-xchange.com>  Tue, 7 Jan 2020 12:41:00 +0200

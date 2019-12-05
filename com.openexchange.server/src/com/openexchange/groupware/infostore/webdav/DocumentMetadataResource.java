@@ -774,6 +774,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
             }
         } else {
             database.startTransaction();
+            metadata.setId(getId());
             if (setMetadata.contains(Metadata.FILENAME_LITERAL)) {
                 metadata.setTitle(metadata.getFileName());
                 setMetadata.add(Metadata.TITLE_LITERAL);

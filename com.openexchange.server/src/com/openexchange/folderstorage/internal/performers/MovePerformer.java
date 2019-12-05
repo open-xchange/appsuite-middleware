@@ -313,10 +313,14 @@ final class MovePerformer extends AbstractPerformer {
             }
             virtualStorage.updateFolder(folder, storageParameters);
             if (folder.getID() != null && permissionsToUpdate != null && !permissionsToUpdate.isEmpty()) {
+                final UpdateFolder updateFolder = new UpdateFolder();
+                updateFolder.setID(folder.getID());
+                updateFolder.setTreeID(folder.getTreeID());
+                updateFolder.setPermissions(permissionsToUpdate.toArray(new Permission[permissionsToUpdate.size()]));
                 folder.setPermissions(permissionsToUpdate.toArray(new Permission[permissionsToUpdate.size()]));
                 storageParameters.getDecorator().put("permissions", "inherit");
                 storageParameters.setTimeStamp(folder.getLastModified());
-                virtualStorage.updateFolder(folder, storageParameters);
+                virtualStorage.updateFolder(updateFolder, storageParameters);
             }
 
         } else {
