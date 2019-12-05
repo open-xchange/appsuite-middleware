@@ -10,7 +10,6 @@
 	<classpathentry exported="true" kind="lib" path="testlib/awaitility-1.6.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="testlib/junit-addons-1.4.jar" sourcepath="testlib/source/junit-addons-1.4-src.jar"/>
 	<classpathentry exported="true" kind="lib" path="testlib/dumbster1.6.jar" sourcepath="testlib/source/dumbster1.6-src.zip"/>
-	<classpathentry exported="true" kind="lib" path="testlib/jersey-test-framework-core-2.25.jar" sourcepath="testlib/source/jersey-test-framework-core-2.25-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="testlib/system-rules-1.12.0.jar" sourcepath="system-rules-1.12.0-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="testlib/junit-4.12.jar" sourcepath="testlib/source/junit-4.12-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="testlib/jchronic-0.2.3.jar"/>
