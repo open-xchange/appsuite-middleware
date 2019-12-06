@@ -224,14 +224,13 @@ spec:
     }
 }
 String version4Documentation(String branchName) {
-    def version = 'develop'
     if ('develop' == branchName)
         return branchName
     if ('master-publish-doku' == branchName)
-        version = sh "awk '\$0 ~ /OXVersion/ {print \$2}' backend/com.openexchange.version/META-INF/MANIFEST.MF"
+        def version = sh("awk '\$0 ~ /OXVersion/ {print \$2}' backend/com.openexchange.version/META-INF/MANIFEST.MF")
         return version
     if ('master' == branchName)
-        version = sh "awk '\$0 ~ /OXVersion/ {print \$2}' backend/com.openexchange.version/META-INF/MANIFEST.MF"
+        def version = sh("awk '\$0 ~ /OXVersion/ {print \$2}' backend/com.openexchange.version/META-INF/MANIFEST.MF")
         return version
     if (branchName.startsWith('master-'))
         return branchName.substring(7)
