@@ -227,8 +227,6 @@ spec:
 String version4Documentation(String branchName) {
     if ('develop' == branchName)
         return branchName
-    if ('master' == branchName)
-        return "7.10.3"
     if (branchName.startsWith('master-'))
         return branchName.substring(7)
     if (branchName.startsWith('release-'))
