@@ -100,6 +100,9 @@ public class HeaderUtility {
     /** "X-OX-Custom-Headers" */
     public static final String HEADER_X_OX_CUSTOM_HEADERS = MessageHeaders.HDR_X_OX_CUSTOM_HEADERS;
 
+    /** "X-OX-Content-Type" */
+    public static final String HEADER_X_OX_CONTENT_TYPE = MessageHeaders.HDR_X_OX_CONTENT_TYPE;
+
     /**
      * Initializes a new {@link HeaderUtility}.
      */

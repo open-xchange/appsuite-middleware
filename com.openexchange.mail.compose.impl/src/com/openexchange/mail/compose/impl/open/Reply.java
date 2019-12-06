@@ -82,6 +82,7 @@ import com.openexchange.mail.compose.AttachmentDescription;
 import com.openexchange.mail.compose.AttachmentStorageService;
 import com.openexchange.mail.compose.AttachmentStorages;
 import com.openexchange.mail.compose.CompositionSpaces;
+import com.openexchange.mail.compose.Message;
 import com.openexchange.mail.compose.OpenCompositionSpaceParameters;
 import com.openexchange.mail.compose.impl.attachment.AttachmentImageDataSource;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -376,13 +377,15 @@ public class Reply extends AbstractOpener {
         }
 
         {
-            TextAndContentType textForReply = usm.isIgnoreOriginalMailTextOnReply() ? null : MimeProcessingUtility.getTextForReply(originalMail, usm.isDisplayHtmlInlineContent(), false, session);
+            Message.ContentType desiredContentType = parameters.getContentType();
+            boolean allowHtmlContent = desiredContentType == null ? usm.isDisplayHtmlInlineContent() : desiredContentType.isImpliesHtml();
+            TextAndContentType textForReply = usm.isIgnoreOriginalMailTextOnReply() ? null : MimeProcessingUtility.getTextForReply(originalMail, allowHtmlContent, false, session);
             if (null == textForReply) {
                 state.message.setContent("");
-                state.message.setContentType(usm.isDisplayHtmlInlineContent() ? TEXT_HTML : TEXT_PLAIN);
+                state.message.setContentType(desiredContentType == null ? (usm.isDisplayHtmlInlineContent() ? TEXT_HTML : TEXT_PLAIN) : desiredContentType);
             } else {
                 state.message.setContent(textForReply.getText());
-                state.message.setContentType(textForReply.isHtml() ? TEXT_HTML : TEXT_PLAIN);
+                state.message.setContentType(textForReply.isHtml() ? (desiredContentType == null || !desiredContentType.isImpliesHtml() ? TEXT_HTML : desiredContentType) : TEXT_PLAIN);
             }
         }
 

@@ -298,7 +298,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
             LoggerHolder.LOG.warn("Missing content in composition space {}. Using empty text instead.", getUnformattedString(compositionSpaceId));
             content = "";
         }
-        if (TEXT_HTML == m.getContentType()) {
+        if (m.getContentType().isImpliesHtml()) {
             // An HTML message...
             if (attachments != null && !attachments.isEmpty()) {
                 // ... with attachments
@@ -755,6 +755,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
 
             // Encode state to headers
             {
+                mimeMessage.setHeader(HeaderUtility.HEADER_X_OX_CONTENT_TYPE, HeaderUtility.encodeHeaderValue(19, m.getContentType().getId()));
                 mimeMessage.setHeader(HeaderUtility.HEADER_X_OX_META, HeaderUtility.encodeHeaderValue(11, HeaderUtility.meta2HeaderValue(m.getMeta())));
                 mimeMessage.setHeader(HeaderUtility.HEADER_X_OX_SECURITY, HeaderUtility.encodeHeaderValue(15, HeaderUtility.security2HeaderValue(m.getSecurity())));
                 mimeMessage.setHeader(HeaderUtility.HEADER_X_OX_SHARED_ATTACHMENTS, HeaderUtility.encodeHeaderValue(25, HeaderUtility.sharedAttachments2HeaderValue(m.getSharedAttachments())));
@@ -769,7 +770,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
             // Build MIME body
             String charset = MailProperties.getInstance().getDefaultMimeCharset();
             List<Attachment> attachments = m.getAttachments();
-            boolean isHtml = TEXT_HTML == m.getContentType();
+            boolean isHtml = m.getContentType().isImpliesHtml();
 
             if (attachments == null || attachments.isEmpty()) {
                 // No attachments
