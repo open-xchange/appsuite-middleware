@@ -69,6 +69,7 @@ import com.openexchange.mail.compose.AttachmentDescription;
 import com.openexchange.mail.compose.AttachmentStorageService;
 import com.openexchange.mail.compose.AttachmentStorages;
 import com.openexchange.mail.compose.CompositionSpaces;
+import com.openexchange.mail.compose.Message;
 import com.openexchange.mail.compose.Meta;
 import com.openexchange.mail.compose.OpenCompositionSpaceParameters;
 import com.openexchange.mail.compose.impl.attachment.AttachmentImageDataSource;
@@ -220,13 +221,15 @@ public class Forward extends AbstractOpener {
             boolean multipart = forwardedMail.getContentType().startsWith("multipart/");
             List<String> contentIds = multipart ? new ArrayList<String>() : null;
             {
-                TextAndContentType textForForward = MimeProcessingUtility.getTextForForward(originalMail, usm.isDisplayHtmlInlineContent(), false, contentIds, session);
+                Message.ContentType desiredContentType = parameters.getContentType();
+                boolean allowHtmlContent = desiredContentType == null ? usm.isDisplayHtmlInlineContent() : desiredContentType.isImpliesHtml();
+                TextAndContentType textForForward = MimeProcessingUtility.getTextForForward(originalMail, allowHtmlContent, false, contentIds, session);
                 if (null == textForForward) {
                     state.message.setContent("");
-                    state.message.setContentType(usm.isDisplayHtmlInlineContent() ? TEXT_HTML : TEXT_PLAIN);
+                    state.message.setContentType(desiredContentType == null ? (usm.isDisplayHtmlInlineContent() ? TEXT_HTML : TEXT_PLAIN) : desiredContentType);
                 } else {
                     state.message.setContent(textForForward.getText());
-                    state.message.setContentType(textForForward.isHtml() ? TEXT_HTML : TEXT_PLAIN);
+                    state.message.setContentType(textForForward.isHtml() ? (desiredContentType == null || !desiredContentType.isImpliesHtml() ? TEXT_HTML : desiredContentType) : TEXT_PLAIN);
                 }
             }
 
