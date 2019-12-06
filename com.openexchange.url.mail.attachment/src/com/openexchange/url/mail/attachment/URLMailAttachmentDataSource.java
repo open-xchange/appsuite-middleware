@@ -133,8 +133,7 @@ public final class URLMailAttachmentDataSource implements DataSource {
                 if (null == sUrl) {
                     throw DataExceptionCodes.MISSING_ARGUMENT.create("url");
                 }
-                url = new URL(URITools.getFinalURL(sUrl.trim()));
-                validate(url);
+                url = validate(sUrl.trim());
             } catch (final MalformedURLException e) {
                 throw DataExceptionCodes.ERROR.create(e, e.getMessage());
             }
@@ -266,32 +265,41 @@ public final class URLMailAttachmentDataSource implements DataSource {
     private static final Set<String> DENIED_HOSTS = ImmutableSet.of("localhost", "127.0.0.1", LOCAL_HOST_ADDRESS, LOCAL_HOST_NAME);
 
     /**
-     * Validates the given URL according to whitelisted prtocols ans blacklisted hosts.
+     * Validates the given URL according to whitelisted protocols and blacklisted hosts.
      *
-     * @param url The URL to validate
+     * @param surl The URL to validate
      * @return An optional OXException
      * @throws OXException 
      */
-    private void validate(URL url) throws OXException {
+    private URL validate(String sUrl) throws OXException, MalformedURLException {
+        String finalURL = null;
+        try {
+            finalURL = URITools.getFinalURL(sUrl.trim());
+        } catch (Exception e) {
+            // Don't disclose any information to caller
+            throw DataExceptionCodes.INVALID_ARGUMENT.create("url", sUrl.toString());
+        }
+        URL url = new URL(finalURL);
         String protocol = url.getProtocol();
         if (protocol == null || !ALLOWED_PROTOCOLS.contains(Strings.asciiLowerCase(protocol))) {
-            throw DataExceptionCodes.INVALID_ARGUMENT.create("url", url.toString());
+            throw DataExceptionCodes.INVALID_ARGUMENT.create("url", sUrl.toString());
         }
 
         String host = Strings.asciiLowerCase(url.getHost());
         if (host == null || DENIED_HOSTS.contains(host)) {
-            throw DataExceptionCodes.INVALID_ARGUMENT.create("url", url.toString());
+            throw DataExceptionCodes.INVALID_ARGUMENT.create("url", sUrl.toString());
         }
 
         try {
             InetAddress inetAddress = InetAddress.getByName(url.getHost());
             if (InetAddresses.isInternalAddress(inetAddress)) {
-                throw DataExceptionCodes.INVALID_ARGUMENT.create("url", url.toString());
+                throw DataExceptionCodes.INVALID_ARGUMENT.create("url", sUrl.toString());
             }
         } catch (UnknownHostException e) {
-            throw DataExceptionCodes.INVALID_ARGUMENT.create("url", url.toString());
+            throw DataExceptionCodes.INVALID_ARGUMENT.create("url", sUrl.toString());
         }
-    };
+        return url;
+    }
 
     @Override
     public String[] getRequiredArguments() {
