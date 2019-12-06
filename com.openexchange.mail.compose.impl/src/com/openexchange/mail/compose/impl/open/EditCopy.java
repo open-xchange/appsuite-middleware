@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.exception.OXException;
@@ -64,6 +65,7 @@ import com.openexchange.mail.compose.AttachmentDescription;
 import com.openexchange.mail.compose.AttachmentStorageService;
 import com.openexchange.mail.compose.AttachmentStorages;
 import com.openexchange.mail.compose.CompositionSpaces;
+import com.openexchange.mail.compose.Message;
 import com.openexchange.mail.compose.Meta;
 import com.openexchange.mail.compose.OpenCompositionSpaceParameters;
 import com.openexchange.mail.compose.Security;
@@ -117,9 +119,16 @@ public class EditCopy extends AbstractOpener {
 
         UserSettingMail usm = parameters.getMailSettings();
 
-        // Restore meta, security, and shared attachments info from draft message
+        // Restore Content-Type, meta, security, and shared attachments info from draft message
+        Optional<Message.ContentType> optionalContentType = Optional.empty();
         {
-            String headerValue = HeaderUtility.decodeHeaderValue(originalMail.getFirstHeader(HeaderUtility.HEADER_X_OX_META));
+            String headerValue = HeaderUtility.decodeHeaderValue(originalMail.getFirstHeader(HeaderUtility.HEADER_X_OX_CONTENT_TYPE));
+            Message.ContentType ct = Message.ContentType.contentTypeFor(headerValue);
+            if (ct != null) {
+                optionalContentType = Optional.of(ct);
+            }
+
+            headerValue = HeaderUtility.decodeHeaderValue(originalMail.getFirstHeader(HeaderUtility.HEADER_X_OX_META));
             Meta parsedMeta = HeaderUtility.headerValue2Meta(headerValue);
             state.metaBuilder.applyFromDraft(parsedMeta);
 
@@ -176,7 +185,21 @@ public class EditCopy extends AbstractOpener {
         // Grab first seen text from original message and check for possible referenced inline images
         boolean multipart = originalMail.getContentType().startsWith("multipart/");
         List<String> contentIds = multipart ? new ArrayList<String>() : null;
-        {
+        if (optionalContentType.isPresent()) {
+            Message.ContentType contentType = optionalContentType.get();
+            TextAndContentType textForForward = MimeProcessingUtility.getTextForForward(originalMail, contentType.isImpliesHtml(), false, contentIds, session);
+            if (null == textForForward) {
+                state.message.setContent("");
+                state.message.setContentType(contentType);
+            } else {
+                state.message.setContent(textForForward.getText());
+                if (textForForward.isHtml()) {
+                    state.message.setContentType(contentType.isImpliesHtml() ? contentType : TEXT_HTML);
+                } else {
+                    state.message.setContentType(TEXT_PLAIN);
+                }
+            }
+        } else {
             TextAndContentType textForForward = MimeProcessingUtility.getTextForForward(originalMail, usm.isDisplayHtmlInlineContent(), false, contentIds, session);
             if (null == textForForward) {
                 state.message.setContent("");
