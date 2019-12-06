@@ -227,11 +227,9 @@ String version4Documentation(String branchName) {
     if ('develop' == branchName)
         return branchName
     if ('master-publish-doku' == branchName)
-        def version = sh("awk '\$0 ~ /OXVersion/ {print \$2}' backend/com.openexchange.version/META-INF/MANIFEST.MF")
-        return version
+        return sh("awk '\$0 ~ /OXVersion/ {print \$2}' backend/com.openexchange.version/META-INF/MANIFEST.MF")
     if ('master' == branchName)
-        def version = sh("awk '\$0 ~ /OXVersion/ {print \$2}' backend/com.openexchange.version/META-INF/MANIFEST.MF")
-        return version
+        return sh("awk '\$0 ~ /OXVersion/ {print \$2}' backend/com.openexchange.version/META-INF/MANIFEST.MF")
     if (branchName.startsWith('master-'))
         return branchName.substring(7)
     if (branchName.startsWith('release-'))
