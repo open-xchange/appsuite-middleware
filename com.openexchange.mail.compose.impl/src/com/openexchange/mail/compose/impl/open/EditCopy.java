@@ -185,8 +185,8 @@ public class EditCopy extends AbstractOpener {
         // Grab first seen text from original message and check for possible referenced inline images
         boolean multipart = originalMail.getContentType().startsWith("multipart/");
         List<String> contentIds = multipart ? new ArrayList<String>() : null;
-        if (optionalContentType.isPresent()) {
-            Message.ContentType contentType = optionalContentType.get();
+        if (optionalContentType.isPresent() || parameters.getContentType() != null) {
+            Message.ContentType contentType = optionalContentType.isPresent() ? optionalContentType.get() : parameters.getContentType();
             TextAndContentType textForForward = MimeProcessingUtility.getTextForForward(originalMail, contentType.isImpliesHtml(), false, contentIds, session);
             if (null == textForForward) {
                 state.message.setContent("");
