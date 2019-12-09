@@ -244,7 +244,7 @@ public class SnippetProcessor {
                 try {
                     src = URITools.getFinalURL(src);
                 } catch (IOException e) {
-                    throw SnippetExceptionCodes.IO_ERROR.create(e, e.getMessage());
+                    throw SnippetExceptionCodes.UNEXPECTED_ERROR.create("Invalid image URL: " + src); // Don't disclose information to caller.
                 }
 
                 // Check for valid URL
