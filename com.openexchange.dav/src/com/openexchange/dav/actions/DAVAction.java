@@ -396,7 +396,7 @@ public abstract class DAVAction extends AbstractAction {
      * @param parentElement The parent element to extract the paths of the children from
      * @return The extracted WebDAV paths, or an empty list if there are none
      */
-    protected List<WebdavPath> getHrefPaths(WebdavRequest request, Element parentElement) throws WebdavProtocolException {
+    protected List<WebdavPath> getHrefPaths(WebdavRequest request, Element parentElement) {
         List<Element> children = null == parentElement ? null : parentElement.getChildren("href", DAV_NS);
         if (null == children || children.isEmpty()) {
             return Collections.emptyList();
@@ -415,7 +415,7 @@ public abstract class DAVAction extends AbstractAction {
      * @param href The <code>href</code> value to get the WebDAV path from
      * @return The WebDAV path
      */
-    protected WebdavPath getPath(WebdavRequest request, String href) throws WebdavProtocolException {
+    protected WebdavPath getPath(WebdavRequest request, String href) {
         String path;
         try {
             path = new URI(href).getPath();
@@ -425,7 +425,7 @@ public abstract class DAVAction extends AbstractAction {
         }
         String urlPrefix = request.getURLPrefix();
         path = removePrefixFromPath(urlPrefix, path);
-        return ((DAVFactory) request.getFactory()).decode(new WebdavPath(path));
+        return new WebdavPath(path);
     }
 
 }
