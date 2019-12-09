@@ -57,6 +57,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
+import com.openexchange.database.Heartbeat;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.outlook.OutlookFolderDeleteListener;
 import com.openexchange.group.internal.GroupDeleteListener;
@@ -244,6 +245,19 @@ public final class DeleteRegistry {
         listeners.remove(listener);
     }
 
+    private static final Heartbeat DUMMY_HEARTBEAT = new Heartbeat() {
+
+        @Override
+        public void stopHeartbeat() {
+            // Nothing
+        }
+
+        @Override
+        public boolean startHeartbeat() {
+            return false;
+        }
+    };
+
     /**
      * Fires the delete event.
      *
@@ -253,51 +267,59 @@ public final class DeleteRegistry {
      * @throws OXException If delete event could not be performed
      */
     public void fireDeleteEvent(final DeleteEvent deleteEvent, final Connection readCon, final Connection writeCon) throws OXException {
-        boolean error = true;
+        Heartbeat heartbeat = writeCon instanceof Heartbeat ? (Heartbeat) writeCon : DUMMY_HEARTBEAT;
+        boolean heartbeatStarted = heartbeat.startHeartbeat();
         try {
-            /*
-             * At first trigger dynamically added listeners
-             */
-            for (DeleteListener listener : listeners) {
-                listener.deletePerformed(deleteEvent, readCon, writeCon);
-            }
-            /*
-             * Now trigger static listeners
-             */
-            for (DeleteListener listener : staticListeners) {
-                try {
+            boolean error = true;
+            try {
+                /*
+                 * At first trigger dynamically added listeners
+                 */
+                for (DeleteListener listener : listeners) {
                     listener.deletePerformed(deleteEvent, readCon, writeCon);
-                } catch (OXException e) {
-                    OXException opt = logFKFailureElseReturnException(e, listener, deleteEvent);
-                    if (null != opt) {
-                        throw opt;
-                    }
-                } catch (RuntimeException e) {
-                    RuntimeException opt = logFKFailureElseReturnException(e, listener, deleteEvent);
-                    if (null != opt) {
-                        throw opt;
+                }
+                /*
+                 * Now trigger static listeners
+                 */
+                for (DeleteListener listener : staticListeners) {
+                    try {
+                        listener.deletePerformed(deleteEvent, readCon, writeCon);
+                    } catch (OXException e) {
+                        OXException opt = logFKFailureElseReturnException(e, listener, deleteEvent);
+                        if (null != opt) {
+                            throw opt;
+                        }
+                    } catch (RuntimeException e) {
+                        RuntimeException opt = logFKFailureElseReturnException(e, listener, deleteEvent);
+                        if (null != opt) {
+                            throw opt;
+                        }
                     }
                 }
+                /*
+                 * Commit Global DB connection (if any)
+                 */
+                Connection globalDbConnection = deleteEvent.optGlobalDbConnection();
+                if (globalDbConnection != null) {
+                    globalDbConnection.commit();
+                }
+                error = false;
+            } catch (SQLException e) {
+                throw DeleteFailedExceptionCode.SQL_ERROR.create(e, e.getMessage());
+            } finally {
+                Connection globalDbConnection = deleteEvent.optGlobalDbConnection();
+                if (globalDbConnection != null) {
+                    if (error) {
+                        Databases.rollback(globalDbConnection);
+                    }
+                    Databases.autocommit(globalDbConnection);
+                    DatabaseService databaseService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
+                    databaseService.backWritableForGlobal(deleteEvent.getContext().getContextId(), globalDbConnection);
+                }
             }
-            /*
-             * Commit Global DB connection (if any)
-             */
-            Connection globalDbConnection = deleteEvent.optGlobalDbConnection();
-            if (globalDbConnection != null) {
-                globalDbConnection.commit();
-            }
-            error = false;
-        } catch (SQLException e) {
-            throw DeleteFailedExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            Connection globalDbConnection = deleteEvent.optGlobalDbConnection();
-            if (globalDbConnection != null) {
-                if (error) {
-                    Databases.rollback(globalDbConnection);
-                }
-                Databases.autocommit(globalDbConnection);
-                DatabaseService databaseService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
-                databaseService.backWritableForGlobal(deleteEvent.getContext().getContextId(), globalDbConnection);
+            if (heartbeatStarted) {
+                heartbeat.stopHeartbeat();
             }
         }
     }
