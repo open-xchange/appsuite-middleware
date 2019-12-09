@@ -14,7 +14,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:	@OXVERSION@
-%define        ox_release 19
+%define        ox_release 18
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -67,8 +67,6 @@ fi
 %doc com.openexchange.spamhandler.cloudmark/ChangeLog
 
 %changelog
-* Mon Dec 02 2019 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>
-Build for patch 2019-12-09 (5509)
 * Tue Nov 19 2019 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>
 Build for patch 2019-11-25 (5484)
 * Mon Nov 04 2019 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>
