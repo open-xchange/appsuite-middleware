@@ -105,9 +105,9 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.file.storage.composition"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.filestore"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.filestore.impl"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.eclipse.osgi_3.13.0.v20180409-1500.jar" sourcepath="/com.openexchange.bundles/source/org.eclipse.osgi.source_3.13.0.v20180409-1500.jar"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.eclipse.osgi.services_3.7.0.v20180223-1712.jar"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.eclipse.osgi.util_3.5.0.v20180219-1511.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.eclipse.osgi_3.15.0.v20190830-1434.jar" sourcepath="/com.openexchange.bundles/source/org.eclipse.osgi.source_3.13.0.v20180409-1500.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.eclipse.osgi.services_3.8.0.v20190206-2147.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.eclipse.osgi.util_3.5.300.v20190708-1141.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.sessionstorage"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.cluster.timer"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/commons-io-2.6.jar"/>
