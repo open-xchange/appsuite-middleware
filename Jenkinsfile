@@ -227,7 +227,7 @@ String version4Documentation(String branchName) {
     if ('develop' == branchName)
         return branchName
     if ('master-publish-doku' == branchName)
-        return sh("awk '\$0 ~ /OXVersion/ {print \$2}' backend/com.openexchange.version/META-INF/MANIFEST.MF")
+        return sh(script: "awk '\$0 ~ /OXVersion/ {print \$2}' backend/com.openexchange.version/META-INF/MANIFEST.MF", returnStdout: true).trim() as String
     if ('master' == branchName)
         return sh("awk '\$0 ~ /OXVersion/ {print \$2}' backend/com.openexchange.version/META-INF/MANIFEST.MF")
     if (branchName.startsWith('master-'))
