@@ -200,7 +200,6 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
         String join = configService.getProperty("com.openexchange.hazelcast.network.join", NETWORK_JOIN_EMPTY);
         String groupName = configService.getProperty("com.openexchange.hazelcast.group.name");
         if (Strings.isNotEmpty(groupName)) {
-            config.getGroupConfig().setName(groupName);
             if (configService.getBoolProperty("com.openexchange.hazelcast.group.name.appendVersion", false)) {
                 Bundle bundle = FrameworkUtil.getBundle(HazelcastInstance.class);
                 if (null == bundle) {
@@ -209,6 +208,7 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
                     groupName = buildGroupName(groupName, bundle.getVersion(), null != config.getLicenseKey());
                 }
             }
+            config.getGroupConfig().setName(groupName);
         } else if (false == NETWORK_JOIN_EMPTY.equalsIgnoreCase(join)) {
             throw ConfigurationExceptionCodes.PROPERTY_MISSING.create("com.openexchange.hazelcast.group.name");
         }
