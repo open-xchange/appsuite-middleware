@@ -229,6 +229,8 @@ String version4Documentation(String branchName) {
         return branchName
     if (branchName.startsWith('master-'))
         return branchName.substring(7)
+    if ('master' == branchName)
+        return sh(script: "awk '\$0 ~ /OXVersion/ {print \$2}' backend/com.openexchange.version/META-INF/MANIFEST.MF", returnStdout: true).trim() as String
     if (branchName.startsWith('release-'))
         return branchName.substring(8)
     return null
