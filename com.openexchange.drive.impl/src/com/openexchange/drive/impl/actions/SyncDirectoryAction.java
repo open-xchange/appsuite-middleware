@@ -65,13 +65,8 @@ public class SyncDirectoryAction extends AbstractDirectoryAction {
     }
 
     public SyncDirectoryAction(DirectoryVersion version, ThreeWayComparison<DirectoryVersion> comparison, boolean reset) {
-        super(version, null, comparison);
+        super(Action.SYNC, version, null, comparison);
         parameters.put(PARAMETER_RESET, Boolean.valueOf(reset));
-    }
-
-    @Override
-    public Action getAction() {
-        return Action.SYNC;
     }
 
 }

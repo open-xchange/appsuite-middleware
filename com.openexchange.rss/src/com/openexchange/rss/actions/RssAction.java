@@ -82,7 +82,7 @@ import com.openexchange.rss.osgi.Services;
 import com.openexchange.rss.preprocessors.RssPreprocessor;
 import com.openexchange.rss.preprocessors.SanitizingPreprocessor;
 import com.openexchange.rss.util.RssProperties;
-import com.openexchange.rss.util.TimoutHttpURLFeedFetcher;
+import com.openexchange.rss.util.TimeoutHttpURLFeedFetcher;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 import com.sun.syndication.feed.synd.SyndContent;
@@ -122,7 +122,7 @@ public class RssAction implements AJAXActionService {
 
     // ------------------------------------------------------------------------------------------------------------------------------
 
-    private final TimoutHttpURLFeedFetcher fetcher;
+    private final TimeoutHttpURLFeedFetcher fetcher;
     private final HashMapFeedInfoCache     feedCache;
 
     /**
@@ -130,7 +130,7 @@ public class RssAction implements AJAXActionService {
      */
     public RssAction() {
         feedCache = new HashMapFeedInfoCache();
-        fetcher = new TimoutHttpURLFeedFetcher(10000, 30000, feedCache);
+        fetcher = new TimeoutHttpURLFeedFetcher(10000, 30000, feedCache);
     }
 
     @Override
@@ -281,7 +281,7 @@ public class RssAction implements AJAXActionService {
         List<SyndFeed> feeds = new LinkedList<SyndFeed>();
 
         for (URL url : urls) {
-            if (RssProperties.isDenied(url.getProtocol(), url.getHost(), url.getPort())) {
+            if (RssProperties.isDenied(url.toString())) {
                 final OXException oxe = RssExceptionCodes.RSS_CONNECTION_ERROR.create(url.toString());
                 warnings.add(oxe);
                 continue;

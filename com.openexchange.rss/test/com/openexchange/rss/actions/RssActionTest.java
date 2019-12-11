@@ -52,6 +52,7 @@ package com.openexchange.rss.actions;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -59,6 +60,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -70,7 +72,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.rss.RssExceptionCodes;
 import com.openexchange.rss.osgi.Services;
 import com.openexchange.rss.util.RssProperties;
-import com.openexchange.rss.util.TimoutHttpURLFeedFetcher;
+import com.openexchange.rss.util.TimeoutHttpURLFeedFetcher;
 import com.openexchange.test.mock.MockUtils;
 import com.sun.syndication.feed.synd.SyndFeed;
 import com.sun.syndication.feed.synd.SyndFeedImpl;
@@ -84,7 +86,7 @@ import com.sun.syndication.io.FeedException;
  * @since v7.8.2
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ Services.class })
+@PrepareForTest({ Services.class, RssProperties.class, InetAddress.class })
 public class RssActionTest {
 
     private RssAction action;
@@ -93,7 +95,7 @@ public class RssActionTest {
     private ConfigurationService configurationService;
 
     @Mock
-    private TimoutHttpURLFeedFetcher fetcher;
+    private TimeoutHttpURLFeedFetcher fetcher;
 
     List<URL> urls = new ArrayList<>();
 
@@ -104,9 +106,13 @@ public class RssActionTest {
         PowerMockito.mockStatic(Services.class);
         Mockito.when(Services.optService(ConfigurationService.class)).thenReturn(configurationService);
         Mockito.when(Services.getService(ConfigurationService.class)).thenReturn(configurationService);
+        PowerMockito.mockStatic(InetAddress.class);
+        InetAddress inetAddress = Mockito.mock(InetAddress.class);
+        Mockito.when(InetAddress.getByName(Matchers.anyString())).thenReturn(inetAddress);
         Mockito.when(configurationService.getProperty("com.openexchange.messaging.rss.feed.blacklist", RssProperties.HOST_BLACKLIST_DEFAULT)).thenReturn(RssProperties.HOST_BLACKLIST_DEFAULT);
         Mockito.when(configurationService.getProperty("com.openexchange.messaging.rss.feed.whitelist.ports", RssProperties.PORT_WHITELIST_DEFAULT)).thenReturn(RssProperties.PORT_WHITELIST_DEFAULT);
         Mockito.when(configurationService.getProperty(RssProperties.SCHEMES_KEY, RssProperties.SCHEMES_DEFAULT)).thenReturn(RssProperties.SCHEMES_DEFAULT);
+        Mockito.when(fetcher.retrieveFeed((URL) Matchers.any())).thenReturn(Mockito.mock(SyndFeed.class));
 
         action = new RssAction();
         MockitoAnnotations.initMocks(this);
@@ -115,8 +121,8 @@ public class RssActionTest {
     }
 
     // tests bug 45402: SSRF at RSS feeds
-     @Test
-     public void testGetAcceptedFeeds_emptyURLs_returnNoWarningAndNoFeed() throws OXException {
+    @Test
+    public void testGetAcceptedFeeds_emptyURLs_returnNoWarningAndNoFeed() throws OXException {
         List<SyndFeed> acceptedFeedsFromUrls = action.getAcceptedFeeds(urls, warnings);
 
         assertEquals(0, acceptedFeedsFromUrls.size());
@@ -124,8 +130,8 @@ public class RssActionTest {
     }
 
     // tests bug 45402: SSRF at RSS feeds
-     @Test
-     public void testGetAcceptedFeeds_localhostURL_returnWarning() throws OXException, MalformedURLException {
+    @Test
+    public void testGetAcceptedFeeds_localhostURL_returnWarning() throws OXException, MalformedURLException {
         urls.add(new URL("http://localhost:80"));
         List<SyndFeed> acceptedFeedsFromUrls = action.getAcceptedFeeds(urls, warnings);
 
@@ -134,8 +140,8 @@ public class RssActionTest {
     }
 
     // tests bug 45402: SSRF at RSS feeds
-     @Test
-     public void testGetAcceptedFeeds_localhostOnly_returnWarning() throws OXException, MalformedURLException {
+    @Test
+    public void testGetAcceptedFeeds_localhostOnly_returnWarning() throws OXException, MalformedURLException {
         urls.add(new URL("http://localhost"));
         List<SyndFeed> acceptedFeedsFromUrls = action.getAcceptedFeeds(urls, warnings);
 
@@ -144,8 +150,8 @@ public class RssActionTest {
     }
 
     // tests bug 45402: SSRF at RSS feeds
-     @Test
-     public void testGetAcceptedFeeds_LocalhostNotAllowedAndAllowedUrl_returnWarningAndFeed() throws OXException, MalformedURLException {
+    @Test
+    public void testGetAcceptedFeeds_LocalhostNotAllowedAndAllowedUrl_returnWarningAndFeed() throws OXException, MalformedURLException {
         urls.add(new URL("http://localhost:80"));
         urls.add(new URL("http://guteStube.com"));
 
@@ -156,8 +162,8 @@ public class RssActionTest {
     }
 
     // tests bug 45402: SSRF at RSS feeds
-     @Test
-     public void testGetAcceptedFeeds_LocalhostNotAllowedAndAllowedUrl_checkCorrectAdded() throws OXException, IllegalArgumentException, IOException, FeedException, FetcherException {
+    @Test
+    public void testGetAcceptedFeeds_LocalhostNotAllowedAndAllowedUrl_checkCorrectAdded() throws OXException, IllegalArgumentException, IOException, FeedException, FetcherException {
         urls.add(new URL("http://localhost:80"));
         URL guteStube = new URL("http://guteStube.com");
         urls.add(guteStube);
@@ -171,8 +177,8 @@ public class RssActionTest {
     }
 
     // tests bug 45402: SSRF at RSS feeds
-     @Test
-     public void testGetAcceptedFeeds_LocalhostNotAllowedAndAllowedUrl_checkCorrectWarning() throws OXException, MalformedURLException {
+    @Test
+    public void testGetAcceptedFeeds_LocalhostNotAllowedAndAllowedUrl_checkCorrectWarning() throws OXException, MalformedURLException {
         URL localhost = new URL("http://localhost:80");
         urls.add(localhost);
         urls.add(new URL("http://guteStube.com"));
@@ -183,8 +189,8 @@ public class RssActionTest {
     }
 
     // tests bug 45402: SSRF at RSS feeds
-     @Test
-     public void testGetAcceptedFeeds_TwoNotAllowed_returnWarningAndFeed() throws OXException, MalformedURLException {
+    @Test
+    public void testGetAcceptedFeeds_TwoNotAllowed_returnWarningAndFeed() throws OXException, MalformedURLException {
         urls.add(new URL("http://localhost:80"));
         urls.add(new URL("http://guteStube.com:77"));
 
@@ -195,8 +201,8 @@ public class RssActionTest {
     }
 
     // tests bug 45402: SSRF at RSS feeds
-     @Test
-     public void testGetAcceptedFeeds_TwoNotAllowedWithPathAndFile_returnWarningAndFeed() throws OXException, MalformedURLException {
+    @Test
+    public void testGetAcceptedFeeds_TwoNotAllowedWithPathAndFile_returnWarningAndFeed() throws OXException, MalformedURLException {
         urls.add(new URL("http://localhost:80/this/is/nice"));
         urls.add(new URL("http://guteStube.com:77/tritt/mich.rss"));
 
@@ -207,8 +213,8 @@ public class RssActionTest {
     }
 
     // tests bug 45402: SSRF at RSS feeds
-     @Test
-     public void testGetAcceptedFeeds_multipleCorrectAndInvalid_returnCorrectData() throws OXException, MalformedURLException {
+    @Test
+    public void testGetAcceptedFeeds_multipleCorrectAndInvalid_returnCorrectData() throws OXException, MalformedURLException {
         urls.add(new URL("http://tollerLaden.de:80/this/is/nice"));
         urls.add(new URL("http://tollerLaden.de:88/this/is/not/nice"));
         urls.add(new URL("http://tollerLaden2.de/this/is/nice/too"));
@@ -233,8 +239,8 @@ public class RssActionTest {
     }
 
     // tests bug 47891: RSS reader allows to detect local files
-     @Test
-     public void testGetAcceptedFeeds_onlyInvalidSchemes_returnNoCorrectData() throws OXException, MalformedURLException {
+    @Test
+    public void testGetAcceptedFeeds_onlyInvalidSchemes_returnNoCorrectData() throws OXException, MalformedURLException {
         urls.add(new URL("netdoc://tollerLaden.de/this/is/secured/never/nice/too/asFile.xml"));
         urls.add(new URL("file://tollerLaden.de/this/is/secured/never/nice/too/asFile.xml"));
         urls.add(new URL("mailto://tollerLaden.de/this/is/secured/never/nice/too/asFile.xml"));
@@ -249,8 +255,8 @@ public class RssActionTest {
     }
 
     // tests bug 47891: RSS reader allows to detect local files
-     @Test
-     public void testGetAcceptedFeeds_mixedValidAndInvalidSchemes_returnData() throws OXException, MalformedURLException {
+    @Test
+    public void testGetAcceptedFeeds_mixedValidAndInvalidSchemes_returnData() throws OXException, MalformedURLException {
         urls.add(new URL("netdoc://tollerLaden.de:80/is/secured/never/nice/too/asFile.xml"));
         urls.add(new URL("file://tollerLaden.de/is/secured/never/nice/too/asFile.xml"));
         urls.add(new URL("mailto://tollerLaden.de/this/is/secured/never/nice/too/asFile.xml"));

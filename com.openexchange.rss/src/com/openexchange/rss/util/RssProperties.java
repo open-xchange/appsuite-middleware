@@ -49,6 +49,10 @@
 
 package com.openexchange.rss.util;
 
+import java.net.InetAddress;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -171,13 +175,32 @@ public class RssProperties {
      * <p>
      * The host name can either be a machine name, such as "<code>java.sun.com</code>", or a textual representation of its IP address.
      *
-     * @param scheme The url scheme; might be something like 'http', 'https', ...
-     * @param hostName The host name; either a machine name or a textual representation of its IP address
-     * @param port The port number
+     * @param uriString The URI (as String) of the rss feed
      * @return <code>true</code> if denied; otherwise <code>false</code>
      */
-    public static boolean isDenied(String scheme, String hostName, int port) {
-        return !isAllowed(port) || isBlacklisted(hostName) || !isAllowedScheme(scheme);
+    public static boolean isDenied(String uriString) {
+        URI uri;
+        try {
+            uri = new URI(uriString);
+            return !isAllowed(uri.getPort()) || isBlacklisted(uri.getHost()) || !isAllowedScheme(uri.getScheme()) || !isValid(uri);
+        } catch (URISyntaxException e) {
+            org.slf4j.LoggerFactory.getLogger(RssProperties.class).debug("Given feed URL \"{}\" appears not to be valid.", uriString, e);
+            return true;
+        }
+    }
+
+    private static boolean isValid(URI uri) {
+        try {
+            InetAddress inetAddress = InetAddress.getByName(uri.getHost());
+            if (inetAddress.isAnyLocalAddress() || inetAddress.isSiteLocalAddress() || inetAddress.isLoopbackAddress() || inetAddress.isLinkLocalAddress()) {
+                org.slf4j.LoggerFactory.getLogger(RssProperties.class).debug("Given feed URL \"{}\" with destination IP {} appears not to be valid.", uri.toString(), inetAddress.getHostAddress());
+                return false;
+            }
+        } catch (UnknownHostException e) {
+            org.slf4j.LoggerFactory.getLogger(RssProperties.class).debug("Given feed URL \"{}\" appears not to be valid.", uri.toString(), e);
+            return false;
+        }
+        return true;
     }
 
     /**
