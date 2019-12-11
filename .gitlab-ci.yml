@@ -17,12 +17,7 @@ build documentation:
     - echo "documentation/*" > .git/info/sparse-checkout
     - echo "com.openexchange.version/META-INF/MANIFEST.MF" >> .git/info/sparse-checkout
     - git read-tree -mu HEAD
-    - >
-      if [ "$CI_COMMIT_REF_NAME" == "develop"]; then
-        export VERSION="develop"
-      else
-        export VERSION=`grep 'OXVersion:' com.openexchange.version/META-INF/MANIFEST.MF | cut -d' ' -f2`
-      fi
+    - (if [ "$CI_COMMIT_REF_NAME" == "develop"]; then export VERSION="develop"; else export VERSION=`grep 'OXVersion:' com.openexchange.version/META-INF/MANIFEST.MF | cut -d' ' -f2`; fi);
     - ln -s $CI_PROJECT_DIR/middleware/documentation /documentation/jekyll/_middleware
     - cd /documentation
     - bundle exec jekyll b --baseurl /$VERSION --config _config.yml
