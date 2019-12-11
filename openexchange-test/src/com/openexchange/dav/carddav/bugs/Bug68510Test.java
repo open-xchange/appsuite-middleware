@@ -49,41 +49,52 @@
 
 package com.openexchange.dav.carddav.bugs;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.test.concurrent.ParallelSuite;
+import static org.junit.Assert.assertNotNull;
+import org.apache.jackrabbit.webdav.DavConstants;
+import org.apache.jackrabbit.webdav.MultiStatusResponse;
+import org.apache.jackrabbit.webdav.client.methods.PropFindMethod;
+import org.apache.jackrabbit.webdav.property.DavProperty;
+import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
+import org.apache.jackrabbit.webdav.security.CurrentUserPrivilegeSetProperty;
+import org.apache.jackrabbit.webdav.security.Privilege;
+import org.junit.Test;
+import com.openexchange.dav.Config;
+import com.openexchange.dav.PropertyNames;
+import com.openexchange.dav.StatusCodes;
+import com.openexchange.dav.carddav.CardDAVTest;
+import com.openexchange.dav.carddav.UserAgents;
 
 /**
- * {@link CardDAVBugSuite}
+ * {@link Bug68510Test}
+ *
+ * MAC contacts app does not allow to add new contacts to OX on Catalina
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since 7.10.4
  */
-@RunWith(ParallelSuite.class)
-@SuiteClasses({ // @formatter:off
-    Bug20665Test.class,
-    Bug21079Test.class,
-    Bug21177Test.class,
-    Bug21235Test.class,
-    Bug21240Test.class,
-    Bug21354Test.class,
-    Bug21374Test.class,
-    Bug23046Test.class,
-    Bug23078Test.class,
-    Bug28672Test.class,
-    Bug30449Test.class,
-    Bug38550Test.class,
-    Bug40471Test.class,
-    Bug46641Test.class,
-    Bug47921Test.class,
-    Bug48661Test.class,
-    Bug48687Test.class,
-    Bug48463Test.class,
-    Bug54026Test.class,
-    Bug58220Test.class,
-    Bug61859Test.class,
-    //Bug61873Test.class Disabled as long as the bug is not fixed (See also MW-1166)
-    Bug68510Test.class,
-}) // @formatter:on
-public final class CardDAVBugSuite {
+public class Bug68510Test extends CardDAVTest {
 
+    @Override
+    protected String getDefaultUserAgent() {
+        return UserAgents.MACOS_10_15;
+    }
+
+    @Test
+    public void testPriviligesOnRootCollection() throws Exception {
+        DavPropertyNameSet props = new DavPropertyNameSet();
+        props.add(PropertyNames.CURRENT_USER_PRIVILEGE_SET);
+        String rootCollectionURI = getWebDAVClient().getBaseURI() + Config.getPathPrefix() + "/carddav/";
+        PropFindMethod propFind = new PropFindMethod(rootCollectionURI, DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
+        MultiStatusResponse response = assertSingleResponse(getWebDAVClient().doPropFind(propFind));
+        DavProperty<?> property = response.getProperties(StatusCodes.SC_OK).get(PropertyNames.CURRENT_USER_PRIVILEGE_SET);
+        assertNotNull("No " + PropertyNames.CURRENT_USER_PRIVILEGE_SET, property);
+        Privilege bindPrivilege = null;
+        for (Privilege privilege : new CurrentUserPrivilegeSetProperty(property).getValue()) {
+            if (Privilege.PRIVILEGE_WRITE_CONTENT.equals(privilege)) {
+                bindPrivilege = privilege;
+                break;
+            }
+        }
+        assertNotNull("No " + Privilege.PRIVILEGE_BIND, bindPrivilege);
+    }
 }
