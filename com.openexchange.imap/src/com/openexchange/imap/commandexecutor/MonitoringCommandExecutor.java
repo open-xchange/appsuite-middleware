@@ -76,6 +76,7 @@ import com.sun.mail.imap.ResponseEvent.StatusResponse;
 public class MonitoringCommandExecutor extends AbstractMetricAwareCommandExecutor {
 
     private static final List<Class<? extends Exception>> NETWORK_COMMUNICATION_ERRORS = ImmutableList.of(
+        com.sun.mail.iap.ConnectionException.class,
         com.sun.mail.iap.ByeIOException.class,
         java.net.SocketTimeoutException.class,
         java.io.EOFException.class);
