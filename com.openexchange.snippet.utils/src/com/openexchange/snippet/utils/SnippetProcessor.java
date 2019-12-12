@@ -54,20 +54,25 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
+import java.net.InetAddress;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.internet.MimeUtility;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.config.cascade.ConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
@@ -76,6 +81,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.java.HTMLDetector;
+import com.openexchange.java.InetAddresses;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
@@ -91,6 +97,7 @@ import com.openexchange.snippet.DefaultAttachment.InputStreamProvider;
 import com.openexchange.snippet.DefaultSnippet;
 import com.openexchange.snippet.SnippetExceptionCodes;
 import com.openexchange.snippet.utils.internal.Services;
+import com.openexchange.tools.net.URITools;
 import com.openexchange.version.Version;
 
 /**
@@ -158,6 +165,25 @@ public class SnippetProcessor {
         }
     }
 
+    private static final String LOCAL_HOST_NAME;
+    private static final String LOCAL_HOST_ADDRESS;
+
+    static {
+        // Host name initialization
+        String localHostName;
+        String localHostAddress;
+        try {
+            InetAddress localHost = InetAddress.getLocalHost();
+            localHostName = localHost.getCanonicalHostName();
+            localHostAddress = localHost.getHostAddress();
+        } catch (UnknownHostException e) {
+            localHostName = "localhost";
+            localHostAddress = "127.0.0.1";
+        }
+        LOCAL_HOST_NAME = localHostName;
+        LOCAL_HOST_ADDRESS = localHostAddress;
+    }
+
     // --------------------------------------------------------------------------------------------------------------------------
 
     private final Session session;
@@ -175,6 +201,9 @@ public class SnippetProcessor {
 
     private static final Pattern IMG_PATTERN = Pattern.compile("<img[^>]*>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
     private static final Pattern SRC_PATTERN = Pattern.compile("(?:src=\"([^\"]+)\")|(?:src='([^']+)')", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+
+    private static final Set<String> ALLOWED_PROTOCOLS = ImmutableSet.of("http", "https", "ftp", "ftps");
+    private static final Set<String> DENIED_HOSTS = ImmutableSet.of("localhost", "127.0.0.1", LOCAL_HOST_ADDRESS, LOCAL_HOST_NAME);
 
     /**
      * Process the images in the snippet, extracts them and convert them to attachments.
@@ -211,6 +240,13 @@ public class SnippetProcessor {
                 String src = srcMatcher.group(1);
                 if (src == null) {
                     src = srcMatcher.group(2);
+                }
+
+                // Check URL validity
+                try {
+                    src = URITools.getFinalURL(src, Optional.of(validator));
+                } catch (IOException e) {
+                    throw SnippetExceptionCodes.IO_ERROR.create(e, e.getMessage());
                 }
 
                 // Check for valid URL
@@ -256,6 +292,34 @@ public class SnippetProcessor {
             snippet.addAttachment(attachment);
         }
     }
+
+    /**
+     * Validates the given URL according to whitelisted prtocols ans blacklisted hosts.
+     *
+     * @param url The URL to validate
+     * @return An optional OXException
+     */
+    private static Function<URL, Optional<OXException>> validator = (url) -> {
+        String protocol = url.getProtocol();
+        if (protocol == null || !ALLOWED_PROTOCOLS.contains(Strings.asciiLowerCase(protocol))) {
+            return Optional.of(SnippetExceptionCodes.UNEXPECTED_ERROR.create("Invalid image URL: " + url.toString()));
+        }
+
+        String host = Strings.asciiLowerCase(url.getHost());
+        if (host == null || DENIED_HOSTS.contains(host)) {
+            return Optional.of(SnippetExceptionCodes.UNEXPECTED_ERROR.create("Invalid image URL: " + url.toString()));
+        }
+
+        try {
+            InetAddress inetAddress = InetAddress.getByName(url.getHost());
+            if (InetAddresses.isInternalAddress(inetAddress)) {
+                return Optional.of(SnippetExceptionCodes.UNEXPECTED_ERROR.create("Invalid image URL: " + url.toString()));
+            }
+        } catch (UnknownHostException e) {
+            return Optional.of(SnippetExceptionCodes.UNEXPECTED_ERROR.create("Invalid image URL: " + url.toString()));
+        }
+        return Optional.empty();
+    };
 
     private static final int READ_TIMEOUT = 10000;
     private static final int CONNECT_TIMEOUT = 3000;
