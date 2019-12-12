@@ -308,7 +308,7 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor extends Abst
     public Response readResponse(Protocol protocol) throws IOException {
         CircuitBreakerInfo breakerInfo = circuitBreakerFor(protocol);
         try {
-            return Failsafe.with(breakerInfo.getCircuitBreaker()).get(new CircuitBreakerReadResponseCallable(protocol));
+            return Failsafe.with(breakerInfo.getCircuitBreaker()).get(new CircuitBreakerReadResponseCallable(protocol, metricServiceReference));
         } catch (CircuitBreakerOpenException e) {
             // Circuit is open
             onDenied(e, breakerInfo);
@@ -492,20 +492,24 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor extends Abst
     private static class CircuitBreakerReadResponseCallable implements Callable<Response> {
 
         private final Protocol protocol;
+        private final AtomicReference<MetricService> metricServiceReference;
 
         /**
          * Initializes a new {@link CircuitBreakerReadResponseCallable}.
          *
          * @param protocol The protocol instance
+         * @param metricServiceReference The metric service reference
          */
-        CircuitBreakerReadResponseCallable(Protocol protocol) {
+        CircuitBreakerReadResponseCallable(Protocol protocol, AtomicReference<MetricService> metricServiceReference) {
             super();
             this.protocol = protocol;
+            this.metricServiceReference = metricServiceReference;
         }
 
         @Override
         public Response call() throws Exception {
-            return protocol.readResponse();
+            MetricService metricService = metricServiceReference.get();
+            return MonitoringCommandExecutor.readResponse(protocol, Optional.ofNullable(metricService));
         }
     }
 
