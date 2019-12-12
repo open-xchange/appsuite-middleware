@@ -152,7 +152,11 @@ public class MonitoringCommandExecutor extends AbstractMetricAwareCommandExecuto
 
         long duration = -1;
         try {
-            return protocol.readResponse();
+            // Measure command execution
+            long start = System.nanoTime();
+            Response response = protocol.readResponse();
+            duration = System.nanoTime() - start;
+            return response;
         } catch (IOException e) {
             if (isEitherOf(e, NETWORK_COMMUNICATION_ERRORS)) {
                 // Command failed due to a network communication error.
