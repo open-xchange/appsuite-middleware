@@ -137,7 +137,7 @@ If a &quot;share link&quot; is created, this results in an implicit creation of 
 
 To have a strict separation between different shared contents, each time a folder or item is shared using the &quot;Get a link&quot; method, a designated anonymous guest account for this share is used. Consequently, each time such an anonymous share is revoked, this guest account is terminated again with no further delay. Additionally, such an anonymous guest entity can only be applied to the permission set of the folder or item the original link was created for, i.e. it's not possible to add more shared contents to an anonymous guest - in contrast to an invited, named guest user.
 
-The displayed folder hirarchy is also modified to hide all folder information that the anonymous user should not have access to. The parent folder of the shared folder will always be the next highest default or system folder in the folder tree. This way any folders in between are hidden.
+The displayed folder hierarchy is also modified to hide all folder information that the anonymous user should not have access to. The parent folder of the shared folder will always be the next highest default or system folder in the folder tree. This way any folders in between are hidden.
 
 Besides the common restrictions for guest accounts outlined above, the following applies for anonymous guest user accounts:
 
@@ -213,7 +213,6 @@ We have basically three different authentication options for guest users accessi
 
 ## Guest Hostname
 
-
 For serving shares, a separate guest hostname needs to be configured. This is mainly required to prevent guest- and regular user sessions using the same cookie container when logged in in the same client (otherwise, the cookie holding the alternative session identifier as well as other cookies would get overwritten concurrently). Additionally, this allows to have separate entry points to the web client for guest- and regular users. 
 
 The hostname for guests is used when generating external share links, as well as at other locations where hyperlinks are constructed in the context of guest users. Usually, the guest hostname refers to a separate subdomain of the installation like <code>share.example.com</code>, and is defined as an additional named virtual host pointing to the web client's document root in the webserver's configuration. 
@@ -228,7 +227,7 @@ Once the webserver configuration is done and the web client is accessible using 
 
 ## Cookies
 
-Guest sessions basically make use of the same cookies as regular user sessions do. This includes the JSESSONID cookie for the JVM route, as well as the <code>open-xchange-secret-&lt;hash&gt;</code>, <code> open-xchange-session-&lt;hash&gt;</code> and <code>open-xchange-public-session-&lt;hash&gt;</code> cookies. Cookie lifetime is set depending on the 'staySignedIn' parameter during login.
+Guest sessions basically make use of the same cookies as regular user sessions do. This includes the JSESSONID cookie for the JVM route, as well as the <code>open-xchange-secret-&lt;hash&gt;</code>, <code> open-xchange-session-&lt;hash&gt;</code> and <code>open-xchange-public-session-&lt;hash&gt;</code> cookies. Cookie lifetime is set depending on the configured value for <code>com.openexchange.share.cookieTTL</code>.
 
 Besides the common cookies, another special cookie is set: <code>open-xchange-share-&lt;hash&gt;</code>. The value contains the unique share token bound to the guest user accessing the share. here, the cookie hash is calculated as it's done for ordinary sessions, so that there can only be one <code>open-xchange-share-&lt;hash&gt;</code> cookie in a client at the same time. Whenever an auto-login request is issued by the client, the server checks for the existence of this &quot;share&quot; cookie, and, once recognized and checked for validity, it will try to perform the auto-login for an existing guest session first, i.e. using the session cookie based on the special guest hash calculation outlined above. Otherwise, the common auto-login process takes place. The &quot;share&quot; cookie is removed once the guest session terminates, i.e. the guest user logs out.
 
@@ -236,7 +235,7 @@ Since guest users access the web interface on a separate (sub)domain (see [Guest
 
 #### Administrator Notes:
 
-* By default, the cookie TTL for guest sessions is inherited from the TTL for cookies of regular sessions as defined by <code>com.openexchange.cookie.ttl</code> - this default may be overridden by defining a timespan at <code>com.openexchange.share.cookieTTL</code>
+* By default, the cookie TTL for guest sessions is <code>-1</code>, meaning that they're configured as "session" cookies (i.e. cookies are deleted once the client is quit) This default may be overridden by defining a timespan at <code>com.openexchange.share.cookieTTL</code>.
 
 ## Login Modes
 
