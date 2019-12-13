@@ -76,6 +76,7 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.SchedulingControl;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.json.converter.mapper.EventMapper;
@@ -188,9 +189,9 @@ public abstract class AbstractChronosAction implements AJAXActionService {
             return new EventID(folderId, objectId);
         }
         try {
-            return new EventID(folderId, objectId, new DefaultRecurrenceId(optRecurrenceId, optRecurrenceRange));
+            return new EventID(folderId, objectId, new DefaultRecurrenceId(CalendarUtils.decode(optRecurrenceId), optRecurrenceRange));
         } catch (IllegalArgumentException e) {
-            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(PARAM_RECURRENCE_ID, optRecurrenceId);
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, PARAM_RECURRENCE_ID, optRecurrenceId);
         }
     }
 

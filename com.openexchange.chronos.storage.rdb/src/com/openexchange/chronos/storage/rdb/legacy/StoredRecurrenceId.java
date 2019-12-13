@@ -95,6 +95,11 @@ public class StoredRecurrenceId implements RecurrenceId {
     }
 
     @Override
+    public boolean matches(RecurrenceId other) {
+        return equals(other);
+    }
+
+    @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;

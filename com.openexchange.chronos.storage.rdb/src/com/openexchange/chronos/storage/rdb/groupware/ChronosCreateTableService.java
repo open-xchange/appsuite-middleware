@@ -123,7 +123,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "rDate TEXT DEFAULT NULL," +
                 "exDate TEXT DEFAULT NULL," +
                 "overriddenDate TEXT DEFAULT NULL," +
-                "recurrence VARCHAR(32) COLLATE utf8mb4_bin DEFAULT NULL," +
+                "recurrence VARCHAR(64) COLLATE utf8mb4_bin DEFAULT NULL," +
                 "sequence INT4 UNSIGNED DEFAULT NULL," +
                 "transp INT4 UNSIGNED DEFAULT NULL," +
                 "class VARCHAR(64) DEFAULT NULL," +
@@ -175,7 +175,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "rDate TEXT DEFAULT NULL," +
                 "exDate TEXT DEFAULT NULL," +
                 "overriddenDate TEXT DEFAULT NULL," +
-                "recurrence VARCHAR(32) COLLATE utf8mb4_bin DEFAULT NULL," +
+                "recurrence VARCHAR(64) COLLATE utf8mb4_bin DEFAULT NULL," +
                 "sequence INT4 UNSIGNED DEFAULT NULL," +
                 "transp INT4 UNSIGNED DEFAULT NULL," +
                 "class VARCHAR(64) DEFAULT NULL," +
@@ -280,7 +280,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "folder VARCHAR(255) COLLATE utf8mb4_bin NOT NULL,"+
                 "triggerDate BIGINT(20) NOT NULL," +
                 "action VARCHAR(32) NOT NULL," +
-                "recurrence VARCHAR(32) COLLATE utf8mb4_bin DEFAULT NULL," +
+                "recurrence VARCHAR(64) COLLATE utf8mb4_bin DEFAULT NULL," +
                 "floatingTimezone VARCHAR(255) DEFAULT NULL," +
                 "relatedTime BIGINT(20) DEFAULT NULL," +
                 "pushed BOOL DEFAULT FALSE," +

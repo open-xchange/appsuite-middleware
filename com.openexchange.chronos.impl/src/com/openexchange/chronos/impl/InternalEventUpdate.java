@@ -365,7 +365,7 @@ public class InternalEventUpdate implements EventUpdate {
         Consistency.adjustAllDayDates(updatedEvent);
         Consistency.adjustTimeZones(session, calendarUser.getEntity(), updatedEvent, originalEvent);
         Consistency.adjustRecurrenceRule(updatedEvent);
-
+        Consistency.normalizeRecurrenceIDs(originalEvent.getStartDate(), updatedEvent);
         /*
          * adjust recurrence-related properties
          */

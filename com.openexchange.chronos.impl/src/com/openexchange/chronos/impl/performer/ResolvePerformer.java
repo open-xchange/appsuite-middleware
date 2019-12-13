@@ -225,7 +225,7 @@ public class ResolvePerformer extends AbstractQueryPerformer {
             /*
              * match recurrence if specified
              */
-            if (null != recurrenceId && false == recurrenceId.equals(event.getRecurrenceId()) || null == recurrenceId && isSeriesException(event)) {
+            if (null != recurrenceId && false == recurrenceId.matches(event.getRecurrenceId()) || null == recurrenceId && isSeriesException(event)) {
                 continue;
             }
             if (null != event.getFolderId()) {

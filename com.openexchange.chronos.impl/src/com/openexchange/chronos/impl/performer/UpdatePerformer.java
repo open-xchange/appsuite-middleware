@@ -182,7 +182,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             result = updateEvent(originalEvent, updatedEventData);
         } else if (isSeriesMaster(originalEvent)) {
             result = updateRecurrence(originalEvent, recurrenceId, updatedEventData);
-        } else if (isSeriesException(originalEvent) && recurrenceId.equals(originalEvent.getRecurrenceId())) {
+        } else if (isSeriesException(originalEvent) && recurrenceId.matches(originalEvent.getRecurrenceId())) {
             result = updateEvent(originalEvent, updatedEventData);
         } else {
             throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create(String.valueOf(recurrenceId), null);
@@ -299,7 +299,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
              * update for existing change exception, perform update, touch master & track results
              */
             Check.recurrenceRangeMatches(recurrenceId, null);
-            Event originalExceptionEvent = loadExceptionData(originalSeriesMaster, recurrenceId);
+            Event originalExceptionEvent = loadExceptionData(originalSeriesMaster, CalendarUtils.find(originalSeriesMaster.getChangeExceptionDates(), recurrenceId));
             InternalUpdateResult result = updateEvent(originalExceptionEvent, updatedEventData, ignoredFields);
             touch(originalSeriesMaster.getSeriesId());
             resultTracker.trackUpdate(originalSeriesMaster, loadEventData(originalSeriesMaster.getId()));
@@ -329,7 +329,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
              * add change exception date to series master & track results
              */
             resultTracker.rememberOriginalEvent(originalSeriesMaster);
-            addChangeExceptionDate(originalSeriesMaster, recurrenceId, CalendarUtils.isInternal(originalSeriesMaster.getOrganizer(), CalendarUserType.INDIVIDUAL));
+            addChangeExceptionDate(originalSeriesMaster, newExceptionEvent.getRecurrenceId(), CalendarUtils.isInternal(originalSeriesMaster.getOrganizer(), CalendarUserType.INDIVIDUAL));
             Event updatedMasterEvent = loadEventData(originalSeriesMaster.getId());
             resultTracker.trackUpdate(originalSeriesMaster, updatedMasterEvent);
             /*

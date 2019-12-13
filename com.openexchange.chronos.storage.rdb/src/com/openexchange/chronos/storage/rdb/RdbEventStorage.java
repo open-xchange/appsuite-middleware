@@ -560,6 +560,9 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
     }
 
     private Event selectException(Connection connection, String seriesId, RecurrenceId recurrenceId, EventField[] fields) throws SQLException, OXException {
+        /*
+         * lookup event with matching encoded recurrence identifier
+         */
         EventField[] mappedFields = MAPPER.getMappedFields(fields);
         String sql = new StringBuilder()
             .append("SELECT ").append(MAPPER.getColumns(mappedFields)).append(" FROM calendar_event ")
@@ -569,11 +572,43 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             stmt.setInt(1, context.getContextId());
             stmt.setInt(2, accountId);
             stmt.setInt(3, asInt(seriesId));
-            stmt.setString(4, String.valueOf(recurrenceId));
+            stmt.setString(4, CalendarUtils.encode(recurrenceId.getValue()));
             try (ResultSet resultSet = logExecuteQuery(stmt)) {
-                return resultSet.next() ? readEvent(resultSet, mappedFields, null) : null;
+                if (resultSet.next()) {
+                    return readEvent(resultSet, mappedFields, null);
+                }
             }
         }
+        /*
+         * lookup event with matching UTC recurrence identifier as fallback, if applicable
+         */
+        if (null != recurrenceId.getValue().getTimeZone() && false == "UTC".equals(recurrenceId.getValue().getTimeZone().getID())) {
+            try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+                stmt.setInt(1, context.getContextId());
+                stmt.setInt(2, accountId);
+                stmt.setInt(3, asInt(seriesId));
+                stmt.setString(4, CalendarUtils.encode(recurrenceId.getValue().shiftTimeZone(TimeZones.UTC)));
+                try (ResultSet resultSet = logExecuteQuery(stmt)) {
+                    if (resultSet.next()) {
+                        return readEvent(resultSet, mappedFields, null);
+                    }
+                }
+            }
+        }
+        /*
+         * lookup matching recurrence manually as last resort
+         */
+        List<Event> changeExceptions = selectExceptions(connection, seriesId, new EventField[] { EventField.ID, EventField.RECURRENCE_ID });
+        for (Event changeException : changeExceptions) {
+            if (recurrenceId.matches(changeException.getRecurrenceId())) {
+                List<Event> events = selectEvents(connection, Collections.singletonList(changeException.getId()), fields);
+                return 0 < events.size() ? events.get(0) : null;
+            }
+        }
+        /*
+         * not found, otherwise
+         */
+        return null;
     }
 
     private List<Event> selectExceptions(Connection connection, String seriesId, EventField[] fields) throws SQLException, OXException {

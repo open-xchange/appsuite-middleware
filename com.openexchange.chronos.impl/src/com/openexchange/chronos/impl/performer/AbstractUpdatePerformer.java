@@ -50,7 +50,18 @@
 package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.AlarmUtils.filterRelativeTriggers;
-import static com.openexchange.chronos.common.CalendarUtils.*;
+import static com.openexchange.chronos.common.CalendarUtils.find;
+import static com.openexchange.chronos.common.CalendarUtils.getAlarmIDs;
+import static com.openexchange.chronos.common.CalendarUtils.getExceptionDates;
+import static com.openexchange.chronos.common.CalendarUtils.getFolderView;
+import static com.openexchange.chronos.common.CalendarUtils.getRecurrenceIds;
+import static com.openexchange.chronos.common.CalendarUtils.hasAttendeePrivileges;
+import static com.openexchange.chronos.common.CalendarUtils.hasExternalOrganizer;
+import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
+import static com.openexchange.chronos.common.CalendarUtils.isLastNonHiddenUserAttendee;
+import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
+import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
+import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.impl.Check.classificationAllowsUpdate;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Utils.getCalendarUser;
@@ -213,6 +224,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         exceptionEvent.setEndDate(CalendarUtils.calculateEnd(originalMasterEvent, recurrenceId));
         Consistency.setCreated(timestamp, exceptionEvent, originalMasterEvent.getCreatedBy());
         Consistency.setModified(session, timestamp, exceptionEvent, session.getUserId());
+        Consistency.normalizeRecurrenceIDs(originalMasterEvent.getStartDate(), exceptionEvent);
         return exceptionEvent;
     }
 

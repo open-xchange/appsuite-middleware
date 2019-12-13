@@ -100,7 +100,8 @@ public class ChronosStorageMigrationTask extends UpdateTaskAdapter {
             "com.openexchange.groupware.update.tasks.CalendarAddIndex2DatesMembersV2",
             com.openexchange.chronos.storage.rdb.groupware.CalendarEventAddRDateColumnTask.class.getName(),
             com.openexchange.chronos.storage.rdb.groupware.CalendarEventAddSeriesIndexTask.class.getName(),
-            com.openexchange.chronos.storage.rdb.groupware.CalendarAlarmAddTimestampColumnTask.class.getName()
+            com.openexchange.chronos.storage.rdb.groupware.CalendarAlarmAddTimestampColumnTask.class.getName(),
+            com.openexchange.chronos.storage.rdb.groupware.CalendarEventAdjustRecurrenceColumnTask.class.getName()
         };
     }
 

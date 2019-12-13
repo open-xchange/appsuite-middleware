@@ -125,7 +125,7 @@ public class GetPerformer extends AbstractQueryPerformer {
             if (isSeriesMaster(event)) {
                 event = getOccurrence(session.getRecurrenceService(), event, recurrenceId);
             }
-            if (null == event || false == recurrenceId.equals(event.getRecurrenceId())) {
+            if (null == event || false == recurrenceId.matches(event.getRecurrenceId())) {
                 throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(eventId, recurrenceId);
             }
         }

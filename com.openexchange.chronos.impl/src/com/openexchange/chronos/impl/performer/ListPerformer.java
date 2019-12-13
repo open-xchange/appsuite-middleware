@@ -164,7 +164,7 @@ public class ListPerformer extends AbstractQueryPerformer {
                         throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(eventID.getObjectID(), recurrenceId);
                     }
                     orderedEvents.add(occurrence);
-                } else if (recurrenceId.equals(event.getRecurrenceId())) {
+                } else if (recurrenceId.matches(event.getRecurrenceId())) {
                     orderedEvents.add(event);
                 } else {
                     throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(eventID.getObjectID(), recurrenceId);

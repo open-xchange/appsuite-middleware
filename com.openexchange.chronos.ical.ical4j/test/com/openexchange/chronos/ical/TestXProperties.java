@@ -134,8 +134,8 @@ public class TestXProperties extends ICalTest {
         assertEquals("mailto:otto@example.com", event.getOrganizer().getUri());
         assertEquals(D("2011-12-08 12:00:00", "CET"), asDate(event.getStartDate()));
         assertEquals(D("2011-12-08 12:30:00", "CET"), asDate(event.getEndDate()));
-        assertEquals("CET", event.getStartDate().getTimeZone().getID());
-        assertEquals("CET", event.getEndDate().getTimeZone().getID());
+        assertEquals("W. Europe Standard Time", event.getStartDate().getTimeZone().getID());
+        assertEquals("W. Europe Standard Time", event.getEndDate().getTimeZone().getID());
 
         assertNotNull(event.getExtendedProperties().get("X-MICROSOFT-CDO-APPT-SEQUENCE"));
         assertEquals("1", event.getExtendedProperties().get("X-MICROSOFT-CDO-APPT-SEQUENCE").getValue());

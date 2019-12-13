@@ -1044,7 +1044,7 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
             for (Event event : events) {
                 if (null != event && eventId.equals(event.getId()) && 
                     (folderId.equals(event.getFolderId()) || folderId.equals(BasicCalendarAccess.FOLDER_ID) && null == event.getFolderId())) { 
-                    if (null == recurrenceId || recurrenceId.equals(event.getRecurrenceId())) {
+                    if (null == recurrenceId || recurrenceId.matches(event.getRecurrenceId())) {
                         return event;
                     }
                 }

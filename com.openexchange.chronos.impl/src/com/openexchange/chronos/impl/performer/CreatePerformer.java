@@ -70,10 +70,10 @@ import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.common.DefaultCalendarObjectResource;
 import com.openexchange.chronos.common.mapping.EventMapper;
-import com.openexchange.chronos.impl.InternalAttendeeUpdates;
 import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.Consistency;
+import com.openexchange.chronos.impl.InternalAttendeeUpdates;
 import com.openexchange.chronos.impl.InternalCalendarResult;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarStorage;
@@ -225,6 +225,7 @@ public class CreatePerformer extends AbstractUpdatePerformer {
             event.setSeriesId(event.getId());
             event.setRecurrenceDates(eventData.getRecurrenceDates());
             event.setDeleteExceptionDates(Check.recurrenceIdsExist(session.getRecurrenceService(), event, eventData.getDeleteExceptionDates()));
+            Consistency.normalizeRecurrenceIDs(event.getStartDate(), event);
         }
         /*
          * copy over further (unchecked) event fields

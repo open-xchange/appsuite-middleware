@@ -54,13 +54,17 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.exception.OXException;
 import net.fortuna.ical4j.model.Component;
+import net.fortuna.ical4j.model.Date;
 import net.fortuna.ical4j.model.DateList;
 import net.fortuna.ical4j.model.DateTime;
 import net.fortuna.ical4j.model.PropertyList;
+import net.fortuna.ical4j.model.TimeZone;
+import net.fortuna.ical4j.model.parameter.Value;
 import net.fortuna.ical4j.model.property.DateListProperty;
 
 /**
@@ -93,19 +97,30 @@ public abstract class ICalDateListMapping<T extends Component, U> extends Abstra
     public void export(U object, T component, ICalParameters parameters, List<OXException> warnings) {
         removeProperties(component, propertyName);
         SortedSet<RecurrenceId> value = getValue(object);
-        if (null != value) {
-            DateList dateList = new DateList();
-            dateList.setUtc(true);
-            for (RecurrenceId date : value) {
-                if (date.getValue().isAllDay()) {
-                    dateList.add(new net.fortuna.ical4j.model.Date(date.getValue().getTimestamp()));
-                } else {
-                    DateTime dateTime = new net.fortuna.ical4j.model.DateTime(true);
-                    dateTime.setTime(date.getValue().getTimestamp());
-                    dateList.add(dateTime);
+        if (null != value && 0 < value.size()) {
+            Iterator<RecurrenceId> iterator = CalendarUtils.normalizeRecurrenceIDs(value).iterator();
+            Date firstICalDate = toICalDate(iterator.next().getValue(), parameters, propertyName, warnings);
+            DateListProperty property;
+            if (DateTime.class.isInstance(firstICalDate)) {
+                property = createProperty(new DateList(Value.DATE_TIME));
+                TimeZone timeZone = ((DateTime) firstICalDate).getTimeZone();
+                if (null != timeZone) {
+                    if ("UTC".equals(timeZone.getID())) {
+                        property.setUtc(true);
+                    } else {
+                        property.setTimeZone(timeZone);
+                    }
+                } else if (((DateTime) firstICalDate).isUtc()) {
+                    property.setUtc(true);
                 }
+            } else {
+                property = createProperty(new DateList(Value.DATE));
             }
-            component.getProperties().add(createProperty(dateList));
+            property.getDates().add(firstICalDate);
+            while (iterator.hasNext()) {
+                property.getDates().add(toICalDate(iterator.next().getValue(), parameters, propertyName, warnings));
+            }
+            component.getProperties().add(property);
         }
     }
 
@@ -116,18 +131,14 @@ public abstract class ICalDateListMapping<T extends Component, U> extends Abstra
             SortedSet<RecurrenceId> recurrenceIds = new TreeSet<RecurrenceId>();
             for (Iterator<?> iterator = properties.iterator(); iterator.hasNext();) {
                 DateListProperty property = (DateListProperty) iterator.next();
+                java.util.TimeZone timeZone = selectTimeZone(property, null);
                 for (Iterator<?> i = property.getDates().iterator(); i.hasNext();) {
                     net.fortuna.ical4j.model.Date date = (net.fortuna.ical4j.model.Date) i.next();
                     org.dmfs.rfc5545.DateTime exceptionDate;
-                    if (DateTime.class.isInstance(date)) {
-                        net.fortuna.ical4j.model.TimeZone parsedTimeZone = ((DateTime) date).getTimeZone();
-                        if (null != parsedTimeZone) {
-                            exceptionDate = new org.dmfs.rfc5545.DateTime(parsedTimeZone, date.getTime());
-                        } else {
-                            exceptionDate = new org.dmfs.rfc5545.DateTime(date.getTime());
-                        }
+                    if (net.fortuna.ical4j.model.DateTime.class.isInstance(date)) {
+                        exceptionDate = org.dmfs.rfc5545.DateTime.parse(timeZone, date.toString());
                     } else {
-                        exceptionDate = new org.dmfs.rfc5545.DateTime(date.getTime()).toAllDay();
+                        exceptionDate = org.dmfs.rfc5545.DateTime.parse(date.toString()).toAllDay();
                     }
                     recurrenceIds.add(new DefaultRecurrenceId(exceptionDate));
                 }

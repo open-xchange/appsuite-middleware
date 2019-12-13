@@ -145,6 +145,31 @@ public class Consistency {
         event.setRecurrenceRule(rule.toString());
     }
 
+    /**
+     * Normalizes all recurrence identifiers within the supplied event so that their value matches the date type and timezone of a certain
+     * <i>reference</i> date, which is usually the start date of the recurring component.
+     * <p/>
+     * This includes the recurrence identifier itself, and additionally the event's collection of recurrence dates, exceptions dates, and
+     * change exception dates, if set.
+     * 
+     * @param referenceDate The reference date to which the recurrence identifiers will be normalized to
+     * @param event The event to normalize the recurrence identifiers in
+     */
+    public static void normalizeRecurrenceIDs(DateTime referenceDate, Event event) {
+        if (event.containsRecurrenceId()) {
+            event.setRecurrenceId(CalendarUtils.normalizeRecurrenceID(referenceDate, event.getRecurrenceId()));
+        }
+        if (event.containsRecurrenceDates()) {
+            event.setRecurrenceDates(CalendarUtils.normalizeRecurrenceIDs(referenceDate, event.getRecurrenceDates()));
+        }
+        if (event.containsDeleteExceptionDates()) {
+            event.setDeleteExceptionDates(CalendarUtils.normalizeRecurrenceIDs(referenceDate, event.getDeleteExceptionDates()));
+        }
+        if (event.containsChangeExceptionDates()) {
+            event.setChangeExceptionDates(CalendarUtils.normalizeRecurrenceIDs(referenceDate, event.getChangeExceptionDates()));
+        }
+    }
+
     public static void setModified(CalendarSession session, Date lastModified, Event event, int modifiedBy) throws OXException {
         setModified(lastModified, event, session.getEntityResolver().applyEntityData(new CalendarUser(), modifiedBy));
     }

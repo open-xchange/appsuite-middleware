@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,54 +47,62 @@
  *
  */
 
-package com.openexchange.chronos;
+package com.openexchange.chronos.storage.rdb.groupware;
 
-import java.util.TimeZone;
-import org.dmfs.rfc5545.DateTime;
+import static com.openexchange.database.Databases.autocommit;
+import static com.openexchange.database.Databases.rollback;
+import static com.openexchange.tools.update.Tools.modifyColumns;
+import java.sql.Connection;
+import java.sql.SQLException;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.tools.update.Column;
 
 /**
- * {@link RecurrenceId}
+ * {@link CalendarEventAdjustRecurrenceColumnTask}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.10.0
- * @see <a href="https://tools.ietf.org/html/rfc5545#section-3.8.4.4">RFC 5545, section 3.8.4.4</a>
+ * @since v7.10.4
  */
-public interface RecurrenceId extends Comparable<RecurrenceId> {
+public class CalendarEventAdjustRecurrenceColumnTask extends UpdateTaskAdapter {
 
     /**
-     * Gets the value, i.e. the (original) start-date of the targeted recurrence in the event series.
-     * <p/>
-     * The returned date-time is either in <code>UTC</code> format or a <i>floating</i> date or date-time.
-     *
-     * @return The recurrence-id value
+     * Initializes a new {@link CalendarEventAdjustRecurrenceColumnTask}.
      */
-    DateTime getValue();
+    public CalendarEventAdjustRecurrenceColumnTask() {
+        super();
+    }
 
-    /**
-     * Gets a value indicating the effective range of targeted recurrence instances.
-     *
-     * @return The range, or <code>null</code> if only this instance is targeted.
-     */
-    RecurrenceRange getRange();
+    @Override
+    public String[] getDependencies() {
+        return new String[] { ChronosCreateTableTask.class.getName() };
+    }
 
-    /**
-     * Compares this recurrence id to another one, taking a concrete timezone into consideration for <i>floating</i> values.
-     *
-     * @param other The recurrence id to compare with
-     * @param timeZone The timezone to consider for <i>floating</i> dates, i.e. the actual 'perspective' of the comparison, or
-     *            <code>null</code> to fall back to UTC
-     * @return A negative integer, zero, or a positive integer as this recurrence id is less than, equal to, or greater than the other
-     *         recurrence id
-     */
-    int compareTo(RecurrenceId other, TimeZone timeZone);
-
-    /**
-     * Gets a value indicating whether this recurrence id <i>matches</i> another one, i.e. both are pointing to the same absolute timestamp
-     * (although possibly in different timezones for non-<i>floating</i> values, or decorated with a different recurrence range).
-     *
-     * @param other The recurrent identifier to match
-     * @return <code>true</code> if both recurrence ids match, <code>false</code> otherwise
-     */
-    boolean matches(RecurrenceId other);
+    @Override
+    public void perform(PerformParameters params) throws OXException {
+        Connection connection = params.getConnection();
+        int rollback = 0;
+        try {
+            connection.setAutoCommit(false);
+            rollback = 1;
+            Column column = new Column("recurrence", "VARCHAR(64) COLLATE utf8mb4_bin DEFAULT NULL");
+            for (String table : new String[] { "calendar_event", "calendar_event_tombstone", "calendar_alarm_trigger" }) {
+                modifyColumns(connection, table, column);
+            }
+            connection.commit();
+            rollback = 2;
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } finally {
+            if (0 < rollback) {
+                if (1 == rollback) {
+                    rollback(connection);
+                }
+                autocommit(connection);
+            }
+        }
+    }
 
 }

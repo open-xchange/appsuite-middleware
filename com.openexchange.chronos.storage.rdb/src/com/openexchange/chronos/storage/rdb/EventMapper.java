@@ -315,7 +315,7 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
 
             @Override
             public void set(Event event, String value) {
-                event.setRecurrenceId(null == value ? null : new DefaultRecurrenceId(value));
+                event.setRecurrenceId(null == value ? null : new DefaultRecurrenceId(CalendarUtils.decode(value)));
             }
 
             @Override
@@ -326,7 +326,7 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
             @Override
             public String get(Event event) {
                 RecurrenceId value = event.getRecurrenceId();
-                return null == value ? null : value.toString();
+                return null == value ? null : CalendarUtils.encode(value.getValue());
             }
 
             @Override
@@ -347,12 +347,12 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
             }
 
             @Override
-            protected SortedSet<RecurrenceId> getRecurrenceIds(Event event) {
+            public SortedSet<RecurrenceId> get(Event event) {
                 return event.getRecurrenceDates();
             }
 
             @Override
-            protected void setRecurrenceIds(Event event, SortedSet<RecurrenceId> value) {
+            public void set(Event event, SortedSet<RecurrenceId> value) throws OXException {
                 event.setRecurrenceDates(value);
             }
         });
@@ -369,12 +369,12 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
             }
 
             @Override
-            protected SortedSet<RecurrenceId> getRecurrenceIds(Event event) {
+            public SortedSet<RecurrenceId> get(Event event) {
                 return event.getChangeExceptionDates();
             }
 
             @Override
-            protected void setRecurrenceIds(Event event, SortedSet<RecurrenceId> value) {
+            public void set(Event event, SortedSet<RecurrenceId> value) throws OXException {
                 event.setChangeExceptionDates(value);
             }
         });
@@ -391,12 +391,12 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
             }
 
             @Override
-            protected SortedSet<RecurrenceId> getRecurrenceIds(Event event) {
+            public SortedSet<RecurrenceId> get(Event event) {
                 return event.getDeleteExceptionDates();
             }
 
             @Override
-            protected void setRecurrenceIds(Event event, SortedSet<RecurrenceId> value) {
+            public void set(Event event, SortedSet<RecurrenceId> value) throws OXException {
                 event.setDeleteExceptionDates(value);
             }
         });

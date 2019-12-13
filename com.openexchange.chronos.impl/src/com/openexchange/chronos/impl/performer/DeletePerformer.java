@@ -346,8 +346,9 @@ public class DeletePerformer extends AbstractUpdatePerformer {
          */
         SortedSet<RecurrenceId> changeExceptionDates = loadChangeExceptionDates(originalMasterEvent.getSeriesId());
         for (RecurrenceId changeExceptionDate : changeExceptionDates) {
-            if (deleteExceptionDates.remove(changeExceptionDate)) {
-                LOG.warn("Skipping {} in delete exception date collection due to existing change exception event.", changeExceptionDate);
+            RecurrenceId matchingChangeExceptionDate = find(deleteExceptionDates, changeExceptionDate);
+            if (null != matchingChangeExceptionDate && deleteExceptionDates.remove(matchingChangeExceptionDate)) {
+                LOG.warn("Skipping {} in delete exception date collection due to existing change exception event.", matchingChangeExceptionDate);
             }
         }
         /*
@@ -364,6 +365,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
             eventUpdate.setSequence(originalMasterEvent.getSequence() + 1);
         }
         Consistency.setModified(session, timestamp, eventUpdate, calendarUserId);
+        Consistency.normalizeRecurrenceIDs(originalMasterEvent.getStartDate(), eventUpdate);
         storage.getEventStorage().updateEvent(eventUpdate);
         Event updatedMasterEvent = loadEventData(originalMasterEvent.getId());
         updateAlarmTrigger(originalMasterEvent, updatedMasterEvent);

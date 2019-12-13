@@ -316,13 +316,8 @@ public class CalendarExportImpl implements CalendarExport {
     private static VCalendar initCalendar() {
         VCalendar vCalendar = new VCalendar();
         vCalendar.getProperties().add(Version.VERSION_2_0);
-        VersionService versionService = Services.getService(VersionService.class);
-        String versionString = null; 
-        if (null == versionService) {
-            versionString = "<unknown version>";
-        } else {
-            versionString = versionService.getVersionString();
-        }
+        VersionService versionService = Services.optService(VersionService.class);
+        String versionString = null != versionService ? versionService.getVersionString() : "<unknown version>";
         vCalendar.getProperties().add(new ProdId("-//" + VersionService.NAME + "//" + versionString + "//EN"));
         return vCalendar;
     }

@@ -49,18 +49,29 @@
 
 package com.openexchange.chronos.ical.ical4j.mapping;
 
+import java.text.ParseException;
 import java.util.Iterator;
 import java.util.List;
+import java.util.TimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.ical.ICalExceptionCodes;
 import com.openexchange.chronos.ical.ICalParameters;
+import com.openexchange.chronos.ical.ical4j.ParserTools;
+import com.openexchange.chronos.ical.impl.ICalParametersImpl;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
+import com.openexchange.java.util.TimeZones;
 import com.openexchange.tools.arrays.Arrays;
 import net.fortuna.ical4j.model.Component;
 import net.fortuna.ical4j.model.Parameter;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.PropertyList;
+import net.fortuna.ical4j.model.TimeZoneRegistry;
+import net.fortuna.ical4j.model.parameter.TzId;
+import net.fortuna.ical4j.model.property.DateListProperty;
+import net.fortuna.ical4j.model.property.DateProperty;
 
 /**
  * {@link AbstractICalMapping}
@@ -159,6 +170,105 @@ public abstract class AbstractICalMapping<T extends Component, U> implements ICa
      */
     protected static String optParameterValue(Property property, String parameterName) {
         return optParameterValue(property.getParameter(parameterName));
+    }
+
+    /**
+     * Converts an internally used {@link org.dmfs.rfc5545.DateTime} to a {@link net.fortuna.ical4j.model.Date} or
+     * {@link net.fortuna.ical4j.model.DateTime}, as used during serialization. The data type of the date-time is applied, as well as its
+     * timezone reference if applicable, taken from the {@link ICalParametersImpl#TIMEZONE_REGISTRY} of the supplied parameters.
+     * <p/>
+     * If conversion fails, a fallback to an <code>UTC</code> date-time is applied implicitly, and an appropriate conversion warning is
+     * added.
+     *
+     * @param dateTime The date-time to convert
+     * @param parameters A reference to the underlying iCal parameters
+     * @param propertyName The parent property name (to indicate a possible conversion warning for)
+     * @param warnings A reference to the warnings list
+     * @return The converted date
+     */
+    protected static net.fortuna.ical4j.model.Date toICalDate(org.dmfs.rfc5545.DateTime dateTime, ICalParameters parameters, String propertyName, List<OXException> warnings) {
+        if (null == dateTime) {
+            return null;
+        }
+        if (dateTime.isAllDay()) {
+            return new net.fortuna.ical4j.model.Date(dateTime.getTimestamp());
+        }
+        String timezoneID = null != dateTime.getTimeZone() ? dateTime.getTimeZone().getID() : null;
+        if (dateTime.isFloating() || null == timezoneID) {
+            try {
+                return new net.fortuna.ical4j.model.DateTime(dateTime.toString());
+            } catch (ParseException e) {
+                addConversionWarning(warnings, propertyName, e.getMessage());
+                net.fortuna.ical4j.model.DateTime iCalDate = new net.fortuna.ical4j.model.DateTime(true);
+                iCalDate.setTime(dateTime.getTimestamp());
+                return iCalDate;
+            }
+        }
+        if ("UTC".equals(timezoneID)) {
+            net.fortuna.ical4j.model.DateTime iCalDate = new net.fortuna.ical4j.model.DateTime(true);
+            iCalDate.setTime(dateTime.getTimestamp());
+            return iCalDate;
+        }
+        TimeZoneRegistry timeZoneRegistry = parameters.get(ICalParametersImpl.TIMEZONE_REGISTRY, TimeZoneRegistry.class);
+        net.fortuna.ical4j.model.TimeZone timeZone = null != timeZoneRegistry ? timeZoneRegistry.getTimeZone(timezoneID) : null;
+        if (null != timeZone) {
+            net.fortuna.ical4j.model.DateTime iCalDate = new net.fortuna.ical4j.model.DateTime(false);
+            iCalDate.setTimeZone(timeZone);
+            iCalDate.setTime(dateTime.getTimestamp());
+            return iCalDate;
+        }
+        addConversionWarning(warnings, propertyName, "No timezone '" + timezoneID + "' registered.");
+        net.fortuna.ical4j.model.DateTime iCalDate = new net.fortuna.ical4j.model.DateTime(true);
+        iCalDate.setTime(dateTime.getTimestamp());
+        return iCalDate;
+    }
+
+    /**
+     * Parses an iCal {@link DateProperty} to an internally used {@link org.dmfs.rfc5545.DateTime} object. The timezone is derived and
+     * applied from the {@link TzId} parameter of the property, if set.
+     *
+     * @param iCalDateProperty The iCal date property to parse
+     * @return The parsed date-time
+     */
+    protected static org.dmfs.rfc5545.DateTime parseICalDate(DateProperty iCalDateProperty) {
+        if (null == iCalDateProperty || null == iCalDateProperty.getValue()) {
+            return null;
+        }
+        if (ParserTools.isDateTime(iCalDateProperty)) {
+            return org.dmfs.rfc5545.DateTime.parse(selectTimeZone(iCalDateProperty, (TimeZone) null), iCalDateProperty.getValue());
+        }
+        return org.dmfs.rfc5545.DateTime.parse(iCalDateProperty.getValue()).toAllDay();
+    }
+
+    /**
+     * Selects the timezone from a parsed iCal property, either based on the internally set timezone, or based on the {@link TzId}
+     * parameter of the property.
+     *
+     * @param property The property to derive the timezone from
+     * @param defaultTimeZone The timezone to use as fallback, or <code>null</code> if not applicable
+     * @return The timezone
+     */
+    protected static TimeZone selectTimeZone(Property property, TimeZone defaultTimeZone) {
+        if (DateProperty.class.isInstance(property)) {
+            DateProperty dateProperty = (DateProperty) property;
+            if (dateProperty.isUtc()) {
+                return TimeZones.UTC;
+            }
+            if (null != dateProperty.getTimeZone()) {
+                return dateProperty.getTimeZone();
+            }
+        }
+        if (DateListProperty.class.isInstance(property)) {
+            DateListProperty dateListProperty = (DateListProperty) property;
+            if (null != dateListProperty.getTimeZone()) {
+                return dateListProperty.getTimeZone();
+            }
+        }
+        Parameter tzidParameter = property.getParameter(Parameter.TZID);
+        if (null != tzidParameter && Strings.isNotEmpty(tzidParameter.getValue())) {
+            return CalendarUtils.optTimeZone(tzidParameter.getValue(), defaultTimeZone);
+        }
+        return defaultTimeZone;
     }
 
     /**

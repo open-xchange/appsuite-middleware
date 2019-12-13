@@ -63,7 +63,9 @@ import org.junit.runners.Suite.SuiteClasses;
 @RunWith(Suite.class)
 @SuiteClasses({
     RecurTest.class,
-    AvailabilityUtilsTest.class
+    AvailabilityUtilsTest.class,
+    UtilsTest.class,
+    RecurrenceIdNormalizationTest.class,
 })
 public final class UnitTests {
 

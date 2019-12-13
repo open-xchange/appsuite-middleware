@@ -106,7 +106,7 @@ public class SingleEventResponseGenerator extends ResponseGenerator {
                             event = iterator.hasNext() ? iterator.next() : null;
                         }
                     }
-                    if (null == event || false == recurrenceId.equals(event.getRecurrenceId())) {
+                    if (null == event || false == recurrenceId.matches(event.getRecurrenceId())) {
                         throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(eventId, recurrenceId);
                     }
                 }
