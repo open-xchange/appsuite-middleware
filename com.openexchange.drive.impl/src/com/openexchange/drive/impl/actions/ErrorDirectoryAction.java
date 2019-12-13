@@ -73,15 +73,10 @@ public class ErrorDirectoryAction extends AbstractDirectoryAction {
      */
     public ErrorDirectoryAction(DirectoryVersion version, DirectoryVersion newVersion, ThreeWayComparison<DirectoryVersion> comparison,
         OXException error, boolean quarantine, boolean stop) {
-        super(version, newVersion, comparison);
+        super(Action.ERROR, version, newVersion, comparison);
         parameters.put(PARAMETER_ERROR, error);
         parameters.put(PARAMETER_QUARANTINE, Boolean.valueOf(quarantine));
         parameters.put(PARAMETER_STOP, Boolean.valueOf(stop));
-    }
-
-    @Override
-    public Action getAction() {
-        return Action.ERROR;
     }
 
 }

@@ -51,11 +51,17 @@ package com.openexchange.url.mail.attachment;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.UnknownHostException;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Function;
 import javax.net.ssl.HttpsURLConnection;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataExceptionCodes;
@@ -63,7 +69,9 @@ import com.openexchange.conversion.DataProperties;
 import com.openexchange.conversion.DataSource;
 import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.InetAddresses;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
@@ -71,6 +79,7 @@ import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.tools.net.URITools;
 
 /**
  * {@link URLMailAttachmentDataSource}
@@ -85,6 +94,25 @@ public final class URLMailAttachmentDataSource implements DataSource {
     private static final int DEFAULT_TIMEOUT = 10000;
 
     private final ServiceLookup services;
+
+    private static final String LOCAL_HOST_NAME;
+    private static final String LOCAL_HOST_ADDRESS;
+
+    static {
+        // Host name initialization
+        String localHostName;
+        String localHostAddress;
+        try {
+            InetAddress localHost = InetAddress.getLocalHost();
+            localHostName = localHost.getCanonicalHostName();
+            localHostAddress = localHost.getHostAddress();
+        } catch (UnknownHostException e) {
+            localHostName = "localhost";
+            localHostAddress = "127.0.0.1";
+        }
+        LOCAL_HOST_NAME = localHostName;
+        LOCAL_HOST_ADDRESS = localHostAddress;
+    }
 
     /**
      * Initializes a new {@link URLMailAttachmentDataSource}.
@@ -107,7 +135,7 @@ public final class URLMailAttachmentDataSource implements DataSource {
                 if (null == sUrl) {
                     throw DataExceptionCodes.MISSING_ARGUMENT.create("url");
                 }
-                url = new URL(sUrl.trim());
+                url = new URL(URITools.getFinalURL(sUrl.trim(), Optional.of(validator)));
             } catch (final MalformedURLException e) {
                 throw DataExceptionCodes.ERROR.create(e, e.getMessage());
             }
@@ -234,6 +262,37 @@ public final class URLMailAttachmentDataSource implements DataSource {
             }
         }
     }
+
+    private static final Set<String> ALLOWED_PROTOCOLS = ImmutableSet.of("http", "https", "ftp", "ftps");
+    private static final Set<String> DENIED_HOSTS = ImmutableSet.of("localhost", "127.0.0.1", LOCAL_HOST_ADDRESS, LOCAL_HOST_NAME);
+
+    /**
+     * Validates the given URL according to whitelisted prtocols ans blacklisted hosts.
+     *
+     * @param url The URL to validate
+     * @return An optional OXException
+     */
+    private static Function<URL, Optional<OXException>> validator = (url) -> {
+        String protocol = url.getProtocol();
+        if (protocol == null || !ALLOWED_PROTOCOLS.contains(Strings.asciiLowerCase(protocol))) {
+            return Optional.of(DataExceptionCodes.INVALID_ARGUMENT.create("url", url.toString()));
+        }
+
+        String host = Strings.asciiLowerCase(url.getHost());
+        if (host == null || DENIED_HOSTS.contains(host)) {
+            return Optional.of(DataExceptionCodes.INVALID_ARGUMENT.create("url", url.toString()));
+        }
+
+        try {
+            InetAddress inetAddress = InetAddress.getByName(url.getHost());
+            if (InetAddresses.isInternalAddress(inetAddress)) {
+                return Optional.of(DataExceptionCodes.INVALID_ARGUMENT.create("url", url.toString()));
+            }
+        } catch (UnknownHostException e) {
+            return Optional.of(DataExceptionCodes.INVALID_ARGUMENT.create("url", url.toString()));
+        }
+        return Optional.empty();
+    };
 
     @Override
     public String[] getRequiredArguments() {

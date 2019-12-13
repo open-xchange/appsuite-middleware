@@ -59,13 +59,8 @@ import com.openexchange.drive.Action;
 public class SyncDirectoriesAction extends AbstractDirectoryAction {
 
     public SyncDirectoriesAction(boolean reset) {
-        super(null, null, null);
+        super(Action.SYNC, null, null, null);
         parameters.put(PARAMETER_RESET, Boolean.valueOf(reset));
-    }
-
-    @Override
-    public Action getAction() {
-        return Action.SYNC;
     }
 
 }

@@ -283,7 +283,7 @@ public class RssAction implements AJAXActionService {
         List<SyndFeed> feeds = new LinkedList<>();
 
         for (URL url : urls) {
-            if (RssProperties.isDenied(url.getProtocol(), url.getHost(), url.getPort())) {
+            if (RssProperties.isDenied(url.toString())) {
                 final OXException oxe = RssExceptionCodes.RSS_CONNECTION_ERROR.create(url.toString());
                 warnings.add(oxe);
                 continue;

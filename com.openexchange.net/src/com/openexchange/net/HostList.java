@@ -50,6 +50,7 @@
 package com.openexchange.net;
 
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -172,6 +173,10 @@ public class HostList {
      * @return <code>true</code> if contained; otherwise <code>false</code>
      */
     public boolean contains(InetAddress hostAddress) {
+        return contains(hostAddress, true);
+    }
+
+    private boolean contains(InetAddress hostAddress, boolean checkHostName) {
         if (null == hostAddress) {
             return false;
         }
@@ -195,7 +200,7 @@ public class HostList {
             }
         }
 
-        return contains(hostAddress.getHostName());
+        return checkHostName ? contains(hostAddress.getHostName()) : false;
     }
 
     /**
@@ -250,7 +255,18 @@ public class HostList {
                 }
             }
         }
-        return this.matchingHostNames.contains(toCheck);
+
+        if (this.matchingHostNames.contains(toCheck)) {
+            return true;
+        }
+
+        // Need to resolve as last resort
+        try {
+            return contains(InetAddress.getByName(toCheck), false);
+        } catch (UnknownHostException e) {
+            // Cannot be resolved
+            return false;
+        }
     }
 
     @Override
