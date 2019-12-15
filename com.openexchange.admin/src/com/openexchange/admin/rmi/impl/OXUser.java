@@ -384,6 +384,8 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
 
         try {
+            final int user_id = user.getId().intValue();
+
             basicauth.doAuthentication(auth, ctx);
             checkContextAndSchema(ctx);
             try {
@@ -392,7 +394,6 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 throw new NoSuchUserException(e);
             }
 
-            final int user_id = user.getId().intValue();
             if (!tool.existsContext(ctx)) {
                 throw new NoSuchContextException(ctx.getId());
             } else if (!tool.existsUser(ctx, user_id)) {
@@ -453,8 +454,9 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 }
             });
 
-            // Schedule task
             oxuser.disableUser(user_id, ctx);
+
+            // Schedule task
             return TaskManager.getInstance().addJob(fsdm, "moveuserfilestore", "move user " + user_id + " from context " + ctx.getIdAsString() + " to another filestore " + dstFilestore.getId(), ctx.getId().intValue());
         } catch (StorageException e) {
             LOGGER.error("", e);
@@ -482,6 +484,10 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
     @Override
     public int moveFromUserFilestoreToMaster(final Context ctx, User user, User masterUser, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+        return moveFromUserFilestoreToMaster(ctx, user, masterUser, credentials, false);
+    }
+
+    private int moveFromUserFilestoreToMaster(final Context ctx, User user, User masterUser, Credentials credentials, boolean inline) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         Credentials auth = credentials == null ? new Credentials("", "") : credentials;
         try {
             doNullCheck(user);
@@ -492,22 +498,24 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
 
         try {
-            basicauth.doAuthentication(auth, ctx);
-            checkContextAndSchema(ctx);
-            try {
-                setIdOrGetIDFromNameAndIdObject(ctx, user);
-            } catch (NoSuchObjectException e) {
-                throw new NoSuchUserException(e);
-            }
-            try {
-                setIdOrGetIDFromNameAndIdObject(ctx, masterUser);
-            } catch (NoSuchObjectException e) {
-                throw new NoSuchUserException(e);
-            }
-
             final int userId = user.getId().intValue();
-            if (!tool.existsUser(ctx, userId)) {
-                throw new NoSuchUserException("No such user " + userId + " in context " + ctx.getId());
+            if (false == inline) {
+                basicauth.doAuthentication(auth, ctx);
+                checkContextAndSchema(ctx);
+                try {
+                    setIdOrGetIDFromNameAndIdObject(ctx, user);
+                } catch (NoSuchObjectException e) {
+                    throw new NoSuchUserException(e);
+                }
+                try {
+                    setIdOrGetIDFromNameAndIdObject(ctx, masterUser);
+                } catch (NoSuchObjectException e) {
+                    throw new NoSuchUserException(e);
+                }
+
+                if (!tool.existsUser(ctx, userId)) {
+                    throw new NoSuchUserException("No such user " + userId + " in context " + ctx.getId());
+                }
             }
 
             final OXUserStorageInterface oxuser = this.oxu;
@@ -589,9 +597,16 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 }
             });
 
-            // Schedule task
             oxuser.disableUser(userId, ctx);
-            return TaskManager.getInstance().addJob(fsdm, "movefromuserfilestoretomaster", "move user " + userId + " from context " + ctx.getIdAsString() + " from individual to master filestore " + destFilestore.getId(), ctx.getId().intValue());
+
+            if (false == inline) {
+                // Schedule task
+                return TaskManager.getInstance().addJob(fsdm, "movefromuserfilestoretomaster", "move user " + userId + " from context " + ctx.getIdAsString() + " from individual to master filestore " + destFilestore.getId(), ctx.getId().intValue());
+            }
+
+            // Execute with current thread
+            fsdm.call();
+            return -1;
         } catch (StorageException e) {
             LOGGER.error("", e);
             throw e;
@@ -610,6 +625,17 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         } catch (NoSuchUserException e) {
             LOGGER.error("", e);
             throw e;
+        } catch (IOException e) {
+            LOGGER.error("", e);
+            throw new StorageException(e);
+        } catch (InterruptedException e) {
+            // Keep interrupted state
+            Thread.currentThread().interrupt();
+            LOGGER.error("", e);
+            throw new StorageException(e);
+        } catch (ProgrammErrorException e) {
+            LOGGER.error("", e);
+            throw new StorageException(e);
         } catch (RuntimeException e) {
             LOGGER.error("", e);
             throw convertException(e);
@@ -1868,42 +1894,64 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     throw noSuchUserException;
                 }
 
-                Set<Integer> dubCheck = new HashSet<Integer>();
+                int contextAdminId = tool.getAdminForContext(ctx);
                 List<User> filestoreOwners = new java.util.LinkedList<User>();
-                for (final User user : users) {
-                    if (destUser != null && user.getId().intValue() == destUser.intValue()) {
-                        throw new InvalidDataException("It is not allowed to reassign the shared data to the user which should be deleted. Please choose a different reassign user.");
-                    }
-                    if (false == dubCheck.add(user.getId())) {
-                        throw new InvalidDataException("User " + user.getId() + " is contained multiple times in delete request.");
-                    }
-
-                    if (tool.isContextAdmin(ctx, user.getId().intValue())) {
-                        throw new InvalidDataException("Admin delete not supported");
-                    }
-
-                    if (tool.isMasterFilestoreOwner(ctx, user.getId().intValue())) {
-                        Map<Integer, List<Integer>> slaveUsers = tool.fetchSlaveUsersOfMasterFilestore(ctx, user.getId().intValue());
-                        if (!slaveUsers.isEmpty()) {
-                            String affectedUsers = mapToString(slaveUsers);
-                            throw new InvalidDataException("The user " + user.getId() + " is the owner of a master filestore which other users are using. " + "Before deleting this user you must move the filestores of the affected users either to the context filestore, " + "to another master filestore or to a user filestore with the appropriate commandline tools. " + "Affected users are: " + affectedUsers);
+                {
+                    Set<Integer> dubCheck = new HashSet<Integer>();
+                    for (final User user : users) {
+                        if (destUser != null && user.getId().intValue() == destUser.intValue()) {
+                            throw new InvalidDataException("It is not allowed to reassign the shared data to the user which should be deleted. Please choose a different reassign user.");
+                        }
+                        if (false == dubCheck.add(user.getId())) {
+                            throw new InvalidDataException("User " + user.getId() + " is contained multiple times in delete request.");
                         }
 
-                        filestoreOwners.add(user);
-                    }
+                        if (contextAdminId == user.getId().intValue()) {
+                            throw new InvalidDataException("Admin delete not supported");
+                        }
 
+                        if (tool.isMasterFilestoreOwner(ctx, user.getId().intValue())) {
+                            Map<Integer, List<Integer>> slaveUsers = tool.fetchSlaveUsersOfMasterFilestore(ctx, user.getId().intValue());
+                            if (!slaveUsers.isEmpty()) {
+                                String affectedUsers = mapToString(slaveUsers);
+                                throw new InvalidDataException("The user " + user.getId() + " is the owner of a master filestore which other users are using. "
+                                    + "Before deleting this user you must move the filestores of the affected users either to the context filestore, "
+                                    + "to another master filestore or to a user filestore with the appropriate commandline tools. "
+                                    + "Affected users are: " + affectedUsers);
+                            }
+
+                            filestoreOwners.add(user);
+                        }
+
+                    }
                 }
 
                 ConfigViewFactory configViewFactory = AdminServiceRegistry.getInstance().getService(ConfigViewFactory.class);
-                if (destUser == null) { // Move to ctx store
-                    for (User filestoreOwner : filestoreOwners) {
-                        // Disable Unified Quota first (if enabled); otherwise 'c.o.filestore.impl.groupware.unified.UnifiedQuotaFilestoreDataMoveListener' kicks-in and will throw an exception
-                        disableUnifiedQuotaIfEnabled(filestoreOwner, ctx, configViewFactory);
+                if (destUser == null) {
+                    // Move to store of context administrator
+                    User adminUser = oxu.getData(ctx, new User[] { new User(contextAdminId) })[0];
+                    if (adminUser.getFilestoreId().intValue() > 0) {
+                        // Context administrator uses a dedicated store
+                        for (User filestoreOwner : filestoreOwners) {
+                            // Disable Unified Quota first (if enabled); otherwise 'c.o.filestore.impl.groupware.unified.UnifiedQuotaFilestoreDataMoveListener' kicks-in and will throw an exception
+                            disableUnifiedQuotaIfEnabled(filestoreOwner, ctx, configViewFactory);
 
-                        // Move files...
-                        LOGGER.info("User {} has an individual filestore set. Hence, moving user-associated files to context filestore...", filestoreOwner.getId());
-                        moveFromUserToContextFilestore(ctx, filestoreOwner, credentials, true);
-                        LOGGER.info("Moved all files from user {} to context filestore.", filestoreOwner.getId());
+                            // Move files...
+                            LOGGER.info("User {} has an individual filestore set. Hence, moving user-associated files to filestore of context administrator...", filestoreOwner.getId());
+                            moveFromUserFilestoreToMaster(ctx, filestoreOwner, adminUser, credentials, true);
+                            LOGGER.info("Moved all files from user {} to filestore of context administrator.", filestoreOwner.getId());
+                        }
+                    } else {
+                        // Context administrator uses general context store
+                        for (User filestoreOwner : filestoreOwners) {
+                            // Disable Unified Quota first (if enabled); otherwise 'c.o.filestore.impl.groupware.unified.UnifiedQuotaFilestoreDataMoveListener' kicks-in and will throw an exception
+                            disableUnifiedQuotaIfEnabled(filestoreOwner, ctx, configViewFactory);
+
+                            // Move files...
+                            LOGGER.info("User {} has an individual filestore set. Hence, moving user-associated files to context filestore...", filestoreOwner.getId());
+                            moveFromUserToContextFilestore(ctx, filestoreOwner, credentials, true);
+                            LOGGER.info("Moved all files from user {} to context filestore.", filestoreOwner.getId());
+                        }
                     }
                 } else {
                     if (destUser.intValue() > 0) { // Move to master store
@@ -1941,11 +1989,11 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
             User[] retusers = oxu.getData(ctx, users);
 
-            final ArrayList<OXUserPluginInterface> interfacelist = new ArrayList<OXUserPluginInterface>();
+            final List<OXUserPluginInterface> interfacelist = new ArrayList<OXUserPluginInterface>();
 
             // Here we define a list which takes all exceptions which occur during plugin-processing
             // By this we are able to throw all exceptions to the client while concurrently processing all plugins
-            final ArrayList<Exception> exceptionlist = new ArrayList<Exception>();
+            final List<Exception> exceptionlist = new ArrayList<Exception>();
 
             // Trigger plugin extensions
             {
@@ -2412,7 +2460,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         return list(ctx, "*", auth, includeGuests, excludeUsers);
     }
 
-    private Exception callDeleteForPlugin(final Context ctx, final Credentials auth, final User[] retusers, final ArrayList<OXUserPluginInterface> interfacelist, final String bundlename, final OXUserPluginInterface oxuser) {
+    private Exception callDeleteForPlugin(final Context ctx, final Credentials auth, final User[] retusers, final List<OXUserPluginInterface> interfacelist, final String bundlename, final OXUserPluginInterface oxuser) {
         try {
             LOGGER.debug("Calling delete for plugin: {}", bundlename);
             oxuser.delete(ctx, retusers, auth);
