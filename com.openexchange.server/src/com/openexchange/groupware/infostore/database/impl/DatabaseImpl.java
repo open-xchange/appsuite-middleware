@@ -1390,8 +1390,6 @@ public class DatabaseImpl extends DBService {
             }
         } catch (SQLException e) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, (query != null) ? query.toString() : "");
-        } catch (OXException e) {
-            throw e;
         } finally {
             if (stmt != null) {
                 try {
