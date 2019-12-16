@@ -245,6 +245,7 @@ public abstract class ListCore extends UserAbstraction {
             datarow.add(String.valueOf(access.isCollectEmailAddresses()));
             datarow.add(String.valueOf(access.isMultipleMailAccounts()));
             datarow.add(String.valueOf(access.isSubscription()));
+            datarow.add(String.valueOf(access.isPublication()));
             datarow.add(String.valueOf(access.isActiveSync()));
             datarow.add(String.valueOf(access.isUSM()));
             datarow.add(String.valueOf(access.isOLOX20()));

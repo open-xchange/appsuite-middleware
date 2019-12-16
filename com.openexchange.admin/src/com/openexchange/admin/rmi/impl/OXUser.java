@@ -2854,6 +2854,9 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         if (namedAccessCombination.isOLOX20()) {
             retval |= UserConfiguration.OLOX20;
         }
+        if (namedAccessCombination.isPublication()) {
+            retval |= UserConfiguration.PUBLICATION;
+        }
         if (namedAccessCombination.getReadCreateSharedFolders()) {
             retval |= UserConfiguration.READ_CREATE_SHARED_FOLDERS;
         }

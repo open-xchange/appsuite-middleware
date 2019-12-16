@@ -2001,6 +2001,11 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
         if (tmp != null) {
             moduleAccess.setOLOX20(booleanValue(tmp));
         }
+        
+        tmp = soapModuleAccess.isPublication();
+        if (tmp != null) {
+            moduleAccess.setPublication(booleanValue(tmp));
+        }
 
         tmp = soapModuleAccess.isPublicFolderEditable();
         if (tmp != null) {
@@ -2078,6 +2083,7 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
         soapModuleAccess.setInfostore(Boolean.valueOf(moduleAccess.getInfostore()));
         soapModuleAccess.setMultipleMailAccounts(Boolean.valueOf(moduleAccess.isMultipleMailAccounts()));
         soapModuleAccess.setOLOX20(Boolean.valueOf(moduleAccess.isOLOX20()));
+        soapModuleAccess.setPublication(Boolean.valueOf(moduleAccess.isPublication()));
         soapModuleAccess.setPublicFolderEditable(Boolean.valueOf(moduleAccess.isPublicFolderEditable()));
         soapModuleAccess.setReadCreateSharedFolders(Boolean.valueOf(moduleAccess.getReadCreateSharedFolders()));
         soapModuleAccess.setSubscription(Boolean.valueOf(moduleAccess.isSubscription()));
