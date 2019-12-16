@@ -2168,11 +2168,7 @@ public class CalendarUtils {
 
             @Override
             protected boolean matches(Event item1, Event item2) {
-                try {
-                    return EventMapper.getInstance().equalsByFields(item1, item2, fieldsToMatch);
-                } catch (OXException e) {
-                    throw new UnsupportedOperationException(e);
-                }
+                return EventMapper.getInstance().equalsByFields(item1, item2, fieldsToMatch);
             }
         };
     }
