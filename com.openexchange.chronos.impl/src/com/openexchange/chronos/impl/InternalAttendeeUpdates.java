@@ -115,8 +115,8 @@ public class InternalAttendeeUpdates implements CollectionUpdate<Attendee, Atten
      *
      * @param session The calendar session
      * @param folder The parent folder of the event being processed
-     * @param originalAttendees The original event holding the original attendees
-     * @param updatedAttendees The updated event holding the new/updated list of attendees, as supplied by the client
+     * @param originalEvent The original event holding the original attendees
+     * @param updatedEvent The updated event holding the new/updated list of attendees, as supplied by the client
      */
     public static InternalAttendeeUpdates onUpdatedEvent(CalendarSession session, CalendarFolder folder, Event originalEvent, Event updatedEvent) throws OXException {
         InternalAttendeeUpdates attendeeHelper = new InternalAttendeeUpdates(session, folder, originalEvent.getAttendees());
