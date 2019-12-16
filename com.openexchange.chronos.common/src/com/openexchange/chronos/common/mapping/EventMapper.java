@@ -185,11 +185,11 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
      * @param event2 The second event to compare
      * @param fields The event fields to compare
      * @return <code>true</code> if all fields are equal, <code>false</code>, otherwise
-     * @throws OXException
      */
-    public boolean equalsByFields(Event event1, Event event2, EventField... fields) throws OXException {
+    public boolean equalsByFields(Event event1, Event event2, EventField... fields) {
         for (EventField field : fields) {
-            if (false == get(field).equals(event1, event2)) {
+            Mapping<? extends Object, Event> mapping = opt(field);
+            if (null != mapping && mapping.equals(event1, event2)) {
                 return false;
             }
         }
