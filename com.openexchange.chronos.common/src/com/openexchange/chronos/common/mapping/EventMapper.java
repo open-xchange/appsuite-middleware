@@ -189,7 +189,7 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
     public boolean equalsByFields(Event event1, Event event2, EventField... fields) {
         for (EventField field : fields) {
             Mapping<? extends Object, Event> mapping = opt(field);
-            if (null != mapping && mapping.equals(event1, event2)) {
+            if (null != mapping && false == mapping.equals(event1, event2)) {
                 return false;
             }
         }
