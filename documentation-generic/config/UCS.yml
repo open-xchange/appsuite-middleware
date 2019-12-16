@@ -137,12 +137,14 @@ properties:
       tags: ["Univention" , "SAML"]
     - key: com.openexchange.saml.ucs.logoutRedirectUrl
       description: |
-        URL of where the users are redirected after logout
+        URL of where the users are redirected after single logout flow.
+        This property is only used when [[com.openexchange.saml.enableSingleLogout]] is set to true.
+        If a redirect after logout is required, logoutLocation can be set in as-config.yml.
       defaultValue: 
       version: 7.10.1
       reloadable: true
       configcascadeAware: false
-      related: 
+      related: com.openexchange.saml.enableSingleLogout
       file: authplugin.properties
       packageName: open-xchange-saml-ucs
       tags: ["Univention" , "SAML"]
