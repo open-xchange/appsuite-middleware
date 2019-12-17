@@ -163,22 +163,32 @@ public class FileStorageCompositionSpaceKeyStorage extends AbstractCompositionSp
             return cachedKey;
         }
 
-        try {
-            Callable<Key> loader = new Callable<Key>() {
+        if (createIfAbsent) {
+            try {
+                Callable<Key> loader = new Callable<Key>() {
 
-                @Override
-                public Key call() throws Exception {
-                    return loadOrCreateKeyfor(compositionSpaceId, createIfAbsent, session);
+                    @Override
+                    public Key call() throws Exception {
+                        return loadOrCreateKeyfor(compositionSpaceId, true, session);
+                    }
+                };
+                return cachedKeys.get(compositionSpaceId, loader);
+            } catch (ExecutionException e) {
+                Throwable cause = e.getCause();
+                if (cause instanceof OXException) {
+                    throw (OXException) cause;
                 }
-            };
-            return cachedKeys.get(compositionSpaceId, loader);
-        } catch (ExecutionException e) {
-            Throwable cause = e.getCause();
-            if (cause instanceof OXException) {
-                throw (OXException) cause;
+                throw CompositionSpaceErrorCode.ERROR.create(cause, cause.getMessage());
             }
-            throw CompositionSpaceErrorCode.ERROR.create(cause, cause.getMessage());
         }
+
+        Key existentKey = loadOrCreateKeyfor(compositionSpaceId, false, session);
+        if (existentKey == null) {
+            return null;
+        }
+
+        cachedKeys.put(compositionSpaceId, existentKey);
+        return existentKey;
     }
 
     Key loadOrCreateKeyfor(UUID compositionSpaceId, boolean createIfAbsent, Session session) throws OXException {
