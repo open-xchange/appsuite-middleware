@@ -49,12 +49,15 @@
 
 package com.openexchange.mailaccount.utils;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.java.IPAddressUtil;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.config.IPRange;
@@ -70,7 +73,7 @@ public class HostList {
     /**
      * The empty host list.
      */
-    public static final HostList EMPTY = new HostList(Collections.<IPRange> emptyList(), Collections.<String> emptySet(), Collections.<String> emptySet());
+    public static final HostList EMPTY = new HostList(Collections.<IPRange> emptyList(), Collections.<String> emptySet(), Collections.<String> emptySet(), "");
 
     /**
      * Accepts a comma-separated list of IP addresses, IP address ranges, and host names.
@@ -89,7 +92,7 @@ public class HostList {
         Set<String> matchingAppendixHostNames = new HashSet<String>(tokens.length);
         List<IPRange> ipRanges = new ArrayList<IPRange>(tokens.length);
         for (String token : tokens) {
-            if (false == Strings.isEmpty(token)) {
+            if (Strings.isNotEmpty(token)) {
                 token = Strings.asciiLowerCase(token);
                 boolean isIp = false;
                 try {
@@ -119,7 +122,7 @@ public class HostList {
             }
         }
 
-        return new HostList(ipRanges, matchingAppendixHostNames, matchingHostNames);
+        return new HostList(ipRanges, matchingAppendixHostNames, matchingHostNames, hostList);
     }
 
     // ----------------------------------------------------------------------------------------------------------------------------------
@@ -127,15 +130,98 @@ public class HostList {
     private final List<IPRange> ipRanges;
     private final Set<String> matchingAppendixHostNames;
     private final Set<String> matchingHostNames;
+    private final String hostString;
 
     /**
      * Initializes a new {@link HostList}.
      */
-    private HostList(List<IPRange> ipRanges, Set<String> matchingAppendixHostNames, Set<String> matchingHostNames) {
+    private HostList(List<IPRange> ipRanges, Set<String> matchingAppendixHostNames, Set<String> matchingHostNames, String hostString) {
         super();
         this.ipRanges = ipRanges;
-        this.matchingAppendixHostNames = matchingAppendixHostNames.isEmpty() ? null : matchingAppendixHostNames;
-        this.matchingHostNames = matchingHostNames;
+        this.hostString = hostString;
+        this.matchingAppendixHostNames = ImmutableSet.copyOf(matchingAppendixHostNames);
+        this.matchingHostNames = ImmutableSet.copyOf(matchingHostNames);
+    }
+
+    private final static int INADDR4SZ = 4;
+    private final static int INADDR16SZ = 16;
+    private final static int INT16SZ = 2;
+
+    static String numericToTextFormatV4(byte[] src) {
+        StringBuilder sb = new StringBuilder(16);
+        sb.append((src[0] & 0xff)).append('.');
+        sb.append((src[1] & 0xff)).append('.');
+        sb.append((src[2] & 0xff)).append('.');
+        sb.append((src[3] & 0xff));
+        return sb.toString();
+    }
+
+    static String numericToTextFormatV6(byte[] src) {
+        StringBuffer sb = new StringBuffer(39);
+        for (int i = 0; i < (INADDR16SZ / INT16SZ); i++) {
+            sb.append(Integer.toHexString(((src[i << 1] << 8) & 0xff00) | (src[(i << 1) + 1] & 0xff)));
+            if (i < (INADDR16SZ / INT16SZ) - 1) {
+                sb.append(":");
+            }
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Checks if this host list is empty.
+     *
+     * @return <code>true</code> if empty; otherwise <code>false</code>
+     */
+    public boolean isEmpty() {
+        return ipRanges.isEmpty() && matchingAppendixHostNames.isEmpty() && matchingHostNames.isEmpty();
+    }
+
+    /**
+     * Gets the host string from which this instance was parsed.
+     *
+     * @return The host string
+     */
+    public String getHostString() {
+        return hostString;
+    }
+
+    /**
+     * Checks if specified host name is contained in this host list.
+     * <p>
+     * The host name can either be a machine name, such as "<code>java.sun.com</code>", or a textual representation of its IP address.
+     *
+     * @param hostAddress The host address
+     * @return <code>true</code> if contained; otherwise <code>false</code>
+     */
+    public boolean contains(InetAddress hostAddress) {
+        return contains(hostAddress, true);
+    }
+
+    private boolean contains(InetAddress hostAddress, boolean checkHostName) {
+        if (null == hostAddress) {
+            return false;
+        }
+
+        byte[] octets = hostAddress.getAddress();
+        if (null != octets) {
+            if (INADDR4SZ == octets.length) {
+                // IPv4
+                for (IPRange ipRange : this.ipRanges) {
+                    if (ipRange.containsIPv4(octets, numericToTextFormatV4(octets))) {
+                        return true;
+                    }
+                }
+            } else if (INADDR16SZ == octets.length) {
+                // IPv6
+                for (IPRange ipRange : this.ipRanges) {
+                    if (ipRange.containsIPv6(octets, numericToTextFormatV6(octets))) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return checkHostName ? contains(hostAddress.getHostName()) : false;
     }
 
     /**
@@ -152,51 +238,68 @@ public class HostList {
         }
 
         String toCheck = Strings.asciiLowerCase(hostName);
-        char firstChar = toCheck.charAt(0);
-        if (Strings.isDigit(firstChar) || firstChar == '[') {
-            // Test for IP address
-            byte[] octets = IPAddressUtil.textToNumericFormatV4(toCheck);
-            if (null != octets) {
-                // IPv4
-                for (IPRange ipRange : ipRanges) {
+
+        // Test for IP address
+        byte[] octets = IPAddressUtil.textToNumericFormatV4(toCheck);
+        if (octets != null) {
+            // IPv4
+            for (IPRange ipRange : this.ipRanges) {
+                if (ipRange.containsIPv4(octets, toCheck)) {
+                    return true;
+                }
+            }
+        }
+
+        octets = IPAddressUtil.textToNumericFormatV6(toCheck);
+        if (octets != null) {
+            if (octets.length == 4) {
+                // IPv4 mapped IPv6 address
+                for (IPRange ipRange : this.ipRanges) {
                     if (ipRange.containsIPv4(octets, toCheck)) {
                         return true;
                     }
                 }
             }
 
-            octets = IPAddressUtil.textToNumericFormatV6(toCheck);
-            if (null != octets) {
-                // IPv6
-                for (IPRange ipRange : ipRanges) {
-                    if (ipRange.containsIPv6(octets, toCheck)) {
-                        return true;
-                    }
+            // IPv6
+            for (IPRange ipRange : this.ipRanges) {
+                if (ipRange.containsIPv6(octets, toCheck)) {
+                    return true;
                 }
             }
         }
 
-        if (null != matchingAppendixHostNames) {
-            for (String appendixHostName : matchingAppendixHostNames) {
+        if (this.matchingAppendixHostNames != null) {
+            for (String appendixHostName : this.matchingAppendixHostNames) {
                 if (toCheck.endsWith(appendixHostName)) {
                     return true;
                 }
             }
         }
 
-        return matchingHostNames.contains(Strings.asciiLowerCase(toCheck));
+        if (this.matchingHostNames.contains(toCheck)) {
+            return true;
+        }
+
+        // Need to resolve as last resort
+        try {
+            return contains(InetAddress.getByName(toCheck), false);
+        } catch (UnknownHostException e) {
+            // Cannot be resolved
+            return false;
+        }
     }
 
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder(32);
         builder.append("[");
-        if (ipRanges != null) {
-            builder.append("ipRanges=").append(ipRanges).append(", ");
+        if (this.ipRanges != null) {
+            builder.append("ipRanges=").append(this.ipRanges).append(", ");
         }
-        if (matchingAppendixHostNames != null) {
+        if (this.matchingAppendixHostNames != null) {
             builder.append("wild-card_hostNames=[");
-            Iterator<String> it = matchingAppendixHostNames.iterator();
+            Iterator<String> it = this.matchingAppendixHostNames.iterator();
             if (it.hasNext()) {
                 builder.append('*').append(it.next());
                 while (it.hasNext()) {
@@ -205,8 +308,8 @@ public class HostList {
             }
             builder.append("], ");
         }
-        if (matchingHostNames != null) {
-            builder.append("hostNames=").append(matchingHostNames);
+        if (this.matchingHostNames != null) {
+            builder.append("hostNames=").append(this.matchingHostNames);
         }
         builder.append("]");
         return builder.toString();
