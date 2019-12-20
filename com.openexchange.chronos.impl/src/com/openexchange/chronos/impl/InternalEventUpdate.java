@@ -72,7 +72,6 @@ import static com.openexchange.chronos.impl.Utils.prepareOrganizer;
 import static com.openexchange.java.Autoboxing.b;
 import static com.openexchange.tools.arrays.Collections.isNullOrEmpty;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -120,7 +119,6 @@ import com.openexchange.chronos.service.SimpleCollectionUpdate;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.groupware.tools.mappings.Mapping;
-import com.openexchange.java.Strings;
 
 /**
  * {@link InternalEventUpdate}
@@ -131,15 +129,6 @@ import com.openexchange.java.Strings;
 public class InternalEventUpdate implements EventUpdate {
 
     private static final Logger LOG = LoggerFactory.getLogger(InternalEventUpdate.class);
-
-    /**
-     * Event fields that, when modified, indicate that a <i>re-scheduling</i> of the calendar object resource is assumed, usually leading
-     * to appropriate notifications and scheduling messages being sent out to the attendees.
-     */
-    private static final EventField[] RESCHEDULE_FIELDS = new EventField[] {
-        EventField.SUMMARY, EventField.LOCATION, EventField.DESCRIPTION, EventField.ATTACHMENTS, EventField.GEO,
-        EventField.ORGANIZER, EventField.START_DATE, EventField.END_DATE, EventField.TRANSP, EventField.RECURRENCE_RULE
-    };
 
     private final CalendarSession session;
     private final CalendarUser calendarUser;
@@ -251,17 +240,8 @@ public class InternalEventUpdate implements EventUpdate {
      * @return <code>true</code> if the calendar resource is re-scheduled along with the update, <code>false</code>, otherwise
      * @throws OXException
      */
-    public boolean isReschedule() throws OXException {
-        if (containsAnyChangeOf(RESCHEDULE_FIELDS)) {
-            if(hasChangedReschedulingFields()) {
-                return true;
-            }
-        }
-        InternalAttendeeUpdates attendeeUpdates = getAttendeeUpdates();
-        if (0 < attendeeUpdates.getAddedItems().size() || 0 < attendeeUpdates.getRemovedItems().size()) {
-            return true;
-        }
-        return false;
+    public boolean isReschedule() {
+        return Utils.isReschedule(this);
     }
 
     @Override
@@ -673,7 +653,7 @@ public class InternalEventUpdate implements EventUpdate {
      * @return <code>true</code> if the event's sequence number should be updated, <code>false</code>, otherwise
      * @see com.openexchange.chronos.impl.performer.AbstractUpdatePerformer 
      */
-    private static boolean needsSequenceNumberIncrement(Event originalEvent, Event updatedEvent) throws OXException {
+    private static boolean needsSequenceNumberIncrement(Event originalEvent, Event updatedEvent) {
         EventField[] relevantFields = new EventField[] {
             EventField.SUMMARY, EventField.LOCATION, EventField.RECURRENCE_RULE, EventField.START_DATE, EventField.END_DATE,
             EventField.RECURRENCE_DATES, EventField.DELETE_EXCEPTION_DATES, EventField.TRANSP
@@ -681,8 +661,7 @@ public class InternalEventUpdate implements EventUpdate {
         if (false == EventMapper.getInstance().equalsByFields(originalEvent, updatedEvent, relevantFields)) {
             return true;
         }
-        CollectionUpdate<Attendee, AttendeeField> attendeeUpdates = CalendarUtils.getAttendeeUpdates(originalEvent.getAttendees(), updatedEvent.getAttendees());
-        if (0 < attendeeUpdates.getAddedItems().size() || 0 < attendeeUpdates.getRemovedItems().size()) {
+        if (false == matches(originalEvent.getAttendees(), updatedEvent.getAttendees())) {
             //TODO: more distinct evaluation of attendee updates
             return true;
         }
@@ -975,48 +954,4 @@ public class InternalEventUpdate implements EventUpdate {
         return coversDifferentTimePeriod(originalEvent, updatedEvent);
     }
     
-    /**
-     * Get a value indicating whether the applied changes represent a <i>re-scheduling</i> of the calendar object resource or not,
-     * depending on the modified event fields.
-     * <p> 
-     * In detail it will be checked if fields containing string values have really changed their value and not just from
-     * <code>null</code> to an only whitespace-String, e.g. <code>""</code>
-     * 
-     * @return <code>true</code> if an fields of interest changed, <code>false</code> otherwise
-     * @throws OXException
-     */
-    private boolean hasChangedReschedulingFields() throws OXException {
-        ArrayList<EventField> list = new ArrayList<>(eventUpdate.getUpdatedFields());
-        list.retainAll(Arrays.asList(RESCHEDULE_FIELDS));
-        for (EventField field : list) {
-            Mapping<? extends Object, Event> mapping = EventMapper.getInstance().get(field);
-            Object value = mapping.get(getOriginal());
-            if (null == value) {
-                Object updated = mapping.get(getUpdate());
-                if (null != updated) {
-                    // No further checking of other changes
-                    if (false == String.class.isAssignableFrom(updated.getClass())) {  
-                        return true;
-                    }
-                    if (Strings.isNotEmpty((String) updated)) {
-                        return true;
-                    }
-                }
-                continue;
-            }
-            // No further checking of other changes
-            if (false == String.class.isAssignableFrom(value.getClass())) {
-                return true;
-            }
-            String original = ((String) value);
-            if (Strings.isEmpty(original)) {
-                if (Strings.isNotEmpty((String) mapping.get(getUpdate()))) {
-                    return true;
-                }
-            }
-        }
-        // No actual change happened
-        return false;
-    }
-
 }

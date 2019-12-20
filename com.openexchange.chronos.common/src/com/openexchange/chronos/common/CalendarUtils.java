@@ -384,6 +384,30 @@ public class CalendarUtils {
     }
 
     /**
+     * Gets a value indicating whether a collection of calendar users matches another one, i.e. both collections contain the same elements,
+     * comparing the entity identifier for internal calendar users, or trying to match the calendar user's URI for external ones.
+     *
+     * @param collection1 The first collection to check
+     * @param collection2 The second collection to check
+     * @return <code>true</code> if the collections <i>match</i>, i.e. their elememts are targeting the same calendar users, <code>false</code>, otherwise
+     */
+    public static <T extends CalendarUser> boolean matches(Collection<T> collection1, Collection<T> collection2) {
+        if (null == collection1 || collection1.isEmpty()) {
+            return null == collection2 || collection2.isEmpty();
+        }
+        if (null == collection2 || collection1.size() != collection2.size()) {
+            return false;
+        }
+        return new AbstractSimpleCollectionUpdate<T>(collection1, collection2) {
+
+            @Override
+            protected boolean matches(T item1, T item2) {
+                return CalendarUtils.matches(item1, item2);
+            }
+        }.isEmpty();
+    }
+
+    /**
      * Gets a value indicating whether a calendar user matches a specific internal user entity.
      *
      * @param calendarUser The calendar user to check

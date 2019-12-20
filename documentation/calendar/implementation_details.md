@@ -416,6 +416,19 @@ To avoid possible ambiguities, only certain changes considered, where the change
 - Removed attendees are also removed from change exceptions, in case they previously attended there, too.
 - For changes to an event's start- and/or enddate, the same change is only propagated if both properties are equal to the original value in the change exception, i.e. the change exception's timeslot is still matching the recurrence.
 
+## Propagate Participation Status to Exceptions
+
+Especially for event series with many attendees, chances are quite high that there are many change exceptions in the series after a while. Main reason is here that users change their participation status for individual occurrences to indicate that they cannot attend an event due to vacation or conflicting appointments at the same time. Or, they apply an individual reminder to an occurrence.
+
+While these are all change exception events from a technical point of view, users do not see them as such, which previously caused some quirks when they want to change their participation status of the whole series, or get hints in the notification area that there are multiple events of the same series they need to reply to.
+
+So, similarly as updates of the event data may get propagated, also an updated participation status of an attendee in the series master event may get applied to existing change exceptions under certain circumstances, which are: 
+
+- The original participation status of a change exception must be equal to the original participation status of the series master event
+- The change exception must not be a *real* exception from the series, i.e. it must not be considered as *re-scheduled* compared to the original occurrence
+
+If these preconditions are met, the updated participation status in the series master event is taken over in overridden instances, too. In the participation status update comes along with a certain comment, this attendee comment is also updated in overridden instances, if its value has been equal to the series master event before, too.
+
 ***
 
 **_References / further reading:_**

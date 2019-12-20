@@ -134,6 +134,7 @@ import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
+import com.openexchange.groupware.tools.mappings.Mapping;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Strings;
@@ -178,6 +179,17 @@ public class Utils {
      * leading to appropriate notifications and scheduling messages being sent out to the organizer.
      */
     private static final AttendeeField[] REPLY_FIELDS = { AttendeeField.PARTSTAT, AttendeeField.COMMENT };
+
+    /**
+     * Event fields that, when modified, indicate that a <i>re-scheduling</i> of the calendar object resource is assumed, usually leading
+     * to appropriate notifications and scheduling messages being sent out to the attendees.
+     * <p/>
+     * This does not contain {@link EventField#ATTENDEES}, as some more sophisticated logic to determine re-schedulings is required here.
+     */
+    private static final EventField[] RESCHEDULE_FIELDS = new EventField[] {
+        EventField.SUMMARY, EventField.LOCATION, EventField.DESCRIPTION, EventField.ATTACHMENTS, EventField.GEO,
+        EventField.ORGANIZER, EventField.START_DATE, EventField.END_DATE, EventField.TRANSP, EventField.RECURRENCE_RULE
+    };
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Utils.class);
 
@@ -867,6 +879,83 @@ public class Utils {
             }
         }
         return false;
+    }
+
+    /**
+     * Gets a value indicating whether an event update represents a <i>re-scheduling</i> of the calendar object resource or not, depending
+     * on the modified event fields.
+     * <p/>
+     * Besides changes to the event's recurrence, start- or end-time, this also includes further important event properties, or changes
+     * in the attendee line-up.
+     *
+     * @param eventUpdate The event update to check
+     * @return <code>true</code> if the updated event is considered as re-scheduled, <code>false</code>, otherwise
+     * @see #RESCHEDULE_FIELDS
+     */
+    public static boolean isReschedule(EventUpdate eventUpdate) {
+        for (EventField updatedField : eventUpdate.getUpdatedFields()) {
+            if (isReschedule(eventUpdate.getOriginal(), eventUpdate.getUpdate(), updatedField)) {
+                return true; // field relevant for re-scheduling changed
+            }
+        }
+        if (0 < eventUpdate.getAttendeeUpdates().getAddedItems().size() || 0 < eventUpdate.getAttendeeUpdates().getRemovedItems().size()) {
+            return true; // attendee lineup changed
+        }
+        return false;
+    }
+    
+    /**
+     * Gets a value indicating whether an event update represents a <i>re-scheduling</i> of the calendar object resource or not, depending
+     * on the modified event fields.
+     * <p/>
+     * Besides changes to the event's recurrence, start- or end-time, this also includes further important event properties, or changes
+     * in the attendee line-up.
+     *
+     * @param originalEvent The original event
+     * @param updatedEvent The updated event
+     * @return <code>true</code> if the updated event is considered as re-scheduled, <code>false</code>, otherwise
+     * @see #RESCHEDULE_FIELDS
+     */
+    public static boolean isReschedule(Event originalEvent, Event updatedEvent) {
+        /*
+         * re-scheduled if one of reschedule fields, or the attendee lineup changes
+         */
+        for (EventField rescheduleField : RESCHEDULE_FIELDS) {
+            if (isReschedule(originalEvent, updatedEvent, rescheduleField)) {
+                return true; // field relevant for re-scheduling changed
+            }
+        }
+        if (false == matches(originalEvent.getAttendees(), updatedEvent.getAttendees())) {
+            return true; // attendee lineup changed
+        }
+        return false;
+    }
+
+    /**
+     * Gets a value indicating whether a particular property of an event update represents a <i>re-scheduling</i> of the calendar object
+     * resource or not, based on the property's value in the original and updated event data.
+     *
+     * @param originalEvent The original event
+     * @param updatedEvent The updated event
+     * @param field The event field to check
+     * @return <code>true</code> if the property in the updated event makes it re-scheduled, <code>false</code>, otherwise
+     * @see #RESCHEDULE_FIELDS
+     */
+    private static boolean isReschedule(Event originalEvent, Event updatedEvent, EventField field) {
+        if (null == field || false == com.openexchange.tools.arrays.Arrays.contains(RESCHEDULE_FIELDS, field)) {
+            return false; // field not relevant
+        }
+        Mapping<? extends Object, Event> mapping = EventMapper.getInstance().opt(field);
+        if (null == mapping || mapping.equals(originalEvent, updatedEvent)) {
+            return false; // no change
+        }
+        Object originalValue = mapping.get(originalEvent);
+        Object updatedValue = mapping.get(updatedEvent);
+        if ((null == originalValue || String.class.isInstance(originalValue) && Strings.isEmpty((String) originalValue)) &&
+            (null == updatedValue || String.class.isInstance(updatedValue) && Strings.isEmpty((String) updatedValue))) {
+            return false; // no relevant change in textual field
+        }
+        return true; // relevant change, otherwise
     }
 
     /**
