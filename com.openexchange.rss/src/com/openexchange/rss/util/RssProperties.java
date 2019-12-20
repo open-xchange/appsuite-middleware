@@ -180,9 +180,8 @@ public class RssProperties {
      * @return <code>true</code> if denied; otherwise <code>false</code>
      */
     public static boolean isDenied(String uriString) {
-        URI uri;
         try {
-            uri = new URI(uriString);
+        	URI uri = new URI(uriString);
             return !isAllowed(uri.getPort()) || isBlacklisted(uri.getHost()) || !isAllowedScheme(uri.getScheme()) || !isValid(uri);
         } catch (URISyntaxException e) {
             org.slf4j.LoggerFactory.getLogger(RssProperties.class).debug("Given feed URL \"{}\" appears not to be valid.", uriString, e);
