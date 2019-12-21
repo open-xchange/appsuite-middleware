@@ -55,6 +55,7 @@ import java.util.Set;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import com.google.common.collect.ImmutableSet;
+import com.openexchange.log.LogProperties;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -115,8 +116,13 @@ public final class PushEventHandler implements EventHandler {
             try {
                 if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic)) {
                     Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
-                    PushManagerRegistry registry = PushManagerRegistry.getInstance();
-                    registry.stopListenerFor(session);
+                    LogProperties.putSessionProperties(session);
+                    try {
+                        PushManagerRegistry registry = PushManagerRegistry.getInstance();
+                        registry.stopListenerFor(session);
+                    } finally {
+                        LogProperties.removeSessionProperties();
+                    }
                 } else if (SessiondEventConstants.TOPIC_REMOVE_DATA.equals(topic) || SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(topic)) {
                     @SuppressWarnings("unchecked")
                     Map<String, Session> sessionContainer = (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
@@ -125,12 +131,22 @@ public final class PushEventHandler implements EventHandler {
                     // Stop listener for sessions
                     final Collection<Session> sessions = sessionContainer.values();
                     for (Session session : sessions) {
-                        registry.stopListenerFor(session);
+                        LogProperties.putSessionProperties(session);
+                        try {
+                            registry.stopListenerFor(session);
+                        } finally {
+                            LogProperties.removeSessionProperties();
+                        }
                     }
                 } else if (CONSIDER_ADDED.contains(topic)) {
                     Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
-                    PushManagerRegistry registry = PushManagerRegistry.getInstance();
-                    registry.startListenerFor(session);
+                    LogProperties.putSessionProperties(session);
+                    try {
+                        PushManagerRegistry registry = PushManagerRegistry.getInstance();
+                        registry.startListenerFor(session);
+                    } finally {
+                        LogProperties.removeSessionProperties();
+                    }
                 }
             } catch (Exception e) {
                 LOG.error("Error while handling SessionD event \"{}\".", topic, e);

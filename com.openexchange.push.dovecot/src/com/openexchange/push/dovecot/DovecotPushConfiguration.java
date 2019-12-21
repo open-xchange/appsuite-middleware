@@ -50,54 +50,46 @@
 package com.openexchange.push.dovecot;
 
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.push.dovecot.locking.DbDovecotPushClusterLock;
-import com.openexchange.push.dovecot.locking.DovecotPushClusterLock;
-import com.openexchange.push.dovecot.locking.HzDovecotPushClusterLock;
-import com.openexchange.push.dovecot.locking.NoOpDovecotPushClusterLock;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link DovecotPushConfiguration}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since 7.6.2
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.10.4
  */
 public class DovecotPushConfiguration {
 
-    private DovecotPushClusterLock clusterLock;
+    private final ConfigurationService configService;
 
-    /**
-     * Initializes a new {@link DovecotPushConfiguration}.
-     */
-    public DovecotPushConfiguration() {
+    public DovecotPushConfiguration(ConfigurationService configService) {
         super();
+        this.configService = configService;
+    }
+
+    public String getClusterLockMech() {
+        return configService.getProperty("com.openexchange.push.dovecot.clusterLock", "hz").trim();
     }
 
     /**
-     * Initializes this configuration instance
+     * Whether to use stateless implementation.
      *
-     * @param services The service to use
+     * @param services The service look-up to obtain required services from
+     * @return <code>true</code> for stateless implementation; otherwise <code>false</code>
+     * @throws OXException If property cannot be checked
      */
-    public void init(ServiceLookup services) {
-        ConfigurationService configService = services.getService(ConfigurationService.class);
-
-        String tmp = configService.getProperty("com.openexchange.push.dovecot.clusterLock", "hz").trim();
-        if ("hz".equalsIgnoreCase(tmp)) {
-            clusterLock = new HzDovecotPushClusterLock(services);
-        } else if ("db".equalsIgnoreCase(tmp)) {
-            clusterLock = new DbDovecotPushClusterLock(services);
-        } else {
-            clusterLock = new NoOpDovecotPushClusterLock();
-        }
+    public boolean useStatelessImpl() throws OXException {
+        return configService.getBoolProperty("com.openexchange.push.dovecot.stateless", true);
     }
 
     /**
-     * Gets the cluster lock
+     * Checks whether to prefer Doveadm to issue METADATA commands.
      *
-     * @return The cluster lock
+     * @param optionalServices The optional service look-up
+     * @return <code>true</code> to prefer Doveadm; otherwise <code>false</code>
      */
-    public DovecotPushClusterLock getClusterLock() {
-        return clusterLock;
+    public boolean preferDoveadmForMetadata() {
+        return configService.getBoolProperty("com.openexchange.push.dovecot.preferDoveadmForMetadata", false);
     }
 
 }

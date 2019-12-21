@@ -50,29 +50,57 @@
 package com.openexchange.push.dovecot;
 
 import java.sql.Connection;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.push.PushUser;
+import com.openexchange.push.dovecot.osgi.Services;
+import com.openexchange.user.UserService;
 
 /**
  * {@link DovecotPushDeleteListener} - Delete listener for Dovecot Push bundle.
  */
 public final class DovecotPushDeleteListener implements DeleteListener {
 
+    private static final Logger LOG = LoggerFactory.getLogger(DovecotPushDeleteListener.class);
+
+    private final AbstractDovecotPushManagerService pushManager;
+
     /**
      * Initializes a new {@link DovecotPushDeleteListener}.
      */
-    public DovecotPushDeleteListener() {
+    public DovecotPushDeleteListener(AbstractDovecotPushManagerService pushManager) {
         super();
+        this.pushManager = pushManager;
     }
 
     @Override
-    public void deletePerformed(final DeleteEvent event, final Connection readCon, final Connection writeCon) throws OXException {
+    public void deletePerformed(DeleteEvent event, Connection readCon, Connection writeCon) throws OXException {
         if (DeleteEvent.TYPE_USER == event.getType()) {
-            DovecotPushManagerService instance = DovecotPushManagerService.getInstance();
-            if (null != instance) {
-                instance.stopListener(false, true, event.getId(), event.getContext().getContextId());
+            dropListenerFor(event.getId(), event.getContext().getContextId());
+        } else if (DeleteEvent.TYPE_CONTEXT == event.getType()) {
+            UserService userService = Services.getServiceLookup().getServiceSafe(UserService.class);
+            int contextId = event.getContext().getContextId();
+            for (int userId : userService.listAllUser(contextId, false, false)) {
+                dropListenerFor(userId, contextId);
             }
+        }
+    }
+
+    /**
+     * Drops the listener associated with given user.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @throws OXException If listener cannot be dropped
+     */
+    private void dropListenerFor(int userId, int contextId) {
+        try {
+            pushManager.unregisterForDeletedUser(new PushUser(userId, contextId));
+        } catch (OXException e) {
+            LOG.warn("Unable to stop push listener for deleted user", e);
         }
     }
 

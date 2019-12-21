@@ -380,14 +380,17 @@ final class SessionData {
      * @param userId The user identifier
      * @param contextId The context identifier
      * @param matcher The matcher to satisfy
+     * @param ignoreShortTerm Whether short-term container should be considered or not
      * @param ignoreLongTerm Whether long-term container should be considered or not
      * @return The first matching session or <code>null</code>
      */
-    public Session findFirstSessionForUser(int userId, int contextId, SessionMatcher matcher, boolean ignoreLongTerm) {
-        for (SessionContainer container : sessionList) {
-            SessionControl control = container.getAnySessionByUser(userId, contextId);
-            if ((control != null) && matcher.accepts(control.getSession())) {
-                return control.getSession();
+    public Session findFirstSessionForUser(int userId, int contextId, SessionMatcher matcher, boolean ignoreShortTerm, boolean ignoreLongTerm) {
+        if (false == ignoreShortTerm) {
+            for (SessionContainer container : sessionList) {
+                SessionControl control = container.getAnySessionByUser(userId, contextId);
+                if ((control != null) && matcher.accepts(control.getSession())) {
+                    return control.getSession();
+                }
             }
         }
 
@@ -403,6 +406,7 @@ final class SessionData {
                 }
             }
         }
+
         return null;
     }
 

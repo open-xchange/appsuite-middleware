@@ -54,13 +54,13 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.LockSupport;
 import org.slf4j.Logger;
@@ -71,6 +71,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.UpdateStatus;
 import com.openexchange.groupware.update.Updater;
+import com.openexchange.groupware.userconfiguration.UserConfigurationCodes;
 import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.log.LogProperties;
 import com.openexchange.mail.api.MailConfig.PasswordSource;
@@ -98,7 +99,7 @@ import com.openexchange.push.impl.osgi.Services;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.user.UserExceptionCode;
 import com.openexchange.user.UserService;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
@@ -147,6 +148,7 @@ public final class PushManagerRegistry implements PushListenerService {
     private final ConcurrentMap<Class<? extends PushManagerService>, PushManagerService> map;
     private final ServiceLookup services;
     private final Set<PushUser> initialPushUsers;
+    private final AtomicBoolean allUsersStarted;
     private final AtomicReference<PermanentListenerRescheduler> reschedulerRef;
 
     /**
@@ -158,22 +160,46 @@ public final class PushManagerRegistry implements PushListenerService {
         super();
         this.services = services;
         initialPushUsers = new HashSet<PushUser>(256); // Always wrapped by surrounding synchronized block
+        allUsersStarted = new AtomicBoolean(false);
         map = new ConcurrentHashMap<Class<? extends PushManagerService>, PushManagerService>();
         reschedulerRef = new AtomicReference<PermanentListenerRescheduler>();
     }
 
     private boolean hasWebMailAndIsActive(Session session) {
+        if (session == null) {
+            return false;
+        }
+
+        if (!(session instanceof ServerSession)) {
+            return hasWebMailAndIsActive(session.getUserId(), session.getContextId());
+        }
+
+        ServerSession serverSession = (ServerSession) session;
+        int contextId = session.getContextId();
+        int userId = session.getUserId();
         try {
-            ServerSession serverSession = ServerSessionAdapter.valueOf(session);
             if (false == serverSession.getUserPermissionBits().hasWebMail()) {
-                LOG.info("User {} in context {} has no 'WebMail' permission. Hence, no listener will be started.", I(session.getUserId()), I(session.getContextId()));
+                LOG.info("User {} in context {} has no 'WebMail' permission. Hence, no listener will be started.", I(userId), I(contextId));
             }
             if (false == serverSession.getUser().isMailEnabled()) {
-                LOG.info("User {} in context {} is deactivated. Hence, no listener will be started.", I(session.getUserId()), I(session.getContextId()));
+                LOG.info("User {} in context {} is deactivated. Hence, no listener will be started.", I(userId), I(contextId));
             }
             return true;
-        } catch (OXException e) {
-            LOG.error("Failed to check 'WebMail' permission and activation for user {} in context {}", I(session.getUserId()), I(session.getContextId()), e);
+        } catch (RuntimeException e) {
+            // Thrown by ServerSession if unable to load resource (User, permission bits, etc.)
+            Throwable cause = e.getCause();
+            if (cause instanceof OXException) {
+                OXException oxe = (OXException) cause;
+                if (UserConfigurationCodes.NOT_FOUND.equals(oxe) || UserExceptionCode.USER_NOT_FOUND.equals(oxe)) {
+                    // Apparently, no such user exists
+                    return false;
+                }
+
+                LOG.error("Failed to check 'WebMail' permission and activation for user {} in context {}", I(userId), I(contextId), oxe);
+                return false;
+            }
+
+            LOG.error("Failed to check 'WebMail' permission and activation for user {} in context {}", I(userId), I(contextId), e);
             return false;
         }
     }
@@ -188,6 +214,11 @@ public final class PushManagerRegistry implements PushListenerService {
             }
             return true;
         } catch (OXException e) {
+            if (UserConfigurationCodes.NOT_FOUND.equals(e) || UserExceptionCode.USER_NOT_FOUND.equals(e)) {
+                // Apparently, no such user exists
+                return false;
+            }
+
             LOG.error("Failed to check 'WebMail' permission and activation for user {} in context {}", I(userId), I(contextId), e);
             return false;
         }
@@ -222,11 +253,30 @@ public final class PushManagerRegistry implements PushListenerService {
     }
 
     /**
-     * Checks if permanent push is allowed as per configuration
+     * Checks if permanent push is allowed as per configuration and if there is at least one push service supporting resource-acquiring
+     * permanent listeners.
      *
      * @return <code>true</code> if allowed; otherwise <code>false</code> if disabled
      */
     public boolean isPermanentPushAllowed() {
+        if (isPermanentPushAllowedPerConfig() == false) {
+            return false;
+        }
+
+        for (PushManagerExtendedService extendedService : getExtendedPushManagers()) {
+            if (extendedService.supportsPermanentListeners() && extendedService.listenersRequireResources()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Checks if permanent push is allowed as per configuration.
+     *
+     * @return <code>true</code> if allowed; otherwise <code>false</code> if disabled
+     */
+    public boolean isPermanentPushAllowedPerConfig() {
         boolean defaultValue = true;
         ConfigurationService service = Services.optService(ConfigurationService.class);
         return null == service ? defaultValue : service.getBoolProperty("com.openexchange.push.allowPermanentPush", defaultValue);
@@ -252,8 +302,7 @@ public final class PushManagerRegistry implements PushListenerService {
      * @return The push users
      */
     public List<PushUserInfo> listPushUsers() {
-        Set<PushUserInfo> pushUsers = listPushUsers0();
-        List<PushUserInfo> list = new ArrayList<PushUserInfo>(pushUsers);
+        List<PushUserInfo> list = new ArrayList<PushUserInfo>(listPushUsers0());
         Collections.sort(list);
         return list;
     }
@@ -312,39 +361,27 @@ public final class PushManagerRegistry implements PushListenerService {
             int contextId = pushUser.getContextId();
             int userId = pushUser.getUserId();
 
-            if (hasWebMailAndIsActive(userId, contextId)) {
-                try {
-                    if (blockedContexts.contains(contextId) || schemaBeingLockedOrNeedsUpdate(contextId)) {
-                        blockedContexts.add(contextId);
-                        LOG.info("Database schema is locked or needs update. Denied start-up of permanent push listener for user {} in context {} by push manager \"{}\"", I(userId), I(contextId), extendedService);
-
-                        DatabaseService dbService = services.getOptionalService(DatabaseService.class);
-                        if (null != dbService) {
-                            try {
-                                for (int contextInSameSchema : dbService.getContextsInSameSchema(contextId)) {
-                                    blockedContexts.add(contextInSameSchema);
-                                }
-                            } catch (Exception e) {
-                                // Ignore
-                            }
-                        }
-                    } else {
+            try {
+                if (schemaBeingLockedOrNeedsUpdate(contextId, blockedContexts)) {
+                    LOG.info("Database schema is locked or needs update. Denied start-up of permanent push listener for user {} in context {} by push manager \"{}\"", I(userId), I(contextId), extendedService);
+                } else {
+                    if (hasWebMailAndIsActive(userId, contextId)) {
                         PermanentListenerJob job = jobQueue.scheduleJob(pushUser, extendedService);
                         if (null != job) {
                             startedOnes.add(job);
                             LOG.debug("Scheduled to start permanent push listener for user {} in context {} by push manager \"{}\"", I(userId), I(contextId), extendedService, new Throwable("Start permanent push listener trace"));
                         }
+                    } else {
+                        LOG.debug("Denied start of a permanent push listener for user {} in context {}: Missing \"webmail\" permission or user is disabled.", I(userId), I(contextId));
                     }
-                } catch (OXException e) {
-                    LOG.error("Error while starting permanent push listener for user {} in context {} by push manager \"{}\".", I(userId), I(contextId), extendedService, e);
-                } catch (ShutDownRuntimeException shutDown) {
-                    LOG.error("Server shut-down while starting permanent push listener for user {} in context {} by push manager \"{}\".", I(userId), I(contextId), extendedService, shutDown);
-                    break NextPushUser;
-                } catch (RuntimeException e) {
-                    LOG.error("Runtime error while starting permanent push listener for user {} in context {} by push manager \"{}\".", I(userId), I(contextId), extendedService, e);
                 }
-            } else {
-                LOG.debug("Denied start of a permanent push listener for user {} in context {}: Missing \"webmail\" permission or user is disabled.", I(userId), I(contextId));
+            } catch (OXException e) {
+                LOG.error("Error while starting permanent push listener for user {} in context {} by push manager \"{}\".", I(userId), I(contextId), extendedService, e);
+            } catch (ShutDownRuntimeException shutDown) {
+                LOG.error("Server shut-down while starting permanent push listener for user {} in context {} by push manager \"{}\".", I(userId), I(contextId), extendedService, shutDown);
+                break NextPushUser;
+            } catch (RuntimeException e) {
+                LOG.error("Runtime error while starting permanent push listener for user {} in context {} by push manager \"{}\".", I(userId), I(contextId), extendedService, e);
             }
         }
         Collections.sort(startedOnes);
@@ -380,23 +417,20 @@ public final class PushManagerRegistry implements PushListenerService {
         }
     }
 
-    private boolean schemaBeingLockedOrNeedsUpdate(int contextId) throws OXException {
+    private boolean schemaBeingLockedOrNeedsUpdate(int contextId, TIntSet blockedContexts) throws OXException {
+        if (blockedContexts.contains(contextId)) {
+            return true;
+        }
+
         Updater updater;
         try {
             updater = Updater.getInstance();
             UpdateStatus status = updater.getStatus(contextId);
-            if (status.blockingUpdatesRunning()) {
-                LOG.info("Another database update process is already running");
+            if (status.blockingUpdatesRunning() || status.needsBlockingUpdates()) {
+                addContextsInTheSameSchema(contextId, blockedContexts);
                 return true;
             }
-
-            // We only reach this point, if no other thread is already locking us
-            if (!status.needsBlockingUpdates()) {
-                return false;
-            }
-
-            // We reach this point, we must return true
-            return true;
+            return false;
         } catch (OXException e) {
             if (e.getCode() == 102) {
                 // NOTE: this situation should not happen!
@@ -405,6 +439,17 @@ public final class PushManagerRegistry implements PushListenerService {
             }
             LOG.error("Error in checking/updating schema",e);
             throw e;
+        }
+    }
+
+    private void addContextsInTheSameSchema(int contextId, TIntSet blockedContexts) {
+        DatabaseService databaseService = services.getOptionalService(DatabaseService.class);
+        if (databaseService != null) {
+            try {
+                blockedContexts.addAll(databaseService.getContextsInSameSchema(contextId));
+            } catch (Exception e) {
+                LOG.warn("Failed to retrieve contexts in the same schema for {}", I(contextId), e);
+            }
         }
     }
 
@@ -449,24 +494,40 @@ public final class PushManagerRegistry implements PushListenerService {
     // ----------------------------------------------------------------------------------------------------------------------------------
 
     /**
+     * Checks if this push manager registry has initially started all permanent listeners.
+     *
+     * @return <code>true</code> when all were started; otherwise <code>false</code>
+     */
+    public boolean wereAllUsersStarted() {
+        return allUsersStarted.get();
+    }
+
+    /**
      * Starts the permanent listeners for given push users.
      *
      * @param pushUsers The push users
+     * @param all <code>true</code> if given list of push users represent all available push users (see {@link #getUsersWithPermanentListeners()}); otherwise <code>false</code>
      * @param parkNanos The number of nanoseconds to wait prior to starting listeners
      * @return The actually started ones
      */
-    public List<PermanentListenerJob> applyInitialListeners(List<PushUser> pushUsers, long parkNanos) {
+    public List<PermanentListenerJob> applyInitialListeners(List<PushUser> pushUsers, boolean all, long parkNanos) {
+        if (pushUsers == null || pushUsers.isEmpty()) {
+            return Collections.emptyList();
+        }
+
         Collection<PushUser> toStop;
         Collection<PushUser> toStart;
 
         synchronized (this) {
-            {
+            if (initialPushUsers.isEmpty()) {
+                toStop = Collections.emptySet();
+            } else {
                 Set<PushUser> current = new HashSet<PushUser>(initialPushUsers);
                 current.removeAll(pushUsers);
                 toStop = current;
             }
 
-            toStart = new LinkedList<PushUser>();
+            toStart = new ArrayList<PushUser>(pushUsers.size());
             for (PushUser pushUser : pushUsers) {
                 if (initialPushUsers.add(pushUser)) {
                     toStart.add(pushUser);
@@ -512,30 +573,33 @@ public final class PushManagerRegistry implements PushListenerService {
         }
 
         // Start permanent candidates
-        List<PermanentListenerJob> startedOnes = new LinkedList<PermanentListenerJob>();
-        boolean allowPermanentPush = isPermanentPushAllowed();
+        List<PermanentListenerJob> startedOnes = new ArrayList<PermanentListenerJob>(toStart.size());
+        boolean allowPermanentPush = isPermanentPushAllowedPerConfig();
         for (PushManagerExtendedService pushManager : managers) {
             List<PermanentListenerJob> started = startPermanentListenersFor(toStart, pushManager, allowPermanentPush);
             startedOnes.addAll(started);
         }
         Collections.sort(startedOnes);
+        if (all) {
+            allUsersStarted.set(true);
+        }
         return startedOnes;
     }
 
     @Override
     public boolean registerPermanentListenerFor(Session session, String clientId) throws OXException {
-        if (MailAccounts.isGuest(session)) {
-            /*
-             * It's a guest
-             */
-            LOG.debug("Denied registration of a permanent push listener for client {} from user {} in context {}: Guest user.", session.getClient(), I(session.getUserId()), I(session.getContextId()));
-            return false;
-        }
         if (false == hasWebMailAndIsActive(session)) {
             /*
              * No "webmail" permission granted
              */
             LOG.info("Denied registration of a permanent push listener for client {} from user {} in context {}: Missing \"webmail\" permission or user is disabled.", clientId, I(session.getUserId()), I(session.getContextId()));
+            return false;
+        }
+        if (MailAccounts.isGuest(session)) {
+            /*
+             * It's a guest
+             */
+            LOG.debug("Denied registration of a permanent push listener for client {} from user {} in context {}: Guest user.", session.getClient(), I(session.getUserId()), I(session.getContextId()));
             return false;
         }
         if (false == PushUtility.allowedClient(clientId, null, true)) {
@@ -572,27 +636,31 @@ public final class PushManagerRegistry implements PushListenerService {
             // Start for push user
             boolean rescheduleOnRegistration = isRescheduleOnRegistration(userId, contextId);
             Optional<PermanentListenerRescheduler> optionalRescheduler = rescheduleOnRegistration ? Optional.ofNullable(reschedulerRef.get()) : Optional.empty();
-            boolean allowPermanentPush = isPermanentPushAllowed();
+            boolean allowPermanentPush = isPermanentPushAllowedPerConfig();
             Collection<PushUser> toStart = Collections.singletonList(new PushUser(userId, contextId));
             if (optionalRescheduler.isPresent()) {
                 for (Iterator<PushManagerExtendedService> it = getExtendedPushManagers().iterator(); useThisInstanceToReschedule == null && it.hasNext();) {
                     PushManagerExtendedService extendedService = it.next();
-                    if (extendedService.supportsPermanentListeners()) {
+                    if (extendedService.supportsPermanentListeners() && extendedService.listenersRequireResources()) {
                         useThisInstanceToReschedule = optionalRescheduler.get();
+                    }
+                }
+
+                if (null != useThisInstanceToReschedule) {
+                    try {
+                        useThisInstanceToReschedule.planReschedule(true, new StringBuilder("Permanent listener registered for client ").append(clientId).append(" from user ").append(userId).append(" in context ").append(contextId).toString());
+                    } catch (OXException e) {
+                        LOG.error("Failed to plan rescheduling", e);
+                    }
+                } else {
+                    for (PushManagerExtendedService extendedService : getExtendedPushManagers()) {
+                        startPermanentListenersFor(toStart, extendedService, allowPermanentPush);
                     }
                 }
             } else {
                 for (PushManagerExtendedService extendedService : getExtendedPushManagers()) {
                     startPermanentListenersFor(toStart, extendedService, allowPermanentPush);
                 }
-            }
-        }
-
-        if (null != useThisInstanceToReschedule) {
-            try {
-                useThisInstanceToReschedule.planReschedule(true, new StringBuilder("Permanent listener registered for client ").append(clientId).append(" from user ").append(userId).append(" in context ").append(contextId).toString());
-            } catch (OXException e) {
-                LOG.error("Failed to plan rescheduling", e);
             }
         }
 
@@ -724,37 +792,36 @@ public final class PushManagerRegistry implements PushListenerService {
 
     /**
      * Stops all permanent listeners.
-     *
-     * @param tryToReconnect Whether a reconnect attempt is supposed to be performed
      */
-    public void stopAllPermanentListener(boolean tryToReconnect) {
+    public void stopAllPermanentListenerForReschedule() {
         for (PushManagerExtendedService pushManager : getExtendedPushManagers()) {
             PushManagerExtendedService extendedService = pushManager;
+            if (extendedService.supportsPermanentListeners() && extendedService.listenersRequireResources()) {
+                // Determine current push manager's listeners
+                List<PushUserInfo> availablePushUsers;
+                try {
+                    availablePushUsers = extendedService.getAvailablePushUsers();
+                } catch (OXException e) {
+                    LOG.error("Error while determining available push users by push manager \"{}\".", pushManager, e);
+                    availablePushUsers = Collections.emptyList();
+                }
 
-            // Determine current push manager's listeners
-            List<PushUserInfo> availablePushUsers;
-            try {
-                availablePushUsers = extendedService.getAvailablePushUsers();
-            } catch (OXException e) {
-                LOG.error("Error while determining available push users by push manager \"{}\".", pushManager, e);
-                availablePushUsers = Collections.emptyList();
-            }
-
-            // Stop the permanent ones
-            for (PushUserInfo pushUserInfo : availablePushUsers) {
-                if (pushUserInfo.isPermanent()) {
-                    int userId = pushUserInfo.getUserId();
-                    int contextId = pushUserInfo.getContextId();
-                    try {
-                        // Stop listener for session
-                        StopResult stopped = stopPermanentListenerFor(pushUserInfo.getPushUser(), extendedService, tryToReconnect);
-                        if (stopped != StopResult.NONE) {
-                            LOG.debug("{} push listener for user {} in context {} by push manager \"{}\"", stopped.getWord(), I(userId), I(contextId), pushManager);
+                // Stop the permanent ones
+                for (PushUserInfo pushUserInfo : availablePushUsers) {
+                    if (pushUserInfo.isPermanent()) {
+                        int userId = pushUserInfo.getUserId();
+                        int contextId = pushUserInfo.getContextId();
+                        try {
+                            // Stop listener for session
+                            StopResult stopped = stopPermanentListenerFor(pushUserInfo.getPushUser(), extendedService, false);
+                            if (stopped != StopResult.NONE) {
+                                LOG.debug("{} push listener for user {} in context {} by push manager \"{}\"", stopped.getWord(), I(userId), I(contextId), pushManager);
+                            }
+                        } catch (OXException e) {
+                            LOG.error("Error while stopping push listener for user {} in context {} by push manager \"{}\".", I(userId), I(contextId), pushManager, e);
+                        } catch (RuntimeException e) {
+                            LOG.error("Runtime error while stopping push listener for user {} in context {} by push manager \"{}\".", I(userId), I(contextId), pushManager, e);
                         }
-                    } catch (OXException e) {
-                        LOG.error("Error while stopping push listener for user {} in context {} by push manager \"{}\".", I(userId), I(contextId), pushManager, e);
-                    } catch (RuntimeException e) {
-                        LOG.error("Runtime error while stopping push listener for user {} in context {} by push manager \"{}\".", I(userId), I(contextId), pushManager, e);
                     }
                 }
             }
@@ -836,18 +903,18 @@ public final class PushManagerRegistry implements PushListenerService {
         /*
          * Check session
          */
-        if (MailAccounts.isGuest(session)) {
-            /*
-             * It's a guest
-             */
-            LOG.debug("Skipping registration of a mail push listener for client {} from user {} in context {}: Guest user.", session.getClient(), I(session.getUserId()), I(session.getContextId()));
-            return null;
-        }
         if (false == hasWebMailAndIsActive(session)) {
             /*
              * No "webmail" permission granted
              */
             LOG.debug("Skipping registration of a mail push listener for client {} from user {} in context {}: Missing \"webmail\" permission or user is disabled.", session.getClient(), I(session.getUserId()), I(session.getContextId()));
+            return null;
+        }
+        if (MailAccounts.isGuest(session)) {
+            /*
+             * It's a guest
+             */
+            LOG.debug("Skipping registration of a mail push listener for client {} from user {} in context {}: Guest user.", session.getClient(), I(session.getUserId()), I(session.getContextId()));
             return null;
         }
         if (false == PushUtility.allowedClient(session.getClient(), session, true)) {
@@ -922,7 +989,7 @@ public final class PushManagerRegistry implements PushListenerService {
 
         if (added && (pushManager instanceof PushManagerExtendedService)) {
             synchronized (this) {
-                startPermanentListenersFor(initialPushUsers, (PushManagerExtendedService) pushManager, isPermanentPushAllowed());
+                startPermanentListenersFor(initialPushUsers, (PushManagerExtendedService) pushManager, isPermanentPushAllowedPerConfig());
             }
         }
 

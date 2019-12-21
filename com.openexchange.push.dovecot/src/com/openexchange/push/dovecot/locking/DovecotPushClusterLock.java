@@ -66,10 +66,35 @@ public interface DovecotPushClusterLock {
     public static final long TIMEOUT_MILLIS = TimeUnit.MINUTES.toMillis(10L);
 
     public static enum Type {
-        HAZELCAST,
-        DATABASE,
-        NONE,
+        HAZELCAST("hz"),
+        DATABASE("db"),
+        NONE("none"),
         ;
+
+        private final String configName;
+
+        private Type(String configName) {
+            this.configName = configName;
+        }
+
+        /**
+         * Gets the configName
+         *
+         * @return The configName
+         */
+        public String getConfigName() {
+            return configName;
+        }
+
+        public static Type parse(String configName) {
+            for (Type t : values()) {
+                if (t.getConfigName().equalsIgnoreCase(configName)) {
+                    return t;
+                }
+            }
+
+            return null;
+        }
     }
 
     /**

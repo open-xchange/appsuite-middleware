@@ -1,0 +1,39 @@
+feature_name: Dovecot Push
+properties:
+    - key: com.openexchange.push.dovecot.clusterLock
+      description: |
+        Specifies what system to use to manage a cluster-lock
+        Possible values
+         * "db" for database-based locking
+         * "hz" for Hazelcast-based locking (default)
+         * "none" for no cluster lock mechanism
+         Only applicable if property "com.openexchange.push.dovecot.stateless" is set to "false"
+      defaultValue: hz
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: ["com.openexchange.push.dovecot.stateless"]
+      file: dovecot-push.properties
+      packageName: open-xchange-push-dovecot
+      tags: ["Mail","Push"]
+    - key: com.openexchange.push.dovecot.stateless
+      description: |
+        Controls whether stateless (true) or statefull (false) Dovecot Push implementation is used. Statefull means to keep track of spawned
+        push listeners through managing a reference to it in application. Such a reference is not created/managed if stateless is selected.
+      defaultValue: true
+      version: 7.10.4
+      reloadable: false
+      configcascadeAware: false
+      file: dovecot-push.properties
+      packageName: open-xchange-push-dovecot
+      tags: ["Mail","Push"]
+    - key: com.openexchange.push.dovecot.preferDoveadmForMetadata
+      description: |
+        Controls whether Doveadm is preferred being used for issuing METADATA commands against Dovecot IMAP server
+      defaultValue: false
+      version: 7.10.4
+      reloadable: false
+      configcascadeAware: false
+      file: dovecot-push.properties
+      packageName: open-xchange-push-dovecot
+      tags: ["Mail","Push"]

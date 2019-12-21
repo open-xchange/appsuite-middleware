@@ -759,13 +759,23 @@ public final class SessionHandler {
         return retval;
     }
 
-    public static Session findFirstSessionForUser(final int userId, final int contextId, final SessionMatcher matcher, final boolean ignoreLongTerm, final boolean ignoreStorage) {
-        SessionData sessionData = SESSION_DATA_REF.get();
-        if (null == sessionData) {
-            LOG.warn("\tSessionData instance is null.");
-            return null;
+    public static Session findFirstSessionForUser(int userId, int contextId, SessionMatcher matcher, boolean ignoreShortTerm, boolean ignoreLongTerm, boolean ignoreStorage) {
+        if (ignoreShortTerm && ignoreLongTerm && ignoreStorage) {
+            // Nothing allowed being looked-up
+             return null;
         }
-        Session retval = sessionData.findFirstSessionForUser(userId, contextId, matcher, ignoreLongTerm);
+
+        Session retval = null;
+        if (!ignoreShortTerm || !ignoreLongTerm) {
+            SessionData sessionData = SESSION_DATA_REF.get();
+            if (null == sessionData) {
+                LOG.warn("\tSessionData instance is null.");
+                return null;
+            }
+
+            retval = sessionData.findFirstSessionForUser(userId, contextId, matcher, ignoreShortTerm, ignoreLongTerm);
+        }
+
         if (null == retval && !ignoreStorage) {
             final SessionStorageService storageService = Services.optService(SessionStorageService.class);
             if (null != storageService) {

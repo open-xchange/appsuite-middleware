@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,78 +47,22 @@
  *
  */
 
-package com.openexchange.push.dovecot;
+package com.openexchange.push.dovecot.osgi;
 
-import com.openexchange.session.Session;
+import com.openexchange.push.dovecot.AbstractDovecotPushManagerService;
 
 /**
- * {@link SimpleKey}
+ * {@link DovecotPushManagerLifecycle}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since 7.6.2
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.10.4
  */
-public class SimpleKey {
+public interface DovecotPushManagerLifecycle {
 
-    /**
-     * Gets a simple key instance for given user.
-     *
-     * @param session The session
-     * @return The simple key
-     */
-    public static SimpleKey valueOf(Session session) {
-        return null == session ? null : new SimpleKey(session.getUserId(), session.getContextId());
-    }
+    boolean isActive();
 
-    /**
-     * Gets a simple key instance for given user.
-     *
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @return The simple key
-     */
-    public static SimpleKey valueOf(final int userId, final int contextId) {
-        return new SimpleKey(userId, contextId);
-    }
+    AbstractDovecotPushManagerService getActiveInstance();
 
-    // -------------------------------------------------------------------------------------------- //
-
-    final int contextId;
-    final int userId;
-    private final int hash;
-
-    private SimpleKey(final int userId, final int contextId) {
-        super();
-        this.contextId = contextId;
-        this.userId = userId;
-        // hash code
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + contextId;
-        result = prime * result + userId;
-        hash = result;
-    }
-
-    @Override
-    public int hashCode() {
-        return hash;
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!(obj instanceof SimpleKey)) {
-            return false;
-        }
-        final SimpleKey other = (SimpleKey) obj;
-        if (contextId != other.contextId) {
-            return false;
-        }
-        if (userId != other.userId) {
-            return false;
-        }
-        return true;
-    }
+    void shutDown();
 
 }

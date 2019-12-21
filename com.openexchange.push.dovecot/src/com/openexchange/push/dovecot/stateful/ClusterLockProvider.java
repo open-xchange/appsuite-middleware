@@ -47,46 +47,78 @@
  *
  */
 
-package com.openexchange.push;
+package com.openexchange.push.dovecot.stateful;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
+import com.openexchange.push.dovecot.DovecotPushConfiguration;
+import com.openexchange.push.dovecot.locking.DbDovecotPushClusterLock;
+import com.openexchange.push.dovecot.locking.DovecotPushClusterLock;
+import com.openexchange.push.dovecot.locking.DovecotPushClusterLock.Type;
+import com.openexchange.push.dovecot.locking.HzDovecotPushClusterLock;
+import com.openexchange.push.dovecot.locking.NoOpDovecotPushClusterLock;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link PushManagerService} - Manages push listeners on session appearance/disappearance events.
+ * {@link ClusterLockProvider}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since 7.6.2
  */
-public interface PushManagerService {
+public class ClusterLockProvider {
+
+    private final DovecotPushClusterLock clusterLock;
 
     /**
-     * Starts a new listener for specified session.
-     * <p>
-     * The push manager is supposed to keep track of started listeners; e.g. only one listener per session or per user-context-pair exists.
-     *
-     * @param session The session
-     * @return A newly started listener or <code>null</code> if a listener could not be started
-     * @throws OXException If listener cannot be started due to an error
+     * Initializes a new {@link ClusterLockProvider}.
+     * @param clusterLock
      */
-    PushListener startListener(Session session) throws OXException;
+    private ClusterLockProvider(DovecotPushClusterLock clusterLock) {
+        super();
+        this.clusterLock = clusterLock;
+    }
 
     /**
-     * Stops the listener for specified session.
+     * Initializes this configuration instance
      *
-     * @param session The session
-     * @return <code>true</code> if listener has been successfully stopped; otherwise <code>false</code>
-     * @throws OXException If listener cannot be stopped due to an error
+     * @param config The configuration that determines the mechanism to use
+     * @param services The service lookup to initialize the implementation with
      */
-    boolean stopListener(Session session) throws OXException;
+    public static ClusterLockProvider newInstance(DovecotPushConfiguration config, ServiceLookup services) {
+        String mech = config.getClusterLockMech();
+        Type type = DovecotPushClusterLock.Type.parse(mech);
+        DovecotPushClusterLock clusterLock;
+        switch (type) {
+            case HAZELCAST:
+                clusterLock = new HzDovecotPushClusterLock(services);
+                break;
+            case DATABASE:
+                clusterLock = new DbDovecotPushClusterLock(services);
+                break;
+            case NONE:
+                clusterLock = new NoOpDovecotPushClusterLock();
+                break;
+            default:
+                throw new IllegalArgumentException("Illegal cluster lock type: " + mech);
+        }
+
+        return new ClusterLockProvider(clusterLock);
+    }
 
     /**
-     * Checks if listeners actually need any kind of socket, connection, whatever and therefore represent an acquired resource that needs to
-     * be managed; e.g. orderly closed once no more needed.
+     * Gets the {@link Type} of the lock that is returned by {@link #getClusterLock()}
      *
-     * @return <code>true</code> if any kind of resource is acquired; otherwise <code>false</code>
+     * @return The type
      */
-    default boolean listenersRequireResources() {
-        return true;
+    public Type getLockType() {
+        return clusterLock.getType();
+    }
+
+    /**
+     * Gets the cluster lock
+     *
+     * @return The cluster lock
+     */
+    public DovecotPushClusterLock getClusterLock() {
+        return clusterLock;
     }
 
 }

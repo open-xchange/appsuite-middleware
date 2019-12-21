@@ -2,6 +2,7 @@
 package com.openexchange.push.dovecot.rest;
 
 import static com.openexchange.java.Autoboxing.I;
+import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -17,10 +18,7 @@ import javax.ws.rs.core.MediaType;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
-import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.Member;
 import com.openexchange.exception.OXException;
-import com.openexchange.hazelcast.Hazelcasts;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -42,13 +40,12 @@ import com.openexchange.push.dovecot.osgi.Services;
 import com.openexchange.rest.services.annotation.Role;
 import com.openexchange.rest.services.annotation.RoleAllowed;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.ObfuscatorService;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionMatcher;
 import com.openexchange.sessiond.SessiondService;
-import com.openexchange.sessionstorage.hazelcast.serialization.PortableSession;
-import com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionRemoteLookUp;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.user.UserExceptionCode;
+import com.openexchange.user.UserService;
 
 /**
  * The {@link DovecotPushRESTService}.
@@ -108,6 +105,9 @@ public class DovecotPushRESTService {
                 if (null != userAndContext) {
                     int contextId = userAndContext[1];
                     int userId = userAndContext[0];
+
+                    checkUserExistence(userId, contextId);
+
                     String folder = data.getString("folder");
                     long uid = data.getLong("imap-uid");
 
@@ -116,12 +116,13 @@ public class DovecotPushRESTService {
                         sendViaNotificationService(userId, contextId, uid, folder, data, pushNotificationService);
                     }
 
+                    // Check for a session in local containers (short-term and long.term)
                     SessiondService sessiondService = Services.getService(SessiondService.class);
                     Session session = sessiondService.findFirstMatchingSessionForUser(userId, contextId, new SessionMatcher() {
 
                         @Override
                         public Set<Flag> flags() {
-                            return SessionMatcher.NO_FLAGS;
+                            return EnumSet.of(SessionMatcher.Flag.IGNORE_SESSION_STORAGE);
                         }
 
                         @Override
@@ -130,35 +131,25 @@ public class DovecotPushRESTService {
                         }}
                     );
 
+                    // Try to generate a session
                     if (null == session) {
                         session = generateSessionFor(userId, contextId);
                     }
 
+                    // Check for a session in session storage (short-term and long.term)
                     if (null == session) {
-                        HazelcastInstance hzInstance = Services.optService(HazelcastInstance.class);
-                        final ObfuscatorService obfuscatorService = Services.optService(ObfuscatorService.class);
-                        if (null != hzInstance && null != obfuscatorService) {
-                            // Determine other cluster members
-                            Set<Member> otherMembers = Hazelcasts.getRemoteMembers(hzInstance);
-                            if (!otherMembers.isEmpty()) {
-                                Hazelcasts.Filter<PortableSession, PortableSession> filter = new Hazelcasts.Filter<PortableSession, PortableSession>() {
+                        session = sessiondService.findFirstMatchingSessionForUser(userId, contextId, new SessionMatcher() {
 
-                                    @Override
-                                    public PortableSession accept(PortableSession portableSession) {
-                                        if (null != portableSession) {
-                                            portableSession.setPassword(obfuscatorService.unobfuscate(portableSession.getPassword()));
-                                            return portableSession;
-                                        }
-                                        return null;
-                                    }
-                                };
-                                try {
-                                    session = Hazelcasts.executeByMembersAndFilter(new PortableSessionRemoteLookUp(userId, contextId), otherMembers, hzInstance.getExecutorService("default"), filter);
-                                } catch (ExecutionException e) {
-                                    throw handleExecutionError(e);
-                                }
+                            @Override
+                            public Set<Flag> flags() {
+                                return EnumSet.of(SessionMatcher.Flag.IGNORE_SHORT_TERM, SessionMatcher.Flag.IGNORE_LONG_TERM);
                             }
-                        }
+
+                            @Override
+                            public boolean accepts(Session session_tmp) {
+                                return true;
+                            }}
+                        );
                     }
 
                     if (null == session) {
@@ -176,6 +167,19 @@ public class DovecotPushRESTService {
             return new JSONObject(2).put("success", true);
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private void checkUserExistence(int userId, int contextId) throws OXException {
+        UserService userService = Services.getServiceLookup().getServiceSafe(UserService.class);
+
+        try {
+            userService.getUser(userId, contextId);
+        } catch (OXException e) {
+            if (!UserExceptionCode.USER_NOT_FOUND.equals(e)) {
+                LOGGER.warn("Failed to check existence of user {} in context {}", I(userId), I(contextId), e);
+            }
+            throw e;
         }
     }
 

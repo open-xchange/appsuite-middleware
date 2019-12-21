@@ -552,7 +552,7 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
 
                 @Override
                 public Set<Flag> flags() {
-                    return SessionMatcher.ALL_FLAGS;
+                    return SessionMatcher.ONLY_SHORT_TERM;
                 }
 
                 @Override

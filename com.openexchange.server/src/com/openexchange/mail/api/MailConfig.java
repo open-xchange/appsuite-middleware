@@ -863,40 +863,36 @@ public abstract class MailConfig {
                 // Apparently, OAuth is supposed to be used
                 Object obj = session.getParameter(Session.PARAM_OAUTH_ACCESS_TOKEN);
                 if (obj == null) {
-                    if (Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST))) {
-                        obj = "";
-                    } else {
+                    if (!Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST))) {
                         throw MailExceptionCode.MISSING_CONNECT_PARAM.create("The session contains no OAuth token.");
                     }
+                    obj = "";
                 }
                 mailConfig.password = obj.toString();
                 mailConfig.authType = configuredAuthType;
             } else {
                 // Common handling based on configuration
-                PasswordSource cur = MailProperties.getInstance().getPasswordSource(session.getUserId(), session.getContextId());
-                if (PasswordSource.GLOBAL.equals(cur)) {
+                PasswordSource passwordSource = MailProperties.getInstance().getPasswordSource(session.getUserId(), session.getContextId());
+                if (PasswordSource.GLOBAL.equals(passwordSource)) {
                     String masterPw = MailProperties.getInstance().getMasterPassword(session.getUserId(), session.getContextId());
                     if (masterPw == null) {
-                        if (Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST))) {
-                            masterPw = "";
-                        } else {
+                        if (!Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST))) {
                             throw MailConfigException.create("Property \"com.openexchange.mail.masterPassword\" not set");
                         }
+                        masterPw = "";
                     }
                     mailConfig.password = masterPw;
                 } else {
                     String sessionPassword = session.getPassword();
                     if (null == sessionPassword) {
-                        if (Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST))) {
-                            sessionPassword = "";
-                        } else {
+                        if (!Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST))) {
                             throw MailExceptionCode.MISSING_CONNECT_PARAM.create("Session password not set. Either an invalid session or master authentication is not enabled (property \"com.openexchange.mail.passwordSource\" is not set to \"global\")");
                         }
+                        sessionPassword = "";
                     }
                     mailConfig.password = sessionPassword;
                 }
             }
-
         } else {
             CredentialsProviderService credentialsProvider = CredentialsProviderRegistry.getInstance().optCredentialsProviderFor(forMailAccess, account.getId(), session);
             if (null == credentialsProvider) {

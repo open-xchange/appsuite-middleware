@@ -53,8 +53,9 @@ import java.util.PriorityQueue;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.push.dovecot.DovecotPushListener;
+import com.openexchange.push.dovecot.AbstractDovecotPushListener;
 import com.openexchange.push.dovecot.registration.RegistrationPerformer;
+import com.openexchange.push.dovecot.stateful.DovecotPushListener;
 
 
 /**
@@ -80,7 +81,7 @@ public class RegistrationPerformerTracker implements ServiceTrackerCustomizer<Re
     @Override
     public synchronized RegistrationPerformer addingService(ServiceReference<RegistrationPerformer> reference) {
         RegistrationPerformer performer = context.getService(reference);
-        RegistrationPerformer newUnused = DovecotPushListener.setIfHigherRanked(performer);
+        RegistrationPerformer newUnused = AbstractDovecotPushListener.setIfHigherRanked(performer);
         if (null != newUnused) {
             performers.offer(new RegistrationPerformerWrapper(newUnused));
         }

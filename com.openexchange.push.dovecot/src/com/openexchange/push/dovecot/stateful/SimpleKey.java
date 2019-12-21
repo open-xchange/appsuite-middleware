@@ -47,45 +47,77 @@
  *
  */
 
-package com.openexchange.push;
+package com.openexchange.push.dovecot.stateful;
 
-import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
 /**
- * {@link PushManagerService} - Manages push listeners on session appearance/disappearance events.
+ * {@link SimpleKey}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since 7.6.2
  */
-public interface PushManagerService {
+public class SimpleKey {
 
     /**
-     * Starts a new listener for specified session.
-     * <p>
-     * The push manager is supposed to keep track of started listeners; e.g. only one listener per session or per user-context-pair exists.
+     * Gets a simple key instance for given user.
      *
      * @param session The session
-     * @return A newly started listener or <code>null</code> if a listener could not be started
-     * @throws OXException If listener cannot be started due to an error
+     * @return The simple key
      */
-    PushListener startListener(Session session) throws OXException;
+    public static SimpleKey valueOf(Session session) {
+        return null == session ? null : new SimpleKey(session.getUserId(), session.getContextId());
+    }
 
     /**
-     * Stops the listener for specified session.
+     * Gets a simple key instance for given user.
      *
-     * @param session The session
-     * @return <code>true</code> if listener has been successfully stopped; otherwise <code>false</code>
-     * @throws OXException If listener cannot be stopped due to an error
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The simple key
      */
-    boolean stopListener(Session session) throws OXException;
+    public static SimpleKey valueOf(final int userId, final int contextId) {
+        return new SimpleKey(userId, contextId);
+    }
 
-    /**
-     * Checks if listeners actually need any kind of socket, connection, whatever and therefore represent an acquired resource that needs to
-     * be managed; e.g. orderly closed once no more needed.
-     *
-     * @return <code>true</code> if any kind of resource is acquired; otherwise <code>false</code>
-     */
-    default boolean listenersRequireResources() {
+    // -------------------------------------------------------------------------------------------- //
+
+    final int contextId;
+    final int userId;
+    private final int hash;
+
+    private SimpleKey(final int userId, final int contextId) {
+        super();
+        this.contextId = contextId;
+        this.userId = userId;
+        // hash code
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + contextId;
+        result = prime * result + userId;
+        hash = result;
+    }
+
+    @Override
+    public int hashCode() {
+        return hash;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof SimpleKey)) {
+            return false;
+        }
+        final SimpleKey other = (SimpleKey) obj;
+        if (contextId != other.contextId) {
+            return false;
+        }
+        if (userId != other.userId) {
+            return false;
+        }
         return true;
     }
 

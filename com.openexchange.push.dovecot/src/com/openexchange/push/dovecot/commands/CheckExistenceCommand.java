@@ -50,6 +50,8 @@
 package com.openexchange.push.dovecot.commands;
 
 import static com.openexchange.imap.util.ImapUtility.prepareImapCommandForLogging;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.log.LogProperties;
 import com.openexchange.session.Session;
@@ -70,6 +72,8 @@ import com.sun.mail.imap.protocol.IMAPResponse;
  * @since v7.8.0
  */
 public class CheckExistenceCommand implements ProtocolCommand {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CheckExistenceCommand.class);
 
     private final Session session;
     private final IMAPFolder imapFolder;
@@ -129,29 +133,60 @@ public class CheckExistenceCommand implements ProtocolCommand {
             for (int i = 0; i < mlen; i++) {
                 if ((r[i] instanceof IMAPResponse)) {
                     IMAPResponse ir = (IMAPResponse) r[i];
+                    /*-
+                     *
+                     * ABNF (https://tools.ietf.org/html/rfc5464#section-4.2):
+                     *   metadata-resp = "METADATA" SP mailbox SP
+                     *                   (entry-values / entry-list)
+                     *                   ; empty string for mailbox implies
+                     *                   ; server annotation.
+                     *
+                     *   entry-values  = "(" entry-value *(SP entry-value) ")"
+                     *
+                     *   entry-list    = entry *(SP entry)
+                     *                   ; list of entries used in unsolicited
+                     *                   ; METADATA response
+                     *
+                     *   entry         = astring
+                     *                   ; slash-separated path to entry
+                     *                   ; MUST NOT contain "*" or "%"*
+                     *
+                     *   entry-value   = entry SP value
+                     *
+                     *   value         = nstring / literal8
+                     *
+                     * Example:
+                     *
+                     *   * METADATA "" (/private/vendor/vendor.dovecot/http-notify {8}
+                     *   user=3@2)
+                     */
                     if (ir.keyEquals("METADATA")) {
-                        /*-
-                         *   * METADATA "" (/private/vendor/vendor.dovecot/http-notify {8}
-                         *   user=3@2)
-                         */
+                        // mailbox
                         ir.readAtomString();
 
                         while (ir.peekByte() != '(' && ir.peekByte() != 0) {
                             ir.readByte(); // Discard
                         }
 
+                        // not unsolicited, so we expect entry-values
                         if (ir.readByte() != '(') {
-                            throw new ParsingException("parse error in STATUS");
+                            throw new ParsingException("parse error in METADATA");
                         }
 
-                        // Expect "/private/vendor/vendor.dovecot/http-notify" as key
-                        String key = ir.readAtomString();
-                        if ("/private/vendor/vendor.dovecot/http-notify".equals(key)) {
+                        // Expect "/private/vendor/vendor.dovecot/http-notify" as entry
+                        String entry = ir.readAtomString();
+                        if ("/private/vendor/vendor.dovecot/http-notify".equals(entry)) {
                             // Expect "user=" + <user> + "@" + <context> as value
                             String expectedValue = new StringBuilder(16).append("user=").append(session.getUserId()).append('@').append(session.getContextId()).toString();
-                            String value = ir.readAtomString();
-                            if (expectedValue.equals(value)) {
+                            // nstring - seems like JavaMail doesn't support literal8 anyway?
+                            String value = ir.readString();
+                            if (value == null) {
+                                LOGGER.debug("Did not find valid registration for push notifications for {} using: {}", imapFolder.getStore(), command);
+                            } else if (expectedValue.equals(value)) {
+                                LOGGER.debug("Found valid registration for push notifications for {} using: {}", imapFolder.getStore(), command);
                                 retval = Boolean.TRUE;
+                            } else {
+                                LOGGER.warn("Found invalid registration for push notifications for {} using: {}. Expected \"{}\" but is \"{}\".", imapFolder.getStore(), command, expectedValue, value);
                             }
                         }
                         r[i] = null;

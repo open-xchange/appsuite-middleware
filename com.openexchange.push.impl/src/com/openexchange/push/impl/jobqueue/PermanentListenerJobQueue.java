@@ -49,6 +49,7 @@
 
 package com.openexchange.push.impl.jobqueue;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
@@ -64,6 +65,8 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.UpdateStatus;
+import com.openexchange.groupware.update.Updater;
 import com.openexchange.osgi.ShutDownRuntimeException;
 import com.openexchange.push.PushExceptionCodes;
 import com.openexchange.push.PushListener;
@@ -101,6 +104,7 @@ public class PermanentListenerJobQueue {
     final Map<PushUser, FutureTask<PushListener>> user2jobs;
     final BlockingQueue<FutureTask<PushListener>> jobs;
     final AtomicReference<Thread> workerReference;
+    final boolean checkUpdateStatus;
     private boolean stopped;
 
     /**
@@ -113,6 +117,7 @@ public class PermanentListenerJobQueue {
         user2jobs = new HashMap<>(256);
         jobs = new LinkedBlockingQueue<>();
         workerReference = new AtomicReference<Thread>(null);
+        checkUpdateStatus = false;
         stopped = false;
     }
 
@@ -317,27 +322,50 @@ public class PermanentListenerJobQueue {
                 int retry = 2;
                 while (retry-- > 0 && !currentThread.isInterrupted()) {
                     try {
+                        if (jobQueue.checkUpdateStatus && schemaBeingLockedOrNeedsUpdate(contextId)) {
+                            LOG.info("Database schema is either currently updated or has (blocking) update tasks pending. Denied start-up of permanent push listener for user {} in context {} by push manager \"{}\"", I(userId), I(contextId), extendedService);
+                            return null;
+                        }
+
                         PushListener pl = extendedService.startPermanentListener(pushUser);
                         retry = 0;
                         if (null != pl) {
-                            LOG.debug("Started permanent push listener for user {} in context {} by push manager \"{}\"", Integer.valueOf(userId), Integer.valueOf(contextId), extendedService);
+                            LOG.debug("Started permanent push listener for user {} in context {} by push manager \"{}\"", I(userId), I(contextId), extendedService);
                         }
                         return pl;
                     } catch (OXException e) {
-                        if (PushExceptionCodes.AUTHENTICATION_ERROR.equals(e) || PushExceptionCodes.MISSING_PASSWORD.equals(e)) {
+                        if (PushExceptionCodes.AUTHENTICATION_ERROR.equals(e)) {
+                            PushManagerRegistry.getInstance().handleInvalidCredentials(pushUser, true, e);
+                        } else if (PushExceptionCodes.MISSING_PASSWORD.equals(e)) {
+                            retry = 0;
                             PushManagerRegistry.getInstance().handleInvalidCredentials(pushUser, true, e);
                         } else {
                             retry = 0;
-                            LOG.error("Error while starting permanent push listener for user {} in context {} by push manager \"{}\".", Integer.valueOf(userId), Integer.valueOf(contextId), extendedService, e);
+                            LOG.error("Error while starting permanent push listener for user {} in context {} by push manager \"{}\".", I(userId), I(contextId), extendedService, e);
                         }
                     } catch (RuntimeException e) {
                         retry = 0;
-                        LOG.error("Runtime error while starting permanent push listener for user {} in context {} by push manager \"{}\".", Integer.valueOf(userId), Integer.valueOf(contextId), extendedService, e);
+                        LOG.error("Runtime error while starting permanent push listener for user {} in context {} by push manager \"{}\".", I(userId), I(contextId), extendedService, e);
                     }
                 }
                 return null;
             } finally {
                 jobQueue.removeJobFor(pushUser);
+            }
+        }
+
+        private boolean schemaBeingLockedOrNeedsUpdate(int contextId) throws OXException {
+            try {
+                UpdateStatus status = Updater.getInstance().getStatus(contextId);
+                return (status.blockingUpdatesRunning() || status.needsBlockingUpdates());
+            } catch (OXException e) {
+                if (e.getCode() == 102) {
+                    // NOTE: this situation should not happen!
+                    // it can only happen, when a schema has not been initialized correctly!
+                    LOG.debug("FATAL: this error must not happen",e);
+                }
+                LOG.error("Error in checking/updating schema",e);
+                throw e;
             }
         }
     }

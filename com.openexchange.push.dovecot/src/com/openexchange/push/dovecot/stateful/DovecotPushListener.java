@@ -1,5 +1,6 @@
 /*
  *
+
  *    OPEN-XCHANGE legal information
  *
  *    All intellectual property rights in the Software are protected by
@@ -47,16 +48,13 @@
  *
  */
 
-package com.openexchange.push.dovecot;
+package com.openexchange.push.dovecot.stateful;
 
 import static com.openexchange.java.Autoboxing.I;
-import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
-import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.push.PushExceptionCodes;
-import com.openexchange.push.PushListener;
+import com.openexchange.push.dovecot.AbstractDovecotPushListener;
 import com.openexchange.push.dovecot.locking.DovecotPushClusterLock;
 import com.openexchange.push.dovecot.locking.SessionInfo;
 import com.openexchange.push.dovecot.registration.RegistrationContext;
@@ -67,8 +65,6 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
-import com.openexchange.user.User;
-import com.openexchange.user.UserService;
 
 /**
  * {@link DovecotPushListener}
@@ -76,7 +72,7 @@ import com.openexchange.user.UserService;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.6.2
  */
-public class DovecotPushListener implements PushListener, Runnable {
+public class DovecotPushListener extends AbstractDovecotPushListener implements Runnable {
 
     /** The logger */
     static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(DovecotPushListener.class);
@@ -84,48 +80,8 @@ public class DovecotPushListener implements PushListener, Runnable {
     /** The timeout threshold; cluster lock timeout minus one minute */
     private static final long TIMEOUT_THRESHOLD_MILLIS = DovecotPushClusterLock.TIMEOUT_MILLIS - 60000L;
 
-    private static final AtomicReference<RegistrationPerformer> REGISTRATION_PERFORMER_REFERENCE = new AtomicReference<RegistrationPerformer>();
-
-    /**
-     * Sets the registration performer to use.
-     *
-     * @param performer The performer
-     * @return The new unused performer after this call or <code>null</code> if there was none
-     */
-    public static RegistrationPerformer setIfHigherRanked(RegistrationPerformer performer) {
-        RegistrationPerformer current;
-        do {
-            current = REGISTRATION_PERFORMER_REFERENCE.get();
-            if (null != current && current.getRanking() >= performer.getRanking()) {
-                return performer;
-            }
-        } while (!REGISTRATION_PERFORMER_REFERENCE.compareAndSet(current, performer));
-        return current;
-    }
-
-    /**
-     * Replaces currently active registration performer with specified replacement
-     *
-     * @param toReplace The performer to replace
-     * @param replacement The performer to use
-     * @return <code>true</code> if replaced; otherwise <code>false</code>
-     */
-    public static boolean replaceIfActive(RegistrationPerformer toReplace, RegistrationPerformer replacement) {
-        RegistrationPerformer current;
-        do {
-            current = REGISTRATION_PERFORMER_REFERENCE.get();
-            if (null != current && !current.equals(toReplace)) {
-                return false;
-            }
-        } while (!REGISTRATION_PERFORMER_REFERENCE.compareAndSet(current, replacement));
-        return true;
-    }
-
     // ---------------------------------------------------------------------------------------------------------------------------------
 
-    private final boolean permanent;
-    final RegistrationContext registrationContext;
-    private final ServiceLookup services;
     private final DovecotPushManagerService pushManager;
 
     private boolean initialized;
@@ -141,41 +97,14 @@ public class DovecotPushListener implements PushListener, Runnable {
      * @param services The OSGi service look-up
      */
     public DovecotPushListener(RegistrationContext registrationContext, boolean permanent, DovecotPushManagerService pushManager, ServiceLookup services) {
-        super();
+        super(registrationContext, permanent, services);
         this.pushManager = pushManager;
-        this.permanent = permanent;
-        this.registrationContext = registrationContext;
-        this.services = services;
-    }
-
-    private boolean isUserValid(boolean ccheckContext) {
-        try {
-            Context context = null;
-            if (ccheckContext) {
-                ContextService contextService = services.getService(ContextService.class);
-                context = contextService.loadContext(registrationContext.getContextId());
-                if (!context.isEnabled()) {
-                    return false;
-                }
-            }
-
-            UserService userService = services.getService(UserService.class);
-            User user;
-            if (context == null) {
-                user = userService.getUser(registrationContext.getUserId(), registrationContext.getContextId());
-            } else {
-                user = userService.getUser(registrationContext.getUserId(), context);
-            }
-            return user.isMailEnabled();
-        } catch (OXException e) {
-            return false;
-        }
     }
 
     @Override
     public void run() {
         try {
-            if (!isUserValid(false)) {
+            if (!isUserValid()) {
                 unregister(false);
                 return;
             }
@@ -186,35 +115,7 @@ public class DovecotPushListener implements PushListener, Runnable {
         }
     }
 
-    /**
-     * Gets the registration context
-     *
-     * @return The registration context
-     */
-    public RegistrationContext getRegistrationContext() {
-        return registrationContext;
-    }
-
-    /**
-     * Gets the permanent flag
-     *
-     * @return The permanent flag
-     */
-    public boolean isPermanent() {
-        return permanent;
-    }
-
     @Override
-    public void notifyNewMail() {
-        // Do nothing as we notify on incoming push event
-    }
-
-    /**
-     * Initializes registration for this listener.
-     *
-     * @return A reason string in case registration failed; otherwise <code>null</code> on success
-     * @throws OXException If registration failed hard
-     */
     public synchronized String initateRegistration() throws OXException {
         if (initialized) {
             // Already initialized
@@ -222,7 +123,7 @@ public class DovecotPushListener implements PushListener, Runnable {
         }
 
         if (false == registrationContext.hasWebMailAndIsActive()) {
-            StringBuilder sb = new StringBuilder("Denied start of a permanent push listener for user ").append(registrationContext.getUserId());
+            StringBuilder sb = new StringBuilder("Denied start of a ").append(permanent ? "permanent" : "session-bound").append(" push listener for user ").append(registrationContext.getUserId());
             sb.append(" in context ").append(registrationContext.getContextId()).append(": Missing \"webmail\" permission or user is disabled.");
             return sb.toString();
         }
@@ -259,16 +160,12 @@ public class DovecotPushListener implements PushListener, Runnable {
         } finally {
             if (scheduleRetry) {
                 long delay = 5000L;
-                retryTask = timerService.schedule(new RetryRunnable(logInfo), delay);
+                retryTask = timerService.schedule(new RetryRunnable(logInfo, LOGGER), delay);
             }
         }
     }
 
-    /**
-     * Unregisters this listeners.
-     *
-     * @throws OXException If unregistration fails
-     */
+    @Override
     public synchronized Runnable unregister(boolean tryToReconnect) throws OXException {
         // Avoid subsequent initialization attempt
         initialized = true;
@@ -371,30 +268,6 @@ public class DovecotPushListener implements PushListener, Runnable {
     private void doUnregistration() throws OXException {
         RegistrationPerformer registrationPerformer = REGISTRATION_PERFORMER_REFERENCE.get();
         registrationPerformer.unregister(registrationContext);
-    }
-
-    // -------------------------------------------------------------------------------------------------------------------------------
-
-    private class RetryRunnable implements Runnable {
-
-        private final String logInfo;
-
-        RetryRunnable(String logInfo) {
-            this.logInfo = logInfo;
-        }
-
-        @Override
-        public void run() {
-            try {
-                initateRegistration();
-            } catch (Exception e) {
-                if (null == logInfo) {
-                    LOGGER.error("Failed to initiate Dovecot Push registration for user {} in context {}", Integer.valueOf(registrationContext.getUserId()), Integer.valueOf(registrationContext.getContextId()), e);
-                } else {
-                    LOGGER.error("Failed to initiate Dovecot Push registration for {} (user={}, context={})", logInfo, Integer.valueOf(registrationContext.getUserId()), Integer.valueOf(registrationContext.getContextId()), e);
-                }
-            }
-        }
     }
 
 }

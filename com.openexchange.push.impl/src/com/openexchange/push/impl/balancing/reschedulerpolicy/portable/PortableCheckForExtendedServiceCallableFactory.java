@@ -49,6 +49,7 @@
 
 package com.openexchange.push.impl.balancing.reschedulerpolicy.portable;
 
+import com.hazelcast.nio.serialization.ClassDefinition;
 import com.hazelcast.nio.serialization.Portable;
 import com.openexchange.hazelcast.serialization.AbstractCustomPortableFactory;
 
@@ -75,7 +76,12 @@ public class PortableCheckForExtendedServiceCallableFactory extends AbstractCust
 
     @Override
     public int getClassId() {
-        return 103;
+        return PortableCheckForExtendedServiceCallable.CLASS_ID;
+    }
+
+    @Override
+    public ClassDefinition getClassDefinition() {
+        return PortableCheckForExtendedServiceCallable.CLASS_DEFINITION;
     }
 
 }

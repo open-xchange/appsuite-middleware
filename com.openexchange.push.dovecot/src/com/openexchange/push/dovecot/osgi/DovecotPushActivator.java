@@ -49,27 +49,26 @@
 
 package com.openexchange.push.dovecot.osgi;
 
+import org.osgi.framework.BundleContext;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.dovecot.doveadm.client.DoveAdmClient;
-import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.lock.LockService;
+import com.openexchange.mail.MailProviderRegistration;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.pns.PushNotificationService;
 import com.openexchange.push.PushListenerService;
+import com.openexchange.push.dovecot.AbstractDovecotPushListener;
 import com.openexchange.push.dovecot.DefaultRegistrationPerformer;
 import com.openexchange.push.dovecot.DovecotPushConfiguration;
-import com.openexchange.push.dovecot.DovecotPushDeleteListener;
-import com.openexchange.push.dovecot.DovecotPushListener;
-import com.openexchange.push.dovecot.DovecotPushManagerService;
-import com.openexchange.push.dovecot.locking.DovecotPushClusterLock;
 import com.openexchange.push.dovecot.registration.RegistrationPerformer;
 import com.openexchange.push.dovecot.rest.DovecotPushRESTService;
+import com.openexchange.push.dovecot.stateful.ClusterLockProvider;
 import com.openexchange.session.ObfuscatorService;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -84,6 +83,8 @@ import com.openexchange.user.UserService;
  * @since 7.6.2
  */
 public class DovecotPushActivator extends HousekeepingActivator {
+
+    private DovecotPushManagerLifecycle pushManagerLifecycle;
 
     /**
      * Initializes a new {@link DovecotPushActivator}.
@@ -107,46 +108,39 @@ public class DovecotPushActivator extends HousekeepingActivator {
         trackService(DoveAdmClient.class);
         trackService(MailAccountStorageService.class);
 
-        DovecotPushListener.setIfHigherRanked(new DefaultRegistrationPerformer(this));
+        AbstractDovecotPushListener.setIfHigherRanked(new DefaultRegistrationPerformer(this));
 
         track(RegistrationPerformer.class, new RegistrationPerformerTracker(context));
 
-        DovecotPushConfiguration configuration = new DovecotPushConfiguration();
-        configuration.init(this);
-
-        // Check Hazelcast-based locking is enabled
-        if (DovecotPushClusterLock.Type.HAZELCAST.equals(configuration.getClusterLock().getType())) {
-            // Start tracking for Hazelcast
-            DovecotRegisteringTracker registeringTracker = new DovecotRegisteringTracker(true, configuration, this, context);
-            track(registeringTracker.getFilter(), registeringTracker);
+        DovecotPushConfiguration config = new DovecotPushConfiguration(getService(ConfigurationService.class));
+        if (config.useStatelessImpl()) {
+            StatelessDovecotRegisteringTracker registeringTracker = new StatelessDovecotRegisteringTracker(config, this, context);
+            track(MailProviderRegistration.class, registeringTracker);
+            this.pushManagerLifecycle = registeringTracker;
         } else {
-            // Register PushManagerService instance
-            DovecotRegisteringTracker registeringTracker = new DovecotRegisteringTracker(false, configuration, this, context);
+            ClusterLockProvider lockProvider = ClusterLockProvider.newInstance(config, this);
+            DovecotRegisteringTracker registeringTracker = new DovecotRegisteringTracker(config, lockProvider, this);
             track(registeringTracker.getFilter(), registeringTracker);
-            trackService(HazelcastInstance.class);
+            this.pushManagerLifecycle = registeringTracker;
         }
-        openTrackers();
 
-        registerService(DeleteListener.class, new DovecotPushDeleteListener());
+        trackService(HazelcastInstance.class);
+        openTrackers();
 
         registerService(DovecotPushRESTService.class, new DovecotPushRESTService(this));
     }
 
     @Override
     protected void stopBundle() throws Exception {
-        DovecotPushManagerService.dropInstance();
+        if (pushManagerLifecycle != null) {
+            pushManagerLifecycle.shutDown();
+        }
         Services.setServiceLookup(null);
         super.stopBundle();
     }
 
-    @Override
-    public <S> boolean addService(Class<S> clazz, S service) {
-        return super.addService(clazz, service);
-    }
-
-    @Override
-    public <S> boolean removeService(Class<? extends S> clazz) {
-        return super.removeService(clazz);
+    public BundleContext getBundleContext() {
+        return context;
     }
 
 }
