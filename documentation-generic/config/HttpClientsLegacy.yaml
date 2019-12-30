@@ -1,0 +1,166 @@
+feature_name: HTTP Client Configuration legacy values
+feature_description: |
+  This pages describes the configurable attributes that can be set to modify each HTTP client used by the Middleware to make requests against thrid parties.
+  This page especially lists all properties which had a programatically default before and thus differs from the general configuration. 
+  For futher details please have a look at [[https://documentation.open-xchange.com/{{version}}/middleware/administration/http_client_configuration.html]].
+properties:
+  - key: com.openenexchange.httpclient.autoconfig-server.readTimeout
+    description: |
+       The read time-out in milliseconds.
+    defaultValue: 10000
+    version: 7.10.4
+    reloadable: true
+    configcascadeAware: false
+    file: 
+    packageName: open-xchange-core
+    tags: ["Server", "HTTP Client", "Autoconfig"]
+  - key: com.openenexchange.httpclient.autoconfig-server.connectionTimeout
+    description: |
+      The connection time-out in milliseconds.
+    defaultValue: 3000
+    version: 7.10.4
+    reloadable: true
+    configcascadeAware: false
+    file: 
+    packageName: open-xchange-core
+    tags: ["Server", "HTTP Client", "Autoconfig"]
+  - key: com.openenexchange.httpclient.davpush.connectionTimeout
+    description: |
+      The connection time-out in milliseconds.
+    defaultValue: 30000
+    version: 7.10.4
+    reloadable: true
+    configcascadeAware: false
+    file: 
+    packageName: open-xchange-core
+    tags: ["Server", "HTTP Client", "DavPush"]
+  - key: com.openenexchange.httpclient.davpush.totalConnections
+    description: |
+       The number of total connections held in HTTP connection pool by each client.
+    defaultValue: 100
+    version: 7.10.4
+    reloadable: true
+    configcascadeAware: false
+    file: 
+    packageName: open-xchange-core
+    tags: ["Server", "HTTP Client", "DavPush"]
+  - key: com.openenexchange.httpclient.davpush.connectionPerRoute
+    description: |
+        The number of connections per route held in HTTP connection pool by each client
+    defaultValue: 100
+    version: 7.10.4
+    reloadable: true
+    configcascadeAware: false
+    file: 
+    packageName: open-xchange-core
+    tags: ["Server", "HTTP Client", "DavPush"]
+  - key: com.openenexchange.httpclient.dropbox.readTimeout
+    description: |
+       The read time-out in milliseconds.
+    defaultValue: 120000
+    version: 7.10.4
+    reloadable: true
+    configcascadeAware: false
+    file: 
+    packageName: open-xchange-core
+    tags: ["Server", "HTTP Client", "DropBox"]
+  - key: com.openenexchange.httpclient.dropbox.connectionTimeout
+    description: |
+      The connection time-out in milliseconds.
+    defaultValue: 20000
+    version: 7.10.4
+    reloadable: true
+    configcascadeAware: false
+    file: 
+    packageName: open-xchange-core
+    tags: ["Server", "HTTP Client", "DropBox"]
+  - key: com.openenexchange.httpclient.proxy.readTimeout
+    description: |
+       The read time-out in milliseconds.
+    defaultValue: 3000
+    version: 7.10.4
+    reloadable: true
+    configcascadeAware: false
+    file: 
+    packageName: open-xchange-core
+    tags: ["Server", "HTTP Client", "Proxy"]
+  - key: com.openenexchange.httpclient.proxy.connectionTimeout
+    description: |
+      The connection time-out in milliseconds.
+    defaultValue: 3000
+    version: 7.10.4
+    reloadable: true
+    configcascadeAware: false
+    file: 
+    packageName: open-xchange-core
+    tags: ["Server", "HTTP Client", "Proxy"]
+  - key: com.openenexchange.httpclient.spamexperts.connectionTimeout
+    description: |
+      The connection time-out in milliseconds.
+    defaultValue: 5000
+    version: 7.10.4
+    reloadable: true
+    configcascadeAware: false
+    file: 
+    packageName: open-xchange-core
+    tags: ["Server", "HTTP Client", "Spam Experts"]
+  - key: com.openenexchange.httpclient.spamexperts.totalConnections
+    description: |
+       The number of total connections held in HTTP connection pool by each client.
+    defaultValue: 32
+    version: 7.10.4
+    reloadable: true
+    configcascadeAware: false
+    file: 
+    packageName: open-xchange-core
+    tags: ["Server", "HTTP Client", "Spam Experts"]
+  - key: com.openenexchange.httpclient.spamexperts.connectionPerRoute
+    description: |
+        The number of connections per route held in HTTP connection pool by each client
+    defaultValue: 32
+    version: 7.10.4
+    reloadable: true
+    configcascadeAware: false
+    file: 
+    packageName: open-xchange-core
+    tags: ["Server", "HTTP Client", "Spam Experts"]
+  - key: com.openenexchange.httpclient.davsub.readTimeout
+    description: |
+       The read time-out in milliseconds.
+    defaultValue: 10000
+    version: 7.10.4
+    reloadable: true
+    configcascadeAware: false
+    file: 
+    packageName: open-xchange-core
+    tags: ["Server", "HTTP Client", "DAV Subscription"]
+  - key: com.openenexchange.httpclient.davsub.connectionTimeout
+    description: |
+      The connection time-out in milliseconds.
+    defaultValue: 5000
+    version: 7.10.4
+    reloadable: true
+    configcascadeAware: false
+    file: 
+    packageName: open-xchange-core
+    tags: ["Server", "HTTP Client", "DAV Subscription"]
+  - key: com.openenexchange.httpclient.davsub.totalConnections
+    description: |
+       The number of total connections held in HTTP connection pool by each client.
+    defaultValue: 10
+    version: 7.10.4
+    reloadable: true
+    configcascadeAware: false
+    file: 
+    packageName: open-xchange-core
+    tags: ["Server", "HTTP Client", "DAV Subscription"]
+  - key: com.openenexchange.httpclient.davsub.connectionPerRoute
+    description: |
+        The number of connections per route held in HTTP connection pool by each client
+    defaultValue: 5
+    version: 7.10.4
+    reloadable: true
+    configcascadeAware: false
+    file: 
+    packageName: open-xchange-core
+    tags: ["Server", "HTTP Client", "DAV Subscription"]

@@ -62,6 +62,7 @@ import com.openexchange.filestore.sproxyd.groupware.SproxydConvertToUtf8mb4;
 import com.openexchange.filestore.sproxyd.groupware.SproxydCreateTableService;
 import com.openexchange.filestore.sproxyd.groupware.SproxydCreateTableTask;
 import com.openexchange.filestore.sproxyd.groupware.SproxydDeleteListener;
+import com.openexchange.filestore.sproxyd.http.SproxydHttpClientConfig;
 import com.openexchange.filestore.sproxyd.rmi.SproxydRemoteManagement;
 import com.openexchange.filestore.sproxyd.rmi.impl.SproxydRemoteImpl;
 import com.openexchange.groupware.delete.DeleteListener;
@@ -69,6 +70,8 @@ import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.metrics.MetricService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.rest.client.httpclient.HttpClientService;
+import com.openexchange.rest.client.httpclient.GenericHttpClientConfigProvider;
 import com.openexchange.timer.TimerService;
 
 /**
@@ -89,7 +92,7 @@ public class SproxydActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, DatabaseService.class, TimerService.class, MetricService.class };
+        return new Class<?>[] { ConfigurationService.class, DatabaseService.class, TimerService.class, MetricService.class, HttpClientService.class };
     }
 
     @Override
@@ -114,6 +117,9 @@ public class SproxydActivator extends HousekeepingActivator {
             props.put("RMIName", SproxydRemoteManagement.RMI_NAME);
             registerService(Remote.class, new SproxydRemoteImpl(this), props);
         }
+        
+        // Register HTTP client config
+        registerService(GenericHttpClientConfigProvider.class, new SproxydHttpClientConfig(this));
     }
 
     @Override
@@ -121,5 +127,4 @@ public class SproxydActivator extends HousekeepingActivator {
         LOG.info("Stopping bundle: com.openexchange.filestore.sproxyd");
         super.stopBundle();
     }
-
 }

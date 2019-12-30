@@ -49,6 +49,7 @@
 
 package com.openexchange.dovecot.doveadm.client.internal;
 
+import static com.openexchange.dovecot.doveadm.client.http.DoveAdmHttpClientConfig.getClientId;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -76,6 +77,7 @@ import org.apache.http.StatusLine;
 import org.apache.http.auth.AuthenticationException;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpResponseException;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.utils.URIBuilder;
@@ -83,7 +85,6 @@ import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.impl.auth.BasicScheme;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.util.EntityUtils;
@@ -107,6 +108,8 @@ import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.rest.client.endpointpool.Endpoint;
+import com.openexchange.rest.client.endpointpool.EndpointManager;
+import com.openexchange.rest.client.httpclient.HttpClientService;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 
@@ -214,9 +217,13 @@ public class HttpDoveAdmClient implements DoveAdmClient {
     private final BasicHttpContext localcontext;
     private final String authorizationHeaderValue;
     private final ServiceLookup services;
-
+    
     /**
      * Initializes a new {@link HttpDoveAdmClient}.
+     * 
+     * @param apiKey The API key
+     * @param endpointManager The {@link EndpointManager}
+     * @param services The {@link ServiceLookup}
      */
     public HttpDoveAdmClient(String apiKey, HttpDoveAdmEndpointManager endpointManager, ServiceLookup services) {
         super();
@@ -231,7 +238,7 @@ public class HttpDoveAdmClient implements DoveAdmClient {
         String encodedApiKey = BaseEncoding.base64().encode(apiKey.getBytes(Charsets.UTF_8));
         authorizationHeaderValue = "X-Dovecot-API " + encodedApiKey;
     }
-
+    
     @Override
     public String checkUser(String user, int userId, int contextId) throws OXException {
         ConfigViewFactory viewFactory = services.getService(ConfigViewFactory.class);
@@ -253,13 +260,12 @@ public class HttpDoveAdmClient implements DoveAdmClient {
     }
 
     private CallProperties getCallProperties(HttpDoveAdmCall call) throws OXException {
-        HttpClientAndEndpoint clientAndUri = endpointManager.getHttpClientAndUri(call);
-        Endpoint endpoint = clientAndUri.endpoint;
+        Endpoint endpoint = endpointManager.getEndpoint(call);
         String sUrl = endpoint.getBaseUri();
         try {
             URI uri = new URI(sUrl);
             HttpHost targetHost = new HttpHost(uri.getHost(), uri.getPort(), uri.getScheme());
-            return new CallProperties(uri, clientAndUri.httpClient, targetHost, endpoint);
+            return new CallProperties(uri, targetHost, endpoint);
         } catch (URISyntaxException e) {
             throw DoveAdmClientExceptionCodes.INVALID_DOVECOT_URL.create(null == sUrl ? "<empty>" : sUrl);
         }
@@ -445,7 +451,7 @@ public class HttpDoveAdmClient implements DoveAdmClient {
                 }
 
                 try {
-                    R response = handleHttpResponse(execute(post, callProperties.targetHost, callProperties.httpClient), resultType, traceBuilder);
+                    R response = handleHttpResponse(execute(call, post, callProperties.targetHost), resultType, traceBuilder);
                     if (null != traceBuilder) {
                         LOG.trace(traceBuilder.toString());
                     }
@@ -579,34 +585,39 @@ public class HttpDoveAdmClient implements DoveAdmClient {
     }
 
     /**
-     * Executes specified HTTP method/request using given HTTP client instance.
+     * Executes specified HTTP method/request.
      *
+     * @param call The DoveAdm Call
      * @param method The method/request to execute
      * @param targetHost The target host
-     * @param httpClient The HTTP client to use
      * @return The HTTP response
      * @throws ClientProtocolException If client protocol error occurs
      * @throws IOException If an I/O error occurs
      */
-    protected HttpResponse execute(HttpRequestBase method, HttpHost targetHost, CloseableHttpClient httpClient) throws ClientProtocolException, IOException {
-        return execute(method, targetHost, httpClient, localcontext);
+    protected CloseableHttpResponse execute(HttpDoveAdmCall call, HttpRequestBase method, HttpHost targetHost) throws ClientProtocolException, IOException {
+        return execute(call, method, targetHost, localcontext);
     }
 
     /**
-     * Executes specified HTTP method/request using given HTTP client instance.
+     * Executes specified HTTP method/request.
      *
+     * @param call The DoveAdm Call
      * @param method The method/request to execute
      * @param targetHost The target host
-     * @param httpClient The HTTP client to use
      * @param context The context
      * @return The HTTP response
      * @throws ClientProtocolException If client protocol error occurs
      * @throws IOException If an I/O error occurs
      */
-    protected HttpResponse execute(HttpRequestBase method, HttpHost targetHost, CloseableHttpClient httpClient, BasicHttpContext context) throws ClientProtocolException, IOException {
-        return httpClient.execute(targetHost, method, context);
+    protected CloseableHttpResponse execute(HttpDoveAdmCall call, HttpRequestBase method, HttpHost targetHost, BasicHttpContext context) throws ClientProtocolException, IOException {
+        try {
+            HttpClientService httpClientService = services.getServiceSafe(HttpClientService.class);
+            return httpClientService.getHttpClient(getClientId(call)).getCloseableHttpClient().execute(targetHost, method, context);
+        } catch (OXException e) {
+            throw new IOException("Unable to obtain connection", e);
+        }
     }
-
+    
     /**
      * Resets given HTTP request
      *
@@ -661,8 +672,12 @@ public class HttpDoveAdmClient implements DoveAdmClient {
      * @throws ClientProtocolException If a client protocol error occurs
      * @throws IOException If an I/O error occurs
      */
-    protected <R> R handleHttpResponse(HttpResponse httpResponse, ResultType<R> type, StringBuilder traceBuilder) throws OXException, ClientProtocolException, IOException {
-        return handleHttpResponse(httpResponse, STATUS_CODE_POLICY_DEFAULT, type, traceBuilder);
+    protected <R> R handleHttpResponse(CloseableHttpResponse httpResponse, ResultType<R> type, StringBuilder traceBuilder) throws OXException, ClientProtocolException, IOException {
+        try {
+            return handleHttpResponse(httpResponse, STATUS_CODE_POLICY_DEFAULT, type, traceBuilder);
+        } finally {
+            Streams.close(httpResponse);
+        }
     }
 
     /**
@@ -677,7 +692,7 @@ public class HttpDoveAdmClient implements DoveAdmClient {
      * @throws IOException If an I/O error occurs
      * @throws IllegalStateException If content stream cannot be created
      */
-    protected <R> R handleHttpResponse(HttpResponse httpResponse, StatusCodePolicy policy, ResultType<R> type, StringBuilder traceBuilder) throws OXException, ClientProtocolException, IOException {
+    protected <R> R handleHttpResponse(CloseableHttpResponse httpResponse, StatusCodePolicy policy, ResultType<R> type, StringBuilder traceBuilder) throws OXException, ClientProtocolException, IOException {
         if (null != traceBuilder) {
             String separator = Strings.getLineSeparator();
             traceBuilder.append(separator).append(separator).append("Response:").append(separator);
@@ -800,13 +815,11 @@ public class HttpDoveAdmClient implements DoveAdmClient {
 
         final URI uri;
         final HttpHost targetHost;
-        final CloseableHttpClient httpClient;
         final Endpoint endpoint;
 
-        CallProperties(URI uri, CloseableHttpClient httpClient, HttpHost targetHost, Endpoint endpoint) {
+        CallProperties(URI uri, HttpHost targetHost, Endpoint endpoint) {
             super();
             this.uri = uri;
-            this.httpClient = httpClient;
             this.targetHost = targetHost;
             this.endpoint = endpoint;
         }

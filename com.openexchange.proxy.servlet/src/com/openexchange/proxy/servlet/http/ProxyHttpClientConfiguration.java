@@ -47,81 +47,38 @@
  *
  */
 
-package com.openexchange.rest.client.httpclient.internal;
+package com.openexchange.proxy.servlet.http;
 
-import com.openexchange.metrics.MetricDescriptor;
-import com.openexchange.metrics.MetricDescriptor.MetricBuilder;
-import com.openexchange.metrics.MetricType;
+import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
+import org.apache.http.impl.client.HttpClientBuilder;
+import com.openexchange.rest.client.httpclient.DefaultHttpClientConfigProvider;
+import com.openexchange.rest.client.httpclient.HttpBasicConfig;
 
 /**
- * {@link MonitoringId}
+ * {@link ProxyHttpClientConfiguration}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.10.3
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @since v7.10.4
  */
-public class MonitoringId {
+public class ProxyHttpClientConfiguration extends DefaultHttpClientConfigProvider {
 
-    private final String clientName;
-
-    private final int instanceId;
-
-
-    public MonitoringId(String clientName, int instanceId) {
-        super();
-        this.clientName = clientName;
-        this.instanceId = instanceId;
-    }
-
-    public String getClientName() {
-        return clientName;
-    }
-
-    public int getInstanceId() {
-        return instanceId;
-    }
-
-    public void applyDimensionsTo(MetricBuilder builder) {
-        builder.addDimension("client", clientName);
-        builder.addDimension("instance", Integer.toString(instanceId));
-    }
-
-    public MetricBuilder newMetricBuilder(String group, String name, MetricType type) {
-        MetricBuilder builder = MetricDescriptor.newBuilder(group, name, type);
-        applyDimensionsTo(builder);
-        return builder;
+    /**
+     * Initializes a new {@link ProxyHttpClientConfiguration}.
+     *
+     */
+    public ProxyHttpClientConfiguration() {
+        super("proxy", null);
     }
 
     @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((clientName == null) ? 0 : clientName.hashCode());
-        result = prime * result + instanceId;
-        return result;
+    public HttpBasicConfig configureHttpBasicConfig(HttpBasicConfig config) {
+        return config.setConnectionTimeout(3000).setSocketReadTimeout(3000);
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        MonitoringId other = (MonitoringId) obj;
-        if (clientName == null) {
-            if (other.clientName != null)
-                return false;
-        } else if (!clientName.equals(other.clientName))
-            return false;
-        if (instanceId != other.instanceId)
-            return false;
-        return true;
-    }
-
-    @Override
-    public String toString() {
-        return clientName + ':' + Integer.toString(instanceId);
+    public void modify(HttpClientBuilder builder) {
+        builder.setRetryHandler(new DefaultHttpRequestRetryHandler(0, false));
+        super.modify(builder);
     }
 
 }

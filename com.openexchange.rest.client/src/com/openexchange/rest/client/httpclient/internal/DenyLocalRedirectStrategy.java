@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,50 +47,41 @@
  *
  */
 
-package com.openexchange.filestore.sproxyd.impl;
+package com.openexchange.rest.client.httpclient.internal;
 
-import org.apache.http.client.HttpClient;
+import java.net.InetAddress;
+import java.net.URI;
+import java.net.UnknownHostException;
+import org.apache.http.ProtocolException;
+import org.apache.http.impl.client.DefaultRedirectStrategy;
+import com.openexchange.java.InetAddresses;
 
 /**
- * {@link SproxydConfig}
+ * {@link DenyLocalRedirectStrategy}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.8.0
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a> - Moved with 7.10.4
+ * @since v7.6.1
  */
-public final class SproxydConfig {
+public class DenyLocalRedirectStrategy extends DefaultRedirectStrategy {
 
-    private final HttpClient httpClient;
+    public static final DenyLocalRedirectStrategy DENY_LOCAL_INSTANCE = new DenyLocalRedirectStrategy();
 
-    private final EndpointPool endpointPool;
-
-    /**
-     * Initializes a new {@link SproxydConfig}.
-     *
-     * @param httpClient The HTTP client to use
-     * @param endpointPool The pool managing available end-points
-     */
-    public SproxydConfig(HttpClient httpClient, EndpointPool endpointPool) {
+    private DenyLocalRedirectStrategy() {
         super();
-        this.httpClient = httpClient;
-        this.endpointPool = endpointPool;
     }
 
-    /**
-     * Gets the HTTP client to use.
-     *
-     * @return The HTTP client to use
-     */
-    public HttpClient getHttpClient() {
-        return httpClient;
+    @Override
+    protected URI createLocationURI(String location) throws ProtocolException {
+        try {
+            URI locationURI = super.createLocationURI(location);
+            InetAddress inetAddress = InetAddress.getByName(locationURI.getHost());
+            if (InetAddresses.isInternalAddress(inetAddress)) {
+                throw new ProtocolException("Invalid redirect URI: " + location + ". No redirect to local address allowed.");
+            }
+            return locationURI;
+        } catch (UnknownHostException e) {
+            throw new ProtocolException("Invalid redirect URI: " + location + ". Unknown host.", e);
+        }
     }
-
-    /**
-     * Gets the end-point pool.
-     *
-     * @return The end-point pool
-     */
-    public EndpointPool getEndpointPool() {
-        return endpointPool;
-    }
-
 }

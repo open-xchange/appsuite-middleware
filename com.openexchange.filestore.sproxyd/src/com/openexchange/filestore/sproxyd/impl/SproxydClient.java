@@ -55,15 +55,18 @@ import java.util.Collection;
 import java.util.UUID;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.InputStreamEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorageCodes;
 import com.openexchange.filestore.sproxyd.SproxydExceptionCode;
+import com.openexchange.filestore.sproxyd.osgi.Services;
 import com.openexchange.java.util.UUIDs;
+import com.openexchange.rest.client.httpclient.HttpClientService;
 
 /**
  * {@link SproxydClient}
@@ -74,22 +77,23 @@ public class SproxydClient {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SproxydClient.class);
 
-    private final EndpointPool endpoints;
-    private final HttpClient httpClient;
+    private final EndpointPool endpointPool;
     private final String prefix;
+    private final String filestoreID;
 
 
     /**
      * Initializes a new {@link SproxydClient}.
      *
-     * @param sproxydConfig The sproxyd config
+     * @param endpointPool The Endpoint pool
      * @param prefix The prefix to use
+     * @param filestoreID The filestore ID
      */
-    public SproxydClient(SproxydConfig sproxydConfig, String prefix) {
+    public SproxydClient(EndpointPool endpointPool, String prefix, String filestoreID) {
         super();
-        this.endpoints = sproxydConfig.getEndpointPool();
-        this.httpClient = sproxydConfig.getHttpClient();
+        this.endpointPool = endpointPool;
         this.prefix = prefix;
+        this.filestoreID = filestoreID;
     }
 
     /**
@@ -107,7 +111,7 @@ public class SproxydClient {
         try {
             request = new HttpPut(endpoint.getObjectUrl(id));
             request.setEntity(new InputStreamEntity(data, length));
-            response = httpClient.execute(request);
+            response = getHttpClient().execute(request);
             int status = response.getStatusLine().getStatusCode();
             if (HttpServletResponse.SC_OK == status || HttpServletResponse.SC_CREATED == status) {
                 return id;
@@ -140,14 +144,14 @@ public class SproxydClient {
      */
     public InputStream get(UUID id, long rangeStart, long rangeEnd) throws OXException {
         HttpGet get = null;
-        HttpResponse response = null;
+        CloseableHttpResponse response = null;
         Endpoint endpoint = getEndpoint();
         try {
             get = new HttpGet(endpoint.getObjectUrl(id));
             if (0 < rangeStart || 0 < rangeEnd) {
                 get.addHeader("Range", "bytes=" + rangeStart + "-" + rangeEnd);
             }
-            response = httpClient.execute(get);
+            response = getHttpClient().execute(get);
             int status = response.getStatusLine().getStatusCode();
             if (HttpServletResponse.SC_OK == status || HttpServletResponse.SC_PARTIAL_CONTENT == status) {
                 InputStream content = response.getEntity().getContent();
@@ -175,11 +179,11 @@ public class SproxydClient {
      */
     public boolean delete(UUID id) throws OXException {
         HttpDelete delete = null;
-        HttpResponse response = null;
+        CloseableHttpResponse response = null;
         Endpoint endpoint = getEndpoint();
         try {
             delete = new HttpDelete(endpoint.getObjectUrl(id));
-            response = httpClient.execute(delete);
+            response = getHttpClient().execute(delete);
             int status = response.getStatusLine().getStatusCode();
             if (HttpServletResponse.SC_OK == status) {
                 return true;
@@ -213,7 +217,7 @@ public class SproxydClient {
      * @throws OXException If no endpoint is available (i.e. all are blacklisted due to connection timeouts).
      */
     private Endpoint getEndpoint() throws OXException {
-        Endpoint endpoint = endpoints.get(prefix);
+        Endpoint endpoint = endpointPool.get(prefix);
         if (endpoint == null) {
             throw SproxydExceptionCode.STORAGE_UNAVAILABLE.create();
         }
@@ -226,20 +230,25 @@ public class SproxydClient {
      * @param endpoint The end-point for which the exception occurred.
      * @param e The exception
      * @return An OXException to re-throw
+     * @throws OXException 
      */
-    private OXException handleCommunicationError(Endpoint endpoint, IOException e) {
+    private OXException handleCommunicationError(Endpoint endpoint, IOException e) throws OXException {
         if (org.apache.http.conn.ConnectionPoolTimeoutException.class.isInstance(e)) {
             // Waiting for an available connection in HttpClient pool expired.
             // Avoid additional stress for that pool by preventing unavailable check, which might in turn wait for a lease.
             return FileStorageCodes.IOERROR.create(e, e.getMessage());
         }
 
-        if (Utils.endpointUnavailable(endpoint.getBaseUrl(), httpClient)) {
+        if (Utils.endpointUnavailable(endpoint.getBaseUrl(), getHttpClient())) {
             LOG.warn("Sproxyd endpoint is unavailable: {}", endpoint);
-            endpoints.blacklist(endpoint.getBaseUrl());
+            endpointPool.blacklist(endpoint.getBaseUrl());
         }
 
         return FileStorageCodes.IOERROR.create(e, e.getMessage());
+    }
+    
+    private CloseableHttpClient getHttpClient() throws OXException {
+        return Services.getService(HttpClientService.class).getHttpClient(filestoreID).getCloseableHttpClient();
     }
 
 }

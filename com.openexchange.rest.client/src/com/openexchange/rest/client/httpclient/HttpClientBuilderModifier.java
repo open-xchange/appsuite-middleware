@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,32 +47,26 @@
  *
  */
 
-package com.openexchange.dovecot.doveadm.client.internal;
+package com.openexchange.rest.client.httpclient;
 
-import org.apache.http.impl.client.CloseableHttpClient;
-import com.openexchange.rest.client.endpointpool.Endpoint;
+import org.apache.http.impl.client.HttpClientBuilder;
 
 /**
- * {@link HttpClientAndEndpoint} - Provides the HTTP client and base URI for a certain DoveAdm call.
+ * {@link HttpClientBuilderModifier}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v1.0.0
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @since v7.10.4
  */
-public class HttpClientAndEndpoint {
-
-    /** The HTTP client to use */
-    final CloseableHttpClient httpClient;
-
-    /** The associated available end-point to call */
-    final Endpoint endpoint;
+public interface HttpClientBuilderModifier {
 
     /**
-     * Initializes a new {@link HttpClientAndEndpoint}.
+     * Callback which allows to modify the HTTP client
+     * <b>before</b> it is created.
+     * <p>
+     * Be <b>careful</b> what you do. With the builder you are able
+     * to modify everything, so even defaults. Handle with care!
+     *
+     * @param builder The builder used to build the client
      */
-    public HttpClientAndEndpoint(CloseableHttpClient httpClient, Endpoint endpoint) {
-        super();
-        this.httpClient = httpClient;
-        this.endpoint = endpoint;
-    }
-
+    void modify(HttpClientBuilder builder);
 }

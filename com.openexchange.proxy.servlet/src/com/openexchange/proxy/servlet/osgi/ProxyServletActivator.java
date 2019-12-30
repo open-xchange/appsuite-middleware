@@ -65,7 +65,10 @@ import com.openexchange.proxy.servlet.Constants;
 import com.openexchange.proxy.servlet.ProxyEventHandler;
 import com.openexchange.proxy.servlet.ProxyRegistryImpl;
 import com.openexchange.proxy.servlet.ProxyServlet;
+import com.openexchange.proxy.servlet.http.ProxyHttpClientConfiguration;
 import com.openexchange.proxy.servlet.services.ServiceRegistry;
+import com.openexchange.rest.client.httpclient.HttpClientConfigProvider;
+import com.openexchange.rest.client.httpclient.HttpClientService;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.timer.TimerService;
@@ -80,14 +83,17 @@ public class ProxyServletActivator extends AbstractSessionServletActivator {
     private List<ServiceTracker<?,?>> trackers;
 
     private List<ServiceRegistration<?>> registrations;
-
+    
     @Override
     public void startBundle() throws Exception {
         final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ProxyServletActivator.class);
         try {
             log.info("starting bundle: com.openexchange.proxy.servlet");
+            
+            Services.setServiceLookup(this);
 
             registerSessionServlet(Constants.PATH, new ProxyServlet());
+            registerService(HttpClientConfigProvider.class, new ProxyHttpClientConfiguration());
 
             trackers = new ArrayList<ServiceTracker<?,?>>(4);
             trackers.add(new ServiceTracker<TimerService,TimerService>(context, TimerService.class, new TimerServiceCustomizer(context)));
@@ -117,6 +123,7 @@ public class ProxyServletActivator extends AbstractSessionServletActivator {
     @Override
     public void stopBundle() throws Exception {
         final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ProxyServletActivator.class);
+        Services.setServiceLookup(null);
         try {
             log.info("stopping bundle: com.openexchange.proxy.servlet");
             if (null != trackers) {
@@ -139,7 +146,7 @@ public class ProxyServletActivator extends AbstractSessionServletActivator {
 
     @Override
     protected Class<?>[] getAdditionalNeededServices() {
-        return null;
+        return new Class<?>[] { HttpClientService.class };
     }
 
 }

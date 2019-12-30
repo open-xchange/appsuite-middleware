@@ -57,6 +57,7 @@ import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestExecutor;
+import com.openexchange.metrics.MetricDescriptor;
 import com.openexchange.metrics.MetricService;
 import com.openexchange.metrics.MetricType;
 import com.openexchange.metrics.noop.NoopTimer;
@@ -74,11 +75,11 @@ import com.openexchange.rest.client.osgi.RestClientServices;
  */
 public class MeteredHttpRequestExecutor extends HttpRequestExecutor {
 
-    private final MonitoringId monitoringId;
+    private final String clientName;
 
-    public MeteredHttpRequestExecutor(MonitoringId monitoringId) {
+    public MeteredHttpRequestExecutor(String clientName) {
         super();
-        this.monitoringId = monitoringId;
+        this.clientName = clientName;
     }
 
     @Override
@@ -103,10 +104,11 @@ public class MeteredHttpRequestExecutor extends HttpRequestExecutor {
             return NoopTimer.getInstance();
         }
 
-        return metrics.getTimer(monitoringId.newMetricBuilder("httpclient", "RequestTimes", MetricType.TIMER)
+        return metrics.getTimer(MetricDescriptor.newBuilder("httpclient", "RequestTimes", MetricType.TIMER)
             .withRate(TimeUnit.SECONDS)
             .withUnit("requests")
             .withDescription("Duration of Apache HttpClient request execution")
+            .addDimension("client", clientName)
             .addDimension("method", method)
             .addDimension("status", status)
             .build());

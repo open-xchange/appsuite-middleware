@@ -50,7 +50,6 @@
 package com.openexchange.chronos.schedjoules.api;
 
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRESTClient;
-import com.openexchange.exception.OXException;
 
 /**
  * {@link SchedJoulesAPI}
@@ -71,22 +70,14 @@ public final class SchedJoulesAPI {
      * @param scheme
      * @param host
      * @param apiKey
-     * @throws OXException if the REST client cannot be initialised
      */
-    public SchedJoulesAPI(String scheme, String host, String apiKey, int timeout) {
+    public SchedJoulesAPI(String scheme, String host, String apiKey) {
         super();
-        client = new SchedJoulesRESTClient(scheme, host, apiKey, timeout);
+        client = new SchedJoulesRESTClient(scheme, host, apiKey);
         pages = new SchedJoulesPagesAPI(client);
         calendar = new SchedJoulesCalendarAPI(client);
         countries = new SchedJoulesCountriesAPI(client);
         languages = new SchedJoulesLanguagesAPI(client);
-    }
-
-    /**
-     * Shuts down the API
-     */
-    public void shutDown() {
-        client.close();
     }
 
     /**

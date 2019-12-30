@@ -53,9 +53,10 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -105,9 +106,9 @@ class Utils {
      * @param httpClient The HTTP client to use
      * @return <code>true</code> if the endpoint is unavailable
      */
-    static boolean endpointUnavailable(String baseUrl, HttpClient httpClient) {
+    static boolean endpointUnavailable(String baseUrl, CloseableHttpClient httpClient) {
         HttpGet get = null;
-        HttpResponse response = null;
+        CloseableHttpResponse response = null;
         try {
             get = new HttpGet(baseUrl + '/' + ".conf");
             response = httpClient.execute(get);

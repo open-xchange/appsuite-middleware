@@ -49,15 +49,19 @@
 
 package com.openexchange.rest.client.osgi;
 
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.metrics.MetricService;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.rest.client.endpointpool.EndpointManagerFactory;
 import com.openexchange.rest.client.endpointpool.internal.EndpointManagerFactoryImpl;
-import com.openexchange.rest.client.httpclient.internal.WrappedClientsRegistry;
+import com.openexchange.rest.client.httpclient.GenericHttpClientConfigProvider;
+import com.openexchange.rest.client.httpclient.HttpClientConfigProvider;
+import com.openexchange.rest.client.httpclient.HttpClientService;
+import com.openexchange.rest.client.httpclient.internal.HttpClientServiceImpl;
 import com.openexchange.timer.TimerService;
-
+import com.openexchange.version.VersionService;
 
 /**
  * {@link RestClientActivator}
@@ -66,6 +70,8 @@ import com.openexchange.timer.TimerService;
  * @since v7.8.1
  */
 public class RestClientActivator extends HousekeepingActivator {
+
+    private HttpClientServiceImpl factoryImpl;
 
     /**
      * Initializes a new {@link RestClientActivator}.
@@ -76,15 +82,25 @@ public class RestClientActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { TimerService.class, SSLSocketFactoryProvider.class, SSLConfigurationService.class, MetricService.class };
+        return new Class<?>[] { TimerService.class, SSLSocketFactoryProvider.class, SSLConfigurationService.class, MetricService.class, ConfigurationService.class };
+    }
+
+    @Override
+    protected Class<?>[] getOptionalServices() {
+        return new Class[] { VersionService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         RestClientServices.setServices(this);
-        WrappedClientsRegistry.getInstance().setSSLServices(getService(SSLSocketFactoryProvider.class), getService(SSLConfigurationService.class));
         registerService(EndpointManagerFactory.class, new EndpointManagerFactoryImpl(this));
 
+        factoryImpl = new HttpClientServiceImpl(context, this);
+        registerService(HttpClientService.class, factoryImpl);
+        track(HttpClientConfigProvider.class, factoryImpl);
+        track(GenericHttpClientConfigProvider.class, factoryImpl);
+
+        openTrackers();
         // Avoid annoying WARN logging
         //System.setProperty("org.apache.commons.logging.simplelog.log.org.apache.http.client.protocol.ResponseProcessCookies", "fatal");
     }
@@ -95,8 +111,10 @@ public class RestClientActivator extends HousekeepingActivator {
             // Clean-up
             super.stopBundle();
             // Clear service registry
-            WrappedClientsRegistry.getInstance().setSSLServices(null, null);
             RestClientServices.setServices(null);
+            if (null != factoryImpl) {
+                factoryImpl.shutdown();
+            }
         } catch (Exception e) {
             org.slf4j.LoggerFactory.getLogger(RestClientActivator.class).error("", e);
             throw e;

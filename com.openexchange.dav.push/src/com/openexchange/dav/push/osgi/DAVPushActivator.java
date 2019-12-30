@@ -71,6 +71,7 @@ import com.openexchange.dav.push.DAVPushUtility;
 import com.openexchange.dav.push.apn.DAVApnOptionsProvider;
 import com.openexchange.dav.push.apn.DAVApnPushMessageGenerator;
 import com.openexchange.dav.push.gcm.DavPushGateway;
+import com.openexchange.dav.push.http.DavHttpClientConfiguration;
 import com.openexchange.dav.push.mixins.PushKey;
 import com.openexchange.dav.push.mixins.PushTransports;
 import com.openexchange.dav.push.mixins.SubscribeURL;
@@ -87,6 +88,8 @@ import com.openexchange.pns.PushNotificationService;
 import com.openexchange.pns.PushNotificationTransport;
 import com.openexchange.pns.PushSubscriptionRegistry;
 import com.openexchange.pns.transport.apn.ApnOptionsProvider;
+import com.openexchange.rest.client.httpclient.HttpClientConfigProvider;
+import com.openexchange.rest.client.httpclient.HttpClientService;
 import com.openexchange.version.VersionService;
 import com.openexchange.webdav.protocol.helpers.PropertyMixin;
 
@@ -105,7 +108,7 @@ public class DAVPushActivator extends HousekeepingActivator implements Reloadabl
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HttpService.class, ConfigurationService.class, PushNotificationService.class, PushSubscriptionRegistry.class, ConfigViewFactory.class, CapabilityService.class, VersionService.class };
+        return new Class<?>[] { HttpService.class, ConfigurationService.class, PushNotificationService.class, PushSubscriptionRegistry.class, ConfigViewFactory.class, CapabilityService.class, HttpClientService.class, VersionService.class };
     }
 
     @Override
@@ -137,6 +140,10 @@ public class DAVPushActivator extends HousekeepingActivator implements Reloadabl
              * initial initialization
              */
             reinit(getService(ConfigurationService.class));
+            /*
+             * register new HTTP client configuration
+             */
+            registerService(HttpClientConfigProvider.class, new DavHttpClientConfiguration(getService(VersionService.class)));
         } catch (Exception e) {
             getLogger(DAVPushActivator.class).error("error starting {}", context.getBundle(), e);
             throw e;

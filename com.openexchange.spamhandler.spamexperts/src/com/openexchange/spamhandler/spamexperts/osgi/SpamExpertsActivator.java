@@ -60,8 +60,11 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.rest.client.httpclient.HttpClientConfigProvider;
+import com.openexchange.rest.client.httpclient.HttpClientService;
 import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.spamhandler.spamexperts.SpamExpertsSpamHandler;
+import com.openexchange.spamhandler.spamexperts.http.SpamExtertsHttpConfiguration;
 import com.openexchange.spamhandler.spamexperts.management.SpamExpertsConfig;
 import com.openexchange.spamhandler.spamexperts.servlets.SpamExpertsServlet;
 import com.openexchange.tools.servlet.http.HTTPServletRegistration;
@@ -71,7 +74,6 @@ import com.openexchange.version.VersionService;
 public class SpamExpertsActivator extends HousekeepingActivator {
 
 	private HTTPServletRegistration servletRegistration;
-    private SpamExpertsServlet spamExpertsServlet;
 
 	public SpamExpertsActivator() {
 		super();
@@ -80,7 +82,7 @@ public class SpamExpertsActivator extends HousekeepingActivator {
 	@Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { UserService.class, DatabaseService.class, ContextService.class, ConfigurationService.class, ConfigViewFactory.class, 
-                                HttpService.class, MailService.class, SSLSocketFactoryProvider.class, VersionService.class };
+                                HttpService.class, MailService.class, SSLSocketFactoryProvider.class, HttpClientService.class, VersionService.class };
     }
 
 	@Override
@@ -105,9 +107,9 @@ public class SpamExpertsActivator extends HousekeepingActivator {
         });
 
         String alias = getService(ConfigurationService.class).getProperty("com.openexchange.custom.spamexperts.panel_servlet", "/ajax/spamexperts/panel").trim();
-		SpamExpertsServlet spamExpertsServlet = new SpamExpertsServlet(config, getServiceSafe(VersionService.class));
-		this.spamExpertsServlet = spamExpertsServlet;
+		SpamExpertsServlet spamExpertsServlet = new SpamExpertsServlet(config, this);
         servletRegistration = new HTTPServletRegistration(context, spamExpertsServlet, alias);
+        registerService(HttpClientConfigProvider.class, new SpamExtertsHttpConfiguration(getService(VersionService.class)));
 	}
 
 	@Override
@@ -120,13 +122,6 @@ public class SpamExpertsActivator extends HousekeepingActivator {
             this.servletRegistration = null;
             servletRegistration.unregister();
         }
-
-        SpamExpertsServlet spamExpertsServlet = this.spamExpertsServlet;
-        if (null != spamExpertsServlet) {
-            this.spamExpertsServlet = null;
-            spamExpertsServlet.shutDown();
-        }
-
         super.stopBundle();
 	}
 

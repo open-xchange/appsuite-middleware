@@ -6,9 +6,11 @@ Bundle-Version: 7.10.4
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.openexchange.ajax.container,
+ com.openexchange.annotation,
  com.openexchange.auth,
  com.openexchange.cache.dynamic,
  com.openexchange.config,
+ com.openexchange.config.lean,
  com.openexchange.configuration,
  com.openexchange.context,
  com.openexchange.database,

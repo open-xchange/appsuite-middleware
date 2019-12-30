@@ -69,6 +69,7 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.pool.PoolStats;
 import org.apache.http.protocol.HttpContext;
 import com.openexchange.metrics.MetricDescriptor;
+import com.openexchange.metrics.MetricDescriptor.MetricBuilder;
 import com.openexchange.metrics.MetricService;
 import com.openexchange.metrics.MetricType;
 import com.openexchange.metrics.noop.NoopCounter;
@@ -84,15 +85,15 @@ import com.openexchange.rest.client.osgi.RestClientServices;
  */
 public class ClientConnectionManager extends PoolingHttpClientConnectionManager {
 
-    private final MonitoringId monitoringId;
+    private final String clientName;
     private final int keepAliveMonitorInterval;
     private final AtomicBoolean shuttingDown;
     private final AtomicBoolean metricsInitialized;
     private volatile IdleConnectionCloser idleConnectionCloser;
 
-    public ClientConnectionManager(MonitoringId monitoringId, Registry<ConnectionSocketFactory> socketFactoryRegistry, int keepAliveMonitorInterval) {
+    public ClientConnectionManager(String clientName, int keepAliveMonitorInterval, Registry<ConnectionSocketFactory> socketFactoryRegistry) {
         super(socketFactoryRegistry);
-        this.monitoringId = monitoringId;
+        this.clientName = clientName;
         this.keepAliveMonitorInterval = keepAliveMonitorInterval;
         shuttingDown = new AtomicBoolean(false);
         metricsInitialized = new AtomicBoolean(false);
@@ -178,56 +179,49 @@ public class ClientConnectionManager extends PoolingHttpClientConnectionManager 
 
     @Override
     public void shutdown() {
-        try {
-            IdleConnectionCloser idleConnectionClose = this.idleConnectionCloser;
-            if (null != idleConnectionClose) {
-                idleConnectionClose.stop();
-                this.idleConnectionCloser = null;
-            }
-            shuttingDown.set(true);
-            super.shutdown();
-        } finally {
-            MonitoringRegistry.getInstance().unregisterInstance(monitoringId);
+        IdleConnectionCloser idleConnectionClose = this.idleConnectionCloser;
+        if (null != idleConnectionClose) {
+            idleConnectionClose.stop();
+            this.idleConnectionCloser = null;
         }
+        shuttingDown.set(true);
+        super.shutdown();
     }
 
     private void initPoolMetrics(MetricService metrics) {
         List<MetricDescriptor> descriptors = getPoolMetricDescriptors();
-        if (MonitoringRegistry.getInstance().hasInstance(monitoringId)) {
-            descriptors.forEach(d -> metrics.removeMetric(d));
-        }
-
+        descriptors.forEach(d -> metrics.removeMetric(d));
         descriptors.forEach(d -> metrics.getGauge(d));
     }
 
     private List<MetricDescriptor> getPoolMetricDescriptors() {
         List<MetricDescriptor> descriptors = new ArrayList<>(6);
-        descriptors.add(monitoringId.newMetricBuilder("httpclient", "Pool.Max", MetricType.GAUGE)
+        descriptors.add(newMetricBuilder("httpclient", "Pool.Max", MetricType.GAUGE)
             .withDescription("The configured maximum number of allowed persistent connections for all routes.")
             .withMetricSupplier(() -> I(getTotalStats().getMax()))
             .build());
 
-        descriptors.add(monitoringId.newMetricBuilder("httpclient", "Pool.Route.Max", MetricType.GAUGE)
+        descriptors.add(newMetricBuilder("httpclient", "Pool.Route.Max", MetricType.GAUGE)
             .withDescription("The configured maximum number of allowed persistent connections per route.")
             .withMetricSupplier(() -> I(getDefaultMaxPerRoute()))
             .build());
 
-        descriptors.add(monitoringId.newMetricBuilder("httpclient", "Pool.Available", MetricType.GAUGE)
+        descriptors.add(newMetricBuilder("httpclient", "Pool.Available", MetricType.GAUGE)
             .withDescription("The number of available persistent connections for all routes.")
             .withMetricSupplier(() -> I(getTotalStats().getAvailable()))
             .build());
 
-        descriptors.add(monitoringId.newMetricBuilder("httpclient", "Pool.Leased", MetricType.GAUGE)
+        descriptors.add(newMetricBuilder("httpclient", "Pool.Leased", MetricType.GAUGE)
             .withDescription("The number of leased persistent connections for all routes.")
             .withMetricSupplier(() -> I(getTotalStats().getLeased()))
             .build());
 
-        descriptors.add(monitoringId.newMetricBuilder("httpclient", "Pool.Pending", MetricType.GAUGE)
+        descriptors.add(newMetricBuilder("httpclient", "Pool.Pending", MetricType.GAUGE)
             .withDescription("The number of pending threads waiting for a connection.")
             .withMetricSupplier(() -> I(getTotalStats().getPending()))
             .build());
 
-        descriptors.add(monitoringId.newMetricBuilder("httpclient", "Pool.Total", MetricType.GAUGE)
+        descriptors.add(newMetricBuilder("httpclient", "Pool.Total", MetricType.GAUGE)
             .withDescription("The total number of pooled connections for all routes.")
             .withMetricSupplier(() -> {
                 PoolStats stats = getTotalStats();
@@ -237,13 +231,17 @@ public class ClientConnectionManager extends PoolingHttpClientConnectionManager 
         return descriptors;
     }
 
+    private MetricBuilder newMetricBuilder(String group, String name, MetricType type) {
+        return MetricDescriptor.newBuilder(group, name, type).addDimension("client", clientName);
+    }
+
     Counter getErrorCounter(String reason) {
         MetricService metrics = RestClientServices.getOptionalService(MetricService.class);
         if (metrics == null) {
             return NoopCounter.getInstance();
         }
 
-        return metrics.getCounter(monitoringId.newMetricBuilder("httpclient", "ConnectErrors", MetricType.COUNTER)
+        return metrics.getCounter(newMetricBuilder("httpclient", "ConnectErrors", MetricType.COUNTER)
             .withDescription("Number of errors while establishing connections")
             .addDimension("reason", reason)
             .build());

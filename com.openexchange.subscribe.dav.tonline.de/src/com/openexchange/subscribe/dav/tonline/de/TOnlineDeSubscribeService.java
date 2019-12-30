@@ -65,6 +65,8 @@ public class TOnlineDeSubscribeService extends AbstractCardDAVSubscribeService {
 
     /**
      * Initializes a new {@link TOnlineDeSubscribeService}.
+     * 
+     * @param services The {@link ServiceLookup}
      */
     public TOnlineDeSubscribeService(ServiceLookup services) {
         super(services);

@@ -80,8 +80,6 @@ public class SchedJoulesAPICache {
     private final Cache<SchedJoulesCachedAPIKey, SchedJoulesAPI> apiCache = CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.HOURS).removalListener(notification -> {
         SchedJoulesCachedAPIKey key = (SchedJoulesCachedAPIKey) notification.getKey();
         LOG.debug("Shutting down SchedJoules API for key '{}'.", key.getApiKeyHash());
-        SchedJoulesAPI api = (SchedJoulesAPI) notification.getValue();
-        api.shutDown();
     }).build();
 
     /**
@@ -103,7 +101,7 @@ public class SchedJoulesAPICache {
             String apiKeyHash = getHashedAPIKey(contextId);
             return apiCache.get(new SchedJoulesCachedAPIKey(apiKeyHash, contextId), () -> {
                 LOG.debug("Cache miss for key '{}', initialising new SchedJoules API.", apiKeyHash);
-                return new SchedJoulesAPI(getProperty(contextId, SchedJoulesProperty.scheme), getProperty(contextId, SchedJoulesProperty.host), getProperty(contextId, SchedJoulesProperty.apiKey), getIntProperty(contextId, SchedJoulesProperty.connectionTimeout));
+                return new SchedJoulesAPI(getProperty(contextId, SchedJoulesProperty.scheme), getProperty(contextId, SchedJoulesProperty.host), getProperty(contextId, SchedJoulesProperty.apiKey));
             });
         } catch (ExecutionException e) {
             throw SchedJoulesAPIExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());

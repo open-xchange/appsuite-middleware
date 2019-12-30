@@ -53,12 +53,16 @@ import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dovecot.doveadm.client.DoveAdmClient;
+import com.openexchange.dovecot.doveadm.client.http.DoveAdmHttpClientConfig;
+import com.openexchange.dovecot.doveadm.client.internal.HttpDoveAdmCall;
 import com.openexchange.dovecot.doveadm.client.internal.HttpDoveAdmClient;
 import com.openexchange.dovecot.doveadm.client.internal.HttpDoveAdmEndpointAvailableStrategy;
 import com.openexchange.dovecot.doveadm.client.internal.HttpDoveAdmEndpointManager;
 import com.openexchange.java.Strings;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.rest.client.endpointpool.EndpointManagerFactory;
+import com.openexchange.rest.client.httpclient.HttpClientConfigProvider;
+import com.openexchange.rest.client.httpclient.HttpClientService;
 import com.openexchange.version.VersionService;
 
 /**
@@ -80,7 +84,7 @@ public class DoveAdmClientActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, EndpointManagerFactory.class, ConfigViewFactory.class, VersionService.class };
+        return new Class<?>[] { ConfigurationService.class, EndpointManagerFactory.class, ConfigViewFactory.class, HttpClientService.class, VersionService.class };
     }
 
     @Override
@@ -116,6 +120,11 @@ public class DoveAdmClientActivator extends HousekeepingActivator {
         if (false == anyAvailable) {
             logger.error("Missing end-points for Dovecot DoveAdm REST interface. DoveAdm client will not be initialized.");
             return;
+        }
+
+        // Initialize HTTP client config for the different doveadm calls
+        for (HttpDoveAdmCall call : HttpDoveAdmCall.values()) {
+            registerService(HttpClientConfigProvider.class, new DoveAdmHttpClientConfig(this, call));
         }
 
         // Initialize client to Dovecot REST interface

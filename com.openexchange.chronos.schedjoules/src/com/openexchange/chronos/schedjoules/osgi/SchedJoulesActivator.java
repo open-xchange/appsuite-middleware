@@ -53,10 +53,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.chronos.schedjoules.SchedJoulesService;
+import com.openexchange.chronos.schedjoules.http.SchedJoulesHttpConfiguration;
 import com.openexchange.chronos.schedjoules.impl.SchedJoulesServiceImpl;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.rest.client.httpclient.HttpClientConfigProvider;
+import com.openexchange.rest.client.httpclient.HttpClientService;
 import com.openexchange.timer.TimerService;
 
 /**
@@ -75,7 +79,7 @@ public class SchedJoulesActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { LeanConfigurationService.class, ICalService.class, TimerService.class };
+        return new Class<?>[] { ConfigurationService.class, LeanConfigurationService.class, ICalService.class, TimerService.class, HttpClientService.class };
     }
 
     @Override
@@ -86,6 +90,7 @@ public class SchedJoulesActivator extends HousekeepingActivator {
         SchedJoulesService service = new SchedJoulesServiceImpl();
         registerService(SchedJoulesService.class, service);
         registerService(Reloadable.class, (Reloadable) service);
+        registerService(HttpClientConfigProvider.class, new SchedJoulesHttpConfiguration(this));
         log.info("Registered SchedJoules Service.");
     }
 

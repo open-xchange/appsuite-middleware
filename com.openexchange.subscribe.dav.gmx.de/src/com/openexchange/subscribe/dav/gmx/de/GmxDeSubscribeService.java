@@ -65,6 +65,8 @@ public class GmxDeSubscribeService extends AbstractCardDAVSubscribeService {
 
     /**
      * Initializes a new {@link GmxDeSubscribeService}.
+     * 
+     * @param services The {@link ServiceLookup}  
      */
     public GmxDeSubscribeService(ServiceLookup services) {
         super(services);

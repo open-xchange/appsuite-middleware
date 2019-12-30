@@ -50,7 +50,6 @@
 package com.openexchange.rest.client.session;
 
 import org.apache.http.HttpRequest;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
 import com.openexchange.exception.OXException;
@@ -90,12 +89,6 @@ public interface Session {
      * a proxy, or a {@link ProxyInfo} object with a host and optionally a port set.
      */
     public ProxyInfo getProxyInfo();
-
-    /**
-     * Will be called every time a REST request is fired, in case you want to use a new client every time. However, it's highly recommended
-     * to create a client once and reuse it to take advantage of connection reuse.
-     */
-    public HttpClient getHttpClient();
 
     /**
      * Will be called every time right before a REST request is fired. It should set the socket and connection timeouts on the request if

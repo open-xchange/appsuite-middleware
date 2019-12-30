@@ -50,6 +50,7 @@
 package com.openexchange.microsoft.graph.api;
 
 import com.openexchange.microsoft.graph.api.client.MicrosoftGraphRESTClient;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link MicrosoftGraphAPI}
@@ -65,10 +66,12 @@ public class MicrosoftGraphAPI {
 
     /**
      * Initialises a new {@link MicrosoftGraphAPI}.
+     * 
+     * @param serviceLookup The service lookup
      */
-    public MicrosoftGraphAPI() {
+    public MicrosoftGraphAPI(ServiceLookup serviceLookup) {
         super();
-        client = new MicrosoftGraphRESTClient();
+        client = new MicrosoftGraphRESTClient(serviceLookup);
         contactsAPI = new MicrosoftGraphContactsAPI(client);
         oneDriveAPI = new MicrosoftGraphOneDriveAPI(client);
     }

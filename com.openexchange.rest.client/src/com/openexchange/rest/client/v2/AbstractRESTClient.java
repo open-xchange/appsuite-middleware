@@ -49,7 +49,7 @@
 
 package com.openexchange.rest.client.v2;
 
-import java.io.Closeable;
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
@@ -57,6 +57,7 @@ import java.util.Map.Entry;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
@@ -71,9 +72,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.rest.client.exception.RESTExceptionCodes;
-import com.openexchange.rest.client.httpclient.HttpClients;
-import com.openexchange.rest.client.httpclient.HttpClients.ClientConfig;
+import com.openexchange.rest.client.httpclient.HttpClientService;
 import com.openexchange.rest.client.v2.parser.RESTResponseParser;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link AbstractRESTClient}
@@ -81,56 +82,34 @@ import com.openexchange.rest.client.v2.parser.RESTResponseParser;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
-public abstract class AbstractRESTClient implements Closeable {
+public abstract class AbstractRESTClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRESTClient.class);
 
-    private final CloseableHttpClient httpClient;
     private final RESTResponseParser parser;
 
-    /**
-     * Initialises a new {@link AbstractRESTClient}.
-     *
-     * @param userAgent The user agent to use for this RESTClient
-     * @param timeout The timeout for socket read and connections
-     * @param parser The {@link RESTResponseParser} to use when parsing the responses
-     */
-    public AbstractRESTClient(String userAgent, int timeout, RESTResponseParser parser) {
-        this(null, userAgent, timeout, parser);
-    }
+    protected ServiceLookup services;
+
+    private String httpClientId;
 
     /**
      * Initialises a new {@link AbstractRESTClient}.
-     *
-     * @param clientName HTTP client name
-     * @param userAgent The user agent to use for this RESTClient
-     * @param timeout The timeout for socket read and connections
+     * 
+     * @param services The service lookup to get the {@link HttpClientService} from
+     * @param httpClientId The service ID to get the HTTP client for
      * @param parser The {@link RESTResponseParser} to use when parsing the responses
      */
-    public AbstractRESTClient(String clientName, String userAgent, int timeout, RESTResponseParser parser) {
+    public AbstractRESTClient(ServiceLookup services, String httpClientId, RESTResponseParser parser) {
         super();
         this.parser = parser;
-        this.httpClient = initializeHttpClient(clientName, userAgent, timeout);
+        this.services= services;
+        this.httpClientId = httpClientId;
     }
 
-    /**
-     * Shuts down the REST client.
-     */
-    @Override
-    public void close() {
-        if (httpClient == null) {
-            return;
-        }
-        try {
-            httpClient.close();
-        } catch (IOException e) {
-            LOGGER.debug("Error closing the http client: {}", e.getMessage(), e);
-        }
-    }
 
     /**
      * Executes the specified {@link HttpRequestBase} and returns the response.
-     *
+     * 
      * @param httpRequest The HTTP request to execute
      * @return The parsed HTTP REST response
      * @throws OXException if a client protocol error or an I/O error occurs
@@ -225,9 +204,8 @@ public abstract class AbstractRESTClient implements Closeable {
      *
      * @param httpRequest the request to add the body to
      * @param body The body to add to the request
-     * @throws OXException if the default HTTP charset is not supported
      */
-    protected void addOptionalBody(HttpRequestBase httpRequest, RESTRequest request) throws OXException {
+    protected void addOptionalBody(HttpRequestBase httpRequest, RESTRequest request) {
         if (request.getBodyEntity() == null) {
             return;
         }
@@ -264,26 +242,6 @@ public abstract class AbstractRESTClient implements Closeable {
     }
 
     /**
-     * Initialises the HTTP client
-     *
-     * @param clientName HTTP client name
-     * @param userAgent The user agent
-     * @param timeout The timeout to use for connections and socket reads
-     * @return The initialised {@link CloseableHttpClient}
-     */
-    private CloseableHttpClient initializeHttpClient(String clientName, String userAgent, int timeout) {
-        if (clientName == null) {
-            clientName = "unknown-rest";
-        }
-        ClientConfig clientConfig = ClientConfig.newInstance();
-        clientConfig.setUserAgent(userAgent);
-        clientConfig.setConnectionTimeout(timeout);
-        clientConfig.setSocketReadTimeout(timeout);
-
-        return HttpClients.getHttpClient(clientConfig);
-    }
-
-    /**
      * Executes the specified {@link HttpRequestBase} and returns the response.
      * This is the lower layer of the RESTClient stack before data leaves the middleware's
      * premises.
@@ -295,9 +253,12 @@ public abstract class AbstractRESTClient implements Closeable {
      */
     private HttpResponse execute(HttpRequestBase httpRequest) throws ClientProtocolException, IOException {
         LOGGER.debug("Executing request: '{}'", httpRequest.getURI());
-        HttpResponse httpResponse = httpClient.execute(httpRequest);
-        LOGGER.debug("Request '{}' completed with status code '{}'", httpRequest.getURI(), httpResponse.getStatusLine().getStatusCode());
-        return httpResponse;
+        try(CloseableHttpResponse httpResponse = getHttpClient().execute(httpRequest)){
+            LOGGER.debug("Request '{}' completed with status code '{}'", httpRequest.getURI(), I(httpResponse.getStatusLine().getStatusCode()));
+            return httpResponse;
+        } catch (OXException e) {
+            throw new IOException("Unable to get client", e);
+        }
     }
 
     /**
@@ -318,5 +279,9 @@ public abstract class AbstractRESTClient implements Closeable {
         } catch (Throwable e) {
             LOGGER.debug("Error while consuming the entity of the HTTP response {}", e.getMessage(), e);
         }
+    }
+
+    private CloseableHttpClient getHttpClient() throws OXException {
+        return services.getServiceSafe(HttpClientService.class).getHttpClient(httpClientId).getCloseableHttpClient();
     }
 }

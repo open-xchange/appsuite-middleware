@@ -49,12 +49,16 @@
 
 package com.openexchange.microsoft.graph.osgi;
 
+import static com.openexchange.microsoft.graph.api.client.MicrosoftGraphRESTClient.CLIENT_NAME;
 import com.openexchange.microsoft.graph.api.MicrosoftGraphAPI;
 import com.openexchange.microsoft.graph.contacts.MicrosoftGraphContactsService;
 import com.openexchange.microsoft.graph.contacts.impl.MicrosoftGraphContactsServiceImpl;
 import com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService;
 import com.openexchange.microsoft.graph.onedrive.impl.MicrosoftGraphDriveServiceImpl;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.rest.client.httpclient.DefaultHttpClientConfigProvider;
+import com.openexchange.rest.client.httpclient.HttpClientConfigProvider;
+import com.openexchange.rest.client.httpclient.HttpClientService;
 
 /**
  * {@link MicrosoftGraphAPIActivator}
@@ -73,13 +77,14 @@ public class MicrosoftGraphAPIActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+        return new Class[] { HttpClientService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        MicrosoftGraphAPI microsoftGraphAPI = new MicrosoftGraphAPI();
+        MicrosoftGraphAPI microsoftGraphAPI = new MicrosoftGraphAPI(this);
         registerService(MicrosoftGraphContactsService.class, new MicrosoftGraphContactsServiceImpl(microsoftGraphAPI.contacts()));
         registerService(MicrosoftGraphDriveService.class, new MicrosoftGraphDriveServiceImpl(microsoftGraphAPI.drive()));
+        registerService(HttpClientConfigProvider.class, new DefaultHttpClientConfigProvider(CLIENT_NAME, "Open-Xchange Microsoft Graph Client"));
     }
 }

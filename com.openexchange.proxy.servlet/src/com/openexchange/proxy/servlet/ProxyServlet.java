@@ -63,17 +63,15 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
-import org.apache.http.impl.client.HttpClientBuilder;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.SessionServlet;
+import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.proxy.ProxyRegistration;
 import com.openexchange.proxy.Response;
 import com.openexchange.proxy.Restriction;
-import com.openexchange.rest.client.httpclient.HttpClients;
-import com.openexchange.rest.client.httpclient.HttpClients.ClientConfig;
-import com.openexchange.rest.client.httpclient.HttpClients.HttpClientBuilderModifyer;
+import com.openexchange.proxy.servlet.osgi.Services;
+import com.openexchange.rest.client.httpclient.HttpClientService;
 
 /**
  * {@link ProxyServlet}
@@ -83,11 +81,13 @@ import com.openexchange.rest.client.httpclient.HttpClients.HttpClientBuilderModi
 public class ProxyServlet extends SessionServlet {
 
     private static final long serialVersionUID = -2988897861113557499L;
-
+    
     /**
-     * The HTTP time out.
+     * Initializes a new {@link ProxyServlet}.
      */
-    private static final int TIMEOUT = 3000;
+    public ProxyServlet() {
+        super();
+    }
 
     @Override
     protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
@@ -114,78 +114,68 @@ public class ProxyServlet extends SessionServlet {
         /*
          * Create host configuration or URI
          */
-        final CloseableHttpClient client = createClient(TIMEOUT);
+        final CloseableHttpClient client;
         try {
-            HttpRequestBase httpMethod;
-            try {
-                httpMethod = new HttpGet(url.toURI());
-            } catch (URISyntaxException e) {
-                // should never happen
-                resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                return;
-            }
-            /*
-             * Fire request
-             */
-            HttpResponse httpResp = client.execute(httpMethod);
-            /*
-             * Check response code
-             */
-            if (HttpStatus.SC_OK != httpResp.getStatusLine().getStatusCode()) {
-                /*
-                 * GET request failed
-                 */
-                final String txt = httpResp.getStatusLine().getReasonPhrase();
-                resp.sendError(httpResp.getStatusLine().getStatusCode(), txt);
-                return;
-            }
-            final Response response = new ResponseImpl(httpResp);
-            for (final Restriction restriction : registration.getRestrictions()) {
-                if (!restriction.allow(response)) {
-                    final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ProxyServlet.class);
-                    log.info("Status code 403 (FORBIDDEN): Restriction failed: {}", restriction.getDescription());
-                    resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Restriction failed: " + restriction.getDescription());
-                    return;
-                }
-            }
-            /*
-             * Set status
-             */
-            resp.setStatus(httpResp.getStatusLine().getStatusCode());
-            /*
-             * Add response header
-             */
-            header2Response(httpResp, resp);
-            /*
-             * Binary content
-             */
-            final InputStream responseStream = httpResp.getEntity().getContent();
-            try {
-                final ServletOutputStream outputStream = resp.getOutputStream();
-                final byte[] buf = new byte[8192];
-                int read = -1;
-                while ((read = responseStream.read(buf)) > 0) {
-                    outputStream.write(buf, 0, read);
-                }
-                outputStream.flush();
-            } finally {
-                Streams.close(responseStream);
-            }
-        } finally {
-            Streams.close(client);
+            client = getHttpClient();
+        } catch (OXException e) {
+            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            return;
         }
-    }
-
-    private static CloseableHttpClient createClient(int timeout) {
-        HttpClientBuilderModifyer modifyer = new HttpClientBuilderModifyer() {
-
-            @Override
-            public void modify(HttpClientBuilder clientBuilder) {
-                clientBuilder.setRetryHandler(new DefaultHttpRequestRetryHandler(0, false));
+        HttpRequestBase httpMethod;
+        try {
+            httpMethod = new HttpGet(url.toURI());
+        } catch (URISyntaxException e) {
+            // should never happen
+            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            return;
+        }
+        /*
+         * Fire request
+         */
+        HttpResponse httpResp = client.execute(httpMethod);
+        /*
+         * Check response code
+         */
+        if (HttpStatus.SC_OK != httpResp.getStatusLine().getStatusCode()) {
+            /*
+             * GET request failed
+             */
+            final String txt = httpResp.getStatusLine().getReasonPhrase();
+            resp.sendError(httpResp.getStatusLine().getStatusCode(), txt);
+            return;
+        }
+        final Response response = new ResponseImpl(httpResp);
+        for (final Restriction restriction : registration.getRestrictions()) {
+            if (!restriction.allow(response)) {
+                final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ProxyServlet.class);
+                log.info("Status code 403 (FORBIDDEN): Restriction failed: {}", restriction.getDescription());
+                resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Restriction failed: " + restriction.getDescription());
+                return;
             }
-        };
-        ClientConfig clientConfig = ClientConfig.newInstance().setConnectionTimeout(timeout).setSocketReadTimeout(timeout).setClientBuilderModifyer(modifyer);
-        return HttpClients.getHttpClient(clientConfig);
+        }
+        /*
+         * Set status
+         */
+        resp.setStatus(httpResp.getStatusLine().getStatusCode());
+        /*
+         * Add response header
+         */
+        header2Response(httpResp, resp);
+        /*
+         * Binary content
+         */
+        final InputStream responseStream = httpResp.getEntity().getContent();
+        try {
+            final ServletOutputStream outputStream = resp.getOutputStream();
+            final byte[] buf = new byte[8192];
+            int read = -1;
+            while ((read = responseStream.read(buf)) > 0) {
+                outputStream.write(buf, 0, read);
+            }
+            outputStream.flush();
+        } finally {
+            Streams.close(responseStream);
+        }
     }
 
     private static void header2Response(final HttpResponse httpResp, final HttpServletResponse resp) {
@@ -234,6 +224,10 @@ public class ProxyServlet extends SessionServlet {
             }
         }
         */
+    }
+    
+    private CloseableHttpClient getHttpClient() throws OXException {
+        return Services.requireService(HttpClientService.class).getHttpClient("proxy").getCloseableHttpClient();
     }
 
 }

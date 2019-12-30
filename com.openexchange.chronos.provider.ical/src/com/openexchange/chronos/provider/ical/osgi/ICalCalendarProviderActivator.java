@@ -55,7 +55,9 @@ import com.openexchange.chronos.provider.CalendarProvider;
 import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
 import com.openexchange.chronos.provider.ical.BasicICalCalendarProvider;
 import com.openexchange.chronos.provider.ical.properties.ICalCalendarProviderReloadable;
+import com.openexchange.chronos.provider.ical.properties.IcalCalendarHttpProperties;
 import com.openexchange.chronos.service.CalendarUtilities;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.conversion.ConversionService;
@@ -64,6 +66,8 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.rest.client.httpclient.HttpClientConfigProvider;
+import com.openexchange.rest.client.httpclient.HttpClientService;
 import com.openexchange.version.VersionService;
 
 /**
@@ -84,7 +88,9 @@ public class ICalCalendarProviderActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ICalService.class, LeanConfigurationService.class, SSLSocketFactoryProvider.class, SSLConfigurationService.class, CryptoService.class, ConversionService.class, AdministrativeCalendarAccountService.class, CalendarUtilities.class, DatabaseService.class, VersionService.class };
+        return new Class<?>[] { ICalService.class, LeanConfigurationService.class, SSLSocketFactoryProvider.class, SSLConfigurationService.class, CryptoService.class, 
+                                ConversionService.class, AdministrativeCalendarAccountService.class, CalendarUtilities.class, DatabaseService.class, 
+                                HttpClientService.class, VersionService.class, ConfigurationService.class };
     }
 
     @Override
@@ -96,6 +102,7 @@ public class ICalCalendarProviderActivator extends HousekeepingActivator {
 
             registerService(CalendarProvider.class, new BasicICalCalendarProvider());
             registerService(Reloadable.class, new ICalCalendarProviderReloadable());
+            registerService(HttpClientConfigProvider.class, new IcalCalendarHttpProperties(this));
         } catch (Exception e) {
             getLogger(ICalCalendarProviderActivator.class).error("error starting {}", context.getBundle(), e);
             throw e;

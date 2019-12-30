@@ -57,6 +57,8 @@ import com.openexchange.mail.api.AuthenticationFailedHandler;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.rest.client.httpclient.HttpClientConfigProvider;
+import com.openexchange.rest.client.httpclient.HttpClientService;
 import com.openexchange.saml.oauth.HttpClientOAuthAccessTokenService;
 import com.openexchange.saml.oauth.OAuthFailedAuthenticationHandler;
 import com.openexchange.saml.oauth.SAMLOAuthConfig;
@@ -73,8 +75,6 @@ public class Activator extends HousekeepingActivator {
 
     private static final int SERVICE_RANKING = 100;
 
-    private HttpClientOAuthAccessTokenService tokenService;
-
     /**
      * Initializes a new {@link Activator}.
      */
@@ -89,14 +89,12 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { SessiondService.class, ConfigViewFactory.class, SSLSocketFactoryProvider.class, SSLConfigurationService.class, LockService.class };
+        return new Class[] { SessiondService.class, ConfigViewFactory.class, SSLSocketFactoryProvider.class, SSLConfigurationService.class, LockService.class, HttpClientService.class };
     }
 
     @Override
     protected synchronized void startBundle() throws Exception {
-        HttpClientOAuthAccessTokenService tokenService = new HttpClientOAuthAccessTokenService(getService(ConfigViewFactory.class), getService(SSLSocketFactoryProvider.class), getService(SSLConfigurationService.class));
-        this.tokenService = tokenService;
-
+        HttpClientOAuthAccessTokenService tokenService = new HttpClientOAuthAccessTokenService(this);
         registerService(ForcedReloadable.class, new ForcedReloadable() {
 
             @Override
@@ -108,17 +106,6 @@ public class Activator extends HousekeepingActivator {
 
         registerService(OAuthAccessTokenService.class, tokenService);
         registerService(AuthenticationFailedHandler.class, new OAuthFailedAuthenticationHandler(tokenService, this), SERVICE_RANKING);
+        registerService(HttpClientConfigProvider.class, new SamlOAuthHttpConfiguration(this));
     }
-
-    @Override
-    protected synchronized void stopBundle() throws Exception {
-        super.stopBundle();
-
-        HttpClientOAuthAccessTokenService tokenService = this.tokenService;
-        if (tokenService != null) {
-            this.tokenService = null;
-            tokenService.closeHttpClient();
-        }
-    }
-
 }

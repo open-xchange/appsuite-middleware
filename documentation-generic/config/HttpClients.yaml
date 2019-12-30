@@ -1,0 +1,86 @@
+feature_name: HTTP Client Configuration
+feature_description: |
+  This pages describes the configurable attributes that can be set to modify each HTTP client used by the Middleware to make requests against thrid parties.
+  Each client can be configured for itself. Therefore simply use the service identifier of the desired service, e.g. "icalfeed", and replace "[serviceIdentifier]" with it.
+  E.g. the property looks like "com.openenexchange.httpclient.icalfeed.readTimeout". For futher details please have a look at [[https://documentation.open-xchange.com/{{version}}/middleware/administration/http_client_configuration.html]] .
+properties:
+  - key: com.openenexchange.httpclient.[serviceIdentifer].readTimeout
+    description: |
+       The read time-out in milliseconds.
+    defaultValue: 30000
+    version: 7.10.4
+    reloadable: true
+    configcascadeAware: false
+    file: 
+    packageName: open-xchange-core
+    tags: ["Server", "HTTP Client"]
+  - key: com.openenexchange.httpclient.[serviceIdentifer].connectionTimeout
+    description: |
+      The connection time-out in milliseconds.
+    defaultValue: 30000
+    version: 7.10.4
+    reloadable: true
+    configcascadeAware: false
+    file: 
+    packageName: open-xchange-core
+    tags: ["Server", "HTTP Client"]
+  - key: com.openenexchange.httpclient.[serviceIdentifer].requestTimeout
+    description: |
+       The request time-out in milliseconds.
+    defaultValue: 30000
+    version: 7.10.4
+    reloadable: true
+    configcascadeAware: false
+    file: 
+    packageName: open-xchange-core
+    tags: ["Server", "HTTP Client"]
+  - key: com.openenexchange.httpclient.[serviceIdentifer].keepAlive.duration
+    description: |
+       The amount of time in seconds a connectuon is kept alive.
+    defaultValue: 20
+    version: 7.10.4
+    reloadable: true
+    configcascadeAware: false
+    file: 
+    packageName: open-xchange-core
+    tags: ["Server", "HTTP Client"]
+  - key: com.openenexchange.httpclient.[serviceIdentifer].keepAlive.monitorInterval
+    description: |
+       The interval time in seconds to check for connections that has passed the keep alive duration.
+    defaultValue: 5
+    version: 7.10.4
+    reloadable: true
+    configcascadeAware: false
+    file: 
+    packageName: open-xchange-core
+    tags: ["Server", "HTTP Client"]
+  - key: com.openenexchange.httpclient.[serviceIdentifer].totalConnections
+    description: |
+       The number of total connections held in HTTP connection pool by each client.
+    defaultValue: 20
+    version: 7.10.4
+    reloadable: true
+    configcascadeAware: false
+    file: 
+    packageName: open-xchange-core
+    tags: ["Server", "HTTP Client"]
+  - key: com.openenexchange.httpclient.[serviceIdentifer].connectionPerRoute
+    description: |
+        The number of connections per route held in HTTP connection pool by each client
+    defaultValue: 10
+    version: 7.10.4
+    reloadable: true
+    configcascadeAware: false
+    file: 
+    packageName: open-xchange-core
+    tags: ["Server", "HTTP Client"]
+  - key: com.openenexchange.httpclient.[serviceIdentifer].socketBufferSize
+    description: |
+       The buffer size of the underlying socket connection. Default is alignd with org.apache.http.config.ConnectionConfig
+    defaultValue: 8192
+    version: 7.10.4
+    reloadable: true
+    configcascadeAware: false
+    file: 
+    packageName: open-xchange-core
+    tags: ["Server", "HTTP Client"]

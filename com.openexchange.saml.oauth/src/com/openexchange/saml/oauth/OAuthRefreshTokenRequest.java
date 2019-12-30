@@ -51,9 +51,8 @@ package com.openexchange.saml.oauth;
 
 import java.util.List;
 import org.apache.http.NameValuePair;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicNameValuePair;
-import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link OAuthRefreshTokenRequest}
@@ -64,8 +63,8 @@ import com.openexchange.config.cascade.ConfigViewFactory;
  */
 public class OAuthRefreshTokenRequest extends AbstractOAuthAccessTokenRequest {
 
-    public OAuthRefreshTokenRequest(CloseableHttpClient httpClient, ConfigViewFactory configViewFactory) {
-        super(httpClient, configViewFactory);
+    public OAuthRefreshTokenRequest(ServiceLookup services, String clientId) {
+        super(services, clientId);
     }
 
     private static final String GRANT_TYPE = "refresh_token";

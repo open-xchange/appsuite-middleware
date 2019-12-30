@@ -65,6 +65,8 @@ public class WebDeSubscribeService extends AbstractCardDAVSubscribeService {
 
     /**
      * Initializes a new {@link WebDeSubscribeService}.
+     * 
+     * @param services The {@link ServiceLookup}
      */
     public WebDeSubscribeService(ServiceLookup services) {
         super(services);

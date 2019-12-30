@@ -61,7 +61,7 @@ properties:
       defaultValue: 1000
       version: 7.10.0
       reloadable: true
-      configcascadeAware: true
+      configcascadeAware: false
       related: 
       file: calendar.properties
       packageName: open-xchange-core
@@ -72,7 +72,7 @@ properties:
       defaultValue: 100
       version: 7.10.0
       reloadable: true
-      configcascadeAware: true
+      configcascadeAware: false
       related: 
       file: calendar.properties
       packageName: open-xchange-core
@@ -83,7 +83,7 @@ properties:
       defaultValue: 5000
       version: 7.10.0
       reloadable: true
-      configcascadeAware: true
+      configcascadeAware: false
       related: 
       file: calendar.properties
       packageName: open-xchange-core
@@ -94,7 +94,7 @@ properties:
       defaultValue: 30000
       version: 7.10.0
       reloadable: true
-      configcascadeAware: true
+      configcascadeAware: false
       related: 
       file: calendar.properties
       packageName: open-xchange-core

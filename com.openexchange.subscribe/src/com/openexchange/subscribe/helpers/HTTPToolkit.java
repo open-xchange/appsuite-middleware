@@ -75,8 +75,6 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.ContentType;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
@@ -84,9 +82,6 @@ import com.openexchange.groupware.contact.ContactConfig;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.infostore.ConverterException;
 import com.openexchange.java.Streams;
-import com.openexchange.rest.client.httpclient.HttpClients;
-import com.openexchange.rest.client.httpclient.HttpClients.ClientConfig;
-import com.openexchange.rest.client.httpclient.HttpClients.HttpClientBuilderModifyer;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.osgi.SubscriptionServiceRegistry;
 import com.openexchange.tools.ImageTypeDetector;
@@ -116,11 +111,11 @@ public class HTTPToolkit {
 
     private static final String UTF_8 = "UTF-8";
 
-    public static InputStream grabStream(final String site) throws IOException, HttpException, URISyntaxException {
-        return grabStream(site, true);
+    public static InputStream grabStream(CloseableHttpClient client, final String site) throws IOException, HttpException, URISyntaxException {
+        return grabStream(client, site, true);
     }
 
-    public static InputStream grabStream(final String site, boolean check) throws IOException, HttpException, URISyntaxException {
+    public static InputStream grabStream(CloseableHttpClient client, final String site, boolean check) throws IOException, HttpException, URISyntaxException {
         final int timeout = 5000;
         final java.net.URL javaURL = new URIBuilder(site).build().toURL();
 
@@ -128,45 +123,35 @@ public class HTTPToolkit {
             checkContentAndLength(javaURL, timeout);
         }
 
-        CloseableHttpClient client = createClient(timeout);
-        try {
-            HttpGet method = new HttpGet(javaURL.toURI());
-            HttpResponse resp = client.execute(method);
-            ClientClosingInputStream inputStream = streamFrom(resp, client);
-            client = null; // Avoid premature closing
-            return inputStream;
-        } finally {
-            Streams.close(client);
-        }
+        HttpGet method = new HttpGet(javaURL.toURI());
+        HttpResponse resp = client.execute(method);
+        ClientClosingInputStream inputStream = streamFrom(resp, client);
+        client = null; // Avoid premature closing
+        return inputStream;
     }
 
-    public static Reader grab(final String site) throws HttpException, IOException, URISyntaxException {
-        return new InputStreamReader(grabStream(site), UTF_8);
+    public static Reader grab(CloseableHttpClient client, final String site) throws HttpException, IOException, URISyntaxException {
+        return new InputStreamReader(grabStream(client, site), UTF_8);
     }
 
-    public static Reader post(final String site, final Map<String, String> values) throws HttpException, IOException, URISyntaxException {
+    public static Reader post(CloseableHttpClient client, final String site, final Map<String, String> values) throws HttpException, IOException, URISyntaxException {
         final int timeout = 5000;
         final java.net.URL javaURL = new java.net.URL(site);
 
         checkContentAndLength(javaURL, timeout);
 
-        CloseableHttpClient client = createClient(timeout);
-        try {
-            HttpPost method = new HttpPost(javaURL.toURI());
-            List<NameValuePair> postParameters = new ArrayList<NameValuePair>();
-            for (final Map.Entry<String, String> entry : values.entrySet()) {
-                postParameters.add(new BasicNameValuePair(entry.getKey(), entry.getValue()));
-            }
-            method.setEntity(new UrlEncodedFormEntity(postParameters, "UTF-8"));
-            HttpResponse resp = client.execute(method);
-            HttpEntity respEntity = resp.getEntity();
-            Charset charSet = ContentType.getOrDefault(respEntity).getCharset();
-            Reader reader = new InputStreamReader(streamFrom(respEntity, client), charSet);
-            client = null;
-            return reader;
-        } finally {
-            Streams.close(client);
+        HttpPost method = new HttpPost(javaURL.toURI());
+        List<NameValuePair> postParameters = new ArrayList<NameValuePair>();
+        for (final Map.Entry<String, String> entry : values.entrySet()) {
+            postParameters.add(new BasicNameValuePair(entry.getKey(), entry.getValue()));
         }
+        method.setEntity(new UrlEncodedFormEntity(postParameters, "UTF-8"));
+        HttpResponse resp = client.execute(method);
+        HttpEntity respEntity = resp.getEntity();
+        Charset charSet = ContentType.getOrDefault(respEntity).getCharset();
+        Reader reader = new InputStreamReader(streamFrom(respEntity, client), charSet);
+        client = null;
+        return reader;
     }
 
     private static ClientClosingInputStream streamFrom(HttpResponse httpResponse, CloseableHttpClient client) throws UnsupportedOperationException, IOException {
@@ -183,18 +168,6 @@ public class HTTPToolkit {
         } finally {
             Streams.close(content);
         }
-    }
-
-    private static CloseableHttpClient createClient(int timeout) {
-        HttpClientBuilderModifyer modifyer = new HttpClientBuilderModifyer() {
-
-            @Override
-            public void modify(HttpClientBuilder clientBuilder) {
-                clientBuilder.setRetryHandler(new DefaultHttpRequestRetryHandler(0, false));
-            }
-        };
-        ClientConfig clientConfig = ClientConfig.newInstance().setConnectionTimeout(timeout).setSocketReadTimeout(timeout).setClientBuilderModifyer(modifyer);
-        return HttpClients.getHttpClient(clientConfig);
     }
 
     private static void checkContentAndLength(final java.net.URL url, final int timeout) throws IOException, HttpException {
