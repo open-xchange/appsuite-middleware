@@ -639,7 +639,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
 
     private static FetchItemHandler getItemHandlerByItem(Item item, boolean checkICal, boolean checkVCard, boolean treatEmbeddedAsAttachment, boolean examineHasAttachmentUserFlags) {
         if (item instanceof BODYSTRUCTURE) {
-            return new BODYSTRUCTUREFetchItemHandler(checkICal, checkVCard, treatEmbeddedAsAttachment);
+            return BODYSTRUCTUREFetchItemHandler.getInstance(checkICal, checkVCard, treatEmbeddedAsAttachment);
         } else if ((item instanceof RFC822DATA) || (item instanceof BODY)) {
             return HEADER_ITEM_HANDLER;
         } else if (item instanceof UID) {
@@ -647,7 +647,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         } else if (item instanceof INTERNALDATE) {
             return INTERNALDATE_ITEM_HANDLER;
         } else if (item instanceof Flags) {
-            return new FLAGSFetchItemHandler(examineHasAttachmentUserFlags);
+            return FLAGSFetchItemHandler.getInstance(examineHasAttachmentUserFlags);
         } else if (item instanceof ENVELOPE) {
             return ENVELOPE_ITEM_HANDLER;
         } else if (item instanceof RFC822SIZE) {
@@ -861,9 +861,19 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
 
     private static final class FLAGSFetchItemHandler implements FetchItemHandler {
 
+        private static final FLAGSFetchItemHandler EXAMINE_HAS_ATTACHMENT_USER_FLAGS_INSTANCE = new FLAGSFetchItemHandler(true);
+
+        private static final FLAGSFetchItemHandler REGULAR_INSTANCE = new FLAGSFetchItemHandler(false);
+
+        static FLAGSFetchItemHandler getInstance(boolean examineHasAttachmentUserFlags) {
+            return examineHasAttachmentUserFlags ? EXAMINE_HAS_ATTACHMENT_USER_FLAGS_INSTANCE : REGULAR_INSTANCE;
+        }
+
+        // ---------------------------------------------------------------------------------------------------------------------------------
+
         private final boolean examineHasAttachmentUserFlags;
 
-        FLAGSFetchItemHandler(boolean examineHasAttachmentUserFlags) {
+        private FLAGSFetchItemHandler(boolean examineHasAttachmentUserFlags) {
             super();
             this.examineHasAttachmentUserFlags = examineHasAttachmentUserFlags;
         }
@@ -1003,7 +1013,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
                 msg.addUserFlags(ufCol.toArray(new String[ufCol.size()]));
             }
         }
-    };
+    }
 
     private static final FetchItemHandler ENVELOPE_ITEM_HANDLER = new FetchItemHandler() {
 
@@ -1094,11 +1104,28 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
 
     private static final class BODYSTRUCTUREFetchItemHandler implements FetchItemHandler {
 
+        private static final BODYSTRUCTUREFetchItemHandler DEFAULT_INSTANCE = new BODYSTRUCTUREFetchItemHandler(false, false, false);
+
+        static BODYSTRUCTUREFetchItemHandler getInstance(boolean checkICal, boolean checkVCard, boolean treatEmbeddedAsAttachment) {
+            if (checkICal) {
+                return new BODYSTRUCTUREFetchItemHandler(checkICal, checkVCard, treatEmbeddedAsAttachment);
+            }
+            if (checkVCard) {
+                return new BODYSTRUCTUREFetchItemHandler(checkICal, checkVCard, treatEmbeddedAsAttachment);
+            }
+            if (treatEmbeddedAsAttachment) {
+                return new BODYSTRUCTUREFetchItemHandler(checkICal, checkVCard, treatEmbeddedAsAttachment);
+            }
+            return DEFAULT_INSTANCE;
+        }
+
+        // ---------------------------------------------------------------------------------------------------------------------------------
+
         final boolean checkICal;
         final boolean checkVCard;
         final boolean treatEmbeddedAsAttachment;
 
-        BODYSTRUCTUREFetchItemHandler(boolean checkICal, boolean checkVCard, boolean treatEmbeddedAsAttachment) {
+        private BODYSTRUCTUREFetchItemHandler(boolean checkICal, boolean checkVCard, boolean treatEmbeddedAsAttachment) {
             super();
             this.checkICal = checkICal;
             this.checkVCard = checkVCard;
