@@ -54,8 +54,6 @@ import static org.junit.Assert.assertNotNull;
 import java.util.Calendar;
 import java.util.TimeZone;
 import javax.servlet.http.HttpServletResponse;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.dav.caldav.CalDAVTest;
 import com.openexchange.dav.caldav.ICalResource;
@@ -79,7 +77,6 @@ public class Bug67667Test extends CalDAVTest {
     private CalendarTestManager catm2;
 
     @Override
-    @Before
     public void setUp() throws Exception {
         super.setUp();
         catm2 = new CalendarTestManager(getClient2());
@@ -87,7 +84,6 @@ public class Bug67667Test extends CalDAVTest {
     }
 
     @Override
-    @After
     public void tearDown() throws Exception {
         try {
             if (null != catm2) {
@@ -147,8 +143,7 @@ public class Bug67667Test extends CalDAVTest {
         alarmComponent.getProperties().add(new Property("DESCRIPTION:Ereignisbenachrichtigung"));
         alarmComponent.getProperties().add(new Property("ACTION:DISPLAY"));
         iCalResource.getVEvent().getComponents().add(alarmComponent);
-        assertEquals("response code wrong", HttpServletResponse.SC_PRECONDITION_FAILED, putICalUpdate(
-            getDefaultFolderID(), uid, iCalResource.toString(), null, iCalResource.getScheduleTag()));
+        assertEquals("response code wrong", HttpServletResponse.SC_PRECONDITION_FAILED, putICalUpdate(getDefaultFolderID(), uid, iCalResource.toString(), iCalResource.getScheduleTag()));
         /*
          * verify that attendees partstat was not changed on server
          */
