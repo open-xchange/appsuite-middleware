@@ -143,7 +143,7 @@ public class AlarmTriggersPerformer extends AbstractQueryPerformer {
                 Event event = find(events, trigger.getEventId());
                 if (null != event) {
                     event = postProcessor.process(event, folder).getFirstEvent();
-                    postProcessor.clear();
+                    postProcessor.reset();
                 }
                 if (null == event) {
                     throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(trigger.getEventId());

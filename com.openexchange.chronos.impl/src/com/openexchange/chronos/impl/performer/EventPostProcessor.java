@@ -110,15 +110,16 @@ public class EventPostProcessor {
     private final CalendarSession session;
     private final CalendarStorage storage;
     private final EventField[] requestedFields;
-    private final List<Event> events;
     private final Map<String, RecurrenceData> knownRecurrenceData;
     private final SelfProtection selfProtection;
 
-    private long maximumTimestamp;
     private Set<String> eventIdsWithAttachment;
     private Set<String> alarmTriggersPerEventId;
     private Map<String, Integer> attendeeCountsPerEventId;
     private Map<String, Attendee> userAttendeePerEventId;
+
+    private long maximumTimestamp;
+    private List<Event> events;
 
     /**
      * Initializes a new {@link EventPostProcessor}.
@@ -132,9 +133,9 @@ public class EventPostProcessor {
         this.session = session;
         this.storage = storage;
         this.selfProtection = selfProtection;
-        this.events = new ArrayList<Event>();
         this.requestedFields = session.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
         this.knownRecurrenceData = new HashMap<String, RecurrenceData>();
+        reset();
     }
 
     /**
@@ -336,10 +337,10 @@ public class EventPostProcessor {
     }
 
     /**
-     * Clears the collection of processed events and resets the maximum timestamp.
+     * Resets the internal list of resulting events and the maximun timestamp.
      */
-    public void clear() {
-        events.clear();
+    public void reset() {
+        events = new ArrayList<Event>();
         maximumTimestamp = 0L;
     }
 

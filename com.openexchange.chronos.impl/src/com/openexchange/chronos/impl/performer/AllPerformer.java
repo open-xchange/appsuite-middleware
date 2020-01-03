@@ -235,6 +235,7 @@ public class AllPerformer extends AbstractQueryPerformer {
              */
             for (Entry<CalendarFolder, List<Event>> eventsInFolder : eventsPerFolder.entrySet()) {
                 resultsPerFolderId.put(eventsInFolder.getKey().getId(), postProcessor.process(eventsInFolder.getValue(), eventsInFolder.getKey()).getEventsResult());
+                postProcessor.reset();
                 Check.resultSizeNotExceeded(getSelfProtection(), resultsPerFolderId, requestedFields);
             }
         }

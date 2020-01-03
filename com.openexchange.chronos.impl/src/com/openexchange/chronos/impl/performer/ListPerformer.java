@@ -143,7 +143,7 @@ public class ListPerformer extends AbstractQueryPerformer {
             Event event = find(events, eventID.getObjectID());
             if (null != event) {
                 event = postProcessor.process(event, folder).getFirstEvent();
-                postProcessor.clear();
+                postProcessor.reset();
             }
             if (null == event) {
                 continue; // skip
