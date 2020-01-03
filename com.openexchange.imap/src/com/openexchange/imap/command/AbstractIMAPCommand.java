@@ -144,7 +144,7 @@ public abstract class AbstractIMAPCommand<T> {
                         try {
                             protocol.notifyResponseHandlers(r);
                         } catch (RuntimeException e) {
-                            // Ignore runtime error in trailing Protocol.notifyResponseHandlers() invocation
+                            // Ignore runtime error in final Protocol.notifyResponseHandlers() invocation
                             LOG.debug("Runtime error during Protocol.notifyResponseHandlers() invocation.", e);
                         }
                     } catch (MessagingException e) {
@@ -195,6 +195,12 @@ public abstract class AbstractIMAPCommand<T> {
         }
     }
 
+    /**
+     * Performs this IMAP command.
+     *
+     * @return The return value
+     * @throws MessagingException If IMAP command fails
+     */
     public final T doCommand() throws MessagingException {
         final long start = System.currentTimeMillis();
         final @SuppressWarnings("unchecked") T obj = (T) imapFolder.doCommand(protocolCommand);
