@@ -64,6 +64,7 @@ import com.sun.mail.iap.Argument;
 import com.sun.mail.iap.Protocol;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
+import com.sun.mail.iap.ResponseInterceptor;
 import com.sun.mail.imap.ResponseEvent.Status;
 import com.sun.mail.imap.ResponseEvent.StatusResponse;
 
@@ -110,9 +111,9 @@ public class MonitoringCommandExecutor extends AbstractMetricAwareCommandExecuto
     }
 
     @Override
-    public Response[] executeCommand(String command, Argument args, Protocol protocol) {
+    public Response[] executeCommand(String command, Argument args, Optional<ResponseInterceptor> optionalInterceptor, Protocol protocol) {
         MetricService metricService = metricServiceReference.get();
-        return executeCommand(command, args, protocol, Optional.ofNullable(metricService)).responses;
+        return executeCommand(command, args, optionalInterceptor, protocol, Optional.ofNullable(metricService)).responses;
     }
 
     // -------------------------------------------------------------------------------------------------------------------------------------
@@ -180,13 +181,14 @@ public class MonitoringCommandExecutor extends AbstractMetricAwareCommandExecuto
      *
      * @param command The command
      * @param args The arguments
+     * @param optionalInterceptor The optional interceptor
      * @param protocol The protocol instance
      * @param optionalMetricService The optional metric service
      * @return The response array
      */
-    public static ExecutedCommand executeCommand(String command, Argument args, Protocol protocol, Optional<MetricService> optionalMetricService) {
+    public static ExecutedCommand executeCommand(String command, Argument args, Optional<ResponseInterceptor> optionalInterceptor, Protocol protocol, Optional<MetricService> optionalMetricService) {
         if (!optionalMetricService.isPresent()) {
-            return new ExecutedCommand(protocol.executeCommand(command, args));
+            return new ExecutedCommand(protocol.executeCommand(command, args, optionalInterceptor));
         }
 
         Metrics metrics = initMetrics(protocol, optionalMetricService.get());
@@ -197,7 +199,7 @@ public class MonitoringCommandExecutor extends AbstractMetricAwareCommandExecuto
         try {
             // Measure command execution
             long start = System.nanoTime();
-            Response[] responses = protocol.executeCommand(command, args);
+            Response[] responses = protocol.executeCommand(command, args, optionalInterceptor);
             duration = System.nanoTime() - start;
 
             // Check responses if command failed
