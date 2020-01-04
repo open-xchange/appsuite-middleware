@@ -68,6 +68,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
@@ -113,6 +114,7 @@ import com.sun.mail.iap.CommandFailedException;
 import com.sun.mail.iap.ParsingException;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
+import com.sun.mail.iap.ResponseInterceptor;
 import com.sun.mail.imap.ACL;
 import com.sun.mail.imap.DefaultFolder;
 import com.sun.mail.imap.IMAPFolder;
@@ -1530,7 +1532,7 @@ public final class IMAPCommandsCollection {
                 public Object doCommand(final IMAPProtocol p) {
                     final Argument args = new Argument();
                     args.writeString(BASE64MailboxEncoder.encode(folder));
-                    performCommand(p, (subscribe ? "SUBSCRIBE" : "UNSUBSCRIBE"), args, true);
+                    performCommand(p, (subscribe ? "SUBSCRIBE" : "UNSUBSCRIBE"), args, Optional.empty(), true);
                     return null;
                 }
             });
@@ -4114,7 +4116,7 @@ public final class IMAPCommandsCollection {
      * @return The responses
      */
     public static Response[] performCommand(IMAPProtocol p, String command, boolean discardResponses) {
-        return performCommand(p, command, null, discardResponses);
+        return performCommand(p, command, null, Optional.empty(), discardResponses);
     }
 
     /**
@@ -4126,7 +4128,7 @@ public final class IMAPCommandsCollection {
      * @return The responses
      */
     public static Response[] performCommand(IMAPProtocol p, String command, Argument args) {
-        return performCommand(p, command, args, false);
+        return performCommand(p, command, args, Optional.empty(), false);
     }
 
     /**
@@ -4134,19 +4136,20 @@ public final class IMAPCommandsCollection {
      *
      * @param p The IMAP protocol
      * @param command The command
-     * @param args The argument
+     * @param args The arguments
+     * @param optionalInterceptor The optional interceptor
      * @param discardResponses Whether to discard regular untagged responses
      * @return The responses
      */
-    public static Response[] performCommand(IMAPProtocol p, String command, Argument args, boolean discardResponses) {
+    public static Response[] performCommand(IMAPProtocol p, String command, Argument args, Optional<ResponseInterceptor> optionalInterceptor, boolean discardResponses) {
         if (!discardResponses) {
-            return performCommand0(p, command, args);
+            return performCommand0(p, command, args, optionalInterceptor);
         }
 
         // Suppress IMAP responses
         LogProperties.put(LogProperties.Name.IMAP_DISCARD_RESPONSES, "true");
         try {
-            return performCommand0(p, command, args);
+            return performCommand0(p, command, args, optionalInterceptor);
         } finally {
             LogProperties.remove(LogProperties.Name.IMAP_DISCARD_RESPONSES);
         }
@@ -4157,14 +4160,14 @@ public final class IMAPCommandsCollection {
      *
      * @param p The IMAP protocol
      * @param command The command
-     * @param args The argument
+     * @param args The arguments
+     * @param optionalInterceptor The optional interceptor
      * @return The responses
      */
-    private static Response[] performCommand0(IMAPProtocol p, String command, Argument args) {
-        final long start = System.currentTimeMillis();
-        final Response[] responses = p.command(command, args);
-        final long time = System.currentTimeMillis() - start;
-        mailInterfaceMonitor.addUseTime(time);
+    private static Response[] performCommand0(IMAPProtocol p, String command, Argument args, Optional<ResponseInterceptor> optionalInterceptor) {
+        long start = System.currentTimeMillis();
+        Response[] responses = p.command(command, args, optionalInterceptor);
+        mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
         return responses;
     }
 

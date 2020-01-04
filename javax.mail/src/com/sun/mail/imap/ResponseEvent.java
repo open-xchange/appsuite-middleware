@@ -32,6 +32,30 @@ public class ResponseEvent {
     public static class StatusResponse {
 
         /**
+         * Gets the status response for specified responses.
+         *
+         * @param responses The responses
+         * @return The associated status response or <code>null</code>
+         */
+        public static StatusResponse statusResponseFor(Response[] responses) {
+            if (null == responses || responses.length == 0) {
+                return null;
+            }
+
+            // JavaMail puts (possibly untagged) BYE response to the end.
+            // Therefore look-up first occurring tagged response starting at the end
+            for (int i = responses.length; i-- > 0;) {
+                Response response = responses[i];
+                if (response.isTagged()) {
+                    return statusResponseFor(response);
+                }
+            }
+
+            // No tagged response. Consider last response...
+            return statusResponseFor(responses[responses.length - 1]);
+        }
+
+        /**
          * Gets the status response for specified response instance
          * 
          * @param response The response instance
