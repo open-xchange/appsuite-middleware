@@ -50,10 +50,12 @@
 package com.sun.mail.imap;
 
 import java.io.IOException;
+import java.util.Optional;
 import com.sun.mail.iap.Argument;
 import com.sun.mail.iap.Protocol;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
+import com.sun.mail.iap.ResponseInterceptor;
 
 /**
  * {@link CommandExecutor} - Is responsible for executing commands and reading responses.
@@ -76,11 +78,12 @@ public interface CommandExecutor {
      *
      * @param command The command
      * @param args The arguments
+     * @param optionalInterceptor The optional interceptor
      * @param protocol The protocol instance
      * @return The response array
      */
-    default Response[] executeCommand(String command, Argument args, Protocol protocol) {
-        return protocol.executeCommand(command, args);
+    default Response[] executeCommand(String command, Argument args, Optional<ResponseInterceptor> optionalInterceptor, Protocol protocol) {
+        return protocol.executeCommand(command, args, optionalInterceptor);
     }
 
     /**

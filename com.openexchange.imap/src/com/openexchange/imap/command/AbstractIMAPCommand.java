@@ -52,6 +52,7 @@ package com.openexchange.imap.command;
 import static com.openexchange.imap.IMAPCommandsCollection.performCommand;
 import static com.openexchange.imap.util.ImapUtility.prepareImapCommandForLogging;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
+import java.util.Optional;
 import javax.mail.MessagingException;
 import com.openexchange.imap.util.ImapUtility;
 import com.openexchange.log.LogProperties;
@@ -61,6 +62,7 @@ import com.sun.mail.iap.BadCommandException;
 import com.sun.mail.iap.CommandFailedException;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
+import com.sun.mail.iap.ResponseInterceptor;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.protocol.IMAPProtocol;
 
@@ -100,6 +102,33 @@ public abstract class AbstractIMAPCommand<T> {
         this.protocolCommand = new CallbackIMAPProtocolCommand(this, imapFolder);
     }
 
+    private static final class IMAPCommandResponseInterceptor implements ResponseInterceptor {
+
+        private final AbstractIMAPCommand<?> abstractIMAPCommand;
+        private MessagingException exception;
+
+        IMAPCommandResponseInterceptor(AbstractIMAPCommand<?> abstractIMAPCommand) {
+            super();
+            this.abstractIMAPCommand = abstractIMAPCommand;
+        }
+
+        @Override
+        public boolean intercept(Response response) {
+            if (exception == null) {
+                try {
+                    return abstractIMAPCommand.addLoopCondition() ? abstractIMAPCommand.handleResponse(response) : false;
+                } catch (MessagingException e) {
+                    exception = e;
+                }
+            }
+            return false;
+        }
+
+        MessagingException getException() {
+            return exception;
+        }
+    }
+
     private static final class CallbackIMAPProtocolCommand implements IMAPFolder.ProtocolCommand {
 
         private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CallbackIMAPProtocolCommand.class);
@@ -125,11 +154,16 @@ public abstract class AbstractIMAPCommand<T> {
             Response[] r = null;
             Response response = null;
             for (int argsIndex = 0; argsIndex < args.length; argsIndex++) {
-                final String imapCmd = abstractIMAPCommand.getCommand(argsIndex);
-                r = performCommand(protocol, imapCmd);
+                String imapCmd = abstractIMAPCommand.getCommand(argsIndex);
+                // Use interceptor for FETCH commands
+                IMAPCommandResponseInterceptor nullableInterceptor = imapCmd.indexOf("FETCH ") >= 0 ? new IMAPCommandResponseInterceptor(abstractIMAPCommand) : null;
+                r = performCommand(protocol, imapCmd, null, Optional.ofNullable(nullableInterceptor), false);
                 response = r[r.length - 1];
                 if (response.isOK()) {
                     try {
+                        if (nullableInterceptor != null && nullableInterceptor.getException() != null) {
+                            throw nullableInterceptor.getException();
+                        }
                         for (int index = 0; (index < r.length) && abstractIMAPCommand.addLoopCondition(); index++) {
                             if (abstractIMAPCommand.handleResponse(r[index])) {
                                 /*
@@ -141,18 +175,14 @@ public abstract class AbstractIMAPCommand<T> {
                         /*
                          * Safely dispatch unhandled responses
                          */
-                        try {
-                            protocol.notifyResponseHandlers(r);
-                        } catch (RuntimeException e) {
-                            // Ignore runtime error in trailing Protocol.notifyResponseHandlers() invocation
-                            LOG.debug("Runtime error during Protocol.notifyResponseHandlers() invocation.", e);
-                        }
+                        notifyResponseHandlersSafe(r, protocol);
                     } catch (MessagingException e) {
                         final ProtocolException pe = new ProtocolException(e.getMessage());
                         pe.initCause(e);
                         throw pe;
                     }
                 } else if (response.isBAD()) {
+                    notifyResponseHandlersSafe(r, protocol);
                     if (ImapUtility.isInvalidMessageset(response)) {
                         return abstractIMAPCommand.getDefaultValue();
                     }
@@ -162,6 +192,7 @@ public abstract class AbstractIMAPCommand<T> {
                     }
                     throw new BadCommandException(response);
                 } else if (response.isNO()) {
+                    notifyResponseHandlersSafe(r, protocol);
                     final String error = com.openexchange.java.Strings.toLowerCase(response.toString());
                     if (MimeMailException.isOverQuotaException(error)) {
                         /*
@@ -181,6 +212,7 @@ public abstract class AbstractIMAPCommand<T> {
                     }
                     throw new CommandFailedException(response);
                 } else {
+                    notifyResponseHandlersSafe(r, protocol);
                     LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(imapCmd));
                     protocol.handleResult(response);
                 }
@@ -191,6 +223,15 @@ public abstract class AbstractIMAPCommand<T> {
                 final ProtocolException pe = new ProtocolException(e.getMessage());
                 pe.initCause(e);
                 throw pe;
+            }
+        }
+
+        private void notifyResponseHandlersSafe(Response[] r, IMAPProtocol protocol) {
+            try {
+                protocol.notifyResponseHandlers(r);
+            } catch (RuntimeException e) {
+                // Ignore runtime error in final Protocol.notifyResponseHandlers() invocation
+                LOG.debug("Runtime error during Protocol.notifyResponseHandlers() invocation.", e);
             }
         }
     }

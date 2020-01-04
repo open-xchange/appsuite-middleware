@@ -87,6 +87,7 @@ import com.openexchange.net.HostList;
 import com.sun.mail.iap.Argument;
 import com.sun.mail.iap.Protocol;
 import com.sun.mail.iap.Response;
+import com.sun.mail.iap.ResponseInterceptor;
 import com.sun.mail.imap.ResponseEvent.Status;
 import com.sun.mail.imap.ResponseEvent.StatusResponse;
 import net.jodah.failsafe.CircuitBreaker;
@@ -279,10 +280,10 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor extends Abst
     }
 
     @Override
-    public Response[] executeCommand(String command, Argument args, Protocol protocol) {
+    public Response[] executeCommand(String command, Argument args, Optional<ResponseInterceptor> optionalInterceptor, Protocol protocol) {
         CircuitBreakerInfo breakerInfo = circuitBreakerFor(protocol);
         try {
-            return Failsafe.with(breakerInfo.getCircuitBreaker()).get(new CircuitBreakerCommandCallable(command, args, protocol, metricServiceReference));
+            return Failsafe.with(breakerInfo.getCircuitBreaker()).get(new CircuitBreakerCommandCallable(command, args, optionalInterceptor, protocol, metricServiceReference));
         } catch (CircuitBreakerOpenException e) {
             // Circuit is open
             onDenied(e, breakerInfo);
@@ -308,7 +309,7 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor extends Abst
     public Response readResponse(Protocol protocol) throws IOException {
         CircuitBreakerInfo breakerInfo = circuitBreakerFor(protocol);
         try {
-            return Failsafe.with(breakerInfo.getCircuitBreaker()).get(new CircuitBreakerReadResponseCallable(protocol));
+            return Failsafe.with(breakerInfo.getCircuitBreaker()).get(new CircuitBreakerReadResponseCallable(protocol, metricServiceReference));
         } catch (CircuitBreakerOpenException e) {
             // Circuit is open
             onDenied(e, breakerInfo);
@@ -492,20 +493,24 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor extends Abst
     private static class CircuitBreakerReadResponseCallable implements Callable<Response> {
 
         private final Protocol protocol;
+        private final AtomicReference<MetricService> metricServiceReference;
 
         /**
          * Initializes a new {@link CircuitBreakerReadResponseCallable}.
          *
          * @param protocol The protocol instance
+         * @param metricServiceReference The metric service reference
          */
-        CircuitBreakerReadResponseCallable(Protocol protocol) {
+        CircuitBreakerReadResponseCallable(Protocol protocol, AtomicReference<MetricService> metricServiceReference) {
             super();
             this.protocol = protocol;
+            this.metricServiceReference = metricServiceReference;
         }
 
         @Override
         public Response call() throws Exception {
-            return protocol.readResponse();
+            MetricService metricService = metricServiceReference.get();
+            return MonitoringCommandExecutor.readResponse(protocol, Optional.ofNullable(metricService));
         }
     }
 
@@ -518,6 +523,7 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor extends Abst
 
         private final String command;
         private final Argument args;
+        private final Optional<ResponseInterceptor> optionalInterceptor;
         private final Protocol protocol;
         private final AtomicReference<MetricService> metricServiceReference;
 
@@ -526,13 +532,15 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor extends Abst
          *
          * @param command The command
          * @param args The optional arguments
+         * @param optionalInterceptor The optional interceptor
          * @param protocol The protocol instance
          * @param metricServiceReference The metric service reference
          */
-        CircuitBreakerCommandCallable(String command, Argument args, Protocol protocol, AtomicReference<MetricService> metricServiceReference) {
+        CircuitBreakerCommandCallable(String command, Argument args, Optional<ResponseInterceptor> optionalInterceptor, Protocol protocol, AtomicReference<MetricService> metricServiceReference) {
             super();
             this.command = command;
             this.args = args;
+            this.optionalInterceptor = optionalInterceptor;
             this.protocol = protocol;
             this.metricServiceReference = metricServiceReference;
         }
@@ -542,7 +550,7 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor extends Abst
             MetricService metricService = metricServiceReference.get();
 
             // Obtain responses
-            ExecutedCommand executedCommand = MonitoringCommandExecutor.executeCommand(command, args, protocol, Optional.ofNullable(metricService));
+            ExecutedCommand executedCommand = MonitoringCommandExecutor.executeCommand(command, args, optionalInterceptor, protocol, Optional.ofNullable(metricService));
             Response[] responses = executedCommand.responses;
 
             // Check status response
