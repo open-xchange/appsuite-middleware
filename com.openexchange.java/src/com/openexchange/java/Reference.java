@@ -81,6 +81,24 @@ public final class Reference<V> {
         super();
         this.value = value;
     }
+    
+    /**
+     * Checks for a <code>null</code> value
+     *
+     * @return <code>true</code> if this reference holds a <code>null</code>  value; otherwise <code>false</code>
+     */
+    public boolean hasNoValue() {
+        return value == null;
+    }
+    
+    /**
+     * Checks for a non-<code>null</code> value
+     *
+     * @return <code>true</code> if this reference holds a non-<code>null</code>  value; otherwise <code>false</code>
+     */
+    public boolean hasValue() {
+        return value != null;
+    }
 
     /**
      * Gets the value
