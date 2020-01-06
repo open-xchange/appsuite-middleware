@@ -214,7 +214,7 @@ public final class NewAction extends AbstractMailAction implements EnqueuableAJA
                 }
                 {
                     Object subject = jMail.opt(MailJSONField.SUBJECT.getKey());
-                    jKeyDesc.put("subject", null == subject ? JSONObject.NULL : subject);
+                    jKeyDesc.put("subject", null == subject ? "" : subject);
                 }
                 jKeyDesc.put("draft", (jMail.optInt(FLAGS, 0) & MailMessage.FLAG_DRAFT) > 0);
 

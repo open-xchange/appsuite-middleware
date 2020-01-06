@@ -767,7 +767,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
     @Override
     public boolean handleSubject(final String subject) throws OXException {
         try {
-            jsonObject.put(MailJSONField.SUBJECT.getKey(), subject == null ? JSONObject.NULL : subject.trim());
+            jsonObject.put(MailJSONField.SUBJECT.getKey(), subject == null ? "" : subject.trim());
             return true;
         } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
