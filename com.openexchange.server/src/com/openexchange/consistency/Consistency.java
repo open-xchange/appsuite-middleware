@@ -391,7 +391,6 @@ public abstract class Consistency extends StandardMBean implements ConsistencyMB
                     throw e;
                 }
                 String contextids = Strings.join(ctxs, ",");
-                contextids = contextids.substring(0, contextids.length() - 1);
                 // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
                 stmt = poolCon.prepareStatement("SELECT cid FROM login2user WHERE cid IN (" + contextids + ") GROUP BY cid");
                 rs = stmt.executeQuery();
