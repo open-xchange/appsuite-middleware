@@ -55,8 +55,6 @@ import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.Event;
@@ -74,7 +72,6 @@ import com.openexchange.folderstorage.cache.lock.UserLockManagement;
 import com.openexchange.folderstorage.cache.memory.FolderMapManagement;
 import com.openexchange.folderstorage.cache.service.FolderCacheInvalidationService;
 import com.openexchange.folderstorage.internal.Tools;
-import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mailaccount.MailAccountDeleteListener;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.osgi.DeferredActivator;
@@ -337,26 +334,6 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
             dict.put(EventConstants.EVENT_TOPIC, FileStorageEventConstants.ALL_FOLDER_TOPICS);
             registrations.add(context.registerService(EventHandler.class, eventHandler, dict));
         }
-    }
-
-    private static final String DEFAULT = MailFolder.DEFAULT_FOLDER_ID;
-
-    private static final Pattern PAT_FIX = Pattern.compile(Pattern.quote(DEFAULT) + "([0-9]+)" + Pattern.quote(DEFAULT));
-
-    protected static String sanitizeFolderId(final String id) {
-        String fid = id;
-        if (fid.startsWith(DEFAULT)) {
-            try {
-                final Matcher matcher = PAT_FIX.matcher(fid);
-                if (matcher.matches()) {
-                    fid = DEFAULT + matcher.group(1);
-                }
-            } catch (Exception e) {
-                LOG.warn("Couldn't sanitize folder identifier: {}. Returning unchanged.", id, e);
-                return id;
-            }
-        }
-        return fid;
     }
 
     private void unregisterCacheFolderStorage() {

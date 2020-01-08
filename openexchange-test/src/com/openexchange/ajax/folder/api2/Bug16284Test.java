@@ -89,7 +89,7 @@ public class Bug16284Test extends AbstractAJAXSession {
 
     @Test
     public void testListWithoutInfoStore() throws Throwable {
-        final PathRequest request = new PathRequest(EnumAPI.OUTLOOK, MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, MailFolder.DEFAULT_FOLDER_ID), COLUMNS, false);
+        final PathRequest request = new PathRequest(EnumAPI.OUTLOOK, MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, MailFolder.ROOT_FOLDER_ID), COLUMNS, false);
         final PathResponse response = client.execute(request);
 
         if (!response.hasError()) {

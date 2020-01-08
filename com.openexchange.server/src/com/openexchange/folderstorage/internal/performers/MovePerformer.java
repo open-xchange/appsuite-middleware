@@ -85,7 +85,7 @@ import com.openexchange.user.User;
  */
 final class MovePerformer extends AbstractPerformer {
 
-    private static final String MAIL_DEFAULT_ID = MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, MailFolder.DEFAULT_FOLDER_ID);
+    private static final String MAIL_DEFAULT_ID = MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, MailFolder.ROOT_FOLDER_ID);
 
     private static final String MAIL = MailContentType.getInstance().toString();
 

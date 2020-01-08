@@ -419,7 +419,7 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage, I
 
     @Override
     public void clearFolder(final String fullname, final boolean hardDelete) throws OXException {
-        if (!MailFolder.DEFAULT_FOLDER_ID.equals(fullname) && !isDefaultFolder(fullname)) {
+        if (!MailFolder.ROOT_FOLDER_ID.equals(fullname) && !isDefaultFolder(fullname)) {
             throw MailExceptionCode.FOLDER_NOT_FOUND.create(fullname);
         }
         // Get affected mail IDs through loading all messages in folder
@@ -469,7 +469,7 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage, I
     @Override
     public String deleteFolder(final String fullname, final boolean hardDelete) throws OXException {
         // TODO: Shall we deny mail folder deletion in POP3 accounts?
-        if (MailFolder.DEFAULT_FOLDER_ID.equals(fullname) || isDefaultFolder(fullname)) {
+        if (MailFolder.ROOT_FOLDER_ID.equals(fullname) || isDefaultFolder(fullname)) {
             throw POP3ExceptionCode.NO_DEFAULT_FOLDER_DELETE.create(fullname);
         }
         final String realFullname = getRealFullname(fullname);
@@ -502,7 +502,7 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage, I
 
     @Override
     public String trashFolder(final String fullname) throws OXException {
-        if (MailFolder.DEFAULT_FOLDER_ID.equals(fullname) || isDefaultFolder(fullname)) {
+        if (MailFolder.ROOT_FOLDER_ID.equals(fullname) || isDefaultFolder(fullname)) {
             throw POP3ExceptionCode.NO_DEFAULT_FOLDER_DELETE.create(fullname);
         }
         final String realFullname = getRealFullname(fullname);
@@ -616,7 +616,7 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage, I
 
     @Override
     public boolean exists(final String fullname) throws OXException {
-        if (MailFolder.DEFAULT_FOLDER_ID.equals(fullname) || isDefaultFolder(fullname)) {
+        if (MailFolder.ROOT_FOLDER_ID.equals(fullname) || isDefaultFolder(fullname)) {
             return true;
         }
         return delegatee.exists(getRealFullname(fullname));
@@ -661,7 +661,7 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage, I
         for (int i = 0; i < folders.length && !stop; i++) {
             final MailFolder mailFolder = folders[i];
             prepareMailFolder(mailFolder);
-            stop = (mailFolder.getFullname().equals(MailFolder.DEFAULT_FOLDER_ID));
+            stop = (mailFolder.getFullname().equals(MailFolder.ROOT_FOLDER_ID));
         }
         return tmp.toArray(new MailFolder[tmp.size()]);
     }
@@ -674,7 +674,7 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage, I
 
     @Override
     public MailFolder getRootFolder() throws OXException {
-        return getFolder(MailFolder.DEFAULT_FOLDER_ID);
+        return getFolder(MailFolder.ROOT_FOLDER_ID);
     }
 
     @Override
@@ -711,7 +711,7 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage, I
 
     @Override
     public String moveFolder(final String fullname, final String newFullname) throws OXException {
-        if (MailFolder.DEFAULT_FOLDER_ID.equals(newFullname)) {
+        if (MailFolder.ROOT_FOLDER_ID.equals(newFullname)) {
             throw POP3ExceptionCode.MOVE_ILLEGAL.create();
         } else if (isDefaultFolder(fullname)) {
             throw POP3ExceptionCode.MOVE_ILLEGAL.create();
@@ -742,7 +742,7 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage, I
         final String newFullname;
         {
             final String parent = stripPathFromFullname(path, realMailFolder.getParentFullname());
-            if (MailFolder.DEFAULT_FOLDER_ID.equals(parent)) {
+            if (MailFolder.ROOT_FOLDER_ID.equals(parent)) {
                 newFullname = newName;
             } else {
                 newFullname = new StringBuilder(parent).append(storage.getSeparator()).append(newName).toString();
@@ -778,7 +778,7 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage, I
         mailFolder.setDefaultFolder(false);
         mailFolder.setDefaultFolderType(DefaultFolderType.NONE);
         final MailPermission mp = getPOP3MailPermission();
-        if (MailFolder.DEFAULT_FOLDER_ID.equals(mailFolder.getFullname())) {
+        if (MailFolder.ROOT_FOLDER_ID.equals(mailFolder.getFullname())) {
             mp.setAllPermission(
                 OCLPermission.CREATE_SUB_FOLDERS,
                 OCLPermission.NO_PERMISSIONS,
@@ -805,7 +805,7 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage, I
     private String[] getParentAndName(final String fullname, final char separator) {
         final int pos = fullname.lastIndexOf(separator);
         if (-1 == pos) {
-            return new String[] { MailFolder.DEFAULT_FOLDER_ID, fullname };
+            return new String[] { MailFolder.ROOT_FOLDER_ID, fullname };
         }
         return new String[] { fullname.substring(0, pos), fullname.substring(pos + 1) };
     }

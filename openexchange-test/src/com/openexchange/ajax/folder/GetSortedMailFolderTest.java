@@ -77,7 +77,7 @@ public class GetSortedMailFolderTest extends AbstractAJAXSession {
 
     /**
      * Initializes a new {@link GetSortedMailFolderTest}.
-     * 
+     *
      * @param name test name.
      */
     public GetSortedMailFolderTest() {
@@ -91,7 +91,7 @@ public class GetSortedMailFolderTest extends AbstractAJAXSession {
         ListResponse response = client.execute(request);
         Iterator<FolderObject> iter = response.getFolder();
         FolderObject rootMailFolder = null;
-        String primaryMailFolder = MailFolderUtility.prepareFullname(0, MailFolder.DEFAULT_FOLDER_ID);
+        String primaryMailFolder = MailFolderUtility.prepareFullname(0, MailFolder.ROOT_FOLDER_ID);
         while (iter.hasNext()) {
             final FolderObject fo = iter.next();
             if (fo.containsFullName() && primaryMailFolder.equals(fo.getFullName())) {

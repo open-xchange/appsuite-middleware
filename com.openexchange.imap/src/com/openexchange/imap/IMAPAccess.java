@@ -567,7 +567,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         /*
          * Check for root folder
          */
-        if (MailFolder.DEFAULT_FOLDER_ID.equals(fullname)) {
+        if (MailFolder.ROOT_FOLDER_ID.equals(fullname)) {
             return 0;
         }
         try {

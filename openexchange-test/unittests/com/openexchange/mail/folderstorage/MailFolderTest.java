@@ -249,7 +249,7 @@ public final class MailFolderTest extends AbstractMailTest {
                     parentFullname = INBOX;
                 } else {
                     fullname = name;
-                    parentFullname = MailFolder.DEFAULT_FOLDER_ID;
+                    parentFullname = MailFolder.ROOT_FOLDER_ID;
                 }
 
                 final MailFolderDescription mfd = new MailFolderDescription();
@@ -354,7 +354,7 @@ public final class MailFolderTest extends AbstractMailTest {
                 assertTrue("Missing supports user flags flag", f.containsSupportsUserFlags());
                 assertTrue("Missing unread message count", f.containsUnreadMessageCount());
 
-                assertTrue("Unexpected root fullname", MailFolder.DEFAULT_FOLDER_ID.equals(f.getFullname()));
+                assertTrue("Unexpected root fullname", MailFolder.ROOT_FOLDER_ID.equals(f.getFullname()));
                 assertTrue("Unexpected root's parent fullname", f.getParentFullname() == null);
 
             } finally {
@@ -390,7 +390,7 @@ public final class MailFolderTest extends AbstractMailTest {
                     parentFullname = INBOX;
                 } else {
                     fullname = name;
-                    parentFullname = MailFolder.DEFAULT_FOLDER_ID;
+                    parentFullname = MailFolder.ROOT_FOLDER_ID;
                 }
 
                 final MailFolderDescription mfd = new MailFolderDescription();
@@ -497,7 +497,7 @@ public final class MailFolderTest extends AbstractMailTest {
                     parentIsDefault = false;
                 } else {
                     fullname = name;
-                    parentFullname = MailFolder.DEFAULT_FOLDER_ID;
+                    parentFullname = MailFolder.ROOT_FOLDER_ID;
                     parentIsDefault = true;
                 }
 
@@ -562,7 +562,7 @@ public final class MailFolderTest extends AbstractMailTest {
                 mf = mailAccess.getFolderStorage().getFolder(fullname);
 
                 assertTrue("Unexpected name: " + mf.getName(), ("TemporaryFolderMovedAgain" + stamp).equals(mf.getName()));
-                assertTrue("Unexpected parent: " + mf.getParentFullname(), MailFolder.DEFAULT_FOLDER_ID.equals(mf.getParentFullname()));
+                assertTrue("Unexpected parent: " + mf.getParentFullname(), MailFolder.ROOT_FOLDER_ID.equals(mf.getParentFullname()));
             } else {
                 fullname = null;
             }
@@ -613,7 +613,7 @@ public final class MailFolderTest extends AbstractMailTest {
                     isParentDefault = false;
                 } else {
                     fullname = name;
-                    parentFullname = MailFolder.DEFAULT_FOLDER_ID;
+                    parentFullname = MailFolder.ROOT_FOLDER_ID;
                     isParentDefault = true;
                 }
 
@@ -680,7 +680,7 @@ public final class MailFolderTest extends AbstractMailTest {
                     parentFullname = INBOX;
                 } else {
                     fullname = name;
-                    parentFullname = MailFolder.DEFAULT_FOLDER_ID;
+                    parentFullname = MailFolder.ROOT_FOLDER_ID;
                 }
 
                 final MailFolderDescription mfd = new MailFolderDescription();
@@ -796,7 +796,7 @@ public final class MailFolderTest extends AbstractMailTest {
                     parentFullname = INBOX;
                 } else {
                     fullname = name;
-                    parentFullname = MailFolder.DEFAULT_FOLDER_ID;
+                    parentFullname = MailFolder.ROOT_FOLDER_ID;
                 }
 
                 final MailFolderDescription mfd = new MailFolderDescription();
@@ -856,7 +856,7 @@ public final class MailFolderTest extends AbstractMailTest {
                     isParentDefault = false;
                 } else {
                     fullname = name;
-                    parentFullname = MailFolder.DEFAULT_FOLDER_ID;
+                    parentFullname = MailFolder.ROOT_FOLDER_ID;
                     isParentDefault = true;
                 }
 

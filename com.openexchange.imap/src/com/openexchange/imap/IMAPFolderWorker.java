@@ -429,7 +429,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
         return setAndOpenFolder(null, fullName, desiredMode);
     }
 
-    private static final String DEFAULT_FOLDER_ID = MailFolder.DEFAULT_FOLDER_ID;
+    private static final String ROOT_FOLDER_ID = MailFolder.ROOT_FOLDER_ID;
 
     /**
      * Sets and opens (only if exists) the folder in a safe manner, checks if selectable and for right {@link Right#READ}
@@ -453,7 +453,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
         }
 
         // Check for default folder
-        boolean isDefaultFolder = DEFAULT_FOLDER_ID.equals(fullName);
+        boolean isRootFolder = ROOT_FOLDER_ID.equals(fullName);
 
         if (imapFolder != null) {
             // Obtain folder lock once to avoid repetitive acquires/releases when invoking folder's getXXX() methods
@@ -461,7 +461,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
                 String imapFolderFullname = imapFolder.getFullName();
 
                 // Check for equal folder
-                boolean isEqualFolder = isDefaultFolder ? ( 0 == imapFolderFullname.length()) : fullName.equals(imapFolderFullname);
+                boolean isEqualFolder = isRootFolder ? ( 0 == imapFolderFullname.length()) : fullName.equals(imapFolderFullname);
 
                 // IMAPCommandsCollection.forceNoopCommand(imapFolder);
                 clearCache(imapFolder);
@@ -526,7 +526,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
         }
 
         // Get IMAP folder for full name
-        IMAPFolder retval = (isDefaultFolder ? (IMAPFolder) imapStore.getDefaultFolder() : (IMAPFolder) imapStore.getFolder(fullName));
+        IMAPFolder retval = (isRootFolder ? (IMAPFolder) imapStore.getDefaultFolder() : (IMAPFolder) imapStore.getFolder(fullName));
 
         // Obtain folder lock once to avoid repetitive acquires/releases when invoking folder's getXXX() methods
         synchronized (retval) {
@@ -534,7 +534,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
 
             // Get associated LIST entry and verify existence
             ListLsubEntry listEntry = ListLsubCache.getCachedLISTEntry(fullName, accountId, retval, session, ignoreSubscriptions);
-            if (!isDefaultFolder && !"INBOX".equals(fullName) && (!listEntry.exists())) {
+            if (!isRootFolder && !"INBOX".equals(fullName) && (!listEntry.exists())) {
                 // Try to open the folder although not LISTed to check existence
                 if (!tryOpen(retval, desiredMode)) {
                     throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
@@ -546,16 +546,16 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
             // Check if selectable aka. does hold messages
             boolean selectable = listEntry.canOpen();
             if (!selectable) { // NoSelect
-                throw IMAPException.create(IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, imapConfig, session, isDefaultFolder ? MailFolder.DEFAULT_FOLDER_NAME : fullName);
+                throw IMAPException.create(IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, imapConfig, session, isRootFolder ? MailFolder.ROOT_FOLDER_NAME : fullName);
             }
 
             // Check ACLs
             try {
                 if (imapConfig.isSupportsACLs() && !aclExtension.canRead(RightsCache.getCachedRights(retval, true, session, accountId))) {
-                    throw IMAPException.create(IMAPException.Code.NO_FOLDER_OPEN, imapConfig, session, isDefaultFolder ? MailFolder.DEFAULT_FOLDER_NAME : fullName);
+                    throw IMAPException.create(IMAPException.Code.NO_FOLDER_OPEN, imapConfig, session, isRootFolder ? MailFolder.ROOT_FOLDER_NAME : fullName);
                 }
             } catch (MessagingException e) {
-                throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, isDefaultFolder ? MailFolder.DEFAULT_FOLDER_NAME : fullName);
+                throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, isRootFolder ? MailFolder.ROOT_FOLDER_NAME : fullName);
             }
 
             // Finally open it in desired mode

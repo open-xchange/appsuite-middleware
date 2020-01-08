@@ -165,18 +165,25 @@ public class MailFolder implements Serializable, Cloneable {
     private final ConcurrentMap<String, Object> properties;
 
     /**
+     * The static prefix used to quickly identify fully-qualified mail folder identifiers; e.g. <code>"default0/INBOX"</code>.
+     *
+     * @value "default"
+     */
+    public static final String MAIL_PREFIX = "default";
+
+    /**
      * Virtual name of mailbox's root folder
      *
      * @value "E-Mail"
      */
-    public static final String DEFAULT_FOLDER_NAME = "E-Mail";
+    public static final String ROOT_FOLDER_NAME = "E-Mail";
 
     /**
      * Virtual full name of mailbox's root folder
      *
-     * @value "default"
+     * @value "" (empty string)
      */
-    public static final String DEFAULT_FOLDER_ID = "default";
+    public static final String ROOT_FOLDER_ID = "";
 
     /**
      * Initializes a new {@link MailFolder}

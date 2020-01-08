@@ -1215,7 +1215,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         /*
          * Check if denoted parent can hold default folders like Trash, Sent, etc.
          */
-        if (!MailFolder.DEFAULT_FOLDER_ID.equals(parentFullname) && !INBOX_ID.equals(parentFullname)) {
+        if (!MailFolder.ROOT_FOLDER_ID.equals(parentFullname) && !INBOX_ID.equals(parentFullname)) {
             /*
              * Denoted parent is not capable to hold default folders. Therefore output as it is.
              */
@@ -1423,8 +1423,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         FullnameArgument argument = prepareMailFolderParam(folder);
         int localAccountId = argument.getAccountId();
         initConnection(localAccountId);
-        if (MailFolder.DEFAULT_FOLDER_ID.equals(folder)) {
-            throw MailExceptionCode.FOLDER_DOES_NOT_HOLD_MESSAGES.create(MailFolder.DEFAULT_FOLDER_ID);
+        if (MailFolder.ROOT_FOLDER_ID.equals(argument.getFullname())) {
+            throw MailExceptionCode.FOLDER_DOES_NOT_HOLD_MESSAGES.create(MailFolder.ROOT_FOLDER_NAME);
         }
         String fullName = argument.getFullname();
         MailMessage mail = mailAccess.getMessageStorage().getMessage(fullName, msgUID, markAsSeen);
@@ -4658,7 +4658,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             if (Strings.isEmpty(prefix)) {
                 separator = mailAccess.getFolderStorage().getFolder(INBOX_ID).getSeparator();
                 archiveFullName = archiveName;
-                parentFullName = MailFolder.DEFAULT_FOLDER_ID;
+                parentFullName = MailFolder.ROOT_FOLDER_ID;
             } else {
                 separator = prefix.charAt(prefix.length() - 1);
                 archiveFullName = new StringBuilder(prefix).append(archiveName).toString();
@@ -4689,7 +4689,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 parentFullName = archiveFullName.substring(0, pos);
                 archiveName = archiveFullName.substring(pos + 1);
             } else {
-                parentFullName = MailFolder.DEFAULT_FOLDER_ID;
+                parentFullName = MailFolder.ROOT_FOLDER_ID;
                 archiveName = archiveFullName;
             }
         }

@@ -2033,7 +2033,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                                 if (isEmpty(af)) {
                                     stmt.setString(pos++, "");
                                 } else {
-                                    stmt.setString(pos++, MailFolderUtility.prepareMailFolderParam(af).getFullname());
+                                    stmt.setString(pos++, MailFolderUtility.prepareMailFolderParamOrElseReturn(af));
                                 }
                                 break;
                             case MAIL_STARTTLS_LITERAL:
@@ -2055,7 +2055,12 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                             default:
                                 if (DEFAULT.contains(attribute)) {
                                     if (DEFAULT_FULL_NAMES.contains(attribute)) {
-                                        String fullName = null == value ? "" : MailFolderUtility.prepareMailFolderParam((String) value).getFullname();
+                                        String fullName;
+                                        if (null == value) {
+                                            fullName = "";
+                                        } else {
+                                            fullName = MailFolderUtility.prepareMailFolderParamOrElseReturn((String) value);
+                                        }
                                         stmt.setString(pos++, fullName);
                                     } else {
                                         if (null == value) {

@@ -90,7 +90,7 @@ public final class MailFolderSpecialCharsTest extends AbstractMailTest {
                 parentFullname = INBOX;
             } else {
                 fullname = invalidName;
-                parentFullname = MailFolder.DEFAULT_FOLDER_ID;
+                parentFullname = MailFolder.ROOT_FOLDER_ID;
             }
 
             final MailFolderDescription mfd = new MailFolderDescription();
@@ -120,7 +120,7 @@ public final class MailFolderSpecialCharsTest extends AbstractMailTest {
                 parentFullname = INBOX;
             } else {
                 fullname = validName;
-                parentFullname = MailFolder.DEFAULT_FOLDER_ID;
+                parentFullname = MailFolder.ROOT_FOLDER_ID;
             }
             mfd.setExists(false);
             mfd.setParentFullname(parentFullname);
@@ -139,7 +139,7 @@ public final class MailFolderSpecialCharsTest extends AbstractMailTest {
                 parentFullname = INBOX;
             } else {
                 fullname = validName;
-                parentFullname = MailFolder.DEFAULT_FOLDER_ID;
+                parentFullname = MailFolder.ROOT_FOLDER_ID;
             }
             mfd.setExists(false);
             mfd.setParentFullname(parentFullname);
@@ -158,7 +158,7 @@ public final class MailFolderSpecialCharsTest extends AbstractMailTest {
                 parentFullname = INBOX;
             } else {
                 fullname = validName;
-                parentFullname = MailFolder.DEFAULT_FOLDER_ID;
+                parentFullname = MailFolder.ROOT_FOLDER_ID;
             }
             mfd.setExists(false);
             mfd.setParentFullname(parentFullname);
@@ -198,7 +198,7 @@ public final class MailFolderSpecialCharsTest extends AbstractMailTest {
                 parentFullname = INBOX;
             } else {
                 fullname = invalidName;
-                parentFullname = MailFolder.DEFAULT_FOLDER_ID;
+                parentFullname = MailFolder.ROOT_FOLDER_ID;
             }
 
             final MailFolderDescription mfd = new MailFolderDescription();
@@ -229,7 +229,7 @@ public final class MailFolderSpecialCharsTest extends AbstractMailTest {
                 parentFullname = INBOX;
             } else {
                 fullname = invalidName;
-                parentFullname = MailFolder.DEFAULT_FOLDER_ID;
+                parentFullname = MailFolder.ROOT_FOLDER_ID;
             }
             mfd.setExists(false);
             mfd.setParentFullname(parentFullname);
@@ -251,7 +251,7 @@ public final class MailFolderSpecialCharsTest extends AbstractMailTest {
                 parentFullname = INBOX;
             } else {
                 fullname = invalidName;
-                parentFullname = MailFolder.DEFAULT_FOLDER_ID;
+                parentFullname = MailFolder.ROOT_FOLDER_ID;
             }
             mfd.setExists(false);
             mfd.setParentFullname(parentFullname);

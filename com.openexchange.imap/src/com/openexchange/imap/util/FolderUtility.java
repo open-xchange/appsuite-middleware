@@ -114,7 +114,7 @@ public final class FolderUtility {
             // Load w/o IMAP folder instance
             IMAPStore imapStore = folderStorage.getImapStore();
             IMAPFolder f;
-            if (MailFolder.DEFAULT_FOLDER_ID.equals(fullName) || 0 == fullName.length()) {
+            if (MailFolder.ROOT_FOLDER_ID.equals(fullName)) {
                 f = (IMAPFolder) imapStore.getDefaultFolder();
                 imapFullName = "";
             } else {

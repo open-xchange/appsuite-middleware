@@ -77,6 +77,7 @@ import com.openexchange.folderstorage.outlook.OutlookFolderStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.lock.LockService;
 import com.openexchange.mail.dataobjects.MailFolder;
+import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
@@ -207,8 +208,9 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
         }
         final FolderMap folderMap = FolderMapManagement.getInstance().optFor(userId, contextId);
         if (null != folderMap) {
-            folderMap.remove(MailFolder.DEFAULT_FOLDER_ID + id, FolderStorage.REAL_TREE_ID);
-            folderMap.remove(MailFolder.DEFAULT_FOLDER_ID + id, OutlookFolderStorage.OUTLOOK_TREE_ID);
+            String rootId = MailFolderUtility.prepareFullname(id, MailFolder.ROOT_FOLDER_ID);
+            folderMap.remove(rootId, FolderStorage.REAL_TREE_ID);
+            folderMap.remove(rootId, OutlookFolderStorage.OUTLOOK_TREE_ID);
         }
     }
 

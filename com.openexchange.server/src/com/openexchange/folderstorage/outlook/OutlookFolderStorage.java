@@ -224,7 +224,7 @@ public final class OutlookFolderStorage implements FolderStorage, SubfolderListi
     /**
      * The prepared full name.
      */
-    static final String PREPARED_FULLNAME_DEFAULT = MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, MailFolder.DEFAULT_FOLDER_ID);
+    static final String PREPARED_FULLNAME_DEFAULT = MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, MailFolder.ROOT_FOLDER_ID);
 
     private static final ThreadPools.ExpectedExceptionFactory<OXException> FACTORY = new ThreadPools.ExpectedExceptionFactory<OXException>() {
 
@@ -2290,7 +2290,7 @@ public final class OutlookFolderStorage implements FolderStorage, SubfolderListi
                     if (suppressUnifiedMail) {
                         for (final MailAccount mailAccount : accounts) {
                             if (!mailAccount.isDefaultAccount() && !PROTOCOL_UNIFIED_INBOX.equals(mailAccount.getMailProtocol())) {
-                                accountSubfolderIDs.add(MailFolderUtility.prepareFullname(mailAccount.getId(), MailFolder.DEFAULT_FOLDER_ID));
+                                accountSubfolderIDs.add(MailFolderUtility.prepareFullname(mailAccount.getId(), MailFolder.ROOT_FOLDER_ID));
                             }
                         }
                     } else {
@@ -2303,14 +2303,14 @@ public final class OutlookFolderStorage implements FolderStorage, SubfolderListi
                                     final UnifiedInboxManagement uim = Services.getService(UnifiedInboxManagement.class);
                                     try {
                                         if (null != uim && uim.isEnabled(user.getId(), contextId)) {
-                                            accountSubfolderIDs.add(MailFolderUtility.prepareFullname(mailAccount.getId(), MailFolder.DEFAULT_FOLDER_ID));
+                                            accountSubfolderIDs.add(MailFolderUtility.prepareFullname(mailAccount.getId(), MailFolder.ROOT_FOLDER_ID));
                                             unifiedMailIndex = accountSubfolderIDs.size() - 1;
                                         }
                                     } catch (OXException e) {
                                         LOG.error("", e);
                                     }
                                 } else {
-                                    accountSubfolderIDs.add(MailFolderUtility.prepareFullname(mailAccount.getId(), MailFolder.DEFAULT_FOLDER_ID));
+                                    accountSubfolderIDs.add(MailFolderUtility.prepareFullname(mailAccount.getId(), MailFolder.ROOT_FOLDER_ID));
                                 }
                             }
                         }
@@ -2926,12 +2926,12 @@ public final class OutlookFolderStorage implements FolderStorage, SubfolderListi
 
     private static boolean isNonPrimaryMailAccountFolder(final OutlookFolder folder) {
         final String id = folder.getID();
-        if (!id.startsWith(MailFolder.DEFAULT_FOLDER_ID)) {
+        if (!id.startsWith(MailFolder.MAIL_PREFIX)) {
             return false;
         }
         try {
             final FullnameArgument arg = MailFolderUtility.prepareMailFolderParam(id);
-            return MailFolder.DEFAULT_FOLDER_ID.equals(arg.getFullname()) && arg.getAccountId() != MailAccount.DEFAULT_ID;
+            return MailFolder.ROOT_FOLDER_ID.equals(arg.getFullname()) && arg.getAccountId() != MailAccount.DEFAULT_ID;
         } catch (RuntimeException e) {
             /*
              * Parsing failed

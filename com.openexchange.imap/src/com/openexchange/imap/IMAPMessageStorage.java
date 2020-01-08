@@ -50,7 +50,7 @@
 package com.openexchange.imap;
 
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
-import static com.openexchange.mail.dataobjects.MailFolder.DEFAULT_FOLDER_ID;
+import static com.openexchange.mail.dataobjects.MailFolder.ROOT_FOLDER_ID;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.fold;
 import static com.openexchange.mail.mime.utils.MimeStorageUtility.getFetchProfile;
 import static com.openexchange.mail.utils.StorageUtility.prepareMailFieldsForSearch;
@@ -3020,7 +3020,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     }
 
     private void copyOrMoveAllMessages(String sourceFullName, String destFullName, boolean move) throws OXException {
-        if (DEFAULT_FOLDER_ID.equals(destFullName)) {
+        if (ROOT_FOLDER_ID.equals(destFullName)) {
             throw IMAPException.create(IMAPException.Code.NO_ROOT_MOVE, imapConfig, session, new Object[0]);
         }
         if ((sourceFullName == null) || (sourceFullName.length() == 0)) {
@@ -3119,7 +3119,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     @Override
     public long[] moveMessagesLong(final String sourceFolder, final String destFolder, final long[] mailIds, final boolean fast) throws OXException {
-        if (DEFAULT_FOLDER_ID.equals(destFolder)) {
+        if (ROOT_FOLDER_ID.equals(destFolder)) {
             throw IMAPException.create(IMAPException.Code.NO_ROOT_MOVE, imapConfig, session, new Object[0]);
         }
         return copyOrMoveMessages(sourceFolder, destFolder, mailIds, true, fast);

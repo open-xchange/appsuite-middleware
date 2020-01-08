@@ -56,7 +56,6 @@ import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.java.Reference;
 import com.openexchange.java.Strings;
-import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
@@ -115,10 +114,10 @@ public class Archive implements PreferencesItemService {
             if (Strings.isEmpty(archiveFullname)) {
                 setting.setSingleValue(null);
             } else {
-                FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(archiveFullname);
+                String fn = MailFolderUtility.prepareMailFolderParamOrElseReturn(archiveFullname);
                 MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> primaryMailAccess = getConnectedMailAccess(session, mailAccessReference);
-                if (primaryMailAccess.getFolderStorage().exists(fa.getFullName())) {
-                    setting.setSingleValue(prepareFullname(MailAccount.DEFAULT_ID, archiveFullname));
+                if (primaryMailAccess.getFolderStorage().exists(fn)) {
+                    setting.setSingleValue(prepareFullname(MailAccount.DEFAULT_ID, fn));
                 } else {
                     setting.setSingleValue(null);
                 }

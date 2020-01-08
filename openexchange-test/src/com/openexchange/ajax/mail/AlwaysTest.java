@@ -144,7 +144,7 @@ public class AlwaysTest extends AbstractAJAXSession {
         final Iterator<FolderObject> iter = listR.getFolder();
         while (iter.hasNext()) {
             final FolderObject fo = iter.next();
-            if (fo.containsFullName() && fo.getFullName().equals(MailFolder.DEFAULT_FOLDER_ID)) {
+            if (fo.containsFullName() && fo.getFullName().equals(MailFolder.ROOT_FOLDER_ID)) {
                 defaultIMAPFolder = fo;
                 break;
             }

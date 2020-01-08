@@ -52,6 +52,7 @@ package com.openexchange.folderstorage.mail;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderType;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 
 /**
@@ -63,7 +64,7 @@ public final class MailFolderType implements FolderType {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailFolderType.class);
 
-    private static final int LEN = MailFolder.DEFAULT_FOLDER_ID.length();
+    private static final int LEN = MailFolder.MAIL_PREFIX.length();
 
     private static final MailFolderType instance = new MailFolderType();
 
@@ -95,27 +96,7 @@ public final class MailFolderType implements FolderType {
         if (null == folderId) {
             return false;
         }
-        if (!folderId.startsWith(MailFolder.DEFAULT_FOLDER_ID)) {
-            return false;
-        }
-        final int len = folderId.length();
-        final char separator = '/';
-        int index = LEN;
-        while (index < len && folderId.charAt(index) != separator) {
-            index++;
-        }
-        // Parse account ID
-        if (index != LEN) {
-            try {
-                Integer.parseInt(folderId.substring(LEN, index));
-            } catch (NumberFormatException e) {
-                final IllegalArgumentException err = new IllegalArgumentException("Mail account is not a number: " + folderId);
-                err.initCause(e);
-                LOG.warn("Ignoring invalid folder identifier", err);
-                return false;
-            }
-        }
-        return true;
+        return checkFolderId(folderId);
     }
 
     @Override
@@ -126,15 +107,21 @@ public final class MailFolderType implements FolderType {
         if (PRIVATE_FOLDER_ID.equals(folderId)) {
             return true;
         }
-        if (!folderId.startsWith(MailFolder.DEFAULT_FOLDER_ID)) {
+        return checkFolderId(folderId);
+    }
+
+    private boolean checkFolderId(final String folderId) {
+        if (!folderId.startsWith(MailFolder.MAIL_PREFIX)) {
             return false;
         }
-        final int len = folderId.length();
-        final char separator = '/';
+
+        int len = folderId.length();
+        char separator = MailProperties.getInstance().getDefaultSeparator();
         int index = LEN;
         while (index < len && folderId.charAt(index) != separator) {
             index++;
         }
+
         // Parse account ID
         if (index != LEN) {
             try {
@@ -142,7 +129,7 @@ public final class MailFolderType implements FolderType {
             } catch (NumberFormatException e) {
                 final IllegalArgumentException err = new IllegalArgumentException("Mail account is not a number: " + folderId);
                 err.initCause(e);
-                LOG.error("", err);
+                LOG.warn("Ignoring invalid folder identifier", err);
                 return false;
             }
         }

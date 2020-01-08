@@ -259,7 +259,7 @@ public final class DefaultFolderNamesProvider {
      * @return The extracted full name
      */
     public static String extractFullname(final String fullnameParameter) {
-        return null == fullnameParameter ? null : MailFolderUtility.prepareMailFolderParam(fullnameParameter).getFullname();
+        return null == fullnameParameter ? null : MailFolderUtility.prepareMailFolderParamOrElseReturn(fullnameParameter);
     }
 
     /**

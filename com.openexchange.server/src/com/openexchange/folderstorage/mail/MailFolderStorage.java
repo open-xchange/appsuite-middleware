@@ -317,7 +317,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
 
     @Override
     public SortableId[] getVisibleFolders(String treeId, ContentType contentType, Type type, StorageParameters storageParameters) throws OXException {
-        return getVisibleFolders(MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, MailFolder.DEFAULT_FOLDER_ID), treeId, contentType, type, storageParameters);
+        return getVisibleFolders(MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, MailFolder.ROOT_FOLDER_ID), treeId, contentType, type, storageParameters);
     }
 
     @Override
@@ -334,7 +334,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
             accountId = MailAccount.DEFAULT_ID;
         } else {
             FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(rootFolderid);
-            if (!MailFolder.DEFAULT_FOLDER_ID.equals(fa.getFullName())) {
+            if (!MailFolder.ROOT_FOLDER_ID.equals(fa.getFullName())) {
                 throw new UnsupportedOperationException("FileStorageFolderStorage.getVisibleSubfolders()");
             }
             accountId = fa.getAccountId();
@@ -410,7 +410,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
                                 } else {
                                     // Add Unified Mail root folder at first position
                                     final MailAccount unifiedMailAccount = accountList.remove(0);
-                                    list.add(0, new MailId(prepareFullname(unifiedMailAccount.getId(), MailFolder.DEFAULT_FOLDER_ID), 0).setName(MailFolder.DEFAULT_FOLDER_NAME));
+                                    list.add(0, new MailId(prepareFullname(unifiedMailAccount.getId(), MailFolder.ROOT_FOLDER_ID), 0).setName(MailFolder.ROOT_FOLDER_NAME));
                                 }
                             }
                         } else {
@@ -425,7 +425,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
                         // Add root folders for external accounts
                         final int sz = accountList.size();
                         for (int j = 0; j < sz; j++) {
-                            list.add(new MailId(prepareFullname(accountList.get(j).getId(), MailFolder.DEFAULT_FOLDER_ID), start++).setName(MailFolder.DEFAULT_FOLDER_NAME));
+                            list.add(new MailId(prepareFullname(accountList.get(j).getId(), MailFolder.ROOT_FOLDER_ID), start++).setName(MailFolder.ROOT_FOLDER_NAME));
                         }
                     }
                     /*
@@ -444,7 +444,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
             /*
              * Start recursive iteration
              */
-            addSubfolders(MailFolder.DEFAULT_FOLDER_ID, folders, mailAccess.getFolderStorage());
+            addSubfolders(MailFolder.ROOT_FOLDER_ID, folders, mailAccess.getFolderStorage());
             /*
              * Filter against possible POP3 storage folders
              */
@@ -490,7 +490,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
                         } else {
                             // Add Unified Mail root folder at first position
                             final MailAccount unifiedMailAccount = accountList.remove(0);
-                            list.add(0, new MailId(prepareFullname(unifiedMailAccount.getId(), MailFolder.DEFAULT_FOLDER_ID), 0).setName(MailFolder.DEFAULT_FOLDER_NAME));
+                            list.add(0, new MailId(prepareFullname(unifiedMailAccount.getId(), MailFolder.ROOT_FOLDER_ID), 0).setName(MailFolder.ROOT_FOLDER_NAME));
                         }
                     }
                 } else {
@@ -505,7 +505,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
                 // Add root folders for external accounts
                 final int sz = accountList.size();
                 for (int j = 0; j < sz; j++) {
-                    list.add(new MailId(prepareFullname(accountList.get(j).getId(), MailFolder.DEFAULT_FOLDER_ID), start++).setName(MailFolder.DEFAULT_FOLDER_NAME));
+                    list.add(new MailId(prepareFullname(accountList.get(j).getId(), MailFolder.ROOT_FOLDER_ID), start++).setName(MailFolder.ROOT_FOLDER_NAME));
                 }
             }
             /*
@@ -542,7 +542,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
             final FullnameArgument argument = prepareMailFolderParam(folderId);
             final int accountId = argument.getAccountId();
             final String fullname = argument.getFullname();
-            if (MailFolder.DEFAULT_FOLDER_ID.equals(fullname)) {
+            if (MailFolder.ROOT_FOLDER_ID.equals(fullname)) {
                 throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create();
             }
             final Session session = storageParameters.getSession();
@@ -609,7 +609,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
                 }
                 mfd.addPermissions(mailPermissions);
             } else {
-                if (MailFolder.DEFAULT_FOLDER_ID.equals(parentFullName)) {
+                if (MailFolder.ROOT_FOLDER_ID.equals(parentFullName)) {
                     final MailPermission[] mailPermissions = new MailPermission[1];
                     final MailProvider provider = MailProviderRegistry.getMailProviderBySession(session, accountId);
                     {
@@ -903,7 +903,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
             }
             mailAccess = mailAccessFor(session, accountId);
             mailAccess.connect(false);
-            if (!MailFolder.DEFAULT_FOLDER_ID.equals(fullname) && !mailAccess.getFolderStorage().exists(fullname)) {
+            if (!MailFolder.ROOT_FOLDER_ID.equals(fullname) && !mailAccess.getFolderStorage().exists(fullname)) {
                 throw MailExceptionCode.FOLDER_NOT_FOUND.create(fullname);
             }
             addWarnings(mailAccess, storageParameters);
@@ -928,7 +928,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
                 return true;
             }
             mailAccess = mailAccessFor(session, accountId);
-            if (MailFolder.DEFAULT_FOLDER_ID.equals(fullname)) {
+            if (MailFolder.ROOT_FOLDER_ID.equals(fullname)) {
                 return true;
             }
             /*
@@ -1046,7 +1046,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
             return new DummyFolder(treeId, MailFolderUtility.prepareFullname(accountId, argument.getFullname()), accountName, accountName, argument.getFullname(), session.getUserId());
         }
 
-        if (MailFolder.DEFAULT_FOLDER_ID.equals(fullName)) {
+        if (MailFolder.ROOT_FOLDER_ID.equals(fullName)) {
             if (MailAccount.DEFAULT_ID == accountId) {
                 mailAccess.connect(false);
 
@@ -1295,7 +1295,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
     private static String[] splitBySeperator(final String fullname, final char sep) {
         int pos = fullname.lastIndexOf(sep);
         if (pos < 0) {
-            return new String[] { MailFolder.DEFAULT_FOLDER_ID, fullname };
+            return new String[] { MailFolder.ROOT_FOLDER_ID, fullname };
         }
         return new String[] { fullname.substring(0, pos), fullname.substring(pos + 1) };
     }
@@ -1384,7 +1384,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
                 List<SortableId> list = new ArrayList<>(accounts.size());
                 int j = 0;
                 for (MailAccount account : accounts) {
-                    list.add(new MailId(prepareFullname(account.getId(), MailFolder.DEFAULT_FOLDER_ID), j++).setName(MailFolder.DEFAULT_FOLDER_NAME));
+                    list.add(new MailId(prepareFullname(account.getId(), MailFolder.ROOT_FOLDER_ID), j++).setName(MailFolder.ROOT_FOLDER_NAME));
                 }
                 return list.toArray(new SortableId[list.size()]);
             }
@@ -1426,7 +1426,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
                     /*
                      * Check if denoted parent can hold default folders like Trash, Sent, etc.
                      */
-                    if ((Boolean.TRUE.equals(accessFast)) || (!MailFolder.DEFAULT_FOLDER_ID.equals(fullname) && !"INBOX".equals(fullname))) {
+                    if ((Boolean.TRUE.equals(accessFast)) || (!MailFolder.ROOT_FOLDER_ID.equals(fullname) && !"INBOX".equals(fullname))) {
                         /*
                          * Denoted parent is not capable to hold default folders. Therefore output as it is.
                          */
@@ -1502,7 +1502,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
             /*
              * Check if denoted parent can hold default folders like Trash, Sent, etc.
              */
-            if ((Boolean.TRUE.equals(accessFast)) || (!MailFolder.DEFAULT_FOLDER_ID.equals(fullname) && !"INBOX".equals(fullname))) {
+            if ((Boolean.TRUE.equals(accessFast)) || (!MailFolder.ROOT_FOLDER_ID.equals(fullname) && !"INBOX".equals(fullname))) {
                 /*
                  * Denoted parent is not capable to hold default folders. Therefore output as it is.
                  */
@@ -1656,7 +1656,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
         try {
             final FullnameArgument argument = prepareMailFolderParam(folderId);
             final String fullname = argument.getFullname();
-            if (MailFolder.DEFAULT_FOLDER_ID.equals(fullname)) {
+            if (MailFolder.ROOT_FOLDER_ID.equals(fullname)) {
                 /*
                  * The default folder always exists
                  */
@@ -1784,7 +1784,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
             {
                 final int pos = fullname.lastIndexOf(separator);
                 if (pos == -1) {
-                    oldParent = MailFolder.DEFAULT_FOLDER_ID;
+                    oldParent = MailFolder.ROOT_FOLDER_ID;
                     oldName = fullname;
                 } else {
                     oldParent = fullname.substring(0, pos);
@@ -1800,7 +1800,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
                 if (accountId == parentAccountID) {
                     final String newParent = mfd.getParentFullname();
                     final StringBuilder newFullname = new StringBuilder(16);
-                    if (!MailFolder.DEFAULT_FOLDER_ID.equals(newParent)) {
+                    if (!MailFolder.ROOT_FOLDER_ID.equals(newParent)) {
                         newFullname.append(newParent).append(mfd.getSeparator());
                     }
                     newFullname.append(mfd.containsName() ? mfd.getName() : oldName);

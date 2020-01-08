@@ -333,7 +333,7 @@ public final class IMAPFolderConverter {
                         mailFolder.setParentFullname(null);
                     } else {
                         final String pfn = parentListEntry.getFullName();
-                        mailFolder.setParentFullname(pfn.length() == 0 ? MailFolder.DEFAULT_FOLDER_ID : pfn);
+                        mailFolder.setParentFullname(pfn.length() == 0 ? MailFolder.ROOT_FOLDER_ID : pfn);
                     }
                 }
                 if (!mailFolder.containsDefaultFolder()) {
@@ -566,8 +566,8 @@ public final class IMAPFolderConverter {
             /*
              * Set full name, name, and parent full name
              */
-            mailFolder.setFullname(MailFolder.DEFAULT_FOLDER_ID);
-            mailFolder.setName(MailFolder.DEFAULT_FOLDER_NAME);
+            mailFolder.setFullname(MailFolder.ROOT_FOLDER_ID);
+            mailFolder.setName(MailFolder.ROOT_FOLDER_NAME);
             mailFolder.setParentFullname(null);
             mailFolder.setDefaultFolder(false);
             mailFolder.setDefaultFolderType(DefaultFolderType.NONE);

@@ -457,11 +457,7 @@ public class MaliciousFolders {
         }
 
         private String getFullNameFrom(String preparedName) {
-            if (null == preparedName) {
-                return null;
-            }
-
-            return MailFolderUtility.prepareMailFolderParam(preparedName).getFullName();
+            return null == preparedName ? null : MailFolderUtility.prepareMailFolderParamOrElseReturn(preparedName);
         }
 
         @Override

@@ -213,7 +213,7 @@ public final class MailSearchTest extends AbstractMailTest {
                 parentFullname = "INBOX";
             } else {
                 fullname = name;
-                parentFullname = MailFolder.DEFAULT_FOLDER_ID;
+                parentFullname = MailFolder.ROOT_FOLDER_ID;
             }
 
             final MailFolderDescription mfd = new MailFolderDescription();
@@ -365,7 +365,7 @@ public final class MailSearchTest extends AbstractMailTest {
                 parentFullname = "INBOX";
             } else {
                 fullname = name;
-                parentFullname = MailFolder.DEFAULT_FOLDER_ID;
+                parentFullname = MailFolder.ROOT_FOLDER_ID;
             }
 
             final MailFolderDescription mfd = new MailFolderDescription();
@@ -529,7 +529,7 @@ public final class MailSearchTest extends AbstractMailTest {
                 parentFullname = "INBOX";
             } else {
                 fullname = name;
-                parentFullname = MailFolder.DEFAULT_FOLDER_ID;
+                parentFullname = MailFolder.ROOT_FOLDER_ID;
             }
 
             final MailFolderDescription mfd = new MailFolderDescription();

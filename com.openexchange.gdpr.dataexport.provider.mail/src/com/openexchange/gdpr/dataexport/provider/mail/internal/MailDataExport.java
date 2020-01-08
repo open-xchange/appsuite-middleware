@@ -221,7 +221,7 @@ public class MailDataExport extends AbstractDataExportProviderTask {
                 IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
                 IMailFolderStorageInfoSupport infoSupport = folderStorage.supports(IMailFolderStorageInfoSupport.class);
                 if (null != infoSupport && infoSupport.isInfoSupported()) {
-                    rootFolder = new DefaultFolder(infoSupport.getFolderInfo(MailFolder.DEFAULT_FOLDER_ID), infoSupport);
+                    rootFolder = new DefaultFolder(infoSupport.getFolderInfo(MailFolder.ROOT_FOLDER_ID), infoSupport);
                 } else {
                     rootFolder = new DefaultFolder(folderStorage.getRootFolder(), folderStorage);
                 }
@@ -400,8 +400,8 @@ public class MailDataExport extends AbstractDataExportProviderTask {
                 }
                 return savePointFor(jSavePoint, e);
             }
-            if (MailFolder.DEFAULT_FOLDER_ID.equals(fullName)) {
-                LOG.debug("Failed to export messages from folder \"{}\" from primary mail account of user {} in context {}", fullName, I(task.getUserId()), I(task.getContextId()), e);
+            if (MailFolder.ROOT_FOLDER_ID.equals(fullName)) {
+                LOG.debug("Failed to export messages from root folder from primary mail account of user {} in context {}", I(task.getUserId()), I(task.getContextId()), e);
             } else {
                 if (isPermissionDenied(e)) {
                     LOG.debug("Forbidden to export messages from folder \"{}\" from primary mail account of user {} in context {}", fullName, I(task.getUserId()), I(task.getContextId()), e);

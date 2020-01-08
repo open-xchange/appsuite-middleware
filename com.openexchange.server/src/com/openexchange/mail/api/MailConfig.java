@@ -1152,7 +1152,11 @@ public abstract class MailConfig {
         if (!force && Strings.isEmpty(value)) {
             return;
         }
-        arr[index] = null == value ? null : MailFolderUtility.prepareMailFolderParam(value).getFullname();
+        if (null == value) {
+            arr[index] = null;
+        } else {
+            arr[index] = MailFolderUtility.prepareMailFolderParamOrElseReturn(value);
+        }
     }
 
     @Override

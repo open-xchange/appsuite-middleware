@@ -361,7 +361,7 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
                  * Special handling for mail folders on root level
                  */
                 if (FolderStorage.PRIVATE_ID.equals(parentId) && CONTENT_TYPE_MAIL.equals(folderContentType.toString())) {
-                    final String rootId = MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, MailFolder.DEFAULT_FOLDER_ID);
+                    final String rootId = MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, MailFolder.ROOT_FOLDER_ID);
                     /*
                      * Check if create is allowed
                      */

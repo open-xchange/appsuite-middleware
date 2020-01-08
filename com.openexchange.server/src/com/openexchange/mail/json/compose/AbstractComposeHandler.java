@@ -1016,12 +1016,12 @@ public abstract class AbstractComposeHandler<T extends ComposeContext, D extends
         if (null != unifiedINBOXManagement && msgref.getAccountId() == unifiedINBOXManagement.getUnifiedINBOXAccountID(session)) {
             // Something like: INBOX/default6/INBOX
             String nestedFullname = msgref.getFolder();
-            int pos = nestedFullname.indexOf(MailFolder.DEFAULT_FOLDER_ID);
+            int pos = nestedFullname.indexOf(MailFolder.MAIL_PREFIX);
             if (-1 == pos) {
                 // Return unchanged
                 return msgref;
             }
-            int check = pos + MailFolder.DEFAULT_FOLDER_ID.length();
+            int check = pos + MailFolder.MAIL_PREFIX.length();
             while (Character.isDigit(nestedFullname.charAt(check))) {
                 check++;
             }

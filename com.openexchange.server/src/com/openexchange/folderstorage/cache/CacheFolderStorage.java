@@ -344,7 +344,7 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
                                 for (MailAccount mailAccount : accounts) {
                                     int accountId = mailAccount.getId();
                                     if (accountId != MailAccount.DEFAULT_ID && !IGNORABLES.contains(mailAccount.getMailProtocol())) {
-                                        final String folderId = prepareFullname(accountId, MailFolder.DEFAULT_FOLDER_ID);
+                                        final String folderId = prepareFullname(accountId, MailFolder.ROOT_FOLDER_ID);
                                         /*
                                          * Check if already present
                                          */

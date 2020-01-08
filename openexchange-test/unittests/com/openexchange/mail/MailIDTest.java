@@ -97,7 +97,7 @@ public final class MailIDTest extends AbstractMailTest {
                     parentFullname = INBOX;
                 } else {
                     fullname = TEMP_FOLDER;
-                    parentFullname = MailFolder.DEFAULT_FOLDER_ID;
+                    parentFullname = MailFolder.ROOT_FOLDER_ID;
                 }
 
                 final MailFolderDescription mfd = new MailFolderDescription();

@@ -527,7 +527,7 @@ public class MailDriveDriver extends ServiceTracker<ModuleSearchDriver, ModuleSe
 
     private List<File> convertMessagesToFiles(List<Field> fields, int userId, FullName fullName, IMAPFolder imapFolder, Message[] messages) throws MessagingException, OXException {
         List<File> files = new LinkedList<>();
-        String rootFolderId = MailFolder.DEFAULT_FOLDER_ID;
+        String rootFolderId = MailFolder.ROOT_FOLDER_ID;
         int i = 0;
         for (int k = messages.length; k-- > 0;) {
             IMAPMessage message = (IMAPMessage) messages[i++];
