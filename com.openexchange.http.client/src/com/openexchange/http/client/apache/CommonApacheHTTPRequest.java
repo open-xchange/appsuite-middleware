@@ -50,17 +50,20 @@
 package com.openexchange.http.client.apache;
 
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.TreeMap;
-import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpMethodBase;
-import org.apache.commons.httpclient.NameValuePair;
-import org.apache.commons.httpclient.URIException;
-import org.apache.commons.httpclient.cookie.CookiePolicy;
-import org.apache.commons.httpclient.params.HttpMethodParams;
-import org.apache.commons.httpclient.protocol.Protocol;
-import org.apache.commons.httpclient.util.URIUtil;
+import org.apache.http.client.CookieStore;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.CookieSpecs;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.impl.client.BasicCookieStore;
+import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.LaxRedirectStrategy;
 import com.openexchange.exception.OXException;
 import com.openexchange.http.client.builder.HTTPGenericRequestBuilder;
 import com.openexchange.http.client.builder.HTTPRequest;
@@ -116,81 +119,38 @@ public abstract class CommonApacheHTTPRequest<T extends HTTPGenericRequestBuilde
 
     public HTTPRequest build() throws OXException {
         try {
-            final HttpClient client = new HttpClient();
+            CookieStore httpCookieStore = new BasicCookieStore();
+            final HttpClient client = HttpClientBuilder.create().setDefaultCookieStore(httpCookieStore).setRetryHandler(new DefaultHttpRequestRetryHandler(0, false)).setRedirectStrategy(new LaxRedirectStrategy()).build();
             final int timeout = 20000;
-            client.getParams().setSoTimeout(timeout);
-            client.getParams().setIntParameter("http.connection.timeout", timeout);
-
-            client.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, new DefaultHttpMethodRetryHandler(0, false));
-
-            client.getParams().setParameter("http.protocol.single-cookie-header", Boolean.TRUE);
-            client.getParams().setCookiePolicy(CookiePolicy.BROWSER_COMPATIBILITY);
-
-            /*
-             * Generate URL
-             */
-
-            String encodedSite = verbatimURL ? url : URIUtil.encodeQuery(url);
-
+            RequestConfig config = RequestConfig.custom().setConnectTimeout(timeout).setConnectTimeout(timeout).setCookieSpec(CookieSpecs.DEFAULT).build();
+            String encodedSite = verbatimURL ? url : new URI(url).toString();
             final java.net.URL javaURL = new java.net.URL(encodedSite);
-
-            if (javaURL.getProtocol().equalsIgnoreCase("https")) {
-                int port = javaURL.getPort();
-                if (port == -1) {
-                    port = 443;
-                }
-
-                final Protocol https = new Protocol("https", new TrustAdapter(), 443);
-                client.getHostConfiguration().setHost(javaURL.getHost(), port, https);
-
-                final HttpMethodBase m = createMethod(javaURL.getFile());
-                m.getParams().setSoTimeout(20000);
-                m.setQueryString(javaURL.getQuery());
-                for (Map.Entry<String, String> entry : headers.entrySet()) {
-                    m.setRequestHeader(entry.getKey(), entry.getValue());
-                }
-                addParams(m, javaURL.getQuery());
-
-                return new ApacheHTTPRequest(headers, parameters, m, client, coreBuilder, this);
-            }
-            /*
-             * No https, but http
-             */
-            final HttpMethodBase m = createMethod(encodedSite);
+            final HttpRequestBase m = createMethod(javaURL.getFile());
+            m.setConfig(config);
             for (Map.Entry<String, String> entry : headers.entrySet()) {
-                m.setRequestHeader(entry.getKey(), entry.getValue());
+                m.setHeader(entry.getKey(), entry.getValue());
             }
-            addParams(m, javaURL.getQuery());
+            addParams(m);
 
-            return new ApacheHTTPRequest(headers, parameters, m, client, coreBuilder, this);
-        } catch (URIException x) {
+            return new ApacheHTTPRequest(headers, parameters, m, client, coreBuilder, this, httpCookieStore);
+        } catch (URISyntaxException x) {
             throw OxHttpClientExceptionCodes.APACHE_CLIENT_ERROR.create(x.getMessage(), x);
         } catch (MalformedURLException e) {
             throw OxHttpClientExceptionCodes.APACHE_CLIENT_ERROR.create(e, e.getMessage());
         }
     }
 
-	protected void addParams(HttpMethodBase m, String q) {
+	protected void addParams(HttpRequestBase m) throws URISyntaxException {
 
-		NameValuePair[] query = new NameValuePair[parameters.size()];
+	    URIBuilder uriBuilder = new URIBuilder(m.getURI());
 
-		int i = 0;
-		for (Map.Entry<String, String> entry : parameters.entrySet()) {
-			query[i++] = new NameValuePair(entry.getKey(), entry.getValue());
-		}
-		m.setQueryString(query);
-		String queryString = m.getQueryString();
-		if (q != null) {
-			if (queryString != null && queryString.length() > 0) {
-				queryString = queryString+"&"+q;
-			} else {
-				queryString = q;
-			}
-		}
-		m.setQueryString(queryString);
+	    for (Map.Entry<String, String> entry : parameters.entrySet()) {
+	        uriBuilder.addParameter(entry.getKey(), entry.getValue());
+	    }
+	    m.setURI(uriBuilder.build());
 	}
 
-	protected abstract HttpMethodBase createMethod(String encodedSite);
+	protected abstract HttpRequestBase createMethod(String encodedSite);
 
 	/**
 	 * Marks as done.

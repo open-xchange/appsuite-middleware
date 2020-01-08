@@ -49,34 +49,41 @@
 
 package com.openexchange.subscribe.helpers;
 
+import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import javax.activation.FileTypeMap;
-import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpContentTooLargeException;
-import org.apache.commons.httpclient.HttpException;
-import org.apache.commons.httpclient.NameValuePair;
-import org.apache.commons.httpclient.cookie.CookiePolicy;
-import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.commons.httpclient.params.HttpMethodParams;
-import org.apache.commons.httpclient.protocol.Protocol;
-import org.apache.commons.httpclient.util.URIUtil;
+import org.apache.http.HttpException;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.message.BasicNameValuePair;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactConfig;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.infostore.ConverterException;
 import com.openexchange.java.Streams;
+import com.openexchange.rest.client.httpclient.HttpClients;
+import com.openexchange.rest.client.httpclient.HttpClients.ClientConfig;
+import com.openexchange.rest.client.httpclient.HttpClients.HttpClientBuilderModifyer;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.osgi.SubscriptionServiceRegistry;
 import com.openexchange.tools.ImageTypeDetector;
@@ -88,102 +95,97 @@ import com.openexchange.tools.ImageTypeDetector;
  */
 public class HTTPToolkit {
 
+    private static class ClientClosingInputStream extends FilterInputStream {
+
+        private final CloseableHttpClient client;
+
+        ClientClosingInputStream(InputStream in, CloseableHttpClient client) {
+            super(in);
+            this.client = client;
+        }
+
+        @Override
+        public void close() throws IOException {
+            super.close();
+            Streams.close(client);
+        }
+    }
+
     private static final String UTF_8 = "UTF-8";
 
-    public static InputStream grabStream(final String site) throws IOException {
+    public static InputStream grabStream(final String site) throws IOException, HttpException, URISyntaxException {
         return grabStream(site, true);
     }
 
-    public static InputStream grabStream(final String site, boolean check) throws IOException {
-        final HttpClient client = new HttpClient();
+    public static InputStream grabStream(final String site, boolean check) throws IOException, HttpException, URISyntaxException {
         final int timeout = 5000;
-        client.getParams().setSoTimeout(timeout);
-        client.getParams().setIntParameter("http.connection.timeout", timeout);
-
-        client.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, new DefaultHttpMethodRetryHandler(0, false));
-
-        client.getParams().setParameter("http.protocol.single-cookie-header", Boolean.TRUE);
-        client.getParams().setCookiePolicy(CookiePolicy.BROWSER_COMPATIBILITY);
-
-        String encodedSite = URIUtil.encodeQuery(site);
-
-        final java.net.URL javaURL = new java.net.URL(encodedSite);
+        final java.net.URL javaURL = new URIBuilder(site).build().toURL();
 
         if (check) {
             checkContentAndLength(javaURL, timeout);
         }
 
-        if (javaURL.getProtocol().equalsIgnoreCase("https")) {
-            int port = javaURL.getPort();
-            if (port == -1) {
-                port = 443;
-            }
-
-            final Protocol https = new Protocol("https", new SubscribeTrustAdapter(), 443);
-            client.getHostConfiguration().setHost(javaURL.getHost(), port, https);
-
-            final GetMethod getMethod = new GetMethod(javaURL.getFile());
-            getMethod.getParams().setSoTimeout(timeout);
-            getMethod.setQueryString(javaURL.getQuery());
-            client.executeMethod(getMethod);
-
-            return getMethod.getResponseBodyAsStream();
+        CloseableHttpClient client = createClient(timeout);
+        try {
+            HttpGet method = new HttpGet(javaURL.toURI());
+            HttpResponse resp = client.execute(method);
+            ClientClosingInputStream inputStream = streamFrom(resp, client);
+            client = null; // Avoid premature closing
+            return inputStream;
+        } finally {
+            Streams.close(client);
         }
-        /*
-         * No HTTPS
-         */
-        final GetMethod getMethod = new GetMethod(encodedSite);
-        client.executeMethod(getMethod);
-        return getMethod.getResponseBodyAsStream();
     }
 
-    public static Reader grab(final String site) throws HttpException, IOException {
+    public static Reader grab(final String site) throws HttpException, IOException, URISyntaxException {
         return new InputStreamReader(grabStream(site), UTF_8);
     }
 
-    public static Reader post(final String site, final Map<String, String> values) throws HttpException, IOException {
-        final HttpClient client = new HttpClient();
+    public static Reader post(final String site, final Map<String, String> values) throws HttpException, IOException, URISyntaxException {
         final int timeout = 5000;
-        client.getParams().setSoTimeout(timeout);
-        client.getParams().setIntParameter("http.connection.timeout", timeout);
-
-        client.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, new DefaultHttpMethodRetryHandler(0, false));
-        client.getParams().setParameter("http.protocol.single-cookie-header", Boolean.TRUE);
-        client.getParams().setCookiePolicy(CookiePolicy.BROWSER_COMPATIBILITY);
-
         final java.net.URL javaURL = new java.net.URL(site);
 
         checkContentAndLength(javaURL, timeout);
 
-        if (javaURL.getProtocol().equalsIgnoreCase("https")) {
-            int port = javaURL.getPort();
-            if (port == -1) {
-                port = 443;
-            }
-
-            final Protocol https = new Protocol("https", new SubscribeTrustAdapter(), 443);
-            client.getHostConfiguration().setHost(javaURL.getHost(), port, https);
-
-            final PostMethod postMethod = new PostMethod(javaURL.getFile());
+        CloseableHttpClient client = createClient(timeout);
+        try {
+            HttpPost method = new HttpPost(javaURL.toURI());
+            List<NameValuePair> postParameters = new ArrayList<NameValuePair>();
             for (final Map.Entry<String, String> entry : values.entrySet()) {
-                postMethod.addParameter(new NameValuePair(entry.getKey(), entry.getValue()));
+                postParameters.add(new BasicNameValuePair(entry.getKey(), entry.getValue()));
             }
-
-            postMethod.getParams().setSoTimeout(timeout);
-            postMethod.setQueryString(javaURL.getQuery());
-            client.executeMethod(postMethod);
-
-            return new InputStreamReader(postMethod.getResponseBodyAsStream(), UTF_8);
+            method.setEntity(new UrlEncodedFormEntity(postParameters, "UTF-8"));
+            HttpResponse resp = client.execute(method);
+            Reader reader = new InputStreamReader(streamFrom(resp, client));
+            client = null;
+            return reader;
+        } finally {
+            Streams.close(client);
         }
-        /*
-         * No HTTPS
-         */
-        final PostMethod postMethod = new PostMethod(site);
-        for (final Map.Entry<String, String> entry : values.entrySet()) {
-            postMethod.addParameter(new NameValuePair(entry.getKey(), entry.getValue()));
+    }
+
+    private static ClientClosingInputStream streamFrom(HttpResponse httpResponse, CloseableHttpClient client) throws UnsupportedOperationException, IOException {
+        InputStream content = null;
+        try {
+            content = httpResponse.getEntity().getContent();
+            ClientClosingInputStream closingInputStream = new ClientClosingInputStream(content, client);
+            content = null;
+            return closingInputStream;
+        } finally {
+            Streams.close(content);
         }
-        client.executeMethod(postMethod);
-        return new InputStreamReader(postMethod.getResponseBodyAsStream(), UTF_8);
+    }
+
+    private static CloseableHttpClient createClient(int timeout) {
+        HttpClientBuilderModifyer modifyer = new HttpClientBuilderModifyer() {
+
+            @Override
+            public void modify(HttpClientBuilder clientBuilder) {
+                clientBuilder.setRetryHandler(new DefaultHttpRequestRetryHandler(0, false));
+            }
+        };
+        ClientConfig clientConfig = ClientConfig.newInstance().setConnectionTimeout(timeout).setSocketReadTimeout(timeout).setClientBuilderModifyer(modifyer);
+        return HttpClients.getHttpClient(clientConfig);
     }
 
     private static void checkContentAndLength(final java.net.URL url, final int timeout) throws IOException, HttpException {
@@ -227,7 +229,7 @@ public class HTTPToolkit {
                 maxLen = configurationService.getIntProperty("MAX_UPLOAD_SIZE", -1);
             }
             if (maxLen > 0 && length > maxLen) {
-                throw new HttpContentTooLargeException(new StringBuilder("Content-Length is ").append(length).toString(), maxLen);
+                throw new HttpException(new StringBuilder("Content-Length ").append(length).append(" is too large").toString());
             }
         }
     }

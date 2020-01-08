@@ -60,6 +60,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
 import java.text.Normalizer;
 import java.text.Normalizer.Form;
@@ -74,13 +75,16 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpException;
-import org.apache.commons.httpclient.HttpStatus;
-import org.apache.commons.httpclient.cookie.CookiePolicy;
-import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.httpclient.params.HttpMethodParams;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.config.CookieSpecs;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.entity.ContentType;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.util.EntityUtils;
 import org.apache.tika.Tika;
 import org.apache.tika.exception.TikaException;
 import org.apache.tika.io.IOUtils;
@@ -1762,34 +1766,34 @@ public final class HtmlServiceImpl implements HtmlService {
         final Matcher mStyleFile = PATTERN_STYLESHEET_FILE.matcher(htmlContent);
         while (mStyleFile.find()) {
             final String cssFile = mStyleFile.group(2);
-            final HttpClient client = new HttpClient();
-            client.getParams().setSoTimeout(3000);
-            client.getParams().setIntParameter("http.connection.timeout", 3000);
-            client.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, new DefaultHttpMethodRetryHandler(0, false));
-            client.getParams().setParameter("http.protocol.single-cookie-header", Boolean.TRUE);
-            client.getParams().setCookiePolicy(CookiePolicy.BROWSER_COMPATIBILITY);
-            final GetMethod get = new GetMethod(cssFile);
+
+            CloseableHttpClient client = null;
+            HttpGet get = null;
             try {
-                final int statusCode = client.executeMethod(get);
-                if (statusCode != HttpStatus.SC_OK) {
+                client = HttpClientBuilder.create().setRetryHandler(new DefaultHttpRequestRetryHandler(0, false)).build();
+                get = new HttpGet(cssFile);
+                get.setConfig(RequestConfig.custom().setSocketTimeout(3000).setConnectTimeout(3000).setCookieSpec(CookieSpecs.DEFAULT).build());
+                HttpResponse resp = client.execute(get);
+                if (resp.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
                     // throw new OXException(); //TODO: set exceptioncode
                 } else {
-                    final byte[] responseBody = get.getResponseBody();
+                    final byte[] responseBody = EntityUtils.toByteArray(resp.getEntity());
                     if (null != responseBody && responseBody.length > 0) {
                         try {
-                            final String charSet = get.getResponseCharSet();
-                            css.append(new String(responseBody, null == charSet ? Charsets.ISO_8859_1 : Charsets.forName(charSet)));
+                            final Charset charSet = ContentType.getOrDefault(resp.getEntity()).getCharset();
+                            css.append(new String(responseBody, null == charSet ? Charsets.ISO_8859_1 : charSet));
                         } catch (UnsupportedCharsetException e) {
                             css.append(new String(responseBody, Charsets.ISO_8859_1));
                         }
                     }
                 }
-            } catch (HttpException e) {
-                // throw new OXException(); //TODO: set exceptioncode
             } catch (IOException e) {
                 // throw new OXException(); //TODO: set exceptioncode
             } finally {
-                get.releaseConnection();
+                if (get != null) {
+                    try { get.releaseConnection(); } catch (Exception e) { /* ignore */ }
+                }
+                Streams.close(client);
             }
         }
         return css.toString();

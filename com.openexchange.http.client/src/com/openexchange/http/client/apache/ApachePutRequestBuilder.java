@@ -50,12 +50,12 @@
 package com.openexchange.http.client.apache;
 
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import org.apache.commons.httpclient.HttpMethodBase;
-import org.apache.commons.httpclient.methods.InputStreamRequestEntity;
-import org.apache.commons.httpclient.methods.PutMethod;
-import org.apache.commons.httpclient.methods.RequestEntity;
-import org.apache.commons.httpclient.methods.StringRequestEntity;
+import org.apache.http.HttpEntity;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.InputStreamEntity;
+import org.apache.http.entity.StringEntity;
 import com.openexchange.http.client.builder.HTTPPutRequestBuilder;
 import com.openexchange.java.Streams;
 
@@ -70,20 +70,17 @@ public class ApachePutRequestBuilder extends CommonApacheHTTPRequest<HTTPPutRequ
 	}
 
 	@Override
-	protected HttpMethodBase createMethod(final String encodedSite) {
-		final PutMethod putMethod = new PutMethod(encodedSite);
-		RequestEntity entity = null;
+	protected HttpRequestBase createMethod(final String encodedSite) {
+		final HttpPut putMethod = new HttpPut(encodedSite);
+		HttpEntity entity = null;
 		if (stringBody != null) {
-			try {
-				entity = new StringRequestEntity(stringBody, (cType != null) ? cType : "text/plain", "UTF-8");
-			} catch (UnsupportedEncodingException e) {
-			}
+			entity = new StringEntity(stringBody, ContentType.create((cType != null) ? cType : "text/plain", "UTF-8"));
 		} else if (isBody != null) {
-			entity = new InputStreamRequestEntity(isBody, (cType != null) ? cType : "application/octet-stream");
+			entity = new InputStreamEntity(isBody, ContentType.create((cType != null) ? cType : "application/octet-stream"));
 		}
 
 		if (entity != null) {
-			putMethod.setRequestEntity(entity);
+			putMethod.setEntity(entity);
 		}
 		return putMethod;
 	}

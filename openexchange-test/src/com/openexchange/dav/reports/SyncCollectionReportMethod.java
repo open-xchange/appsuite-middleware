@@ -64,7 +64,7 @@ import com.openexchange.dav.PropertyNames;
 /**
  * {@link SyncCollectionReportMethod} - Report method for the
  * "sync-collection" request.
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class SyncCollectionReportMethod extends ReportMethod {

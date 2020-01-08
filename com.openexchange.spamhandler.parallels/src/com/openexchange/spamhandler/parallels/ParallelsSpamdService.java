@@ -53,16 +53,19 @@ import static com.openexchange.custom.parallels.impl.ParallelsOptions.PROPERTY_A
 import static com.openexchange.java.Autoboxing.I;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpException;
-import org.apache.commons.httpclient.URI;
-import org.apache.commons.httpclient.URIException;
-import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -84,8 +87,6 @@ import com.openexchange.user.UserService;
 public class ParallelsSpamdService implements SpamdService {
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ParallelsSpamdService.class);
-
-    private static final String POA_SPAM_PROVIDER_ATTRIBUTE_NAME = "POA_SPAM_PROVIDER";
 
     private final ConfigViewFactory factory;
     private final UserService userService;
@@ -211,11 +212,7 @@ public class ParallelsSpamdService implements SpamdService {
          * so that no 2nd request must be made to the xmlrpc to keep the load low.
          *
          */
-
-        HttpClient http_client = new HttpClient();
-
-        final PostMethod post_method = new PostMethod();
-
+        CloseableHttpClient http_client = HttpClientBuilder.create().build();
         try {
 
             // spamd port from configuration
@@ -234,17 +231,17 @@ public class ParallelsSpamdService implements SpamdService {
             LOG.debug("Using port {} for connections to xmlrpc service", I(xml_rpc_port));
 
             final String URL_to_xmlrpc = "http://" +xmlrpc_server+":"+xml_rpc_port;
+            HttpPost post_method = new HttpPost();
             post_method.setURI(new URI(URL_to_xmlrpc));
-            post_method.setRequestHeader("Content-type", "text/xml;");
-            post_method.setRequestBody(getXmlRpcRequestBody(xml_rpc_prim_email));
+            post_method.setEntity(new StringEntity(getXmlRpcRequestBody(xml_rpc_prim_email), ContentType.TEXT_XML));
 
             LOG.debug("Using {} to connect to xmlrpc service", URL_to_xmlrpc);
             LOG.debug("Using email address {} for xmlrpc request", xml_rpc_prim_email);
 
 
-            http_client.executeMethod(post_method);
+            HttpResponse resp = http_client.execute(post_method);
 
-            final String xml_rpc_response = post_method.getResponseBodyAsString();
+            final String xml_rpc_response = EntityUtils.toString(resp.getEntity());
 
             LOG.debug("Got response from xmlrpc service:");
             LOG.debug(xml_rpc_response);
@@ -307,12 +304,6 @@ public class ParallelsSpamdService implements SpamdService {
         } catch (OXException e) {
             LOG.error("error loading user object from session", e);
             throw MailExceptionCode.SPAM_HANDLER_INIT_FAILED.create(e,"error loading user object from session");
-        } catch (URIException e) {
-            LOG.error("error sending request to xmlrpc service",e);
-            throw MailExceptionCode.SPAM_HANDLER_INIT_FAILED.create(e,"error loading user object from session");
-        } catch (HttpException e) {
-            LOG.error("error sending request to xmlrpc service",e);
-            throw MailExceptionCode.SPAM_HANDLER_INIT_FAILED.create(e,"error loading user object from session");
         } catch (IOException e) {
             LOG.error("error sending request to xmlrpc service",e);
             throw MailExceptionCode.SPAM_HANDLER_INIT_FAILED.create(e,"error loading user object from session");
@@ -328,6 +319,11 @@ public class ParallelsSpamdService implements SpamdService {
         } finally {
             // free http client
             if (http_client!=null){
+                try {
+                    http_client.close();
+                } catch (IOException e) {
+                    // ignore
+                }
                 http_client = null;
             }
         }

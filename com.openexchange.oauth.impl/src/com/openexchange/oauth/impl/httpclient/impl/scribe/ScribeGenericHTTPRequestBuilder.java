@@ -50,10 +50,10 @@
 package com.openexchange.oauth.impl.httpclient.impl.scribe;
 
 import static com.openexchange.java.Autoboxing.I;
+import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.TreeMap;
-import org.apache.commons.httpclient.URIException;
-import org.apache.commons.httpclient.util.URIUtil;
+import org.apache.http.client.utils.URIBuilder;
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.builder.api.Api;
 import org.scribe.model.OAuthRequest;
@@ -167,8 +167,8 @@ public abstract class ScribeGenericHTTPRequestBuilder<T extends HTTPGenericReque
         {
             String finalUrl;
             try {
-                finalUrl = isVerbatimUrl ? verbatimUrl : URIUtil.encodeQuery(baseUrl);
-            } catch (URIException e) {
+                finalUrl = isVerbatimUrl ? verbatimUrl : new URIBuilder(baseUrl).build().toString();
+            } catch (URISyntaxException e) {
                 finalUrl = baseUrl;
             }
             request = new OAuthRequest(getVerb(), finalUrl);
@@ -200,6 +200,7 @@ public abstract class ScribeGenericHTTPRequestBuilder<T extends HTTPGenericReque
         }
     }
 
+    @SuppressWarnings("unused")
     protected void modify(final OAuthRequest request) {
         // Nope
     }

@@ -49,150 +49,122 @@
 
 package com.openexchange.http.client.apache;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import org.apache.commons.httpclient.HttpMethodBase;
-import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.commons.httpclient.methods.multipart.ByteArrayPartSource;
-import org.apache.commons.httpclient.methods.multipart.FilePart;
-import org.apache.commons.httpclient.methods.multipart.FilePartSource;
-import org.apache.commons.httpclient.methods.multipart.MultipartRequestEntity;
-import org.apache.commons.httpclient.methods.multipart.Part;
-import org.apache.commons.httpclient.methods.multipart.PartSource;
-import org.apache.commons.httpclient.methods.multipart.StringPart;
+import java.util.Map;
+import java.util.Map.Entry;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.entity.mime.content.ContentBody;
+import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.entity.mime.content.StringBody;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.http.client.builder.HTTPMultipartPostRequestBuilder;
-import com.openexchange.http.client.exceptions.OxHttpClientExceptionCodes;
 
-public class ApacheMultipartPostRequestBuilder extends CommonApacheHTTPRequest<HTTPMultipartPostRequestBuilder> implements
-		HTTPMultipartPostRequestBuilder {
+/**
+ *
+ * {@link ApacheMultipartPostRequestBuilder}
+ *
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ */
+public class ApacheMultipartPostRequestBuilder extends CommonApacheHTTPRequest<HTTPMultipartPostRequestBuilder> implements HTTPMultipartPostRequestBuilder {
 
-	private ManagedFileManagement fileManager;
-	private List<Part> parts = new ArrayList<Part>();
+    private final ManagedFileManagement fileManager;
+    private final Map<String, ContentBody> parts = new HashMap<String, ContentBody>();
 
-	private List<ManagedFile> managedFiles = new ArrayList<ManagedFile>();
+    private final List<ManagedFile> managedFiles = new ArrayList<ManagedFile>();
 
-	public ApacheMultipartPostRequestBuilder(
-			ApacheClientRequestBuilder coreBuilder, ManagedFileManagement fileManager) {
-		super(coreBuilder);
-		this.fileManager = fileManager;
+    public ApacheMultipartPostRequestBuilder(ApacheClientRequestBuilder coreBuilder, ManagedFileManagement fileManager) {
+        super(coreBuilder);
+        this.fileManager = fileManager;
 
-	}
+    }
 
-	@Override
+    @Override
     public HTTPMultipartPostRequestBuilder part(String fieldName, File file) throws OXException {
-		try {
-			parts.add(new FilePart(fieldName, file));
-		} catch (FileNotFoundException e) {
-		}
-		return this;
-	}
+        parts.put(fieldName, new FileBody(file));
+        return this;
+    }
 
-	@Override
-    public HTTPMultipartPostRequestBuilder part(String fieldName,
-			InputStream is, String contentType, String filename) throws OXException {
-		parts.add(new FilePart(fieldName, partSource(filename, is), contentType, "UTF-8"));
-		return this;
-	}
+    @Override
+    public HTTPMultipartPostRequestBuilder part(String fieldName, InputStream is, String contentType, String filename) throws OXException {
+        parts.put(fieldName, new FileBody(partSource(is), ContentType.create(contentType, "UTF-8"), filename));
+        return this;
+    }
 
+    @Override
+    public HTTPMultipartPostRequestBuilder part(String fieldName, InputStream is, String contentType) throws OXException {
+        parts.put(fieldName, new FileBody(partSource(is), ContentType.create(contentType, "UTF-8"), "data.bin"));
+        return this;
+    }
 
-	@Override
-    public HTTPMultipartPostRequestBuilder part(String fieldName,
-			InputStream is, String contentType) throws OXException {
-		parts.add(new FilePart(fieldName, partSource("data.bin", is), contentType, "UTF-8"));
-		return this;
-	}
+    @Override
+    public HTTPMultipartPostRequestBuilder part(String fieldName, String s, String contentType, String filename) throws OXException {
+        try {
+            parts.put(fieldName, new FileBody(partSource(s.getBytes("UTF-8")), ContentType.create(contentType, "UTF-8"), filename));
+        } catch (UnsupportedEncodingException e) {
+        }
+        return this;
+    }
 
-	@Override
-    public HTTPMultipartPostRequestBuilder part(String fieldName, String s,
-			String contentType, String filename) throws OXException {
-		try {
-			parts.add(new FilePart(fieldName, new ByteArrayPartSource(filename, s.getBytes("UTF-8")), contentType, "UTF-8"));
-		} catch (UnsupportedEncodingException e) {
-		}
-		return this;
-	}
+    @Override
+    public HTTPMultipartPostRequestBuilder part(String fieldName, String s, String contentType) throws OXException {
+        try {
+            parts.put(fieldName, new FileBody(partSource(s.getBytes("UTF-8")), ContentType.create(contentType, "UTF-8"), "data.txt"));
+        } catch (UnsupportedEncodingException e) {
+        }
+        return this;
+    }
 
-	@Override
-    public HTTPMultipartPostRequestBuilder part(String fieldName, String s,
-			String contentType) throws OXException {
-		try {
-			parts.add(new FilePart(fieldName, new ByteArrayPartSource("data.txt", s.getBytes("UTF-8")), contentType, "UTF-8"));
-		} catch (UnsupportedEncodingException e) {
-		}
-		return this;
-	}
-
-	@Override
+    @Override
     public HTTPMultipartPostRequestBuilder part(String fieldName, InputStream is, String contentType, long length, String filename) throws OXException {
-            parts.add(new FilePart(fieldName, partSource(length, filename, is), contentType, "UTF-8"));
+        parts.put(fieldName, new FileBody(partSource(is), ContentType.create(contentType, "UTF-8"), filename));
         return this;
     }
 
-	@Override
+    @Override
     public HTTPMultipartPostRequestBuilder stringPart(String fieldName, String fieldValue) {
-        parts.add(new StringPart(fieldName, fieldValue, "UTF-8"));
+        parts.put(fieldName, new StringBody(fieldValue, ContentType.TEXT_PLAIN));
         return this;
     }
 
-	@Override
-	protected HttpMethodBase createMethod(String encodedSite) {
-		PostMethod m = new PostMethod(encodedSite);
-
-		MultipartRequestEntity multipart = new MultipartRequestEntity(parts.toArray(new Part[parts.size()]), m.getParams());
-		m.setRequestEntity( multipart );
-
-		return m;
-	}
-
-	private PartSource partSource(String filename, InputStream is) throws OXException {
-		try {
-			ManagedFile managedFile = fileManager.createManagedFile(is);
-			managedFiles.add(managedFile);
-			return new FilePartSource(filename, managedFile.getFile());
-		} catch (FileNotFoundException e) {
-            throw OxHttpClientExceptionCodes.APACHE_CLIENT_ERROR.create(e, e.getMessage());
-		}
-	}
-
-	private PartSource partSource(final long size, final String filename, final InputStream is) throws OXException {
-	    PartSource source = new PartSource() {
-
-            @Override
-            public long getLength() {
-                return size;
-            }
-
-            @Override
-            public String getFileName() {
-                return filename;
-            }
-
-            @Override
-            public InputStream createInputStream() throws IOException {
-                return is;
-            }
-        };
-        return source;
+    @Override
+    protected HttpRequestBase createMethod(String encodedSite) {
+        HttpPost m = new HttpPost(encodedSite);
+        MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+        for (Entry<String, ContentBody> entry : parts.entrySet()) {
+            builder.addPart(entry.getKey(), entry.getValue());
+        }
+        m.setEntity(builder.build());
+        return m;
     }
 
-	@Override
-	public void done() {
-		for (ManagedFile managedFile : managedFiles) {
-			managedFile.delete();
-		}
-		managedFiles.clear();
-		super.done();
-	}
+    private File partSource(byte[] data) throws OXException {
+        return partSource(new ByteArrayInputStream(data));
+    }
 
+    private File partSource(InputStream is) throws OXException {
+        ManagedFile managedFile = fileManager.createManagedFile(is);
+        managedFiles.add(managedFile);
+        return managedFile.getFile();
+    }
 
-
+    @Override
+    public void done() {
+        for (ManagedFile managedFile : managedFiles) {
+            managedFile.delete();
+        }
+        managedFiles.clear();
+        super.done();
+    }
 
 }

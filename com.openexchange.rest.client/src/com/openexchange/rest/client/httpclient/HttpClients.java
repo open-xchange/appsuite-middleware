@@ -254,9 +254,15 @@ public final class HttpClients {
     }
 
     private static CloseableHttpClient initializeHttpClientUsing(final ClientConfig config, HttpClientConnectionManager ccm) {
-        HttpClientBuilder clientBuilder = org.apache.http.impl.client.HttpClients.custom()
-            .setConnectionManager(ccm)
-            .setDefaultRequestConfig(RequestConfig.custom()
+        HttpClientBuilder clientBuilder = org.apache.http.impl.client.HttpClients.custom();
+
+        if (config.clientBuilderModifyer != null) {
+            config.clientBuilderModifyer.modify(clientBuilder);
+        }
+
+        clientBuilder.setConnectionManager(ccm);
+
+        clientBuilder.setDefaultRequestConfig(RequestConfig.custom()
                 .setConnectTimeout(config.connectionTimeout)
                 .setSocketTimeout(config.socketReadTimeout)
                 .setConnectionRequestTimeout(config.connectionRequestTimeout)
@@ -351,6 +357,21 @@ public final class HttpClients {
     }
 
     /**
+     * Allows to modify a <code>HttpClientBuilder</code> instance.
+     */
+    public static interface HttpClientBuilderModifyer {
+
+        /**
+         * Allows to modify the given <code>HttpClientBuilder</code> instance.
+         * <p>
+         * This method is invoked prior to applying all other settings from <code>ClientConfig</code>.
+         *
+         * @param clientBuilder The <code>HttpClientBuilder</code> instance
+         */
+        void modify(HttpClientBuilder clientBuilder);
+    }
+
+    /**
      * A container for HTTP client settings. All settings are pre-set to default values.
      * However those probably don't fit your use case, so you should adjust them accordingly.
      * Settings can be applied in a builder-like way, e.g.:
@@ -382,6 +403,8 @@ public final class HttpClients {
         ConnectionReuseStrategy connectionReuseStrategy;
         boolean contentCompressionDisabled = false;
 
+        HttpClientBuilderModifyer clientBuilderModifyer;
+
         ClientConfig() {
             super();
             denyLocalRedirect = false;
@@ -406,6 +429,7 @@ public final class HttpClients {
          * </pre>
          *
          * @param denyLocalRedirect <code>true</code> to deny redirect attempts to a local address; otherwise <code>false</code>
+         * @return This instance
          */
         public ClientConfig setDenyLocalRedirect(boolean denyLocalRedirect) {
             this.denyLocalRedirect = denyLocalRedirect;
@@ -427,6 +451,7 @@ public final class HttpClients {
          *
          * @param login The login to set
          * @param password The password to set
+         * @return This instance
          */
         public ClientConfig setCredentials(String login, String password) {
             this.credentials = new UsernamePasswordCredentials(login, password);
@@ -437,6 +462,7 @@ public final class HttpClients {
          * Sets the proxy information.
          *
          * @param proxy The proxy to set
+         * @return This instance
          */
         public ClientConfig setProxy(URI proxyUrl, String proxyLogin, String proxyPassword) {
             boolean isHttps = proxyUrl.getScheme().equalsIgnoreCase("https");
@@ -451,6 +477,7 @@ public final class HttpClients {
          * Sets the proxy information.
          *
          * @param proxy The proxy to set
+         * @return This instance
          */
         public ClientConfig setProxy(HttpHost proxy, String proxyLogin, String proxyPassword) {
             this.proxy = proxy;
@@ -465,6 +492,7 @@ public final class HttpClients {
          * Default: {@value #DEFAULT_TIMEOUT_MILLIS}
          *
          * @param socketReadTimeout The timeout
+         * @return This instance
          */
         public ClientConfig setSocketReadTimeout(int socketReadTimeout) {
             this.socketReadTimeout = socketReadTimeout;
@@ -477,6 +505,7 @@ public final class HttpClients {
          * Default: {@value #DEFAULT_TIMEOUT_MILLIS}
          *
          * @param connectionTimeout The timeout
+         * @return This instance
          */
         public ClientConfig setConnectionTimeout(int connectionTimeout) {
             this.connectionTimeout = connectionTimeout;
@@ -490,6 +519,7 @@ public final class HttpClients {
          * Default: {@value #DEFAULT_TIMEOUT_MILLIS}
          *
          * @param connectionRequestTimeout The timeout in milliseconds
+         * @return This instance
          */
         public ClientConfig setConnectionRequestTimeout(int connectionRequestTimeout) {
             this.connectionRequestTimeout = connectionRequestTimeout;
@@ -502,6 +532,7 @@ public final class HttpClients {
          * Default: {@value #MAX_TOTAL_CONNECTIONS}
          *
          * @param maxTotalConnections The number of connections
+         * @return This instance
          */
         public ClientConfig setMaxTotalConnections(int maxTotalConnections) {
             this.maxTotalConnections = maxTotalConnections;
@@ -514,6 +545,7 @@ public final class HttpClients {
          * Default: {@value #MAX_CONNECTIONS_PER_ROUTE}
          *
          * @param maxTotalConnections The number of connections
+         * @return This instance
          */
         public ClientConfig setMaxConnectionsPerRoute(int maxConnectionsPerRoute) {
             this.maxConnectionsPerRoute = maxConnectionsPerRoute;
@@ -525,6 +557,7 @@ public final class HttpClients {
          * Default: {@value #KEEP_ALIVE_DURATION_SECS}.
          *
          * @param keepAliveDuration The keep alive duration
+         * @return This instance
          */
         public ClientConfig setKeepAliveDuration(int keepAliveDuration) {
             this.keepAliveDuration = keepAliveDuration;
@@ -549,6 +582,7 @@ public final class HttpClients {
          * Default: null
          *
          * @param strategy The {@link ConnectionReuseStrategy}
+         * @return This instance
          */
         public ClientConfig setConnectionReuseStrategy(ConnectionReuseStrategy strategy) {
             this.connectionReuseStrategy = strategy;
@@ -560,6 +594,7 @@ public final class HttpClients {
          * Default: false
          *
          * @param contentCompressionDisabled
+         * @return This instance
          */
         public ClientConfig setContentCompressionDisabled(boolean contentCompressionDisabled) {
             this.contentCompressionDisabled = contentCompressionDisabled;
@@ -572,6 +607,7 @@ public final class HttpClients {
          * Default: {@value #KEEP_ALIVE_MONITOR_INTERVAL_SECS}
          *
          * @param keepAliveMonitorInterval The interval
+         * @return This instance
          */
         public ClientConfig setKeepAliveMonitorInterval(int keepAliveMonitorInterval) {
             this.keepAliveMonitorInterval = keepAliveMonitorInterval;
@@ -583,6 +619,7 @@ public final class HttpClients {
          * Default: {@value #DEFAULT_SOCKET_BUFFER_SIZE}
          *
          * @param socketBufferSize The buffer size.
+         * @return This instance
          */
         public ClientConfig setSocketBufferSize(int socketBufferSize) {
             this.socketBufferSize = socketBufferSize;
@@ -594,9 +631,22 @@ public final class HttpClients {
          * Default: <code>null</code>
          *
          * @param userAgent The user agent
+         * @return This instance
          */
         public ClientConfig setUserAgent(String userAgent) {
             this.userAgent = userAgent;
+            return this;
+        }
+
+
+        /**
+         * Sets the modifyer for the <code>HttpClientBuilder</code> instance.
+         *
+         * @param clientBuilderModifyer The modifyer to set
+         * @return This instance
+         */
+        public ClientConfig setClientBuilderModifyer(HttpClientBuilderModifyer clientBuilderModifyer) {
+            this.clientBuilderModifyer = clientBuilderModifyer;
             return this;
         }
 

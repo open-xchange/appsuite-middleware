@@ -51,30 +51,29 @@ package com.openexchange.proxy.servlet;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.net.URL;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
-import org.apache.commons.httpclient.Header;
-import org.apache.commons.httpclient.HostConfiguration;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpMethod;
-import org.apache.commons.httpclient.HttpMethodBase;
-import org.apache.commons.httpclient.URI;
-import org.apache.commons.httpclient.cookie.CookiePolicy;
-import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.httpclient.params.HttpMethodParams;
-import org.apache.commons.httpclient.protocol.Protocol;
-import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
-import org.slf4j.LoggerFactory;
+import org.apache.http.Header;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
+import org.apache.http.impl.client.HttpClientBuilder;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.java.Streams;
 import com.openexchange.proxy.ProxyRegistration;
 import com.openexchange.proxy.Response;
 import com.openexchange.proxy.Restriction;
+import com.openexchange.rest.client.httpclient.HttpClients;
+import com.openexchange.rest.client.httpclient.HttpClients.ClientConfig;
+import com.openexchange.rest.client.httpclient.HttpClients.HttpClientBuilderModifyer;
 
 /**
  * {@link ProxyServlet}
@@ -89,16 +88,6 @@ public class ProxyServlet extends SessionServlet {
      * The HTTP time out.
      */
     private static final int TIMEOUT = 3000;
-
-    /**
-     * The HTTPS identifier constant.
-     */
-    private static final String HTTPS = "https";
-
-    /**
-     * The HTTP protocol constant.
-     */
-    private static final Protocol PROTOCOL_HTTP = Protocol.getProtocol("http");
 
     @Override
     protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
@@ -122,71 +111,35 @@ public class ProxyServlet extends SessionServlet {
          * Compose GET method from URL
          */
         final URL url = registration.getURL();
-        final HttpClient client = new HttpClient();
-        client.getParams().setSoTimeout(TIMEOUT);
-        client.getParams().setIntParameter("http.connection.timeout", TIMEOUT);
-        client.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, new DefaultHttpMethodRetryHandler(0, false));
-        client.getParams().setParameter("http.protocol.single-cookie-header", Boolean.TRUE);
-        client.getParams().setCookiePolicy(CookiePolicy.BROWSER_COMPATIBILITY);
         /*
          * Create host configuration or URI
          */
-        final HostConfiguration hostConfiguration;
-        {
-            final String host = url.getHost();
-            if (HTTPS.equalsIgnoreCase(url.getProtocol())) {
-                int port = url.getPort();
-                if (port == -1) {
-                    port = 443;
-                }
-                /*
-                 * Own HTTPS host configuration and relative URI
-                 */
-                final Protocol httpsProtocol = new Protocol(HTTPS, ((ProtocolSocketFactory) new ProxyServletTrustAdapter()), port);
-                hostConfiguration = new HostConfiguration();
-                hostConfiguration.setHost(host, port, httpsProtocol);
-            } else {
-                int port = url.getPort();
-                if (port == -1) {
-                    port = 80;
-                }
-                /*
-                 * HTTP host configuration and relative URI
-                 */
-                hostConfiguration = new HostConfiguration();
-                hostConfiguration.setHost(host, port, PROTOCOL_HTTP);
-            }
-        }
-        final HttpMethodBase httpMethod = new GetMethod();
-        String uri = url.getPath();
-        /*
-         * Create a URI and allow for null/empty URI values
-         */
-        if (uri == null || uri.equals("")) {
-            uri = "/";
-        }
-        final HttpMethodParams params = httpMethod.getParams();
-        httpMethod.setURI(new URI(uri, true, params.getUriCharset()));
-        params.setSoTimeout(TIMEOUT);
-        httpMethod.setQueryString(url.getQuery());
-        /*
-         * Fire request
-         */
-        final int responseCode = client.executeMethod(hostConfiguration, httpMethod);
-        /*
-         * Check response code
-         */
-        if (200 != responseCode) {
-            /*
-             * GET request failed
-             */
-            final String txt = httpMethod.getStatusLine().toString();
-            closeHttpMethod(httpMethod);
-            resp.sendError(responseCode, txt);
-            return;
-        }
+        final CloseableHttpClient client = createClient(TIMEOUT);
         try {
-            final Response response = new ResponseImpl(httpMethod);
+            HttpRequestBase httpMethod;
+            try {
+                httpMethod = new HttpGet(url.toURI());
+            } catch (URISyntaxException e) {
+                // should never happen
+                resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                return;
+            }
+            /*
+             * Fire request
+             */
+            HttpResponse httpResp = client.execute(httpMethod);
+            /*
+             * Check response code
+             */
+            if (HttpStatus.SC_OK != httpResp.getStatusLine().getStatusCode()) {
+                /*
+                 * GET request failed
+                 */
+                final String txt = httpResp.getStatusLine().getReasonPhrase();
+                resp.sendError(httpResp.getStatusLine().getStatusCode(), txt);
+                return;
+            }
+            final Response response = new ResponseImpl(httpResp);
             for (final Restriction restriction : registration.getRestrictions()) {
                 if (!restriction.allow(response)) {
                     final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ProxyServlet.class);
@@ -198,15 +151,15 @@ public class ProxyServlet extends SessionServlet {
             /*
              * Set status
              */
-            resp.setStatus(httpMethod.getStatusCode());
+            resp.setStatus(httpResp.getStatusLine().getStatusCode());
             /*
              * Add response header
              */
-            header2Response(httpMethod, resp);
+            header2Response(httpResp, resp);
             /*
              * Binary content
              */
-            final InputStream responseStream = httpMethod.getResponseBodyAsStream();
+            final InputStream responseStream = httpResp.getEntity().getContent();
             try {
                 final ServletOutputStream outputStream = resp.getOutputStream();
                 final byte[] buf = new byte[8192];
@@ -219,15 +172,27 @@ public class ProxyServlet extends SessionServlet {
                 Streams.close(responseStream);
             }
         } finally {
-            closeHttpMethod(httpMethod);
+            Streams.close(client);
         }
     }
 
-    private static void header2Response(final HttpMethodBase method, final HttpServletResponse resp) {
+    private static CloseableHttpClient createClient(int timeout) {
+        HttpClientBuilderModifyer modifyer = new HttpClientBuilderModifyer() {
+
+            @Override
+            public void modify(HttpClientBuilder clientBuilder) {
+                clientBuilder.setRetryHandler(new DefaultHttpRequestRetryHandler(0, false));
+            }
+        };
+        ClientConfig clientConfig = ClientConfig.newInstance().setConnectionTimeout(timeout).setSocketReadTimeout(timeout).setClientBuilderModifyer(modifyer);
+        return HttpClients.getHttpClient(clientConfig);
+    }
+
+    private static void header2Response(final HttpResponse httpResp, final HttpServletResponse resp) {
         /*
          * By now only considers Content-Type and Content-Length header
          */
-        final Header ctHeader = method.getResponseHeader("Content-Type");
+        final Header ctHeader = httpResp.getFirstHeader("Content-Type");
         if (null != ctHeader) {
             /*-
              *
@@ -240,7 +205,8 @@ public class ProxyServlet extends SessionServlet {
             */
             resp.setContentType(ctHeader.getValue());
         }
-        final long length = method.getResponseContentLength(); // Content-Length
+
+        final long length = httpResp.getEntity().getContentLength();
         if (length > 0) {
             resp.setContentLength((int) length);
         }
@@ -268,29 +234,6 @@ public class ProxyServlet extends SessionServlet {
             }
         }
         */
-    }
-
-    /**
-     * Closes specified HTTP method.
-     *
-     * @param httpMethod The HTTP method to close
-     */
-    private static void closeHttpMethod(final HttpMethod httpMethod) {
-        if (null != httpMethod) {
-            /*
-             * Ensure closing response
-             */
-            try {
-                Streams.close(httpMethod.getResponseBodyAsStream());
-            } catch (IOException e) {
-                LoggerFactory.getLogger(ProxyServlet.class).error("", e);
-            } finally {
-                /*
-                 * We are done with the connection and that it can now be reused
-                 */
-                httpMethod.releaseConnection();
-            }
-        }
     }
 
 }

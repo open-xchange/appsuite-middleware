@@ -54,15 +54,23 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
-import org.apache.commons.httpclient.Credentials;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpMethod;
-import org.apache.commons.httpclient.HttpStatus;
-import org.apache.commons.httpclient.UsernamePasswordCredentials;
-import org.apache.commons.httpclient.auth.AuthPolicy;
-import org.apache.commons.httpclient.auth.AuthScope;
-import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.httpclient.params.HttpClientParams;
+import org.apache.http.HttpHost;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.AuthCache;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.impl.auth.BasicScheme;
+import org.apache.http.impl.client.BasicAuthCache;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.protocol.HttpContext;
+import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -87,6 +95,7 @@ public class SipgateSMSService implements SMSServiceSPI {
 
     private final HttpClient client;
     private final ServiceLookup services;
+    private HttpContext context;
 
     /**
      * Initializes a new {@link SipgateSMSService}.
@@ -99,13 +108,25 @@ public class SipgateSMSService implements SMSServiceSPI {
         String sipgateUsername = configService.getProperty("com.openexchange.sms.sipgate.username");
         String sipgatePassword = configService.getProperty("com.openexchange.sms.sipgate.password");
         MAX_MESSAGE_LENGTH = configService.getIntProperty("com.openexchange.sms.sipgate.maxlength", 0);
-        HttpClientParams params = new HttpClientParams();
-        params.setAuthenticationPreemptive(true);
-        params.setParameter(AuthPolicy.AUTH_SCHEME_PRIORITY, AuthPolicy.BASIC);
-        Credentials credentials = new UsernamePasswordCredentials(sipgateUsername, sipgatePassword);
-        HttpClient client = new HttpClient(params);
-        client.getState().setCredentials(new AuthScope("api.sipgate.net", 443), credentials);
+        
+        
+        HttpClient client = HttpClientBuilder.create().build();
+        
+        // preemtive auth
+        HttpHost targetHost = new HttpHost("api.sipgate.net", 443, "https");
+        CredentialsProvider credsProvider = new BasicCredentialsProvider();
+        credsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(sipgateUsername, sipgatePassword));
+         
+        AuthCache authCache = new BasicAuthCache();
+        authCache.put(targetHost, new BasicScheme());
+         
+        // Add AuthCache to the execution context
+        HttpClientContext context = HttpClientContext.create();
+        context.setCredentialsProvider(credsProvider);
+        context.setAuthCache(authCache);
+        
         this.client = client;
+        this.context = context;
     }
 
     @Override
@@ -123,7 +144,7 @@ public class SipgateSMSService implements SMSServiceSPI {
             jsonObject.put("Content", message);
             jsonObject.put("RemoteUri", phoneNumbers);
             String encoded = URLEncoder.encode(jsonObject.toString(), StandardCharsets.UTF_8.toString());
-            HttpMethod method = getHttpMethod("samurai.SessionInitiateMulti", encoded);
+            HttpGet method = getHttpMethod("samurai.SessionInitiateMulti", encoded);
             execute(method);
         } catch (JSONException e) {
             throw SipgateSMSExceptionCode.UNKNOWN_ERROR.create(e, e.getMessage());
@@ -140,31 +161,28 @@ public class SipgateSMSService implements SMSServiceSPI {
         return sb.toString();
     }
 
-    private HttpMethod getHttpMethod(String method, String parameters) {
+    private HttpGet getHttpMethod(String method, String parameters) {
         StringBuilder sb = new StringBuilder();
         sb.append(URL).append(method).append("/").append(parameters);
-        return new GetMethod(sb.toString());
+        return new HttpGet(sb.toString());
     }
 
-    private void execute(HttpMethod method) throws OXException {
+    private void execute(HttpUriRequest request) throws OXException {
         try {
-            int statusCode = client.executeMethod(method);
-            if (HttpStatus.SC_OK == statusCode) {
-                String response = method.getResponseBodyAsString();
-                JSONObject resp = new JSONObject(response);
-                if (resp.hasAndNotNull("error")) {
-                    String errorMessage = resp.getString("error");
+            HttpResponse resp = client.execute(request, this.context);
+            
+            if (HttpStatus.SC_OK == resp.getStatusLine().getStatusCode()) {
+                String jsonStr = EntityUtils.toString(resp.getEntity());
+                JSONObject json = new JSONObject(jsonStr);
+                if (json.hasAndNotNull("error")) {
+                    String errorMessage = json.getString("error");
                     throw SMSExceptionCode.NOT_SENT.create(errorMessage);
                 }
             } else {
-                throw SipgateSMSExceptionCode.HTTP_ERROR.create(String.valueOf(statusCode), method.getStatusText());
+                throw SipgateSMSExceptionCode.HTTP_ERROR.create(String.valueOf(resp.getStatusLine().getStatusCode()), resp.getStatusLine().getReasonPhrase());
             }
         } catch (JSONException | IOException e) {
             throw SipgateSMSExceptionCode.UNKNOWN_ERROR.create(e, e.getMessage());
-        } finally {
-            if (null != method && method.hasBeenUsed()) {
-                method.releaseConnection();
-            }
         }
     }
 
