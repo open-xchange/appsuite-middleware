@@ -94,6 +94,33 @@ public class PGPSignatureCreator {
     }
 
     /**
+     * Create the content type for the pgp signed email, specifying the hash type
+     * getHeader
+     *
+     * @return Content-type to be used for the signed email
+     */
+    public String getContentType() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("signed; micalg=pgp-");
+        switch (hashAlgorithm) {
+            case HashAlgorithmTags.SHA512:
+                sb.append("sha512");
+                break;
+            case HashAlgorithmTags.SHA256:
+                sb.append("sha256");
+                break;
+            case HashAlgorithmTags.SHA1:
+                sb.append("sha1");
+                break;
+            default:
+                sb.append("sha1");
+                break;
+        }
+        sb.append("; protocol=\"application/pgp-signature\"");
+        return sb.toString();
+    }
+
+    /**
      * Creates a signature
      *
      * @param input The data to create a signature for
@@ -131,14 +158,11 @@ public class PGPSignatureCreator {
                 }
                 signatureGenerator.generate().encode(signingStream);
             }
-        }
-        catch(PGPException e) {
+        } catch (PGPException e) {
             PGPCoreExceptionCodes.PGP_EXCEPTION.create(e, e.getMessage());
-        }
-        catch(IOException e) {
+        } catch (IOException e) {
             PGPCoreExceptionCodes.IO_EXCEPTION.create(e, e.getMessage());
-        }
-        finally {
+        } finally {
             if (armored) {
                 try {
                     output.close();

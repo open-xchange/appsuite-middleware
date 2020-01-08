@@ -232,8 +232,7 @@ public class PGPMimeServiceImpl implements PGPMimeService {
             PGPSignatureCreator signatureCreator = new PGPSignatureCreator();
             final boolean armored = true;
             signatureCreator.createSignature(signingContentStream, signedContentStream, armored, signingKey, password);
-
-            MimeMultipart newcontent = new MimeMultipart("signed; micalg=pgp-sha1; protocol=\"application/pgp-signature\"");
+            MimeMultipart newcontent = new MimeMultipart(signatureCreator.getContentType());
             // Add our normalized text back as a body part
             MimeBodyPart bodyPart = new MimeBodyPart(new ByteArrayInputStream(signingContent.getBytes("UTF-8")));
             newcontent.addBodyPart(bodyPart);
