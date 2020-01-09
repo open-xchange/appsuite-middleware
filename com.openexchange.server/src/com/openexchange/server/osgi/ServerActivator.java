@@ -163,7 +163,9 @@ import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.reminder.ReminderService;
 import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.groupware.settings.tree.JsonMaxSize;
 import com.openexchange.groupware.settings.tree.ShardingSubdomains;
+import com.openexchange.groupware.settings.tree.modules.mail.MaliciousCheck;
 import com.openexchange.groupware.upgrade.SegmentedUpdateService;
 import com.openexchange.groupware.upload.impl.UploadUtility;
 import com.openexchange.groupware.userconfiguration.osgi.CapabilityRegistrationListener;
@@ -408,6 +410,8 @@ public final class ServerActivator extends HousekeepingActivator {
             // JSON configuration
             final ConfigurationService service = getService(ConfigurationService.class);
             JSONObject.setMaxSize(service.getIntProperty("com.openexchange.json.maxSize", 2500));
+            JsonMaxSize jsonMaxSize = new JsonMaxSize(); // --> Statically registered via ConfigTree class
+            registerService(ConfigTreeEquivalent.class, jsonMaxSize);
         }
         Config.LoggerProvider = LoggerProvider.DISABLED;
         // (Re-)Initialize server service registry with available services
