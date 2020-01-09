@@ -49,11 +49,15 @@
 
 package com.openexchange.chronos.storage.rdb;
 
+import static com.openexchange.chronos.common.CalendarUtils.shiftToUTC;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.exception.OXException;
 
@@ -84,11 +88,7 @@ public abstract class RecurrenceIdListMapping<O> extends VarCharListMapping<O> {
         if (null == value) {
             setRecurrenceIds(object, null);
         } else {
-            SortedSet<RecurrenceId> recurrenceIds = new TreeSet<RecurrenceId>();
-            for (String dateTime : value) {
-                recurrenceIds.add(new DefaultRecurrenceId(dateTime));
-            }
-            setRecurrenceIds(object, recurrenceIds);
+            setRecurrenceIds(object, deserialize(value));
         }
     }
 
@@ -100,9 +100,60 @@ public abstract class RecurrenceIdListMapping<O> extends VarCharListMapping<O> {
         }
         ArrayList<String> value = new ArrayList<String>(recurrenceIds.size());
         for (RecurrenceId recurrenceId : recurrenceIds) {
-            value.add(recurrenceId.toString());
+            value.add(shiftToUTC(recurrenceId.getValue()).toString());
         }
         return value;
+    }
+
+    private static SortedSet<RecurrenceId> deserialize(List<String> values) {
+        if (null == values) {
+            return null;
+        }
+        DateTime[] dateTimes = decode(values);
+        if (0 == dateTimes.length) {
+            return Collections.emptySortedSet();
+        }
+        SortedSet<RecurrenceId> recurrenceIds = new TreeSet<RecurrenceId>();
+        recurrenceIds.add(new DefaultRecurrenceId(shiftToUTC(dateTimes[0])));
+        if (1 == dateTimes.length) {
+            return recurrenceIds;
+        }
+        /*
+         * check if first timezone is applicable for all values ("normalized" recurrence ids)
+         */
+        if (false == dateTimes[0].isAllDay() && null != dateTimes[0].getTimeZone() && false == "UTC".equals(dateTimes[0].getTimeZone().getID())) {
+            boolean considerNormalized = true;
+            for (int i = 1; i < dateTimes.length; i++) {
+                if (null != dateTimes[i].getTimeZone() && false == dateTimes[i].isAllDay()) {
+                    considerNormalized = false;
+                    break;
+                }
+            }
+            if (considerNormalized) {
+                for (int i = 1; i < dateTimes.length; i++) {
+                    recurrenceIds.add(new DefaultRecurrenceId(shiftToUTC(dateTimes[i].swapTimeZone(dateTimes[0].getTimeZone()))));
+                }
+                return recurrenceIds;
+            }
+        }
+        /*
+         * return set of individual recurrence ids, otherwise
+         */
+        for (int i = 1; i < dateTimes.length; i++) {
+            recurrenceIds.add(new DefaultRecurrenceId(shiftToUTC(dateTimes[i])));
+        }
+        return recurrenceIds;
+    }
+
+    private static DateTime[] decode(List<String> values) {
+        if (null == values) {
+            return null;
+        }
+        DateTime[] dateTimes = new DateTime[values.size()];
+        for (int i = 0; i < values.size(); i++) {
+            dateTimes[i] = CalendarUtils.decode(values.get(i));
+        }
+        return dateTimes;
     }
 
 }
