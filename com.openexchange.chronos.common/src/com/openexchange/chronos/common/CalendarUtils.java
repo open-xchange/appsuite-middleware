@@ -499,6 +499,81 @@ public class CalendarUtils {
     }
 
     /**
+     * Encodes a date-time instance to its <a href="https://tools.ietf.org/html/rfc5545#section-3.3.5">RFC 5545</a> date-time
+     * string representation, along with an optional timezone identifier as prefix.
+     * 
+     * @param dateTime The date-time to encode
+     * @return The encoded date-time string
+     */
+    public static String encode(DateTime dateTime) {
+        if (null == dateTime) {
+            return null;
+        }
+        TimeZone timeZone = dateTime.getTimeZone();
+        if (null == timeZone || "UTC".equals(timeZone.getID())) {
+            /*
+             * floating or UTC
+             */
+            return dateTime.toString();
+        }
+        /*
+         * date-time with timezone reference
+         */
+        return timeZone.getID() + ':' + dateTime.toString();
+    }
+
+    /**
+     * Decodes a date-time string from its encoded <a href="https://tools.ietf.org/html/rfc5545#section-3.3.5">RFC 5545</a> representation,
+     * along with an optional timezone identifier as prefix.
+     * <p/>
+     * The following formats are supported:
+     * <ul>
+     * <li><i>floating</i> date-time, e.g. <code>20191206T102800</code></li>
+     * <li><i>all-day</i> date, e.g. <code>20191206</code></li>
+     * <li><code>UTC</code>, e.g. <code>20191206T102800Z</code></li>
+     * <li>date-time with timezone reference, e.g. <code>Europe/Berlin:20191206T102800</code></li>
+     * </ul>
+     * 
+     * @param value The value to decode
+     * @return The decoded date-time instance
+     * @throws IllegalArgumentException If the value cannot be parsed
+     */
+    public static DateTime decode(String value) {
+        if (null == value) {
+            return null;
+        }
+        int idx = value.lastIndexOf(':');
+        if (-1 == idx) {
+            /*
+             * floating or UTC
+             */
+            return DateTime.parse(value);
+        }
+        /*
+         * date-time with timezone reference
+         */
+        TimeZone timeZone = optTimeZone(value.substring(0, idx));
+        if (null == timeZone) {
+            throw new IllegalArgumentException("Unknown timezone: " + value);
+        }
+        return DateTime.parse(timeZone, value.substring(idx + 1));
+    }
+
+    /**
+     * Shifts the timezone of a specific date-time with timezone reference to <code>UTC</code>, keeping the absolute time constant.
+     * Invoking this method on floating dates has no effect.
+     *
+     * @param dateTime The date-time to shift the timezone in
+     * @return The date-time with the timezone shifted to <code>UTC</code>, or the value as-is if not applicable
+     */
+    public static DateTime shiftToUTC(DateTime dateTime) {
+        if (null != dateTime && null != dateTime.getTimeZone() && false == "UTC".equals(dateTime.getTimeZone().getID())) {
+            return dateTime.shiftTimeZone(TimeZones.UTC);
+        }
+        return dateTime;
+    }
+
+    /**
      * Gets a date representing the supplied date-time's value.
      *
      * @param dateTime The date-time to get the corresponding date for
