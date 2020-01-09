@@ -559,7 +559,7 @@ public final class MessageWriter {
                     MailAuthenticityResult mailAuthenticityResult = mail.getAuthenticityResult();
                     Object value = null == mailAuthenticityResult ? null : JsonMessageHandler.authenticityOverallResultToJson(mailAuthenticityResult);
                     if (withKey) {
-                        jsonContainer.toObject().put(MailJSONField.AUTHENTICITY.getKey(), value);
+                        jsonContainer.toObject().put(MailJSONField.AUTHENTICITY_PREVIEW.getKey(), value);
                     } else {
                         jsonContainer.toArray().put(value);
                     }
