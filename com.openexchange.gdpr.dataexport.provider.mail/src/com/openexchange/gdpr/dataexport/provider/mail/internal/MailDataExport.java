@@ -434,12 +434,16 @@ public class MailDataExport extends AbstractDataExportProviderTask {
             InputStream stream = null;
             try {
                 MailMessage m = mailAccess.getMessageStorage().getMessage(fullName, mailId, false);
-                stream = MimeMessageUtility.getStreamFromMailPart(m);
-                boolean exported = sink.export(stream, new Item(path, sanitizeNameForZipEntry(mailId + ".eml"), m.getSentDate()));
-                if (!exported) {
-                    return savePointFor(new JSONObject(4).putSafe("folder", fullName).putSafe("id", mailId));
+                if (m == null) {
+                    LOG.debug("No such mail {} ({} of {}) in directory {} for data export {} of user {} in context {}", mailId, I(batchCount), I(messages.length), fullName, UUIDs.getUnformattedString(task.getId()), I(task.getUserId()), I(task.getContextId()));
+                } else {
+                    stream = MimeMessageUtility.getStreamFromMailPart(m);
+                    boolean exported = sink.export(stream, new Item(path, sanitizeNameForZipEntry(mailId + ".eml"), m.getSentDate()));
+                    if (!exported) {
+                        return savePointFor(new JSONObject(4).putSafe("folder", fullName).putSafe("id", mailId));
+                    }
+                    LOG.debug("Exported mail {} ({} of {}) from directory {} for data export {} of user {} in context {}", mailId, I(batchCount), I(messages.length), fullName, UUIDs.getUnformattedString(task.getId()), I(task.getUserId()), I(task.getContextId()));
                 }
-                LOG.debug("Exported mail {} ({} of {}) from directory {} for data export {} of user {} in context {}", mailId, I(batchCount), I(messages.length), fullName, UUIDs.getUnformattedString(task.getId()), I(task.getUserId()), I(task.getContextId()));
             } catch (Exception e) {
                 if (isRetryableExceptionAndMayFail(e, sink)) {
                     return savePointFor(new JSONObject(4).putSafe("folder", fullName).putSafe("id", mailId), e);
