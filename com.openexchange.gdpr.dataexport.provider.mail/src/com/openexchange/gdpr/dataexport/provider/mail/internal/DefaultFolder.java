@@ -52,6 +52,9 @@ package com.openexchange.gdpr.dataexport.provider.mail.internal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailFolderStorageInfoSupport;
@@ -65,6 +68,23 @@ import com.openexchange.mail.dataobjects.MailFolderInfo;
  * @since v7.10.3
  */
 public class DefaultFolder implements Folder {
+
+    static AtomicReference<Set<String>> FULL_NAMES_TO_IGNORE = new AtomicReference<>(Collections.emptySet());
+
+    /**
+     * Sets the full names to ignore.
+     *
+     * @param fullNamesToIgnore The set containing the full names to ignore
+     */
+    public static void setFullNamesToIgnore(Set<String> fullNamesToIgnore) {
+        if (fullNamesToIgnore == null) {
+            return;
+        }
+
+        FULL_NAMES_TO_IGNORE.set(ImmutableSet.copyOf(fullNamesToIgnore));
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
 
     private final FolderAccess folderAccess;
     private final String fullname;
@@ -200,9 +220,14 @@ public class DefaultFolder implements Folder {
                 return Collections.emptyList();
             }
 
+            Set<String> fullNamesToIgnore = FULL_NAMES_TO_IGNORE.get();
+            boolean ignoreFullNamesToIgnore = fullNamesToIgnore.isEmpty();
+
             List<Folder> retval = new ArrayList<>(size);
             for (MailFolderInfo mailFolderInfo : children) {
-                retval.add(new DefaultFolder(mailFolderInfo, infoSupport));
+                if (ignoreFullNamesToIgnore || !fullNamesToIgnore.contains(mailFolderInfo.getFullname())) {
+                    retval.add(new DefaultFolder(mailFolderInfo, infoSupport));
+                }
             }
             return retval;
         }
@@ -232,9 +257,14 @@ public class DefaultFolder implements Folder {
                 return Collections.emptyList();
             }
 
+            Set<String> fullNamesToIgnore = FULL_NAMES_TO_IGNORE.get();
+            boolean ignoreFullNamesToIgnore = fullNamesToIgnore.isEmpty();
+
             List<Folder> retval = new ArrayList<>(children.length);
             for (MailFolder mailFolder : children) {
-                retval.add(new DefaultFolder(mailFolder, folderStorage));
+                if (ignoreFullNamesToIgnore || !fullNamesToIgnore.contains(mailFolder.getFullname())) {
+                    retval.add(new DefaultFolder(mailFolder, folderStorage));
+                }
             }
             return retval;
         }

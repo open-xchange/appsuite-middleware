@@ -67,6 +67,9 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.config.cascade.ComposedConfigProperty;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.gdpr.dataexport.DataExportAbortedException;
 import com.openexchange.gdpr.dataexport.DataExportExceptionCode;
@@ -85,6 +88,7 @@ import com.openexchange.gdpr.dataexport.provider.mail.generator.FailedAuthentica
 import com.openexchange.gdpr.dataexport.provider.mail.generator.SessionGenerator;
 import com.openexchange.java.Collators;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailSortField;
@@ -110,6 +114,22 @@ public class MailDataExport extends AbstractDataExportProviderTask {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailDataExport.class);
 
     private static final String ID_MAIL = "mail";
+
+    /** The full name for the virtual "all messages" folder */
+    private static String allMessagesFolder(int userId, int contextId, ServiceLookup services) throws OXException {
+        ConfigViewFactory factory = services.getService(ConfigViewFactory.class);
+        ConfigView view = factory.getView(userId, contextId);
+
+        ComposedConfigProperty<String> property = view.property("com.openexchange.find.basic.mail.allMessagesFolder", String.class);
+        if (false == property.isDefined()) {
+            return null;
+        }
+
+        String fn = property.get();
+        return Strings.isEmpty(fn) ? null : fn;
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
 
     private final SessionGeneratorRegistry generatorRegistry;
 
@@ -189,6 +209,11 @@ public class MailDataExport extends AbstractDataExportProviderTask {
                     }
                     session = failedAuthenticationResult.getOptionalSession().get();
                 }
+            }
+
+            String allMessagesFolder = allMessagesFolder(session.getUserId(), session.getContextId(), services);
+            if (Strings.isNotEmpty(allMessagesFolder)) {
+                DefaultFolder.setFullNamesToIgnore(Collections.singleton(allMessagesFolder));
             }
 
             Folder rootFolder;
