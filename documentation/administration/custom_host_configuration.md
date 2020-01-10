@@ -34,6 +34,10 @@ Example content:
 	    contact: 'E-Mail: cloudservice@host1-support.de'
 	    languages:
 	        de_DE: Deutsch
+	    locales:
+            de_DE: Deutsch (Deutschland)
+            de_AT: Deutsch (Österreich)
+            de_CH: Deutsch (Schweiz)
 	    notificationMails:
 	        button:
 	            textColor: '#ffffff'
@@ -170,6 +174,7 @@ This list provides some other properties, that influence the login page itself o
 | copyright   | String  | Bottom of the login screen and also inside the about dialog  | copyright: Customs ltd.  |
 | forgotPassword  | String  | URL path that should be used to direct the user to the <br>forgot password path. Will be appended to the current API path.  | forgotPassword: forgot/Password.html  |
 | languages  | Map  | List of languages that are supposed to be displayed to the user  |languages: <br>de_DE: German <br>en_US: American english <br>en_EN: Britain english |
+| locales   | Map  | List of locales that are supposed to be displayed to the user. Only locales which languages are configured will be displayed.   | locales: <br>de_DE: Deutsch (Deutschland) <br>de_AT: Deutsch (Österreich) <br>de_CH: Deutsch (Schweiz)
 | pageHeader  | String  | The header of the login mask.  | pageHeader: Company  |
 | pageHeaderPrefix  | String  | A Text written before the page header.  | pageHeader: My  |
 | pageTitle  | String  | Sets the page title, visible as a prefix in the tab name.  | pageTitle: My Company  |
