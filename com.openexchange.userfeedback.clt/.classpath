@@ -19,6 +19,9 @@
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/jersey-media-json-jackson-2.17.jar" sourcepath="/com.openexchange.bundles/source/jersey-media-json-jackson-2.17-sources.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/jersey-entity-filtering-2.17.jar" sourcepath="/com.openexchange.bundles/source/jersey-entity-filtering-2.17-sources.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/javax.annotation-api-1.2.0.jar" sourcepath="/com.openexchange.bundles/source/javax.annotation-api.source_1.2.0.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/jackson-jaxrs-json-provider-2.9.9.jar" sourcepath="/com.openexchange.bundles/source/jackson-jaxrs-json-provider-2.9.9-sources.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/jackson-jaxrs-base-2.9.9.jar" sourcepath="/com.openexchange.bundles/source/jackson-jaxrs-base-2.9.9-sources.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/jackson-databind-2.9.9.3.jar" sourcepath="/com.openexchange.bundles/source/jackson-databind-2.9.9.3-sources.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.global"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.java"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.json"/>

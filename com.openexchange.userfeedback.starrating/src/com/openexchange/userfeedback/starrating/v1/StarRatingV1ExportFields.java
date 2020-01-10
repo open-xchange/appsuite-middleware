@@ -47,24 +47,29 @@
  *
  */
 
-package com.openexchange.userfeedback.starrating;
+package com.openexchange.userfeedback.starrating.v1;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.userfeedback.starrating.v1.StarRatingV1ExportResultConverterTest;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+import com.openexchange.userfeedback.fields.GenericUserFeedbackExportFields;
+import com.openexchange.userfeedback.fields.UserFeedbackField;
 
 /**
  * 
- * {@link UnitTests}
+ * {@link StarRatingV1ExportFields}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since v7.8.4
+ * @since v7.10.4
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    StarRatingV1ExportResultConverterTest.class
+public class StarRatingV1ExportFields extends GenericUserFeedbackExportFields {
 
-})
-public class UnitTests {
+    public static final UserFeedbackField SCORE = new UserFeedbackField("Score", "score", true, 5);
+    public static final UserFeedbackField COMMENT = new UserFeedbackField("Comment", "comment", true, 20000);
+
+    public static final List<UserFeedbackField> ALL = Arrays.asList(DATE, SCORE, COMMENT, APP, ENTRY_POINT, OPERATING_SYSTEM, BROWSER, BROWSER_VERSION, USER_AGENT, SCREEN_RESOLUTION, LANGUAGE, USER, SERVER_VERSION, CLIENT_VERSION);
+
+    public static List<UserFeedbackField> getFieldsRequiredByClient() {
+        return ALL.stream().filter(x -> x.isProvidedByClient()).collect(Collectors.toList());
+    }
 }

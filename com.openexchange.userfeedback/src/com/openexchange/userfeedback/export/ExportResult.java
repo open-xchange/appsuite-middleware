@@ -47,76 +47,20 @@
  *
  */
 
-package com.openexchange.userfeedback;
-
-import java.sql.Connection;
-import com.openexchange.exception.OXException;
+package com.openexchange.userfeedback.export;
 
 /**
- * {@link AbstractFeedbackType}
+ * {@link ExportResult}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.4
  */
-public abstract class AbstractFeedbackType implements FeedbackType {
-
-    @Override
-    public long storeFeedback(Object feedback, Connection con) throws OXException {
-        Object validatedFeedback = prepareAndValidateFeedback(feedback);
-        return storeFeedbackInternal(validatedFeedback, con);
-    }
-
-    public abstract long storeFeedbackInternal(Object feedback, Connection con) throws OXException;
+public interface ExportResult {
 
     /**
-     * Returns the updated and ready-to-persist feedback object
+     * Returns the result of the export. The type depends on the {@link ExportType} used while triggering the export.
      * 
-     * @param feedback
-     * @return ready-to-persist object
-     * @throws OXException
+     * @return Object containing the result.
      */
-    public final Object prepareAndValidateFeedback(Object feedback) throws OXException {
-        checkFeedback(feedback);
-
-        Object normalizedFeedback = normalize(feedback);
-        Object cleanUpFeedback = cleanUp(normalizedFeedback);
-
-        validate(cleanUpFeedback);
-
-        return cleanUpFeedback;
-    }
-
-    /**
-     * Syntactic check of the feedback content. Checks if the provided feedback has the minimum requirements for further processing.
-     * 
-     * @param feedback The feedback object to check
-     * @throws OXException
-     */
-    protected abstract void checkFeedback(Object feedback) throws OXException;
-
-    /**
-     * Semantic check of the feedback content. Validates the normalized ({@link #normalize(Object)}) and cleaned ({@link #cleanUp(Object)}) feedback content.
-     * 
-     * @param feedback The feedback object to validate
-     * @throws OXException
-     */
-    protected abstract void validate(Object feedback) throws OXException;
-
-    /**
-     * Ensures the feedback is well prepared for persisting. No additional and the minimum required information are available.
-     * 
-     * @param feedback The feedback object to clean up
-     * @return The cleaned and syntactic ready feedback
-     * @throws OXException
-     */
-    protected abstract Object cleanUp(Object feedback) throws OXException;
-
-    /**
-     * Ensures a normalized representation of the feedback object for upcoming cleanups (e. g. lower case keys in JSON)
-     * 
-     * @param feedback The feedback object to normalize
-     * @return The normalized feedback
-     * @throws OXException
-     */
-    protected abstract Object normalize(Object feedback) throws OXException;
+    Object getResult();
 }

@@ -85,11 +85,11 @@ import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.pgp.keys.parsing.KeyRingParserResult;
 import com.openexchange.pgp.keys.parsing.PGPKeyRingParser;
-import com.openexchange.userfeedback.ExportResult;
-import com.openexchange.userfeedback.ExportResultConverter;
-import com.openexchange.userfeedback.ExportType;
 import com.openexchange.userfeedback.FeedbackService;
 import com.openexchange.userfeedback.exception.FeedbackExceptionCodes;
+import com.openexchange.userfeedback.export.ExportResult;
+import com.openexchange.userfeedback.export.ExportResultConverter;
+import com.openexchange.userfeedback.export.ExportType;
 import com.openexchange.userfeedback.mail.filter.FeedbackMailFilter;
 import com.openexchange.userfeedback.mail.osgi.Services;
 
@@ -118,9 +118,9 @@ public class FeedbackMimeMessageUtility {
     /**
      * Create a {@link MimeMessage} which can be send via email for the given {@link File} and {@link FeedbackMailFilter}.
      *
-     * @param feedbackFile, the file that should be attached to the email
-     * @param filter, the filter to use
-     * @param session, the session for MimeMessage creation purposes
+     * @param feedbackFile the file that should be attached to the email
+     * @param filter the filter to use
+     * @param session the session for MimeMessage creation purposes
      * @return a MimeMessage with the gathered user feedback, which can be send
      * @throws OXException
      */
@@ -180,7 +180,7 @@ public class FeedbackMimeMessageUtility {
      * Loads the file with all user feedback from the {@link FeedbackService} and translates
      * the result into a file, that is returned.
      *
-     * @param filter, all necessary filter informations
+     * @param filter all necessary filter informations
      * @return a file with all user feedback for the given filter
      * @throws OXException, when something during the export goes wrong
      */
@@ -199,7 +199,7 @@ public class FeedbackMimeMessageUtility {
      * Compress the given {@link InputStream} into a GZIPed {@link ByteArrayOutputStream}.
      * 
      * @param toCompress the stream that is supposed to be compressed
-     * @return 
+     * @return the {@link InputStream} in a compressed byte array
      * @throws OXException
      */
     public static byte[] compress(InputStream toCompress) throws OXException {
@@ -225,8 +225,8 @@ public class FeedbackMimeMessageUtility {
      * Extract all valid email addresses from the given filter and also put all invalid addresses into
      * the given list of "invalidAddresses".
      *
-     * @param filter, the filter object with all needed information
-     * @param invalidAddresses, the list where all invalid email addresses should be stored
+     * @param filter the filter object with all needed information
+     * @param invalidAddresses the list where all invalid email addresses should be stored
      * @return an Array with {@link InternetAddress}s
      */
     public static Address[] extractValidRecipients(FeedbackMailFilter filter, List<InternetAddress> invalidAddresses) {

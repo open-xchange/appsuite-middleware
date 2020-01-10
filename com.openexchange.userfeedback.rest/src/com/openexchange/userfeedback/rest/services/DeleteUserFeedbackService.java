@@ -94,8 +94,8 @@ public class DeleteUserFeedbackService extends AbstractUserFeedbackService {
         FeedbackFilter filter = new FeedbackFilter() {
 
             @Override
-            public Long start() {
-                return Long.valueOf(start <= 0 ? Long.MIN_VALUE : start);
+            public long start() {
+                return start <= 0 ? Long.MIN_VALUE : start;
             }
 
             @Override
@@ -104,8 +104,8 @@ public class DeleteUserFeedbackService extends AbstractUserFeedbackService {
             }
 
             @Override
-            public Long end() {
-                return Long.valueOf(end <= 0 ? Long.MAX_VALUE : end);
+            public long end() {
+                return end <= 0 ? Long.MAX_VALUE : end;
             }
 
             @Override
@@ -157,10 +157,10 @@ public class DeleteUserFeedbackService extends AbstractUserFeedbackService {
             resp.put("successful", "true");
             resp.put("type", filter.getType());
             resp.put("contextGroup", contextGroup);
-            if (filter.start().longValue() != Long.MIN_VALUE) {
+            if (filter.start() != Long.MIN_VALUE) {
                 resp.put("start", filter.start());
             }
-            if (filter.end().longValue() != Long.MAX_VALUE) {
+            if (filter.end() != Long.MAX_VALUE) {
                 resp.put("end", filter.end());
             }
         } catch (JSONException e) {

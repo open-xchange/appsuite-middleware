@@ -74,6 +74,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.pgp.core.exceptions.PGPCoreExceptionCodes;
 import com.openexchange.pgp.mail.PGPMimeService;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.userfeedback.exception.FeedbackExceptionCodes;
 import com.openexchange.userfeedback.mail.FeedbackMailService;
 import com.openexchange.userfeedback.mail.filter.FeedbackMailFilter;
@@ -115,26 +116,26 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
 
     private String sendMail(InputStream data, FeedbackMailFilter filter) throws OXException {
         LeanConfigurationService leanConfig = Services.getService(LeanConfigurationService.class);
+        if (leanConfig == null) {
+            throw ServiceExceptionCode.absentService(LeanConfigurationService.class);
+        }
+
         boolean sign = false;
         boolean encrypt = false;
-        String secretKeyFile = null;
-        String secretKeyPassword = null;
+        String secretKeyFile = leanConfig.getProperty(UserFeedbackMailProperty.signKeyFile);
+        String secretKeyPassword = leanConfig.getProperty(UserFeedbackMailProperty.signKeyPassword);
         PGPSecretKey signingKey = null;
-        PGPMimeService pgpMimeService = Services.getService(PGPMimeService.class);
         List<InternetAddress> invalidAddresses = new ArrayList<>();
         List<InternetAddress> pgpFailedAddresses = new ArrayList<>();
         Map<Address, PGPPublicKey> pgpRecipients = null;
-        if (null != pgpMimeService) {
-            secretKeyFile = leanConfig.getProperty(UserFeedbackMailProperty.signKeyFile);
-            secretKeyPassword = leanConfig.getProperty(UserFeedbackMailProperty.signKeyPassword);
-            if (Strings.isNotEmpty(secretKeyFile)) {
-                signingKey = FeedbackMimeMessageUtility.parsePrivateKey(secretKeyFile);
-                sign = true;
-            }
-            if (null != filter.getPgpKeys() && !filter.getPgpKeys().isEmpty()) {
-                pgpRecipients = FeedbackMimeMessageUtility.extractRecipientsForPgp(filter, invalidAddresses, pgpFailedAddresses);
-                encrypt = true;
-            }
+
+        if (Strings.isNotEmpty(secretKeyFile)) {
+            signingKey = FeedbackMimeMessageUtility.parsePrivateKey(secretKeyFile);
+            sign = true;
+        }
+        if (null != filter.getPgpKeys() && !filter.getPgpKeys().isEmpty()) {
+            pgpRecipients = FeedbackMimeMessageUtility.extractRecipientsForPgp(filter, invalidAddresses, pgpFailedAddresses);
+            encrypt = true;
         }
         Properties smtpProperties = getSMTPProperties(leanConfig);
         String smtpUser = leanConfig.getProperty(UserFeedbackMailProperty.username);
@@ -158,7 +159,7 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
 
             recipients = FeedbackMimeMessageUtility.extractValidRecipients(filter, invalidAddresses);
             if (recipients.length == 0 && (null == pgpRecipients || pgpRecipients.size() == 0)) {
-                if (null != pgpFailedAddresses && pgpFailedAddresses.size() > 0) {
+                if (pgpFailedAddresses.size() > 0) {
                     throw FeedbackExceptionCodes.INVALID_EMAIL_ADDRESSES_PGP.create();
                 }
                 throw FeedbackExceptionCodes.INVALID_EMAIL_ADDRESSES.create();
@@ -169,6 +170,11 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
             String smtpHost = leanConfig.getProperty(UserFeedbackMailProperty.hostname);
             int smtpPort = leanConfig.getIntProperty(UserFeedbackMailProperty.port);
             transport.connect(smtpHost, smtpPort, smtpUser, smtpPass);
+
+            PGPMimeService pgpMimeService = Services.getService(PGPMimeService.class);
+            if (pgpMimeService == null) {
+                throw ServiceExceptionCode.absentService(PGPMimeService.class);
+            }
 
             if (encrypt && null != pgpRecipients && pgpRecipients.size() > 0) {
                 MimeMessage pgpMail = null;
@@ -250,8 +256,10 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
     private Properties getSMTPProperties(LeanConfigurationService leanConfig) {
         Properties properties = new Properties();
         SSLSocketFactoryProvider factoryProvider = Services.getService(SSLSocketFactoryProvider.class);
-        String socketFactoryClass = factoryProvider.getDefault().getClass().getName();
-        properties.put("mail.smtp.ssl.socketFactory.class", socketFactoryClass);
+        if (factoryProvider != null) {
+            String socketFactoryClass = factoryProvider.getDefault().getClass().getName();
+            properties.put("mail.smtp.ssl.socketFactory.class", socketFactoryClass);
+        }
         properties.put("mail.smtp.ssl.socketFactory.port", I(leanConfig.getIntProperty(UserFeedbackMailProperty.port)));
         properties.put("mail.smtp.starttls.enable", Boolean.TRUE);
         properties.put("mail.smtp.ssl.trust", "*");

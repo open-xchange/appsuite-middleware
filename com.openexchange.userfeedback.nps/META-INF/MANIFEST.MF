@@ -1,11 +1,11 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: The star rating feedback bundle
-Bundle-SymbolicName: com.openexchange.userfeedback.starrating
-Bundle-Version: 7.10.3
+Bundle-Name: The NPS feedback bundle
+Bundle-SymbolicName: com.openexchange.userfeedback.nps
+Bundle-Version: 7.10.4
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Bundle-Activator: com.openexchange.userfeedback.starrating.osgi.Activator
+Bundle-Activator: com.openexchange.userfeedback.nps.osgi.Activator
 Import-Package: com.fasterxml.jackson.core,
  com.google.common.collect,
  com.google.common.hash,

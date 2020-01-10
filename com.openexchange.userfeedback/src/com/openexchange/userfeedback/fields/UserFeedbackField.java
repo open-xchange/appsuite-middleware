@@ -47,24 +47,84 @@
  *
  */
 
-package com.openexchange.userfeedback.starrating;
-
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.userfeedback.starrating.v1.StarRatingV1ExportResultConverterTest;
+package com.openexchange.userfeedback.fields;
 
 /**
- * 
- * {@link UnitTests}
+ * {@link UserFeedbackField}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since v7.8.4
+ * @since v7.10.4
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    StarRatingV1ExportResultConverterTest.class
+public class UserFeedbackField {
 
-})
-public class UnitTests {
+    private final String displayName;
+
+    private final String name;
+
+    private final boolean providedByClient;
+
+    private final int storageSize;
+
+    /**
+     * Initializes a new {@link UserFeedbackField}.
+     * 
+     * @param lDisplayName String The display name of a field which is used for exports
+     * @param lName String The internally used name of the field
+     * @param lProvidedByClient boolean Defines if the fields should be provided by the client
+     */
+    public UserFeedbackField(String lDisplayName, String lName, boolean lProvidedByClient) {
+        this(lDisplayName, lName, lProvidedByClient, 0);
+    }
+
+    /**
+     * 
+     * Initializes a new {@link UserFeedbackField}.
+     * 
+     * @param lDisplayName String The display name of a field which is used for exports
+     * @param lName String The internally used name of the field
+     * @param lProvidedByClient boolean Defines if the fields should be provided by the client
+     * @param lStorageSize int Defines the length of the field
+     */
+    public UserFeedbackField(String lDisplayName, String lName, boolean lProvidedByClient, int lStorageSize) {
+        this.displayName = lDisplayName;
+        this.name = lName;
+        this.providedByClient = lProvidedByClient;
+        this.storageSize = lStorageSize;
+    }
+
+    /**
+     * Returns the display name
+     * 
+     * @return the display name
+     */
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    /**
+     * Returns the name
+     * 
+     * @return the name
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Returns if the field is expected to be provided by the client
+     * 
+     * @return if the field should be provided by the client
+     */
+    public boolean isProvidedByClient() {
+        return providedByClient;
+    }
+
+    /**
+     * Returns the storage size
+     * 
+     * @return the storage size
+     */
+    public int getStorageSize() {
+        return storageSize;
+    }
 }

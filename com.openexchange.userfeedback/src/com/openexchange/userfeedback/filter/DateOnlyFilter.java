@@ -80,7 +80,7 @@ public class DateOnlyFilter implements FeedbackFilter {
     }
 
     @Override
-    public Long start() {
+    public long start() {
         if (start == 0) {
             return Long.MIN_VALUE;
         }
@@ -88,7 +88,7 @@ public class DateOnlyFilter implements FeedbackFilter {
     }
 
     @Override
-    public Long end() {
+    public long end() {
         if (end == 0) {
             return Long.MAX_VALUE;
         }

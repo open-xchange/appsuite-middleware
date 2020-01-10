@@ -47,20 +47,30 @@
  *
  */
 
-package com.openexchange.userfeedback;
+package com.openexchange.userfeedback.nps.v1;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+import com.openexchange.userfeedback.fields.GenericUserFeedbackExportFields;
+import com.openexchange.userfeedback.fields.UserFeedbackField;
 
 /**
- * {@link ExportResultConverter}
+ * 
+ * {@link NPSv1ExportFields}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since v7.8.4
+ * @since v7.10.4
  */
-public interface ExportResultConverter {
+public class NPSv1ExportFields extends GenericUserFeedbackExportFields {
 
-    /**
-     * 
-     * @param type
-     * @return the result of an export
-     */
-    ExportResult get(ExportType type);
+    public static final UserFeedbackField SCORE = new UserFeedbackField("Score", "score", true, 5);
+    public static final UserFeedbackField COMMENT = new UserFeedbackField("Comment", "comment", true, 20000);
+    public static final UserFeedbackField QUESTION_ID = new UserFeedbackField("Question", "questionid", true, 5);
+
+    public static final List<UserFeedbackField> ALL = Arrays.asList(DATE, SCORE, QUESTION_ID, COMMENT, APP, ENTRY_POINT, OPERATING_SYSTEM, BROWSER, BROWSER_VERSION, USER_AGENT, SCREEN_RESOLUTION, LANGUAGE, USER, SERVER_VERSION, CLIENT_VERSION);
+
+    public static List<UserFeedbackField> getFieldsRequiredByClient() {
+        return ALL.stream().filter(x -> x.isProvidedByClient()).collect(Collectors.toList());
+    }
 }

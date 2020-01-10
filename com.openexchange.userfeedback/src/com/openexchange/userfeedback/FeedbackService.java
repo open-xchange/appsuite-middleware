@@ -52,6 +52,8 @@ package com.openexchange.userfeedback;
 import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
+import com.openexchange.userfeedback.export.ExportResultConverter;
+import com.openexchange.userfeedback.export.ExportType;
 import com.openexchange.userfeedback.filter.FeedbackFilter;
 
 /**

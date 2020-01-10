@@ -47,33 +47,31 @@
  *
  */
 
-package com.openexchange.userfeedback.starrating.v1;
-
-import java.io.InputStream;
-import org.json.JSONArray;
-import com.openexchange.userfeedback.ExportResult;
+package com.openexchange.userfeedback.export;
 
 /**
- * {@link StarRatingV1ExportResult}
+ * {@link ExportType}
  *
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.4
  */
-public class StarRatingV1ExportResult implements ExportResult {
+public enum ExportType {
+    RAW("application", "json"),
+    CSV("text", "csv");
 
-    private Object result;
+    private final String mediaType;
+    private final String mediaSubType;
 
-    @Override
-    public Object getResult() {
-        return result;
+    private ExportType(String mediaType, String mediaSubType) {
+        this.mediaType = mediaType;
+        this.mediaSubType = mediaSubType;
     }
 
-    public void setCSV(InputStream result) {
-        this.result = result;
-
+    public String getMediaType() {
+        return mediaType;
     }
 
-    public void setRAW(JSONArray result) {
-        this.result = result;
+    public String getMediaSubType() {
+        return mediaSubType;
     }
 }

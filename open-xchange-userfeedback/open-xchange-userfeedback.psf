@@ -5,6 +5,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.userfeedback.clt"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.userfeedback.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.userfeedback.mail"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.userfeedback.nps"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.userfeedback.rest"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.userfeedback.starrating"/>
 </provider>

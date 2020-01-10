@@ -47,71 +47,32 @@
  *
  */
 
-package com.openexchange.userfeedback.starrating.v1;
+package com.openexchange.userfeedback.nps.exception;
 
-import java.util.HashSet;
-import java.util.Set;
-import org.json.JSONObject;
-import com.google.common.collect.ImmutableSet;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link StarRatingV1Fields}
+ * 
+ * {@link NPSExceptionMessages}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.4
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.10.4
  */
-public enum StarRatingV1Fields {
-    date("Date"), // only for export
-    score("Score"),
-    comment("Comment"),
-    app("App"),
-    entry_point("Entry Point"),
-    operating_system("Operating System"),
-    browser("Browser"),
-    browser_version("Browser Version"),
-    user_agent("User Agent"),
-    screen_resolution("Screen Resolution"),
-    language("Language"),
-    user("User"), // only for export
-    server_version("Server Version"), // only for export
-    client_version("Client Version"),
-    ;
+public final class NPSExceptionMessages implements LocalizableStrings {
 
-    private static final Set<String> INTERNAL_KEYS;
+    // The provided feedback for '%s' is invalid.
+    public static final String INVALID_VALUE_MSG = "The provided feedback for '%s' is invalid.";
 
-    static {
-        ImmutableSet.Builder<String> keys = ImmutableSet.builder();
-        for (StarRatingV1Fields field : StarRatingV1Fields.values()) {
-            keys.add(field.name().toLowerCase());
-        }
-        INTERNAL_KEYS = keys.build();
-    }
+    // The provided feedback for key '%s' has an invalid type.
+    public static final String INVALID_TYPE_MSG = "The provided feedback for key '%s' has an invalid type.";
 
-    private String displayName;
+    // The provided feedback does not contain required key '%s'.
+    public static final String KEY_MISSING_MSG = "The provided feedback does not contain required key '%s'.";
 
-    StarRatingV1Fields(String displayName) {
-        this.displayName = displayName;
-    }
+    // The provided feedback for key '%s' cannot be parsed.
+    public static final String BAD_VALUE_MSG = "The provided feedback for key '%s' cannot be parsed.";
 
-    /**
-     * Gets the displayName
-     *
-     * @return The displayName
-     */
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    /**
-     * Returns keys that are required within the to persist JSONObject. Those removed from {@link com.openexchange.userfeedback.starrating.v1.StarRatingV1Fields#values()} are retrieved from other tables.
-     *
-     * @return Set of {@link String} that are required within the {@link JSONObject}
-     */
-    public static Set<String> requiredJsonKeys() {
-        Set<String> copy = new HashSet<>(INTERNAL_KEYS);
-        copy.remove("date");
-        copy.remove("user");
-        copy.remove("server_version");
-        return copy;
+    private NPSExceptionMessages() {
+        super();
     }
 }

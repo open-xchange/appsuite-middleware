@@ -70,8 +70,7 @@ import com.openexchange.userfeedback.osgi.Services;
  * @since v7.8.4
  */
 public class FeedbackMode implements PreferencesItemService, ConfigTreeEquivalent {
-    
-    
+
     public FeedbackMode() {
         super();
     }
@@ -88,23 +87,23 @@ public class FeedbackMode implements PreferencesItemService, ConfigTreeEquivalen
 
     @Override
     public String[] getPath() {
-        return new String[] {"feedback", "mode"};
+        return new String[] { "feedback", "mode" };
     }
 
     @Override
     public IValueHandler getSharedValue() {
         return new ReadOnlyValue() {
-            
+
             @Override
             public boolean isAvailable(UserConfiguration userConfig) {
                 LeanConfigurationService leanConfig = Services.getService(LeanConfigurationService.class);
-                return leanConfig.getBooleanProperty(UserFeedbackProperty.enabled);
+                return leanConfig.getBooleanProperty(userConfig.getUserId(), userConfig.getContext().getContextId(), UserFeedbackProperty.enabled);
             }
-            
+
             @Override
             public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
                 LeanConfigurationService leanConfig = Services.getService(LeanConfigurationService.class);
-                setting.setSingleValue(leanConfig.getProperty(UserFeedbackProperty.mode));
+                setting.setSingleValue(leanConfig.getProperty(userConfig.getUserId(), userConfig.getContext().getContextId(), UserFeedbackProperty.mode));
             }
         };
     }

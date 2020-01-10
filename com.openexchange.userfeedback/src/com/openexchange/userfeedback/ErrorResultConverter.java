@@ -56,6 +56,9 @@ import org.json.JSONObject;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
+import com.openexchange.userfeedback.export.ExportResult;
+import com.openexchange.userfeedback.export.ExportResultConverter;
+import com.openexchange.userfeedback.export.ExportType;
 
 /**
  * {@link ErrorResultConverter}

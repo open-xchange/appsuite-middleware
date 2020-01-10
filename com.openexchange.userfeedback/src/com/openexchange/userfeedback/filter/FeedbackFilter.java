@@ -74,13 +74,13 @@ public interface FeedbackFilter {
         }
 
         @Override
-        public Long start() {
-            return 0L;
+        public long start() {
+            return 0;
         }
 
         @Override
-        public Long end() {
-            return 0L;
+        public long end() {
+            return 0;
         }
     };
 
@@ -93,8 +93,8 @@ public interface FeedbackFilter {
      */
     public String getType();
 
-    public Long start();
+    public long start();
 
-    public Long end();
+    public long end();
 
 }
