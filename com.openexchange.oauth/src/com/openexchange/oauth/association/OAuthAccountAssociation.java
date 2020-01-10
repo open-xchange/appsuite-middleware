@@ -109,16 +109,16 @@ public interface OAuthAccountAssociation {
     String getDisplayName();
 
     /**
-     * Returns the module which the OAuth account is associated with
+     * Gets the module which the OAuth account is associated with.
      *
-     * @return the module which the OAuth account is associated with
+     * @return The module which the OAuth account is associated with
      */
     String getModule();
 
     /**
-     * Returns the optional folder of the association
+     * Gets the optional folder of the association.
      *
-     * @return the optional folder or <code>null</code> if no
+     * @return The optional folder or <code>null</code> if no
      *         folder is associated with this {@link OAuthAccountAssociation}
      */
     String getFolder();
@@ -135,9 +135,9 @@ public interface OAuthAccountAssociation {
     Status getStatus(Session session) throws OXException;
 
     /**
-     * Returns an unmodifiable {@link List} with all enabled scopes of the association
+     * Gets an unmodifiable {@link List} with all enabled scopes of the association.
      *
-     * @return an unmodifiable {@link List} with all enabled scopes of the association
+     * @return An unmodifiable {@link List} with all enabled scopes of the association
      */
     List<OAuthScope> getScopes();
 

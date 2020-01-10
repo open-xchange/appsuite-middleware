@@ -66,13 +66,13 @@ public abstract class AbstractOAuthAccountAssociation implements OAuthAccountAss
     private final int contextId;
 
     /**
-     * Initialises a new {@link AbstractOAuthAccountAssociation}.
-     * 
+     * Initializes a new {@link AbstractOAuthAccountAssociation}.
+     *
      * @param accountId The identifier of the OAuth account
      * @param userId The user identifier
      * @param contextId The context identifier
      */
-    public AbstractOAuthAccountAssociation(int accountId, int userId, int contextId) {
+    protected AbstractOAuthAccountAssociation(int accountId, int userId, int contextId) {
         super();
         this.accountId = accountId;
         this.userId = userId;
@@ -80,11 +80,11 @@ public abstract class AbstractOAuthAccountAssociation implements OAuthAccountAss
     }
 
     /**
-     * Initialises and returns a new {@link AbstractOAuthAccess}
-     * 
-     * @param session The groupware {@link Session}
-     * @return The new oauth access
-     * @throws OXException if the oauth access cannot be initialised or any other error occurs
+     * Initializes and returns a new {@link AbstractOAuthAccess}
+     *
+     * @param session The session
+     * @return The new OAuth access
+     * @throws OXException If the OAuth access cannot be initialized or any other error occurs
      */
     protected abstract AbstractOAuthAccess newAccess(Session session) throws OXException;
 
