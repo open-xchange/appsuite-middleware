@@ -209,6 +209,7 @@ public class ITipEventUpdate implements EventUpdate {
         for (ItemUpdate<Attendee, AttendeeField> updatedItem : updatedItems) {
             Set<AttendeeField> temp = new HashSet<>(updatedItem.getUpdatedFields());
             temp.remove(AttendeeField.PARTSTAT);
+            temp.remove(AttendeeField.TIMESTAMP);
             temp.remove(AttendeeField.COMMENT);
             temp.remove(AttendeeField.HIDDEN);
             temp.remove(AttendeeField.TRANSP);
@@ -277,6 +278,7 @@ public class ITipEventUpdate implements EventUpdate {
         }
         Set<AttendeeField> updatedFields = new HashSet<>(attendeeUpdate.getUpdatedFields());
         updatedFields.remove(AttendeeField.PARTSTAT);
+        updatedFields.remove(AttendeeField.TIMESTAMP);
         if (!updatedFields.isEmpty()) {
             return false;
         }

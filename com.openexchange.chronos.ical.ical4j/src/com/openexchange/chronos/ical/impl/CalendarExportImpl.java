@@ -231,6 +231,7 @@ public class CalendarExportImpl implements CalendarExport {
          */
         VEvent vEvent = mapper.exportEvent(event, parameters, warnings);
         ICalUtils.removeProperties(vEvent, parameters.get(ICalParameters.IGNORED_PROPERTIES, String[].class));
+        ICalUtils.removeParameters(vEvent, parameters.get(ICalParameters.IGNORED_PROPERTY_PARAMETERS, String[].class));
         if (false == CalendarUtils.isFloating(event)) {
             trackTimezones(event.getStartDate(), event.getEndDate());
         }
@@ -254,6 +255,7 @@ public class CalendarExportImpl implements CalendarExport {
          */
         VAlarm vAlarm = mapper.exportAlarm(alarm, parameters, warnings);
         ICalUtils.removeProperties(vAlarm, parameters.get(ICalParameters.IGNORED_PROPERTIES, String[].class));
+        ICalUtils.removeParameters(vAlarm, parameters.get(ICalParameters.IGNORED_PROPERTY_PARAMETERS, String[].class));
         return vAlarm;
     }
 
@@ -263,6 +265,7 @@ public class CalendarExportImpl implements CalendarExport {
          */
         VFreeBusy vFreeBusy = mapper.exportFreeBusy(freeBusyData, parameters, warnings);
         ICalUtils.removeProperties(vFreeBusy, parameters.get(ICalParameters.IGNORED_PROPERTIES, String[].class));
+        ICalUtils.removeParameters(vFreeBusy, parameters.get(ICalParameters.IGNORED_PROPERTY_PARAMETERS, String[].class));
         trackTimezones(freeBusyData.getStartDate(), freeBusyData.getEndDate());
         return vFreeBusy;
     }
@@ -276,6 +279,7 @@ public class CalendarExportImpl implements CalendarExport {
     private VAvailability exportAvailability(Availability availability) {
         VAvailability vAvailability = mapper.exportAvailability(availability, parameters, warnings);
         ICalUtils.removeProperties(vAvailability, parameters.get(ICalParameters.IGNORED_PROPERTIES, String[].class));
+        ICalUtils.removeParameters(vAvailability, parameters.get(ICalParameters.IGNORED_PROPERTY_PARAMETERS, String[].class));
         // TODO: Track timezones of availability/available components
         return vAvailability;
     }

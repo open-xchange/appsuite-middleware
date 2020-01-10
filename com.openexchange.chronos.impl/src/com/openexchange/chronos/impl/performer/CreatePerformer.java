@@ -200,7 +200,7 @@ public class CreatePerformer extends AbstractUpdatePerformer {
         /*
          * attendees, attachments
          */
-        event.setAttendees(Check.maxAttendees(getSelfProtection(), InternalAttendeeUpdates.onNewEvent(session, folder, eventData).getAddedItems()));
+        event.setAttendees(Check.maxAttendees(getSelfProtection(), InternalAttendeeUpdates.onNewEvent(session, folder, eventData, timestamp).getAddedItems()));
         event.setAttachments(Check.attachmentsAreVisible(session, storage, eventData.getAttachments()));
         /*
          * classification, transparency, color, geo

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,42 +47,56 @@
  *
  */
 
-package com.openexchange.chronos.ical.ical4j.handler;
+package com.openexchange.chronos.storage.rdb.groupware;
 
-import java.util.List;
-import com.openexchange.chronos.Alarm;
-import com.openexchange.chronos.ical.ICalParameters;
-import com.openexchange.chronos.ical.ical4j.mapping.ICalMapper;
-import com.openexchange.chronos.ical.impl.ICalUtils;
+import static com.openexchange.database.Databases.autocommit;
+import static com.openexchange.database.Databases.rollback;
+import java.sql.Connection;
+import java.sql.SQLException;
 import com.openexchange.exception.OXException;
-import net.fortuna.ical4j.model.component.VAlarm;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.tools.update.Column;
+import com.openexchange.tools.update.Tools;
 
 /**
- * {@link Alarm2ICalDataHandler}
+ * 
+ * {@link CalendarAttendeeAddTimestampColumnTask}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.10.0
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @since v7.10.4
  */
-public class Alarm2ICalDataHandler extends Object2ICalDataHandler<VAlarm, Alarm> {
+public class CalendarAttendeeAddTimestampColumnTask extends UpdateTaskAdapter {
 
-    private final ICalMapper mapper;
-
-    /**
-     * Initializes a new {@link Alarm2ICalDataHandler}.
-     *
-     * @param mapper The iCal mapper to use
-     */
-    public Alarm2ICalDataHandler(ICalMapper mapper) {
-        super(Alarm.class, Alarm[].class);
-        this.mapper = mapper;
+    @Override
+    public String[] getDependencies() {
+        return new String[] { "com.openexchange.chronos.storage.rdb.groupware.ChronosCreateTableTask" };
     }
 
     @Override
-    protected VAlarm export(Alarm object, ICalParameters parameters, List<OXException> warnings) throws OXException {
-        VAlarm vAlarm = mapper.exportAlarm(object, parameters, warnings);
-        ICalUtils.removeProperties(vAlarm, parameters.get(ICalParameters.IGNORED_PROPERTIES, String[].class));
-        ICalUtils.removeParameters(vAlarm, parameters.get(ICalParameters.IGNORED_PROPERTY_PARAMETERS, String[].class));
-        return vAlarm;
+    public void perform(PerformParameters params) throws OXException {
+        Connection connection = params.getConnection();
+        int rollback = 0;
+        try {
+            connection.setAutoCommit(false);
+            rollback = 1;
+            Tools.checkAndAddColumns(connection, "calendar_attendee", new Column("timestamp", "BIGINT UNSIGNED DEFAULT NULL"));
+            Tools.checkAndAddColumns(connection, "calendar_attendee_tombstone", new Column("timestamp", "BIGINT UNSIGNED DEFAULT NULL"));
+            connection.commit();
+            rollback = 2;
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
+        } finally {
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    rollback(connection);
+                }
+                autocommit(connection);
+            }
+        }
     }
 
 }

@@ -81,6 +81,7 @@ public class Event2ICalDataHandler extends Object2ICalDataHandler<VEvent, Event>
     protected VEvent export(Event object, ICalParameters parameters, List<OXException> warnings) throws OXException {
         VEvent vEvent = mapper.exportEvent(object, parameters, warnings);
         ICalUtils.removeProperties(vEvent, parameters.get(ICalParameters.IGNORED_PROPERTIES, String[].class));
+        ICalUtils.removeParameters(vEvent, parameters.get(ICalParameters.IGNORED_PROPERTY_PARAMETERS, String[].class));
         return vEvent;
     }
 

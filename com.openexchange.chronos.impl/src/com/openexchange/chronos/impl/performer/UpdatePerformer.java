@@ -618,7 +618,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             storage.getAlarmStorage().deleteAlarms(originalEvent.getId(), getUserIDs(removedItems));
         }
         /*
-         * perform attendee updates
+         * perform attendee updates, ensure correct timestamp for each attendee
          */
         List<? extends ItemUpdate<Attendee, AttendeeField>> updatedItems = attendeeUpdates.getUpdatedItems();
         if (0 < updatedItems.size()) {
@@ -627,17 +627,21 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                 requireWritePermissions(originalEvent, attendeeToUpdate, assumeExternalOrganizerUpdate);
                 Attendee originalAttendee = attendeeToUpdate.getOriginal();
                 Attendee newAttendee = AttendeeMapper.getInstance().copy(originalAttendee, null, (AttendeeField[]) null);
-                AttendeeMapper.getInstance().copy(attendeeToUpdate.getUpdate(), newAttendee, AttendeeField.RSVP, AttendeeField.HIDDEN, AttendeeField.COMMENT, AttendeeField.PARTSTAT, AttendeeField.ROLE, AttendeeField.EXTENDED_PARAMETERS);
+                AttendeeMapper.getInstance().copy(attendeeToUpdate.getUpdate(), newAttendee, AttendeeField.RSVP, AttendeeField.HIDDEN, AttendeeField.COMMENT, AttendeeField.PARTSTAT, AttendeeField.ROLE, AttendeeField.EXTENDED_PARAMETERS, AttendeeField.TIMESTAMP);
                 attendeesToUpdate.add(newAttendee);
             }
             storage.getAttendeeStorage().updateAttendees(originalEvent.getId(), attendeesToUpdate);
         }
         /*
-         * perform attendee inserts
+         * perform attendee inserts, ensure correct timestamp for attendees
          */
         if (0 < attendeeUpdates.getAddedItems().size()) {
             requireWritePermissions(originalEvent, assumeExternalOrganizerUpdate);
-            storage.getAttendeeStorage().insertAttendees(originalEvent.getId(), attendeeUpdates.getAddedItems());
+            List<Attendee> addedAttendees = attendeeUpdates.getAddedItems();
+            for (Attendee attendee : addedAttendees) {
+                attendee.setTimestamp(timestamp.getTime());
+            }
+            storage.getAttendeeStorage().insertAttendees(originalEvent.getId(), addedAttendees);
         }
         return true;
     }

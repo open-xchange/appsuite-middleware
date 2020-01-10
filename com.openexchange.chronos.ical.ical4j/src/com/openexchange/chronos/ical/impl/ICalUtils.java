@@ -105,6 +105,7 @@ import net.fortuna.ical4j.extensions.property.WrCalName;
 import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.Component;
 import net.fortuna.ical4j.model.ComponentList;
+import net.fortuna.ical4j.model.Parameter;
 import net.fortuna.ical4j.model.ParameterFactoryImpl;
 import net.fortuna.ical4j.model.ParameterFactoryRegistry;
 import net.fortuna.ical4j.model.ParameterList;
@@ -179,6 +180,7 @@ public class ICalUtils {
     static ImportedCalendar importCalendar(VCalendar vCalendar, ICalMapper mapper, ICalParameters parameters) {
         List<OXException> warnings = new ArrayList<OXException>();
         removeProperties(vCalendar, parameters.get(ICalParameters.IGNORED_PROPERTIES, String[].class));
+        removeParameters(vCalendar, parameters.get(ICalParameters.IGNORED_PROPERTY_PARAMETERS, String[].class));
         ImportedCalendar importedCalendar = new ImportedCalendar(mapper.importVCalendar(vCalendar, parameters, warnings), warnings);
         importedCalendar.setEvents(importEvents(limitComponents(vCalendar.getEvents(), parameters, warnings), mapper, parameters));
         importedCalendar.setFreeBusyDatas(importFreeBusys(limitComponents(vCalendar.getFreeBusys(), parameters, warnings), mapper, parameters));
@@ -201,6 +203,7 @@ public class ICalUtils {
     static Event importEvent(int index, VEvent vEvent, ICalMapper mapper, ICalParameters parameters) {
         List<OXException> warnings = new ArrayList<OXException>();
         removeProperties(vEvent, parameters.get(ICalParameters.IGNORED_PROPERTIES, String[].class));
+        removeParameters(vEvent, parameters.get(ICalParameters.IGNORED_PROPERTY_PARAMETERS, String[].class));
         ImportedEvent importedEvent = new ImportedEvent(index, mapper.importVEvent(vEvent, parameters, warnings), warnings);
         if (!Autoboxing.b(parameters.get(ICalParameters.IGNORE_ALARM, Boolean.class, Boolean.FALSE))) {
             importedEvent.setAlarms(importAlarms(vEvent.getAlarms(), mapper, parameters));
@@ -223,6 +226,7 @@ public class ICalUtils {
     static ImportedAlarm importAlarm(int index, VAlarm vAlarm, ICalMapper mapper, ICalParameters parameters) {
         List<OXException> warnings = new ArrayList<OXException>();
         removeProperties(vAlarm, parameters.get(ICalParameters.IGNORED_PROPERTIES, String[].class));
+        removeParameters(vAlarm, parameters.get(ICalParameters.IGNORED_PROPERTY_PARAMETERS, String[].class));
         ImportedAlarm importedAlarm = new ImportedAlarm(index, mapper.importVAlarm(vAlarm, parameters, warnings), warnings);
         return importedAlarm;
     }
@@ -256,6 +260,7 @@ public class ICalUtils {
     static FreeBusyData importFreeBusy(VFreeBusy vFreeBusy, ICalMapper mapper, ICalParameters parameters) {
         List<OXException> warnings = new ArrayList<OXException>();
         removeProperties(vFreeBusy, parameters.get(ICalParameters.IGNORED_PROPERTIES, String[].class));
+        removeParameters(vFreeBusy, parameters.get(ICalParameters.IGNORED_PROPERTY_PARAMETERS, String[].class));
         return mapper.importVFreeBusy(vFreeBusy, parameters, warnings);
     }
 
@@ -270,6 +275,7 @@ public class ICalUtils {
     static Availability importAvailability(VAvailability vAvailability, ICalMapper mapper, ICalParameters parameters) {
         List<OXException> warnings = new ArrayList<OXException>();
         removeProperties(vAvailability, parameters.get(ICalParameters.IGNORED_PROPERTIES, String[].class));
+        removeParameters(vAvailability, parameters.get(ICalParameters.IGNORED_PROPERTY_PARAMETERS, String[].class));
         return mapper.importVAvailability(vAvailability, parameters, warnings);
     }
 
@@ -384,7 +390,61 @@ public class ICalUtils {
         }
         return matchingProperties;
     }
+    
+    /**
+     * Builds a key for a specific parameter to be removed
+     *
+     * @param propertyName The property the parameter belongs to
+     * @param parameterName The parameter to remove
+     * @return A key
+     */
+    public static String preparePrameterToRemove(String propertyName, String parameterName) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(propertyName);
+        sb.append(':');
+        sb.append(parameterName);
+        return sb.toString();
+    }
 
+    /**
+     * Removes specific parameters
+     *
+     * @param <T> The class of the component
+     * @param component The component to remove the parameters from
+     * @param parameters The parameters to remove as keys. Each parameter <b>MUST</b> be specified with a property.
+     *            To build such a key, see {@link #preparePrameterToRemove(Property, Parameter)}
+     * @return The component without the parameters
+     */
+    public static <T extends Component> T removeParameters(T component, String[] parameters) {
+        if (null == parameters || 0 == parameters.length) {
+            return component;
+        }
+        for (String param : parameters) {
+            String[] pair = Strings.splitByColon(param);
+            PropertyList propertyList = getProperties(component, pair[0]);
+            for (Iterator<?> iterator = propertyList.iterator(); iterator.hasNext();) {
+                PropertyList properties = component.getProperties().getProperties(((Property) iterator.next()).getName());
+                for (Iterator<?> it = properties.iterator(); it.hasNext();) {
+                    removeParameters(pair[1], (Property) it.next());
+                }
+            }
+        }
+        return component;
+    }
+
+    private static void removeParameters(String parameterName, Property property) {
+        if (null == property || Strings.isEmpty(parameterName)) {
+            return;
+        }
+        for (Iterator<?> iterator = property.getParameters().iterator(); iterator.hasNext();) {
+            Parameter parameter = (Parameter) iterator.next();
+            if (parameterName.equals(parameter.getName())) {
+                property.getParameters().remove(parameter);
+                break;
+            }
+        }
+    }
+    
     public static CalendarBuilder getCalendarBuilder(ICalParameters parameters) {
         ICalParameters iCalParameters = getParametersOrDefault(parameters);
         CalendarParser calendarParser = CalendarParserFactory.getInstance().createParser();

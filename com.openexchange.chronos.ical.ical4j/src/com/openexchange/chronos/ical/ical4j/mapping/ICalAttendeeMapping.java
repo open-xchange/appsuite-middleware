@@ -55,6 +55,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import javax.mail.internet.AddressException;
+import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
@@ -65,6 +66,7 @@ import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.QuotedInternetAddress;
+import net.fortuna.ical4j.extensions.caldav.parameter.CalendarServerDtStamp;
 import net.fortuna.ical4j.model.AddressList;
 import net.fortuna.ical4j.model.Parameter;
 import net.fortuna.ical4j.model.ParameterList;
@@ -88,7 +90,7 @@ import net.fortuna.ical4j.util.Uris;
  * @since v7.10.0
  */
 public abstract class ICalAttendeeMapping<T extends CalendarComponent, U> extends AbstractICalMapping<T, U> {
-
+    
     /**
      * Initializes a new {@link ICalAttendeeMapping}.
      */
@@ -201,6 +203,11 @@ public abstract class ICalAttendeeMapping<T extends CalendarComponent, U> extend
         } else {
             property.getParameters().removeAll("EMAIL");
         }
+        if (attendee.getTimestamp() > 0) {
+            property.getParameters().replace(new CalendarServerDtStamp(new DateTime(attendee.getTimestamp()).toString()));
+        } else {
+            property.getParameters().removeAll(CalendarServerDtStamp.PARAMETER_NAME);
+        }
         if (null != attendee.getExtendedParameters() && 0 < attendee.getExtendedParameters().size()) {
             for (ExtendedPropertyParameter parameter : attendee.getExtendedParameters()) {
                 property.getParameters().replace(new XParameter(parameter.getName(), parameter.getValue()));
@@ -260,6 +267,16 @@ public abstract class ICalAttendeeMapping<T extends CalendarComponent, U> extend
                         break;
                     case "EMAIL":
                         attendee.setEMail(value);
+                        break;
+                    case CalendarServerDtStamp.PARAMETER_NAME:
+                        try {
+                            DateTime dateTime = DateTime.parse(value);
+                            if (null != dateTime) {
+                                attendee.setTimestamp(dateTime.getTimestamp());
+                            }
+                        } catch (IllegalArgumentException e) {
+                            LOG.debug("Recieved invalid data", e);
+                        }
                         break;
                     default:
                         extendedParameters.add(new ExtendedPropertyParameter(parameter.getName(), parameter.getValue()));
@@ -337,6 +354,7 @@ public abstract class ICalAttendeeMapping<T extends CalendarComponent, U> extend
         attendee.setRsvp(null);
         attendee.setSentBy(null);
         attendee.setUri(null);
+        attendee.setTimestamp(0L);
         return attendee;
     }
 

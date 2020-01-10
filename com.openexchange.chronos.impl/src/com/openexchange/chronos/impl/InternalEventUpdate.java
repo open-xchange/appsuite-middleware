@@ -151,6 +151,7 @@ public class InternalEventUpdate implements EventUpdate {
     private final Event deltaEvent;
     private final List<Event> originalChangeExceptions;
     private final CollectionUpdate<Event, EventField> exceptionUpdates;
+    private final Date timestamp;
 
     /**
      * Initializes a new {@link InternalEventUpdate}.
@@ -170,19 +171,20 @@ public class InternalEventUpdate implements EventUpdate {
         this.folder = folder;
         this.calendarUser = Utils.getCalendarUser(session, folder);
         this.originalChangeExceptions = originalChangeExceptions;
+        this.timestamp = timestamp;
         /*
          * apply, check, adjust event update as needed
          */
         Event changedEvent = apply(originalEvent, updatedEvent, ignoredFields);
         checkIntegrity(originalEvent, changedEvent, originalSeriesMasterEvent);
-        ensureConsistency(originalEvent, changedEvent, timestamp);
+        ensureConsistency(originalEvent, changedEvent);
         List<Event> changedChangeExceptions = adjustExceptions(originalEvent, changedEvent, originalChangeExceptions);
         /*
          * derive & take over event update
          */
         Set<EventField> differentFields = EventMapper.getInstance().getDifferentFields(originalEvent, changedEvent, true);
         this.eventUpdate = new DefaultItemUpdate<Event, EventField>(originalEvent, changedEvent, differentFields);
-        this.attendeeUpdates = InternalAttendeeUpdates.onUpdatedEvent(session, folder, originalEvent, changedEvent);
+        this.attendeeUpdates = InternalAttendeeUpdates.onUpdatedEvent(session, folder, originalEvent, changedEvent, timestamp);
         this.attachmentUpdates = CalendarUtils.getAttachmentUpdates(originalEvent.getAttachments(), changedEvent.getAttachments());
         this.alarmUpdates = AlarmUtils.getAlarmUpdates(originalEvent.getAlarms(), changedEvent.getAlarms());
         this.exceptionUpdates = CalendarUtils.getEventUpdates(originalChangeExceptions, changedChangeExceptions, EventField.ID);
@@ -361,7 +363,7 @@ public class InternalEventUpdate implements EventUpdate {
         return changedChangeExceptions;
     }
 
-    private void ensureConsistency(Event originalEvent, Event updatedEvent, Date timestamp) throws OXException {
+    private void ensureConsistency(Event originalEvent, Event updatedEvent) throws OXException {
         Consistency.adjustAllDayDates(updatedEvent);
         Consistency.adjustTimeZones(session, calendarUser.getEntity(), updatedEvent, originalEvent);
         Consistency.adjustRecurrenceRule(updatedEvent);
@@ -572,7 +574,7 @@ public class InternalEventUpdate implements EventUpdate {
          * (virtually) apply & take over attendee updates in changed event
          */
         if (updatedFields.contains(EventField.ATTENDEES)) {
-            List<Attendee> changedAttendees = InternalAttendeeUpdates.onUpdatedEvent(session, folder, originalEvent, updatedEvent).previewChanges();
+            List<Attendee> changedAttendees = InternalAttendeeUpdates.onUpdatedEvent(session, folder, originalEvent, updatedEvent, timestamp).previewChanges();
             /*
              * only consider 'own' attendee in attendee scheduling resources as needed
              */
@@ -726,7 +728,7 @@ public class InternalEventUpdate implements EventUpdate {
         /*
          * apply added & removed attendees
          */
-        InternalAttendeeUpdates attendeeUpdates = InternalAttendeeUpdates.onUpdatedEvent(session, folder, originalMaster, updatedMaster);
+        InternalAttendeeUpdates attendeeUpdates = InternalAttendeeUpdates.onUpdatedEvent(session, folder, originalMaster, updatedMaster, timestamp);
         changedChangeExceptions = propagateAttendeeUpdates(attendeeUpdates, changedChangeExceptions);
         return changedChangeExceptions;
     }
@@ -948,6 +950,7 @@ public class InternalEventUpdate implements EventUpdate {
         for (Attendee attendee : CalendarUtils.filter(attendees, null, CalendarUserType.INDIVIDUAL)) {
             if (calendarUser.getEntity() != attendee.getEntity()) {
                 attendee.setPartStat(ParticipationStatus.NEEDS_ACTION); //TODO: or reset to initial partstat based on folder type?
+                attendee.setTimestamp(timestamp.getTime());
                 attendee.setComment(null);
                 attendee.setHidden(false);
                 continue;

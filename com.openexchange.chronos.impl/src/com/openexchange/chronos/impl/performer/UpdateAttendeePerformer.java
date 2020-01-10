@@ -138,6 +138,7 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
         if (needsConflictCheck(originalEvent, originalAttendee, attendee)) {
             Check.noConflicts(storage, session, originalEvent, Collections.singletonList(resolvedAttendee));
         }
+        Check.requireUpToDateTimestamp(originalAttendee, attendee);
         /*
          * perform update
          */
@@ -324,6 +325,13 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
                      * ensure to reset RSVP expectation along with change of participation status
                      */
                     attendeeUpdate.setRsvp(null);
+                    attendeeUpdate.setTimestamp(timestamp.getTime());
+                    break;
+                case COMMENT:
+                    /*
+                     * Ensure correct timestamp 
+                     */
+                    attendeeUpdate.setTimestamp(timestamp.getTime());
                     break;
                 case CU_TYPE:
                 case ENTITY:

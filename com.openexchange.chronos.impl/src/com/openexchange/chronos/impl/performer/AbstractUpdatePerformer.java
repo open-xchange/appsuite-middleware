@@ -370,6 +370,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         Attendee updatedAttendee = AttendeeMapper.getInstance().copy(originalAttendee, null, AttendeeField.ENTITY, AttendeeField.MEMBER, AttendeeField.CU_TYPE, AttendeeField.URI);
         updatedAttendee.setHidden(true);
         updatedAttendee.setPartStat(ParticipationStatus.DECLINED);
+        updatedAttendee.setTimestamp(timestamp.getTime());
         updatedAttendee.setTransp(TimeTransparency.TRANSPARENT);
         updatedAttendee.setComment(session.get(CalendarParameters.PARAMETER_COMMENT, String.class));
         storage.getAttendeeStorage().updateAttendee(id, updatedAttendee);
@@ -437,6 +438,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         Attendee updatedAttendee = AttendeeMapper.getInstance().copy(originalAttendee, null, (AttendeeField[]) null);
         updatedAttendee.setHidden(true);
         updatedAttendee.setPartStat(ParticipationStatus.DECLINED);
+        updatedAttendee.setTimestamp(timestamp.getTime());
         updatedAttendee.setTransp(TimeTransparency.TRANSPARENT);
         attendees.add(updatedAttendee);
         storage.getAttendeeStorage().insertAttendees(newExceptionEvent.getId(), attendees);
@@ -536,7 +538,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
             for (Alarm alarm : entry.getValue()) {
                 Alarm newAlarm = AlarmMapper.getInstance().copy(alarm, null, (AlarmField[]) null);
                 newAlarm.setId(storage.getAlarmStorage().nextId());
-                newAlarm.setTimestamp(System.currentTimeMillis());
+                newAlarm.setTimestamp(timestamp.getTime());
                 if (forceNewUids || false == newAlarm.containsUid() || Strings.isEmpty(newAlarm.getUid())) {
                     newAlarm.setUid(UUID.randomUUID().toString());
                 }
@@ -605,7 +607,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
                 AlarmMapper.getInstance().copy(itemUpdate.getUpdate(), alarm, AlarmField.values());
                 alarm.setId(itemUpdate.getOriginal().getId());
                 alarm.setUid(itemUpdate.getOriginal().getUid());
-                alarm.setTimestamp(System.currentTimeMillis());
+                alarm.setTimestamp(timestamp.getTime());
                 alarms.add(Check.alarmIsValid(alarm, itemUpdate.getUpdatedFields().toArray(new AlarmField[itemUpdate.getUpdatedFields().size()])));
                 Integer alarmId = I(alarm.getId());
                 toDelete.add(alarmId);

@@ -168,7 +168,8 @@ public abstract class AbstractQueryPerformer {
             Attendee attendee = new Attendee();
             attendee.setEntity(calendarUserId);
             AttendeeField[] fields = {
-                AttendeeField.ENTITY, AttendeeField.CU_TYPE, AttendeeField.FOLDER_ID, AttendeeField.PARTSTAT, AttendeeField.HIDDEN
+                AttendeeField.ENTITY, AttendeeField.CU_TYPE, AttendeeField.FOLDER_ID, 
+                AttendeeField.PARTSTAT, AttendeeField.HIDDEN, AttendeeField.TIMESTAMP
             };
             postProcessor.setUserAttendeeInfo(storage.getAttendeeStorage().loadAttendee(eventIds, attendee, fields));
         }

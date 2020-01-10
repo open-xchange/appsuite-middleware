@@ -51,6 +51,7 @@ package com.openexchange.chronos.storage.rdb;
 
 import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.java.Autoboxing.b;
 import static com.openexchange.java.Autoboxing.i;
 import java.util.Arrays;
@@ -66,6 +67,7 @@ import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.compat.ShownAsTransparency;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.tools.mappings.database.BigIntMapping;
 import com.openexchange.groupware.tools.mappings.database.BooleanMapping;
 import com.openexchange.groupware.tools.mappings.database.DbMapping;
 import com.openexchange.groupware.tools.mappings.database.DefaultDbMapper;
@@ -290,6 +292,28 @@ public class AttendeeMapper extends DefaultDbMapper<Attendee, AttendeeField> {
             @Override
             public void remove(Attendee attendee) {
                 attendee.removePartStat();
+            }
+        });
+        mappings.put(AttendeeField.TIMESTAMP, new BigIntMapping<Attendee>("timestamp", "PartStatTimestamp") {
+
+            @Override
+            public boolean isSet(Attendee object) {
+                return object.containsTimestamp();
+            }
+
+            @Override
+            public void set(Attendee object, Long value) throws OXException {
+                object.setTimestamp(null == value ? -1 : value.longValue());
+            }
+
+            @Override
+            public Long get(Attendee object) {
+                return L(object.getTimestamp());
+            }
+
+            @Override
+            public void remove(Attendee object) {
+                object.removeTimestamp();
             }
         });
         mappings.put(AttendeeField.RSVP, new BooleanMapping<Attendee>("rsvp", "RSVP") {

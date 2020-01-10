@@ -59,6 +59,7 @@ import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.common.CalendarUtils.optExtendedProperty;
 import static com.openexchange.chronos.common.CalendarUtils.removeExtendedProperties;
+import static com.openexchange.chronos.ical.ICalParameters.IGNORED_PROPERTY_PARAMETERS;
 import static com.openexchange.tools.arrays.Collections.isNullOrEmpty;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -186,8 +187,34 @@ public class EventPatches {
                  */
                 parameters.set(ICalParameters.IGNORED_PROPERTIES, new String[] { "X-MICROSOFT-CDO-ALLDAYEVENT", "X-MICROSOFT-CDO-BUSYSTATUS" });
             }
+            /*
+             * Per default attendee timestamp is suppressed when im- or exporting. Ensure that the timestamp is added.
+             */
+            unignoreAttendeeTimestamp(parameters);
         }
         return parameters;
+    }
+
+    private static void unignoreAttendeeTimestamp(ICalParameters parameters) {
+        if (null == parameters.get(IGNORED_PROPERTY_PARAMETERS, String[].class)) {
+            return;
+        }
+        String[] ignored = parameters.get(IGNORED_PROPERTY_PARAMETERS, String[].class);
+        if (ignored.length <= 0) {
+            parameters.set(IGNORED_PROPERTY_PARAMETERS, null);
+            return;
+        }
+        ArrayList<String> others = new ArrayList<>(ignored.length);
+        for (String ignoree : ignored) {
+            if (false == ignoree.equals("ATTENDEE:X-CALENDARSERVER-DTSTAMP")) {
+                others.add(ignoree);
+            }
+        }
+        if (others.isEmpty()) {
+            parameters.set(IGNORED_PROPERTY_PARAMETERS, null);
+        } else {
+            parameters.set(IGNORED_PROPERTY_PARAMETERS, others.toArray(new String[others.size()]));
+        }
     }
 
     /**
@@ -750,6 +777,7 @@ public class EventPatches {
                         Attendee originalAttendee = find(originalEvent.getAttendees(), originalEvent.getOrganizer());
                         if (null != updatedAttendee && null != originalAttendee && matches(updatedAttendee, originalAttendee)) {
                             updatedAttendee.setPartStat(originalAttendee.getPartStat());
+                            updatedAttendee.setTimestamp(originalAttendee.getTimestamp());
                         }
                         if (null != importedChangeExceptions) {
                             for (Event importedChangeException : importedChangeExceptions) {
@@ -759,6 +787,7 @@ public class EventPatches {
                                 originalAttendee = find(originalChangeException.getAttendees(), originalChangeException.getOrganizer());
                                 if (null != updatedAttendee && null != originalAttendee && matches(updatedAttendee, originalAttendee)) {
                                     updatedAttendee.setPartStat(originalAttendee.getPartStat());
+                                    updatedAttendee.setTimestamp(originalAttendee.getTimestamp());
                                 }
                             }
                         }

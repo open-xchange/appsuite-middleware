@@ -87,7 +87,8 @@ public class RdbCalendarStorageUtilities implements CalendarStorageUtilities {
 
     /** The attendee fields that are preserved for reference in <i>tombstone</i> attendees */
     private static final AttendeeField[] ATTENDEE_TOMBSTONE_FIELDS = {
-        AttendeeField.CU_TYPE, AttendeeField.ENTITY, AttendeeField.FOLDER_ID, AttendeeField.MEMBER, AttendeeField.PARTSTAT, AttendeeField.URI
+        AttendeeField.CU_TYPE, AttendeeField.ENTITY, AttendeeField.FOLDER_ID, AttendeeField.MEMBER, AttendeeField.PARTSTAT, 
+        AttendeeField.URI, AttendeeField.TIMESTAMP
     };
 
     private final CalendarStorage storage;

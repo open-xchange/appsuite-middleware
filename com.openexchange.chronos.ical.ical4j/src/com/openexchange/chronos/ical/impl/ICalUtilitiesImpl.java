@@ -239,6 +239,7 @@ public class ICalUtilitiesImpl implements ICalUtilities {
             Component component = exporter.export(d, parameters, warnings);
             if (null != component) {
                 ICalUtils.removeProperties(component, parameters.get(ICalParameters.IGNORED_PROPERTIES, String[].class));
+                ICalUtils.removeParameters(component, parameters.get(ICalParameters.IGNORED_PROPERTY_PARAMETERS, String[].class));
                 components.add(component);
             }
         }

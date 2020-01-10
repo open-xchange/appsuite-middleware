@@ -212,6 +212,25 @@ public class Check extends com.openexchange.chronos.common.Check {
         }
         return eventUpdate;
     }
+    
+    /**
+     * Checks that the incoming update does not contain outdated participant status
+     * <p>
+     * Note: Due the fact that some clients will receive the timestamp in DateTime format <code>ISO.8601.2004</code>,
+     * see {@link <a href="https://tools.ietf.org/html/rfc5545#section-3.3.5">RFC 5545 Section 3.3.5</a>}, the timestamp
+     * can only be evaluated in seconds.
+     *
+     * @param original The original attendee from the DB
+     * @param updated The updated attendee
+     * @throws OXException {@link CalendarExceptionCodes#CONCURRENT_MODIFICATION}
+     */
+    public static void requireUpToDateTimestamp(Attendee original, Attendee updated) throws OXException {
+        if (original.getTimestamp() > 0 && updated.getTimestamp() > 0 
+            && original.getTimestamp() > updated.getTimestamp()
+            && original.getTimestamp() - updated.getTimestamp() >= 1000) {
+            throw CalendarExceptionCodes.CONCURRENT_MODIFICATION.create(I(original.getEntity()), L(original.getTimestamp()), L(updated.getTimestamp()));
+        }
+    }
 
     /**
      * Checks that a specific event is actually present in the supplied folder. Based on the folder type, the event's public folder

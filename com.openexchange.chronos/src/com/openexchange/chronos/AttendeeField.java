@@ -86,6 +86,10 @@ public enum AttendeeField {
      */
     PARTSTAT,
     /**
+     * The timestamp the attedee's participant status was changed the last time.
+     */
+    TIMESTAMP,
+    /**
      * The attendee's comment.
      */
     COMMENT,

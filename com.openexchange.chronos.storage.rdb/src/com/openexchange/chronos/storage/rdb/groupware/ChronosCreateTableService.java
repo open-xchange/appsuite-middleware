@@ -220,6 +220,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "comment TEXT DEFAULT NULL," +
                 "member VARCHAR(1024) DEFAULT NULL," +
                 "transp INT4 UNSIGNED DEFAULT NULL," +
+                "timestamp BIGINT UNSIGNED DEFAULT NULL," +
                 "extendedParameters BLOB DEFAULT NULL," +
                 "PRIMARY KEY (cid,account,event,entity)," +
                 "KEY uri (cid,account,event,uri(191))," +
@@ -243,6 +244,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "comment TEXT DEFAULT NULL," +
                 "member VARCHAR(1024) DEFAULT NULL," +
                 "transp INT4 UNSIGNED DEFAULT NULL," +
+                "timestamp BIGINT UNSIGNED DEFAULT NULL," +
                 "extendedParameters BLOB DEFAULT NULL," +
                 "PRIMARY KEY (cid,account,event,entity)," +
                 "KEY uri (cid,account,event,uri(191))," +
