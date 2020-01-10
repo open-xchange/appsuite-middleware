@@ -37,8 +37,9 @@ Requires:      open-xchange-system >= @OXVERSION@
 Obsoletes:     open-xchange-freebusy < %{version}
 Conflicts:     open-xchange-publish < 7.10.2
 Obsoletes:     open-xchange-publish < 7.10.2
-Conflicts:     open-xchange-geoip-ip2location >= 7.10.2
-Obsoletes:     open-xchange-geoip-ip2location >= 7.10.2
+Conflicts:     open-xchange-geoip-ip2location < 7.10.3
+Obsoletes:     open-xchange-geoip-ip2location < 7.10.3
+Obsoletes:     open-xchange-filestore-swift < 7.10.4
 
 %description
 This package installs all essential bundles that are necessary to get a working backend installation. This are the bundles for the main
