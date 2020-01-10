@@ -74,14 +74,15 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.session.Session;
 import com.openexchange.test.mock.MockUtils;
-import com.openexchange.userfeedback.ExportResultConverter;
 import com.openexchange.userfeedback.FeedbackMetaData;
 import com.openexchange.userfeedback.FeedbackType;
+import com.openexchange.userfeedback.export.ExportResultConverter;
 import com.openexchange.userfeedback.filter.FeedbackFilter;
 import com.openexchange.userfeedback.osgi.Services;
 
@@ -129,6 +130,9 @@ public class FeedbackServiceImplTest {
     private ServerConfigService serverConfigService;
 
     @Mock
+    private LeanConfigurationService leanConfigurationService;
+
+    @Mock
     private ConfigViewFactory configViewFactory;
 
     @Mock
@@ -156,6 +160,7 @@ public class FeedbackServiceImplTest {
         PowerMockito.mockStatic(Services.class);
 
         PowerMockito.when(Services.getService(ServerConfigService.class)).thenReturn(serverConfigService);
+        PowerMockito.when(Services.getService(LeanConfigurationService.class)).thenReturn(leanConfigurationService);
 
         PowerMockito.when(Services.getService(ConfigViewFactory.class)).thenReturn(configViewFactory);
         PowerMockito.when(configViewFactory.getView(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt())).thenReturn(configView);
@@ -251,6 +256,8 @@ public class FeedbackServiceImplTest {
 
     @Test
     public void testStore_ok_ensureSavedInternally() throws OXException, SQLException {
+        PowerMockito.when(leanConfigurationService.getProperty(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt(), ArgumentMatchers.any())).thenReturn("star-rating-v1");
+
         FeedbackTypeRegistryImpl.getInstance().registerType(feedbackType);
         feedbackService = Mockito.spy(new FeedbackServiceImpl());
         Mockito.doNothing().when(feedbackService).saveFeedBackInternal((Connection) ArgumentMatchers.any(), (FeedbackMetaData) ArgumentMatchers.any(), ArgumentMatchers.anyString());

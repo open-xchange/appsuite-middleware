@@ -55,13 +55,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
@@ -71,13 +71,13 @@ import com.openexchange.serverconfig.ServerConfig;
 import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.session.Session;
 import com.openexchange.tools.validate.ParameterValidator;
-import com.openexchange.userfeedback.ExportResultConverter;
 import com.openexchange.userfeedback.FeedbackMetaData;
 import com.openexchange.userfeedback.FeedbackMetaData.Builder;
 import com.openexchange.userfeedback.FeedbackService;
 import com.openexchange.userfeedback.FeedbackType;
 import com.openexchange.userfeedback.FeedbackTypeRegistry;
 import com.openexchange.userfeedback.exception.FeedbackExceptionCodes;
+import com.openexchange.userfeedback.export.ExportResultConverter;
 import com.openexchange.userfeedback.filter.FeedbackFilter;
 import com.openexchange.userfeedback.osgi.Services;
 
@@ -96,15 +96,6 @@ public class FeedbackServiceImpl implements FeedbackService {
         ParameterValidator.checkObject(params);
         ParameterValidator.checkObject(feedback);
 
-        // Get context group id
-        ConfigViewFactory factory = Services.getService(ConfigViewFactory.class);
-        if (factory == null) {
-            throw ServiceExceptionCode.absentService(ConfigViewFactory.class);
-        }
-
-        ConfigView view = factory.getView(session.getUserId(), session.getContextId());
-        String contextGroupId = view.opt("com.openexchange.context.group", String.class, null);
-
         String type = params.get("type");
         ParameterValidator.checkString(type);
 
@@ -112,11 +103,19 @@ public class FeedbackServiceImpl implements FeedbackService {
         FeedbackTypeRegistry registry = FeedbackTypeRegistryImpl.getInstance();
         FeedbackType feedBackType = registry.getFeedbackType(type);
 
-        if (feedBackType == null) {
+        LeanConfigurationService leanConfig = Services.getService(LeanConfigurationService.class);
+        if (leanConfig == null) {
+            throw ServiceExceptionCode.absentService(LeanConfigurationService.class);
+        }
+        String configuredTypeForUser = leanConfig.getProperty(session.getUserId(), session.getContextId(), UserFeedbackProperty.mode);
+        if (feedBackType == null || !type.equalsIgnoreCase(configuredTypeForUser)) {
             throw FeedbackExceptionCodes.INVALID_FEEDBACK_TYPE.create(type);
         }
 
         DatabaseService dbService = Services.getService(DatabaseService.class);
+        if (dbService == null) {
+            throw ServiceExceptionCode.absentService(DatabaseService.class);
+        }
         if (!dbService.isGlobalDatabaseAvailable()) {
             throw FeedbackExceptionCodes.GLOBAL_DB_NOT_CONFIGURED.create();
         }
@@ -127,9 +126,11 @@ public class FeedbackServiceImpl implements FeedbackService {
         String serverVersion = "";
         if (Strings.isNotEmpty(hostname)) {
             ServerConfigService serverConfigService = Services.getService(ServerConfigService.class);
-            ServerConfig serverConfig = serverConfigService.getServerConfig(hostname, session);
-            if (serverConfig != null) {
-                serverVersion = serverConfig.getServerVersion();
+            if (serverConfigService != null) {
+                ServerConfig serverConfig = serverConfigService.getServerConfig(hostname, session);
+                if (serverConfig != null) {
+                    serverVersion = serverConfig.getServerVersion();
+                }
             }
         }
         String uiVersion = "";
@@ -146,6 +147,13 @@ public class FeedbackServiceImpl implements FeedbackService {
             LOG.debug("Unable to retrieve ui version as provided feedback is from type {}.", feedback.getClass().getName());
         }
 
+        // Get context group id
+        ConfigViewFactory factory = Services.getService(ConfigViewFactory.class);
+        if (factory == null) {
+            throw ServiceExceptionCode.absentService(ConfigViewFactory.class);
+        }
+        ConfigView view = factory.getView(session.getUserId(), session.getContextId());
+        String contextGroupId = view.opt("com.openexchange.context.group", String.class, null);
         Connection writeCon = dbService.getWritableForGlobal(contextGroupId);
         int rollback = 0;
         try {
@@ -168,7 +176,7 @@ public class FeedbackServiceImpl implements FeedbackService {
             LOG.error("Unable to store feedback data.", e);
         } finally {
             if (rollback > 0) {
-                if (rollback==1) {
+                if (rollback == 1) {
                     Databases.rollback(writeCon);
                 }
                 Databases.autocommit(writeCon);
@@ -325,14 +333,14 @@ public class FeedbackServiceImpl implements FeedbackService {
             stmt = con.prepareStatement(TYPEID_FEEDBACK_SQL);
             stmt.setString(1, ctxGroup);
             stmt.setString(2, filter.getType());
-            stmt.setLong(3, filter.start().longValue());
-            stmt.setLong(4, filter.end().longValue());
+            stmt.setLong(3, filter.start());
+            stmt.setLong(4, filter.end());
             rs = stmt.executeQuery();
             if (false == rs.next()) {
                 return Collections.emptyList();
             }
 
-            List<Long> results = new LinkedList<>();
+            List<Long> results = new ArrayList<>();
             do {
                 results.add(Long.valueOf(rs.getLong("typeId")));
             } while (rs.next());

@@ -66,10 +66,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.userfeedback.ExportResult;
-import com.openexchange.userfeedback.ExportType;
 import com.openexchange.userfeedback.Feedback;
 import com.openexchange.userfeedback.FeedbackMetaData;
+import com.openexchange.userfeedback.export.ExportResult;
+import com.openexchange.userfeedback.export.ExportType;
 
 /**
  * {@link StarRatingV1ExportResultConverterTest}
@@ -84,7 +84,7 @@ public class StarRatingV1ExportResultConverterTest {
     Map<String, String> config = new HashMap<>();
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         FeedbackMetaData metaData = FeedbackMetaData.builder().setCtxId(0).setDate(System.currentTimeMillis()).setLoginName("loginName").setServerVersion("serverVersion").build();
         feedback = Feedback.builder(metaData).build();
 

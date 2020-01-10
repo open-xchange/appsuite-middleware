@@ -21,7 +21,7 @@ The feedback is collected from the user by showing a dedicated dialog within the
 
 The user is able to give his feedback, as often as he desires. Every given feedback is stored inside the <code>globaldb</code> database in the <code>feedback</code> table. The middleware provides a HTTP API for those purposes which is used by the UI and documented [here](/components/middleware/http{{ site.baseurl }}/index.html#!/userfeedback/store).
 
-Since 7.8.4 the Open-Xchange server provides a default implementation for <code>star-rating-v1</code>. It is easy to create a custom feedback type by implementing related interfaces and register the custom feedback type for a defined user group (see above).
+Since 7.8.4 the Open-Xchange server provides a default implementation for <code>star-rating-v1</code>. With 7.10.4 there is also support for <code>nps-v1</code>. It is easy to create a custom feedback type by implementing related interfaces and register the custom feedback type for a defined user group (see above).
 
 # Configuration guide
 
@@ -37,14 +37,14 @@ If everything is set up as described you can continue with the following steps.
 # Feedback export
 To review the collected feedback, a service provider can trigger the export of the collected data. 
 
-## star-rating-v1 export
+## star-rating-v1/nps-v1 export
 
-For feedback type <code>star-rating-v1</code> the export as comma separated values in a file is provided. This can be done by using the provided REST API or a CLT (CSV only).
+For feedback type <code>star-rating-v1</code> or <code>nps-v1</code> the export as comma separated values in a file is provided. This can be done by using the provided REST API or a CLT (CSV only).
 
 To ensure privacy the user and context id are delivered in a hashed form. This way multiple entries can be matched to one user without revealing their identity. Generally the following parameters are supported to filter the stored data:
 
 * context group to export feedback for (optional, default: 'default')
-* type of feedback to export (optional, default: 'star-rating-v1')
+* type of feedback to export (optional, default: 'star-rating-v1', other: 'nps-v1')
 * time range to export feedback for (optional, default: export all feedback); use separate parameters for start and end time to support "since X" and "up to X" use cases
 
 The handling of export data (and the date contained within the export) is in Coordinated Universal Time (UTC). 
@@ -64,7 +64,7 @@ Raw export will provide a JSON array containing the requested feedback (based on
 After a certain amount of time, it can be necessary to delete the collected feedback data to preserve database space. For those purposes a REST service or a CLT. The data can be deleted for a context group and one feedback type at a time. If no information is provided, the used default values are:
 
 * context group : 'default'
-* feedback type : 'star-rating-v1'
+* feedback type : 'star-rating-v1' (or 'nps-v1')
 
 The user can also provide a timeframe, that should be considered. Only the data inside this timeframe will be deleted.
 

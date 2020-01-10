@@ -71,11 +71,11 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
-import com.openexchange.userfeedback.ExportResult;
-import com.openexchange.userfeedback.ExportResultConverter;
-import com.openexchange.userfeedback.ExportType;
 import com.openexchange.userfeedback.FeedbackService;
 import com.openexchange.userfeedback.exception.FeedbackExceptionCodes;
+import com.openexchange.userfeedback.export.ExportResult;
+import com.openexchange.userfeedback.export.ExportResultConverter;
+import com.openexchange.userfeedback.export.ExportType;
 import com.openexchange.userfeedback.mail.filter.FeedbackMailFilter;
 import com.openexchange.userfeedback.mail.osgi.Services;
 
@@ -128,7 +128,6 @@ public class FeedbackMailServiceSMTPTest {
                         try {
                             in = IOUtils.toInputStream(source, "UTF-8");
                         } catch (IOException e) {
-                            // TODO Auto-generated catch block
                             e.printStackTrace();
                         }
                         return in;

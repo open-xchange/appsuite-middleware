@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.userfeedback.starrating.v1;
+package com.openexchange.userfeedback.nps.v1;
 
 import static com.openexchange.java.Autoboxing.L;
 import java.io.ByteArrayOutputStream;
@@ -83,47 +83,62 @@ import com.openexchange.userfeedback.FeedbackMetaData;
 import com.openexchange.userfeedback.exception.FeedbackExceptionCodes;
 import com.openexchange.userfeedback.export.ExportResultConverter;
 import com.openexchange.userfeedback.fields.UserFeedbackField;
-import com.openexchange.userfeedback.starrating.exception.StarRatingExceptionCodes;
+import com.openexchange.userfeedback.nps.exception.NPSExceptionCodes;
 
 /**
- * {@link StarRatingV1}
+ * 
+ * {@link NPSv1}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.4
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.10.4
  */
-public class StarRatingV1 extends AbstractJSONFeedbackType {
+public class NPSv1 extends AbstractJSONFeedbackType {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(StarRatingV1.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(NPSv1.class);
 
-    private static final String TYPE = "star-rating-v1";
-    private static final String INSERT_SQL = "INSERT INTO feedback_star_rating_v1 (data) VALUES (?)";
-    private static final String SELECT_SQL = "SELECT id, data FROM feedback_star_rating_v1 WHERE id IN (";
-    private static final String DELETE_SQL = "DELETE FROM feedback_star_rating_v1 WHERE id = ?";
+    private static final String TYPE = "nps-v1";
+    private static final String INSERT_SQL = "INSERT INTO feedback_nps_v1 (data) VALUES (?)";
+    private static final String SELECT_SQL = "SELECT id, data FROM feedback_nps_v1 WHERE id IN (";
+    private static final String DELETE_SQL = "DELETE FROM feedback_nps_v1 WHERE id = ?";
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void validate(JSONObject jsonFeedback) throws OXException {
-        if (!jsonFeedback.has(StarRatingV1ExportFields.SCORE.getName())) {
-            throw StarRatingExceptionCodes.PARAMETER_MISSING.create(StarRatingV1ExportFields.SCORE.getName());
+        if (!jsonFeedback.has(NPSv1ExportFields.SCORE.getName())) {
+            throw NPSExceptionCodes.PARAMETER_MISSING.create(NPSv1ExportFields.SCORE.getName());
         }
 
         try {
-            String score = jsonFeedback.getString(StarRatingV1ExportFields.SCORE.getName());
+            String score = jsonFeedback.getString(NPSv1ExportFields.SCORE.getName());
             if (Strings.isEmpty(score)) {
-                throw StarRatingExceptionCodes.INVALID_SCORE_TYPE.create(score);
+                throw NPSExceptionCodes.INVALID_TYPE.create(score);
             }
             long scoreInt = Long.valueOf(score).longValue();
-            if (scoreInt < 1) {
-                throw StarRatingExceptionCodes.INVALID_SCORE_VALUE.create(L(scoreInt));
+            if (scoreInt < Integer.MIN_VALUE || scoreInt > Integer.MAX_VALUE) {
+                throw NPSExceptionCodes.INVALID_VALUE.create(NPSv1ExportFields.SCORE.getDisplayName(), L(scoreInt));
+            }
+            String questionId = jsonFeedback.optString(NPSv1ExportFields.QUESTION_ID.getName());
+            if (Strings.isEmpty(questionId)) {
+                return;
+            }
+            long questionIdInt = Long.valueOf(questionId).longValue();
+            if (questionIdInt < 0 || questionIdInt > 3) {
+                throw NPSExceptionCodes.INVALID_VALUE.create(NPSv1ExportFields.QUESTION_ID.getDisplayName(), L(questionIdInt));
             }
         } catch (JSONException e) {
             LOG.error("Unable to retrieve 'score' from feedback.", e);
-            throw StarRatingExceptionCodes.PARAMETER_MISSING.create(StarRatingV1ExportFields.SCORE.getName());
+            throw NPSExceptionCodes.PARAMETER_MISSING.create(NPSv1ExportFields.SCORE.getName());
         } catch (NumberFormatException e) {
             LOG.error("Unable to parse 'score' value from feedback.", e);
-            throw StarRatingExceptionCodes.BAD_PARAMETER.create(StarRatingV1ExportFields.SCORE.getName());
+            throw NPSExceptionCodes.BAD_PARAMETER.create(NPSv1ExportFields.SCORE.getName());
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public long storeFeedbackInternal(JSONObject jsonFeedback, Connection con) throws OXException {
         ResultSet rs = null;
@@ -165,15 +180,21 @@ public class StarRatingV1 extends AbstractJSONFeedbackType {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public ExportResultConverter getFeedbacks(List<FeedbackMetaData> feedbackMetaData, Connection con) throws OXException {
         return getFeedbacks(feedbackMetaData, con, Collections.<String, String> emptyMap());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public ExportResultConverter getFeedbacks(List<FeedbackMetaData> feedbackMetaData, Connection con, Map<String, String> configuration) throws OXException {
-        if (feedbackMetaData.size() == 0) {
-            return createExportObject(Collections.<Feedback> emptyList(), Collections.<String, String> emptyMap());
+        if (feedbackMetaData == null || feedbackMetaData.size() == 0) {
+            return new NPSv1ExportResultConverter(Collections.<Feedback> emptyList(), configuration);
         }
 
         ResultSet rs = null;
@@ -199,7 +220,7 @@ public class StarRatingV1 extends AbstractJSONFeedbackType {
                 }
             }
             SortedSet<Feedback> sorted = sort(feedbacks.values());
-            return createExportObject(sorted, configuration);
+            return new NPSv1ExportResultConverter(sorted, configuration);
         } catch (SQLException e) {
             throw FeedbackExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -207,6 +228,12 @@ public class StarRatingV1 extends AbstractJSONFeedbackType {
         }
     }
 
+    /**
+     * Sorts the given collection of {@link Feedback}s based on the date
+     * 
+     * @param collection {@link Collection} to sort
+     * @return {@link SortedSet} of {@link Feedback}
+     */
     private SortedSet<Feedback> sort(Collection<Feedback> collection) {
         Comparator<Feedback> comparator = new Comparator<Feedback>() {
 
@@ -246,11 +273,6 @@ public class StarRatingV1 extends AbstractJSONFeedbackType {
         current.setContent(content);
     }
 
-    private ExportResultConverter createExportObject(Collection<Feedback> feedbacks, Map<String, String> configuration) {
-        ExportResultConverter converter = new StarRatingV1ExportResultConverter(feedbacks, configuration);
-        return converter;
-    }
-
     @Override
     public void deleteFeedbacks(List<Long> ids, Connection con) throws OXException {
         PreparedStatement stmt = null;
@@ -275,7 +297,7 @@ public class StarRatingV1 extends AbstractJSONFeedbackType {
 
     @Override
     protected List<UserFeedbackField> getRequiredFields() throws OXException {
-        return StarRatingV1ExportFields.getFieldsRequiredByClient();
+        return NPSv1ExportFields.getFieldsRequiredByClient();
     }
 
 }

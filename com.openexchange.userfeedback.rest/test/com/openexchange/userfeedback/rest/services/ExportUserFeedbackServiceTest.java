@@ -74,7 +74,7 @@ public class ExportUserFeedbackServiceTest {
     private long now;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
 
         service = new ExportUserFeedbackService(serviceLookup);

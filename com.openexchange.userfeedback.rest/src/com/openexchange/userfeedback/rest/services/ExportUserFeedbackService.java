@@ -67,11 +67,11 @@ import com.openexchange.java.Strings;
 import com.openexchange.rest.services.annotation.Role;
 import com.openexchange.rest.services.annotation.RoleAllowed;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.userfeedback.ExportResult;
-import com.openexchange.userfeedback.ExportResultConverter;
-import com.openexchange.userfeedback.ExportType;
 import com.openexchange.userfeedback.FeedbackService;
 import com.openexchange.userfeedback.exception.FeedbackExceptionCodes;
+import com.openexchange.userfeedback.export.ExportResult;
+import com.openexchange.userfeedback.export.ExportResultConverter;
+import com.openexchange.userfeedback.export.ExportType;
 import com.openexchange.userfeedback.filter.DateOnlyFilter;
 
 /**

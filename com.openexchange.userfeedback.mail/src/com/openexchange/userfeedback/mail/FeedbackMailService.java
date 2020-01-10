@@ -65,7 +65,7 @@ public interface FeedbackMailService {
      * Send a user feedback file to a set of recipients. All needed information is 
      * inside the {@link FeedbackMailFilter} property.
      * 
-     * @param filter, with all export filter information and recipients
+     * @param filter with all export filter information and recipients
      * @return, a result String if at least one mail is sent out
      * @throws OXException, if anything during gathering export data or sending went wrong
      */

@@ -47,24 +47,21 @@
  *
  */
 
-package com.openexchange.userfeedback.starrating;
-
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.userfeedback.starrating.v1.StarRatingV1ExportResultConverterTest;
+package com.openexchange.userfeedback.export;
 
 /**
- * 
- * {@link UnitTests}
+ * {@link ExportResultConverter}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.4
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    StarRatingV1ExportResultConverterTest.class
+public interface ExportResultConverter {
 
-})
-public class UnitTests {
+    /**
+     * Exports the feedback to the given {@link ExportType}
+     * 
+     * @param type {@link ExportType} defining the type of the exported feedback
+     * @return the result of an export
+     */
+    ExportResult get(ExportType type);
 }

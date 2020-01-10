@@ -5,7 +5,6 @@ import static org.junit.Assert.assertTrue;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -16,7 +15,6 @@ import javax.mail.Multipart;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
-import org.bouncycastle.openpgp.PGPException;
 import org.bouncycastle.openpgp.PGPPublicKey;
 import org.junit.Before;
 import org.junit.Test;
@@ -46,7 +44,7 @@ public class FeedbackMimeMessageUtilityTest {
     KeyRingParserResult keyRingParserResult;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
 
         PowerMockito.mockStatic(Services.class);
         PowerMockito.when(Services.getService(LeanConfigurationService.class)).thenReturn(leanConfigurationService);
@@ -93,14 +91,14 @@ public class FeedbackMimeMessageUtilityTest {
     }
 
     @Test
-    public void extractRecipientsTest_NoneNotNullResult() throws UnsupportedEncodingException, OXException {
+    public void extractRecipientsTest_NoneNotNullResult() {
         FeedbackMailFilter filter = getDefaultFilter();
         Address[] extractRecipients = FeedbackMimeMessageUtility.extractValidRecipients(filter, new ArrayList<InternetAddress>());
         assertTrue(extractRecipients != null);
     }
 
     @Test
-    public void extractRecipientsTest_AdressNoPrivate() throws UnsupportedEncodingException, OXException {
+    public void extractRecipientsTest_AdressNoPrivate() {
         HashMap<String, String> recipients = new HashMap<>();
         final String recipient = "recipient1@ox.de";
         recipients.put(recipient, "");
@@ -113,7 +111,7 @@ public class FeedbackMimeMessageUtilityTest {
     }
 
     @Test
-    public void extractRecipientsTest_MultipleAdresses() throws UnsupportedEncodingException, OXException {
+    public void extractRecipientsTest_MultipleAdresses() {
         HashMap<String, String> recipients = new HashMap<>();
         final String recipient = "recipient1@ox.de";
         recipients.put(recipient, "");
@@ -164,7 +162,7 @@ public class FeedbackMimeMessageUtilityTest {
     }
     
     @Test
-    public void extractRecipientsForPgpTest_validPGPAddress() throws OXException, IOException, PGPException {
+    public void extractRecipientsForPgpTest_validPGPAddress() throws OXException, IOException {
         PGPPublicKey pgpPublicKey = PowerMockito.mock(PGPPublicKey.class);
         
         PowerMockito.when(pgpKeyRingParser.parse(org.mockito.ArgumentMatchers.any(InputStream.class))).thenReturn(keyRingParserResult);

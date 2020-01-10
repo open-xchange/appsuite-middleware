@@ -53,6 +53,7 @@ import java.sql.Connection;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
+import com.openexchange.userfeedback.export.ExportResultConverter;
 
 /**
  * {@link FeedbackType}

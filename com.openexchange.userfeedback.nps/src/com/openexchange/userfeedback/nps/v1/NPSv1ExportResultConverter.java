@@ -47,24 +47,33 @@
  *
  */
 
-package com.openexchange.userfeedback.starrating;
+package com.openexchange.userfeedback.nps.v1;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.userfeedback.starrating.v1.StarRatingV1ExportResultConverterTest;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import com.openexchange.userfeedback.Feedback;
+import com.openexchange.userfeedback.export.AbstractExportResultConverter;
+import com.openexchange.userfeedback.fields.UserFeedbackField;
 
 /**
  * 
- * {@link UnitTests}
+ * {@link NPSv1ExportResultConverter}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since v7.8.4
+ * @since v7.10.4
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    StarRatingV1ExportResultConverterTest.class
+public class NPSv1ExportResultConverter extends AbstractExportResultConverter {
 
-})
-public class UnitTests {
+    public NPSv1ExportResultConverter(Collection<Feedback> lFeedbacks, Map<String, String> configuration) {
+        super(lFeedbacks, configuration);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected List<UserFeedbackField> getExportFields() {
+        return NPSv1ExportFields.ALL;
+    }
 }

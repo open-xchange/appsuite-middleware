@@ -47,15 +47,28 @@
  *
  */
 
-package com.openexchange.userfeedback;
+package com.openexchange.userfeedback.nps.osgi;
+
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.userfeedback.FeedbackType;
+import com.openexchange.userfeedback.nps.v1.NPSv1;
 
 /**
- * {@link ExportResult}
+ * 
+ * {@link Activator}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since v7.8.4
+ * @since v7.10.4
  */
-public interface ExportResult {
+public class Activator extends HousekeepingActivator{
 
-    Object getResult();
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class[]{};
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
+        registerService(FeedbackType.class, new NPSv1());
+    }
 }
