@@ -61,7 +61,7 @@ import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
 /**
- * {@link CalendarEventAddRDateColumnTask2}
+ * {@link CalendarEventAddAttendeePrivilegesColumnTask}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.2

@@ -508,6 +508,7 @@ public class DefaultEntityResolver implements EntityResolver {
      *
      * @param id The identifier of the folder to get
      * @return The folder
+     * @throws OXException 
      */
     public FolderObject getFolder(int id) throws OXException {
         return getFolder(id, null);
@@ -519,6 +520,7 @@ public class DefaultEntityResolver implements EntityResolver {
      * @param id The identifier of the folder to get
      * @param optConnection An optional connection to the database to use, or <code>null</code> to acquire one dynamically
      * @return The folder
+     * @throws OXException 
      */
     public FolderObject getFolder(int id, Connection optConnection) throws OXException {
         Integer iD = I(id);
@@ -535,6 +537,7 @@ public class DefaultEntityResolver implements EntityResolver {
      *
      * @param id The identifier of the folder to get
      * @return The folder, or <code>null</code> it doesn't exist
+     * @throws OXException 
      */
     public FolderObject optFolder(int id) throws OXException {
         try {
@@ -553,6 +556,7 @@ public class DefaultEntityResolver implements EntityResolver {
      * @param userId The identifier of the user to get the visible folders for
      * @param optConnection An optional connection to the database to use, or <code>null</code> to acquire one dynamically
      * @return The folders, or an empty list if there are none
+     * @throws OXException 
      */
     public List<FolderObject> getVisibleFolders(int userId, Connection optConnection) throws OXException {
         List<FolderObject> folders = loadVisibleFolders(userId, optConnection);
@@ -763,9 +767,8 @@ public class DefaultEntityResolver implements EntityResolver {
                 if (null != e.getLogArgs() && 0 < e.getLogArgs().length) {
                     Object arg = e.getLogArgs()[0];
                     throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(e, arg, arg, CalendarUserType.INDIVIDUAL);
-                } else {
-                    throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(e, java.util.Arrays.toString(entities), I(0), CalendarUserType.INDIVIDUAL);
                 }
+                throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(e, java.util.Arrays.toString(entities), I(0), CalendarUserType.INDIVIDUAL);
             }
             throw e;
         }

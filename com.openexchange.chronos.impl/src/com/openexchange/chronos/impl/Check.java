@@ -534,7 +534,7 @@ public class Check extends com.openexchange.chronos.common.Check {
      * @param event The event to check
      * @param attendee The attendee to lookup
      * @return The successfully looked up attendee
-     * @see CalendarUtils#find(List, Attendee)
+     * @see CalendarUtils#find(Collection, CalendarUser)
      * @throws OXException {@link CalendarExceptionCodes#ATTENDEE_NOT_FOUND}
      */
     public static Attendee attendeeExists(Event event, Attendee attendee) throws OXException {
