@@ -67,6 +67,7 @@ public class TestConfig extends AbstractConfig {
      * Enumeration of all properties in the test.properties file.
      */
     public static enum Property {
+
         /**
          * ajax.properties
          */
@@ -79,6 +80,10 @@ public class TestConfig extends AbstractConfig {
          * googletest.properties
          */
         GOOGLE_PROPS("googlePropertiesFile"),
+        /**
+         * ocp.properties
+         */
+        OCP_PROPS("ocpPropertiesFile"),
 
         FILESTORE("filestoreId");
 

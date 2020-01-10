@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2018-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,23 +47,87 @@
  *
  */
 
-package com.openexchange.policy.retry;
+package com.openexchange.ocp;
 
 /**
- * {@link LinearRetryPolicy}
+ * {@link DatabaseReportingEvent}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since v7.10.1
+ * @since v7.12.0
  */
-public class LinearRetryPolicy extends AbstractRetryPolicy {
+public class DatabaseReportingEvent {
+
+    private final int id;
+    private final String reseller;
+    private final int contextId;
+    private final int userId;
+    private final int eventType;
+    private final long timestamp;
 
     /**
-     * Initialises a new {@link LinearRetryPolicy}.
-     * The {@link #maxTries} is initialised with
-     * {@link Integer#MAX_VALUE} and {@link #sleepTime}
-     * with 5000 milliseconds.
+     * Initialises a new {@link DatabaseReportingEvent}.
      */
-    public LinearRetryPolicy() {
-        super(Integer.MAX_VALUE, 5000L);
+    public DatabaseReportingEvent(int id, String reseller, int contextId, int userId, int eventType, long timestamp) {
+        super();
+        this.id = id;
+        this.reseller = reseller;
+        this.contextId = contextId;
+        this.userId = userId;
+        this.eventType = eventType;
+        this.timestamp = timestamp;
+    }
+
+    /**
+     * Gets the id
+     *
+     * @return The id
+     */
+    public int getId() {
+        return id;
+    }
+
+    /**
+     * Gets the contextId
+     *
+     * @return The contextId
+     */
+    public int getContextId() {
+        return contextId;
+    }
+
+    /**
+     * Gets the userId
+     *
+     * @return The userId
+     */
+    public int getUserId() {
+        return userId;
+    }
+
+    /**
+     * Gets the eventType
+     *
+     * @return The eventType
+     */
+    public int getEventType() {
+        return eventType;
+    }
+
+    /**
+     * Gets the timestamp
+     *
+     * @return The timestamp
+     */
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    /**
+     * Gets the reseller
+     *
+     * @return The reseller
+     */
+    public String getReseller() {
+        return reseller;
     }
 }

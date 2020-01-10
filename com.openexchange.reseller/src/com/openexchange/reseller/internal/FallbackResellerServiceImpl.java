@@ -51,6 +51,7 @@ package com.openexchange.reseller.internal;
 
 import java.util.Collections;
 import java.util.List;
+import com.openexchange.exception.OXException;
 import com.openexchange.reseller.ResellerService;
 import com.openexchange.reseller.data.ResellerAdmin;
 
@@ -60,6 +61,7 @@ import com.openexchange.reseller.data.ResellerAdmin;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.3
  */
+@SuppressWarnings("unused")
 public class FallbackResellerServiceImpl implements ResellerService {
 
     private static ResellerAdmin DEFAULT;
@@ -70,6 +72,26 @@ public class FallbackResellerServiceImpl implements ResellerService {
     @Override
     public ResellerAdmin getReseller(int cid) {
         return DEFAULT;
+    }
+
+    @Override
+    public ResellerAdmin getResellerByName(String resellerName) throws OXException {
+        return DEFAULT;
+    }
+
+    @Override
+    public ResellerAdmin getResellerById(int resellerId) throws OXException {
+        return DEFAULT;
+    }
+
+    @Override
+    public List<ResellerAdmin> getResellerAdminPath(int cid) throws OXException {
+        return getAll();
+    }
+
+    @Override
+    public List<ResellerAdmin> getSubResellers(int parentId) throws OXException {
+        return getAll();
     }
 
     @Override

@@ -57,26 +57,64 @@ import com.openexchange.reseller.data.ResellerAdmin;
  * {@link ResellerService}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.8.3
  */
 public interface ResellerService {
 
     /**
-     * Retrieves the ResellerAdmin for the given context
-     * 
+     * Retrieves the reseller administrator for the given context.
+     *
      * @param cid The context id
-     * @return The ResellerAdmin
-     * @throws OXException if it was unable to retrieve the ResellerAdmin
+     * @return The reseller administrator
+     * @throws OXException If reseller administrator cannot be returned
      */
-    public ResellerAdmin getReseller(int cid) throws OXException;
+    ResellerAdmin getReseller(int cid) throws OXException;
 
     /**
-     * Retrieves the ResellerAdmin for the given context
-     * 
-     * @param cid The context id
-     * @return The ResellerAdmin
-     * @throws OXException if it was unable to retrieve the ResellerAdmin
+     * Retrieves the reseller administrator with the specified identifier.
+     *
+     * @param resellerId The reseller identifier
+     * @return The reseller administrator
+     * @throws OXException If reseller administrator cannot be returned
      */
-    public List<ResellerAdmin> getAll() throws OXException;
+    ResellerAdmin getResellerById(int resellerId) throws OXException;
+
+    /**
+     * Retrieves the reseller administrator with the specified name.
+     *
+     * @param resellerName The reseller name
+     * @return The reseller administrator
+     * @throws OXException If reseller administrator cannot be returned
+     */
+    ResellerAdmin getResellerByName(String resellerName) throws OXException;
+
+    /**
+     * Retrieves the reseller administrator path for the specified context.
+     * <p>
+     * First in list is root reseller administrator, last one in list is the reseller administrator for given context.
+     *
+     * @param cid The context identifier
+     * @return A {@link List} with the path of the reseller sub-administrators
+     * @throws OXException If reseller administrator path cannot be returned
+     */
+    List<ResellerAdmin> getResellerAdminPath(int cid) throws OXException;
+
+    /**
+     * Retrieves all reseller sub-administrators for the specified parent reseller administrator.
+     *
+     * @param parentId The parent identifier
+     * @return A list with all reseller sub-administrators
+     * @throws OXException If sub-administrator cannot be returned
+     */
+    List<ResellerAdmin> getSubResellers(int parentId) throws OXException;
+
+    /**
+     * Retrieves all reseller administrators.
+     *
+     * @return The reseller administrators
+     * @throws OXException If reseller administrators cannot be returned
+     */
+    List<ResellerAdmin> getAll() throws OXException;
 
 }

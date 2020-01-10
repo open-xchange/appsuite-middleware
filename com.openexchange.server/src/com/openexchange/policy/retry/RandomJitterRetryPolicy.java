@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2018-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,20 +50,42 @@
 package com.openexchange.policy.retry;
 
 /**
- * {@link LinearRetryPolicy}
+ * {@link RandomJitterRetryPolicy}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since v7.10.1
+ * @since v7.12.0
  */
-public class LinearRetryPolicy extends AbstractRetryPolicy {
+public class RandomJitterRetryPolicy extends AbstractRetryPolicy {
+
+    private final float jitter;
 
     /**
-     * Initialises a new {@link LinearRetryPolicy}.
+     * Initialises a new {@link RandomJitterRetryPolicy}.
      * The {@link #maxTries} is initialised with
-     * {@link Integer#MAX_VALUE} and {@link #sleepTime}
-     * with 5000 milliseconds.
+     * {@link Integer#MAX_VALUE}, {@link #sleepTime}
+     * with 2500 milliseconds and the random {@link #jitter} with 20%.
      */
-    public LinearRetryPolicy() {
-        super(Integer.MAX_VALUE, 5000L);
+    public RandomJitterRetryPolicy() {
+        this(Integer.MAX_VALUE, 2500, 0.2f);
+    }
+
+    /**
+     * Initialises a new {@link RandomJitterRetryPolicy}.
+     * 
+     * @param maxTries The amount of maximum tries
+     * @param sleepTime The delay between each try in milliseconds
+     * @param jitter The random jitter percentage to add to the sleep time to avoid retry storms
+     */
+    public RandomJitterRetryPolicy(int maxTries, long sleepTime, float jitter) {
+        super(maxTries, sleepTime);
+        if (jitter < 0 || jitter > 1) {
+            throw new IllegalArgumentException("The jitter should be less than or equal to 1.0f and greater than or equal to 0");
+        }
+        this.jitter = jitter;
+    }
+
+    @Override
+    protected long getSleepTime() {
+        return super.getSleepTime() + Math.round(Math.random() * jitter * 1000);
     }
 }

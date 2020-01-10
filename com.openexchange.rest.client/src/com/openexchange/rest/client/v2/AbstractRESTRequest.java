@@ -115,6 +115,15 @@ public abstract class AbstractRESTRequest implements RESTRequest {
         queryParameters.put(name, value);
     }
 
+    /**
+     * Sets the body entity
+     * 
+     * @param entity The body entity to set
+     */
+    public void setBodyEntity(RESTBodyEntity entity) {
+        this.entity = entity;
+    }
+
     @Override
     public Map<String, String> getQueryParameters() {
         return Collections.unmodifiableMap(queryParameters);
@@ -127,13 +136,6 @@ public abstract class AbstractRESTRequest implements RESTRequest {
     @Override
     public Map<String, String> getHeaders() {
         return Collections.unmodifiableMap(headers);
-    }
-
-    /**
-     * 
-     */
-    public void sethBodyEntity(RESTBodyEntity entity) {
-        this.entity = entity;
     }
 
     @Override

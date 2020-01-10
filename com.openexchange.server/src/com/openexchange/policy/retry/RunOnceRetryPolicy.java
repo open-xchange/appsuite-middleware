@@ -54,25 +54,13 @@ package com.openexchange.policy.retry;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class RunOnceRetryPolicy implements RetryPolicy {
-    
-    private int retryCount = 0;
+public class RunOnceRetryPolicy extends AbstractRetryPolicy {
 
     /**
      * Initialises a new {@link RunOnceRetryPolicy}.
      */
     public RunOnceRetryPolicy() {
-        super();
-    }
-
-    @Override
-    public int getMaxTries() {
-        return 1;
-    }
-
-    @Override
-    public int retryCount() {
-        return retryCount;
+        super(1, 0);
     }
 
     @Override

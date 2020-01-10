@@ -287,7 +287,7 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
         MicrosoftGraphRequest request = new MicrosoftGraphRequest(RESTMethod.POST, BASE_URL + "/items/" + itemId + "/copy");
         request.setAccessToken(accessToken);
         request.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
-        request.sethBodyEntity(new JSONObjectEntity(body));
+        request.setBodyEntity(new JSONObjectEntity(body));
         RESTResponse restResponse = client.execute(request);
         if (restResponse.getStatusCode() == 202) {
             return restResponse.getHeader(HttpHeaders.LOCATION);
@@ -309,7 +309,7 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
         MicrosoftGraphRequest request = new MicrosoftGraphRequest(RESTMethod.POST, BASE_URL + "/items/" + itemId + "/copy");
         request.setAccessToken(accessToken);
         request.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
-        request.sethBodyEntity(new JSONObjectEntity(body));
+        request.setBodyEntity(new JSONObjectEntity(body));
         RESTResponse restResponse = client.execute(request);
         String location = restResponse.getHeader(HttpHeaders.LOCATION);
         if (Strings.isEmpty(location)) {

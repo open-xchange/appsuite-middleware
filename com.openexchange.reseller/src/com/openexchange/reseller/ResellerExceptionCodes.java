@@ -55,13 +55,16 @@ import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.exception.OXExceptionStrings;
+
 /**
  * {@link ResellerExceptionCodes}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.8.3
  */
 public enum ResellerExceptionCodes implements DisplayableOXExceptionCode {
+
     /**
      * Unable to retrieve ResellerAdmin with id %s
      */
@@ -73,8 +76,11 @@ public enum ResellerExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Unexpected database error: %s
      */
-    UNEXPECTED_DATABASE_ERROR("Unexpected database error: %s", MESSAGE, Category.CATEGORY_ERROR, 3);
-    
+    UNEXPECTED_DATABASE_ERROR("Unexpected database error: %s", MESSAGE, Category.CATEGORY_ERROR, 3),
+    /**
+     * Unable to retrieve ResellerAdmin with name %s
+     */
+    NO_RESELLER_WITH_NAME_FOUND("Unable to retrieve ResellerAdmin with name %s", MESSAGE, Category.CATEGORY_ERROR, 4);
 
     public static final String PREFIX = "RESELL";
 

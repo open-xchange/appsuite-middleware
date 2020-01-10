@@ -171,7 +171,7 @@ public abstract class AbstractRESTResponseParser implements RESTResponseParser {
      * 
      * @return The name of the remote service
      */
-    protected abstract String getRemoveServiceName();
+    protected abstract String getRemoteServiceName();
 
     /**
      * Parses from the specified {@link HttpResponse} the headers that are defined in the {@link #headerParsers}
@@ -239,12 +239,12 @@ public abstract class AbstractRESTResponseParser implements RESTResponseParser {
         // Assert the 5xx codes
         switch (statusCode) {
             case 500:
-                throw RESTExceptionCodes.REMOTE_INTERNAL_SERVER_ERROR.create(httpResponse.getStatusLine().getReasonPhrase(), getRemoveServiceName());
+                throw RESTExceptionCodes.REMOTE_INTERNAL_SERVER_ERROR.create(httpResponse.getStatusLine().getReasonPhrase(), getRemoteServiceName());
             case 503:
-                throw RESTExceptionCodes.REMOTE_SERVICE_UNAVAILABLE.create(httpResponse.getStatusLine().getReasonPhrase(), getRemoveServiceName());
+                throw RESTExceptionCodes.REMOTE_SERVICE_UNAVAILABLE.create(httpResponse.getStatusLine().getReasonPhrase(), getRemoteServiceName());
         }
         if (statusCode >= 500 && statusCode <= 599) {
-            throw RESTExceptionCodes.REMOTE_SERVER_ERROR.create(httpResponse.getStatusLine(), getRemoveServiceName());
+            throw RESTExceptionCodes.REMOTE_SERVER_ERROR.create(httpResponse.getStatusLine(), getRemoteServiceName());
         }
         return statusCode;
     }

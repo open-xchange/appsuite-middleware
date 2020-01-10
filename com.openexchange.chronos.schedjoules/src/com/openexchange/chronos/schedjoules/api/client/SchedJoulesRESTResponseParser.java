@@ -76,7 +76,7 @@ public class SchedJoulesRESTResponseParser extends AbstractRESTResponseParser {
     }
 
     @Override
-    protected String getRemoveServiceName() {
+    protected String getRemoteServiceName() {
         return REMOTE_SERVICE_NAME;
     }
 

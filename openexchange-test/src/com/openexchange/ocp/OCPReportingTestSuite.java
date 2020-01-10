@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2018-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,23 +47,28 @@
  *
  */
 
-package com.openexchange.policy.retry;
+package com.openexchange.ocp;
+
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import com.openexchange.ocp.login.TestLoginReporting;
+import com.openexchange.ocp.provisioning.TestResellerProvisioningReporting;
+import com.openexchange.ocp.provisioning.TestSubResellerProvisioningReporting;
 
 /**
- * {@link LinearRetryPolicy}
+ * {@link OCPReportingTestSuite}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since v7.10.1
+ * @since v7.12.0
  */
-public class LinearRetryPolicy extends AbstractRetryPolicy {
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    // @formatter:off
+    TestLoginReporting.class,
+    TestResellerProvisioningReporting.class,
+    TestSubResellerProvisioningReporting.class
+    // @formatter:on
+})
+public class OCPReportingTestSuite {
 
-    /**
-     * Initialises a new {@link LinearRetryPolicy}.
-     * The {@link #maxTries} is initialised with
-     * {@link Integer#MAX_VALUE} and {@link #sleepTime}
-     * with 5000 milliseconds.
-     */
-    public LinearRetryPolicy() {
-        super(Integer.MAX_VALUE, 5000L);
-    }
 }

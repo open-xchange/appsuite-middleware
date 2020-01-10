@@ -522,15 +522,25 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                     for (final OXContextPluginInterface oxContextPlugin : plugins) {
                         if (oxContextPlugin instanceof OXContextPluginInterfaceExtended) {
                             OXContextPluginInterfaceExtended extended = (OXContextPluginInterfaceExtended) oxContextPlugin;
-                            Map<String, Object> undoInfo = extended.undoableDelete(ctx, auth);
-                            if (undoInfo != null) {
-                                if (undeleteInfos == null) {
-                                    undeleteInfos = new LinkedHashMap<OXContextPluginInterfaceExtended, Map<String, Object>>(plugins.size());
+                            try {
+                                Map<String, Object> undoInfo = extended.undoableDelete(ctx, auth);
+                                if (undoInfo != null) {
+                                    if (undeleteInfos == null) {
+                                        undeleteInfos = new LinkedHashMap<OXContextPluginInterfaceExtended, Map<String, Object>>(plugins.size());
+                                    }
+                                    undeleteInfos.put(extended, undoInfo);
                                 }
-                                undeleteInfos.put(extended, undoInfo);
+                            } catch (PluginException e) {
+                                undoDelete(ctx, undeleteInfos);
+                                throw e;
                             }
                         } else {
-                            oxContextPlugin.delete(ctx, auth);
+                            try {
+                                oxContextPlugin.delete(ctx, auth);
+                            } catch (PluginException e) {
+                                undoDelete(ctx, undeleteInfos);
+                                throw e;
+                            }
                         }
                     }
                 }
@@ -545,14 +555,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                     deleted = true;
                 } finally {
                     if (!deleted) {
-                        for (Map.Entry<OXContextPluginInterfaceExtended, Map<String, Object>> undeleteInfo : undeleteInfos.entrySet()) {
-                            try {
-                                Map<String, Object> undoInfo = undeleteInfo.getValue();
-                                undeleteInfo.getKey().undelete(ctx, undoInfo);
-                            } catch (PluginException x) {
-                                log(LogLevel.WARNING, LOGGER, credentials, ctx.getIdAsString(), x, "Undeletion failed");
-                            }
-                        }
+                        undoDelete(ctx, undeleteInfos);
                     }
                 }
             }
@@ -563,6 +566,26 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         } catch (Throwable e) {
             logAndEnhanceException(e, credentials, ctx);
             throw e;
+        }
+    }
+
+    /**
+     * Performs an undo
+     *
+     * @param ctx The context
+     * @param undeleteInformation The undelete information
+     */
+    private void undoDelete(final Context ctx, Map<OXContextPluginInterfaceExtended, Map<String, Object>> undeleteInformation) {
+        if (undeleteInformation == null) {
+            return;
+        }
+        for (Map.Entry<OXContextPluginInterfaceExtended, Map<String, Object>> undeleteInfo : undeleteInformation.entrySet()) {
+            try {
+                Map<String, Object> undoInfo = undeleteInfo.getValue();
+                undeleteInfo.getKey().undelete(ctx, undoInfo);
+            } catch (PluginException x) {
+                LOGGER.warn("Undeletion failed", x);
+            }
         }
     }
 

@@ -62,6 +62,13 @@ import com.openexchange.reseller.impl.ResellerServiceImpl;
  */
 public class Activator extends HousekeepingActivator {
 
+    /**
+     * Initializes a new {@link Activator}.
+     */
+    public Activator() {
+        super();
+    }
+
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class[] { DatabaseService.class };
@@ -75,7 +82,5 @@ public class Activator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         registerService(ResellerService.class, new ResellerServiceImpl(getService(DatabaseService.class)));
-
     }
-
 }

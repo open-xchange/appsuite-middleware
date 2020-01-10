@@ -56,11 +56,11 @@ import com.google.common.collect.ImmutableList;
  *
  * {@link ResellerAdmin} - A reseller administrator.
  * <pre>
- *   ResellerAdmin ra = ResellerAdmin.builder()
- *                                   .id(123)
- *                                   .name("admin")
- *                                    ...
- *                                   .build();
+ * ResellerAdmin ra = ResellerAdmin.builder()
+ * .id(123)
+ * .name("admin")
+ * ...
+ * .build();
  * </pre>
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
@@ -87,7 +87,7 @@ public class ResellerAdmin implements PasswordMechObject, Cloneable {
         private String passwordMech;
         private String salt;
         private String displayname;
-        private Restriction[] restrictions;
+        private List<Restriction> restrictions;
 
         ResellerAdminBuilder() {
             super();
@@ -135,7 +135,7 @@ public class ResellerAdmin implements PasswordMechObject, Cloneable {
             return this;
         }
 
-        public ResellerAdminBuilder restrictions(Restriction[] restrictions) {
+        public ResellerAdminBuilder restrictions(List<Restriction> restrictions) {
             this.restrictions = restrictions;
             return this;
         }
@@ -145,7 +145,7 @@ public class ResellerAdmin implements PasswordMechObject, Cloneable {
          *
          * @return The {@code ResellerAdmin} instance
          */
-        public ResellerAdmin build(){
+        public ResellerAdmin build() {
             return new ResellerAdmin(id, parentId, name, password, passwordMech, salt, displayname, restrictions);
         }
     }
@@ -181,7 +181,7 @@ public class ResellerAdmin implements PasswordMechObject, Cloneable {
     /**
      * Initializes a new {@link ResellerAdmin}.
      */
-    ResellerAdmin(Integer id, Integer parentId, String name, String password, String passwordMech, String salt, String displayname, Restriction[] restrictions) {
+    ResellerAdmin(Integer id, Integer parentId, String name, String password, String passwordMech, String salt, String displayname, List<Restriction> restrictions) {
         super();
 
         if (id != null) {
@@ -262,7 +262,6 @@ public class ResellerAdmin implements PasswordMechObject, Cloneable {
     public Integer getId() {
         return id;
     }
-
 
     /**
      * @return the name

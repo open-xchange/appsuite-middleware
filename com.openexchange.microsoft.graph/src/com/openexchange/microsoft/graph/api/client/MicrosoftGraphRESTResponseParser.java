@@ -74,7 +74,7 @@ public class MicrosoftGraphRESTResponseParser extends AbstractRESTResponseParser
     }
 
     @Override
-    protected String getRemoveServiceName() {
+    protected String getRemoteServiceName() {
         return REMOTE_SERVICE;
     }
 

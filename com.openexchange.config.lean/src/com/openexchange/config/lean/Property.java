@@ -161,10 +161,13 @@ public interface Property {
         }
 
         // Check this order to be able to cast to sub-classes, too
-        try {
-            return clazz.cast(defaultValue);
-        } catch (ClassCastException e) {
-            throw new IllegalArgumentException("The object cannot be converted to the specified type: " + clazz.getCanonicalName(), e);
+        if (clazz.isAssignableFrom(defaultValue.getClass())) {
+            try {
+                return clazz.cast(defaultValue);
+            } catch (ClassCastException e) {
+                throw new IllegalArgumentException("The object '" + defaultValue + "' cannot be converted to the specified type '" + clazz.getCanonicalName() + "'");
+            }
         }
+        throw new IllegalArgumentException("The object '" + defaultValue + "' cannot be converted to the specified type '" + clazz.getCanonicalName() + "'");
     }
 }

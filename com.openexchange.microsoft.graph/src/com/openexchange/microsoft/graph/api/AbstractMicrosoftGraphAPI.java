@@ -141,7 +141,7 @@ abstract class AbstractMicrosoftGraphAPI {
      */
     JSONObject postResource(String accessToken, String path, JSONObject body) throws OXException {
         MicrosoftGraphRequest request = createRequest(RESTMethod.POST, accessToken, path);
-        request.sethBodyEntity(new JSONObjectEntity(body));
+        request.setBodyEntity(new JSONObjectEntity(body));
         return executeRequest(request);
     }
 
@@ -158,7 +158,7 @@ abstract class AbstractMicrosoftGraphAPI {
      */
     JSONObject putResource(String accessToken, String path, String contentType, InputStream body) throws OXException {
         MicrosoftGraphRequest request = createRequest(RESTMethod.PUT, accessToken, path, contentType);
-        request.sethBodyEntity(new InputStreamEntity(body, contentType));
+        request.setBodyEntity(new InputStreamEntity(body, contentType));
         return executeRequest(request);
     }
 
@@ -188,7 +188,7 @@ abstract class AbstractMicrosoftGraphAPI {
      */
     JSONObject patchResource(String accessToken, String path, JSONObject body) throws OXException {
         MicrosoftGraphRequest request = createRequest(RESTMethod.PATCH, accessToken, path);
-        request.sethBodyEntity(new JSONObjectEntity(body));
+        request.setBodyEntity(new JSONObjectEntity(body));
         return executeRequest(request);
     }
 

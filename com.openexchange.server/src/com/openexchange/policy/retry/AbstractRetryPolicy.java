@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2018-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,21 +49,60 @@
 
 package com.openexchange.policy.retry;
 
+import java.util.concurrent.TimeUnit;
+
 /**
- * {@link LinearRetryPolicy}
+ * {@link AbstractRetryPolicy}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since v7.10.1
+ * @since v7.12.0
  */
-public class LinearRetryPolicy extends AbstractRetryPolicy {
+class AbstractRetryPolicy implements RetryPolicy {
+
+    private final int maxTries;
+    private final long sleepTime;
+    private int retryCount = 1;
 
     /**
-     * Initialises a new {@link LinearRetryPolicy}.
-     * The {@link #maxTries} is initialised with
-     * {@link Integer#MAX_VALUE} and {@link #sleepTime}
-     * with 5000 milliseconds.
+     * Initialises a new {@link RandomJitterRetryPolicy}.
+     * 
+     * @param maxTries The amount of maximum tries
+     * @param sleepTime The delay between each try in milliseconds
      */
-    public LinearRetryPolicy() {
-        super(Integer.MAX_VALUE, 5000L);
+    public AbstractRetryPolicy(int maxTries, long sleepTime) {
+        this.maxTries = maxTries;
+        this.sleepTime = sleepTime;
+    }
+
+    @Override
+    public int getMaxTries() {
+        return maxTries;
+    }
+
+    @Override
+    public int retryCount() {
+        return retryCount;
+    }
+
+    @Override
+    public boolean isRetryAllowed() {
+        if (++retryCount > maxTries) {
+            return false;
+        }
+        try {
+            TimeUnit.MILLISECONDS.sleep(getSleepTime());
+        } catch (InterruptedException e) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Returns the sleep time in milliseconds
+     * 
+     * @return the sleep time in milliseconds
+     */
+    protected long getSleepTime() {
+        return sleepTime;
     }
 }
