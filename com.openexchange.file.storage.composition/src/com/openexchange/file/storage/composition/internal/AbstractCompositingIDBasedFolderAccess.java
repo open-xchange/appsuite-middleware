@@ -360,12 +360,11 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
     public String deleteFolder(String folderId, boolean hardDelete) throws OXException {
         FolderID folderID = new FolderID(folderId);
         FileStorageFolderAccess folderAccess = getFolderAccess(folderID);
-        FolderID[] path = getPathIds(folderID.getFolderId(), folderID.getAccountId(), folderID.getService(), folderAccess);
 
-        if (folderAccess instanceof UserCreatedFileStorageFolderAccess) {
-            String rootId = folderAccess.getRootFolder().getId();
-            if (rootId.equals(folderID.getFolderId())) {
-                // delete of root folder -> delete account
+        if (FileStorageFolder.ROOT_FULLNAME.equals(folderID.getFolderId())) {
+            // Deletion of root folder
+            if (folderAccess instanceof UserCreatedFileStorageFolderAccess) {
+                // Deletion of root folder -> delete account
                 FileStorageAccountManagerLookupService service = Services.getService(FileStorageAccountManagerLookupService.class);
                 if (service == null) {
                     throw ServiceExceptionCode.absentService(FileStorageAccountManagerLookupService.class);
@@ -374,20 +373,22 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
                 if (accountManager == null) {
                     throw FileStorageExceptionCodes.NO_ACCOUNT_MANAGER_FOR_SERVICE.create(folderID.getService());
                 }
-                final DefaultFileStorageAccount updatedAccount = new DefaultFileStorageAccount();
-                updatedAccount.setId(folderID.getAccountId());
-                accountManager.deleteAccount(updatedAccount, session);
-                FolderID newFolderID = new FolderID(folderID.getService(), folderID.getAccountId(), rootId);
-                fire(new Event(FileStorageEventConstants.DELETE_FOLDER_TOPIC, getEventProperties(session, newFolderID, path)));
-                return newFolderID.toUniqueID();
-            }
-        }
 
-        if (FileStorageFolder.ROOT_FULLNAME.equals(folderID.getFolderId())) {
+                FileStorageAccount accountToDelete = accountManager.getAccount(folderID.getAccountId(), session);
+                accountManager.deleteAccount(accountToDelete, session);
+
+                FolderID[] path = getPathIds(folderID.getFolderId(), folderID.getAccountId(), folderID.getService(), folderAccess);
+                Dictionary<String, Object> eventProperties = getEventProperties(session, folderID, path);
+                fire(new Event(FileStorageEventConstants.DELETE_FOLDER_TOPIC, eventProperties));
+                return folderID.toUniqueID();
+            }
+
             throw FileStorageExceptionCodes.DELETE_DENIED.create(folderID.getService(), folderId);
         }
 
         folderAccess.deleteFolder(folderID.getFolderId(), hardDelete);
+
+        FolderID[] path = getPathIds(folderID.getFolderId(), folderID.getAccountId(), folderID.getService(), folderAccess);
         Dictionary<String, Object> eventProperties = getEventProperties(session, folderID, path);
         eventProperties.put(FileStorageEventConstants.HARD_DELETE, Boolean.valueOf(hardDelete));
         fire(new Event(FileStorageEventConstants.DELETE_FOLDER_TOPIC, eventProperties));

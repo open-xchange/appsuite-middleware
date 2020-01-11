@@ -175,12 +175,25 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
     public void deleteAccount(Session session, int accountId) throws OXException {
         int userId = session.getUserId();
         int contextId = session.getContextId();
-        final Context context = getContext(contextId);
-        final Connection con = getConnection(false, context);
+
+        Connection connection = (Connection) session.getParameter("__file.storage.delete.connection");
+        if (connection != null) {
+            try {
+                if (Databases.isInTransaction(connection)) {
+                    // Given connection is already in transaction. Invoke & return immediately.
+                    deleteAccount(session, accountId, connection);
+                    return;
+                }
+            } catch (SQLException e) {
+                throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+            }
+        }
+
+        Context context = getContext(contextId);
+        connection = getConnection(false, context);
         int rollback = 0;
-        PreparedStatement stmt = null;
         try {
-            startTransaction(con);
+            startTransaction(connection);
             rollback = 1;
 
             final DeleteListenerRegistry deleteListenerRegistry = DeleteListenerRegistry.getInstance();
@@ -189,15 +202,11 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
             // This hint has to be passed via the delete listener
             properties.put(OAuthConstants.SESSION_PARAM_UPDATE_SCOPES, Boolean.FALSE);
 
-            deleteListenerRegistry.triggerOnBeforeDeletion(accountId, properties, userId, contextId, con);
-            stmt = con.prepareStatement("DELETE FROM oauthAccounts WHERE cid = ? AND user = ? and id = ?");
-            stmt.setInt(1, contextId);
-            stmt.setInt(2, userId);
-            stmt.setInt(3, accountId);
-            stmt.executeUpdate();
-            deleteListenerRegistry.triggerOnAfterDeletion(accountId, properties, userId, contextId, con);
+            deleteListenerRegistry.triggerOnBeforeDeletion(accountId, properties, userId, contextId, connection);
+            deleteAccount(session, accountId, connection);
+            deleteListenerRegistry.triggerOnAfterDeletion(accountId, properties, userId, contextId, connection);
 
-            con.commit(); // COMMIT
+            connection.commit(); // COMMIT
             rollback = 2;
             LOG.info("Deleted OAuth account with id '{}' for user '{}' in context '{}'", I(accountId), I(userId), I(contextId));
         } catch (SQLException e) {
@@ -207,14 +216,13 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
         } catch (RuntimeException e) {
             throw OAuthExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            Databases.closeSQLStuff(stmt);
             if (rollback > 0) {
                 if (rollback == 1) {
-                    Databases.rollback(con);
+                    Databases.rollback(connection);
                 }
-                Databases.autocommit(con);
+                Databases.autocommit(connection);
             }
-            provider.releaseReadConnection(context, con);
+            provider.releaseReadConnection(context, connection);
         }
     }
 
@@ -723,6 +731,19 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
     }
 
     ////////////////////////////////////// HELPERS //////////////////////////////////////////
+
+    private boolean deleteAccount(Session session, int accountId, Connection connection) throws SQLException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = connection.prepareStatement("DELETE FROM oauthAccounts WHERE cid = ? AND user = ? and id = ?");
+            stmt.setInt(1, session.getContextId());
+            stmt.setInt(2, session.getUserId());
+            stmt.setInt(3, accountId);
+            return stmt.executeUpdate() > 0;
+        } finally {
+            Databases.closeSQLStuff(stmt);
+        }
+    }
 
     /**
      *
