@@ -1,3 +1,9 @@
+open-xchange-client-onboarding (7.10.1-26) stable; urgency=medium
+
+  * Build for patch 2020-01-20 (5545)
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Mon, 13 Jan 2020 15:50:43 +0100
+
 open-xchange-client-onboarding (7.10.1-25) stable; urgency=medium
 
   * Build for patch 2019-12-09 (5508)
