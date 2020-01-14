@@ -153,13 +153,14 @@ public class MonitoringCommandExecutor extends AbstractMetricAwareCommandExecuto
         Meter errorMeter = metrics.errorMeter;
 
         long duration = -1;
+        long start = System.nanoTime();
         try {
             // Measure command execution
-            long start = System.nanoTime();
             Response response = protocol.readResponse();
             duration = System.nanoTime() - start;
             return response;
         } catch (IOException e) {
+            duration = System.nanoTime() - start;
             if (isEitherOf(e, NETWORK_COMMUNICATION_ERRORS)) {
                 // Command failed due to a network communication error.
                 errorMeter.mark();
@@ -167,6 +168,11 @@ public class MonitoringCommandExecutor extends AbstractMetricAwareCommandExecuto
             throw e;
         } catch (ProtocolException e) {
             // Cannot occur
+            duration = System.nanoTime() - start;
+            throw new IOException(e);
+        } catch (RuntimeException e) {
+            // Should not occur
+            duration = System.nanoTime() - start;
             throw new IOException(e);
         } finally {
             if (duration >= 0) {
