@@ -50,6 +50,7 @@
 package com.openexchange.tools;
 
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -72,7 +73,7 @@ public class HostList {
     /**
      * The empty host list.
      */
-    public static final HostList EMPTY = new HostList(Collections.<IPRange> emptyList(), Collections.<String> emptySet(), Collections.<String> emptySet());
+    public static final HostList EMPTY = new HostList(Collections.<IPRange> emptyList(), Collections.<String> emptySet(), Collections.<String> emptySet(), "");
 
     /**
      * Accepts a comma-separated list of IP addresses, IP address ranges, and host names.
@@ -91,7 +92,7 @@ public class HostList {
         Set<String> matchingAppendixHostNames = new HashSet<String>(tokens.length);
         List<IPRange> ipRanges = new ArrayList<IPRange>(tokens.length);
         for (String token : tokens) {
-            if (false == Strings.isEmpty(token)) {
+            if (Strings.isNotEmpty(token)) {
                 token = Strings.asciiLowerCase(token);
                 boolean isIp = false;
                 try {
@@ -121,7 +122,7 @@ public class HostList {
             }
         }
 
-        return new HostList(ipRanges, matchingAppendixHostNames, matchingHostNames);
+        return new HostList(ipRanges, matchingAppendixHostNames, matchingHostNames, hostList);
     }
 
     // ----------------------------------------------------------------------------------------------------------------------------------
@@ -129,14 +130,16 @@ public class HostList {
     private final List<IPRange> ipRanges;
     private final Set<String> matchingAppendixHostNames;
     private final Set<String> matchingHostNames;
+    private final String hostString;
 
     /**
      * Initializes a new {@link HostList}.
      */
-    private HostList(List<IPRange> ipRanges, Set<String> matchingAppendixHostNames, Set<String> matchingHostNames) {
+    private HostList(List<IPRange> ipRanges, Set<String> matchingAppendixHostNames, Set<String> matchingHostNames, String hostString) {
         super();
         this.ipRanges = ipRanges;
-        this.matchingAppendixHostNames = matchingAppendixHostNames.isEmpty() ? null : ImmutableSet.copyOf(matchingAppendixHostNames);
+        this.hostString = hostString;
+        this.matchingAppendixHostNames = ImmutableSet.copyOf(matchingAppendixHostNames);
         this.matchingHostNames = ImmutableSet.copyOf(matchingHostNames);
     }
 
@@ -165,6 +168,24 @@ public class HostList {
     }
 
     /**
+     * Checks if this host list is empty.
+     *
+     * @return <code>true</code> if empty; otherwise <code>false</code>
+     */
+    public boolean isEmpty() {
+        return ipRanges.isEmpty() && matchingAppendixHostNames.isEmpty() && matchingHostNames.isEmpty();
+    }
+
+    /**
+     * Gets the host string from which this instance was parsed.
+     *
+     * @return The host string
+     */
+    public String getHostString() {
+        return hostString;
+    }
+
+    /**
      * Checks if specified host name is contained in this host list.
      * <p>
      * The host name can either be a machine name, such as "<code>java.sun.com</code>", or a textual representation of its IP address.
@@ -173,6 +194,10 @@ public class HostList {
      * @return <code>true</code> if contained; otherwise <code>false</code>
      */
     public boolean contains(InetAddress hostAddress) {
+        return contains(hostAddress, true);
+    }
+
+    private boolean contains(InetAddress hostAddress, boolean checkHostName) {
         if (null == hostAddress) {
             return false;
         }
@@ -196,7 +221,7 @@ public class HostList {
             }
         }
 
-        return contains(hostAddress.getHostName());
+        return checkHostName ? contains(hostAddress.getHostName()) : false;
     }
 
     /**
@@ -251,7 +276,18 @@ public class HostList {
                 }
             }
         }
-        return this.matchingHostNames.contains(Strings.asciiLowerCase(toCheck));
+
+        if (this.matchingHostNames.contains(toCheck)) {
+            return true;
+        }
+
+        // Need to resolve as last resort
+        try {
+            return contains(InetAddress.getByName(toCheck), false);
+        } catch (UnknownHostException e) {
+            // Cannot be resolved
+            return false;
+        }
     }
 
     @Override

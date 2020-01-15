@@ -49,8 +49,16 @@
 
 package com.openexchange.tools.net;
 
+import static com.openexchange.java.Autoboxing.I;
+import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.Set;
+import com.google.common.collect.ImmutableSet;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link URITools}
@@ -80,5 +88,35 @@ public final class URITools {
             retval = retval.substring(1, retval.length() -1);
         }
         return retval;
+    }
+
+    private static final Set<Integer> REDIRECT_RESPONSE_CODES = ImmutableSet.of(I(HttpURLConnection.HTTP_MOVED_PERM), I(HttpURLConnection.HTTP_MOVED_TEMP), I(HttpURLConnection.HTTP_SEE_OTHER), I(HttpURLConnection.HTTP_USE_PROXY));
+
+    /**
+     * Returns the final url which might be different due to HTTP(S) redirects.
+     *
+     * @param url The url to resolve
+     * @return The final url
+     * @throws IOException if an I/O error occurs
+     */
+    public static String getFinalURL(String url) throws IOException, OXException {
+        URL u = new URL(url);
+
+        URLConnection urlConnnection = u.openConnection();
+        urlConnnection.setConnectTimeout(2500);
+        urlConnnection.setReadTimeout(2500);
+
+        if (urlConnnection instanceof HttpURLConnection) {
+            HttpURLConnection httpURLConnection = (HttpURLConnection) urlConnnection;
+            httpURLConnection.setInstanceFollowRedirects(false);
+            httpURLConnection.connect();
+            httpURLConnection.getInputStream();
+            if (REDIRECT_RESPONSE_CODES.contains(I(httpURLConnection.getResponseCode()))) {
+                String redirectUrl = httpURLConnection.getHeaderField("Location");
+                httpURLConnection.disconnect();
+                return getFinalURL(redirectUrl);
+            }
+        }
+        return url;
     }
 }

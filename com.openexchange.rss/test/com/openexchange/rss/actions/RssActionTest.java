@@ -52,6 +52,7 @@ package com.openexchange.rss.actions;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -59,6 +60,8 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Matchers;
+import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -70,7 +73,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.rss.RssExceptionCodes;
 import com.openexchange.rss.osgi.Services;
 import com.openexchange.rss.util.RssProperties;
-import com.openexchange.rss.util.TimoutHttpURLFeedFetcher;
+import com.openexchange.rss.util.TimeoutHttpURLFeedFetcher;
 import com.openexchange.test.mock.MockUtils;
 import com.sun.syndication.feed.synd.SyndFeed;
 import com.sun.syndication.feed.synd.SyndFeedImpl;
@@ -84,7 +87,7 @@ import com.sun.syndication.io.FeedException;
  * @since v7.8.2
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ Services.class })
+@PrepareForTest({ Services.class, RssProperties.class, InetAddress.class })
 public class RssActionTest {
 
     private RssAction action;
@@ -93,7 +96,7 @@ public class RssActionTest {
     private ConfigurationService configurationService;
 
     @Mock
-    private TimoutHttpURLFeedFetcher fetcher;
+    private TimeoutHttpURLFeedFetcher fetcher;
 
     List<URL> urls = new ArrayList<URL>();
 
@@ -104,9 +107,13 @@ public class RssActionTest {
         PowerMockito.mockStatic(Services.class);
         Mockito.when(Services.optService(ConfigurationService.class)).thenReturn(configurationService);
         Mockito.when(Services.getService(ConfigurationService.class)).thenReturn(configurationService);
+        PowerMockito.mockStatic(InetAddress.class);
+        InetAddress inetAddress = Mockito.mock(InetAddress.class);
+        Mockito.when(InetAddress.getByName(Matchers.anyString())).thenReturn(inetAddress);
         Mockito.when(configurationService.getProperty("com.openexchange.messaging.rss.feed.blacklist", RssProperties.HOST_BLACKLIST_DEFAULT)).thenReturn(RssProperties.HOST_BLACKLIST_DEFAULT);
         Mockito.when(configurationService.getProperty("com.openexchange.messaging.rss.feed.whitelist.ports", RssProperties.PORT_WHITELIST_DEFAULT)).thenReturn(RssProperties.PORT_WHITELIST_DEFAULT);
         Mockito.when(configurationService.getProperty(RssProperties.SCHEMES_KEY, RssProperties.SCHEMES_DEFAULT)).thenReturn(RssProperties.SCHEMES_DEFAULT);
+        Mockito.when(fetcher.retrieveFeed((URL)Matchers.any())).thenReturn(Mockito.mock(SyndFeed.class));
 
         action = new RssAction();
         MockitoAnnotations.initMocks(this);
