@@ -49,6 +49,7 @@
 
 package com.openexchange.filestore.impl;
 
+import static com.openexchange.filestore.FileStorages.indicatesConnectionClosed;
 import static com.openexchange.filestore.impl.groupware.unified.UnifiedQuotaUtils.isUnifiedQuotaEnabledFor;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
@@ -73,7 +74,6 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import org.apache.commons.io.FileUtils;
-import com.openexchange.configuration.ServerConfig;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
@@ -723,6 +723,10 @@ public class DBQuotaFileStorage implements SpoolingCapableQuotaFileStorage, Seri
             file = null;
             return retval;
         } catch (IOException e) {
+            if (indicatesConnectionClosed(e)) {
+                // End of stream has been reached unexpectedly during reading input
+                throw FileStorageCodes.CONNECTION_CLOSED.create(e.getCause(), new Object[0]);
+            }
             throw FileStorageCodes.IOERROR.create(e, e.getMessage());
         } catch (OXException e) {
             Throwable cause = e.getCause();
@@ -806,6 +810,10 @@ public class DBQuotaFileStorage implements SpoolingCapableQuotaFileStorage, Seri
                 }
             }
         } catch (IOException e) {
+            if (indicatesConnectionClosed(e)) {
+                // End of stream has been reached unexpectedly during reading input
+                throw FileStorageCodes.CONNECTION_CLOSED.create(e.getCause(), new Object[0]);
+            }
             throw FileStorageCodes.IOERROR.create(e, e.getMessage());
         } catch (OXException e) {
             Throwable cause = e.getCause();

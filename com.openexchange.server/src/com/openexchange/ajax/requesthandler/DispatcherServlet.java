@@ -82,6 +82,7 @@ import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionConstants;
+import com.openexchange.filestore.FileStorageCodes;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.groupware.upload.impl.UploadException;
@@ -399,7 +400,8 @@ public class DispatcherServlet extends SessionServlet {
             SessionExceptionCodes.SESSION_EXPIRED,
             UploadException.UploadCode.MAX_UPLOAD_FILE_SIZE_EXCEEDED,
             UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED,
-            AjaxExceptionCodes.CONNECTION_RESET
+            AjaxExceptionCodes.CONNECTION_RESET,
+            FileStorageCodes.CONNECTION_CLOSED
         );
 
     /**
