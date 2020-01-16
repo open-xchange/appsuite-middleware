@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: The Open-Xchange Mail Compose JSON Bundle
 Bundle-SymbolicName: com.openexchange.mail.compose.json
-Bundle-Version: 7.10.3
+Bundle-Version: 7.10.4
 Bundle-Vendor: OX Software GmbH
 Automatic-Module-Name: com.openexchange.mail.compose
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8

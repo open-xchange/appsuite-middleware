@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: The loader bundle is able to load GCM secret keys and APN certificates from attached fragments
 Bundle-SymbolicName: com.openexchange.pns.loader
-Bundle-Version: 7.10.3
+Bundle-Version: 7.10.4
 Bundle-Activator: com.openexchange.pns.loader.osgi.PnsLoaderActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
