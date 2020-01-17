@@ -38,21 +38,33 @@ public class ResponseEvent {
          * @return The associated status response or <code>null</code>
          */
         public static StatusResponse statusResponseFor(Response[] responses) {
-            if (null == responses || responses.length == 0) {
+            if (null == responses) {
                 return null;
             }
 
-            // JavaMail puts (possibly untagged) BYE response to the end.
-            // Therefore look-up first occurring tagged response starting at the end
-            for (int i = responses.length; i-- > 0;) {
-                Response response = responses[i];
-                if (response.isTagged()) {
-                    return statusResponseFor(response);
-                }
+            int length = responses.length;
+            switch (length) {
+                case 0:
+                    return null;
+                case 1:
+                    // Just a single response...
+                    return statusResponseFor(responses[0]);
+                default:
+                    // JavaMail puts (possibly untagged) BYE response to the end.
+                    // Therefore look-up first occurring tagged response starting at the end
+                    Response lastResponse = responses[length - 1];
+                    if (lastResponse.isTagged()) {
+                        return statusResponseFor(lastResponse);
+                    }
+                    for (int i = length - 1; i-- > 0;) {
+                        Response response = responses[i];
+                        if (response.isTagged()) {
+                            return statusResponseFor(response);
+                        }
+                    }
+                    // No tagged response. Consider last response...
+                    return statusResponseFor(lastResponse);
             }
-
-            // No tagged response. Consider last response...
-            return statusResponseFor(responses[responses.length - 1]);
         }
 
         /**
