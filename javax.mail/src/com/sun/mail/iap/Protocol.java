@@ -487,73 +487,71 @@ public class Protocol {
 	    v = new java.util.ArrayList<Response>(32);
 	} catch (LiteralException lex) {
 	    Response lexResponse = lex.getResponse();
-	    intercept(lexResponse, interceptor);
+	    isInterceptedAndConsumed(lexResponse, interceptor);
         v = new java.util.ArrayList<Response>(1);
         v.add(lexResponse);
 	    done = true;
 	} catch (Exception ex) {
 	    // Convert this into a BYE response
 	    Response byeResponse = Response.byeResponse(ex);
-	    intercept(byeResponse, interceptor);
+	    isInterceptedAndConsumed(byeResponse, interceptor);
         v = new java.util.ArrayList<Response>(1);
         v.add(byeResponse);
 	    done = true;
 	}
 
-    Response r = null;
+    boolean discardResponses = "true".equals(MDC.get("mail.imap.discardresponses"));
+    String lowerCaseCommand = null;
+
     Response taggedResp = null;
-    if (!done) {
-	boolean discardResponses = "true".equals(MDC.get("mail.imap.discardresponses"));
-	String lowerCaseCommand = null;
+    Response byeResp = null;
+    while (!done) {
+        Response r = null;
+        try {
+        r = readResponse();
+        } catch (IOException ioex) {
+        if (byeResp == null)    // convert this into a BYE response
+            byeResp = Response.byeResponse(ioex);
+        // else, connection closed after BYE was sent
+        break;
+        } catch (ProtocolException pex) {
+        logger.log(Level.FINE, "ignoring bad response", pex);
+        continue; // skip this response
+        }
 
-	Response byeResp = null;
-	do {
-	    try {
-		r = readResponse();
-	    } catch (IOException ioex) {
-		if (byeResp != null)	// connection closed after BYE was sent
-		    break;
-		// convert this into a BYE response
-		r = Response.byeResponse(ioex);
-	    } catch (ProtocolException pex) {
-            logger.log(java.util.logging.Level.FINE, "Failed to read IMAP response", pex);
-		    continue; // skip this response
-	    }
+        if (r.isBYE()) {
+        byeResp = r;
+        continue;
+        }
 
-	    if (r.isBYE()) {
-		byeResp = r;
-		continue;
-	    }
-
-	    // If this is a matching command completion response, we are done
-	    boolean tagged = r.isTagged();
+        // If this is a matching command completion response, we are done
+        boolean tagged = r.isTagged();
         if (tagged && r.getTag().equals(tag)) {
-            intercept(r, interceptor);
+            taggedResp = r;
+            isInterceptedAndConsumed(r, interceptor);
             v.add(r);
-	        done = true;
-	        taggedResp = r;
-	    } else {
-	        if (!intercept(r, interceptor)) {
-	            if (discardResponses && !tagged && !r.isSynthetic() && (r instanceof IMAPResponse)) {
-	                IMAPResponse imapResponse = (IMAPResponse) r;
-	                if (lowerCaseCommand == null) {
-	                    lowerCaseCommand = asciiLowerCase(command);
-	                }
-	                String key = asciiLowerCase(imapResponse.getKey());
-	                if ((key == null) || (lowerCaseCommand.indexOf(key) < 0)) {
-	                    v.add(r);
-	                }
-	            } else {
-	                v.add(r);
-	            }
+            done = true;
+        } else {
+            if (!isInterceptedAndConsumed(r, interceptor)) {
+                if (discardResponses && !tagged && !r.isSynthetic() && (r instanceof IMAPResponse)) {
+                    IMAPResponse imapResponse = (IMAPResponse) r;
+                    if (lowerCaseCommand == null) {
+                        lowerCaseCommand = asciiLowerCase(command);
+                    }
+                    String key = asciiLowerCase(imapResponse.getKey());
+                    if ((key == null) || (lowerCaseCommand.indexOf(key) < 0)) {
+                        v.add(r);
+                    }
+                } else {
+                    v.add(r);
+                }
             }
-	    }
-	} while (!done);
+        }
+    }
 
-	if (byeResp != null) {
-	    intercept(byeResp, interceptor);
-	    v.add(byeResp);	// must be last
-	}
+    if (byeResp != null) {
+        isInterceptedAndConsumed(byeResp, interceptor);
+        v.add(byeResp); // must be last
     }
 
 	Response[] responses = v.toArray(new Response[v.size()]);
@@ -562,7 +560,7 @@ public class Protocol {
         timestamp = end;
 	commandEnd();
 
-	if (measure) {	    
+	if (measure) {
 	    long executionMillis = end - start;
 	    if (auditLogEnabled) {
             com.sun.mail.imap.AuditLog.LOG.info("command='{}' time={} timestamp={} taggedResponse='{}'", (null == args ? command : command + " " + args.toString()), Long.valueOf(executionMillis), Long.valueOf(end), null == taggedResp ? "<none>" : taggedResp.toString());
@@ -597,7 +595,7 @@ public class Protocol {
 	return responses;
     }
 
-    private boolean intercept(Response response, ResponseInterceptor interceptor) {
+    private boolean isInterceptedAndConsumed(Response response, ResponseInterceptor interceptor) {
         try {
             return interceptor.intercept(response);
         } catch (Exception e) {
