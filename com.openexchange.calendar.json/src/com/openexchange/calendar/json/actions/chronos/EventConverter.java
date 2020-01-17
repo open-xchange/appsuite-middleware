@@ -582,6 +582,15 @@ public abstract class EventConverter {
      * @return The appointment
      */
     public CalendarDataObject getAppointment(Event event) throws OXException {
+        try {
+            return convertToAppointment(event);
+        } catch (OXException e) {
+            getLogger(EventConverter.class).warn("Unexpected error converting event {} to appointment: {}", event, e.getMessage(), e);
+            throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e, I(629));
+        }
+    }
+
+    private CalendarDataObject convertToAppointment(Event event) throws OXException {
         CalendarDataObject appointment = new CalendarDataObject();
         RecurrenceData recurrenceData = null;
         if (event.containsId()) {
