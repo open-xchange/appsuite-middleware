@@ -168,7 +168,7 @@ public class PListDownloadServlet extends WebDavServlet {
                     scenario = onboardingService.getScenario(scenarioId, ClientDevice.IMPLIES_ALL, device, userId, contextId);
                 }
                 catch (OXException e) {
-                    if (e.getPrefix().equals(OnboardingExceptionCodes.NO_SUCH_SCENARIO.getPrefix()) && e.getCode() == OnboardingExceptionCodes.NO_SUCH_SCENARIO.getNumber()) {
+                    if (OnboardingExceptionCodes.NO_SUCH_SCENARIO.equals(e)) {
                         scenario = getDirectDownloadScenario(scenarioId, onboardingService);
                     } else {
                         throw e;
