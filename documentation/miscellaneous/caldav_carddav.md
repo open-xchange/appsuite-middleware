@@ -58,7 +58,7 @@ Please note the <code>NameVirtualHost</code> directive is needed to be able to s
 
 ### How it works
 
-The following picture shows an abstract request and response flow with the above configuration. Please note that the *DAV servlets are registered under `/servlet/dav` and that the proxy balancer adds this path before transmitting the response to the client. 
+The following picture shows an abstract request and response flow with the above configuration. Please note that the *DAV servlets are registered under `/servlet/dav` and that the proxy balancer adds this path before transmitting the request to the server. 
 
 ![Execution flow](apache_vhost.png "Apache vhost flowchart")
 
@@ -85,7 +85,7 @@ It is highly recommended to use <code>/dav</code> as path prefix. Clients like t
 
 ### How it works
 
-The following picture shows an abstract request and response flow with the above configuration. Please note that the *DAV servlets are registered under `/dav` and that the middleware is fully responsible for generating the path. 
+The following picture shows an abstract request and response flow with the above configuration. Please note that the *DAV servlets are registered under `/dav` and that the middleware is fully responsible of handling the path.
 
 ![Execution flow](mw_prefix.png "Middleware flowchart")
 
@@ -129,7 +129,7 @@ For environments where it is inconvenient to setup a virtual host there is also 
 
 ### How it works
 
-The following picture shows an abstract request and response flow with the above configuration. Please note that the *DAV servlets are registered under `/servlet/dav` and that the proxy balancer adds this path before transmitting the response to the client. 
+The following picture shows an abstract request and response flow with the above configuration. Please note that the *DAV servlets are registered under `/servlet/dav` and that the proxy balancer adds this path before transmitting the request to the server. 
 
 ![Execution flow](apache_rewrite.png "Apache rewrite flowchart")
 
