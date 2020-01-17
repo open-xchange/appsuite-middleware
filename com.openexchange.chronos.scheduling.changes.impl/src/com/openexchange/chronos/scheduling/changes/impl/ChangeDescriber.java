@@ -50,6 +50,7 @@
 package com.openexchange.chronos.scheduling.changes.impl;
 
 import com.openexchange.annotation.NonNull;
+import com.openexchange.annotation.Nullable;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.scheduling.changes.Description;
 import com.openexchange.chronos.service.EventUpdate;
@@ -76,6 +77,6 @@ public interface ChangeDescriber {
      * @param eventUpdate The {@link EventUpdate} to describe
      * @return A {@link Description}
      */
-    Description describe(EventUpdate eventUpdate);
+    @Nullable Description describe(EventUpdate eventUpdate);
 
 }

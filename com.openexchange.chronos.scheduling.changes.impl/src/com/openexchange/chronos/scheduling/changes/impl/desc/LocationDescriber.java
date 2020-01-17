@@ -91,21 +91,33 @@ public class LocationDescriber implements ChangeDescriber {
             return null;
         }
 
+        /*
+         * Create data for the message, e.g. "Berlin, 52.520008, 13.404954"
+         */
         StringBuilder sb = new StringBuilder();
-        if (changedLocation) {
+        if (changedLocation && Strings.isNotEmpty(eventUpdate.getUpdate().getLocation())) {
             sb.append(eventUpdate.getUpdate().getLocation());
         }
         if (changedGeo) {
             String description = describeGeo(eventUpdate);
             if (Strings.isNotEmpty(description)) {
-                if (changedLocation) {
+                if (sb.length() > 0) {
                     sb.append(", ");
                 }
                 sb.append(description);
             }
         }
 
-        return new DefaultDescription(Collections.singletonList(new SentenceImpl(Messages.HAS_CHANGED_LOCATION).add(sb.toString(), ArgumentType.UPDATED)), getEventFields(changedGeo, changedLocation));
+        /*
+         * Check that we described a change. If not, Geo or location has been removed.
+         */
+        SentenceImpl sentence;
+        if (sb.length() > 0) {
+            sentence = new SentenceImpl(Messages.HAS_CHANGED_LOCATION).add(sb.toString(), ArgumentType.UPDATED);
+        } else {
+            sentence = new SentenceImpl(Messages.HAS_REMOVED_LOCATION);
+        }
+        return new DefaultDescription(Collections.singletonList(sentence), getEventFields(changedGeo, changedLocation));
     }
 
     private static String describeGeo(EventUpdate eventUpdate) {

@@ -238,6 +238,8 @@ public class Messages implements LocalizableStrings {
     public static final String INTENTION_CHANGE_LOCATION = "Change the location to %1$s.";
 
     public static final String HAS_CHANGED_LOCATION = "The appointment takes place in a new location: %1$s.";
+    
+    public static final String HAS_REMOVED_LOCATION = "The location of the appointment has been removed.";
 
     public static final String ASK_CHANGE_NOTE = "Use the appointment description below.";
 
