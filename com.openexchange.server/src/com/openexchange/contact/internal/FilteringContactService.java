@@ -73,8 +73,8 @@ import com.openexchange.tools.iterator.SearchIterator;
  */
 public class FilteringContactService implements ContactService {
 
-    private ContactService delegate;
-    private ServiceLookup services;
+    private final ContactService delegate;
+    private final ServiceLookup services;
 
     public FilteringContactService(ContactService lDelegate, ServiceLookup lServices) {
         this.delegate = lDelegate;
