@@ -1,9 +1,3 @@
-open-xchange-recaptcha (7.10.2-20) stable; urgency=medium
-
-  * Build for patch 2020-01-20 (5546)
-
- -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 14 Jan 2020 09:49:45 +0100
-
 open-xchange-recaptcha (7.10.2-19) stable; urgency=medium
 
   * Build for patch 2019-12-09 (5509)
