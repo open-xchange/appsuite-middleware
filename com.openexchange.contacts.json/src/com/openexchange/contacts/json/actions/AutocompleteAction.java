@@ -100,7 +100,7 @@ public class AutocompleteAction extends ContactAction {
         AutocompleteParameters parameters = AutocompleteParameters.newInstance();
         parameters.put(AutocompleteParameters.REQUIRE_EMAIL, requireEmail);
         SearchIterator<Contact> searchIterator;
-        SortOptions sortOptions = request.getSortOptions();
+        SortOptions sortOptions = request.getSortOptions(false);
         if (null != folderID) {
             searchIterator = getContactService().autocompleteContacts(request.getSession(), Collections.singletonList(folderID),
                 query, parameters, fields, sortOptions);

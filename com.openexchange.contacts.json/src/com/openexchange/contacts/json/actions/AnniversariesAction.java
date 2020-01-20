@@ -91,16 +91,21 @@ public class AnniversariesAction extends ContactAction {
         SearchIterator<Contact> searchIterator;
         if (null != folderID) {
             searchIterator = getContactService().searchContactsWithAnniversary(request.getSession(),
-                Arrays.asList(new String[] { folderID }), request.getStart(), request.getEnd(), fields, request.getSortOptions());
+                Arrays.asList(new String[] { folderID }), request.getStart(), request.getEnd(), fields, request.getSortOptions(true));
         } else {
             searchIterator = getContactService().searchContactsWithAnniversary(request.getSession(), request.getStart(),
-                request.getEnd(), fields, request.getSortOptions());
+                request.getEnd(), fields, request.getSortOptions(true));
         }
         List<Contact> contacts = new ArrayList<Contact>();
         Date lastModified = addContacts(contacts, searchIterator, excludedAdminID);
         if (request.sortInternalIfNeeded(contacts, ContactField.ANNIVERSARY, request.getStart())) {
             // Slice...
             contacts = request.slice(contacts);
+        } else if (excludeAdmin) {
+            int limit = request.getLimit();
+            if (limit >= 0 && contacts.size() > limit) {
+                contacts = contacts.subList(0, limit);
+            }
         }
         return new AJAXRequestResult(contacts, lastModified, "contact");
     }
