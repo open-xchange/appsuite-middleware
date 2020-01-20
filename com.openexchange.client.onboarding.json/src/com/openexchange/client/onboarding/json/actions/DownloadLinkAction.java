@@ -49,12 +49,14 @@
 
 package com.openexchange.client.onboarding.json.actions;
 
+import java.util.Optional;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.client.onboarding.Device;
 import com.openexchange.client.onboarding.OnboardingUtility;
 import com.openexchange.client.onboarding.download.DownloadLinkProvider;
+import com.openexchange.client.onboarding.plist.PlistScenarioType;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.server.ServiceLookup;
@@ -66,10 +68,16 @@ import com.openexchange.tools.session.ServerSession;
  * {@link DownloadLinkAction}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.1
  */
 public class DownloadLinkAction extends AbstractOnboardingAction {
 
+    /**
+     * Initializes a new {@link DownloadLinkAction}.
+     *
+     * @param services The service look-up
+     */
     public DownloadLinkAction(ServiceLookup services) {
         super(services);
     }
@@ -77,8 +85,13 @@ public class DownloadLinkAction extends AbstractOnboardingAction {
     @Override
     protected AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException, JSONException {
         String type = requestData.requireParameter("type");
-        switch (type) {
-            case "caldav":
+        Optional<PlistScenarioType> optionalScenarioType = PlistScenarioType.plistScenarioTypeFor(type);
+        if (!optionalScenarioType.isPresent()) {
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("type", type);
+        }
+
+        switch (optionalScenarioType.get()) {
+            case CALDAV:
                 if (!OnboardingUtility.hasCapability(Permission.CALDAV.getCapabilityName(), session)) {
                     throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create(Permission.CALDAV);
                 }
@@ -86,7 +99,7 @@ public class DownloadLinkAction extends AbstractOnboardingAction {
                     throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create(Permission.CALENDAR);
                 }
                 break;
-            case "carddav":
+            case CARDDAV:
                 if (!OnboardingUtility.hasCapability(Permission.CARDDAV.getCapabilityName(), session)) {
                     throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create(Permission.CARDDAV);
                 }
@@ -94,7 +107,7 @@ public class DownloadLinkAction extends AbstractOnboardingAction {
                     throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create(Permission.CONTACTS);
                 }
                 break;
-            case "dav":
+            case DAV:
                 if (!OnboardingUtility.hasCapability(Permission.CALDAV.getCapabilityName(), session)) {
                     throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create(Permission.CALDAV);
                 }
@@ -111,6 +124,7 @@ public class DownloadLinkAction extends AbstractOnboardingAction {
             default:
                 throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("type", type);
         }
+
         DownloadLinkProvider linkProvider = services.getService(DownloadLinkProvider.class);
         String link = linkProvider.getLink(requestData.getHostData(), session.getUserId(), session.getContextId(), type, Device.APPLE_IPHONE.getId());
         return new AJAXRequestResult(link, "json");

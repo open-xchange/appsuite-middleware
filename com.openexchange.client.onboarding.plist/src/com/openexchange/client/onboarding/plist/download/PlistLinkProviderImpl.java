@@ -189,7 +189,7 @@ public class PlistLinkProviderImpl implements DownloadLinkProvider {
                 if (index == -1 || index == toParse.length() - 1) {
                     throw OnboardingExceptionCodes.INVALID_DOWNLOAD_LINK.create();
                 }
-                String token = toParse.substring(index + 1, toParse.length());
+                String token = toParse.substring(index + 1);
                 result[x] = x <= 3 ? Charsets.toAsciiString(decoder.decode(token)) : token;
                 toParse = toParse.substring(0, index);
             }
