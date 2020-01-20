@@ -14,7 +14,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 3
+%define        ox_release 4
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -68,6 +68,8 @@ fi
 %doc docs/
 
 %changelog
+* Mon Jan 20 2020 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2020-01-20 (5547)
 * Thu Nov 28 2019 Marcus Klein <marcus.klein@open-xchange.com>
 Second candidate for 7.10.3 release
 * Thu Nov 21 2019 Marcus Klein <marcus.klein@open-xchange.com>

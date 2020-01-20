@@ -14,7 +14,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 3
+%define        ox_release 4
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -59,6 +59,8 @@ ox_update_permissions /opt/open-xchange/etc/sipgate.properties root:open-xchange
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/sipgate.properties
 
 %changelog
+* Mon Jan 20 2020 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Build for patch 2020-01-20 (5547)
 * Thu Nov 28 2019 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 Second candidate for 7.10.3 release
 * Thu Nov 21 2019 Jan Bauerdick <jan.bauerdick@open-xchange.com>
