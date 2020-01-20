@@ -49,26 +49,36 @@
 
 package com.openexchange.sms.sipgate;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.i;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.Locale;
-import org.apache.commons.httpclient.Credentials;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpMethod;
-import org.apache.commons.httpclient.HttpStatus;
-import org.apache.commons.httpclient.UsernamePasswordCredentials;
-import org.apache.commons.httpclient.auth.AuthPolicy;
-import org.apache.commons.httpclient.auth.AuthScope;
-import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.httpclient.params.HttpClientParams;
-import org.json.JSONArray;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpStatus;
+import org.apache.http.StatusLine;
+import org.apache.http.auth.AuthScheme;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.InputStreamEntity;
+import org.apache.http.impl.auth.BasicScheme;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.protocol.BasicHttpContext;
+import org.apache.http.protocol.HttpContext;
+import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
+import org.json.JSONInputStream;
 import org.json.JSONObject;
-import com.openexchange.config.ConfigurationService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Autoboxing;
+import com.openexchange.java.Charsets;
+import com.openexchange.java.Strings;
+import com.openexchange.rest.client.httpclient.HttpClients;
+import com.openexchange.rest.client.httpclient.HttpClients.ClientConfig;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.sms.PhoneNumberParserService;
 import com.openexchange.sms.SMSExceptionCode;
@@ -82,10 +92,9 @@ import com.openexchange.sms.SMSServiceSPI;
  */
 public class SipgateSMSService implements SMSServiceSPI {
 
-    private static final String URL = "https://api.sipgate.net/my/xmlrpcfacade/";
-    private final int MAX_MESSAGE_LENGTH;
+    private static final Logger LOG = LoggerFactory.getLogger(SipgateSMSService.class);
+    private static final String URI = "https://api.sipgate.com/v2/sessions/sms";
 
-    private final HttpClient client;
     private final ServiceLookup services;
 
     /**
@@ -95,40 +104,40 @@ public class SipgateSMSService implements SMSServiceSPI {
      */
     public SipgateSMSService(ServiceLookup services) {
         this.services = services;
-        ConfigurationService configService = services.getService(ConfigurationService.class);
-        String sipgateUsername = configService.getProperty("com.openexchange.sms.sipgate.username");
-        String sipgatePassword = configService.getProperty("com.openexchange.sms.sipgate.password");
-        MAX_MESSAGE_LENGTH = configService.getIntProperty("com.openexchange.sms.sipgate.maxlength", 0);
-        HttpClientParams params = new HttpClientParams();
-        params.setAuthenticationPreemptive(true);
-        params.setParameter(AuthPolicy.AUTH_SCHEME_PRIORITY, AuthPolicy.BASIC);
-        Credentials credentials = new UsernamePasswordCredentials(sipgateUsername, sipgatePassword);
-        HttpClient client = new HttpClient(params);
-        client.getState().setCredentials(new AuthScope("api.sipgate.net", 443), credentials);
-        this.client = client;
     }
 
     @Override
     public void sendMessage(String[] recipients, String message, int userId, int contextId) throws OXException {
-        if (MAX_MESSAGE_LENGTH > 0 && message.length() > MAX_MESSAGE_LENGTH) {
-            throw SMSExceptionCode.MESSAGE_TOO_LONG.create(Autoboxing.I(message.length()), Autoboxing.I(MAX_MESSAGE_LENGTH));
+        ConfigViewFactory configViewFactory = services.getService(ConfigViewFactory.class);
+        if (null == configViewFactory) {
+            throw ServiceExceptionCode.absentService(ConfigViewFactory.class);
         }
-        JSONArray phoneNumbers = new JSONArray(recipients.length);
+        ConfigView view = configViewFactory.getView(userId, contextId);
+        String sipgateUsername = view.get("com.openexchange.sms.sipgate.username", String.class);
+        String sipgatePassword = view.get("com.openexchange.sms.sipgate.password", String.class);
+        Integer maxLength = view.get("com.openexchange.sms.sipgate.maxlength", Integer.class);
+        if (Strings.isEmpty(sipgateUsername) || Strings.isEmpty(sipgatePassword)) {
+            throw SipgateSMSExceptionCode.NOT_CONFIGURED.create(I(userId), I(contextId));
+        }
+        if (null == maxLength) {
+            LOG.debug("Property \"com.openexchange.sms.sipgate.maxlength\" is not set, using default value 460.");
+            maxLength = I(460);
+        }
+        if (i(maxLength) > 0 && message.length() > i(maxLength)) {
+            throw SMSExceptionCode.MESSAGE_TOO_LONG.create(I(message.length()), maxLength);
+        }
+        ClientConfig config = ClientConfig.newInstance().setCredentials(sipgateUsername, sipgatePassword);
+        CloseableHttpClient client = HttpClients.getHttpClient(config);
         try {
             for (int i = 0; i < recipients.length; i++) {
-                phoneNumbers.put(i, checkAndFormatPhoneNumber(recipients[i], null));
+                JSONObject jsonObject = new JSONObject(3);
+                jsonObject.put("smsId", "s0");
+                jsonObject.put("recipient", checkAndFormatPhoneNumber(recipients[i], null));
+                jsonObject.put("message", message);
+                sendMessage(client, jsonObject);
             }
-            JSONObject jsonObject = new JSONObject(3);
-            jsonObject.put("TOS", "text");
-            jsonObject.put("Content", message);
-            jsonObject.put("RemoteUri", phoneNumbers);
-            String encoded = URLEncoder.encode(jsonObject.toString(), StandardCharsets.UTF_8.toString());
-            HttpMethod method = getHttpMethod("samurai.SessionInitiateMulti", encoded);
-            execute(method);
         } catch (JSONException e) {
-            throw SipgateSMSExceptionCode.UNKNOWN_ERROR.create(e, e.getMessage());
-        } catch (UnsupportedEncodingException e) {
-            throw SipgateSMSExceptionCode.UNKNOWN_ERROR.create(e, e.getMessage());
+            // will not happen
         }
     }
 
@@ -136,35 +145,32 @@ public class SipgateSMSService implements SMSServiceSPI {
         PhoneNumberParserService parser = services.getService(PhoneNumberParserService.class);
         String parsedNumber = parser.parsePhoneNumber(phoneNumber, locale);
         StringBuilder sb = new StringBuilder(30);
-        sb.append("sip:").append(parsedNumber).append("@sipgate.net");
+        sb.append("+").append(parsedNumber);
         return sb.toString();
     }
 
-    private HttpMethod getHttpMethod(String method, String parameters) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(URL).append(method).append("/").append(parameters);
-        return new GetMethod(sb.toString());
-    }
-
-    private void execute(HttpMethod method) throws OXException {
+    private void sendMessage(CloseableHttpClient client, JSONObject message) throws OXException {
+        HttpPost request = new HttpPost(URI);
+        request.setEntity(new InputStreamEntity(new JSONInputStream(message, Charsets.UTF_8_NAME), -1L, ContentType.APPLICATION_JSON));
+        CloseableHttpResponse response = null;
+        HttpContext context = new BasicHttpContext();
+        AuthScheme basicAuth = new BasicScheme(Charsets.UTF_8);
+        context.setAttribute("preemptive-auth", basicAuth);
         try {
-            int statusCode = client.executeMethod(method);
-            if (HttpStatus.SC_OK == statusCode) {
-                String response = method.getResponseBodyAsString();
-                JSONObject resp = new JSONObject(response);
-                if (resp.hasAndNotNull("error")) {
-                    String errorMessage = resp.getString("error");
-                    throw SMSExceptionCode.NOT_SENT.create(errorMessage);
+            response = client.execute(request, context);
+            StatusLine statusLine = response.getStatusLine();
+            if (HttpStatus.SC_NO_CONTENT != statusLine.getStatusCode()) {
+                HttpEntity entity = response.getEntity();
+                String body = null;
+                if (null != entity && entity.getContentLength() > 0) {
+                    body = EntityUtils.toString(entity, Charsets.UTF_8);
                 }
-            } else {
-                throw SipgateSMSExceptionCode.HTTP_ERROR.create(String.valueOf(statusCode), method.getStatusText());
+                throw SipgateSMSExceptionCode.HTTP_ERROR.create(String.valueOf(statusLine.getStatusCode()), Strings.isEmpty(body) ? statusLine.getReasonPhrase() : body);
             }
-        } catch (JSONException | IOException e) {
+        } catch (IOException e) {
             throw SipgateSMSExceptionCode.UNKNOWN_ERROR.create(e, e.getMessage());
         } finally {
-            if (null != method && method.hasBeenUsed()) {
-                method.releaseConnection();
-            }
+            HttpClients.close(request, response);
         }
     }
 
