@@ -86,9 +86,14 @@ public class AdvancedSearchAction extends ContactAction {
         ContactField[] fields = excludeAdmin ? request.getFields(ContactField.INTERNAL_USERID) : request.getFields();
         List<Contact> contacts = new ArrayList<Contact>();
         Date lastModified = addContacts(contacts, getContactService().searchContacts(
-            request.getSession(), request.getSearchFilter(), fields, request.getSortOptions()), excludedAdminID);
+            request.getSession(), request.getSearchFilter(), fields, request.getSortOptions(true)), excludedAdminID);
         if (request.sortInternalIfNeeded(contacts)) {
             contacts = request.slice(contacts);
+        } else if (excludeAdmin) {
+            int limit = request.getLimit();
+            if (limit >= 0 && contacts.size() > limit) {
+                contacts = contacts.subList(0, limit);
+            }
         }
         return new AJAXRequestResult(contacts, lastModified, "contact");
     }
