@@ -468,9 +468,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
 
             @Override
             public void set(Event object, String value) throws OXException {
-                if (Strings.isNotEmpty(value)) {
-                    object.setLocation(value);
-                }
+                object.setLocation(value);
             }
 
             @Override
@@ -492,9 +490,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
 
             @Override
             public void set(Event object, String value) throws OXException {
-                if (Strings.isNotEmpty(value)) {
-                    object.setDescription(value);
-                }
+                object.setDescription(value);
             }
 
             @Override

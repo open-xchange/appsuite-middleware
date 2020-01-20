@@ -71,6 +71,7 @@ import static com.openexchange.chronos.impl.Utils.prepareOrganizer;
 import static com.openexchange.java.Autoboxing.b;
 import static com.openexchange.tools.arrays.Collections.isNullOrEmpty;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -118,6 +119,7 @@ import com.openexchange.chronos.service.SimpleCollectionUpdate;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.groupware.tools.mappings.Mapping;
+import com.openexchange.java.Strings;
 
 /**
  * {@link InternalEventUpdate}
@@ -244,10 +246,13 @@ public class InternalEventUpdate implements EventUpdate {
      * in the attendee line-up.
      * 
      * @return <code>true</code> if the calendar resource is re-scheduled along with the update, <code>false</code>, otherwise
+     * @throws OXException
      */
-    public boolean isReschedule() {
+    public boolean isReschedule() throws OXException {
         if (containsAnyChangeOf(RESCHEDULE_FIELDS)) {
-            return true;
+            if(hasChangedReschedulingFields()) {
+                return true;
+            }
         }
         InternalAttendeeUpdates attendeeUpdates = getAttendeeUpdates();
         if (0 < attendeeUpdates.getAddedItems().size() || 0 < attendeeUpdates.getRemovedItems().size()) {
@@ -963,6 +968,50 @@ public class InternalEventUpdate implements EventUpdate {
          * reset participation status if a different time period will be occupied by the update
          */
         return coversDifferentTimePeriod(originalEvent, updatedEvent);
+    }
+    
+    /**
+     * Get a value indicating whether the applied changes represent a <i>re-scheduling</i> of the calendar object resource or not,
+     * depending on the modified event fields.
+     * <p> 
+     * In detail it will be checked if fields containing string values have really changed their value and not just from
+     * <code>null</code> to an only whitespace-String, e.g. <code>""</code>
+     * 
+     * @return <code>true</code> if an fields of interest changed, <code>false</code> otherwise
+     * @throws OXException
+     */
+    private boolean hasChangedReschedulingFields() throws OXException {
+        ArrayList<EventField> list = new ArrayList<>(eventUpdate.getUpdatedFields());
+        list.retainAll(Arrays.asList(RESCHEDULE_FIELDS));
+        for (EventField field : list) {
+            Mapping<? extends Object, Event> mapping = EventMapper.getInstance().get(field);
+            Object value = mapping.get(getOriginal());
+            if (null == value) {
+                Object updated = mapping.get(getUpdate());
+                if (null != updated) {
+                    // No further checking of other changes
+                    if (false == String.class.isAssignableFrom(updated.getClass())) {  
+                        return true;
+                    }
+                    if (Strings.isNotEmpty((String) updated)) {
+                        return true;
+                    }
+                }
+                continue;
+            }
+            // No further checking of other changes
+            if (false == String.class.isAssignableFrom(value.getClass())) {
+                return true;
+            }
+            String original = ((String) value);
+            if (Strings.isEmpty(original)) {
+                if (Strings.isNotEmpty((String) mapping.get(getUpdate()))) {
+                    return true;
+                }
+            }
+        }
+        // No actual change happened
+        return false;
     }
 
 }
