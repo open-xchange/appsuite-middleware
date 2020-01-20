@@ -49,7 +49,7 @@
 
 package com.openexchange.sms.sipgate.osgi;
 
-import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.sms.PhoneNumberParserService;
 import com.openexchange.sms.SMSServiceSPI;
@@ -72,7 +72,7 @@ public class SipgateSMSActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, PhoneNumberParserService.class };
+        return new Class<?>[] { ConfigViewFactory.class, PhoneNumberParserService.class };
     }
 
     @Override
