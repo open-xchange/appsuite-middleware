@@ -87,14 +87,19 @@ public class AllAction extends ContactAction {
         ContactField[] fields = excludeAdmin ? request.getFields(ContactField.INTERNAL_USERID) : request.getFields();
         SearchIterator<Contact> searchIterator;
         if (null == request.optFolderID()) {
-            searchIterator = getContactService().getAllContacts(request.getSession(), fields, request.getSortOptions());
+            searchIterator = getContactService().getAllContacts(request.getSession(), fields, request.getSortOptions(true));
         } else {
-            searchIterator = getContactService().getAllContacts(request.getSession(), request.getFolderID(), fields, request.getSortOptions());
+            searchIterator = getContactService().getAllContacts(request.getSession(), request.getFolderID(), fields, request.getSortOptions(true));
         }
         List<Contact> contacts = new LinkedList<Contact>();
         Date lastModified = addContacts(contacts, searchIterator, excludedAdminID);
         if (request.sortInternalIfNeeded(contacts)) {
             contacts = request.slice(contacts);
+        } else if (excludeAdmin) {
+            int limit = request.getLimit();
+            if (limit >= 0 && contacts.size() > limit) {
+                contacts = contacts.subList(0, limit);
+            }
         }
 
         return new AJAXRequestResult(contacts, lastModified, "contact");
