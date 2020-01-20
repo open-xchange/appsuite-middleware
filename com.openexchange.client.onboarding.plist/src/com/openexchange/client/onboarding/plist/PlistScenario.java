@@ -82,7 +82,7 @@ public class PlistScenario implements Scenario {
      */
     public static PlistScenario newInstance(String id, List<? extends OnboardingProvider> providers) {
         if (Strings.isEmpty(id)) {
-            throw new IllegalArgumentException("Sceanrio identifier must not be null or empty");
+            throw new IllegalArgumentException("Scenario identifier must not be null or empty");
         }
         if (providers == null || providers.isEmpty()) {
             throw new IllegalArgumentException("Provider listing must not be null or empty");

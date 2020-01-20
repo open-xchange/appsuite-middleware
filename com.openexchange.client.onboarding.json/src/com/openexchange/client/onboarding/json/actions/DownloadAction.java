@@ -78,6 +78,11 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class DownloadAction extends AbstractOnboardingAction {
 
+    /**
+     * Initializes a new {@link DownloadAction}.
+     *
+     * @param services The service look-up
+     */
     public DownloadAction(ServiceLookup services) {
         super(services);
     }
