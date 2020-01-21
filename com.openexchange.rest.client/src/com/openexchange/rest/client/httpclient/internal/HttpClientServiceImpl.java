@@ -164,9 +164,9 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
     }
 
     @Override
-    public ManagedHttpClient getHttpClient(String httpClientId) throws OXException, RuntimeException {
+    public ManagedHttpClient getHttpClient(String httpClientId) {
         if (Strings.isEmpty(httpClientId)) {
-            throw OXException.general("The argument must not be empty!");
+            throw new IllegalArgumentException("The argument must not be empty!");
         }
         checkShutdownStatus();
 
@@ -180,9 +180,9 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
     }
 
     @Override
-    public void destroyHttpClient(String httpClientId) throws OXException {
+    public void destroyHttpClient(String httpClientId) {
         if (Strings.isEmpty(httpClientId)) {
-            throw OXException.general("The argument must not be empty!");
+            throw new IllegalArgumentException("The argument must not be empty!");
         }
         checkShutdownStatus();
 
@@ -493,9 +493,9 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
     /**
      * Checks whether the service is currently shutting down or not.
      *
-     * @throws RuntimeException If the service is shut-down
+     * @throws IllegalStateException If the service is shut-down
      */
-    private void checkShutdownStatus() throws RuntimeException {
+    private void checkShutdownStatus() {
         if (isShutdown.get()) {
             throw new IllegalStateException("Service is shutting down.");
         }

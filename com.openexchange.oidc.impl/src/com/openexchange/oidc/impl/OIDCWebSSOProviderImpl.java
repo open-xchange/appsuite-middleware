@@ -93,10 +93,12 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.java.Strings;
 import com.openexchange.login.internal.LoginPerformer;
+import com.openexchange.nimbusds.oauth2.sdk.http.send.HTTPSender;
 import com.openexchange.oidc.AuthenticationInfo;
 import com.openexchange.oidc.OIDCBackend;
 import com.openexchange.oidc.OIDCBackendConfig;
 import com.openexchange.oidc.OIDCBackendConfig.AutologinMode;
+import com.openexchange.oidc.http.outbound.OIDCHttpClientConfig;
 import com.openexchange.oidc.OIDCExceptionCode;
 import com.openexchange.oidc.OIDCWebSSOProvider;
 import com.openexchange.oidc.osgi.Services;
@@ -106,6 +108,7 @@ import com.openexchange.oidc.state.StateManagement;
 import com.openexchange.oidc.state.impl.DefaultAuthenticationRequestInfo;
 import com.openexchange.oidc.state.impl.DefaultLogoutRequestInfo;
 import com.openexchange.oidc.tools.OIDCTools;
+import com.openexchange.rest.client.httpclient.HttpClientService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.session.reservation.SessionReservationService;
@@ -304,8 +307,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
             scope = null;
         }
 
-        TokenRequest tokenRequest = new TokenRequest(tokenEndpoint, clientAuth, codeGrant, scope);
-        return this.backend.getTokenRequest(tokenRequest);
+        return this.backend.getTokenRequest(new TokenRequest(tokenEndpoint, clientAuth, codeGrant, scope));
     }
 
     private OIDCTokenResponse getTokenResponse(TokenRequest tokenReq) throws OXException {
@@ -313,7 +315,13 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         HTTPRequest httpRequest = this.backend.getHttpRequest(tokenReq.toHTTPRequest());
         HTTPResponse httpResponse = null;
         try {
-            httpResponse = httpRequest.send();
+            httpResponse = HTTPSender.send(httpRequest, () -> {
+                HttpClientService httpClientService = Services.getOptionalService(HttpClientService.class);
+                if (httpClientService == null) {
+                    throw new IllegalStateException("Missing service " + HttpClientService.class.getName());
+                }
+                return httpClientService.getHttpClient(OIDCHttpClientConfig.getClientIdOidc());
+            });
         } catch (IOException e) {
             throw OIDCExceptionCode.UNABLE_TO_SEND_REQUEST.create(e, GET_THE_ID_TOKEN);
         }

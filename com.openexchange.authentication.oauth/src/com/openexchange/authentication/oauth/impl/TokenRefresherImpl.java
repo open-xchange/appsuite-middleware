@@ -62,7 +62,11 @@ import com.nimbusds.oauth2.sdk.TokenErrorResponse;
 import com.nimbusds.oauth2.sdk.TokenRequest;
 import com.nimbusds.oauth2.sdk.TokenResponse;
 import com.nimbusds.oauth2.sdk.token.RefreshToken;
+import com.openexchange.authentication.oauth.http.OAuthAuthenticationHttpClientConfig;
 import com.openexchange.exception.OXException;
+import com.openexchange.nimbusds.oauth2.sdk.http.send.HTTPSender;
+import com.openexchange.rest.client.httpclient.HttpClientService;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.session.oauth.OAuthTokens;
 import com.openexchange.session.oauth.TokenRefreshResponse;
@@ -80,10 +84,12 @@ public class TokenRefresherImpl extends OAuthRequestIssuer implements TokenRefre
     private static final Logger LOG = LoggerFactory.getLogger(TokenRefresherImpl.class);
 
     private final Session session;
+    private final ServiceLookup services;
 
-    public TokenRefresherImpl(Session session, OAuthAuthenticationConfig config) {
+    public TokenRefresherImpl(Session session, OAuthAuthenticationConfig config, ServiceLookup services) {
         super(config);
         this.session = session;
+        this.services = services;
     }
 
     @Override
@@ -102,7 +108,13 @@ public class TokenRefresherImpl extends OAuthRequestIssuer implements TokenRefre
         LOG.debug("Sending refresh token request for session '{}'", session.getSessionID());
 
         try {
-            TokenResponse response = TokenResponse.parse(request.toHTTPRequest().send());
+            TokenResponse response = TokenResponse.parse(HTTPSender.send(request.toHTTPRequest(), () -> {
+                HttpClientService httpClientService = services.getOptionalService(HttpClientService.class);
+                if (httpClientService == null) {
+                    throw new IllegalStateException("Missing service " + HttpClientService.class.getName());
+                }
+                return httpClientService.getHttpClient(OAuthAuthenticationHttpClientConfig.getClientIdOAuthAuthentication());
+            }));
             return validateResponse(response);
         } catch (com.nimbusds.oauth2.sdk.ParseException | IOException e) {
             LOG.info("Unable to refresh access token for user {} in context {}. Session will be invalidated.", I(session.getUserId()), I(session.getContextId()));

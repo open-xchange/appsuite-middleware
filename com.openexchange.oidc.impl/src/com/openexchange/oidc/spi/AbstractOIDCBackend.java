@@ -72,6 +72,7 @@ import org.slf4j.LoggerFactory;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.proc.BadJOSEException;
+import com.nimbusds.jose.util.ResourceRetriever;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.JWTParser;
@@ -117,6 +118,8 @@ import com.openexchange.login.LoginResult;
 import com.openexchange.login.internal.LoginMethodClosure;
 import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.login.internal.LoginResultImpl;
+import com.openexchange.nimbusds.oauth2.sdk.http.send.HTTPSender;
+import com.openexchange.nimbusds.oauth2.sdk.http.send.HttpClientResourceRetriever;
 import com.openexchange.oidc.AuthenticationInfo;
 import com.openexchange.oidc.OIDCBackend;
 import com.openexchange.oidc.OIDCBackendConfig;
@@ -124,11 +127,13 @@ import com.openexchange.oidc.OIDCBackendConfig.AutologinMode;
 import com.openexchange.oidc.OIDCConfig;
 import com.openexchange.oidc.OIDCExceptionCode;
 import com.openexchange.oidc.OIDCExceptionHandler;
+import com.openexchange.oidc.http.outbound.OIDCHttpClientConfig;
 import com.openexchange.oidc.impl.OIDCBackendConfigImpl;
 import com.openexchange.oidc.impl.OIDCConfigImpl;
 import com.openexchange.oidc.impl.OIDCTokenRefresher;
 import com.openexchange.oidc.osgi.Services;
 import com.openexchange.oidc.tools.OIDCTools;
+import com.openexchange.rest.client.httpclient.HttpClientService;
 import com.openexchange.session.Session;
 import com.openexchange.session.SessionDescription;
 import com.openexchange.session.oauth.OAuthTokens;
@@ -236,11 +241,17 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
     @Override
     public IDTokenClaimsSet validateIdToken(JWT idToken, String nonce) throws OXException {
         LOG.trace("IDTokenClaimsSet validateIdToken(JWT idToken: {},String nonce: {})", idToken.getParsedString(), nonce);
-        IDTokenClaimsSet result = null;
         JWSAlgorithm expectedJWSAlg = this.getJWSAlgorithm();
         try {
-            IDTokenValidator idTokenValidator = new IDTokenValidator(new Issuer(this.getBackendConfig().getOpIssuer()), new ClientID(this.getBackendConfig().getClientID()), expectedJWSAlg, new URL(this.getBackendConfig().getOpJwkSetEndpoint()));
-            result = idTokenValidator.validate(idToken, Strings.isEmpty(nonce) ? null : new Nonce(nonce));
+            ResourceRetriever resourceRetriever = new HttpClientResourceRetriever(() -> {
+                HttpClientService httpClientService = Services.getOptionalService(HttpClientService.class);
+                if (httpClientService == null) {
+                    throw new IllegalStateException("Missing service " + HttpClientService.class.getName());
+                }
+                return httpClientService.getHttpClient(OIDCHttpClientConfig.getClientIdOidc());
+            });
+            IDTokenValidator idTokenValidator = new IDTokenValidator(new Issuer(this.getBackendConfig().getOpIssuer()), new ClientID(this.getBackendConfig().getClientID()), expectedJWSAlg, new URL(this.getBackendConfig().getOpJwkSetEndpoint()),  resourceRetriever);
+            return idTokenValidator.validate(idToken, Strings.isEmpty(nonce) ? null : new Nonce(nonce));
         } catch (BadJOSEException e) {
             throw OIDCExceptionCode.IDTOKEN_VALIDATON_FAILED_CONTENT.create(e, e.getMessage());
         } catch (JOSEException e) {
@@ -248,7 +259,6 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
         } catch (MalformedURLException e) {
             throw OIDCExceptionCode.IDTOKEN_VALIDATON_FAILED.create(e, "Unable to parse JWKSet URL");
         }
-        return result;
     }
 
     @Override
@@ -444,7 +454,13 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
             HTTPRequest httpRequest = getHttpRequest(request.toHTTPRequest());
             LOG.trace("Build TokenRequest to get tokens from OP: {} {}", httpRequest.getURL().toString(), httpRequest.getQuery());
             TokenResponse response = null;
-            response = TokenResponse.parse(httpRequest.send());
+            response = TokenResponse.parse(HTTPSender.send(httpRequest, () -> {
+                HttpClientService httpClientService = Services.getOptionalService(HttpClientService.class);
+                if (httpClientService == null) {
+                    throw new IllegalStateException("Missing service " + HttpClientService.class.getName());
+                }
+                return httpClientService.getHttpClient(OIDCHttpClientConfig.getClientIdOidc());
+            }));
 
             if (!response.indicatesSuccess()) {
                 TokenErrorResponse errorResponse = (TokenErrorResponse) response;

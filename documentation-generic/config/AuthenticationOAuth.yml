@@ -231,3 +231,68 @@ properties:
       file: authentication-oauth.properties 
       packageName: open-xchange-authentication-oauth
       tags: ["Authentication", "OAuth"]
+
+    - key: com.openexchange.authentication.oauth.http.maxConnections
+      description: |
+        The max. number of concurrent HTTP connections that may be established. If you have specified more
+        than one hosts, this setting should be configured so that  
+        maxConnectionsPerHost < maxConnections <= n * maxConnectionsPerHost.
+      defaultValue: 100
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: openid.properties
+      packageName: open-xchange-oidc
+      tags: ["Authentication", "OAuth", "Limit"]
+      
+    - key: com.openexchange.authentication.oauth.http.maxConnectionsPerHost
+      description: |
+        The max. number of concurrent HTTP connections that may be established with a certain endpoint.
+      defaultValue: 100
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: openid.properties
+      packageName: open-xchange-oidc
+      tags: ["Authentication", "OAuth", "Limit"]
+      
+    - key: com.openexchange.authentication.oauth.http.connectTimeout
+      description: |
+        The connection timeout in milliseconds. If establishing a new HTTP connection to a certain
+        host exceeds this value, a timeout exception is thrown.
+      defaultValue: 5000
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: openid.properties
+      packageName: open-xchange-oidc
+      tags: ["Authentication", "OAuth", "Timeout"]
+      
+    - key: com.openexchange.authentication.oauth.http.readTimeout
+      description: |
+        The socket read timeout in milliseconds. If waiting for the next expected TCP packet exceeds
+        this value, a timeout exception is thrown.
+      defaultValue: 15000
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: openid.properties
+      packageName: oopen-xchange-oidc
+      tags: ["Authentication", "OAuth", "Timeout"]
+
+    - key: com.openexchange.authentication.oauth.http.poolTimeout
+      description: |
+        The pool timeout in milliseconds. If waiting for the next available HTTP connection from pool exceeds
+        this value, a timeout exception is thrown.
+      defaultValue: 15000
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: openid.properties
+      packageName: oopen-xchange-oidc
+      tags: ["Authentication", "OAuth", "Timeout"]

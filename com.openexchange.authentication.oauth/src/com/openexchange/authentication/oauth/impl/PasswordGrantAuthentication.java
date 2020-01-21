@@ -69,12 +69,15 @@ import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.DefaultAuthenticated;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.authentication.LoginInfo;
+import com.openexchange.authentication.oauth.http.OAuthAuthenticationHttpClientConfig;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.java.Strings;
+import com.openexchange.nimbusds.oauth2.sdk.http.send.HTTPSender;
 import com.openexchange.osgi.Tools;
+import com.openexchange.rest.client.httpclient.HttpClientService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.session.SessionDescription;
@@ -97,7 +100,7 @@ public class PasswordGrantAuthentication extends OAuthRequestIssuer implements A
 
     /**
      * Initializes a new {@link PasswordGrantAuthentication}.
-     * 
+     *
      * @param config The configuration
      * @param services The service lookup
      */
@@ -122,7 +125,13 @@ public class PasswordGrantAuthentication extends OAuthRequestIssuer implements A
         TokenResponse response;
         try {
             LOG.debug("Sending password grant token request for user '{}' as '{}'", loginInfo.getUsername(), authorizationGrant.getUsername());
-            response = TokenResponse.parse(request.toHTTPRequest().send());
+            response = TokenResponse.parse(HTTPSender.send(request.toHTTPRequest(), () -> {
+                HttpClientService httpClientService = services.getOptionalService(HttpClientService.class);
+                if (httpClientService == null) {
+                    throw new IllegalStateException("Missing service " + HttpClientService.class.getName());
+                }
+                return httpClientService.getHttpClient(OAuthAuthenticationHttpClientConfig.getClientIdOAuthAuthentication());
+            }));
         } catch (com.nimbusds.oauth2.sdk.ParseException | IOException e) {
             throw LoginExceptionCodes.UNKNOWN.create(e, e.getMessage());
         }

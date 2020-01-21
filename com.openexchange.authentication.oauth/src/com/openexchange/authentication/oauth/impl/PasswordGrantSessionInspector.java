@@ -55,6 +55,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Reply;
 import com.openexchange.session.Session;
 import com.openexchange.session.inspector.Reason;
@@ -76,31 +77,26 @@ public class PasswordGrantSessionInspector implements SessionInspectorService {
 
     private static final Logger LOG = LoggerFactory.getLogger(PasswordGrantSessionInspector.class);
 
-    private final SessionOAuthTokenService tokenService;
-
-    private final SessiondService sessiondService;
-
     private final OAuthAuthenticationConfig config;
+    private final ServiceLookup services;
 
-
-    public PasswordGrantSessionInspector(SessionOAuthTokenService tokenService, SessiondService sessiondService, OAuthAuthenticationConfig config) {
+    public PasswordGrantSessionInspector(OAuthAuthenticationConfig config, ServiceLookup services) {
         super();
-        this.tokenService = tokenService;
-        this.sessiondService = sessiondService;
         this.config = config;
+        this.services = services;
     }
 
     @Override
     public Reply onSessionHit(Session session, HttpServletRequest request, HttpServletResponse response) throws OXException {
         if (Boolean.TRUE.equals(session.getParameter(SessionParameters.PASSWORD_GRANT_MARKER))) {
             try {
-                TokenRefresherImpl refresher = new TokenRefresherImpl(session, config);
+                TokenRefresherImpl refresher = new TokenRefresherImpl(session, config, services);
                 TokenRefreshConfig refreshConfig = TokenRefreshConfig.newBuilder()
                     .setLockTimeout(config.getTokenLockTimeoutSeconds(), TimeUnit.SECONDS)
                     .setRefreshThreshold(config.getEarlyTokenRefreshSeconds(), TimeUnit.SECONDS)
                     .setTryRecoverStoredTokens(config.tryRecoverStoredTokens())
                     .build();
-                RefreshResult result = tokenService.checkOrRefreshTokens(session, refresher, refreshConfig);
+                RefreshResult result = services.getServiceSafe(SessionOAuthTokenService.class).checkOrRefreshTokens(session, refresher, refreshConfig);
                 if (result.isSuccess()) {
                     LOG.debug("Returning neutral reply for session '{}' due to successful token refresh result: {}", session.getSessionID(), result.getSuccessReason().name());
                     return Reply.NEUTRAL;
@@ -129,7 +125,7 @@ public class PasswordGrantSessionInspector implements SessionInspectorService {
             } else {
                 LOG.info("Terminating session '{}' due to oauth token refresh error: {} ({})", session.getSessionID(), failReason.name(), result.getErrorDesc());
             }
-            sessiondService.removeSession(session.getSessionID());
+            services.getServiceSafe(SessiondService.class).removeSession(session.getSessionID());
             throw SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID());
         }
 

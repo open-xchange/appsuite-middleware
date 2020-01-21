@@ -91,6 +91,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.SimConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
+import com.openexchange.nimbusds.oauth2.sdk.http.send.HTTPSender;
 import com.openexchange.oidc.AuthenticationInfo;
 import com.openexchange.oidc.OIDCBackend;
 import com.openexchange.oidc.OIDCBackendConfig;
@@ -117,8 +118,8 @@ import com.openexchange.session.reservation.SimSessionReservationService;
  * @since v7.10.0
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ LoginConfiguration.class, Services.class, OIDCWebSSOProviderImpl.class, OIDCTokenResponseParser.class,
-    ServerServiceRegistry.class, ConfigurationService.class, SimHttpServletResponse.class })
+@PrepareForTest({ LoginConfiguration.class, Services.class, OIDCWebSSOProviderImpl.class, OIDCTokenResponseParser.class, OIDCTools.class,
+    ServerServiceRegistry.class, ConfigurationService.class, SimHttpServletResponse.class, HTTPSender.class })
 public class OIDCWebSSoProviderImplTest {
 
     private static final String STATE_VALUE = "stateValue";
@@ -316,6 +317,9 @@ public class OIDCWebSSoProviderImplTest {
 
         Mockito.when(mockedBackend.getHttpRequest(ArgumentMatchers.any(HTTPRequest.class))).thenReturn(mockedHttpRequest);
         Mockito.when(mockedHttpRequest.send()).thenReturn(mockedHttpResponse);
+
+        PowerMockito.mockStatic(HTTPSender.class);
+        PowerMockito.when(HTTPSender.send(Mockito.any(), Mockito.any())).thenReturn(mockedHttpResponse);
 
         String code = "100";
         String errorDescription = "Token response parsing failed";

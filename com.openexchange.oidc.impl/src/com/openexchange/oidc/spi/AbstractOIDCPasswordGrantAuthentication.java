@@ -69,6 +69,7 @@ import com.nimbusds.oauth2.sdk.TokenRequest;
 import com.nimbusds.oauth2.sdk.TokenResponse;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 import com.nimbusds.oauth2.sdk.auth.Secret;
+import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import com.nimbusds.oauth2.sdk.token.RefreshToken;
 import com.nimbusds.openid.connect.sdk.OIDCTokenResponse;
@@ -86,12 +87,15 @@ import com.openexchange.java.Strings;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.LoginResult;
 import com.openexchange.login.listener.LoginListener;
+import com.openexchange.nimbusds.oauth2.sdk.http.send.HTTPSender;
 import com.openexchange.oidc.AuthenticationInfo;
 import com.openexchange.oidc.OIDCBackend;
+import com.openexchange.oidc.http.outbound.OIDCHttpClientConfig;
 import com.openexchange.oidc.impl.OIDCPasswordGrantAuthentication;
 import com.openexchange.oidc.osgi.OIDCBackendRegistry;
 import com.openexchange.oidc.osgi.Services;
 import com.openexchange.oidc.tools.OIDCTools;
+import com.openexchange.rest.client.httpclient.HttpClientService;
 import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.session.Session;
 import com.openexchange.session.SessionDescription;
@@ -151,7 +155,14 @@ public abstract class AbstractOIDCPasswordGrantAuthentication implements Authent
 
     protected TokenResponse sendTokenRequest(OIDCBackend backend, TokenRequest request) throws OXException {
         try {
-            return OIDCTokenResponseParser.parse(backend.getHttpRequest(request.toHTTPRequest()).send());
+            HTTPRequest httpRequest = backend.getHttpRequest(request.toHTTPRequest());
+            return OIDCTokenResponseParser.parse(HTTPSender.send(httpRequest, () -> {
+                HttpClientService httpClientService = Services.getOptionalService(HttpClientService.class);
+                if (httpClientService == null) {
+                    throw new IllegalStateException("Missing service " + HttpClientService.class.getName());
+                }
+                return httpClientService.getHttpClient(OIDCHttpClientConfig.getClientIdOidc());
+            }));
         } catch (com.nimbusds.oauth2.sdk.ParseException | IOException e) {
             throw LoginExceptionCodes.UNKNOWN.create(e, e.getMessage());
         }
