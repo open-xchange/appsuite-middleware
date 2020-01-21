@@ -53,7 +53,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import com.openexchange.client.onboarding.BuiltInProvider;
 import com.openexchange.client.onboarding.OnboardingExceptionCodes;
 import com.openexchange.client.onboarding.OnboardingProvider;
 import com.openexchange.client.onboarding.service.OnboardingService;
@@ -118,6 +120,54 @@ public class PlistUtility {
             }
         }
         return retval == null ? Collections.emptyList() : retval;
+    }
+
+    /**
+     * Puts the referenced built-in PLIST provider into specified map.
+     * <p>
+     * <div style="margin-left: 0.1in; margin-right: 0.5in; margin-bottom: 0.1in; background-color:#FFDDDD;">
+     * <b>Note</b>: Referenced provider is expected to be of type {@link OnboardingPlistProvider}.
+     * </div>
+     *
+     * @param builtInProvider The built-in provider
+     * @param providers The map to put into
+     * @param service The client on-boarding service to use
+     * @throws OXException If there is no such provider associated with given identifier or looked-up provider is not suitable to generate a PLIST dictionary
+     * @throws IllegalArgumentException If given provider identifier is <code>null</code> or empty or any other argument is <code>null</code>
+     */
+    public static void putPlistProviderById(BuiltInProvider builtInProvider, Map<String, OnboardingPlistProvider> providers, OnboardingService service) throws OXException {
+        putPlistProviderById(builtInProvider.getId(), providers, service);
+    }
+
+    /**
+     * Puts the PLIST provider associated with given identifier into specified map.
+     * <p>
+     * <div style="margin-left: 0.1in; margin-right: 0.5in; margin-bottom: 0.1in; background-color:#FFDDDD;">
+     * <b>Note</b>: Referenced provider is expected to be of type {@link OnboardingPlistProvider}.
+     * </div>
+     *
+     * @param id The provider identifier
+     * @param providers The map to put into
+     * @param service The client on-boarding service to use
+     * @throws OXException If there is no such provider associated with given identifier or looked-up provider is not suitable to generate a PLIST dictionary
+     * @throws IllegalArgumentException If given provider identifier is <code>null</code> or empty or any other argument is <code>null</code>
+     */
+    public static void putPlistProviderById(String id, Map<String, OnboardingPlistProvider> providers, OnboardingService service) throws OXException {
+        if (Strings.isEmpty(id)) {
+            throw new IllegalArgumentException("Provider identifier must not be null or empty");
+        }
+        if (providers == null) {
+            throw new IllegalArgumentException("Map must not be null");
+        }
+        if (service == null) {
+            throw new IllegalArgumentException("Service must not be null");
+        }
+
+        OnboardingProvider provider = service.getProvider(id);
+        if (!(provider instanceof OnboardingPlistProvider)) {
+            throw OnboardingExceptionCodes.NO_PLIST_PROVIDER.create(id);
+        }
+        providers.put(id, (OnboardingPlistProvider) provider);
     }
 
 }
