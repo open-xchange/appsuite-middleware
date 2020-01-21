@@ -76,7 +76,7 @@ import com.openexchange.test.concurrent.ParallelSuite;
     QuotaForSyncTest.class,
     Bug67685Test.class,
     TrashTests.class,
-    //    ResumableChecksumTest.class
+    ResumableChecksumTest.class
 })
 public class DriveAJAXSuite  {
 

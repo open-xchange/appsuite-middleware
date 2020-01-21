@@ -63,13 +63,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import org.apache.commons.io.IOUtils;
-import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.framework.AbstractAPIClientSession;
 import com.openexchange.groupware.modules.Module;
-import com.openexchange.junit.Assert;
-import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.ConfigResponse;
 import com.openexchange.testing.httpclient.models.DriveDownloadBody;
@@ -91,40 +88,30 @@ import jonelo.jacksum.algorithm.MD;
 public class ResumableChecksumTest extends AbstractAPIClientSession {
 
     private DriveApi driveApi;
-    private ApiClient client;
-    private String session;
     private String folderId;
     private String privateInfostoreFolder;
     private List<String> folders = new ArrayList<>();
 
-    /**
-     * Initializes a new {@link ResumableChecksumTest} that tests
-     * if the resumable calculation of the checksum for uploading a file in chunks works.
-     */
-    public ResumableChecksumTest() {
-        super();
-    }
-
     @Override
-    @Before
     public void setUp() throws Exception {
         super.setUp();
-        client = getApiClient();
-        session = client.getSession();
-        driveApi = new DriveApi(client);
+        driveApi = new DriveApi(getApiClient());
 
-        String folderTitle = "ResumableChecksumFolder" + UUID.randomUUID().toString();
+        String folderTitle = "ResumableChecksumFolder_" + UUID.randomUUID().toString();
         folderId = createFolderForTest(folderTitle);
         rememberFolder(folderId);
     }
 
     @Override
     public void tearDown() throws Exception {
-        if (!folders.isEmpty()) {
-            FoldersApi folderApi = new FoldersApi(getApiClient());
-            folderApi.deleteFolders(getApiClient().getSession(), folders, "1", L(new Date().getTime()), null, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE, null);
+        try {
+            if (!folders.isEmpty()) {
+                FoldersApi folderApi = new FoldersApi(getApiClient());
+                folderApi.deleteFolders(getApiClient().getSession(), folders, "1", L(new Date().getTime()), null, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE, null);
+            }
+        } finally {
+            super.tearDown();
         }
-        super.tearDown();
     }
 
     /**
@@ -139,17 +126,19 @@ public class ResumableChecksumTest extends AbstractAPIClientSession {
     @Test
     public void testResumableChecksum_UploadWith3EmptyChunks_Successful() throws NoSuchAlgorithmException, ApiException, IOException {
         String newName = "testResumableChecksum_3chunks.txt";
-        int chunksize = 22000;
+        int chunksize = 2000;
         byte[] body = new byte[chunksize];
         Long totalLength = L(3 * chunksize);
         Long offset = L(0);
         String newChecksum = getChecksum(new byte[3 * chunksize]);
 
-        DriveUploadResponse uploadFile = driveApi.uploadFile(session, folderId, "/", newName, newChecksum, body, null, null, null, null, offset, totalLength, null, null, null, null, null);
+        DriveUploadResponse uploadFile = driveApi.uploadFile(getApiClient().getSession(), folderId, "/", newName, newChecksum, body, null, null, null, null, offset, totalLength, null, null, null, null, null);
+        assertNull(uploadFile.getErrorDesc(), uploadFile.getError());
         offset = L(chunksize);
-        uploadFile = driveApi.uploadFile(session, folderId, "/", newName, newChecksum, body, null, null, null, null, offset, totalLength, null, null, null, null, null);
+        uploadFile = driveApi.uploadFile(getApiClient().getSession(), folderId, "/", newName, newChecksum, body, null, null, null, null, offset, totalLength, null, null, null, null, null);
+        assertNull(uploadFile.getErrorDesc(), uploadFile.getError());
         offset = L(2 * chunksize);
-        uploadFile = driveApi.uploadFile(session, folderId, "/", newName, newChecksum, body, null, null, null, null, offset, totalLength, null, null, null, null, null);
+        uploadFile = driveApi.uploadFile(getApiClient().getSession(), folderId, "/", newName, newChecksum, body, null, null, null, null, offset, totalLength, null, null, null, null, null);
 
         assertNull(uploadFile.getErrorDesc(), uploadFile.getError());
 
@@ -157,10 +146,12 @@ public class ResumableChecksumTest extends AbstractAPIClientSession {
          * downloading the file to assert that checksum and length are equal with the uploaded file
          */
         DriveDownloadBody downloadBody = new DriveDownloadBody();
-        File downloadFile = driveApi.downloadFile(session, folderId, "/", newName, newChecksum, null, L(0), L(-1), downloadBody);
-        byte[] downloadArray = IOUtils.toByteArray(new FileInputStream(downloadFile));
-        assertEquals(l(totalLength), downloadFile.length());
-        assertEquals(newChecksum, getChecksum(downloadArray));
+        File downloadFile = driveApi.downloadFile(getApiClient().getSession(), folderId, "/", newName, newChecksum, null, L(0), L(-1), downloadBody);
+        try (FileInputStream in = new FileInputStream(downloadFile)) {
+            byte[] downloadArray = IOUtils.toByteArray(in);
+            assertEquals(l(totalLength), downloadFile.length());
+            assertEquals(newChecksum, getChecksum(downloadArray));
+        }
     }
 
     /**
@@ -175,7 +166,7 @@ public class ResumableChecksumTest extends AbstractAPIClientSession {
     @Test
     public void testResumableChecksum_UploadWithFilledChunks_Successful() throws NoSuchAlgorithmException, ApiException, IOException {
         String newName = "testResumableChecksum_filledChunks.txt";
-        int chunksize = 33000;
+        int chunksize = 3000;
         byte[] body1 = new byte[chunksize];
         SecureRandom.getInstanceStrong().nextBytes(body1);
         byte[] body2 = new byte[chunksize];
@@ -187,9 +178,10 @@ public class ResumableChecksumTest extends AbstractAPIClientSession {
         String newChecksum = getChecksum(bodyComplete);
         Long offset = L(0);
 
-        DriveUploadResponse uploadFile = driveApi.uploadFile(session, folderId, "/", newName, newChecksum, body1, null, null, null, null, offset, totalLength, null, null, null, null, null);
+        DriveUploadResponse uploadFile = driveApi.uploadFile(getApiClient().getSession(), folderId, "/", newName, newChecksum, body1, null, null, null, null, offset, totalLength, null, null, null, null, null);
+        assertNull(uploadFile.getErrorDesc(), uploadFile.getError());
         offset = L(chunksize);
-        uploadFile = driveApi.uploadFile(session, folderId, "/", newName, newChecksum, body2, null, null, null, null, offset, totalLength, null, null, null, null, null);
+        uploadFile = driveApi.uploadFile(getApiClient().getSession(), folderId, "/", newName, newChecksum, body2, null, null, null, null, offset, totalLength, null, null, null, null, null);
 
         assertNull(uploadFile.getErrorDesc(), uploadFile.getError());
 
@@ -197,13 +189,13 @@ public class ResumableChecksumTest extends AbstractAPIClientSession {
          * downloading the file to assert that checksum and length are equal with the uploaded file
          */
         DriveDownloadBody downloadBody = new DriveDownloadBody();
-        File downloadFile = driveApi.downloadFile(session, folderId, "/", newName, newChecksum, null, L(0), L(-1), downloadBody);
-        byte[] downloadArray = IOUtils.toByteArray(new FileInputStream(downloadFile));
-        assertEquals(l(totalLength), downloadFile.length());
-        assertEquals(newChecksum, getChecksum(downloadArray));
+        File downloadFile = driveApi.downloadFile(getApiClient().getSession(), folderId, "/", newName, newChecksum, null, L(0), L(-1), downloadBody);
+        try (FileInputStream in = new FileInputStream(downloadFile)) {
+            byte[] downloadArray = IOUtils.toByteArray(in);
+            assertEquals(l(totalLength), downloadFile.length());
+            assertEquals(newChecksum, getChecksum(downloadArray));
+        }
     }
-
-
 
     private String getChecksum(byte[] bytes) throws NoSuchAlgorithmException {
         MD md5 = new MD("MD5");
@@ -238,7 +230,7 @@ public class ResumableChecksumTest extends AbstractAPIClientSession {
             if (data != null && !data.toString().equalsIgnoreCase("null")) {
                 privateInfostoreFolder = String.valueOf(data);
             } else {
-                Assert.fail("It seems that the user doesn't support drive.");
+                org.junit.Assert.fail("It seems that the user doesn't support drive.");
             }
 
         }
@@ -246,14 +238,14 @@ public class ResumableChecksumTest extends AbstractAPIClientSession {
     }
 
     private Object checkResponse(ConfigResponse resp) {
-        Assert.assertNull(resp.getErrorDesc(), resp.getError());
-        Assert.assertNotNull(resp.getData());
+        org.junit.Assert.assertNull(resp.getErrorDesc(), resp.getError());
+        org.junit.Assert.assertNotNull(resp.getData());
         return resp.getData();
     }
 
     private String checkResponse(FolderUpdateResponse resp) {
-        Assert.assertNull(resp.getErrorDesc(), resp.getError());
-        Assert.assertNotNull(resp.getData());
+        org.junit.Assert.assertNull(resp.getErrorDesc(), resp.getError());
+        org.junit.Assert.assertNotNull(resp.getData());
         return resp.getData();
     }
 }
