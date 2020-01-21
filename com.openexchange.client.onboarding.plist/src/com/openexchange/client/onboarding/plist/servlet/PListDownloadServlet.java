@@ -55,8 +55,8 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -76,6 +76,7 @@ import com.openexchange.client.onboarding.plist.OnboardingPlistProvider;
 import com.openexchange.client.onboarding.plist.PListSigner;
 import com.openexchange.client.onboarding.plist.PlistScenario;
 import com.openexchange.client.onboarding.plist.PlistScenarioType;
+import com.openexchange.client.onboarding.plist.PlistUtility;
 import com.openexchange.client.onboarding.plist.osgi.Services;
 import com.openexchange.client.onboarding.service.OnboardingService;
 import com.openexchange.exception.OXException;
@@ -234,30 +235,43 @@ public class PListDownloadServlet extends WebDavServlet {
         }
     }
 
-    private Scenario getDirectDownloadScenario(String scenarioId, OnboardingService onboardingService) throws OXException {
-        Optional<PlistScenarioType> optionalScenarioType = PlistScenarioType.plistScenarioTypeFor(scenarioId);
-        if (!optionalScenarioType.isPresent()) {
-            throw OnboardingExceptionCodes.NO_SUCH_SCENARIO.create(scenarioId);
+    private Scenario getDirectDownloadScenario(String sTypes, OnboardingService onboardingService) throws OXException {
+        String[] types = Strings.splitByComma(sTypes);
+
+        // Determine suitable providers
+        Map<String, OnboardingPlistProvider> onboardingProviders = new LinkedHashMap<>(types.length);
+        for (String type : types) {
+            Optional<PlistScenarioType> optionalScenarioType = PlistScenarioType.plistScenarioTypeFor(type);
+            if (optionalScenarioType.isPresent()) {
+                switch (optionalScenarioType.get()) {
+                    case CALDAV:
+                        PlistUtility.putPlistProviderById(BuiltInProvider.CALDAV, onboardingProviders, onboardingService);
+                        break;
+                    case CARDDAV:
+                        PlistUtility.putPlistProviderById(BuiltInProvider.CARDDAV, onboardingProviders, onboardingService);
+                        break;
+                    case DAV:
+                        PlistUtility.putPlistProviderById(BuiltInProvider.CALDAV, onboardingProviders, onboardingService);
+                        PlistUtility.putPlistProviderById(BuiltInProvider.CARDDAV, onboardingProviders, onboardingService);
+                        break;
+                    case MAIL:
+                        PlistUtility.putPlistProviderById(BuiltInProvider.MAIL, onboardingProviders, onboardingService);
+                        break;
+                    default:
+                        throw OnboardingExceptionCodes.NO_SUCH_SCENARIO.create(type);
+
+                }
+            } else {
+                Optional<OnboardingPlistProvider> optionalProvider = PlistUtility.lookUpPlistProviderById(type, onboardingService);
+                if (!optionalScenarioType.isPresent()) {
+                    throw OnboardingExceptionCodes.NOT_FOUND.create(type);
+                }
+
+                onboardingProviders.put(type, optionalProvider.get());
+            }
         }
 
-        List<OnboardingProvider> providers;
-        switch (optionalScenarioType.get()) {
-            case CALDAV:
-                providers = Collections.singletonList(onboardingService.getProvider(BuiltInProvider.CALDAV.getId()));
-                break;
-            case CARDDAV:
-                providers = Collections.singletonList(onboardingService.getProvider(BuiltInProvider.CARDDAV.getId()));
-                break;
-            case DAV:
-                providers = new ArrayList<>(2);
-                providers.add(onboardingService.getProvider(BuiltInProvider.CALDAV.getId()));
-                providers.add(onboardingService.getProvider(BuiltInProvider.CARDDAV.getId()));
-                break;
-            default:
-                throw OnboardingExceptionCodes.NO_SUCH_SCENARIO.create(scenarioId);
-
-        }
-        return PlistScenario.newInstance(scenarioId, providers);
+        return PlistScenario.newInstance(sTypes, new ArrayList<>(onboardingProviders.values()));
     }
 
     private String determineHostName(final HttpServletRequest req, int userId, int contextId) {

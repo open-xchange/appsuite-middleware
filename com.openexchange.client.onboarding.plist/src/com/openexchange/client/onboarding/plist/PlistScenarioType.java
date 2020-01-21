@@ -72,6 +72,10 @@ public enum PlistScenarioType {
      * The synthetic scenario identifier for yielding a PLIST dictionary for a CalDAV &amp; CardDAV profile.
      */
     DAV("dav"),
+    /**
+     * The synthetic scenario identifier for yielding a PLIST dictionary for an Email profile.
+     */
+    MAIL("mail"),
     ;
 
     private final String scenarioId;

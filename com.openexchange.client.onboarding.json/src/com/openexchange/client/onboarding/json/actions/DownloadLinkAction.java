@@ -56,9 +56,13 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.client.onboarding.Device;
 import com.openexchange.client.onboarding.OnboardingUtility;
 import com.openexchange.client.onboarding.download.DownloadLinkProvider;
+import com.openexchange.client.onboarding.plist.OnboardingPlistProvider;
 import com.openexchange.client.onboarding.plist.PlistScenarioType;
+import com.openexchange.client.onboarding.plist.PlistUtility;
+import com.openexchange.client.onboarding.service.OnboardingService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.Permission;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -84,49 +88,67 @@ public class DownloadLinkAction extends AbstractOnboardingAction {
 
     @Override
     protected AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException, JSONException {
-        String type = requestData.requireParameter("type");
-        Optional<PlistScenarioType> optionalScenarioType = PlistScenarioType.plistScenarioTypeFor(type);
-        if (!optionalScenarioType.isPresent()) {
-            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("type", type);
-        }
+        // Obtain needed service
+        OnboardingService service = getOnboardingService();
 
-        switch (optionalScenarioType.get()) {
-            case CALDAV:
-                if (!OnboardingUtility.hasCapability(Permission.CALDAV.getCapabilityName(), session)) {
-                    throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create(Permission.CALDAV);
+        // Obtain referenced PLIST scenario
+        String sTypes = requestData.requireParameter("type");
+        String[] types = Strings.splitByComma(sTypes);
+
+        // Determine suitable providers
+        for (String type : types) {
+            Optional<PlistScenarioType> optionalScenarioType = PlistScenarioType.plistScenarioTypeFor(type);
+            if (optionalScenarioType.isPresent()) {
+                switch (optionalScenarioType.get()) {
+                    case CALDAV:
+                        if (!OnboardingUtility.hasCapability(Permission.CALDAV.getCapabilityName(), session)) {
+                            throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create(Permission.CALDAV.getCapabilityName());
+                        }
+                        if (!session.getUserPermissionBits().hasCalendar()) {
+                            throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create(Permission.CALENDAR.getCapabilityName());
+                        }
+                        break;
+                    case CARDDAV:
+                        if (!OnboardingUtility.hasCapability(Permission.CARDDAV.getCapabilityName(), session)) {
+                            throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create(Permission.CARDDAV.getCapabilityName());
+                        }
+                        if (!session.getUserPermissionBits().hasContact()) {
+                            throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create(Permission.CONTACTS.getCapabilityName());
+                        }
+                        break;
+                    case DAV:
+                        if (!OnboardingUtility.hasCapability(Permission.CALDAV.getCapabilityName(), session)) {
+                            throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create(Permission.CALDAV.getCapabilityName());
+                        }
+                        if (!OnboardingUtility.hasCapability(Permission.CARDDAV.getCapabilityName(), session)) {
+                            throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create(Permission.CARDDAV.getCapabilityName());
+                        }
+                        if (!session.getUserPermissionBits().hasCalendar()) {
+                            throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create(Permission.CALENDAR.getCapabilityName());
+                        }
+                        if (!session.getUserPermissionBits().hasContact()) {
+                            throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create(Permission.CONTACTS.getCapabilityName());
+                        }
+                        break;
+                    case MAIL:
+                        if (!OnboardingUtility.hasCapability(Permission.WEBMAIL.getCapabilityName(), session)) {
+                            throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create(Permission.WEBMAIL.getCapabilityName());
+                        }
+                        break;
+                    default:
+                        throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("type", type);
+
                 }
-                if (!session.getUserPermissionBits().hasCalendar()) {
-                    throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create(Permission.CALENDAR);
+            } else {
+                Optional<OnboardingPlistProvider> optionalProvider = PlistUtility.lookUpPlistProviderById(type, service);
+                if (!optionalProvider.isPresent()) {
+                    throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("type", type);
                 }
-                break;
-            case CARDDAV:
-                if (!OnboardingUtility.hasCapability(Permission.CARDDAV.getCapabilityName(), session)) {
-                    throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create(Permission.CARDDAV);
-                }
-                if (!session.getUserPermissionBits().hasContact()) {
-                    throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create(Permission.CONTACTS);
-                }
-                break;
-            case DAV:
-                if (!OnboardingUtility.hasCapability(Permission.CALDAV.getCapabilityName(), session)) {
-                    throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create(Permission.CALDAV);
-                }
-                if (!OnboardingUtility.hasCapability(Permission.CARDDAV.getCapabilityName(), session)) {
-                    throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create(Permission.CARDDAV);
-                }
-                if (!session.getUserPermissionBits().hasCalendar()) {
-                    throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create(Permission.CALENDAR);
-                }
-                if (!session.getUserPermissionBits().hasContact()) {
-                    throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create(Permission.CONTACTS);
-                }
-                break;
-            default:
-                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("type", type);
+            }
         }
 
         DownloadLinkProvider linkProvider = services.getService(DownloadLinkProvider.class);
-        String link = linkProvider.getLink(requestData.getHostData(), session.getUserId(), session.getContextId(), type, Device.APPLE_IPHONE.getId());
+        String link = linkProvider.getLink(requestData.getHostData(), session.getUserId(), session.getContextId(), sTypes, Device.APPLE_IPHONE.getId());
         return new AJAXRequestResult(link, "json");
 
     }
