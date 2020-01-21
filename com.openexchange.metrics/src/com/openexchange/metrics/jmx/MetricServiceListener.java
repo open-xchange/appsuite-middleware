@@ -76,7 +76,7 @@ public interface MetricServiceListener {
      *
      * @param name the gauge's name
      */
-    void onGaugeRemoved(String name);
+    void onGaugeRemoved(MetricDescriptor descriptor);
 
     /**
      * Called when a {@link Counter} is added to the registry.
@@ -91,7 +91,7 @@ public interface MetricServiceListener {
      *
      * @param name the counter's name
      */
-    void onCounterRemoved(String name);
+    void onCounterRemoved(MetricDescriptor descriptor);
 
     /**
      * Called when a {@link Histogram} is added to the registry.
@@ -106,7 +106,7 @@ public interface MetricServiceListener {
      *
      * @param name the histogram's name
      */
-    void onHistogramRemoved(String name);
+    void onHistogramRemoved(MetricDescriptor descriptor);
 
     /**
      * Called when a {@link Meter} is added to the registry.
@@ -121,7 +121,7 @@ public interface MetricServiceListener {
      *
      * @param name the meter's name
      */
-    void onMeterRemoved(String name);
+    void onMeterRemoved(MetricDescriptor descriptor);
 
     /**
      * Called when a {@link Timer} is added to the registry.
@@ -136,5 +136,5 @@ public interface MetricServiceListener {
      *
      * @param name the timer's name
      */
-    void onTimerRemoved(String name);
+    void onTimerRemoved(MetricDescriptor descriptor);
 }

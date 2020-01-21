@@ -49,8 +49,6 @@
 
 package com.openexchange.metrics;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -58,6 +56,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.metrics.jmx.MetricServiceListener;
 import com.openexchange.metrics.types.Counter;
 import com.openexchange.metrics.types.Gauge;
@@ -90,23 +89,23 @@ public abstract class AbstractMetricService implements MetricService {
         registerers = new ConcurrentHashMap<>();
         listeners = new ConcurrentLinkedQueue<>();
 
-        Map<MetricType, MetricServiceListenerNotifier> l = new HashMap<>();
-        l.put(MetricType.COUNTER, (listener, metric, descriptor) -> listener.onCounterAdded(descriptor, (Counter) metric));
-        l.put(MetricType.GAUGE, (listener, metric, descriptor) -> listener.onGaugeAdded(descriptor, (Gauge<?>) metric));
-        l.put(MetricType.HISTOGRAM, (listener, metric, descriptor) -> listener.onHistogramAdded(descriptor, (Histogram) metric));
-        l.put(MetricType.METER, (listener, metric, descriptor) -> listener.onMeterAdded(descriptor, (Meter) metric));
-        l.put(MetricType.TIMER, (listener, metric, descriptor) -> listener.onTimerAdded(descriptor, (Timer) metric));
+        // @formatter:off
+        listenerNotifiersOnAdd = ImmutableMap.of(
+            MetricType.COUNTER, (listener, metric, descriptor) -> listener.onCounterAdded(descriptor, (Counter) metric),
+            MetricType.GAUGE, (listener, metric, descriptor) -> listener.onGaugeAdded(descriptor, (Gauge<?>) metric),
+            MetricType.HISTOGRAM, (listener, metric, descriptor) -> listener.onHistogramAdded(descriptor, (Histogram) metric),
+            MetricType.METER, (listener, metric, descriptor) -> listener.onMeterAdded(descriptor, (Meter) metric),
+            MetricType.TIMER, (listener, metric, descriptor) -> listener.onTimerAdded(descriptor, (Timer) metric)
+        );
 
-        listenerNotifiersOnAdd = Collections.unmodifiableMap(l);
-
-        l = new HashMap<>();
-        l.put(MetricType.COUNTER, (listener, metric, descriptor) -> listener.onCounterRemoved(descriptor.getFullName()));
-        l.put(MetricType.GAUGE, (listener, metric, descriptor) -> listener.onGaugeRemoved(descriptor.getFullName()));
-        l.put(MetricType.HISTOGRAM, (listener, metric, descriptor) -> listener.onHistogramRemoved(descriptor.getFullName()));
-        l.put(MetricType.METER, (listener, metric, descriptor) -> listener.onMeterRemoved(descriptor.getFullName()));
-        l.put(MetricType.TIMER, (listener, metric, descriptor) -> listener.onTimerRemoved(descriptor.getFullName()));
-
-        listenerNotifiersOnRemove = Collections.unmodifiableMap(l);
+        listenerNotifiersOnRemove = ImmutableMap.of(
+            MetricType.COUNTER, (listener, metric, descriptor) -> listener.onCounterRemoved(descriptor),
+            MetricType.GAUGE, (listener, metric, descriptor) -> listener.onGaugeRemoved(descriptor),
+            MetricType.HISTOGRAM, (listener, metric, descriptor) -> listener.onHistogramRemoved(descriptor),
+            MetricType.METER, (listener, metric, descriptor) -> listener.onMeterRemoved(descriptor),
+            MetricType.TIMER, (listener, metric, descriptor) -> listener.onTimerRemoved(descriptor)
+        );
+        // @formatter:on
     }
 
     /**

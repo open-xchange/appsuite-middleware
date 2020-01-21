@@ -82,8 +82,8 @@ public class DropwizardMetricServiceMBeanListener extends AbstractMetricServiceL
     }
 
     @Override
-    public void onGaugeRemoved(String name) {
-        unregisterMBean(name);
+    public void onGaugeRemoved(MetricDescriptor descriptor) {
+        unregisterMBean(descriptor);
     }
 
     @Override
@@ -92,8 +92,8 @@ public class DropwizardMetricServiceMBeanListener extends AbstractMetricServiceL
     }
 
     @Override
-    public void onCounterRemoved(String name) {
-        unregisterMBean(name);
+    public void onCounterRemoved(MetricDescriptor descriptor) {
+        unregisterMBean(descriptor);
     }
 
     @Override
@@ -102,8 +102,8 @@ public class DropwizardMetricServiceMBeanListener extends AbstractMetricServiceL
     }
 
     @Override
-    public void onHistogramRemoved(String name) {
-        unregisterMBean(name);
+    public void onHistogramRemoved(MetricDescriptor descriptor) {
+        unregisterMBean(descriptor);
     }
 
     @Override
@@ -112,8 +112,8 @@ public class DropwizardMetricServiceMBeanListener extends AbstractMetricServiceL
     }
 
     @Override
-    public void onMeterRemoved(String name) {
-        unregisterMBean(name);
+    public void onMeterRemoved(MetricDescriptor descriptor) {
+        unregisterMBean(descriptor);
     }
 
     @Override
@@ -122,7 +122,7 @@ public class DropwizardMetricServiceMBeanListener extends AbstractMetricServiceL
     }
 
     @Override
-    public void onTimerRemoved(String name) {
-        unregisterMBean(name);
+    public void onTimerRemoved(MetricDescriptor descriptor) {
+        unregisterMBean(descriptor);
     }
 }

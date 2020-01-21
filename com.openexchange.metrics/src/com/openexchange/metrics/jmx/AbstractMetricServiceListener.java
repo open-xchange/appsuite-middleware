@@ -62,7 +62,6 @@ import javax.management.ObjectName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
 import com.openexchange.management.ManagementService;
 import com.openexchange.metrics.MetricDescriptor;
 import com.openexchange.metrics.MetricType;
@@ -145,20 +144,6 @@ public abstract class AbstractMetricServiceListener implements MetricServiceList
     }
 
     /**
-     * Unregisters an MBean with the specified name
-     *
-     * @param name The metric's name
-     * @throws OXException if the MBean for the specified {@link Metric} cannot be unregistered
-     */
-    protected void unregisterMBean(String name) {
-        try {
-            managementService.unregisterMBean(getObjectName(name));
-        } catch (MalformedObjectNameException | OXException e) {
-            LOG.warn("Unable to unregister MBean for metric {}", name, e);
-        }
-    }
-
-    /**
      * Unregisters an MBean with the specified metric descriptor
      *
      * @param metricDescriptor The {@link MetricDescriptor} of the {@link Metric}
@@ -186,29 +171,6 @@ public abstract class AbstractMetricServiceListener implements MetricServiceList
         Optional<Map<String, String>> dimensions = metricDescriptor.getDimensions();
         if (dimensions.isPresent()) {
             properties.putAll(dimensions.get());
-        }
-        return ObjectName.getInstance(DOMAIN_NAME, properties);
-    }
-
-    /**
-     * Gets the {@link ObjectName} for the specified component and metric
-     *
-     * @param name the metric name
-     * @return The created {@link ObjectName}
-     * @throws MalformedObjectNameException if the string passed as a parameter does not have the right format.
-     */
-    private ObjectName getObjectName(String name) throws MalformedObjectNameException {
-        if (Strings.isEmpty(name)) {
-            throw new IllegalArgumentException("Cannot create an ObjectName for an empty or 'null' name");
-        }
-
-        Hashtable<String, String> properties = new Hashtable<>();
-        int indexOf = name.indexOf('.');
-        if (indexOf <= 0) {
-            properties.put("name", name);
-        } else {
-            properties.put("type", name.substring(0, indexOf));
-            properties.put("name", name.substring(indexOf + 1));
         }
         return ObjectName.getInstance(DOMAIN_NAME, properties);
     }
