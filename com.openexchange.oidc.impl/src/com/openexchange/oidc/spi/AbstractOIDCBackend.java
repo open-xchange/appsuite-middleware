@@ -121,6 +121,10 @@ import com.openexchange.oidc.AuthenticationInfo;
 import com.openexchange.oidc.OIDCBackend;
 import com.openexchange.oidc.OIDCBackendConfig;
 import com.openexchange.oidc.OIDCBackendConfig.AutologinMode;
+import com.openexchange.oidc.http.outbound.HttpConfig;
+import com.openexchange.oidc.http.outbound.SSLInjectingHTTPRequest;
+import com.openexchange.oidc.http.outbound.SSLInjectingResourceRetriever;
+import com.openexchange.oidc.http.outbound.SSLInjectingTokenRequest;
 import com.openexchange.oidc.OIDCConfig;
 import com.openexchange.oidc.OIDCExceptionCode;
 import com.openexchange.oidc.OIDCExceptionHandler;
@@ -194,7 +198,14 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
 
     @Override
     public HTTPRequest getHttpRequest(HTTPRequest request) {
-        return request;
+        if (request == null) {
+            return null;
+        }
+
+        HttpConfig httpConfig = HttpConfig.getInstance();
+        request.setConnectTimeout(httpConfig.getConnectTimeout());
+        request.setReadTimeout(httpConfig.getReadTimeout());
+        return SSLInjectingHTTPRequest.valueOf(request);
     }
 
     @Override
@@ -206,7 +217,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
 
     @Override
     public TokenRequest getTokenRequest(TokenRequest tokenRequest) {
-        return tokenRequest;
+        return SSLInjectingTokenRequest.valueOf(tokenRequest);
     }
 
     @Override
@@ -236,11 +247,10 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
     @Override
     public IDTokenClaimsSet validateIdToken(JWT idToken, String nonce) throws OXException {
         LOG.trace("IDTokenClaimsSet validateIdToken(JWT idToken: {},String nonce: {})", idToken.getParsedString(), nonce);
-        IDTokenClaimsSet result = null;
         JWSAlgorithm expectedJWSAlg = this.getJWSAlgorithm();
         try {
-            IDTokenValidator idTokenValidator = new IDTokenValidator(new Issuer(this.getBackendConfig().getOpIssuer()), new ClientID(this.getBackendConfig().getClientID()), expectedJWSAlg, new URL(this.getBackendConfig().getOpJwkSetEndpoint()));
-            result = idTokenValidator.validate(idToken, Strings.isEmpty(nonce) ? null : new Nonce(nonce));
+            IDTokenValidator idTokenValidator = new IDTokenValidator(new Issuer(this.getBackendConfig().getOpIssuer()), new ClientID(this.getBackendConfig().getClientID()), expectedJWSAlg, new URL(this.getBackendConfig().getOpJwkSetEndpoint()), SSLInjectingResourceRetriever.newInstance());
+            return idTokenValidator.validate(idToken, Strings.isEmpty(nonce) ? null : new Nonce(nonce));
         } catch (BadJOSEException e) {
             throw OIDCExceptionCode.IDTOKEN_VALIDATON_FAILED_CONTENT.create(e, e.getMessage());
         } catch (JOSEException e) {
@@ -248,7 +258,6 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
         } catch (MalformedURLException e) {
             throw OIDCExceptionCode.IDTOKEN_VALIDATON_FAILED.create(e, "Unable to parse JWKSet URL");
         }
-        return result;
     }
 
     @Override

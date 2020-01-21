@@ -419,4 +419,29 @@ properties:
       file: openid.properties
       packageName: open-xchange-oidc
       tags: ["OpenID"]
-
+      
+    - key: com.openexchange.oidc.http.outbound.connectTimeout
+      description: |
+        The connection timeout in milliseconds. If establishing a new HTTP connection to a certain
+        host exceeds this value, a timeout exception is thrown.
+      defaultValue: 5000
+      version: 
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: openid.properties
+      packageName: open-xchange-oidc
+      tags: ["OpenID", "Timeout"]
+      
+    - key: com.openexchange.oidc.http.outbound.readTimeout
+      description: |
+        The socket read timeout in milliseconds. If waiting for the next expected TCP packet exceeds
+        this value, a timeout exception is thrown.
+      defaultValue: 15000
+      version: 
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: openid.properties
+      packageName: oopen-xchange-oidc
+      tags: ["OpenID", "Timeout"]

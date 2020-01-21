@@ -53,6 +53,9 @@ import org.slf4j.Logger;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
+import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
@@ -60,7 +63,9 @@ import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 import com.openexchange.lock.LockService;
 import com.openexchange.login.listener.LoginListener;
 import com.openexchange.mail.api.AuthenticationFailedHandler;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.oidc.OIDCBackend;
+import com.openexchange.oidc.http.outbound.HttpConfig;
 import com.openexchange.oidc.hz.PortableAuthenticationRequestFactory;
 import com.openexchange.oidc.hz.PortableLogoutRequestFactory;
 import com.openexchange.oidc.impl.OIDCAuthenticationFailedHandler;
@@ -127,7 +132,25 @@ public class OIDCActivator extends HousekeepingActivator{
         Services.setServices(this);
         trackService(SessionStorageService.class);
         trackService(LockService.class);
+        trackService(SSLSocketFactoryProvider.class);
         openTrackers();
+
+        // Initialize configuration for outbound HTTP traffic
+        {
+            HttpConfig.initInstance(getService(ConfigurationService.class));
+            registerService(Reloadable.class, new Reloadable() {
+
+                @Override
+                public void reloadConfiguration(ConfigurationService configService) {
+                    HttpConfig.initInstance(configService);
+                }
+
+                @Override
+                public Interests getInterests() {
+                    return Reloadables.interestsForProperties("com.openexchange.oidc.http.outbound.*");
+                }
+            });
+        }
 
         OIDCConfigImpl config = new OIDCConfigImpl(this);
 
@@ -164,6 +187,7 @@ public class OIDCActivator extends HousekeepingActivator{
             this.oidcBackendRegistry = null;
             oidcBackends.close();
         }
+        HttpConfig.resetInstance();
         Services.setServices(null);
         super.stopBundle();
     }
