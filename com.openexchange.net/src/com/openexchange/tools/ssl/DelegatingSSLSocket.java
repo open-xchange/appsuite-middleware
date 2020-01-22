@@ -434,7 +434,7 @@ public class DelegatingSSLSocket extends SSLSocket {
                 SSLSession session = delegate.getSession();
                 SocketAddress endpoint = this.endpoint;
                 String hostname = InetSocketAddress.class.isInstance(endpoint) ? ((InetSocketAddress) endpoint).getHostName() : session.getPeerHost();
-                if (false == optHostnameVerifier.verify(hostname, session)) {
+                if (hostname != null && false == optHostnameVerifier.verify(hostname, session)) {
                     throw new SSLPeerUnverifiedException("SSL peer failed hostname validation for name: " + hostname);
                 }
             }
