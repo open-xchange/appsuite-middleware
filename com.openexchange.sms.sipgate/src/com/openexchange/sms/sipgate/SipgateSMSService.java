@@ -75,6 +75,7 @@ import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.rest.client.httpclient.HttpClients;
 import com.openexchange.rest.client.httpclient.HttpClients.ClientConfig;
@@ -138,6 +139,8 @@ public class SipgateSMSService implements SMSServiceSPI {
             }
         } catch (JSONException e) {
             // will not happen
+        } finally {
+            Streams.close(client);
         }
     }
 
