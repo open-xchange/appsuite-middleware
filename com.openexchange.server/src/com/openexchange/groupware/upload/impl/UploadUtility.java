@@ -360,6 +360,18 @@ public final class UploadUtility {
                 throw UploadException.UploadCode.UNEXPECTED_EOF.create(cause, cause.getMessage());
             }
             throw UploadException.UploadCode.UPLOAD_FAILED.create(e, null == cause ? e.getMessage() : (null == cause.getMessage() ? e.getMessage() : cause.getMessage()));
+        } catch (FileUploadIOException e) {
+            // Might wrap a size-limit-exceeded error
+            Throwable cause = e.getCause();
+            if (cause instanceof FileSizeLimitExceededException) {
+                FileSizeLimitExceededException exc = (FileSizeLimitExceededException) cause;
+                throw UploadFileSizeExceededException.create(exc.getActualSize(), exc.getPermittedSize(), true);
+            }
+            if (cause instanceof SizeLimitExceededException) {
+                SizeLimitExceededException exc = (SizeLimitExceededException) cause;
+                throw UploadSizeExceededException.create(exc.getActualSize(), exc.getPermittedSize(), true);
+            }
+            throw UploadException.UploadCode.UPLOAD_FAILED.create(e, action);
         } catch (IOException e) {
             throw UploadException.UploadCode.UPLOAD_FAILED.create(e, action);
         }
@@ -693,13 +705,26 @@ public final class UploadUtility {
         try {
             uploadEvent.addUploadFile(processUploadedFile(req.getInputStream(), contentType, uploadDir, fileName, maxFileSize, maxOverallSize, uuid, session, listeners));
             error = false;
-        } catch (IOException e) {
-            Throwable cause = e.getCause();
-            if (cause instanceof java.util.concurrent.TimeoutException) {
-                throwException(uuid, UploadException.UploadCode.UNEXPECTED_TIMEOUT.create(e, new Object[0]), session, listeners);
-            }
-            throwException(uuid, UploadException.UploadCode.UPLOAD_FAILED.create(e, action), session, listeners);
+        } catch (FileSizeLimitExceededException e) {
+            throwException(uuid, UploadFileSizeExceededException.create(e.getActualSize(), e.getPermittedSize(), true), session, listeners);
+        } catch (SizeLimitExceededException e) {
+            throwException(uuid, UploadSizeExceededException.create(e.getActualSize(), e.getPermittedSize(), true), session, listeners);
         } catch (FileUploadException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof IOException) {
+                String message = cause.getMessage();
+                if (null != message && message.startsWith("Max. byte count of ")) {
+                    // E.g. Max. byte count of 10240 exceeded.
+                    int pos = message.indexOf(" exceeded", 19 + 1);
+                    String limit = message.substring(19, pos);
+                    throwException(uuid, UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED_UNKNOWN.create(cause, getSize(Long.parseLong(limit), 2, false, true)), session, listeners);
+                }
+            } else if (cause instanceof EOFException) {
+                // Stream closed/ended unexpectedly
+                throwException(uuid, UploadException.UploadCode.UNEXPECTED_EOF.create(cause, cause.getMessage()), session, listeners);
+            }
+            throwException(uuid, UploadException.UploadCode.UPLOAD_FAILED.create(e, null == cause ? e.getMessage() : (null == cause.getMessage() ? e.getMessage() : cause.getMessage())), session, listeners);
+        } catch (FileUploadIOException e) {
             // Might wrap a size-limit-exceeded error
             Throwable cause = e.getCause();
             if (cause instanceof FileSizeLimitExceededException) {
@@ -709,6 +734,12 @@ public final class UploadUtility {
             if (cause instanceof SizeLimitExceededException) {
                 SizeLimitExceededException exc = (SizeLimitExceededException) cause;
                 throwException(uuid, UploadSizeExceededException.create(exc.getActualSize(), exc.getPermittedSize(), true), session, listeners);
+            }
+            throwException(uuid, UploadException.UploadCode.UPLOAD_FAILED.create(e, action), session, listeners);
+        } catch (IOException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof java.util.concurrent.TimeoutException) {
+                throwException(uuid, UploadException.UploadCode.UNEXPECTED_TIMEOUT.create(e, new Object[0]), session, listeners);
             }
             throwException(uuid, UploadException.UploadCode.UPLOAD_FAILED.create(e, action), session, listeners);
         } finally {

@@ -73,6 +73,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import org.apache.commons.fileupload.FileUploadBase.FileSizeLimitExceededException;
+import org.apache.commons.fileupload.FileUploadBase.FileUploadIOException;
+import org.apache.commons.fileupload.FileUploadBase.SizeLimitExceededException;
 import org.apache.commons.io.FileUtils;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
@@ -93,6 +96,8 @@ import com.openexchange.filestore.unified.KnownContributor;
 import com.openexchange.filestore.unified.UnifiedQuotaService;
 import com.openexchange.filestore.unified.UsageResult;
 import com.openexchange.filestore.utils.TempFileHelper;
+import com.openexchange.groupware.upload.impl.UploadFileSizeExceededException;
+import com.openexchange.groupware.upload.impl.UploadSizeExceededException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationCodes;
 import com.openexchange.java.Streams;
 import com.openexchange.log.LogProperties;
@@ -722,6 +727,18 @@ public class DBQuotaFileStorage implements SpoolingCapableQuotaFileStorage, Seri
             String retval = file;
             file = null;
             return retval;
+        } catch (FileUploadIOException e) {
+            // Might wrap a size-limit-exceeded error
+            Throwable cause = e.getCause();
+            if (cause instanceof FileSizeLimitExceededException) {
+                FileSizeLimitExceededException exc = (FileSizeLimitExceededException) cause;
+                throw UploadFileSizeExceededException.create(exc.getActualSize(), exc.getPermittedSize(), true);
+            }
+            if (cause instanceof SizeLimitExceededException) {
+                SizeLimitExceededException exc = (SizeLimitExceededException) cause;
+                throw UploadSizeExceededException.create(exc.getActualSize(), exc.getPermittedSize(), true);
+            }
+            throw FileStorageCodes.IOERROR.create(e, e.getMessage());
         } catch (IOException e) {
             if (indicatesConnectionClosed(e)) {
                 // End of stream has been reached unexpectedly during reading input
@@ -735,6 +752,24 @@ public class DBQuotaFileStorage implements SpoolingCapableQuotaFileStorage, Seri
                 long usage = getUsage();
                 notifyOnQuotaExceeded(null, quota, required, usage + required, usage);
                 throw QuotaFileStorageExceptionCodes.STORE_FULL.create(e, new Object[0]);
+            }
+            if (cause instanceof FileUploadIOException) {
+                // Might wrap a size-limit-exceeded error
+                Throwable thr = cause.getCause();
+                if (thr instanceof FileSizeLimitExceededException) {
+                    FileSizeLimitExceededException exc = (FileSizeLimitExceededException) thr;
+                    throw UploadFileSizeExceededException.create(exc.getActualSize(), exc.getPermittedSize(), true);
+                }
+                if (thr instanceof SizeLimitExceededException) {
+                    SizeLimitExceededException exc = (SizeLimitExceededException) thr;
+                    throw UploadSizeExceededException.create(exc.getActualSize(), exc.getPermittedSize(), true);
+                }
+            }
+            if (cause instanceof IOException) {
+                if (indicatesConnectionClosed(cause)) {
+                    // End of stream has been reached unexpectedly during reading input
+                    throw FileStorageCodes.CONNECTION_CLOSED.create(e.getCause(), new Object[0]);
+                }
             }
             throw e;
         } finally {
@@ -809,6 +844,18 @@ public class DBQuotaFileStorage implements SpoolingCapableQuotaFileStorage, Seri
                     LOGGER.warn("", e);
                 }
             }
+        } catch (FileUploadIOException e) {
+            // Might wrap a size-limit-exceeded error
+            Throwable cause = e.getCause();
+            if (cause instanceof FileSizeLimitExceededException) {
+                FileSizeLimitExceededException exc = (FileSizeLimitExceededException) cause;
+                throw UploadFileSizeExceededException.create(exc.getActualSize(), exc.getPermittedSize(), true);
+            }
+            if (cause instanceof SizeLimitExceededException) {
+                SizeLimitExceededException exc = (SizeLimitExceededException) cause;
+                throw UploadSizeExceededException.create(exc.getActualSize(), exc.getPermittedSize(), true);
+            }
+            throw FileStorageCodes.IOERROR.create(e, e.getMessage());
         } catch (IOException e) {
             if (indicatesConnectionClosed(e)) {
                 // End of stream has been reached unexpectedly during reading input
@@ -822,6 +869,24 @@ public class DBQuotaFileStorage implements SpoolingCapableQuotaFileStorage, Seri
                 long usage = getUsage();
                 notifyOnQuotaExceeded(name, quota, required, usage + required, usage);
                 throw QuotaFileStorageExceptionCodes.STORE_FULL.create(e, new Object[0]);
+            }
+            if (cause instanceof FileUploadIOException) {
+                // Might wrap a size-limit-exceeded error
+                Throwable thr = cause.getCause();
+                if (thr instanceof FileSizeLimitExceededException) {
+                    FileSizeLimitExceededException exc = (FileSizeLimitExceededException) thr;
+                    throw UploadFileSizeExceededException.create(exc.getActualSize(), exc.getPermittedSize(), true);
+                }
+                if (thr instanceof SizeLimitExceededException) {
+                    SizeLimitExceededException exc = (SizeLimitExceededException) thr;
+                    throw UploadSizeExceededException.create(exc.getActualSize(), exc.getPermittedSize(), true);
+                }
+            }
+            if (cause instanceof IOException) {
+                if (indicatesConnectionClosed(cause)) {
+                    // End of stream has been reached unexpectedly during reading input
+                    throw FileStorageCodes.CONNECTION_CLOSED.create(e.getCause(), new Object[0]);
+                }
             }
             if (FileStorageCodes.FILE_NOT_FOUND.equals(e)) {
                 notFoundError = true;
