@@ -115,24 +115,28 @@ public abstract class AbstractLiquibaseUtf8mb4Adapter implements CustomTaskChang
         }
 
         Connection connection = ((JdbcConnection) databaseConnection).getUnderlyingConnection();
+        String schemaName = null;
         try {
-            String schemaName = getSchemaName(connection, database);
-
+            schemaName = getSchemaName(connection, database);
+            if (Strings.isEmpty(schemaName)) {
+                throw new CustomChangeException("Unable to determine schema name.");
+            }
             before(connection, schemaName);
             for (String table : tablesToConvert()) {
                 changeTable(connection, schemaName, table);
             }
             after(connection, schemaName);
         } catch (SQLException e) {
-            LOGGER.error("Failed to convert {} to utf8mb4 for GlobalDB", Strings.concat(",", tablesToConvert()), e);
+            LOGGER.error("Failed to convert {} to utf8mb4 for {}", Strings.concat(",", tablesToConvert()), schemaName, e);
             throw new CustomChangeException("SQL error", e);
         } catch (RuntimeException e) {
-            LOGGER.error("Failed to convert {} to utf8mb4 for GlobalDB", Strings.concat(",", tablesToConvert()), e);
+            LOGGER.error("Failed to convert {} to utf8mb4 for {}", Strings.concat(",", tablesToConvert()), schemaName, e);
             throw new CustomChangeException("Runtime error", e);
         } finally {
             Databases.autocommit(connection);
         }
     }
+
 
     private String getSchemaName(Connection connection, Database database) throws SQLException {
         String catalogName = connection.getCatalog();
