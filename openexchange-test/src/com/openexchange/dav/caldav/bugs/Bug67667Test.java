@@ -143,7 +143,7 @@ public class Bug67667Test extends CalDAVTest {
         alarmComponent.getProperties().add(new Property("DESCRIPTION:Ereignisbenachrichtigung"));
         alarmComponent.getProperties().add(new Property("ACTION:DISPLAY"));
         iCalResource.getVEvent().getComponents().add(alarmComponent);
-        assertEquals("response code wrong", HttpServletResponse.SC_PRECONDITION_FAILED, putICalUpdate(getDefaultFolderID(), uid, iCalResource.toString(), iCalResource.getScheduleTag()));
+        assertEquals("response code wrong", HttpServletResponse.SC_PRECONDITION_FAILED, putICalUpdate(getDefaultFolderID(), uid, iCalResource.toString(), null, iCalResource.getScheduleTag()));
         /*
          * verify that attendees partstat was not changed on server
          */

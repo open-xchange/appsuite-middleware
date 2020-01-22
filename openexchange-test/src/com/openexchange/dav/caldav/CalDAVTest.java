@@ -403,12 +403,19 @@ public abstract class CalDAVTest extends WebDAVTest {
     }
 
     protected int putICalUpdate(String folderID, String resourceName, String iCal, String ifMatchEtag) throws Exception {
+    	return putICalUpdate(folderID, resourceName, iCal, ifMatchEtag, null);
+    }
+
+    protected int putICalUpdate(String folderID, String resourceName, String iCal, String ifMatchEtag, String ifMatchScheduleTag) throws Exception {
         PutMethod put = null;
         try {
             String href = Config.getPathPrefix() + "/caldav/" + encodeFolderID(folderID) + "/" + urlEncode(resourceName) + ".ics";
             put = new PutMethod(getBaseUri() + href);
             if (null != ifMatchEtag) {
                 put.addRequestHeader(Headers.IF_MATCH, ifMatchEtag);
+            }
+            if (null != ifMatchScheduleTag) {
+                put.addRequestHeader("If-Schedule-Tag-Match", ifMatchScheduleTag);
             }
             put.setRequestEntity(new StringRequestEntity(iCal, "text/calendar", null));
             return getWebDAVClient().executeMethod(put);
