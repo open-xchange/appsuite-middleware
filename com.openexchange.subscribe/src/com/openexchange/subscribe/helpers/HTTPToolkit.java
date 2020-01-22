@@ -59,11 +59,13 @@ import java.net.SocketTimeoutException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import javax.activation.FileTypeMap;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -71,6 +73,7 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.entity.ContentType;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -156,7 +159,9 @@ public class HTTPToolkit {
             }
             method.setEntity(new UrlEncodedFormEntity(postParameters, "UTF-8"));
             HttpResponse resp = client.execute(method);
-            Reader reader = new InputStreamReader(streamFrom(resp, client));
+            HttpEntity respEntity = resp.getEntity();
+            Charset charSet = ContentType.getOrDefault(respEntity).getCharset();
+            Reader reader = new InputStreamReader(streamFrom(respEntity, client), charSet);
             client = null;
             return reader;
         } finally {
@@ -165,9 +170,13 @@ public class HTTPToolkit {
     }
 
     private static ClientClosingInputStream streamFrom(HttpResponse httpResponse, CloseableHttpClient client) throws UnsupportedOperationException, IOException {
+        return streamFrom(httpResponse.getEntity(), client);
+    }
+
+    private static ClientClosingInputStream streamFrom(HttpEntity httpEntity, CloseableHttpClient client) throws UnsupportedOperationException, IOException {
         InputStream content = null;
         try {
-            content = httpResponse.getEntity().getContent();
+            content = httpEntity.getContent();
             ClientClosingInputStream closingInputStream = new ClientClosingInputStream(content, client);
             content = null;
             return closingInputStream;
