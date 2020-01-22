@@ -55,6 +55,7 @@ import java.util.Arrays;
 import org.apache.http.HttpResponse;
 import org.apache.http.impl.io.ChunkedInputStream;
 import org.apache.http.util.EntityUtils;
+import com.openexchange.java.Streams;
 import com.openexchange.proxy.Header;
 import com.openexchange.proxy.Response;
 
@@ -122,7 +123,7 @@ public final class ResponseImpl implements Response {
 
     @Override
     public Header[] getResponseFooters() {
-        InputStream inputStream;
+        InputStream inputStream = null;
         try {
             inputStream = response.getEntity().getContent();
 
@@ -140,6 +141,8 @@ public final class ResponseImpl implements Response {
            // nothing to do
         } catch (IOException e) {
             // nothing to do
+        } finally {
+            Streams.close(inputStream);
         }
         return new Header[0];
     }
