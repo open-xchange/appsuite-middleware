@@ -55,12 +55,12 @@ import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.TreeMap;
 import org.apache.http.client.CookieStore;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.BasicCookieStore;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.LaxRedirectStrategy;
@@ -68,6 +68,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.http.client.builder.HTTPGenericRequestBuilder;
 import com.openexchange.http.client.builder.HTTPRequest;
 import com.openexchange.http.client.exceptions.OxHttpClientExceptionCodes;
+import com.openexchange.java.Streams;
 
 public abstract class CommonApacheHTTPRequest<T extends HTTPGenericRequestBuilder<T>> {
 
@@ -118,10 +119,11 @@ public abstract class CommonApacheHTTPRequest<T extends HTTPGenericRequestBuilde
 	}
 
     public HTTPRequest build() throws OXException {
+        CloseableHttpClient client = null;
         try {
             CookieStore httpCookieStore = new BasicCookieStore();
-            final HttpClient client = HttpClientBuilder.create().setDefaultCookieStore(httpCookieStore).setRetryHandler(new DefaultHttpRequestRetryHandler(0, false)).setRedirectStrategy(new LaxRedirectStrategy()).build();
-            final int timeout = 20000;
+            client = HttpClientBuilder.create().setDefaultCookieStore(httpCookieStore).setRetryHandler(new DefaultHttpRequestRetryHandler(0, false)).setRedirectStrategy(new LaxRedirectStrategy()).build();
+            int timeout = 20000;
             RequestConfig config = RequestConfig.custom().setConnectTimeout(timeout).setConnectTimeout(timeout).setCookieSpec(CookieSpecs.DEFAULT).build();
             String encodedSite = verbatimURL ? url : new URI(url).toString();
             final java.net.URL javaURL = new java.net.URL(encodedSite);
@@ -132,11 +134,15 @@ public abstract class CommonApacheHTTPRequest<T extends HTTPGenericRequestBuilde
             }
             addParams(m);
 
-            return new ApacheHTTPRequest(headers, parameters, m, client, coreBuilder, this, httpCookieStore);
+            ApacheHTTPRequest httpRequest = new ApacheHTTPRequest(headers, parameters, m, client, coreBuilder, this, httpCookieStore);
+            client = null; // Avoid premature closing
+            return httpRequest;
         } catch (URISyntaxException x) {
             throw OxHttpClientExceptionCodes.APACHE_CLIENT_ERROR.create(x.getMessage(), x);
         } catch (MalformedURLException e) {
             throw OxHttpClientExceptionCodes.APACHE_CLIENT_ERROR.create(e, e.getMessage());
+        } finally {
+            Streams.close(client);
         }
     }
 
