@@ -82,6 +82,8 @@ import com.openexchange.timer.TimerService;
 public class APNDriveEventsActivator extends HousekeepingActivator {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(APNDriveEventsActivator.class);
+    private static final String TOPIC_VANILLA_APP_IOS = "com.openexchange.drive";
+    private static final String TOPIC_VANILLA_APP_MACOS = "com.openxchange.drive.macos.OXDrive";
 
     /**
      * Initializes a new {@link APNDriveEventsActivator}.
@@ -112,13 +114,13 @@ public class APNDriveEventsActivator extends HousekeepingActivator {
             public synchronized void added(ServiceReference<FragmentPropertiesLoader> ref, FragmentPropertiesLoader service) {
                 Properties properties = service.load(DriveEventsAPNProperty.FRAGMENT_FILE_NAME);
                 if (properties != null) {
-                    APNAccess access = createAccess(properties, OperationSystemType.IOS, service);
+                    APNAccess access = createAccess(properties, OperationSystemType.IOS, service, TOPIC_VANILLA_APP_IOS);
                     if (access != null) {
                         iosProvider = () -> access;
                         registerService(IOSAPNCertificateProvider.class, iosProvider);
                     }
 
-                    APNAccess macAccess = createAccess(properties, OperationSystemType.MACOS, service);
+                    APNAccess macAccess = createAccess(properties, OperationSystemType.MACOS, service, TOPIC_VANILLA_APP_MACOS);
                     if (macAccess != null) {
                         macosProvider = () -> macAccess;
                         registerService(MacOSAPNCertificateProvider.class, macosProvider);
@@ -163,7 +165,7 @@ public class APNDriveEventsActivator extends HousekeepingActivator {
      * @param The {@link FragmentPropertiesLoader}
      * @return The {@link APNAccess} or null
      */
-    protected APNAccess createAccess(Properties properties, OperationSystemType type, FragmentPropertiesLoader loader) {
+    protected APNAccess createAccess(Properties properties, OperationSystemType type, FragmentPropertiesLoader loader, String topic) {
         try {
             Map<String, String> optionals = Collections.singletonMap(DriveEventsAPNProperty.OPTIONAL_FIELD, type.getName());
             String keystore = getProperty(properties, DriveEventsAPNProperty.keystore, optionals);
@@ -171,7 +173,6 @@ public class APNDriveEventsActivator extends HousekeepingActivator {
             if (Strings.isNotEmpty(keystore)) {
                 String password = getProperty(properties, DriveEventsAPNProperty.password, optionals);
                 boolean production = Boolean.parseBoolean(getProperty(properties, DriveEventsAPNProperty.production, optionals));
-                String topic = getProperty(properties, DriveEventsAPNProperty.topic, optionals);
 
                 // Check file path validity
                 if (new File(keystore).exists()) {
