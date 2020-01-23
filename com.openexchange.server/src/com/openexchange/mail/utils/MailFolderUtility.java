@@ -265,4 +265,14 @@ public final class MailFolderUtility {
         return m.matches() ? m.group(1) : fullName;
     }
 
+    /**
+     * Checks if given full name is invalid.
+     *
+     * @param fullName The full name to check
+     * @return <code>true</code> if invalid; otherwise <code>false</code>
+     */
+    public static boolean isInvalidFullName(String fullName) {
+        return Strings.isEmpty(fullName) ? false : DEFAULT_FOLDER_ID.equals(fullName);
+    }
+
 }

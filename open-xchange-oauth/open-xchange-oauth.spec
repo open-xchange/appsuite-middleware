@@ -14,7 +14,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 19
+%define        ox_release 20
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -96,26 +96,28 @@ if [ ${1:-0} -eq 2 ]; then
     ox_add_property com.openexchange.oauth.yahoo.productName REPLACE_WITH_YOUR_REGISTERED_YAHOO_APP /opt/open-xchange/etc/yahoooauth.properties
 
     SCR=SCR-316
-    ox_scr_todo ${SCR} && {
-      old_prefix=com.openexchange.oauth.msliveconnect
-      new_prefix=com.openexchange.oauth.microsoft.graph
-      old_pfile=/opt/open-xchange/etc/msliveconnectoauth.properties
-      new_pfile=/opt/open-xchange/etc/microsoftgraphoauth.properties
-      if [ -e $old_pfile ]
-      then
-        redirect=$(ox_read_property ${old_prefix}.redirectUrl ${old_pfile})
-        if [[ ( -n "${redirect}") && (! "${redirect}" = REPLACE_THIS*) ]]
+    if ox_scr_todo ${SCR}
+    then
+        old_prefix=com.openexchange.oauth.msliveconnect
+        new_prefix=com.openexchange.oauth.microsoft.graph
+        old_pfile=/opt/open-xchange/etc/msliveconnectoauth.properties
+        new_pfile=/opt/open-xchange/etc/microsoftgraphoauth.properties
+        if [ -e $old_pfile ]
         then
-          ox_set_property ${new_prefix}.redirectUrl ${redirect} ${new_pfile}
+          redirect=$(ox_read_property ${old_prefix}.redirectUrl ${old_pfile})
+          if [[ ( -n "${redirect}") && (! "${redirect}" = REPLACE_THIS*) ]]
+          then
+            ox_set_property ${new_prefix}.redirectUrl ${redirect} ${new_pfile}
+          fi
+          enabled=$(ox_read_property ${old_prefix} ${old_pfile})
+          if [[ "${enabled}" = true ]]
+          then
+            ox_set_property ${new_prefix} ${enabled} ${new_pfile}
+          fi
         fi
-        enabled=$(ox_read_property ${old_prefix} ${old_pfile})
-        if [[ "${enabled}" = true ]]
-        then
-          ox_set_property ${new_prefix} ${enabled} ${new_pfile}
-        fi
-      fi
-      ox_scr_done ${SCR}
-    }
+        ox_scr_done ${SCR}
+    fi
+
 fi
 
 %clean
@@ -142,6 +144,8 @@ fi
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/settings/tumblroauth.properties
 
 %changelog
+* Mon Jan 20 2020 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2020-01-20 (5546)
 * Tue Dec 10 2019 Steffen Templin <marcus.klein@open-xchange.com>
 Build for patch 2019-12-09 (5509)
 * Tue Nov 19 2019 Steffen Templin <marcus.klein@open-xchange.com>

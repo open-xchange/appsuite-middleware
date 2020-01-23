@@ -79,6 +79,7 @@ import com.openexchange.java.ConcurrentHashSet;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.utils.MailFolderUtility;
 import com.sun.mail.iap.Argument;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
@@ -1090,7 +1091,10 @@ final class ListLsubCollection implements Serializable {
             if (r[i] instanceof IMAPResponse) {
                 IMAPResponse ir = (IMAPResponse) r[i];
                 if (ir.keyEquals(command)) {
-                    list.add(parseListResponse(ir, lsub ? null : lsubMap));
+                    ListLsubEntryImpl listLsubEntry = parseListResponse(ir, lsub ? null : lsubMap);
+                    if (listLsubEntry != null) {
+                        list.add(listLsubEntry);
+                    }
                     r[i] = null;
                 }
             }
@@ -2006,6 +2010,10 @@ final class ListLsubCollection implements Serializable {
         // Read full name; decode the name (using RFC2060's modified UTF7)
         listResponse.skipSpaces();
         String name = null == predefinedName ? BASE64MailboxDecoder.decode(listResponse.readAtomString()) : predefinedName;
+        if (MailFolderUtility.isInvalidFullName(name)) {
+            LOG.warn("Detected unsupported full name: {}. IMAP folder will be discarded.", name);
+            return null;
+        }
 
         // Return
         return new ListLsubEntryImpl(name, attributes, separator, changeState, hasInferiors, canOpen, hasChildren, lsubMap).setNamespace(isNamespace(name));

@@ -308,6 +308,7 @@ public final class ConfigTree {
             com.openexchange.groupware.settings.tree.folder.EASFolder.class,
             com.openexchange.groupware.settings.tree.GUI.class,
             com.openexchange.groupware.settings.tree.Identifier.class,
+            com.openexchange.groupware.settings.tree.JsonMaxSize.class,
             com.openexchange.groupware.settings.tree.Language.class,
             com.openexchange.groupware.settings.tree.mail.AppendMailTextSP3.class,
             com.openexchange.groupware.settings.tree.mail.AddressesSP3.class,

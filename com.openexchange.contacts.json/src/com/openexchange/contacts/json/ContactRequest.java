@@ -161,10 +161,11 @@ public class ContactRequest {
     /**
      * Gets the requested sort options.
      *
+     * @param considerExcludeAdmin Whether exclusion of administrator user should be rewarded
      * @return the sort options
      * @throws OXException
      */
-    public SortOptions getSortOptions() throws OXException {
+    public SortOptions getSortOptions(boolean considerExcludeAdmin) throws OXException {
         SortOptions sortOptions = new SortOptions();
         if (false == isInternalSort()) {
             // Left-hand and right-hand limit only applicable if no internal sorting is supposed to be performed
@@ -176,6 +177,9 @@ public class ContactRequest {
             if (0 < rightHandLimit) {
                 if (rightHandLimit < leftHandLimit) {
                     throw OXJSONExceptionCodes.INVALID_VALUE.create(Autoboxing.valueOf(rightHandLimit), "right_hand_limit");
+                }
+                if (considerExcludeAdmin && isExcludeAdmin()) {
+                    rightHandLimit++;
                 }
                 sortOptions.setLimit(rightHandLimit - leftHandLimit);
             }
@@ -280,6 +284,29 @@ public class ContactRequest {
         }
 
         return contacts;
+    }
+
+    /**
+     * Gets the supposed number of contacts according to optional left-hand and right-hand parameters.
+     * <p>
+     * <b>Note</b>: Actual number of contacts in result set might be less.
+     *
+     * @return The supposed number of contacts
+     * @throws OXException If parameters cannot be read
+     */
+    public int getLimit() throws OXException {
+        int leftHandLimit = this.optInt(AJAXServlet.LEFT_HAND_LIMIT);
+        int rightHandLimit = this.optInt(AJAXServlet.RIGHT_HAND_LIMIT);
+
+        if (leftHandLimit < 0) {
+            return rightHandLimit <= 0 ? -1 : rightHandLimit;
+        }
+
+        if (rightHandLimit <= 0) {
+            return rightHandLimit == 0 ? 0 : -1;
+        }
+
+        return rightHandLimit - leftHandLimit;
     }
 
     /**

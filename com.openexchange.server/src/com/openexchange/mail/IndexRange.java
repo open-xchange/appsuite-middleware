@@ -49,6 +49,9 @@
 
 package com.openexchange.mail;
 
+import java.util.Collections;
+import java.util.List;
+
 /**
  * {@link IndexRange} - A simple class representing an index range.
  *
@@ -60,6 +63,45 @@ public final class IndexRange {
      * The <code>null</code> index range
      */
     public static final IndexRange NULL = null;
+
+    /**
+     * Applies given index range to specified list.
+     *
+     * @param <T> The type of elements contained in list
+     * @param list The list to apply to
+     * @param indexRange The index range to apply
+     * @return The index range taken from list
+     */
+    public static <T> List<T> applyIndexRange(List<T> list, IndexRange indexRange) {
+        if (list == null) {
+            return Collections.emptyList();
+        }
+        if (indexRange == null) {
+            return list;
+        }
+        int size = list.size();
+        if (size <= 0) {
+            return Collections.emptyList();
+        }
+
+        final int fromIndex = indexRange.start;
+        int toIndex = indexRange.end;
+        if ((fromIndex) > size) {
+            /*
+             * Return empty iterator if start is out of range
+             */
+            return Collections.emptyList();
+        }
+        /*
+         * Reset end index if out of range
+         */
+        if (toIndex > size) {
+            toIndex = size;
+        }
+        return list.subList(fromIndex, toIndex);
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
 
     /**
      * The start index

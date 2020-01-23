@@ -56,6 +56,8 @@ import java.util.List;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.carddav.GroupwareCarddavFactory;
+import com.openexchange.dav.DAVUserAgent;
+import com.openexchange.dav.mixins.CurrentUserPrivilegeSet;
 import com.openexchange.dav.mixins.SyncToken;
 import com.openexchange.dav.resources.DAVCollection;
 import com.openexchange.dav.resources.DAVRootCollection;
@@ -92,10 +94,20 @@ public class RootCollection extends DAVRootCollection {
      *
      * @param factory the factory
      */
-    public RootCollection(GroupwareCarddavFactory factory) {
+    public RootCollection(GroupwareCarddavFactory factory) throws WebdavProtocolException {
     	super(factory, "Addressbooks");
     	this.factory = factory;
     	includeProperties(new SyncToken(this));
+        if (DAVUserAgent.MAC_CONTACTS.equals(getUserAgent())) {
+            /*
+             * indicate permissions from default folder also for root collection for macOS client
+             */
+            try {
+                includeProperties(new CurrentUserPrivilegeSet(factory.getState().getDefaultFolder().getOwnPermission()));
+            } catch (OXException e) {
+                throw protocolException(getUrl(), e);
+            }
+        }
     }
 
     @Override

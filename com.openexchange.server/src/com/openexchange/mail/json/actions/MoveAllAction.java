@@ -107,12 +107,22 @@ public final class MoveAllAction extends AbstractMailAction {
                     folders.put(other, FolderInfo.getFolderInfo(other.getFullName(), mailInterface.getMailAccess().getFolderStorage()));
                 }
             } else {
-                // MailServletInterface is still connected to other account
-                folders.put(other, FolderInfo.getFolderInfo(other.getFullName(), mailInterface.getMailAccess().getFolderStorage()));
-                if (!folders.containsKey(first)) {
-                    // Reconnect to previous account
-                    mailInterface.openFor(sourceFolder);
+                if (mailInterface.getMailAccess().getAccountId() == first.getAccountId()) {
+                    // MailServletInterface is still connected to source account
                     folders.put(first, FolderInfo.getFolderInfo(first.getFullName(), mailInterface.getMailAccess().getFolderStorage()));
+                    if (!folders.containsKey(other)) {
+                        // Reconnect to previous account
+                        mailInterface.openFor(destFolder);
+                        folders.put(other, FolderInfo.getFolderInfo(other.getFullName(), mailInterface.getMailAccess().getFolderStorage()));
+                    }
+                } else {
+                    // MailServletInterface is still connected to other account
+                    folders.put(other, FolderInfo.getFolderInfo(other.getFullName(), mailInterface.getMailAccess().getFolderStorage()));
+                    if (!folders.containsKey(first)) {
+                        // Reconnect to previous account
+                        mailInterface.openFor(sourceFolder);
+                        folders.put(first, FolderInfo.getFolderInfo(first.getFullName(), mailInterface.getMailAccess().getFolderStorage()));
+                    }
                 }
             }
 
