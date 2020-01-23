@@ -1,3 +1,9 @@
+open-xchange-push-malpoll (7.10.1-26) stable; urgency=medium
+
+  * Build for patch 2020-01-20 (5545)
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 13 Jan 2020 15:50:57 +0100
+
 open-xchange-push-malpoll (7.10.1-25) stable; urgency=medium
 
   * Build for patch 2019-12-09 (5508)
