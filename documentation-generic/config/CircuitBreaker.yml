@@ -1,0 +1,218 @@
+feature_name: Circuit Breaker
+properties:
+    - key: com.openexchange.imap.breaker.enabled
+      description: |
+        The flag to enable/disable the generic IMAP circuit breaker.
+      defaultValue: false
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: circuit-breaker.properties
+      packageName: open-xchange-imap
+      tags: ["IMAP", "Circuit Breaker"]
+    - key: com.openexchange.imap.breaker.failureThreshold
+      description: |
+        The failure threshold; which is the number of successive failures that must occur in order to open the circuit.
+      defaultValue: 5
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: false
+      related: com.openexchange.imap.breaker.enabled
+      file: circuit-breaker.properties
+      packageName: open-xchange-imap
+      tags: ["IMAP", "Circuit Breaker"]
+    - key: com.openexchange.imap.breaker.failureExecutions
+      description: |
+        The number of executions to measure the failures against. Default is always the same as [[com.openexchange.imap.breaker.failureThreshold]]
+      defaultValue: 5
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: false
+      related: [com.openexchange.imap.breaker.enabled, com.openexchange.imap.breaker.failureThreshold]
+      file: circuit-breaker.properties
+      packageName: open-xchange-imap
+      tags: ["IMAP", "Circuit Breaker"]
+    - key: com.openexchange.imap.breaker.successThreshold
+      description: |
+        The success threshold; which is the number of successive successful executions that must occur when in a half-open state in order to close the circuit.
+      defaultValue: 2
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: false
+      related: com.openexchange.imap.breaker.enabled
+      file: circuit-breaker.properties
+      packageName: open-xchange-imap
+      tags: ["IMAP", "Circuit Breaker"]
+    - key: com.openexchange.imap.breaker.successExecutions
+      description: |
+        he number of executions to measure the successes against. The default is the same value as for [[com.openexchange.imap.breaker.successThreshold]]
+      defaultValue: 2
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: false
+      related: [com.openexchange.imap.breaker.enabled, com.openexchange.imap.breaker.successThreshold]
+      file: circuit-breaker.properties
+      packageName: open-xchange-imap
+      tags: ["IMAP", "Circuit Breaker"]
+    - key: com.openexchange.imap.breaker.delayMillis
+      description: |
+        The delay in milliseconds; the number of milliseconds to wait in open state before transitioning to half-open. 
+      defaultValue: 60000
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: false
+      related: com.openexchange.imap.breaker.enabled
+      file: circuit-breaker.properties
+      packageName: open-xchange-imap
+      tags: ["IMAP", "Circuit Breaker"]
+
+
+
+    - key: com.openexchange.imap.breaker.[breaker-name].enabled
+      description: |
+        The flag to enable/disable the generic IMAP circuit breaker.
+
+        [breaker-name] must be replaced with a valid breaker name or primary for the primary account.
+      defaultValue: false
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: circuit-breaker.properties
+      packageName: open-xchange-imap
+      tags: ["IMAP", "Circuit Breaker"]
+    - key: com.openexchange.imap.breaker.[breaker-name].failureThreshold
+      description: |
+        The failure threshold; which is the number of successive failures that must occur in order to open the circuit.
+
+        [breaker-name] must be replaced with a valid breaker name or primary for the primary account.
+      defaultValue: 5
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: false
+      related: com.openexchange.imap.breaker.[breaker-name].enabled
+      file: circuit-breaker.properties
+      packageName: open-xchange-imap
+      tags: ["IMAP", "Circuit Breaker"]
+    - key: com.openexchange.imap.breaker.[breaker-name].failureExecutions
+      description: |
+        The number of executions to measure the failures against. Default is always the same as [[com.openexchange.imap.breaker.[breaker-name].failureThreshold]]
+
+        [breaker-name] must be replaced with a valid breaker name or primary for the primary account.
+      defaultValue: 5
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: false
+      related: [com.openexchange.imap.breaker.[breaker-name].enabled, com.openexchange.imap.breaker.[breaker-name].failureThreshold]
+      file: circuit-breaker.properties
+      packageName: open-xchange-imap
+      tags: ["IMAP", "Circuit Breaker"]
+    - key: com.openexchange.imap.breaker.[breaker-name].successThreshold
+      description: |
+        The success threshold; which is the number of successive successful executions that must occur when in a half-open state in order to close the circuit.
+
+        [breaker-name] must be replaced with a valid breaker name or primary for the primary account.
+      defaultValue: 2
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: false
+      related: com.openexchange.imap.breaker.[breaker-name].enabled
+      file: circuit-breaker.properties
+      packageName: open-xchange-imap
+      tags: ["IMAP", "Circuit Breaker"]
+    - key: com.openexchange.imap.breaker.[breaker-name].successExecutions
+      description: |
+        he number of executions to measure the successes against. The default is the same value as for [[com.openexchange.imap.breaker.[breaker-name].successThreshold]]
+
+        [breaker-name] must be replaced with a valid breaker name or primary for the primary account.
+      defaultValue: 2
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: false
+      related: [com.openexchange.imap.breaker.[breaker-name].enabled, com.openexchange.imap.breaker.[breaker-name].successThreshold]
+      file: circuit-breaker.properties
+      packageName: open-xchange-imap
+      tags: ["IMAP", "Circuit Breaker"]
+    - key: com.openexchange.imap.breaker.[breaker-name].delayMillis
+      description: |
+        The delay in milliseconds; the number of milliseconds to wait in open state before transitioning to half-open. 
+
+        [breaker-name] must be replaced with a valid breaker name or primary for the primary account.
+      defaultValue: 60000
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: false
+      related: com.openexchange.imap.breaker.[breaker-name].enabled
+      file: circuit-breaker.properties
+      packageName: open-xchange-imap
+      tags: ["IMAP", "Circuit Breaker"]
+
+
+
+    - key: com.openexchange.mail.filter.breaker.enabled
+      description: |
+        The flag to enable/disable the generic mail filter circuit breaker.
+      defaultValue: false
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: circuit-breaker.properties
+      packageName: open-xchange-Mail Filter
+      tags: ["Mail Filter", "Circuit Breaker"]
+    - key: com.openexchange.mail.filter.breaker.failureThreshold
+      description: |
+        The failure threshold; which is the number of successive failures that must occur in order to open the circuit.
+      defaultValue: 5
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: false
+      related: com.openexchange.mail.filter.breaker.enabled
+      file: circuit-breaker.properties
+      packageName: open-xchange-Mail Filter
+      tags: ["Mail Filter", "Circuit Breaker"]
+    - key: com.openexchange.mail.filter.breaker.failureExecutions
+      description: |
+        The number of executions to measure the failures against. Default is always the same as [[com.openexchange.mail.filter.breaker.failureThreshold]]
+      defaultValue: 5
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: false
+      related: [com.openexchange.mail.filter.breaker.enabled, com.openexchange.mail.filter.breaker.failureThreshold]
+      file: circuit-breaker.properties
+      packageName: open-xchange-Mail Filter
+      tags: ["Mail Filter", "Circuit Breaker"]
+    - key: com.openexchange.mail.filter.breaker.successThreshold
+      description: |
+        The success threshold; which is the number of successive successful executions that must occur when in a half-open state in order to close the circuit.
+      defaultValue: 2
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: false
+      related: com.openexchange.mail.filter.breaker.enabled
+      file: circuit-breaker.properties
+      packageName: open-xchange-Mail Filter
+      tags: ["Mail Filter", "Circuit Breaker"]
+    - key: com.openexchange.mail.filter.breaker.successExecutions
+      description: |
+        he number of executions to measure the successes against. The default is the same value as for [[com.openexchange.mail.filter.breaker.successThreshold]]
+      defaultValue: 2
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: false
+      related: [com.openexchange.mail.filter.breaker.enabled, com.openexchange.mail.filter.breaker.successThreshold]
+      file: circuit-breaker.properties
+      packageName: open-xchange-Mail Filter
+      tags: ["Mail Filter", "Circuit Breaker"]
+    - key: com.openexchange.mail.filter.breaker.delayMillis
+      description: |
+        The delay in milliseconds; the number of milliseconds to wait in open state before transitioning to half-open. 
+      defaultValue: 60000
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: false
+      related: com.openexchange.mail.filter.breaker.enabled
+      file: circuit-breaker.properties
+      packageName: open-xchange-Mail Filter
+      tags: ["Mail Filter", "Circuit Breaker"]
