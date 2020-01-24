@@ -114,7 +114,7 @@ public class DescriptionServiceImpl implements DescriptionService {
 
     @Override
     public List<Description> describeOnly(EventUpdate eventUpdate, EventField... toDescribe) {
-        if (null == toDescribe) {
+        if (toDescribe == null || eventUpdate == null) {
             return Collections.emptyList();
         }
         List<Description> descriptions = new LinkedList<>();
