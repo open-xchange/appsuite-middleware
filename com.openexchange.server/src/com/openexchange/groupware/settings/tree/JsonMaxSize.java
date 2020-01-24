@@ -47,55 +47,68 @@
  *
  */
 
-package com.openexchange.contacts.json.actions;
+package com.openexchange.groupware.settings.tree;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.contacts.json.ContactActionFactory;
-import com.openexchange.contacts.json.ContactRequest;
+import static com.openexchange.java.Autoboxing.I;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.helpers.ContactField;
-import com.openexchange.groupware.container.Contact;
-import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
-import com.openexchange.server.ServiceLookup;
-
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.settings.IValueHandler;
+import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.groupware.settings.ReadOnlyValue;
+import com.openexchange.groupware.settings.Setting;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.jslob.ConfigTreeEquivalent;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.Session;
+import com.openexchange.user.User;
 
 /**
- * {@link AdvancedSearchAction}
+ * Adds the configuration setting tree entry for the max. number of fields allowed for a single JSON object.
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@OAuthAction(ContactActionFactory.OAUTH_READ_SCOPE)
-public class AdvancedSearchAction extends ContactAction {
+public final class JsonMaxSize implements PreferencesItemService, ConfigTreeEquivalent {
+
+    public static final String NAME = "jsonMaxSize";
 
     /**
-     * Initializes a new {@link AdvancedSearchAction}.
-     * @param serviceLookup
+     * Initializes a new {@link JsonMaxSize}.
      */
-    public AdvancedSearchAction(ServiceLookup serviceLookup) {
-        super(serviceLookup);
+    public JsonMaxSize() {
+        super();
     }
 
     @Override
-    protected AJAXRequestResult perform(ContactRequest request) throws OXException {
-        boolean excludeAdmin = request.isExcludeAdmin();
-        int excludedAdminID = excludeAdmin ? request.getSession().getContext().getMailadmin() : -1;
-        ContactField[] fields = excludeAdmin ? request.getFields(ContactField.INTERNAL_USERID) : request.getFields();
-        List<Contact> contacts = new ArrayList<Contact>();
-        Date lastModified = addContacts(contacts, getContactService().searchContacts(
-            request.getSession(), request.getSearchFilter(), fields, request.getSortOptions(true)), excludedAdminID);
-        if (request.sortInternalIfNeeded(contacts)) {
-            contacts = request.slice(contacts);
-        } else if (excludeAdmin) {
-            int limit = request.getLimit();
-            if (limit >= 0 && contacts.size() > limit) {
-                contacts = contacts.subList(0, limit);
+    public String[] getPath() {
+        return new String[] { NAME };
+    }
+
+    @Override
+    public IValueHandler getSharedValue() {
+        return new ReadOnlyValue() {
+
+            @Override
+            public boolean isAvailable(UserConfiguration userConfig) {
+                return true;
             }
-        }
-        return new AJAXRequestResult(contacts, lastModified, "contact");
+
+            @Override
+            public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
+                ConfigurationService configService = ServerServiceRegistry.getServize(ConfigurationService.class, true);
+                setting.setSingleValue(I(configService.getIntProperty("com.openexchange.json.maxSize", 2500)));
+            }
+        };
+    }
+
+    @Override
+    public String getConfigTreePath() {
+        return NAME;
+    }
+
+    @Override
+    public String getJslobPath() {
+        return "io.ox/core//" + NAME;
     }
 
 }

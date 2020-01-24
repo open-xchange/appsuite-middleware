@@ -423,57 +423,92 @@ public class Protocol {
      * @return      array of Response objects returned by the server
      */
     public synchronized Response[] command(String command, Argument args) {
+        return command(command, args, Optional.empty());
+    }
+
+    /**
+     * Send a command to the server possibly using a command executor.
+     * <p>
+     * Collect all responses until either the corresponding command
+     * completion response or a BYE response (indicating server failure).
+     * Return all the collected responses.
+     *
+     * @param   command             the command
+     * @param   args                the arguments
+     * @param   optionalInterceptor the optional interceptor
+     * @return      array of Response objects returned by the server
+     */
+    public synchronized Response[] command(String command, Argument args, Optional<ResponseInterceptor> optionalInterceptor) {
         // Determine suitable executor
         Optional<CommandExecutor> optionalCommandExecutor = IMAPStore.getMatchingCommandExecutor(this);
         if (optionalCommandExecutor.isPresent()) {            
             // Issue command using matching executor
-            return optionalCommandExecutor.get().executeCommand(command, args, this);
+            return optionalCommandExecutor.get().executeCommand(command, args, optionalInterceptor, this);
         }
 
         // No matching executor available
-        return executeCommand(command, args);
+        return executeCommand(command, args, optionalInterceptor);
     }
+
+    /**
+     * The no-op interceptor that does nothing at all.
+     */
+    private static final ResponseInterceptor NOOP_INTERCEPTOR = new ResponseInterceptor() {
+        
+        @Override
+        public boolean intercept(Response r) {
+            return false;
+        }
+    };
 
     /**
      * Send a command to the server. Collect all responses until either
      * the corresponding command completion response or a BYE response 
-     * (indicating server failure).  Return all the collected responses.
+     * (indicating server failure).  Return all the collected responses;
+     * unless an interceptor has been specified.
      *
-     * @param	command	the command
-     * @param	args	the arguments
+     * @param	command	            the command
+     * @param	args	            the arguments
+     * @param   optionalInterceptor the optional interceptor
      * @return		array of Response objects returned by the server
      */
-    public synchronized Response[] executeCommand(String command, Argument args) {
+    public synchronized Response[] executeCommand(String command, Argument args, Optional<ResponseInterceptor> optionalInterceptor) {
 	commandStart(command);
 	List<Response> v = null;
 	boolean done = false;
 	String tag = null;
-	Response r = null;
+	ResponseInterceptor interceptor = optionalInterceptor.orElse(NOOP_INTERCEPTOR);
 
 	// write the command
 	ProtocolListenerCollection protocolListeners = IMAPStore.getProtocolListeners();
 	boolean measure = null != protocolListeners || auditLogEnabled;
 	long start = measure ? System.currentTimeMillis() : 0L;
-	try {
+    try {
 	    tag = writeCommand(command, args);
 	    v = new java.util.ArrayList<Response>(32);
 	} catch (LiteralException lex) {
-	    v = new java.util.ArrayList<Response>(1);
-	    v.add(lex.getResponse());
+	    Response lexResponse = lex.getResponse();
+	    intercept(lexResponse, interceptor);
+        v = new java.util.ArrayList<Response>(1);
+        v.add(lexResponse);
 	    done = true;
 	} catch (Exception ex) {
 	    // Convert this into a BYE response
-	    v = new java.util.ArrayList<Response>(1);
-	    v.add(Response.byeResponse(ex));
+	    Response byeResponse = Response.byeResponse(ex);
+	    intercept(byeResponse, interceptor);
+        v = new java.util.ArrayList<Response>(1);
+        v.add(byeResponse);
 	    done = true;
 	}
 
+    Response r = null;
+    Response taggedResp = null;
+    if (!done) {
 	boolean discardResponses = "true".equals(MDC.get("mail.imap.discardresponses"));
 	String lowerCaseCommand = null;
 
 	Response byeResp = null;
-	Response taggedResp = null;
-	while (!done) {
+	do {
 	    try {
 		r = readResponse();
 	    } catch (IOException ioex) {
@@ -494,28 +529,36 @@ public class Protocol {
 	    // If this is a matching command completion response, we are done
 	    boolean tagged = r.isTagged();
         if (tagged && r.getTag().equals(tag)) {
-	        v.add(r);
+            intercept(r, interceptor);
+            v.add(r);
 	        done = true;
 	        taggedResp = r;
 	    } else {
-	        if (discardResponses && !tagged && !r.isSynthetic() && (r instanceof IMAPResponse)) {
-	            IMAPResponse imapResponse = (IMAPResponse) r;
-	            if (lowerCaseCommand == null) {
-                    lowerCaseCommand = asciiLowerCase(command);
-                }
-                String key = asciiLowerCase(imapResponse.getKey());
-                if ((key == null) || (lowerCaseCommand.indexOf(key) < 0)) {
-                    v.add(r);
-                }
-            } else {
-                v.add(r);
+	        if (!intercept(r, interceptor)) {
+	            if (discardResponses && !tagged && !r.isSynthetic() && (r instanceof IMAPResponse)) {
+	                IMAPResponse imapResponse = (IMAPResponse) r;
+	                if (lowerCaseCommand == null) {
+	                    lowerCaseCommand = asciiLowerCase(command);
+	                }
+	                String key = asciiLowerCase(imapResponse.getKey());
+	                if ((key == null) || (lowerCaseCommand.indexOf(key) < 0)) {
+	                    v.add(r);
+	                }
+	            } else {
+	                v.add(r);
+	            }
             }
 	    }
-	}
+	} while (!done);
 
-	if (byeResp != null)
-		v.add(byeResp);	// must be last
+	if (byeResp != null) {
+	    intercept(byeResp, interceptor);
+	    v.add(byeResp);	// must be last
+	}
+    }
+
 	Response[] responses = v.toArray(new Response[v.size()]);
+	v = null;
 	long end = System.currentTimeMillis();
         timestamp = end;
 	commandEnd();
@@ -553,6 +596,15 @@ public class Protocol {
 	}
 
 	return responses;
+    }
+
+    private boolean intercept(Response response, ResponseInterceptor interceptor) {
+        try {
+            return interceptor.intercept(response);
+        } catch (Exception e) {
+            logger.log(java.util.logging.Level.WARNING, "Failed to intercept IMAP response using " + interceptor.getClass().getName(), e);
+        }
+        return false;
     }
 
     /**

@@ -267,6 +267,7 @@ public final class CSSMatcher {
      */
     public static boolean matches(final String value, final Set<String> allowedValuesSet) {
         final Set<String> allowedValues = new HashSet<String>(allowedValuesSet);
+        allowedValues.add("!important"); // "!important" is always allowed
         /*
          * Ensure to check against pattern first
          */

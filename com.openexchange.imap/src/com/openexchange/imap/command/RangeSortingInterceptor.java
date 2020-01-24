@@ -47,62 +47,78 @@
  *
  */
 
-package com.openexchange.contacts.json.actions;
+package com.openexchange.imap.command;
 
-import java.util.Date;
-import java.util.LinkedList;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.contacts.json.ContactActionFactory;
-import com.openexchange.contacts.json.ContactRequest;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.helpers.ContactField;
-import com.openexchange.groupware.container.Contact;
-import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.iterator.SearchIterator;
+import javax.mail.MessagingException;
+import com.openexchange.imap.command.MailMessageFetchIMAPCommand.MailMessageFetchInterceptor;
+import com.openexchange.mail.IndexRange;
+import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.utils.MailMessageComparator;
 
 
 /**
- * {@link AllAction}
+ * {@link RangeSortingInterceptor} - An interceptor that holds a sorted range.
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.3
  */
-@OAuthAction(ContactActionFactory.OAUTH_READ_SCOPE)
-public class AllAction extends ContactAction {
+public class RangeSortingInterceptor implements MailMessageFetchInterceptor {
+
+    private final int total;
+    private final List<MailMessage> mails;
+    private final MailMessageComparator comparator;
+    private final IndexRange indexRange;
 
     /**
-     * Initializes a new {@link AllAction}.
-     * @param serviceLookup
+     * Initializes a new {@link RangeSortingInterceptor}.
      */
-    public AllAction(ServiceLookup serviceLookup) {
-        super(serviceLookup);
+    public RangeSortingInterceptor(IndexRange indexRange, MailMessageComparator comparator) {
+        super();
+        this.indexRange = indexRange;
+        this.comparator = comparator;
+        total = indexRange.getEnd();
+        mails = new ArrayList<>(total + 1);
     }
 
     @Override
-    protected AJAXRequestResult perform(ContactRequest request) throws OXException {
-        boolean excludeAdmin = request.isExcludeAdmin();
-        int excludedAdminID = excludeAdmin ? request.getSession().getContext().getMailadmin() : -1;
-        ContactField[] fields = excludeAdmin ? request.getFields(ContactField.INTERNAL_USERID) : request.getFields();
-        SearchIterator<Contact> searchIterator;
-        if (null == request.optFolderID()) {
-            searchIterator = getContactService().getAllContacts(request.getSession(), fields, request.getSortOptions(true));
-        } else {
-            searchIterator = getContactService().getAllContacts(request.getSession(), request.getFolderID(), fields, request.getSortOptions(true));
-        }
-        List<Contact> contacts = new LinkedList<Contact>();
-        Date lastModified = addContacts(contacts, searchIterator, excludedAdminID);
-        if (request.sortInternalIfNeeded(contacts)) {
-            contacts = request.slice(contacts);
-        } else if (excludeAdmin) {
-            int limit = request.getLimit();
-            if (limit >= 0 && contacts.size() > limit) {
-                contacts = contacts.subList(0, limit);
+    public void intercept(MailMessage mail) throws MessagingException {
+        if (mails.add(mail)) {
+            int size = mails.size();
+            if (size > 1) {
+                Collections.sort(mails, comparator);
+            }
+            if (size > total) {
+                mails.remove(total);
             }
         }
+    }
 
-        return new AJAXRequestResult(contacts, lastModified, "contact");
+    @Override
+    public MailMessage[] getMails() {
+        int size = mails.size();
+        if (size <= 0) {
+            return new MailMessage[0];
+        }
+
+        int fromIndex = indexRange.start;
+        int toIndex = indexRange.end;
+        if ((fromIndex) > size) {
+            // Return empty array if start is out of range
+            return new MailMessage[0];
+        }
+
+        // Reset end index if out of range
+        if (toIndex > size) {
+            toIndex = size;
+        }
+        MailMessage[] arr = new MailMessage[toIndex - fromIndex];
+        for (int k = fromIndex, i = 0; k < toIndex; k++, i++) {
+            arr[i] = mails.get(k);
+        }
+        return arr;
     }
 
 }
