@@ -66,9 +66,6 @@ properties:
       file: circuit-breaker.properties
       packageName: open-xchange-imap
       tags: ["IMAP", "Circuit Breaker"]
-
-
-
     - key: com.openexchange.imap.breaker.[breaker-name].enabled
       description: |
         The flag to enable/disable the generic IMAP circuit breaker.
@@ -104,7 +101,7 @@ properties:
       version: 7.10.3
       reloadable: true
       configcascadeAware: false
-      related: [com.openexchange.imap.breaker.[breaker-name].enabled, com.openexchange.imap.breaker.[breaker-name].failureThreshold]
+      related: ["com.openexchange.imap.breaker.[breaker-name].enabled", "com.openexchange.imap.breaker.[breaker-name].failureThreshold"]
       file: circuit-breaker.properties
       packageName: open-xchange-imap
       tags: ["IMAP", "Circuit Breaker"]
@@ -130,7 +127,7 @@ properties:
       version: 7.10.3
       reloadable: true
       configcascadeAware: false
-      related: [com.openexchange.imap.breaker.[breaker-name].enabled, com.openexchange.imap.breaker.[breaker-name].successThreshold]
+      related: ["com.openexchange.imap.breaker.[breaker-name].enabled", "com.openexchange.imap.breaker.[breaker-name].successThreshold"]
       file: circuit-breaker.properties
       packageName: open-xchange-imap
       tags: ["IMAP", "Circuit Breaker"]
@@ -147,9 +144,6 @@ properties:
       file: circuit-breaker.properties
       packageName: open-xchange-imap
       tags: ["IMAP", "Circuit Breaker"]
-
-
-
     - key: com.openexchange.mail.filter.breaker.enabled
       description: |
         The flag to enable/disable the generic mail filter circuit breaker.
@@ -179,7 +173,7 @@ properties:
       version: 7.10.3
       reloadable: true
       configcascadeAware: false
-      related: [com.openexchange.mail.filter.breaker.enabled, com.openexchange.mail.filter.breaker.failureThreshold]
+      related: ["com.openexchange.mail.filter.breaker.enabled", "com.openexchange.mail.filter.breaker.failureThreshold"]
       file: circuit-breaker.properties
       packageName: open-xchange-Mail Filter
       tags: ["Mail Filter", "Circuit Breaker"]
@@ -196,12 +190,12 @@ properties:
       tags: ["Mail Filter", "Circuit Breaker"]
     - key: com.openexchange.mail.filter.breaker.successExecutions
       description: |
-        he number of executions to measure the successes against. The default is the same value as for [[com.openexchange.mail.filter.breaker.successThreshold]]
+        The number of executions to measure the successes against. The default is the same value as for [[com.openexchange.mail.filter.breaker.successThreshold]]
       defaultValue: 2
       version: 7.10.3
       reloadable: true
       configcascadeAware: false
-      related: [com.openexchange.mail.filter.breaker.enabled, com.openexchange.mail.filter.breaker.successThreshold]
+      related: ["com.openexchange.mail.filter.breaker.enabled", "com.openexchange.mail.filter.breaker.successThreshold"]
       file: circuit-breaker.properties
       packageName: open-xchange-Mail Filter
       tags: ["Mail Filter", "Circuit Breaker"]
