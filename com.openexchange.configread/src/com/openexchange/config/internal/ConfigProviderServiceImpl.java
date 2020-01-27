@@ -82,6 +82,8 @@ public class ConfigProviderServiceImpl implements ReinitializableConfigProviderS
 
     private static final String TRUE = "true";
 
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConfigProviderServiceImpl.class);
+
     // -------------------------------------------------------------------------------------------------------------------
 
     private final ConfigurationService configService;
@@ -113,6 +115,11 @@ public class ConfigProviderServiceImpl implements ReinitializableConfigProviderS
             String value = configService.getProperty(property);
             newBasicProperty.setDefined(value != null);
             newBasicProperty.set(value);
+            if (null == value && property.startsWith("com.openexchange.capability.")) {
+                Exception e = new Exception("No value for property \"" + property+ "\"");
+                LOG.debug("Tracking undefined server property as 'capability' through \"get({}, {}, {})\": {}", 
+                    property, Integer.valueOf(contextId), Integer.valueOf(userId), newBasicProperty, e);
+            }
             basicProperty = properties.putIfAbsent(property, newBasicProperty);
             if (null == basicProperty) {
                 basicProperty = newBasicProperty;

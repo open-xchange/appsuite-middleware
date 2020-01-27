@@ -75,12 +75,12 @@ import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.capabilities.Capability;
 import com.openexchange.capabilities.CapabilityChecker;
-import com.openexchange.capabilities.FailureAwareCapabilityChecker;
 import com.openexchange.capabilities.CapabilityExceptionCodes;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.capabilities.ConfigurationProperty;
 import com.openexchange.capabilities.DependentCapabilityChecker;
+import com.openexchange.capabilities.FailureAwareCapabilityChecker;
 import com.openexchange.capabilities.osgi.PermissionAvailabilityServiceRegistry;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ComposedConfigProperty;
@@ -625,9 +625,29 @@ public abstract class AbstractCapabilityService implements CapabilityService {
             for (Map.Entry<String, ComposedConfigProperty<String>> entry : all.entrySet()) {
                 final String propName = entry.getKey();
                 if (propName.startsWith("com.openexchange.capability.", 0)) {
-                    boolean value = Boolean.parseBoolean(entry.getValue().get());
+                    ComposedConfigProperty<String> configProperty = entry.getValue();
+                    /*
+                     * don't apply undefined capabilities
+                     */
+                    if (false == configProperty.isDefined()) {
+                        LOG.debug("Ignoring undefined capability property for user {} in context {}: {}", 
+                            Integer.valueOf(userId), Integer.valueOf(contextId), propName);
+                        continue;
+                    }
+                    /*
+                     * check for discouraged use of module permissions
+                     */                    
                     String name = toLowerCase(propName.substring(28));
-                    if (value) {
+                    String value = configProperty.get();
+                    Permission matchingModulePermission = Permission.get(name);
+                    if (null != matchingModulePermission) {
+                        LOG.debug("Overriding module permission {} with 'capability' property {}={} for user {} in context {}.", 
+                            matchingModulePermission, propName, value, Integer.valueOf(userId), Integer.valueOf(contextId));
+                    }
+                    /*
+                     * apply capability
+                     */
+                    if (Boolean.parseBoolean(value)) {
                         capabilities.add(getCapability(name));
                     } else {
                         capabilities.remove(name);
@@ -1004,7 +1024,13 @@ public abstract class AbstractCapabilityService implements CapabilityService {
                 for (Map.Entry<String, ComposedConfigProperty<String>> entry : all.entrySet()) {
                     final String propName = entry.getKey();
                     if (propName.startsWith("com.openexchange.capability.")) {
-                        boolean value = Boolean.parseBoolean(entry.getValue().get());
+                        ComposedConfigProperty<String> configProperty = entry.getValue();
+                        if (false == configProperty.isDefined()) {
+                            LOG.debug("Ignoring undefined capability property for user {} in context {}: {}", 
+                                Integer.valueOf(userId), Integer.valueOf(contextId), propName);
+                            continue;
+                        }
+                        boolean value = Boolean.parseBoolean(configProperty.get());
                         String name = toLowerCase(propName.substring(28));
                         if (value) {
                             grantedCapabilities.add(getCapability(name));
