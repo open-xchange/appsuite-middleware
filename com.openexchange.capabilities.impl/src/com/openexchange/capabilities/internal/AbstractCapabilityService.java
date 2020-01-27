@@ -581,18 +581,10 @@ public abstract class AbstractCapabilityService implements CapabilityService {
                         continue;
                     }
                     /*
-                     * check for discouraged use of module permissions
+                     * apply capability
                      */                    
                     String name = toLowerCase(propName.substring(28));
                     String value = configProperty.get();
-                    Permission matchingModulePermission = Permission.get(name);
-                    if (null != matchingModulePermission) {
-                        LOG.debug("Overriding module permission {} with 'capability' property {}={} for user {} in context {}.", 
-                            matchingModulePermission, propName, value, Integer.valueOf(userId), Integer.valueOf(contextId));
-                    }
-                    /*
-                     * apply capability
-                     */
                     if (name.startsWith("forced.", 0)) {
                         name = name.substring(7);
                         forcedCapabilities.put(getCapability(name), Boolean.valueOf(value));
@@ -602,6 +594,14 @@ public abstract class AbstractCapabilityService implements CapabilityService {
                         } else {
                             capabilities.remove(name);
                         }
+                    }
+                    /*
+                     * additionally check for discouraged use of module permissions
+                     */                    
+                    Permission matchingModulePermission = Permission.get(name);
+                    if (null != matchingModulePermission) {
+                        LOG.debug("Overriding module permission {} with 'capability' property {}={} for user {} in context {}.", 
+                            matchingModulePermission, propName, value, Integer.valueOf(userId), Integer.valueOf(contextId));
                     }
                 }
             }
