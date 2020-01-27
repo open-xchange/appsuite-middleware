@@ -18,6 +18,8 @@
 #       Boolean. Indicates which APNS service is used when sending push notifications to iOS
 #                devices. A value of "true" will use the production service, a value of "false"
 #                references to the sandbox service. Default is "true".
+#     topic: <topic>
+#       String. The topic of the app, which is typically the bundle ID of the app
 #
 
 # Only an example
@@ -27,3 +29,4 @@ myiosclient:
     keystore: /opt/open-xchange/etc/mykey-apns.p12
     password: A3JWKAKR8XB
     production: true
+    topic: bundleIdFromMyIosClient

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.pns.transport.apns_http2.internal;
+package com.openexchange.pns.transport.apns_http2.util;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.io.UnsupportedEncodingException;
@@ -58,6 +58,7 @@ import java.util.UUID;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.turo.pushy.apns.DeliveryPriority;
+import com.turo.pushy.apns.PushType;
 import com.turo.pushy.apns.util.SimpleApnsPushNotification;
 
 
@@ -104,6 +105,7 @@ public class ApnsHttp2Notification extends SimpleApnsPushNotification {
         private String collapseId = null;
         private long expiration;
         private DeliveryPriority priority;
+        private PushType pushType;
         private UUID uuid;
 
         /**
@@ -209,6 +211,11 @@ public class ApnsHttp2Notification extends SimpleApnsPushNotification {
             return this;
         }
 
+        public Builder pushType(PushType pushType) {
+            this.pushType = pushType;
+            return this;
+        }
+
         public int size() {
             try {
                 return build().getPayload().getBytes("UTF-8").length;
@@ -284,7 +291,8 @@ public class ApnsHttp2Notification extends SimpleApnsPushNotification {
         public ApnsHttp2Notification build() {
             root.put("aps", aps);
             aps.put("alert", alert);
-            return new ApnsHttp2Notification(token, topic, root, expiration < 0 ? null : new Date(System.currentTimeMillis() + expiration), priority, collapseId, uuid);
+            
+            return new ApnsHttp2Notification(token, topic, root, expiration < 0 ? null : new Date(System.currentTimeMillis() + expiration), priority, pushType, collapseId, uuid);
         }
     }
 
@@ -305,8 +313,8 @@ public class ApnsHttp2Notification extends SimpleApnsPushNotification {
      * @param apnsId The unique identifier for this notification; may be {@code null}, in which case the APNs server
      * will assign a unique identifier automatically
      */
-    public ApnsHttp2Notification(String token, String topic, Map<String, Object> payload, Date invalidationTime, DeliveryPriority priority, String collapseId, UUID apnsId) {
-        super(token, topic, maptoString(payload), invalidationTime, priority, collapseId, apnsId);
+    public ApnsHttp2Notification(String token, String topic, Map<String, Object> payload, Date invalidationTime, DeliveryPriority priority, PushType pushType, String collapseId, UUID apnsId) {
+        super(token, topic, maptoString(payload), invalidationTime, priority, pushType, collapseId, apnsId);
     }
 
 }

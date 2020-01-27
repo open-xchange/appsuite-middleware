@@ -47,29 +47,30 @@
  *
  */
 
-package com.openexchange.pns.transport.apn;
+package com.openexchange.pns.transport.apns_http2.util;
 
 import java.util.Collection;
 
 /**
- * {@link ApnOptionsProvider} - Provides the options to communicate with the Apple Push Notification System.
+ * {@link ApnsHttp2OptionsProvider} - Provides the options to communicate with the Apple Push Notification System via HTTP/2.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.0
  */
-public interface ApnOptionsProvider {
+public interface ApnsHttp2OptionsProvider {
 
     /**
-     * Gets the APNS options containing the push certificate for specified client.
+     * Gets the APNS HTTP/2 options containing the push certificate for specified client.
      *
      * @return The APNS options or <code>null</code>
      */
-    ApnOptions getOptions(String client);
+    ApnsHttp2Options getOptions(String client);
 
     /**
      * Gets available options from this provider
      *
      * @return The available options
      */
-    Collection<ApnOptionsPerClient> getAvailableOptions();
+    Collection<ApnsHttp2OptionsPerClient> getAvailableOptions();
 
 }

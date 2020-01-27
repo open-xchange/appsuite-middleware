@@ -84,18 +84,6 @@ properties:
       file: pns.properties
       packageName: open-xchange-pns-impl
       tags: ["Push"]
-    - key: com.openexchange.pns.transport.apn.ios.feedbackQueryInterval
-      description: |
-        Specifies the frequency in milliseconds when to query the Apple feedback service to check for expired
-        and/or invalid tokens.
-      defaultValue: 3600000
-      version: 7.8.3
-      reloadable: true
-      configcascadeAware: false
-      related:
-      file: pns.properties
-      packageName: open-xchange-pns-impl
-      tags: ["Push"]
     - key: com.openexchange.pns.transport.gcm.enabled
       description: |
         Specifies whether the GCM transport is enabled.

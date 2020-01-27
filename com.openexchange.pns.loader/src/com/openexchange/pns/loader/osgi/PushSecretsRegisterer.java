@@ -52,17 +52,13 @@ package com.openexchange.pns.loader.osgi;
 import static com.openexchange.osgi.Tools.withRanking;
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import org.apache.commons.io.IOUtils;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
@@ -70,9 +66,9 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.pns.loader.ClientIdentifierProvider;
-import com.openexchange.pns.transport.apn.ApnOptions;
-import com.openexchange.pns.transport.apn.ApnOptionsProvider;
 import com.openexchange.pns.transport.apn.DefaultApnOptionsProvider;
+import com.openexchange.pns.transport.apns_http2.util.ApnOptions;
+import com.openexchange.pns.transport.apns_http2.util.ApnOptionsProvider;
 import com.openexchange.pns.transport.gcm.DefaultGcmOptionsProvider;
 import com.openexchange.pns.transport.gcm.GcmOptions;
 import com.openexchange.pns.transport.gcm.GcmOptionsProvider;
@@ -86,6 +82,8 @@ import com.openexchange.pns.transport.gcm.GcmOptionsProvider;
 public class PushSecretsRegisterer implements ServiceTrackerCustomizer<ClientIdentifierProvider, ClientIdentifierProvider> {
 
     static final Logger LOG = LoggerFactory.getLogger(PushSecretsRegisterer.class);
+
+    private static final String TOPIC_IOS_VANILLA_MAILAPP = "com.openxchange.mobile.mailapp2";
 
     private final BundleContext context;
     private final Map<String, List<ServiceRegistration<?>>> serviceRegistrations; // Guarded by synchronized
@@ -241,16 +239,7 @@ public class PushSecretsRegisterer implements ServiceTrackerCustomizer<ClientIde
             if (null == is) {
                 throw new IOException("Could not load resource " + filename + " from com.openexchange.pns.loader fragment.");
             }
-
-            final KeyStore keystore;
-            try {
-                keystore = KeyStore.getInstance("PKCS12");
-                keystore.load(is, password.toCharArray());
-            } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException e) {
-                throw new IOException("Error reading certificate from  '" + filename + "'", e);
-            }
-
-            return new ApnOptions(keystore, password, production);
+            return new ApnOptions(IOUtils.toByteArray(is), password, production, TOPIC_IOS_VANILLA_MAILAPP, client);
         }
     }
 }

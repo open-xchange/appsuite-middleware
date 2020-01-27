@@ -52,6 +52,9 @@ package com.openexchange.pns.transport.apn;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
+import com.openexchange.pns.transport.apns_http2.util.ApnOptions;
+import com.openexchange.pns.transport.apns_http2.util.ApnOptionsPerClient;
+import com.openexchange.pns.transport.apns_http2.util.ApnOptionsProvider;
 
 
 /**
