@@ -73,7 +73,8 @@ import org.junit.runners.Suite.SuiteClasses;
     RecurrenceIdIteratorTest.class,
     com.openexchange.chronos.recurrence.compat.RecurrenceTests.class,
     com.openexchange.chronos.recurrence.compat.RecurrencePositionTest.class,
-    com.openexchange.chronos.recurrence.compat.Bug66412Test.class
+    com.openexchange.chronos.recurrence.compat.Bug66412Test.class,
+    Bug68612Test.class,
 })
 public class UnitTests {
 
