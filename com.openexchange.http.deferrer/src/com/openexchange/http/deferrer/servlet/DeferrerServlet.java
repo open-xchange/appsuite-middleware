@@ -98,7 +98,7 @@ public class DeferrerServlet extends HttpServlet {
      */
     public DeferrerServlet(LeanConfigurationService lean) {
         super();
-        this.max = lean.getLongProperty(MAX_PARAMETER_LENGTH_PROP);
+        this.max = null != lean ? lean.getLongProperty(MAX_PARAMETER_LENGTH_PROP) : -1;
     }
 
     @Override
