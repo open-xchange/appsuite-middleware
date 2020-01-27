@@ -62,8 +62,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.IOUtils;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.Timeout;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.framework.AbstractAPIClientSession;
 import com.openexchange.groupware.modules.Module;
@@ -86,6 +89,9 @@ import jonelo.jacksum.algorithm.MD;
  * @since v7.10.4
  */
 public class ResumableChecksumTest extends AbstractAPIClientSession {
+
+    @Rule
+    public Timeout timeout = new Timeout(1, TimeUnit.MINUTES);
 
     private DriveApi driveApi;
     private String folderId;
