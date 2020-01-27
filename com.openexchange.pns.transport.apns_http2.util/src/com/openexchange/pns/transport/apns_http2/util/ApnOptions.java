@@ -47,30 +47,88 @@
  *
  */
 
-package com.openexchange.pns.transport.apns_http2;
-
-import java.util.Collection;
+package com.openexchange.pns.transport.apns_http2.util;
 
 /**
- * {@link ApnsHttp2OptionsProvider} - Provides the options to communicate with the Apple Push Notification System via HTTP/2.
+ * {@link ApnOptions} - Holds the (immutable) options to communicate with the Apple Push Notification System.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.10.0
  */
-public interface ApnsHttp2OptionsProvider {
+public class ApnOptions {
+
+    private final String password;
+    private final Object keystore;
+    private final boolean production;
+    private final String topic;
+    private final String clientId;
 
     /**
-     * Gets the APNS HTTP/2 options containing the push certificate for specified client.
+     * Initializes a new immutable {@link ApnOptions} instance.
      *
-     * @return The APNS options or <code>null</code>
+     * @param keystore A keystore containing the private key and the certificate signed by Apple.<br>
+     *                 The following formats can be used:
+     *                 <ul>
+     *                 <li><code>java.io.File</code></li>
+     *                 <li><code>java.io.InputStream</code></li>
+     *                 <li><code>byte[]</code></li>
+     *                 <li><code>java.security.KeyStore</code></li>
+     *                 <li><code>java.lang.String</code> for a file path</li>
+     *                 </ul>
+     * @param password The keystore's password.
+     * @param production <code>true</code> to use Apple's production servers, <code>false</code> to use the sandbox servers
+     * @param topic The push topic, should be the app's bundle identifier
+     * @param clientId The client identifier
      */
-    ApnsHttp2Options getOptions(String client);
+    public ApnOptions(Object keystore, String password, boolean production, String topic, String clientId) {
+        super();
+        this.keystore = keystore;
+        this.password = password;
+        this.production = production;
+        this.topic = topic;
+        this.clientId = clientId;
+    }
 
     /**
-     * Gets available options from this provider
+     * Gets the password
      *
-     * @return The available options
+     * @return The password
      */
-    Collection<ApnsHttp2OptionsPerClient> getAvailableOptions();
+    public String getPassword() {
+        return password;
+    }
+
+    /**
+     * Gets the keystore
+     *
+     * @return The keystore
+     */
+    public Object getKeystore() {
+        return keystore;
+    }
+
+    /**
+     * Gets the production
+     *
+     * @return The production
+     */
+    public boolean isProduction() {
+        return production;
+    }
+
+    /**
+     * Gets the topic
+     *
+     * @return The topic
+     */
+    public String getTopic() {
+        return topic;
+    }
+
+    /**
+     * Gets the client identifier
+     */
+    public String getClientId() {
+        return clientId;
+    }
 
 }

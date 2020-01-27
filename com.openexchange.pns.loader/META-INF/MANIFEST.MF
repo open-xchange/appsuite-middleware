@@ -8,7 +8,9 @@ Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.openexchange.osgi,
  com.openexchange.pns.transport.apn,
+ com.openexchange.pns.transport.apns_http2.util,
  com.openexchange.pns.transport.gcm,
+ org.apache.commons.io,
  org.osgi.framework,
  org.osgi.util.tracker,
  org.slf4j

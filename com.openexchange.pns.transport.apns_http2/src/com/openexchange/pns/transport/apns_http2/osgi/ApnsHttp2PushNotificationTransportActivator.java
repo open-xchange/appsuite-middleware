@@ -51,7 +51,6 @@ package com.openexchange.pns.transport.apns_http2.osgi;
 
 import static com.openexchange.osgi.Tools.withRanking;
 import java.io.File;
-import java.util.Dictionary;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.osgi.framework.ServiceRegistration;
@@ -67,13 +66,11 @@ import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.pns.PushExceptionCodes;
 import com.openexchange.pns.PushMessageGeneratorRegistry;
 import com.openexchange.pns.PushSubscriptionRegistry;
-import com.openexchange.pns.transport.apns_http2.ApnsHttp2Options;
-import com.openexchange.pns.transport.apns_http2.ApnsHttp2Options.AuthType;
-import com.openexchange.pns.transport.apns_http2.ApnsHttp2OptionsProvider;
 import com.openexchange.pns.transport.apns_http2.internal.ApnsHttp2PushNotificationTransport;
 import com.openexchange.pns.transport.apns_http2.internal.DefaultApnsHttp2OptionsProvider;
-import com.openexchange.timer.ScheduledTimerTask;
-import com.openexchange.timer.TimerService;
+import com.openexchange.pns.transport.apns_http2.util.ApnsHttp2Options;
+import com.openexchange.pns.transport.apns_http2.util.ApnsHttp2Options.AuthType;
+import com.openexchange.pns.transport.apns_http2.util.ApnsHttp2OptionsProvider;
 
 
 /**
@@ -90,7 +87,6 @@ public class ApnsHttp2PushNotificationTransportActivator extends HousekeepingAct
 
     private ServiceRegistration<ApnsHttp2OptionsProvider> optionsProviderRegistration;
     private ApnsHttp2PushNotificationTransport apnHttp2Transport;
-    private ScheduledTimerTask feedbackQueryTask;
 
     /**
      * Initializes a new {@link ApnsHttp2PushNotificationTransportActivator}.
@@ -123,7 +119,7 @@ public class ApnsHttp2PushNotificationTransportActivator extends HousekeepingAct
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, PushSubscriptionRegistry.class, PushMessageGeneratorRegistry.class, ConfigViewFactory.class, TimerService.class };
+        return new Class<?>[] { ConfigurationService.class, PushSubscriptionRegistry.class, PushMessageGeneratorRegistry.class, ConfigViewFactory.class };
     }
 
     @Override
@@ -154,11 +150,6 @@ public class ApnsHttp2PushNotificationTransportActivator extends HousekeepingAct
             optionsProviderRegistration.unregister();
             this.optionsProviderRegistration = null;
         }
-        ScheduledTimerTask feedbackQueryTask = this.feedbackQueryTask;
-        if (null != feedbackQueryTask) {
-            feedbackQueryTask.cancel();
-            this.feedbackQueryTask = null;
-        }
         super.stopBundle();
     }
 
@@ -173,12 +164,6 @@ public class ApnsHttp2PushNotificationTransportActivator extends HousekeepingAct
         if (null != optionsProviderRegistration) {
             optionsProviderRegistration.unregister();
             this.optionsProviderRegistration = null;
-        }
-
-        ScheduledTimerTask feedbackQueryTask = this.feedbackQueryTask;
-        if (null != feedbackQueryTask) {
-            feedbackQueryTask.cancel();
-            this.feedbackQueryTask = null;
         }
 
         Object yaml = configService.getYaml(CONFIGFILE_APNS_OPTIONS);
@@ -307,7 +292,7 @@ public class ApnsHttp2PushNotificationTransportActivator extends HousekeepingAct
         return new ApnsHttp2Options(clientId, new File(resourceName), password, production, topic);
     }
 
-    private ApnsHttp2Options createOptions(String clientId, String privateKey, String keyId, String teamId, boolean production, String topic) throws Exception{
+    private ApnsHttp2Options createOptions(String clientId, String privateKey, String keyId, String teamId, boolean production, String topic) {
         return new ApnsHttp2Options(clientId, new File(privateKey), keyId, teamId, production, topic);
     }
 

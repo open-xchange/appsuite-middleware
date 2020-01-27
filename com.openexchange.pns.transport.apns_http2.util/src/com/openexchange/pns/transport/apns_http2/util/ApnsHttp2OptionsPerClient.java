@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,66 +47,48 @@
  *
  */
 
-package com.openexchange.pns.transport.apn;
+package com.openexchange.pns.transport.apns_http2.util;
+
 
 /**
- * {@link ApnOptions} - Holds the (immutable) options to communicate with the Apple Push Notification System.
+ * {@link ApnsHttp2OptionsPerClient} - A pair of client identifier and associated APNS HTTP/2 options.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.0
  */
-public class ApnOptions {
+public class ApnsHttp2OptionsPerClient {
 
-    private final String password;
-    private final Object keystore;
-    private final boolean production;
+    private final String client;
+    private final ApnsHttp2Options options;
 
     /**
-     * Initializes a new immutable {@link ApnOptions} instance.
+     * Initializes a new {@link ApnsHttp2OptionsPerClient}.
      *
-     * @param keystore A keystore containing the private key and the certificate signed by Apple.<br>
-     *                 The following formats can be used:
-     *                 <ul>
-     *                 <li><code>java.io.File</code></li>
-     *                 <li><code>java.io.InputStream</code></li>
-     *                 <li><code>byte[]</code></li>
-     *                 <li><code>java.security.KeyStore</code></li>
-     *                 <li><code>java.lang.String</code> for a file path</li>
-     *                 </ul>
-     * @param password The keystore's password.
-     * @param production <code>true</code> to use Apple's production servers, <code>false</code> to use the sandbox servers
+     * @param client The client
+     * @param options The associated APNS HTTP/2 options
      */
-    public ApnOptions(Object keystore, String password, boolean production) {
+    public ApnsHttp2OptionsPerClient(String client, ApnsHttp2Options options) {
         super();
-        this.keystore = keystore;
-        this.password = password;
-        this.production = production;
+        this.client = client;
+        this.options = options;
     }
 
     /**
-     * Gets the password
+     * Gets the client
      *
-     * @return The password
+     * @return The client
      */
-    public String getPassword() {
-        return password;
+    public String getClient() {
+        return client;
     }
 
     /**
-     * Gets the keystore
+     * Gets the APNS HTTP/2 options
      *
-     * @return The keystore
+     * @return The APNS HTTP/2 options
      */
-    public Object getKeystore() {
-        return keystore;
-    }
-
-    /**
-     * Gets the production
-     *
-     * @return The production
-     */
-    public boolean isProduction() {
-        return production;
+    public ApnsHttp2Options getOptions() {
+        return options;
     }
 
 }
