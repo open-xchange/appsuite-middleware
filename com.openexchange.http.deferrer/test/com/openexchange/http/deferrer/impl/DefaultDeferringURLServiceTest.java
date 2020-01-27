@@ -55,9 +55,9 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.sim.SimHttpServletRequest;
 import javax.servlet.http.sim.SimHttpServletResponse;
 import javax.servlet.sim.ByteArrayServletOutputStream;
-import junit.framework.TestCase;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.http.deferrer.servlet.DeferrerServlet;
+import junit.framework.TestCase;
 
 
 /**
@@ -119,7 +119,7 @@ public class DefaultDeferringURLServiceTest extends TestCase {
         resp.setOutputStream(servletOutputStream);
         resp.setCharacterEncoding("UTF-8");
 
-        DeferrerServlet deferrerServlet = new DeferrerServlet();
+        DeferrerServlet deferrerServlet = new DeferrerServlet(null);
         deferrerServlet.service(req, resp);
 
         int status = resp.getStatus();

@@ -66,6 +66,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.http.deferrer.CustomRedirectURLDetermination;
 import com.openexchange.http.deferrer.impl.DefaultDeferringURLService;
@@ -81,10 +82,27 @@ public class DeferrerServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1358634554782437089L;
 
+    private static final String MAX_PARAMETER_LENGTH_PROP = "com.openexchange.http.deferrer.servlet.maxParameterLength";
+    // DefaultProperty.valueOf("com.openexchange.http.deferrer.servlet.maxParameterLength",Long.valueOf(1024*10l)); // 10 KB
+
     /**
      * The listing for custom handlers.
      */
     public static final List<CustomRedirectURLDetermination> CUSTOM_HANDLERS = new CopyOnWriteArrayList<CustomRedirectURLDetermination>();
+
+    private final long max;
+
+    /**
+     * Initializes a new {@link DeferrerServlet}.
+     */
+    public DeferrerServlet(ConfigurationService config) {
+        super();
+        if (config == null) {
+            max = -1;
+        } else {
+            this.max = config.getIntProperty(MAX_PARAMETER_LENGTH_PROP, 1024 * 10);
+        }
+    }
 
     @Override
     protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
@@ -125,6 +143,7 @@ public class DeferrerServlet extends HttpServlet {
 
         Map<String, String> params = parseQueryStringFromUrl(redirectURL);
         StringBuilder builder = new StringBuilder(encodeUrl(redirectURL, true, false));
+        long size = 0;
         for (Enumeration<?> parameterNames = req.getParameterNames(); parameterNames.hasMoreElements();) {
             String name = (String) parameterNames.nextElement();
             if ("redirect".equals(name) || params.containsKey(name)) {
@@ -132,6 +151,11 @@ public class DeferrerServlet extends HttpServlet {
             }
 
             String parameter = req.getParameter(name);
+            size += ((name != null ? name.getBytes().length : 0) + (parameter != null ? parameter.getBytes().length : 0)); // add both the param name size and the param content size
+            if(max > 0 && size >= max) {
+                Tools.sendErrorPage(resp, HttpServletResponse.SC_REQUEST_URI_TOO_LONG, "Request parameters contain too much data");
+                return;
+            }
             builder.append(concat);
             concat = '&';
             builder.append(name).append('=').append(encodeUrl(parameter, true, true));

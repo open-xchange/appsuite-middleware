@@ -85,7 +85,7 @@ public class HTTPDeferrerActivator extends HousekeepingActivator {
         final DispatcherPrefixService prefixService = getService(DispatcherPrefixService.class);
         DefaultDeferringURLService.PREFIX.set(prefixService);
         String alias = prefixService.getPrefix() + "defer";
-        getService(HttpService.class).registerServlet(alias, new DeferrerServlet(), null, null);
+        getService(HttpService.class).registerServlet(alias, new DeferrerServlet(getService(ConfigurationService.class)), null, null);
         this.alias = alias;
 
         registerService(DeferringURLService.class, new DefaultDeferringURLService() {
