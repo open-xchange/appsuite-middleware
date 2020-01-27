@@ -1,0 +1,27 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange PNS transport apns HTTP/2 utility bundle
+Bundle-SymbolicName: com.openexchange.pns.transport.apns_http2.util
+Bundle-Version: 7.10.4
+Bundle-Vendor: OX Software GmbH
+Automatic-Module-Name: com.openexchange.pns.transport.apns_http2.util
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: com.fasterxml.jackson.core,
+ com.fasterxml.jackson.databind,
+ com.openexchange.exception,
+ com.openexchange.java,
+ com.openexchange.osgi,
+ com.openexchange.osgi.util,
+ com.openexchange.pns,
+ com.openexchange.server,
+ com.openexchange.threadpool,
+ com.openexchange.tools.arrays,
+ com.turo.pushy.apns,
+ com.turo.pushy.apns.auth,
+ com.turo.pushy.apns.util,
+ com.turo.pushy.apns.util.concurrent,
+ org.apache.log4j,
+ org.json,
+ org.osgi.framework,
+ org.slf4j
+Export-Package: com.openexchange.pns.transport.apns_http2.util

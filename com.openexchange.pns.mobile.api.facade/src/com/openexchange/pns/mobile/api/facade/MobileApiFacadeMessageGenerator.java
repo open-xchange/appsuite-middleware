@@ -49,19 +49,19 @@
 
 package com.openexchange.pns.mobile.api.facade;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
+import org.json.JSONArray;
 import org.json.JSONException;
-import com.openexchange.config.cascade.ConfigViewFactory;
+import org.json.JSONObject;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
-import com.openexchange.pns.ApnsConstants;
+import com.openexchange.pns.JsonMessage;
 import com.openexchange.pns.KnownTransport;
 import com.openexchange.pns.Message;
 import com.openexchange.pns.PushExceptionCodes;
 import com.openexchange.pns.PushMessageGenerator;
 import com.openexchange.pns.PushNotification;
-import javapns.notification.PushNotificationBigPayload;
-import javapns.notification.PushNotificationPayload;
 
 /**
  * {@link MobileApiFacadeMessageGenerator} - The message generator for Mobile API Facade.
@@ -73,21 +73,20 @@ public class MobileApiFacadeMessageGenerator implements PushMessageGenerator {
 
     private static final String TRANSPORT_ID_GCM = KnownTransport.GCM.getTransportId();
     private static final String TRANSPORT_ID_APNS = KnownTransport.APNS.getTransportId();
+    private static final String DEFAULT_NAMESPACE = "/";
 
     // ------------------------------------------------------------------------------------------------------------------------
 
     private final ClientConfig clientConfig;
-    private final ConfigViewFactory viewFactory;
 
     /**
      * Initializes a new {@link MobileApiFacadeMessageGenerator}.
      *
      * @param viewFactory The service to use
      */
-    public MobileApiFacadeMessageGenerator(ClientConfig clientConfig, ConfigViewFactory viewFactory) {
+    public MobileApiFacadeMessageGenerator(ClientConfig clientConfig) {
         super();
         this.clientConfig = clientConfig;
-        this.viewFactory = viewFactory;
     }
 
     @Override
@@ -127,63 +126,15 @@ public class MobileApiFacadeMessageGenerator implements PushMessageGenerator {
         } else if (TRANSPORT_ID_APNS.equals(transportId)) {
             // Build APNS payload as expected by client
 
-            final PushNotificationPayload payload = new PushNotificationBigPayload();
-            Map<String, Object> messageData = notification.getMessageData();
+            String topic = notification.getTopic();
+            Collection<Object> args;
+            // Default to wrap message data as a single JSON object
+            args = Collections.<Object> singleton(new JSONObject(notification.getMessageData()));
+
             try {
-                String subject = MessageDataUtil.getSubject(messageData);
-                String displayName = MessageDataUtil.getDisplayName(messageData);
-                String senderAddress = MessageDataUtil.getSender(messageData);
-                String sender = displayName.length() == 0 ? senderAddress : displayName;
-                String folder = MessageDataUtil.getFolder(messageData);
-                String id = MessageDataUtil.getId(messageData);
-                String path = MessageDataUtil.getPath(messageData);
-                int unread = MessageDataUtil.getUnread(messageData);
-
-                if (Strings.isNotEmpty(subject) && Strings.isNotEmpty(sender)) {
-                    // Non-silent push
-                    StringBuilder sb = new StringBuilder(sender);
-                    sb.append("\n");
-                    sb.append(subject);
-                    String alertMessage = sb.toString();
-                    alertMessage = alertMessage.length() > ApnsConstants.APNS_MAX_ALERT_LENGTH ? alertMessage.substring(0, ApnsConstants.APNS_MAX_ALERT_LENGTH) : alertMessage;
-                    payload.addAlert(alertMessage);
-
-                    MobileApiFacadePushConfiguration config = MobileApiFacadePushConfiguration.getConfigFor(notification.getUserId(), notification.getContextId(), viewFactory);
-
-                    if (config.isApnBadgeEnabled() && unread >= 0) {
-                        payload.addBadge(unread);
-                    }
-
-                    if (config.isApnSoundEnabled()) {
-                        payload.addSound(config.getApnSoundFile());
-                    }
-
-                    payload.addCategory("new-message-category");
-                    payload.setContentAvailable(false);
-                } else {
-                    // Silent push
-                    payload.setContentAvailable(true);
-                }
-
-                if (Strings.isEmpty(path) && Strings.isNotEmpty(folder) && Strings.isNotEmpty(id)) {
-                    path = folder + "/" + id;
-                }
-
-                if (path.length() > 0) {
-                    payload.addCustomDictionary("cid", path);
-                } else if (folder.length() > 0) {
-                    payload.addCustomDictionary("folder", folder);
-                }
-
-                return new Message<PushNotificationPayload>() {
-
-                    @Override
-                    public PushNotificationPayload getMessage() {
-                        return payload;
-                    }
-                };
+                return new JsonMessage(new JSONObject(3).put("name", topic).put("args", new JSONArray(args)).put("namespace", DEFAULT_NAMESPACE));
             } catch (JSONException e) {
-                throw PushExceptionCodes.MESSAGE_GENERATION_FAILED.create(e, e.getMessage());
+                throw PushExceptionCodes.JSON_ERROR.create(e, e.getMessage());
             }
         }
 
