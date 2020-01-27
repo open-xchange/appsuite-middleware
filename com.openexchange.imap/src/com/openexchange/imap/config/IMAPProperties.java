@@ -913,17 +913,16 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
     }
 
     /**
-     *
-     * Initializes the circuit breaker with the optional name
+     * Initializes the circuit breaker with the optional infix.
      *
      * @param optionalInfix The optional circuit breaker name
-     * @param configuration
-     * @param genericBreaker
+     * @param configuration The configuration service to use
+     * @param genericBreaker The already initialized generic circuit breaker or <code>null</code>
      * @return An optional {@link AbstractFailsafeCircuitBreakerCommandExecutor}
      */
     private static Optional<AbstractFailsafeCircuitBreakerCommandExecutor> initCircuitBreakerForName(Optional<String> optionalInfix, ConfigurationService configuration, GenericFailsafeCircuitBreakerCommandExecutor genericBreaker) {
         if (!optionalInfix.isPresent()) {
-            initGenericCircuitBreakerInternal(configuration);
+            return initGenericCircuitBreakerInternal(configuration);
         } // End of generic
 
         String infix = optionalInfix.get();
@@ -935,10 +934,10 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
     }
 
     /**
-     * Initializes the generic circuit breaker
+     * Initializes the generic circuit breaker.
      *
-     * @param configuration
-     * @return An optional {@link AbstractFailsafeCircuitBreakerCommandExecutor}
+     * @param configuration The configuration service to use
+     * @return An optional generic circuit breaker
      */
     private static Optional<AbstractFailsafeCircuitBreakerCommandExecutor> initGenericCircuitBreakerInternal(ConfigurationService configuration) {
             // The generic IMAP circuit breaker
@@ -1040,12 +1039,12 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
     }
 
     /**
-     * Initializes a specific circuit breaker
+     * Initializes a specific circuit breaker.
      *
-     * @param configuration
-     * @param genericBreaker
+     * @param configuration The configuration service to use
+     * @param genericBreaker The already initialized generic circuit breaker or <code>null</code>
      * @param infix The name of the circuit breaker
-     * @return An optional {@link AbstractFailsafeCircuitBreakerCommandExecutor}
+     * @return An optional specific circuit breaker
      */
     private static Optional<AbstractFailsafeCircuitBreakerCommandExecutor> initSpecificCircuitBreaker(ConfigurationService configuration, GenericFailsafeCircuitBreakerCommandExecutor genericBreaker, String infix) {
         // Specific
@@ -1179,11 +1178,11 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
     }
 
     /**
-     * Initializes the primary account circuit breaker
+     * Initializes the primary account circuit breaker.
      *
-     * @param configuration
-     * @param genericBreaker
-     * @return An optional {@link AbstractFailsafeCircuitBreakerCommandExecutor}
+     * @param configuration The configuration service to use
+     * @param genericBreaker The already initialized generic circuit breaker or <code>null</code>
+     * @return An optional primary account circuit breaker
      */
     private static Optional<AbstractFailsafeCircuitBreakerCommandExecutor> initPrimaryCircuitBreaker(ConfigurationService configuration, GenericFailsafeCircuitBreakerCommandExecutor genericBreaker) {
         // The IMAP circuit breaker form primary account
