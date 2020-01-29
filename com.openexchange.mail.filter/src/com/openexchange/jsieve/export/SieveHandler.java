@@ -275,6 +275,24 @@ public class SieveHandler {
     }
 
     /**
+     * Gets the input reader from SIEVE end-point.
+     *
+     * @return The input reader
+     */
+    public BufferedReader getInput() {
+        return bis_sieve;
+    }
+
+    /**
+     * Gets the output stream to SIEVE end-point.
+     *
+     * @return The output stream
+     */
+    public BufferedOutputStream getOutput() {
+        return bos_sieve;
+    }
+
+    /**
      * Sets the start time stamp, which is the current time in milliseconds at the time of invocation.
      */
     private void measureStart() {
@@ -530,7 +548,7 @@ public class SieveHandler {
         }
     }
 
-    private IMetricArguments createMetricArguments() {
+    public IMetricArguments createMetricArguments() {
         return optionalMetricService.isPresent() ? new MetricArguments(optionalMetricService.get(), this) : NOOP;
     }
 
@@ -538,7 +556,7 @@ public class SieveHandler {
         java.net.SocketTimeoutException.class,
         java.io.EOFException.class);
 
-    private String readResponseLine(IMetricArguments metricArgs) throws IOException {
+    public String readResponseLine(IMetricArguments metricArgs) throws IOException {
         if (metricArgs == null || metricArgs.dontMeasureRead()) {
             return bis_sieve.readLine();
         }
@@ -1497,7 +1515,7 @@ public class SieveHandler {
      * @param response line
      * @return null, if no response code in line, the @{SIEVEResponse.Code} otherwise.
      */
-    protected SieveResponse parseSIEVEResponse(final String resp, final String multiline) {
+    public SieveResponse parseSIEVEResponse(final String resp, final String multiline) {
         if (!useSIEVEResponseCodes || null == resp) {
             return null;
         }
@@ -1914,7 +1932,7 @@ public class SieveHandler {
     /** The key for server dimension */
     private static final String METRICS_DIMENSION_SERVER_KEY = "server";
 
-    private static interface IMetricArguments {
+    public static interface IMetricArguments {
 
         boolean measureRead();
 

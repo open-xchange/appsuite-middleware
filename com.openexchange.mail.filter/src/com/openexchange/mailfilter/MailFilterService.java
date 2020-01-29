@@ -223,4 +223,13 @@ public interface MailFilterService {
      */
     public String convertToString(Credentials credentials, Rule rule) throws OXException;
 
+    /**
+     * Executes given command.
+     *
+     * @param credentials The credentials
+     * @param command The command to execute
+     * @throws OXException If command execution fails
+     */
+    public void executeCommand(Credentials credentials, MailFilterCommand command) throws OXException;
+
 }

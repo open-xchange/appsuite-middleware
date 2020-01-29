@@ -124,6 +124,7 @@ import com.openexchange.jsieve.export.exceptions.OXSieveHandlerInvalidCredential
 import com.openexchange.jsieve.visitors.Visitor;
 import com.openexchange.jsieve.visitors.Visitor.OwnType;
 import com.openexchange.mailfilter.Credentials;
+import com.openexchange.mailfilter.MailFilterCommand;
 import com.openexchange.mailfilter.MailFilterService;
 import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
 import com.openexchange.mailfilter.properties.MailFilterProperty;
@@ -1027,6 +1028,22 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
                     throw (OXException) t;
                 }
                 throw OXException.general("Failed loading Sieve capabilities", t);
+            }
+        }
+    }
+
+    @Override
+    public void executeCommand(Credentials credentials, MailFilterCommand command) throws OXException {
+        Object lock = lockFor(credentials);
+        synchronized (lock) {
+            SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials, getOptionalCircuitBreaker(), getOptionalMetricService());
+            try {
+                handlerConnect(sieveHandler, credentials.getSubject());
+                command.execute(new SieveProtocolImpl(sieveHandler, credentials, useSIEVEResponseCodes(credentials.getUserid(), credentials.getContextid())));
+            } catch (OXSieveHandlerException e) {
+                throw MailFilterExceptionCode.handleParsingException(e, credentials, useSIEVEResponseCodes(credentials.getUserid(), credentials.getContextid()));
+            } finally {
+                closeSieveHandler(sieveHandler);
             }
         }
     }
