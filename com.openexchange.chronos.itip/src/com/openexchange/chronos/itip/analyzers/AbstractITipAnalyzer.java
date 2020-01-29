@@ -370,7 +370,7 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
                     iterator.remove();
                     continue;
                 }
-                if (masterEvent != null && (masterEvent.getId().equals(conflict.getConflictingEvent().getId()))) {
+                if (masterEvent != null && masterEvent.getId() != null && (masterEvent.getId().equals(conflict.getConflictingEvent().getId()))) {
                     iterator.remove();
                     continue;
                 }
