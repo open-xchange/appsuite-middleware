@@ -113,7 +113,6 @@ import com.openexchange.jsieve.commands.TestCommand;
 import com.openexchange.jsieve.commands.TestCommand.Commands;
 import com.openexchange.jsieve.commands.test.ITestCommand;
 import com.openexchange.jsieve.export.Capabilities;
-import com.openexchange.jsieve.export.CircuitBreakerInfo;
 import com.openexchange.jsieve.export.RuleConverter;
 import com.openexchange.jsieve.export.SieveHandler;
 import com.openexchange.jsieve.export.SieveHandlerFactory;

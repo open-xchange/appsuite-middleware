@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.jsieve.export;
+package com.openexchange.mailfilter.internal;
 
 import java.util.concurrent.atomic.AtomicReference;
 import net.jodah.failsafe.CircuitBreaker;
