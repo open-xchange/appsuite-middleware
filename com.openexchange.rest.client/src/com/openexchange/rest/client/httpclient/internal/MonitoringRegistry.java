@@ -82,7 +82,7 @@ public class MonitoringRegistry {
     public MonitoringId registerInstance(String clientName) {
         AtomicInteger existing = registeredClients.putIfAbsent(clientName, new AtomicInteger(1));
         if (existing == null) {
-            log("HTTP client with name '{}' was instantiated for the first time.");
+            log("HTTP client with name '{}' was instantiated for the first time.", clientName);
             return new MonitoringId(clientName, 1);
         }
 
