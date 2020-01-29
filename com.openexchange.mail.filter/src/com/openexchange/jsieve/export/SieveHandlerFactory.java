@@ -59,7 +59,6 @@ import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailfilter.Credentials;
 import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
-import com.openexchange.mailfilter.internal.CircuitBreakerInfo;
 import com.openexchange.mailfilter.properties.CredentialSource;
 import com.openexchange.mailfilter.properties.LoginType;
 import com.openexchange.mailfilter.properties.MailFilterProperty;

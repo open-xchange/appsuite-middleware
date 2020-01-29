@@ -52,7 +52,7 @@ package com.openexchange.jsieve.export.utils;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import com.openexchange.mailfilter.internal.CircuitBreakerInfo;
+import com.openexchange.jsieve.export.CircuitBreakerInfo;
 import net.jodah.failsafe.CircuitBreakerOpenException;
 import net.jodah.failsafe.Failsafe;
 import net.jodah.failsafe.FailsafeException;
