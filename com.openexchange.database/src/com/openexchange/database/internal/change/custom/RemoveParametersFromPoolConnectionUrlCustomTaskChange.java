@@ -162,8 +162,8 @@ public class RemoveParametersFromPoolConnectionUrlCustomTaskChange implements Cu
         if (!id2NewUrl.isEmpty()) {
             try {
                 stmt = con.prepareStatement(UPDATE);
-                for (Entry<Integer, String> entry : id2Url.entrySet()) {
-                    stmt.setString(1, id2NewUrl.get(entry.getKey()));
+                for (Entry<Integer, String> entry : id2NewUrl.entrySet()) {
+                    stmt.setString(1, entry.getValue());
                     stmt.setInt(2, entry.getKey().intValue());
                     stmt.addBatch();
 
