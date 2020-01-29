@@ -90,7 +90,6 @@ import com.openexchange.jsieve.export.utils.FailsafeCircuitBreakerBufferedOutput
 import com.openexchange.jsieve.export.utils.FailsafeCircuitBreakerBufferedReader;
 import com.openexchange.jsieve.export.utils.HostAndPort;
 import com.openexchange.mail.mime.QuotedInternetAddress;
-import com.openexchange.mailfilter.internal.CircuitBreakerInfo;
 import com.openexchange.mailfilter.properties.MailFilterProperty;
 import com.openexchange.mailfilter.properties.PreferredSASLMech;
 import com.openexchange.mailfilter.services.Services;
