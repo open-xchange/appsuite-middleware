@@ -52,8 +52,9 @@ package com.openexchange.config.internal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.config.cascade.BasicProperty;
-import com.openexchange.config.cascade.ConfigCascadeExceptionCodes;
 import com.openexchange.exception.OXException;
 
 /**
@@ -64,50 +65,41 @@ import com.openexchange.exception.OXException;
  */
 public class ServerProperty implements BasicProperty {
 
-    private final String value;
+    private final AtomicReference<String> value;
     private final Map<String, String> metadata;
 
     /**
      * Initializes a new {@link ServerProperty}.
-     * 
-     * @param value The property's value
-     * @param metadata The optional metadata of the property
      */
-    public ServerProperty(String value, Map<String, String> metadata) {
+    public ServerProperty() {
         super();
-        this.value = value;
-        this.metadata = metadata;
+        value = new AtomicReference<String>(null);
+        metadata = new ConcurrentHashMap<String, String>(8, 0.9F, 1);
     }
 
     @Override
     public String get() {
-        return value;
+        return value.get();
     }
 
     @Override
     public String get(String metadataName) {
-        return null == metadata ? null : metadata.get(metadataName);
+        return metadata.get(metadataName);
     }
 
     @Override
     public boolean isDefined() {
-        return null != value;
+        return value.get() != null;
     }
 
-    /**
-     * Unsupported.
-     */
     @Override
-    public void set(String value) throws OXException {
-        throw ConfigCascadeExceptionCodes.CAN_NOT_SET_PROPERTY.create("", "server");
+    public void set(String value) {
+        this.value.set(value);
     }
 
-    /**
-     * Unsupported.
-     */
     @Override
-    public void set(String metadataName, String value) throws OXException {
-        throw ConfigCascadeExceptionCodes.CAN_NOT_DEFINE_METADATA.create(metadataName, "server");
+    public void set(String metadataName, String value) {
+        metadata.put(metadataName, value);
     }
 
     @Override
@@ -119,10 +111,11 @@ public class ServerProperty implements BasicProperty {
     public String toString() {
         StringBuilder builder = new StringBuilder(64);
         builder.append("ServerProperty [");
+        String value = this.value.get();
         if (value != null) {
             builder.append("value=").append(value).append(", ");
         }
-        builder.append("defined=").append(isDefined()).append(", ");
+        builder.append("defined=").append(null != value).append(", ");
         if (metadata != null) {
             builder.append("metadata=").append(metadata);
         }
