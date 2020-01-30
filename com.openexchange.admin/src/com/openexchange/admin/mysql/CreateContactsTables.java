@@ -108,26 +108,6 @@ public class CreateContactsTables extends AbstractCreateTableImpl {
         + ") ENGINE = InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
     /**
-     * Table name of prg_contacts_linkage table
-     */
-    private static final String TABLE_PRG_CONTACTS_LINKAGE = "prg_contacts_linkage";
-
-    /**
-     * SQL statement for prg_contacts_linkage table
-     */
-    private static final String CREATE_PRG_CONTACTS_LINKAGE_PRIMARY_KEY = "CREATE TABLE " + TABLE_PRG_CONTACTS_LINKAGE + " ("
-        + "intfield01 INT4 NOT NULL,"
-        + "intfield02 INT4 NOT NULL,"
-        + "field01 VARCHAR(320),"
-        + "field02 VARCHAR(320),"
-        + "cid INT4 NOT NULL,"
-        + "uuid binary(16) NOT NULL,"
-        + "PRIMARY KEY (cid, uuid),"
-        + "INDEX (intfield01, intfield02, cid),"
-        + "INDEX (cid)"
-        + ") ENGINE = InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
-
-    /**
      * Table name of prg_contacts_image table
      */
     private static final String TABLE_PRG_CONTACTS_IMAGE = "prg_contacts_image";
@@ -463,7 +443,7 @@ public class CreateContactsTables extends AbstractCreateTableImpl {
     @Override
     public String[] tablesToCreate() {
         return new String[] {
-            TABLE_PRG_DLIST, TABLE_DEL_DLIST, TABLE_PRG_CONTACTS_LINKAGE, TABLE_PRG_CONTACTS_IMAGE, TABLE_DEL_CONTACTS_IMAGE,
+            TABLE_PRG_DLIST, TABLE_DEL_DLIST, TABLE_PRG_CONTACTS_IMAGE, TABLE_DEL_CONTACTS_IMAGE,
             TABLE_DEL_CONTACTS, TABLE_PRG_CONTACTS };
     }
 
@@ -472,7 +452,7 @@ public class CreateContactsTables extends AbstractCreateTableImpl {
      */
     @Override
     protected String[] getCreateStatements() {
-        return new String[] { CREATE_PRG_DLIST_PRIMARY_KEY, CREATE_DEL_DLIST_PRIMARY_KEY, CREATE_PRG_CONTACTS_LINKAGE_PRIMARY_KEY, CREATE_PRG_CONTACTS_IMAGE,
+        return new String[] { CREATE_PRG_DLIST_PRIMARY_KEY, CREATE_DEL_DLIST_PRIMARY_KEY, CREATE_PRG_CONTACTS_IMAGE,
             CREATE_DEL_CONTACTS_IMAGE, CREATE_DEL_CONTACTS, CREATE_PRG_CONTACTS };
     }
 
