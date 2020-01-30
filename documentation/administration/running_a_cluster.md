@@ -515,7 +515,7 @@ Additionally, there may always be some kind of race conditions during an update,
 
 Upgrading all nodes in the cluster should usually be done sequentially, i.o.w. one node after the other. This means that during the upgrade of one node, the node is temporarily disconnected from the other nodes in the cluster, and will join the cluster again after the update is completed. From the backend perspective, this is as easy as stopping the open-xchange service. other nodes in the cluster will recognize the disconnected node and start to repartition the shared cluster data automatically. But wait a minute - doing so would potentially lead to the webserver not registering the node being stopped immediately, resulting in temporary errors for currently logged in users until they are routed to another machine in the cluster. That's why it's good practice to tell the webserver's load balancer that the node should no longer fulfill incoming requests. The Apache Balancer Manager is an excellent tool for this ([module mod_status](http://httpd.apache.org/docs/2.2/mod/mod_status.html)). Look at the screen shot. Every node can be put into a disabled mode. Further requests will the redirected to other nodes in the cluster:
 
-![Balancer Manager](Balancer_manager.jpg)
+![Balancer Manager](running_a_cluster/Balancer_manager.jpg)
 
 Afterwards, the open-xchange service on the disabled node can be stopped by executing:
 
