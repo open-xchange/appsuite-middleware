@@ -315,22 +315,19 @@ properties:
       file: drive.properties
       packageName: open-xchange-drive
       tags: ["Drive", "Push", "Apple"]
-    - key: com.openexchange.drive.events.apn.ios.feedbackQueryInterval
+    - key: com.openexchange.drive.events.apn.ios.topic
       description: |
-        Configures the interval between queries to the APN feedback service for the
-        subscribed iOS devices. The value can be defined using units of measurement:
-        "D" (=days), "W" (=weeks) and "H" (=hours).
-        Leaving this parameter empty disables the feedback queries on this node.
-        Since each received feedback is processed cluster-wide, only one node in the
-        cluster should be enabled here.
-      defaultValue: 1D
+        Specifies the topic to use for OX Drive push notifications. Topic is the app's bundleId. Required if
+        [[com.openexchange.drive.events.apn.ios.enabled]] is <code>true</code> and the package
+        containing the restricted drive components is not installed.
+      defaultValue:
       version:
       reloadable: false
       configcascadeAware: false
-      related: 
+      related: com.openexchange.drive.events.apn.ios.enabled
       file: drive.properties
       packageName: open-xchange-drive
-      tags: ["Drive", "Push", "Apple"]
+      tags: ["Drive", "Push", "Apple"]   
     - key: com.openexchange.drive.events.apn.macos.enabled
       description: |
         Enables or disables push event notifications to clients using the Apple Push
@@ -388,22 +385,19 @@ properties:
       file: drive.properties
       packageName: open-xchange-drive
       tags: ["Drive", "Push", "Apple"]
-    - key: com.openexchange.drive.events.apn.macos.feedbackQueryInterval
+    - key: com.openexchange.drive.events.apn.macos.topic
       description: |
-        Configures the interval between queries to the APN feedback service for the
-        subscribed Mac OS devices. The value can be defined using units of
-        measurement: "D" (=days), "W" (=weeks) and "H" (=hours). 
-        Leaving this parameter empty disables the feedback queries on
-        this node. Since each received feedback is processed cluster-wide, only one
-        node in the cluster should be enabled here.
-      defaultValue: 1D
+        Specifies the topic to use for OX Drive push notifications. Topic is the app's bundleId. Required if
+        [[com.openexchange.drive.events.apn.[os].enabled]] is <code>true</code> and the package
+        containing the restricted drive components is not installed.
+      defaultValue:
       version:
       reloadable: false
       configcascadeAware: false
       related: com.openexchange.drive.events.apn.macos.enabled
       file: drive.properties
       packageName: open-xchange-drive
-      tags: ["Drive", "Push", "Apple"]
+      tags: ["Drive", "Push", "Apple"]   
     - key: com.openexchange.drive.events.gcm.enabled
       description: |
         Enables or disables push event notifications to clients using the Google
