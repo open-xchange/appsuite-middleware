@@ -52,13 +52,11 @@ package com.openexchange.drive.events.apn.internal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import com.openexchange.drive.events.DriveContentChange;
 import com.openexchange.drive.events.DriveEvent;
 import com.openexchange.drive.events.apn2.util.ApnsHttp2Notification;
 import com.openexchange.drive.events.apn2.util.ApnsHttp2Options;
 import com.openexchange.drive.events.apn2.util.SubscriptionDeliveryTask;
 import com.openexchange.drive.events.subscribe.Subscription;
-import com.openexchange.drive.events.subscribe.SubscriptionMode;
 import com.openexchange.server.ServiceLookup;
 import com.turo.pushy.apns.DeliveryPriority;
 import com.turo.pushy.apns.PushType;
@@ -97,17 +95,6 @@ public class APNSubscriptionDeliveryTask extends SubscriptionDeliveryTask {
             .withContentAvailable(true)
             .withExpiration(TimeUnit.DAYS.toMillis(1L))
         ;
-        if (event.isContentChangesOnly() && SubscriptionMode.SEPARATE.equals(subscription.getMode())) {
-            List<String> paths = new ArrayList<String>();
-            for (DriveContentChange contentChange : event.getContentChanges()) {
-                if (contentChange.isSubfolderOf(subscription.getRootFolderID())) {
-                    paths.add(contentChange.getPath(subscription.getRootFolderID()));
-                }
-            }
-            if (false == paths.isEmpty()) {
-                builder.withCustomField("paths", paths);
-            }
-        }
         builder.withPriority(DeliveryPriority.CONSERVE_POWER);
         builder.withPushType(PushType.BACKGROUND);
         return builder.build();
