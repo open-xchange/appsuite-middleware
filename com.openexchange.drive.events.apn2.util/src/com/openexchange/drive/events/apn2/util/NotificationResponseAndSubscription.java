@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,52 +47,52 @@
  *
  */
 
-package com.openexchange.drive.events.apn.internal;
+package com.openexchange.drive.events.apn2.util;
 
-import com.openexchange.configuration.ConfigurationExceptionCodes;
-import com.openexchange.drive.events.apn.APNAccess;
-import com.openexchange.drive.events.apn.MacOSAPNCertificateProvider;
-import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
-import com.openexchange.server.ServiceExceptionCode;
-
+import com.openexchange.drive.events.subscribe.Subscription;
+import com.turo.pushy.apns.PushNotificationResponse;
+import com.turo.pushy.apns.util.SimpleApnsPushNotification;
+import com.turo.pushy.apns.util.concurrent.PushNotificationFuture;
 
 /**
- * {@link MacOSDriveEventPublisher}
+ * {@link NotificationResponseAndSubscription}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @since v7.10.4
  */
-public class MacOSDriveEventPublisher extends APNDriveEventPublisher {
+public class NotificationResponseAndSubscription {
 
-    private static final String SERIVCE_ID = "apn.macos";
+    private final PushNotificationFuture<SimpleApnsPushNotification, PushNotificationResponse<SimpleApnsPushNotification>> sendNotificationFuture;
+    private final Subscription subscription;
 
     /**
-     * Initializes a new {@link MacOSDriveEventPublisher}.
+     * Initializes a new {@link NotificationResponseAndSubscription}.
+     *
+     * @param sendNotificationFuture The result of the push operation
+     * @param subscription The subscription related to the push operation
      */
-    public MacOSDriveEventPublisher() {
+    public NotificationResponseAndSubscription(PushNotificationFuture<SimpleApnsPushNotification, PushNotificationResponse<SimpleApnsPushNotification>> sendNotificationFuture, Subscription subscription) {
         super();
+        this.sendNotificationFuture = sendNotificationFuture;
+        this.subscription = subscription;
     }
 
-    @Override
-    protected String getServiceID() {
-        return SERIVCE_ID;
+    /**
+     * Gets the {@link PushNotificationFuture}
+     *
+     * @return The PushNotificationFuture
+     */
+    public PushNotificationFuture<SimpleApnsPushNotification, PushNotificationResponse<SimpleApnsPushNotification>> getSendNotificationFuture() {
+        return sendNotificationFuture;
     }
 
-    @Override
-    protected APNAccess getAccess() throws OXException {
-        MacOSAPNCertificateProvider certificateProvider = Services.getOptionalService(MacOSAPNCertificateProvider.class);
-        if (null == certificateProvider) {
-            throw ServiceExceptionCode.absentService(MacOSAPNCertificateProvider.class);
-        }
-        APNAccess access = certificateProvider.getAccess();
-        if (null == access) {
-            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("No APN access for service " + SERIVCE_ID + " available.");
-        }
-        if (Strings.isEmpty(access.getTopic())) {
-        	return new APNAccess(access.getKeystore(), access.getPassword(), access.isProduction(), TOPIC_VANILLA_APP_MACOS);
-        }
-        return access;
+    /**
+     * Gets the {@link Subscription}
+     *
+     * @return The subscription
+     */
+    public Subscription getSubscription() {
+        return subscription;
     }
-
 
 }

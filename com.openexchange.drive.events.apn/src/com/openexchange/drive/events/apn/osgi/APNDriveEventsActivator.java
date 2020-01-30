@@ -64,7 +64,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.timer.TimerService;
-import com.openexchange.tools.strings.TimeSpanParser;
 
 /**
  * {@link APNDriveEventsActivator}
@@ -74,6 +73,7 @@ import com.openexchange.tools.strings.TimeSpanParser;
 public class APNDriveEventsActivator extends HousekeepingActivator {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(APNDriveEventsActivator.class);
+    
 
     /**
      * Initializes a new {@link APNDriveEventsActivator}.
@@ -118,9 +118,6 @@ public class APNDriveEventsActivator extends HousekeepingActivator {
              */
             APNDriveEventPublisher publisher = new IOSDriveEventPublisher();
             eventService.registerPublisher(publisher);
-            String feedbackQueryInterval = configService.getProperty(
-                "com.openexchange.drive.events.apn.ios.feedbackQueryInterval", (String)null);
-            setupFeedbackQueries(publisher, feedbackQueryInterval);
         } else {
             LOG.info("Drive events for iOS clients via APN are disabled, skipping publisher registration.");
         }
@@ -149,28 +146,8 @@ public class APNDriveEventsActivator extends HousekeepingActivator {
              */
             APNDriveEventPublisher publisher = new MacOSDriveEventPublisher();
             eventService.registerPublisher(publisher);
-            String feedbackQueryInterval = configService.getProperty(
-                "com.openexchange.drive.events.apn.macos.feedbackQueryInterval", (String)null);
-            setupFeedbackQueries(publisher, feedbackQueryInterval);
         } else {
             LOG.info("Drive events for Mac OS clients via APN are disabled, skipping publisher registration.");
-        }
-    }
-
-    private static void setupFeedbackQueries(final APNDriveEventPublisher publisher, String feedbackQueryInterval) throws OXException {
-        if (Strings.isNotEmpty(feedbackQueryInterval)) {
-            long interval = TimeSpanParser.parseTimespan(feedbackQueryInterval);
-            if (60 * 1000 <= interval) {
-                Services.getService(TimerService.class, true).scheduleWithFixedDelay(new Runnable() {
-
-                    @Override
-                    public void run() {
-                        publisher.queryFeedbackService();
-                    }
-                }, interval, interval);
-            } else {
-                LOG.warn("Ignoring too small value '{} for APN feedback query interval.", feedbackQueryInterval);
-            }
         }
     }
 
@@ -192,7 +169,11 @@ public class APNDriveEventsActivator extends HousekeepingActivator {
             throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(prefix + "password");
         }
         boolean production = configService.getBoolProperty(prefix + "production", true);
-        return new APNAccess(keystore, password, production);
+        String topic = configService.getProperty(prefix + "topic");
+        if (Strings.isEmpty(topic)) {
+        	throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(prefix + "topic");
+        }
+        return new APNAccess(keystore, password, production, topic);
     }
 
     @Override

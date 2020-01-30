@@ -47,52 +47,21 @@
  *
  */
 
-package com.openexchange.drive.events.apn.internal;
-
-import com.openexchange.configuration.ConfigurationExceptionCodes;
-import com.openexchange.drive.events.apn.APNAccess;
-import com.openexchange.drive.events.apn.MacOSAPNCertificateProvider;
-import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
-import com.openexchange.server.ServiceExceptionCode;
-
+package com.openexchange.drive.events.apn2.util;
 
 /**
- * {@link MacOSDriveEventPublisher}
+ * {@link ApnsHttp2OptionsProvider} - Provides the options to communicate with the Apple Push Notification System via HTTP/2.
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.1
  */
-public class MacOSDriveEventPublisher extends APNDriveEventPublisher {
-
-    private static final String SERIVCE_ID = "apn.macos";
+public interface ApnsHttp2OptionsProvider {
 
     /**
-     * Initializes a new {@link MacOSDriveEventPublisher}.
+     * Gets the APNS HTTP/2 options.
+     *
+     * @return The APNS options or <code>null</code>
      */
-    public MacOSDriveEventPublisher() {
-        super();
-    }
-
-    @Override
-    protected String getServiceID() {
-        return SERIVCE_ID;
-    }
-
-    @Override
-    protected APNAccess getAccess() throws OXException {
-        MacOSAPNCertificateProvider certificateProvider = Services.getOptionalService(MacOSAPNCertificateProvider.class);
-        if (null == certificateProvider) {
-            throw ServiceExceptionCode.absentService(MacOSAPNCertificateProvider.class);
-        }
-        APNAccess access = certificateProvider.getAccess();
-        if (null == access) {
-            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("No APN access for service " + SERIVCE_ID + " available.");
-        }
-        if (Strings.isEmpty(access.getTopic())) {
-        	return new APNAccess(access.getKeystore(), access.getPassword(), access.isProduction(), TOPIC_VANILLA_APP_MACOS);
-        }
-        return access;
-    }
-
+    ApnsHttp2Options getOptions();
 
 }

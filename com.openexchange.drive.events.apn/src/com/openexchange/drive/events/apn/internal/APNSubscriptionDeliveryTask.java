@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,50 +49,51 @@
 
 package com.openexchange.drive.events.apn.internal;
 
-import com.openexchange.configuration.ConfigurationExceptionCodes;
-import com.openexchange.drive.events.apn.APNAccess;
-import com.openexchange.drive.events.apn.MacOSAPNCertificateProvider;
-import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
-import com.openexchange.server.ServiceExceptionCode;
+import java.util.concurrent.TimeUnit;
+import com.openexchange.drive.events.DriveEvent;
+import com.openexchange.drive.events.apn2.util.ApnsHttp2Notification;
+import com.openexchange.drive.events.apn2.util.ApnsHttp2Options;
+import com.openexchange.drive.events.apn2.util.SubscriptionDeliveryTask;
+import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
+import com.openexchange.drive.events.subscribe.Subscription;
+import com.turo.pushy.apns.DeliveryPriority;
+import com.turo.pushy.apns.PushType;
+import com.turo.pushy.apns.util.SimpleApnsPushNotification;
 
 
 /**
- * {@link MacOSDriveEventPublisher}
+ * {@link APNSubscriptionDeliveryTask}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public class MacOSDriveEventPublisher extends APNDriveEventPublisher {
-
-    private static final String SERIVCE_ID = "apn.macos";
+public class APNSubscriptionDeliveryTask extends SubscriptionDeliveryTask {
 
     /**
-     * Initializes a new {@link MacOSDriveEventPublisher}.
+     * Initializes a new {@link APNSubscriptionDeliveryTask}.
+     *
+     * @param subscription The subscription
+     * @param event The drive event
+     * @param options The HTTP/2 options
+     * @param subscriptionStore The subscription store
      */
-    public MacOSDriveEventPublisher() {
-        super();
+    public APNSubscriptionDeliveryTask(Subscription subscription, DriveEvent event, ApnsHttp2Options options, DriveSubscriptionStore subscriptionStore) {
+        super(subscription, event, options, subscriptionStore);
     }
 
     @Override
-    protected String getServiceID() {
-        return SERIVCE_ID;
+    protected SimpleApnsPushNotification getNotification(DriveEvent event, Subscription subscription, ApnsHttp2Options options) {
+        String pushTokenReference = event.getPushTokenReference();
+        if (null != pushTokenReference && subscription.matches(pushTokenReference)) {
+            return null;
+        }
+        return new ApnsHttp2Notification.Builder(subscription.getToken(), options.getTopic())
+            .withCustomField("root", subscription.getRootFolderID())
+            .withCustomField("action", "sync")
+            .withContentAvailable(true)
+            .withExpiration(TimeUnit.DAYS.toMillis(1L))
+            .withPriority(DeliveryPriority.CONSERVE_POWER)
+            .withPushType(PushType.BACKGROUND)
+            .build();
     }
-
-    @Override
-    protected APNAccess getAccess() throws OXException {
-        MacOSAPNCertificateProvider certificateProvider = Services.getOptionalService(MacOSAPNCertificateProvider.class);
-        if (null == certificateProvider) {
-            throw ServiceExceptionCode.absentService(MacOSAPNCertificateProvider.class);
-        }
-        APNAccess access = certificateProvider.getAccess();
-        if (null == access) {
-            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("No APN access for service " + SERIVCE_ID + " available.");
-        }
-        if (Strings.isEmpty(access.getTopic())) {
-        	return new APNAccess(access.getKeystore(), access.getPassword(), access.isProduction(), TOPIC_VANILLA_APP_MACOS);
-        }
-        return access;
-    }
-
 
 }
