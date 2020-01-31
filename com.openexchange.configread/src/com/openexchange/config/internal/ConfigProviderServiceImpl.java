@@ -51,10 +51,13 @@ package com.openexchange.config.internal;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -85,6 +88,10 @@ public class ConfigProviderServiceImpl implements ReinitializableConfigProviderS
 
     private static final String TRUE = "true";
 
+    private static final Map<String, String> METADATA_PROTECTED = Collections.singletonMap(PROTECTED, TRUE);
+
+    private static final ServerProperty EMPTY_PROPERTY = new ServerProperty(null, METADATA_PROTECTED);
+
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConfigProviderServiceImpl.class);
 
     // -------------------------------------------------------------------------------------------------------------------
@@ -98,7 +105,7 @@ public class ConfigProviderServiceImpl implements ReinitializableConfigProviderS
      * @param configService The associated configuration service
      * @throws OXException If initialization fails
      */
-    public ConfigProviderServiceImpl(final ConfigurationService configService) throws OXException {
+    public ConfigProviderServiceImpl(final ConfigurationService configService) {
         super();
         this.configService = configService;
         properties = new ConcurrentHashMap<String, ServerProperty>(2048, 0.9f, 1);
@@ -110,24 +117,25 @@ public class ConfigProviderServiceImpl implements ReinitializableConfigProviderS
         if (null == property) {
             return null;
         }
-
-        ServerProperty basicProperty = properties.get(property);
-        if (null == basicProperty) {
-            // Not yet available, create it...
-            ServerProperty newBasicProperty = new ServerProperty();
-            String value = configService.getProperty(property);
-            newBasicProperty.set(value);
-            if (null == value && property.startsWith("com.openexchange.capability.")) {
-                Exception e = new Exception("No value for property \"" + property+ "\"");
-                LOG.debug("Tracking undefined server property as 'capability' through \"get({}, {}, {})\": {}", 
-                    property, Integer.valueOf(contextId), Integer.valueOf(userId), newBasicProperty, e);
-            }
-            basicProperty = properties.putIfAbsent(property, newBasicProperty);
-            if (null == basicProperty) {
-                basicProperty = newBasicProperty;
-            }
+        ServerProperty serverProperty = properties.get(property);
+        if (null != serverProperty) {
+            return serverProperty;
         }
-        return basicProperty;
+        /*
+         * no server property available yet, create if defined
+         */
+        String value = configService.getProperty(property);
+        if (null == value) {
+            if (property.startsWith("com.openexchange.capability.")) {
+                Exception e = new Exception("No value for property \"" + property+ "\"");
+                LOG.debug("Requested undefined server property as 'capability' through \"get({}, {}, {})\"",
+                    property, Integer.valueOf(contextId), Integer.valueOf(userId), e);
+            }
+            return EMPTY_PROPERTY;
+        }
+        serverProperty = new ServerProperty(value, METADATA_PROTECTED);
+        ServerProperty existingProperty = properties.putIfAbsent(property, serverProperty);
+        return null != existingProperty ? existingProperty : serverProperty;
     }
 
     @Override
@@ -146,27 +154,21 @@ public class ConfigProviderServiceImpl implements ReinitializableConfigProviderS
         return retval;
     }
 
-    private void init(ConfigurationService configService) throws OXException {
+    private void init(ConfigurationService configService) {
         initSettings(configService);
         initStructuredObjects(configService);
         initMetadata(configService);
     }
 
-    private void initSettings(final ConfigurationService config) throws OXException {
+    private void initSettings(final ConfigurationService config) {
         Properties propertiesInFolder = config.getPropertiesInFolder(SETTINGS);
-        for (Object propKey : propertiesInFolder.keySet()) {
-            String propName = propKey.toString();
-            ServerProperty serverProperty = get(propName, -1, -1);
-            serverProperty.set(PREFRENCE_PATH, propName);
-            if (serverProperty.get(PROTECTED) == null) {
-                serverProperty.set(PROTECTED, TRUE);
-            }
-
+        for (Entry<Object, Object> entry : propertiesInFolder.entrySet()) {
+            String value = null != entry.getValue() ? String.valueOf(entry.getValue()) : null;
+            properties.put(String.valueOf(entry.getKey()), new ServerProperty(value, METADATA_PROTECTED));
         }
-
     }
 
-    private void initStructuredObjects(final ConfigurationService config) throws OXException {
+    private void initStructuredObjects(final ConfigurationService config) {
         Map<String, Object> yamlInFolder = config.getYamlInFolder(SETTINGS);
         for (Object yamlContent : yamlInFolder.values()) {
             if (yamlContent instanceof Map) {
@@ -180,32 +182,29 @@ public class ConfigProviderServiceImpl implements ReinitializableConfigProviderS
         }
     }
 
-    private void recursivelyInitStructuredObjects(String namespace, Object subkeys) throws OXException {
+    private void recursivelyInitStructuredObjects(String namespace, Object subkeys) {
         if (subkeys instanceof Map) {
             Map<String, Object> entries = (Map<String, Object>) subkeys;
             for (Map.Entry<String, Object> entry : entries.entrySet()) {
-                recursivelyInitStructuredObjects(namespace + "/" + entry.getKey(), entry.getValue());
+                recursivelyInitStructuredObjects(namespace + '/' + entry.getKey(), entry.getValue());
             }
         } else {
             // We found a leaf
-            final ServerProperty serverProperty = get(namespace, -1, -1);
-            serverProperty.set(PREFRENCE_PATH, namespace);
-            serverProperty.set(subkeys.toString());
-            if (serverProperty.get(PROTECTED) == null) {
-                serverProperty.set(PROTECTED, TRUE);
-            }
+            Map<String, String> metadata = new HashMap<String, String>(2);
+            metadata.put(PREFRENCE_PATH, namespace);
+            metadata.put(PROTECTED, TRUE);
+            properties.put(namespace, new ServerProperty(String.valueOf(subkeys), metadata));
         }
     }
 
-    private void initMetadata(final ConfigurationService config) throws OXException {
+    private void initMetadata(final ConfigurationService config) {
         org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ConfigProviderService.class);
         final Map<String, Object> yamlInFolder = config.getYamlInFolder(META);
         for (final Object o : yamlInFolder.values()) {
             if (false == checkMap(o, logger)) {
                 continue;
             }
-            @SuppressWarnings("unchecked")
-            Map<String, Object> metadataDef = (Map<String, Object>) o;
+            @SuppressWarnings("unchecked") Map<String, Object> metadataDef = (Map<String, Object>) o;
             for (final Map.Entry<String, Object> entry : metadataDef.entrySet()) {
                 final String propertyName = entry.getKey();
                 final Object value2 = entry.getValue();
@@ -213,26 +212,24 @@ public class ConfigProviderServiceImpl implements ReinitializableConfigProviderS
                     continue;
                 }
 
-                @SuppressWarnings("unchecked")
-                Map<String, Object> metadata = (Map<String, Object>) value2;
-                final ServerProperty basicProperty = get(propertyName, -1, -1);
-                for (final Map.Entry<String, Object> metadataProp : metadata.entrySet()) {
+                @SuppressWarnings("unchecked") Map<String, Object> metadata = (Map<String, Object>) value2;
+                Map<String, String> propertyMetadata = new HashMap<String, String>(metadata.size());
+                for (Map.Entry<String, Object> metadataProp : metadata.entrySet()) {
                     if (metadataProp.getValue() != null) {
-                        basicProperty.set(metadataProp.getKey(), metadataProp.getValue().toString());
+                        propertyMetadata.put(metadataProp.getKey(), String.valueOf(metadataProp.getValue()));
                     }
                 }
-
-                String value = basicProperty.get(VALUE);
+                String value = propertyMetadata.get(VALUE);
                 if (value == null) {
                     value = config.getProperty(propertyName);
                 }
-                basicProperty.set(value);
+                properties.put(propertyName, new ServerProperty(value, propertyMetadata));
             }
         }
     }
 
     private boolean checkMap(Object o, org.slf4j.Logger logger) {
-        if (! Map.class.isInstance(o)) {
+        if (!Map.class.isInstance(o)) {
             List<Object> args = new ArrayList<Object>();
             StringBuilder b = new StringBuilder("One of the .yml files in the meta configuration directory is improperly formatted{}");
             args.add(Strings.getLineSeparator());
