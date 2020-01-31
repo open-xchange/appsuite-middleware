@@ -163,8 +163,12 @@ public class ConfigProviderServiceImpl implements ReinitializableConfigProviderS
     private void initSettings(final ConfigurationService config) {
         Properties propertiesInFolder = config.getPropertiesInFolder(SETTINGS);
         for (Entry<Object, Object> entry : propertiesInFolder.entrySet()) {
+            String propName = String.valueOf(entry.getKey());
             String value = null != entry.getValue() ? String.valueOf(entry.getValue()) : null;
-            properties.put(String.valueOf(entry.getKey()), new ServerProperty(value, METADATA_PROTECTED));
+            Map<String, String> metadata = new HashMap<String, String>(2);
+            metadata.put(PREFRENCE_PATH, propName);
+            metadata.put(PROTECTED, TRUE);
+            properties.put(propName, new ServerProperty(value, metadata));
         }
     }
 
