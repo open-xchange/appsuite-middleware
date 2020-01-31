@@ -3,7 +3,7 @@
     operationId: clear
     tags:
       - sessionmanagement
-    summary: Removes all user's session expect given and blacklisted
+    summary: Removes all user's session except given and blacklisted
     parameters:
       - $ref: '#/components/parameters/gblQueryParamSession'
     responses:
