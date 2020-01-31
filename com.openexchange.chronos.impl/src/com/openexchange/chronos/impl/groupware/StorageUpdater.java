@@ -60,9 +60,11 @@ import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Organizer;
+import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.impl.Consistency;
+import com.openexchange.chronos.impl.session.CalendarUserSettings;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.service.CalendarEventNotificationService;
 import com.openexchange.chronos.service.CalendarHandler;
@@ -70,8 +72,10 @@ import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
 /**
@@ -85,6 +89,7 @@ class StorageUpdater {
     private static final EventField[] SEARCH_FIELDS = { EventField.ID, EventField.SERIES_ID, EventField.RECURRENCE_ID, EventField.FOLDER_ID, EventField.CREATED_BY, EventField.MODIFIED_BY,
         EventField.CALENDAR_USER, EventField.ORGANIZER, EventField.ATTENDEES };
 
+    private final ServiceLookup services;
     private final CalendarStorage storage;
     private final SimpleResultTracker tracker;
     private final int attendeeId;
@@ -102,8 +107,9 @@ class StorageUpdater {
      * @param attendeeId The identifier of the attendee
      * @param destinationUserId The identifier of the destination user
      */
-    public StorageUpdater(CalendarStorage storage, EntityResolver entityResolver, CalendarEventNotificationService notificationService, int attendeeId, int destinationUserId) throws OXException {
+    public StorageUpdater(ServiceLookup services, CalendarStorage storage, EntityResolver entityResolver, CalendarEventNotificationService notificationService, int attendeeId, int destinationUserId) throws OXException {
         super();
+        this.services = services;
         this.entityResolver = entityResolver;
         this.attendeeId = attendeeId;
         this.replacement = entityResolver.prepareUserAttendee(destinationUserId);
@@ -196,7 +202,7 @@ class StorageUpdater {
      * @param event The {@link Event} to update
      * @throws OXException Various
      */
-    void replaceAttendeeIn(Event event) throws OXException {
+    void replaceAttendeeIn(Event event, Context context) throws OXException {
         Event eventUpdate = new Event();
         boolean updated = false;
         if (CalendarUtils.matches(event.getCreatedBy(), attendeeId)) {
@@ -213,7 +219,7 @@ class StorageUpdater {
         }
         if (null != event.getOrganizer()) {
             if (CalendarUtils.matches(event.getOrganizer(), attendeeId)) {
-                eventUpdate.setOrganizer(entityResolver.applyEntityData(new Organizer(), replacement.getEntity()));
+                replaceOrganizer(event, eventUpdate, context.getContextId());
                 updated = true;
             } else if (CalendarUtils.matches(event.getOrganizer().getSentBy(), attendeeId)) {
                 Organizer organizer = new Organizer(event.getOrganizer());
@@ -238,9 +244,9 @@ class StorageUpdater {
      * @param events The {@link Event}s to update
      * @throws OXException Various
      */
-    void replaceAttendeeIn(List<Event> events) throws OXException {
+    void replaceAttendeeIn(List<Event> events, Context context) throws OXException {
         for (final Event event : events) {
-            replaceAttendeeIn(event);
+            replaceAttendeeIn(event, context);
         }
     }
 
@@ -251,7 +257,7 @@ class StorageUpdater {
      *
      * @param events The events to remove the user from
      */
-    public void removeUserReferences(List<Event> events) throws OXException {
+    public void removeUserReferences(List<Event> events, Context context) throws OXException {
         if (null == events || events.isEmpty()) {
             return;
         }
@@ -264,11 +270,11 @@ class StorageUpdater {
          * remove user references from each event
          */
         for (Event event : events) {
-            removeUserReferences(event);
+            removeUserReferences(event, context);
         }
     }
 
-    private void removeUserReferences(Event event) throws OXException {
+    private void removeUserReferences(Event event, Context context) throws OXException {
         Event eventUpdate = new Event();
         boolean updated = false;
         /*
@@ -287,7 +293,7 @@ class StorageUpdater {
             updated = true;
         }
         if (CalendarUtils.matches(event.getOrganizer(), attendeeId)) {
-            eventUpdate.setOrganizer(entityResolver.applyEntityData(new Organizer(), replacement.getEntity()));
+            replaceOrganizer(event, eventUpdate, context.getContextId());
             updated = true;
         }
         /*
@@ -311,6 +317,38 @@ class StorageUpdater {
             Event updatedEvent = EventMapper.getInstance().copy(event, null, (EventField[]) null);
             updatedEvent = EventMapper.getInstance().copy(eventUpdate, updatedEvent, (EventField[]) null);
             tracker.addUpdate(event, updatedEvent);
+        }
+    }
+
+    /**
+     * Replaces the organizer with the replacement. Ensures further the correct event folder after a
+     * switch and that the new organizer is added to the attendees
+     * <p>
+     * {@link CalendarParameters#PARAMETER_DEFAULT_ATTENDEE} is <b>NOT</b> validated.
+     * 
+     * @param event The original event
+     * @param eventUpdate The event delta to set the update in
+     * @param contextId The context ID
+     * @throws OXException Various
+     * @see CalendarParameters#PARAMETER_DEFAULT_ATTENDEE
+     */
+    private void replaceOrganizer(Event event, Event eventUpdate, int contextId) throws OXException {
+        eventUpdate.setOrganizer(entityResolver.applyEntityData(new Organizer(), replacement.getEntity()));
+        /*
+         * Ensure new organizer participates
+         */
+        Attendee attendee = CalendarUtils.find(event.getAttendees(), replacement.getEntity());
+        if (null == attendee) {
+            attendee = entityResolver.prepareUserAttendee(replacement.getEntity());
+            attendee = entityResolver.applyEntityData(attendee, replacement.getEntity());
+            attendee.setPartStat(ParticipationStatus.ACCEPTED);
+            if (null == event.getFolderId()) {
+                attendee.setFolderId(new CalendarUserSettings(contextId, replacement.getEntity(), services).getDefaultFolderId());
+            }
+            storage.getAttendeeStorage().insertAttendees(event.getId(), Collections.singletonList(attendee));
+            List<Attendee> updatedAttendees = new ArrayList<Attendee>(event.getAttendees());
+            updatedAttendees.add(attendee);
+            eventUpdate.setAttendees(updatedAttendees);
         }
     }
 

@@ -93,6 +93,7 @@ import com.openexchange.java.Autoboxing;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
@@ -114,6 +115,7 @@ public final class CalendarDeleteListener implements DeleteListener {
 
     private final CalendarUtilities calendarUtilities;
     private final CalendarEventNotificationService notificationService;
+	private final ServiceLookup services;
 
     /**
      * Initializes a new {@link CalendarDeleteListener}.
@@ -121,8 +123,9 @@ public final class CalendarDeleteListener implements DeleteListener {
      * @param calendarUtilities A reference to the calendar utilities
      * @param notificationService The {@link CalendarEventNotificationService}
      */
-    public CalendarDeleteListener(CalendarUtilities calendarUtilities, CalendarEventNotificationService notificationService) {
+    public CalendarDeleteListener(ServiceLookup services, CalendarUtilities calendarUtilities, CalendarEventNotificationService notificationService) {
         super();
+        this.services = services;
         this.calendarUtilities = calendarUtilities;
         this.notificationService = notificationService;
     }
@@ -165,7 +168,7 @@ public final class CalendarDeleteListener implements DeleteListener {
     private void purgeUserData(DBProvider dbProvider, Context context, int userId, Integer destinationUserId, Session adminSession) throws OXException {
         EntityResolver entityResolver = calendarUtilities.getEntityResolver(context.getContextId());
         CalendarStorage storage = Services.getService(CalendarStorageFactory.class).create(context, Utils.ACCOUNT_ID, entityResolver, dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
-        StorageUpdater updater = new StorageUpdater(storage, entityResolver, notificationService, userId, null != destinationUserId && 0 < i(destinationUserId) ? i(destinationUserId) : context.getMailadmin());
+        StorageUpdater updater = new StorageUpdater(services, storage, entityResolver, notificationService, userId, null != destinationUserId && 0 < i(destinationUserId) ? i(destinationUserId) : context.getMailadmin());
         /*
          * Get all events the user attends & distinguish between those that can be deleted completely, and those that need to be updated
          */
@@ -183,7 +186,7 @@ public final class CalendarDeleteListener implements DeleteListener {
         /*
          * Remove user references in events where the user is attendee, delete where he is the last internal user
          */
-        updater.removeUserReferences(eventsToUpdate);
+        updater.removeUserReferences(eventsToUpdate, context);
         updater.deleteEvent(eventsToDelete, ServerSessionAdapter.valueOf(userId, context.getContextId()));
         /*
          * Update event fields where the user might still be referenced
@@ -193,10 +196,10 @@ public final class CalendarDeleteListener implements DeleteListener {
             .addSearchTerm(CalendarUtils.getSearchTerm(EventField.MODIFIED_BY, SingleOperation.EQUALS, Integer.valueOf(userId)))
             .addSearchTerm(CalendarUtils.getSearchTerm(EventField.ORGANIZER, SingleOperation.EQUALS, '*' + ResourceId.forUser(context.getContextId(), userId) + '*'))
         ;
-        updater.replaceAttendeeIn(updater.searchEvents(searchTerm));
+        updater.replaceAttendeeIn(updater.searchEvents(searchTerm), context);
         try {
             // Legacy storage doesen't know a calendar user, so make an independent call
-            updater.replaceAttendeeIn(updater.searchEvents(CalendarUtils.getSearchTerm(EventField.CALENDAR_USER, SingleOperation.EQUALS, Integer.valueOf(userId))));
+            updater.replaceAttendeeIn(updater.searchEvents(CalendarUtils.getSearchTerm(EventField.CALENDAR_USER, SingleOperation.EQUALS, Integer.valueOf(userId))), context);
         } catch (IllegalArgumentException e) {
             if (false == e.getMessage().equals("No mapping available for: CALENDAR_USER")) {
                 throw e;
@@ -286,7 +289,7 @@ public final class CalendarDeleteListener implements DeleteListener {
     private void deleteAttendee(DBProvider dbProvider, Context context, int attendeeId, Session adminSession) throws OXException {
         EntityResolver entityResolver = calendarUtilities.getEntityResolver(context.getContextId());
         CalendarStorage storage = Services.getService(CalendarStorageFactory.class).create(context, Utils.ACCOUNT_ID, entityResolver, dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
-        StorageUpdater updater = new StorageUpdater(storage, entityResolver, notificationService, attendeeId, context.getMailadmin());
+        StorageUpdater updater = new StorageUpdater(services, storage, entityResolver, notificationService, attendeeId, context.getMailadmin());
         updater.removeAttendeeFrom(updater.searchEvents());
         updater.notifyCalendarHandlers(adminSession, new DefaultCalendarParameters().set(PARAMETER_SCHEDULING, SchedulingControl.NONE));
     }
