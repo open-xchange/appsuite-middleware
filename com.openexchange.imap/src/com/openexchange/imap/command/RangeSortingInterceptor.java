@@ -67,6 +67,8 @@ import com.openexchange.mail.utils.MailMessageComparator;
  */
 public class RangeSortingInterceptor implements MailMessageFetchInterceptor {
 
+    private static final boolean SORT_ON_INSERT = false;
+
     private final int total;
     private final List<MailMessage> mails;
     private final MailMessageComparator comparator;
@@ -83,12 +85,40 @@ public class RangeSortingInterceptor implements MailMessageFetchInterceptor {
         mails = new ArrayList<>(total + 1);
     }
 
+    /**
+     * Gets the comparator.
+     *
+     * @return The comparator
+     */
+    public MailMessageComparator getComparator() {
+        return comparator;
+    }
+
+    /**
+     * Gets the index range.
+     *
+     * @return The index range
+     */
+    public IndexRange getIndexRange() {
+        return indexRange;
+    }
+
     @Override
     public void intercept(MailMessage mail) throws MessagingException {
-        if (mails.add(mail)) {
+        if (mail != null && mails.add(mail)) {
+            // Appended mail to the end of the list
             int size = mails.size();
             if (size > 1) {
-                Collections.sort(mails, comparator);
+                if (SORT_ON_INSERT) {
+                    int i = size - 1;
+                    while (i > 0 && comparator.compare(mails.get(i - 1), mails.get(i)) > 0) {
+                        int index1 = i - 1;
+                        mails.set(index1, mails.set(i, mails.get(index1)));
+                        i--;
+                    }
+                } else {
+                    Collections.sort(mails, comparator);
+                }
             }
             if (size > total) {
                 mails.remove(total);
@@ -104,13 +134,13 @@ public class RangeSortingInterceptor implements MailMessageFetchInterceptor {
         }
 
         int fromIndex = indexRange.start;
-        int toIndex = indexRange.end;
         if ((fromIndex) > size) {
             // Return empty array if start is out of range
             return new MailMessage[0];
         }
 
         // Reset end index if out of range
+        int toIndex = indexRange.end;
         if (toIndex > size) {
             toIndex = size;
         }
