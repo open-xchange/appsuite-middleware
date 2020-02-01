@@ -182,9 +182,10 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
      * @param serverInfo The IMAP server information deduced from configuration
      * @param examineHasAttachmentUserFlags Whether has-attachment user flags should be considered
      * @param previewSupported Whether target IMAP server supports <code>"PREVIEW=FUZZY"</code> capability
+     * @param optionalInterceptor The optional interceptor
      * @throws MessagingException If initialization fails
      */
-    public MailMessageFetchIMAPCommand(IMAPFolder imapFolder, boolean isRev1, int[] seqNums, FetchProfile fp, IMAPServerInfo serverInfo, boolean examineHasAttachmentUserFlags, boolean previewSupported) throws MessagingException {
+    public MailMessageFetchIMAPCommand(IMAPFolder imapFolder, boolean isRev1, int[] seqNums, FetchProfile fp, IMAPServerInfo serverInfo, boolean examineHasAttachmentUserFlags, boolean previewSupported, Optional<? extends MailMessageFetchInterceptor> optionalInterceptor) throws MessagingException {
         super(imapFolder);
         determineAttachmentByHeader = false;
         this.examineHasAttachmentUserFlags = examineHasAttachmentUserFlags;
@@ -197,18 +198,27 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         command = getFetchCommand(isRev1, fp, false, serverInfo, previewSupported);
         uid = false;
         length = seqNums.length;
-        seqNum2index = new TIntIntHashMap(length, Constants.DEFAULT_LOAD_FACTOR, 0, -1);
         uid2index = null;
-        for (int i = 0; i < length; i++) {
-            seqNum2index.put(seqNums[i], i);
+        if (optionalInterceptor.isPresent()) {
+            seqNum2index = null;
+        } else {
+            seqNum2index = new TIntIntHashMap(length, Constants.DEFAULT_LOAD_FACTOR, 0, -1);
+            for (int i = 0; i < length; i++) {
+                seqNum2index.put(seqNums[i], i);
+            }
         }
         args = length == messageCount ? (1 == length ? ARGS_FIRST : ARGS_ALL) : IMAPNumArgSplitter.splitSeqNumArg(seqNums, false, LENGTH + command.length());
         if (0 == length) {
             returnDefaultValue = true;
         }
         fullname = imapFolder.getFullName();
-        retval = new MailMessage[length];
-        interceptor = null;
+        if (optionalInterceptor.isPresent()) {
+            retval = null;
+            interceptor = optionalInterceptor.get();
+        } else {
+            retval = new MailMessage[length];
+            interceptor = null;
+        }
     }
 
     /**
@@ -223,7 +233,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
      * @param optionalInterceptor The optional interceptor
      * @throws MessagingException If initialization fails
      */
-    public MailMessageFetchIMAPCommand(IMAPFolder imapFolder, boolean isRev1, FetchProfile fp, IMAPServerInfo serverInfo, boolean examineHasAttachmentUserFlags, boolean previewSupported, Optional<MailMessageFetchInterceptor> optionalInterceptor) throws MessagingException {
+    public MailMessageFetchIMAPCommand(IMAPFolder imapFolder, boolean isRev1, FetchProfile fp, IMAPServerInfo serverInfo, boolean examineHasAttachmentUserFlags, boolean previewSupported, Optional<? extends MailMessageFetchInterceptor> optionalInterceptor) throws MessagingException {
         super(imapFolder);
         determineAttachmentByHeader = false;
         this.examineHasAttachmentUserFlags = examineHasAttachmentUserFlags;
@@ -262,9 +272,10 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
      * @param serverInfo The IMAP server information deduced from configuration
      * @param examineHasAttachmentUserFlags Whether has-attachment user flags should be considered
      * @param previewSupported Whether target IMAP server supports <code>"PREVIEW=FUZZY"</code> capability
+     * @param optionalInterceptor The optional interceptor
      * @throws MessagingException If initialization fails
      */
-    public MailMessageFetchIMAPCommand(IMAPFolder imapFolder, boolean isRev1, long[] uids, FetchProfile fp, IMAPServerInfo serverInfo, boolean examineHasAttachmentUserFlags, boolean previewSupported) throws MessagingException {
+    public MailMessageFetchIMAPCommand(IMAPFolder imapFolder, boolean isRev1, long[] uids, FetchProfile fp, IMAPServerInfo serverInfo, boolean examineHasAttachmentUserFlags, boolean previewSupported, Optional<? extends MailMessageFetchInterceptor> optionalInterceptor) throws MessagingException {
         super(imapFolder);
         determineAttachmentByHeader = false;
         this.examineHasAttachmentUserFlags = examineHasAttachmentUserFlags;
@@ -275,10 +286,14 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         accountId = null == serverInfo ? 0 : serverInfo.getAccountId();
         lastHandlers = new HashSet<FetchItemHandler>();
         length = uids.length;
-        uid2index = new TLongIntHashMap(length, Constants.DEFAULT_LOAD_FACTOR, 0, -1);
         seqNum2index = null;
-        for (int i = 0; i < length; i++) {
-            uid2index.put(uids[i], i);
+        if (optionalInterceptor.isPresent()) {
+            uid2index = null;
+        } else {
+            uid2index = new TLongIntHashMap(length, Constants.DEFAULT_LOAD_FACTOR, 0, -1);
+            for (int i = 0; i < length; i++) {
+                uid2index.put(uids[i], i);
+            }
         }
         if (length == messageCount) {
             fp.add(UIDFolder.FetchProfileItem.UID);
@@ -294,8 +309,13 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
             returnDefaultValue = true;
         }
         fullname = imapFolder.getFullName();
-        retval = new MailMessage[length];
-        interceptor = null;
+        if (optionalInterceptor.isPresent()) {
+            retval = null;
+            interceptor = optionalInterceptor.get();
+        } else {
+            retval = new MailMessage[length];
+            interceptor = null;
+        }
     }
 
     /**
