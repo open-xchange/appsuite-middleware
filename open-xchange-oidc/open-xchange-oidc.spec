@@ -18,7 +18,7 @@ BuildRequires: java-devel >= 1.7.0
 %endif
 %endif
 Version:       @OXVERSION@
-%define        ox_release 25
+%define        ox_release 26
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -59,6 +59,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %config(noreplace) /opt/open-xchange/etc/hazelcast/oidcLogoutInfos.properties
 
 %changelog
+* Mon Feb 03 2020 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2020-02-10 (5578)
 * Mon Dec 09 2019 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2019-12-09 (5507)
 * Mon Nov 18 2019 Marcus Klein <marcus.klein@open-xchange.com>
