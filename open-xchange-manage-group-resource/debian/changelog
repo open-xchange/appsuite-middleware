@@ -1,3 +1,9 @@
+open-xchange-manage-group-resource (7.10.1-27) stable; urgency=medium
+
+  * Build for patch 2020-02-10 (5570)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 03 Feb 2020 18:00:59 +0100
+
 open-xchange-manage-group-resource (7.10.1-26) stable; urgency=medium
 
   * Build for patch 2020-01-20 (5545)
