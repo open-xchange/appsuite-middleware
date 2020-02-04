@@ -510,6 +510,12 @@ public class CardDAVCollection extends FolderCollection<Contact> {
 	}
 
     @Override
+    public String getSyncToken() throws WebdavProtocolException {
+        Date lastModified = getLastModified();
+        return null == lastModified ? "0" : String.valueOf(lastModified.getTime());
+    }
+
+    @Override
     public SyncStatus<WebdavResource> getSyncStatus(String token) throws WebdavProtocolException {
         if (null != token && 0 < token.length()) {
             /*
