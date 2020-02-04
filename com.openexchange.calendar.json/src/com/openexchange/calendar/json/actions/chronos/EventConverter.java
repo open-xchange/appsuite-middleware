@@ -712,21 +712,27 @@ public abstract class EventConverter {
                 appointment.setRecurrencePosition(0);
                 appointment.setRecurrenceDatePosition(null);
             } else {
-                if (PositionAwareRecurrenceId.class.isInstance(event.getRecurrenceId())) {
-                    appointment.setRecurrenceDatePosition(((PositionAwareRecurrenceId) event.getRecurrenceId()).getRecurrenceDatePosition());
-                    appointment.setRecurrencePosition(((PositionAwareRecurrenceId) event.getRecurrenceId()).getRecurrencePosition());
-                } else {
-                    if (null == recurrenceData) {
-                        if (DataAwareRecurrenceId.class.isInstance(event.getRecurrenceId())) {
-                            recurrenceData = (RecurrenceData) event.getRecurrenceId();
-                        } else {
-                            recurrenceData = loadRecurrenceData(event);
+                try {
+                    if (PositionAwareRecurrenceId.class.isInstance(event.getRecurrenceId())) {
+                        appointment.setRecurrenceDatePosition(((PositionAwareRecurrenceId) event.getRecurrenceId()).getRecurrenceDatePosition());
+                        appointment.setRecurrencePosition(((PositionAwareRecurrenceId) event.getRecurrenceId()).getRecurrencePosition());
+                    } else {
+                        if (null == recurrenceData) {
+                            if (DataAwareRecurrenceId.class.isInstance(event.getRecurrenceId())) {
+                                recurrenceData = (RecurrenceData) event.getRecurrenceId();
+                            } else {
+                                recurrenceData = loadRecurrenceData(event);
+                            }
+                        }
+                        appointment.setRecurrenceDatePosition(Event2Appointment.getRecurrenceDatePosition(event.getRecurrenceId()));
+                        if (null != event.getId()) {
+                            appointment.setRecurrencePosition(Event2Appointment.getRecurrencePosition(getRecurrenceService(), recurrenceData, event.getRecurrenceId()));
                         }
                     }
-                    appointment.setRecurrenceDatePosition(Event2Appointment.getRecurrenceDatePosition(event.getRecurrenceId()));
-                    if (null != event.getId()) {
-                        appointment.setRecurrencePosition(Event2Appointment.getRecurrencePosition(getRecurrenceService(), recurrenceData, event.getRecurrenceId()));
-                    }
+                } catch (OXException e) {
+                    getLogger(EventConverter.class).warn("Error converting recurrence id to recurrence (date) position for event {}.", event, e);
+                    appointment.setRecurrencePosition(0);
+                    appointment.setRecurrenceDatePosition(null);
                 }
             }
         }
