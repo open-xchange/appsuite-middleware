@@ -169,6 +169,10 @@ public abstract class CalDAVTest extends WebDAVTest {
         getManager().delete(appointment);
     }
 
+    protected void delete(Task task) {
+        ttm.deleteTaskOnServer(task);
+    }
+
     @Override
     protected String fetchSyncToken(String folderID) throws Exception {
         return super.fetchSyncToken(Config.getPathPrefix() + "/caldav/" + encodeFolderID(folderID));
@@ -510,6 +514,15 @@ public abstract class CalDAVTest extends WebDAVTest {
         return appointment;
     }
 
+    protected static Task generateTask(Date start, Date end, String uid, String summary) {
+        Task task = new Task();
+        task.setStartDate(start);
+        task.setEndDate(end);
+        task.setUid(uid);
+        task.setTitle(summary);
+        return task;
+    }
+
     protected static String generateICal(Date start, Date end, String uid, String summary, String location) {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("BEGIN:VCALENDAR").append("\r\n").append("VERSION:2.0").append("\r\n").append("PRODID:-//Apple Inc.//iCal 5.0.2//EN").append("\r\n").append("CALSCALE:GREGORIAN").append("\r\n").append("BEGIN:VTIMEZONE").append("\r\n").append("TZID:Europe/Amsterdam").append("\r\n").append("BEGIN:DAYLIGHT").append("\r\n").append("TZOFFSETFROM:+0100").append("\r\n").append("RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU").append("\r\n").append("DTSTART:19810329T020000").append("\r\n").append("TZNAME:CEST").append("\r\n").append("TZOFFSETTO:+0200").append("\r\n").append("END:DAYLIGHT").append("\r\n").append("BEGIN:STANDARD").append("\r\n").append("TZOFFSETFROM:+0200").append("\r\n").append("RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU").append("\r\n").append("DTSTART:19961027T030000").append("\r\n").append("TZNAME:CET").append("\r\n").append("TZOFFSETTO:+0100").append("\r\n").append("END:STANDARD").append("\r\n").append("END:VTIMEZONE").append("\r\n").append("BEGIN:VEVENT").append("\r\n").append("CREATED:").append(formatAsUTC(new Date())).append("\r\n");
@@ -608,9 +621,16 @@ public abstract class CalDAVTest extends WebDAVTest {
     public static ICalResource assertContains(String uid, Collection<ICalResource> iCalResources) {
         ICalResource match = null;
         for (ICalResource iCalResource : iCalResources) {
-            if (uid.equals(iCalResource.getVEvent().getUID())) {
-                assertNull("duplicate match for UID '" + uid + "'", match);
-                match = iCalResource;
+            if (null != iCalResource.getVEvent()) {
+                if (uid.equals(iCalResource.getVEvent().getUID())) {
+                    assertNull("duplicate match for UID '" + uid + "'", match);
+                    match = iCalResource;
+                }
+            } else if (null != iCalResource.getVTodo()) {
+                if (uid.equals(iCalResource.getVTodo().getUID())) {
+                    assertNull("duplicate match for UID '" + uid + "'", match);
+                    match = iCalResource;
+                }
             }
         }
         assertNotNull("no iCal resource with UID '" + uid + "' found", match);
@@ -625,6 +645,15 @@ public abstract class CalDAVTest extends WebDAVTest {
         appointment.setParentFolderID(parse(folderID));
         appointment.setIgnoreConflicts(true);
         return getManager().insert(appointment);
+    }
+
+    protected Task create(String folderID, Task task) {
+        task.setParentFolderID(parse(folderID));
+        return ttm.insertTaskOnServer(task);
+    }
+
+    protected Task update(Task task) {
+        return ttm.updateTaskOnServer(task);
     }
 
     protected Appointment update(Appointment appointment) {
