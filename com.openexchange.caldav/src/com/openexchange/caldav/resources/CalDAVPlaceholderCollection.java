@@ -263,6 +263,12 @@ public class CalDAVPlaceholderCollection<T> extends CalDAVFolderCollection<T> {
         return null;
     }
 
+    @Override
+    public String getSyncToken() throws WebdavProtocolException {
+        Date lastModified = getLastModified();
+        return null == lastModified ? "0" : String.valueOf(lastModified.getTime());
+    }
+
     private Permission getDefaultAdminPermissions(int entity) {
         BasicPermission permission = new BasicPermission();
         permission.setMaxPermissions();

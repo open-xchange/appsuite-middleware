@@ -130,6 +130,11 @@ public class UserPrincipalCollection extends DAVCollection {
     }
 
     @Override
+    public String getSyncToken() throws WebdavProtocolException {
+        return "0";
+    }
+
+    @Override
     public String getDisplayName() throws WebdavProtocolException {
         return "Users";
     }
