@@ -238,6 +238,12 @@ public class PlaceholderCollection<T> extends FolderCollection<T> {
     }
 
     @Override
+    public String getSyncToken() throws WebdavProtocolException {
+        Date lastModified = getLastModified();
+        return null == lastModified ? "0" : String.valueOf(lastModified.getTime());
+    }
+
+    @Override
     protected Collection<T> getObjects() {
         return Collections.emptyList();
     }

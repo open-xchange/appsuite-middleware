@@ -110,6 +110,12 @@ public abstract class DAVRootCollection extends DAVCollection {
     }
 
     @Override
+    public String getSyncToken() throws WebdavProtocolException {
+        Date lastModified = getLastModified();
+        return null == lastModified ? "0" : String.valueOf(lastModified.getTime());
+    }
+
+    @Override
     public String getDisplayName() throws WebdavProtocolException {
         return displayName;
     }
