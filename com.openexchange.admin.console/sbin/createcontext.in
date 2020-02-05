@@ -161,6 +161,9 @@ case "${BNAME}" in
 	"upgradeschemata")
     ACTION="util.database.UpgradeSchemata"
     ;;
+	"countdatabaseschema")
+    ACTION="util.database.CountDatabaseSchema"
+    ;;
     "unblockdatabase")
     ACTION="util.database.UnblockDatabase"
     ;;
