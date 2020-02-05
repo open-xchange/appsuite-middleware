@@ -86,6 +86,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Filter;
 import com.openexchange.config.cascade.ConfigProviderService;
 import com.openexchange.context.ContextService;
+import com.openexchange.exception.ExceptionUtils;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.notify.hostname.HostnameService;
@@ -1058,7 +1059,11 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
             try {
                 transport.close();
             } catch (MessagingException e) {
-                LOG.error("Closing SMTP transport failed.", e);
+                if (ExceptionUtils.isEitherOf(e, java.net.SocketException.class)) {
+                    // Connection already closed by remote host
+                } else {
+                    LOG.error("Closing SMTP transport failed.", e);
+                }
             }
         }
     }
