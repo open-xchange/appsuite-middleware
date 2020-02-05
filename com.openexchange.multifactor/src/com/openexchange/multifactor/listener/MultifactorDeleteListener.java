@@ -82,7 +82,7 @@ public class MultifactorDeleteListener implements DeleteListener {
      * @throws OXException
      */
     private void deleteUser(int contextId, int userId) throws OXException {
-        final MultifactorRequest multifactorRequest = new MultifactorRequest(contextId, userId, null, null);
+        final MultifactorRequest multifactorRequest = new MultifactorRequest(contextId, userId, null, null, null);
         final Collection<MultifactorProvider> providers = registry.getProviders(multifactorRequest);
         for (final MultifactorProvider provider : providers) {
             provider.deleteRegistrations(contextId, userId);
@@ -96,7 +96,7 @@ public class MultifactorDeleteListener implements DeleteListener {
      * @throws OXException
      */
     private void deleteContext(int contextId) throws OXException {
-        final MultifactorRequest multifactorRequest = new MultifactorRequest(contextId, 0, null, null);
+        final MultifactorRequest multifactorRequest = new MultifactorRequest(contextId, 0, null, null, null);
         final Collection<MultifactorProvider> providers = registry.getProviders(multifactorRequest);
         for (final MultifactorProvider provider : providers) {
             provider.deleteRegistrations(contextId);

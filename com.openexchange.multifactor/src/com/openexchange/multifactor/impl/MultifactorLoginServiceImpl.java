@@ -152,7 +152,7 @@ public class MultifactorLoginServiceImpl implements MultifactorLoginService {
 
     @Override
     public boolean checkMultiFactorAuthentication(int userId, int contextId, Locale locale, LoginRequest request) throws OXException {
-        final MultifactorRequest multifactorRequest = new MultifactorRequest(contextId, userId, request.getServerName(), locale);
+        final MultifactorRequest multifactorRequest = new MultifactorRequest(contextId, userId, request.getLogin(), request.getServerName(), locale);
         final Collection<MultifactorProvider> multifactorProviders = registry.getProviders(multifactorRequest);
         if (multifactorProviders != null && !multifactorProviders.isEmpty()) {
             DefaultMultifactorDevice device = new DefaultMultifactorDevice();
@@ -171,7 +171,7 @@ public class MultifactorLoginServiceImpl implements MultifactorLoginService {
 
     @Override
     public boolean requiresMultifactor(int userId, int contextId) throws OXException {
-        final MultifactorRequest request = new MultifactorRequest(contextId, userId, null, null);
+        final MultifactorRequest request = new MultifactorRequest(contextId, userId, null, null, null);
         final Collection<MultifactorProvider> multifactorProviders = registry.getProviders(request);
         for (MultifactorProvider provider : multifactorProviders) {
             if (!provider.getDevices(request).isEmpty()) {

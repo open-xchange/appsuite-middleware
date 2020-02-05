@@ -63,6 +63,7 @@ public class MultifactorRequest {
 
     private final int userId;
     private final int contextId;
+    private String login;
     private final String host;
     private Locale locale;
 
@@ -74,9 +75,10 @@ public class MultifactorRequest {
      * @param host The host related to this session
      * @param locale The locale related to this session, or null if the locale is unknown
      */
-    public MultifactorRequest(int contextId, int userId, String host, Locale locale) {
+    public MultifactorRequest(int contextId, int userId, String login, String host, Locale locale) {
         this.contextId = contextId;
         this.userId = userId;
+        this.login = login;
         this.host = host;
         this.locale = locale;
     }
@@ -90,7 +92,7 @@ public class MultifactorRequest {
      * @param providerParameters Provider specific parameters, or null if nor available/required
      */
     public MultifactorRequest(Session session, Locale locale) {
-        this(session.getContextId(), session.getUserId(), (String) session.getParameter(Session.PARAM_HOST_NAME), locale);
+        this(session.getContextId(), session.getUserId(), session.getLogin(), (String) session.getParameter(Session.PARAM_HOST_NAME), locale);
     }
 
     /**
@@ -109,6 +111,15 @@ public class MultifactorRequest {
      */
     public int getContextId() {
         return contextId;
+    }
+
+    /**
+     * Gets the login
+     *
+     * @return The login
+     */
+    public String getLogin() {
+        return login;
     }
 
     @Override
