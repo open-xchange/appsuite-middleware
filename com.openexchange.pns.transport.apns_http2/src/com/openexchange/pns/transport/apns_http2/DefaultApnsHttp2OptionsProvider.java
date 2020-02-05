@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.pns.transport.apns_http2.internal;
+package com.openexchange.pns.transport.apns_http2;
 
 import java.util.ArrayList;
 import java.util.Collection;
