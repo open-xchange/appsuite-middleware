@@ -220,4 +220,10 @@ public class MimeMailExceptionMessage implements LocalizableStrings {
     // Access to mail server is not permitted due to a lack of privacy. E.g. client is supposed to switch to a connection with Transport Layer Security (TLS).
     public static final String PRIVACY_REQUIRED_MSG_DISPLAY = "Access to mail server is not permitted due to a lack of privacy.";
 
+    // Message was blocked by outgoing SMTP server; e.g. due to triggering a filter such as a URL in the message being found in a domain black list.
+    public static final String MESSAGE_REJECTED_MSG_DISPLAY = "Message could not be sent because it has been rejected.";
+
+    // Message was blocked by outgoing SMTP server; e.g. due to triggering a filter such as a URL in the message being found in a domain black list.
+    public static final String MESSAGE_REJECTED_EXT_MSG_DISPLAY = "Message could not be sent because it has been rejected (%1$s).";
+
 }

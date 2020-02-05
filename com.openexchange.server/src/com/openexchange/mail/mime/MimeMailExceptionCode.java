@@ -362,6 +362,14 @@ public enum MimeMailExceptionCode implements DisplayableOXExceptionCode {
      * The client is supposed to switch to a connection with Transport Layer Security (TLS).
      */
     PRIVACY_REQUIRED("Access to mail server %1$s is not permitted for login %2$s due to a lack of privacy.", CATEGORY_PERMISSION_DENIED, 1040, MimeMailExceptionMessage.PRIVACY_REQUIRED_MSG_DISPLAY),
+    /**
+     * Message could not be sent because it has been rejected
+     */
+    MESSAGE_REJECTED("Message could not be sent because it has been rejected", CATEGORY_USER_INPUT, 1012, MimeMailExceptionMessage.MESSAGE_REJECTED_MSG_DISPLAY),
+    /**
+     * Message could not be sent because it has been rejected (%1$s) (<i>arbitrary server information</i>)
+     */
+    MESSAGE_REJECTED_EXT("Message could not be sent because it has been rejected (%1$s)", CATEGORY_USER_INPUT, 1012, MimeMailExceptionMessage.MESSAGE_REJECTED_EXT_MSG_DISPLAY),
 
     ;
 
