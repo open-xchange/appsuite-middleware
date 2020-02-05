@@ -96,8 +96,7 @@ public class TotpRegister {
             StringBuilder sb = new StringBuilder();
             sb.append("otpauth://totp/");
             sb.append(host);
-            sb.append(":");
-            sb.append(URLEncoder.encode(name, "UTF-8").replaceAll("\\+", "%20"));
+            sb.append(URLEncoder.encode(":" + name, "UTF-8").replaceAll("\\+", "%20"));
             sb.append("?secret=");
             sb.append(secret);
             sb.append("&issuer=");
@@ -119,7 +118,8 @@ public class TotpRegister {
      */
     public TotpChallenge createChallenge(MultifactorRequest request, MultifactorDevice device, int maxQrSize) throws OXException {
         final String newSharedSecret = getNewSharedSecret();
-        final String url = TotpRegister.generateUrl(newSharedSecret, request.getHost(), device.getName());
+        String name = device.getName() + "/" + request.getLogin();
+        final String url = TotpRegister.generateUrl(newSharedSecret, request.getHost(), name);
         if (url.length() > maxQrSize) {
             throw MultifactorExceptionCodes.INVALID_ARGUMENT_LENGTH.create(URL, I(url.length()), I(maxQrSize));
         }
