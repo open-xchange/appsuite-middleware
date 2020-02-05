@@ -53,3 +53,4 @@ Import-Package: com.fasterxml.jackson.core,
  org.osgi.util.tracker,
  org.slf4j
 Bundle-Activator: com.openexchange.pns.transport.apns_http2.osgi.ApnsHttp2PushNotificationTransportActivator
+Export-Package: com.openexchange.pns.transport.apns_http2

@@ -77,9 +77,6 @@ com.openexchange.pns.transport.apn.ios.enabled.open-xchange-appsuite.ox:calendar
 ```
 That allows the client "open-xchange-appsuite" (App Suite UI) to receive "new mail" notifications
 via APNS, but not for "new appointment".
-* [com.openexchange.pns.transport.apn.ios.feedbackQueryInterval](/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.pns.transport.apn.ios.feedbackQueryInterval)  
- Specifies the frequency in milliseconds when to query the Apple feedback service to check for expired and/or invalid tokens.  
- Default is 3600000 (1 hour).
 
 Furthermore the actual APNS options need to be configured on a per client basis. APNS options are specified in the ``/opt/open-xchange/etc/pns-apns-options.yml`` file; e.g.
 
@@ -91,6 +88,7 @@ myiosclient:
     keystore: /opt/open-xchange/etc/mykey-apns.p12
     password: A3JWKAKR8XB
     production: true
+    topic: myBundleId
 ```
 
 In this example, ``myiosclient`` is the identifier of the client, to which the push notifications are supposed to be routed. Below a certain client identifier, the options specify:
@@ -103,6 +101,8 @@ In this example, ``myiosclient`` is the identifier of the client, to which the p
   String. Specifies the password to use when creating the referenced keystore containing the certificate of the iOS application.
 * `production`  
   Boolean. Indicates which APNS service is used when sending push notifications to iOS devices. A value of "true" will use the production service, a value of "false" references to the sandbox service.  Default is "true".
+* `topic`  
+  String. Specifies the topic to use for this client's push notifications. Typically the topic is the app's bundleId.
 
 ### GCM transport
 
