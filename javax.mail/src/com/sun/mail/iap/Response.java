@@ -346,11 +346,15 @@ public class Response {
 	return readStringList(false);
     }
 
-    public String[] readAtomStringList() {
-	return readStringList(true);
+    public String[] readStringList(boolean acceptComma) {
+    return readStringList(false, acceptComma);
     }
 
-    private String[] readStringList(boolean atom) {
+    public String[] readAtomStringList() {
+	return readStringList(true, false);
+    }
+
+    private String[] readStringList(boolean atom, boolean acceptComma) {
 	skipSpaces();
 
 	if (buffer[index] != '(') { // not what we expected
@@ -362,6 +366,10 @@ public class Response {
 	// well as spaces after the left paren or before the right paren
 	List<String> result = new LinkedList<String>();
 	while (!isNextNonSpace(')')) {
+	    // to handle buggy IMAP servers returning a comma-separated list; e.g. ("name", "BuggyImap", "version", "1.0", "os", "Linux")
+	    if (acceptComma)
+	    isNextNonSpace(',');
+	    // Read next atom/string
         String s = atom ? readAtomString() : readString();
         if (s == null)  // not the expected string or atom
         break;
