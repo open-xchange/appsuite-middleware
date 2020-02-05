@@ -373,7 +373,9 @@ There are some precautions required, though.
 
 It is a feature of the OX App Suite middleware to automatically start update tasks on a database schema when a user tries to login whose context lives on that schema. For installations beyond a certain size, if you just update the OX App Suite software without special handling of the update tasks, user logins will trigger an uncontrolled storm of update tasks on the databases, potentially leading to resource contention, unnecessary long update tasks runtimes, excessive load on the database server, maybe even service outages.
 
-So one key element of every update strategy is to avoid user logins on nodes which have already been updated to the new software version, while the database schemas are still on the old version. There are two fundamentally different approaches to this goal: use either a full downtime, or use a rolling update strategy.
+The same applies if property `com.openexchange.push.allowPermanentPush` is set to `true`, since to spawn a permanent listener for a registered client requires to load user/context data, which also triggers pending update tasks on context-associated database schema.
+
+So one key element of every update strategy is to avoid user logins on nodes which have already been updated to the new software version and ensuring property `com.openexchange.push.allowPermanentPush` is set to `false`, while the database schemas are still on the old version. There are two fundamentally different approaches to this goal: use either a full downtime, or use a rolling update strategy.
 
 We describe the update strategy in more detail in the next section. Note that these are still high-level outlines of the actual procedure, which requires additional details with regards to Hazelcast, given further down below.
 
@@ -394,6 +396,7 @@ It is possible to execute the update tasks decoupled from the real update of the
 
 * If the load situation allows for it, take one node out of the loadbalancer (we call it the upgrade node). Otherwise, add a dedicated upgrade node to your cluster, identically configured to the other middleware nodes.
 * Make sure there are no user sessions left on the upgrade node, and that no new sessions will be routed to that node
+* Make sure property `com.openexchange.push.allowPermanentPush` is set to `false` on that node
 * update the software on the upgrade node
 * execute all update tasks from the update node.
 
@@ -452,6 +455,7 @@ The following steps all refer to one special middleware node, the so-called upgr
 
 * Take one middleware node (the upgrade node) out of the HTTP traffic by adjusting the apache mod\_proxy tables. We propose a combination of the balancer_manager to do this during runtime without restart, but also update the config files to prevent service restarts of apache to accidentally route sessions to the upgrade node.
 * Make sure there are no user sessions left on the upgrade node, and that no new sessions will be routed to that node
+* Make sure property `com.openexchange.push.allowPermanentPush` is set to `false` on that node
 * Update packages on the upgrade node and restart the middleware service there. See [UpdatingOXPackages](https://www.oxpedia.org/wiki/index.php?title=AppSuite:UpdatingOXPackages) for details on how to do that.
 * Execute update tasks from that node. See [UpdateTasks](https://www.oxpedia.org/wiki/index.php?title=UpdateTasks) for an explanation how to do that.
  * Note that executing update tasks on database schemas will result in users from the given database schema to be logged out and locked out during the update tasks.
@@ -483,6 +487,7 @@ So the pre-update steps look like:
 
 * Take one middleware node (the upgrade node) out of the HTTP traffic by adjusting the apache mod_proxy tables. We propose a combination of the balancer_manager to do this during runtime without restart, but also update the config files to prevent service restarts of apache to accidentally route sessions to the upgrade node.
 * Make sure there are no user sessions left on the upgrade node, and that no new sessions will be routed to that node
+* Make sure property `com.openexchange.push.allowPermanentPush` is set to `false` on that node
 * Update packages on the upgrade node and restart the middleware service there. See AppSuite:UpdatingOXPackages for details on how to do that.
 * Install the special Hazelcast Upgrade Package on the upgrade node (e.g. one from open-xchange-cluster-upgrade-from-76x, open-xchange-cluster-upgrade-from-780-782, open-xchange-cluster-upgrade-from-783, open-xchange-cluster-upgrade-from-784, ...). Restart the service again.
 * Execute update tasks from that node. See UpdateTasks for an explanation how to do that. You might want to keep the load low on the DBs, to affect production operations as low as possible, and because with this decoupled update tasks approach there is no immediate time pressure. If you want to follow the limited parallel approach, use a small, mild parallelity factor (e.g. 2 or maybe 4 if you know this by far does not saturate your DB platform).
@@ -560,7 +565,7 @@ Once installed, a legacy cluster is discovered based on the available informatio
 As an example, along with the server v7.8.0, a new package named open-xchange-cluster-upgrade-from-76x can be installed that aids in invalidating cluster server nodes running v7.6.x (which includes the Hazelcast library in version 3.2.4). Using this package, the recommended steps to update an OX cluster from version 7.6.x to version 7.8.0 would be:
 
 1. Pick a node from your cluster that you want to use for executing the database update tasks shipped with the new release
-2. Disable this node for incoming HTTP requests in your webserver configuration as described at #Upgrading a single Node
+2. Disable this node for incoming HTTP requests in your webserver configuration as described at #Upgrading a single Node and make sure property `com.openexchange.push.allowPermanentPush` is set to `false` on that node
 3. Update the OX packages on this node, additionally install the package open-xchange-cluster-upgrade-from-76x
 4. Restart the open-xchange services on this node
 5. Trigger the update task executions using the runUpdate commandline utility as described at UpdateTasks
