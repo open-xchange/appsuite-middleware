@@ -62,6 +62,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.osgi.util.RankedService;
 import com.openexchange.pns.DefaultPushSubscription;
 import com.openexchange.pns.KnownTransport;
@@ -74,9 +75,8 @@ import com.openexchange.pns.PushNotification;
 import com.openexchange.pns.PushSubscriptionRegistry;
 import com.turo.pushy.apns.ApnsClient;
 import com.turo.pushy.apns.ApnsPushNotification;
-import com.turo.pushy.apns.DeliveryPriority;
 import com.turo.pushy.apns.PushNotificationResponse;
-import com.turo.pushy.apns.PushType;
+import com.turo.pushy.apns.util.SimpleApnsPushNotification;
 import com.turo.pushy.apns.util.concurrent.PushNotificationFuture;
 
 /**
@@ -90,18 +90,19 @@ public class ApnsHttp2PushPerformer {
     private static final Logger LOG = LoggerFactory.getLogger(ApnsHttp2PushPerformer.class);
 
     private final String ID;
-    private final List<RankedService<?>> providers;
+    private final List<RankedService<ApnsHttp2OptionsProvider>> providers;
     private final PushSubscriptionRegistry subscriptionRegistry;
     private final PushMessageGeneratorRegistry generatorRegistry;
 
     /**
      * Initializes a new {@link ApnsHttp2PushPerformer}.
+     * 
      * @param ID The ID of the transport mechanism, see {@link KnownTransport}
-     * @param providers A prior sorted list of {@link ApnOptionsProvider} or {@link ApnsHttp2OptionsProvider}
+     * @param providers A prior sorted list of {@link ApnsHttp2OptionsProvider}
      * @param subscriptionRegistry The PNS subscription registry
      * @param generatorRegistry The message generator registry
      */
-    public ApnsHttp2PushPerformer(String ID, List<RankedService<?>> providers, PushSubscriptionRegistry subscriptionRegistry, PushMessageGeneratorRegistry generatorRegistry) {
+    public ApnsHttp2PushPerformer(String ID, List<RankedService<ApnsHttp2OptionsProvider>> providers, PushSubscriptionRegistry subscriptionRegistry, PushMessageGeneratorRegistry generatorRegistry) {
         super();
         this.ID = ID;
         this.providers = providers;
@@ -173,6 +174,9 @@ public class ApnsHttp2PushPerformer {
         if (messageObject instanceof JSONObject) {
             return toPayload((JSONObject) messageObject, deviceToken, topic);
         }
+        if (messageObject instanceof String) {
+            return new SimpleApnsPushNotification(deviceToken, topic, (String) messageObject);
+        }
         throw PushExceptionCodes.UNSUPPORTED_MESSAGE_CLASS.create(null == messageObject ? "null" : messageObject.getClass().getName());
     }
 
@@ -238,19 +242,15 @@ public class ApnsHttp2PushPerformer {
                     builder.withCustomField(key, obj.get(key));
                 }
             }
-        } catch (JSONException e) {}
-        builder.withPriority(DeliveryPriority.CONSERVE_POWER);
-        builder.pushType(PushType.BACKGROUND);
+        } catch (JSONException e) {
+            // will not happen
+        }
         return builder.build();
     }
 
-    private void transport(String client, List<Entry<PushMatch, ApnsPushNotification>> payloads, Map<String, ApnsHttp2Options> optionsPerClient) {
+    private void transport(String client, List<Entry<PushMatch, ApnsPushNotification>> payloads, Map<String, ApnsHttp2Options> optionsPerClient) throws OXException {
         List<NotificationResponsePerDevice> notifications = null;
-        try {
-            notifications = transport(optionsPerClient.get(client), getPayloadsPerDevice(payloads));
-        } catch (Exception e) {
-            LOG.warn("error submitting push notifications", e);
-        }
+        notifications = transport(optionsPerClient.get(client), getPayloadsPerDevice(payloads));
         processNotificationResults(notifications, payloads);
     }
 
@@ -275,17 +275,18 @@ public class ApnsHttp2PushPerformer {
             try {
                 PushNotificationResponse<ApnsPushNotification> pushNotificationResponse = sendNotificationFuture.get();
                 if (pushNotificationResponse.isAccepted()) {
-                    LOG.debug("Push notification for drive event accepted by APNs gateway for device token: {}", deviceToken);
+                    LOG.debug("Push notification accepted by APNs gateway for device token: {}", deviceToken);
                 } else {
-                    if (pushNotificationResponse.getTokenInvalidationTimestamp() != null) {
+                    if (pushNotificationResponse.getTokenInvalidationTimestamp() != null || isInvalidToken(pushNotificationResponse.getRejectionReason())) {
                         LOG.warn("Unsuccessful push notification due to inactive or invalid device token: {}", deviceToken);
                         PushMatch pushMatch = findMatching(deviceToken, payloads);
                         if (null != pushMatch) {
                             boolean removed = removeSubscription(pushMatch);
                             if (removed) {
                                 LOG.info("Removed subscription for device with token: {}.", pushMatch.getToken());
+                            } else {
+                                LOG.debug("Could not remove subscriptions for device with token: {}.", pushMatch.getToken());
                             }
-                            LOG.debug("Could not remove subscriptions for device with token: {}.", pushMatch.getToken());
                         } else {
                             int removed = removeSubscriptions(deviceToken);
                             if (0 < removed) {
@@ -297,13 +298,22 @@ public class ApnsHttp2PushPerformer {
                     }
                 }
             } catch (ExecutionException e) {
-                LOG.warn("Failed to send push notification for drive event for device token {}", deviceToken, e.getCause());
+                LOG.warn("Failed to send push notification for device token {}", deviceToken, e.getCause());
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                LOG.warn("Interrupted while sending push notification for drive event for device token {}", deviceToken, e.getCause());
+                LOG.warn("Interrupted while sending push notification for device token {}", deviceToken, e.getCause());
                 return;
             }
         }
+    }
+
+    // Checks if rejectionReason is because of invalid token
+    // see section 'Understand Error Codes' https://developer.apple.com/documentation/usernotifications/setting_up_a_remote_notification_server/handling_notification_responses_from_apns
+    private boolean isInvalidToken(String rejectionReason) {
+        if (Strings.isEmpty(rejectionReason)) {
+            return false;
+        }
+        return "BadDeviceToken".equals(rejectionReason) || "Unregistered".equals(rejectionReason);
     }
 
     private static PushMatch findMatching(String deviceToken, List<Entry<PushMatch, ApnsPushNotification>> payloads) {
@@ -363,26 +373,14 @@ public class ApnsHttp2PushPerformer {
     }
 
     private ApnsHttp2Options optHighestRankedApnOptionsFor(String client) {
-        for (RankedService<?> rankedService : providers) {
-            Object service = rankedService.service;
-            if (ApnsHttp2OptionsProvider.class.isInstance(service)) {
-                ApnsHttp2Options options = ((ApnsHttp2OptionsProvider) service).getOptions(client);
-                if (null != options) {
-                    return options;
-                }
-            }
-            if (ApnOptionsProvider.class.isInstance(service)) {
-                ApnOptions options = ((ApnOptionsProvider) service).getOptions(client);
-                if (null != options) {
-                    return convert(options);
-                }
+        for (RankedService<ApnsHttp2OptionsProvider> rankedService : providers) {
+            ApnsHttp2OptionsProvider service = rankedService.service;
+            ApnsHttp2Options options = service.getOptions(client);
+            if (null != options) {
+                return options;
             }
         }
         return null;
-    }
-
-    private ApnsHttp2Options convert(ApnOptions options) {
-        return new ApnsHttp2Options(options.getClientId(), options.getKeystore(), options.getPassword(), options.isProduction(), options.getTopic());
     }
 
     // -------------------------------------------------------------------------------------------------------------------------------

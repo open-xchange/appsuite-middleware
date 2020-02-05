@@ -282,7 +282,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,de.l3s.boilerpipe"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,documentation-generic"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,documentation-tools"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,javapns.notification.management"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,javax.annotation.concurrent"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,javax.mail"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,liquibase.core"/>

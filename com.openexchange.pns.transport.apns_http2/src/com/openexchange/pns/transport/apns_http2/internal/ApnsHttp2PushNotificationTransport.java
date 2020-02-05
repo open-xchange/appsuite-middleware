@@ -95,7 +95,7 @@ public class ApnsHttp2PushNotificationTransport extends ServiceTracker<ApnsHttp2
     private final ConfigViewFactory configViewFactory;
     private final PushSubscriptionRegistry subscriptionRegistry;
     private final PushMessageGeneratorRegistry generatorRegistry;
-    private final SortableConcurrentList<RankedService<?>> trackedProviders;
+    private final SortableConcurrentList<RankedService<ApnsHttp2OptionsProvider>> trackedProviders;
     private ServiceRegistration<PushNotificationTransport> registration; // non-volatile, protected by synchronized blocks
 
     /**
@@ -104,7 +104,7 @@ public class ApnsHttp2PushNotificationTransport extends ServiceTracker<ApnsHttp2
     public ApnsHttp2PushNotificationTransport(PushSubscriptionRegistry subscriptionRegistry, PushMessageGeneratorRegistry generatorRegistry, ConfigViewFactory configViewFactory, BundleContext context) {
         super(context, ApnsHttp2OptionsProvider.class, null);
         this.configViewFactory = configViewFactory;
-        this.trackedProviders = new SortableConcurrentList<RankedService<?>>();
+        this.trackedProviders = new SortableConcurrentList<RankedService<ApnsHttp2OptionsProvider>>();
         this.generatorRegistry = generatorRegistry;
         this.subscriptionRegistry = subscriptionRegistry;
     }
@@ -145,9 +145,9 @@ public class ApnsHttp2PushNotificationTransport extends ServiceTracker<ApnsHttp2
     // ---------------------------------------------------------------------------------------------------------
 
     private ApnsHttp2Options optHighestRankedApnOptionsFor(String client) {
-        List<RankedService<?>> list = trackedProviders.getSnapshot();
-        for (RankedService<?> rankedService : list) {
-            ApnsHttp2OptionsProvider provider = (ApnsHttp2OptionsProvider) rankedService.service;
+        List<RankedService<ApnsHttp2OptionsProvider>> list = trackedProviders.getSnapshot();
+        for (RankedService<ApnsHttp2OptionsProvider> rankedService : list) {
+            ApnsHttp2OptionsProvider provider = rankedService.service;
             ApnsHttp2Options options = provider.getOptions(client);
             if (null != options) {
                 return options;

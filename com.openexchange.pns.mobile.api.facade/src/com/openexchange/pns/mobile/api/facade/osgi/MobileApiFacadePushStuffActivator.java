@@ -103,10 +103,10 @@ public class MobileApiFacadePushStuffActivator extends HousekeepingActivator imp
     protected void startBundle() throws Exception {
         registerService(ClientIdentifierProvider.class, new OXBrandingMailApp());
         registerService(Reloadable.class, this);
-        reinit(getService(ConfigurationService.class));
+        reinit(getService(ConfigurationService.class), getService(ConfigViewFactory.class));
     }
 
-    private synchronized void reinit(ConfigurationService configService) throws Exception {
+    private synchronized void reinit(ConfigurationService configService, ConfigViewFactory viewFactory) throws Exception {
         List<ServiceRegistration<PushMessageGenerator>> registrations = this.registrations;
         if (null != registrations) {
             this.registrations = null;
@@ -119,7 +119,7 @@ public class MobileApiFacadePushStuffActivator extends HousekeepingActivator imp
         registrations = new LinkedList<>();
 
         // Add generic one
-        registrations.add(context.registerService(PushMessageGenerator.class, new MobileApiFacadeMessageGenerator(ClientConfig.GENERIC_CLIENT_CONFIG), null));
+        registrations.add(context.registerService(PushMessageGenerator.class, new MobileApiFacadeMessageGenerator(ClientConfig.GENERIC_CLIENT_CONFIG, viewFactory), null));
         LOG.info("Registered PNS Mobile API Facade configuration for client {}", ClientConfig.GENERIC_CLIENT_CONFIG.getClientId());
 
         // Parse brand-specific ones
@@ -131,7 +131,7 @@ public class MobileApiFacadePushStuffActivator extends HousekeepingActivator imp
                 if (null != configs && !configs.isEmpty()) {
                     for (ClientConfig config : configs.values()) {
                         if (config.isEnabled()) {
-                            registrations.add(context.registerService(PushMessageGenerator.class, new MobileApiFacadeMessageGenerator(config), null));
+                            registrations.add(context.registerService(PushMessageGenerator.class, new MobileApiFacadeMessageGenerator(config, viewFactory), null));
                             LOG.info("Registered PNS Mobile API Facade configuration for client {}", config.getClientId());
                         } else {
                             LOG.info("PNS Mobile API Facade configuration for client {} is disabled", config.getClientId());
@@ -198,7 +198,7 @@ public class MobileApiFacadePushStuffActivator extends HousekeepingActivator imp
     public void reloadConfiguration(ConfigurationService configService) {
         MobileApiFacadePushConfiguration.invalidateCache();
         try {
-            reinit(configService);
+            reinit(configService, getService(ConfigViewFactory.class));
         } catch (Exception e) {
             LOG.error("Failed to re-initialize PNS Mobile API Facade configurations", e);
         }

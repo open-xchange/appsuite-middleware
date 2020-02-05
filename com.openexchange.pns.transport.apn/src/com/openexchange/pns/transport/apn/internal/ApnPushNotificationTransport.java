@@ -52,6 +52,7 @@ package com.openexchange.pns.transport.apn.internal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -75,8 +76,12 @@ import com.openexchange.pns.PushMessageGeneratorRegistry;
 import com.openexchange.pns.PushNotification;
 import com.openexchange.pns.PushNotificationTransport;
 import com.openexchange.pns.PushSubscriptionRegistry;
+import com.openexchange.pns.transport.apns_http2.DefaultApnsHttp2OptionsProvider;
 import com.openexchange.pns.transport.apns_http2.util.ApnOptions;
+import com.openexchange.pns.transport.apns_http2.util.ApnOptionsPerClient;
 import com.openexchange.pns.transport.apns_http2.util.ApnOptionsProvider;
+import com.openexchange.pns.transport.apns_http2.util.ApnsHttp2Options;
+import com.openexchange.pns.transport.apns_http2.util.ApnsHttp2OptionsProvider;
 import com.openexchange.pns.transport.apns_http2.util.ApnsHttp2PushPerformer;
 
 /**
@@ -94,7 +99,7 @@ public class ApnPushNotificationTransport extends ServiceTracker<ApnOptionsProvi
     private final ConfigViewFactory configViewFactory;
     private final PushSubscriptionRegistry subscriptionRegistry;
     private final PushMessageGeneratorRegistry generatorRegistry;
-    private final SortableConcurrentList<RankedService<?>> trackedProviders;
+    private final SortableConcurrentList<RankedService<ApnsHttp2OptionsProvider>> trackedProviders;
     private ServiceRegistration<PushNotificationTransport> registration; // non-volatile, protected by synchronized blocks
 
     /**
@@ -103,7 +108,7 @@ public class ApnPushNotificationTransport extends ServiceTracker<ApnOptionsProvi
     public ApnPushNotificationTransport(PushSubscriptionRegistry subscriptionRegistry, PushMessageGeneratorRegistry generatorRegistry, ConfigViewFactory configViewFactory, BundleContext context) {
         super(context, ApnOptionsProvider.class, null);
         this.configViewFactory = configViewFactory;
-        this.trackedProviders = new SortableConcurrentList<RankedService<?>>();
+        this.trackedProviders = new SortableConcurrentList<RankedService<ApnsHttp2OptionsProvider>>();
         this.generatorRegistry = generatorRegistry;
         this.subscriptionRegistry = subscriptionRegistry;
     }
@@ -115,7 +120,7 @@ public class ApnPushNotificationTransport extends ServiceTracker<ApnOptionsProvi
         int ranking = RankedService.getRanking(reference);
         ApnOptionsProvider provider = context.getService(reference);
 
-        trackedProviders.addAndSort(new RankedService<ApnOptionsProvider>(provider, ranking));
+        trackedProviders.addAndSort(new RankedService<ApnsHttp2OptionsProvider>(convertProvider(provider), ranking));
 
         if (null == registration) {
             registration = context.registerService(PushNotificationTransport.class, this, null);
@@ -143,11 +148,11 @@ public class ApnPushNotificationTransport extends ServiceTracker<ApnOptionsProvi
 
     // ---------------------------------------------------------------------------------------------------------
 
-    private ApnOptions optHighestRankedApnOptionsFor(String client) {
-        List<RankedService<?>> list = trackedProviders.getSnapshot();
-        for (RankedService<?> rankedService : list) {
-            ApnOptionsProvider provider = (ApnOptionsProvider) rankedService.service;
-            ApnOptions options = provider.getOptions(client);
+    private ApnsHttp2Options optHighestRankedApnOptionsFor(String client) {
+        List<RankedService<ApnsHttp2OptionsProvider>> list = trackedProviders.getSnapshot();
+        for (RankedService<ApnsHttp2OptionsProvider> rankedService : list) {
+            ApnsHttp2OptionsProvider provider = rankedService.service;
+            ApnsHttp2Options options = provider.getOptions(client);
             if (null != options) {
                 return options;
             }
@@ -225,6 +230,20 @@ public class ApnPushNotificationTransport extends ServiceTracker<ApnOptionsProvi
             List<PushMatch> pushMatches = new ArrayList<PushMatch>(matches);
             transport(Collections.singletonMap(notification, pushMatches));
         }
+    }
+
+    private ApnsHttp2OptionsProvider convertProvider(ApnOptionsProvider provider) {
+        if (null == provider) {
+            return null;
+        }
+        Collection<ApnOptionsPerClient> optionsPerClient = provider.getAvailableOptions();
+        HashMap<String, ApnsHttp2Options> convertedOptions = new HashMap<String, ApnsHttp2Options>(optionsPerClient.size());
+        for (ApnOptionsPerClient clientOptions : optionsPerClient) {
+            ApnOptions options = clientOptions.getOptions();
+            ApnsHttp2Options apnsOptions = new ApnsHttp2Options(options.getClientId(), options.getKeystore(), options.getPassword(), options.isProduction(), options.getTopic()); 
+            convertedOptions.put(clientOptions.getClient(), apnsOptions);
+        }
+        return new DefaultApnsHttp2OptionsProvider(convertedOptions);
     }
 
 }
