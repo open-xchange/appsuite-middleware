@@ -156,7 +156,7 @@ public class JsonMessageHandlerTest {
 
             ServerSession session = new SimServerSession(new SimContext(1), new SimUser(1), null);
 
-            JsonMessageHandler handler = new JsonMessageHandler(0, "INBOX/1", DisplayMode.DISPLAY, true, true, session, usm, false, 0);
+            JsonMessageHandler handler = new JsonMessageHandler(0, "default0/INBOX/1", DisplayMode.DISPLAY, true, true, session, usm, false, 0);
 
             // Test
 
@@ -213,7 +213,7 @@ public class JsonMessageHandlerTest {
 
             ServerSession session = new SimServerSession(new SimContext(1), new SimUser(1), null);
 
-            JsonMessageHandler handler = new JsonMessageHandler(0, "INBOX/1", DisplayMode.DISPLAY, true, true, session, usm, false, 0);
+            JsonMessageHandler handler = new JsonMessageHandler(0, "default0/INBOX/1", DisplayMode.DISPLAY, true, true, session, usm, false, 0);
 
             // Test
 
@@ -270,7 +270,7 @@ public class JsonMessageHandlerTest {
 
             ServerSession session = new SimServerSession(new SimContext(1), new SimUser(1), null);
 
-            JsonMessageHandler handler = new JsonMessageHandler(0, "INBOX/1", DisplayMode.DISPLAY, true, true, session, usm, false, 0);
+            JsonMessageHandler handler = new JsonMessageHandler(0, "default0/INBOX/1", DisplayMode.DISPLAY, true, true, session, usm, false, 0);
 
             // Test
 
@@ -321,7 +321,7 @@ public class JsonMessageHandlerTest {
 
             ServerSession session = new SimServerSession(new SimContext(1), new SimUser(1), null);
 
-            JsonMessageHandler handler = new JsonMessageHandler(0, "INBOX/1", DisplayMode.DISPLAY, true, true, session, usm, false, 0);
+            JsonMessageHandler handler = new JsonMessageHandler(0, "default0/INBOX/1", DisplayMode.DISPLAY, true, true, session, usm, false, 0);
 
             // Test
 
