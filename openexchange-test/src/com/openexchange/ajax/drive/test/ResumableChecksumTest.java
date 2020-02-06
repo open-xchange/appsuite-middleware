@@ -51,8 +51,10 @@ package com.openexchange.ajax.drive.test;
 
 import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.java.Autoboxing.l;
+import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -60,15 +62,20 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.IOUtils;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.Timeout;
+import org.junit.runner.RunWith;
+import org.junit.runners.BlockJUnit4ClassRunner;
 import com.openexchange.ajax.config.actions.Tree;
-import com.openexchange.ajax.framework.AbstractAPIClientSession;
+import com.openexchange.ajax.framework.AbstractConfigAwareAPIClientSession;
+import com.openexchange.drive.DriveProperty;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.ConfigResponse;
@@ -88,7 +95,8 @@ import jonelo.jacksum.algorithm.MD;
  * @author <a href="mailto:anna.ottersbach@open-xchange.com">Anna Ottersbach</a>
  * @since v7.10.4
  */
-public class ResumableChecksumTest extends AbstractAPIClientSession {
+@RunWith(BlockJUnit4ClassRunner.class)
+public class ResumableChecksumTest extends AbstractConfigAwareAPIClientSession {
 
     @Rule
     public Timeout timeout = new Timeout(1, TimeUnit.MINUTES);
@@ -101,8 +109,16 @@ public class ResumableChecksumTest extends AbstractAPIClientSession {
     @Override
     public void setUp() throws Exception {
         super.setUp();
+        /*
+         * prepare config
+         */
+        CONFIG.put(DriveProperty.OPTIMISTIC_SAVE_THRESHOLD_DESKTOP.getFQPropertyName(), "1kB");
+        CONFIG.put(DriveProperty.OPTIMISTIC_SAVE_THRESHOLD_MOBILE.getFQPropertyName(), "1kB");
+        super.setUpConfiguration();
+        /*
+         * set up
+         */
         driveApi = new DriveApi(getApiClient());
-
         String folderTitle = "ResumableChecksumFolder_" + UUID.randomUUID().toString();
         folderId = createFolderForTest(folderTitle);
         rememberFolder(folderId);
@@ -131,7 +147,7 @@ public class ResumableChecksumTest extends AbstractAPIClientSession {
      */
     @Test
     public void testResumableChecksum_UploadWith3EmptyChunks_Successful() throws NoSuchAlgorithmException, ApiException, IOException {
-        String newName = "testResumableChecksum_3chunks.txt";
+        String newName = "testResumableChecksum_UploadWith3EmptyChunks_Successful.txt";
         int chunksize = 2000;
         byte[] body = new byte[chunksize];
         Long totalLength = L(3 * chunksize);
@@ -171,8 +187,8 @@ public class ResumableChecksumTest extends AbstractAPIClientSession {
      */
     @Test
     public void testResumableChecksum_UploadWithFilledChunks_Successful() throws NoSuchAlgorithmException, ApiException, IOException {
-        String newName = "testResumableChecksum_filledChunks.txt";
-        int chunksize = 3000;
+        String newName = "testResumableChecksum_UploadWithFilledChunks_Successful.txt";
+        int chunksize = 1500;
         byte[] body1 = new byte[chunksize];
         SecureRandom.getInstanceStrong().nextBytes(body1);
         byte[] body2 = new byte[chunksize];
@@ -201,6 +217,30 @@ public class ResumableChecksumTest extends AbstractAPIClientSession {
             assertEquals(l(totalLength), downloadFile.length());
             assertEquals(newChecksum, getChecksum(downloadArray));
         }
+    }
+
+    /**
+     *
+     * Tries to upload an array in two chunks, that are smaller then {@link DriveProperty#OPTIMISTIC_SAVE_THRESHOLD_DESKTOP}
+     * or {@link DriveProperty#OPTIMISTIC_SAVE_THRESHOLD_MOBILE}. After every try an error is expected.
+     *
+     * @throws NoSuchAlgorithmException if algorithm 'MD5' is not known in jonelo.jacksum.algorithm.MD.MD
+     * @throws ApiException if fails to make API call
+     */
+    @Test
+    public void testResumableChecksum_TooSmallChunkSize_Failure() throws NoSuchAlgorithmException, ApiException {
+        String newName = "testResumableChecksum_TooSmallChunkSize_Failure.txt";
+        int chunksize = 500;
+        byte[] body = new byte[chunksize];
+        Long totalLength = L(2 * chunksize);
+        Long offset = L(0);
+        String newChecksum = getChecksum(new byte[2 * chunksize]);
+
+        DriveUploadResponse uploadFile = driveApi.uploadFile(getApiClient().getSession(), folderId, "/", newName, newChecksum, body, null, null, null, null, offset, totalLength, null, null, null, null, null);
+        assertThat("Checksum for the first chunk must not be equal total checksum", uploadFile.getError(), startsWith("Integrity checks failed"));
+        offset = L(chunksize);
+        uploadFile = driveApi.uploadFile(getApiClient().getSession(), folderId, "/", newName, newChecksum, body, null, null, null, null, offset, totalLength, null, null, null, null, null);
+        assertThat("Upload must not be resumed", uploadFile.getError(), startsWith("Unable to access the file at the requested position"));
     }
 
     private String getChecksum(byte[] bytes) throws NoSuchAlgorithmException {
@@ -253,5 +293,14 @@ public class ResumableChecksumTest extends AbstractAPIClientSession {
         org.junit.Assert.assertNull(resp.getErrorDesc(), resp.getError());
         org.junit.Assert.assertNotNull(resp.getData());
         return resp.getData();
+    }
+
+    // -------------------------   prepare config --------------------------------------
+
+    private static final Map<String, String> CONFIG = new HashMap<String, String>();
+
+    @Override
+    protected Map<String, String> getNeededConfigurations() {
+        return CONFIG;
     }
 }
