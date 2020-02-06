@@ -1,20 +1,20 @@
 ---
-title: deleteorphanedattachments
+title: dbmigrations
 icon: far fa-circle
 tags: Administration, Command Line tools
 ---
 
 # NAME
 
-deleteorphanedattachments - delete orphaned references
+dbmigrations
 
 # SYNOPSIS
 
-**deleteorphanedattachments** [OPTIONS] | [-h]
+**dbmigrations** -n <schemaName> [[-f] | [-ll] [-u]] -A <masterAdmin> -P <masterAdminPassword> [-p <RMI-Port>] [-s <RMI-Server>] [--responsetimeout <responseTimeout>] | [-h]
 
 # DESCRIPTION
 
-The command-line tool for deleting orphaned references from mail compose for specified file storage identifiers.
+Command line tool to control database migrations.
 
 # OPTIONS
 
