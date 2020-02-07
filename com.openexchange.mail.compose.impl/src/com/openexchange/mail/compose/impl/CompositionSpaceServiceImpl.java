@@ -335,6 +335,14 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
             }
             sourceMessage.addFrom(toMimeAddress(from));
         }
+        
+        // Reply-To
+        {
+            Address replyTo = m.getReplyTo();
+            if (null != replyTo) {                
+                sourceMessage.addReplyTo(toMimeAddress(replyTo));
+            }
+        }
 
         // Recipients
         {
@@ -710,7 +718,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
 
                     // Determine the account identifier by From address
                     try {
-                        InternetAddress fromAddresss = toMimeAddress(m.getFrom());
+                        InternetAddress fromAddresss = toMimeAddress(from);
                         accountId = MimeMessageFiller.resolveFrom2Account(ServerSessionAdapter.valueOf(session), fromAddresss, true, true);
                     } catch (final OXException e) {
                         if (MailExceptionCode.NO_TRANSPORT_SUPPORT.equals(e) || MailExceptionCode.INVALID_SENDER.equals(e)) {
@@ -726,6 +734,11 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                 Address sender = m.getSender();
                 if (null != sender) {
                     mimeMessage.setSender(toMimeAddress(sender));
+                }
+                
+                Address replyTo = m.getReplyTo();
+                if (null != replyTo) {
+                    mimeMessage.setReplyTo(new javax.mail.Address[] { toMimeAddress(replyTo) });
                 }
             }
             {

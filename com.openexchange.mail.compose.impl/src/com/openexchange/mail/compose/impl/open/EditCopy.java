@@ -167,6 +167,14 @@ public class EditCopy extends AbstractOpener {
             }
         }
 
+        // Set "Reply-To"
+        {
+            InternetAddress[] replyTo = originalMail.getReplyTo();
+            if (null != replyTo && replyTo.length > 0) {
+                state.message.setReplyTo(toAddress(replyTo[0]));
+            }
+        }
+
         // Pre-set recipients
         {
             InternetAddress[] recipients = originalMail.getTo();

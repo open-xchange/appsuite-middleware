@@ -100,6 +100,7 @@ import com.openexchange.mail.compose.impl.attachment.rdb.RdbAttachmentStorage;
 import com.openexchange.mail.compose.impl.groupware.CompositionSpaceAddContentEncryptedFlag;
 import com.openexchange.mail.compose.impl.groupware.CompositionSpaceAddCustomHeaders;
 import com.openexchange.mail.compose.impl.groupware.CompositionSpaceAddFileStorageIdentifier;
+import com.openexchange.mail.compose.impl.groupware.CompositionSpaceAddReplyTo;
 import com.openexchange.mail.compose.impl.groupware.CompositionSpaceCreateTableService;
 import com.openexchange.mail.compose.impl.groupware.CompositionSpaceCreateTableTask;
 import com.openexchange.mail.compose.impl.groupware.CompositionSpaceDeleteListener;
@@ -330,7 +331,8 @@ public class CompositionSpaceActivator extends HousekeepingActivator {
             new CompositionSpaceAddContentEncryptedFlag(),
             new CompositionSpaceAddFileStorageIdentifier(),
             new CompositionSpaceEnlargeSubjectField(),
-            new CompositionSpaceAddCustomHeaders()
+            new CompositionSpaceAddCustomHeaders(),
+            new CompositionSpaceAddReplyTo()
         ));
         registerService(DeleteListener.class, new CompositionSpaceDeleteListener(this));
 

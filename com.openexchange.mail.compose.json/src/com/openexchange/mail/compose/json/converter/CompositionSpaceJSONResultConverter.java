@@ -144,6 +144,9 @@ public class CompositionSpaceJSONResultConverter implements ResultConverter {
         if (null == optFields || optFields.contains(MessageField.SENDER)) {
             json.putOpt("sender", convertAddress(message.getSender()));
         }
+        if (null == optFields || optFields.contains(MessageField.REPLY_TO)) {
+            json.putOpt("reply_to", convertAddress(message.getReplyTo()));
+        }
         if (null == optFields || optFields.contains(MessageField.TO)) {
             json.putOpt("to", convertAddresses(message.getTo()));
         }

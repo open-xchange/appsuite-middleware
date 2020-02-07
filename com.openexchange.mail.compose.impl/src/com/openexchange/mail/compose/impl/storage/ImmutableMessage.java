@@ -83,6 +83,7 @@ public class ImmutableMessage implements Message {
 
         private Address from;
         private Address sender;
+        private Address replyTo;
         private List<Address> to;
         private List<Address> cc;
         private List<Address> bcc;
@@ -119,6 +120,11 @@ public class ImmutableMessage implements Message {
 
         public Builder withSender(Address sender) {
             this.sender = sender;
+            return this;
+        }
+        
+        public Builder withReplyTo(Address replyTo) {
+            this.replyTo = replyTo;
             return this;
         }
 
@@ -191,6 +197,7 @@ public class ImmutableMessage implements Message {
             if (null != md) {
                 from = md.getFrom();
                 sender = md.getSender();
+                replyTo = md.getReplyTo();
                 to = md.getTo();
                 cc = md.getCc();
                 bcc = md.getBcc();
@@ -213,6 +220,7 @@ public class ImmutableMessage implements Message {
             if (null != m) {
                 from = m.getFrom();
                 sender = m.getSender();
+                replyTo = m.getReplyTo();
                 to = m.getTo();
                 cc = m.getCc();
                 bcc = m.getBcc();
@@ -232,7 +240,7 @@ public class ImmutableMessage implements Message {
         }
 
         public ImmutableMessage build() {
-            return new ImmutableMessage(from, sender, to, cc, bcc, subject, content, contentType, requestReadReceipt, sharedAttachmentsInfo, attachments, meta, security, priority, contentEncrypted, customHeaders);
+            return new ImmutableMessage(from, sender, replyTo, to, cc, bcc, subject, content, contentType, requestReadReceipt, sharedAttachmentsInfo, attachments, meta, security, priority, contentEncrypted, customHeaders);
         }
     }
 
@@ -240,6 +248,7 @@ public class ImmutableMessage implements Message {
 
     private final Address from;
     private final Address sender;
+    private final Address replyTo;
     private final List<Address> to;
     private final List<Address> cc;
     private final List<Address> bcc;
@@ -255,10 +264,11 @@ public class ImmutableMessage implements Message {
     private final Priority priority;
     private final boolean contentEncrypted;
 
-    ImmutableMessage(Address from, Address sender, List<Address> to, List<Address> cc, List<Address> bcc, String subject, String content, ContentType contentType, boolean requestReadReceipt, SharedAttachmentsInfo sharedAttachmentsInfo, List<Attachment> attachments, Meta meta, Security security, Priority priority, boolean contentEncrypted, Map<String, String> customHeaders) {
+    ImmutableMessage(Address from, Address sender, Address replyTo, List<Address> to, List<Address> cc, List<Address> bcc, String subject, String content, ContentType contentType, boolean requestReadReceipt, SharedAttachmentsInfo sharedAttachmentsInfo, List<Attachment> attachments, Meta meta, Security security, Priority priority, boolean contentEncrypted, Map<String, String> customHeaders) {
         super();
         this.from = from;
         this.sender = sender;
+        this.replyTo = replyTo;
         this.to = immutableListFor(to);
         this.cc = immutableListFor(cc);
         this.bcc = immutableListFor(bcc);
@@ -297,6 +307,11 @@ public class ImmutableMessage implements Message {
     @Override
     public Address getSender() {
         return sender;
+    }
+    
+    @Override
+    public Address getReplyTo() {
+        return replyTo;
     }
 
     @Override

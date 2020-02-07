@@ -90,6 +90,7 @@ public class InMemoryMessage implements Message {
     private final Meta meta;
     private volatile Address from;
     private volatile Address sender;
+    private volatile Address replyTo;
     private volatile List<Address> to;
     private volatile List<Address> cc;
     private volatile List<Address> bcc;
@@ -126,6 +127,7 @@ public class InMemoryMessage implements Message {
         } else {
             from = initialMessageDesc.getFrom();
             sender = initialMessageDesc.getSender();
+            replyTo = initialMessageDesc.getReplyTo();
             to = initialMessageDesc.getTo();
             cc = initialMessageDesc.getCc();
             bcc = initialMessageDesc.getBcc();
@@ -177,6 +179,11 @@ public class InMemoryMessage implements Message {
     @Override
     public Address getSender() {
         return sender;
+    }
+    
+    @Override
+    public Address getReplyTo() {
+        return replyTo;
     }
 
     @Override
@@ -307,6 +314,27 @@ public class InMemoryMessage implements Message {
                 bufferingQueue.offerIfAbsentElseReset(this);
             }
             md.setFrom(from);
+        } finally {
+            lock.unlock();
+        }
+    }
+    
+    /**
+     * Sets the reply-to address
+     *
+     * @param replyTo The reply-to address to set
+     */
+    public void setReplyTo(Address replyTo) {
+        lock.lock();
+        try {
+            this.replyTo = replyTo;
+            MessageDescription md = messageDescription;
+            if (null == md) {
+                md = new MessageDescription();
+                messageDescription = md;
+                bufferingQueue.offerIfAbsentElseReset(this);
+            }
+            md.setReplyTo(replyTo);
         } finally {
             lock.unlock();
         }
@@ -597,6 +625,9 @@ public class InMemoryMessage implements Message {
                 }
                 if (md.containsFrom()) {
                     setFrom(md.getFrom());
+                }
+                if (md.containsReplyTo()) {
+                    setReplyTo(md.getReplyTo());
                 }
                 if (md.containsPriority()) {
                     setPriority(md.getPriority());

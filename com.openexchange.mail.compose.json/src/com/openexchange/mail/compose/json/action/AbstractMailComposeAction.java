@@ -168,6 +168,14 @@ public abstract class AbstractMailComposeAction implements AJAXActionService {
         }
 
         {
+            JSONArray jReplyTo = jMessage.optJSONArray("reply_to");
+            if (null != jReplyTo) {
+                JSONArray jAddress = jReplyTo.optJSONArray(0);
+                md.setReplyTo(toAddress(null == jAddress ? jReplyTo : jAddress));
+            }
+        }
+
+        {
             String subject = jMessage.optString("subject", null);
             if (null != subject) {
                 md.setSubject(subject);

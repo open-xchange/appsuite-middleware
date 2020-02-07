@@ -49,9 +49,11 @@
 
 package com.openexchange.mail.compose;
 
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.compose.Message.ContentType;
 import com.openexchange.mail.compose.Message.Priority;
 
@@ -68,6 +70,7 @@ public class MessageDescription {
     private List<Address> to;
     private List<Address> cc;
     private List<Address> bcc;
+    private Address replyTo;
     private String subject;
     private String content;
     private ContentType contentType;
@@ -85,6 +88,7 @@ public class MessageDescription {
     private boolean bTo;
     private boolean bCc;
     private boolean bBcc;
+    private boolean bReplyTo;
     private boolean bSubject;
     private boolean bContent;
     private boolean bContentType;
@@ -236,6 +240,25 @@ public class MessageDescription {
         bBcc = false;
     }
 
+    public Address getReplyTo() {
+        return replyTo;
+    }
+
+    public MessageDescription setReplyTo(Address replyTo) {
+        this.replyTo = replyTo;
+        bReplyTo = true;
+        return this;
+    }
+
+    public boolean containsReplyTo() {
+        return bReplyTo;
+    }
+
+    public void removeReplyTo() {
+        replyTo = null;
+        bReplyTo = false;
+    }
+
     public String getSubject() {
         return subject;
     }
@@ -319,6 +342,18 @@ public class MessageDescription {
     public void setCustomHeaders(Map<String, String> customHeaders) {
         this.customHeaders = customHeaders;
         bCustomHeaders = true;
+    }
+    
+    public void addCustomHeader(String name, String value) {
+        if (Strings.isNotEmpty(name) && Strings.isNotEmpty(value)) {            
+            Map<String, String> customHeaders = this.customHeaders;
+            if (customHeaders == null) {
+                customHeaders = new LinkedHashMap<>();
+                this.customHeaders = customHeaders;
+            }
+            customHeaders.put(name, value);
+            bCustomHeaders = true;
+        }
     }
 
     public boolean containsCustomHeaders() {

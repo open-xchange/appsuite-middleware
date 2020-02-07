@@ -227,6 +227,30 @@ public class MessageMapper extends DefaultDbMapper<MessageDescription, MessageFi
 
         });
 
+        mappings.put(MessageField.REPLY_TO, new VarCharJsonAddressMapping<MessageDescription>("replyToAddr", "Reply-To") {
+
+            @Override
+            public boolean isSet(MessageDescription object) {
+                return object.containsReplyTo();
+            }
+
+            @Override
+            public void set(MessageDescription object, Address value) throws OXException {
+                object.setReplyTo(value);
+            }
+
+            @Override
+            public Address get(MessageDescription object) {
+                return object.getReplyTo();
+            }
+
+            @Override
+            public void remove(MessageDescription object) {
+                object.removeReplyTo();
+            }
+
+        });
+
         mappings.put(MessageField.SUBJECT, new VarCharMapping<MessageDescription>("subject", "Subject") {
 
             @Override

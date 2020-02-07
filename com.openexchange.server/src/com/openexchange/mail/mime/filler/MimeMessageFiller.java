@@ -559,30 +559,21 @@ public class MimeMessageFiller {
             /*
              * Reply-To
              */
-            final String hdrReplyTo = mail.getFirstHeader("Reply-To");
-            if (!isEmpty(hdrReplyTo) && !toLowerCase(hdrReplyTo).startsWith("null")) {
-                InternetAddress[] replyTo = null;
-                try {
-                    replyTo = QuotedInternetAddress.parse(hdrReplyTo, true);
-                } catch (final AddressException e) {
-                    LOG.error("Specified Reply-To address cannot be parsed", e);
-                }
-
-                if (null != replyTo) {
-                    mimeMessage.setReplyTo(replyTo);
-                }
+            InternetAddress[] replyTo = mail.getReplyTo();
+            if (replyTo != null && replyTo.length > 0) {
+                mimeMessage.setReplyTo(replyTo);
             } else {
-                String replyTo = compositionParameters.getReplyToAddress();
-                if (!isEmpty(replyTo)) {
+                String replyToAddress = compositionParameters.getReplyToAddress();
+                if (!isEmpty(replyToAddress)) {
                     try {
-                        mimeMessage.setReplyTo(QuotedInternetAddress.parse(replyTo, true));
-                    } catch (final AddressException e) {
+                        mimeMessage.setReplyTo(QuotedInternetAddress.parse(replyToAddress, true));
+                    } catch (AddressException e) {
                         LOG.error("Default Reply-To address cannot be parsed", e);
                         try {
                             mimeMessage.setHeader(
                                 MessageHeaders.HDR_REPLY_TO,
-                                MimeUtility.encodeWord(replyTo, MailProperties.getInstance().getDefaultMimeCharset(), "Q"));
-                        } catch (final UnsupportedEncodingException e1) {
+                                MimeUtility.encodeWord(replyToAddress, MailProperties.getInstance().getDefaultMimeCharset(), "Q"));
+                        } catch (UnsupportedEncodingException e1) {
                             /*
                              * Cannot occur since default mime charset is supported by JVM
                              */

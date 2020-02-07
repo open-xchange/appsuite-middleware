@@ -100,4 +100,7 @@ public class CompositionSpaceExceptionMessages implements LocalizableStrings {
 
     // The user entered a very long Bcc addresses, which cannot be stored due to data truncation
     public static final String BCC_TOO_LONG_MSG = "The entered \"bcc\" addresses are too long.";
+
+    // The user entered a very long Reply-To address, which cannot be stored due to data truncation
+    public static final String REPLY_TO_TOO_LONG_MSG = "The entered \"Reply-To\" address is too long.";;
 }
