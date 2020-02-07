@@ -205,6 +205,13 @@ public interface Message {
      * @return The "Sender" address
      */
     Address getSender();
+    
+    /**
+     * Gets the "Reply-To" address.
+     *
+     * @return The "Reply-To" address
+     */
+    Address getReplyTo();
 
     /**
      * Gets the "To" addresses.
