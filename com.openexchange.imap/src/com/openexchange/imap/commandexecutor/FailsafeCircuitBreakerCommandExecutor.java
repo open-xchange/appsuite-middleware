@@ -102,7 +102,7 @@ public class FailsafeCircuitBreakerCommandExecutor extends AbstractFailsafeCircu
             breakerInfo = circuitBreakers.putIfAbsent(key, newBreakerInfo);
             if (breakerInfo == null) {
                 breakerInfo = newBreakerInfo;
-                initMetricsFor(key, newBreakerInfo, metricServiceReference.get(), metricDescriptors.get());
+                initMetricsFor(key, newBreakerInfo);
             }
         }
         return breakerInfo;

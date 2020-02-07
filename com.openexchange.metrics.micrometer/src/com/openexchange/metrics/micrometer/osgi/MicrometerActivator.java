@@ -47,70 +47,41 @@
  *
  */
 
-package com.openexchange.mailfilter.osgi;
+package com.openexchange.metrics.micrometer.osgi;
 
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.osgi.service.http.HttpService;
 import org.slf4j.Logger;
-import com.openexchange.mailfilter.internal.MailFilterServiceImpl;
-import com.openexchange.metrics.MetricService;
-
+import org.slf4j.LoggerFactory;
+import com.openexchange.osgi.HousekeepingActivator;
+import io.micrometer.core.instrument.Metrics;
+import io.micrometer.prometheus.PrometheusConfig;
+import io.micrometer.prometheus.PrometheusMeterRegistry;
+import io.prometheus.client.exporter.MetricsServlet;
+import io.prometheus.client.hotspot.DefaultExports;
 
 /**
- * {@link MetricServiceTracker} - Tracker for metric service.
+ * {@link MicrometerActivator}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.10.3
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.4
  */
-public class MetricServiceTracker implements ServiceTrackerCustomizer<MetricService, MetricService> {
+public class MicrometerActivator extends HousekeepingActivator {
 
-    /** Simple class to delay initialization until needed */
-    private static class LoggerHolder {
-        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(MetricServiceTracker.class);
-    }
+    private static final Logger LOG = LoggerFactory.getLogger(MicrometerActivator.class);
 
-    private final BundleContext context;
-    private final MailFilterServiceImpl mailFilterService;
-
-    /**
-     * Initializes a new {@link MetricServiceTracker}.
-     *
-     * @param mailFilterService The ail filter service instance
-     * @param context The bundle context
-     */
-    public MetricServiceTracker(MailFilterServiceImpl mailFilterService, BundleContext context) {
-        super();
-        this.mailFilterService = mailFilterService;
-        this.context = context;
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class[] { HttpService.class };
     }
 
     @Override
-    public MetricService addingService(ServiceReference<MetricService> reference) {
-        MetricService service = context.getService(reference);
-        try {
-            mailFilterService.onMetricServiceAppeared(service);
-            return service;
-        } catch (Exception e) {
-            LoggerHolder.LOG.warn("Failed to apply metric service to mail filter circuit breaker", e);
-        }
-        context.ungetService(reference);
-        return null;
-    }
-
-    @Override
-    public void modifiedService(ServiceReference<MetricService> reference, MetricService service) {
-        // Ignore
-    }
-
-    @Override
-    public void removedService(ServiceReference<MetricService> reference, MetricService service) {
-        context.ungetService(reference);
-        try {
-            mailFilterService.onMetricServiceDisppearing(service);
-        } catch (Exception e) {
-            LoggerHolder.LOG.warn("Failed to remove metric service from mail filter circuit breaker", e);
-        }
+    protected void startBundle() throws Exception {
+        HttpService httpService = getServiceSafe(HttpService.class);
+        PrometheusMeterRegistry prometheusRegistry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
+        Metrics.addRegistry(prometheusRegistry);
+        DefaultExports.register(prometheusRegistry.getPrometheusRegistry());
+        httpService.registerServlet("/metrics", new MetricsServlet(prometheusRegistry.getPrometheusRegistry()), null, null);
+        LOG.info("Bundle {} successfully started", this.context.getBundle().getSymbolicName());
     }
 
 }

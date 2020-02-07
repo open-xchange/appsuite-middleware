@@ -105,7 +105,6 @@ public class AntiVirusServiceImpl implements AntiVirusService {
     private final ServiceLookup services;
     private final ICAPResponseParser parser;
     private final Cache<String, AntiVirusResult> cachedResults;
-    private final MetricHandler metricHandler;
 
     /**
      * Initialises a new {@link AntiVirusServiceImpl}.
@@ -117,7 +116,6 @@ public class AntiVirusServiceImpl implements AntiVirusService {
         this.cachedResults = CacheBuilder.newBuilder().initialCapacity(1000).maximumSize(10000).expireAfterAccess(365, TimeUnit.DAYS).build(); //Yup, never expire, we invalidate manually
         this.services = services;
         this.parser = new ICAPResponseParser();
-        this.metricHandler = new MetricHandler(services);
     }
 
     @Override
@@ -215,10 +213,10 @@ public class AntiVirusServiceImpl implements AntiVirusService {
 
         AntiVirusResult result = cachedResults.getIfPresent(uniqueId);
         if (result != null && result.getISTag().equals(options.getIsTag())) {
-            metricHandler.incrementCacheHits();
+            MetricHandler.incrementCacheHits();
             return result;
         }
-        metricHandler.incrementCacheMisses();
+        MetricHandler.incrementCacheMisses();
 
         LockService lockService = services.getService(LockService.class);
         Lock lock = lockService == null ? LockService.EMPTY_LOCK : lockService.getSelfCleaningLockFor(uniqueId);
@@ -226,16 +224,16 @@ public class AntiVirusServiceImpl implements AntiVirusService {
         try {
             // Check again to ensure nothing was changed in the meanwhile
             if (result != null && result.getISTag().equals(options.getIsTag())) {
-                metricHandler.incrementCacheHits();
+                MetricHandler.incrementCacheHits();
                 return result;
             }
             if (result == null) {
-                metricHandler.incrementCacheMisses();
+                MetricHandler.incrementCacheMisses();
             } else {
                 // The ISTag is different, we scan again
                 LOG.debug("The ISTag '{}' of the cached result of the file with uniqueId '{}' differs from the server's ISTag '{}'. Scanning again.", result.getISTag(), uniqueId, options.getIsTag());
                 cachedResults.invalidate(uniqueId);
-                metricHandler.incrementCacheInvalidations();
+                MetricHandler.incrementCacheInvalidations();
             }
 
             result = scan(stream, contentLength, server, port, service, mode, client, options);
@@ -339,8 +337,8 @@ public class AntiVirusServiceImpl implements AntiVirusService {
         MDC.clear();
         LOG.trace("Completed scanning of {} in {}-- average rate {}/sec.", Strings.humanReadableByteCount(contentLength, true), formatted, Strings.humanReadableByteCount(transferRate, true));
 
-        metricHandler.updateScansPerSecond();
-        metricHandler.updateScanningTime(duration.getMillis());
-        metricHandler.updateTransferRate(contentLength);
+        MetricHandler.recordScanTime(duration.getMillis());
+        MetricHandler.updateScanningTime(duration.getMillis());
+        MetricHandler.updateTransferRate(contentLength);
     }
 }

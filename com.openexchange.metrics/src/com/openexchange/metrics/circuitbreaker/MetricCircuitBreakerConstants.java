@@ -72,7 +72,7 @@ public class MetricCircuitBreakerConstants {
     public static final String METRICS_DIMENSION_ACCOUNT_KEY = "account";
 
     /** The group name for circuit breaker metrics */
-    public static final String METRICS_GROUP = "circuit-breakers";
+    public static final String METRICS_GROUP = "circuit.breakers.";
 
     /** The name for circuit breaker status */
     public static final String METRICS_STATUS_NAME = "status";

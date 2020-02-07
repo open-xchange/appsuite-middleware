@@ -49,16 +49,13 @@
 
 package com.openexchange.filestore.s3.osgi;
 
-import org.osgi.framework.ServiceReference;
 import com.amazonaws.metrics.AwsSdkMetrics;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.filestore.FileStorageProvider;
 import com.openexchange.filestore.s3.internal.S3FileStorageFactory;
 import com.openexchange.filestore.s3.internal.S3Properties;
 import com.openexchange.filestore.s3.metrics.S3FileStorageMetricCollector;
-import com.openexchange.metrics.MetricService;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.SimpleRegistryListener;
 
 /**
  * {@link S3Activator}
@@ -107,23 +104,12 @@ public class S3Activator extends HousekeepingActivator {
         System.setProperty(com.amazonaws.services.s3.internal.SkipMd5CheckStrategy.DISABLE_GET_OBJECT_MD5_VALIDATION_PROPERTY, "true");
 
         final LeanConfigurationService config = getService(LeanConfigurationService.class);
-        track(MetricService.class, new SimpleRegistryListener<MetricService>() {
-            @Override
-            public void added(ServiceReference<MetricService> ref, MetricService service) {
-                // Check for metric collection
-                boolean metricCollection = config.getBooleanProperty(S3Properties.METRIC_COLLECTION);
-                if (metricCollection) {
-                    // Enable metric collection by overriding the default metrics
-                    AwsSdkMetrics.setMetricCollector(new S3FileStorageMetricCollector(service, config));
-                }
-            }
-
-            @Override
-            public void removed(ServiceReference<MetricService> ref, MetricService service) {
-                AwsSdkMetrics.setMetricCollector(null);
-            }
-        });
-        openTrackers();
+        // Check for metric collection
+        boolean metricCollection = config.getBooleanProperty(S3Properties.METRIC_COLLECTION);
+        if (metricCollection) {
+            // Enable metric collection by overriding the default metrics
+            AwsSdkMetrics.setMetricCollector(new S3FileStorageMetricCollector(config));
+        }
 
         S3FileStorageFactory factory = new S3FileStorageFactory(this);
         registerService(FileStorageProvider.class, factory);

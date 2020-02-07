@@ -49,10 +49,8 @@
 
 package com.openexchange.ipcheck.countrycode.mbean;
 
-import com.openexchange.metrics.MetricDescriptor;
-import com.openexchange.metrics.MetricService;
-import com.openexchange.metrics.MetricType;
-import com.openexchange.metrics.types.Meter;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.Metrics;
 
 /**
  * {@link IPCheckMetricCollector}
@@ -61,52 +59,39 @@ import com.openexchange.metrics.types.Meter;
  */
 public class IPCheckMetricCollector {
 
-    public static final String COMPONENT_NAME = "ipcheck";
-    private MetricService metrics;
+    /**
+     * Initializes a new {@link IPCheckMetricCollector}.
+     */
+    public IPCheckMetricCollector() {
+        super();
+    }
 
     /**
-     * Initialises a new {@link IPCheckMetricCollector}.
+     * Increments the counter of the given {@link IPCheckMetric}
      *
-     * @param componentName
+     * @param metric The {@link IPCheckMetric} to increment
      */
-    public IPCheckMetricCollector(MetricService metrics) {
-        super();
-        this.metrics = metrics;
+    public void increment(IPCheckMetric metric) {
+        getCounter(metric.getMetricName()).increment();
     }
 
-    public void incrementTotalIPChanges() {
-        getMeter(IPCheckMetric.totalIPChanges.getMetricName()).mark();
+    /**
+     * Gets the current count for the given metric name
+     *
+     * @param metricName The metric name
+     * @return The current count
+     */
+    long getCount(String metricName) {
+        return (long) getCounter(metricName).count();
     }
 
-    public void incrementAcceptedIPChanges() {
-        getMeter(IPCheckMetric.acceptedIPChanges.getMetricName()).mark();
-    }
-
-    public void incrementDeniedIPChanges() {
-        getMeter(IPCheckMetric.deniedIPChanges.getMetricName()).mark();
-    }
-
-    public void incrementAcceptedPrivateIP() {
-        getMeter(IPCheckMetric.acceptedPrivateIP.getMetricName()).mark();
-    }
-
-    public void incrementAcceptedWhiteListed() {
-        getMeter(IPCheckMetric.acceptedWhiteListed.getMetricName()).mark();
-    }
-
-    public void incrementAcceptedEligibleIPChange() {
-        getMeter(IPCheckMetric.acceptedEligibleIPChanges.getMetricName()).mark();
-    }
-
-    public void incrementDeniedException() {
-        getMeter(IPCheckMetric.deniedException.getMetricName()).mark();
-    }
-
-    public void incrementDeniedCountryChange() {
-        getMeter(IPCheckMetric.deniedCountryChanged.getMetricName()).mark();
-    }
-
-    Meter getMeter(String metricName) {
-        return metrics.getMeter(MetricDescriptor.newBuilder(COMPONENT_NAME, metricName, MetricType.METER).build());
+    /**
+     * Get the counter for the given name
+     *
+     * @param metricName The metric name
+     * @return The {@link Counter}
+     */
+    Counter getCounter(String metricName) {
+        return Counter.builder(metricName).register(Metrics.globalRegistry);
     }
 }

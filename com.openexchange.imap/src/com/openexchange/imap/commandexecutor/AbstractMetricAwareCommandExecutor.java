@@ -49,11 +49,6 @@
 
 package com.openexchange.imap.commandexecutor;
 
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.metrics.MetricDescriptor;
-import com.openexchange.metrics.MetricService;
 import com.sun.mail.imap.CommandExecutor;
 
 /**
@@ -64,19 +59,11 @@ import com.sun.mail.imap.CommandExecutor;
  */
 public abstract class AbstractMetricAwareCommandExecutor implements CommandExecutor {
 
-    /** The registered metric descriptors */
-    protected final AtomicReference<List<MetricDescriptor>> metricDescriptors;
-
-    /** The reference for the metric service */
-    protected final AtomicReference<MetricService> metricServiceReference;
-
     /**
      * Initializes a new {@link AbstractMetricAwareCommandExecutor}.
      */
     protected AbstractMetricAwareCommandExecutor() {
         super();
-        metricServiceReference = new AtomicReference<>(null);
-        metricDescriptors = new AtomicReference<>(null);
     }
 
     /**
@@ -85,43 +72,5 @@ public abstract class AbstractMetricAwareCommandExecutor implements CommandExecu
      * @return The description
      */
     public abstract String getDescription();
-
-    /**
-     * Adds metric descriptors to given list.
-     *
-     * @param descriptors The list to add to
-     * @param metricService The mtric service
-     */
-    protected abstract void addMetricDescriptors(List<MetricDescriptor> descriptors, MetricService metricService);
-
-    /**
-     * Invoked when given metric service appeared.
-     *
-     * @param metricService The metric service
-     * @throws Exception If an error occurs
-     */
-    public void onMetricServiceAppeared(MetricService metricService) throws Exception {
-        metricServiceReference.set(metricService);
-        List<MetricDescriptor> descriptors = new CopyOnWriteArrayList<MetricDescriptor>();
-        addMetricDescriptors(descriptors, metricService);
-        this.metricDescriptors.set(descriptors);
-    }
-
-    /**
-     * Invoked when given metric service is about to disappear.
-     *
-     * @param metricService The metric service
-     * @throws Exception If an error occurs
-     */
-    public void onMetricServiceDisppearing(MetricService metricService) throws Exception {
-        metricServiceReference.set(null);
-
-        List<MetricDescriptor> descriptors = metricDescriptors.getAndSet(null);
-        if (descriptors != null) {
-            for (MetricDescriptor metricDescriptor : descriptors) {
-                metricService.removeMetric(metricDescriptor);
-            }
-        }
-    }
 
 }

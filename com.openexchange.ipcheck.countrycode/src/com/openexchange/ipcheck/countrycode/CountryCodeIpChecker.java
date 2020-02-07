@@ -67,6 +67,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.geolocation.GeoInformation;
 import com.openexchange.geolocation.GeoLocationService;
 import com.openexchange.geolocation.exceptions.GeoLocationExceptionCodes;
+import com.openexchange.ipcheck.countrycode.mbean.IPCheckMetric;
 import com.openexchange.ipcheck.countrycode.mbean.IPCheckMetricCollector;
 import com.openexchange.management.MetricAware;
 import com.openexchange.server.ServiceLookup;
@@ -84,8 +85,8 @@ public class CountryCodeIpChecker implements IPChecker, MetricAware<IPCheckMetri
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CountryCodeIpChecker.class);
 
-    private IPCheckMetricCollector metricCollector;
-    private ServiceLookup services;
+    private final IPCheckMetricCollector metricCollector;
+    private final ServiceLookup services;
 
     /**
      * Initializes a new {@link CountryCodeIpChecker}.
@@ -182,17 +183,17 @@ public class CountryCodeIpChecker implements IPChecker, MetricAware<IPCheckMetri
         LOGGER.debug("The IP change from '{}' to '{}' was accepted. Reason: '{}'", previous, current, acceptReason.getMessage());
         switch (acceptReason) {
             case PRIVATE_IPV4:
-                metricCollector.incrementAcceptedPrivateIP();
+                metricCollector.increment(IPCheckMetric.acceptedPrivateIP);
                 break;
             case WHITE_LISTED:
-                metricCollector.incrementAcceptedWhiteListed();
+                metricCollector.increment(IPCheckMetric.acceptedWhiteListed);
                 break;
             case ELIGIBLE:
             default:
-                metricCollector.incrementAcceptedEligibleIPChange();
+                metricCollector.increment(IPCheckMetric.acceptedEligibleIPChanges);
         }
-        metricCollector.incrementAcceptedIPChanges();
-        metricCollector.incrementTotalIPChanges();
+        metricCollector.increment(IPCheckMetric.acceptedIPChanges);
+        metricCollector.increment(IPCheckMetric.totalIPChanges);
     }
 
     /**
@@ -223,10 +224,10 @@ public class CountryCodeIpChecker implements IPChecker, MetricAware<IPCheckMetri
 
         switch (reason) {
             case EXCEPTION:
-                metricCollector.incrementDeniedException();
+                metricCollector.increment(IPCheckMetric.deniedException);
                 break;
             case COUNTRY_CHANGE:
-                metricCollector.incrementDeniedCountryChange();
+                metricCollector.increment(IPCheckMetric.deniedCountryChanged);
                 break;
             default:
                 break;
@@ -243,8 +244,8 @@ public class CountryCodeIpChecker implements IPChecker, MetricAware<IPCheckMetri
         synchronized (sessionId) {
             // Only increase metrics when the session was not previously kicked
             if (null != service.getSession(sessionId)) {
-                metricCollector.incrementTotalIPChanges();
-                metricCollector.incrementDeniedIPChanges();
+                metricCollector.increment(IPCheckMetric.totalIPChanges);
+                metricCollector.increment(IPCheckMetric.deniedIPChanges);
             }
         }
         IPCheckers.kick(current, session);

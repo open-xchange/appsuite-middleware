@@ -122,7 +122,7 @@ public class IPCheckMBeanImpl extends AnnotatedDynamicStandardMBean implements I
 
     /**
      * Initialises a new {@link IPCheckMBeanImpl}.
-     * 
+     *
      * @param services The {@link ServiceLookup} instance
      * @throws NotCompliantMBeanException
      */
@@ -147,9 +147,9 @@ public class IPCheckMBeanImpl extends AnnotatedDynamicStandardMBean implements I
             @Override
             public void run() {
                 try {
-                    long accepted = collector.getMeter(IPCheckMetric.acceptedEligibleIPChanges.getMetricName()).getCount();
-                    long denied = collector.getMeter(IPCheckMetric.deniedIPChanges.getMetricName()).getCount();
-                    long ipChanges = collector.getMeter(IPCheckMetric.totalIPChanges.getMetricName()).getCount();
+                    long accepted = collector.getCount(IPCheckMetric.acceptedEligibleIPChanges.getMetricName());
+                    long denied = collector.getCount(IPCheckMetric.deniedIPChanges.getMetricName());
+                    long ipChanges = collector.getCount(IPCheckMetric.totalIPChanges.getMetricName());
                     tmp_measurements.add(new Measurement(accepted, denied, ipChanges));
                     cleanUp();
                 } catch (Exception e) {
@@ -175,20 +175,20 @@ public class IPCheckMBeanImpl extends AnnotatedDynamicStandardMBean implements I
      */
     private void calculatePercentages() {
         // Work with local copies
-        long total = metricCollector.getMeter(IPCheckMetric.totalIPChanges.getMetricName()).getCount();
-        long totalAccepted = metricCollector.getMeter(IPCheckMetric.acceptedIPChanges.getMetricName()).getCount();
-        long totalDenied = metricCollector.getMeter(IPCheckMetric.deniedIPChanges.getMetricName()).getCount();
+        long total = metricCollector.getCount(IPCheckMetric.totalIPChanges.getMetricName());
+        long totalAccepted = metricCollector.getCount(IPCheckMetric.acceptedIPChanges.getMetricName());
+        long totalDenied = metricCollector.getCount(IPCheckMetric.deniedIPChanges.getMetricName());
 
         long acceptedPrivate = 0;
         long acceptedWL = 0;
         long acceptedEligible = 0;
         if (totalAccepted > 0) {
             // Accepted percentages
-            acceptedPrivate = metricCollector.getMeter(IPCheckMetric.acceptedPrivateIP.getMetricName()).getCount();
+            acceptedPrivate = metricCollector.getCount(IPCheckMetric.acceptedPrivateIP.getMetricName());
             acceptedPrivatePercentage = ((float) acceptedPrivate / totalAccepted) * 100;
-            acceptedWL = metricCollector.getMeter(IPCheckMetric.acceptedWhiteListed.getMetricName()).getCount();
+            acceptedWL = metricCollector.getCount(IPCheckMetric.acceptedWhiteListed.getMetricName());
             acceptedWhiteListedPercentage = ((float) acceptedWL / totalAccepted) * 100;
-            acceptedEligible = metricCollector.getMeter(IPCheckMetric.acceptedEligibleIPChanges.getMetricName()).getCount();
+            acceptedEligible = metricCollector.getCount(IPCheckMetric.acceptedEligibleIPChanges.getMetricName());
             acceptedEligilePercentage = ((float) acceptedEligible / totalAccepted) * 100;
         }
 
@@ -196,9 +196,9 @@ public class IPCheckMBeanImpl extends AnnotatedDynamicStandardMBean implements I
         long deniedCC = 0;
         // Denied percentages
         if (totalDenied > 0) {
-            deniedEx = metricCollector.getMeter(IPCheckMetric.deniedException.getMetricName()).getCount();
+            deniedEx = metricCollector.getCount(IPCheckMetric.deniedException.getMetricName());
             deniedExceptionPercentage = ((float) deniedEx / totalDenied) * 100;
-            deniedCC = metricCollector.getMeter(IPCheckMetric.deniedCountryChanged.getMetricName()).getCount();
+            deniedCC = metricCollector.getCount(IPCheckMetric.deniedCountryChanged.getMetricName());
             deniedCountryChangedPercentage = ((float) deniedCC / totalDenied) * 100;
         }
 
@@ -219,7 +219,7 @@ public class IPCheckMBeanImpl extends AnnotatedDynamicStandardMBean implements I
 
     /**
      * Calculates the changes per hour
-     * 
+     *
      * @throws MBeanException
      */
     private void calculateChangesPerHour() {

@@ -50,14 +50,14 @@
 package com.openexchange.sessiond.impl;
 
 import static com.openexchange.java.Autoboxing.I;
-import com.openexchange.exception.OXException;
-import com.openexchange.metrics.MetricDescriptor;
-import com.openexchange.metrics.MetricService;
-import com.openexchange.metrics.MetricType;
+import java.util.ArrayList;
+import java.util.List;
+import io.micrometer.core.instrument.Gauge;
+import io.micrometer.core.instrument.Metrics;
 
 /**
  *
- * {@link SessionMetricHandler}
+ * {@link SessionMetricHandler} - initializes metrics
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.2
@@ -65,7 +65,7 @@ import com.openexchange.metrics.MetricType;
 public final class SessionMetricHandler {
 
     private static final String SESSIONS = "sessions";
-    private static final String GROUP = "sessiond";
+    private static final String GROUP = "sessiond.";
 
     private static final String COUNT_TOTAL = "TotalCount";
     private static final String COUNT_TOTAL_DESC = "The number of total sessions";
@@ -79,63 +79,50 @@ public final class SessionMetricHandler {
     private static final String COUNT_ACTIVE = "ActiveCount";
     private static final String COUNT_ACTIVE_DESC = "The number of active sessions or in other words the number of sessions within the first two short term containers.";
 
-    private static final MetricDescriptor DESC_TOTAL;
-    private static final MetricDescriptor DESC_LONG;
-    private static final MetricDescriptor DESC_SHORT;
-    private static final MetricDescriptor DESC_ACTIVE;
-    
+    private static final List<Gauge> METERS = new ArrayList<>(4);
+
     private static final String CLIENT_DIMENSION_KEY = "client";
     private static final String CLIENT_DIMENSION_VALUE = "all";
 
+    /**
+     * Initializes the metrics
+     */
+    public static void init() {
+        // @formatter:off
+        METERS.add(Gauge.builder(GROUP+COUNT_TOTAL, () -> I(SessionHandler.getMetricTotalSessions()))
+                          .baseUnit(SESSIONS).description(COUNT_TOTAL_DESC)
+                          .tags(CLIENT_DIMENSION_KEY, CLIENT_DIMENSION_VALUE)
+                          .register(Metrics.globalRegistry));
 
-    static {
-        DESC_TOTAL = MetricDescriptor.newBuilder(GROUP, COUNT_TOTAL, MetricType.GAUGE).withUnit(SESSIONS).withDescription(COUNT_TOTAL_DESC).withMetricSupplier(() -> {
-            return I(SessionHandler.getMetricTotalSessions());
-        }).addDimension(CLIENT_DIMENSION_KEY, CLIENT_DIMENSION_VALUE).build();
+        METERS.add(Gauge.builder(GROUP+COUNT_LONG, () -> I(SessionHandler.getMetricLongSessions()))
+            .baseUnit(SESSIONS).description(COUNT_LONG_DESC)
+            .tags(CLIENT_DIMENSION_KEY, CLIENT_DIMENSION_VALUE)
+            .register(Metrics.globalRegistry));
 
-        DESC_LONG = MetricDescriptor.newBuilder(GROUP, COUNT_LONG, MetricType.GAUGE).withUnit(SESSIONS).withDescription(COUNT_LONG_DESC).withMetricSupplier(() -> {
-            return I(SessionHandler.getMetricLongSessions());
-        }).addDimension(CLIENT_DIMENSION_KEY, CLIENT_DIMENSION_VALUE).build();
+        METERS.add(Gauge.builder(GROUP+COUNT_SHORT, () -> I(SessionHandler.getMetricShortSessions()))
+            .baseUnit(SESSIONS).description(COUNT_SHORT_DESC)
+            .tags(CLIENT_DIMENSION_KEY, CLIENT_DIMENSION_VALUE)
+            .register(Metrics.globalRegistry));
 
-        DESC_SHORT = MetricDescriptor.newBuilder(GROUP, COUNT_SHORT, MetricType.GAUGE).withUnit(SESSIONS).withDescription(COUNT_SHORT_DESC).withMetricSupplier(() -> {
-            return I(SessionHandler.getMetricShortSessions());
-        }).addDimension(CLIENT_DIMENSION_KEY, CLIENT_DIMENSION_VALUE).build();
-
-        DESC_ACTIVE = MetricDescriptor.newBuilder(GROUP, COUNT_ACTIVE, MetricType.GAUGE).withUnit(SESSIONS).withDescription(COUNT_ACTIVE_DESC).withMetricSupplier(() -> {
-            return I(SessionHandler.getMetricActiveSessions());
-        }).addDimension(CLIENT_DIMENSION_KEY, CLIENT_DIMENSION_VALUE).build();
+        METERS.add(Gauge.builder(GROUP+COUNT_ACTIVE, () -> I(SessionHandler.getMetricActiveSessions()))
+            .baseUnit(SESSIONS).description(COUNT_ACTIVE_DESC)
+            .tags(CLIENT_DIMENSION_KEY, CLIENT_DIMENSION_VALUE)
+            .register(Metrics.globalRegistry));
+        // @formatter:on
     }
 
     /**
-     * Initializes a new {@link SessionMetricHandler}.
-     *
-     * @throws OXException
+     * Removes the metrics from the metric registry
+     */
+    public static void stop() {
+        METERS.forEach((m) -> Metrics.globalRegistry.remove(m));
+    }
+
+    /**
+     * Prevents initialization
      */
     private SessionMetricHandler() {
         super();
     }
 
-    /**
-     * Registers metrics for the SessionHandler
-     *
-     * @param metricService The {@link MetricService}
-     */
-    public static void registerMetrics(MetricService metricService){
-        metricService.getGauge(DESC_TOTAL);
-        metricService.getGauge(DESC_LONG);
-        metricService.getGauge(DESC_SHORT);
-        metricService.getGauge(DESC_ACTIVE);
-    }
-
-    /**
-     * Unregisters metrics for the SessionHandler
-     *
-     * @param metricService The {@link MetricService}
-     */
-    public static void unregisterMetrics(MetricService metricService) {
-        metricService.removeMetric(DESC_TOTAL);
-        metricService.removeMetric(DESC_LONG);
-        metricService.removeMetric(DESC_SHORT);
-        metricService.removeMetric(DESC_ACTIVE);
-    }
 }

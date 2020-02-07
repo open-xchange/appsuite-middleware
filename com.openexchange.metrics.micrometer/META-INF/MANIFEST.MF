@@ -1,0 +1,24 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Micrometer
+Bundle-SymbolicName: com.openexchange.metrics.micrometer
+Bundle-Version: 7.10.4
+Bundle-Vendor: OX Software GmbH
+Automatic-Module-Name: com.openexchange.metrics.micrometer
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-Activator: com.openexchange.metrics.micrometer.osgi.MicrometerActivator
+Import-Package: com.openexchange.exception,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ javax.management,
+ javax.net,
+ javax.net.ssl,
+ javax.servlet,
+ javax.servlet.http,
+ org.osgi.framework,
+ org.osgi.service.http,
+ org.slf4j
+Export-Package: 
+ io.micrometer.core.instrument,
+ io.micrometer.core.instrument.binder.jvm,
+ io.micrometer.core.instrument.composite

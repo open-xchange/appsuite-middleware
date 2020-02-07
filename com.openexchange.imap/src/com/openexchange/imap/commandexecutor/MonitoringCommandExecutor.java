@@ -55,11 +55,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import com.google.common.collect.ImmutableList;
-import com.openexchange.metrics.MetricDescriptor;
-import com.openexchange.metrics.MetricService;
-import com.openexchange.metrics.MetricType;
-import com.openexchange.metrics.types.Meter;
-import com.openexchange.metrics.types.Timer;
 import com.sun.mail.iap.Argument;
 import com.sun.mail.iap.Protocol;
 import com.sun.mail.iap.ProtocolException;
@@ -67,6 +62,9 @@ import com.sun.mail.iap.Response;
 import com.sun.mail.iap.ResponseInterceptor;
 import com.sun.mail.imap.ResponseEvent.Status;
 import com.sun.mail.imap.ResponseEvent.StatusResponse;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.Timer;
 
 /**
  * {@link MonitoringCommandExecutor}
@@ -100,57 +98,21 @@ public class MonitoringCommandExecutor extends AbstractMetricAwareCommandExecuto
     }
 
     @Override
-    protected void addMetricDescriptors(List<MetricDescriptor> descriptors, MetricService metricService) {
-        // Nothing
-    }
-
-    @Override
     public Response readResponse(Protocol protocol) throws IOException {
-        MetricService metricService = metricServiceReference.get();
-        return readResponse(protocol, Optional.ofNullable(metricService));
+        return readResponseInternal(protocol);
     }
-
-    @Override
-    public Response[] executeCommand(String command, Argument args, Optional<ResponseInterceptor> optionalInterceptor, Protocol protocol) {
-        MetricService metricService = metricServiceReference.get();
-        return executeCommand(command, args, optionalInterceptor, protocol, Optional.ofNullable(metricService)).responses;
-    }
-
-    // -------------------------------------------------------------------------------------------------------------------------------------
-
-    /** The group name for IMAP metrics */
-    private static final String METRICS_GROUP = "imap";
-
-    /** The name for request rate metric */
-    private static final String METRICS_REQUEST_RATE_NAME = "requestRate";
-
-    /** The name for error rate metric */
-    private static final String METRICS_ERROR_RATE_NAME = "errorRate";
-
-    /** The key for server dimension */
-    private static final String METRICS_DIMENSION_SERVER_KEY = "server";
 
     /**
-     * Reads a single IMAP response.
+     * Reads the response
      *
-     * @param protocol The protocol to read from
-     * @param optionalMetricService The optional metric service
-     * @return The IMAP response
-     * @throws IOException If IMAP response cannot be returned due to an I/O error
+     * @param protocol The Protocol
+     * @return The Response
+     * @throws IOException
      */
-    public static Response readResponse(Protocol protocol, Optional<MetricService> optionalMetricService) throws IOException {
-        if (!optionalMetricService.isPresent()) {
-            try {
-                return protocol.readResponse();
-            } catch (ProtocolException e) {
-                // Cannot occur
-                throw new IOException(e);
-            }
-        }
-
-        Metrics metrics = initMetrics(protocol, optionalMetricService.get());
+    public static Response readResponseInternal(Protocol protocol) throws IOException {
+        MetricsHelper metrics = initMetrics(protocol);
         Timer requestTimer = metrics.requestTimer;
-        Meter errorMeter = metrics.errorMeter;
+        Counter errorMeter = metrics.errorMeter;
 
         long duration = -1;
         long start = System.nanoTime();
@@ -163,7 +125,7 @@ public class MonitoringCommandExecutor extends AbstractMetricAwareCommandExecuto
             duration = System.nanoTime() - start;
             if (isEitherOf(e, NETWORK_COMMUNICATION_ERRORS)) {
                 // Command failed due to a network communication error.
-                errorMeter.mark();
+                errorMeter.increment();
             }
             throw e;
         } catch (ProtocolException e) {
@@ -176,30 +138,31 @@ public class MonitoringCommandExecutor extends AbstractMetricAwareCommandExecuto
             throw new IOException(e);
         } finally {
             if (duration >= 0) {
-                requestTimer.update(duration, TimeUnit.NANOSECONDS);
+                requestTimer.record(duration, TimeUnit.NANOSECONDS);
             }
         }
     }
 
-    /**
-     * Executes given command with specified arguments using passed protocol instance while adding metrics in case optional metric service
-     * is present.
-     *
-     * @param command The command
-     * @param args The arguments
-     * @param optionalInterceptor The optional interceptor
-     * @param protocol The protocol instance
-     * @param optionalMetricService The optional metric service
-     * @return The response array
-     */
-    public static ExecutedCommand executeCommand(String command, Argument args, Optional<ResponseInterceptor> optionalInterceptor, Protocol protocol, Optional<MetricService> optionalMetricService) {
-        if (!optionalMetricService.isPresent()) {
-            return new ExecutedCommand(protocol.executeCommand(command, args, optionalInterceptor));
-        }
 
-        Metrics metrics = initMetrics(protocol, optionalMetricService.get());
+
+    @Override
+    public Response[] executeCommand(String command, Argument args, Optional<ResponseInterceptor> optionalInterceptor, Protocol protocol) {
+       return executeCommandInternal(command, args, optionalInterceptor, protocol).responses;
+    }
+
+    /**
+     * Executes the given command
+     *
+     * @param command The command to execute
+     * @param args The arguments of the command
+     * @param optionalInterceptor The optional {@link ResponseInterceptor}
+     * @param protocol The protocol to use
+     * @return The {@link ExecutedCommand}
+     */
+    public static ExecutedCommand executeCommandInternal(String command, Argument args, Optional<ResponseInterceptor> optionalInterceptor, Protocol protocol) {
+        MetricsHelper metrics = initMetrics(protocol);
         Timer requestTimer = metrics.requestTimer;
-        Meter errorMeter = metrics.errorMeter;
+        Counter errorMeter = metrics.errorMeter;
 
         long duration = -1;
         try {
@@ -216,40 +179,55 @@ public class MonitoringCommandExecutor extends AbstractMetricAwareCommandExecuto
                 Exception byeException = response.getByeException();
                 if (isEitherOf(byeException, NETWORK_COMMUNICATION_ERRORS)) {
                     // Command failed due to a network communication error.
-                    errorMeter.mark();
+                    errorMeter.increment();
                 }
             }
 
             return new ExecutedCommand(statusResponse, responses);
         } finally {
             if (duration >= 0) {
-                requestTimer.update(duration, TimeUnit.NANOSECONDS);
+                requestTimer.record(duration, TimeUnit.NANOSECONDS);
             }
         }
     }
 
-    private static Metrics initMetrics(Protocol protocol, MetricService metricService) {
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    /** The group name for IMAP metrics */
+    private static final String METRICS_GROUP = "imap";
+
+    /** The name for request rate metric */
+    private static final String METRICS_REQUEST_RATE_NAME = "requestRate";
+
+    /** The name for error rate metric */
+    private static final String METRICS_ERROR_RATE_NAME = "errorRate";
+
+    /** The key for server dimension */
+    private static final String METRICS_DIMENSION_SERVER_KEY = "server";
+
+
+    private static MetricsHelper initMetrics(Protocol protocol) {
         String serverInfo = new StringBuilder(protocol.getHost()).append('@').append(protocol.getPort()).toString();
 
-        Timer requestTimer = metricService.getTimer(MetricDescriptor.newBuilder(METRICS_GROUP, METRICS_REQUEST_RATE_NAME, MetricType.TIMER)
-            .withDescription("Overall IMAP request timer per target server")
-            .addDimension(METRICS_DIMENSION_SERVER_KEY, serverInfo)
-            .build());
+        Timer requestTimer = Timer.builder(METRICS_GROUP+METRICS_REQUEST_RATE_NAME)
+            .description("Overall mail filter requests per target server")
+            .tags(METRICS_DIMENSION_SERVER_KEY, serverInfo)
+            .register(Metrics.globalRegistry);
 
-        Meter errorMeter = metricService.getMeter(MetricDescriptor.newBuilder(METRICS_GROUP, METRICS_ERROR_RATE_NAME, MetricType.METER)
-            .withDescription("Failed IMAP request meter per target server")
-            .addDimension(METRICS_DIMENSION_SERVER_KEY, serverInfo)
-            .build());
+        Counter errorMeter = Counter.builder(METRICS_GROUP+METRICS_ERROR_RATE_NAME)
+            .description("Failed mail filter requests per target server")
+            .tags(METRICS_DIMENSION_SERVER_KEY, serverInfo)
+            .register(Metrics.globalRegistry);
 
-        return new Metrics(requestTimer, errorMeter);
+        return new MetricsHelper(requestTimer, errorMeter);
     }
 
-    private static class Metrics {
+    private static class MetricsHelper {
 
         final Timer requestTimer;
-        final Meter errorMeter;
+        final Counter errorMeter;
 
-        Metrics(Timer requestTimer, Meter errorMeter) {
+        MetricsHelper(Timer requestTimer, Counter errorMeter) {
             super();
             this.requestTimer = requestTimer;
             this.errorMeter = errorMeter;

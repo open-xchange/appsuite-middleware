@@ -92,7 +92,7 @@ public class PrimaryFailsafeCircuitBreakerCommandExecutor extends AbstractFailsa
             breakerInfo = circuitBreakers.putIfAbsent(key, newBreakerInfo);
             if (breakerInfo == null) {
                 breakerInfo = newBreakerInfo;
-                initMetricsFor(id, newBreakerInfo, metricServiceReference.get(), metricDescriptors.get());
+                initMetricsFor(id, newBreakerInfo);
             }
         }
         return breakerInfo;

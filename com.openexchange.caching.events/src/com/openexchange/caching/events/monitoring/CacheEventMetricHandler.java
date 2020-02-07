@@ -49,12 +49,9 @@
 
 package com.openexchange.caching.events.monitoring;
 
-import java.util.concurrent.TimeUnit;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.Metrics;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.metrics.MetricDescriptorCache;
-import com.openexchange.metrics.MetricService;
-import com.openexchange.metrics.MetricType;
 
 /**
  * {@link CacheEventMetricHandler}
@@ -64,32 +61,20 @@ import com.openexchange.metrics.MetricType;
  */
 public final class CacheEventMetricHandler implements CacheEventMonitor {
 
-    private static class MetricServiceAndCache {
+    private static final String UNIT = "events";
+    private static final String BASE = "cache.events";
+    private static final String OFFERED = BASE + ".offered";
+    private static final String DELIVERED = BASE + ".delivered";
 
-        final MetricDescriptorCache metricDescriptorCache;
-        final MetricService metricService;
-
-        MetricServiceAndCache(MetricService metricService) {
-            super();
-            this.metricDescriptorCache = new MetricDescriptorCache(metricService, "cache");
-            this.metricService = metricService;
-        }
-    }
-
-    // -------------------------------------------------------------------------------------------------------------------------------
-
-    private final AtomicReference<MetricServiceAndCache> metricServiceRef;
     private final AtomicLong numOfferedEvents;
     private final AtomicLong numDeliveredEvents;
 
     /**
-     * Initialises a new {@link CacheEventMetricHandler}.
+     * Initializes a new {@link CacheEventMetricHandler}.
      *
-     * @param metricService The instance of the {@link MetricService}
      */
-    public CacheEventMetricHandler(MetricService metricService) {
+    public CacheEventMetricHandler() {
         super();
-        this.metricServiceRef = new AtomicReference<>(metricService == null ? null : new MetricServiceAndCache(metricService));
         this.numOfferedEvents = new AtomicLong();
         this.numDeliveredEvents = new AtomicLong();
     }
@@ -102,15 +87,6 @@ public final class CacheEventMetricHandler implements CacheEventMonitor {
     @Override
     public long getDeliveredEvents() {
         return numDeliveredEvents.get();
-    }
-
-    /**
-     * Sets the metric service reference to given value
-     *
-     * @param metricService The metricService or <code>null</code>
-     */
-    public void setMetricService(MetricService metricService) {
-        metricServiceRef.set(metricService == null ? null : new MetricServiceAndCache(metricService));
     }
 
     /**
@@ -128,17 +104,9 @@ public final class CacheEventMetricHandler implements CacheEventMonitor {
         /*
          * increment overall and region-specific metrics
          */
-        MetricServiceAndCache metricServiceAndCache = metricServiceRef.get();
-        if (null == metricServiceAndCache) {
-            return;
-        }
-        MetricService metricService = metricServiceAndCache.metricService;
-        MetricDescriptorCache metricDescriptorCache = metricServiceAndCache.metricDescriptorCache;
-        metricService.getMeter(metricDescriptorCache.getMetricDescriptor(
-            MetricType.METER, "offeredEvents", "Offered events for all cache regions", "events", TimeUnit.MINUTES)).mark();
+        Counter.builder(OFFERED).baseUnit(UNIT).description("Offered events for all cache regions").register(Metrics.globalRegistry).increment();
         if (null != region) {
-            metricService.getMeter(metricDescriptorCache.getMetricDescriptor(
-                MetricType.METER, region + ".offeredEvents", "Offered events for cache region \"" + region + "\"", "events", TimeUnit.MINUTES)).mark();
+            Counter.builder(OFFERED + "." + region).baseUnit(UNIT).description(String.format("Offered events for cache region \"{}\"", region)).register(Metrics.globalRegistry).increment();
         }
     }
 
@@ -157,17 +125,9 @@ public final class CacheEventMetricHandler implements CacheEventMonitor {
         /*
          * increment overall and region-specific metrics
          */
-        MetricServiceAndCache metricServiceAndCache = metricServiceRef.get();
-        if (null == metricServiceAndCache) {
-            return;
-        }
-        MetricService metricService = metricServiceAndCache.metricService;
-        MetricDescriptorCache metricDescriptorCache = metricServiceAndCache.metricDescriptorCache;
-        metricService.getMeter(metricDescriptorCache.getMetricDescriptor(
-            MetricType.METER, "deliveredEvents", "Delivered events for all cache regions", "events", TimeUnit.MINUTES)).mark();
+        Counter.builder(DELIVERED).baseUnit(UNIT).description("Delivered events for all cache regions").register(Metrics.globalRegistry).increment();
         if (null != region) {
-            metricService.getMeter(metricDescriptorCache.getMetricDescriptor(
-                MetricType.METER, region + ".deliveredEvents", "Delivered events for cache region \"" + region + "\"", "events", TimeUnit.MINUTES)).mark();
+            Counter.builder(DELIVERED + "." + region).baseUnit(UNIT).description(String.format("Delivered events for cache region \"{}\"", region)).register(Metrics.globalRegistry).increment();
         }
     }
 

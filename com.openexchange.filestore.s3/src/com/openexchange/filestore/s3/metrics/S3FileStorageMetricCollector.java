@@ -56,7 +56,6 @@ import com.amazonaws.metrics.ServiceMetricCollector;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.s3.internal.S3Properties;
-import com.openexchange.metrics.MetricService;
 
 /**
  * {@link S3FileStorageMetricCollector}
@@ -66,7 +65,6 @@ import com.openexchange.metrics.MetricService;
 public class S3FileStorageMetricCollector extends MetricCollector {
 
     private boolean started;
-    private final MetricService metrics;
     private final LeanConfigurationService config;
     private final AtomicReference<RequestMetricCollector> s3FileStorageRequestMetricCollector;
     private final AtomicReference<ServiceMetricCollector> s3FileStorageServiceMetricCollector;
@@ -76,11 +74,10 @@ public class S3FileStorageMetricCollector extends MetricCollector {
      *
      * @throws OXException
      */
-    public S3FileStorageMetricCollector(MetricService metrics, LeanConfigurationService config) {
+    public S3FileStorageMetricCollector(LeanConfigurationService config) {
         super();
         s3FileStorageRequestMetricCollector = new AtomicReference<RequestMetricCollector>(RequestMetricCollector.NONE);
         s3FileStorageServiceMetricCollector = new AtomicReference<ServiceMetricCollector>(ServiceMetricCollector.NONE);
-        this.metrics = metrics;
         this.config = config;
         start();
     }
@@ -92,8 +89,8 @@ public class S3FileStorageMetricCollector extends MetricCollector {
         }
 
         // Not started? Initialize the request and service metric collectors
-        s3FileStorageRequestMetricCollector.set(new S3FileStorageRequestMetricCollector(metrics));
-        s3FileStorageServiceMetricCollector.set(new S3FileStorageServiceMetricCollector(metrics));
+        s3FileStorageRequestMetricCollector.set(new S3FileStorageRequestMetricCollector());
+        s3FileStorageServiceMetricCollector.set(new S3FileStorageServiceMetricCollector());
         started = true;
         return true;
     }
@@ -105,15 +102,10 @@ public class S3FileStorageMetricCollector extends MetricCollector {
         }
 
         // Was started? Replace the request and service metric collectors
-        S3FileStorageRequestMetricCollector reqCollector = null;
-        S3FileStorageServiceMetricCollector servCollector = null;
         {
             RequestMetricCollector tmpReqCollector = s3FileStorageRequestMetricCollector.get();
             if (tmpReqCollector != RequestMetricCollector.NONE) {
                 s3FileStorageRequestMetricCollector.set(RequestMetricCollector.NONE);
-                if (tmpReqCollector instanceof S3FileStorageRequestMetricCollector) {
-                    reqCollector = (S3FileStorageRequestMetricCollector) tmpReqCollector;
-                }
             }
         }
 
@@ -121,17 +113,7 @@ public class S3FileStorageMetricCollector extends MetricCollector {
             ServiceMetricCollector tmpServCollector = s3FileStorageServiceMetricCollector.get();
             if (tmpServCollector != ServiceMetricCollector.NONE) {
                 s3FileStorageServiceMetricCollector.set(ServiceMetricCollector.NONE);
-                if (tmpServCollector instanceof S3FileStorageServiceMetricCollector) {
-                    servCollector = (S3FileStorageServiceMetricCollector) tmpServCollector;
-                }
             }
-        }
-
-        if (null != reqCollector) {
-            reqCollector.stop();
-        }
-        if (null != servCollector) {
-            servCollector.stop();
         }
 
         started = false;

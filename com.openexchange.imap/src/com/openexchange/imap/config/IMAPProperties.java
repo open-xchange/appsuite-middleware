@@ -84,7 +84,6 @@ import com.openexchange.imap.commandexecutor.GenericFailsafeCircuitBreakerComman
 import com.openexchange.imap.commandexecutor.MonitoringCommandExecutor;
 import com.openexchange.imap.commandexecutor.PrimaryFailsafeCircuitBreakerCommandExecutor;
 import com.openexchange.imap.entity2acl.Entity2ACL;
-import com.openexchange.imap.osgi.MetricServiceTracker;
 import com.openexchange.imap.services.Services;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.java.CharsetDetector;
@@ -814,7 +813,6 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             for (AbstractMetricAwareCommandExecutor commandExecutor : commandExecutorList) {
                 IMAPStore.addCommandExecutor(commandExecutor);
             }
-            MetricServiceTracker.openMetricServiceTracker();
 
             IMAPReloadable.getInstance().addReloadable(new Reloadable() {
 
@@ -826,7 +824,6 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
                 @SuppressWarnings("synthetic-access")
                 @Override
                 public void reloadConfiguration(ConfigurationService configService) {
-                    MetricServiceTracker.closeMetricServiceTracker();
                     List<AbstractMetricAwareCommandExecutor> commandExecutorList = commandExecutors;
                     if (null != commandExecutorList) {
                         for (AbstractMetricAwareCommandExecutor commandExecutor : commandExecutorList) {
@@ -841,7 +838,6 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
                     for (AbstractMetricAwareCommandExecutor commandExecutor : commandExecutorList) {
                         IMAPStore.addCommandExecutor(commandExecutor);
                     }
-                    MetricServiceTracker.openMetricServiceTracker();
                 }
 
             });
@@ -1325,7 +1321,6 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         cipherSuites = null;
         hostExtractingGreetingListener = null;
         enableAttachmentSearch = false;
-        MetricServiceTracker.closeMetricServiceTracker();
         List<AbstractMetricAwareCommandExecutor> commandExecutorsList = commandExecutors;
         commandExecutors = null;
         if (null != commandExecutorsList) {

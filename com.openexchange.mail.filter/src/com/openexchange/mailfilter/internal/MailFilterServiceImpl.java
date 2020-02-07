@@ -55,7 +55,6 @@ import static com.openexchange.metrics.circuitbreaker.MetricCircuitBreakerConsta
 import static com.openexchange.metrics.circuitbreaker.MetricCircuitBreakerConstants.METRICS_DELAY_MILLIS_NAME;
 import static com.openexchange.metrics.circuitbreaker.MetricCircuitBreakerConstants.METRICS_DENIALS_DESC;
 import static com.openexchange.metrics.circuitbreaker.MetricCircuitBreakerConstants.METRICS_DENIALS_NAME;
-import static com.openexchange.metrics.circuitbreaker.MetricCircuitBreakerConstants.METRICS_DENIALS_UNITS;
 import static com.openexchange.metrics.circuitbreaker.MetricCircuitBreakerConstants.METRICS_DIMENSION_ACCOUNT_KEY;
 import static com.openexchange.metrics.circuitbreaker.MetricCircuitBreakerConstants.METRICS_DIMENSION_PROTOCOL_KEY;
 import static com.openexchange.metrics.circuitbreaker.MetricCircuitBreakerConstants.METRICS_FAILURE_THRESHOLD_DESC;
@@ -129,12 +128,11 @@ import com.openexchange.mailfilter.MailFilterService;
 import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
 import com.openexchange.mailfilter.properties.MailFilterProperty;
 import com.openexchange.mailfilter.properties.PasswordSource;
-import com.openexchange.metrics.MetricDescriptor;
-import com.openexchange.metrics.MetricService;
-import com.openexchange.metrics.MetricType;
-import com.openexchange.metrics.circuitbreaker.MetricCircuitBreakerConstants;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.Gauge;
+import io.micrometer.core.instrument.Metrics;
 import net.jodah.failsafe.CircuitBreaker;
 import net.jodah.failsafe.function.CheckedRunnable;
 
@@ -146,6 +144,9 @@ import net.jodah.failsafe.function.CheckedRunnable;
 public final class MailFilterServiceImpl implements MailFilterService, Reloadable {
 
     static final Logger LOGGER = LoggerFactory.getLogger(MailFilterServiceImpl.class);
+
+    private static final String METRICS_DIMENSION_PROTOCOL_VALUE = "mailfilter";
+    private static final String METRICS_DIMENSION_ACCOUNT_VALUE = "primary";
 
     private static final String CATEGORY_FLAG = "category";
     private static final String SYSTEM_CATEGORY_FLAG = "syscategory";
@@ -204,8 +205,6 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
     private final ServiceLookup services;
     private final AtomicReference<CircuitBreakerInfo> optionalCircuitBreaker;
 
-    private final AtomicReference<MetricService> metricServiceReference;
-    private final AtomicReference<List<MetricDescriptor>> metricDescriptors;
     private final AtomicReference<Runnable> onOpenMetricTask;
     private final AtomicReference<Runnable> onDeniedMetricTask;
 
@@ -221,14 +220,13 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
         staticCapabilities = CacheBuilder.newBuilder().maximumSize(10).expireAfterWrite(30, TimeUnit.MINUTES).build();
         optionalCircuitBreaker = new AtomicReference<>(null);
 
-        metricServiceReference = new AtomicReference<>(null);
         onOpenMetricTask = new AtomicReference<>(null);
         onDeniedMetricTask = new AtomicReference<>(null);
-        metricDescriptors = new AtomicReference<>(null);
 
         ConfigurationService config = getService(ConfigurationService.class);
         checkConfigfile(config);
         reinitBreaker(config);
+        initMetrics();
     }
 
     /**
@@ -316,158 +314,47 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
             optionalCircuitBreaker.set(null);
         }
 
-        // Re-init metrics
-        MetricService metricService = metricServiceReference.get();
-        if (metricService != null) {
-            dropMetrics(metricService);
-            initMetrics(metricService);
-        }
     }
 
-    private static final String METRICS_DIMENSION_PROTOCOL_VALUE = "mailfilter";
-    private static final String METRICS_DIMENSION_ACCOUNT_VALUE = "primary";
 
     /**
-     * Invoked when given metric service appeared.
-     *
-     * @param metricService The metric service
-     * @throws Exception If an error occurs
+     * Initializes the metrics for this {@link MailFilterService}
      */
-    public void onMetricServiceAppeared(MetricService metricService) throws Exception {
-        metricServiceReference.set(metricService);
-        initMetrics(metricService);
-    }
+    private void initMetrics() {
+        // @formatter:off
+        Gauge.builder(METRICS_GROUP+METRICS_STATUS_NAME, () -> getOptionalCircuitBreaker().map((info) -> I(info.getCircuitBreaker().getState().ordinal())).orElse((Integer) null))
+                       .tags(METRICS_DIMENSION_PROTOCOL_KEY, METRICS_DIMENSION_PROTOCOL_VALUE, METRICS_DIMENSION_ACCOUNT_KEY, METRICS_DIMENSION_ACCOUNT_VALUE)
+                       .register(Metrics.globalRegistry);
 
-    /**
-     * Invoked when given metric service appeared.
-     *
-     * @param metricService The metric service
-     */
-    private void initMetrics(MetricService metricService) {
-        CircuitBreakerInfo circuitBreakerInfo = optionalCircuitBreaker.get();
-        CircuitBreaker circuitBreaker = circuitBreakerInfo == null ? null : circuitBreakerInfo.getCircuitBreaker();
-        if (circuitBreaker == null) {
-            return;
-        }
+        Gauge.builder(METRICS_GROUP+METRICS_FAILURE_THRESHOLD_NAME, () -> getOptionalCircuitBreaker().map((info) -> I(info.getCircuitBreaker().getFailureThreshold().numerator)).orElse(I(0)))
+            .description(METRICS_FAILURE_THRESHOLD_DESC)
+            .tags(METRICS_DIMENSION_PROTOCOL_KEY, METRICS_DIMENSION_PROTOCOL_VALUE, METRICS_DIMENSION_ACCOUNT_KEY, METRICS_DIMENSION_ACCOUNT_VALUE)
+            .register(Metrics.globalRegistry);
 
-        List<MetricDescriptor> descriptors= new ArrayList<MetricDescriptor>();
+       Gauge.builder(METRICS_GROUP+METRICS_SUCCESS_THRESHOLD_NAME, () -> getOptionalCircuitBreaker().map((info) -> I(info.getCircuitBreaker().getSuccessThreshold().numerator)).orElse(I(0)))
+            .description(METRICS_SUCCESS_THRESHOLD_DESC)
+            .tags(METRICS_DIMENSION_PROTOCOL_KEY, METRICS_DIMENSION_PROTOCOL_VALUE, METRICS_DIMENSION_ACCOUNT_KEY, METRICS_DIMENSION_ACCOUNT_VALUE)
+            .register(Metrics.globalRegistry);
 
-        {
-            MetricDescriptor breakerStatusGauge = MetricDescriptor.newBuilder(METRICS_GROUP, METRICS_STATUS_NAME, MetricType.GAUGE)
-                .withDescription(MetricCircuitBreakerConstants.METRICS_STATUS_DESC)
-                .withMetricSupplier(() -> {
-                    return circuitBreaker.getState().name();
-                })
-                .addDimension(METRICS_DIMENSION_PROTOCOL_KEY, METRICS_DIMENSION_PROTOCOL_VALUE)
-                .addDimension(METRICS_DIMENSION_ACCOUNT_KEY, METRICS_DIMENSION_ACCOUNT_VALUE)
-                .build();
-            metricService.getGauge(breakerStatusGauge);
-            descriptors.add(breakerStatusGauge);
-        }
+       Gauge.builder(METRICS_GROUP+METRICS_DELAY_MILLIS_NAME, () -> getOptionalCircuitBreaker().map((info) -> L(info.getCircuitBreaker().getDelay().toMillis())).orElse(L(0l)))
+            .description(METRICS_DELAY_MILLIS_DESC)
+            .tags(METRICS_DIMENSION_PROTOCOL_KEY, METRICS_DIMENSION_PROTOCOL_VALUE, METRICS_DIMENSION_ACCOUNT_KEY, METRICS_DIMENSION_ACCOUNT_VALUE)
+            .register(Metrics.globalRegistry);
 
-        {
-            MetricDescriptor failureThresholdGauge = MetricDescriptor.newBuilder(METRICS_GROUP, METRICS_FAILURE_THRESHOLD_NAME, MetricType.GAUGE)
-                .withDescription(METRICS_FAILURE_THRESHOLD_DESC)
-                .withMetricSupplier(() -> {
-                    return I(circuitBreaker.getFailureThreshold().numerator);
-                })
-                .addDimension(METRICS_DIMENSION_PROTOCOL_KEY, METRICS_DIMENSION_PROTOCOL_VALUE)
-                .addDimension(METRICS_DIMENSION_ACCOUNT_KEY, METRICS_DIMENSION_ACCOUNT_VALUE)
-                .build();
-            metricService.getGauge(failureThresholdGauge);
-            descriptors.add(failureThresholdGauge);
-        }
 
-        {
-            MetricDescriptor successThresholdGauge = MetricDescriptor.newBuilder(METRICS_GROUP, METRICS_SUCCESS_THRESHOLD_NAME, MetricType.GAUGE)
-                .withDescription(METRICS_SUCCESS_THRESHOLD_DESC)
-                .withMetricSupplier(() -> {
-                    return I(circuitBreaker.getSuccessThreshold().numerator);
-                })
-                .addDimension(METRICS_DIMENSION_PROTOCOL_KEY, METRICS_DIMENSION_PROTOCOL_VALUE)
-                .addDimension(METRICS_DIMENSION_ACCOUNT_KEY, METRICS_DIMENSION_ACCOUNT_VALUE)
-                .build();
-            metricService.getGauge(successThresholdGauge);
-            descriptors.add(successThresholdGauge);
-        }
+        Counter TRIP_COUNT = Counter.builder(METRICS_GROUP + METRICS_TRIP_COUNT_NAME)
+            .description(METRICS_TRIP_COUNT_DESC)
+            .baseUnit(METRICS_TRIP_COUNT_UNITS)
+            .tags(METRICS_DIMENSION_PROTOCOL_KEY, METRICS_DIMENSION_PROTOCOL_VALUE, METRICS_DIMENSION_ACCOUNT_KEY, METRICS_DIMENSION_ACCOUNT_VALUE)
+            .register(Metrics.globalRegistry);
+        onOpenMetricTask.set(() -> TRIP_COUNT.increment());
 
-        {
-            MetricDescriptor delayMillisGauge = MetricDescriptor.newBuilder(METRICS_GROUP, METRICS_DELAY_MILLIS_NAME, MetricType.GAUGE)
-                .withDescription(METRICS_DELAY_MILLIS_DESC)
-                .withMetricSupplier(() -> {
-                    return L(circuitBreaker.getDelay().toMillis());
-                })
-                .addDimension(METRICS_DIMENSION_PROTOCOL_KEY, METRICS_DIMENSION_PROTOCOL_VALUE)
-                .addDimension(METRICS_DIMENSION_ACCOUNT_KEY, METRICS_DIMENSION_ACCOUNT_VALUE)
-                .build();
-            metricService.getGauge(delayMillisGauge);
-            descriptors.add(delayMillisGauge);
-        }
-
-        {
-            MetricDescriptor tripCounter = MetricDescriptor.newBuilder(METRICS_GROUP, METRICS_TRIP_COUNT_NAME, MetricType.COUNTER)
-                .withDescription(METRICS_TRIP_COUNT_DESC)
-                .withUnit(METRICS_TRIP_COUNT_UNITS)
-                .addDimension(METRICS_DIMENSION_PROTOCOL_KEY, METRICS_DIMENSION_PROTOCOL_VALUE)
-                .addDimension(METRICS_DIMENSION_ACCOUNT_KEY, METRICS_DIMENSION_ACCOUNT_VALUE)
-                .build();
-            metricService.getCounter(tripCounter);
-            onOpenMetricTask.set(new Runnable() {
-
-                @Override
-                public void run() {
-                    metricService.getCounter(tripCounter).incement();
-                }
-            });
-            descriptors.add(tripCounter);
-        }
-
-        {
-            MetricDescriptor denialMeter = MetricDescriptor.newBuilder(METRICS_GROUP, METRICS_DENIALS_NAME, MetricType.METER)
-                .withDescription(METRICS_DENIALS_DESC)
-                .withUnit(METRICS_DENIALS_UNITS)
-                .addDimension(METRICS_DIMENSION_PROTOCOL_KEY, METRICS_DIMENSION_PROTOCOL_VALUE)
-                .addDimension(METRICS_DIMENSION_ACCOUNT_KEY, METRICS_DIMENSION_ACCOUNT_VALUE)
-                .build();
-            metricService.getMeter(denialMeter);
-            onDeniedMetricTask.set(new Runnable() {
-
-                @Override
-                public void run() {
-                    metricService.getMeter(denialMeter).mark();
-                }
-            });
-            descriptors.add(denialMeter);
-        }
-
-        this.metricDescriptors.set(descriptors);
-    }
-
-    /**
-     * Invoked when given metric service is about to disappear.
-     *
-     * @param metricService The metric service
-     * @throws Exception If an error occurs
-     */
-    public void onMetricServiceDisppearing(MetricService metricService) throws Exception {
-        metricServiceReference.set(null);
-        dropMetrics(metricService);
-    }
-
-    /**
-     * Invoked when given metric service is about to disappear.
-     *
-     * @param metricService The metric service
-     */
-    private void dropMetrics(MetricService metricService) {
-        onDeniedMetricTask.set(null);
-        onOpenMetricTask.set(null);
-        List<MetricDescriptor> descriptors = this.metricDescriptors.getAndSet(null);
-        if (descriptors != null) {
-            for (MetricDescriptor metricDescriptor : descriptors) {
-                metricService.removeMetric(metricDescriptor);
-            }
-        }
+        Counter DENIAL_METER = Counter.builder(METRICS_GROUP+METRICS_DENIALS_NAME)
+            .description(METRICS_DENIALS_DESC)
+            .tags(METRICS_DIMENSION_PROTOCOL_KEY, METRICS_DIMENSION_PROTOCOL_VALUE, METRICS_DIMENSION_ACCOUNT_KEY, METRICS_DIMENSION_ACCOUNT_VALUE)
+            .register(Metrics.globalRegistry);
+        onDeniedMetricTask.set(() -> DENIAL_METER.increment());
+        // @formatter:on
     }
 
     /**
@@ -557,21 +444,12 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
         return Optional.ofNullable(optionalCircuitBreaker.get());
     }
 
-    /**
-     * Gets the optional metric service.
-     *
-     * @return The optional metric service
-     */
-    private Optional<MetricService> getOptionalMetricService() {
-        return Optional.ofNullable(metricServiceReference.get());
-    }
-
     @Override
     public final int createFilterRule(Credentials credentials, Rule rule) throws OXException {
         Object lock = lockFor(credentials);
         synchronized (lock) {
             SieveTextFilter sieveTextFilter = new SieveTextFilter(credentials);
-            SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials, getOptionalCircuitBreaker(), getOptionalMetricService());
+            SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials, getOptionalCircuitBreaker());
             try {
                 handlerConnect(sieveHandler, credentials.getSubject());
 
@@ -626,7 +504,7 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
         Object lock = lockFor(credentials);
         synchronized (lock) {
             SieveTextFilter sieveTextFilter = new SieveTextFilter(credentials);
-            SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials, getOptionalCircuitBreaker(), getOptionalMetricService());
+            SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials, getOptionalCircuitBreaker());
             try {
                 handlerConnect(sieveHandler, credentials.getSubject());
 
@@ -685,7 +563,7 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
         Object lock = lockFor(credentials);
         synchronized (lock) {
             SieveTextFilter sieveTextFilter = new SieveTextFilter(credentials);
-            SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials, getOptionalCircuitBreaker(), getOptionalMetricService());
+            SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials, getOptionalCircuitBreaker());
             try {
                 handlerConnect(sieveHandler, credentials.getSubject());
 
@@ -730,7 +608,7 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
     public final void purgeFilters(Credentials credentials) throws OXException {
         Object lock = lockFor(credentials);
         synchronized (lock) {
-            SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials, getOptionalCircuitBreaker(), getOptionalMetricService());
+            SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials, getOptionalCircuitBreaker());
             try {
                 handlerConnect(sieveHandler, credentials.getSubject());
 
@@ -755,7 +633,7 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
     public final String getActiveScript(Credentials credentials) throws OXException {
         Object lock = lockFor(credentials);
         synchronized (lock) {
-            SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials, getOptionalCircuitBreaker(), getOptionalMetricService());
+            SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials, getOptionalCircuitBreaker());
             try {
                 handlerConnect(sieveHandler, credentials.getSubject());
                 String expectedScriptName = getScriptName(credentials.getUserid(), credentials.getContextid());
@@ -785,7 +663,7 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
     public List<Rule> listRules(Credentials credentials, String flag) throws OXException {
         Object lock = lockFor(credentials);
         synchronized (lock) {
-            SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials, getOptionalCircuitBreaker(), getOptionalMetricService());
+            SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials, getOptionalCircuitBreaker());
             try {
                 handlerConnect(sieveHandler, credentials.getSubject());
                 String expectedScriptName = getScriptName(credentials.getUserid(), credentials.getContextid());
@@ -842,7 +720,7 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
     public List<Rule> listRules(Credentials credentials, List<FilterType> exclusionFlags) throws OXException {
         Object lock = lockFor(credentials);
         synchronized (lock) {
-            SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials, getOptionalCircuitBreaker(), getOptionalMetricService());
+            SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials, getOptionalCircuitBreaker());
             try {
                 handlerConnect(sieveHandler, credentials.getSubject());
                 String expectedScriptName = getScriptName(credentials.getUserid(), credentials.getContextid());
@@ -882,7 +760,7 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
         Object lock = lockFor(credentials);
         synchronized (lock) {
             SieveTextFilter sieveTextFilter = new SieveTextFilter(credentials);
-            SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials, getOptionalCircuitBreaker(), getOptionalMetricService());
+            SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials, getOptionalCircuitBreaker());
             try {
                 handlerConnect(sieveHandler, credentials.getSubject());
                 String expectedScriptName = getScriptName(credentials.getUserid(), credentials.getContextid());
@@ -941,7 +819,7 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
         Object lock = lockFor(credentials);
         synchronized (lock) {
             SieveTextFilter sieveTextFilter = new SieveTextFilter(credentials);
-            SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials, getOptionalCircuitBreaker(), getOptionalMetricService());
+            SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials, getOptionalCircuitBreaker());
 
             try {
                 handlerConnect(sieveHandler, credentials.getSubject());
@@ -985,7 +863,7 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
     public Set<String> getCapabilities(Credentials credentials) throws OXException {
         Object lock = lockFor(credentials);
         synchronized (lock) {
-            SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials, getOptionalCircuitBreaker(), getOptionalMetricService());
+            SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials, getOptionalCircuitBreaker());
             try {
                 handlerConnect(sieveHandler, credentials.getSubject());
                 Capabilities capabilities = sieveHandler.getCapabilities();
@@ -1002,7 +880,7 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
     public Set<String> getStaticCapabilities(final Credentials credentials) throws OXException {
         Object lock = lockFor(credentials);
         synchronized (lock) {
-            final SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials, Optional.empty(), getOptionalMetricService(), true);
+            final SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials, Optional.empty(), true);
             sieveHandler.setConnectTimeout(1500);
             sieveHandler.setReadTimeout(2000);
             HostAndPort key = new HostAndPort(sieveHandler.getSieveHost(), sieveHandler.getSievePort());
@@ -1075,9 +953,10 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
      * @param userId The user identifier
      * @param contextId the context identifier
      * @return The script name
+     * @throws OXException
      */
-    private String getScriptName(int userId, int contextId) {
-        LeanConfigurationService config = services.getService(LeanConfigurationService.class);
+    private String getScriptName(int userId, int contextId) throws OXException {
+        LeanConfigurationService config = services.getServiceSafe(LeanConfigurationService.class);
         return config.getProperty(userId, contextId, MailFilterProperty.scriptName);
     }
 
@@ -1086,9 +965,10 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
      * @param userId
      * @param contextId
      * @return
+     * @throws OXException
      */
-    boolean useSIEVEResponseCodes(int userId, int contextId) {
-        LeanConfigurationService config = services.getService(LeanConfigurationService.class);
+    boolean useSIEVEResponseCodes(int userId, int contextId) throws OXException {
+        LeanConfigurationService config = services.getServiceSafe(LeanConfigurationService.class);
         return config.getBooleanProperty(userId, contextId, MailFilterProperty.useSIEVEResponseCodes);
     }
 
@@ -1548,7 +1428,7 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
     public Map<String, Object> getExtendedProperties(Credentials credentials) throws OXException {
         Object lock = lockFor(credentials);
         synchronized (lock) {
-            SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials, getOptionalCircuitBreaker(), getOptionalMetricService());
+            SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials, getOptionalCircuitBreaker());
             try {
                 handlerConnect(sieveHandler, credentials.getSubject());
                 Capabilities capabilities = sieveHandler.getCapabilities();

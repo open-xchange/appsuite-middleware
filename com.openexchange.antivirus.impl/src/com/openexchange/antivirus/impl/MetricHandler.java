@@ -49,95 +49,81 @@
 
 package com.openexchange.antivirus.impl;
 
-import java.util.function.Consumer;
-import com.openexchange.metrics.MetricDescriptor;
-import com.openexchange.metrics.MetricDescriptorCache;
-import com.openexchange.metrics.MetricService;
-import com.openexchange.metrics.MetricType;
-import com.openexchange.server.ServiceLookup;
+import java.util.concurrent.TimeUnit;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.Timer;
 
 /**
  * {@link MetricHandler} - Simple utility class to handle metric updates
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.2
  */
 final class MetricHandler {
 
-    private final MetricDescriptorCache metricDescriptorCache;
-    private final ServiceLookup services;
+    private static final String RESULTS = "results";
 
     /**
-     * Initialises a new {@link MetricHandler}.
+     * Prevents initialization
      */
-    public MetricHandler(ServiceLookup services) {
+    private MetricHandler() {
         super();
-        this.services = services;
-        this.metricDescriptorCache = new MetricDescriptorCache(services.getService(MetricService.class), "antivirus");
     }
+
+    private final static Counter CACHE_HIT = Counter.builder("antivirus.cache.hit").description("Cached Anti-Virus results hits").baseUnit(RESULTS).register(Metrics.globalRegistry);
+    private final static Counter CACHE_MISS = Counter.builder("antivirus.cache.miss").description("Cached Anti-Virus results misses").baseUnit(RESULTS).register(Metrics.globalRegistry);
+    private final static Counter CACHE_INVALIDATIONS = Counter.builder("antivirus.cache.invalidations").description("Cached Anti-Virus results invalidations").baseUnit(RESULTS).register(Metrics.globalRegistry);
+    private final static Counter TRANSFER_SIZE = Counter.builder("antivirus.transfer.size").description("Measures the amount of bytes transfered to the anti-virus server").baseUnit("bytes").register(Metrics.globalRegistry);
+
+    private final static Timer SCANNING_RATE = Timer.builder("antivirus.scanning.rate").description("Measures the number of files scanned per second").register(Metrics.globalRegistry);
+    private final static Timer SCANNING_TIME = Timer.builder("antivirus.scanning.time").description("Measures the time elapsed during scanning a file").publishPercentileHistogram().register(Metrics.globalRegistry);
 
     /**
      * Increments the cache hits metric
      */
-    void incrementCacheHits() {
-        MetricDescriptor descriptor = metricDescriptorCache.getMetricDescriptor(MetricType.COUNTER, "Cache Hit", "Cached Anti-Virus results hits", "results");
-        updateMetric(t -> t.getCounter(descriptor).incement());
+    static void incrementCacheHits() {
+        CACHE_HIT.increment();
     }
 
     /**
      * Increments the cache misses metric
      */
-    void incrementCacheMisses() {
-        MetricDescriptor descriptor = metricDescriptorCache.getMetricDescriptor(MetricType.COUNTER, "Cache Miss", "Cached Anti-Virus results misses", "results");
-        updateMetric(t -> t.getCounter(descriptor).incement());
+    static void incrementCacheMisses() {
+        CACHE_MISS.increment();
     }
 
     /**
      * Increments the cache invalidations metric
      */
-    void incrementCacheInvalidations() {
-        MetricDescriptor descriptor = metricDescriptorCache.getMetricDescriptor(MetricType.COUNTER, "Cache Invalidations", "Cached Anti-Virus results invalidations", "results");
-        updateMetric(t -> t.getCounter(descriptor).incement());
+    static void incrementCacheInvalidations() {
+        CACHE_INVALIDATIONS.increment();
     }
 
     /**
-     * Increments the scans per second metric
+     * Records the scan time
      */
-    void updateScansPerSecond() {
-        MetricDescriptor descriptor = metricDescriptorCache.getMetricDescriptor(MetricType.METER, "Scanning Rate", "Measures the number of files scanned per second", "scans");
-        updateMetric(t -> t.getMeter(descriptor).mark());
+    static void recordScanTime(long  duration) {
+        SCANNING_RATE.record(duration, TimeUnit.MILLISECONDS);
     }
 
     /**
      * Updates the scanning time by the specified elapsed time
-     * 
-     * @param timeElapsed The elapsed time
+     *
+     * @param timeElapsed The elapsed time in milliseconds
      */
-    void updateScanningTime(long timeElapsed) {
-        MetricDescriptor descriptor = metricDescriptorCache.getMetricDescriptor(MetricType.HISTOGRAM, "Scanning Time", "Measures the time elapsed during scanning a file", "");
-        updateMetric(t -> t.getHistogram(descriptor).update(timeElapsed));
+    static void updateScanningTime(long timeElapsed) {
+        SCANNING_TIME.record(timeElapsed, TimeUnit.MILLISECONDS);
     }
 
     /**
-     * Updates the transfer rate by the specified content length
-     * 
-     * @param contentLength The content length
+     * Updates the transfer size by the specified content length
+     *
+     * @param contentLength The content length in bytes
      */
-    void updateTransferRate(long contentLength) {
-        MetricDescriptor descriptor = metricDescriptorCache.getMetricDescriptor(MetricType.METER, "Transfer Rate", "Measures the transfer rate when uploading a file to the anti-virus server", "bytes");
-        updateMetric(t -> t.getMeter(descriptor).mark(contentLength));
+    static void updateTransferRate(long contentLength) {
+        TRANSFER_SIZE.increment(contentLength);
     }
 
-    /**
-     * Updates the metric specified in the provided {@link Consumer}
-     * 
-     * @param consumer The consumer
-     */
-    private void updateMetric(Consumer<MetricService> consumer) {
-        MetricService metricService = services.getService(MetricService.class);
-        if (metricService == null) {
-            return;
-        }
-        consumer.accept(metricService);
-    }
 }
