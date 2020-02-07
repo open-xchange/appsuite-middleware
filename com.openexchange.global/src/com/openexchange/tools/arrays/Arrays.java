@@ -301,4 +301,33 @@ public final class Arrays {
         return false;
     }
 
+    /**
+     * Gets a value indicating whether the supplied array contains only elements that are "equal to" one of the supplied ones.
+     *
+     * @param array The array to check
+     * @param ts The possible elements to check against
+     * @return <code>true</code> if for all array elements an equal element was found, <code>false</code>, otherwise
+     */
+    public static <T> boolean containsOnly(T[] array, T... ts) {
+        if (null != ts) {
+            if (null == array) {
+                return false;
+            }
+            for (int i = array.length; i-- > 0;) {
+                boolean found = false;
+                for (int j = 0; j < ts.length; j++) {
+                    if (ts[j].equals(array[i])) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (false == found) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
 }
