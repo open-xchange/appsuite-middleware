@@ -49,18 +49,26 @@
 
 package com.openexchange.chronos.impl.performer;
 
+import static com.openexchange.chronos.common.CalendarUtils.getFields;
 import static com.openexchange.chronos.common.CalendarUtils.getObjectIDs;
+import static com.openexchange.chronos.common.CalendarUtils.isClassifiedFor;
+import static com.openexchange.chronos.common.CalendarUtils.isInRange;
+import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.SearchUtils.getSearchTerm;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
 import static com.openexchange.chronos.impl.Utils.getFolder;
 import static com.openexchange.chronos.impl.Utils.getFolderIdTerm;
+import static com.openexchange.chronos.impl.Utils.getTimeZone;
 import static com.openexchange.chronos.impl.Utils.isEnforceDefaultAttendee;
+import static com.openexchange.chronos.impl.Utils.isResolveOccurrences;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.READ_FOLDER;
 import static com.openexchange.folderstorage.Permission.READ_OWN_OBJECTS;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
+import static com.openexchange.tools.arrays.Arrays.contains;
+import static com.openexchange.tools.arrays.Arrays.containsOnly;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -68,12 +76,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import com.openexchange.chronos.AttendeeField;
+import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.common.Check;
 import com.openexchange.chronos.common.DefaultCalendarParameters;
 import com.openexchange.chronos.common.DefaultEventsResult;
+import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
@@ -84,6 +94,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
+import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SearchTerm;
@@ -143,16 +154,24 @@ public class AllPerformer extends AbstractQueryPerformer {
      * @return The loaded events
      */
     public List<Event> perform(String folderId) throws OXException {
-        /*
-         * perform search & userize the results based on the requested folder
-         */
         CalendarFolder folder = getFolder(session, folderId);
         requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
-        SearchTerm<?> searchTerm = getFolderIdTerm(session, folder);
         /*
-         * get events with default fields & load additional event data as needed
+         * check for possible shortcut if only id fields are requested and no recurrence expansion takes place
          */
         EventField[] requestedFields = session.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
+        EventField requestedOrderBy = session.get(CalendarParameters.PARAMETER_ORDER_BY, EventField.class);
+        if (null != requestedFields && containsOnly(requestedFields, EventField.ID, EventField.FOLDER_ID, EventField.SERIES_ID, EventField.UID, EventField.TIMESTAMP) &&
+            (null == requestedOrderBy || contains(requestedFields, requestedOrderBy)) && false == isResolveOccurrences(session)) {
+            /*
+             * search events & directly pass-through results from storage
+             */
+            return performPassedThrough(folder, requestedFields);
+        }
+        /*
+         * perform default search & userize the results based on the requested folder
+         */
+        SearchTerm<?> searchTerm = getFolderIdTerm(session, folder);
         EventField[] fields = getFieldsForStorage(requestedFields);
         List<Event> events = storage.getEventStorage().searchEvents(searchTerm, getSearchOptionsForStorage(session), fields);
         events = storage.getUtilities().loadAdditionalEventData(folder.getCalendarUserId(), events, fields);
@@ -329,6 +348,80 @@ public class AllPerformer extends AbstractQueryPerformer {
         List<Event> events = storage.getEventStorage().searchEvents(searchTerm, getSearchOptionsForStorage(session), fields);
         events = storage.getUtilities().loadAdditionalEventData(session.getUserId(), events, fields);
         return postProcessor(getObjectIDs(events), session.getUserId(), requestedFields, fields).process(events, session.getUserId()).getEvents();
+    }
+
+    /**
+     * Performs the 'all' request in a more efficient mode where event data loaded from the storage is passed through (almost) as-is.
+     * <p/>
+     * May only be used if a very limited number of fields is requested by the client, and no post-processing like expanding recurring
+     * event series or applying personal alarms is required.
+     *
+     * @param folder The calendar folder to get the event data from
+     * @param requestedFields The fields as requested by the client
+     * @return The loaded events
+     */
+    private List<Event> performPassedThrough(CalendarFolder folder, EventField[] requestedFields) throws OXException {
+        /*
+         * ensure to retrieve classification in shared folders to remove classified events later on
+         */
+        EventField[] queriedFields = requestedFields;
+        if (SharedType.getInstance().equals(folder.getType()) && false == contains(queriedFields, EventField.CLASSIFICATION)) {
+            queriedFields = Arrays.add(queriedFields, EventField.CLASSIFICATION);
+        }
+        /*
+         * ensure to retrieve date/time-related fields if a range is specified
+         */
+        SearchOptions searchOptions = new SearchOptions(session);
+        if (null != searchOptions.getFrom() || null != searchOptions.getUntil()) {
+            queriedFields = Arrays.add(queriedFields, EventField.ID, EventField.SERIES_ID, EventField.RECURRENCE_ID, EventField.START_DATE, EventField.END_DATE, 
+                EventField.RECURRENCE_RULE, EventField.RECURRENCE_DATES, EventField.DELETE_EXCEPTION_DATES, EventField.CHANGE_EXCEPTION_DATES);
+        }
+        /*
+         * load events in folder from storage
+         */
+        SearchTerm<?> searchTerm = getFolderIdTerm(session, folder);
+        if (false == PublicType.getInstance().equals(folder.getType())) {
+            searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
+                .addSearchTerm(searchTerm)
+                .addSearchTerm(new CompositeSearchTerm(CompositeOperation.OR)
+                    .addSearchTerm(getSearchTerm(AttendeeField.HIDDEN, SingleOperation.ISNULL))
+                    .addSearchTerm(getSearchTerm(AttendeeField.HIDDEN, SingleOperation.EQUALS, Boolean.FALSE)));
+        }
+        List<Event> loadedEvents = storage.getEventStorage().searchEvents(searchTerm, searchOptions, queriedFields);
+        /*
+         * perform basic post-processing of event data as necessary
+         */
+        List<Event> events = new ArrayList<Event>(loadedEvents.size());
+        for (Event event : loadedEvents) {
+            /*
+             * re-check that event falls within requested time range
+             */
+            if (null != searchOptions.getFrom() || null != searchOptions.getUntil()) {
+                if (isSeriesMaster(event)) {
+                    if (false == session.getRecurrenceService().iterateEventOccurrences(event, searchOptions.getFrom(), searchOptions.getUntil()).hasNext()) {
+                        continue;
+                    }
+                } else if (false == isInRange(event, searchOptions.getFrom(), searchOptions.getUntil(), getTimeZone(session))) {
+                    continue;
+                }
+            }
+            /*
+             * remove 'private' event in shared folder if classified for requesting user
+             */
+            if (Classification.PRIVATE.equals(event.getClassification()) && SharedType.getInstance().equals(folder.getType())) {
+                event = storage.getEventStorage().loadEvent(event.getId(), getFields(requestedFields));
+                event.setAttendees(storage.getAttendeeStorage().loadAttendees(event.getId()));
+                if (isClassifiedFor(event, session.getUserId())) {
+                    continue;
+                }
+            }
+            /*
+             * take over only the requested fields for resulting event list
+             */
+            event.setFolderId(folder.getId());
+            events.add(EventMapper.getInstance().copy(event, null, true, requestedFields));
+        }
+        return events;
     }
 
     private static Map<Integer, List<CalendarFolder>> getFoldersPerCalendarUserId(List<CalendarFolder> folders) {
