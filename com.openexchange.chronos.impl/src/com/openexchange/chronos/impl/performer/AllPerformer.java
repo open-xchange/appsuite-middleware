@@ -56,14 +56,11 @@ import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
 import static com.openexchange.chronos.impl.Utils.getFolder;
 import static com.openexchange.chronos.impl.Utils.getFolderIdTerm;
 import static com.openexchange.chronos.impl.Utils.isEnforceDefaultAttendee;
-import static com.openexchange.chronos.impl.Utils.isResolveOccurrences;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.READ_FOLDER;
 import static com.openexchange.folderstorage.Permission.READ_OWN_OBJECTS;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
-import static com.openexchange.tools.arrays.Arrays.contains;
-import static com.openexchange.tools.arrays.Arrays.containsOnly;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -146,32 +143,16 @@ public class AllPerformer extends AbstractQueryPerformer {
      * @return The loaded events
      */
     public List<Event> perform(String folderId) throws OXException {
+        /*
+         * perform search & userize the results based on the requested folder
+         */
         CalendarFolder folder = getFolder(session, folderId);
         requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
+        SearchTerm<?> searchTerm = getFolderIdTerm(session, folder);
         /*
-         * check for possible shortcut if only id fields are requested 
+         * get events with default fields & load additional event data as needed
          */
         EventField[] requestedFields = session.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
-        EventField requestedOrderBy = session.get(CalendarParameters.PARAMETER_ORDER_BY, EventField.class);
-        if (null != requestedFields && containsOnly(requestedFields, EventField.ID, EventField.FOLDER_ID, EventField.SERIES_ID, EventField.UID, EventField.TIMESTAMP) &&
-            (null == requestedOrderBy || contains(requestedFields, requestedOrderBy)) && false == isResolveOccurrences(session)) {
-            /*
-             * search events & directly pass-through results from storage
-             */
-            SearchTerm<?> searchTerm = getFolderIdTerm(session, folder);
-            if (false == PublicType.getInstance().equals(folder.getType())) {
-                searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
-                    .addSearchTerm(searchTerm)
-                    .addSearchTerm(new CompositeSearchTerm(CompositeOperation.OR)
-                        .addSearchTerm(getSearchTerm(AttendeeField.HIDDEN, SingleOperation.ISNULL))
-                        .addSearchTerm(getSearchTerm(AttendeeField.HIDDEN, SingleOperation.EQUALS, Boolean.FALSE)));
-            }
-            return storage.getEventStorage().searchEvents(searchTerm, new SearchOptions(session), requestedFields);
-        }
-        /*
-         * perform default search & userize the results based on the requested folder
-         */
-        SearchTerm<?> searchTerm = getFolderIdTerm(session, folder);
         EventField[] fields = getFieldsForStorage(requestedFields);
         List<Event> events = storage.getEventStorage().searchEvents(searchTerm, getSearchOptionsForStorage(session), fields);
         events = storage.getUtilities().loadAdditionalEventData(folder.getCalendarUserId(), events, fields);
