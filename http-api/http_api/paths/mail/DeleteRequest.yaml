@@ -13,6 +13,18 @@
         schema:
           type: integer
           format: int64
+      - in: query
+        name: harddelete
+        description: 'Flag to hard delete the messages, meaning not to create a backup copy of each message in default trash if set to `true`.'
+        required: false
+        schema:
+          type: boolean
+      - in: query
+        name: returnAffectedFolders
+        description: 'Flag to generate an JSON reponse as described below. If set to `false` just an empty JSON Array is returned.'
+        required: false
+        schema:
+          type: boolean
     responses:
       '200':
         description: >
