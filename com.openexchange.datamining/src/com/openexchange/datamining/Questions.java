@@ -872,7 +872,7 @@ public class Questions {
     protected static void reportNumberOfUsersWhoLoggedInWithClientCalDAVInTheLast30Days() {
         try {
             Datamining.allTheQuestions.add(NUMBER_OF_USERS_WHO_LOGGED_IN_WITH_CLIENT_CALDAV_IN_THE_LAST_30_DAYS);
-            String sql = "SELECT count(DISTINCT id, cid) FROM user_attribute WHERE name = 'client:CALDAV' AND value>=" + Tools.calculate30DaysBack() + ";";
+            String sql = "SELECT count(DISTINCT id, cid) FROM user_attribute WHERE name LIKE 'client:%CALDAV%' AND value>=" + Tools.calculate30DaysBack() + ";";
             BigInteger numberOfUsers = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_USERS_WHO_LOGGED_IN_WITH_CLIENT_CALDAV_IN_THE_LAST_30_DAYS, numberOfUsers.toString());
         } catch (Exception e) {
@@ -883,7 +883,7 @@ public class Questions {
     protected static void reportNumberOfUsersWhoLoggedInWithClientCardDAVInTheLast30Days() {
         try {
             Datamining.allTheQuestions.add(NUMBER_OF_USERS_WHO_LOGGED_IN_WITH_CLIENT_CARDDAV_IN_THE_LAST_30_DAYS);
-            String sql = "SELECT count(DISTINCT id, cid) FROM user_attribute WHERE name = 'client:CARDDAV' AND value>=" + Tools.calculate30DaysBack() + ";";
+            String sql = "SELECT count(DISTINCT id, cid) FROM user_attribute WHERE name LIKE 'client:%CARDDAV%' AND value>=" + Tools.calculate30DaysBack() + ";";
             BigInteger numberOfUsers = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_USERS_WHO_LOGGED_IN_WITH_CLIENT_CARDDAV_IN_THE_LAST_30_DAYS, numberOfUsers.toString());
         } catch (Exception e) {
