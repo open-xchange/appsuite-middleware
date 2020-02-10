@@ -107,7 +107,16 @@ public class ITipUtils {
      */
     public static String generateHeaderValue(String uid, boolean timestamp) {
         StringBuilder builder = new StringBuilder("<Appointment.");
-        builder.append(uid);
+        if (uid.contains("@")) {
+            /*
+             * Remove the domain part from the UID to construct a valid address
+             */
+            builder.append(uid.substring(0, uid.lastIndexOf("@")));
+            builder.append("(at)");
+            builder.append(uid.substring(uid.lastIndexOf("@") + 1, uid.length()));
+        } else {
+            builder.append(uid);
+        }
         if (timestamp) {
             builder.append(".");
             builder.append(String.valueOf(System.currentTimeMillis()));
