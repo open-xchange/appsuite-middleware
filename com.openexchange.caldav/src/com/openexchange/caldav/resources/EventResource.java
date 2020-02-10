@@ -523,6 +523,7 @@ public class EventResource extends DAVObjectResource<Event> {
                         LOG.warn("{}: No exception created.", getUrl());
                         throw new PreconditionException(DAVProtocol.CAL_NS.getURI(), "valid-calendar-object-resource", url, HttpServletResponse.SC_FORBIDDEN);
                     }
+                    clientTimestamp = result.getTimestamp();
                 }
                 return createdEvent;
             }
