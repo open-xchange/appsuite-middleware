@@ -95,7 +95,7 @@ public class RssActivator extends AJAXModuleActivator {
                     final ConfigViewFactory factory = getService(ConfigViewFactory.class);
                     if (null != factory) {
                         final ConfigView view = factory.getView(session.getUserId(), session.getContextId());
-                        return view.opt("com.openexchange.rss", boolean.class, Boolean.TRUE).booleanValue();
+                        return view.opt("com.openexchange.rss", boolean.class, Boolean.TRUE).booleanValue() && view.opt("com.openexchange.messaging.rss", boolean.class, Boolean.TRUE).booleanValue();
                     }
                 }
 
