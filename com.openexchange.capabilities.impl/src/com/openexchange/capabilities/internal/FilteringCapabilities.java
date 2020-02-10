@@ -50,7 +50,6 @@
 package com.openexchange.capabilities.internal;
 
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import com.openexchange.capabilities.Capability;
@@ -65,18 +64,18 @@ import com.openexchange.java.Strings;
  */
 public class FilteringCapabilities {
 
-    private final Map<Capability, Boolean> forced;
-    private final CapabilitySet caps;
+    private final Map<Capability, ValueAndScope> forced;
+    private final CapabilitySetImpl caps;
     private final Function<String, Boolean> filter;
 
     /**
      * Initializes a new {@link FilteringCapabilities}.
      *
      * @param forced the map with forced capabilities
-     * @param caps The {@link CapabilitySet}
+     * @param caps The capability set
      * @param filter A function which returns <code>true</code> or <code>false</code> depending on whether the capability should be applied or not.
      */
-    public FilteringCapabilities(Map<Capability, Boolean> forced, CapabilitySet caps, Function<String, Boolean> filter) {
+    public FilteringCapabilities(Map<Capability, ValueAndScope> forced, CapabilitySetImpl caps, Function<String, Boolean> filter) {
         super();
         this.forced = forced;
         this.caps = caps;
@@ -88,15 +87,17 @@ public class FilteringCapabilities {
      *
      * @param name The name of the capability
      * @param sup The {@link Supplier} which provides the capability if it is accepted
+     * @param source The capability source
+     * @param optionalReason The optional reason string; may be <code>null</code>
      */
-    public void add(String name, Supplier<Capability> sup) {
+    public void add(String name, Supplier<Capability> sup, CapabilitySource capabilitySource, String optReason) {
         if (Strings.isEmpty(name) || sup == null) {
             return;
         }
         if (filter.apply(name).booleanValue()) {
             Capability capability = sup.get();
             if (capability != null) {
-                caps.add(capability);
+                caps.add(capability, capabilitySource, optReason);
             }
         }
     }
@@ -105,13 +106,15 @@ public class FilteringCapabilities {
      * Removes the capability with the given name from the {@link CapabilitySet} if it is accepted by the filter of this {@link FilteringCapabilities}
      *
      * @param name The name of the capability
+     * @param source The capability source
+     * @param optionalReason The optional reason string; may be <code>null</code>
      */
-    public void remove(String name) {
+    public void remove(String name, CapabilitySource capabilitySource, String optReason) {
         if (Strings.isEmpty(name)) {
             return;
         }
         if (filter.apply(name).booleanValue()) {
-            caps.remove(name);
+            caps.remove(name, capabilitySource, optReason);
         }
     }
 
@@ -122,7 +125,7 @@ public class FilteringCapabilities {
      * @param sup The {@link Supplier} which provides the capability if it is accepted
      * @param value The value of the capability
      */
-    public void addForced(String name, Supplier<Capability> sup, Boolean value) {
+    public void addForced(String name, Supplier<Capability> sup, ValueAndScope value) {
         if (Strings.isEmpty(name) || sup == null || value == null) {
             return;
         }
@@ -139,16 +142,8 @@ public class FilteringCapabilities {
      *
      * @return The {@link CapabilitySet}
      */
-    public CapabilitySet getCapabilitySet() {
-        CapabilitySet clone = caps.clone();
-        for (Entry<Capability, Boolean> forcedCapability : forced.entrySet()) {
-            Boolean capValue = forcedCapability.getValue();
-            if (capValue != null && capValue.booleanValue()) {
-                clone.add(forcedCapability.getKey());
-            } else {
-                clone.remove(forcedCapability.getKey());
-            }
-        }
-        return clone;
+    public CapabilitySetImpl getCapabilitySet() {
+        return caps;
     }
+
 }

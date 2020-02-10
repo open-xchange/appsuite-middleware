@@ -65,7 +65,7 @@ public class CapabilityServiceImplTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        this.capabilities = new CapabilitySet(64);
+        this.capabilities = new CapabilitySetImpl(64);
         this.capabilities.add(CapabilityServiceImpl.getCapability(Permission.CALDAV.toString().toLowerCase()));
         this.capabilities.add(CapabilityServiceImpl.getCapability(Permission.CARDDAV.toString().toLowerCase()));
         this.capabilities.add(CapabilityServiceImpl.getCapability(Permission.INFOSTORE.toString().toLowerCase()));

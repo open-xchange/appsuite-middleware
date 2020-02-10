@@ -47,39 +47,33 @@
  *
  */
 
-package com.openexchange.capabilities;
+package com.openexchange.capabilities.internal;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
 
 /**
- * {@link DependentCapabilityChecker}
+ * {@link ValueAndScope} - The value and config-cascade scope for a forced capability; e.g. <code>"com.openexchange.capability.forced.mycap"</code>.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.4
  */
-public abstract class DependentCapabilityChecker implements CapabilityChecker {
+class ValueAndScope {
+
+    /** The config-cascade scope */
+    final String scope;
+
+    /** The value; whether to add or not */
+    final Boolean value;
 
     /**
-     * Initializes a new {@link DependentCapabilityChecker}.
-     */
-    protected DependentCapabilityChecker() {
-        super();
-    }
-
-    /**
-     * Check whether the capability should be awarded for a certain user
+     * Initializes a new {@link ValueAndScope}.
      *
-     * @param capability The capability to check
-     * @param session Provides the users session for which to check
-     * @param capabilities The capabilities collected so far (declared capabilities are added at the very end)
-     * @return Whether to award this capability or not
-     * @throws OXException If check fails
+     * @param value The value; whether to add or not
+     * @param scope The config-cascade scope
      */
-    public abstract boolean isEnabled(String capability, Session session, CapabilitySet capabilities) throws OXException;
-
-    @Override
-    public boolean isEnabled(String capability, Session session) throws OXException {
-        return isEnabled(capability, session, Capabilities.emptyCapabilitySet());
+    ValueAndScope(Boolean value, String scope) {
+        super();
+        this.value = value;
+        this.scope = scope;
     }
 
 }

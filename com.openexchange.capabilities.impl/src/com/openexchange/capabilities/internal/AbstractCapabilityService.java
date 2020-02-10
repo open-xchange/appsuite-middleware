@@ -152,10 +152,14 @@ public abstract class AbstractCapabilityService implements CapabilityService, Re
 
             @Override
             public void handleProperty(final String propValue, final CapabilitySet capabilities) throws OXException {
+                doHandleProperty(propValue, (CapabilitySetImpl) capabilities);
+            }
+
+            private void doHandleProperty(final String propValue, final CapabilitySetImpl capabilities) {
                 if (Boolean.parseBoolean(propValue)) {
-                    capabilities.add(getCapability(Permission.CALDAV));
+                    capabilities.add(getCapability(Permission.CALDAV), CapabilitySource.CONFIGURATION, "Through property \"com.openexchange.caldav.enabled\"");
                 } else {
-                    capabilities.remove(Permission.CALDAV.getCapabilityName());
+                    capabilities.remove(Permission.CALDAV.getCapabilityName(), CapabilitySource.CONFIGURATION, "Through property \"com.openexchange.caldav.enabled\"");
                 }
             }
         });
@@ -164,10 +168,14 @@ public abstract class AbstractCapabilityService implements CapabilityService, Re
 
             @Override
             public void handleProperty(final String propValue, final CapabilitySet capabilities) throws OXException {
+                doHandleProperty(propValue, (CapabilitySetImpl) capabilities);
+            }
+
+            private void doHandleProperty(final String propValue, final CapabilitySetImpl capabilities) {
                 if (Boolean.parseBoolean(propValue)) {
-                    capabilities.add(getCapability(Permission.CARDDAV));
+                    capabilities.add(getCapability(Permission.CARDDAV), CapabilitySource.CONFIGURATION, "Through property \"com.openexchange.carddav.enabled\"");
                 } else {
-                    capabilities.remove(Permission.CARDDAV.getCapabilityName());
+                    capabilities.remove(Permission.CARDDAV.getCapabilityName(), CapabilitySource.CONFIGURATION, "Through property \"com.openexchange.carddav.enabled\"");
                 }
             }
         });
@@ -283,13 +291,13 @@ public abstract class AbstractCapabilityService implements CapabilityService, Re
         }
     }
 
-    private CapabilitySet optCachedCapabilitySet(final int userId, final int contextId) {
+    private CapabilitySetImpl optCachedCapabilitySet(final int userId, final int contextId) {
         final Cache cache = optCache();
         if (null == cache) {
             return null;
         }
         final Object object = cache.getFromGroup(Integer.valueOf(userId), Integer.toString(contextId));
-        return (object instanceof CapabilitySet) ? ((CapabilitySet) object).clone() : null;
+        return (object instanceof CapabilitySetImpl) ? ((CapabilitySetImpl) object).clone() : null;
     }
 
     @Override
@@ -325,50 +333,77 @@ public abstract class AbstractCapabilityService implements CapabilityService, Re
      * @return
      * @throws OXException
      */
-    private CapabilitySet getCapabilities(int userId, int contextId, Session session, boolean alignPermissions, boolean allowCache) throws OXException {
-        final CapabilitySet cachedCapabilitySet = allowCache ? optCachedCapabilitySet(userId, contextId) : null;
-        if (null != cachedCapabilitySet) {
-            if (alignPermissions) {
-                alignPermissions(cachedCapabilitySet);
+    private CapabilitySetImpl getCapabilities(int userId, int contextId, Session session, boolean alignPermissions, boolean allowCache) throws OXException {
+        return getCapabilities(userId, contextId, session, alignPermissions, getCacheOptionsFor(allowCache, true));
+    }
+
+
+    /**
+     * Gets the capabilities.
+     *
+     * @param userId The user ID or <code>-1</code>
+     * @param contextId The context ID or <code>-1</code>
+     * @param session The session; must either belong to the user and context ID or be <code>null</code>
+     * @param alignPermissions Whether permission-bound capabilities shall be removed from the resulting set if the services
+     *                         which define/require those are unavailable (e.g. a user has the <code>editpassword</code> permission
+     *                         set, but no PasswordChangeService is available).
+     * @param cacheOptions The cache options
+     * @return
+     * @throws OXException
+     */
+    private CapabilitySetImpl getCapabilities(int userId, int contextId, Session session, boolean alignPermissions, CacheOptions cacheOptions) throws OXException {
+        // Try fetch from cache is allowed
+        if (cacheOptions.allowFetchFromCache) {
+            CapabilitySetImpl cachedCapabilitySet = optCachedCapabilitySet(userId, contextId);
+            if (null != cachedCapabilitySet) {
+                if (alignPermissions) {
+                    alignPermissions(cachedCapabilitySet);
+                }
+                return cachedCapabilitySet;
             }
-            return cachedCapabilitySet;
         }
 
-        User user = null;
+        // Load context
         Context context = null;
         if (contextId > 0) {
             context = requireService(ContextService.class, services).getContext(contextId);
-            if (userId > 0) {
-                user = requireService(UserService.class, services).getUser(userId, context);
-            }
         }
 
-        /*
-         * Never ever re-order the apply methods!
+        // Load user
+        User user = null;
+        if (userId > 0) {
+            user = requireService(UserService.class, services).getUser(userId, context);
+        }
+
+        /*-
+         * Compile set of effective capabilities
+         *
+         * NOTE: Never ever re-order the apply methods!
          */
-        CapabilitySet capabilities = new CapabilitySet(64);
-        Map<Capability, Boolean> forcedCapabilities = new HashMap<Capability, Boolean>(4);
+        CapabilitySetImpl capabilities = new CapabilitySetImpl(64);
+        Map<Capability, ValueAndScope> forcedCapabilities = new HashMap<Capability, ValueAndScope>(4);
         applyUserPermissions(capabilities, user, context);
-        applyConfiguredCapabilities(capabilities, forcedCapabilities, user, context, allowCache);
-        BoolReference putIntoCache = new BoolReference(true);
+        applyConfiguredCapabilities(capabilities, forcedCapabilities, user, context, cacheOptions.allowFetchFromCache);
+        BoolReference putIntoCache = new BoolReference(cacheOptions.allowPutIntoCache);
         if (session == null) {
             applyDeclaredCapabilities(capabilities, ServerSessionAdapter.valueOf(userId, contextId), putIntoCache); // Code smell level: Ninja...
         } else {
             applyDeclaredCapabilities(capabilities, session, putIntoCache);
         }
         applyGuestFilter(capabilities, user);
-        for (Map.Entry<Capability, Boolean> forcedCapability : forcedCapabilities.entrySet()) {
+        for (Map.Entry<Capability, ValueAndScope> forcedCapability : forcedCapabilities.entrySet()) {
             Capability capability = forcedCapability.getKey();
-            if (forcedCapability.getValue().booleanValue()) {
-                capabilities.add(capability);
+            ValueAndScope vas = forcedCapability.getValue();
+            if (vas.value.booleanValue()) {
+                capabilities.add(capability, CapabilitySource.CONFIGURATION, "Forced through \"com.openexchange.capability.forced." + capability.getId() + "\" with final scope " + vas.scope);
             } else {
-                capabilities.remove(capability);
+                capabilities.remove(capability, CapabilitySource.CONFIGURATION, "Forced through \"com.openexchange.capability.forced." + capability.getId() + "\" with final scope " + vas.scope);
             }
         }
 
         if (putIntoCache.getValue() && userId > 0 && contextId > 0 && (session == null || !session.isTransient())) {
             // Put in cache
-            final Cache cache = optCache();
+            Cache cache = optCache();
             if (null != cache) {
                 cache.putInGroup(Integer.valueOf(userId), Integer.toString(contextId), capabilities.clone(), false);
             }
@@ -376,6 +411,10 @@ public abstract class AbstractCapabilityService implements CapabilityService, Re
 
         if (alignPermissions) {
             alignPermissions(capabilities);
+        }
+
+        if (LOG.isDebugEnabled()) {
+            capabilities.printHistoryFor(userId, contextId, LOG);
         }
 
         return capabilities;
@@ -403,7 +442,7 @@ public abstract class AbstractCapabilityService implements CapabilityService, Re
      * @param context The context; if <code>null</code>, calling this method is a no-op
      * @throws OXException
      */
-    private void applyUserPermissions(CapabilitySet capabilities, User user, Context context) throws OXException {
+    private void applyUserPermissions(CapabilitySetImpl capabilities, User user, Context context) throws OXException {
         if (user == null || context == null) {
             return;
         }
@@ -413,68 +452,68 @@ public abstract class AbstractCapabilityService implements CapabilityService, Re
 
         // Capabilities by user permission bits
         for (final Permission p : Permission.byBits(userPermissionBits.getPermissionBits())) {
-            capabilities.add(getCapability(p));
+            capabilities.add(getCapability(p), CapabilitySource.PERMISSIONS);
         }
 
         // Webmail
         if (user.getId() == context.getMailadmin()) {
             final boolean adminMailLoginEnabled = services.getService(ConfigurationService.class).getBoolProperty("com.openexchange.mail.adminMailLoginEnabled", false);
             if (!adminMailLoginEnabled) {
-                capabilities.remove(getCapability(Permission.WEBMAIL));
+                capabilities.remove(getCapability(Permission.WEBMAIL), CapabilitySource.PERMISSIONS, "Through property \"com.openexchange.mail.adminMailLoginEnabled\"");
             }
         }
 
         // Portal - stick to positive "portal" capability only
         capabilities.remove("denied_portal");
         if (userPermissionBits.hasPortal()) {
-            capabilities.add(getCapability("portal"));
+            capabilities.add(getCapability("portal"), CapabilitySource.PERMISSIONS);
         } else {
-            capabilities.remove("portal");
+            capabilities.remove("portal", CapabilitySource.PERMISSIONS);
         }
         // Free-Busy
         if (userPermissionBits.hasFreeBusy()) {
-            capabilities.add(getCapability("freebusy"));
+            capabilities.add(getCapability("freebusy"), CapabilitySource.PERMISSIONS);
         } else {
-            capabilities.remove("freebusy");
+            capabilities.remove("freebusy", CapabilitySource.PERMISSIONS);
         }
         // Conflict-Handling
         if (userPermissionBits.hasConflictHandling()) {
-            capabilities.add(getCapability("conflict_handling"));
+            capabilities.add(getCapability("conflict_handling"), CapabilitySource.PERMISSIONS);
         } else {
-            capabilities.remove("conflict_handling");
+            capabilities.remove("conflict_handling", CapabilitySource.PERMISSIONS);
         }
         // Participants-Dialog
         if (userPermissionBits.hasParticipantsDialog()) {
-            capabilities.add(getCapability("participants_dialog"));
+            capabilities.add(getCapability("participants_dialog"), CapabilitySource.PERMISSIONS);
         } else {
-            capabilities.remove("participants_dialog");
+            capabilities.remove("participants_dialog", CapabilitySource.PERMISSIONS);
         }
         // Group-ware
         if (userPermissionBits.hasGroupware()) {
-            capabilities.add(getCapability("groupware"));
+            capabilities.add(getCapability("groupware"), CapabilitySource.PERMISSIONS);
         } else {
-            capabilities.remove("groupware");
+            capabilities.remove("groupware", CapabilitySource.PERMISSIONS);
         }
         // PIM
         if (userPermissionBits.hasPIM()) {
-            capabilities.add(getCapability("pim"));
+            capabilities.add(getCapability("pim"), CapabilitySource.PERMISSIONS);
         } else {
-            capabilities.remove("pim");
+            capabilities.remove("pim", CapabilitySource.PERMISSIONS);
         }
         // Spam
         if (userPermissionBits.hasWebMail()) {
             UserSettingMail mailSettings = UserSettingMailStorage.getInstance().getUserSettingMail(user.getId(), context);
             if (null != mailSettings && mailSettings.isSpamEnabled()) {
-                capabilities.add(getCapability("spam"));
+                capabilities.add(getCapability("spam"), CapabilitySource.PERMISSIONS);
             } else {
-                capabilities.remove("spam");
+                capabilities.remove("spam", CapabilitySource.PERMISSIONS);
             }
         }
         // Global Address Book
         if (userPermissionBits.isGlobalAddressBookEnabled()) {
-            capabilities.add(getCapability("gab"));
+            capabilities.add(getCapability("gab"), CapabilitySource.PERMISSIONS);
         } else {
-            capabilities.remove("gab");
+            capabilities.remove("gab", CapabilitySource.PERMISSIONS);
         }
     }
 
@@ -497,7 +536,7 @@ public abstract class AbstractCapabilityService implements CapabilityService, Re
      * @param allowCache Whether caching of loaded capabilities is allowed
      * @throws OXException
      */
-    private void applyConfiguredCapabilities(CapabilitySet capabilities, Map<Capability, Boolean> forcedCapabilities, User user, Context context, boolean allowCache) throws OXException {
+    private void applyConfiguredCapabilities(CapabilitySetImpl capabilities, Map<Capability, ValueAndScope> forcedCapabilities, User user, Context context, boolean allowCache) throws OXException {
         final int contextId = context == null ? -1 : context.getContextId();
         final int userId = user == null ? -1 : user.getId();
         FilteringCapabilities filteredCaps = new FilteringCapabilities(forcedCapabilities, capabilities, (name) -> B(isLegal(name, userId, contextId)));
@@ -544,17 +583,17 @@ public abstract class AbstractCapabilityService implements CapabilityService, Re
     }
 
     /**
-     * Adds all capabilities that have been specified via config cascade properties to the passed set.
+     * Adds all capabilities that have been specified via config-cascade properties to the passed set.
      *
      * <ul>
-     *  <li>capabilities specified via the <code>permissions</code> property - looked up via config cascade</li>
-     *  <li>capabilities specified as properties with a <code>com.openexchange.capability.</code> prefix - looked up via config cascade</li>
+     *  <li>capabilities specified via the <code>permissions</code> property - looked up via config-cascade</li>
+     *  <li>capabilities specified as properties with a <code>com.openexchange.capability.</code> prefix - looked up via config-cascade</li>
      *  <li>capabilities that depend on whether a feature is enabled via a configuration property (e.g. <code>com.openexchange.caldav.enabled => caldav</code>)</li>
      * </ul>
      *
      * @param capabilities The {@link FilteringCapabilities}
-     * @param userId The user ID for config cascade lookups
-     * @param contextId The context ID for config cascade lookups
+     * @param userId The user ID for config-cascade lookups
+     * @param contextId The context ID for config-cascade lookups
      * @throws OXException
      */
     private void applyConfigCascade(FilteringCapabilities capabilities, int userId, int contextId) throws OXException {
@@ -566,19 +605,18 @@ public abstract class AbstractCapabilityService implements CapabilityService, Re
             for (final String scope : configViews.getSearchPath()) {
                 final String permissions = view.property(property, String.class).precedence(scope).get();
                 if (permissions != null) {
-                    for (String permissionModifier : P_SPLIT.split(permissions)) {
+                    for (String permissionModifier : Strings.splitByComma(permissions)) {
                         if (!isEmpty(permissionModifier)) {
-                            permissionModifier = permissionModifier.trim();
-                            final char firstChar = permissionModifier.charAt(0);
+                            char firstChar = permissionModifier.charAt(0);
                             if ('-' == firstChar) {
-                                capabilities.remove(permissionModifier.substring(1));
+                                capabilities.remove(permissionModifier.substring(1), CapabilitySource.CONFIGURATION, "Through \"permissions\" property in file 'permissions.properties'");
                             } else {
                                 if ('+' == firstChar) {
                                     String name = permissionModifier.substring(1);
-                                    capabilities.add(name, () -> getCapability(name));
+                                    capabilities.add(name, () -> getCapability(name), CapabilitySource.CONFIGURATION, "Through \"permissions\" property in file 'permissions.properties'");
                                 } else {
                                     String name = permissionModifier;
-                                    capabilities.add(name, () -> getCapability(name));
+                                    capabilities.add(name, () -> getCapability(name), CapabilitySource.CONFIGURATION, "Through \"permissions\" property in file 'permissions.properties'");
                                 }
                             }
                         }
@@ -603,18 +641,27 @@ public abstract class AbstractCapabilityService implements CapabilityService, Re
                      * apply capability
                      */
                     String name = toLowerCase(propName.substring(28));
+                    String scope = configProperty.getScope();
                     String value = configProperty.get();
                     if (name.startsWith("forced.", 0)) {
                         name = name.substring(7);
                         final String capName = name;
-                        capabilities.addForced(name, () -> getCapability(capName) , Boolean.valueOf(value));
+                        capabilities.addForced(name, () -> getCapability(capName), new ValueAndScope(Boolean.valueOf(value), scope));
                     } else {
                         final String capName = name;
                         if (Boolean.parseBoolean(value)) {
-                            capabilities.add(name, () -> getCapability(capName));
+                            capabilities.add(name, () -> getCapability(capName), CapabilitySource.CONFIGURATION, "Final scope: " + scope);
                         } else {
-                            capabilities.remove(name);
+                            capabilities.remove(name, CapabilitySource.CONFIGURATION, "Final scope: " + scope);
                         }
+                    }
+                    /*
+                     * additionally check for discouraged use of module permissions
+                     */
+                    Permission matchingModulePermission = Permission.get(name);
+                    if (null != matchingModulePermission) {
+                        LOG.debug("Overriding module permission {} with 'capability' property {}={} for user {} in context {}.",
+                            matchingModulePermission, propName, value, Integer.valueOf(userId), Integer.valueOf(contextId));
                     }
                 }
             }
@@ -639,7 +686,7 @@ public abstract class AbstractCapabilityService implements CapabilityService, Re
      */
     private void applyContextCapabilities(FilteringCapabilities capabilities, int contextId, boolean allowCache) throws OXException {
         if (contextId > 0) {
-            applySet(capabilities, getContextCaps(contextId, allowCache));
+            applySet(capabilities, getContextCaps(contextId, allowCache), CapabilitySource.CONTEXT);
         }
     }
 
@@ -654,7 +701,7 @@ public abstract class AbstractCapabilityService implements CapabilityService, Re
      */
     private void applyUserCapabilities(FilteringCapabilities capabilities, int userId, int contextId, boolean allowCache) throws OXException {
         if (contextId > 0 && userId > 0) {
-            applySet(capabilities, getUserCaps(userId, contextId, allowCache));
+            applySet(capabilities, getUserCaps(userId, contextId, allowCache), CapabilitySource.USER);
         }
     }
 
@@ -665,7 +712,7 @@ public abstract class AbstractCapabilityService implements CapabilityService, Re
      * @param capabilities The {@link FilteringCapabilities}
      * @param capabilitiesToApply The capabilities to apply
      */
-    private void applySet(FilteringCapabilities capabilities, Set<String> capabilitiesToApply) {
+    private void applySet(FilteringCapabilities capabilities, Set<String> capabilitiesToApply, CapabilitySource source) {
         Set<String> set = new HashSet<String>();
         Set<String> removees = new HashSet<String>();
         for (String sCap : capabilitiesToApply) {
@@ -691,10 +738,10 @@ public abstract class AbstractCapabilityService implements CapabilityService, Re
 
         // Merge them into result set
         for (String sCap : removees) {
-            capabilities.remove(sCap);
+            capabilities.remove(sCap, source, null);
         }
         for (String sCap : set) {
-            capabilities.add(sCap, () -> getCapability(sCap));
+            capabilities.add(sCap, () -> getCapability(sCap), source, null);
         }
     }
 
@@ -706,12 +753,12 @@ public abstract class AbstractCapabilityService implements CapabilityService, Re
      * @param session The session; either a real one or a synthetic one, but never <code>null</code>
      * @param putIntoCache Tracks whether a put into cache is recommended
      */
-    private void applyDeclaredCapabilities(CapabilitySet capabilities, Session session, BoolReference putIntoCache) {
+    private void applyDeclaredCapabilities(CapabilitySetImpl capabilities, Session session, BoolReference putIntoCache) {
         for (String cap : declaredCapabilities.keySet()) {
             if (check(cap, session, capabilities, putIntoCache)) {
-                capabilities.add(getCapability(cap));
+                capabilities.add(getCapability(cap), CapabilitySource.DECLARED);
             } else {
-                capabilities.remove(cap);
+                capabilities.remove(cap, CapabilitySource.DECLARED);
             }
         }
     }
@@ -723,7 +770,7 @@ public abstract class AbstractCapabilityService implements CapabilityService, Re
      * @param capabilities The capability set
      * @param user The user; if <code>null</code>, calling this method is a no-op
      */
-    private void applyGuestFilter(CapabilitySet capabilities, User user) {
+    private void applyGuestFilter(CapabilitySetImpl capabilities, User user) {
         if (user == null) {
             return;
         }
@@ -771,7 +818,7 @@ public abstract class AbstractCapabilityService implements CapabilityService, Re
      * @param context The context
      * @throws OXException
      */
-    private void applyStaticGuestCapabilities(CapabilitySet capabilities, User user, Context context) throws OXException {
+    private void applyStaticGuestCapabilities(CapabilitySetImpl capabilities, User user, Context context) throws OXException {
         ConfigViewFactory configViews = services.getService(ConfigViewFactory.class);
         if (configViews != null) {
             ConfigView view = configViews.getView(user.getId(), context.getContextId());
@@ -779,7 +826,7 @@ public abstract class AbstractCapabilityService implements CapabilityService, Re
             if (Strings.isNotEmpty(value)) {
                 List<String> staticCapabilities = Strings.splitAndTrim(value, ",");
                 for (String cap : staticCapabilities) {
-                    capabilities.add(getCapability(cap));
+                    capabilities.add(getCapability(cap), CapabilitySource.CONFIGURATION, "Through property \"com.openexchange.share.staticGuestCapabilities\"");
                 }
             }
         }
@@ -946,6 +993,17 @@ public abstract class AbstractCapabilityService implements CapabilityService, Re
      */
     @Override
     public Map<String, Map<String, Set<String>>> getCapabilitiesSource(int userId, int contextId) throws OXException {
+        if ((userId > 0 && contextId > 0) && LOG.isDebugEnabled()) {
+            CapabilitySetImpl capabilitySet = optCachedCapabilitySet(userId, contextId);
+            if (capabilitySet == null) {
+                capabilitySet = getCapabilities(userId, contextId, null, true, getCacheOptionsFor(false, false));
+            } else {
+                alignPermissions(capabilitySet);
+            }
+
+            capabilitySet.printHistoryFor(userId, contextId, LOG);
+        }
+
         Map<String, Map<String, Set<String>>> sets = new LinkedHashMap<String, Map<String, Set<String>>>(6);
 
         /*
@@ -962,7 +1020,7 @@ public abstract class AbstractCapabilityService implements CapabilityService, Re
             }
 
             Set<String> capabilities = new TreeSet<String>();
-            CapabilitySet capabilitySet = new CapabilitySet(64);
+            CapabilitySetImpl capabilitySet = new CapabilitySetImpl(64);
             applyUserPermissions(capabilitySet, user, context);
             for (Iterator<Capability> iterator = capabilitySet.iterator(); iterator.hasNext();) {
                 Capability capability = iterator.next();
@@ -977,8 +1035,8 @@ public abstract class AbstractCapabilityService implements CapabilityService, Re
         }
 
         {
-            CapabilitySet grantedCapabilities = new CapabilitySet(16);
-            CapabilitySet deniedCapabilities = new CapabilitySet(16);
+            CapabilitySetImpl grantedCapabilities = new CapabilitySetImpl(16);
+            CapabilitySetImpl deniedCapabilities = new CapabilitySetImpl(16);
             final ConfigViewFactory configViews = services.getService(ConfigViewFactory.class);
             if (configViews != null) {
                 final ConfigView view = configViews.getView(userId, contextId);
@@ -1116,7 +1174,7 @@ public abstract class AbstractCapabilityService implements CapabilityService, Re
 
         {
             // Now the declared ones
-            CapabilitySet grantedCapabilities = new CapabilitySet(16);
+            CapabilitySetImpl grantedCapabilities = new CapabilitySetImpl(16);
             FakeSession fakeSession = new FakeSession(userId, contextId);
             BoolReference dontCare = new BoolReference();
             for (String cap : declaredCapabilities.keySet()) {
@@ -1261,6 +1319,29 @@ public abstract class AbstractCapabilityService implements CapabilityService, Re
     }
 
     // ------------------------------------------------------------------------------------------------------------------------- //
+
+    private static final CacheOptions READ_OPTIONS = new CacheOptions(true, true);
+
+    private static final CacheOptions NON_READ_OPTIONS = new CacheOptions(false, true);
+
+    private static CacheOptions getCacheOptionsFor(boolean allowFetchFromCache, boolean allowPutInotCache) {
+        if (allowPutInotCache) {
+            return allowFetchFromCache ? READ_OPTIONS : NON_READ_OPTIONS;
+        }
+        return new CacheOptions(allowFetchFromCache, allowPutInotCache);
+    }
+
+    private static final class CacheOptions {
+
+        final boolean allowFetchFromCache;
+        final boolean allowPutIntoCache;
+
+        CacheOptions(boolean allowFetchFromCache, boolean allowPutIntoCache) {
+            super();
+            this.allowFetchFromCache = allowFetchFromCache;
+            this.allowPutIntoCache = allowPutIntoCache;
+        }
+    }
 
     private static final class FakeSession implements Session, Serializable {
 

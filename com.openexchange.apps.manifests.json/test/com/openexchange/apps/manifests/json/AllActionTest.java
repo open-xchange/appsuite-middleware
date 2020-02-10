@@ -66,8 +66,8 @@ import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.apps.manifests.DefaultManifestBuilder;
 import com.openexchange.apps.manifests.ManifestBuilder;
 import com.openexchange.apps.manifests.ManifestContributor;
+import com.openexchange.capabilities.Capabilities;
 import com.openexchange.capabilities.CapabilityService;
-import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.NearRegistryServiceTracker;
 import com.openexchange.tools.session.ServerSession;
@@ -113,7 +113,7 @@ public class AllActionTest {
         Mockito.when(B(this.serverSession.isAnonymous())).thenReturn(Boolean.FALSE);
         Mockito.when(serviceLookup.getService(CapabilityService.class)).thenReturn(this.capabilityService);
         Mockito.when(this.capabilityService.getCapabilities(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt(), ArgumentMatchers.anyBoolean(), ArgumentMatchers.anyBoolean())).thenReturn(
-            new CapabilitySet(0));
+            Capabilities.emptyCapabilitySet());
         Mockito.when(this.manifestContributorTracker.getServiceList()).thenReturn(Collections.<ManifestContributor> emptyList());
     }
 

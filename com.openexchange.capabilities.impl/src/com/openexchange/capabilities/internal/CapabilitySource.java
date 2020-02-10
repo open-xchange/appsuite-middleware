@@ -47,101 +47,41 @@
  *
  */
 
-package com.openexchange.capabilities;
+package com.openexchange.capabilities.internal;
 
-import java.io.Serializable;
-import java.util.Iterator;
-import java.util.Set;
 
 /**
- * {@link CapabilitySet} - A capability set.
+ * {@link CapabilitySource} - An enumeration of capability sources.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.4
  */
-public interface CapabilitySet extends Iterable<Capability>, Serializable, Cloneable {
+public enum CapabilitySource {
 
     /**
-     * Gets the size
-     *
-     * @return The size
+     * Capabilities associated with user permissions
      */
-    int size();
-
+    PERMISSIONS,
     /**
-     * Checks if set is empty
-     *
-     * @return <code>true</code> if empty; else <code>false</code>
+     * Capabilities set through configuration using <code>"com.openexchange.capability"</code> (and <code>"com.openexchange.capability.forced"</code> respectively) prefix
      */
-    boolean isEmpty();
-
+    CONFIGURATION,
     /**
-     * Checks for presence of given capability.
-     *
-     * @param capability The capability to look for
-     * @return <code>true</code> if contained; else <code>false</code>
+     * Capabilities applied to a certain context (as <code>context_capabilities</code> DB entries) through provisioning API
      */
-    boolean contains(Capability capability);
-
+    CONTEXT,
     /**
-     * Checks for presence of denoted capability.
-     *
-     * @param id The capability identifier to look for
-     * @return <code>true</code> if contained; else <code>false</code>
+     * Capabilities applied to a certain user (as <code>user_capabilities</code> DB entries) through provisioning API
      */
-    boolean contains(String id);
-
+    USER,
     /**
-     * Gets the capability identifies by the supplied ID.
-     *
-     * @param id The capability identifier to look for
-     * @return The capability, or <code>null</code> if not found
+     * Capabilities declared (and controlled) by application
      */
-    Capability get(String id);
-
+    DECLARED,
     /**
-     * Gets an iterator for capabilities.
-     *
-     * @return An iterator for capabilities
+     * Capabilities programmatically managed by application
      */
-    @Override
-    Iterator<Capability> iterator();
-
-    /**
-     * Adds given capability.
-     *
-     * @param capability The capability to add
-     * @return <code>true</code> if set changed; otherwise <code>false</code> if already contained
-     */
-    boolean add(Capability capability);
-
-    /**
-     * Removes the given capability.
-     *
-     * @param capability The capability
-     * @return <code>true</code> if removed; otherwise <code>false</code> if no such capability was contained
-     */
-    boolean remove(Capability capability);
-
-    /**
-     * Removes the denoted capability.
-     *
-     * @param id The capability identifier
-     * @return <code>true</code> if removed; otherwise <code>false</code> if no such capability was contained
-     */
-    boolean remove(String id);
-
-    /**
-     * Clears this set.
-     */
-    void clear();
-
-    /**
-     * Creates the {@link Set set} view for this capability set.
-     * <p>
-     * Changes to returned set are <b>not</b> reflected in this capability set.
-     *
-     * @return The {@link Set set} view for this capability set
-     */
-    Set<Capability> asSet();
+    PROGRAMMATIC,
+    ;
 
 }

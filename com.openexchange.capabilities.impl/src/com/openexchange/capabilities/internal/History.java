@@ -47,101 +47,86 @@
  *
  */
 
-package com.openexchange.capabilities;
+package com.openexchange.capabilities.internal;
 
 import java.io.Serializable;
-import java.util.Iterator;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
- * {@link CapabilitySet} - A capability set.
+ * {@link History} - A set of operations, which were applied to a capability set.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.4
  */
-public interface CapabilitySet extends Iterable<Capability>, Serializable, Cloneable {
+public class History implements Serializable {
+
+    private static final long serialVersionUID = 1254265250025909179L;
+
+    /** The operations map */
+    private final transient List<Operation> operations;
 
     /**
-     * Gets the size
-     *
-     * @return The size
+     * Initializes a new {@link History}.
      */
-    int size();
+    public History() {
+        super();
+        operations = new ArrayList<>();
+    }
 
     /**
-     * Checks if set is empty
+     * Adds specified operation to this history.
      *
-     * @return <code>true</code> if empty; else <code>false</code>
+     * @param operation The operation to add
+     * @return <code>true</code> if an existent operation associated with the same capability has been replaced; otherwise <code>false</code>
      */
-    boolean isEmpty();
+    public synchronized void addOperation(Operation operation) {
+        operations.add(operation);
+    }
 
     /**
-     * Checks for presence of given capability.
+     * Gets a mapping of operations grouped by type. Each listing is chronologically sorted.
      *
-     * @param capability The capability to look for
-     * @return <code>true</code> if contained; else <code>false</code>
+     * @return The operation mapping
      */
-    boolean contains(Capability capability);
+    public synchronized Map<Operation.Type, List<Operation>> getGroupedOperations() {
+        Map<Operation.Type, List<Operation>> map = new TreeMap<>();
+
+        for (Operation operation : this.operations) {
+            List<Operation> ops = map.get(operation.getType());
+            if (ops == null) {
+                ops = new ArrayList<>();
+                map.put(operation.getType(), ops);
+            }
+            ops.add(operation);
+        }
+
+        return map;
+    }
 
     /**
-     * Checks for presence of denoted capability.
+     * Gets a chronological listing of this history's operations.
      *
-     * @param id The capability identifier to look for
-     * @return <code>true</code> if contained; else <code>false</code>
+     * @return The operations
      */
-    boolean contains(String id);
+    public synchronized List<Operation> getOperations() {
+        return new ArrayList<>(operations);
+    }
 
     /**
-     * Gets the capability identifies by the supplied ID.
+     * Checks if this history contains operations.
      *
-     * @param id The capability identifier to look for
-     * @return The capability, or <code>null</code> if not found
+     * @return <tt>true</tt> if this history contains no operations; otherwise <code>false</code>
      */
-    Capability get(String id);
+    public synchronized boolean isEmpty() {
+        return this.operations.isEmpty();
+    }
 
-    /**
-     * Gets an iterator for capabilities.
-     *
-     * @return An iterator for capabilities
-     */
     @Override
-    Iterator<Capability> iterator();
-
-    /**
-     * Adds given capability.
-     *
-     * @param capability The capability to add
-     * @return <code>true</code> if set changed; otherwise <code>false</code> if already contained
-     */
-    boolean add(Capability capability);
-
-    /**
-     * Removes the given capability.
-     *
-     * @param capability The capability
-     * @return <code>true</code> if removed; otherwise <code>false</code> if no such capability was contained
-     */
-    boolean remove(Capability capability);
-
-    /**
-     * Removes the denoted capability.
-     *
-     * @param id The capability identifier
-     * @return <code>true</code> if removed; otherwise <code>false</code> if no such capability was contained
-     */
-    boolean remove(String id);
-
-    /**
-     * Clears this set.
-     */
-    void clear();
-
-    /**
-     * Creates the {@link Set set} view for this capability set.
-     * <p>
-     * Changes to returned set are <b>not</b> reflected in this capability set.
-     *
-     * @return The {@link Set set} view for this capability set
-     */
-    Set<Capability> asSet();
+    public synchronized String toString() {
+        return operations.toString();
+    }
 
 }

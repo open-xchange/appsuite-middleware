@@ -50,98 +50,101 @@
 package com.openexchange.capabilities;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Set;
 
 /**
- * {@link CapabilitySet} - A capability set.
+ * {@link Capabilities} -  A utility class for capabilities.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.4
  */
-public interface CapabilitySet extends Iterable<Capability>, Serializable, Cloneable {
+public class Capabilities {
 
     /**
-     * Gets the size
+     * Initializes a new {@link Capabilities}.
+     */
+    private Capabilities() {
+        super();
+    }
+
+    private static final CapabilitySet EMPTY_SET = new EmptyCapabilitySet();
+
+    /**
+     * Gets an empty set (immutable). This set is serializable.
      *
-     * @return The size
+     * @return the empty set
      */
-    int size();
+    public static final CapabilitySet emptyCapabilitySet() {
+        return EMPTY_SET;
+    }
 
-    /**
-     * Checks if set is empty
-     *
-     * @return <code>true</code> if empty; else <code>false</code>
-     */
-    boolean isEmpty();
+    // -------------------------------------------------------------------------------------------------------------------------------------
 
-    /**
-     * Checks for presence of given capability.
-     *
-     * @param capability The capability to look for
-     * @return <code>true</code> if contained; else <code>false</code>
-     */
-    boolean contains(Capability capability);
+    private static class EmptyCapabilitySet implements CapabilitySet, Serializable {
 
-    /**
-     * Checks for presence of denoted capability.
-     *
-     * @param id The capability identifier to look for
-     * @return <code>true</code> if contained; else <code>false</code>
-     */
-    boolean contains(String id);
+        private static final long serialVersionUID = -2940333299499389866L;
 
-    /**
-     * Gets the capability identifies by the supplied ID.
-     *
-     * @param id The capability identifier to look for
-     * @return The capability, or <code>null</code> if not found
-     */
-    Capability get(String id);
+        EmptyCapabilitySet() {
+            super();
+        }
 
-    /**
-     * Gets an iterator for capabilities.
-     *
-     * @return An iterator for capabilities
-     */
-    @Override
-    Iterator<Capability> iterator();
+        @Override
+        public int size() {
+            return 0;
+        }
 
-    /**
-     * Adds given capability.
-     *
-     * @param capability The capability to add
-     * @return <code>true</code> if set changed; otherwise <code>false</code> if already contained
-     */
-    boolean add(Capability capability);
+        @Override
+        public boolean isEmpty() {
+            return true;
+        }
 
-    /**
-     * Removes the given capability.
-     *
-     * @param capability The capability
-     * @return <code>true</code> if removed; otherwise <code>false</code> if no such capability was contained
-     */
-    boolean remove(Capability capability);
+        @Override
+        public boolean contains(Capability capability) {
+            return false;
+        }
 
-    /**
-     * Removes the denoted capability.
-     *
-     * @param id The capability identifier
-     * @return <code>true</code> if removed; otherwise <code>false</code> if no such capability was contained
-     */
-    boolean remove(String id);
+        @Override
+        public boolean contains(String id) {
+            return false;
+        }
 
-    /**
-     * Clears this set.
-     */
-    void clear();
+        @Override
+        public Capability get(String id) {
+            return null;
+        }
 
-    /**
-     * Creates the {@link Set set} view for this capability set.
-     * <p>
-     * Changes to returned set are <b>not</b> reflected in this capability set.
-     *
-     * @return The {@link Set set} view for this capability set
-     */
-    Set<Capability> asSet();
+        @Override
+        public Iterator<Capability> iterator() {
+            return Collections.<Capability> emptySet().iterator();
+        }
+
+        @Override
+        public boolean add(Capability capability) {
+            return false;
+        }
+
+        @Override
+        public boolean remove(Capability capability) {
+            return false;
+        }
+
+        @Override
+        public boolean remove(String id) {
+            return false;
+        }
+
+        @Override
+        public void clear() {
+            // Nothing to do
+        }
+
+        @Override
+        public Set<Capability> asSet() {
+            return Collections.emptySet();
+        }
+
+    }
 
 }
