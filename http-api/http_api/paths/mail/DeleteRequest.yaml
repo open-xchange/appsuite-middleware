@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /mail?action=delete:
   put:
     operationId: deleteMails
@@ -14,6 +15,18 @@
         format: int64
         description: 'Not IMAP: timestamp of the last update of the deleted mails.'
         required: false
+      - in: query
+        name: harddelete
+        description: 'Flag to hard delete the messages, meaning not to create a backup copy of each message in default trash if set to `true`.'
+        required: false
+        schema:
+          type: boolean
+      - in: query
+        name: returnAffectedFolders
+        description: 'Flag to generate an JSON reponse as described below. If set to `false` just an empty JSON Array is returned.'
+        required: false
+        schema:
+          type: boolean
       - in: body
         name: body
         description: A JSON array of JSON objects with the id and folder of the mails.
