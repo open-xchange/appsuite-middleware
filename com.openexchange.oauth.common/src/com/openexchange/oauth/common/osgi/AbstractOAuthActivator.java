@@ -108,6 +108,11 @@ public abstract class AbstractOAuthActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return NEEDED_SERVICES;
     }
+    
+    @Override
+    protected boolean stopOnServiceUnavailability() {
+        return true;
+    }
 
     @Override
     protected void startBundle() throws Exception {
