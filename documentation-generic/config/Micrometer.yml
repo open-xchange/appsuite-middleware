@@ -1,0 +1,30 @@
+feature_name: Micrometer
+feature_description: |
+  Properties for the micrometer metrics framework
+properties:
+    - key: com.openexchange.metrics.micrometer.basicauth.login
+      description: |
+        The basic auth login of the prometheus /metrics endpoint. 
+        Note: 
+        Only if this and [[com.openexchange.metrics.micrometer.basicauth.password]] are configured is the endpoint basic auth protected.
+      defaultValue: 
+      version: 7.10.4
+      reloadable: false
+      configcascadeAware: false
+      related: com.openexchange.metrics.micrometer.basicauth.password
+      file: micrometer.properties
+      packageName: open-xchange-core
+      tags: ["Micrometer", "Metrics"]
+    - key: com.openexchange.metrics.micrometer.basicauth.password
+      description: |
+        The basic auth password of the prometheus /metrics endpoint.
+        Note: 
+        Only if this and [[com.openexchange.metrics.micrometer.basicauth.login]] are configured is the endpoint basic auth protected.
+      defaultValue: 
+      version: 7.10.4
+      reloadable: false
+      configcascadeAware: false
+      related: com.openexchange.metrics.micrometer.basicauth.login
+      file: micrometer.properties
+      packageName: open-xchange-core
+      tags: ["Micrometer", "Metrics"]

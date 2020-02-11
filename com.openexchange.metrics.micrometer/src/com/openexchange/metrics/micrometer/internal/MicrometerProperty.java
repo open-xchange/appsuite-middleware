@@ -47,54 +47,36 @@
  *
  */
 
-package com.openexchange.metrics.micrometer.osgi;
+package com.openexchange.metrics.micrometer.internal;
 
-import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.HttpService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.openexchange.config.lean.LeanConfigurationService;
-import com.openexchange.java.Strings;
-import com.openexchange.metrics.micrometer.internal.BasicAuthHttpContext;
-import com.openexchange.metrics.micrometer.internal.MicrometerProperty;
-import com.openexchange.osgi.HousekeepingActivator;
-import io.micrometer.core.instrument.Metrics;
-import io.micrometer.prometheus.PrometheusConfig;
-import io.micrometer.prometheus.PrometheusMeterRegistry;
-import io.prometheus.client.exporter.MetricsServlet;
-import io.prometheus.client.hotspot.DefaultExports;
+import com.openexchange.config.lean.Property;
 
 /**
- * {@link MicrometerActivator}
+ * {@link MicrometerProperty}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.4
  */
-public class MicrometerActivator extends HousekeepingActivator {
+public enum MicrometerProperty implements Property {
+    /**
+     * The basic-auth login name
+     */
+    LOGIN,
+    /**
+     * The basic-auth login password
+     */
+    PASSWORD;
 
-    private static final Logger LOG = LoggerFactory.getLogger(MicrometerActivator.class);
+    private static final String BASE = "com.openexchange.metrics.micrometer.basicauth.";
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { HttpService.class, LeanConfigurationService.class };
+    public String getFQPropertyName() {
+        return BASE + this.name().toLowerCase();
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        HttpService httpService = getServiceSafe(HttpService.class);
-        PrometheusMeterRegistry prometheusRegistry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
-        Metrics.addRegistry(prometheusRegistry);
-        DefaultExports.register(prometheusRegistry.getPrometheusRegistry());
-
-        LeanConfigurationService lean = getServiceSafe(LeanConfigurationService.class);
-        String login = lean.getProperty(MicrometerProperty.LOGIN);
-        String password = lean.getProperty(MicrometerProperty.PASSWORD);
-        HttpContext ctx = null;
-        if(Strings.isNotEmpty(login) && Strings.isNotEmpty(password)) {
-            ctx = new BasicAuthHttpContext(login, password);
-        }
-        httpService.registerServlet("/metrics", new MetricsServlet(prometheusRegistry.getPrometheusRegistry()), null, ctx);
-        LOG.info("Bundle {} successfully started", this.context.getBundle().getSymbolicName());
+    public Object getDefaultValue() {
+        return null;
     }
 
 }

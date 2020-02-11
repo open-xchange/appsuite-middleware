@@ -47,54 +47,92 @@
  *
  */
 
-package com.openexchange.metrics.micrometer.osgi;
+package com.openexchange.metrics.micrometer.internal;
 
+import java.io.IOException;
+import java.net.URL;
+import java.util.Base64;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.HttpService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.java.Strings;
-import com.openexchange.metrics.micrometer.internal.BasicAuthHttpContext;
-import com.openexchange.metrics.micrometer.internal.MicrometerProperty;
-import com.openexchange.osgi.HousekeepingActivator;
-import io.micrometer.core.instrument.Metrics;
-import io.micrometer.prometheus.PrometheusConfig;
-import io.micrometer.prometheus.PrometheusMeterRegistry;
-import io.prometheus.client.exporter.MetricsServlet;
-import io.prometheus.client.hotspot.DefaultExports;
 
 /**
- * {@link MicrometerActivator}
+ * {@link BasicAuthHttpContext}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.4
  */
-public class MicrometerActivator extends HousekeepingActivator {
+public class BasicAuthHttpContext implements HttpContext {
 
-    private static final Logger LOG = LoggerFactory.getLogger(MicrometerActivator.class);
+    private static final String AUTH_HEADER = "Authorization";
+    private final String password;
+    private final String login;
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { HttpService.class, LeanConfigurationService.class };
+    /**
+     * Initializes a new {@link BasicAuthHttpContext}.
+     *
+     * @param login The user name
+     * @param password The password
+     */
+    public BasicAuthHttpContext(String login, String password) {
+        super();
+        this.login = login;
+        this.password = password;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        HttpService httpService = getServiceSafe(HttpService.class);
-        PrometheusMeterRegistry prometheusRegistry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
-        Metrics.addRegistry(prometheusRegistry);
-        DefaultExports.register(prometheusRegistry.getPrometheusRegistry());
-
-        LeanConfigurationService lean = getServiceSafe(LeanConfigurationService.class);
-        String login = lean.getProperty(MicrometerProperty.LOGIN);
-        String password = lean.getProperty(MicrometerProperty.PASSWORD);
-        HttpContext ctx = null;
-        if(Strings.isNotEmpty(login) && Strings.isNotEmpty(password)) {
-            ctx = new BasicAuthHttpContext(login, password);
+    public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        if (!request.getScheme().toLowerCase().equals("https")) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return false;
         }
-        httpService.registerServlet("/metrics", new MetricsServlet(prometheusRegistry.getPrometheusRegistry()), null, ctx);
-        LOG.info("Bundle {} successfully started", this.context.getBundle().getSymbolicName());
+        if (request.getHeader(AUTH_HEADER) == null) {
+            response.setHeader("WWW-Authenticate", "Basic realm=\"Access to the prometheus metrics\"");
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+            return false;
+        }
+
+        if (isAuthenticated(request)) {
+            return true;
+        }
+        response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+        return false;
     }
+
+    /**
+     * Checks if the given request is authenticated
+     *
+     * @param request The request
+     * @return <code>true</code> if its authenticated, <code>false</code> otherwise
+     */
+    protected boolean isAuthenticated(HttpServletRequest request) {
+        try {
+            String authzHeader = request.getHeader(AUTH_HEADER);
+            String loginAndPassword = new String(Base64.getDecoder().decode(authzHeader.substring(6)));
+
+            String[] creds = Strings.splitByColon(loginAndPassword);
+            if (creds.length != 2 || Strings.isEmpty(creds[0]) || Strings.isEmpty(creds[1])) {
+                return false;
+            }
+            return creds[0].equals(this.login) && creds[1].equals(this.password);
+        } catch (@SuppressWarnings("unused") IllegalArgumentException e) {
+            return false;
+        }
+    }
+
+    @Override
+    public URL getResource(String name) {
+        return null;
+    }
+
+    @Override
+    public String getMimeType(String name) {
+        return null;
+    }
+
+
+
+
 
 }
