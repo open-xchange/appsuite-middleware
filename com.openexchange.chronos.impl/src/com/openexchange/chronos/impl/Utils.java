@@ -104,6 +104,7 @@ import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DataAwareRecurrenceId;
 import com.openexchange.chronos.common.DefaultCalendarObjectResource;
+import com.openexchange.chronos.common.DefaultCalendarParameters;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.common.mapping.EventMapper;
@@ -1433,6 +1434,47 @@ public class Utils {
      */
     public static Connection optConnection(CalendarSession session) {
         return session.get(PARAMETER_CONNECTION(), Connection.class, null);
+    }
+
+    /**
+     * Extracts (and optionally removes) specific calendar parameters from the supplied parameter container.
+     * 
+     * @param parameters The parameters to extract
+     * @param remove <code>true</code> to remove the extracted parameters from the original parameter container, <code>false</code> to
+     *            keep them
+     * @param parameterNames The names of the parameters to extract
+     * @return The extracted calendar parameters in a new parameter container
+     */
+    public static CalendarParameters extract(CalendarParameters parameters, boolean remove, String... parameterNames) {
+        DefaultCalendarParameters extractedParameters = new DefaultCalendarParameters();
+        if (null != parameterNames) {
+            for (String parameterName : parameterNames) {
+                Object value = parameters.get(parameterName, Object.class);
+                if (null != value) {
+                    extractedParameters.set(parameterName, value);
+                    if (remove) {
+                        parameters.set(parameterName, null);
+                    }
+                }
+            }
+        }
+        return extractedParameters;
+    }
+
+    /**
+     * Copies all calendar parameters from one parameter container into another one.
+     * 
+     * @param from The calendar parameters to copy
+     * @param to The target calendar parameters to copy into
+     * @return The possibly modified target calendar parameters
+     */
+    public static CalendarParameters copy(CalendarParameters from, CalendarParameters to) {
+        if (null != to && null != from) {
+            for (Entry<String, Object> entry : from.entrySet()) {
+                to.set(entry.getKey(), entry.getValue());
+            }
+        }
+        return to;
     }
 
     private static DefaultEntityResolver getEntityResolver(CalendarSession session) throws OXException {

@@ -55,8 +55,13 @@ import static com.openexchange.chronos.common.CalendarUtils.getObjectIDs;
 import static com.openexchange.chronos.common.CalendarUtils.getOccurrence;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.SearchUtils.getSearchTerm;
+import static com.openexchange.chronos.impl.Utils.copy;
+import static com.openexchange.chronos.impl.Utils.extract;
 import static com.openexchange.chronos.impl.Utils.getFolder;
 import static com.openexchange.chronos.impl.Utils.getUntil;
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_EXPAND_OCCURRENCES;
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_RANGE_END;
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_RANGE_START;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -70,6 +75,7 @@ import com.openexchange.chronos.common.AlarmUtils;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.impl.Check;
+import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
@@ -120,11 +126,16 @@ public class AlarmTriggersPerformer extends AbstractQueryPerformer {
         EventField[] requestedFields = getFields(new EventField[0], (EventField[]) null);
         EventField[] fields = getFieldsForStorage(requestedFields);
         List<Event> events = loadEvents(triggers, fields);
-        EventPostProcessor postProcessor = postProcessor(getObjectIDs(events), session.getUserId(), requestedFields, fields);
         /*
          * remove triggers where the targeted events are not or no longer accessible for the requesting user
          */
-        return filterInaccessible(triggers, events, postProcessor);
+        CalendarParameters oldParameters = extract(session, true, PARAMETER_EXPAND_OCCURRENCES, PARAMETER_RANGE_START, PARAMETER_RANGE_END);
+        try {
+            EventPostProcessor postProcessor = postProcessor(getObjectIDs(events), session.getUserId(), requestedFields, fields);
+            return filterInaccessible(triggers, events, postProcessor);
+        } finally {
+            copy(oldParameters, session);
+        }
     }
 
     /**
