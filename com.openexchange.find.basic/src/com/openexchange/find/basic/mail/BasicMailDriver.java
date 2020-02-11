@@ -146,6 +146,7 @@ import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailCapabilities;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.search.ANDTerm;
@@ -165,6 +166,7 @@ import com.openexchange.mail.search.SubjectTerm;
 import com.openexchange.mail.search.ToTerm;
 import com.openexchange.mail.search.UserFlagTerm;
 import com.openexchange.mail.utils.MailFolderUtility;
+import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -347,6 +349,9 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
             String allMessageFolder = getAllMessageFolder(session);
             if (Strings.isEmpty(allMessageFolder)) {
                 throw FindExceptionCode.MISSING_MANDATORY_FACET.create(CommonFacetType.FOLDER.getId());
+            }
+            if (!allMessageFolder.startsWith(MailFolder.MAIL_PREFIX)) {
+                allMessageFolder = MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, allMessageFolder);
             }
             folderId = allMessageFolder;
         }
