@@ -134,7 +134,7 @@ public final class MailFolderUtility {
      *
      * @param fullnameArgument The groupware's mail folder full name
      * @return The stripped mail folder full name argument
-     * @throws IllegalArgumentException If mail account identifier is invalid
+     * @throws IllegalArgumentException If mail folder identifier is invalid
      * @see #optPrepareMailFolderParam(String)
      */
     public static FullnameArgument prepareMailFolderParam(final String fullnameArgument) {
@@ -143,7 +143,7 @@ public final class MailFolderUtility {
         }
         Optional<FullnameArgument> optional = optPrepareMailFolderParam(fullnameArgument);
         if (!optional.isPresent()) {
-            throw new IllegalArgumentException("Invalid fully-qualifying mail account identifier: " + fullnameArgument);
+            throw new IllegalArgumentException("Invalid fully-qualifying mail folder identifier: " + fullnameArgument);
         }
         return optional.get();
     }
