@@ -452,7 +452,7 @@ public final class IMAPFolderConverter {
                         try {
                             applyACL2Permissions(imapFolder, listEntry, session, imapConfig, mailFolder, ownRights, ctx);
                         } catch (OXException e) {
-                            LOG.warn("ACLs could not be parsed", e);
+                            LOG.warn("ACLs could not be parsed for folder {} of account {}", imapFullName, imapFolder.getStore(), e);
                             mailFolder.removePermissions();
                             addOwnACL(mailFolder);
                         }
