@@ -68,6 +68,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -142,6 +143,7 @@ import com.openexchange.chronos.service.EventUpdate;
 import com.openexchange.chronos.service.EventUpdates;
 import com.openexchange.chronos.service.EventsResult;
 import com.openexchange.chronos.service.ItemUpdate;
+import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.service.UpdateResult;
 import com.openexchange.chronos.service.UpdatesResult;
@@ -894,20 +896,29 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
      * @return The list of create results
      */
     protected List<CreateResult> create(CalendarStorage calendarStorage, EventUpdates diff, List<Event> existingEvents) throws OXException {
-        List<Event> addedItems = diff.getAddedItems();
+        List<Event> addedItems = sortSeriesMasterFirst(diff.getAddedItems());
         if (addedItems.isEmpty()) {
             return Collections.emptyList();
         }
+        
+        
         List<CreateResult> createResults = new ArrayList<CreateResult>(addedItems.size());
         Map<String, List<Event>> originalEventsByUID = CalendarUtils.getEventsByUID(existingEvents, false);
         Date now = new Date();
         Map<String, List<Event>> extEventsByUID = getEventsByUID(addedItems, true);
         for (Entry<String, List<Event>> entry : extEventsByUID.entrySet()) {
             List<Event> originalEventGroup = sortSeriesMasterFirst(originalEventsByUID.get(entry.getKey()));
+            List<Event> toCreate = sortSeriesMasterFirst(entry.getValue());
+            
+            /*
+             * Check events before processing
+             */
+            Check.recurrenceRuleIsValid(Services.getService(RecurrenceService.class), toCreate.get(0));
+
             if (null != originalEventGroup && 0 < originalEventGroup.size() && isSeriesMaster(originalEventGroup.get(0))) {
-                insertEvents(calendarStorage, now, sortSeriesMasterFirst(entry.getValue()), originalEventGroup.get(0));
+                insertEvents(calendarStorage, now, toCreate, originalEventGroup.get(0));
             } else {
-                insertEvents(calendarStorage, now, sortSeriesMasterFirst(entry.getValue()), null);
+                insertEvents(calendarStorage, now, toCreate, null);
             }
             for (Event createdEvent : entry.getValue()) {
                 createResults.add(new CreateResultImpl(createdEvent));
@@ -1043,7 +1054,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
     /**
      * Prepares the list of events from the external calendar source for further processing. This includes:
      * <ul>
-     * <li>remove events that cannot be stored due to missing mandatory fields</li>
+     * <li>remove events that cannot be stored due to missing mandatory fields or syntactically wrong data</li>
      * <li>map events by their UID property (events without UID are mapped to <code>null</code>)</li>
      * <li>event lists are sorted so that the series master event will be the first element</li>
      * <li>the change exception field of series master events will be set based on the actual overridden instances</li>
@@ -1072,19 +1083,33 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
              */
             com.openexchange.tools.arrays.Collections.put(eventsByUID, event.getUid(), event);
         }
-        for (List<Event> eventGroup : eventsByUID.values()) {
-            if (1 >= eventGroup.size()) {
-                continue;
-            }
-            /*
-             * sort series master first, then assign change exception dates
-             */
-            eventGroup = sortSeriesMasterFirst(eventGroup);
-            if (null != eventGroup.get(0).getRecurrenceRule()) {
-                eventGroup.get(0).setChangeExceptionDates(getRecurrenceIds(eventGroup.subList(1, eventGroup.size())));
+        for (Iterator<List<Event>> iterator = eventsByUID.values().iterator(); iterator.hasNext();) {
+            List<Event> eventGroup = iterator.next();
+            try {
+                eventGroup = sortEventGroup(eventGroup);
+            } catch (OXException e) {
+                LOG.debug("Removed event with uid {} from list to add because of the following corrupt data: {}", eventGroup.get(0).getUid(), e.getMessage());
+                iterator.remove();
             }
         }
         return eventsByUID;
+    }
+
+    private static List<Event> sortEventGroup(List<Event> eventGroup) throws OXException {
+        if (1 >= eventGroup.size()) {
+            Check.recurrenceRuleIsValid(Services.getService(RecurrenceService.class), eventGroup.get(0));
+            return eventGroup;
+        }
+        /*
+         * sort series master first, then assign change exception dates
+         */
+        eventGroup = sortSeriesMasterFirst(eventGroup);
+        Event masterEvent = eventGroup.get(0);
+        if (null != masterEvent.getRecurrenceRule()) {
+            Check.recurrenceRuleIsValid(Services.getService(RecurrenceService.class), masterEvent);
+            masterEvent.setChangeExceptionDates(getRecurrenceIds(eventGroup.subList(1, eventGroup.size())));
+        }
+        return eventGroup;
     }
 
     /**
