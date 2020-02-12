@@ -1531,6 +1531,7 @@ public final class SessionHandler {
             SessionControl sc = sessionData.addSession(unwrappedSession, noLimit, true);
             if (unwrappedSession == sc.getSession()) {
                 // This thread restored the session first
+                LOG.info("Restored session {} from session storage for user {} in context {}.", sessionId, I(sc.getUserId()), I(sc.getContextId()));
                 for (SessionSerializationInterceptor interceptor : interceptors) {
                     interceptor.deserialize(unwrappedSession);
                 }
@@ -1542,7 +1543,7 @@ public final class SessionHandler {
 
         } catch (OXException e) {
             if (!SessionStorageExceptionCodes.NO_SESSION_FOUND.equals(e)) {
-                LOG.warn("Session look-up failed in session storage.", e);
+                LOG.warn("Session look-up for {} failed in session storage.", sessionId, e);
             }
         }
 
