@@ -736,6 +736,10 @@ public final class InternalList {
         // Add 'checksum' column to attachment tablesm see MW-1235
         list.add(new com.openexchange.groupware.update.tasks.AddChecksumColumnToAttachmentsTablesUpdateTask());
         
+        // +++++++++++++++++++++++++++++++++ Version 7.10.4 starts here. +++++++++++++++++++++++++++++++++
+        // Remove readable DAV user agent names from table user_attribute see MWB-58
+        list.add(new com.openexchange.groupware.update.tasks.RemoveDAVUserAgentNamesForMWB58());
+
         // +++++++++++++++++++++++++++++++++ Version 7.12.0 starts here. +++++++++++++++++++++++++++++++++
         // list.add(new com.openexchange.groupware.update.tasks.DropUWAWidgetsTask());
         // list.add(new com.openexchange.groupware.update.tasks.DropSwiftFilestoreTask());
