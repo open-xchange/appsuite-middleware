@@ -69,7 +69,6 @@ import com.openexchange.saml.SAMLProperties;
 import com.openexchange.saml.impl.DefaultConfig;
 import com.openexchange.saml.impl.DefaultLoginConfigurationLookup;
 import com.openexchange.saml.impl.VeryDangerousSAMLBackend;
-import com.openexchange.saml.impl.SAMLConfigRegistryImpl;
 import com.openexchange.saml.impl.SAMLSessionInspector;
 import com.openexchange.saml.impl.SAMLSessionSsoProvider;
 import com.openexchange.saml.impl.SAMLSessionStorageParameterNamesProvider;
@@ -77,7 +76,6 @@ import com.openexchange.saml.impl.hz.PortableAuthnRequestInfoFactory;
 import com.openexchange.saml.impl.hz.PortableLogoutRequestInfoFactory;
 import com.openexchange.saml.oauth.service.OAuthAccessTokenService;
 import com.openexchange.saml.spi.SAMLBackend;
-import com.openexchange.saml.spi.SAMLConfigRegistry;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.SessionSsoProvider;
 import com.openexchange.session.inspector.SessionInspectorService;
@@ -95,8 +93,6 @@ import com.openexchange.user.UserService;
  * @since v7.6.1
  */
 public class SAMLFeature extends DependentServiceStarter {
-
-    private SAMLBackendRegistry samlBackends;
 
     private static final Logger LOG = LoggerFactory.getLogger(SAMLFeature.class);
 
@@ -118,6 +114,10 @@ public class SAMLFeature extends DependentServiceStarter {
         HostnameService.class
     };
 
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    private SAMLBackendRegistry samlBackends;
+
     private final Stack<ServiceRegistration<?>> serviceRegistrations = new Stack<ServiceRegistration<?>>();
 
     private final Stack<String> servlets = new Stack<String>();
@@ -127,7 +127,7 @@ public class SAMLFeature extends DependentServiceStarter {
     }
 
     @Override
-    protected void start(ServiceLookup services) throws Exception {
+    protected synchronized void start(ServiceLookup services) throws Exception {
         ConfigurationService configService = services.getService(ConfigurationService.class);
         boolean enabled = configService.getBoolProperty(SAMLProperties.ENABLED, false);
         if (enabled) {
@@ -141,11 +141,6 @@ public class SAMLFeature extends DependentServiceStarter {
 
             getSamlBackend(services);
 
-            SAMLConfigRegistryImpl configRegistry = SAMLConfigRegistryImpl.getInstance();
-            DefaultConfig config = DefaultConfig.init(configService);
-            configRegistry.registerSAMLConfig(SAMLConfigRegistryImpl.DEFAULT_KEY, config);
-            serviceRegistrations.push(context.registerService(SAMLConfigRegistry.class, configRegistry, null));
-
             if (configService.getBoolProperty("com.openexchange.saml.startVeryDangerousDebugBackend", false)) {
                 serviceRegistrations.push(context.registerService(SAMLBackend.class, new VeryDangerousSAMLBackend(services.getService(UserService.class), services.getService(ContextService.class)), null));
             }
@@ -155,9 +150,10 @@ public class SAMLFeature extends DependentServiceStarter {
     }
 
     /**
-     * Helper method to get the SAMLBackendRegistry
-     * @param services the ServiceLookup
-     * @throws BundleException if start fails
+     * Helper method to initialize the <code>SAMLBackendRegistry</code>.
+     *
+     * @param services The service look-up
+     * @throws BundleException If initialization fails
      */
     private void getSamlBackend(ServiceLookup services) throws BundleException {
         SAMLBackendRegistry samlBackends = this.samlBackends;
@@ -169,7 +165,7 @@ public class SAMLFeature extends DependentServiceStarter {
     }
 
     @Override
-    protected void stop(ServiceLookup services) {
+    protected synchronized void stop(ServiceLookup services) {
         LOG.info("Stopping SAML 2.0 support...");
         HttpService httpService = services.getService(HttpService.class);
         while (!servlets.isEmpty()) {
@@ -184,7 +180,7 @@ public class SAMLFeature extends DependentServiceStarter {
             samlBackends.stop();
             samlBackends = null;
         }
-        SAMLConfigRegistryImpl.getInstance().clear();
+        DefaultConfig.release();
     }
 
 }
