@@ -17,7 +17,7 @@ BuildRequires: java-1.8.0-openjdk-devel
 %endif
 BuildRequires: pandoc >= 2.0.0
 Version:       @OXVERSION@
-%define        ox_release 5
+%define        ox_release 4
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -74,8 +74,6 @@ sed -i -e 's;%{buildroot};;' %{manlist}
 %doc ./com.openexchange.admin.reseller/ChangeLog
 
 %changelog
-* Thu Feb 06 2020 Jan Bauerdick <jan.bauerdick@open-xchange.com>
-Build for patch 2020-02-10 (5572)
 * Mon Jan 20 2020 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 Build for patch 2020-01-20 (5547)
 * Thu Nov 28 2019 Jan Bauerdick <jan.bauerdick@open-xchange.com>
