@@ -62,10 +62,20 @@ import com.openexchange.exception.OXExceptionStrings;
  * @since v7.8.1
  */
 public enum SipgateSMSExceptionCode implements DisplayableOXExceptionCode {
-
+    /**
+     * Unknown error: %1$s
+     */
     UNKNOWN_ERROR("Unknown error: %1$s", Category.CATEGORY_ERROR, 1),
 
+    /**
+     * Unexpected HTTP status: %1$s, %2$s
+     */
     HTTP_ERROR("Unexpected HTTP status: %1$s, %2$s", Category.CATEGORY_ERROR, 2),
+
+    /**
+     * Sipgate SMS service is not configured for user %1$s in context %2$s
+     */
+    NOT_CONFIGURED("Sipgate SMS service is not configured for user %1$s in context %2$s", Category.CATEGORY_ERROR, 3),
 
     ;
 
