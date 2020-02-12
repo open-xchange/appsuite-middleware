@@ -93,6 +93,8 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
+import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.Timer;
 
 /**
  * {@link DefaultDispatcher} - The default {@link Dispatcher dispatcher} implementation.
@@ -102,6 +104,8 @@ import com.openexchange.tools.session.ServerSession;
 public class DefaultDispatcher implements Dispatcher {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DefaultDispatcher.class);
+
+    private static final String OK_RECORD_STATUS = "OK";
 
     private final DispatcherListenerRegistry listenerRegistry;
 
@@ -161,6 +165,8 @@ public class DefaultDispatcher implements Dispatcher {
 
     @Override
     public AJAXRequestResult perform(final AJAXRequestData requestData, final AJAXState state, final ServerSession session) throws OXException {
+        final long startTime = System.currentTimeMillis();
+
         if (null == session) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(AJAXServlet.PARAMETER_SESSION);
         }
@@ -244,10 +250,13 @@ public class DefaultDispatcher implements Dispatcher {
                         // Enqueue (if not computed in time)
                         try {
                             long maxRequestAgeMillis = jobQueue.getMaxRequestAgeMillis();
-                            return jobQueue.enqueueAndWait(job.build(), maxRequestAgeMillis, TimeUnit.MILLISECONDS).get(true);
+                            final AJAXRequestResult result = jobQueue.enqueueAndWait(job.build(), maxRequestAgeMillis, TimeUnit.MILLISECONDS).get(true);
+                            recordRequest(requestData.getModule(), requestData.getAction(), OK_RECORD_STATUS, System.currentTimeMillis() - startTime);
+                            return result;
                         } catch (InterruptedException e) {
                             // Keep interrupted state
                             Thread.currentThread().interrupt();
+                            recordRequest(requestData.getModule(), requestData.getAction(), AjaxExceptionCodes.UNEXPECTED_ERROR.getCategory().toString(), System.currentTimeMillis() - startTime);
                             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, "Interrupted");
                         } catch (EnqueuedException e) {
                             // Result not computed in time
@@ -258,7 +267,9 @@ public class DefaultDispatcher implements Dispatcher {
                 }
             }
 
-            return doPerform(action, factory, modifiedRequestData, state, customizers, session);
+            AJAXRequestResult result = doPerform(action, factory, modifiedRequestData, state, customizers, session);
+            recordRequest(requestData.getModule(), requestData.getAction(), OK_RECORD_STATUS, System.currentTimeMillis() - startTime);
+            return result;
         } catch (OXException e) {
             for (AJAXActionCustomizer customizer : customizers) {
                 if (customizer instanceof AJAXExceptionHandler) {
@@ -273,6 +284,7 @@ public class DefaultDispatcher implements Dispatcher {
                 UserAwareSSLConfigurationService userAwareSSLConfigurationService = ServerServiceRegistry.getInstance().getService(UserAwareSSLConfigurationService.class);
                 if (null != userAwareSSLConfigurationService) {
                     if (userAwareSSLConfigurationService.isAllowedToDefineTrustLevel(session.getUserId(), session.getContextId())) {
+                        recordRequest(requestData.getModule(), requestData.getAction(), SSLExceptionCode.UNTRUSTED_CERT_USER_CONFIG.getCategory().toString(), System.currentTimeMillis() - startTime);
                         throw SSLExceptionCode.UNTRUSTED_CERT_USER_CONFIG.create(e.getDisplayArgs());
                     }
                 }
@@ -282,21 +294,25 @@ public class DefaultDispatcher implements Dispatcher {
                 Throwable t = ExceptionUtils.getRootCause(e);
                 if (t instanceof OXException) {
                     OXException oxe = (OXException) t;
+                    recordRequest(requestData.getModule(), requestData.getAction(), oxe.getCategory().toString(), System.currentTimeMillis() - startTime);
                     throw oxe;
                 }
             }
+            recordRequest(requestData.getModule(), requestData.getAction(), e.getCategory().toString(), System.currentTimeMillis() - startTime);
             throw e;
         } catch (RuntimeException e) {
             if ("org.mozilla.javascript.WrappedException".equals(e.getClass().getName())) {
                 // Handle special Rhino wrapper error
                 Throwable wrapped = e.getCause();
                 if (wrapped instanceof OXException) {
+                    recordRequest(requestData.getModule(), requestData.getAction(), ((OXException)wrapped).getCategory().toString(), System.currentTimeMillis() - startTime);
                     throw (OXException) wrapped;
                 }
             }
 
             // Wrap unchecked exception
             addLogProperties(requestData, true);
+            recordRequest(requestData.getModule(), requestData.getAction(), AjaxExceptionCodes.UNEXPECTED_ERROR.getCategory().toString(), System.currentTimeMillis() - startTime);
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             RequestContextHolder.reset();
@@ -508,6 +524,26 @@ public class DefaultDispatcher implements Dispatcher {
 
         return null;
     }
+
+    /**
+     * Records the duration of a request
+     *
+     * @param module The name of the action's module
+     * @param action The name of the action
+     * @param status The status code of the request
+     * @param durationMillis The duration in milliseconds
+     */
+    private static void recordRequest(String module, String action, String status, long durationMillis) {
+        if(module != null && action != null && status != null) {
+            Timer timer = Timer.builder("appsuite.httpapi.requests")
+                .tags("module", module, "action", action, "status", status)
+                .description("HTTP API request times")
+                .publishPercentileHistogram()
+                .register(Metrics.globalRegistry);
+            timer.record(durationMillis, TimeUnit.MILLISECONDS);
+        }
+    }
+
 
     // ------------------------------------------------ Execution stuff -------------------------------------------------------
 

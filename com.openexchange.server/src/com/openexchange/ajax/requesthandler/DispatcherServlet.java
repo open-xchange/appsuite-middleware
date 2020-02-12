@@ -61,7 +61,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -111,8 +110,6 @@ import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
-import io.micrometer.core.instrument.Metrics;
-import io.micrometer.core.instrument.Timer;
 
 /**
  * {@link DispatcherServlet} - The main dispatcher servlet which delegates request to dispatcher framework.
@@ -130,8 +127,6 @@ public class DispatcherServlet extends SessionServlet {
     private static final @NonNull Session NO_SESSION = new SessionObject(Dispatcher.class.getSimpleName() + "-Fake-Session");
 
     private static final @NonNull String RETRY_AFTER = "Retry-After";
-
-    private static final @NonNull String OK_RECORD_STATUS = "OK";
 
     /*-
      * /!\ These must be static for our servlet container to work properly. /!\
@@ -451,9 +446,6 @@ public class DispatcherServlet extends SessionServlet {
      * @throws IOException If an I/O error occurs
      */
     public void handle(HttpServletRequest httpRequest, HttpServletResponse httpResponse, boolean preferStream) throws IOException {
-
-        final long startTime = System.currentTimeMillis();
-
         /*-
          * No needed because SessionServlet.service() does already perform it
          *
@@ -469,15 +461,10 @@ public class DispatcherServlet extends SessionServlet {
         AJAXState state = null;
         AJAXRequestResult result = null;
         Exception exc = null;
-        String module = null;
-        String action = null;
         Dispatcher dispatcher = DISPATCHER.get();
         boolean enqueued = false;
         try {
             AJAXRequestData requestData = initializeRequestData(httpRequest, httpResp, preferStream);
-            action = requestData.getAction();
-            module = requestData.getModule();
-
 
             // Acquire session
             session = requestData.getSession();
@@ -513,8 +500,6 @@ public class DispatcherServlet extends SessionServlet {
                 }
                 sendResponse(requestData, result, httpRequest, httpResp);
             }
-
-            recordRequest(module, action, OK_RECORD_STATUS, System.currentTimeMillis() - startTime);
         } catch (UploadException e) {
             exc = e;
             boolean forceJSON = AJAXRequestDataTools.parseBoolParameter(httpRequest.getParameter("force_json_response"));
@@ -527,7 +512,6 @@ public class DispatcherServlet extends SessionServlet {
                 if (null == session || !Client.OX6_UI.getClientId().equals(session.getClient())) {
                     httpResp.sendError(HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE, e.getDisplayMessage(getLocaleFrom(session, Locale.US)));
                     logException(e, LogLevel.DEBUG, HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE);
-                    recordRequest(module, action, e.getCategory().toString(), System.currentTimeMillis() - startTime);
                     return;
                 }
             }
@@ -540,7 +524,6 @@ public class DispatcherServlet extends SessionServlet {
                 LOG.warn(e.getSoleMessage());
             }
             handleOXException(e, httpRequest, httpResp);
-            recordRequest(module, action, e.getCategory().toString(), System.currentTimeMillis() - startTime);
         } catch (OXException e) {
             exc = e;
             Locale locale = getLocaleFrom(session, null);
@@ -548,7 +531,6 @@ public class DispatcherServlet extends SessionServlet {
                 e.setProperty(OXExceptionConstants.PROPERTY_LOCALE, locale.toString());
             }
             handleOXException(e, httpRequest, httpResp);
-            recordRequest(module, action, e.getCategory().toString(), System.currentTimeMillis() - startTime);
         } catch (RateLimitedException e) {
             e.send(httpResponse);
         } catch (RuntimeException e) {
@@ -560,7 +542,6 @@ public class DispatcherServlet extends SessionServlet {
                 oxe.setProperty(OXExceptionConstants.PROPERTY_LOCALE, locale.toString());
             }
             super.handleOXException(oxe, httpRequest, httpResp, false, false);
-            recordRequest(module, action, oxe.getCategory().toString(), System.currentTimeMillis() - startTime);
         } finally {
             if (false == enqueued) {
                 Dispatchers.signalDone(result, exc);
@@ -775,26 +756,6 @@ public class DispatcherServlet extends SessionServlet {
             logger.error(msg, e);
         }
     }
-
-    /**
-     * Records the duration of a request
-     *
-     * @param module The name of the action's module
-     * @param action The name of the action
-     * @param status The status code of the request
-     * @param durationMillis The duration in milliseconds
-     */
-    private static void recordRequest(String module, String action, String status, long durationMillis) {
-        if(module != null && action != null && status != null) {
-            Timer timer = Timer.builder("appsuite.httpapi.requests")
-                .tags("module", module, "action", action, "status", status)
-                .description("HTTP API request times")
-                .publishPercentileHistogram()
-                .register(Metrics.globalRegistry);
-            timer.record(durationMillis, TimeUnit.MILLISECONDS);
-        }
-    }
-
 
     private ServerSession getSession(HttpServletRequest httpRequest, Dispatcher dispatcher, String module, String action) throws OXException {
         ServerSession session = SessionUtility.getSessionObject(httpRequest, dispatcher.mayUseFallbackSession(module, action));

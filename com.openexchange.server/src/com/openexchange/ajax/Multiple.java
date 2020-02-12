@@ -63,6 +63,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -115,6 +116,8 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 import gnu.trove.ConcurrentTIntObjectHashMap;
+import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.Timer;
 
 /**
  * The <tt>Multiple</tt> Servlet processes <a href="http://oxpedia.org/wiki/index.php?title=HTTP_API#Module_.22multiple.22">multiple incoming JSON</a> requests.
@@ -136,6 +139,8 @@ public class Multiple extends SessionServlet {
     private static final String ATTRIBUTE_MAIL_INTERFACE = "mi";
 
     private static final String ATTRIBUTE_MAIL_REQUEST = "mr";
+
+    private static final String OK_RECORD_STATUS = "OK";
 
     private static volatile Dispatcher dispatcher;
 
@@ -159,6 +164,9 @@ public class Multiple extends SessionServlet {
 
     @Override
     protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
+
+        final long startTime = System.currentTimeMillis();
+
         // Acquire session
         ServerSession session = getSessionObject(req);
         if (session == null) {
@@ -166,6 +174,7 @@ public class Multiple extends SessionServlet {
             e.setDisplayMessage(OXExceptionStrings.BAD_REQUEST, new Object[0]);
             LOG.error("Missing '{}' parameter.", PARAMETER_SESSION, e);
             Tools.sendErrorPage(resp, HttpServletResponse.SC_BAD_REQUEST, e.getDisplayMessage(Locale.US));
+            recordRequest(e.getCategory().toString(), System.currentTimeMillis() - startTime);
             return;
         }
 
@@ -180,6 +189,7 @@ public class Multiple extends SessionServlet {
                 exc.setDisplayMessage(OXExceptionStrings.BAD_REQUEST, new Object[0]);
                 LOG.error("Received invalid JSON body in multiple request for user {} in context {} (exceptionId: {})", Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), exc.getExceptionId(), e);
                 Tools.sendErrorPage(resp, HttpServletResponse.SC_BAD_REQUEST, exc.getDisplayMessage(localeFrom(session)));
+                recordRequest(exc.getCategory().toString(), System.currentTimeMillis() - startTime);
                 return;
             }
         }
@@ -192,11 +202,34 @@ public class Multiple extends SessionServlet {
             final Writer writer = resp.getWriter();
             writeTo(null == respArr ? new JSONArray(0) : respArr, writer);
             writer.flush();
+            recordRequest(OK_RECORD_STATUS, System.currentTimeMillis() - startTime);
         } catch (JSONException | OXException | RuntimeException e) {
             logError(session, e);
             sendError(resp);
+            if(e instanceof OXException) {
+                recordRequest(((OXException)e).getCategory().toString(), System.currentTimeMillis() - startTime);
+            }
         } finally {
             LogProperties.removeLogProperties();
+        }
+    }
+
+    /**
+     * Records the duration of a multiple request
+     *
+     * @param module The name of the action's module
+     * @param action The name of the action
+     * @param status The status code of the request
+     * @param durationMillis The duration in milliseconds
+     */
+    private static void recordRequest(String status, long durationMillis) {
+        if(status != null) {
+            Timer timer = Timer.builder("appsuite.httpapi.requests")
+                .tags("action", "multiple", "module", "multiple", "status", status)
+                .description("HTTP API request times")
+                .publishPercentileHistogram()
+                .register(Metrics.globalRegistry);
+            timer.record(durationMillis, TimeUnit.MILLISECONDS);
         }
     }
 
