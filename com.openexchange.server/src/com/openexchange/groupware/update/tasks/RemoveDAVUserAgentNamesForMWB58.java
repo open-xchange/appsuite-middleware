@@ -126,7 +126,7 @@ public class RemoveDAVUserAgentNamesForMWB58 implements UpdateTaskV2 {
 
     @Override
     public String[] getDependencies() {
-        return new String[0];
+        return new String[] { com.openexchange.groupware.update.tasks.ChangePrimaryKeyForUserAttribute.class.getName() };
     }
 
     @Override
