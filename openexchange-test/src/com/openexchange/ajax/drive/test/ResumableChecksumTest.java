@@ -59,7 +59,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -188,11 +187,16 @@ public class ResumableChecksumTest extends AbstractConfigAwareAPIClientSession {
     @Test
     public void testResumableChecksum_UploadWithFilledChunks_Successful() throws NoSuchAlgorithmException, ApiException, IOException {
         String newName = "testResumableChecksum_UploadWithFilledChunks_Successful.txt";
+        byte[] testData1 = { 76, 111, 114, 101, 109, 32, 105, 112, 115, 117, 109, 32, 100, 111, 108, 111, 114, 32, 115, 105, 116, 32, 97, 109, 101 };
+        byte[] testData2 = { 83, 101, 100, 32, 117, 116, 32, 112, 101, 114, 115, 112, 105, 99, 105, 97, 116, 105, 115, 32, 117, 110, 100, 101, 32 };
+        int testDataLength = 25;
         int chunksize = 1500;
         byte[] body1 = new byte[chunksize];
-        SecureRandom.getInstanceStrong().nextBytes(body1);
         byte[] body2 = new byte[chunksize];
-        SecureRandom.getInstanceStrong().nextBytes(body2);
+        for (int i = 0; i < chunksize; i = i + testDataLength) {
+            System.arraycopy(testData1, 0, body1, i, testDataLength);
+            System.arraycopy(testData2, 0, body2, i, testDataLength);
+        }
         byte[] bodyComplete = new byte[2 * chunksize];
         System.arraycopy(body1, 0, bodyComplete, 0, body1.length);
         System.arraycopy(body2, 0, bodyComplete, body1.length, body2.length);
