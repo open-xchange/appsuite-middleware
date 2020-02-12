@@ -83,7 +83,7 @@ public class BasicAuthHttpContext implements HttpContext {
 
     @Override
     public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        if (!request.getScheme().toLowerCase().equals("https")) {
+        if ((!request.getScheme().toLowerCase().equals("https")) && !request.getRemoteAddr().equals(request.getLocalAddr())) {
             response.sendError(HttpServletResponse.SC_FORBIDDEN);
             return false;
         }
