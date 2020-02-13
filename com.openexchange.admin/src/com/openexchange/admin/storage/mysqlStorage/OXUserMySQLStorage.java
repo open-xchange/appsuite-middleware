@@ -289,7 +289,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             throw new StorageException(e);
         } finally {
             Databases.closeSQLStuff(rs, stmt);
-            releaseWriteContextConnection(con, ctx, cache);
+            releaseWriteContextConnectionAfterReading(con, ctx.getId().intValue(), cache);
         }
     }
 
