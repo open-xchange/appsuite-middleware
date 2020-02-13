@@ -835,7 +835,30 @@ public class FileResponseRendererTest {
         final String expectedCT = "text/plain";
         assertTrue("Wrong Content-Type", resp.getContentType().startsWith(expectedCT));
     }
+    
+    @Test
+    public void testContentTypeXJavaScriptView_MWB70() throws IOException {
 
+        final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
+        ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder("MWB70.html", "text/x-javascript", Delivery.view, Disposition.inline, "oxout.html");
+        final AJAXRequestData requestData = new AJAXRequestData();
+        requestData.putParameter("content_type", "text/x-javascript");
+        final AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
+        final SimHttpServletRequest req = new SimHttpServletRequest();
+        req.setParameter("content_type", "text/x-javascript");
+        final SimHttpServletResponse resp = new SimHttpServletResponse();
+        final ByteArrayServletOutputStream servletOutputStream = new ByteArrayServletOutputStream();
+        resp.setOutputStream(servletOutputStream);
+        fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
+
+        final int expectedStatus = 403;
+        final int currentStatus = resp.getStatus();
+        assertEquals("Unexpected status code", expectedStatus, currentStatus);
+        final String expectedContentType = null;
+        final String currentContentType = resp.getContentType();
+        assertEquals("Unexpected content-type", expectedContentType, currentContentType);
+    } 
+    
     private static final class TestableResourceCache implements ResourceCache {
 
         private final boolean isEnabled;
