@@ -49,7 +49,6 @@
 
 package com.openexchange.file.storage.owncloud.rest;
 
-import java.io.Serializable;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
@@ -61,31 +60,15 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.4
  */
-public class OCCapabilities extends AbstractOCJSONResponse implements Serializable {
+public class OCCapabilities extends AbstractOCJSONResponse {
 
     private static final String SHARING_FIELD = "files_sharing";
     private static final String FILES_FIELD = "files";
-    private static final long serialVersionUID = 1L;
-
-    JSONObject capabilities;
-    // Data fields for important entries
-    Integer searchMinLength = null;
-    Boolean versioning = null;
-    Boolean trash = null;
-
-    /**
-     * Initializes a new {@link OCCapabilities}.
-     * @param json
-     * @throws OXException
-     */
-    public OCCapabilities(JSONObject json) throws OXException {
-        super(json);
-    }
 
     /**
      * Parses the {@link JSONObject} to a {@link OCCapabilities} object
      *
-     * @param json The json to parse
+     * @param json The JSON to parse
      * @return The {@link OCCapabilities}
      * @throws OXException
      */
@@ -99,6 +82,24 @@ public class OCCapabilities extends AbstractOCJSONResponse implements Serializab
         }
     }
 
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    private JSONObject capabilities;
+    // Data fields for important entries
+    private final Integer searchMinLength = null;
+    private Boolean versioning = null;
+    private Boolean trash = null;
+
+    /**
+     * Initializes a new {@link OCCapabilities}.
+     *
+     * @param json
+     * @throws OXException
+     */
+    public OCCapabilities(JSONObject json) throws OXException {
+        super(json);
+    }
+
     /**
      * Gets the minimum search length
      *
@@ -106,14 +107,14 @@ public class OCCapabilities extends AbstractOCJSONResponse implements Serializab
      * @throws OXException In case of a parsing error
      */
     public int getSearchMinLength() throws OXException {
-        if(searchMinLength != null) {
+        if (searchMinLength != null) {
             return searchMinLength.intValue();
         }
         try {
             JSONObject sharing = capabilities.getJSONObject(SHARING_FIELD);
             Integer searchMinLength = null;
-            if(sharing.has("search_min_length")){
-                searchMinLength =  Integer.valueOf(sharing.getInt("search_min_length"));
+            if (sharing.has("search_min_length")) {
+                searchMinLength = Integer.valueOf(sharing.getInt("search_min_length"));
             }
             return searchMinLength == null ? 0 : searchMinLength.intValue();
         } catch (JSONException e) {
@@ -128,11 +129,11 @@ public class OCCapabilities extends AbstractOCJSONResponse implements Serializab
      * @throws OXException In case of a parsing error
      */
     public boolean supportsVersioning() throws OXException {
-        if(versioning != null) {
+        if (versioning != null) {
             return versioning.booleanValue();
         }
         try {
-            versioning =  Boolean.valueOf(capabilities.getJSONObject(FILES_FIELD).getBoolean("versioning"));
+            versioning = Boolean.valueOf(capabilities.getJSONObject(FILES_FIELD).getBoolean("versioning"));
             return versioning == null ? false : versioning.booleanValue();
         } catch (JSONException e) {
             throw FileStorageExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
@@ -146,11 +147,11 @@ public class OCCapabilities extends AbstractOCJSONResponse implements Serializab
      * @throws OXException In case of a parsing error
      */
     public boolean supportsTrash() throws OXException {
-        if(trash != null) {
+        if (trash != null) {
             return trash.booleanValue();
         }
         try {
-            trash =  Boolean.valueOf(capabilities.getJSONObject(FILES_FIELD).getBoolean("undelete"));
+            trash = Boolean.valueOf(capabilities.getJSONObject(FILES_FIELD).getBoolean("undelete"));
             return trash == null ? false : trash.booleanValue();
         } catch (JSONException e) {
             throw FileStorageExceptionCodes.JSON_ERROR.create(e.getMessage(), e);

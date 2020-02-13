@@ -64,7 +64,7 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
 public class AbstractOCJSONResponse {
     
     // json object containing the data
-    JSONValue data;
+    protected final JSONValue data;
     
     /**
      * Initializes a new {@link AbstractOCJSONResponse}.
