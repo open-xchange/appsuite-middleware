@@ -119,7 +119,7 @@ public class OCShares extends AbstractOCJSONResponse {
      * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
      * @since v7.10.4
      */
-    public class OCShare {
+    public static class OCShare {
         
         final String id; 
         final int share_type;
