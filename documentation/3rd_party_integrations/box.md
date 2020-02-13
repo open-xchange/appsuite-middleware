@@ -9,8 +9,10 @@ To setup the Box.com file store you have to install the package `open-xchange-fi
 # Registering your app
 
 * Sign in to [box Developers](https://developers.box.com/)
-* Select **Create a Box Application**
-* Select **Box Content**
+* Select **Create new App**
+* Select **Custom App**
+* Select **Standard OAuth 2.0 (User Authentication)**
+* Provide a name for you application
 * Hit **Configure your application**
 * Enter *redirect_uri* (the deferrer URL; e.g. `https://my.oxsetup.invalid/ajax/defer`)
 * Enable _Read and write all files and folders_
