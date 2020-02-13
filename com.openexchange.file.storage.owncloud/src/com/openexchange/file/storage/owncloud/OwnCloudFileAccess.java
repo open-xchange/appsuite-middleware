@@ -206,6 +206,9 @@ public class OwnCloudFileAccess extends AbstractWebDAVFileAccess implements File
 
         List<WebDAVResource> resources = client.propFind(path.toString(), 0, getPropertiesToQuery(fields), null);
         WebDAVResource resource = WebDAVUtils.find(resources, path);
+        if (resource == null) {
+            throw FileStorageExceptionCodes.FILE_VERSION_NOT_FOUND.create(version, id, folderId);
+        }
         return getVersionFile(master, resource);
     }
 
