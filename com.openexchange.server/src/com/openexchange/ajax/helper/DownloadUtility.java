@@ -236,8 +236,8 @@ public final class DownloadUtility {
                         in = new ByteArrayRandomAccess(tmp);
                     }
                 }
-            } else if (Strings.startsWithAny(toLowerCase(contentType.getSubType()), "javascript") || fileNameImpliesJavascript(fileName)) {
-                // Treat all JavaScript content as harmful
+            } else if (Strings.containsAny(toLowerCase(contentType.getSubType()), "javascript") || fileNameImpliesJavascript(fileName)) {
+                // Treat all JavaScript content as harmful including x-javascript
                 harmful = true;
                 sContentDisposition = "attachment";
             } else if (Strings.containsAny(toLowerCase(contentType.getSubType()), "svg") || fileNameImpliesSvg(fileName)) {
