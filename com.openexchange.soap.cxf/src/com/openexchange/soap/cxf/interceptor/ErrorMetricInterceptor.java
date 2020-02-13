@@ -94,7 +94,7 @@ public class ErrorMetricInterceptor extends AbstractPhaseInterceptor<Message> {
      */
     private Counter getCounter(String service, String operation, String status) {
         // @formatter:off
-        return Counter.builder("appsuite.soapapi.requests.timer").description("Records the timing of the soap calls.")
+        return Counter.builder("appsuite.soapapi.requests.error.counter").description("Records the timing of the soap calls.")
                                   .tags("service", service, "operation", operation, "status", status)
                                   .register(Metrics.globalRegistry);
         // @formatter:on
