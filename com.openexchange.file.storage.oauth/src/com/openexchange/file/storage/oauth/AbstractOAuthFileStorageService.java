@@ -254,7 +254,7 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
         // Retrieve the OAuth account id that is linked with the file storage account that was deleted.
         Object value = eventProps.get("account");
         if (value == null) {
-            LOG.debug("Not OAuth account information was found");
+            LOG.debug("No OAuth account information was found");
             return;
         }
 
