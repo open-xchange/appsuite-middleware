@@ -262,7 +262,7 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
         try {
             accountId = Integer.parseInt((String) value);
         } catch (NumberFormatException e) {
-            LOG.debug("Not OAuth account information was found");
+            LOG.debug("No OAuth account information was found");
             return;
         }
 
