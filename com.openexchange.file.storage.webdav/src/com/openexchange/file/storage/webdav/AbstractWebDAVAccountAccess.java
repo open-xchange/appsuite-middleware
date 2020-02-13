@@ -97,8 +97,7 @@ public abstract class AbstractWebDAVAccountAccess implements CapabilityAware {
 
     @Override
     public Boolean supports(FileStorageCapability capability) {
-        Boolean supportedByAbstractClass = FileStorageCapabilityTools.supportsByClass(AbstractWebDAVFileAccess.class, capability);
-        return Boolean.TRUE.equals(supportedByAbstractClass) ? Boolean.TRUE : null;
+        return FileStorageCapabilityTools.supportsByClass(AbstractWebDAVFileAccess.class, capability);
     }
 
     /**
