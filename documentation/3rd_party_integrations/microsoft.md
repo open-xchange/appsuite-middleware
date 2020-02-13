@@ -8,17 +8,17 @@ tags: 3rd Party, Microsoft, Installation, Configuration, Filestore, Contacts
 
 First things first. As with every OAuth provider, you will first need to register your App with Microsoft. You can do this as follows:
 
-* Sign in to [Microsoft Application Registration Portal](https://apps.dev.microsoft.com) using your Microsoft account
-* Click on "*Add an app*" to the right
-* Enter a name for your application in the the *Application Name* field and click on "*Create*" button
-* After the application is created you will have to generate a new password. Click on the "*Generate New Password*" button uynder the "*Application Secrets*" sub-section.
-* A pop-up dialog will display your generated password. Make a note of that as it will be used later in the Configuration section.
-* Under the "*Platforms*" sub-section, click on the "*Add Platform*" button and select "*Web*"
-* Enter the redirect URL as advised [here](({{ site.baseurl }}/middleware/3rd_party_integrations.html#common-preparations).
-* Under the "*Microsoft Graph Permissions*" you can enable the "*Delegated Permissions*" that are relevant for your project. The middleware currently supports functionality for:
-   * [Microsoft OneDrive](#microsoft-onedrive) (Read/Write)
-   * [Microsoft Contacts](#microsoft-contacts) (Read Only)
-* The following permissions are shared among both OneDrive and Contacts and should be enabled right away:
+* Sign in to [Microsoft Azure Portal](https://portal.azure.com/) using your Microsoft account
+* Choose App Registration
+* Enter a name for your application in the the *Application Name* field
+* Enter the redirect URL as advised [here](({{ site.baseurl }}/middleware/3rd_party_integrations.html#common-preparations) and click on "*Create*" button
+* After the application is created you will have to generate a new password. Click on "*Certificates & secrets*" and click on "*New Client Secret*""
+* Now you must enable required permission. Go to "*API Permissions*" and click on "*Add Permission*"
+* Choose "*Microsoft Graph*" and then "*Delegated permissions*"
+* Select the permissions that are relevant for your project. The middleware currently supports functionality for:
+   * [Files](#microsoft-onedrive) (Read/Write)
+   * [Contacts](#microsoft-contacts) (Read Only)
+* The following permissions are shared among both Files and Contacts and should be enabled right away:
  * [offline_access](https://docs.microsoft.com/en-us/graph/permissions-reference#openid-permissions)
  * [openid](https://docs.microsoft.com/en-us/graph/permissions-reference#openid-permissions)
  * [profile](https://docs.microsoft.com/en-us/graph/permissions-reference#openid-permissions)
