@@ -69,6 +69,9 @@ import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 import com.openexchange.soap.cxf.ExceptionUtils;
 import com.openexchange.soap.cxf.WebserviceName;
+import com.openexchange.soap.cxf.interceptor.ErrorMetricInterceptor;
+import com.openexchange.soap.cxf.interceptor.MetricInterceptor;
+import com.openexchange.soap.cxf.interceptor.TimerInterceptor;
 
 /**
  * {@link WebserviceCollector}
@@ -282,6 +285,10 @@ public class WebserviceCollector implements ServiceListener {
                 // Add logging interceptors
                 serverEndpoint.getInInterceptors().add(new com.openexchange.soap.cxf.interceptor.LoggingInInterceptor());
                 serverEndpoint.getOutInterceptors().add(new com.openexchange.soap.cxf.interceptor.LoggingOutInterceptor());
+                // Add metric interceptors
+                serverEndpoint.getInInterceptors().add(new TimerInterceptor());
+                serverEndpoint.getInInterceptors().add(new MetricInterceptor());
+                serverEndpoint.getOutFaultInterceptors().add(new ErrorMetricInterceptor());
             }
             oldEndpoint = endpoints.replace(name, endpoint);
             LOG.info("Publishing endpoint succeeded. Published \"{}\" under address \"{}\".", name, address);
