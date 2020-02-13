@@ -77,6 +77,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
@@ -805,19 +806,40 @@ public class InternalEventUpdate implements EventUpdate {
          */
         if (false == isNullOrEmpty(seriesMaster.getDeleteExceptionDates())) {
             SortedSet<RecurrenceId> newDeleteExceptionDates = new TreeSet<RecurrenceId>(seriesMaster.getDeleteExceptionDates());
-            if (newDeleteExceptionDates.retainAll(possibleExceptionDates)) {
+            boolean modified = false;
+            for (Iterator<RecurrenceId> iterator = newDeleteExceptionDates.iterator(); iterator.hasNext();) {
+                if (false == CalendarUtils.contains(possibleExceptionDates, iterator.next())) {
+                    iterator.remove();
+                    modified = true;
+                }
+            }
+            if (modified) {
                 seriesMaster.setDeleteExceptionDates(newDeleteExceptionDates);
             }
         }
         if (false == isNullOrEmpty(seriesMaster.getChangeExceptionDates())) {
             SortedSet<RecurrenceId> newChangeExceptionDates = new TreeSet<RecurrenceId>(seriesMaster.getChangeExceptionDates());
-            if (newChangeExceptionDates.retainAll(possibleExceptionDates)) {
+            boolean modified = false;
+            for (Iterator<RecurrenceId> iterator = newChangeExceptionDates.iterator(); iterator.hasNext();) {
+                if (false == CalendarUtils.contains(possibleExceptionDates, iterator.next())) {
+                    iterator.remove();
+                    modified = true;
+                }
+            }
+            if (modified) {
                 seriesMaster.setChangeExceptionDates(newChangeExceptionDates);
             }
         }
         if (false == isNullOrEmpty(changeExceptions)) {
             List<Event> newChangeExceptions = new ArrayList<Event>(changeExceptions);
-            if (newChangeExceptions.removeIf(event -> false == possibleExceptionDates.contains(event.getRecurrenceId()))) {
+            boolean modified = false;
+            for (Iterator<Event> iterator = newChangeExceptions.iterator(); iterator.hasNext();) {
+                if (false == CalendarUtils.contains(possibleExceptionDates, iterator.next().getRecurrenceId())) {
+                    iterator.remove();
+                    modified = true;
+                }
+            }
+            if (modified) {
                 changeExceptions = newChangeExceptions;
             }
         }
