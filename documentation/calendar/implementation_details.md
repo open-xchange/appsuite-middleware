@@ -792,4 +792,6 @@ Lets consider the case that the event is organized by another entity than the us
 
 
 ## Export
-The export will only touch so called 'pseudo group scheduled' events. Events that are only attended by the organizer herself are considered 'pseudo group scheduled'. Those events will be exported without the organizer and the attendee information as those are only persisted to legacy reasons (see [Group-scheduled Events](#group-scheduled-events)). 
+The export will touch so called 'pseudo group scheduled' events. Events that are only attended by the organizer herself are considered 'pseudo group scheduled'. Those events will be exported without the organizer and the attendee information as those are only persisted to legacy reasons (see [Group-scheduled Events](#group-scheduled-events)). 
+When exporting events the event flags as per [Event Flags](#event-flags) will be ignored, as they represent internal state.
+Besides this, alarms will be removed on exported events. The motivation behind this is that alarms are bound to a user and not to the exported event. Additionally some alarms that will trigger mails which might be imported as-is on other systems, generating unwanted mails.
