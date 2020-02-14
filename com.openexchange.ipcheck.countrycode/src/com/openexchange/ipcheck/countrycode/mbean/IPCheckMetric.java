@@ -64,7 +64,7 @@ public enum IPCheckMetric {
     deniedException,
     deniedCountryChanged;
 
-    public static final String COMPONENT_NAME = "ipcheck.";
+    public static final String COMPONENT_NAME = "appsuite.ipcheck.";
 
     /**
      * Returns the metric's name

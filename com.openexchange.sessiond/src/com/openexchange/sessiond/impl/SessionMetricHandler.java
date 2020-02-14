@@ -65,7 +65,7 @@ import io.micrometer.core.instrument.Metrics;
 public final class SessionMetricHandler {
 
     private static final String SESSIONS = "sessions";
-    private static final String GROUP = "sessiond.";
+    private static final String GROUP = "appsuite.sessiond.";
 
     private static final String COUNT_TOTAL = "TotalCount";
     private static final String COUNT_TOTAL_DESC = "The number of total sessions";

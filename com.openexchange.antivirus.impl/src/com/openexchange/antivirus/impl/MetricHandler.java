@@ -64,6 +64,8 @@ import io.micrometer.core.instrument.Timer;
 final class MetricHandler {
 
     private static final String RESULTS = "results";
+    
+    private static final String GROUP = "appsuite.antivirus.";
 
     /**
      * Prevents initialization
@@ -72,13 +74,13 @@ final class MetricHandler {
         super();
     }
 
-    private final static Counter CACHE_HIT = Counter.builder("antivirus.cache.hit").description("Cached Anti-Virus results hits").baseUnit(RESULTS).register(Metrics.globalRegistry);
-    private final static Counter CACHE_MISS = Counter.builder("antivirus.cache.miss").description("Cached Anti-Virus results misses").baseUnit(RESULTS).register(Metrics.globalRegistry);
-    private final static Counter CACHE_INVALIDATIONS = Counter.builder("antivirus.cache.invalidations").description("Cached Anti-Virus results invalidations").baseUnit(RESULTS).register(Metrics.globalRegistry);
-    private final static Counter TRANSFER_SIZE = Counter.builder("antivirus.transfer.size").description("Measures the amount of bytes transfered to the anti-virus server").baseUnit("bytes").register(Metrics.globalRegistry);
+    private final static Counter CACHE_HIT = Counter.builder(GROUP + "cache.hit").description("Cached Anti-Virus results hits").baseUnit(RESULTS).register(Metrics.globalRegistry);
+    private final static Counter CACHE_MISS = Counter.builder(GROUP + "cache.miss").description("Cached Anti-Virus results misses").baseUnit(RESULTS).register(Metrics.globalRegistry);
+    private final static Counter CACHE_INVALIDATIONS = Counter.builder(GROUP + "cache.invalidations").description("Cached Anti-Virus results invalidations").baseUnit(RESULTS).register(Metrics.globalRegistry);
+    private final static Counter TRANSFER_SIZE = Counter.builder(GROUP + "transfer.size").description("Measures the amount of bytes transfered to the anti-virus server").baseUnit("bytes").register(Metrics.globalRegistry);
 
-    private final static Timer SCANNING_RATE = Timer.builder("antivirus.scanning.rate").description("Measures the number of files scanned per second").register(Metrics.globalRegistry);
-    private final static Timer SCANNING_TIME = Timer.builder("antivirus.scanning.time").description("Measures the time elapsed during scanning a file").publishPercentileHistogram().register(Metrics.globalRegistry);
+    private final static Timer SCANNING_RATE = Timer.builder(GROUP + "scanning.rate").description("Measures the number of files scanned per second").register(Metrics.globalRegistry);
+    private final static Timer SCANNING_TIME = Timer.builder(GROUP + "scanning.time").description("Measures the time elapsed during scanning a file").publishPercentileHistogram().register(Metrics.globalRegistry);
 
     /**
      * Increments the cache hits metric

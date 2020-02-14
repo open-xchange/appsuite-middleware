@@ -56,9 +56,9 @@ import com.amazonaws.metrics.AwsSdkMetrics;
 import com.amazonaws.metrics.RequestMetricCollector;
 import com.amazonaws.util.AWSRequestMetrics;
 import com.amazonaws.util.AWSRequestMetrics.Field;
+import com.amazonaws.util.TimingInfo;
 import io.micrometer.core.instrument.Metrics;
 import io.micrometer.core.instrument.Timer;
-import com.amazonaws.util.TimingInfo;
 
 /**
  * {@link S3FileStorageRequestMetricCollector}
@@ -101,7 +101,7 @@ public class S3FileStorageRequestMetricCollector extends RequestMetricCollector 
             Field predefined = (Field) type;
             switch (predefined) {
                 case ClientExecuteTime:
-                    Timer timer = Timer.builder("s3.requestTimes."+request.getHttpMethod().name()).description(String.format("The execution time of %s requests measured in events/sec", request.getHttpMethod().name())).register(Metrics.globalRegistry);
+                    Timer timer = Timer.builder("appsuite.s3.requestTimes."+request.getHttpMethod().name()).description(String.format("The execution time of %s requests measured in events/sec", request.getHttpMethod().name())).register(Metrics.globalRegistry);
                     timer.record(longValue, TimeUnit.MILLISECONDS);
                     break;
                 default:

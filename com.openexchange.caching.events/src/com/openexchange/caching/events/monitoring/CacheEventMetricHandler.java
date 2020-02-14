@@ -49,9 +49,9 @@
 
 package com.openexchange.caching.events.monitoring;
 
+import java.util.concurrent.atomic.AtomicLong;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * {@link CacheEventMetricHandler}
@@ -62,9 +62,9 @@ import java.util.concurrent.atomic.AtomicLong;
 public final class CacheEventMetricHandler implements CacheEventMonitor {
 
     private static final String UNIT = "events";
-    private static final String BASE = "cache.events";
-    private static final String OFFERED = BASE + ".offered";
-    private static final String DELIVERED = BASE + ".delivered";
+    private static final String GROUP = "appsuite.cache.events";
+    private static final String OFFERED = GROUP + ".offered";
+    private static final String DELIVERED = GROUP + ".delivered";
 
     private final AtomicLong numOfferedEvents;
     private final AtomicLong numDeliveredEvents;
