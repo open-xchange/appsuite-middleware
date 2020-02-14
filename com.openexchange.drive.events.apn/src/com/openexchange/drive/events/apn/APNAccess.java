@@ -59,6 +59,7 @@ public class APNAccess {
     private final String password;
     private final Object keystore;
     private final boolean production;
+    private final String topic;
 
     /**
      * Initializes a new {@link APNAccess}.
@@ -80,6 +81,31 @@ public class APNAccess {
         this.keystore = keystore;
         this.password = password;
         this.production = production;
+        this.topic = null;
+    }
+
+    /**
+     * Initializes a new {@link APNAccess}.
+     *
+     * @param keystore A keystore containing the private key and the certificate signed by Apple. <p/>
+     *                 The following formats can be used:
+     *                 <ul>
+     *                 <li><code>java.io.File</code></li>
+     *                 <li><code>java.io.InputStream</code></li>
+     *                 <li><code>byte[]</code></li>
+     *                 <li><code>java.security.KeyStore</code></li>
+     *                 <li><code>java.lang.String</code> for a file path</li>
+     *                 </ul>
+     * @param password The keystore's password.
+     * @param production <code>true</code> to use Apple's production servers, <code>false</code> to use the sandbox servers
+     * @param topic 
+     */
+    public APNAccess(Object keystore, String password, boolean production, String topic) {
+        super();
+        this.keystore = keystore;
+        this.password = password;
+        this.production = production;
+        this.topic = topic;
     }
 
     /**
@@ -107,6 +133,15 @@ public class APNAccess {
      */
     public boolean isProduction() {
         return production;
+    }
+
+    /**
+     * Gets the topic
+     * 
+     * @return The topic
+     */
+    public String getTopic() {
+    	return topic;
     }
 
 }

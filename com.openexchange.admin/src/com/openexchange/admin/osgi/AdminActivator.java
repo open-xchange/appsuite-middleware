@@ -63,7 +63,6 @@ import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.mysql.CreateAttachmentTables;
 import com.openexchange.admin.mysql.CreateCalendarTables;
 import com.openexchange.admin.mysql.CreateContactsTables;
-import com.openexchange.admin.mysql.CreateIcalVcardTables;
 import com.openexchange.admin.mysql.CreateInfostoreTables;
 import com.openexchange.admin.mysql.CreateLdap2SqlTables;
 import com.openexchange.admin.mysql.CreateMiscTables;
@@ -275,7 +274,6 @@ public class AdminActivator extends HousekeepingActivator {
         registerService(CreateTableService.class, new CreateInfostoreTables());
         registerService(CreateTableService.class, new CreateAttachmentTables());
         registerService(CreateTableService.class, new CreateMiscTables());
-        registerService(CreateTableService.class, new CreateIcalVcardTables());
 
         // Register authenticator
         AuthenticatorImpl authenticator = new AuthenticatorImpl();

@@ -53,6 +53,7 @@ import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.drive.events.apn.APNAccess;
 import com.openexchange.drive.events.apn.IOSAPNCertificateProvider;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceExceptionCode;
 
 /**
@@ -85,6 +86,9 @@ public class IOSDriveEventPublisher extends APNDriveEventPublisher {
         APNAccess access = certificateProvider.getAccess();
         if (null == access) {
             throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("No APN access for service " + SERIVCE_ID + " available.");
+        }
+        if (Strings.isEmpty(access.getTopic())) {
+        	return new APNAccess(access.getKeystore(), access.getPassword(), access.isProduction(), TOPIC_VANILLA_APP_IOS);
         }
         return access;
     }

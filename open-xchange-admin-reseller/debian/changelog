@@ -1,3 +1,9 @@
+open-xchange-admin-reseller (7.10.1-27) stable; urgency=medium
+
+  * Build for patch 2020-02-10 (5570)
+
+ -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Mon, 03 Feb 2020 17:59:54 +0100
+
 open-xchange-admin-reseller (7.10.1-26) stable; urgency=medium
 
   * Build for patch 2020-01-20 (5545)

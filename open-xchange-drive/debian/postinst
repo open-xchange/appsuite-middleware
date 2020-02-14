@@ -38,6 +38,14 @@ postFix() {
     ox_add_property com.openexchange.drive.checksum.cleaner.interval 1D $PFILE
     ox_add_property com.openexchange.drive.checksum.cleaner.maxAge 4W $PFILE
 
+    # SCR-581
+    ox_remove_property com.openexchange.drive.events.apn.ios.feedbackQueryInterval $PFILE
+    ox_remove_property com.openexchange.drive.events.apn.macos.feedbackQueryInterval $PFILE
+    ox_add_property com.openexchange.drive.events.apn.ios.topic '' $PFILE
+    ox_add_property com.openexchange.drive.events.apn.macos.topic '' $PFILE
+}
+
+setConfigFilePermissions() {
     ox_update_permissions /opt/open-xchange/etc/drive.properties root:open-xchange 640
 }
 
@@ -47,6 +55,7 @@ case "$1" in
             # we are in update mode, run postFix to apply fixes
             postFix "$2"
         }
+        setConfigFilePermissions
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)

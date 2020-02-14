@@ -14,7 +14,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:        @OXVERSION@
-%define         ox_release 26
+%define         ox_release 27
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -46,22 +46,30 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 
 %post
 . /opt/open-xchange/lib/oxfunctions.sh
+if [ ${1:-0} -eq 2 ]; then
+    # only when updating
 
-# prevent bash from expanding, see bug 13316
-GLOBIGNORE='*'
+    # prevent bash from expanding, see bug 13316
+    GLOBIGNORE='*'
 
-PFILE=/opt/open-xchange/etc/drive.properties
+    PFILE=/opt/open-xchange/etc/drive.properties
 
-# SoftwareChange_Request-2850
-ox_add_property com.openexchange.drive.maxDirectories 65535 $PFILE
-ox_add_property com.openexchange.drive.maxFilesPerDirectory 65535 $PFILE
-ox_add_property com.openexchange.drive.enabledServices com.openexchange.infostore $PFILE
-ox_add_property com.openexchange.drive.excludedFolders '' $PFILE
+    # SoftwareChange_Request-2850
+    ox_add_property com.openexchange.drive.maxDirectories 65535 $PFILE
+    ox_add_property com.openexchange.drive.maxFilesPerDirectory 65535 $PFILE
+    ox_add_property com.openexchange.drive.enabledServices com.openexchange.infostore $PFILE
+    ox_add_property com.openexchange.drive.excludedFolders '' $PFILE
 
-# SoftwareChange_Request-3244
-ox_add_property com.openexchange.drive.checksum.cleaner.interval 1D $PFILE
-ox_add_property com.openexchange.drive.checksum.cleaner.maxAge 4W $PFILE
+    # SoftwareChange_Request-3244
+    ox_add_property com.openexchange.drive.checksum.cleaner.interval 1D $PFILE
+    ox_add_property com.openexchange.drive.checksum.cleaner.maxAge 4W $PFILE
 
+    # SCR-581
+    ox_remove_property com.openexchange.drive.events.apn.ios.feedbackQueryInterval $PFILE
+    ox_remove_property com.openexchange.drive.events.apn.macos.feedbackQueryInterval $PFILE
+    ox_add_property com.openexchange.drive.events.apn.ios.topic '' $PFILE
+    ox_add_property com.openexchange.drive.events.apn.macos.topic '' $PFILE
+fi
 ox_update_permissions /opt/open-xchange/etc/drive.properties root:open-xchange 640
 
 %files
@@ -75,6 +83,8 @@ ox_update_permissions /opt/open-xchange/etc/drive.properties root:open-xchange 6
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Mon Feb 03 2020 Tobias Friedrich <tobias.friedrich@open-xchange.com>
+Build for patch 2020-02-10 (5570)
 * Mon Jan 13 2020 Tobias Friedrich <tobias.friedrich@open-xchange.com>
 Build for patch 2020-01-20 (5545)
 * Mon Dec 02 2019 Tobias Friedrich <tobias.friedrich@open-xchange.com>
