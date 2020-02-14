@@ -50,6 +50,7 @@
 package com.openexchange.dav;
 
 import java.io.IOException;
+import java.time.Duration;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -57,6 +58,7 @@ import com.openexchange.ajax.Client;
 import com.openexchange.ajax.requesthandler.oauth.OAuthConstants;
 import com.openexchange.exception.OXException;
 import com.openexchange.framework.request.RequestContextHolder;
+import com.openexchange.java.util.HttpStatusFamily;
 import com.openexchange.log.LogProperties;
 import com.openexchange.login.Interface;
 import com.openexchange.login.LoginRequest;
@@ -74,6 +76,8 @@ import com.openexchange.tools.webdav.OXServlet;
 import com.openexchange.tools.webdav.WebDAVRequestContext;
 import com.openexchange.webdav.action.WebdavAction;
 import com.openexchange.webdav.protocol.WebdavMethod;
+import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.Timer;
 
 /**
  * {@link DAVServlet}
@@ -151,6 +155,7 @@ public class DAVServlet extends OXServlet {
 
     @Override
     protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        long start = System.nanoTime();
         /*
          * ensure to have a HTTP session when using cookies
          */
@@ -205,7 +210,33 @@ public class DAVServlet extends OXServlet {
             LogProperties.removeSessionProperties();
             RequestContextHolder.reset();
             decrementRequests();
+            recordMetric(Duration.ofNanos(System.nanoTime() - start), request.getMethod(), response.getStatus());
         }
+    }
+    
+    /**
+     * Records the duration
+     *
+     * @param duration The duration to record
+     * @param method The used method
+     * @param statusCode The response status
+     */
+    private void recordMetric(Duration duration, String method, int statusCode) {
+        String res = performer.getURLPrefix();
+        if(res.startsWith("/")) {
+            res = res.substring(1);
+        }
+        if(res.endsWith("/")) {
+            res = res.substring(0, res.length() - 1);
+        }
+        String status = HttpStatusFamily.SUCCESSFUL.equals(HttpStatusFamily.of(statusCode)) ? "OK" : String.valueOf(statusCode);
+        
+        // @formatter:off
+        Timer.builder("appsuite.webdav.requests")
+             .description("Records the timing of webdav requests")
+             .tags("interface", interfaze.name(), "resource", res, "method", method, "status", status)
+             .register(Metrics.globalRegistry).record(duration);
+        // @formatter:on
     }
 
     private void doIt(HttpServletRequest request, HttpServletResponse response, WebdavMethod method, Session session) {
@@ -213,6 +244,7 @@ public class DAVServlet extends OXServlet {
         try {
             serverSession = ServerSessionAdapter.valueOf(session);
         } catch (OXException e) {
+            LOG.error(e.getMessage(), e);
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             return;
         }
@@ -232,7 +264,7 @@ public class DAVServlet extends OXServlet {
      * @param session The session to check permissions for
      * @return <code>true</code> if permissions are sufficient, <code>false</code>, otherwise
      */
-    protected boolean checkPermission(HttpServletRequest request, ServerSession session) {
+    protected boolean checkPermission(HttpServletRequest request, @SuppressWarnings("unused") ServerSession session) {
         OAuthAccess oAuthAccess = (OAuthAccess) request.getAttribute(OAuthConstants.PARAM_OAUTH_ACCESS);
         if (null == oAuthAccess) {
             // basic authentication took place

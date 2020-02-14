@@ -50,17 +50,21 @@
 package com.openexchange.webdav;
 
 import java.io.IOException;
+import java.time.Duration;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.java.util.HttpStatusFamily;
 import com.openexchange.login.Interface;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.webdav.OXServlet;
 import com.openexchange.webdav.InfostorePerformer.Action;
+import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.Timer;
 
 /**
  * {@link Infostore} - The WebDAV/XML servlet for infostore module.
@@ -146,20 +150,44 @@ public class Infostore extends OXServlet {
         doIt(req, resp, Action.TRACE);
     }
 
+    @SuppressWarnings("unused")
     private void doIt(final HttpServletRequest req, final HttpServletResponse resp, final Action action) throws ServletException, IOException {
-        ServerSession session;
+        long start = System.nanoTime();
         try {
-            session = ServerSessionAdapter.valueOf(getSession(req));
-        } catch (OXException exc) {
-            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            return;
+            ServerSession session;
+            try {
+                session = ServerSessionAdapter.valueOf(getSession(req));
+            } catch (OXException exc) {
+                resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                return;
+            }
+            final UserConfiguration uc = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext());
+            if (!uc.hasWebDAV() || !uc.hasInfostore()) {
+                resp.setStatus(HttpServletResponse.SC_PRECONDITION_FAILED);
+                return;
+            }
+            InfostorePerformer.getInstance().doIt(req, resp, action, session);
+        } finally {
+            recordMetric(Duration.ofNanos(System.nanoTime() - start), req.getMethod(), resp.getStatus());
         }
-        final UserConfiguration uc = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext());
-        if (!uc.hasWebDAV() || !uc.hasInfostore()) {
-            resp.setStatus(HttpServletResponse.SC_PRECONDITION_FAILED);
-            return;
-        }
-        InfostorePerformer.getInstance().doIt(req, resp, action, session);
+    }
+    
+    /**
+     * Records the duration
+     *
+     * @param duration The duration to record
+     * @param method The used method
+     * @param status The response status
+     */
+    private void recordMetric(Duration duration, String method, int statusCode) {
+        String status = HttpStatusFamily.SUCCESSFUL.equals(HttpStatusFamily.of(statusCode)) ? "OK" : String.valueOf(statusCode);
+        
+        // @formatter:off
+        Timer.builder("appsuite.webdav.requests")
+             .description("Records the timing of webdav requests")
+             .tags("interface", "infostore", "resource", "webdav/infostore", "method", method, "status", status)
+             .register(Metrics.globalRegistry).record(duration);
+        // @formatter:on
     }
 
 }
