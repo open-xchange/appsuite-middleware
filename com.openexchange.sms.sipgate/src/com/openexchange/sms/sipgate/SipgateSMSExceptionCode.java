@@ -72,6 +72,11 @@ public enum SipgateSMSExceptionCode implements DisplayableOXExceptionCode {
      */
     HTTP_ERROR("Unexpected HTTP status: %1$s, %2$s", Category.CATEGORY_ERROR, 2),
 
+    /**
+     * Sipgate SMS service is not configured for user %1$s in context %2$s
+     */
+    NOT_CONFIGURED("Sipgate SMS service is not configured for user %1$s in context %2$s", Category.CATEGORY_ERROR, 3),
+
     ;
 
     public static final String PREFIX = "SIPGATE";

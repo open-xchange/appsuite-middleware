@@ -47,18 +47,18 @@
  *
  */
 
-package com.openexchange.drive.events.apn2.internal;
+package com.openexchange.drive.events.apn2.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.drive.DriveExceptionCodes;
-import com.openexchange.drive.events.apn2.ApnsHttp2Options;
-import com.openexchange.drive.events.apn2.ApnsHttp2Options.AuthType;
+import com.openexchange.drive.events.apn2.util.ApnsHttp2Options.AuthType;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.turo.pushy.apns.ApnsClient;
@@ -72,6 +72,8 @@ import com.turo.pushy.apns.auth.ApnsSigningKey;
  * @since v7.10.1
  */
 public class ApnsHttp2Utility {
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ApnsHttp2Utility.class);
 
     /**
      * Initializes a new {@link ApnsHttp2Utility}.
@@ -134,6 +136,21 @@ public class ApnsHttp2Utility {
         } catch (InvalidKeyException e) {
             throw DriveExceptionCodes.UNEXPECTED_ERROR.create(e, "Invalid APNS HTTP/2 private key specified for drive events");
         }
+    }
+
+    /**
+     * Gets the APNS HTTP/2 client for specified options if it is available.
+     *
+     * @param options The APNS HTTP/2 options
+     * @return The optional {@link ApnsClient}
+     */
+    public static Optional<ApnsClient> getClient(ApnsHttp2Options options) {
+        try {
+            return options == null ? Optional.empty() : Optional.of(ApnsHttp2Utility.getApnsClient(options));
+        } catch (Exception e) {
+            LOG.error("Unable to create APNS HTTP/2 client for service {}", "apn/apn2", e);
+        }
+        return Optional.empty();
     }
 
 }

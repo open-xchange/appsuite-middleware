@@ -63,19 +63,26 @@ public interface Message {
 
     /** The type of a message's (textual) content */
     public static enum ContentType {
-    /**
-     * The <code>"text/plain"</code> content type.
-     */
-    TEXT_PLAIN("text/plain"),
-    /**
-     * The <code>"text/html"</code> content type.
-     */
-    TEXT_HTML("text/html");
+
+        /**
+         * The <code>"text/plain"</code> content type.
+         */
+        TEXT_PLAIN("text/plain", false),
+        /**
+         * The <code>"text/html"</code> content type.
+         */
+        TEXT_HTML("text/html", true),
+        /**
+         * The <code>"multipart/alternative"</code> content type.
+         */
+        MULTIPART_ALTERNATIVE("multipart/alternative", true);
 
         private final String id;
+        private final boolean impliesHtml;
 
-        private ContentType(String id) {
+        private ContentType(String id, boolean impliesHtml) {
             this.id = id;
+            this.impliesHtml = impliesHtml;
         }
 
         /**
@@ -85,6 +92,15 @@ public interface Message {
          */
         public String getId() {
             return id;
+        }
+
+        /**
+         * Whether this content type implies HTML content.
+         *
+         * @return <code>true</code> if HTML content is implied; otherwise <code>false</code>
+         */
+        public boolean isImpliesHtml() {
+            return impliesHtml;
         }
 
         /**
@@ -99,9 +115,9 @@ public interface Message {
             }
 
             String lk = contentType.trim();
-            if ("ALTERNATIVE".equals(lk)) {
-                // Old behavior for requesting to build a multipart/alternative message. Assume text/html in that case.
-                return ContentType.TEXT_HTML;
+            if ("alternative".equalsIgnoreCase(lk)) {
+                // Old behavior for requesting to build a multipart/alternative message.
+                return ContentType.MULTIPART_ALTERNATIVE;
             }
             for (ContentType ct : ContentType.values()) {
                 if (lk.equalsIgnoreCase(ct.id)) {

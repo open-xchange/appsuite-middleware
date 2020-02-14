@@ -62,6 +62,7 @@ public class APNAccess {
     private final String stringKeystore;
     private final byte[] bytesKeystore;
     private final boolean production;
+    private final String topic;
     private int hash = 0;
 
     /**
@@ -76,12 +77,13 @@ public class APNAccess {
      * @param password The keystore's password.
      * @param production <code>true</code> to use Apple's production servers, <code>false</code> to use the sandbox servers
      */
-    public APNAccess(String keystore, String password, boolean production) {
+    public APNAccess(String keystore, String password, boolean production, String topic) {
         super();
         this.stringKeystore = keystore;
         this.bytesKeystore = null;
         this.password = password;
         this.production = production;
+        this.topic = topic;
     }
 
     /**
@@ -96,12 +98,13 @@ public class APNAccess {
      * @param password The keystore's password.
      * @param production <code>true</code> to use Apple's production servers, <code>false</code> to use the sandbox servers
      */
-    public APNAccess(byte[] keystore, String password, boolean production) {
+    public APNAccess(byte[] keystore, String password, boolean production, String topic) {
         super();
         this.stringKeystore = null;
         this.bytesKeystore = keystore;
         this.password = password;
         this.production = production;
+        this.topic = topic;
     }
 
     /**
@@ -131,6 +134,15 @@ public class APNAccess {
         return production;
     }
 
+    /**
+     * Gets the topic
+     *
+     * @return The topic
+     */
+    public String getTopic() {
+        return topic;
+    }
+
     @Override
     public int hashCode() {
         int result = hash; // Does not need to be thread-safe
@@ -140,6 +152,7 @@ public class APNAccess {
             result = prime * result + (production ? 1231 : 1237);
             result = prime * result + ((password == null) ? 0 : password.hashCode());
             result = prime * result + ((stringKeystore == null) ? 0 : stringKeystore.hashCode());
+            result = prime * result + ((topic == null) ? 0 : topic.hashCode());
             result = prime * result + Arrays.hashCode(bytesKeystore);
             this.hash = result;
         }

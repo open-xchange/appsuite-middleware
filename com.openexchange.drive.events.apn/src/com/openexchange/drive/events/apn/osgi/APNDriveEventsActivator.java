@@ -71,6 +71,7 @@ import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
 
 /**
@@ -81,6 +82,8 @@ import com.openexchange.timer.TimerService;
 public class APNDriveEventsActivator extends HousekeepingActivator {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(APNDriveEventsActivator.class);
+    private static final String TOPIC_VANILLA_APP_IOS = "com.openexchange.drive";
+    private static final String TOPIC_VANILLA_APP_MACOS = "com.openxchange.drive.macos.OXDrive";
 
     /**
      * Initializes a new {@link APNDriveEventsActivator}.
@@ -91,7 +94,7 @@ public class APNDriveEventsActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DriveEventService.class, DriveSubscriptionStore.class, LeanConfigurationService.class, TimerService.class };
+        return new Class<?>[] { DriveEventService.class, DriveSubscriptionStore.class, LeanConfigurationService.class, TimerService.class, ThreadPoolService.class };
     }
 
     @Override
@@ -111,13 +114,13 @@ public class APNDriveEventsActivator extends HousekeepingActivator {
             public synchronized void added(ServiceReference<FragmentPropertiesLoader> ref, FragmentPropertiesLoader service) {
                 Properties properties = service.load(DriveEventsAPNProperty.FRAGMENT_FILE_NAME);
                 if (properties != null) {
-                    APNAccess access = createAccess(properties, OperationSystemType.IOS, service);
+                    APNAccess access = createAccess(properties, OperationSystemType.IOS, service, TOPIC_VANILLA_APP_IOS);
                     if (access != null) {
                         iosProvider = () -> access;
                         registerService(IOSAPNCertificateProvider.class, iosProvider);
                     }
 
-                    APNAccess macAccess = createAccess(properties, OperationSystemType.MACOS, service);
+                    APNAccess macAccess = createAccess(properties, OperationSystemType.MACOS, service, TOPIC_VANILLA_APP_MACOS);
                     if (macAccess != null) {
                         macosProvider = () -> macAccess;
                         registerService(MacOSAPNCertificateProvider.class, macosProvider);
@@ -162,7 +165,7 @@ public class APNDriveEventsActivator extends HousekeepingActivator {
      * @param The {@link FragmentPropertiesLoader}
      * @return The {@link APNAccess} or null
      */
-    protected APNAccess createAccess(Properties properties, OperationSystemType type, FragmentPropertiesLoader loader) {
+    protected APNAccess createAccess(Properties properties, OperationSystemType type, FragmentPropertiesLoader loader, String topic) {
         try {
             Map<String, String> optionals = Collections.singletonMap(DriveEventsAPNProperty.OPTIONAL_FIELD, type.getName());
             String keystore = getProperty(properties, DriveEventsAPNProperty.keystore, optionals);
@@ -173,7 +176,7 @@ public class APNDriveEventsActivator extends HousekeepingActivator {
 
                 // Check file path validity
                 if (new File(keystore).exists()) {
-                    return new APNAccess(keystore, password, production);
+                    return new APNAccess(keystore, password, production, topic);
                 }
 
                 // Assume file is given as resource identifier
@@ -182,7 +185,7 @@ public class APNDriveEventsActivator extends HousekeepingActivator {
                     if(keystoreBytes.length == 0) {
                         return null;
                     }
-                    return new APNAccess(keystoreBytes, password, production);
+                    return new APNAccess(keystoreBytes, password, production, topic);
                 } catch (IOException e) {
                     LOG.warn("Error instantiating APNS options from resource {}", keystore, e);
                 }

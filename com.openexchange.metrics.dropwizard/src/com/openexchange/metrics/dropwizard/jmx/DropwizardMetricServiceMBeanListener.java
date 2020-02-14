@@ -92,8 +92,8 @@ public class DropwizardMetricServiceMBeanListener extends AbstractMetricServiceL
      * @see com.openexchange.metrics.jmx.MetricServiceListener#onGaugeRemoved(java.lang.String)
      */
     @Override
-    public void onGaugeRemoved(String name) {
-        unregisterMBean(name);
+    public void onGaugeRemoved(MetricDescriptor descriptor) {
+        unregisterMBean(descriptor);
     }
 
     /*
@@ -112,8 +112,8 @@ public class DropwizardMetricServiceMBeanListener extends AbstractMetricServiceL
      * @see com.openexchange.metrics.jmx.MetricServiceListener#onCounterRemoved(java.lang.String)
      */
     @Override
-    public void onCounterRemoved(String name) {
-        unregisterMBean(name);
+    public void onCounterRemoved(MetricDescriptor descriptor) {
+        unregisterMBean(descriptor);
     }
 
     /*
@@ -132,8 +132,8 @@ public class DropwizardMetricServiceMBeanListener extends AbstractMetricServiceL
      * @see com.openexchange.metrics.jmx.MetricServiceListener#onHistogramRemoved(java.lang.String)
      */
     @Override
-    public void onHistogramRemoved(String name) {
-        unregisterMBean(name);
+    public void onHistogramRemoved(MetricDescriptor descriptor) {
+        unregisterMBean(descriptor);
     }
 
     /*
@@ -152,8 +152,8 @@ public class DropwizardMetricServiceMBeanListener extends AbstractMetricServiceL
      * @see com.openexchange.metrics.jmx.MetricServiceListener#onMeterRemoved(java.lang.String)
      */
     @Override
-    public void onMeterRemoved(String name) {
-        unregisterMBean(name);
+    public void onMeterRemoved(MetricDescriptor descriptor) {
+        unregisterMBean(descriptor);
     }
 
     /*
@@ -172,7 +172,7 @@ public class DropwizardMetricServiceMBeanListener extends AbstractMetricServiceL
      * @see com.openexchange.metrics.jmx.MetricServiceListener#onTimerRemoved(java.lang.String)
      */
     @Override
-    public void onTimerRemoved(String name) {
-        unregisterMBean(name);
+    public void onTimerRemoved(MetricDescriptor descriptor) {
+        unregisterMBean(descriptor);
     }
 }

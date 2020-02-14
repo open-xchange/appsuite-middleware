@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.drive.events.apn2.internal;
+package com.openexchange.drive.events.apn2.util;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
@@ -57,6 +57,7 @@ import java.util.UUID;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.turo.pushy.apns.DeliveryPriority;
+import com.turo.pushy.apns.PushType;
 import com.turo.pushy.apns.util.SimpleApnsPushNotification;
 
 
@@ -104,6 +105,7 @@ public class ApnsHttp2Notification extends SimpleApnsPushNotification {
         private long expiration;
         private DeliveryPriority priority;
         private UUID uuid;
+        private PushType pushType;
 
         /**
          * Creates a new notification builder.
@@ -172,6 +174,7 @@ public class ApnsHttp2Notification extends SimpleApnsPushNotification {
         public Builder withSound(String sound) {
             if (sound != null) {
                 aps.put("sound", sound);
+                pushType = PushType.ALERT;
             } else {
                 aps.remove("sound");
             }
@@ -218,6 +221,11 @@ public class ApnsHttp2Notification extends SimpleApnsPushNotification {
             return this;
         }
 
+        public Builder withPushType(PushType pushType) {
+            this.pushType = pushType;
+            return this;
+        }
+
         /**
          * Builds the notification.
          *
@@ -226,11 +234,15 @@ public class ApnsHttp2Notification extends SimpleApnsPushNotification {
         public ApnsHttp2Notification build() {
             if (false == alert.isEmpty()) {
                 aps.put("alert", alert);
+                pushType = PushType.ALERT;
             }
             if (false == aps.isEmpty()) {
                 root.put("aps", aps);
             }
-            return new ApnsHttp2Notification(token, topic, root, expiration < 0 ? null : new Date(System.currentTimeMillis() + expiration), priority, collapseId, uuid);
+            if (null == pushType) {
+                pushType = PushType.BACKGROUND;
+            }
+            return new ApnsHttp2Notification(token, topic, root, expiration < 0 ? null : new Date(System.currentTimeMillis() + expiration), priority, pushType, collapseId, uuid);
         }
     }
 
@@ -246,13 +258,14 @@ public class ApnsHttp2Notification extends SimpleApnsPushNotification {
      * @param invalidationTime The time at which Apple's servers should stop trying to deliver this message; if
      * {@code null}, no delivery attempts beyond the first will be made
      * @param priority The priority with which this notification should be delivered to the receiving device
+     * @param pushType The notification display type
      * @param collapseId The "collapse identifier" for this notification, which allows it to supersede or be superseded
      * by other notifications with the same collapse identifier
      * @param apnsId The unique identifier for this notification; may be {@code null}, in which case the APNs server
      * will assign a unique identifier automatically
      */
-    public ApnsHttp2Notification(String token, String topic, Map<String, Object> payload, Date invalidationTime, DeliveryPriority priority, String collapseId, UUID apnsId) {
-        super(token, topic, maptoString(payload), invalidationTime, priority, collapseId, apnsId);
+    public ApnsHttp2Notification(String token, String topic, Map<String, Object> payload, Date invalidationTime, DeliveryPriority priority, PushType pushType, String collapseId, UUID apnsId) {
+        super(token, topic, maptoString(payload), invalidationTime, priority, pushType, collapseId, apnsId);
     }
 
 }

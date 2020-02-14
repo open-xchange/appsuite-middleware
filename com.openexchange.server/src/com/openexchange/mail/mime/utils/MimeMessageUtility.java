@@ -166,7 +166,6 @@ import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.behavior.AbortBehavior;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.sun.mail.imap.protocol.BODYSTRUCTURE;
 import com.sun.mail.util.BASE64DecoderStream;
@@ -1266,40 +1265,7 @@ public final class MimeMessageUtility {
      * @return The proper unicode string
      */
     public static String checkNonAscii(final String rawHeader) {
-        if (null == rawHeader || isAscii(rawHeader)) {
-            return rawHeader;
-        }
-        return convertNonAscii(rawHeader);
-    }
-
-    private static String convertNonAscii(final String rawHeader) {
-        final int length = rawHeader.length();
-        final byte[] bytes = new byte[length];
-        for (int i = 0; i < length; i++) {
-            bytes[i] = (byte) rawHeader.charAt(i);
-        }
-        try {
-            final String detectCharset = CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream(bytes));
-            return MessageUtility.readStream(new UnsynchronizedByteArrayInputStream(bytes), detectCharset);
-        } catch (final IOException e) {
-            // Cannot occur
-            return rawHeader;
-        }
-    }
-
-    /**
-     * Checks whether the specified string's characters are ASCII 7 bit
-     *
-     * @param s The string to check
-     * @return <code>true</code> if string's characters are ASCII 7 bit; otherwise <code>false</code>
-     */
-    private static boolean isAscii(final String s) {
-        final int length = s.length();
-        boolean isAscci = true;
-        for (int i = 0; (i < length) && isAscci; i++) {
-            isAscci &= (s.charAt(i) < 128);
-        }
-        return isAscci;
+        return rawHeader;
     }
 
     /**
