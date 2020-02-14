@@ -386,7 +386,7 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion> {
                 /*
                  * let client synchronize the directory
                  */
-                result.addActionForClient(new SyncDirectoryAction(comparison.getClientVersion(), comparison));
+                result.addActionForClient(new SyncDirectoryAction(comparison.getClientVersion(), comparison, true));
                 return 1;
             } else {
                 OXException e = DriveExceptionCodes.NO_CREATE_DIRECTORY_PERMISSION.create(lastExistingParentVersion.getPath());
