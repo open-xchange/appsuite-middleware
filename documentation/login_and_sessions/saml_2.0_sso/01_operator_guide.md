@@ -6,7 +6,7 @@ tags: SAML, Installation, Configuration, SSO
 
 # Installation
 
-The SAML integration is provided by the `open-xchange-saml-core` package and requires an additional package that provides `open-xchange-saml-backend` and contains your custom SAML backend. It is also necessary that a package providing `open-xchange-authentication` is installed. For your convenience you can install the metapackage `open-xchange-saml` which depends on a core and backend package. Finally the package for SAML support within App Suite UI is needed: `open-xchange-appsuite-saml`.
+The SAML integration is provided by the `open-xchange-saml-core` package and requires an additional package that provides `open-xchange-saml-backend` and contains your custom SAML backend. It is also necessary that a package providing `open-xchange-authentication` is installed. For your convenience you can install the metapackage `open-xchange-saml` which depends on a core and backend package.
 
 
 # Configuration
@@ -33,7 +33,7 @@ Furthermore it is possible to re-enter an existing App Suite session when return
 
 ## Frontend Configuration
 
-The frontend plugin `open-xchange-appsuite-saml` is deactivated by default. In order to enable the special SAML login handling, enable a samlLogin flag in `/opt/open-xchange/etc/as-config.yml`:
+The frontend SAML plugin is deactivated by default. In order to enable the special SAML login handling, enable a samlLogin flag in `/opt/open-xchange/etc/as-config.yml`:
 
     default:
         host: all
