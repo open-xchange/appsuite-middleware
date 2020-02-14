@@ -209,6 +209,35 @@ public class CalendarUtils {
     }
 
     /**
+     * Removes all recurrence identifiers from a collection that are not present in a defined list of possible recurrence identifiers.
+     * I.e., only those recurrence identifiers are preserved that are present in the defined set of possible recurrence ids.
+     * <p/>
+     * Lookups are performed based on {@link RecurrenceId#matches(RecurrenceId)}.
+     *
+     * @param recurrenceIds The recurrence identifiers to remove non-matching ones from
+     * @param possibleRecurrenceIds The collection of possible recurrence identifiers
+     * @return <code>true</code> if the collection was modified, <code>false</code>, otherwise
+     * @see RecurrenceId#matches(RecurrenceId)
+     */
+    public static boolean removeNonMatching(Collection<RecurrenceId> recurrenceIds, Collection<RecurrenceId> possibleRecurrenceIds) {
+        if (isNullOrEmpty(recurrenceIds)) {
+            return false;
+        }
+        if (isNullOrEmpty(possibleRecurrenceIds)) {
+            recurrenceIds.clear();
+            return true;
+        }
+        boolean modified = false;
+        for (Iterator<RecurrenceId> iterator = recurrenceIds.iterator(); iterator.hasNext();) {
+            if (false == contains(possibleRecurrenceIds, iterator.next())) {
+                iterator.remove();
+                modified = true;
+            }
+        }
+        return modified;
+    }
+
+    /**
      * Looks up a specific recurrence identifier within a collection of recurrence identifiers, based on its value. The lookup is
      * performed based on {@link RecurrenceId#matches(RecurrenceId)}.
      *
@@ -226,6 +255,18 @@ public class CalendarUtils {
             }
         }
         return null;
+    }
+
+    /**
+     * Gets a value indicating whether the value of one recurrence identifier matches another one, based on
+     * {@link RecurrenceId#matches(RecurrenceId)}.
+     * 
+     * @param recurrenceId1 The first recurrence identifier to match, or <code>null</code>
+     * @param recurrenceId2 The second recurrence identifier to match, or <code>null</code>
+     * @return <code>true</code> if both recurrence identifiers are <code>null</code> or their values matches, <code>false</code>, otherwise
+     */
+    public static boolean matches(RecurrenceId recurrenceId1, RecurrenceId recurrenceId2) {
+        return null == recurrenceId1 ? null == recurrenceId2 : recurrenceId1.matches(recurrenceId2);
     }
 
     /**

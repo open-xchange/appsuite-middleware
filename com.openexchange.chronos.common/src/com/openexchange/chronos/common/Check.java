@@ -141,7 +141,7 @@ public class Check {
             RecurrenceData recurrenceData = new DefaultRecurrenceData(seriesMaster.getRecurrenceRule(), seriesMaster.getStartDate(), null);
             SortedSet<RecurrenceId> validRecurrenceIds = CalendarUtils.removeInvalid(recurrenceIDs, recurrenceData, recurrenceService);
             for (RecurrenceId recurrenceID : recurrenceIDs) {
-                if (false == validRecurrenceIds.contains(recurrenceID)) {
+                if (false == CalendarUtils.contains(validRecurrenceIds, recurrenceID)) {
                     throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create(String.valueOf(recurrenceID), recurrenceData);
                 }
             }

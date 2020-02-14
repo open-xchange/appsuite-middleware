@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.impl;
 
+import static com.openexchange.chronos.common.CalendarUtils.contains;
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.getExceptionDateUpdates;
 import static com.openexchange.chronos.common.CalendarUtils.getRecurrenceIds;
@@ -959,7 +960,7 @@ public class Utils {
             userizedDeleteExceptions.addAll(seriesMaster.getDeleteExceptionDates());
         }
         for (RecurrenceId originalChangeExceptionDate : seriesMaster.getChangeExceptionDates()) {
-            if (false == userizedChangeExceptions.contains(originalChangeExceptionDate)) {
+            if (false == contains(userizedChangeExceptions, originalChangeExceptionDate)) {
                 userizedDeleteExceptions.add(originalChangeExceptionDate);
             }
         }

@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.impl;
 
+import static com.openexchange.chronos.common.CalendarUtils.matches;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -360,6 +361,15 @@ public class InternalCalendarResult {
         return new DefaultCalendarResult(session.getSession(), calendarUserId, folder.getId(), userizedCreations, userizedUpdates, userizedDeletions);
     }
 
+    /**
+     * Gets the <i>plain</i> calendar result representing the overall view on the performed changes.
+     *
+     * @return The calendar result
+     */
+    public CalendarResult getPlainResult() {
+        return new DefaultCalendarResult(session.getSession(), calendarUserId, folder.getId(), creations, updates, deletions);
+    }
+
     private Map<Integer, List<String>> getAffectedFoldersPerUser() {
         if (null == affectedFolderIds || 0 == affectedFolderIds.size()) {
             return Collections.emptyMap();
@@ -383,7 +393,7 @@ public class InternalCalendarResult {
         if (null != creations) {
             for (CreateResult creation : creations) {
                 Event event = creation.getCreatedEvent();
-                if (Objects.equals(folderId, event.getFolderId()) && Objects.equals(id, event.getId()) && Objects.equals(recurrenceId, event.getRecurrenceId())) {
+                if (Objects.equals(folderId, event.getFolderId()) && Objects.equals(id, event.getId()) && matches(recurrenceId, event.getRecurrenceId())) {
                     return creation;
                 }
             }
@@ -395,7 +405,7 @@ public class InternalCalendarResult {
         if (null != updates) {
             for (UpdateResult update : updates) {
                 Event event = update.getOriginal();
-                if (Objects.equals(folderId, event.getFolderId()) && Objects.equals(id, event.getId()) && Objects.equals(recurrenceId, event.getRecurrenceId())) {
+                if (Objects.equals(folderId, event.getFolderId()) && Objects.equals(id, event.getId()) && matches(recurrenceId, event.getRecurrenceId())) {
                     return update;
                 }
             }

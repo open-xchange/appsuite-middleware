@@ -487,7 +487,7 @@ public class EventPatches {
                                 patchedAlarms.add(snoozedAlarm);
                                 importedEvent.setAlarms(patchedAlarms);
                                 for (Iterator<Event> iter = importedChangeExceptions.iterator(); iter.hasNext();) {
-                                    if (newChangeException.getRecurrenceId().equals(iter.next().getRecurrenceId())) {
+                                    if (newChangeException.getRecurrenceId().matches(iter.next().getRecurrenceId())) {
                                         iter.remove();
                                         break;
                                     }
@@ -830,15 +830,16 @@ public class EventPatches {
                             return null;
                         }
                         for (RecurrenceId exceptionDate : originalSeriesMaster.getChangeExceptionDates()) {
-                            if (deleteExceptionDates.contains(exceptionDate) && now.after(exceptionDate.getValue())) {
+                            RecurrenceId matchingExceptionDate = find(deleteExceptionDates, exceptionDate);
+                            if (null != matchingExceptionDate && now.after(exceptionDate.getValue())) {
                                 Event originalChangeException = access.getEvent(
-                                    new EventID(resource.getEvent().getFolderId(), resource.getEvent().getId(), exceptionDate));
+                                    new EventID(resource.getEvent().getFolderId(), resource.getEvent().getId(), matchingExceptionDate));
                                 Attendee attendee = find(originalChangeException.getAttendees(), resource.getParent().getCalendarUser().getId());
                                 if (null != attendee && ParticipationStatus.DECLINED.matches(attendee.getPartStat())) {
                                     /*
                                      * restore original change exception; remove delete exception date
                                      */
-                                    deleteExceptionDates.remove(exceptionDate);
+                                    deleteExceptionDates.remove(matchingExceptionDate);
                                     importedChangeExceptions.add(exportAndImport(resource, originalChangeException));
                                 }
                             }

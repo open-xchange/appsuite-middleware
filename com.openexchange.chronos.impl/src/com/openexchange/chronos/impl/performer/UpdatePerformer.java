@@ -434,7 +434,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
          * track update result & update any stored alarm triggers of all users if required
          */
         Event updatedEvent = loadEventData(originalEvent.getId());
-        if (originalEvent.getId().equals(updatedEvent.getId()) && Objects.equals(originalEvent.getRecurrenceId(), updatedEvent.getRecurrenceId())) {
+        if (originalEvent.getId().equals(updatedEvent.getId()) && matches(originalEvent.getRecurrenceId(), updatedEvent.getRecurrenceId())) {
             resultTracker.trackUpdate(originalEvent, updatedEvent);
         } else {
             resultTracker.trackDeletion(originalEvent);

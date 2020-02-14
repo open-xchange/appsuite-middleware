@@ -63,6 +63,7 @@ import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.matches;
+import static com.openexchange.chronos.common.CalendarUtils.removeNonMatching;
 import static com.openexchange.chronos.common.CalendarUtils.shiftRecurrenceId;
 import static com.openexchange.chronos.common.CalendarUtils.shiftRecurrenceIds;
 import static com.openexchange.chronos.impl.Utils.asList;
@@ -77,7 +78,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
@@ -789,7 +789,7 @@ public class InternalEventUpdate implements EventUpdate {
         return changeExceptions;
     }
 
-    private List<Event> removeInvalidRecurrenceIds(Event seriesMaster, List<Event> changeExceptions) throws OXException {
+    protected List<Event> removeInvalidRecurrenceIds(Event seriesMaster, List<Event> changeExceptions) throws OXException {
         /*
          * build list of possible exception dates
          */
@@ -806,40 +806,19 @@ public class InternalEventUpdate implements EventUpdate {
          */
         if (false == isNullOrEmpty(seriesMaster.getDeleteExceptionDates())) {
             SortedSet<RecurrenceId> newDeleteExceptionDates = new TreeSet<RecurrenceId>(seriesMaster.getDeleteExceptionDates());
-            boolean modified = false;
-            for (Iterator<RecurrenceId> iterator = newDeleteExceptionDates.iterator(); iterator.hasNext();) {
-                if (false == CalendarUtils.contains(possibleExceptionDates, iterator.next())) {
-                    iterator.remove();
-                    modified = true;
-                }
-            }
-            if (modified) {
+            if (removeNonMatching(newDeleteExceptionDates, possibleExceptionDates)) {
                 seriesMaster.setDeleteExceptionDates(newDeleteExceptionDates);
             }
         }
         if (false == isNullOrEmpty(seriesMaster.getChangeExceptionDates())) {
             SortedSet<RecurrenceId> newChangeExceptionDates = new TreeSet<RecurrenceId>(seriesMaster.getChangeExceptionDates());
-            boolean modified = false;
-            for (Iterator<RecurrenceId> iterator = newChangeExceptionDates.iterator(); iterator.hasNext();) {
-                if (false == CalendarUtils.contains(possibleExceptionDates, iterator.next())) {
-                    iterator.remove();
-                    modified = true;
-                }
-            }
-            if (modified) {
+            if (removeNonMatching(newChangeExceptionDates, possibleExceptionDates)) {
                 seriesMaster.setChangeExceptionDates(newChangeExceptionDates);
             }
         }
         if (false == isNullOrEmpty(changeExceptions)) {
             List<Event> newChangeExceptions = new ArrayList<Event>(changeExceptions);
-            boolean modified = false;
-            for (Iterator<Event> iterator = newChangeExceptions.iterator(); iterator.hasNext();) {
-                if (false == CalendarUtils.contains(possibleExceptionDates, iterator.next().getRecurrenceId())) {
-                    iterator.remove();
-                    modified = true;
-                }
-            }
-            if (modified) {
+            if (newChangeExceptions.removeIf(event -> false == contains(possibleExceptionDates, event.getRecurrenceId()))) {
                 changeExceptions = newChangeExceptions;
             }
         }
@@ -858,13 +837,13 @@ public class InternalEventUpdate implements EventUpdate {
         if (false == isNullOrEmpty(seriesMaster.getDeleteExceptionDates())) {
             if (false == isNullOrEmpty(changeExceptions)) {
                 List<Event> newChangeExceptions = new ArrayList<Event>(changeExceptions);
-                if (newChangeExceptions.removeIf(event -> seriesMaster.getDeleteExceptionDates().contains(event.getRecurrenceId()))) {
+                if (newChangeExceptions.removeIf(event -> contains(seriesMaster.getDeleteExceptionDates(), event.getRecurrenceId()))) {
                     changeExceptions = newChangeExceptions;
                 }
             }
             if (false == isNullOrEmpty(seriesMaster.getChangeExceptionDates())) {
                 SortedSet<RecurrenceId> newChangeExceptionDates = new TreeSet<RecurrenceId>(seriesMaster.getChangeExceptionDates());
-                if (newChangeExceptionDates.removeAll(seriesMaster.getDeleteExceptionDates())) {
+                if (newChangeExceptionDates.removeIf(recurrenceId -> contains(seriesMaster.getDeleteExceptionDates(), recurrenceId))) {
                     seriesMaster.setChangeExceptionDates(newChangeExceptionDates);
                 }
             }
@@ -900,13 +879,14 @@ public class InternalEventUpdate implements EventUpdate {
         List<Event> checkedChangeExceptions = new ArrayList<Event>(changeExceptions.size());
         SortedSet<RecurrenceId> checkedChangeExceptionDates = new TreeSet<RecurrenceId>();
         for (Event changeException : changeExceptions) {
-            if (checkedChangeExceptionDates.add(changeException.getRecurrenceId())) {
+            if (false == contains(checkedChangeExceptionDates, changeException.getRecurrenceId())) {
+                checkedChangeExceptionDates.add(changeException.getRecurrenceId());
                 checkedChangeExceptions.add(changeException);
             } else {
                 LOG.warn("Duplicate change exception event {}, skipping.", changeException);
             }
         }
-        if (false == checkedChangeExceptionDates.equals(seriesMaster.getChangeExceptionDates())) {
+        if (false == getExceptionDateUpdates(checkedChangeExceptionDates, seriesMaster.getChangeExceptionDates()).isEmpty()) {
             LOG.warn("Inconsistent list of change exception dates in series master {}, correcting to {}.", seriesMaster.getChangeExceptionDates(), checkedChangeExceptionDates);
             seriesMaster.setChangeExceptionDates(checkedChangeExceptionDates);
         }
