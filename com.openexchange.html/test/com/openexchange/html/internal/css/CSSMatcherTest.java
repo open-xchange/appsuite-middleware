@@ -286,7 +286,7 @@ public class CSSMatcherTest {
         CSSMatcher.doCheckCss(cssBld, FilterMaps.getStaticStyleMap(), "123456", true);
         String convertedCss = cssBld.toString().replaceAll("\\s+", " ");
 
-        String content = "#123456  {width: 100%;}".replaceAll("\\s+", " ");
+        String content = "#123456  {width: 100% !important;}".replaceAll("\\s+", " ");
 
         Assert.assertTrue("Processed CSS does not contain desired content " + content, convertedCss.contains(content));
     }
