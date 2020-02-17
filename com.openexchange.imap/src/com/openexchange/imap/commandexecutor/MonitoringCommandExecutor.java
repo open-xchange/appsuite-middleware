@@ -194,7 +194,7 @@ public class MonitoringCommandExecutor extends AbstractMetricAwareCommandExecuto
     // -------------------------------------------------------------------------------------------------------------------------------------
 
     /** The group name for IMAP metrics */
-    private static final String METRICS_GROUP = "imap";
+    private static final String METRICS_GROUP = "appsuite.imap.";
 
     /** The name for request rate metric */
     private static final String METRICS_REQUEST_RATE_NAME = "requestRate";
