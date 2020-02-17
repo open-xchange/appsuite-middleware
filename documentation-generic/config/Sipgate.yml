@@ -5,8 +5,8 @@ properties:
         The sipgate username.
       defaultValue:
       version:
-      reloadable: false
-      configcascadeAware: false
+      reloadable: true
+      configcascadeAware: true
       related: 
       file: sipgate.properties
       packageName: open-xchange-sms-sipgate
@@ -16,8 +16,8 @@ properties:
         The sipgate password.
       defaultValue:
       version:
-      reloadable: false
-      configcascadeAware: false
+      reloadable: true
+      configcascadeAware: true
       related: 
       file: sipgate.properties
       packageName: open-xchange-sms-sipgate
@@ -27,8 +27,8 @@ properties:
         Max message length. 460 characters is sipgate's maximum.
       defaultValue: 460
       version:
-      reloadable: false
-      configcascadeAware: false
+      reloadable: true
+      configcascadeAware: true
       related: 
       file: sipgate.properties
       packageName: open-xchange-sms-sipgate

@@ -186,12 +186,14 @@ public class OpenCompositionSpaceAction extends AbstractMailComposeAction {
             String contentType = requestData.getParameter("contentType");
             if (Strings.isNotEmpty(contentType)) {
                 ContentType ct = ContentType.contentTypeFor(contentType);
-                if (null != ct) {
+                if (null == ct) {
+                    // Found no such Content-Type for given identifier
+                    parameters.withContentType(usm.isDisplayHtmlInlineContent() ? ContentType.TEXT_HTML : ContentType.TEXT_PLAIN);
+                } else {
                     parameters.withContentType(ct);
                 }
             } else if (Type.NEW == type) {
-                ContentType ct = usm.isDisplayHtmlInlineContent() ? ContentType.TEXT_HTML : ContentType.TEXT_PLAIN;
-                parameters.withContentType(ct);
+                parameters.withContentType(usm.isDisplayHtmlInlineContent() ? ContentType.TEXT_HTML : ContentType.TEXT_PLAIN);
             }
         }
 

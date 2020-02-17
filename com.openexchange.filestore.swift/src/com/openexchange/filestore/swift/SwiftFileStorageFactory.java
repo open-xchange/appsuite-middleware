@@ -328,7 +328,12 @@ public class SwiftFileStorageFactory implements FileStorageProvider, InterestsAw
         int heartbeatInterval = optIntProperty(filestoreID, "heartbeatInterval", 60000, nameBuilder, config);
 
         // Create the HTTP client
-        CloseableHttpClient httpClient = HttpClients.getHttpClient(ClientConfig.newInstance().setMaxTotalConnections(maxConnections).setMaxConnectionsPerRoute(maxConnectionsPerHost).setConnectionTimeout(connectionTimeout).setSocketReadTimeout(socketReadTimeout));
+        CloseableHttpClient httpClient = HttpClients.getHttpClient(
+            ClientConfig.newInstance("swift-" + filestoreID)
+                .setMaxTotalConnections(maxConnections)
+                .setMaxConnectionsPerRoute(maxConnectionsPerHost)
+                .setConnectionTimeout(connectionTimeout)
+                .setSocketReadTimeout(socketReadTimeout));
         try {
             // Create the auth info
             AuthInfo authInfo = new AuthInfo(authValue, authType, tenantName, domain, identityUrl);

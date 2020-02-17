@@ -95,7 +95,7 @@ public class HttpClientOAuthAccessTokenService implements OAuthAccessTokenServic
         this.configViewFactory = configViewFactory;
 
         // Initialize HttpClient
-        ClientConfig config = ClientConfig.newInstance();
+        ClientConfig config = ClientConfig.newInstance("saml-oauth");
         config.setUserAgent("Open-Xchange SAML OAuth Client");
 
         init(config, configViewFactory.getView());

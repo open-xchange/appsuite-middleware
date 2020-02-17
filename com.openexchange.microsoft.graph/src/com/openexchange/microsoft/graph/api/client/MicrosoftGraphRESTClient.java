@@ -76,8 +76,10 @@ import com.openexchange.rest.client.v2.RESTResponse;
  */
 public class MicrosoftGraphRESTClient extends AbstractRESTClient {
 
+
     private static final Logger LOG = LoggerFactory.getLogger(MicrosoftGraphRESTClient.class);
 
+    private static final String CLIENT_NAME = "msgraph";
     private static final String USER_AGENT = "Open-Xchange Microsoft Graph Client";
     private static final String API_URL = "graph.microsoft.com";
     private static final String API_VERSION = "v1.0";
@@ -89,7 +91,7 @@ public class MicrosoftGraphRESTClient extends AbstractRESTClient {
      * Initialises a new {@link MicrosoftGraphRESTClient}.
      */
     public MicrosoftGraphRESTClient() {
-        super(USER_AGENT, TIMEOUT, new MicrosoftGraphRESTResponseParser());
+        super(CLIENT_NAME, USER_AGENT, TIMEOUT, new MicrosoftGraphRESTResponseParser());
     }
 
     /**

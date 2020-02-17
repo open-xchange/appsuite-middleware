@@ -155,7 +155,7 @@ public abstract class AbstractDAVSubscribeService extends AbstractSubscribeServi
      * @return The HTTP client instance
      */
     protected HttpClient initHttpClient(int maxTotalConnections, int maxConnectionsPerRoute, int conntectTimeout, int readTimeout) {
-        ClientConfig clientConfig = ClientConfig.newInstance()
+        ClientConfig clientConfig = ClientConfig.newInstance("davsub")
             .setUserAgent("Open-Xchange DAV Http Client")
             .setMaxTotalConnections(maxTotalConnections > 0 ? maxTotalConnections : 20)
             .setMaxConnectionsPerRoute(maxConnectionsPerRoute > 0 ? maxConnectionsPerRoute : 10)

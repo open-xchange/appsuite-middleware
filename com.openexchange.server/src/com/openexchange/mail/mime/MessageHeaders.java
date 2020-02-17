@@ -258,4 +258,9 @@ public final class MessageHeaders {
 
     public static final HeaderName X_OX_NO_REPLY_PERSONAL = HeaderName.valueOf(HDR_X_OX_NO_REPLY_PERSONAL);
 
+    /** "X-OX-Content-Type" */
+    public static final String HDR_X_OX_CONTENT_TYPE = "X-OX-Content-Type";
+
+    public static final HeaderName X_OX_CONTENT_TYPE = HeaderName.valueOf(HDR_X_OX_CONTENT_TYPE);
+
 }

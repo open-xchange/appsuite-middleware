@@ -131,10 +131,6 @@ public class ListenAction extends AbstractDriveAction {
          * get subscription mode if set
          */
         SubscriptionMode mode = extractSubscriptionMode(requestData);
-
-        //
-        mode = SubscriptionMode.SEPARATE;
-
         /*
          * get or create a polling listener for this session and await result
          */

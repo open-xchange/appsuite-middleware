@@ -254,7 +254,7 @@ public abstract class AbstractSession implements Session {
                 client = this.client.get();
                 if (client == null) {
 
-                    ClientConfig config = ClientConfig.newInstance();
+                    ClientConfig config = ClientConfig.newInstance("xing");
                     config.setMaxConnectionsPerRoute(10);
                     config.setMaxTotalConnections(20);
 

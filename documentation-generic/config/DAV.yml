@@ -32,8 +32,8 @@ properties:
          
          Then, the value "/servlet/dav" should be specified here. 
          
-         The correct value is necessary to indicate the  correct paths to *DAV clients in responses, which in turn 
-         avoids avoid duplicated prefix paths in case the proxy forwards or rewrites requests to a subpath, too. 
+         The correct value is necessary to indicate the correct paths to *DAV clients in responses, which in turn 
+         avoids duplicated prefix paths in case the proxy forwards or rewrites requests to a subpath, too. 
          
          Also, in case no special handling for *DAV requests is configured on the proxy-side, this value should be 
          set "/", meaning that client requests will be routed as-is to the application server.

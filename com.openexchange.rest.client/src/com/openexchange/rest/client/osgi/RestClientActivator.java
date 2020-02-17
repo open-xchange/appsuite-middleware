@@ -49,6 +49,7 @@
 
 package com.openexchange.rest.client.osgi;
 
+import com.openexchange.metrics.MetricService;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -75,7 +76,7 @@ public class RestClientActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { TimerService.class, SSLSocketFactoryProvider.class, SSLConfigurationService.class };
+        return new Class<?>[] { TimerService.class, SSLSocketFactoryProvider.class, SSLConfigurationService.class, MetricService.class };
     }
 
     @Override

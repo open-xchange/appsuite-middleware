@@ -49,6 +49,7 @@
 
 package com.openexchange.drive.events.apn2;
 
+import com.openexchange.drive.events.apn2.util.ApnsHttp2OptionsProvider;
 import com.openexchange.osgi.annotation.Service;
 
 /**

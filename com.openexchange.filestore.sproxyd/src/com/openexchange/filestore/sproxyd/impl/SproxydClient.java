@@ -78,6 +78,7 @@ public class SproxydClient {
     private final HttpClient httpClient;
     private final String prefix;
 
+
     /**
      * Initializes a new {@link SproxydClient}.
      *

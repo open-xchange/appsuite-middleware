@@ -90,11 +90,10 @@ public enum DriveEventsAPNProperty implements Property {
     password(null),
 
     /**
-     * Configures the interval between queries to the APN feedback service for the subscribed devices.
-     * The value can be defined using units of measurement: "D" (=days), "W" (=weeks) and "H" (=hours).
-     * Leaving this parameter empty disables the feedback queries on this node. Since each received feedback is processed cluster-wide, only one node in the cluster should be enabled here.
+     * Specifies the topic to use for OX Drive push notifications. Topic is the app's bundleId
+     * Default: no default
      */
-    feedbackQueryInterval("1D")
+    topic(null)
 
     ;
 

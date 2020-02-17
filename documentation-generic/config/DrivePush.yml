@@ -14,7 +14,7 @@ properties:
       version:
       reloadable: true
       configcascadeAware: true
-      related: ["com.openexchange.drive.events.apn.[os].keystore", "com.openexchange.drive.events.apn.[os].password"]
+      related: ["com.openexchange.drive.events.apn.[os].keystore", "com.openexchange.drive.events.apn.[os].password", "com.openexchange.drive.events.apn.[os].production", "com.openexchange.drive.events.apn.[os].topic"]
       file: drive.properties
       packageName: open-xchange-drive
       tags: ["Drive", "Push", "Apple"]
@@ -63,25 +63,22 @@ properties:
       version:
       reloadable: true
       configcascadeAware: true
-      related: 
+      related: com.openexchange.drive.events.apn.[os].enabled
       file: drive.properties
       packageName: open-xchange-drive
       tags: ["Drive", "Push", "Apple"]
-    - key: com.openexchange.drive.events.apn.[os].feedbackQueryInterval
+    - key: com.openexchange.drive.events.apn.[os].topic
       description: |
-        Configures the interval between queries to the APN feedback service for the
-        subscribed devices. The value can be defined using units of measurement:
-        "D" (=days), "W" (=weeks) and "H" (=hours).
-        Leaving this parameter empty disables the feedback queries on this node.
-        Since each received feedback is processed cluster-wide, only one node in the
-        cluster should be enabled here.
+        Specifies the topic to use for OX Drive push notifications. Topic is the app's bundleId. Required if
+        [[com.openexchange.drive.events.apn.[os].enabled]] is <code>true</code> and the package
+        containing the restricted drive components is not installed.
 
         [os] must be replaced with the operation system you want to configure. Available options are 'ios' and 'macos'.
-      defaultValue: 1D
-      version:
-      reloadable: false
-      configcascadeAware: false
-      related: 
+      defaultValue:
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: true
+      related: com.openexchange.drive.events.apn.[os].enabled
       file: drive.properties
       packageName: open-xchange-drive
       tags: ["Drive", "Push", "Apple"]   
@@ -245,4 +242,4 @@ properties:
       related: ["com.openexchange.drive.events.apn2.ios.enabled", "com.openexchange.drive.events.apn2.ios.authtype"]
       file: drive.properties
       packageName: open-xchange-drive
-      tags: ["Drive", "Push", "Apple"]      
+      tags: ["Drive", "Push", "Apple"]

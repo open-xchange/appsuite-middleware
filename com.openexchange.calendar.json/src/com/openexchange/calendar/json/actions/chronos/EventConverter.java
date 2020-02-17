@@ -582,6 +582,15 @@ public abstract class EventConverter {
      * @return The appointment
      */
     public CalendarDataObject getAppointment(Event event) throws OXException {
+        try {
+            return convertToAppointment(event);
+        } catch (OXException e) {
+            getLogger(EventConverter.class).warn("Unexpected error converting event {} to appointment: {}", event, e.getMessage(), e);
+            throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e, I(629));
+        }
+    }
+
+    private CalendarDataObject convertToAppointment(Event event) throws OXException {
         CalendarDataObject appointment = new CalendarDataObject();
         RecurrenceData recurrenceData = null;
         if (event.containsId()) {
@@ -703,21 +712,27 @@ public abstract class EventConverter {
                 appointment.setRecurrencePosition(0);
                 appointment.setRecurrenceDatePosition(null);
             } else {
-                if (PositionAwareRecurrenceId.class.isInstance(event.getRecurrenceId())) {
-                    appointment.setRecurrenceDatePosition(((PositionAwareRecurrenceId) event.getRecurrenceId()).getRecurrenceDatePosition());
-                    appointment.setRecurrencePosition(((PositionAwareRecurrenceId) event.getRecurrenceId()).getRecurrencePosition());
-                } else {
-                    if (null == recurrenceData) {
-                        if (DataAwareRecurrenceId.class.isInstance(event.getRecurrenceId())) {
-                            recurrenceData = (RecurrenceData) event.getRecurrenceId();
-                        } else {
-                            recurrenceData = loadRecurrenceData(event);
+                try {
+                    if (PositionAwareRecurrenceId.class.isInstance(event.getRecurrenceId())) {
+                        appointment.setRecurrenceDatePosition(((PositionAwareRecurrenceId) event.getRecurrenceId()).getRecurrenceDatePosition());
+                        appointment.setRecurrencePosition(((PositionAwareRecurrenceId) event.getRecurrenceId()).getRecurrencePosition());
+                    } else {
+                        if (null == recurrenceData) {
+                            if (DataAwareRecurrenceId.class.isInstance(event.getRecurrenceId())) {
+                                recurrenceData = (RecurrenceData) event.getRecurrenceId();
+                            } else {
+                                recurrenceData = loadRecurrenceData(event);
+                            }
+                        }
+                        appointment.setRecurrenceDatePosition(Event2Appointment.getRecurrenceDatePosition(event.getRecurrenceId()));
+                        if (null != event.getId()) {
+                            appointment.setRecurrencePosition(Event2Appointment.getRecurrencePosition(getRecurrenceService(), recurrenceData, event.getRecurrenceId()));
                         }
                     }
-                    appointment.setRecurrenceDatePosition(Event2Appointment.getRecurrenceDatePosition(event.getRecurrenceId()));
-                    if (null != event.getId()) {
-                        appointment.setRecurrencePosition(Event2Appointment.getRecurrencePosition(getRecurrenceService(), recurrenceData, event.getRecurrenceId()));
-                    }
+                } catch (OXException e) {
+                    getLogger(EventConverter.class).warn("Error converting recurrence id to recurrence (date) position for event {}.", event, e);
+                    appointment.setRecurrencePosition(0);
+                    appointment.setRecurrenceDatePosition(null);
                 }
             }
         }

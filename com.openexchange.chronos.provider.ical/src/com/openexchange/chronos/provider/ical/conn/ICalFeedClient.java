@@ -293,7 +293,7 @@ public class ICalFeedClient {
                 synchronized (ICalFeedHttpClient.class) {
                     tmp = httpClient;
                     if (tmp == null) {
-                        ClientConfig config = ClientConfig.newInstance();
+                        ClientConfig config = ClientConfig.newInstance("icalfeed");
                         config.setDenyLocalRedirect(true);
                         config.setUserAgent(initUserAgent());
                         initConfig(config);

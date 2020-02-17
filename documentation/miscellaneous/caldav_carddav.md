@@ -26,7 +26,7 @@ Please edit your site configuration file for OX so that the existing OX configur
  # NameVirtualHost directive no longer has any effect since Apache >=2.4
  # uncomment only for Apache Versions <2.4
  #NameVirtualHost *:443
- <VirtualHost *:442>
+ <VirtualHost *:443>
      ServerName dav.<MYSERVER.TLD>
      ErrorLog /tmp/dav.err.log
      TransferLog /tmp/dav.access.log
@@ -50,9 +50,17 @@ Please edit your site configuration file for OX so that the existing OX configur
  </VirtualHost>
 ```
 
+
+
 Please adjust the SSL configuration as needed and make sure that <code>dav.<MYSERVER.TLD></code> is reachable; your DNS configuration needs an entry for this name. Take care of the the <code>dav.*</code> logfiles, the example writes them without logrotation to <code>/tmp</code>.
 
 Please note the <code>NameVirtualHost</code> directive is needed to be able to specify multiple virtual hosts for the same IP. The differentiation is only done by the given <code>ServerName</code>. This implies that you need two server names, so the virtual host entry for the existing ox site configuration needs to be also enriched by a <code>ServerName</code> if not already present. If you access the system without one of the given <code>ServerName</code>s so e.g. via the IP the system will pick the corresponding one by order (in this case the DAV part first. If you want it to work differently please change the order accordingly.
+
+### How it works
+
+The following picture shows an abstract request and response flow with the above configuration. Please note that the *DAV servlets are registered under `/servlet/dav` and that the proxy balancer adds this path before transmitting the request to the server. 
+
+![Execution flow](apache_vhost.png "Apache vhost flowchart")
 
 
 ## Via prefix path configuration 
@@ -60,11 +68,11 @@ Please note the <code>NameVirtualHost</code> directive is needed to be able to s
 Starting with v7.10.3, it is also possible to provide access to CalDAV- and CardDAV-servlets below a designated path. Client requests will then no longer be targeted at the server's root level, but will include the advertised prefix path instead. This prefix path needs to be configured in the middleware like in the example below:
 
 ```
-com.openexchange.dav.pathPrefix=/dav
-com.openexchange.dav.proxyPathPrefix=/
+com.openexchange.dav.prefixPath=/dav
+com.openexchange.dav.proxyPrefixPath=/
 ```
 
-> Note: For further information about the properties, have a look at [com.openexchange.dav.pathPrefix](http://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.dav.pathPrefix) and [com.openexchange.dav.proxyPathPrefix](http://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.dav.proxyPathPrefix)
+> Note: For further information about the properties, have a look at [com.openexchange.dav.prefixPath](http://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.dav.prefixPath) and [com.openexchange.dav.proxyPrefixPath](http://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.dav.proxyPrefixPath)
 
 With this configuration, the server will register all *DAV servlets* with the prefix <code>/dav/*</code>, thus e.g. the CalDAV servlet will be reachable under <code>MYSERVER.TLD/dav/caldav</code>. To ensure requests will reach the server, a corresponding ProxyPass directive needs to be configured, too. E.g. for Apache:
 
@@ -74,6 +82,12 @@ With this configuration, the server will register all *DAV servlets* with the pr
 ```
 
 It is highly recommended to use <code>/dav</code> as path prefix. Clients like the Mac OS Calendar will automatically search under this path if e.g. only <code>MYSERVER.TLD</code> is entered as server address.
+
+### How it works
+
+The following picture shows an abstract request and response flow with the above configuration. Please note that the *DAV servlets are registered under `/dav` and that the middleware is fully responsible of handling the path.
+
+![Execution flow](mw_prefix.png "Middleware flowchart")
 
 
 ## Via Apache UserAgent detection
@@ -112,6 +126,12 @@ For environments where it is inconvenient to setup a virtual host there is also 
 >Note:The address book app on OSX 10.6 uses a localized user-agent string. If you're expecting clients with non-english language settings, you need to add the translated user-agent string to these rewrite rules. For example: "Adressbuch" for german OSX clients.
 
 >Note: Depending on the specific configuration, such a global definition of the rewrite rules might not be appropriate. However, the rules may also be defined inside a <code>Directory</code> context. More details are available at http://httpd.apache.org/docs/current/mod/mod_rewrite.html#rewriterule.
+
+### How it works
+
+The following picture shows an abstract request and response flow with the above configuration. Please note that the *DAV servlets are registered under `/servlet/dav` and that the proxy balancer adds this path before transmitting the request to the server. 
+
+![Execution flow](apache_rewrite.png "Apache rewrite flowchart")
 
 
 # Autodiscovery
