@@ -77,13 +77,16 @@ public class MetricInterceptor extends AbstractPhaseInterceptor<Message> {
     public void handleMessage(Message message) throws Fault {
         Long start = (Long) message.get(TimerInterceptor.KEY);
         long timing = System.currentTimeMillis() - start.longValue();
-        QName operation = (QName) message.get("javax.xml.ws.wsdl.operation");
-        QName service = (QName) message.get("javax.xml.ws.wsdl.service");
-        getTimer(service.getLocalPart(), operation.getLocalPart()).record(Duration.ofMillis(timing));
+
+        if(message.containsKey(Message.WSDL_OPERATION) && message.containsKey(Message.WSDL_SERVICE)) {
+            QName operation = (QName) message.get(Message.WSDL_OPERATION);
+            QName service = (QName) message.get(Message.WSDL_SERVICE);
+            getTimer(service.getLocalPart(), operation.getLocalPart()).record(Duration.ofMillis(timing));
+        }
     }
     
     /**
-     * Gest the timer for the given service and operation
+     * Gets the timer for the given service and operation
      *
      * @param service The requested service
      * @param operation The requested operation
