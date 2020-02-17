@@ -471,6 +471,7 @@ public class EventPatches {
                                 .originalEvent(originalOccurrence)
                                 .updatedEvent(newChangeException)
                                 .ignoredEventFields(EventField.TIMESTAMP, EventField.LAST_MODIFIED, EventField.SEQUENCE, EventField.RECURRENCE_RULE, EventField.RECURRENCE_ID, EventField.CREATED, EventField.EXTENDED_PROPERTIES)
+                                .ignoredEventFields(AttendeeField.TIMESTAMP)
                                 .considerUnset(true)
                                 .ignoreDefaults(true)
                             .build();
