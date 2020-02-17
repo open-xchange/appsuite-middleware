@@ -52,7 +52,7 @@ package com.openexchange.rest.client.httpclient;
 import com.openexchange.config.Interests;
 
 /**
- * {@link HttpClientConfigProvider}
+ * {@link HttpClientConfigProvider} - A HTTP configuration provider for a specific client.
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.4
@@ -60,30 +60,10 @@ import com.openexchange.config.Interests;
 public interface HttpClientConfigProvider extends HttpClientBuilderModifier {
 
     /**
-     * Get the unique identifier
-     * 
-     * @return The identifier of the HTTP client
-     */
-    String getClientId();
-
-    /**
-     * Configures the {@link HttpBasicConfig}.
-     * <p>
-     * This method is for implementations that needs to set values based on additional properties.
-     * If no adjustments needs to be performed, the implementor <b>MUST</b> not change anything.
-     * 
-     * @param config The HTTP configuration initialized with default values.
-     * @return The {@link HttpBasicConfig}
-     */
-    default HttpBasicConfig configureHttpBasicConfig(HttpBasicConfig config) {
-        return config;
-    }
-
-    /**
      * Get the additional interests a modifier can have regarding
      * configuration and properties.
      * <p>
-     * Note: It is always supposed that each modifier will have
+     * <b>Note</b>: It is always supposed that each modifier will have
      * interests in {@link HttpClientProperty#PREFIX}
      *
      * @return Additional interests, <code>null</code> per default

@@ -67,7 +67,7 @@ import com.openexchange.proxy.servlet.ProxyRegistryImpl;
 import com.openexchange.proxy.servlet.ProxyServlet;
 import com.openexchange.proxy.servlet.http.ProxyHttpClientConfiguration;
 import com.openexchange.proxy.servlet.services.ServiceRegistry;
-import com.openexchange.rest.client.httpclient.HttpClientConfigProvider;
+import com.openexchange.rest.client.httpclient.SpecificHttpClientConfigProvider;
 import com.openexchange.rest.client.httpclient.HttpClientService;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
@@ -93,7 +93,7 @@ public class ProxyServletActivator extends AbstractSessionServletActivator {
             Services.setServiceLookup(this);
 
             registerSessionServlet(Constants.PATH, new ProxyServlet());
-            registerService(HttpClientConfigProvider.class, new ProxyHttpClientConfiguration());
+            registerService(SpecificHttpClientConfigProvider.class, new ProxyHttpClientConfiguration());
 
             trackers = new ArrayList<ServiceTracker<?,?>>(4);
             trackers.add(new ServiceTracker<TimerService,TimerService>(context, TimerService.class, new TimerServiceCustomizer(context)));

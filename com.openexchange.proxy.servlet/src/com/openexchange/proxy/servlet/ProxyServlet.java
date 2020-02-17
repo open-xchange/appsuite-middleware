@@ -60,9 +60,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.impl.client.CloseableHttpClient;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.exception.OXException;
@@ -81,7 +81,7 @@ import com.openexchange.rest.client.httpclient.HttpClientService;
 public class ProxyServlet extends SessionServlet {
 
     private static final long serialVersionUID = -2988897861113557499L;
-    
+
     /**
      * Initializes a new {@link ProxyServlet}.
      */
@@ -114,7 +114,7 @@ public class ProxyServlet extends SessionServlet {
         /*
          * Create host configuration or URI
          */
-        final CloseableHttpClient client;
+        final HttpClient client;
         try {
             client = getHttpClient();
         } catch (OXException e) {
@@ -225,9 +225,9 @@ public class ProxyServlet extends SessionServlet {
         }
         */
     }
-    
-    private CloseableHttpClient getHttpClient() throws OXException {
-        return Services.requireService(HttpClientService.class).getHttpClient("proxy").getCloseableHttpClient();
+
+    private HttpClient getHttpClient() throws OXException {
+        return Services.requireService(HttpClientService.class).getHttpClient("proxy").getHttpClient();
     }
 
 }

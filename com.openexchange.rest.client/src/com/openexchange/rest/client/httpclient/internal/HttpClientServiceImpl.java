@@ -54,10 +54,10 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
@@ -85,29 +85,27 @@ import org.apache.http.protocol.HttpContext;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.annotation.NonNull;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.DefaultInterests;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.ConcurrentLinkedList;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
-import com.openexchange.java.util.Pair;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
-import com.openexchange.osgi.SimpleRegistryListener;
-import com.openexchange.rest.client.httpclient.GenericHttpClientConfigProvider;
 import com.openexchange.rest.client.httpclient.HttpBasicConfig;
 import com.openexchange.rest.client.httpclient.HttpClientBuilderModifier;
-import com.openexchange.rest.client.httpclient.HttpClientConfigProvider;
 import com.openexchange.rest.client.httpclient.HttpClientProperty;
 import com.openexchange.rest.client.httpclient.HttpClientService;
 import com.openexchange.rest.client.httpclient.ManagedHttpClient;
+import com.openexchange.rest.client.httpclient.SpecificHttpClientConfigProvider;
+import com.openexchange.rest.client.httpclient.WildcardHttpClientConfigProvider;
 import com.openexchange.rest.client.httpclient.ssl.EasySSLSocketFactory;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.timer.TimerService;
@@ -116,165 +114,167 @@ import com.openexchange.timer.TimerService;
  * {@link HttpClientServiceImpl}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.4
  */
-public class HttpClientServiceImpl extends ServiceTracker<HttpClientConfigProvider, HttpClientConfigProvider> implements HttpClientService, SimpleRegistryListener<GenericHttpClientConfigProvider> {
+public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerCustomizer<Object, Object> {
 
     static final Logger LOGGER = LoggerFactory.getLogger(HttpClientServiceImpl.class);
 
     /** A boolean value that indicates whether the service is shutting down or not */
     private final AtomicBoolean isShutdown;
 
+    private final BundleContext context;
     private final ServiceLookup serviceLookup;
 
-    final ConcurrentHashMap<String, ManagedHttpClientImpl> httpClients = new ConcurrentHashMap<>(30, 0.9f); // Core knows about 15 providers, 1 generic
-    final ConcurrentHashMap<String, HttpClientConfigProvider> providers = new ConcurrentHashMap<>(20, 0.9f); // Core knows about 15
-    final ConcurrentLinkedList<Pair<Pattern, GenericHttpClientConfigProvider>> genericProviders = new ConcurrentLinkedList<>();
+    final ConcurrentMap<String, ManagedHttpClientImpl> httpClients = new ConcurrentHashMap<>(30, 0.9f); // Core knows about 15 providers, 1 generic
+    final ConcurrentMap<String, SpecificHttpClientConfigProvider> providers = new ConcurrentHashMap<>(20, 0.9f); // Core knows about 15
+    final ConcurrentMap<String, PatternEnhancedWildcardHttpClientConfigProvider> wildcardProviders = new ConcurrentHashMap<>(16, 0.9F, 1);
     final Map<String, ServiceRegistration<Reloadable>> reloadableRegistrations = new ConcurrentHashMap<>(30, 0.9f);
 
     /**
      * Initializes a new {@link HttpClientServiceImpl}.
-     * 
+     *
      * @param context The bundle context
      * @param serviceLookup The {@link ServiceLookup}
      */
     public HttpClientServiceImpl(BundleContext context, ServiceLookup serviceLookup) {
-        super(context, HttpClientConfigProvider.class, null);
+        super();
+        this.context = context;
         this.serviceLookup = serviceLookup;
         this.isShutdown = new AtomicBoolean(false);
     }
 
     @Override
     public ManagedHttpClient getHttpClient(String httpClientId) throws OXException {
-        checkShutdownStatus();
         if (Strings.isEmpty(httpClientId)) {
             throw HttpClientExceptionCodes.MISSING_ID.create();
         }
+        checkShutdownStatus();
 
         /*
          * Get HTTP client from cache
          */
-        if (httpClients.containsKey(httpClientId)) {
+        ManagedHttpClientImpl optHttpClient = httpClients.get(httpClientId);
+        if (optHttpClient != null) {
             LOGGER.trace("Getting client with ID {} from cache", httpClientId);
-            return httpClients.get(httpClientId);
+            return optHttpClient;
         }
 
         /*
          * Create HTTP client
          */
-        HttpBasicConfig httpBasicConfig = getDefaultConfig();
-        if (providers.containsKey(httpClientId)) {
-            HttpClientConfigProvider provider = providers.get(httpClientId);
-            HttpBasicConfig config = adjustConfig(httpClientId, provider.configureHttpBasicConfig(httpBasicConfig));
-            return putIntoCache(httpClientId, createHttpClient(httpClientId, provider, config), config, forProvider(httpClientId, provider));
+        HttpBasicConfigImpl httpBasicConfigImpl = createNewDefaultConfig();
+
+        {
+            SpecificHttpClientConfigProvider provider = providers.get(httpClientId);
+            if (provider != null) {
+                HttpBasicConfig config = adjustConfig(httpClientId, provider.configureHttpBasicConfig(httpBasicConfigImpl));
+                return putIntoCache(httpClientId, createHttpClient(httpClientId, provider, config), config, forProvider(httpClientId, provider));
+            }
         }
-        GenericHttpClientConfigProvider provider = getGenericProvider(httpClientId);
+
+        WildcardHttpClientConfigProvider provider = getWildcardProvider(httpClientId);
         if (null != provider) {
-            HttpBasicConfig config = adjustConfig(httpClientId, provider.configureHttpBasicConfig(httpClientId, httpBasicConfig));
+            HttpBasicConfig config = adjustConfig(httpClientId, provider.configureHttpBasicConfig(httpClientId, httpBasicConfigImpl));
             return putIntoCache(httpClientId, createHttpClient(httpClientId, provider, config), config, forProvider(httpClientId, provider));
         }
 
         throw HttpClientExceptionCodes.MISSING_PROVIDER.create(httpClientId);
     }
 
-    /*
-     * -----------------------------------------------------------------
-     * ------------------ OSGi related functions -----------------------
-     * -----------------------------------------------------------------
-     */
-
-    //-------------------- HttpClientConfigProvider --------------------
+    // ------------------------------------------------ Tracking of providers --------------------------------------------------------------
 
     @Override
-    public HttpClientConfigProvider addingService(ServiceReference<HttpClientConfigProvider> reference) {
+    public synchronized Object addingService(ServiceReference<Object> reference) {
         checkShutdownStatus();
-        HttpClientConfigProvider provider = context.getService(reference);
-        String clientId = provider.getClientId();
-        if (providers.containsKey(clientId)) {
+
+        // Acquire provider instance
+        Object service = context.getService(reference);
+        if (service instanceof SpecificHttpClientConfigProvider) {
+            SpecificHttpClientConfigProvider provider = (SpecificHttpClientConfigProvider) service;
+            String clientId = provider.getClientId();
+            if (providers.putIfAbsent(clientId, provider) == null) {
+                return provider;
+            }
+
+            // Such a provider already contained
             LOGGER.error("Unable to add provider {}. Already have a provider for {}", provider.getClass().getSimpleName(), clientId);
+            context.ungetService(reference);
             return null;
         }
-        providers.put(clientId, provider);
-        return provider;
-    }
 
-    @Override
-    public void removedService(ServiceReference<HttpClientConfigProvider> reference, HttpClientConfigProvider service) {
-        String clientId = service.getClientId();
-        if (providers.containsKey(clientId)) {
+        if (service instanceof WildcardHttpClientConfigProvider) {
+            WildcardHttpClientConfigProvider provider = (WildcardHttpClientConfigProvider) service;
+            if (wildcardProviders.putIfAbsent(provider.getClientIdPattern(), new PatternEnhancedWildcardHttpClientConfigProvider(provider)) == null) {
+                LOGGER.trace("Added provider for pattern {}", provider.getClientIdPattern());
+                return provider;
+            }
+
+            LOGGER.error("Already registered a provider with pattern {}", provider.getClientIdPattern());
             context.ungetService(reference);
-            providers.remove(clientId);
-            close(clientId, httpClients.get(clientId));
-            LOGGER.trace("Removed provider for {}", clientId);
+            return null;
         }
+
+        // Neither SpecificHttpClientConfigProvider nor WildcardHttpClientConfigProvider
+        context.ungetService(reference);
+        return null;
     }
 
-    //----------------- GenericHttpClientConfigProvider -----------------
+    @Override
+    public void modifiedService(ServiceReference<Object> reference, Object service) {
+        // Nothing to do
+    }
 
     @Override
-    public void added(ServiceReference<GenericHttpClientConfigProvider> ref, GenericHttpClientConfigProvider service) {
-        checkShutdownStatus();
-        GenericHttpClientConfigProvider provider = context.getService(ref);
-        for (Pair<Pattern, GenericHttpClientConfigProvider> pair : genericProviders) {
-            if (pair.getSecond().getClientIdPattern().equals(provider.getClientIdPattern())) {
-                LOGGER.error("Already registered a provider with pattern {}", provider.getClientIdPattern());
+    public synchronized void removedService(ServiceReference<Object> reference, Object service) {
+        if (service instanceof SpecificHttpClientConfigProvider) {
+            SpecificHttpClientConfigProvider provider = (SpecificHttpClientConfigProvider) service;
+            String clientId = provider.getClientId();
+            if (providers.remove(clientId) != null) {
+                close(clientId, httpClients.get(clientId));
+                LOGGER.trace("Removed provider for {}", clientId);
+            }
+        } else if (service instanceof WildcardHttpClientConfigProvider) {
+            WildcardHttpClientConfigProvider provider = (WildcardHttpClientConfigProvider) service;
+            PatternEnhancedWildcardHttpClientConfigProvider removed = wildcardProviders.remove(provider.getClientIdPattern());
+            if (null == removed) {
+                LOGGER.warn("Unable to find provider for {} in cache. Won't remove any HTTP client for provided pattern.", provider.getClientIdPattern());
                 return;
             }
-        }
 
-        String regex = Strings.wildcardToRegex(provider.getClientIdPattern());
-        LOGGER.trace("Adding provider for regex {}", regex);
-        genericProviders.add(new Pair<>(Pattern.compile(regex), provider));
-    }
-
-    @Override
-    public void removed(ServiceReference<GenericHttpClientConfigProvider> ref, GenericHttpClientConfigProvider service) {
-        Pair<Pattern, GenericHttpClientConfigProvider> matching = null;
-        for (Iterator<Pair<Pattern, GenericHttpClientConfigProvider>> iterator = genericProviders.iterator(); iterator.hasNext();) {
-            Pair<Pattern, GenericHttpClientConfigProvider> pair = iterator.next();
-            if (pair.getSecond().getClientIdPattern().equals(service.getClientIdPattern())) {
-                LOGGER.trace("Removing provider for pattern {}", service.getClientIdPattern());
-                context.ungetService(ref);
-                iterator.remove();
-                matching = pair;
-                break;
+            /*
+             * Remove HTTP clients, which matches the regex and are not provided by a SpecificHttpClientConfigProvider
+             */
+            Pattern pattern = removed.getRegularExpressionPattern();
+            for (Map.Entry<String, ManagedHttpClientImpl> entry : httpClients.entrySet()) {
+                if (false == providers.containsKey(entry.getKey()) && pattern.matcher(entry.getKey()).matches()) {
+                    close(entry.getKey(), entry.getValue());
+                }
             }
         }
-        if (null == matching) {
-            LOGGER.warn("Unable to find provider for {} in cache. Won't remove any HTTP client for provided pattern.", service.getClientIdPattern());
-            return;
-        }
 
-        /*
-         * Remove HTTP clients, which matches the regex and are not provided by a HttpClientConfigProvider
-         */
-        Pattern pattern = matching.getFirst();
-        for (Iterator<Entry<String, ManagedHttpClientImpl>> iterator = httpClients.entrySet().iterator(); iterator.hasNext();) {
-            Entry<String, ManagedHttpClientImpl> entry = iterator.next();
-            if (false == providers.containsKey(entry.getKey()) && pattern.matcher(entry.getKey()).matches()) {
-                close(entry.getKey(), entry.getValue());
-            }
-        }
+        context.ungetService(reference);
     }
 
-    //--------------------- Service shutdown ---------------------
+    // ------------------------------------------------------ Service shutdown -------------------------------------------------------------
 
     /**
      * Closes all HTTP clients and shuts down the service
      * See {@link #close(String, CloseableHttpClient)} for details
      */
-    public void shutdown() {
-        isShutdown.set(true);
-        for (Iterator<Entry<String, ManagedHttpClientImpl>> iterator = httpClients.entrySet().iterator(); iterator.hasNext();) {
-            Entry<String, ManagedHttpClientImpl> entry = iterator.next();
-            close(entry.getKey(), entry.getValue());
+    public synchronized void shutdown() {
+        if (isShutdown.compareAndSet(false, true)) {
+            for (Map.Entry<String, ManagedHttpClientImpl> entry : httpClients.entrySet()) {
+                close(entry.getKey(), entry.getValue());
+            }
         }
     }
 
-    /*
-     * -----------------------------------------------------------------
-     * ---------------------- Private helpers --------------------------
-     * -----------------------------------------------------------------
+    /*-
+     * -------------------------------------------------------------------------------------------------------------------------------------
+     * --------------------------------------------------------- Private helpers -----------------------------------------------------------
+     * -------------------------------------------------------------------------------------------------------------------------------------
      */
 
     /**
@@ -304,16 +304,15 @@ public class HttpClientServiceImpl extends ServiceTracker<HttpClientConfigProvid
      */
     private ManagedHttpClient putIntoCache(String httpClientId, CloseableHttpClient closeableHttpClient, HttpBasicConfig config, Reloadable reloadable) {
         ManagedHttpClientImpl managedClient = new ManagedHttpClientImpl(httpClientId, config.hashCode(), closeableHttpClient);
-        if (httpClients.containsKey(httpClientId)) {
-            // Other thread was faster, close created client
+
+        ManagedHttpClientImpl previous = httpClients.putIfAbsent(httpClientId, managedClient);
+        if (previous != null) {
+            // Another thread alread put client into map
             LOGGER.trace("Closing redundant HTTP client.");
             close(httpClientId, managedClient);
-            return httpClients.get(httpClientId);
+            return previous;
         }
-        /*
-         * Fail-safe put the client into the cache
-         */
-        close(httpClientId, httpClients.put(httpClientId, managedClient));
+
         removeReloadable(reloadableRegistrations.put(httpClientId, context.registerService(Reloadable.class, reloadable, null)));
         LOGGER.trace("Initialized HTTP client for {} and put it into cache", httpClientId);
         return managedClient;
@@ -335,8 +334,8 @@ public class HttpClientServiceImpl extends ServiceTracker<HttpClientConfigProvid
         //@formatter:off
         Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory> create()
             .register("http", PlainConnectionSocketFactory.getSocketFactory())
-            .register("https", null == factoryProvider || null == sslConfig ? 
-                EasySSLSocketFactory.getInstance() 
+            .register("https", null == factoryProvider || null == sslConfig ?
+                EasySSLSocketFactory.getInstance()
                 : new SSLConnectionSocketFactory(factoryProvider.getDefault(), sslConfig.getSupportedProtocols(), sslConfig.getSupportedCipherSuites(), NoopHostnameVerifier.INSTANCE))
             .build();
         //@formatter:on
@@ -409,9 +408,9 @@ public class HttpClientServiceImpl extends ServiceTracker<HttpClientConfigProvid
         return builder.build();
     }
 
-    HttpBasicConfig getDefaultConfig() {
+    HttpBasicConfigImpl createNewDefaultConfig() {
         LeanConfigurationService leanConfigurationService = serviceLookup.getService(LeanConfigurationService.class);
-        return new HttpBasicConfig(leanConfigurationService);
+        return new HttpBasicConfigImpl(Optional.ofNullable(leanConfigurationService));
     }
 
     /**
@@ -420,7 +419,7 @@ public class HttpClientServiceImpl extends ServiceTracker<HttpClientConfigProvid
      * <p>
      * If a value for a specified property is set, this will overwrite
      * the set value in the configuration.
-     * 
+     *
      * @param clientId The identifier
      * @param httpBasicConfig The config to adjust
      * @return The adjusted config
@@ -450,15 +449,15 @@ public class HttpClientServiceImpl extends ServiceTracker<HttpClientConfigProvid
     }
 
     /**
-     * Get a {@link GenericHttpClientConfigProvider} for the provided client identifier
+     * Get a {@link WildcardHttpClientConfigProvider} for the provided client identifier
      *
      * @param clientId The identifier to match to a provider
      * @return A provider or <code>null</code>
      */
-    private GenericHttpClientConfigProvider getGenericProvider(String clientId) {
-        for (Pair<Pattern, GenericHttpClientConfigProvider> pair : genericProviders) {
-            if (pair.getFirst().matcher(clientId).matches()) {
-                return pair.getSecond();
+    private WildcardHttpClientConfigProvider getWildcardProvider(String clientId) {
+        for (PatternEnhancedWildcardHttpClientConfigProvider provider : wildcardProviders.values()) {
+            if (provider.getRegularExpressionPattern().matcher(clientId).matches()) {
+                return provider;
             }
         }
         return null;
@@ -522,7 +521,7 @@ public class HttpClientServiceImpl extends ServiceTracker<HttpClientConfigProvid
     /**
      * Checks whether the service is currently shutting down or not.
      *
-     * @throws RuntimeException If the service is shutting down
+     * @throws RuntimeException If the service is shut-down
      */
     private void checkShutdownStatus() throws RuntimeException {
         if (isShutdown.get()) {
@@ -532,7 +531,7 @@ public class HttpClientServiceImpl extends ServiceTracker<HttpClientConfigProvid
 
     private class CloseableListener implements Closeable {
 
-        private String clientId;
+        private final String clientId;
 
         public CloseableListener(String clientId) {
             super();
@@ -575,12 +574,12 @@ public class HttpClientServiceImpl extends ServiceTracker<HttpClientConfigProvid
      * @param provider THe provider to get configuration from. This is needed on reload, to avoid unnecessary closing of HTTP clients
      * @return The {@link Reloadable}
      */
-    private Reloadable forProvider(final String httpClientId, final HttpClientConfigProvider provider) {
+    private Reloadable forProvider(final String httpClientId, final SpecificHttpClientConfigProvider provider) {
         return new Reloadable() {
 
             @Override
             public void reloadConfiguration(ConfigurationService configService) {
-                reloadClient(httpClientId, adjustConfig(httpClientId, provider.configureHttpBasicConfig(getDefaultConfig())), provider);
+                reloadClient(httpClientId, adjustConfig(httpClientId, provider.configureHttpBasicConfig(createNewDefaultConfig())), provider);
             }
 
             @Override
@@ -597,12 +596,12 @@ public class HttpClientServiceImpl extends ServiceTracker<HttpClientConfigProvid
      * @param provider THe provider to get configuration from. This is needed on reload, to avoid unnecessary closing of HTTP clients
      * @return The {@link Reloadable}
      */
-    private Reloadable forProvider(final String httpClientId, final GenericHttpClientConfigProvider provider) {
+    private Reloadable forProvider(final String httpClientId, final WildcardHttpClientConfigProvider provider) {
         return new Reloadable() {
 
             @Override
             public void reloadConfiguration(ConfigurationService configService) {
-                reloadClient(httpClientId, adjustConfig(httpClientId, provider.configureHttpBasicConfig(httpClientId, getDefaultConfig())), provider);
+                reloadClient(httpClientId, adjustConfig(httpClientId, provider.configureHttpBasicConfig(httpClientId, createNewDefaultConfig())), provider);
             }
 
             @Override
@@ -629,16 +628,22 @@ public class HttpClientServiceImpl extends ServiceTracker<HttpClientConfigProvid
      * @param clientId The identifier
      * @param config The configuration to check. Can be <code>null</code>
      */
-    void reloadClient(String clientId, HttpBasicConfig config, HttpClientBuilderModifier modifier) {
-        if (null == config || !httpClients.containsKey(clientId) || config.hashCode() == httpClients.get(clientId).getConfigHash()) {
+    synchronized void reloadClient(String clientId, HttpBasicConfig config, HttpClientBuilderModifier modifier) {
+        checkShutdownStatus();
+        if (null == config) {
             return;
         }
-        LOGGER.trace("Configuration for client {} has changed.", clientId);
+
         ManagedHttpClientImpl managedHttpClient = httpClients.get(clientId);
-        if (null == managedHttpClient) {
+        if (managedHttpClient == null) {
             LOGGER.error("No HTTP client to reload found", HttpClientExceptionCodes.MISSING_HTTP_CLIENT.create(clientId));
             return;
         }
+        if (config.hashCode() == managedHttpClient.getConfigHash()) {
+            return;
+        }
+
+        LOGGER.trace("Configuration for client {} has changed.", clientId);
         /*
          * Create new client and replace it in managed object
          */
@@ -656,6 +661,45 @@ public class HttpClientServiceImpl extends ServiceTracker<HttpClientConfigProvid
             if (close) {
                 Streams.close(newHttpClient);
             }
+        }
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    private static class PatternEnhancedWildcardHttpClientConfigProvider implements WildcardHttpClientConfigProvider {
+
+        private final WildcardHttpClientConfigProvider provider;
+        private final Pattern pattern;
+
+        PatternEnhancedWildcardHttpClientConfigProvider(WildcardHttpClientConfigProvider provider) {
+            super();
+            this.provider = provider;
+            String regex = Strings.wildcardToRegex(provider.getClientIdPattern());
+            this.pattern = Pattern.compile(regex);
+        }
+
+        @Override
+        public void modify(HttpClientBuilder builder) {
+            provider.modify(builder);
+        }
+
+        @Override
+        public Interests getAdditionalInterests() {
+            return provider.getAdditionalInterests();
+        }
+
+        @Override
+        public @NonNull String getClientIdPattern() {
+            return provider.getClientIdPattern();
+        }
+
+        @Override
+        public HttpBasicConfig configureHttpBasicConfig(String clientId, HttpBasicConfig config) {
+            return provider.configureHttpBasicConfig(clientId, config);
+        }
+
+        Pattern getRegularExpressionPattern() {
+            return pattern;
         }
     }
 

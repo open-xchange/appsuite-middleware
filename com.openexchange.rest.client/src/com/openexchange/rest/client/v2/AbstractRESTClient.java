@@ -57,7 +57,7 @@ import java.util.Map.Entry;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
@@ -66,13 +66,13 @@ import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.rest.client.exception.RESTExceptionCodes;
 import com.openexchange.rest.client.httpclient.HttpClientService;
+import com.openexchange.rest.client.httpclient.HttpClients;
 import com.openexchange.rest.client.v2.parser.RESTResponseParser;
 import com.openexchange.server.ServiceLookup;
 
@@ -90,11 +90,11 @@ public abstract class AbstractRESTClient {
 
     protected ServiceLookup services;
 
-    private String httpClientId;
+    private final String httpClientId;
 
     /**
      * Initialises a new {@link AbstractRESTClient}.
-     * 
+     *
      * @param services The service lookup to get the {@link HttpClientService} from
      * @param httpClientId The service ID to get the HTTP client for
      * @param parser The {@link RESTResponseParser} to use when parsing the responses
@@ -109,7 +109,7 @@ public abstract class AbstractRESTClient {
 
     /**
      * Executes the specified {@link HttpRequestBase} and returns the response.
-     * 
+     *
      * @param httpRequest The HTTP request to execute
      * @return The parsed HTTP REST response
      * @throws OXException if a client protocol error or an I/O error occurs
@@ -124,7 +124,7 @@ public abstract class AbstractRESTClient {
         } catch (IOException e) {
             throw RESTExceptionCodes.IO_EXCEPTION.create(e, e.getMessage());
         } finally {
-            consume(httpResponse);
+            HttpClients.close(httpRequest, httpResponse);
         }
     }
 
@@ -148,6 +148,8 @@ public abstract class AbstractRESTClient {
             throw RESTExceptionCodes.CLIENT_PROTOCOL_ERROR.create(e, e.getMessage());
         } catch (IOException e) {
             throw RESTExceptionCodes.IO_EXCEPTION.create(e, e.getMessage());
+        } finally {
+            HttpClients.close(httpRequest, httpResponse);
         }
     }
 
@@ -253,7 +255,8 @@ public abstract class AbstractRESTClient {
      */
     private HttpResponse execute(HttpRequestBase httpRequest) throws ClientProtocolException, IOException {
         LOGGER.debug("Executing request: '{}'", httpRequest.getURI());
-        try(CloseableHttpResponse httpResponse = getHttpClient().execute(httpRequest)){
+        try {
+            HttpResponse httpResponse = getHttpClient().execute(httpRequest);
             LOGGER.debug("Request '{}' completed with status code '{}'", httpRequest.getURI(), I(httpResponse.getStatusLine().getStatusCode()));
             return httpResponse;
         } catch (OXException e) {
@@ -281,7 +284,7 @@ public abstract class AbstractRESTClient {
         }
     }
 
-    private CloseableHttpClient getHttpClient() throws OXException {
-        return services.getServiceSafe(HttpClientService.class).getHttpClient(httpClientId).getCloseableHttpClient();
+    private HttpClient getHttpClient() throws OXException {
+        return services.getServiceSafe(HttpClientService.class).getHttpClient(httpClientId).getHttpClient();
     }
 }

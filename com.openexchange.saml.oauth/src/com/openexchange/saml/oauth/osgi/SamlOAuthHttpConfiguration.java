@@ -69,21 +69,21 @@ import com.openexchange.server.ServiceLookup;
  */
 public class SamlOAuthHttpConfiguration extends DefaultHttpClientConfigProvider {
 
-    private static final int READ_TIMEOUT = 6000;
-    private static final int TIMEOUT = 3000;
-    private static final int CONNECTIONS_PER_ROUTE = 100;
-    private static final int TOTAL_CONNECTIONS = 100;
+    private static final int DEFAULT_READ_TIMEOUT = 6000;
+    private static final int DEFAULT_TIMEOUT = 3000;
+    private static final int DEFAULT_CONNECTIONS_PER_ROUTE = 100;
+    private static final int DEFAULT_TOTAL_CONNECTIONS = 100;
 
     private static final String MAX_CONNECTIONS = "com.openexchange.saml.oauth.maxConnections";
     private static final String MAX_CONNECTIONS_PER_HOST = "com.openexchange.saml.oauth.maxConnectionsPerHost";
     private static final String CONNECTION_TIMEOUT = "com.openexchange.saml.oauth.connectionTimeout";
     private static final String SOCKET_READ_TIMEOUT = "com.openexchange.saml.oauth.socketReadTimeout";
 
-    private ServiceLookup serviceLookup;
+    private final ServiceLookup serviceLookup;
 
     /**
      * Initializes a new {@link SamlOAuthHttpConfiguration}.
-     * 
+     *
      * @param serviceLookup The {@link ServiceLookup}
      */
     public SamlOAuthHttpConfiguration(ServiceLookup serviceLookup) {
@@ -103,21 +103,21 @@ public class SamlOAuthHttpConfiguration extends DefaultHttpClientConfigProvider 
         } catch (OXException e) {
             LoggerFactory.getLogger(SamlOAuthHttpConfiguration.class).warn("Can't apply HTTP client configuration for SAML OAuth.", e);
         }
-        return config.setMaxTotalConnections(TOTAL_CONNECTIONS).setMaxConnectionsPerRoute(CONNECTIONS_PER_ROUTE).setConnectionTimeout(TIMEOUT).setSocketReadTimeout(READ_TIMEOUT);
+        return config.setMaxTotalConnections(DEFAULT_TOTAL_CONNECTIONS).setMaxConnectionsPerRoute(DEFAULT_CONNECTIONS_PER_ROUTE).setConnectionTimeout(DEFAULT_TIMEOUT).setSocketReadTimeout(DEFAULT_READ_TIMEOUT);
     }
 
     private HttpBasicConfig getFromConfiguration(HttpBasicConfig config) throws OXException {
         ConfigView view = serviceLookup.getService(ConfigViewFactory.class).getView();
-        Integer value = view.opt(MAX_CONNECTIONS, Integer.class, I(TOTAL_CONNECTIONS));
+        Integer value = view.opt(MAX_CONNECTIONS, Integer.class, I(DEFAULT_TOTAL_CONNECTIONS));
         config.setMaxTotalConnections(i(value));
 
-        value = view.opt(MAX_CONNECTIONS_PER_HOST, Integer.class, I(CONNECTIONS_PER_ROUTE));
+        value = view.opt(MAX_CONNECTIONS_PER_HOST, Integer.class, I(DEFAULT_CONNECTIONS_PER_ROUTE));
         config.setMaxConnectionsPerRoute(i(value));
 
-        value = view.opt(CONNECTION_TIMEOUT, Integer.class, I(TIMEOUT));
+        value = view.opt(CONNECTION_TIMEOUT, Integer.class, I(DEFAULT_TIMEOUT));
         config.setConnectionTimeout(i(value));
 
-        value = view.opt(SOCKET_READ_TIMEOUT, Integer.class, I(READ_TIMEOUT));
+        value = view.opt(SOCKET_READ_TIMEOUT, Integer.class, I(DEFAULT_READ_TIMEOUT));
         config.setSocketReadTimeout(i(value));
         return config;
     }

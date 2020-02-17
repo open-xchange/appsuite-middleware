@@ -50,6 +50,7 @@
 package com.openexchange.rest.client.httpclient.internal;
 
 import java.util.concurrent.atomic.AtomicReference;
+import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.CloseableHttpClient;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.rest.client.httpclient.ManagedHttpClient;
@@ -65,11 +66,11 @@ public class ManagedHttpClientImpl implements ManagedHttpClient {
     private final String clientId;
     private final AtomicReference<CloseableHttpClient> httpClientReference;;
 
-    private int configHashCode;
+    private volatile int configHashCode;
 
     /**
      * Initializes a new {@link ManagedHttpClientImpl}.
-     * 
+     *
      * @param clientId
      * @param configHashCode
      * @param httpClient
@@ -84,7 +85,7 @@ public class ManagedHttpClientImpl implements ManagedHttpClient {
     }
 
     @Override
-    public @NonNull CloseableHttpClient getCloseableHttpClient() throws IllegalStateException {
+    public @NonNull HttpClient getHttpClient() throws IllegalStateException {
         CloseableHttpClient httpClient = httpClientReference.get();
         if (null == httpClient) {
             throw new IllegalStateException("HttpClient is null.");

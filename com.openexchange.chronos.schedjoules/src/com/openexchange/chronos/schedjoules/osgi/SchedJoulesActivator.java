@@ -59,7 +59,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.rest.client.httpclient.HttpClientConfigProvider;
+import com.openexchange.rest.client.httpclient.SpecificHttpClientConfigProvider;
 import com.openexchange.rest.client.httpclient.HttpClientService;
 import com.openexchange.timer.TimerService;
 
@@ -90,7 +90,7 @@ public class SchedJoulesActivator extends HousekeepingActivator {
         SchedJoulesService service = new SchedJoulesServiceImpl();
         registerService(SchedJoulesService.class, service);
         registerService(Reloadable.class, (Reloadable) service);
-        registerService(HttpClientConfigProvider.class, new SchedJoulesHttpConfiguration(this));
+        registerService(SpecificHttpClientConfigProvider.class, new SchedJoulesHttpConfiguration(this));
         log.info("Registered SchedJoules Service.");
     }
 

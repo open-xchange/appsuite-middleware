@@ -49,48 +49,75 @@
 
 package com.openexchange.rest.client.httpclient;
 
-import static com.openexchange.java.Autoboxing.I;
 import javax.annotation.concurrent.NotThreadSafe;
-import com.openexchange.config.lean.LeanConfigurationService;
 
 /**
- * {@link HttpBasicConfig} - Represents the basic configuration for a HTTP client.
+ * {@link HttpBasicConfig} - Represents the basic configuration for an HTTP client.
  * <p>
- * Contains only values a administrator can modify.
+ * Contains only values an administrator can modify.
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.4
  */
 @NotThreadSafe
-public class HttpBasicConfig {
-
-    private int socketReadTimeout;
-    private int connectionTimeout;
-    private int connectionRequestTimeout;
-    private int maxTotalConnections;
-    private int maxConnectionsPerRoute;
-    private int keepAliveDuration;
-    private int keepAliveMonitorInterval;
-    private int socketBufferSize;
+public interface HttpBasicConfig {
 
     /**
-     * Initializes a new {@link HttpBasicConfig}.
-     * 
-     * @param leanService The {@link LeanConfigurationService} to obtain the default configuration from
+     * Gets the socketReadTimeout
+     *
+     * @return The socketReadTimeout
      */
-    public HttpBasicConfig(LeanConfigurationService leanService) {
-        super();
-        for (HttpClientProperty property : HttpClientProperty.values()) {
-            if (null == leanService) {
-                // Apply defaults
-                property.setInConfig(this, null);
-            } else {
-                // Read from default configuration
-                property.setInConfig(this, I(leanService.getIntProperty(property.getProperty())));
+    int getSocketReadTimeout();
 
-            }
-        }
-    }
+    /**
+     * Gets the connectionTimeout
+     *
+     * @return The connectionTimeout
+     */
+    int getConnectionTimeout();
+
+    /**
+     * Gets the connectionRequestTimeout
+     *
+     * @return The connectionRequestTimeout
+     */
+    int getConnectionRequestTimeout();
+
+    /**
+     * Gets the maxTotalConnections
+     *
+     * @return The maxTotalConnections
+     */
+    int getMaxTotalConnections();
+
+    /**
+     * Gets the maxConnectionsPerRoute
+     *
+     * @return The maxConnectionsPerRoute
+     */
+    int getMaxConnectionsPerRoute();
+
+    /**
+     * Gets the keepAliveDuration
+     *
+     * @return The keepAliveDuration
+     */
+    int getKeepAliveDuration();
+
+    /**
+     * Gets the keepAliveMonitorInterval
+     *
+     * @return The keepAliveMonitorInterval
+     */
+    int getKeepAliveMonitorInterval();
+
+    /**
+     * Gets the socketBufferSize
+     *
+     * @return The socketBufferSize
+     */
+    int getSocketBufferSize();
 
     /**
      * Sets the socket read timeout in milliseconds. A timeout value of zero
@@ -100,10 +127,7 @@ public class HttpBasicConfig {
      * @param socketReadTimeout The timeout
      * @return This instance for chaining
      */
-    public HttpBasicConfig setSocketReadTimeout(int socketReadTimeout) {
-        this.socketReadTimeout = socketReadTimeout;
-        return this;
-    }
+    HttpBasicConfig setSocketReadTimeout(int socketReadTimeout);
 
     /**
      * Sets the connection timeout in milliseconds. A timeout value of zero
@@ -113,10 +137,7 @@ public class HttpBasicConfig {
      * @param connectionTimeout The timeout
      * @return This instance for chaining
      */
-    public HttpBasicConfig setConnectionTimeout(int connectionTimeout) {
-        this.connectionTimeout = connectionTimeout;
-        return this;
-    }
+    HttpBasicConfig setConnectionTimeout(int connectionTimeout);
 
     /**
      * Sets the connection request timeout in milliseconds defining the maximum time to wait for a connection from the pool. A timeout
@@ -127,10 +148,7 @@ public class HttpBasicConfig {
      * @param connectionRequestTimeout The timeout in milliseconds
      * @return This instance for chaining
      */
-    public HttpBasicConfig setConnectionRequestTimeout(int connectionRequestTimeout) {
-        this.connectionRequestTimeout = connectionRequestTimeout;
-        return this;
-    }
+    HttpBasicConfig setConnectionRequestTimeout(int connectionRequestTimeout);
 
     /**
      * Sets the max. number of concurrent connections that can be opened by the
@@ -140,10 +158,7 @@ public class HttpBasicConfig {
      * @param maxTotalConnections The number of connections
      * @return This instance for chaining
      */
-    public HttpBasicConfig setMaxTotalConnections(int maxTotalConnections) {
-        this.maxTotalConnections = maxTotalConnections;
-        return this;
-    }
+    HttpBasicConfig setMaxTotalConnections(int maxTotalConnections);
 
     /**
      * Sets the max. number of concurrent connections that can be opened by the
@@ -153,10 +168,7 @@ public class HttpBasicConfig {
      * @param maxConnectionsPerRoute The number of connections
      * @return This instance for chaining
      */
-    public HttpBasicConfig setMaxConnectionsPerRoute(int maxConnectionsPerRoute) {
-        this.maxConnectionsPerRoute = maxConnectionsPerRoute;
-        return this;
-    }
+    HttpBasicConfig setMaxConnectionsPerRoute(int maxConnectionsPerRoute);
 
     /**
      * Sets the number of seconds that connections shall be kept alive.
@@ -165,10 +177,7 @@ public class HttpBasicConfig {
      * @param keepAliveDuration The keep alive duration
      * @return This instance for chaining
      */
-    public HttpBasicConfig setKeepAliveDuration(int keepAliveDuration) {
-        this.keepAliveDuration = keepAliveDuration;
-        return this;
-    }
+    HttpBasicConfig setKeepAliveDuration(int keepAliveDuration);
 
     /**
      * The interval in seconds between two monitoring runs that close stale connections
@@ -178,10 +187,7 @@ public class HttpBasicConfig {
      * @param keepAliveMonitorInterval The interval
      * @return This instance for chaining
      */
-    public HttpBasicConfig setKeepAliveMonitorInterval(int keepAliveMonitorInterval) {
-        this.keepAliveMonitorInterval = keepAliveMonitorInterval;
-        return this;
-    }
+    HttpBasicConfig setKeepAliveMonitorInterval(int keepAliveMonitorInterval);
 
     /**
      * Sets the socket buffer size in bytes.
@@ -190,141 +196,6 @@ public class HttpBasicConfig {
      * @param socketBufferSize The buffer size.
      * @return This instance for chaining
      */
-    public HttpBasicConfig setSocketBufferSize(int socketBufferSize) {
-        this.socketBufferSize = socketBufferSize;
-        return this;
-    }
-
-    /**
-     * Gets the socketReadTimeout
-     *
-     * @return The socketReadTimeout
-     */
-    public int getSocketReadTimeout() {
-        return socketReadTimeout;
-    }
-
-    /**
-     * Gets the connectionTimeout
-     *
-     * @return The connectionTimeout
-     */
-    public int getConnectionTimeout() {
-        return connectionTimeout;
-    }
-
-    /**
-     * Gets the connectionRequestTimeout
-     *
-     * @return The connectionRequestTimeout
-     */
-    public int getConnectionRequestTimeout() {
-        return connectionRequestTimeout;
-    }
-
-    /**
-     * Gets the maxTotalConnections
-     *
-     * @return The maxTotalConnections
-     */
-    public int getMaxTotalConnections() {
-        return maxTotalConnections;
-    }
-
-    /**
-     * Gets the maxConnectionsPerRoute
-     *
-     * @return The maxConnectionsPerRoute
-     */
-    public int getMaxConnectionsPerRoute() {
-        return maxConnectionsPerRoute;
-    }
-
-    /**
-     * Gets the keepAliveDuration
-     *
-     * @return The keepAliveDuration
-     */
-    public int getKeepAliveDuration() {
-        return keepAliveDuration;
-    }
-
-    /**
-     * Gets the keepAliveMonitorInterval
-     *
-     * @return The keepAliveMonitorInterval
-     */
-    public int getKeepAliveMonitorInterval() {
-        return keepAliveMonitorInterval;
-    }
-
-    /**
-     * Gets the socketBufferSize
-     *
-     * @return The socketBufferSize
-     */
-    public int getSocketBufferSize() {
-        return socketBufferSize;
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 131;
-        int result = 1;
-        result = prime * result + connectionRequestTimeout;
-        result = prime * result + connectionTimeout;
-        result = prime * result + keepAliveDuration;
-        result = prime * result + keepAliveMonitorInterval;
-        result = prime * result + maxConnectionsPerRoute;
-        result = prime * result + maxTotalConnections;
-        result = prime * result + socketBufferSize;
-        result = prime * result + socketReadTimeout;
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!(obj instanceof HttpBasicConfig)) {
-            return false;
-        }
-        HttpBasicConfig other = (HttpBasicConfig) obj;
-        if (connectionRequestTimeout != other.connectionRequestTimeout) {
-            return false;
-        }
-        if (connectionTimeout != other.connectionTimeout) {
-            return false;
-        }
-        if (keepAliveDuration != other.keepAliveDuration) {
-            return false;
-        }
-        if (keepAliveMonitorInterval != other.keepAliveMonitorInterval) {
-            return false;
-        }
-        if (maxConnectionsPerRoute != other.maxConnectionsPerRoute) {
-            return false;
-        }
-        if (maxTotalConnections != other.maxTotalConnections) {
-            return false;
-        }
-        if (socketBufferSize != other.socketBufferSize) {
-            return false;
-        }
-        if (socketReadTimeout != other.socketReadTimeout) {
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public String toString() {
-        //@formatter:off
-        return "HttpBasicConfig [socketReadTimeout=" + socketReadTimeout + ", connectionTimeout=" + connectionTimeout + ", connectionRequestTimeout=" + connectionRequestTimeout 
-            + ", maxTotalConnections=" + maxTotalConnections + ", maxConnectionsPerRoute=" + maxConnectionsPerRoute + ", keepAliveDuration=" + keepAliveDuration 
-            + ", keepAliveMonitorInterval=" + keepAliveMonitorInterval + ", socketBufferSize=" + socketBufferSize + "]";
-        //@formatter:on
-    }
+    HttpBasicConfig setSocketBufferSize(int socketBufferSize);
 
 }

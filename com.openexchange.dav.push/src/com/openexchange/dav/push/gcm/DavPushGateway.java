@@ -63,12 +63,12 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -376,7 +376,7 @@ public class DavPushGateway implements PushNotificationTransport {
      */
     private JSONObject doPost(String uri, JSONObject body) throws OXException {
         HttpPost post = null;
-        CloseableHttpResponse response = null;
+        HttpResponse response = null;
         try {
             post = new HttpPost(uri);
             post.setEntity(new StringEntity(body.toString(), ContentType.APPLICATION_JSON));
@@ -393,7 +393,6 @@ public class DavPushGateway implements PushNotificationTransport {
             throw PushExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
             close(post, response);
-            Streams.close(response);
         }
     }
 
@@ -415,10 +414,14 @@ public class DavPushGateway implements PushNotificationTransport {
         }
         return null;
     }
-    
-    
-    private CloseableHttpClient getHttpClient() throws OXException {
-        return Services.getService(HttpClientService.class).getHttpClient(HTTP_CLIENT_ID).getCloseableHttpClient();
+
+
+    private HttpClient getHttpClient() throws OXException {
+        HttpClientService httpClientService = Services.requireService(HttpClientService.class);
+        if (httpClientService == null) {
+            throw ServiceExceptionCode.absentService(HttpClientService.class);
+        }
+        return httpClientService.getHttpClient(HTTP_CLIENT_ID).getHttpClient();
     }
 
     /**
@@ -435,6 +438,13 @@ public class DavPushGateway implements PushNotificationTransport {
                     EntityUtils.consume(entity);
                 } catch (Exception e) {
                     LOG.debug("Error consuming HTTP response entity", e);
+                }
+            }
+            if (response instanceof CloseableHttpResponse) {
+                try {
+                    ((CloseableHttpResponse) response).close();
+                } catch (Exception e) {
+                    LOG.debug("Error closing HTTP response", e);
                 }
             }
         }

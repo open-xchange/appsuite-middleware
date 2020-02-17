@@ -77,7 +77,6 @@ import org.apache.http.StatusLine;
 import org.apache.http.auth.AuthenticationException;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpResponseException;
-import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.utils.URIBuilder;
@@ -110,6 +109,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.rest.client.endpointpool.Endpoint;
 import com.openexchange.rest.client.endpointpool.EndpointManager;
 import com.openexchange.rest.client.httpclient.HttpClientService;
+import com.openexchange.rest.client.httpclient.HttpClients;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 
@@ -217,10 +217,10 @@ public class HttpDoveAdmClient implements DoveAdmClient {
     private final BasicHttpContext localcontext;
     private final String authorizationHeaderValue;
     private final ServiceLookup services;
-    
+
     /**
      * Initializes a new {@link HttpDoveAdmClient}.
-     * 
+     *
      * @param apiKey The API key
      * @param endpointManager The {@link EndpointManager}
      * @param services The {@link ServiceLookup}
@@ -238,7 +238,7 @@ public class HttpDoveAdmClient implements DoveAdmClient {
         String encodedApiKey = BaseEncoding.base64().encode(apiKey.getBytes(Charsets.UTF_8));
         authorizationHeaderValue = "X-Dovecot-API " + encodedApiKey;
     }
-    
+
     @Override
     public String checkUser(String user, int userId, int contextId) throws OXException {
         ConfigViewFactory viewFactory = services.getService(ConfigViewFactory.class);
@@ -594,7 +594,7 @@ public class HttpDoveAdmClient implements DoveAdmClient {
      * @throws ClientProtocolException If client protocol error occurs
      * @throws IOException If an I/O error occurs
      */
-    protected CloseableHttpResponse execute(HttpDoveAdmCall call, HttpRequestBase method, HttpHost targetHost) throws ClientProtocolException, IOException {
+    protected HttpResponse execute(HttpDoveAdmCall call, HttpRequestBase method, HttpHost targetHost) throws ClientProtocolException, IOException {
         return execute(call, method, targetHost, localcontext);
     }
 
@@ -609,15 +609,15 @@ public class HttpDoveAdmClient implements DoveAdmClient {
      * @throws ClientProtocolException If client protocol error occurs
      * @throws IOException If an I/O error occurs
      */
-    protected CloseableHttpResponse execute(HttpDoveAdmCall call, HttpRequestBase method, HttpHost targetHost, BasicHttpContext context) throws ClientProtocolException, IOException {
+    protected HttpResponse execute(HttpDoveAdmCall call, HttpRequestBase method, HttpHost targetHost, BasicHttpContext context) throws ClientProtocolException, IOException {
         try {
             HttpClientService httpClientService = services.getServiceSafe(HttpClientService.class);
-            return httpClientService.getHttpClient(getClientId(call)).getCloseableHttpClient().execute(targetHost, method, context);
+            return httpClientService.getHttpClient(getClientId(call)).getHttpClient().execute(targetHost, method, context);
         } catch (OXException e) {
             throw new IOException("Unable to obtain connection", e);
         }
     }
-    
+
     /**
      * Resets given HTTP request
      *
@@ -672,11 +672,11 @@ public class HttpDoveAdmClient implements DoveAdmClient {
      * @throws ClientProtocolException If a client protocol error occurs
      * @throws IOException If an I/O error occurs
      */
-    protected <R> R handleHttpResponse(CloseableHttpResponse httpResponse, ResultType<R> type, StringBuilder traceBuilder) throws OXException, ClientProtocolException, IOException {
+    protected <R> R handleHttpResponse(HttpResponse httpResponse, ResultType<R> type, StringBuilder traceBuilder) throws OXException, ClientProtocolException, IOException {
         try {
             return handleHttpResponse(httpResponse, STATUS_CODE_POLICY_DEFAULT, type, traceBuilder);
         } finally {
-            Streams.close(httpResponse);
+            HttpClients.close(httpResponse, false);
         }
     }
 
@@ -692,7 +692,7 @@ public class HttpDoveAdmClient implements DoveAdmClient {
      * @throws IOException If an I/O error occurs
      * @throws IllegalStateException If content stream cannot be created
      */
-    protected <R> R handleHttpResponse(CloseableHttpResponse httpResponse, StatusCodePolicy policy, ResultType<R> type, StringBuilder traceBuilder) throws OXException, ClientProtocolException, IOException {
+    protected <R> R handleHttpResponse(HttpResponse httpResponse, StatusCodePolicy policy, ResultType<R> type, StringBuilder traceBuilder) throws OXException, ClientProtocolException, IOException {
         if (null != traceBuilder) {
             String separator = Strings.getLineSeparator();
             traceBuilder.append(separator).append(separator).append("Response:").append(separator);

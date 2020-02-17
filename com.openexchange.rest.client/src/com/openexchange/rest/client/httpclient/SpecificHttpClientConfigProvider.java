@@ -49,31 +49,32 @@
 
 package com.openexchange.rest.client.httpclient;
 
-import org.apache.http.client.HttpClient;
-import com.openexchange.annotation.NonNull;
-
 /**
- * {@link ManagedHttpClient}
+ * {@link SpecificHttpClientConfigProvider} - A HTTP configuration provider for a specific client.
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.4
  */
-public interface ManagedHttpClient {
+public interface SpecificHttpClientConfigProvider extends HttpClientConfigProvider {
 
     /**
-     * Get the HTTP client.
-     * <p>
-     * The {@link HttpClient} obtained by this call <b>SHOULD NOT</b> be closed.
-     * The HTTP client is <i>managed</i> by the {@link HttpClientService}, which will take
-     * care of closing the client.
-     * <p>
-     * The HTTP client is wrapped into this class, so that this class <b>CAN</b> be used as
-     * a class member. It is ensured, that a caller will always receive a usable HTTP client
-     * when calling this method, expect the managing service is shutting down.
+     * Get the unique identifier
      *
-     * @return The {@link HttpClient}
-     * @throws IllegalStateException If the managing service has been shutdown and the client is unavailable
+     * @return The identifier of the HTTP client
      */
-    @NonNull
-    HttpClient getHttpClient() throws IllegalStateException;
+    String getClientId();
+
+    /**
+     * Configures the {@link HttpBasicConfig}.
+     * <p>
+     * This method is for implementations that needs to set values based on additional properties.
+     * If no adjustments needs to be performed, the implementor <b>MUST</b> not change anything.
+     *
+     * @param config The HTTP configuration initialized with default values.
+     * @return The {@link HttpBasicConfig}
+     */
+    default HttpBasicConfig configureHttpBasicConfig(HttpBasicConfig config) {
+        return config;
+    }
+
 }

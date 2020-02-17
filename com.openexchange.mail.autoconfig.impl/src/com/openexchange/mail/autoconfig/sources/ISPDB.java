@@ -58,8 +58,8 @@ import javax.net.ssl.SSLHandshakeException;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.openexchange.config.cascade.ConfigView;
@@ -142,8 +142,7 @@ public class ISPDB extends AbstractProxyAwareConfigSource {
         }
 
         ProxyInfo proxy = getHttpProxyIfEnabled(view);
-        CloseableHttpClient httpclient = services.getServiceSafe(HttpClientService.class).getHttpClient("autoconfig-ispdb").getCloseableHttpClient();
-        
+        HttpClient httpclient = services.getServiceSafe(HttpClientService.class).getHttpClient("autoconfig-ispdb").getHttpClient();
         try {
             int port = url.getPort();
             if (port < 0) {
@@ -189,7 +188,7 @@ public class ISPDB extends AbstractProxyAwareConfigSource {
         } catch (IOException e) {
             LOG.warn("Could not retrieve config XML.", e);
             return null;
-        } 
+        }
     }
 
     private DefaultAutoconfig generateIndividualAutoconfig(String emailLocalPart, String emailDomain, DefaultAutoconfig autoconfig, boolean forceSecure) {

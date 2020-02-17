@@ -49,6 +49,7 @@
 
 package com.openexchange.spamhandler.spamexperts.http;
 
+import java.util.Optional;
 import com.openexchange.rest.client.httpclient.DefaultHttpClientConfigProvider;
 import com.openexchange.rest.client.httpclient.HttpBasicConfig;
 import com.openexchange.version.VersionService;
@@ -63,11 +64,11 @@ public class SpamExtertsHttpConfiguration extends DefaultHttpClientConfigProvide
 
     /**
      * Initializes a new {@link SpamExtertsHttpConfiguration}.
-     * 
+     *
      * @param versionService The version service
      */
     public SpamExtertsHttpConfiguration(VersionService versionService) {
-        super("spamexperts", "OX Spam Experts Client v", versionService);
+        super("spamexperts", "OX Spam Experts Client v", Optional.ofNullable(versionService));
     }
 
     @Override

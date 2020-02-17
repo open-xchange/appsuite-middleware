@@ -60,7 +60,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.rest.client.httpclient.HttpClientConfigProvider;
+import com.openexchange.rest.client.httpclient.SpecificHttpClientConfigProvider;
 import com.openexchange.rest.client.httpclient.HttpClientService;
 import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.spamhandler.spamexperts.SpamExpertsSpamHandler;
@@ -109,7 +109,7 @@ public class SpamExpertsActivator extends HousekeepingActivator {
         String alias = getService(ConfigurationService.class).getProperty("com.openexchange.custom.spamexperts.panel_servlet", "/ajax/spamexperts/panel").trim();
 		SpamExpertsServlet spamExpertsServlet = new SpamExpertsServlet(config, this);
         servletRegistration = new HTTPServletRegistration(context, spamExpertsServlet, alias);
-        registerService(HttpClientConfigProvider.class, new SpamExtertsHttpConfiguration(getService(VersionService.class)));
+        registerService(SpecificHttpClientConfigProvider.class, new SpamExtertsHttpConfiguration(getService(VersionService.class)));
 	}
 
 	@Override

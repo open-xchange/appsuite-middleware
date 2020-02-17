@@ -59,9 +59,9 @@ import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URLEncodedUtils;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HttpContext;
 import com.openexchange.exception.OXException;
@@ -81,7 +81,7 @@ import com.openexchange.server.ServiceLookup;
 public class ConfigServer extends AbstractProxyAwareConfigSource {
 
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConfigServer.class);
-    
+
     /**
      * Initializes a new {@link ConfigServer}.
      */
@@ -109,7 +109,7 @@ public class ConfigServer extends AbstractProxyAwareConfigSource {
 
         HttpContext httpContext = httpContextFor(contextId, userId);
         httpContext.setAttribute(OX_TARGET_ID, url);
-        CloseableHttpClient httpclient = services.getServiceSafe(HttpClientService.class).getHttpClient("autoconfig-server").getCloseableHttpClient();
+        HttpClient httpclient = services.getServiceSafe(HttpClientService.class).getHttpClient("autoconfig-server").getHttpClient();
         try {
 
             HttpHost target = new HttpHost(url.getHost(), -1, url.getProtocol());
@@ -171,7 +171,7 @@ public class ConfigServer extends AbstractProxyAwareConfigSource {
             // Apparently an I/O communication problem occurred while trying to connect to/read from deduced end-point from auto-config data
             LOG.debug("Could not retrieve config XML.", e);
             return null;
-        } 
+        }
     }
 
 }

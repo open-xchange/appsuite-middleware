@@ -61,13 +61,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import org.apache.http.HttpHeaders;
+import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.StatusLine;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.HttpResponseException;
-import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.jackrabbit.webdav.MultiStatus;
 import org.apache.jackrabbit.webdav.MultiStatusResponse;
 import org.apache.jackrabbit.webdav.property.DavProperty;
@@ -89,6 +89,7 @@ import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.rest.client.httpclient.HttpClientService;
+import com.openexchange.rest.client.httpclient.HttpClients;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.impl.OCLPermission;
@@ -139,7 +140,7 @@ public abstract class AbstractCardDAVSubscribeService extends AbstractDAVSubscri
         final String login = (String) configuration.get("login");
         final String password = (String) configuration.get("password");
 
-        final CloseableHttpClient httpClient = getHttpClient();
+        final HttpClient httpClient = getHttpClient();
         String addressBookHome = getAddressBookHome(httpClient, login, password, subscription);
         List<DisplayNameAndHref> addressbooks = getAvailableCollectionsInAddressbook(addressBookHome, httpClient, login, password, subscription);
 
@@ -242,9 +243,9 @@ public abstract class AbstractCardDAVSubscribeService extends AbstractDAVSubscri
      * @return The converted contacts
      * @throws OXException
      */
-    protected List<Contact> processAddressBookChunk(DisplayNameAndHref addressBook, List<String> contactHrefs, CloseableHttpClient httpClient, String login, String password, Subscription subscription, VCardService vcardService) throws OXException {
+    protected List<Contact> processAddressBookChunk(DisplayNameAndHref addressBook, List<String> contactHrefs, HttpClient httpClient, String login, String password, Subscription subscription, VCardService vcardService) throws OXException {
         HttpEntityMethod propfind = null;
-        CloseableHttpResponse httpResponse = null;
+        HttpResponse httpResponse = null;
         try {
             propfind = new HttpEntityMethod("REPORT", buildUri(getBaseUrl(subscription.getSession()), null, addressBook.getHref()));
             setAuthorizationHeader(propfind, login, password);
@@ -311,8 +312,7 @@ public abstract class AbstractCardDAVSubscribeService extends AbstractDAVSubscri
         } catch (RuntimeException e) {
             throw SubscriptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            reset(propfind);
-            Streams.close(httpResponse);
+            HttpClients.close(propfind, httpResponse);
         }
     }
 
@@ -326,9 +326,9 @@ public abstract class AbstractCardDAVSubscribeService extends AbstractDAVSubscri
      * @return The href value
      * @throws OXException If href value cannot be returned
      */
-    protected String getAddressBookHome(CloseableHttpClient httpClient, String login, String password, Subscription subscription) throws OXException {
+    protected String getAddressBookHome(HttpClient httpClient, String login, String password, Subscription subscription) throws OXException {
         HttpEntityMethod propfind = null;
-        CloseableHttpResponse httpResponse = null;
+        HttpResponse httpResponse = null;
         try {
             propfind = new HttpEntityMethod("PROPFIND", getUserPrincipal(subscription.getSession()));
             setAuthorizationHeader(propfind, login, password);
@@ -388,8 +388,7 @@ public abstract class AbstractCardDAVSubscribeService extends AbstractDAVSubscri
         } catch (RuntimeException e) {
             throw SubscriptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            reset(propfind);
-            Streams.close(httpResponse);
+            HttpClients.close(propfind, httpResponse);
         }
     }
 
@@ -404,9 +403,9 @@ public abstract class AbstractCardDAVSubscribeService extends AbstractDAVSubscri
      * @return The hrefs of available collections
      * @throws OXException
      */
-    protected List<String> getContactHrefsFrom(String addressBookHref, CloseableHttpClient httpClient, String login, String password, Subscription subscription) throws OXException {
+    protected List<String> getContactHrefsFrom(String addressBookHref, HttpClient httpClient, String login, String password, Subscription subscription) throws OXException {
         HttpEntityMethod propfind = null;
-        CloseableHttpResponse httpResponse = null;
+        HttpResponse httpResponse = null;
         try {
             propfind = new HttpEntityMethod("PROPFIND", buildUri(getBaseUrl(subscription.getSession()), null, addressBookHref));
             setAuthorizationHeader(propfind, login, password);
@@ -469,8 +468,7 @@ public abstract class AbstractCardDAVSubscribeService extends AbstractDAVSubscri
         } catch (RuntimeException e) {
             throw SubscriptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            reset(propfind);
-            Streams.close(httpResponse);
+            HttpClients.close(propfind, httpResponse);
         }
     }
 
@@ -503,9 +501,9 @@ public abstract class AbstractCardDAVSubscribeService extends AbstractDAVSubscri
      * @return The hrefs of available collections
      * @throws OXException
      */
-    protected List<DisplayNameAndHref> getAvailableCollectionsInAddressbook(String addressBookHomeHref, CloseableHttpClient httpClient, String login, String password, Subscription subscription) throws OXException {
+    protected List<DisplayNameAndHref> getAvailableCollectionsInAddressbook(String addressBookHomeHref, HttpClient httpClient, String login, String password, Subscription subscription) throws OXException {
         HttpEntityMethod propfind = null;
-        CloseableHttpResponse httpResponse = null;
+        HttpResponse httpResponse = null;
         try {
             propfind = new HttpEntityMethod("PROPFIND", buildUri(getBaseUrl(subscription.getSession()), null, addressBookHomeHref));
             setAuthorizationHeader(propfind, login, password);
@@ -570,8 +568,7 @@ public abstract class AbstractCardDAVSubscribeService extends AbstractDAVSubscri
         } catch (RuntimeException e) {
             throw SubscriptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            reset(propfind);
-            Streams.close(httpResponse);
+            HttpClients.close(propfind, httpResponse);
         }
     }
 
@@ -616,9 +613,9 @@ public abstract class AbstractCardDAVSubscribeService extends AbstractDAVSubscri
 
         return ((Element) value).getTextContent();
     }
-    
-    private CloseableHttpClient getHttpClient() throws OXException {
-        return services.getService(HttpClientService.class).getHttpClient(CLIENT_ID).getCloseableHttpClient();
+
+    private HttpClient getHttpClient() throws OXException {
+        return services.getServiceSafe(HttpClientService.class).getHttpClient(CLIENT_ID).getHttpClient();
     }
 
     /**

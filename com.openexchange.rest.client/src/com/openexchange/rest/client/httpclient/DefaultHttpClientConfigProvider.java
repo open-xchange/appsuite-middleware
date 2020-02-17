@@ -49,6 +49,7 @@
 
 package com.openexchange.rest.client.httpclient;
 
+import java.util.Optional;
 import com.openexchange.version.VersionService;
 
 /**
@@ -57,13 +58,13 @@ import com.openexchange.version.VersionService;
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.4
  */
-public class DefaultHttpClientConfigProvider extends AbstractHttpClientModifer implements HttpClientConfigProvider {
+public class DefaultHttpClientConfigProvider extends AbstractHttpClientModifer implements SpecificHttpClientConfigProvider {
 
     private final String clientId;
 
     /**
      * Initializes a new {@link DefaultHttpClientConfigProvider}.
-     * 
+     *
      * @param clientId The identifier of the HTTP client
      * @param userAgent The user agent to use for the client
      */
@@ -74,13 +75,13 @@ public class DefaultHttpClientConfigProvider extends AbstractHttpClientModifer i
 
     /**
      * Initializes a new {@link DefaultHttpClientConfigProvider}.
-     * 
+     *
      * @param clientId The identifier of the HTTP client
      * @param userAgent The user agent to use for the client
-     * @param versionService The version service. Will be used to append the version to the user agent
+     * @param optionalVersionService The optional version service. Will be used to append the version to the user agent
      */
-    public DefaultHttpClientConfigProvider(String clientId, String userAgent, VersionService versionService) {
-        super(userAgent + getVersion(versionService));
+    public DefaultHttpClientConfigProvider(String clientId, String userAgent, Optional<VersionService> optionalVersionService) {
+        super(userAgent + getVersion(optionalVersionService));
         this.clientId = clientId;
     }
 
@@ -89,8 +90,8 @@ public class DefaultHttpClientConfigProvider extends AbstractHttpClientModifer i
         return clientId;
     }
 
-    private static String getVersion(VersionService versionService) {
-        return null == versionService ? "<unknown version>" : versionService.getVersionString();
+    private static String getVersion(Optional<VersionService> optionalVersionService) {
+        return optionalVersionService.isPresent() ? optionalVersionService.get().getVersionString() : "<unknown version>";
     }
 
 }

@@ -71,7 +71,7 @@ import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.metrics.MetricService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.rest.client.httpclient.HttpClientService;
-import com.openexchange.rest.client.httpclient.GenericHttpClientConfigProvider;
+import com.openexchange.rest.client.httpclient.WildcardHttpClientConfigProvider;
 import com.openexchange.timer.TimerService;
 
 /**
@@ -119,7 +119,7 @@ public class SproxydActivator extends HousekeepingActivator {
         }
         
         // Register HTTP client config
-        registerService(GenericHttpClientConfigProvider.class, new SproxydHttpClientConfig(this));
+        registerService(WildcardHttpClientConfigProvider.class, new SproxydHttpClientConfig(this));
     }
 
     @Override

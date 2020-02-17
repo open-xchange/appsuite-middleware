@@ -50,6 +50,7 @@
 package com.openexchange.rest.client.httpclient;
 
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.http.Header;
 import org.apache.http.HeaderElement;
 import org.apache.http.HttpEntity;
@@ -71,18 +72,17 @@ import com.openexchange.java.Strings;
 public abstract class AbstractHttpClientModifer implements HttpClientBuilderModifier {
 
     private final String userAgent;
-
-    private boolean isContentCompressionDisabled = false;
+    private final AtomicBoolean isContentCompressionDisabled;
 
     /**
      * Initializes a new {@link AbstractHttpClientModifer}.
-     * 
-     * @param userAgent The user agent to set.
+     *
+     * @param userAgent The user agent to set; may be <code>null</code>
      */
-    public AbstractHttpClientModifer(@Nullable String userAgent) {
+    protected AbstractHttpClientModifer(@Nullable String userAgent) {
         super();
         this.userAgent = userAgent;
-
+        isContentCompressionDisabled = new AtomicBoolean(false);
     }
 
     /**
@@ -106,13 +106,14 @@ public abstract class AbstractHttpClientModifer implements HttpClientBuilderModi
      * @param isContentCompressionDisabled The isContentCompressionDisabled to set
      */
     protected void setContentCompressionDisabled(boolean isContentCompressionDisabled) {
-        this.isContentCompressionDisabled = isContentCompressionDisabled;
+        this.isContentCompressionDisabled.set(isContentCompressionDisabled);
     }
 
     private void setCompression(HttpClientBuilder builder) {
-        if (isContentCompressionDisabled) {
+        if (isContentCompressionDisabled.get()) {
             return;
         }
+
         builder.addInterceptorLast(new HttpResponseInterceptor() {
 
             @Override

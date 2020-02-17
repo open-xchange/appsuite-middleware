@@ -59,7 +59,7 @@ import com.openexchange.mail.autoconfig.internal.AutoconfigServiceImpl;
 import com.openexchange.mail.autoconfig.tools.Services;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.rest.client.httpclient.HttpClientConfigProvider;
+import com.openexchange.rest.client.httpclient.SpecificHttpClientConfigProvider;
 import com.openexchange.rest.client.httpclient.HttpClientService;
 
 /**
@@ -78,8 +78,8 @@ public class Activator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         Services.setServiceLookup(this);
         registerService(AutoconfigService.class, new AutoconfigServiceImpl(this));
-        registerService(HttpClientConfigProvider.class, new AutoConfigHttpConfiguration());
-        registerService(HttpClientConfigProvider.class, new ISPDBHttpConfiguration());
+        registerService(SpecificHttpClientConfigProvider.class, new AutoConfigHttpConfiguration());
+        registerService(SpecificHttpClientConfigProvider.class, new ISPDBHttpConfiguration());
     }
 
     @Override

@@ -66,11 +66,10 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.NoHttpResponseException;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.utils.DateUtils;
-import org.apache.http.impl.client.CloseableHttpClient;
 import com.openexchange.auth.info.AuthInfo;
 import com.openexchange.auth.info.AuthType;
 import com.openexchange.chronos.ical.ICalParameters;
@@ -88,6 +87,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.rest.client.httpclient.HttpClientService;
+import com.openexchange.rest.client.httpclient.HttpClients;
 import com.openexchange.session.Session;
 
 /**
@@ -178,13 +178,15 @@ public class ICalFeedClient {
      * Returns the calendar behind the given feed URL if available. If there is no update (based on etag and last modification header) the contained calendar will be <code>null</code>.
      *
      * @return GetResponse containing the feed content
-     * @throws OXException 
+     * @throws OXException
      */
     public GetResponse executeRequest() throws OXException {
         ICalProviderUtils.verifyURI(this.iCalFeedConfig.getFeedUrl());
         HttpGet request = prepareGet();
 
-        try (CloseableHttpResponse response = getHttpClient().execute(request)) {
+        HttpResponse response = null;
+        try {
+            response = getHttpClient().execute(request);
             int statusCode = assertStatusCode(response);
             if (statusCode == HttpStatus.SC_NOT_MODIFIED) {
                 // OK, nothing was modified, no response body, return as is
@@ -204,13 +206,13 @@ public class ICalFeedClient {
             LOG.error("Error while processing the retrieved information:{}.", e.getMessage(), e);
             throw ICalProviderExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
-            reset(request);
+            HttpClients.close(request, response);
         }
     }
-    
-    private CloseableHttpClient getHttpClient() throws OXException {
+
+    private HttpClient getHttpClient() throws OXException {
         HttpClientService httpClientService = Services.getServiceLookup().getServiceSafe(HttpClientService.class);
-        return httpClientService.getHttpClient("icalfeed").getCloseableHttpClient();
+        return httpClientService.getHttpClient("icalfeed").getHttpClient();
     }
 
     private GetResponse prepareResponse(URI uri, HttpResponse httpResponse) throws OXException {
@@ -279,7 +281,7 @@ public class ICalFeedClient {
             }
         }
     }
-    
+
     /**
      * Prepares an appropriate exception for a response with status <code>401 Unauthorized</code>.
      *

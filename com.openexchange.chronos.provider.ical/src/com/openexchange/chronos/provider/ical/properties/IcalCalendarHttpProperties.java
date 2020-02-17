@@ -54,6 +54,7 @@ import static com.openexchange.chronos.provider.ical.properties.ICalCalendarProv
 import static com.openexchange.chronos.provider.ical.properties.ICalCalendarProviderProperties.maxConnectionsPerRoute;
 import static com.openexchange.chronos.provider.ical.properties.ICalCalendarProviderProperties.socketReadTimeout;
 import static com.openexchange.java.Autoboxing.i;
+import java.util.Optional;
 import org.slf4j.LoggerFactory;
 import com.openexchange.config.DefaultInterests;
 import com.openexchange.config.Interests;
@@ -72,15 +73,15 @@ import com.openexchange.version.VersionService;
  */
 public class IcalCalendarHttpProperties extends DefaultHttpClientConfigProvider {
 
-    private ServiceLookup serviceLookup;
+    private final ServiceLookup serviceLookup;
 
     /**
      * Initializes a new {@link IcalCalendarHttpProperties}.
-     * 
+     *
      * @param serviceLookup The {@link ServiceLookup}
      */
     public IcalCalendarHttpProperties(ServiceLookup serviceLookup) {
-        super("icalfeed", VersionService.NAME + "/", serviceLookup.getService(VersionService.class));
+        super("icalfeed", VersionService.NAME + "/", Optional.ofNullable(serviceLookup.getService(VersionService.class)));
         this.serviceLookup = serviceLookup;
     }
 
@@ -112,7 +113,7 @@ public class IcalCalendarHttpProperties extends DefaultHttpClientConfigProvider 
      */
     private HttpBasicConfig getFromConfiguration(HttpBasicConfig config) throws OXException {
         LeanConfigurationService configurationService = serviceLookup.getServiceSafe(LeanConfigurationService.class);
-        
+
         config.setMaxTotalConnections(configurationService.getIntProperty(maxConnections));
         config.setMaxConnectionsPerRoute(configurationService.getIntProperty(maxConnectionsPerRoute));
         config.setConnectionTimeout(configurationService.getIntProperty(connectionTimeout));

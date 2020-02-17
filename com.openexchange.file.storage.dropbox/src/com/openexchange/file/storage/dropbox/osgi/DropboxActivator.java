@@ -63,7 +63,7 @@ import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.access.OAuthAccessRegistryService;
-import com.openexchange.rest.client.httpclient.HttpClientConfigProvider;
+import com.openexchange.rest.client.httpclient.SpecificHttpClientConfigProvider;
 import com.openexchange.rest.client.httpclient.HttpClientService;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.timer.TimerService;
@@ -93,7 +93,7 @@ public final class DropboxActivator extends AbstractCloudStorageActivator {
     @Override
     protected void startBundle() throws Exception {
         DropboxServices.setServices(this);
-        registerService(HttpClientConfigProvider.class, new DropboxHttpClientConfiguration(getService(VersionService.class)));
+        registerService(SpecificHttpClientConfigProvider.class, new DropboxHttpClientConfiguration(getService(VersionService.class)));
         super.startBundle();
     }
 

@@ -49,6 +49,7 @@
 
 package com.openexchange.rest.client.osgi;
 
+import static com.openexchange.osgi.Tools.generateServiceFilter;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.metrics.MetricService;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
@@ -56,8 +57,8 @@ import com.openexchange.net.ssl.config.SSLConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.rest.client.endpointpool.EndpointManagerFactory;
 import com.openexchange.rest.client.endpointpool.internal.EndpointManagerFactoryImpl;
-import com.openexchange.rest.client.httpclient.GenericHttpClientConfigProvider;
-import com.openexchange.rest.client.httpclient.HttpClientConfigProvider;
+import com.openexchange.rest.client.httpclient.WildcardHttpClientConfigProvider;
+import com.openexchange.rest.client.httpclient.SpecificHttpClientConfigProvider;
 import com.openexchange.rest.client.httpclient.HttpClientService;
 import com.openexchange.rest.client.httpclient.internal.HttpClientServiceImpl;
 import com.openexchange.timer.TimerService;
@@ -71,7 +72,7 @@ import com.openexchange.version.VersionService;
  */
 public class RestClientActivator extends HousekeepingActivator {
 
-    private HttpClientServiceImpl factoryImpl;
+    private HttpClientServiceImpl httpClientService;
 
     /**
      * Initializes a new {@link RestClientActivator}.
@@ -91,30 +92,35 @@ public class RestClientActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void startBundle() throws Exception {
+    protected synchronized void startBundle() throws Exception {
         RestClientServices.setServices(this);
         registerService(EndpointManagerFactory.class, new EndpointManagerFactoryImpl(this));
 
-        factoryImpl = new HttpClientServiceImpl(context, this);
-        registerService(HttpClientService.class, factoryImpl);
-        track(HttpClientConfigProvider.class, factoryImpl);
-        track(GenericHttpClientConfigProvider.class, factoryImpl);
-
+        HttpClientServiceImpl httpClientService = new HttpClientServiceImpl(context, this);
+        this.httpClientService = httpClientService;
+        track(generateServiceFilter(context, SpecificHttpClientConfigProvider.class, WildcardHttpClientConfigProvider.class), httpClientService);
         openTrackers();
+
+        registerService(HttpClientService.class, httpClientService);
         // Avoid annoying WARN logging
         //System.setProperty("org.apache.commons.logging.simplelog.log.org.apache.http.client.protocol.ResponseProcessCookies", "fatal");
     }
 
     @Override
-    protected void stopBundle() throws Exception {
+    protected synchronized void stopBundle() throws Exception {
         try {
-            // Clean-up
-            super.stopBundle();
             // Clear service registry
             RestClientServices.setServices(null);
-            if (null != factoryImpl) {
-                factoryImpl.shutdown();
+            // Clean-up registered services and trackers
+            cleanUp();
+            // Shut-down service
+            HttpClientServiceImpl httpClientService = this.httpClientService;
+            if (null != httpClientService) {
+                this.httpClientService = null;
+                httpClientService.shutdown();
             }
+            // Call to super...
+            super.stopBundle();
         } catch (Exception e) {
             org.slf4j.LoggerFactory.getLogger(RestClientActivator.class).error("", e);
             throw e;

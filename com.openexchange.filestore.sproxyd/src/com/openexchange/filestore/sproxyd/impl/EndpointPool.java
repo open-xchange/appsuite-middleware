@@ -56,7 +56,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import javax.annotation.concurrent.ThreadSafe;
-import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.client.HttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.filestore.sproxyd.osgi.Services;
@@ -266,7 +266,7 @@ public class EndpointPool {
 
                 LOG.debug("Sproxyd endpoint pool [{}]: Heartbeat - blacklist contains {} endpoints", filestoreId, I(blacklist.size()));
                 for (String endpoint : blacklist) {
-                    CloseableHttpClient httpClient = Services.getService(HttpClientService.class).getHttpClient(filestoreId).getCloseableHttpClient();
+                    HttpClient httpClient = Services.getService(HttpClientService.class).getHttpClient(filestoreId).getHttpClient();
                     if (Utils.endpointUnavailable(endpoint, httpClient)) {
                         LOG.warn("Sproxyd endpoint pool [{}]: Endpoint {} is still unavailable", filestoreId, endpoint);
                     } else {

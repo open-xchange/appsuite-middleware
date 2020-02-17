@@ -52,7 +52,7 @@ package com.openexchange.sms.sipgate.osgi;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.rest.client.httpclient.DefaultHttpClientConfigProvider;
-import com.openexchange.rest.client.httpclient.HttpClientConfigProvider;
+import com.openexchange.rest.client.httpclient.SpecificHttpClientConfigProvider;
 import com.openexchange.rest.client.httpclient.HttpClientService;
 import com.openexchange.sms.PhoneNumberParserService;
 import com.openexchange.sms.SMSServiceSPI;
@@ -83,7 +83,7 @@ public class SipgateSMSActivator extends HousekeepingActivator {
         org.slf4j.LoggerFactory.getLogger(SipgateSMSActivator.class).info("starting bundle: \"com.openexchange.sms.sipgate\"");
         SMSServiceSPI service = new SipgateSMSService(this);
         registerService(SMSServiceSPI.class, service);
-        registerService(HttpClientConfigProvider.class, new DefaultHttpClientConfigProvider("sipgate", null));
+        registerService(SpecificHttpClientConfigProvider.class, new DefaultHttpClientConfigProvider("sipgate", null));
     }
 
     @Override

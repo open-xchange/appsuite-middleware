@@ -57,7 +57,7 @@ import com.openexchange.mail.api.AuthenticationFailedHandler;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.rest.client.httpclient.HttpClientConfigProvider;
+import com.openexchange.rest.client.httpclient.SpecificHttpClientConfigProvider;
 import com.openexchange.rest.client.httpclient.HttpClientService;
 import com.openexchange.saml.oauth.HttpClientOAuthAccessTokenService;
 import com.openexchange.saml.oauth.OAuthFailedAuthenticationHandler;
@@ -106,6 +106,6 @@ public class Activator extends HousekeepingActivator {
 
         registerService(OAuthAccessTokenService.class, tokenService);
         registerService(AuthenticationFailedHandler.class, new OAuthFailedAuthenticationHandler(tokenService, this), SERVICE_RANKING);
-        registerService(HttpClientConfigProvider.class, new SamlOAuthHttpConfiguration(this));
+        registerService(SpecificHttpClientConfigProvider.class, new SamlOAuthHttpConfiguration(this));
     }
 }

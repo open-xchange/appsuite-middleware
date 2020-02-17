@@ -52,6 +52,7 @@ package com.openexchange.rest.client.httpclient;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.util.EntityUtils;
 
@@ -108,27 +109,52 @@ public final class HttpClients {
      * <ul>
      * <li>Resets internal state of the HTTP request making it reusable.</li>
      * <li>Ensures that the response's content is fully consumed and the content stream, if exists, is closed</li>
+     * <li>Checks if HTTP response is an instance of {@link CloseableHttpResponse}. If so <code>close()</code> is invoked</li>
      * </ul>
      *
      * @param request The HTTP request to reset
      * @param response The HTTP response to consume and close
      */
     public static void close(HttpRequestBase request, HttpResponse response) {
-        if (null != response) {
-            HttpEntity entity = response.getEntity();
-            if (null != entity) {
-                try {
-                    EntityUtils.consumeQuietly(entity);
-                } catch (Exception e) {
-                    LOG.trace("Failed to ensure that the entity content is fully consumed and the content stream, if exists, is closed.", e);
-                }
-            }
-        }
+        close(response, true);
         if (null != request) {
             try {
                 request.reset();
             } catch (Exception e) {
                 LOG.trace("Failed to reset request for making it reusable.", e);
+            }
+        }
+    }
+
+    /**
+     * Closes the supplied HTTP response resource silently.
+     * <p>
+     * <ul>
+     * <li>Ensures that the response's content is fully consumed and the content stream, if exists, is closed (provided that <code>consumeEntity</code> is set to <code>true</code>)</li>
+     * <li>Checks if HTTP response is an instance of {@link CloseableHttpResponse}. If so <code>close()</code> is invoked</li>
+     * </ul>
+     *
+     * @param response The HTTP response to consume and close
+     * @param consumeEntity Whether to consume the message entity of given HTTP response
+     */
+    public static void close(HttpResponse response, boolean consumeEntity) {
+        if (null != response) {
+            if (consumeEntity) {
+                HttpEntity entity = response.getEntity();
+                if (null != entity) {
+                    try {
+                        EntityUtils.consumeQuietly(entity);
+                    } catch (Exception e) {
+                        LOG.trace("Failed to ensure that the entity content is fully consumed and the content stream, if exists, is closed.", e);
+                    }
+                }
+            }
+            if (response instanceof CloseableHttpResponse) {
+                try {
+                    ((CloseableHttpResponse) response).close();
+                } catch (Exception e) {
+                    LOG.debug("Error closing HTTP response", e);
+                }
             }
         }
     }

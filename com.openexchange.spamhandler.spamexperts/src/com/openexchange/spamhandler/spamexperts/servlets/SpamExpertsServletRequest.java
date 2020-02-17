@@ -226,7 +226,7 @@ public final class SpamExpertsServletRequest {
             getRequest = new HttpGet(buildUri(getURIFor(authid), queryString, null));
 		    setAuthorizationHeader(getRequest, admin, password);
 
-		    HttpResponse httpResponse = httpClient.getCloseableHttpClient().execute(getRequest);
+		    HttpResponse httpResponse = httpClient.getHttpClient().execute(getRequest);
             StatusLine statusLine = httpResponse.getStatusLine();
             int statusCode = statusLine.getStatusCode();
             if (statusCode != HttpStatus.SC_OK) {

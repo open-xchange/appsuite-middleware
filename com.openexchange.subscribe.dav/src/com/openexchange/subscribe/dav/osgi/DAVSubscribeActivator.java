@@ -54,9 +54,9 @@ import com.openexchange.context.ContextService;
 import com.openexchange.groupware.generic.FolderUpdaterRegistry;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.rest.client.httpclient.DefaultHttpClientConfigProvider;
-import com.openexchange.rest.client.httpclient.HttpBasicConfig;
-import com.openexchange.rest.client.httpclient.HttpClientConfigProvider;
+import com.openexchange.rest.client.httpclient.SpecificHttpClientConfigProvider;
 import com.openexchange.rest.client.httpclient.HttpClientService;
+import com.openexchange.rest.client.httpclient.HttpBasicConfig;
 import com.openexchange.subscribe.SubscriptionExecutionService;
 import com.openexchange.threadpool.ThreadPoolService;
 
@@ -84,7 +84,7 @@ public class DAVSubscribeActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         Services.setServices(this);
 
-        registerService(HttpClientConfigProvider.class, new DefaultHttpClientConfigProvider("davsub", "Open-Xchange DAV Http Client") {
+        registerService(SpecificHttpClientConfigProvider.class, new DefaultHttpClientConfigProvider("davsub", "Open-Xchange DAV Http Client") {
 
             @Override
             public HttpBasicConfig configureHttpBasicConfig(HttpBasicConfig config) {

@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.dropbox.http;
 
+import java.util.Optional;
 import com.openexchange.rest.client.httpclient.DefaultHttpClientConfigProvider;
 import com.openexchange.rest.client.httpclient.HttpBasicConfig;
 import com.openexchange.version.VersionService;
@@ -68,11 +69,11 @@ public class DropboxHttpClientConfiguration extends DefaultHttpClientConfigProvi
 
     /**
      * Initializes a new {@link DropboxHttpClientConfiguration}.
-     * 
+     *
      * @param versionService The version service
      */
     public DropboxHttpClientConfiguration(VersionService versionService) {
-        super(HTTP_CLIENT_DROPBOX, "Open-Xchange Dropbox HttpClient v", versionService);
+        super(HTTP_CLIENT_DROPBOX, "Open-Xchange Dropbox HttpClient v", Optional.ofNullable(versionService));
     }
 
     @Override

@@ -70,8 +70,8 @@ public interface HttpClientService {
      * <li> Created by this service</li>
      * 
      * The client will be created from a configuration which is provided by registered service of classes
-     * <li> {@link HttpClientConfigProvider}</li>
-     * <li> {@link GenericHttpClientConfigProvider}</li>
+     * <li> {@link SpecificHttpClientConfigProvider}</li>
+     * <li> {@link WildcardHttpClientConfigProvider}</li>
      * Created clients will be put into the cache.
      * <p>
      * The client will be closed and removed if the corresponding service of above classes is removed via
@@ -97,7 +97,7 @@ public interface HttpClientService {
      *         It is strongly recommended to fetch the client each time from the service instead of using it as
      *         class member because this service ensures that the underlying HTTP client can be used.
      * @throws OXException If no HTTP client with the provided identifier exists or client configuration is invalid
-     * @see {@link ManagedHttpClient#getCloseableHttpClient()}
+     * @see {@link ManagedHttpClient#getHttpClient()}
      */
     ManagedHttpClient getHttpClient(String httpClientId) throws OXException;
 

@@ -54,6 +54,7 @@ import static com.openexchange.rest.client.httpclient.HttpClientProperty.CONNTEC
 import static com.openexchange.rest.client.httpclient.HttpClientProperty.MAX_CONNECTIONS_PER_ROUTE;
 import static com.openexchange.rest.client.httpclient.HttpClientProperty.MAX_TOTAL_CONNECTIONS;
 import static com.openexchange.rest.client.httpclient.HttpClientProperty.SOCKET_READ_TIMEOUT_MILLIS;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.config.ConfigurationService;
@@ -64,8 +65,8 @@ import com.openexchange.dovecot.doveadm.client.internal.HttpDoveAdmEndpointManag
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.rest.client.httpclient.DefaultHttpClientConfigProvider;
-import com.openexchange.rest.client.httpclient.HttpBasicConfig;
 import com.openexchange.rest.client.httpclient.HttpClientProperty;
+import com.openexchange.rest.client.httpclient.HttpBasicConfig;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.version.VersionService;
 
@@ -84,17 +85,17 @@ public class DoveAdmHttpClientConfig extends DefaultHttpClientConfigProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DoveAdmHttpClientConfig.class);
 
-    private ServiceLookup serviceLookup;
-    private HttpDoveAdmCall call;
+    private final ServiceLookup serviceLookup;
+    private final HttpDoveAdmCall call;
 
     /**
      * Initializes a new {@link DoveAdmHttpClientConfig}.
-     * 
+     *
      * @param serviceLookup The {@link ServiceLookup}
      * @param call The {@link HttpDoveAdmCall}^
      */
     public DoveAdmHttpClientConfig(ServiceLookup serviceLookup, HttpDoveAdmCall call) {
-        super(getClientId(call), "OX Dovecot Http Client v", serviceLookup.getService(VersionService.class));
+        super(getClientId(call), "OX Dovecot Http Client v", Optional.ofNullable(serviceLookup.getService(VersionService.class)));
         this.serviceLookup = serviceLookup;
         this.call = call;
     }

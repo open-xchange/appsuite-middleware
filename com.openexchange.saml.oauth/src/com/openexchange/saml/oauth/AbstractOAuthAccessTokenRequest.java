@@ -58,9 +58,9 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
@@ -83,9 +83,9 @@ import com.openexchange.server.ServiceLookup;
  */
 public abstract class AbstractOAuthAccessTokenRequest {
 
-    private ServiceLookup services;
+    private final ServiceLookup services;
 
-    private String clientId;
+    private final String clientId;
 
     /**
      * Initializes a new {@link AbstractOAuthAccessTokenRequest}.
@@ -194,9 +194,9 @@ public abstract class AbstractOAuthAccessTokenRequest {
             HttpClients.close(requestAccessToken, validationResp);
         }
     }
-    
-    private CloseableHttpClient getHttpClient() throws IllegalStateException, OXException {
-        return services.getServiceSafe(HttpClientService.class).getHttpClient(clientId).getCloseableHttpClient();
+
+    private HttpClient getHttpClient() throws IllegalStateException, OXException {
+        return services.getServiceSafe(HttpClientService.class).getHttpClient(clientId).getHttpClient();
     }
 
     /**

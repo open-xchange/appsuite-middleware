@@ -52,7 +52,7 @@ package com.openexchange.xing.osgi;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.rest.client.httpclient.HttpClientConfigProvider;
+import com.openexchange.rest.client.httpclient.SpecificHttpClientConfigProvider;
 import com.openexchange.rest.client.httpclient.HttpClientService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
@@ -82,7 +82,7 @@ public final class XingActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         Services.setServiceLookup(this);
-        registerService(HttpClientConfigProvider.class, new XingHttpConfiguration());
+        registerService(SpecificHttpClientConfigProvider.class, new XingHttpConfiguration());
     }
 
     @Override

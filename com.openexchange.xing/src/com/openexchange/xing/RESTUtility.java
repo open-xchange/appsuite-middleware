@@ -73,8 +73,8 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -83,7 +83,6 @@ import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.InputStreamEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.json.JSONException;
 import org.json.JSONInputStream;
 import org.json.JSONObject;
@@ -171,7 +170,7 @@ public class RESTUtility {
         default:
             throw new XingException("Unsupported HTTP method: " + method);
         }
-        final CloseableHttpResponse resp = execute(session, req, expectedStatusCode);
+        final HttpResponse resp = execute(session, req, expectedStatusCode);
 
         return parseAsJSON(resp, expectedStatusCode);
     }
@@ -394,7 +393,7 @@ public class RESTUtility {
         }
         // Sign request
         session.sign(req);
-        final CloseableHttpResponse resp = execute(session, req, expectedStatusCode);
+        final HttpResponse resp = execute(session, req, expectedStatusCode);
         return new RequestAndResponse(req, resp);
     }
 
@@ -513,20 +512,20 @@ public class RESTUtility {
             Streams.close(contentStream, scanner);
         }
     }
-    
+
     /**
      * Get the {@link HttpClientService}
-     * 
+     *
      * @return The service
      * @throws XingException If service is missing
      */
-    private static CloseableHttpClient getHttpClient() throws XingException {
+    private static HttpClient getHttpClient() throws XingException {
         try {
             HttpClientService httpClientService = Services.getService(HttpClientService.class);
             if (null == httpClientService) {
                 throw new XingException("Internal server error. Missing service " + HttpClientService.class.getSimpleName());
             }
-            return httpClientService.getHttpClient("xing").getCloseableHttpClient();
+            return httpClientService.getHttpClient("xing").getHttpClient();
         } catch (OXException e) {
             throw new XingException("Internal server error. Unable to get HTTP client", e);
         }
@@ -547,7 +546,7 @@ public class RESTUtility {
      * @throws XingException For any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
      *             catch this exception which signals that some kind of error occurred.
      */
-    private static CloseableHttpResponse execute(final Session session, final HttpRequestBase req, final List<Integer> expectedStatusCode) throws XingException {
+    private static HttpResponse execute(final Session session, final HttpRequestBase req, final List<Integer> expectedStatusCode) throws XingException {
         return execute(session, req, -1, expectedStatusCode);
     }
 
@@ -567,8 +566,8 @@ public class RESTUtility {
      * @throws XingException For any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
      *             catch this exception which signals that some kind of error occurred.
      */
-    private static CloseableHttpResponse execute(final Session session, final HttpRequestBase req, final int socketTimeoutOverrideMs, final List<Integer> expectedStatusCode) throws XingException {
-        final CloseableHttpClient client = getHttpClient();
+    private static HttpResponse execute(final Session session, final HttpRequestBase req, final int socketTimeoutOverrideMs, final List<Integer> expectedStatusCode) throws XingException {
+        final HttpClient client = getHttpClient();
 
         // Set request timeouts.
         session.setRequestTimeout(req);
@@ -578,7 +577,7 @@ public class RESTUtility {
 
         final boolean repeatable = isRequestRepeatable(req);
 
-        CloseableHttpResponse response = null;
+        HttpResponse response = null;
         try {
             for (int retries = 0; response == null && retries < 5; retries++) {
                 /*

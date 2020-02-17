@@ -69,13 +69,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.InputStreamEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicHeader;
 import com.dropbox.core.http.HttpRequestor;
 import com.openexchange.exception.OXException;
@@ -94,7 +93,7 @@ public class ApacheHttpClientHttpRequestor extends HttpRequestor {
 
     /**
      * Initializes a new {@link ApacheHttpClientHttpRequestor}.
-     * 
+     *
      */
     public ApacheHttpClientHttpRequestor() {
         super();
@@ -128,7 +127,7 @@ public class ApacheHttpClientHttpRequestor extends HttpRequestor {
     @Override
     public Response doGet(String url, Iterable<Header> headers) throws IOException {
         HttpGet request = null;
-        CloseableHttpResponse httpResponse = null;
+        HttpResponse httpResponse = null;
         boolean error = true;
         try {
             request = new HttpGet(url);
@@ -159,6 +158,8 @@ public class ApacheHttpClientHttpRequestor extends HttpRequestor {
         } finally {
             if (error) {
                 HttpClients.close(request, httpResponse);
+            } else {
+                HttpClients.close(httpResponse, false);
             }
         }
     }
@@ -310,9 +311,9 @@ public class ApacheHttpClientHttpRequestor extends HttpRequestor {
             return new Response(httpResponse.getStatusLine().getStatusCode(), body, responseHeaders);
         }
     }
-    
-    static CloseableHttpClient getHttpClient() throws OXException {
-        return getService(HttpClientService.class).getHttpClient(HTTP_CLIENT_DROPBOX).getCloseableHttpClient();
+
+    static HttpClient getHttpClient() throws OXException {
+        return getService(HttpClientService.class).getHttpClient(HTTP_CLIENT_DROPBOX).getHttpClient();
     }
 
     private static final class PipedStream implements Closeable {

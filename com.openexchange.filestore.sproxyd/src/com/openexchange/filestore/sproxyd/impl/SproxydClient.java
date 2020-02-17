@@ -55,12 +55,11 @@ import java.util.Collection;
 import java.util.UUID;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.InputStreamEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorageCodes;
 import com.openexchange.filestore.sproxyd.SproxydExceptionCode;
@@ -144,7 +143,7 @@ public class SproxydClient {
      */
     public InputStream get(UUID id, long rangeStart, long rangeEnd) throws OXException {
         HttpGet get = null;
-        CloseableHttpResponse response = null;
+        HttpResponse response = null;
         Endpoint endpoint = getEndpoint();
         try {
             get = new HttpGet(endpoint.getObjectUrl(id));
@@ -179,7 +178,7 @@ public class SproxydClient {
      */
     public boolean delete(UUID id) throws OXException {
         HttpDelete delete = null;
-        CloseableHttpResponse response = null;
+        HttpResponse response = null;
         Endpoint endpoint = getEndpoint();
         try {
             delete = new HttpDelete(endpoint.getObjectUrl(id));
@@ -230,7 +229,7 @@ public class SproxydClient {
      * @param endpoint The end-point for which the exception occurred.
      * @param e The exception
      * @return An OXException to re-throw
-     * @throws OXException 
+     * @throws OXException
      */
     private OXException handleCommunicationError(Endpoint endpoint, IOException e) throws OXException {
         if (org.apache.http.conn.ConnectionPoolTimeoutException.class.isInstance(e)) {
@@ -246,9 +245,9 @@ public class SproxydClient {
 
         return FileStorageCodes.IOERROR.create(e, e.getMessage());
     }
-    
-    private CloseableHttpClient getHttpClient() throws OXException {
-        return Services.getService(HttpClientService.class).getHttpClient(filestoreID).getCloseableHttpClient();
+
+    private HttpClient getHttpClient() throws OXException {
+        return Services.getService(HttpClientService.class).getHttpClient(filestoreID).getHttpClient();
     }
 
 }

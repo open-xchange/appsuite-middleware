@@ -61,7 +61,7 @@ import com.openexchange.dovecot.doveadm.client.internal.HttpDoveAdmEndpointManag
 import com.openexchange.java.Strings;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.rest.client.endpointpool.EndpointManagerFactory;
-import com.openexchange.rest.client.httpclient.HttpClientConfigProvider;
+import com.openexchange.rest.client.httpclient.SpecificHttpClientConfigProvider;
 import com.openexchange.rest.client.httpclient.HttpClientService;
 import com.openexchange.version.VersionService;
 
@@ -124,7 +124,7 @@ public class DoveAdmClientActivator extends HousekeepingActivator {
 
         // Initialize HTTP client config for the different doveadm calls
         for (HttpDoveAdmCall call : HttpDoveAdmCall.values()) {
-            registerService(HttpClientConfigProvider.class, new DoveAdmHttpClientConfig(this, call));
+            registerService(SpecificHttpClientConfigProvider.class, new DoveAdmHttpClientConfig(this, call));
         }
 
         // Initialize client to Dovecot REST interface

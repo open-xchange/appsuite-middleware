@@ -54,16 +54,16 @@ import static com.openexchange.java.Autoboxing.i;
 import java.io.IOException;
 import java.util.Locale;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.StatusLine;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
@@ -133,7 +133,7 @@ public class SipgateSMSService implements SMSServiceSPI {
         }
 
         try {
-            CloseableHttpClient client = getHttpClient();
+            HttpClient client = getHttpClient();
             for (int i = 0; i < recipients.length; i++) {
                 JSONObject jsonObject = new JSONObject(3);
                 jsonObject.put("smsId", "s0");
@@ -154,10 +154,10 @@ public class SipgateSMSService implements SMSServiceSPI {
         return sb.toString();
     }
 
-    private void sendMessage(CloseableHttpClient client, String username, String password, JSONObject message) throws OXException {
+    private void sendMessage(HttpClient client, String username, String password, JSONObject message) throws OXException {
         HttpPost request = new HttpPost(URI);
         request.setEntity(new InputStreamEntity(new JSONInputStream(message, Charsets.UTF_8_NAME), -1L, ContentType.APPLICATION_JSON));
-        CloseableHttpResponse response = null;
+        HttpResponse response = null;
 
         HttpContext context = new BasicHttpContext();
         {
@@ -187,8 +187,8 @@ public class SipgateSMSService implements SMSServiceSPI {
         }
     }
 
-    private CloseableHttpClient getHttpClient() throws OXException {
-        return services.getServiceSafe(HttpClientService.class).getHttpClient("sipgate").getCloseableHttpClient();
+    private HttpClient getHttpClient() throws OXException {
+        return services.getServiceSafe(HttpClientService.class).getHttpClient("sipgate").getHttpClient();
     }
 
 }

@@ -57,7 +57,7 @@ import com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService;
 import com.openexchange.microsoft.graph.onedrive.impl.MicrosoftGraphDriveServiceImpl;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.rest.client.httpclient.DefaultHttpClientConfigProvider;
-import com.openexchange.rest.client.httpclient.HttpClientConfigProvider;
+import com.openexchange.rest.client.httpclient.SpecificHttpClientConfigProvider;
 import com.openexchange.rest.client.httpclient.HttpClientService;
 
 /**
@@ -85,6 +85,6 @@ public class MicrosoftGraphAPIActivator extends HousekeepingActivator {
         MicrosoftGraphAPI microsoftGraphAPI = new MicrosoftGraphAPI(this);
         registerService(MicrosoftGraphContactsService.class, new MicrosoftGraphContactsServiceImpl(microsoftGraphAPI.contacts()));
         registerService(MicrosoftGraphDriveService.class, new MicrosoftGraphDriveServiceImpl(microsoftGraphAPI.drive()));
-        registerService(HttpClientConfigProvider.class, new DefaultHttpClientConfigProvider(CLIENT_NAME, "Open-Xchange Microsoft Graph Client"));
+        registerService(SpecificHttpClientConfigProvider.class, new DefaultHttpClientConfigProvider(CLIENT_NAME, "Open-Xchange Microsoft Graph Client"));
     }
 }

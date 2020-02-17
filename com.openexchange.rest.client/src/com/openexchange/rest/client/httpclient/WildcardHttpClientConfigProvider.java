@@ -50,22 +50,23 @@
 package com.openexchange.rest.client.httpclient;
 
 import com.openexchange.annotation.NonNull;
-import com.openexchange.config.Interests;
 
 /**
- * {@link GenericHttpClientConfigProvider}
+ * {@link WildcardHttpClientConfigProvider} - A provider for a concrete HTTP configuration using a wild-card expression to determine the
+ * associated client.
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.4
  */
-public interface GenericHttpClientConfigProvider extends HttpClientBuilderModifier {
+public interface WildcardHttpClientConfigProvider extends HttpClientConfigProvider {
 
     /**
-     * Provides a pattern as {@link String} that can be used to determine if a specific
+     * Provides a wild-card expression as {@link String} that can be used to determine if a specific
      * client identifier can be used to generate a configuration.
-     * In other words, the pattern is used to identify the correct provider.
+     * <p>
+     * In other words, the wild-card expression is used to identify the correct provider.
      *
-     * @return A pattern to match client identifier, never <code>null</code>. Pattern should be a simple regex,
+     * @return A wild-card expression to match client identifier, never <code>null</code>. Expression should be a simple wild-card,
      *         like e.g. <code>myRegex-id-?</code> for matching one specific character or <code>myRegex*</code> for multiple
      *         characters followed.
      */
@@ -77,26 +78,13 @@ public interface GenericHttpClientConfigProvider extends HttpClientBuilderModifi
      * <p>
      * This method is for implementations that needs to set values based on additional properties.
      * If no adjustments needs to be performed, the implementor <b>MUST</b> not change anything.
-     * 
+     *
      * @param clientId The actual HTTP client identifier
      * @param config The configuration to adjust
      * @return The {@link HttpBasicConfig}
      */
     default HttpBasicConfig configureHttpBasicConfig(@SuppressWarnings("unused") String clientId, HttpBasicConfig config) {
         return config;
-    }
-
-    /**
-     * Get the additional interests a modifier can have regarding
-     * configuration and properties.
-     * <p>
-     * Note: It is always supposed that each modifier will have
-     * interests in {@link HttpClientProperty#PREFIX}
-     *
-     * @return Additional interests, <code>null</code> per default
-     */
-    default Interests getAdditionalInterests() {
-        return null;
     }
 
 }

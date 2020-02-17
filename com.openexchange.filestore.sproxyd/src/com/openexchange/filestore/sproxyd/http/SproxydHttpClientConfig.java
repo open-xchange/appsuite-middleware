@@ -58,7 +58,7 @@ import com.openexchange.config.Interests;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.utils.PropertyNameBuilder;
 import com.openexchange.rest.client.httpclient.AbstractHttpClientModifer;
-import com.openexchange.rest.client.httpclient.GenericHttpClientConfigProvider;
+import com.openexchange.rest.client.httpclient.WildcardHttpClientConfigProvider;
 import com.openexchange.rest.client.httpclient.HttpBasicConfig;
 import com.openexchange.server.ServiceLookup;
 
@@ -68,17 +68,18 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.4
  */
-public class SproxydHttpClientConfig extends AbstractHttpClientModifer implements GenericHttpClientConfigProvider {
+public class SproxydHttpClientConfig extends AbstractHttpClientModifer implements WildcardHttpClientConfigProvider {
 
     private static final int DEF_READ_TIMEOUT = 15000;
     private static final int DEF_CON_TIMEOUT = 5000;
     private static final int DEF_MAX_CONNECTIONS_PER_HOST = 100;
     private static final int DEF_MAX_CONNECTIONS = 100;
-    private ServiceLookup serviceLookup;
+
+    private final ServiceLookup serviceLookup;
 
     /**
      * Initializes a new {@link SproxydHttpClientConfig}.
-     * 
+     *
      * @param serviceLookup The {@link ServiceLookup}
      */
     public SproxydHttpClientConfig(ServiceLookup serviceLookup) {
@@ -108,7 +109,7 @@ public class SproxydHttpClientConfig extends AbstractHttpClientModifer implement
     }
 
     /**
-     * Get the {@link HttpBasicConfig} from the configuration 
+     * Get the {@link HttpBasicConfig} from the configuration
      *
      * @param clientId The client id
      * @param config The {@link HttpBasicConfig}

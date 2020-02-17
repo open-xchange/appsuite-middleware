@@ -88,7 +88,7 @@ import com.openexchange.pns.PushNotificationService;
 import com.openexchange.pns.PushNotificationTransport;
 import com.openexchange.pns.PushSubscriptionRegistry;
 import com.openexchange.pns.transport.apn.ApnOptionsProvider;
-import com.openexchange.rest.client.httpclient.HttpClientConfigProvider;
+import com.openexchange.rest.client.httpclient.SpecificHttpClientConfigProvider;
 import com.openexchange.rest.client.httpclient.HttpClientService;
 import com.openexchange.version.VersionService;
 import com.openexchange.webdav.protocol.helpers.PropertyMixin;
@@ -143,7 +143,7 @@ public class DAVPushActivator extends HousekeepingActivator implements Reloadabl
             /*
              * register new HTTP client configuration
              */
-            registerService(HttpClientConfigProvider.class, new DavHttpClientConfiguration(getService(VersionService.class)));
+            registerService(SpecificHttpClientConfigProvider.class, new DavHttpClientConfiguration(getService(VersionService.class)));
         } catch (Exception e) {
             getLogger(DAVPushActivator.class).error("error starting {}", context.getBundle(), e);
             throw e;

@@ -66,7 +66,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.rest.client.httpclient.HttpClientConfigProvider;
+import com.openexchange.rest.client.httpclient.SpecificHttpClientConfigProvider;
 import com.openexchange.rest.client.httpclient.HttpClientService;
 import com.openexchange.version.VersionService;
 
@@ -102,7 +102,7 @@ public class ICalCalendarProviderActivator extends HousekeepingActivator {
 
             registerService(CalendarProvider.class, new BasicICalCalendarProvider());
             registerService(Reloadable.class, new ICalCalendarProviderReloadable());
-            registerService(HttpClientConfigProvider.class, new IcalCalendarHttpProperties(this));
+            registerService(SpecificHttpClientConfigProvider.class, new IcalCalendarHttpProperties(this));
         } catch (Exception e) {
             getLogger(ICalCalendarProviderActivator.class).error("error starting {}", context.getBundle(), e);
             throw e;

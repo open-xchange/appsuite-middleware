@@ -49,6 +49,7 @@
 
 package com.openexchange.dav.push.http;
 
+import java.util.Optional;
 import com.openexchange.rest.client.httpclient.DefaultHttpClientConfigProvider;
 import com.openexchange.rest.client.httpclient.HttpBasicConfig;
 import com.openexchange.version.VersionService;
@@ -68,11 +69,11 @@ public class DavHttpClientConfiguration extends DefaultHttpClientConfigProvider 
 
     /**
      * Initializes a new {@link DavHttpClientConfiguration}.
-     * 
+     *
      * @param versionService <code>null</code> or the {@link VersionService}
      */
     public DavHttpClientConfiguration(VersionService versionService) {
-        super(HTTP_CLIENT_ID, "OX DAV-Push Gateway Client v", versionService);
+        super(HTTP_CLIENT_ID, "OX DAV-Push Gateway Client v", Optional.ofNullable(versionService));
     }
 
     @Override
