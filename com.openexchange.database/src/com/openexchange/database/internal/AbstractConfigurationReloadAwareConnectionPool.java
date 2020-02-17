@@ -58,14 +58,14 @@ import com.openexchange.pooling.PoolImplData;
 import com.openexchange.pooling.PooledData;
 
 /**
- * {@link AbstractConfigurationListener} - Bridge between {@link ConnectionPool}s and the reloadable
+ * {@link AbstractConfigurationReloadAwareConnectionPool} - Bridge between {@link ConnectionPool}s and the reloadable
  * from {@link ConfigurationListener}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @param <T> The Class of the data to be processed by the converters
  * @since v7.10.1
  */
-public abstract class AbstractConfigurationListener<T> extends ConnectionPool implements ConfigurationListener {
+public abstract class AbstractConfigurationReloadAwareConnectionPool<T> extends ConnectionPool implements ConfigurationListener {
 
     private final int poolId;
     private final Function<T, String> urlConverter;
@@ -73,7 +73,7 @@ public abstract class AbstractConfigurationListener<T> extends ConnectionPool im
     private final Function<T, PoolConfig> poolConfigConverter;
 
     /**
-     * Initializes a new {@link AbstractConfigurationListener}.
+     * Initializes a new {@link AbstractConfigurationReloadAwareConnectionPool}.
      *
      * @param poolId The pool identifier
      * @param data The initial data to feed the converters with
@@ -81,7 +81,7 @@ public abstract class AbstractConfigurationListener<T> extends ConnectionPool im
      * @param connectionArgumentsConverter Converter to get connection arguments' {@link Properties}
      * @param poolConfigConverter Converter to get {@link PoolConfig}
      */
-    protected AbstractConfigurationListener(int poolId, T data, Function<T, String> urlConverter, Function<T, Properties> connectionArgumentsConverter, Function<T, PoolConfig> poolConfigConverter) {
+    protected AbstractConfigurationReloadAwareConnectionPool(int poolId, T data, Function<T, String> urlConverter, Function<T, Properties> connectionArgumentsConverter, Function<T, PoolConfig> poolConfigConverter) {
         super(urlConverter.apply(data), connectionArgumentsConverter.apply(data), poolConfigConverter.apply(data));
         this.poolId = poolId;
         this.urlConverter = urlConverter;

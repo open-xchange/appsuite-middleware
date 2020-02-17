@@ -303,7 +303,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                 LOG.trace("Creating object.");
                 final T pooled;
                 try {
-                    pooled = lifecycle.create();
+                    pooled = createPooledObject();
                     brokenCreate.set(false);
                 } catch (Exception e) {
                     brokenCreate.set(true);
@@ -358,6 +358,16 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
             return retval.getPooled();
         }
         throw new PoolingException("Pool has been stopped.");
+    }
+    
+    /**
+     * Creates a new object of this pool
+     *
+     * @return The new object
+     * @throws Exception
+     */
+    protected T createPooledObject() throws Exception {
+        return lifecycle.create();
     }
 
     private static final long getWaitTime(final long startTime) {
@@ -597,5 +607,13 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
         }
         LOG.trace("Clean run ending. Time: {}", L(getWaitTime(startTime)));
     }
-
+    
+    /**
+     * Gets the maxActive
+     *
+     * @return The maxActive
+     */
+    public int getMaxActive() {
+        return maxActive;
+    }
 }
