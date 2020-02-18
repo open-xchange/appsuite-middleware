@@ -344,20 +344,21 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor extends Abst
     protected void initMetricsFor(String account, CircuitBreakerInfo info) {
         // @formatter:off
         Gauge.builder(METRICS_GROUP+METRICS_STATUS_NAME, () -> I(info.getCircuitBreaker().getState().ordinal()))
-                       .tags(METRICS_DIMENSION_PROTOCOL_KEY, METRICS_DIMENSION_PROTOCOL_VALUE, METRICS_DIMENSION_ACCOUNT_KEY, account)
-                       .register(Metrics.globalRegistry);
+            .tags(METRICS_DIMENSION_PROTOCOL_KEY, METRICS_DIMENSION_PROTOCOL_VALUE, METRICS_DIMENSION_ACCOUNT_KEY, account,
+                METRICS_STATUS_NAME, info.getCircuitBreaker().getState().toString())
+            .register(Metrics.globalRegistry);
 
         Gauge.builder(METRICS_GROUP+METRICS_FAILURE_THRESHOLD_NAME, () -> I(info.getCircuitBreaker().getFailureThreshold().numerator))
             .description(METRICS_FAILURE_THRESHOLD_DESC)
             .tags(METRICS_DIMENSION_PROTOCOL_KEY, METRICS_DIMENSION_PROTOCOL_VALUE, METRICS_DIMENSION_ACCOUNT_KEY, account)
             .register(Metrics.globalRegistry);
 
-       Gauge.builder(METRICS_GROUP+METRICS_SUCCESS_THRESHOLD_NAME, () -> I(info.getCircuitBreaker().getSuccessThreshold().numerator))
+        Gauge.builder(METRICS_GROUP+METRICS_SUCCESS_THRESHOLD_NAME, () -> I(info.getCircuitBreaker().getSuccessThreshold().numerator))
             .description(METRICS_SUCCESS_THRESHOLD_DESC)
             .tags(METRICS_DIMENSION_PROTOCOL_KEY, METRICS_DIMENSION_PROTOCOL_VALUE, METRICS_DIMENSION_ACCOUNT_KEY, account)
             .register(Metrics.globalRegistry);
 
-       Gauge.builder(METRICS_GROUP+METRICS_DELAY_MILLIS_NAME, () -> L(info.getCircuitBreaker().getDelay().toMillis()))
+        Gauge.builder(METRICS_GROUP+METRICS_DELAY_MILLIS_NAME, () -> L(info.getCircuitBreaker().getDelay().toMillis()))
             .description(METRICS_DELAY_MILLIS_DESC)
             .tags(METRICS_DIMENSION_PROTOCOL_KEY, METRICS_DIMENSION_PROTOCOL_VALUE, METRICS_DIMENSION_ACCOUNT_KEY, account)
             .register(Metrics.globalRegistry);

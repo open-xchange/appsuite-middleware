@@ -323,20 +323,21 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
     private void initMetrics() {
         // @formatter:off
         Gauge.builder(METRICS_GROUP+METRICS_STATUS_NAME, () -> getOptionalCircuitBreaker().map((info) -> I(info.getCircuitBreaker().getState().ordinal())).orElse((Integer) null))
-                       .tags(METRICS_DIMENSION_PROTOCOL_KEY, METRICS_DIMENSION_PROTOCOL_VALUE, METRICS_DIMENSION_ACCOUNT_KEY, METRICS_DIMENSION_ACCOUNT_VALUE)
-                       .register(Metrics.globalRegistry);
+            .tags(METRICS_DIMENSION_PROTOCOL_KEY, METRICS_DIMENSION_PROTOCOL_VALUE, METRICS_DIMENSION_ACCOUNT_KEY, METRICS_DIMENSION_ACCOUNT_VALUE,
+                METRICS_STATUS_NAME, getOptionalCircuitBreaker().map(info -> info.getCircuitBreaker().getState().toString()).orElse((String) null))
+            .register(Metrics.globalRegistry);
 
         Gauge.builder(METRICS_GROUP+METRICS_FAILURE_THRESHOLD_NAME, () -> getOptionalCircuitBreaker().map((info) -> I(info.getCircuitBreaker().getFailureThreshold().numerator)).orElse(I(0)))
             .description(METRICS_FAILURE_THRESHOLD_DESC)
             .tags(METRICS_DIMENSION_PROTOCOL_KEY, METRICS_DIMENSION_PROTOCOL_VALUE, METRICS_DIMENSION_ACCOUNT_KEY, METRICS_DIMENSION_ACCOUNT_VALUE)
             .register(Metrics.globalRegistry);
 
-       Gauge.builder(METRICS_GROUP+METRICS_SUCCESS_THRESHOLD_NAME, () -> getOptionalCircuitBreaker().map((info) -> I(info.getCircuitBreaker().getSuccessThreshold().numerator)).orElse(I(0)))
+        Gauge.builder(METRICS_GROUP+METRICS_SUCCESS_THRESHOLD_NAME, () -> getOptionalCircuitBreaker().map((info) -> I(info.getCircuitBreaker().getSuccessThreshold().numerator)).orElse(I(0)))
             .description(METRICS_SUCCESS_THRESHOLD_DESC)
             .tags(METRICS_DIMENSION_PROTOCOL_KEY, METRICS_DIMENSION_PROTOCOL_VALUE, METRICS_DIMENSION_ACCOUNT_KEY, METRICS_DIMENSION_ACCOUNT_VALUE)
             .register(Metrics.globalRegistry);
 
-       Gauge.builder(METRICS_GROUP+METRICS_DELAY_MILLIS_NAME, () -> getOptionalCircuitBreaker().map((info) -> L(info.getCircuitBreaker().getDelay().toMillis())).orElse(L(0l)))
+        Gauge.builder(METRICS_GROUP+METRICS_DELAY_MILLIS_NAME, () -> getOptionalCircuitBreaker().map((info) -> L(info.getCircuitBreaker().getDelay().toMillis())).orElse(L(0l)))
             .description(METRICS_DELAY_MILLIS_DESC)
             .tags(METRICS_DIMENSION_PROTOCOL_KEY, METRICS_DIMENSION_PROTOCOL_VALUE, METRICS_DIMENSION_ACCOUNT_KEY, METRICS_DIMENSION_ACCOUNT_VALUE)
             .register(Metrics.globalRegistry);
