@@ -679,6 +679,8 @@ public class DataExportServiceImpl implements DataExportService {
                     schedule(startDelay, stopDelay, currentTimeMillis, timerService);
                     return;
                 }
+
+                //dayOfWeekTimeRanges = null;
             }
 
             // Find follow-up day's time range
