@@ -51,9 +51,14 @@ package com.openexchange.gdpr.dataexport.internal;
 
 import static org.junit.Assert.assertTrue;
 import java.time.DayOfWeek;
+import java.util.List;
+import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.gdpr.dataexport.DataExportConfig;
+import com.openexchange.gdpr.dataexport.DayOfWeekTimeRanges;
+import com.openexchange.gdpr.dataexport.TimeOfTheDay;
+import com.openexchange.gdpr.dataexport.TimeRange;
 
 /**
  * {@link DataExportConfigTest}
@@ -90,6 +95,27 @@ public class DataExportConfigTest {
         assertTrue(config.getRangesOfTheWeek().containsKey(DayOfWeek.MONDAY));
         assertTrue(config.getRangesOfTheWeek().containsKey(DayOfWeek.TUESDAY));
         assertTrue(config.getRangesOfTheWeek().containsKey(DayOfWeek.WEDNESDAY));
+    }
+
+    @Test
+    public void testScheduleParser3() {
+        DataExportConfig config = DataExportConfig.builder().parse("Mon-Sun 0-6").build();
+
+        Map<DayOfWeek, DayOfWeekTimeRanges> rangesOfTheWeek = config.getRangesOfTheWeek();
+        for (DayOfWeek dayOfWeek : DayOfWeek.values()) {
+            assertTrue(rangesOfTheWeek.containsKey(dayOfWeek));
+        }
+
+        for (DayOfWeek dayOfWeek : DayOfWeek.values()) {
+            DayOfWeekTimeRanges dayOfWeekTimeRanges = rangesOfTheWeek.get(dayOfWeek);
+
+            List<TimeRange> ranges = dayOfWeekTimeRanges.getRanges();
+            assertTrue(ranges.size() == 1);
+
+            TimeRange timeRange = ranges.get(0);
+            assertTrue(timeRange.getStart().equals(new TimeOfTheDay(0, 0, 0)));
+            assertTrue(timeRange.getEnd().equals(new TimeOfTheDay(6, 0, 0)));
+        }
     }
 
 }
