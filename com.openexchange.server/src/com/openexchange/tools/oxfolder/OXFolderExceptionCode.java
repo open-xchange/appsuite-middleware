@@ -74,7 +74,7 @@ public enum OXFolderExceptionCode implements DisplayableOXExceptionCode  {
     /**
      * Folder \"%1$s\" not visible to user %2$s in context %3$s
      * <p>
-     * Either underlying user configuration or folder CATEGORY_PERMISSION_DENIED setting denies visibility of folder in question
+     * Either underlying user configuration or folder permission setting denies visibility of folder in question
      * </p>
      */
     NOT_VISIBLE("Folder \"%1$s\" not visible to user %2$s in context %3$s",
@@ -98,7 +98,7 @@ public enum OXFolderExceptionCode implements DisplayableOXExceptionCode  {
     /**
      * User %1$s has no create-subfolder permission on folder %2$s in context %3$s
      * <p>
-     * Folder CATEGORY_PERMISSION_DENIED setting denies subfolder creation beneath folder in question
+     * Folder permission setting denies subfolder creation beneath folder in question
      * </p>
      */
     NO_CREATE_SUBFOLDER_PERMISSION("User %1$s has no create-subfolder permission on folder %2$s in context %3$s",
@@ -162,7 +162,7 @@ public enum OXFolderExceptionCode implements DisplayableOXExceptionCode  {
      */
     INVALID_MODULE("Parent folder %1$s does not allow module %2$s in context %3$s", OXFolderExceptionMessage.INVALID_MODULE_MSG, Category.CATEGORY_ERROR, 14),
     /**
-     * Only one admin CATEGORY_PERMISSION_DENIED is allowed on a private folder
+     * Only one admin permission is allowed on a private folder
      * <p>
      * Only one admin is allowed on a private folder
      * </p>
@@ -170,17 +170,17 @@ public enum OXFolderExceptionCode implements DisplayableOXExceptionCode  {
     ONLY_ONE_PRIVATE_FOLDER_ADMIN("Only one admin permission is allowed on a private folder",
         OXFolderExceptionMessage.ONLY_ONE_PRIVATE_FOLDER_ADMIN_MSG, Category.CATEGORY_ERROR, 15),
     /**
-     * A group must not hold admin CATEGORY_PERMISSION_DENIED on a private folder
+     * A group must not hold admin permission on a private folder
      * <p>
-     * No admin group CATEGORY_PERMISSION_DENIED is allowed on a private folder
+     * No admin group permission is allowed on a private folder
      * </p>
      */
     NO_PRIVATE_FOLDER_ADMIN_GROUP("A group must not hold admin permission on a private folder",
         OXFolderExceptionMessage.NO_PRIVATE_FOLDER_ADMIN_GROUP_MSG, Category.CATEGORY_ERROR, 16),
     /**
-     * Only folder owner may hold admin CATEGORY_PERMISSION_DENIED on a private folder
+     * Only folder owner may hold admin permission on a private folder
      * <p>
-     * Only folder owner may hold admin CATEGORY_PERMISSION_DENIED on a private folder
+     * Only folder owner may hold admin permission on a private folder
      * </p>
      */
     ONLY_PRIVATE_FOLDER_OWNER_ADMIN("Only folder owner may hold admin permission on a private folder",
@@ -326,9 +326,9 @@ public enum OXFolderExceptionCode implements DisplayableOXExceptionCode  {
      */
     FOLDER_COULD_NOT_BE_PUT_INTO_CACHE("Folder %1$s could not be put into cache in context %2$s", MESSAGE, Category.CATEGORY_ERROR, 36),
     /**
-     * Effective CATEGORY_PERMISSION_DENIED of folder %1$s could not be determined for user %2$s in context %3$s
+     * Effective permission of folder %1$s could not be determined for user %2$s in context %3$s
      * <p>
-     * User's effective CATEGORY_PERMISSION_DENIED on folder could not be determined
+     * User's effective permission on folder could not be determined
      * </p>
      */
     NO_EFFECTIVE_PERMISSION("Effective permission of folder %1$s could not be determined for user %2$s in context %3$s",
@@ -419,7 +419,7 @@ public enum OXFolderExceptionCode implements DisplayableOXExceptionCode  {
      */
     PARAMETER_MISMATCH("Parameter %1$s does not match JSON key %2$s", MESSAGE, Category.CATEGORY_ERROR, 60),
     /**
-     * Invalid CATEGORY_PERMISSION_DENIED values: fp=%1$s orp=%2$s owp=%3$s odp=%4$s
+     * Invalid permission values: fp=%1$s orp=%2$s owp=%3$s odp=%4$s
      */
     INVALID_PERMISSION("Invalid permission values: fp=%1$s orp=%2$s owp=%3$s odp=%4$s", MESSAGE, Category.CATEGORY_ERROR, 61),
     /**
