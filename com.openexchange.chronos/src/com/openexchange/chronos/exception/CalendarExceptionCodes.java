@@ -51,6 +51,7 @@ package com.openexchange.chronos.exception;
 
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.ACCOUNT_DISABLED_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.ACCOUNT_NOT_FOUND_MSG;
+import static com.openexchange.chronos.exception.CalendarExceptionMessages.ALARM_NOT_FOUND_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.ATTACHMENT_NOT_FOUND_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.ATTENDEE_NOT_FOUND_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.AUTH_FAILED_MSG;
@@ -156,6 +157,11 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      * <li>Event not found with sequence [id %1$s, sequence [id %2$d]</li>
      */
     EVENT_SEQUENCE_NOT_FOUND("Event not found with sequence [id %1$s, sequence [id %2$d]", EVENT_SEQUENCE_NOT_FOUND_MSG, Category.CATEGORY_USER_INPUT, 4048),
+    /**
+     * <li>The requested alarm was not found.</li>
+     * <li>Alarm not found [alarm %1$d, event %2$s]</li>
+     */
+    ALARM_NOT_FOUND("Alarm not found [alarm %1$d, event %2$s]", ALARM_NOT_FOUND_MSG, Category.CATEGORY_USER_INPUT, 4049),
     /**
      * <li>The operation could not be completed due to insufficient permissions.</li>
      * <li>Insufficient read permissions in folder [folder %1$s]</li>

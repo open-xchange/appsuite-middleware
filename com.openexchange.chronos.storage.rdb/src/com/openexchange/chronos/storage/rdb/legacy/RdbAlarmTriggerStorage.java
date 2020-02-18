@@ -148,11 +148,11 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
     }
 
     @Override
-    public List<AlarmTrigger> loadTriggers(int userId, Date until) throws OXException {
+    public List<AlarmTrigger> loadTriggers(int userId, Date from, Date until) throws OXException {
         Connection connection = null;
         try {
             connection = dbProvider.getReadConnection(context);
-            return selectTriggers(connection, context.getContextId(), userId, until);
+            return selectTriggers(connection, context.getContextId(), userId, from, until);
         } catch (SQLException e) {
             throw asOXException(e);
         } finally {
@@ -177,13 +177,15 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
         return Collections.emptySet();
     }
 
-    private List<AlarmTrigger> selectTriggers(Connection connection, int contextID, int userID, Date until) throws SQLException, OXException {
+    private List<AlarmTrigger> selectTriggers(Connection connection, int contextID, int userID, Date from, Date until) throws SQLException, OXException {
         List<AlarmTrigger> triggers = new ArrayList<AlarmTrigger>();
         String sql = new StringBuilder()
             .append("SELECT r.object_id,r.target_id,r.alarm,r.folder,r.recurrence,p.reminder ")
             .append("FROM reminder AS r JOIN prg_dates_members AS p ON r.target_id=p.object_id AND r.userid=p.member_uid AND r.cid=p.cid ")
             .append("WHERE r.cid=? AND r.userid=?")
-            .append(null != until ? " AND r.alarm<?" : "").append("AND r.module=?")
+            .append(null != until ? " AND r.alarm<?" : "")
+            .append(null != from ? " AND (r.recurrence=0 OR r.alarm>=?)" : "")
+            .append("AND r.module=?")
         .toString();
         RecurrenceService recurrenceService = Services.getService(RecurrenceService.class);
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
@@ -192,6 +194,9 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
             stmt.setInt(parameterIndex++, userID);
             if (null != until) {
                 stmt.setTimestamp(parameterIndex++, new Timestamp(until.getTime()));
+            }
+            if (null != from) {
+                stmt.setTimestamp(parameterIndex++, new Timestamp(from.getTime()));
             }
             stmt.setInt(parameterIndex++, REMINDER_MODULE);
             try (ResultSet resultSet = logExecuteQuery(stmt)) {

@@ -1186,8 +1186,9 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
      * @throws OXException
      */
     protected List<AlarmTrigger> getAlarmTriggersInternal(Set<String> actions) throws OXException {
-        Date until = parameters.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
-        return getAlarmHelper().getAlarmTriggers(until, actions);
+        Date rangeFrom = parameters.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
+        Date rangeUntil = parameters.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
+        return getAlarmHelper().getAlarmTriggers(rangeFrom, rangeUntil, actions);
     }
 
     /**

@@ -67,6 +67,8 @@ public class CalendarExceptionMessages implements LocalizableStrings {
 
     public static final String ATTENDEE_NOT_FOUND_MSG = "The requested participant was not found.";
 
+    public static final String ALARM_NOT_FOUND_MSG = "The requested alarm was not found.";
+
     public static final String ACCOUNT_NOT_FOUND_MSG = "The requested calendar account was not found.";
 
     public static final String PROVIDER_NOT_AVAILABLE_MSG = "The calendar provider \"%1$s\" is not available.";

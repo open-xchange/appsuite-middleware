@@ -62,7 +62,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
@@ -283,8 +282,17 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
 
     @Override
     public List<AlarmTrigger> getAlarmTriggers(Set<String> actions) throws OXException {
-        Date until = parameters.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
-        return removeInaccessible(getAlarmHelper().getAlarmTriggers(until, actions));
+        Date rangeUntil = parameters.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
+        Date rangeFrom = parameters.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
+        return getAlarmHelper().getAlarmTriggers(rangeFrom, rangeUntil, actions, (storage, trigger) -> {
+            try {
+                Contact contact = getBirthdayContact(trigger.getEventId());
+                return null == trigger.getRecurrenceId() ? eventConverter.getSeriesMaster(contact) : eventConverter.getOccurrence(contact, trigger.getRecurrenceId());
+            } catch (OXException e) {
+                LOG.warn("Error getting birthday event {} referenced by alarm trigger", trigger.getEventId(), e);
+                return null;
+            }
+        });
     }
 
     @Override
@@ -499,46 +507,6 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
             SearchIterators.close(searchIterator);
         }
         return contacts;
-    }
-
-    /**
-     * Removes those alarm triggers from the supplied collection where the targeted birthday event no longer exists, to ensure that the
-     * triggers are still valid.
-     * <p/>
-     * In case an inaccessible birthday event is referenced, the corresponding trigger, and any configured alarms for that birthday event
-     * are cleaned up implicitly.
-     *
-     * @param alarmTriggers The alarm triggers to remove inaccessible ones from
-     * @return The passed collection, with the inaccessible triggers removed
-     */
-    private List<AlarmTrigger> removeInaccessible(List<AlarmTrigger> alarmTriggers) {
-        if (null == alarmTriggers || alarmTriggers.isEmpty()) {
-            return alarmTriggers;
-        }
-        List<EventID> eventIds = new ArrayList<EventID>(alarmTriggers.size());
-        for (AlarmTrigger alarmTrigger : alarmTriggers) {
-            eventIds.add(new EventID(alarmTrigger.getFolder(), alarmTrigger.getEventId()));
-        }
-        Set<String> accessibleEventIds;
-        try {
-            accessibleEventIds = getBirthdayContacts(eventIds).keySet();
-        } catch (OXException e) {
-            LOG.warn("Error checking for inaccessible alarm triggers", e);
-            return alarmTriggers;
-        }
-        for (Iterator<AlarmTrigger> iterator = alarmTriggers.iterator(); iterator.hasNext();) {
-            String eventId = iterator.next().getEventId();
-            try {
-                if (false == accessibleEventIds.contains(eventId)) {
-                    getAlarmHelper().deleteAlarms(eventId);
-                    iterator.remove();
-                    LOG.info("Removed inaccessible alarm for event {} in account {}.", eventId, account);
-                }
-            } catch (OXException e) {
-                LOG.warn("Error removing inaccessible alarm for event {} in account {}", eventId, account);
-            }
-        }
-        return alarmTriggers;
     }
 
     private AlarmHelper getAlarmHelper() {
