@@ -680,7 +680,7 @@ public class DataExportServiceImpl implements DataExportService {
                     return;
                 }
 
-                //dayOfWeekTimeRanges = null;
+                dayOfWeekTimeRanges = null;
             }
 
             // Find follow-up day's time range
