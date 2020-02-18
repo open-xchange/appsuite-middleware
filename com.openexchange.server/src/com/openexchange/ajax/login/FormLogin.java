@@ -84,11 +84,13 @@ public class FormLogin implements LoginRequestHandler {
     }
 
     @Override
-    public void handleRequest(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    public void handleRequest(HttpServletRequest req, HttpServletResponse resp, LoginRequestContext requestContext) throws IOException {
         try {
             doFormLogin(req, resp);
+            requestContext.getMetricProvider().recordSuccess();
         } catch (OXException e) {
             LoginTools.useErrorPageTemplateOrSendException(e, conf.getErrorPageTemplate(), req, resp);
+            requestContext.getMetricProvider().recordException(e);
         }
     }
 

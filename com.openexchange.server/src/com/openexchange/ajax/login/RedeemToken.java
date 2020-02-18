@@ -90,20 +90,25 @@ public class RedeemToken implements LoginRequestHandler {
     }
 
     @Override
-    public void handleRequest(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    public void handleRequest(HttpServletRequest req, HttpServletResponse resp, LoginRequestContext requestContext) throws IOException {
         try {
-            doRedeemToken(req, resp);
+            doRedeemToken(req, resp, requestContext);
+            if(requestContext.getMetricProvider().isStateUnknown()) {
+               requestContext.getMetricProvider().recordSuccess();
+            }
         } catch (OXException e) {
             LoginTools.useErrorPageTemplateOrSendException(e, conf.getErrorPageTemplate(), req, resp);
+            requestContext.getMetricProvider().recordException(e);
         }
     }
 
-    private void doRedeemToken(HttpServletRequest req, HttpServletResponse resp) throws OXException, IOException {
+    private void doRedeemToken(HttpServletRequest req, HttpServletResponse resp, LoginRequestContext requestContext) throws OXException, IOException {
         // Parse token and app-secret
         String token = LoginTools.parseToken(req);
         String appSecret = LoginTools.parseAppSecret(req);
         if (null == token || null == appSecret) {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            //TODO-1030: What metric tag should be used here?
             return;
         }
         Tools.disableCaching(resp);
@@ -121,6 +126,7 @@ public class RedeemToken implements LoginRequestHandler {
             session = service.redeemToken(token, appSecret, client, authId, hash, clientIp, userAgent);
         } catch (OXException e) {
             LoginServlet.logAndSendException(resp, e);
+            requestContext.getMetricProvider().recordException(e);
             return;
         }
         req.getSession().setAttribute(Constants.HTTP_SESSION_ATTR_AUTHENTICATED, Boolean.TRUE);
@@ -132,15 +138,18 @@ public class RedeemToken implements LoginRequestHandler {
             if (!context.isEnabled() || !user.isMailEnabled()) {
                 LOG.info("Either context {} or user {} not enabled", Integer.valueOf(context.getContextId()), Integer.valueOf(user.getId()));
                 resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                requestContext.getMetricProvider().recordHTTPStatus(HttpServletResponse.SC_FORBIDDEN);
                 return;
             }
         } catch (OXException e) {
             LOG.info("Couldn't resolve context/user by identifier: {}/{}", Integer.valueOf(session.getContextId()), Integer.valueOf(session.getUserId()), e);
             resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+            requestContext.getMetricProvider().recordException(e);
             return;
         } catch (Exception e) {
             LOG.info("Unexpected error occurred during login", e);
             resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+            requestContext.getMetricProvider().recordHTTPStatus(HttpServletResponse.SC_FORBIDDEN);
             return;
         }
         // Write cookie accordingly
@@ -160,6 +169,7 @@ public class RedeemToken implements LoginRequestHandler {
             } catch (JSONException e) {
                 LOG.info("", e);
                 resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                requestContext.getMetricProvider().recordHTTPStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             }
         } else {
             StringBuilder sb = new StringBuilder(redirectUrl).append("&session=").append(session.getSessionID());

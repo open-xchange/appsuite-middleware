@@ -60,6 +60,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.http.HttpStatus;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -176,12 +177,13 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
      * @param resp The associated HTTP response
      * @param login The login closure to invoke
      * @param conf The login configuration
+     * @param requestContext The request's context
      * @return <code>true</code> if an auto-login should proceed afterwards; otherwise <code>false</code>
      * @throws IOException If an I/O error occurs
      * @throws OXException If an Open-Xchange error occurs
      */
-    protected boolean loginOperation(HttpServletRequest req, HttpServletResponse resp, LoginClosure login, LoginConfiguration conf) throws IOException, OXException {
-        return loginOperation(req, resp, login, null, conf);
+    protected boolean loginOperation(HttpServletRequest req, HttpServletResponse resp, LoginClosure login, LoginConfiguration conf, LoginRequestContext requestContext) throws IOException, OXException {
+        return loginOperation(req, resp, login, null, conf, requestContext);
     }
 
     /**
@@ -193,11 +195,12 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
      * @param resp The associated HTTP response
      * @param login The login closure to invoke
      * @param conf The login configuration
+     * @param requestContext The request's context
      * @return <code>true</code> if an auto-login should proceed afterwards; otherwise <code>false</code>
      * @throws IOException If an I/O error occurs
      * @throws OXException If an Open-Xchange error occurs
      */
-    protected boolean loginOperation(HttpServletRequest req, HttpServletResponse resp, LoginClosure login, LoginCookiesSetter cookiesSetter, LoginConfiguration conf) throws IOException, OXException {
+    protected boolean loginOperation(HttpServletRequest req, HttpServletResponse resp, LoginClosure login, LoginCookiesSetter cookiesSetter, LoginConfiguration conf, LoginRequestContext requestContext) throws IOException, OXException {
         Tools.disableCaching(resp);
         resp.setContentType(LoginServlet.CONTENTTYPE_JAVASCRIPT);
 
@@ -365,6 +368,7 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
                 LOG.error("", e);
             }
             response.setException(e);
+            requestContext.getMetricProvider().recordException(e);
         } catch (JSONException e) {
             final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
             LOG.error("", oje);
@@ -410,10 +414,13 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
             }
             LOG.error(LoginServlet.RESPONSE_ERROR, e);
             LoginServlet.sendError(resp);
+            requestContext.getMetricProvider().recordHTTPStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR);
             return false;
         } finally {
             ThreadLocalSessionHolder.getInstance().clear();
         }
+
+        requestContext.getMetricProvider().recordSuccess();
         return false;
     }
 

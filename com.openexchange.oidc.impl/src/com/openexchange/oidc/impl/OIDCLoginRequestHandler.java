@@ -56,6 +56,7 @@ import org.json.JSONException;
 import org.json.JSONWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.ajax.login.LoginRequestContext;
 import com.openexchange.ajax.login.LoginRequestHandler;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.OXException;
@@ -89,7 +90,7 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
     }
 
     @Override
-    public void handleRequest(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public void handleRequest(HttpServletRequest request, HttpServletResponse response, LoginRequestContext requestContext) throws IOException {
         boolean respondWithJson = false;
         try {
             respondWithJson = respondWithJson(request);
@@ -98,18 +99,22 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
             LOG.error(e.getLocalizedMessage(), e);
             if (respondWithJson) {
                 try {
+                    requestContext.getMetricProvider().recordException(e);
                     ResponseWriter.writeException(e, new JSONWriter(
                         response.getWriter()).object());
                 } catch (JSONException jsonError) {
                     LOG.error(e.getLocalizedMessage(), jsonError);
                     response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                    requestContext.getMetricProvider().recordHTTPStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 }
             } else {
                 response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                requestContext.getMetricProvider().recordHTTPStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             }
         } catch (JSONException e) {
             LOG.error(e.getLocalizedMessage(), e);
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            requestContext.getMetricProvider().recordHTTPStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }
 

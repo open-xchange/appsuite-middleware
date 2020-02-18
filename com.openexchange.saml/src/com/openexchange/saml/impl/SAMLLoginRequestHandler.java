@@ -64,6 +64,7 @@ import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.SessionUtility;
 import com.openexchange.ajax.login.HashCalculator;
 import com.openexchange.ajax.login.LoginConfiguration;
+import com.openexchange.ajax.login.LoginRequestContext;
 import com.openexchange.ajax.login.LoginRequestHandler;
 import com.openexchange.ajax.login.LoginTools;
 import com.openexchange.authentication.Authenticated;
@@ -122,22 +123,26 @@ public class SAMLLoginRequestHandler implements LoginRequestHandler {
         this.services = services;
     }
 
-
     @Override
-    public void handleRequest(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    public void handleRequest(HttpServletRequest req, HttpServletResponse resp, LoginRequestContext requestContext) throws IOException {
         LoginConfiguration loginConfiguration = loginConfigurationLookup.getLoginConfiguration();
         try {
-            doSsoLogin(req, resp, loginConfiguration);
+            doSsoLogin(req, resp, loginConfiguration,requestContext);
+            if(requestContext.getMetricProvider().isStateUnknown()) {
+               requestContext.getMetricProvider().recordSuccess();
+            }
         } catch (OXException e) {
             LoginTools.useErrorPageTemplateOrSendException(e, loginConfiguration.getErrorPageTemplate(), req, resp);
+            requestContext.getMetricProvider().recordException(e);
         }
     }
 
-    private void doSsoLogin(HttpServletRequest req, HttpServletResponse resp, LoginConfiguration conf) throws OXException, IOException {
+    private void doSsoLogin(HttpServletRequest req, HttpServletResponse resp, LoginConfiguration conf, LoginRequestContext requestContext) throws OXException, IOException {
         String token = req.getParameter(SAMLLoginTools.PARAM_TOKEN);
         if (Strings.isEmpty(token)) {
             LOG.warn("SAML login requested without session reservation token: {}", token);
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            requestContext.getMetricProvider().recordHTTPStatus(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
 
@@ -148,6 +153,7 @@ public class SAMLLoginRequestHandler implements LoginRequestHandler {
             if (null == reservation) {
                 LOG.warn("SAML login requested with invalid or expired session reservation token: {}", token);
                 backend.getExceptionHandler().handleSessionReservationExpired(req, resp, token);
+                requestContext.getMetricProvider().record("INVALID_RESERVATION_TOKEN");
                 return;
             }
         }
@@ -159,9 +165,11 @@ public class SAMLLoginRequestHandler implements LoginRequestHandler {
             if (!context.isEnabled()) {
                 LOG.info("Declining SAML login for user {} of context {}: Context is disabled.", I(reservation.getUserId()), I(reservation.getContextId()));
                 backend.getExceptionHandler().handleContextDisabled(req, resp, reservation.getContextId());
+                requestContext.getMetricProvider().record("CONTEXT_DISABLED");
                 return;
             }
         } catch (OXException e) {
+            requestContext.getMetricProvider().recordException(e);
             if (ContextExceptionCodes.UPDATE.equals(e) || ContextExceptionCodes.UPDATE_NEEDED.equals(e)) {
                 LOG.info("Declining SAML login for user {} of context {}: Running or pending update tasks.", I(reservation.getUserId()), I(reservation.getContextId()));
                 backend.getExceptionHandler().handleUpdateTasksRunningOrPending(req, resp, reservation.getContextId());
@@ -177,6 +185,7 @@ public class SAMLLoginRequestHandler implements LoginRequestHandler {
             if (!user.isMailEnabled()) {
                 LOG.info("Declining SAML login for user {} of context {}: User is disabled.", I(reservation.getUserId()), I(reservation.getContextId()));
                 backend.getExceptionHandler().handleUserDisabled(req, resp, reservation.getUserId(), reservation.getContextId());
+                requestContext.getMetricProvider().record("USER_DISABLED");
                 return;
             }
         }

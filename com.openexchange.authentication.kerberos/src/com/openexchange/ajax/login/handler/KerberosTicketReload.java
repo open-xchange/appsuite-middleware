@@ -65,6 +65,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.fields.Header;
+import com.openexchange.ajax.login.LoginRequestContext;
 import com.openexchange.ajax.login.LoginRequestHandler;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.exception.OXException;
@@ -104,7 +105,7 @@ public final class KerberosTicketReload extends SessionServlet implements LoginR
     }
 
     @Override
-    public void handleRequest(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    public void handleRequest(HttpServletRequest req, HttpServletResponse resp, LoginRequestContext requestContext) throws IOException {
         try {
             doAuthHeaderTicketReload(req, resp);
         } catch (OXException e) {

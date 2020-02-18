@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,62 +49,29 @@
 
 package com.openexchange.ajax.login;
 
-import static com.openexchange.ajax.AJAXServlet.ACTION_AUTOLOGIN;
-import java.io.IOException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import org.apache.http.HttpStatus;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-import com.openexchange.ajax.LoginServlet;
-import com.openexchange.tools.servlet.http.Tools;
-
 /**
- * {@link HasAutoLogin} implements the hasAutoLogin action.
+ * {@link LoginRequestContext} - The context of a login request
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
- * @since 7.6.2
+ * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
+ * @since v7.10.4
  */
-public final class HasAutoLogin implements LoginRequestHandler {
+public class LoginRequestContext {
 
-    /** Simple class to delay initialization until needed */
-    private static class LoggerHolder {
-        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(HasAutoLogin.class);
-    }
-
-    private static final HasAutoLogin INSTANCE = new HasAutoLogin();
+    private final MetricProvider metricProvider;
 
     /**
-     * Gets the instance
-     *
-     * @return The instance
+     * Initializes a new {@link LoginRequestContext}.
      */
-    public static HasAutoLogin getInstance() {
-        return INSTANCE;
+    public LoginRequestContext() {
+        this.metricProvider = new MetricProvider();
     }
 
-    // ------------------------------------------------------------------------------------------------------------------------------------
-
-    private HasAutoLogin() {
-        super();
+    /**
+     * Gets the {@link MetricProvider} of the request context
+     *
+     * @return The {@link MetricProvider}
+     */
+    public MetricProvider getMetricProvider() {
+        return metricProvider;
     }
-
-    @Override
-    public void handleRequest(HttpServletRequest req, HttpServletResponse resp, LoginRequestContext requestContext) throws IOException {
-        Tools.disableCaching(resp);
-        resp.setStatus(HttpServletResponse.SC_OK);
-        resp.setContentType(LoginServlet.CONTENTTYPE_JAVASCRIPT);
-        try {
-            final JSONObject json = new JSONObject(2);
-            json.put(ACTION_AUTOLOGIN, true); // Keeping this for compatibility...
-            json.write(resp.getWriter());
-            requestContext.getMetricProvider().recordSuccess();
-        } catch (JSONException e) {
-            LoggerHolder.LOG.error(LoginServlet.RESPONSE_ERROR, e);
-            LoginServlet.sendError(resp);
-            requestContext.getMetricProvider().recordHTTPStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR);
-        }
-    }
-
 }

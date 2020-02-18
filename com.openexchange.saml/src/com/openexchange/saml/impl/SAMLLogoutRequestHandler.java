@@ -58,6 +58,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.SessionUtility;
+import com.openexchange.ajax.login.LoginRequestContext;
 import com.openexchange.ajax.login.LoginRequestHandler;
 import com.openexchange.exception.OXException;
 import com.openexchange.login.internal.LoginPerformer;
@@ -87,7 +88,7 @@ public class SAMLLogoutRequestHandler implements LoginRequestHandler {
     }
 
     @Override
-    public void handleRequest(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws IOException {
+    public void handleRequest(HttpServletRequest httpRequest, HttpServletResponse httpResponse, LoginRequestContext requestContext) throws IOException {
         try {
             Session session = null;
             String sessionId = httpRequest.getParameter(LoginServlet.PARAMETER_SESSION);
@@ -111,9 +112,10 @@ public class SAMLLogoutRequestHandler implements LoginRequestHandler {
             }
         } catch (OXException e) {
             LOG.error("Logout failed", e);
+            requestContext.getMetricProvider().recordException(e);
         }
 
         backend.finishLogout(httpRequest, httpResponse);
+        requestContext.getMetricProvider().recordSuccess();
     }
-
 }

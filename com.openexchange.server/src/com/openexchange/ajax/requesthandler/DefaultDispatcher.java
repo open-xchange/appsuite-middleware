@@ -256,7 +256,6 @@ public class DefaultDispatcher implements Dispatcher {
                         } catch (InterruptedException e) {
                             // Keep interrupted state
                             Thread.currentThread().interrupt();
-                            recordRequest(requestData.getModule(), requestData.getAction(), AjaxExceptionCodes.UNEXPECTED_ERROR.getCategory().toString(), System.currentTimeMillis() - startTime);
                             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, "Interrupted");
                         } catch (EnqueuedException e) {
                             // Result not computed in time

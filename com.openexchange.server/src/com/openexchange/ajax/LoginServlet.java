@@ -61,6 +61,7 @@ import java.util.EnumSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -82,6 +83,7 @@ import com.openexchange.ajax.login.HasAutoLogin;
 import com.openexchange.ajax.login.HashCalculator;
 import com.openexchange.ajax.login.Login;
 import com.openexchange.ajax.login.LoginConfiguration;
+import com.openexchange.ajax.login.LoginRequestContext;
 import com.openexchange.ajax.login.LoginRequestHandler;
 import com.openexchange.ajax.login.LoginTools;
 import com.openexchange.ajax.login.RampUp;
@@ -92,6 +94,7 @@ import com.openexchange.ajax.login.TokenLogin;
 import com.openexchange.ajax.login.Tokens;
 import com.openexchange.ajax.writer.LoginWriter;
 import com.openexchange.ajax.writer.ResponseWriter;
+import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.configuration.CookieHashSource;
 import com.openexchange.configuration.ServerConfig;
@@ -124,6 +127,8 @@ import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.User;
+import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.Timer;
 
 /**
  * Servlet doing the login and logout stuff.
@@ -321,37 +326,43 @@ public class LoginServlet extends AJAXServlet {
         handlerMap.put(ACTION_STORE, new LoginRequestHandler() {
 
             @Override
-            public void handleRequest(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
+            public void handleRequest(HttpServletRequest req, HttpServletResponse resp, LoginRequestContext requestContext) throws IOException {
                 LOG.debug("Deprecated action 'store' called by {}.", req.getParameter(PARAMETER_SESSION));
                 resp.setHeader("Deprecation", "version=\"v7.10.3\"");
                 resp.setStatus(200);
                 resp.flushBuffer();
+                if(requestContext != null) {
+                    requestContext.getMetricProvider().recordSuccess();
+                }
             }
         });
         handlerMap.put(ACTION_REFRESH_SECRET, new LoginRequestHandler() {
 
             @Override
-            public void handleRequest(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
+            public void handleRequest(HttpServletRequest req, HttpServletResponse resp, LoginRequestContext requestContext) throws IOException {
                 try {
                     doRefreshSecret(req, resp);
                 } catch (OXException e) {
                     logAndSendException(resp, e);
+                    requestContext.getMetricProvider().recordException(e);
                 } catch (JSONException e) {
                     log(RESPONSE_ERROR, e);
                     sendError(resp);
+                    requestContext.getMetricProvider().recordHTTPStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 }
             }
         });
         handlerMap.put(ACTION_LOGOUT, new LoginRequestHandler() {
 
             @Override
-            public void handleRequest(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
+            public void handleRequest(HttpServletRequest req, HttpServletResponse resp, LoginRequestContext requestContext) throws IOException {
                 // The magic spell to disable caching
                 Tools.disableCaching(resp);
                 resp.setContentType(CONTENTTYPE_JAVASCRIPT);
                 final String sessionId = req.getParameter(PARAMETER_SESSION);
                 if (sessionId == null) {
                     resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+                    requestContext.getMetricProvider().recordHTTPStatus(HttpServletResponse.SC_BAD_REQUEST);
                     return;
                 }
 
@@ -360,6 +371,7 @@ public class LoginServlet extends AJAXServlet {
                     if (session == null) {
                         LOG.info("Status code 403 (FORBIDDEN): No such session.");
                         resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                        requestContext.getMetricProvider().recordHTTPStatus(HttpServletResponse.SC_FORBIDDEN);
                         return;
                     }
 
@@ -380,6 +392,7 @@ public class LoginServlet extends AJAXServlet {
                     if (secret == null || !session.getSecret().equals(secret)) {
                         LOG.info("Status code 403 (FORBIDDEN): Missing or non-matching secret.");
                         resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                        requestContext.getMetricProvider().recordHTTPStatus(HttpServletResponse.SC_FORBIDDEN);
                         return;
                     }
 
@@ -389,22 +402,27 @@ public class LoginServlet extends AJAXServlet {
                     // Drop relevant cookies
                     SessionUtility.removeOXCookies(session, req, resp);
                     SessionUtility.removeJSESSIONID(req, resp);
+
+                    requestContext.getMetricProvider().recordSuccess();
                 } catch (OXException e) {
+                    requestContext.getMetricProvider().recordException(e);
                     if (SessionUtility.isSessionExpiredError(e)) {
                         LOG.info("Status code 403 (FORBIDDEN): Session expired.");
                         resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                        requestContext.getMetricProvider().recordHTTPStatus(HttpServletResponse.SC_FORBIDDEN);
                         return;
                     }
                     LOG.error("Logout failed", e);
                 } catch (RuntimeException e) {
                     LOG.error("Logout failed", e);
+                    requestContext.getMetricProvider().recordUnknown();
                 }
             }
         });
         handlerMap.put(ACTION_REDIRECT, new LoginRequestHandler() {
 
             @Override
-            public void handleRequest(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
+            public void handleRequest(HttpServletRequest req, HttpServletResponse resp, LoginRequestContext requestContext) throws IOException {
                 final LoginConfiguration conf = confReference.get();
                 // The magic spell to disable caching
                 Tools.disableCaching(resp);
@@ -417,6 +435,7 @@ public class LoginServlet extends AJAXServlet {
                     final String msg = "Random token is disable (as per default since considered as insecure). See \"com.openexchange.ajax.login.randomToken\" in 'login.properties' file.";
                     LOG.warn(msg, new Throwable(msg));
                     resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+                    requestContext.getMetricProvider().recordHTTPStatus(HttpServletResponse.SC_BAD_REQUEST);
                     return;
                 }
                 final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
@@ -424,6 +443,7 @@ public class LoginServlet extends AJAXServlet {
                     final OXException se = ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class.getName());
                     LOG.error("", se);
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                    requestContext.getMetricProvider().recordHTTPStatus(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 }
                 final Session session;
@@ -455,6 +475,7 @@ public class LoginServlet extends AJAXServlet {
                                 }
                             } catch (OXException e) {
                                 LOG.error("", e);
+                                requestContext.getMetricProvider().recordException(e);
                                 resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                                 return;
                             }
@@ -472,6 +493,7 @@ public class LoginServlet extends AJAXServlet {
                         LOG.info("No session could be found for random token: {}", randomToken);
                     }
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                    requestContext.getMetricProvider().recordHTTPStatus(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 }
                 // Add session log properties
@@ -486,15 +508,18 @@ public class LoginServlet extends AJAXServlet {
                     if (!context.isEnabled() || !user.isMailEnabled()) {
                         LOG.info("Status code 403 (FORBIDDEN): Either context {} or user {} not enabled", I(context.getContextId()), I(user.getId()));
                         resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                        requestContext.getMetricProvider().recordHTTPStatus(HttpServletResponse.SC_FORBIDDEN);
                         return;
                     }
                 } catch (UndeclaredThrowableException e) {
                     LOG.info("Status code 403 (FORBIDDEN): Unexpected error occurred during login: {}", e.getMessage());
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                    requestContext.getMetricProvider().recordHTTPStatus(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 } catch (OXException e) {
                     LOG.info("Status code 403 (FORBIDDEN): Couldn't resolve context/user by identifier: {}/{}", I(session.getContextId()), I(session.getUserId()));
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                    requestContext.getMetricProvider().recordException(e);
                     return;
                 }
 
@@ -513,23 +538,26 @@ public class LoginServlet extends AJAXServlet {
                 }
                 writeSecretCookie(req, resp, session, hash, req.isSecure(), req.getServerName(), conf);
                 resp.sendRedirect(LoginTools.generateRedirectURL(req.getParameter(LoginFields.UI_WEB_PATH_PARAM), session.getSessionID(), conf.getUiWebPath()));
+                requestContext.getMetricProvider().recordSuccess();
             }
         });
         handlerMap.put(ACTION_CHANGEIP, new LoginRequestHandler() {
 
             @Override
-            public void handleRequest(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
+            public void handleRequest(HttpServletRequest req, HttpServletResponse resp, LoginRequestContext requestContext) throws IOException {
                 final Response response = new Response();
                 Session session = null;
                 try {
                     final String sessionId = req.getParameter(PARAMETER_SESSION);
                     if (null == sessionId) {
                         LOG.info("Parameter \"{}\" not found for action {}", PARAMETER_SESSION, ACTION_CHANGEIP);
+                        requestContext.getMetricProvider().recordErrorCode(AjaxExceptionCodes.MISSING_PARAMETER);
                         throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_SESSION);
                     }
                     final String newIP = req.getParameter(LoginFields.CLIENT_IP_PARAM);
                     if (null == newIP) {
                         LOG.info("Parameter \"{}\" not found for action {}", LoginFields.CLIENT_IP_PARAM, ACTION_CHANGEIP);
+                        requestContext.getMetricProvider().recordErrorCode(AjaxExceptionCodes.MISSING_PARAMETER);
                         throw AjaxExceptionCodes.MISSING_PARAMETER.create(LoginFields.CLIENT_IP_PARAM);
                     }
                     final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class, true);
@@ -545,6 +573,7 @@ public class LoginServlet extends AJAXServlet {
                             if (null != secret) {
                                 LOG.info("Session secret is different. Given secret \"{}\" differs from secret in session \"{}\".", secret, session.getSecret());
                             }
+                            requestContext.getMetricProvider().recordErrorCode(SessionExceptionCodes.SESSION_EXPIRED);
                             throw SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID());
                         }
                         final String oldIP = session.getLocalIp();
@@ -556,6 +585,7 @@ public class LoginServlet extends AJAXServlet {
                         response.setData("1");
                     } else {
                         LOG.info("There is no session associated with session identifier: {}", sessionId);
+                        requestContext.getMetricProvider().recordErrorCode(SessionExceptionCodes.SESSION_EXPIRED);
                         throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
                     }
                 } catch (OXException e) {
@@ -570,13 +600,18 @@ public class LoginServlet extends AJAXServlet {
                 } catch (JSONException e) {
                     log(RESPONSE_ERROR, e);
                     sendError(resp);
+                    requestContext.getMetricProvider().recordHTTPStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                }
+
+                if(requestContext.getMetricProvider().isStateUnknown()) {
+                    requestContext.getMetricProvider().recordSuccess();
                 }
             }
         });
         handlerMap.put(ACTION_REDEEM, new LoginRequestHandler() {
 
             @Override
-            public void handleRequest(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
+            public void handleRequest(HttpServletRequest req, HttpServletResponse resp, LoginRequestContext requestContext) throws IOException {
                 final LoginConfiguration conf = confReference.get();
                 // The magic spell to disable caching
                 Tools.disableCaching(resp);
@@ -589,6 +624,7 @@ public class LoginServlet extends AJAXServlet {
                     final String msg = "Random token is disable (as per default since considered as insecure). See \"com.openexchange.ajax.login.randomToken\" in 'login.properties' file.";
                     LOG.warn(msg, new Throwable(msg));
                     resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+                    requestContext.getMetricProvider().recordHTTPStatus(HttpServletResponse.SC_BAD_REQUEST);
                     return;
                 }
                 final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
@@ -596,6 +632,7 @@ public class LoginServlet extends AJAXServlet {
                     final OXException se = ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class.getName());
                     LOG.error("", se);
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                    requestContext.getMetricProvider().recordHTTPStatus(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 }
                 final Session session;
@@ -628,6 +665,7 @@ public class LoginServlet extends AJAXServlet {
                             } catch (OXException e) {
                                 LOG.error("", e);
                                 resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                                requestContext.getMetricProvider().recordException(e);
                                 return;
                             }
                         }
@@ -644,6 +682,7 @@ public class LoginServlet extends AJAXServlet {
                         LOG.info("No session could be found for random token: {}", randomToken);
                     }
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                    requestContext.getMetricProvider().recordHTTPStatus(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 }
                 // Add session log properties
@@ -658,15 +697,18 @@ public class LoginServlet extends AJAXServlet {
                     if (!context.isEnabled() || !user.isMailEnabled()) {
                         LOG.info("Status code 403 (FORBIDDEN): Either context {} or user {} not enabled", I(context.getContextId()), I(user.getId()));
                         resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                        requestContext.getMetricProvider().recordHTTPStatus(HttpServletResponse.SC_FORBIDDEN);
                         return;
                     }
                 } catch (UndeclaredThrowableException e) {
                     LOG.info("Status code 403 (FORBIDDEN): Unexpected error occurred during login: {}", e.getMessage());
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                    requestContext.getMetricProvider().recordHTTPStatus(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 } catch (OXException e) {
                     LOG.info("Status code 403 (FORBIDDEN): Couldn't resolve context/user by identifier: {}/{}", I(session.getContextId()), I(session.getUserId()));
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                    requestContext.getMetricProvider().recordException(e);
                     return;
                 }
 
@@ -691,6 +733,9 @@ public class LoginServlet extends AJAXServlet {
                     // Append "config/modules"
                     appendModules(session, json, req);
                     json.write(resp.getWriter());
+                    if(requestContext.getMetricProvider().isStateUnknown()) {
+                        requestContext.getMetricProvider().recordSuccess();
+                    }
                 } catch (JSONException e) {
                     log(RESPONSE_ERROR, e);
                     sendError(resp);
@@ -764,6 +809,7 @@ public class LoginServlet extends AJAXServlet {
 
     @Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
+        final long startTime = System.currentTimeMillis();
         try {
             Tools.checkNonExistence(req, PARAMETER_PASSWORD);
         } catch (OXException oxException) {
@@ -774,13 +820,21 @@ public class LoginServlet extends AJAXServlet {
         try {
             final String action = req.getParameter(PARAMETER_ACTION);
             final String subPath = getServletSpecificURI(req);
-
+            final LoginRequestContext requestContext = new LoginRequestContext();
             if (null != subPath && subPath.startsWith("/httpAuth")) {
-                handlerMap.get("/httpAuth").handleRequest(req, resp);
+                try {
+                    handlerMap.get("/httpAuth").handleRequest(req, resp, requestContext);
+                }
+                catch(IOException e) {
+                    requestContext.getMetricProvider().recordErrorCode(LoginExceptionCodes.UNKNOWN);
+                    throw e;
+                }
+
             } else {
                 // Regular login handling
-                doJSONAuth(req, resp, action);
+                doJSONAuth(req, resp, action, requestContext);
             }
+            recordLoginRequest(action, requestContext.getMetricProvider().getStatus(), System.currentTimeMillis() - startTime);
         } catch (RateLimitedException e) {
             e.send(resp);
         } finally {
@@ -788,18 +842,40 @@ public class LoginServlet extends AJAXServlet {
         }
     }
 
-    private void doJSONAuth(final HttpServletRequest req, final HttpServletResponse resp, final String action) throws IOException {
+    /**
+     * Records a login request
+     *
+     * @param action The action to record
+     * @param status The status of the login request
+     * @param durationMillis The duration of the request in milliseconds
+     */
+    private static void recordLoginRequest(String action, String status, long durationMillis) {
+        if(action != null && status != null) {
+            Timer timer = Timer.builder("appsuite.httpapi.requests")
+                .tags("module", "login", "action", action, "status", status)
+                .description("HTTP API request times")
+                .publishPercentileHistogram()
+                .register(Metrics.globalRegistry);
+            timer.record(durationMillis, TimeUnit.MILLISECONDS);
+        }
+    }
+
+    private void doJSONAuth(final HttpServletRequest req, final HttpServletResponse resp, final String action, LoginRequestContext requestContext) throws IOException {
         if (null == action) {
-            logAndSendException(resp, AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_ACTION));
+            final OXException exp = AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_ACTION);
+            logAndSendException(resp, exp);
+            requestContext.getMetricProvider().recordException(exp);
             return;
         }
 
         LoginRequestHandler handler = handlerMap.get(action);
         if (null == handler) {
-            logAndSendException(resp, AjaxExceptionCodes.UNKNOWN_ACTION.create(action));
+            final OXException exp = AjaxExceptionCodes.UNKNOWN_ACTION.create(action);
+            logAndSendException(resp, exp);
+            requestContext.getMetricProvider().recordException(exp);
             return;
         }
-        handler.handleRequest(req, resp);
+        handler.handleRequest(req, resp, requestContext);
     }
 
     /**
