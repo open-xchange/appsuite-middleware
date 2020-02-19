@@ -770,9 +770,9 @@ index d56a04f3e1f..1214fd369fe 100644
 --- a/hazelcast.properties
 +++ b/hazelcast.properties
 @@ -44,10 +44,11 @@ com.openexchange.hazelcast.group.name=
-
-# Specifies which mechanism is used to discover other backend nodes in the
-# cluster. Possible values are "empty" (no discovery for single-node setups),
+ 
+ # Specifies which mechanism is used to discover other backend nodes in the
+ # cluster. Possible values are "empty" (no discovery for single-node setups),
 -# "static" (fixed set of cluster member nodes) or "multicast" (automatic
 -# discovery of other nodes via multicast). Defaults to "empty". Depending on
 -# the specified value, further configuration might be needed, see "Networking"
@@ -782,9 +782,9 @@ index d56a04f3e1f..1214fd369fe 100644
 +# domain names to the most recent set of IP addresses of all service nodes.
 +# Defaults to "empty". Depending on the specified value, further configuration
 +# might be needed; see "Networking" section below.
-com.openexchange.hazelcast.network.join=empty
-
-# Configures a comma-separated list of IP addresses / hostnames of possible
+ com.openexchange.hazelcast.network.join=empty
+ 
+ # Configures a comma-separated list of IP addresses / hostnames of possible
 EOF
   fi
   ox_add_property com.openexchange.hazelcast.network.join.dns.domainNames "" /opt/open-xchange/etc/hazelcast.properties
