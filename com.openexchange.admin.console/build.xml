@@ -19,8 +19,14 @@
         <foreach list="${contextLinks}" target="createContextLink" param="linkName" />
         <property name="userLinks" value="deleteuser,changeuser,listuser,listuserfilestores,listusersbyaliasdomain,existsuser,creategroup,deletegroup,changegroup,listgroup,createresource,deleteresource,changeresource,moveuserfilestore,movecontextfilestore2user,moveuserfilestore2context,movemasterfilestore2user,moveuserfilestore2master,listresource,getaccesscombinationnameforuser,getusercapabilities,changeaccessglobal" />
         <foreach list="${userLinks}" target="createUserLink" param="linkName" />
+    	<property name="reasonLinks" value="listreason,deletereason" />
+    	<foreach list="${reasonLinks}" target="createReasonLink" param="linkName" />
     </target>
 
+	<target name="createReasonLink">
+	        <symlink resource="${prefix}/${sbinDir}/createreason" link="${destDir}/${prefix}/${sbinDir}/${linkName}" overwrite="true" />
+	</target>
+	
     <target name="createContextLink">
         <symlink resource="${prefix}/${sbinDir}/createcontext" link="${destDir}/${prefix}/${sbinDir}/${linkName}" overwrite="true" />
     </target>
