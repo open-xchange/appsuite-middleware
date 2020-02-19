@@ -351,19 +351,28 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
             DateTimeData startDate = DateTimeUtil.getDateTime(null, cal.getTimeInMillis());
             DateTimeData endDate = DateTimeUtil.incrementDateTimeData(startDate, TimeUnit.HOURS.toMillis(1));
 
-            EventData toCreate = EventFactory.createSingleEventWithSingleAlarm(getCalendaruser(), "testFloatingEventAlarmTriggerTime", startDate, endDate, AlarmFactory.createAlarm("-PT3D", RelatedEnum.START), folderId);
+            EventData toCreate = EventFactory.createSingleEventWithSingleAlarm(getCalendaruser(), "testFloatingEventAlarmTriggerTime", startDate, endDate, AlarmFactory.createAlarm("-PT4D", RelatedEnum.START), folderId);
             EventData event = eventManager.createEvent(toCreate, true);
             getAndAssertAlarms(event, 1, folderId);
 
+            // Determine effective start date of event in user's timezone
+            Date localStartDate;
+            {
+                DateTimeData localDateTimeData = new DateTimeData();
+                localDateTimeData.setTzid(tmpTimeZone.getID());
+                localDateTimeData.setValue(startDate.getValue());
+                localStartDate = DateTimeUtil.parseDateTime(localDateTimeData);
+            }
+
             // Check if next trigger is at correct time
             Calendar from = Calendar.getInstance(UTC);
-            from.setTimeInMillis(cal.getTimeInMillis());
+            from.setTimeInMillis(localStartDate.getTime());
             from.add(Calendar.DAY_OF_MONTH, -5);
 
             List<AlarmTrigger> triggers = getAndCheckAlarmTrigger(from.getTimeInMillis() + TimeUnit.DAYS.toMillis(10), null, 1, event.getId());
             Calendar instance = Calendar.getInstance(TimeZone.getTimeZone("Europe/Berlin"));
-            instance.setTime(cal.getTime());
-            instance.add(Calendar.DAY_OF_MONTH, -3);
+            instance.setTime(localStartDate);
+            instance.add(Calendar.DAY_OF_MONTH, -4);
 
             long triggerTime = instance.getTimeInMillis();
             AlarmTrigger trigger = findTrigger(event.getId(), triggers);

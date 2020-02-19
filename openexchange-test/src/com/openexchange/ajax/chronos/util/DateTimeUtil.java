@@ -190,6 +190,8 @@ public final class DateTimeUtil {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
         if (time.getTzid() != null) {
             dateFormat.setTimeZone(TimeZone.getTimeZone(time.getTzid()));
+        } else {
+            dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         }
         return dateFormat.parse(time.getValue());
     }
@@ -230,6 +232,8 @@ public final class DateTimeUtil {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
         if (timezoneId != null) {
             dateFormat.setTimeZone(TimeZone.getTimeZone(timezoneId));
+        } else {
+            dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         }
         result.setValue(dateFormat.format(date));
 
@@ -248,6 +252,8 @@ public final class DateTimeUtil {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
         if (data.getTzid() != null) {
             dateFormat.setTimeZone(TimeZone.getTimeZone(data.getTzid()));
+        } else {
+            dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         }
         Date date = dateFormat.parse(data.getValue());
         return getDateTime(data.getTzid(), date.getTime() + millis);
