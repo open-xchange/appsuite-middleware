@@ -50,6 +50,7 @@
 package com.openexchange.mail.compose;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.annotation.SingletonService;
@@ -115,9 +116,10 @@ public interface CompositionSpaceStorageService {
      *
      * @param session The session providing user information
      * @param compositionSpaceDesc The description providing the changes to apply
+     * @param optionalOriginalSpace The optional original compositon space that is supposed to be updated
      * @return The composition space after changes are applied
      */
-    CompositionSpace updateCompositionSpace(Session session, CompositionSpaceDescription compositionSpaceDesc) throws OXException;
+    CompositionSpace updateCompositionSpace(Session session, CompositionSpaceDescription compositionSpaceDesc, Optional<CompositionSpace> optionalOriginalSpace) throws OXException;
 
     /**
      * Closes a composition space, which effectively removes it from the storage.
