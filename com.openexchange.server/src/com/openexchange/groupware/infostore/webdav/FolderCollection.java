@@ -92,6 +92,7 @@ import com.openexchange.webdav.protocol.WebdavLock;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
+import com.openexchange.webdav.protocol.WebdavProtocolException.Code;
 import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.helpers.AbstractCollection;
 
@@ -188,42 +189,33 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 
 	@Override
 	public WebdavResource move(final WebdavPath dest, final boolean noroot, final boolean overwrite) throws WebdavProtocolException {
-		final FolderCollection coll = (FolderCollection) factory.resolveCollection(dest);
-		if (coll.exists()) {
-			if (overwrite) {
-				loadFolder();
-				final ArrayList<OCLPermission> override = new ArrayList<OCLPermission>();
-				for(final OCLPermission perm : folder.getPermissions()) {
-					override.add(perm.deepClone());
-				}
-				coll.loadFolder();
-				coll.folder.setPermissions(override);
-				coll.save();
-			}
-			final WebdavResource moved = mergeTo(coll, true, overwrite);
-			delete();
-			return moved;
-		}
+        FolderCollection parentCollection = (FolderCollection) factory.resolveCollection(dest.parent());
+        if (false == parentCollection.exists()) {
+            throw WebdavProtocolException.Code.FOLDER_NOT_FOUND.create(getUrl(), HttpServletResponse.SC_CONFLICT, dest.parent());
+        }
+        WebdavResource destinationResource = factory.resolveResource(dest);
+        if (destinationResource.exists()) {
+            if (false == overwrite) {
+                Code code = destinationResource.isCollection() ? Code.DIRECTORY_ALREADY_EXISTS : Code.FILE_ALREADY_EXISTS;
+                throw code.create(getUrl(), HttpServletResponse.SC_PRECONDITION_FAILED, dest);
+            }
+            destinationResource.delete();
+        }
+
 		loadFolder();
-		final String name = dest.name();
-		final int parentId =  ((OXWebdavResource) coll.parent()).getId();
-
-
-        folder.setFolderName(name);
-		folder.setParentFolderID(parentId);
-
+        folder.setFolderName(dest.name());
+        folder.setParentFolderID(parentCollection.getId());
 
 		invalidate();
 		factory.invalidate(url, id, Type.COLLECTION);
 		factory.invalidate(dest, id, Type.COLLECTION);
-
 
 		url = dest;
 		save();
 		try {
 			lockHelper.deleteLocks();
 		} catch (OXException e) {
-			throw WebdavProtocolException.generalError(getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            throw WebdavProtocolException.generalError(e, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 		return this;
 	}
