@@ -74,9 +74,8 @@ import com.openexchange.pns.PushNotification;
 import com.openexchange.pns.PushSubscriptionRegistry;
 import com.turo.pushy.apns.ApnsClient;
 import com.turo.pushy.apns.ApnsPushNotification;
-import com.turo.pushy.apns.DeliveryPriority;
 import com.turo.pushy.apns.PushNotificationResponse;
-import com.turo.pushy.apns.PushType;
+import com.turo.pushy.apns.util.SimpleApnsPushNotification;
 import com.turo.pushy.apns.util.concurrent.PushNotificationFuture;
 
 /**
@@ -173,6 +172,9 @@ public class ApnsHttp2PushPerformer {
         if (messageObject instanceof JSONObject) {
             return toPayload((JSONObject) messageObject, deviceToken, topic);
         }
+        if (messageObject instanceof String) {
+            return new SimpleApnsPushNotification(deviceToken, topic, (String) messageObject);
+        }
         throw PushExceptionCodes.UNSUPPORTED_MESSAGE_CLASS.create(null == messageObject ? "null" : messageObject.getClass().getName());
     }
 
@@ -238,9 +240,9 @@ public class ApnsHttp2PushPerformer {
                     builder.withCustomField(key, obj.get(key));
                 }
             }
-        } catch (JSONException e) {}
-        builder.withPriority(DeliveryPriority.CONSERVE_POWER);
-        builder.pushType(PushType.BACKGROUND);
+        } catch (JSONException e) {
+            // will not happen
+        }
         return builder.build();
     }
 

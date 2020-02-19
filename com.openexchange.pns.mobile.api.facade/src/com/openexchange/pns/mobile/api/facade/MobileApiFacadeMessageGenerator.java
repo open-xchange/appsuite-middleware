@@ -49,19 +49,18 @@
 
 package com.openexchange.pns.mobile.api.facade;
 
-import java.util.Collection;
-import java.util.Collections;
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Map;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.pns.JsonMessage;
+import com.openexchange.java.Strings;
+import com.openexchange.pns.ApnsConstants;
 import com.openexchange.pns.KnownTransport;
 import com.openexchange.pns.Message;
 import com.openexchange.pns.PushExceptionCodes;
 import com.openexchange.pns.PushMessageGenerator;
 import com.openexchange.pns.PushNotification;
+import com.turo.pushy.apns.util.ApnsPayloadBuilder;
 
 /**
  * {@link MobileApiFacadeMessageGenerator} - The message generator for Mobile API Facade.
@@ -78,15 +77,17 @@ public class MobileApiFacadeMessageGenerator implements PushMessageGenerator {
     // ------------------------------------------------------------------------------------------------------------------------
 
     private final ClientConfig clientConfig;
+    private final ConfigViewFactory viewFactory;
 
     /**
      * Initializes a new {@link MobileApiFacadeMessageGenerator}.
      *
      * @param viewFactory The service to use
      */
-    public MobileApiFacadeMessageGenerator(ClientConfig clientConfig) {
+    public MobileApiFacadeMessageGenerator(ClientConfig clientConfig, ConfigViewFactory viewFactory) {
         super();
         this.clientConfig = clientConfig;
+        this.viewFactory = viewFactory;
     }
 
     @Override
@@ -125,16 +126,63 @@ public class MobileApiFacadeMessageGenerator implements PushMessageGenerator {
             };
         } else if (TRANSPORT_ID_APNS.equals(transportId)) {
             // Build APNS payload as expected by client
-
-            String topic = notification.getTopic();
-            Collection<Object> args;
-            // Default to wrap message data as a single JSON object
-            args = Collections.<Object> singleton(new JSONObject(notification.getMessageData()));
-
+            ApnsPayloadBuilder builder = new ApnsPayloadBuilder();
+            Map<String, Object> messageData = notification.getMessageData();
             try {
-                return new JsonMessage(new JSONObject(3).put("name", topic).put("args", new JSONArray(args)).put("namespace", DEFAULT_NAMESPACE));
-            } catch (JSONException e) {
-                throw PushExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+                String subject = MessageDataUtil.getSubject(messageData);
+                String displayName = MessageDataUtil.getDisplayName(messageData);
+                String senderAddress = MessageDataUtil.getSender(messageData);
+                String sender = displayName.length() == 0 ? senderAddress : displayName;
+                String folder = MessageDataUtil.getFolder(messageData);
+                String id = MessageDataUtil.getId(messageData);
+                String path = MessageDataUtil.getPath(messageData);
+                int unread = MessageDataUtil.getUnread(messageData);
+
+                if (Strings.isNotEmpty(subject) && Strings.isNotEmpty(sender)) {
+                    // Non-silent push
+                    StringBuilder sb = new StringBuilder(sender);
+                    sb.append("\n");
+                    sb.append(subject);
+                    String alertMessage = sb.toString();
+                    alertMessage = alertMessage.length() > ApnsConstants.APNS_MAX_ALERT_LENGTH ? alertMessage.substring(0, ApnsConstants.APNS_MAX_ALERT_LENGTH) : alertMessage;
+                    builder.setAlertTitle(subject);
+                    builder.setAlertBody(alertMessage);
+
+                    MobileApiFacadePushConfiguration config = MobileApiFacadePushConfiguration.getConfigFor(notification.getUserId(), notification.getContextId(), viewFactory);
+
+                    if (config.isApnBadgeEnabled() && unread >= 0) {
+                        builder.setBadgeNumber(I(unread));
+                    }
+
+                    if (config.isApnSoundEnabled()) {
+                        builder.setSound(config.getApnSoundFile());
+                    }
+
+                    builder.setCategoryName("new-message-category");
+                    builder.setContentAvailable(false);
+                } else {
+                    // Silent push
+                    builder.setContentAvailable(true);
+                }
+                if (Strings.isEmpty(path) && Strings.isNotEmpty(folder) && Strings.isNotEmpty(id)) {
+                    path = folder + "/" + id;
+                }
+                if (path.length() > 0) {
+                    builder.addCustomProperty("cid", path);
+                } else if (folder.length() > 0) {
+                    builder.addCustomProperty("folder", folder);
+                }
+                builder.addCustomProperty("namespace", DEFAULT_NAMESPACE);
+                return new Message<String>() {
+
+                    @Override
+                    public String getMessage() {
+                        return builder.buildWithMaximumLength(ApnsConstants.APNS_MAX_PAYLOAD_SIZE);
+                    }
+
+                };
+            } catch (Exception e) {
+                throw PushExceptionCodes.MESSAGE_GENERATION_FAILED.create(e, e.getMessage());
             }
         }
 
