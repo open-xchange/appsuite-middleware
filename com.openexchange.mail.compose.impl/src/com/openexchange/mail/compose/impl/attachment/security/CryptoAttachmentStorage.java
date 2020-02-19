@@ -115,7 +115,7 @@ public class CryptoAttachmentStorage extends AbstractCryptoAware implements Atta
     public Attachment getAttachment(UUID id, Session session) throws OXException {
         Attachment attachment = attachmentStorage.getAttachment(id, session);
         if (null != attachment) {
-            if (needsEncryption(session) || hasEncryptedContent(attachment.getCompositionSpaceId(), session)) {
+            if (hasEncryptedContent(attachment.getCompositionSpaceId(), session)) {
                 Optional<Key> optionalKey = getKeyFor(attachment.getCompositionSpaceId(), false, session);
                 if (!optionalKey.isPresent()) {
                     throw CompositionSpaceErrorCode.MISSING_KEY.create(UUIDs.getUnformattedString(attachment.getCompositionSpaceId()));
@@ -133,7 +133,7 @@ public class CryptoAttachmentStorage extends AbstractCryptoAware implements Atta
             return attachments;
         }
 
-        if (!needsEncryption(session) && !hasEncryptedContent(compositionSpaceId, session)) {
+        if (!hasEncryptedContent(compositionSpaceId, session)) {
             return attachments;
         }
 
@@ -158,7 +158,7 @@ public class CryptoAttachmentStorage extends AbstractCryptoAware implements Atta
             return sizeReturner;
         }
 
-        if (!needsEncryption(session) && !hasEncryptedContent(compositionSpaceId, session) ) {
+        if (!hasEncryptedContent(compositionSpaceId, session)) {
             return sizeReturner;
         }
 
@@ -179,7 +179,7 @@ public class CryptoAttachmentStorage extends AbstractCryptoAware implements Atta
 
     @Override
     public Attachment saveAttachment(InputStream input, AttachmentDescription attachment, SizeProvider sizeProvider, Session session) throws OXException {
-        if (false == needsEncryption(session)) {
+        if (!hasEncryptedContent(attachment.getCompositionSpaceId(), session)) {
             return attachmentStorage.saveAttachment(input, attachment, sizeProvider, session);
         }
 

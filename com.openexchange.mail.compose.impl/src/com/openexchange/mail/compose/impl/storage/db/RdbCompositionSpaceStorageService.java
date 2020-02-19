@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
@@ -220,7 +221,7 @@ public class RdbCompositionSpaceStorageService extends AbstractCompositionSpaceS
     }
 
     @Override
-    public CompositionSpace updateCompositionSpace(Session session, CompositionSpaceDescription compositionSpaceDesc) throws OXException {
+    public CompositionSpace updateCompositionSpace(Session session, CompositionSpaceDescription compositionSpaceDesc, Optional<CompositionSpace> optionalOriginalSpace) throws OXException {
         if (compositionSpaceDesc == null) {
             return null;
         }
