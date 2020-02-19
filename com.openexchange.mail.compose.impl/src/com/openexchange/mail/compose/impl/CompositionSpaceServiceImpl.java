@@ -1492,7 +1492,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                         // Add new attachments to composition space
                         MessageDescription md = new MessageDescription();
                         md.setAttachments(attachments);
-                        getStorageService().updateCompositionSpace(session, new CompositionSpaceDescription().setUuid(compositionSpaceId).setMessage(md).setLastModifiedDate(new Date(compositionSpace.getLastModified())));
+                        getStorageService().updateCompositionSpace(session, new CompositionSpaceDescription().setUuid(compositionSpaceId).setMessage(md).setLastModifiedDate(new Date(compositionSpace.getLastModified())), Optional.of(compositionSpace));
                         retry = false;
                     } catch (OXException e) {
                         if (!CompositionSpaceErrorCode.CONCURRENT_UPDATE.equals(e)) {
@@ -1608,7 +1608,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                     // Replace attachment in composition space
                     MessageDescription md = new MessageDescription();
                     md.setAttachments(attachments);
-                    getStorageService().updateCompositionSpace(session, new CompositionSpaceDescription().setUuid(compositionSpaceId).setMessage(md).setLastModifiedDate(new Date(compositionSpace.getLastModified())));
+                    getStorageService().updateCompositionSpace(session, new CompositionSpaceDescription().setUuid(compositionSpaceId).setMessage(md).setLastModifiedDate(new Date(compositionSpace.getLastModified())), Optional.of(compositionSpace));
                     retry = false;
                 } catch (OXException e) {
                     if (!CompositionSpaceErrorCode.CONCURRENT_UPDATE.equals(e)) {
@@ -1673,7 +1673,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                     // Add new attachments to composition space
                     MessageDescription md = new MessageDescription();
                     md.setAttachments(attachments);
-                    getStorageService().updateCompositionSpace(session, new CompositionSpaceDescription().setUuid(compositionSpaceId).setMessage(md).setLastModifiedDate(new Date(compositionSpace.getLastModified())));
+                    getStorageService().updateCompositionSpace(session, new CompositionSpaceDescription().setUuid(compositionSpaceId).setMessage(md).setLastModifiedDate(new Date(compositionSpace.getLastModified())), Optional.of(compositionSpace));
                     retry = false;
                 } catch (OXException e) {
                     if (!CompositionSpaceErrorCode.CONCURRENT_UPDATE.equals(e)) {
@@ -1738,7 +1738,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
 
                     // Add new attachments to composition space
                     MessageDescription md = new MessageDescription().setAttachments(attachments);
-                    getStorageService().updateCompositionSpace(session, new CompositionSpaceDescription().setUuid(compositionSpaceId).setMessage(md).setLastModifiedDate(new Date(compositionSpace.getLastModified())));
+                    getStorageService().updateCompositionSpace(session, new CompositionSpaceDescription().setUuid(compositionSpaceId).setMessage(md).setLastModifiedDate(new Date(compositionSpace.getLastModified())), Optional.of(compositionSpace));
                     retry = false;
                 } catch (OXException e) {
                     if (!CompositionSpaceErrorCode.CONCURRENT_UPDATE.equals(e)) {
@@ -1792,7 +1792,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
 
                     // Add new attachments to composition space
                     MessageDescription md = new MessageDescription().setAttachments(attachments);
-                    getStorageService().updateCompositionSpace(session, new CompositionSpaceDescription().setUuid(compositionSpaceId).setMessage(md).setLastModifiedDate(new Date(compositionSpace.getLastModified())));
+                    getStorageService().updateCompositionSpace(session, new CompositionSpaceDescription().setUuid(compositionSpaceId).setMessage(md).setLastModifiedDate(new Date(compositionSpace.getLastModified())), Optional.of(compositionSpace));
                     retry = false;
                 } catch (OXException e) {
                     if (!CompositionSpaceErrorCode.CONCURRENT_UPDATE.equals(e)) {
@@ -1853,7 +1853,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                 }
 
                 // Perform update
-                compositionSpace = getStorageService().updateCompositionSpace(session, new CompositionSpaceDescription().setUuid(compositionSpaceId).setMessage(md).setLastModifiedDate(new Date(compositionSpace.getLastModified())));
+                compositionSpace = getStorageService().updateCompositionSpace(session, new CompositionSpaceDescription().setUuid(compositionSpaceId).setMessage(md).setLastModifiedDate(new Date(compositionSpace.getLastModified())), Optional.of(compositionSpace));
                 retry = false;
 
                 // Update successfully performed... Check for orphaned attachments
@@ -1977,7 +1977,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                     // Add new attachments to composition space
                     MessageDescription md = new MessageDescription();
                     md.setAttachments(attachments);
-                    getStorageService().updateCompositionSpace(session, new CompositionSpaceDescription().setUuid(compositionSpaceId).setMessage(md).setLastModifiedDate(new Date(compositionSpace.getLastModified())));
+                    getStorageService().updateCompositionSpace(session, new CompositionSpaceDescription().setUuid(compositionSpaceId).setMessage(md).setLastModifiedDate(new Date(compositionSpace.getLastModified())), Optional.of(compositionSpace));
                     retry = false;
                 } catch (OXException e) {
                     if (!CompositionSpaceErrorCode.CONCURRENT_UPDATE.equals(e)) {
@@ -2062,7 +2062,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                     Collections.sort(attachments, AttachmentComparator.getInstance());
 
                     MessageDescription md = new MessageDescription().setAttachments(attachments);
-                    getStorageService().updateCompositionSpace(session, new CompositionSpaceDescription().setUuid(compositionSpaceId).setMessage(md).setLastModifiedDate(new Date(compositionSpace.getLastModified())));
+                    getStorageService().updateCompositionSpace(session, new CompositionSpaceDescription().setUuid(compositionSpaceId).setMessage(md).setLastModifiedDate(new Date(compositionSpace.getLastModified())), Optional.of(compositionSpace));
                     retry = false;
                 } catch (OXException e) {
                     if (CompositionSpaceErrorCode.CONCURRENT_UPDATE.equals(e)) {
@@ -2136,7 +2136,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
 
                 // Update composition space
                 MessageDescription md = new MessageDescription().setAttachments(attachments);
-                getStorageService().updateCompositionSpace(session, new CompositionSpaceDescription().setUuid(compositionSpaceId).setMessage(md).setLastModifiedDate(new Date(compositionSpace.getLastModified())));
+                getStorageService().updateCompositionSpace(session, new CompositionSpaceDescription().setUuid(compositionSpaceId).setMessage(md).setLastModifiedDate(new Date(compositionSpace.getLastModified())), Optional.of(compositionSpace));
                 retry = false;
             } catch (OXException e) {
                 if (!CompositionSpaceErrorCode.CONCURRENT_UPDATE.equals(e)) {
