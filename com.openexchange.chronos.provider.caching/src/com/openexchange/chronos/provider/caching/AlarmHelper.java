@@ -649,6 +649,15 @@ public class AlarmHelper {
         return count;
     }
 
+    /**
+     * Try and shift the trigger to a more recent occurrence if trigger time is before requested range as needed 
+     *
+     * @param storage The {@link CalendarStorage}
+     * @param trigger The {@link AlarmTrigger} to shift
+     * @param event The {@link Event}
+     * @param rangeFrom The lower (inclusive) boundary of the requested time range, or <code>null</code> if not limited
+     * @param rangeUntil The upper (exclusive) boundary of the requested time range, or <code>null</code> if not limited
+     */
     void shiftIntoRange(CalendarStorage storage, AlarmTrigger trigger, Event event, Date rangeFrom, Date rangeUntil) {
         Date triggerTime = new Date(l(trigger.getTime()));
         if (null != rangeFrom && rangeFrom.after(triggerTime) && isSeriesEvent(event) && false == isSeriesException(event) && null != event.getRecurrenceRule()) {
@@ -667,6 +676,14 @@ public class AlarmHelper {
         }
     }
 
+    /**
+     * Prepares new alarms for the given default alarms
+     *
+     * @param storage The initialized {@link CalendarStorage} to use 
+     * @param defaultAlarms The default alarms
+     * @return A list of new {@link Alarm}s
+     * @throws OXException
+     */
     private static List<Alarm> prepareNewAlarms(CalendarStorage storage, List<Alarm> defaultAlarms) throws OXException {
         List<Alarm> newAlarms = new ArrayList<Alarm>(defaultAlarms.size());
         for (Alarm alarm : defaultAlarms) {
