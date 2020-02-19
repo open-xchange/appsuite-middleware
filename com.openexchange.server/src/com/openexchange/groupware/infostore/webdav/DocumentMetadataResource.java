@@ -541,13 +541,15 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
                 throw WebdavProtocolException.Code.FOLDER_NOT_FOUND.create(getUrl(), HttpServletResponse.SC_CONFLICT, parent);
             }
 
-            final DocumentMetadataResource copy = (DocumentMetadataResource) factory.resolveResource(dest);
-            if (copy.exists()) {
+            WebdavResource destinationResource = factory.resolveResource(dest);
+            if (destinationResource.exists()) {
                 if (!overwrite) {
                     throw WebdavProtocolException.Code.FILE_ALREADY_EXISTS.create(getUrl(), HttpServletResponse.SC_PRECONDITION_FAILED, dest);
                 }
-                copy.delete();
+                destinationResource.delete();
             }
+
+            final DocumentMetadataResource copy = (DocumentMetadataResource) factory.resolveResource(dest);
             copyMetadata(copy);
             initDest(copy, name, coll.getId());
             copy.url = dest;
