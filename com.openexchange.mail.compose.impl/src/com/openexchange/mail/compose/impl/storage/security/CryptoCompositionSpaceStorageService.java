@@ -107,6 +107,7 @@ public class CryptoCompositionSpaceStorageService extends AbstractCryptoAware im
         }
         BITSET_BASE64.set('+');
         BITSET_BASE64.set('/');
+        BITSET_BASE64.set('='); // padding character
     }
 
 
@@ -222,13 +223,27 @@ public class CryptoCompositionSpaceStorageService extends AbstractCryptoAware im
             return false;
         }
 
-        for (int i = toCheck.length(); i-- > 0;) {
-            char ch = toCheck.charAt(i);
-            if (!BITSET_BASE64.get(ch)) {
+        {
+            /*-
+             * Plain checks:
+             * * Check that the length is a multiple of 4 characters
+             * * Check that every character is in the set A-Z, a-z, 0-9, +, / except for padding at the end which is 0, 1 or 2 '=' characters
+             */
+
+            int length = toCheck.length();
+            if (length % 4 != 0) {
                 return false;
+            }
+
+            for (int i = length; i-- > 0;) {
+                char ch = toCheck.charAt(i);
+                if (!BITSET_BASE64.get(ch)) {
+                    return false;
+                }
             }
         }
 
+        // Ultimately, check if base64 decodable
         try {
             java.util.Base64.getDecoder().decode(toCheck);
             return true;
