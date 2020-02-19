@@ -55,8 +55,10 @@ import com.openexchange.webdav.protocol.WebdavProtocolException;
 public class WebdavMkcolAction extends AbstractAction {
 
 	@Override
-    public void perform(final WebdavRequest req, final WebdavResponse res)
-			throws WebdavProtocolException {
+    public void perform(final WebdavRequest req, final WebdavResponse res) throws WebdavProtocolException {
+        if (req.hasBody()) {
+            throw WebdavProtocolException.generalError(req.getUrl(), HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
+        }
 		req.getCollection().create();
 		res.setStatus(HttpServletResponse.SC_CREATED);
 	}
