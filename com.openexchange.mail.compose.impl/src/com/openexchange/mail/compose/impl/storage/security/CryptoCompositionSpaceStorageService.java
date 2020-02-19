@@ -322,7 +322,9 @@ public class CryptoCompositionSpaceStorageService extends AbstractCryptoAware im
     public CompositionSpace updateCompositionSpace(Session session, CompositionSpaceDescription compositionSpaceDesc) throws OXException {
         if (!needsEncryption(session)) {
             // Un-Mark to have encrypted content
-            compositionSpaceDesc.getMessage().setContentEncrypted(false);
+            if (compositionSpaceDesc.getMessage().containsContent()) {
+                compositionSpaceDesc.getMessage().setContentEncrypted(false);
+            }
             return delegate.updateCompositionSpace(session, compositionSpaceDesc);
         }
 
