@@ -53,6 +53,7 @@ import java.security.Key;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
@@ -168,12 +169,12 @@ public abstract class AbstractCryptoAware {
      * @param compositionSpaceId The composition space identifier
      * @param createIfAbsent <code>true</code> to create a key if there is none; otherwise <code>false</code>
      * @param session The session
-     * @return The key
+     * @return The key or <code>null</code>; never <code>null</code> if <code>createIfAbsent</code> is <code>true</code>
      * @throws OXException If key cannot be returned
      */
-    protected Key getKeyFor(UUID compositionSpaceId, boolean createIfAbsent, Session session) throws OXException {
+    protected Optional<Key> getKeyFor(UUID compositionSpaceId, boolean createIfAbsent, Session session) throws OXException {
         CompositionSpaceKeyStorage keyStorage = keyStorageService.getKeyStorageFor(session);
-        return keyStorage.getKeyFor(compositionSpaceId, createIfAbsent, session);
+        return Optional.ofNullable(keyStorage.getKeyFor(compositionSpaceId, createIfAbsent, session));
     }
 
     /**
