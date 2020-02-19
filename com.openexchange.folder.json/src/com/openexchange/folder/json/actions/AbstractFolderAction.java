@@ -114,7 +114,9 @@ import com.openexchange.tools.session.ServerSession;
 public abstract class AbstractFolderAction implements AJAXActionService {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractFolderAction.class);
-
+    
+    protected static final String PARAM_AUTORENAME = "autorename";
+    
     /**
      * <code>"ignoreTranslation"</code>.
      */

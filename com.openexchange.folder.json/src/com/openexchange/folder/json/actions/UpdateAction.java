@@ -193,7 +193,7 @@ public final class UpdateAction extends AbstractFolderAction implements Enqueuab
         FolderServiceDecorator decorator = new FolderServiceDecorator()
             .put("permissions", request.getParameter("permissions"))
             .put("altNames", request.getParameter("altNames"))
-            .put("autorename", request.getParameter("autorename"))
+            .put(PARAM_AUTORENAME, request.getParameter(PARAM_AUTORENAME))
             .put("suppressUnifiedMail", isSuppressUnifiedMail(session))
             .put("cascadePermissions", Boolean.valueOf(cascadePermissions))
             .put("ignoreWarnings", Boolean.valueOf(ignoreWarnings))
