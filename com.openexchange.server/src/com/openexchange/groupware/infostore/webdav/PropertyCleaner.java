@@ -52,8 +52,8 @@ package com.openexchange.groupware.infostore.webdav;
 import static com.openexchange.file.storage.FileStorageEventHelper.createDebugMessage;
 import static com.openexchange.file.storage.FileStorageEventHelper.extractObjectId;
 import static com.openexchange.file.storage.FileStorageEventHelper.extractSession;
+import static com.openexchange.file.storage.FileStorageEventHelper.isDeleteEvent;
 import static com.openexchange.file.storage.FileStorageEventHelper.isInfostoreEvent;
-import static com.openexchange.file.storage.FileStorageEventHelper.isUpdateEvent;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.event.impl.FolderEventInterface;
@@ -107,7 +107,7 @@ public class PropertyCleaner implements FolderEventInterface, EventHandler {
 
     @Override
     public void handleEvent(final Event event) {
-        if (isInfostoreEvent(event) && isUpdateEvent(event)) {
+        if (isInfostoreEvent(event) && isDeleteEvent(event)) {
             try {
                 FileID fileID = new FileID(extractObjectId(event));
                 if (FileID.INFOSTORE_SERVICE_ID.equals(fileID.getService()) && FileID.INFOSTORE_ACCOUNT_ID.equals(fileID.getAccountId())) {
@@ -118,7 +118,7 @@ public class PropertyCleaner implements FolderEventInterface, EventHandler {
                     infoProperties.commit();
                 }
             } catch (OXException e) {
-                LOG.error("Couldn't remove locks from infoitem. Run the consistency tool.", e);
+                LOG.error("Couldn't remove properties from infoitem. Run the consistency tool.", e);
             } catch (NumberFormatException e) {
                 // Obviously no numeric identifier; therefore not related to InfoStore file storage
                 LOG.debug("", e);
