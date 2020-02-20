@@ -305,15 +305,17 @@ public class CryptoCompositionSpaceStorageService extends AbstractCryptoAware im
     }
 
     @Override
-    public CompositionSpace openCompositionSpace(Session session, CompositionSpaceDescription compositionSpaceDesc) throws OXException {
-        if (!needsEncryption(session)) {
-            CompositionSpace compositionSpace = delegate.openCompositionSpace(session, compositionSpaceDesc);
+    public CompositionSpace openCompositionSpace(Session session, CompositionSpaceDescription compositionSpaceDesc, Optional<Boolean> optionalEncrypt) throws OXException {
+        boolean encrypt = optionalEncrypt.isPresent() ? optionalEncrypt.get().booleanValue() : needsEncryption(session);
+
+        if (!encrypt) {
+            CompositionSpace compositionSpace = delegate.openCompositionSpace(session, compositionSpaceDesc, Optional.empty());
             LoggerHolder.LOG.debug("Opened composition space {}: encrypted=false", UUIDs.getUnformattedString(compositionSpace.getId()));
             return compositionSpace;
         }
 
         encryptCompositionSpaceDescription(compositionSpaceDesc, true, session);
-        CompositionSpace openedCompositionSpace = delegate.openCompositionSpace(session, compositionSpaceDesc);
+        CompositionSpace openedCompositionSpace = delegate.openCompositionSpace(session, compositionSpaceDesc, Optional.empty());
         CompositionSpace compositionSpace = decryptCompositionSpace(openedCompositionSpace, session, true).compositionSpace;
         LoggerHolder.LOG.debug("Opened composition space {}: encrypted=true", UUIDs.getUnformattedString(compositionSpace.getId()));
         return compositionSpace;

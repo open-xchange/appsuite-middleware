@@ -207,8 +207,8 @@ public class InMemoryCompositionSpaceStorageService implements NonCryptoComposit
     }
 
     @Override
-    public CompositionSpace openCompositionSpace(Session session, CompositionSpaceDescription compositionSpaceDesc) throws OXException {
-        CompositionSpace persistentCompositionSpace = persistentStorage.openCompositionSpace(session, compositionSpaceDesc);
+    public CompositionSpace openCompositionSpace(Session session, CompositionSpaceDescription compositionSpaceDesc, Optional<Boolean> optionalEncrypt) throws OXException {
+        CompositionSpace persistentCompositionSpace = persistentStorage.openCompositionSpace(session, compositionSpaceDesc, optionalEncrypt);
 
         MessageDescription messageDesc = compositionSpaceDesc.getMessage();
         InMemoryCompositionSpace compositionSpace = new InMemoryCompositionSpace(persistentCompositionSpace.getId(), messageDesc, bufferingQueue, session.getUserId(), session.getContextId());

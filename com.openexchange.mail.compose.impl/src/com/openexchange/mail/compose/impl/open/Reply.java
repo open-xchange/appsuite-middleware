@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.compose.impl.open;
 
+import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.parseAddressList;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.unfold;
 import java.util.ArrayList;
@@ -58,6 +59,7 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
@@ -387,6 +389,7 @@ public class Reply extends AbstractOpener {
         }
 
         // Check whether to attach original message
+        Optional<Boolean> optionalEncrypt = Optional.of(B(state.encrypt));
         if (usm.getAttachOriginalMessage() > 0) {
             // Obtain attachment storage (can only be null here)
             state.attachmentStorage = getAttachmentStorage(session);
@@ -397,7 +400,7 @@ public class Reply extends AbstractOpener {
 
                 // Compile attachment
                 AttachmentDescription attachment = AttachmentStorages.createAttachmentDescriptionFor(originalMail, 0, sink.getLength(), state.compositionSpaceId);
-                Attachment emlAttachment = AttachmentStorages.saveAttachment(sink.getStream(), attachment, session, state.attachmentStorage);
+                Attachment emlAttachment = AttachmentStorages.saveAttachment(sink.getStream(), attachment, optionalEncrypt, session, state.attachmentStorage);
                 state.attachments = new ArrayList<>(1);
                 state.attachments.add(emlAttachment);
             } finally {
@@ -441,7 +444,7 @@ public class Reply extends AbstractOpener {
                         MailPart mailPart = inlineEntry.getValue();
                         // Compile & store attachment
                         AttachmentDescription attachment = AttachmentStorages.createInlineAttachmentDescriptionFor(mailPart, inlineEntry.getKey(), i + 1, state.compositionSpaceId);
-                        Attachment partAttachment = AttachmentStorages.saveAttachment(mailPart.getInputStream(), attachment, session, state.attachmentStorage);
+                        Attachment partAttachment = AttachmentStorages.saveAttachment(mailPart.getInputStream(), attachment, optionalEncrypt, session, state.attachmentStorage);
                         state.attachments.add(partAttachment);
 
                         inlineAttachments.put(inlineEntry.getKey(), partAttachment);
@@ -474,7 +477,7 @@ public class Reply extends AbstractOpener {
                 for (MailPart mailPart : nonInlineParts) {
                     // Compile & store attachment
                     AttachmentDescription attachment = AttachmentStorages.createAttachmentDescriptionFor(mailPart, i + 1, state.compositionSpaceId, session);
-                    Attachment partAttachment = AttachmentStorages.saveAttachment(mailPart.getInputStream(), attachment, session, state.attachmentStorage);
+                    Attachment partAttachment = AttachmentStorages.saveAttachment(mailPart.getInputStream(), attachment, optionalEncrypt, session, state.attachmentStorage);
                     state.attachments.add(partAttachment);
                     i++;
                 }

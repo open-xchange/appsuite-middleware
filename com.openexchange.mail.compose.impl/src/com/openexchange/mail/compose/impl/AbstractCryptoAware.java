@@ -55,8 +55,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import com.openexchange.capabilities.CapabilityService;
-import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.config.cascade.ConfigViews;
@@ -65,7 +63,6 @@ import com.openexchange.mail.compose.CompositionSpace;
 import com.openexchange.mail.compose.Message;
 import com.openexchange.mail.compose.security.CompositionSpaceKeyStorage;
 import com.openexchange.mail.compose.security.CompositionSpaceKeyStorageService;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
@@ -126,26 +123,6 @@ public abstract class AbstractCryptoAware {
         return ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.mail.compose.security.autoDeleteIfKeyIsMissing", defaultValue, view);
     }
 
-    private CapabilitySet getCapabilitySet(Session session) throws OXException {
-        CapabilityService capabilityService = services.getOptionalService(CapabilityService.class);
-        if (null == capabilityService) {
-            throw ServiceExceptionCode.absentService(CapabilityService.class);
-        }
-        return capabilityService.getCapabilities(session);
-    }
-
-    private boolean isEncryptionEnabled(Session session) throws OXException {
-        boolean defaultValue = true;
-
-        ConfigViewFactory viewFactory = services.getOptionalService(ConfigViewFactory.class);
-        if (null == viewFactory) {
-            return defaultValue;
-        }
-
-        ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
-        return ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.mail.compose.security.encryptionEnabled", defaultValue, view);
-    }
-
     /**
      * Checks whether encryption is needed for specified session.
      * <p>
@@ -160,7 +137,7 @@ public abstract class AbstractCryptoAware {
      * @throws OXException If need for encryption cannot be checked
      */
     protected boolean needsEncryption(Session session) throws OXException {
-        return isEncryptionEnabled(session) && getCapabilitySet(session).contains("guard");
+        return CryptoUtility.needsEncryption(session, services);
     }
 
     /**

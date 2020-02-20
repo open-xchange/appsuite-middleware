@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.compose.impl;
 
+import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.util.UUIDs.getUnformattedString;
 import static com.openexchange.mail.text.TextProcessing.performLineFolding;
@@ -1201,6 +1202,9 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                 message.setRequestReadReceipt(true);
             }
 
+            // Check if composition space to open is supposed to be encrypted
+            boolean encrypt = CryptoUtility.needsEncryption(session, services);
+
             // Determine the meta information for the message (draft)
             if (Type.NEW == type) {
                 message.setMeta(Meta.META_NEW);
@@ -1209,7 +1213,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
             } else if (Type.SMS == type) {
                 message.setMeta(Meta.META_SMS);
             } else {
-                OpenState args = new OpenState(uuid, message, Meta.builder());
+                OpenState args = new OpenState(uuid, message, encrypt, Meta.builder());
                 try {
                     Meta.Builder metaBuilder = args.metaBuilder;
                     metaBuilder.withType(Meta.MetaType.metaTypeFor(type));
@@ -1249,7 +1253,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
 
                 // Compile attachment
                 AttachmentDescription attachment = AttachmentStorages.createVCardAttachmentDescriptionFor(userVCard, uuid);
-                Attachment vcardAttachment = AttachmentStorages.saveAttachment(Streams.newByteArrayInputStream(vcard), attachment, session, attachmentStorage);
+                Attachment vcardAttachment = AttachmentStorages.saveAttachment(Streams.newByteArrayInputStream(vcard), attachment, Optional.of(B(encrypt)), session, attachmentStorage);
                 if (null == attachments) {
                     attachments = new ArrayList<>(1);
                 }
@@ -1261,7 +1265,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                 message.setAttachments(attachments);
             }
 
-            CompositionSpace compositionSpace = getStorageService().openCompositionSpace(session, new CompositionSpaceDescription().setUuid(uuid).setMessage(message));
+            CompositionSpace compositionSpace = getStorageService().openCompositionSpace(session, new CompositionSpaceDescription().setUuid(uuid).setMessage(message), Optional.of(B(encrypt)));
             if (!compositionSpace.getId().equals(uuid)) {
                 // Composition space identifier is not equal to generated one
                 getStorageService().closeCompositionSpace(session, compositionSpace.getId());
