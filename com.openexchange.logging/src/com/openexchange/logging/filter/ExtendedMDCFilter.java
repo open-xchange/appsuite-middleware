@@ -83,6 +83,7 @@ public class ExtendedMDCFilter extends TurboFilter {
         levels = new HashMap<String, Level>();
     }
 
+    @SuppressWarnings("unused")
     @Override
     public FilterReply decide(Marker marker, Logger logger, Level level, String format, Object[] params, Throwable th) {
         boolean check = false;

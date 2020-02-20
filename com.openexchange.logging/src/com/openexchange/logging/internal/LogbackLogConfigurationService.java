@@ -63,7 +63,7 @@ import com.google.common.collect.ImmutableList;
 import com.openexchange.ajax.response.IncludeStackTraceService;
 import com.openexchange.java.util.Pair;
 import com.openexchange.log.LogProperties.Name;
-import com.openexchange.logback.extensions.logstash.LogstashSocketAppender;
+import com.openexchange.logback.extensions.appenders.logstash.LogstashSocketAppender;
 import com.openexchange.logging.LogConfigurationService;
 import com.openexchange.logging.LogResponse;
 import com.openexchange.logging.MessageType;

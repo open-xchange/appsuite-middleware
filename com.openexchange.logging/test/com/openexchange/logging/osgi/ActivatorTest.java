@@ -57,7 +57,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.osgi.framework.Bundle;
@@ -198,7 +197,7 @@ public class ActivatorTest {
         Mockito.doNothing().when(activatorSpy).overrideLoggerLevels(loggerContext);
         Mockito.doNothing().when(activatorSpy).configureJavaUtilLogging();
         Mockito.doNothing().when(activatorSpy).installJulLevelChangePropagator(loggerContext);
-        Mockito.doNothing().when(activatorSpy).registerLogstashAppenderMBean(Matchers.eq(bundleContext));
+        Mockito.doNothing().when(activatorSpy).registerRemoteAppenderMBeans(ArgumentMatchers.eq(bundleContext));
 
         activatorSpy.start(bundleContext);
 
@@ -216,13 +215,14 @@ public class ActivatorTest {
         Mockito.doNothing().when(activatorSpy).overrideLoggerLevels(loggerContext);
         Mockito.doNothing().when(activatorSpy).configureJavaUtilLogging();
         Mockito.doNothing().when(activatorSpy).installJulLevelChangePropagator(loggerContext);
-        Mockito.doNothing().when(activatorSpy).registerLogstashAppenderMBean(Matchers.eq(bundleContext));
+        Mockito.doNothing().when(activatorSpy).registerRemoteAppenderMBeans(ArgumentMatchers.eq(bundleContext));
 
         activatorSpy.start(bundleContext);
 
         Mockito.verify(activatorSpy, Mockito.times(1)).installJulLevelChangePropagator(loggerContext);
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void testInstallJulLevelChangePropagator_propagatorNotAvailable_addPropagator() {
         Activator activatorSpy = Mockito.spy(activator);
@@ -233,6 +233,7 @@ public class ActivatorTest {
         Mockito.verify(loggerContext, Mockito.atLeast(1)).addListener((LoggerContextListener) ArgumentMatchers.any());
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void testInstallJulLevelChangePropagator_propagatorAvailable_DoNothing() {
         Activator activatorSpy = Mockito.spy(activator);

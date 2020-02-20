@@ -54,22 +54,22 @@ import javax.management.ObjectName;
 import org.osgi.framework.BundleContext;
 import com.openexchange.logback.extensions.appenders.AbstractRemoteAppender;
 import com.openexchange.logback.extensions.appenders.kafka.KafkaAppender;
-import com.openexchange.logback.extensions.appenders.logstash.LogstashSocketAppenderMBean;
+import com.openexchange.logback.extensions.appenders.kafka.KafkaAppenderMBean;
 
 /**
- * {@link LogbackSocketAppenderMBeanRegisterer}
+ * {@link KafkaAppenderMBeanRegisterer}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class LogbackSocketAppenderMBeanRegisterer extends AbstractRemoteAppenderMBeanRegisterer {
+public class KafkaAppenderMBeanRegisterer extends AbstractRemoteAppenderMBeanRegisterer {
 
-    private static final String PROPERTY = "com.openexchange.logback.extensions.appenders.logstash.enabled";
-    private static final String APPENDER_NAME = "Logstash";
+    private static final String PROPERTY = "com.openexchange.logback.extensions.appenders.kafka.enabled";
+    private static final String APPENDER_NAME = "Kafka";
 
     /**
-     * Initialises a new {@link LogbackSocketAppenderMBeanRegisterer}.
+     * Initialises a new {@link KafkaAppenderMBeanRegisterer}.
      */
-    public LogbackSocketAppenderMBeanRegisterer(BundleContext context) {
+    public KafkaAppenderMBeanRegisterer(BundleContext context) {
         super(context, APPENDER_NAME);
     }
 
@@ -85,7 +85,6 @@ public class LogbackSocketAppenderMBeanRegisterer extends AbstractRemoteAppender
 
     @Override
     ObjectName getObjectName() throws MalformedObjectNameException {
-        return new ObjectName(LogstashSocketAppenderMBean.DOMAIN, LogstashSocketAppenderMBean.KEY, LogstashSocketAppenderMBean.VALUE);
+        return new ObjectName(KafkaAppenderMBean.DOMAIN, KafkaAppenderMBean.KEY, KafkaAppenderMBean.VALUE);
     }
-
 }
