@@ -108,7 +108,8 @@ public class PropertyHelper {
 		this.id = id;
 	}
 
-	public void removeProperty(final String namespace, final String name) {
+    public void removeProperty(final String namespace, final String name) throws WebdavProtocolException {
+        loadProperty(namespace, name);
 		if (properties.remove(new WebdavProperty(namespace, name)) != null) {
 			markRemovedProperty(new WebdavProperty(namespace, name));
 		}

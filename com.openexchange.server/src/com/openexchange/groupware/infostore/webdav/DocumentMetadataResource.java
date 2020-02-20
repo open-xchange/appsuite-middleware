@@ -293,7 +293,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
     }
 
     @Override
-    public String getETag() {
+    public String getETag() throws WebdavProtocolException {
         if (!exists && !existsInDB) {
             /*
              * try { dumpMetadataToDB(); } catch (Exception e) { throw new
@@ -302,6 +302,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
              */
             return null;
         }
+        loadMetadata();
         return String.format(
                 "http://www.open-xchange.com/webdav/etags/%d-%d-%d-%d",
                 Integer.valueOf(getSession().getContext().getContextId()),
@@ -559,7 +560,6 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
             copy.create();
 
             factory.invalidate(dest, copy.getId(), Type.RESOURCE);
-            lockHelper.deleteLocks();
             return copy;
         } catch (OXException e) {
             if (e instanceof WebdavProtocolException) {
