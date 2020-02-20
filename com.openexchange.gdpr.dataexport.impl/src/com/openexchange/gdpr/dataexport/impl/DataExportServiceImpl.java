@@ -721,7 +721,7 @@ public class DataExportServiceImpl implements DataExportService {
             throw new IllegalArgumentException("Start delay must not be less than 0 (zero): " + startDelay);
         }
         if (stopDelay < startDelay) {
-            throw new IllegalArgumentException("Stop delay (" + startDelay + ") must be greater than start delay (" + stopDelay + ")");
+            throw new IllegalArgumentException("Stop delay (" + stopDelay + ") must be greater than start delay (" + startDelay + ")");
         }
         final long endTimeMillis = currentTimeMillis + stopDelay;
         Runnable startTask = new Runnable() {
