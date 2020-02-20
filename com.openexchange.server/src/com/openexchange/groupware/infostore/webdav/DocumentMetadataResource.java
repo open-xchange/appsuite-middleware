@@ -176,7 +176,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
     }
 
     @Override
-    protected void internalRemoveProperty(final String namespace, final String name) {
+    protected void internalRemoveProperty(final String namespace, final String name) throws WebdavProtocolException {
         propertyHelper.removeProperty(namespace, name);
     }
 
