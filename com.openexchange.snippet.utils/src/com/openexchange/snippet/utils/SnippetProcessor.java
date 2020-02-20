@@ -109,34 +109,6 @@ public class SnippetProcessor {
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(SnippetProcessor.class);
 
-    private static class ManagedFileInputStreamProvider implements InputStreamProvider {
-
-        private final ManagedFile managedFile;
-
-        /**
-         * Initializes a new {@link ManagedFileInputStreamProvider}.
-         *
-         * @param mf The managed file
-         */
-        ManagedFileInputStreamProvider(ManagedFile managedFile) {
-            super();
-            this.managedFile = managedFile;
-        }
-
-        @Override
-        public InputStream getInputStream() throws IOException {
-            try {
-                return managedFile.getInputStream();
-            } catch (OXException e) {
-                Throwable cause = e.getCause();
-                if (cause instanceof IOException) {
-                    throw (IOException) cause;
-                }
-                throw new IOException(null == cause ? e : cause);
-            }
-        }
-    }
-
     private static class ThresholdFileHolderInputStreamProvider implements InputStreamProvider {
 
         private final ThresholdFileHolder fileHolder;
