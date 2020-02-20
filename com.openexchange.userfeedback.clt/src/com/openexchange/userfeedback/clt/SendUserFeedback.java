@@ -215,7 +215,7 @@ public class SendUserFeedback extends AbstractUserFeedback {
                     sb.append(a.get(i)).append("\n");
                 }
             }
-        } catch (JSONException e) {
+        } catch (@SuppressWarnings("unused") JSONException e) {
             // will not happen
         }
         System.out.println(sb.toString());
@@ -247,13 +247,13 @@ public class SendUserFeedback extends AbstractUserFeedback {
                     try {
                         pgp = new String(Files.readAllBytes(Paths.get(pgp)));
                         json.put("pgp_key", pgp);
-                    } catch (IOException e) {
+                    } catch (@SuppressWarnings("unused") IOException e) {
                         exitWithError("Could not load PGP key " + pgp);
                     }
                 }
                 array.add(0, json);
             }
-        } catch (IOException e) {
+        } catch (@SuppressWarnings("unused") IOException e) {
             exitWithError("Could not load CSV file " + filename);
         } finally {
             if (null != parser) {
@@ -292,7 +292,7 @@ public class SendUserFeedback extends AbstractUserFeedback {
                 String pgp = new String(Files.readAllBytes(Paths.get(publicKeyFile)));
                 json.put("pgp_key", pgp);
             }
-        } catch (IOException e) {
+        } catch (@SuppressWarnings("unused") IOException e) {
             exitWithError("Could not load PGP public key file " + publicKeyFile);
         }
         return json;
@@ -317,12 +317,12 @@ public class SendUserFeedback extends AbstractUserFeedback {
 
     @Override
     protected String getName() {
-        return "senduserfeedback -U myUser:myPassword [OPTIONS]";
+        return "senduserfeedback -U <user:password> [OPTIONS]";
     }
 
     @Override
     protected String getHeader() {
-        return "senduserfeedback -U myUser:myPassword -s 1487348317 -r \"Displayname <email@example.com>\"";
+        return "senduserfeedback -U <user:password> -s 1487348317 -r \"Displayname <email@example.com>\"";
     }
 
     private void exitWithError(String message) {

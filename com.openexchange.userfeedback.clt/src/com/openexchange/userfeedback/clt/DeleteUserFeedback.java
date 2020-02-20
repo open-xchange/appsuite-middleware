@@ -69,9 +69,6 @@ import org.json.JSONObject;
  */
 public class DeleteUserFeedback extends AbstractUserFeedback {
 
-    /**
-     * @param args
-     */
     public static void main(String[] args) {
         new DeleteUserFeedback().execute(args);
     }
@@ -139,11 +136,21 @@ public class DeleteUserFeedback extends AbstractUserFeedback {
 
     @Override
     protected String getName() {
-        return "deleteuserfeedback -U myUser:myPassword [OPTIONS]";
+        return "deleteuserfeedback -U <user:password> [OPTIONS]";
     }
 
     @Override
     protected String getHeader() {
-        return "deleteuserfeedback -U myUser:myPassword [-t type] [-g ctx_grp] [-s time] [-e time]\n" + "deleteuserfeedback -s 1487348317";
+        return "deleteuserfeedback -U <user:password> [-t type] [-g ctx_grp] [-s time] [-e time]\n" + "deleteuserfeedback -s 1487348317";
+    }
+
+    @Override
+    protected String getStartDesceription() {
+        return super.getStartDesceription() + " Only feedback given after this time is deleted. If not set, all feedback up to -e is deleted.";
+    }
+
+    @Override
+    protected String getEndDesceription() {
+        return super.getEndDesceription() + " Only feedback given before this time is deleted. If not set, all feedback since -s is deleted.";
     }
 }
