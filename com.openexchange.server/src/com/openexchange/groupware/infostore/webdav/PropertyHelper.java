@@ -71,7 +71,7 @@ public class PropertyHelper {
 
 	private final Set<WebdavProperty> removedProperties = new HashSet<WebdavProperty>();
 	private boolean loadedAllProps;
-	private final List<WebdavProperty> changedProps = new ArrayList<WebdavProperty>();
+    private final Map<WebdavProperty, WebdavProperty> changedProps = new HashMap<WebdavProperty, WebdavProperty>();
 
 	private final PropertyStore propertyStore;
 	private final SessionHolder sessionHolder;
@@ -115,17 +115,19 @@ public class PropertyHelper {
 	}
 
 	public boolean isRemoved(final WebdavProperty property) {
-		return removedProperties.contains(property);
+        return removedProperties.contains(new WebdavProperty(property.getNamespace(), property.getName()));
 	}
 
 	private void markRemovedProperty(final WebdavProperty property) {
-		removedProperties.add(property);
-		changedProps.remove(properties.get(property));
+        WebdavProperty key = new WebdavProperty(property.getNamespace(), property.getName());
+        removedProperties.add(key);
+        changedProps.remove(key);
 	}
 
 	private void markSetProperty(final WebdavProperty property) {
-		removedProperties.remove(property);
-		changedProps.add(property);
+        WebdavProperty key = new WebdavProperty(property.getNamespace(), property.getName());
+        removedProperties.remove(key);
+        changedProps.put(key, property);
 	}
 
 	private void markChanged() {
@@ -180,7 +182,7 @@ public class PropertyHelper {
 		changed = false;
 		final ServerSession session = getSession();
         if (false == changedProps.isEmpty()) {
-            propertyStore.saveProperties(id, new ArrayList<WebdavProperty>(changedProps), session.getContext());
+            propertyStore.saveProperties(id, new ArrayList<WebdavProperty>(changedProps.values()), session.getContext());
             changedProps.clear();
         }
         if (false == removedProperties.isEmpty()) {
