@@ -3,6 +3,6 @@ properties:
   $ref: ../common/CommonResponseData.yaml
   data:
     type: array
-    description: Not IMAP: An array with object IDs of mails which were modified after the specified timestamp and were therefore not deleted.
+    description: "Not IMAP: An array with object IDs of mails which were modified after the specified timestamp and were therefore not deleted."
     items:
       type: string
