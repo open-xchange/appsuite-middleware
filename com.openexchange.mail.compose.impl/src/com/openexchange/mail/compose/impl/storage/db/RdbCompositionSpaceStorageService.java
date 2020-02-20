@@ -156,7 +156,7 @@ public class RdbCompositionSpaceStorageService extends AbstractCompositionSpaceS
     public List<CompositionSpace> getCompositionSpaces(Session session, MessageField[] fields) throws OXException {
         CompositionSpaceDbStorage dbStorage = newDbStorageFor(session);
 
-        MessageField[] fieldsToQuery = null == fields ? MessageField.values() : fields;
+        MessageField[] fieldsToQuery = null == fields ? MessageField.values() : MessageField.addMessageFieldIfAbsent(fields, MessageField.CONTENT_ENCRYPTED);
         List<CompositionSpaceContainer> containers = dbStorage.selectAll(fieldsToQuery);
         int size;
         if (null == containers || (size = containers.size()) <= 0) {
@@ -194,7 +194,7 @@ public class RdbCompositionSpaceStorageService extends AbstractCompositionSpaceS
     }
 
     @Override
-    public CompositionSpace openCompositionSpace(Session session, CompositionSpaceDescription compositionSpaceDesc) throws OXException {
+    public CompositionSpace openCompositionSpace(Session session, CompositionSpaceDescription compositionSpaceDesc, Optional<Boolean> optionalEncrypt) throws OXException {
         CompositionSpaceDbStorage dbStorage = newDbStorageFor(session);
 
         // Check if user exceeds max. number of composition spaces
@@ -308,8 +308,7 @@ public class RdbCompositionSpaceStorageService extends AbstractCompositionSpaceS
         AttachmentStorage attachmentStorage = attachmentStorageService.getAttachmentStorageFor(session);
         List<Attachment> attachmentsToSet = new ArrayList<>(size);
         boolean modified = false;
-        for (Attachment a : availableAttachments) {
-            Attachment attachment = attachmentStorage.getAttachment(a.getId(), session);
+        for (Attachment attachment : attachmentStorage.getAttachments(getIdsFrom(availableAttachments, size), session)) {
             if (null == attachment) {
                 modified = true;
             } else {
@@ -327,6 +326,14 @@ public class RdbCompositionSpaceStorageService extends AbstractCompositionSpaceS
             attachmentsToUpdate.add(DefaultAttachment.createWithId(attachment.getId(), null));
         }
         return attachmentsToUpdate;
+    }
+
+    private List<UUID> getIdsFrom(List<Attachment> availableAttachments, int size) {
+        List<UUID> ids = new ArrayList<>(size);
+        for (Attachment a : availableAttachments) {
+            ids.add(a.getId());
+        }
+        return ids;
     }
 
 }

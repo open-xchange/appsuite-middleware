@@ -69,6 +69,7 @@ public class OpenState {
     public final UUID compositionSpaceId;
     public final MessageDescription message;
     public final Meta.Builder metaBuilder;
+    public final boolean encrypt;
 
     // Variants
     public AttachmentStorage attachmentStorage = null;
@@ -80,11 +81,13 @@ public class OpenState {
      *
      * @param compositionSpaceId The composition space identifier
      * @param message The message to compose
+     * @param encrypt Whether the composition space to open shall be encrypted
      * @param metaBuilder The meta-data builder
      */
-    public OpenState(UUID compositionSpaceId, MessageDescription message, Meta.Builder metaBuilder) {
+    public OpenState(UUID compositionSpaceId, MessageDescription message, boolean encrypt, Meta.Builder metaBuilder) {
         super();
         this.compositionSpaceId = compositionSpaceId;
+        this.encrypt = encrypt;
         this.metaBuilder = metaBuilder;
         this.message = message;
     }
