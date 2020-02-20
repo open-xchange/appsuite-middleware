@@ -101,9 +101,12 @@ public interface CompositionSpaceStorageService {
      *
      * @param session The session providing user information
      * @param compositionSpaceDesc The composition space, which shall be opened
+     * @param optionalEncrypt The optional encryption flag. If present and <code>true</code> the attachment to save is supposed to be
+     *                        encrypted according to caller. If present and<code>false</code>  the attachment to save is <b>not</b> supposed
+     *                        to be encrypted according to caller. If absent, encryption is automatically determined.
      * @return The identifier for the newly created composition space
      */
-    CompositionSpace openCompositionSpace(Session session, CompositionSpaceDescription compositionSpaceDesc) throws OXException;
+    CompositionSpace openCompositionSpace(Session session, CompositionSpaceDescription compositionSpaceDesc, Optional<Boolean> optionalEncrypt) throws OXException;
 
     /**
      * Updates a composition space.

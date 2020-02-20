@@ -51,10 +51,18 @@ package com.openexchange.mail.compose.impl;
 
 import java.io.InputStream;
 import java.security.Key;
+import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.capabilities.CapabilitySet;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.cascade.ConfigViews;
 import com.openexchange.crypto.CryptoErrorMessage;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
 
 /**
  * {@link CryptoUtility}
@@ -136,6 +144,44 @@ public class CryptoUtility {
         }
 
         return cryptoService.decryptingStreamFor(in, key);
+    }
+
+    /**
+     * Checks whether encryption is needed for specified session.
+     * <p>
+     * Currently encryption is needed for session-associated user when
+     * <ul>
+     * <li>Property "com.openexchange.mail.compose.security.encryptionEnabled" is set to "true" (default)</li>
+     * <li>Capability "guard" is available</li>
+     * </ul>
+     *
+     * @param session The session
+     * @param services The service look-up providing <code>CapabilityService</code> and <code>ConfigViewFactory</code> services
+     * @return <code>true</code> if encryption is needed; otherwise <code>false</code>
+     * @throws OXException If need for encryption cannot be checked
+     */
+    public static boolean needsEncryption(Session session, ServiceLookup services) throws OXException {
+        return isEncryptionEnabled(session, services) && getCapabilitySet(session, services).contains("guard");
+    }
+
+    private static CapabilitySet getCapabilitySet(Session session, ServiceLookup services) throws OXException {
+        CapabilityService capabilityService = services.getOptionalService(CapabilityService.class);
+        if (null == capabilityService) {
+            throw ServiceExceptionCode.absentService(CapabilityService.class);
+        }
+        return capabilityService.getCapabilities(session);
+    }
+
+    private static boolean isEncryptionEnabled(Session session, ServiceLookup services) throws OXException {
+        boolean defaultValue = true;
+
+        ConfigViewFactory viewFactory = services.getOptionalService(ConfigViewFactory.class);
+        if (null == viewFactory) {
+            return defaultValue;
+        }
+
+        ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
+        return ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.mail.compose.security.encryptionEnabled", defaultValue, view);
     }
 
 }

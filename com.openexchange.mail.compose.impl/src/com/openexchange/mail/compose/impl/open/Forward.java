@@ -49,10 +49,12 @@
 
 package com.openexchange.mail.compose.impl.open;
 
+import static com.openexchange.java.Autoboxing.B;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.ajax.container.ThresholdFileHolder;
@@ -177,6 +179,7 @@ public class Forward extends AbstractOpener {
             }
         }
 
+        Optional<Boolean> optionalEncrypt = Optional.of(B(state.encrypt));
         if (usm.isForwardAsAttachment() || forwardsFor.size() > 1) {
             state.metaBuilder.withType(Meta.MetaType.FORWARD_ATTACHMENT);
             // Forward as attachment, add mail(s) as attachment(s)
@@ -195,7 +198,7 @@ public class Forward extends AbstractOpener {
 
                     // Compile attachment
                     AttachmentDescription attachment = AttachmentStorages.createAttachmentDescriptionFor(forwardedMail, i + 1, sink.getLength(), state.compositionSpaceId);
-                    Attachment emlAttachment = AttachmentStorages.saveAttachment(sink.getStream(), attachment, session, state.attachmentStorage);
+                    Attachment emlAttachment = AttachmentStorages.saveAttachment(sink.getStream(), attachment, optionalEncrypt, session, state.attachmentStorage);
                     state.attachments.add(emlAttachment);
                 } finally {
                     Streams.close(sink);
@@ -248,7 +251,7 @@ public class Forward extends AbstractOpener {
                     for (MailPart mailPart : nonInlineParts) {
                         // Compile & store attachment
                         AttachmentDescription attachment = AttachmentStorages.createAttachmentDescriptionFor(mailPart, i + 1, state.compositionSpaceId, session);
-                        Attachment partAttachment = AttachmentStorages.saveAttachment(mailPart.getInputStream(), attachment, session, state.attachmentStorage);
+                        Attachment partAttachment = AttachmentStorages.saveAttachment(mailPart.getInputStream(), attachment, optionalEncrypt, session, state.attachmentStorage);
                         state.attachments.add(partAttachment);
                         i++;
                     }
@@ -274,7 +277,7 @@ public class Forward extends AbstractOpener {
                         // Compile & store attachment
                         MailPart mailPart = inlineEntry.getValue();
                         AttachmentDescription attachment = AttachmentStorages.createInlineAttachmentDescriptionFor(mailPart, inlineEntry.getKey(), i + 1, state.compositionSpaceId);
-                        Attachment partAttachment = AttachmentStorages.saveAttachment(mailPart.getInputStream(), attachment, session, state.attachmentStorage);
+                        Attachment partAttachment = AttachmentStorages.saveAttachment(mailPart.getInputStream(), attachment, optionalEncrypt, session, state.attachmentStorage);
                         state.attachments.add(partAttachment);
                         inlineAttachments.put(inlineEntry.getKey(), partAttachment);
                         i++;
