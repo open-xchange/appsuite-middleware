@@ -324,7 +324,7 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
         // @formatter:off
         Gauge.builder(METRICS_GROUP+METRICS_STATUS_NAME, () -> getOptionalCircuitBreaker().map((info) -> I(info.getCircuitBreaker().getState().ordinal())).orElse((Integer) null))
             .tags(METRICS_DIMENSION_PROTOCOL_KEY, METRICS_DIMENSION_PROTOCOL_VALUE, METRICS_DIMENSION_ACCOUNT_KEY, METRICS_DIMENSION_ACCOUNT_VALUE,
-                METRICS_STATUS_NAME, getOptionalCircuitBreaker().map(info -> info.getCircuitBreaker().getState().toString()).orElse((String) null))
+                METRICS_STATUS_NAME, getOptionalCircuitBreaker().map(info -> info.getCircuitBreaker().getState().toString()).orElse(""))
             .register(Metrics.globalRegistry);
 
         Gauge.builder(METRICS_GROUP+METRICS_FAILURE_THRESHOLD_NAME, () -> getOptionalCircuitBreaker().map((info) -> I(info.getCircuitBreaker().getFailureThreshold().numerator)).orElse(I(0)))
