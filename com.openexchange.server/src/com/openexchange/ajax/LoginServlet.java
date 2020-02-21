@@ -824,12 +824,10 @@ public class LoginServlet extends AJAXServlet {
             if (null != subPath && subPath.startsWith("/httpAuth")) {
                 try {
                     handlerMap.get("/httpAuth").handleRequest(req, resp, requestContext);
-                }
-                catch(IOException e) {
+                } catch (IOException e) {
                     requestContext.getMetricProvider().recordErrorCode(LoginExceptionCodes.UNKNOWN);
                     throw e;
                 }
-
             } else {
                 // Regular login handling
                 doJSONAuth(req, resp, action, requestContext);

@@ -120,9 +120,7 @@ public final class HTTPAuthLogin implements LoginRequestHandler {
             resp.addHeader("WWW-Authenticate", "NEGOTIATE");
             resp.addHeader("WWW-Authenticate", "Basic realm=\"Open-Xchange\"");
             resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
-            if(requestContext != null) {
-                requestContext.getMetricProvider().recordException(e);
-            }
+            requestContext.getMetricProvider().recordException(e);
         }
     }
 
