@@ -71,6 +71,7 @@ import com.openexchange.client.onboarding.Scenario;
 import com.openexchange.client.onboarding.mail.custom.CustomLoginSource;
 import com.openexchange.client.onboarding.plist.OnboardingPlistProvider;
 import com.openexchange.client.onboarding.plist.PlistResult;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.i18n.tools.StringHelper;
@@ -298,9 +299,9 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
                 }
                 account = service.getDefaultMailAccount(userId, contextId);
             }
-            transportSettings = new TransportAccountTransportSettings(account);
+            transportSettings = new TransportAccountTransportSettings(account, services.getServiceSafe(ConfigurationService.class));
         } else {
-            TransportConfig smtpConfig = services.getService(MailService.class).getTransportConfig(optSession, MailAccount.DEFAULT_ID);
+            TransportConfig smtpConfig = services.getServiceSafe(MailService.class).getTransportConfig(optSession, MailAccount.DEFAULT_ID);
             TransportConfig.getTransportConfig(smtpConfig, optSession, MailAccount.DEFAULT_ID);
             transportSettings = new TransportConfigTransportSettings(smtpConfig);
         }
