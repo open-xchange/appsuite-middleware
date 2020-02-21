@@ -114,7 +114,9 @@ public final class HTTPAuthLogin implements LoginRequestHandler {
     public void handleRequest(HttpServletRequest req, HttpServletResponse resp, LoginRequestContext requestContext) throws IOException {
         try {
             doAuthHeaderLogin(req, resp, requestContext);
-            requestContext.getMetricProvider().recordSuccess();
+            if(requestContext.getMetricProvider().isStateUnknown()) {
+                requestContext.getMetricProvider().recordSuccess();
+            }
         } catch (OXException e) {
             LOG.error(e.getMessage(), e);
             resp.addHeader("WWW-Authenticate", "NEGOTIATE");

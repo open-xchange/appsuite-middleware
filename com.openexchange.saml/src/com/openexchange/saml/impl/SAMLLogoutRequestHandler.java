@@ -116,6 +116,8 @@ public class SAMLLogoutRequestHandler implements LoginRequestHandler {
         }
 
         backend.finishLogout(httpRequest, httpResponse);
-        requestContext.getMetricProvider().recordSuccess();
+        if(requestContext.getMetricProvider().isStateUnknown()) {
+            requestContext.getMetricProvider().recordSuccess();
+        }
     }
 }

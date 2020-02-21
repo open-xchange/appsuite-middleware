@@ -135,6 +135,7 @@ public class AutoLogin extends AbstractLoginRequestHandler {
                         }
                         throw AjaxExceptionCodes.DISABLED_ACTION.create("autologin");
                     }
+                    requestContext.getMetricProvider().recordSuccess();
                     return;
                 }
 
@@ -156,6 +157,7 @@ public class AutoLogin extends AbstractLoginRequestHandler {
                         }
                         throw OXJSONExceptionCodes.INVALID_COOKIE.create();
                     }
+                    requestContext.getMetricProvider().recordSuccess();
                     return;
                 }
             }

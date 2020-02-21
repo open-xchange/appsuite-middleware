@@ -830,7 +830,13 @@ public class LoginServlet extends AJAXServlet {
                 }
             } else {
                 // Regular login handling
-                doJSONAuth(req, resp, action, requestContext);
+                try {
+                    doJSONAuth(req, resp, action, requestContext);
+                }
+                catch (IOException e) {
+                    requestContext.getMetricProvider().recordErrorCode(LoginExceptionCodes.UNKNOWN);
+                    throw e;
+                }
             }
             recordLoginRequest(action, requestContext.getMetricProvider().getStatus(), System.currentTimeMillis() - startTime);
         } catch (RateLimitedException e) {

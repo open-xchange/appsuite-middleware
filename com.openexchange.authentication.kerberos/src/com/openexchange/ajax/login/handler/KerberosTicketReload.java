@@ -107,8 +107,12 @@ public final class KerberosTicketReload extends SessionServlet implements LoginR
     @Override
     public void handleRequest(HttpServletRequest req, HttpServletResponse resp, LoginRequestContext requestContext) throws IOException {
         try {
-            doAuthHeaderTicketReload(req, resp);
+            doAuthHeaderTicketReload(req, resp, requestContext);
+            if(requestContext.getMetricProvider().isStateUnknown()) {
+               requestContext.getMetricProvider().recordSuccess();
+            }
         } catch (OXException e) {
+            requestContext.getMetricProvider().recordException(e);
             if (SessionExceptionCodes.hasPrefix(e)) {
                 // Is a session exception
                 LOG.debug(e.getMessage(), e);
@@ -119,7 +123,7 @@ public final class KerberosTicketReload extends SessionServlet implements LoginR
         }
     }
 
-    private void doAuthHeaderTicketReload(HttpServletRequest req, HttpServletResponse resp) throws OXException, IOException {
+    private void doAuthHeaderTicketReload(HttpServletRequest req, HttpServletResponse resp, LoginRequestContext requestContext) throws OXException, IOException {
         final String sessionId = getSessionId(req);
         SessionResult<ServerSession> result = getSession(req, resp, sessionId, sessiondService);
         if (Reply.STOP == result.getReply()) {
@@ -133,11 +137,13 @@ public final class KerberosTicketReload extends SessionServlet implements LoginR
         verifySession(req, sessiondService, sessionId, session);
         if (session.containsParameter(SESSION_PRINCIPAL)) {
             resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
+            requestContext.getMetricProvider().recordHTTPStatus(HttpServletResponse.SC_NO_CONTENT);
             return;
         }
         final String auth = req.getHeader(Header.AUTH_HEADER);
         if (null == auth) {
             notAuthorized(resp, "Authorization Required!");
+            requestContext.getMetricProvider().recordHTTPStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
         if (!Authorization.checkForAuthorizationHeader(auth)) {
@@ -155,6 +161,7 @@ public final class KerberosTicketReload extends SessionServlet implements LoginR
             // Is thrown if the ticket is no longer valid. See bug 35182.
             LOG.error(e.getMessage(), e);
             notAuthorized(resp, e.getMessage());
+            requestContext.getMetricProvider().recordHTTPStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
         session.setParameter(SESSION_SUBJECT, principal.getDelegateSubject());

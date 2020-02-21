@@ -108,7 +108,7 @@ public class RedeemToken implements LoginRequestHandler {
         String appSecret = LoginTools.parseAppSecret(req);
         if (null == token || null == appSecret) {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
-            //TODO-1030: What metric tag should be used here?
+            requestContext.getMetricProvider().recordHTTPStatus(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
         Tools.disableCaching(resp);

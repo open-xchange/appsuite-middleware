@@ -168,6 +168,7 @@ public class DefaultDispatcher implements Dispatcher {
         final long startTime = System.currentTimeMillis();
 
         if (null == session) {
+            recordRequest(requestData.getModule(), requestData.getAction(), AjaxExceptionCodes.MISSING_PARAMETER.getCategory().toString(), System.currentTimeMillis() - startTime);
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(AJAXServlet.PARAMETER_SESSION);
         }
 
@@ -260,6 +261,7 @@ public class DefaultDispatcher implements Dispatcher {
                         } catch (EnqueuedException e) {
                             // Result not computed in time
                             LOG.debug("Action \"{}\" of module \"{}\" could not be executed in time for user {} in context {}.", requestData.getAction(), requestData.getModule(), I(session.getUserId()), I(session.getContextId()), e);
+                            recordRequest(requestData.getModule(), requestData.getAction(), OK_RECORD_STATUS, System.currentTimeMillis() - startTime);
                             return new AJAXRequestResult(e.getJobInfo(), "enqueued");
                         }
                     }

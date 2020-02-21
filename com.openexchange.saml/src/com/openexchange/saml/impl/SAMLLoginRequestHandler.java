@@ -153,7 +153,7 @@ public class SAMLLoginRequestHandler implements LoginRequestHandler {
             if (null == reservation) {
                 LOG.warn("SAML login requested with invalid or expired session reservation token: {}", token);
                 backend.getExceptionHandler().handleSessionReservationExpired(req, resp, token);
-                requestContext.getMetricProvider().record("INVALID_RESERVATION_TOKEN");
+                requestContext.getMetricProvider().recordHTTPStatus(HttpServletResponse.SC_FORBIDDEN);
                 return;
             }
         }
@@ -165,7 +165,7 @@ public class SAMLLoginRequestHandler implements LoginRequestHandler {
             if (!context.isEnabled()) {
                 LOG.info("Declining SAML login for user {} of context {}: Context is disabled.", I(reservation.getUserId()), I(reservation.getContextId()));
                 backend.getExceptionHandler().handleContextDisabled(req, resp, reservation.getContextId());
-                requestContext.getMetricProvider().record("CONTEXT_DISABLED");
+                requestContext.getMetricProvider().recordHTTPStatus(HttpServletResponse.SC_FORBIDDEN);
                 return;
             }
         } catch (OXException e) {
@@ -185,7 +185,7 @@ public class SAMLLoginRequestHandler implements LoginRequestHandler {
             if (!user.isMailEnabled()) {
                 LOG.info("Declining SAML login for user {} of context {}: User is disabled.", I(reservation.getUserId()), I(reservation.getContextId()));
                 backend.getExceptionHandler().handleUserDisabled(req, resp, reservation.getUserId(), reservation.getContextId());
-                requestContext.getMetricProvider().record("USER_DISABLED");
+                requestContext.getMetricProvider().recordHTTPStatus(HttpServletResponse.SC_FORBIDDEN);
                 return;
             }
         }

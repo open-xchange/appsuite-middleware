@@ -378,6 +378,7 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
         try {
             if (response.hasError() || null == result) {
                 ResponseWriter.write(response, resp.getWriter(), extractLocale(req, result));
+                requestContext.getMetricProvider().recordException(response.getException());
                 return false;
             }
 

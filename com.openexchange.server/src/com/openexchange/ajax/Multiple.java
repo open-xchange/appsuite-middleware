@@ -209,6 +209,9 @@ public class Multiple extends SessionServlet {
             if(e instanceof OXException) {
                 recordRequest(((OXException)e).getCategory().toString(), System.currentTimeMillis() - startTime);
             }
+            else {
+                recordRequest(Integer.toString(HttpServletResponse.SC_INTERNAL_SERVER_ERROR), System.currentTimeMillis() - startTime);
+            }
         } finally {
             LogProperties.removeLogProperties();
         }
