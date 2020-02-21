@@ -100,32 +100,33 @@ public class WebdavIfAction extends AbstractAction {
 		IfHeader ifHeader;
 		try {
 			ifHeader = req.getIfHeader();
-			if (ifHeader != null) {
-			    rememberMentionedLocks(req, ifHeader);
-				checkIfs(ifHeader, req, depth);
-			}
-			final List<LoadingHints> lockHints = new ArrayList<LoadingHints>();
-			if (checkSourceLocks) {
-				lockHints.add(preloadSourceLocks(req, depth));
-			}
-			if (checkDestinationLocks) {
-				lockHints.add(preloadDestinationLocks(req));
-			}
+        } catch (IfHeaderParseException e) {
+            LOG.trace("", e);
+            throw WebdavProtocolException.generalError(e, req.getUrl(), HttpServletResponse.SC_PRECONDITION_FAILED);
+        }
 
-			preLoad(lockHints);
+        if (ifHeader != null) {
+            rememberMentionedLocks(req, ifHeader);
+            checkIfs(ifHeader, req, depth);
+        }
+        final List<LoadingHints> lockHints = new ArrayList<LoadingHints>();
+        if (checkSourceLocks) {
+            lockHints.add(preloadSourceLocks(req, depth));
+        }
+        if (checkDestinationLocks) {
+            lockHints.add(preloadDestinationLocks(req));
+        }
 
-			if (checkSourceLocks) {
-				checkNeededLocks(ifHeader,req,depth);
-			}
-			if (checkDestinationLocks || req.getResource().isLockNull()) {
-				checkDestinationLocks(ifHeader, req);
-			}
-		} catch (IfHeaderParseException e) {
-			LOG.trace("", e);
-		}
+        preLoad(lockHints);
+
+        if (checkSourceLocks) {
+            checkNeededLocks(ifHeader, req, depth);
+        }
+        if (checkDestinationLocks || req.getResource().isLockNull()) {
+            checkDestinationLocks(ifHeader, req);
+        }
 
 		yield(req,res);
-
 	}
 
     private void rememberMentionedLocks(WebdavRequest req, IfHeader ifHeader) {
