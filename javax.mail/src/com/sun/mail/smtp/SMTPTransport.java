@@ -151,6 +151,7 @@ public class SMTPTransport extends Transport {
     private String defaultAuthenticationMechanisms;	// set in constructor
 
     private boolean quitWait = false;	// true if we should wait
+    private boolean quitOnSessionReject = false;   // true if we should send quit when session initiation is rejected
 
     private String saslRealm = UNKNOWN;
     private String authorizationID = UNKNOWN;
@@ -236,6 +237,11 @@ public class SMTPTransport extends Transport {
 	// response from the QUIT command
 	quitWait = PropUtil.getBooleanProperty(props,
 				"mail." + name + ".quitwait", true);
+
+    // setting mail.smtp.quitonsessionreject to false causes us to directly
+    // close the socket without sending a QUIT command
+    quitOnSessionReject = PropUtil.getBooleanProperty(props,
+            "mail." + name + ".quitonsessionreject", false);
 
 	// mail.smtp.reportsuccess causes us to throw an exception on success
 	reportSuccess = PropUtil.getBooleanProperty(props,
@@ -2077,9 +2083,9 @@ public class SMTPTransport extends Transport {
 	    validUnsentAddr = new Address[valid.size() + validUnsent.size()];
 	    int i = 0;
 	    for (int j = 0; j < valid.size(); j++)
-		validUnsentAddr[i++] = (Address)valid.get(j);
+		validUnsentAddr[i++] = valid.get(j);
 	    for (int j = 0; j < validUnsent.size(); j++)
-		validUnsentAddr[i++] = (Address)validUnsent.get(j);
+		validUnsentAddr[i++] = validUnsent.get(j);
 	} else if (reportSuccess || (sendPartial &&
 			(invalid.size() > 0 || validUnsent.size() > 0))) {
 	    // we'll go on to send the message, but after sending we'll
@@ -2262,19 +2268,34 @@ public class SMTPTransport extends Transport {
 
 	    int r = -1;
 	    if ((r = readServerResponse()) != 220) {
-		serverSocket.close();
-		serverSocket = null;
-		serverOutput = null;
-		serverInput = null;
-		lineInputStream = null;
-		if (logger.isLoggable(Level.FINE))
-		    logger.fine("could not connect to host \"" +
-				    host + "\", port: " + port +
-				    ", response: " + r);
-		throw new MessagingException(
-			"Could not connect to SMTP host: " + host +
-				    ", port: " + port +
-				    ", response: " + r);
+           try {
+               if (quitOnSessionReject) {
+                   sendCommand("QUIT");
+                   if (quitWait) {
+                       int resp = readServerResponse();
+                       if (resp != 221 && resp != -1 &&
+                           logger.isLoggable(Level.FINE))
+                           logger.fine("QUIT failed with " + resp);
+                   }
+               }
+           } catch (Exception e) {
+               if (logger.isLoggable(Level.FINE))
+                   logger.log(Level.FINE, "QUIT failed", e);
+           } finally {
+               serverSocket.close();
+               serverSocket = null;
+               serverOutput = null;
+               serverInput = null;
+               lineInputStream = null;
+           }
+           if (logger.isLoggable(Level.FINE))
+               logger.fine("could not connect to host \"" +
+                       host + "\", port: " + port +
+                       ", response: " + r);
+           throw new MessagingException(
+                   "Could not connect to SMTP host: " + host +
+                   ", port: " + port +
+                   ", response: " + r);
 	    } else {
 		if (logger.isLoggable(Level.FINE))
 		    logger.fine("connected to host \"" +
@@ -2309,11 +2330,26 @@ public class SMTPTransport extends Transport {
 
 	    int r = -1;
 	    if ((r = readServerResponse()) != 220) {
-		serverSocket.close();
-		serverSocket = null;
-		serverOutput = null;
-		serverInput = null;
-		lineInputStream = null;
+        try {
+            if (quitOnSessionReject) {
+                sendCommand("QUIT");
+                if (quitWait) {
+                    int resp = readServerResponse();
+                    if (resp != 221 && resp != -1 &&
+                        logger.isLoggable(Level.FINE))
+                        logger.fine("QUIT failed with " + resp);
+                }
+            }
+        } catch (Exception e) {
+            if (logger.isLoggable(Level.FINE))
+                logger.log(Level.FINE, "QUIT failed", e);
+        } finally {
+            serverSocket.close();
+            serverSocket = null;
+            serverOutput = null;
+            serverInput = null;
+            lineInputStream = null;
+        }
 		if (logger.isLoggable(Level.FINE))
 		    logger.fine("got bad greeting from host \"" +
 				    host + "\", port: " + port +
@@ -2709,7 +2745,7 @@ public class SMTPTransport extends Transport {
 	else
 	    bytes = ASCIIUtility.getBytes(s);
 	for (int i = 0; i < bytes.length; i++) {
-	    char c = (char)(((int)bytes[i])&0xff);
+	    char c = (char)((bytes[i])&0xff);
 	    if (!utf8 && c >= 128)	// not ASCII
 		throw new IllegalArgumentException(
 			    "Non-ASCII character in SMTP submitter: " + s);
@@ -2720,8 +2756,8 @@ public class SMTPTransport extends Transport {
 		    sb.append(s.substring(0, i));
 		}
 		sb.append('+');
-		sb.append(hexchar[(((int)c)& 0xf0) >> 4]);
-		sb.append(hexchar[((int)c)& 0x0f]);
+        sb.append(hexchar[((c)& 0xf0) >> 4]);
+        sb.append(hexchar[(c)& 0x0f]);
 	    } else {
 		if (sb != null)
 		    sb.append(c);
