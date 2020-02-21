@@ -98,7 +98,7 @@ public class TransportConfigTransportSettings implements TransportSettings {
 
     @Override
     public boolean needsAuthentication() throws OXException {
-        return (!(transportConfig instanceof TransportAuthSupportAware) || (false != ((TransportAuthSupportAware) transportConfig).isAuthSupported()));
+        return (!(transportConfig instanceof TransportAuthSupportAware) || ((TransportAuthSupportAware) transportConfig).isAuthSupported());
     }
 
 }
