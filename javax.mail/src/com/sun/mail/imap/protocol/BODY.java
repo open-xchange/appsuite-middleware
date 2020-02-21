@@ -85,7 +85,7 @@ public class BODY implements Item {
 	    origin = r.readNumber();
 	    r.skip(1); // skip '>';
 	} else
-	    origin = 0;
+	    origin = -1;
 
 	data = r.readByteArray();
     }
@@ -107,5 +107,12 @@ public class BODY implements Item {
 
     public String getSection() {
 	return section;
+    }
+
+    /**
+     * @since   JavaMail 1.6.4
+     */
+    public int getOrigin() {
+    return origin;
     }
 }
