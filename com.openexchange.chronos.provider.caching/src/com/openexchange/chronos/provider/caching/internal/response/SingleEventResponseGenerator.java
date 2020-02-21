@@ -97,7 +97,6 @@ public class SingleEventResponseGenerator extends ResponseGenerator {
             throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(eventId);
         }
         event = storage.getUtilities().loadAdditionalEventData(userId, event, fields);
-        event.setFlags(getFlags(event, userId));
         if (null != recurrenceId) {
             if (isSeriesMaster(event)) {
                 Event exceptionEvent = storage.getEventStorage().loadException(eventId, recurrenceId, fields);
@@ -112,6 +111,7 @@ public class SingleEventResponseGenerator extends ResponseGenerator {
                 throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(eventId, recurrenceId);
             }
         }
+        event.setFlags(getFlags(event, userId));
         return event;
     }
 
