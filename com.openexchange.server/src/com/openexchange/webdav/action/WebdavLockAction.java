@@ -94,6 +94,11 @@ public class WebdavLockAction extends AbstractAction {
 		        }
 		    }
 
+            /*
+             * (re-)check If-header against existing locks on requested resource, allowing multiple shared locks (RFC 4918, 9.10.5)
+             */
+            new WebdavIfAction(0, true, false, Scope.SHARED_LITERAL.equals(lock.getScope())).check(req, false);
+
 			WebdavResource resource = req.getResource();
 
             if (null != lock.getToken()) {

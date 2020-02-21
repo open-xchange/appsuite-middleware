@@ -67,6 +67,7 @@ import com.openexchange.webdav.loader.LoadingHints;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavCollection;
 import com.openexchange.webdav.protocol.WebdavLock;
+import com.openexchange.webdav.protocol.WebdavLock.Scope;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 
@@ -79,37 +80,58 @@ public class WebdavIfAction extends AbstractAction {
 	private int defaultDepth;
 	private boolean checkSourceLocks;
 	private boolean checkDestinationLocks;
+    private boolean ignoreSharedLocks;
 
-	public WebdavIfAction(){}
+    public WebdavIfAction() {
+        this(false, false);
+    }
 
-	public WebdavIfAction(final int defaultDepth, final boolean checkSourceLocks, final boolean checkDestinationLocks) {
-		this.defaultDepth = defaultDepth;
-		this.checkSourceLocks = checkSourceLocks;
-		this.checkDestinationLocks = checkDestinationLocks;
+    public WebdavIfAction(boolean checkSourceLocks, boolean checkDestinationLocks) {
+        this(0, checkSourceLocks, checkDestinationLocks);
+    }
+
+    public WebdavIfAction(int defaultDepth, boolean checkSourceLocks, boolean checkDestinationLocks) {
+        this(defaultDepth, checkSourceLocks, checkDestinationLocks, false);
 	}
 
-	public WebdavIfAction(final boolean checkSourceLocks, final boolean checkDestinationLocks) {
-		this(0,checkSourceLocks,checkDestinationLocks);
-	}
+    /**
+     * Initializes a new {@link WebdavIfAction}.
+     * 
+     * @param defaultDepth The default depth to assume unless specified in request header
+     * @param checkSourceLocks <code>true</code> to check locks on the targeted resource, <code>false</code>, otherwise
+     * @param checkDestinationLocks <code>true</code> to check locks on resource targeted via destination header, <code>false</code>, otherwise
+     * @param ignoreSharedLocks <code>true</code> to ignore locks with {@link Scope#SHARED_LITERAL}, <code>false</code>, otherwise
+     */
+    public WebdavIfAction(int defaultDepth, boolean checkSourceLocks, boolean checkDestinationLocks, boolean ignoreSharedLocks) {
+        super();
+        this.defaultDepth = defaultDepth;
+        this.checkSourceLocks = checkSourceLocks;
+        this.checkDestinationLocks = checkDestinationLocks;
+        this.ignoreSharedLocks = ignoreSharedLocks;
+    }
 
-	@Override
-	public void perform(final WebdavRequest req, final WebdavResponse res)
-			throws WebdavProtocolException {
-		final int depth = getDepth(req);
-
-		IfHeader ifHeader;
-		try {
-			ifHeader = req.getIfHeader();
+    /**
+     * Checks the supplied WebDAV request, without yielding to the next chained action.
+     *
+     * @param req The request to check
+     * @param rememberMentionedLocks <code>true</code> to remember mentioned locks, <code>false</code>, otherwise
+     */
+    public void check(WebdavRequest req, boolean rememberMentionedLocks) throws WebdavProtocolException {
+        int depth = getDepth(req);
+        IfHeader ifHeader;
+        try {
+            ifHeader = req.getIfHeader();
         } catch (IfHeaderParseException e) {
             LOG.trace("", e);
             throw WebdavProtocolException.generalError(e, req.getUrl(), HttpServletResponse.SC_PRECONDITION_FAILED);
         }
-
-        if (ifHeader != null) {
-            rememberMentionedLocks(req, ifHeader);
+        if (null != ifHeader) {
+            if (rememberMentionedLocks) {
+                rememberMentionedLocks(req, ifHeader);
+            }
             checkIfs(ifHeader, req, depth);
         }
-        final List<LoadingHints> lockHints = new ArrayList<LoadingHints>();
+        List<LoadingHints> lockHints = new ArrayList<LoadingHints>();
         if (checkSourceLocks) {
             lockHints.add(preloadSourceLocks(req, depth));
         }
@@ -125,7 +147,11 @@ public class WebdavIfAction extends AbstractAction {
         if (checkDestinationLocks || req.getResource().isLockNull()) {
             checkDestinationLocks(ifHeader, req);
         }
+    }
 
+    @Override
+    public void perform(final WebdavRequest req, final WebdavResponse res) throws WebdavProtocolException {
+        check(req, true);
 		yield(req,res);
 	}
 
@@ -194,10 +220,10 @@ public class WebdavIfAction extends AbstractAction {
 		final Set<String> neededLocks = new HashSet<String>();
 
 		for(final WebdavResource resource : iter) {
-			addLocks(neededLocks, resource);
+            addLocks(neededLocks, resource, ignoreSharedLocks);
 		}
 
-		addLocks(neededLocks, res);
+        addLocks(neededLocks, res, ignoreSharedLocks);
 
 		removeProvidedLocks(ifHeader,neededLocks);
 
@@ -219,8 +245,11 @@ public class WebdavIfAction extends AbstractAction {
 		}
 	}
 
-	private void addLocks(final Set<String> neededLocks, final WebdavResource res) throws WebdavProtocolException {
+    private static void addLocks(final Set<String> neededLocks, final WebdavResource res, boolean ignoreSharedLocks) throws WebdavProtocolException {
 		for(final WebdavLock lock : res.getLocks()) {
+            if (ignoreSharedLocks && Scope.SHARED_LITERAL.equals(lock.getScope())) {
+                continue;
+            }
 			neededLocks.add(lock.getToken());
 		}
 	}

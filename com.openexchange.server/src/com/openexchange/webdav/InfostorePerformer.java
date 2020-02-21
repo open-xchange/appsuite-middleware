@@ -200,7 +200,7 @@ public final class InfostorePerformer implements SessionHolder {
         options = prepare(new WebdavOptionsAction(), true, true, new WebdavIfAction(0, false, false));
         move = prepare(new WebdavMoveAction(infoFactory), true, true, new WebdavExistsAction(), new WebdavIfAction(0, true, true));
         mkcol = prepare(new WebdavMkcolAction(), true, true, new WebdavIfAction(0, true, false));
-        lock = prepare(new WebdavLockAction(), true, true, new WebdavIfAction(0, true, false));
+        lock = prepare(new WebdavLockAction(), true, true, new WebdavIfAction(0, false, false));
         copy = prepare(new WebdavCopyAction(infoFactory), true, true, new WebdavExistsAction(), new WebdavIfAction(0, false, true));
         delete = prepare(new WebdavDeleteAction(), true, true, new WebdavExistsAction(), new WebdavIfAction(0, true, false));
         get = prepare(new WebdavGetAction(), true, false, new WebdavExistsAction(), new WebdavIfAction(0, false, false));

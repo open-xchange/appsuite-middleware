@@ -304,7 +304,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
         }
         loadMetadata();
         return String.format(
-                "http://www.open-xchange.com/webdav/etags/%d-%d-%d-%d",
+                "%d-%d-%d-%d",
                 Integer.valueOf(getSession().getContext().getContextId()),
                 Integer.valueOf(metadata.getId()),
                 Integer.valueOf(metadata.getVersion()),
