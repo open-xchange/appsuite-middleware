@@ -63,8 +63,6 @@ import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.annotation.NonNull;
@@ -74,12 +72,15 @@ import com.openexchange.file.storage.FileStorageCapability;
 import com.openexchange.file.storage.FileStorageCapabilityTools;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.file.storage.owncloud.osgi.Services;
 import com.openexchange.file.storage.owncloud.rest.OwnCloudRestClient;
 import com.openexchange.file.storage.webdav.AbstractWebDAVAccountAccess;
 import com.openexchange.file.storage.webdav.AbstractWebDAVFileAccess;
 import com.openexchange.file.storage.webdav.AbstractWebDAVFolderAccess;
 import com.openexchange.file.storage.webdav.exception.WebdavExceptionCodes;
 import com.openexchange.java.Strings;
+import com.openexchange.rest.client.httpclient.HttpClientService;
+import com.openexchange.rest.client.httpclient.ManagedHttpClient;
 import com.openexchange.session.Session;
 import com.openexchange.webdav.client.WebDAVClient;
 
@@ -91,9 +92,12 @@ import com.openexchange.webdav.client.WebDAVClient;
  */
 public class OwnCloudAccountAccess extends AbstractWebDAVAccountAccess {
 
+    /** The identifier for obtaining a OwnCloud-associated HTTP client */
+    public final static String HTTP_CLIENT_ID = "owncloud";
+
     private static final String REMOTE_PHP = "/remote.php";
     private static final Logger LOG = LoggerFactory.getLogger(OwnCloudAccountAccess.class);
-    
+
     private OwnCloudRestClient restClient;
 
     /**
@@ -179,11 +183,15 @@ public class OwnCloudAccountAccess extends AbstractWebDAVAccountAccess {
             context.setCredentialsProvider(credsProvider);
             context.setAuthCache(authCache);
 
-            CloseableHttpClient client = HttpClients.custom().build();
+            ManagedHttpClient client = initDefaultClient();
             restClient = new OwnCloudRestClient(client, baseUri, context);
         } catch (URISyntaxException e) {
             throw FileStorageExceptionCodes.INVALID_URL.create(host, e.getMessage(), e);
         }
+    }
+
+    private static ManagedHttpClient initDefaultClient() throws OXException {
+        return Services.getServiceLookup().getServiceSafe(HttpClientService.class).getHttpClient(HTTP_CLIENT_ID);
     }
 
 }

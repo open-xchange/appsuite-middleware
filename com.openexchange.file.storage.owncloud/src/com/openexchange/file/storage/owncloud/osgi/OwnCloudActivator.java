@@ -65,11 +65,15 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.owncloud.NextCloudFileStorageService;
+import com.openexchange.file.storage.owncloud.OwnCloudAccountAccess;
 import com.openexchange.file.storage.owncloud.OwnCloudEntityResolver;
 import com.openexchange.file.storage.owncloud.OwnCloudFileStorageService;
 import com.openexchange.file.storage.owncloud.internal.permissions.SimpleOwnCloudEntityResolver;
 import com.openexchange.java.Strings;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.rest.client.httpclient.DefaultHttpClientConfigProvider;
+import com.openexchange.rest.client.httpclient.HttpClientService;
+import com.openexchange.rest.client.httpclient.SpecificHttpClientConfigProvider;
 
 /**
  * {@link OwnCloudActivator}
@@ -85,17 +89,27 @@ public class OwnCloudActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { FileStorageAccountManagerLookupService.class, LeanConfigurationService.class, CapabilityService.class };
+        return new Class[] { FileStorageAccountManagerLookupService.class, LeanConfigurationService.class, CapabilityService.class, HttpClientService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
+        Services.setServiceLookup(this);
         track(OwnCloudEntityResolver.class);
         openTrackers();
+
+        registerService(SpecificHttpClientConfigProvider.class, new DefaultHttpClientConfigProvider(OwnCloudAccountAccess.HTTP_CLIENT_ID, "Open-Xchange OwnCloud HTTP client"));
+
         registerSimpleResolver();
 
         registerService(FileStorageService.class, new OwnCloudFileStorageService(this));
         registerService(FileStorageService.class, new NextCloudFileStorageService(this));
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        super.stopBundle();
+        Services.setServiceLookup(null);
     }
 
     /**
@@ -106,43 +120,47 @@ public class OwnCloudActivator extends HousekeepingActivator {
      */
     private void registerSimpleResolver() throws OXException, IOException {
         LeanConfigurationService config = getServiceSafe(LeanConfigurationService.class);
-        SIMPLE: if(config.getBooleanProperty(SIMPLE_RESOLVER_ENABLED)) {
-            String path = config.getProperty(SIMPLE_RESOLVER_FILE);
-            if(path == null) {
-                LOG.error("Missing property '%s'", SIMPLE_RESOLVER_FILE);
-                break SIMPLE;
-            }
-
-            File file = new File(path);
-            if(file.exists() == false || file.isDirectory()) {
-                LOG.error("Missing property '%s'", SIMPLE_RESOLVER_FILE);
-                break SIMPLE;
-            }
-            List<String> mappings = Files.readAllLines(file.toPath(), Charset.forName("UTF-8"));
-            HashBiMap<String, Integer> users = HashBiMap.create(mappings.size());
-            HashBiMap<String, Integer> groups = HashBiMap.create();
-            mappings.forEach((line) -> {
-                boolean processingGroups = false;
-                String[] splits = Strings.splitBy(line, ':', true);
-                if (splits.length >= 2) {
-                    int x = 0;
-                    if (splits.length == 3) {
-                        processingGroups = splits[x++].contentEquals("group");
-                    }
-                    try {
-                        if (processingGroups) {
-                            groups.put(splits[x++], Integer.valueOf(splits[x++]));
-                        } else {
-                            users.put(splits[x++], Integer.valueOf(splits[x++]));
-                        }
-                    } catch (NumberFormatException e) {
-                        LOG.error("Invalid mapping: %s", e.getMessage(), e);
-                    }
-                }
-            });
-
-            registerService(OwnCloudEntityResolver.class, new SimpleOwnCloudEntityResolver(users, groups));
+        if (config.getBooleanProperty(SIMPLE_RESOLVER_ENABLED) == false) {
+            // Not enabled
+            return;
         }
+
+        String path = config.getProperty(SIMPLE_RESOLVER_FILE);
+        if (path == null) {
+            LOG.error("Missing property '%s'", SIMPLE_RESOLVER_FILE);
+            return;
+        }
+
+        File file = new File(path);
+        if (file.exists() == false || file.isDirectory()) {
+            LOG.error("Missing property '%s'", SIMPLE_RESOLVER_FILE);
+            return;
+        }
+
+        List<String> mappings = Files.readAllLines(file.toPath(), Charset.forName("UTF-8"));
+        HashBiMap<String, Integer> users = HashBiMap.create(mappings.size());
+        HashBiMap<String, Integer> groups = HashBiMap.create();
+        mappings.forEach((line) -> {
+            boolean processingGroups = false;
+            String[] splits = Strings.splitBy(line, ':', true);
+            if (splits.length >= 2) {
+                int x = 0;
+                if (splits.length == 3) {
+                    processingGroups = splits[x++].contentEquals("group");
+                }
+                try {
+                    if (processingGroups) {
+                        groups.put(splits[x++], Integer.valueOf(splits[x++]));
+                    } else {
+                        users.put(splits[x++], Integer.valueOf(splits[x++]));
+                    }
+                } catch (NumberFormatException e) {
+                    LOG.error("Invalid mapping: %s", e.getMessage(), e);
+                }
+            }
+        });
+
+        registerService(OwnCloudEntityResolver.class, new SimpleOwnCloudEntityResolver(users, groups));
     }
 
 }

@@ -57,16 +57,16 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
@@ -77,6 +77,8 @@ import com.openexchange.annotation.NonNull;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.owncloud.rest.OCShares.OCShare;
+import com.openexchange.rest.client.httpclient.HttpClients;
+import com.openexchange.rest.client.httpclient.ManagedHttpClient;
 import com.openexchange.webdav.client.functions.ErrorAwareFunction;
 
 /**
@@ -105,7 +107,7 @@ public class OwnCloudRestClient {
         OwnCloudRestClient.cache = cache;
     }
 
-    private final CloseableHttpClient client;
+    private final ManagedHttpClient client;
     private final String host;
     private final HttpClientContext context;
     private final Callable<OCCapabilities> loader;
@@ -113,11 +115,11 @@ public class OwnCloudRestClient {
     /**
      * Initializes a new {@link OwnCloudRestClient}.
      *
-     * @param client The {@link CloseableHttpClient} to use
+     * @param client The {@link ManagedHttpClient} to use
      * @param host The base path
      * @param context The {@link HttpClientContext} to use for every request or null to use the default one
      */
-    public OwnCloudRestClient(@NonNull CloseableHttpClient client, @NonNull String host, @NonNull HttpClientContext context) {
+    public OwnCloudRestClient(@NonNull ManagedHttpClient client, @NonNull String host, @NonNull HttpClientContext context) {
         super();
         this.client = client;
         this.host = host;
@@ -223,15 +225,16 @@ public class OwnCloudRestClient {
      * Performs the {@link HttpUriRequest}
      *
      * @param <T> The response type
-     * @param method The {@link HttpUriRequest}
+     * @param request The HTTP request to perform
      * @param handler The response handler
      * @return The parsed response
      * @throws OXException
      */
-    private final <T> T perform(HttpUriRequest method, ErrorAwareFunction<JSONObject, T> handler) throws OXException {
+    private final <T> T perform(HttpRequestBase request, ErrorAwareFunction<JSONObject, T> handler) throws OXException {
+        HttpResponse response = null;
         try {
-            method.addHeader(OCS_APIREQUEST_HEADER, "true");
-            CloseableHttpResponse response = client.execute(method, context);
+            request.addHeader(OCS_APIREQUEST_HEADER, "true");
+            response = client.getHttpClient().execute(request, context);
             String json = EntityUtils.toString(response.getEntity());
             return handler.apply(new JSONObject(json));
         } catch (JSONException e) {
@@ -240,6 +243,8 @@ public class OwnCloudRestClient {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage(), e);
         } catch (IOException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage(), e);
+        } finally {
+            HttpClients.close(request, response);
         }
     }
 
