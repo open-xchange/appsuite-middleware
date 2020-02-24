@@ -53,7 +53,8 @@ import static org.slf4j.LoggerFactory.getLogger;
 import java.io.IOException;
 import java.io.InputStream;
 import org.apache.http.HttpEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.HttpResponse;
+import com.openexchange.rest.client.httpclient.HttpClients;
 import com.openexchange.tools.stream.CountingOnlyInputStream;
 
 /**
@@ -64,10 +65,10 @@ import com.openexchange.tools.stream.CountingOnlyInputStream;
  */
 public class HttpResponseStream extends CountingOnlyInputStream {
 
-    private final CloseableHttpResponse response;
+    private final HttpResponse response;
     private final long contentLength;
 
-    public HttpResponseStream(CloseableHttpResponse response) throws IOException {
+    public HttpResponseStream(HttpResponse response) throws IOException {
         super(getEntityStream(response.getEntity()));
         this.response = response;
         this.contentLength = response.getEntity().getContentLength();
@@ -81,7 +82,7 @@ public class HttpResponseStream extends CountingOnlyInputStream {
         try {
             if (0 < contentLength && contentLength > getCount()) {
                 getLogger(HttpResponseStream.class).warn("Closing not entirely consumed response {}", response);
-                response.close();
+                HttpClients.close(response, true);
             }
         } finally {
             super.close();

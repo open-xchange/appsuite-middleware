@@ -61,6 +61,7 @@ import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.impl.client.BasicCredentialsProvider;
@@ -166,7 +167,7 @@ public class SipgateSMSService implements SMSServiceSPI {
              */
             BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
             credentialsProvider.setCredentials(AUTHSCOPE, new UsernamePasswordCredentials(username, password));
-            context.setAttribute("http.auth.credentials-provider", credentialsProvider);
+            context.setAttribute(HttpClientContext.CREDS_PROVIDER, credentialsProvider);
         }
 
         try {

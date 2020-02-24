@@ -52,7 +52,12 @@ package com.openexchange.webdav.client.osgi;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.exception.OXException;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.rest.client.httpclient.DefaultHttpClientConfigProvider;
+import com.openexchange.rest.client.httpclient.HttpClientService;
+import com.openexchange.rest.client.httpclient.SpecificHttpClientConfigProvider;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.webdav.client.WebDAVClient;
 import com.openexchange.webdav.client.WebDAVClientFactory;
 import com.openexchange.webdav.client.jackrabbit.WebDAVClientImpl;
@@ -76,18 +81,22 @@ public class WebDAVClientActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+        return new Class<?>[] { HttpClientService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         try {
             LOG.info("starting bundle {}", context.getBundle());
+
+            registerService(SpecificHttpClientConfigProvider.class, new DefaultHttpClientConfigProvider(WebDAVClientImpl.HTTP_CLIENT_ID, "Open-Xchange WebDAV client"));
+
+            ServiceLookup services = this;
             registerService(WebDAVClientFactory.class, new WebDAVClientFactory() {
 
                 @Override
-                public WebDAVClient create(String baseUrl, String login, String password) {
-                    return new WebDAVClientImpl(baseUrl, login, password);
+                public WebDAVClient create(String baseUrl, String login, String password) throws OXException {
+                    return new WebDAVClientImpl(baseUrl, login, password, services);
                 }
 
                 @Override

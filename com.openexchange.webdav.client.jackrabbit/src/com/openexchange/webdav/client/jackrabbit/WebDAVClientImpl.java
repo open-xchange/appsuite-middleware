@@ -53,6 +53,7 @@ import static com.openexchange.webdav.client.jackrabbit.Utils.addHeaders;
 import static com.openexchange.webdav.client.jackrabbit.Utils.asOXException;
 import static com.openexchange.webdav.client.jackrabbit.Utils.getPropertyNameSet;
 import static com.openexchange.webdav.client.jackrabbit.Utils.getPropertySet;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.net.URI;
@@ -68,15 +69,22 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.FileEntity;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.protocol.HttpContext;
 import org.apache.jackrabbit.webdav.DavException;
 import org.apache.jackrabbit.webdav.DavServletResponse;
 import org.apache.jackrabbit.webdav.MultiStatus;
@@ -101,7 +109,10 @@ import org.w3c.dom.Element;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
+import com.openexchange.rest.client.httpclient.HttpClientService;
 import com.openexchange.rest.client.httpclient.HttpClients;
+import com.openexchange.rest.client.httpclient.ManagedHttpClient;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.webdav.client.WebDAVClient;
 import com.openexchange.webdav.client.WebDAVClientException;
 import com.openexchange.webdav.client.WebDAVClientExceptionCodes;
@@ -117,34 +128,54 @@ import com.openexchange.webdav.client.functions.ErrorAwareFunction;
  */
 public class WebDAVClientImpl implements WebDAVClient {
 
-    private final CloseableHttpClient client;
+    /** The identifier for obtaining a WebDAV-associated HTTP client */
+    public final static String HTTP_CLIENT_ID = "webdavclient";
+
+    private final HttpClientProvider clientProvider;
+    private final HttpContext context;
     private final String baseUrl;
 
     /**
      * Initializes a new {@link WebDAVClientImpl}.
      *
-     * @param client The underlying HTTP client to use
+     * @param clientProvider The provides the HTTP client to use
+     * @param context The context to pass when executing an HTTP request
      * @param baseUrl The URL of the WebDAV host to connect to
      */
-    public WebDAVClientImpl(CloseableHttpClient client, String baseUrl) {
+    private WebDAVClientImpl(HttpClientProvider clientProvider, HttpContext context, String baseUrl) {
         super();
-        this.client = client;
+        this.clientProvider = clientProvider;
+        this.context = context;
         this.baseUrl = baseUrl;
     }
 
     /**
      * Initializes a new {@link WebDAVClientImpl}.
      *
+     * @param client The underlying HTTP client to use
      * @param baseUrl The URL of the WebDAV host to connect to
-     * @param login The username to use for authentication
-     * @param password The password to use for authentication
+     * @param services The service look-up providing OSGi services
      */
-    public WebDAVClientImpl(String baseUrl, String login, String password) {
-        this(initDefaultClient(login, password), baseUrl);
+    public WebDAVClientImpl(CloseableHttpClient client, String baseUrl) {
+        this(new InstanceHttpClientProvider(client), null, baseUrl);
     }
 
-    public void close() {
-        Streams.close(client);
+    /**
+     * Initializes a new {@link WebDAVClientImpl}.
+     *
+     * @param baseUrl The URL of the WebDAV host to connect to
+     * @param login The user name to use for authentication
+     * @param password The password to use for authentication
+     * @param services The service look-up providing OSGi services
+     * @throws OXException If initialization fails
+     */
+    public WebDAVClientImpl(String baseUrl, String login, String password, ServiceLookup services) throws IllegalStateException, OXException {
+        this(new ManagedHttpClientProvider(initDefaultClient(services)), initDefaultContext(login, password), baseUrl);
+    }
+
+    private HttpResponse execute(HttpUriRequest request) throws IOException, ClientProtocolException {
+        HttpClient client = clientProvider.getHttpClient();
+        return context == null ? client.execute(request) : client.execute(request, context);
     }
 
     @Override
@@ -153,7 +184,7 @@ public class WebDAVClientImpl implements WebDAVClient {
         HttpResponse response = null;
         try {
             request = addHeaders(new HttpPropfind(getUri(href), getPropertyNameSet(props), depth), headers);
-            response = client.execute(request);
+            response = execute(request);
             request.checkSuccess(response);
             MultiStatus multiStatus = request.getResponseBodyAsMultiStatus(response);
             return parseResources(multiStatus, DavServletResponse.SC_OK);
@@ -175,7 +206,7 @@ public class WebDAVClientImpl implements WebDAVClient {
 
             HttpReport report = new HttpReport(getUri(href), reportInfo);
             request = addHeaders(report, headers);
-            response = client.execute(request);
+            response = execute(request);
             Document doc = request.getResponseBodyAsDocument(response.getEntity());
             request.checkSuccess(response);
             return handler.apply(doc);
@@ -216,7 +247,7 @@ public class WebDAVClientImpl implements WebDAVClient {
             request.setEntity(entity);
 
             request = addHeaders(request, headers);
-            response = client.execute(request);
+            response = execute(request);
             HttpEntity responseEntity = response.getEntity();
             Document doc = request.getResponseBodyAsDocument(responseEntity);
             request.checkSuccess(response);
@@ -234,7 +265,7 @@ public class WebDAVClientImpl implements WebDAVClient {
         HttpResponse response = null;
         try {
             request = addHeaders(new HttpDelete(getUri(href)), headers);
-            response = client.execute(request);
+            response = execute(request);
             request.checkSuccess(response);
         } catch (Exception e) {
             throw asOXException(e);
@@ -250,7 +281,7 @@ public class WebDAVClientImpl implements WebDAVClient {
         try {
             request = addHeaders(new HttpHead(getUri(href)), headers);
             request = new HttpHead(getUri(href));
-            response = client.execute(request);
+            response = execute(request);
             int status = response.getStatusLine().getStatusCode();
             if (status >= 200 && status <= 299) {
                 return true;
@@ -269,10 +300,10 @@ public class WebDAVClientImpl implements WebDAVClient {
     @Override
     public InputStream get(String href, Map<String, String> headers) throws WebDAVClientException {
         HttpGet request = null;
-        CloseableHttpResponse response = null;
+        HttpResponse response = null;
         try {
             request = addHeaders(new HttpGet(getUri(href)), headers);
-            response = client.execute(request);
+            response = execute(request);
             int status = response.getStatusLine().getStatusCode();
             if (status >= 200 && status <= 299) {
                 HttpResponseStream responseStream = new HttpResponseStream(response);
@@ -294,7 +325,7 @@ public class WebDAVClientImpl implements WebDAVClient {
         HttpResponse response = null;
         try {
             request = addHeaders(new HttpMkcol(getUri(href)), headers);
-            response = client.execute(request);
+            response = execute(request);
             request.checkSuccess(response);
         } catch (Exception e) {
             throw asOXException(e);
@@ -309,7 +340,7 @@ public class WebDAVClientImpl implements WebDAVClient {
         HttpResponse response = null;
         try {
             request = addHeaders(new HttpMove(getUri(href), getUri(destinationHref), true), headers);
-            response = client.execute(request);
+            response = execute(request);
             request.checkSuccess(response);
         } catch (Exception e) {
             throw asOXException(e);
@@ -324,7 +355,7 @@ public class WebDAVClientImpl implements WebDAVClient {
         HttpResponse response = null;
         try {
             request = addHeaders(new HttpCopy(getUri(href), getUri(destinationHref), true, true), headers);
-            response = client.execute(request);
+            response = execute(request);
             request.checkSuccess(response);
         } catch (Exception e) {
             throw asOXException(e);
@@ -339,7 +370,7 @@ public class WebDAVClientImpl implements WebDAVClient {
         HttpResponse response = null;
         try {
             request = addHeaders(new HttpProppatch(getUri(href), getPropertySet(propsToSet), getPropertyNameSet(propsToRemove)), headers);
-            response = client.execute(request);
+            response = execute(request);
             request.checkSuccess(response);
         } catch (Exception e) {
             throw asOXException(e);
@@ -375,7 +406,7 @@ public class WebDAVClientImpl implements WebDAVClient {
         HttpResponse response = null;
         try {
             request = addHeaders(new HttpLock(getUri(href), lockInfo), headers);
-            response = client.execute(request);
+            response = execute(request);
             request.checkSuccess(response);
             return request.getLockToken(response);
         } catch (Exception e) {
@@ -391,7 +422,7 @@ public class WebDAVClientImpl implements WebDAVClient {
         HttpResponse response = null;
         try {
             request = addHeaders(new HttpUnlock(getUri(href), lockToken), headers);
-            response = client.execute(request);
+            response = execute(request);
             request.checkSuccess(response);
         } catch (Exception e) {
             throw asOXException(e);
@@ -419,7 +450,7 @@ public class WebDAVClientImpl implements WebDAVClient {
         try {
             request = addHeaders(new HttpPut(getUri(href)), headers);
             request.setEntity(entity);
-            response = client.execute(request);
+            response = execute(request);
             int status = response.getStatusLine().getStatusCode();
             if (status >= 200 && status <= 299) {
                 return;
@@ -436,11 +467,53 @@ public class WebDAVClientImpl implements WebDAVClient {
         return URI.create(baseUrl + href);
     }
 
-    private static CloseableHttpClient initDefaultClient(String login, String password) {
-        HttpClients.ClientConfig config = HttpClients.ClientConfig.newInstance();
-        config.setUserAgent("Open-Xchange WebDAV client");
-        config.setCredentials(login, password);
-        return HttpClients.getHttpClient(config);
+    // ------------------------------------------------ Static helpers ----------------------------------------------------------------------
+
+    private static ManagedHttpClient initDefaultClient(ServiceLookup services) throws OXException {
+        return services.getServiceSafe(HttpClientService.class).getHttpClient(HTTP_CLIENT_ID);
     }
 
+    private static HttpContext initDefaultContext(String login, String password) {
+        BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+        credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(login, password));
+
+        HttpClientContext context = HttpClientContext.create();
+        context.setCredentialsProvider(credentialsProvider);
+        return context;
+    }
+
+    private static interface HttpClientProvider {
+
+        HttpClient getHttpClient();
+    }
+
+    private static class InstanceHttpClientProvider implements HttpClientProvider {
+
+        private final HttpClient client;
+
+        InstanceHttpClientProvider(HttpClient client) {
+            super();
+            this.client = client;
+        }
+
+        @Override
+        public HttpClient getHttpClient() {
+            return client;
+        }
+    }
+
+    private static class ManagedHttpClientProvider implements HttpClientProvider {
+
+        private final ManagedHttpClient managedHttpClient;
+
+        ManagedHttpClientProvider(ManagedHttpClient managedHttpClient) {
+            super();
+            this.managedHttpClient = managedHttpClient;
+        }
+
+        @Override
+        public HttpClient getHttpClient() {
+            return managedHttpClient.getHttpClient();
+        }
+    }
 }

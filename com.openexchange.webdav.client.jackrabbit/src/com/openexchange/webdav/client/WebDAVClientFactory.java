@@ -50,6 +50,7 @@
 package com.openexchange.webdav.client;
 
 import org.apache.http.impl.client.CloseableHttpClient;
+import com.openexchange.exception.OXException;
 import com.openexchange.webdav.client.jackrabbit.WebDAVClientImpl;
 
 /**
@@ -66,8 +67,9 @@ public interface WebDAVClientFactory {
      * @param client The underlying HTTP client to use
      * @param baseUrl The URL of the WebDAV host to connect to
      * @return An initialized WebDAV client
+     * @throws If WebDAV client cannot be created
      */
-    WebDAVClient create(CloseableHttpClient client, String baseUrl);
+    WebDAVClient create(CloseableHttpClient client, String baseUrl) throws OXException;
 
     /**
      * Initializes a new {@link WebDAVClientImpl}.
@@ -76,8 +78,9 @@ public interface WebDAVClientFactory {
      * @param login The username to use for authentication
      * @param password The password to use for authentication
      * @return An initialized WebDAV client
+     * @throws If WebDAV client cannot be created
      */
-    WebDAVClient create(String baseUrl, String login, String password);
+    WebDAVClient create(String baseUrl, String login, String password) throws OXException;
 
 }
 
