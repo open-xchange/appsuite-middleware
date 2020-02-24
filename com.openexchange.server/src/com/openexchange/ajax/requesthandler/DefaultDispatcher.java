@@ -103,6 +103,8 @@ import io.micrometer.core.instrument.Timer;
  */
 public class DefaultDispatcher implements Dispatcher {
 
+    private static final String UNKNOWN_METRIC_RECORD = "UNKNOWN";
+
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DefaultDispatcher.class);
 
     private static final String OK_RECORD_STATUS = "OK";
@@ -166,9 +168,11 @@ public class DefaultDispatcher implements Dispatcher {
     @Override
     public AJAXRequestResult perform(final AJAXRequestData requestData, final AJAXState state, final ServerSession session) throws OXException {
         final long startTime = System.currentTimeMillis();
+        String moduleToRecord = UNKNOWN_METRIC_RECORD;
+        String actionToRecord = UNKNOWN_METRIC_RECORD;
 
         if (null == session) {
-            recordRequest(requestData.getModule(), requestData.getAction(), AjaxExceptionCodes.MISSING_PARAMETER.getCategory().toString(), System.currentTimeMillis() - startTime);
+            recordRequest(moduleToRecord, actionToRecord, AjaxExceptionCodes.MISSING_PARAMETER.getCategory().toString(), System.currentTimeMillis() - startTime);
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(AJAXServlet.PARAMETER_SESSION);
         }
 
@@ -187,11 +191,13 @@ public class DefaultDispatcher implements Dispatcher {
             if (factory == null) {
                 throw AjaxExceptionCodes.UNKNOWN_MODULE.create(modifiedRequestData.getModule());
             }
+            moduleToRecord = modifiedRequestData.getModule();
 
             AJAXActionService action = factory.createActionService(modifiedRequestData.getAction());
             if (action == null) {
                 throw AjaxExceptionCodes.UNKNOWN_ACTION_IN_MODULE.create(modifiedRequestData.getAction(), modifiedRequestData.getModule());
             }
+            actionToRecord = modifiedRequestData.getAction();
 
             // Load request body if stream is not preferred
             if (false == preferStream(modifiedRequestData.getModule(), modifiedRequestData.getAction(), action)) {
@@ -252,7 +258,7 @@ public class DefaultDispatcher implements Dispatcher {
                         try {
                             long maxRequestAgeMillis = jobQueue.getMaxRequestAgeMillis();
                             final AJAXRequestResult result = jobQueue.enqueueAndWait(job.build(), maxRequestAgeMillis, TimeUnit.MILLISECONDS).get(true);
-                            recordRequest(requestData.getModule(), requestData.getAction(), OK_RECORD_STATUS, System.currentTimeMillis() - startTime);
+                            recordRequest(moduleToRecord, actionToRecord, OK_RECORD_STATUS, System.currentTimeMillis() - startTime);
                             return result;
                         } catch (InterruptedException e) {
                             // Keep interrupted state
@@ -261,7 +267,7 @@ public class DefaultDispatcher implements Dispatcher {
                         } catch (EnqueuedException e) {
                             // Result not computed in time
                             LOG.debug("Action \"{}\" of module \"{}\" could not be executed in time for user {} in context {}.", requestData.getAction(), requestData.getModule(), I(session.getUserId()), I(session.getContextId()), e);
-                            recordRequest(requestData.getModule(), requestData.getAction(), OK_RECORD_STATUS, System.currentTimeMillis() - startTime);
+                            recordRequest(moduleToRecord, actionToRecord, OK_RECORD_STATUS, System.currentTimeMillis() - startTime);
                             return new AJAXRequestResult(e.getJobInfo(), "enqueued");
                         }
                     }
@@ -269,7 +275,7 @@ public class DefaultDispatcher implements Dispatcher {
             }
 
             AJAXRequestResult result = doPerform(action, factory, modifiedRequestData, state, customizers, session);
-            recordRequest(requestData.getModule(), requestData.getAction(), OK_RECORD_STATUS, System.currentTimeMillis() - startTime);
+            recordRequest(moduleToRecord, actionToRecord, OK_RECORD_STATUS, System.currentTimeMillis() - startTime);
             return result;
         } catch (OXException e) {
             for (AJAXActionCustomizer customizer : customizers) {
@@ -285,7 +291,7 @@ public class DefaultDispatcher implements Dispatcher {
                 UserAwareSSLConfigurationService userAwareSSLConfigurationService = ServerServiceRegistry.getInstance().getService(UserAwareSSLConfigurationService.class);
                 if (null != userAwareSSLConfigurationService) {
                     if (userAwareSSLConfigurationService.isAllowedToDefineTrustLevel(session.getUserId(), session.getContextId())) {
-                        recordRequest(requestData.getModule(), requestData.getAction(), SSLExceptionCode.UNTRUSTED_CERT_USER_CONFIG.getCategory().toString(), System.currentTimeMillis() - startTime);
+                        recordRequest(moduleToRecord, actionToRecord, SSLExceptionCode.UNTRUSTED_CERT_USER_CONFIG.getCategory().toString(), System.currentTimeMillis() - startTime);
                         throw SSLExceptionCode.UNTRUSTED_CERT_USER_CONFIG.create(e.getDisplayArgs());
                     }
                 }
@@ -295,25 +301,25 @@ public class DefaultDispatcher implements Dispatcher {
                 Throwable t = ExceptionUtils.getRootCause(e);
                 if (t instanceof OXException) {
                     OXException oxe = (OXException) t;
-                    recordRequest(requestData.getModule(), requestData.getAction(), oxe.getCategory().toString(), System.currentTimeMillis() - startTime);
+                    recordRequest(moduleToRecord, actionToRecord, oxe.getCategory().toString(), System.currentTimeMillis() - startTime);
                     throw oxe;
                 }
             }
-            recordRequest(requestData.getModule(), requestData.getAction(), e.getCategory().toString(), System.currentTimeMillis() - startTime);
+            recordRequest(moduleToRecord, actionToRecord, e.getCategory().toString(), System.currentTimeMillis() - startTime);
             throw e;
         } catch (RuntimeException e) {
             if ("org.mozilla.javascript.WrappedException".equals(e.getClass().getName())) {
                 // Handle special Rhino wrapper error
                 Throwable wrapped = e.getCause();
                 if (wrapped instanceof OXException) {
-                    recordRequest(requestData.getModule(), requestData.getAction(), ((OXException)wrapped).getCategory().toString(), System.currentTimeMillis() - startTime);
+                    recordRequest(moduleToRecord, actionToRecord, ((OXException)wrapped).getCategory().toString(), System.currentTimeMillis() - startTime);
                     throw (OXException) wrapped;
                 }
             }
 
             // Wrap unchecked exception
             addLogProperties(requestData, true);
-            recordRequest(requestData.getModule(), requestData.getAction(), AjaxExceptionCodes.UNEXPECTED_ERROR.getCategory().toString(), System.currentTimeMillis() - startTime);
+            recordRequest(moduleToRecord, actionToRecord, AjaxExceptionCodes.UNEXPECTED_ERROR.getCategory().toString(), System.currentTimeMillis() - startTime);
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             RequestContextHolder.reset();
