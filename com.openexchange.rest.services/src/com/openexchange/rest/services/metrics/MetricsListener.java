@@ -51,6 +51,7 @@ package com.openexchange.rest.services.metrics;
 
 import java.time.Duration;
 import java.util.List;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.Response.StatusType;
@@ -94,6 +95,8 @@ public class MetricsListener implements ApplicationEventListener  {
      */
     private static class RequestListener implements RequestEventListener {
         
+        private static final String METHOD_NOT_ALLOWED = "METHOD_NOT_ALLOWED";
+        private static final String INVALID = "INVALID";
         private final long start;
 
         /**
@@ -122,6 +125,11 @@ public class MetricsListener implements ApplicationEventListener  {
                     Throwable exception = event.getException();
                     if(exception instanceof WebApplicationException) {
                         WebApplicationException we = (WebApplicationException) exception;
+                        if(we instanceof NotFoundException) {
+                            Duration duration = Duration.ofMillis(System.currentTimeMillis() - start);
+                            getTimer(INVALID, METHOD_NOT_ALLOWED, 404).record(duration);
+                            return;
+                        }
                         status = we.getResponse().getStatusInfo();
                     }
                 } else {
@@ -130,7 +138,7 @@ public class MetricsListener implements ApplicationEventListener  {
                     }
                 }
                 Duration duration = Duration.ofMillis(System.currentTimeMillis() - start);
-                getTimer(path, event.getContainerRequest().getMethod(), status.getStatusCode()).record(duration);
+                getTimer(path, status.equals(Status.METHOD_NOT_ALLOWED) ? METHOD_NOT_ALLOWED : event.getContainerRequest().getMethod(), status.getStatusCode()).record(duration);
             }
         }
         
