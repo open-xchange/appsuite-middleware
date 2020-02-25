@@ -110,8 +110,7 @@ public class BasicAuthHttpContext implements HttpContext {
         try {
             String authzHeader = request.getHeader(AUTH_HEADER);
             String loginAndPassword = new String(Base64.getDecoder().decode(authzHeader.substring(6)));
-
-            String[] creds = Strings.splitByColon(loginAndPassword);
+            String[] creds = loginAndPassword.split(":", 2);
             if (creds.length != 2 || Strings.isEmpty(creds[0]) || Strings.isEmpty(creds[1])) {
                 return false;
             }
