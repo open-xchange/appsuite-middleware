@@ -78,21 +78,20 @@ public class multipart_mixed extends handler_base {
      */
     @Override
     public void writeTo(Object obj, String mimeType, OutputStream os) 
-			throws IOException {
-    if (!(obj instanceof Message))
+            throws IOException {
+    if (!(obj instanceof Multipart))
         throw new IOException("\"" + getDataFlavors()[0].getMimeType() +
-        "\" DataContentHandler requires Message object, " +
+        "\" DataContentHandler requires Multipart object, " +
         "was given object of type " + obj.getClass().toString() +
         "; obj.cl " + obj.getClass().getClassLoader() +
-        ", Message.cl " + Message.class.getClassLoader());
+        ", Multipart.cl " + Multipart.class.getClassLoader());
 
-    // if the object is a message, we know how to write that out
-    Message m = (Message)obj;
     try {
-        m.writeTo(os);
-    } catch (MessagingException me) {
-        IOException ioex = new IOException("Exception writing message");
-        ioex.initCause(me);
+        ((Multipart)obj).writeTo(os);
+    } catch (MessagingException e) {
+        IOException ioex =
+        new IOException("Exception writing Multipart");
+        ioex.initCause(e);
         throw ioex;
     }
     }
