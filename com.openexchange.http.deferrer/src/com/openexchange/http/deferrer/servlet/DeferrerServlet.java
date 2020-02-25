@@ -51,9 +51,6 @@ package com.openexchange.http.deferrer.servlet;
 
 import static com.openexchange.ajax.AJAXUtility.encodeUrl;
 import static com.openexchange.java.Strings.isEmpty;
-import com.openexchange.config.lean.DefaultProperty;
-import com.openexchange.config.lean.LeanConfigurationService;
-import com.openexchange.config.lean.Property;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Collections;
@@ -69,6 +66,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
+import com.openexchange.config.lean.DefaultProperty;
+import com.openexchange.config.lean.LeanConfigurationService;
+import com.openexchange.config.lean.Property;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.http.deferrer.CustomRedirectURLDetermination;
 import com.openexchange.http.deferrer.impl.DefaultDeferringURLService;
@@ -84,7 +84,7 @@ public class DeferrerServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1358634554782437089L;
 
-    private static final Property MAX_PARAMETER_LENGTH_PROP = DefaultProperty.valueOf("com.openexchange.http.deferrer.maxParameterLength", Long.valueOf(1024*10l)); // 10 KB
+    private static final Property MAX_PARAMETER_LENGTH_PROP = new DefaultProperty("com.openexchange.http.deferrer.maxParameterLength", Long.valueOf(1024*10l)); // 10 KB
 
     /**
      * The listing for custom handlers.

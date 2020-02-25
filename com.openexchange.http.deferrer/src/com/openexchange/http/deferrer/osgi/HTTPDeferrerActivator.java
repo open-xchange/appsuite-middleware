@@ -63,6 +63,7 @@ import com.openexchange.http.deferrer.impl.DefaultDeferringURLService;
 import com.openexchange.http.deferrer.servlet.DeferrerServlet;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
+import com.openexchange.server.ServiceExceptionCode;
 
 /**
  * {@link HTTPDeferrerActivator}
@@ -86,7 +87,11 @@ public class HTTPDeferrerActivator extends HousekeepingActivator {
         final DispatcherPrefixService prefixService = getService(DispatcherPrefixService.class);
         DefaultDeferringURLService.PREFIX.set(prefixService);
         String alias = prefixService.getPrefix() + "defer";
-        getService(HttpService.class).registerServlet(alias, new DeferrerServlet(getServiceSafe(LeanConfigurationService.class)), null, null);
+        LeanConfigurationService leanConfigurationService = getService(LeanConfigurationService.class);
+        if(leanConfigurationService == null) {
+            throw ServiceExceptionCode.absentService(LeanConfigurationService.class);
+        }
+        getService(HttpService.class).registerServlet(alias, new DeferrerServlet(leanConfigurationService), null, null);
         this.alias = alias;
 
         registerService(DeferringURLService.class, new DefaultDeferringURLService() {
