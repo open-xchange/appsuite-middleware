@@ -407,7 +407,10 @@ public class MimeMessage extends Message implements MimePart {
      */
     @Override
     public void setFrom(Address address) throws MessagingException {
-    setAddressHeader("From", new Address[] { address });
+    if (address == null)
+        removeHeader("From");
+    else
+        setAddressHeader("From", new Address[] { address });
     }
 
     /**
@@ -425,7 +428,10 @@ public class MimeMessage extends Message implements MimePart {
      * @since		JvaMail 1.5
      */
     public void setFrom(String address) throws MessagingException {
-    setAddressHeader("From", InternetAddress.parse(address));
+    if (address == null)
+        removeHeader("From");
+    else
+        setAddressHeader("From", InternetAddress.parse(address));
     }
 
     /**
@@ -507,7 +513,10 @@ public class MimeMessage extends Message implements MimePart {
      * @since		JavaMail 1.3
      */
     public void setSender(Address address) throws MessagingException {
-    setAddressHeader("Sender", new Address[] { address });
+    if (address == null)
+        removeHeader("Sender");
+    else
+        setAddressHeader("Sender", new Address[] { address });
     }
 
     /**
