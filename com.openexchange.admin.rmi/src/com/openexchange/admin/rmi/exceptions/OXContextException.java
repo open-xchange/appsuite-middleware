@@ -106,4 +106,8 @@ public class OXContextException extends Exception {
     public OXContextException( String s ) {
         super( s );
     }
+
+    public OXContextException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

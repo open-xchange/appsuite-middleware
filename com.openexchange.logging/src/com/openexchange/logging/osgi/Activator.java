@@ -69,7 +69,6 @@ import com.openexchange.config.Reloadable;
 import com.openexchange.config.Reloadables;
 import com.openexchange.logging.LogLevelService;
 import com.openexchange.logging.LogConfigurationService;
-import com.openexchange.logging.filter.MDCEnablerTurboFilter;
 import com.openexchange.logging.filter.ParamsCheckingTurboFilter;
 import com.openexchange.logging.filter.RankingAwareTurboFilterList;
 import com.openexchange.logging.internal.IncludeStackTraceServiceImpl;
@@ -150,7 +149,6 @@ public class Activator implements BundleActivator, Reloadable {
         RankingAwareTurboFilterList rankingAwareTurboFilterList = initialiseRankingAwareTurboFilterList(loggerContext);
 
         // Add static turbo filters
-        rankingAwareTurboFilterList.addTurboFilter(new MDCEnablerTurboFilter());
         rankingAwareTurboFilterList.addTurboFilter(new ParamsCheckingTurboFilter());
 
         // Register services

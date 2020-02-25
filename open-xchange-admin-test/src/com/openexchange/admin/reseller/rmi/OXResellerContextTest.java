@@ -51,6 +51,7 @@ package com.openexchange.admin.reseller.rmi;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import java.rmi.RemoteException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -58,7 +59,6 @@ import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.factory.ResellerAdminFactory;
@@ -76,6 +76,7 @@ public class OXResellerContextTest extends AbstractOXResellerTest {
         super();
     }
 
+    @Override
     @Before
     public final void setUp() throws Exception {
         super.setUp();
@@ -83,6 +84,7 @@ public class OXResellerContextTest extends AbstractOXResellerTest {
         getResellerManager().create(randomAdmin);
     }
 
+    @Override
     @After
     public final void tearDown() throws Exception {
         final ResellerAdmin[] adms = getResellerManager().search(randomAdmin.getName());
@@ -91,17 +93,25 @@ public class OXResellerContextTest extends AbstractOXResellerTest {
         }
     }
 
-    @Test(expected = InvalidCredentialsException.class)
+    @Test
     public void testListAllContextInvalidAuthNoUser() throws Exception {
         ResellerAdmin second = ResellerAdminFactory.createRandomResellerAdmin();
-        getContextManager().listAll(ResellerRandomCredentials(second.getName()));
+        try {
+            getContextManager().listAll(ResellerRandomCredentials(second.getName()));
+        } catch (RemoteException e) {
+            checkException(e);
+        }
     }
 
-    @Test(expected = InvalidCredentialsException.class)
+    @Test
     public void testListAllContextInvalidAuthWrongpasswd() throws Exception {
-        Credentials creds = ResellerRandomCredentials(randomAdmin.getName());
-        creds.setPassword("wrongpass");
-        getContextManager().listAll(creds);
+        try {
+            Credentials creds = ResellerRandomCredentials(randomAdmin.getName());
+            creds.setPassword("wrongpass");
+            getContextManager().listAll(creds);
+        } catch (RemoteException e) {
+            checkException(e);
+        }
     }
 
     @Test

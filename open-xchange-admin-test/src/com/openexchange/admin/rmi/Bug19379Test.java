@@ -54,11 +54,11 @@ import static com.openexchange.java.Autoboxing.L;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import java.rmi.RemoteException;
 import java.util.HashSet;
 import org.junit.Test;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.User;
-import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.factory.ContextFactory;
 
@@ -192,7 +192,7 @@ public class Bug19379Test extends AbstractRMITest {
         Context context = new Context(I(contextID));
         try {
             getContextManager().delete(context);
-        } catch (NoSuchContextException e) {
+        } catch (RemoteException e) {
             // Ignore
         }
     }

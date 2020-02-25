@@ -382,6 +382,23 @@ public final class LogProperties {
          * A special log property that controls whether regular untagged IMAP responses are supposed to be discarded
          */
         IMAP_DISCARD_RESPONSES("mail.imap.discardresponses"),
+
+        /**
+         * com.openexchange.provisioning.adminName
+         */
+        PROVISIONING_ADMIN_NAME("com.openexchange.provisioning.adminName"),
+        /**
+         * com.openexchange.provisioning.contextId
+         */
+        PROVISIONING_AFFECTED_CTX("com.openexchange.provisioning.contextId"),
+        /**
+         * com.openexchange.provisioning.objectId
+         */
+        PROVISIONING_AFFECTED_OBJECT("com.openexchange.provisioning.objectId"),
+        /**
+         * com.openexchange.provisioning.exceptionId
+         */
+        PROVISIONING_EXCEPTION_ID("com.openexchange.provisioning.exceptionId"),
         ;
 
         private final String name;
@@ -975,6 +992,37 @@ public final class LogProperties {
             hostname = LogProperties.get(Name.GRIZZLY_SERVER_NAME);
         }
         return hostname;
+    }
+
+    /**
+     * Puts provisioning related properties
+     *
+     * @param adminName The admin/reseller name
+     * @param exceptionId The exception identifier
+     * @param contextId The context identifier
+     * @param objectId The object identifier
+     */
+    public static void putProvisioningLogProperties(String adminName, String exceptionId, String contextId, String objectId) {
+        if (Strings.isNotEmpty(adminName)) {
+            MDC.put(Name.PROVISIONING_ADMIN_NAME.getName(), adminName);
+        }
+        if (Strings.isNotEmpty(exceptionId)) {
+            MDC.put(Name.PROVISIONING_EXCEPTION_ID.getName(), exceptionId);
+        }
+        if (Strings.isNotEmpty(contextId)) {
+            MDC.put(Name.PROVISIONING_AFFECTED_CTX.getName(), contextId);
+        }
+        if (Strings.isNotEmpty(objectId)) {
+            MDC.put(Name.PROVISIONING_AFFECTED_OBJECT.getName(), objectId);
+        }
+    }
+
+    /**
+     * Removes all provisioning related properties
+     *
+     */
+    public static void removeProvisioningLogProperties() {
+        removeProperties(Name.PROVISIONING_ADMIN_NAME, Name.PROVISIONING_AFFECTED_CTX, Name.PROVISIONING_AFFECTED_OBJECT, Name.PROVISIONING_EXCEPTION_ID);
     }
 
 }

@@ -141,10 +141,6 @@ public final class AuthenticatorImpl implements Authenticator, Reloadable {
             final OXException oxe = OXException.general(e.getMessage());
             oxe.setStackTrace(e.getStackTrace());
             throw oxe;
-        } catch (InvalidDataException e) {
-            final OXException oxe = OXException.general(e.getMessage());
-            oxe.setStackTrace(e.getStackTrace());
-            throw oxe;
         }
     }
 
@@ -157,10 +153,6 @@ public final class AuthenticatorImpl implements Authenticator, Reloadable {
             oxe.setStackTrace(e.getStackTrace());
             throw oxe;
         } catch (StorageException e) {
-            final OXException oxe = OXException.general(e.getMessage());
-            oxe.setStackTrace(e.getStackTrace());
-            throw oxe;
-        } catch (InvalidDataException e) {
             final OXException oxe = OXException.general(e.getMessage());
             oxe.setStackTrace(e.getStackTrace());
             throw oxe;

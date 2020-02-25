@@ -51,6 +51,8 @@ package com.openexchange.admin.reseller.rmi;
 
 import static org.junit.Assert.assertTrue;
 import java.util.Stack;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
@@ -71,6 +73,18 @@ public class OXResellerUserTest extends AbstractOXResellerTest {
      */
     public OXResellerUserTest() {
         super();
+    }
+
+    @Override
+    @Before
+    public void setUp() throws Exception {
+        super.setUp();
+    }
+
+    @Override
+    @After
+    public void tearDown() throws Exception {
+        super.tearDown();
     }
 
     @Test

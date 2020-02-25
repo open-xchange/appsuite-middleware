@@ -65,6 +65,7 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.services.PluginInterfaces;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
+import com.openexchange.exception.LogLevel;
 
 /**
  *
@@ -77,7 +78,7 @@ public class OXLogin extends OXCommonImpl implements OXLoginInterface {
 
     public OXLogin() {
         super();
-        LOGGER.info("Class loaded: {}", this.getClass().getName());
+        log(LogLevel.INFO, LOGGER, null, null, "Class loaded: {}", this.getClass().getName());
     }
 
     @Override
@@ -85,9 +86,8 @@ public class OXLogin extends OXCommonImpl implements OXLoginInterface {
         try {
             BasicAuthenticator.createNonPluginAwareAuthenticator().doUserAuthentication(auth, ctx);
             triggerUpdateProcess(ctx);
-        } catch (RuntimeException e) {
-            LOGGER.error("", e);
-            throw convertException(e);
+        } catch (Exception e) {
+            throw convertException(logAndEnhanceException(LOGGER, e, auth, ctx.getIdAsString()));
         }
     }
 
@@ -96,9 +96,8 @@ public class OXLogin extends OXCommonImpl implements OXLoginInterface {
         try {
             doNullCheck(auth);
             BasicAuthenticator.createNonPluginAwareAuthenticator().doAuthentication(auth);
-        } catch (RuntimeException e) {
-            LOGGER.error("", e);
-            throw convertException(e);
+        } catch (Exception e) {
+            throw convertException(logAndEnhanceException(LOGGER, e, auth));
         }
     }
 
@@ -106,9 +105,7 @@ public class OXLogin extends OXCommonImpl implements OXLoginInterface {
     public User login2User(final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
         try {
             BasicAuthenticator.createNonPluginAwareAuthenticator().doUserAuthentication(auth, ctx);
-
             triggerUpdateProcess(ctx);
-
             int user_id;
             try {
                 user_id = tool.getUserIDByUsername(ctx, auth.getLogin());
@@ -128,16 +125,15 @@ public class OXLogin extends OXCommonImpl implements OXLoginInterface {
                 final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
                 if (null != pluginInterfaces) {
                     for (final OXUserPluginInterface oxuserplugin : pluginInterfaces.getUserPlugins().getServiceList()) {
-                        LOGGER.debug("Calling getData for plugin: {}", oxuserplugin.getClass().getName());
+                        log(LogLevel.DEBUG, LOGGER, auth, ctx.getIdAsString(), null, "Calling getData for plugin: {}", oxuserplugin.getClass().getName());
                         retusers = oxuserplugin.getData(ctx, retusers, auth);
                     }
                 }
             }
 
             return retusers[0];
-        } catch (RuntimeException e) {
-            LOGGER.error("", e);
-            throw convertException(e);
+        } catch (Exception e) {
+            throw convertException(logAndEnhanceException(LOGGER, e, auth, ctx.getIdAsString()));
         }
     }
 
@@ -149,7 +145,7 @@ public class OXLogin extends OXCommonImpl implements OXLoginInterface {
                 oxt.generateDatabaseUpdateException(ctx.getId().intValue());
             }
         } catch (StorageException e) {
-            LOGGER.error("Error running updateprocess", e);
+            log(LogLevel.ERROR, LOGGER, null, ctx.getIdAsString(), e, "Error running updateprocess");
             throw new DatabaseUpdateException(e.toString());
         }
     }

@@ -61,6 +61,7 @@ import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.rmi.Naming;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -73,8 +74,6 @@ import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
-import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
-import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.factory.ContextFactory;
 import com.openexchange.admin.rmi.factory.UserFactory;
 import com.openexchange.admin.rmi.util.AssertUtil;
@@ -274,7 +273,7 @@ public class UserTest extends AbstractRMITest {
         try {
             createdUser = getUserManager().create(context, user, access, contextAdminCredentials);
             fail("No exception was thrown");
-        } catch (InvalidDataException e) {
+        } catch (RemoteException e) {
             // Do nothing, we expect that
         }
         assertNull("User was created although an unsupported folder mode was set", createdUser);
@@ -283,20 +282,24 @@ public class UserTest extends AbstractRMITest {
     /**
      * Tests user deletion
      */
-    @Test(expected = NoSuchUserException.class)
+    @Test
     public void testDelete() throws Exception {
-        // create new user
-        UserModuleAccess access = new UserModuleAccess();
+        try {
+            // create new user
+            UserModuleAccess access = new UserModuleAccess();
 
-        User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context, false);
-        User createduser = getUserManager().create(context, usr, access, contextAdminCredentials);
+            User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context, false);
+            User createduser = getUserManager().create(context, usr, access, contextAdminCredentials);
 
-        // delete user
-        getUserManager().delete(context, id(createduser), contextAdminCredentials);
+            // delete user
+            getUserManager().delete(context, id(createduser), contextAdminCredentials);
 
-        // try to load user, this MUST fail
-        getUserManager().getData(context, createduser, contextAdminCredentials);
-        fail("user not exists expected");
+            // try to load user, this MUST fail
+            getUserManager().getData(context, createduser, contextAdminCredentials);
+            fail("user not exists expected");
+        } catch (RemoteException e) {
+            checkException(e);
+        }
     }
 
     //@Test
@@ -397,7 +400,7 @@ public class UserTest extends AbstractRMITest {
         try {
             createduser = getUserManager().create(context, usr, access, contextAdminCredentials);
             fail("Creating a user with permission to edit public folder permissions should be denied.");
-        } catch (StorageException e) {
+        } catch (RemoteException e) {
             // Everything is fine. Setting publicFolderEditable should be denied. See bugs 18866, 20369, 20635.
             access.setPublicFolderEditable(false);
             createduser = getUserManager().create(context, usr, access, contextAdminCredentials);
@@ -412,7 +415,7 @@ public class UserTest extends AbstractRMITest {
         try {
             getUserManager().changeModuleAccess(context, usr, moduleAccess, contextAdminCredentials);
             fail("Setting publicfoldereditable to true was not denied by admin.");
-        } catch (StorageException e) {
+        } catch (RemoteException e) {
             // This is expected.
         }
     }
@@ -742,7 +745,7 @@ public class UserTest extends AbstractRMITest {
         boolean canary = true;
         try {
             getUserManager().change(context, srv_loaded, contextAdminCredentials);
-        } catch (StorageException e) {
+        } catch (RemoteException e) {
             canary = false;
         }
 
@@ -846,50 +849,54 @@ public class UserTest extends AbstractRMITest {
     /**
      * Tests changing all user attributes to <code>null</code>
      */
-    @Test(expected = InvalidDataException.class)
+    @Test
     public void testChangeAllAttributesNull() throws Exception {
-        // set all values to null in the user object and then call change, what
-        // happens?
-        UserModuleAccess access = new UserModuleAccess();
-        User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
-        User createduser = getUserManager().create(context, usr, access, contextAdminCredentials);
+        try {
+            // set all values to null in the user object and then call change, what
+            // happens?
+            UserModuleAccess access = new UserModuleAccess();
+            User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
+            User createduser = getUserManager().create(context, usr, access, contextAdminCredentials);
 
-        // now load user from server and check if data is correct, else fail
-        User srv_loaded = getUserManager().getData(context, id(createduser), contextAdminCredentials);
-        if (createduser.getId().equals(srv_loaded.getId())) {
-            //verify data
-            AssertUtil.assertUser(createduser, srv_loaded);
-        } else {
-            fail("Expected to get user data");
-        }
-
-        // loop through methods and change each attribute per single call and load and compare
-        MethodMapObject[] meth_objects = getSetableAttributeMethods(usr.getClass());
-        User tmp_usr = new User();
-        for (MethodMapObject map_obj : meth_objects) {
-            if (!map_obj.getMethodName().equals("setId")) {
-                // resolv by name
-                tmp_usr.setId(srv_loaded.getId());
+            // now load user from server and check if data is correct, else fail
+            User srv_loaded = getUserManager().getData(context, id(createduser), contextAdminCredentials);
+            if (createduser.getId().equals(srv_loaded.getId())) {
+                //verify data
+                AssertUtil.assertUser(createduser, srv_loaded);
             } else {
-                // server must resolv by name
-                tmp_usr.setName(srv_loaded.getName());
-            }
-            if (!map_obj.getMethodName().equals("setUserAttribute")) {
-                map_obj.getSetter().invoke(tmp_usr, new Object[] { null });
-                System.out.println("Setting null via " + map_obj.getMethodName() + " -> " + map_obj.getGetter().invoke(tmp_usr));
+                fail("Expected to get user data");
             }
 
+            // loop through methods and change each attribute per single call and load and compare
+            MethodMapObject[] meth_objects = getSetableAttributeMethods(usr.getClass());
+            User tmp_usr = new User();
+            for (MethodMapObject map_obj : meth_objects) {
+                if (!map_obj.getMethodName().equals("setId")) {
+                    // resolv by name
+                    tmp_usr.setId(srv_loaded.getId());
+                } else {
+                    // server must resolv by name
+                    tmp_usr.setName(srv_loaded.getName());
+                }
+                if (!map_obj.getMethodName().equals("setUserAttribute")) {
+                    map_obj.getSetter().invoke(tmp_usr, new Object[] { null });
+                    System.out.println("Setting null via " + map_obj.getMethodName() + " -> " + map_obj.getGetter().invoke(tmp_usr));
+                }
+
+            }
+
+            // submit changes
+            getUserManager().change(context, tmp_usr, contextAdminCredentials);
+
+            // load from server and compare the single changed value
+            User user_single_change_loaded = getUserManager().getData(context, id(srv_loaded), contextAdminCredentials);
+
+            // TODO
+            // special compare must be written that checks for special attributes like username etc which cannot be null
+            AssertUtil.compareUserSpecialForNulledAttributes(tmp_usr, user_single_change_loaded);
+        } catch (RemoteException e) {
+            checkException(e);
         }
-
-        // submit changes
-        getUserManager().change(context, tmp_usr, contextAdminCredentials);
-
-        // load from server and compare the single changed value
-        User user_single_change_loaded = getUserManager().getData(context, id(srv_loaded), contextAdminCredentials);
-
-        // TODO
-        // special compare must be written that checks for special attributes like username etc which cannot be null
-        AssertUtil.compareUserSpecialForNulledAttributes(tmp_usr, user_single_change_loaded);
     }
 
     /**
@@ -1208,28 +1215,31 @@ public class UserTest extends AbstractRMITest {
     /**
      * Tests a change without identifier and name
      */
-    @Test(expected = InvalidDataException.class)
+    @Test
     public void testChangeWithoutIdAndName() throws Exception {
+        try {
+            UserModuleAccess access = new UserModuleAccess();
+            User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
+            User createduser = getUserManager().create(context, usr, access, contextAdminCredentials);
 
-        UserModuleAccess access = new UserModuleAccess();
-        User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
-        User createduser = getUserManager().create(context, usr, access, contextAdminCredentials);
+            // now load user from server and check if data is correct, else fail
+            User srv_loaded = getUserManager().getData(context, id(createduser), contextAdminCredentials);
+            if (createduser.getId().equals(srv_loaded.getId())) {
+                //verify data
+                AssertUtil.assertUser(createduser, srv_loaded);
+            } else {
+                fail("Expected to get user data");
+            }
 
-        // now load user from server and check if data is correct, else fail
-        User srv_loaded = getUserManager().getData(context, id(createduser), contextAdminCredentials);
-        if (createduser.getId().equals(srv_loaded.getId())) {
-            //verify data
-            AssertUtil.assertUser(createduser, srv_loaded);
-        } else {
-            fail("Expected to get user data");
+            // now change data
+            srv_loaded = createChangeUserData(srv_loaded);
+            srv_loaded.setId(null);
+            srv_loaded.setName(null);
+            // submit changes
+            getUserManager().change(context, srv_loaded, contextAdminCredentials);
+        } catch (RemoteException e) {
+            checkException(e);
         }
-
-        // now change data
-        srv_loaded = createChangeUserData(srv_loaded);
-        srv_loaded.setId(null);
-        srv_loaded.setName(null);
-        // submit changes
-        getUserManager().change(context, srv_loaded, contextAdminCredentials);
     }
 
     /**

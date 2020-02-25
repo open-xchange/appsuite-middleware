@@ -75,7 +75,7 @@ public class OXTaskMgmtImpl extends OXCommonImpl implements OXTaskMgmtInterface 
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXTaskMgmtImpl.class);
 
-    private void doAuth(final Credentials creds, final Context ctx) throws InvalidCredentialsException, StorageException, InvalidDataException {
+    private void doAuth(final Credentials creds, final Context ctx) throws InvalidCredentialsException, StorageException {
         BasicAuthenticator basicAuth = BasicAuthenticator.createNonPluginAwareAuthenticator();
         if (cache.isMasterAdmin(creds)) {
             basicAuth.doAuthentication(creds);
@@ -98,21 +98,8 @@ public class OXTaskMgmtImpl extends OXCommonImpl implements OXTaskMgmtInterface 
                 contextcheck(ctx);
                 TaskManager.getInstance().deleteJob(id, ctx.getId());
             }
-        } catch (InvalidCredentialsException e) {
-            log.error("", e);
-            throw e;
-        } catch (StorageException e) {
-            log.error("", e);
-            throw e;
-        } catch (InvalidDataException e) {
-            log.error("", e);
-            throw e;
-        } catch (TaskManagerException e) {
-            log.error("", e);
-            throw e;
-        } catch (RuntimeException e) {
-            log.error("", e);
-            throw convertException(e);
+        } catch (Exception e) {
+            throw convertException(logAndEnhanceException(log, e, cred, ctx.getIdAsString(), String.valueOf(id)));
         }
     }
 
@@ -126,21 +113,8 @@ public class OXTaskMgmtImpl extends OXCommonImpl implements OXTaskMgmtInterface 
                 contextcheck(ctx);
                 TaskManager.getInstance().flush(ctx.getId());
             }
-        } catch (InvalidCredentialsException e) {
-            log.error("", e);
-            throw e;
-        } catch (StorageException e) {
-            log.error("", e);
-            throw e;
-        } catch (InvalidDataException e) {
-            log.error("", e);
-            throw e;
-        } catch (TaskManagerException e) {
-            log.error("", e);
-            throw e;
-        } catch (RuntimeException e) {
-            log.error("", e);
-            throw convertException(e);
+        } catch (Exception e) {
+            throw convertException(logAndEnhanceException(log, e, cred, ctx.getIdAsString()));
         }
     }
 
@@ -154,18 +128,8 @@ public class OXTaskMgmtImpl extends OXCommonImpl implements OXTaskMgmtInterface 
 
             contextcheck(ctx);
             return TaskManager.getInstance().getJobList(ctx.getId());
-        } catch (InvalidCredentialsException e) {
-            log.error("", e);
-            throw e;
-        } catch (StorageException e) {
-            log.error("", e);
-            throw e;
-        } catch (InvalidDataException e) {
-            log.error("", e);
-            throw e;
-        } catch (RuntimeException e) {
-            log.error("", e);
-            throw convertException(e);
+        } catch (Exception e) {
+            throw convertException(logAndEnhanceException(log, e, cred, ctx.getIdAsString()));
         }
     }
 
@@ -179,24 +143,8 @@ public class OXTaskMgmtImpl extends OXCommonImpl implements OXTaskMgmtInterface 
 
             contextcheck(ctx);
             return getTaskResults(id, ctx.getId());
-        } catch (InvalidCredentialsException e) {
-            log.error("", e);
-            throw e;
-        } catch (StorageException e) {
-            log.error("", e);
-            throw e;
-        } catch (InvalidDataException e) {
-            log.error("", e);
-            throw e;
-        } catch (InterruptedException e) {
-            log.error("", e);
-            throw e;
-        } catch (TaskManagerException e) {
-            log.error("", e);
-            throw new InvalidDataException(e.getMessage());
-        } catch (RuntimeException e) {
-            log.error("", e);
-            throw convertException(e);
+        } catch (Exception e) {
+            throw convertException(logAndEnhanceException(log, e, cred, ctx.getIdAsString(), String.valueOf(id)));
         }
     }
 

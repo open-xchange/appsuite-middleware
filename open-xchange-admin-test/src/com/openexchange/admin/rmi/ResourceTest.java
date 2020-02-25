@@ -53,10 +53,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import java.rmi.RemoteException;
 import org.junit.Test;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Resource;
-import com.openexchange.admin.rmi.exceptions.NoSuchResourceException;
 import com.openexchange.admin.rmi.factory.ResourceFactory;
 
 /**
@@ -260,7 +260,7 @@ public class ResourceTest extends AbstractRMITest {
         try {
             srv_res = getResourceManager().getData(createResourcedresource, context, contextAdminCredentials);
             fail("Expected that the resource was deleted!");
-        } catch (NoSuchResourceException nsr) {
+        } catch (RemoteException nsr) {
         }
 
     }
@@ -285,7 +285,7 @@ public class ResourceTest extends AbstractRMITest {
         try {
             srv_res = getResourceManager().getData(createResourcedresource, context, contextAdminCredentials);
             fail("Expected that the resource was deleted!");
-        } catch (NoSuchResourceException nsr) {
+        } catch (RemoteException nsr) {
         }
 
         // createResource again
@@ -315,7 +315,7 @@ public class ResourceTest extends AbstractRMITest {
         try {
             srv_res = getResourceManager().getData(createResourcedresource, context, contextAdminCredentials);
             fail("Expected that the resource was deleted!");
-        } catch (NoSuchResourceException nsr) {
+        } catch (RemoteException nsr) {
         }
 
     }
@@ -341,7 +341,7 @@ public class ResourceTest extends AbstractRMITest {
         try {
             srv_res = getResourceManager().getData(createResourcedresource, context, contextAdminCredentials);
             fail("Expected that the resource was deleted!");
-        } catch (NoSuchResourceException nsr) {
+        } catch (RemoteException nsr) {
         }
 
     }

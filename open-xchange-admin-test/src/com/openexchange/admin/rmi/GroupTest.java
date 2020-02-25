@@ -53,13 +53,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import java.rmi.RemoteException;
 import org.junit.Test;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Group;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
-import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.factory.ContextFactory;
 import com.openexchange.admin.rmi.factory.GroupFactory;
 import com.openexchange.admin.rmi.factory.UserFactory;
@@ -477,28 +477,32 @@ public class GroupTest extends AbstractRMITest {
 
     }
 
-    @Test(expected = InvalidDataException.class)
+    @Test
     public void testChangeNull() throws Exception {
-        // change group display name and name to null, this must fail
-        Group addgroup = GroupFactory.createGroup("changed_this_group" + System.currentTimeMillis());
-        Group createdgroup = getGroupManager().create(addgroup, context, contextAdminCredentials);
-        assertTrue("expected id > 0", Autoboxing.i(createdgroup.getId()) > 0);
+        try {
+            // change group display name and name to null, this must fail
+            Group addgroup = GroupFactory.createGroup("changed_this_group" + System.currentTimeMillis());
+            Group createdgroup = getGroupManager().create(addgroup, context, contextAdminCredentials);
+            assertTrue("expected id > 0", Autoboxing.i(createdgroup.getId()) > 0);
 
-        // load group from server
-        Group srv_response = getGroupManager().getData(createdgroup, context, contextAdminCredentials);
+            // load group from server
+            Group srv_response = getGroupManager().getData(createdgroup, context, contextAdminCredentials);
 
-        // check if group is created on server correct
-        assertEquals("displayname id not equal", createdgroup.getDisplayname(), srv_response.getDisplayname());
-        assertEquals("id not equals", createdgroup.getId(), srv_response.getId());
-        assertEquals("identifier not equal", createdgroup.getName(), srv_response.getName());
+            // check if group is created on server correct
+            assertEquals("displayname id not equal", createdgroup.getDisplayname(), srv_response.getDisplayname());
+            assertEquals("id not equals", createdgroup.getId(), srv_response.getId());
+            assertEquals("identifier not equal", createdgroup.getName(), srv_response.getName());
 
-        // set display name to null and name to null
-        Group tmp_group = new Group(srv_response.getId());
-        tmp_group.setDisplayname(null);
-        tmp_group.setName(null);
+            // set display name to null and name to null
+            Group tmp_group = new Group(srv_response.getId());
+            tmp_group.setDisplayname(null);
+            tmp_group.setName(null);
 
-        // do the changes on the remote server for the group
-        getGroupManager().change(tmp_group, context, contextAdminCredentials);
+            // do the changes on the remote server for the group
+            getGroupManager().change(tmp_group, context, contextAdminCredentials);
+        } catch (RemoteException e) {
+            checkException(e);
+        }
     }
 
     @Test

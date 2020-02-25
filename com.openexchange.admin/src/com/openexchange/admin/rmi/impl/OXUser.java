@@ -52,7 +52,6 @@ package com.openexchange.admin.rmi.impl;
 import static com.openexchange.admin.rmi.exceptions.RemoteExceptionUtils.convertException;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.rmi.RemoteException;
@@ -90,7 +89,6 @@ import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchFilestoreException;
 import com.openexchange.admin.rmi.exceptions.NoSuchObjectException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
-import com.openexchange.admin.rmi.exceptions.ProgrammErrorException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.impl.util.OXUserPropertySorter;
 import com.openexchange.admin.services.AdminServiceRegistry;
@@ -114,6 +112,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorages;
 import com.openexchange.groupware.container.FolderObject;
@@ -151,12 +150,12 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         this.cache = ClientAdminThread.cache;
         this.prop = this.cache.getProperties();
         allowChangingQuotaIfNoFileStorageSet = Boolean.parseBoolean(prop.getUserProp("ALLOW_CHANGING_QUOTA_IF_NO_FILESTORE_SET", "false").trim());
-        LOGGER.info("Class loaded: {}", this.getClass().getName());
+        log(LogLevel.INFO, LOGGER, null, null, "Class loaded: {}", this.getClass().getName());
         basicauth = BasicAuthenticator.createPluginAwareAuthenticator();
         try {
             oxu = OXUserStorageInterface.getInstance();
         } catch (StorageException e) {
-            LOGGER.error("", e);
+            log(LogLevel.ERROR, LOGGER, null, e, "");
             throw e;
         }
     }
@@ -167,14 +166,13 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
     @Override
     public Set<String> getCapabilities(final Context ctx, final User user, final Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
-        if (null == ctx) {
-            throw new InvalidDataException("Missing context.");
-        }
-        if (null == user) {
-            throw new InvalidDataException("Missing user.");
-        }
-
         try {
+            if (null == ctx) {
+                throw new InvalidDataException("Missing context.");
+            }
+            if (null == user) {
+                throw new InvalidDataException("Missing user.");
+            }
             Credentials auth = credentials == null ? new Credentials("", "") : credentials;
             if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
                 auth.setLogin(auth.getLogin().toLowerCase());
@@ -192,35 +190,15 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 throw new NoSuchUserException("No such user " + user_id + " in context " + ctx.getId());
             }
             return oxu.getCapabilities(ctx, user);
-        } catch (StorageException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (InvalidDataException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (InvalidCredentialsException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (DatabaseUpdateException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (NoSuchContextException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (NoSuchUserException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (RuntimeException e) {
-            LOGGER.error("", e);
-            throw convertException(e);
+        } catch (Exception e) {
+            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString(), String.valueOf(user.getId())));
         }
     }
 
     @Override
     public void changeMailAddressPersonal(Context ctx, User user, String personal, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
-        Credentials auth = credentials == null ? new Credentials("", "") : credentials;
-
         try {
+            Credentials auth = credentials == null ? new Credentials("", "") : credentials;
             if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
                 auth.setLogin(auth.getLogin().toLowerCase());
             }
@@ -250,64 +228,42 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     for (final OXUserPluginInterface oxuser : pluginInterfaces.getUserPlugins().getServiceList()) {
                         if (oxuser.canHandleContextAdmin() || (!oxuser.canHandleContextAdmin() && !isContextAdmin)) {
                             try {
-                                LOGGER.debug("Calling changeMailAddressPersonal for plugin: {}", oxuser.getClass().getName());
+                                log(LogLevel.DEBUG, LOGGER, credentials, ctx.getIdAsString(), String.valueOf(user.getId()), null, "Calling changeMailAddressPersonal for plugin: {}", oxuser.getClass().getName());
                                 oxuser.changeMailAddressPersonal(ctx, user, personal, auth);
                             } catch (PluginException e) {
-                                LOGGER.error("Error while calling changeMailAddressPersonal for plugin: {}", oxuser.getClass().getName(), e);
+                                log(LogLevel.ERROR, LOGGER, credentials, ctx.getIdAsString(), String.valueOf(user.getId()), e, "Error while calling changeMailAddressPersonal for plugin: {}", oxuser.getClass().getName());
                                 throw StorageException.wrapForRMI(e);
                             } catch (RuntimeException e) {
-                                LOGGER.error("Error while calling changeMailAddressPersonal for plugin: {}", oxuser.getClass().getName(), e);
+                                log(LogLevel.ERROR, LOGGER, credentials, ctx.getIdAsString(), String.valueOf(user.getId()), e, "Error while calling changeMailAddressPersonal for plugin: {}", oxuser.getClass().getName());
                                 throw StorageException.wrapForRMI(e);
                             }
                         }
                     }
                 }
             }
-
-        } catch (StorageException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (InvalidDataException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (InvalidCredentialsException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (DatabaseUpdateException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (NoSuchContextException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (NoSuchUserException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (RuntimeException e) {
-            LOGGER.error("", e);
-            throw convertException(e);
+        } catch (Exception e) {
+            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString(), String.valueOf(user.getId())));
         }
     }
 
     @Override
     public void changeCapabilities(final Context ctx, final User user, final Set<String> capsToAdd, final Set<String> capsToRemove, final Set<String> capsToDrop, final Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
-        if ((null == capsToAdd || capsToAdd.isEmpty()) && (null == capsToRemove || capsToRemove.isEmpty()) && (null == capsToDrop || capsToDrop.isEmpty())) {
-            throw new InvalidDataException("No capabilities specified.");
-        }
-        if (null == ctx) {
-            throw new InvalidDataException("Missing context.");
-        }
-        if (null == user) {
-            throw new InvalidDataException("Missing user.");
-        }
-
-
         try {
+            if ((null == capsToAdd || capsToAdd.isEmpty()) && (null == capsToRemove || capsToRemove.isEmpty()) && (null == capsToDrop || capsToDrop.isEmpty())) {
+                throw new InvalidDataException("No capabilities specified.");
+            }
+            if (null == ctx) {
+                throw new InvalidDataException("Missing context.");
+            }
+            if (null == user) {
+                throw new InvalidDataException("Missing user.");
+            }
             Credentials auth = credentials == null ? new Credentials("", "") : credentials;
             if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
                 auth.setLogin(auth.getLogin().toLowerCase());
             }
 
-            LOGGER.debug("{} - {} - {} | {} - {}", ctx, user, (null == capsToAdd ? "" : capsToAdd.toString()), (null == capsToRemove ? "" : capsToRemove.toString()), auth);
+            log(LogLevel.DEBUG, LOGGER, credentials, ctx.getIdAsString(), String.valueOf(user.getId()), null, "{} - {} - {} | {} - {}", ctx, user, (null == capsToAdd ? "" : capsToAdd.toString()), (null == capsToRemove ? "" : capsToRemove.toString()), auth);
 
             basicauth.doAuthentication(auth, ctx);
             checkContextAndSchema(ctx);
@@ -334,56 +290,35 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     for (final OXUserPluginInterface oxuser : pluginInterfaces.getUserPlugins().getServiceList()) {
                         if (oxuser.canHandleContextAdmin() || (!oxuser.canHandleContextAdmin() && !isContextAdmin)) {
                             try {
-                                LOGGER.debug("Calling changeCapabilities for plugin: {}", oxuser.getClass().getName());
+                                log(LogLevel.DEBUG, LOGGER, credentials, ctx.getIdAsString(), String.valueOf(user_id), null, "Calling changeCapabilities for plugin: {}", oxuser.getClass().getName());
                                 oxuser.changeCapabilities(ctx, user, capsToAdd, capsToRemove, capsToDrop, auth);
                             } catch (PluginException e) {
-                                LOGGER.error("Error while calling change for plugin: {}", oxuser.getClass().getName(), e);
+                                log(LogLevel.ERROR, LOGGER, credentials, ctx.getIdAsString(), String.valueOf(user_id), e, "Error while calling change for plugin: {}", oxuser.getClass().getName());
                                 throw StorageException.wrapForRMI(e);
                             } catch (RuntimeException e) {
-                                LOGGER.error("Error while calling change for plugin: {}", oxuser.getClass().getName(), e);
+                                log(LogLevel.ERROR, LOGGER, credentials, ctx.getIdAsString(), String.valueOf(user_id), e, "Error while calling change for plugin: {}", oxuser.getClass().getName());
                                 throw StorageException.wrapForRMI(e);
                             }
                         }
                     }
                 }
             }
-
-        } catch (StorageException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (InvalidDataException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (InvalidCredentialsException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (DatabaseUpdateException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (NoSuchContextException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (NoSuchUserException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (RuntimeException e) {
-            LOGGER.error("", e);
-            throw convertException(e);
+        } catch (Exception e) {
+            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString(), String.valueOf(user.getId())));
         }
     }
 
     @Override
     public int moveUserFilestore(final Context ctx, User user, Filestore dstFilestore, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
-        Credentials auth = credentials == null ? new Credentials("", "") : credentials;
         try {
-            doNullCheck(user);
-        } catch (InvalidDataException e2) {
-            final InvalidDataException invalidDataException = new InvalidDataException("One of the given arguments for moving file storage data is null");
-            LOGGER.error("", invalidDataException);
-            throw invalidDataException;
-        }
-
-        try {
+            Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+            try {
+                doNullCheck(user);
+            } catch (InvalidDataException e2) {
+                final InvalidDataException invalidDataException = new InvalidDataException("One of the given arguments for moving file storage data is null", e2);
+                log(LogLevel.ERROR, LOGGER, credentials, invalidDataException, "");
+                throw invalidDataException;
+            }
             final int user_id = user.getId().intValue();
 
             basicauth.doAuthentication(auth, ctx);
@@ -395,7 +330,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             }
 
             if (!tool.existsContext(ctx)) {
-                throw new NoSuchContextException(ctx.getId());
+                throw new NoSuchContextException(i(ctx.getId()));
             } else if (!tool.existsUser(ctx, user_id)) {
                 throw new NoSuchUserException("No such user " + user_id + " in context " + ctx.getId());
             } else if (!tool.existsStore(dstFilestore.getId().intValue())) {
@@ -449,7 +384,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     if (null == executionError) {
                         oxuser.enableUser(user_id, ctx);
                     } else {
-                        LOGGER.warn("An execution error occurred during \"moveuserfilestore\" for user {} in context {}. User will stay disabled.", I(user_id), ctx.getId(), executionError.getCause());
+                        log(LogLevel.WARNING, LOGGER, credentials, ctx.getIdAsString(), String.valueOf(user_id), null, "An execution error occurred during \"moveuserfilestore\" for user {} in context {}. User will stay disabled.", I(user_id), ctx.getId(), executionError.getCause());
                     }
                 }
             });
@@ -458,27 +393,8 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
             // Schedule task
             return TaskManager.getInstance().addJob(fsdm, "moveuserfilestore", "move user " + user_id + " from context " + ctx.getIdAsString() + " to another filestore " + dstFilestore.getId(), ctx.getId().intValue());
-        } catch (StorageException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (InvalidDataException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (InvalidCredentialsException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (DatabaseUpdateException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (NoSuchContextException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (NoSuchUserException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (RuntimeException e) {
-            LOGGER.error("", e);
-            throw convertException(e);
+        } catch (Exception e) {
+            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString(), String.valueOf(user.getId())));
         }
     }
 
@@ -487,17 +403,16 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         return moveFromUserFilestoreToMaster(ctx, user, masterUser, credentials, false);
     }
 
-    private int moveFromUserFilestoreToMaster(final Context ctx, User user, User masterUser, Credentials credentials, boolean inline) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
-        Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+    private int moveFromUserFilestoreToMaster(final Context ctx, User user, User masterUser, Credentials credentials, boolean inline) throws RemoteException {
         try {
-            doNullCheck(user);
-        } catch (InvalidDataException e2) {
-            final InvalidDataException invalidDataException = new InvalidDataException("One of the given arguments for moving file storage data is null");
-            LOGGER.error("", invalidDataException);
-            throw invalidDataException;
-        }
-
-        try {
+            Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+            try {
+                doNullCheck(user);
+            } catch (InvalidDataException e2) {
+                final InvalidDataException invalidDataException = new InvalidDataException("One of the given arguments for moving file storage data is null", e2);
+                log(LogLevel.ERROR, LOGGER, credentials, invalidDataException, "");
+                throw invalidDataException;
+            }
             final int userId = user.getId().intValue();
             if (false == inline) {
                 basicauth.doAuthentication(auth, ctx);
@@ -592,7 +507,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     if (null == executionError) {
                         oxuser.enableUser(userId, ctx);
                     } else {
-                        LOGGER.warn("An execution error occurred during \"movefromuserfilestoretomaster\" for user {} in context {}. User will stay disabled.", I(userId), ctx.getId(), executionError.getCause());
+                        log(LogLevel.WARNING, LOGGER, credentials, ctx.getIdAsString(), String.valueOf(userId), null, "An execution error occurred during \"movefromuserfilestoretomaster\" for user {} in context {}. User will stay disabled.", I(userId), ctx.getId(), executionError.getCause());
                     }
                 }
             });
@@ -607,53 +522,22 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             // Execute with current thread
             fsdm.call();
             return -1;
-        } catch (StorageException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (InvalidDataException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (InvalidCredentialsException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (DatabaseUpdateException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (NoSuchContextException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (NoSuchUserException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (IOException e) {
-            LOGGER.error("", e);
-            throw new StorageException(e);
-        } catch (InterruptedException e) {
-            // Keep interrupted state
-            Thread.currentThread().interrupt();
-            LOGGER.error("", e);
-            throw new StorageException(e);
-        } catch (ProgrammErrorException e) {
-            LOGGER.error("", e);
-            throw new StorageException(e);
-        } catch (RuntimeException e) {
-            LOGGER.error("", e);
-            throw convertException(e);
+        } catch (Exception e) {
+            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString(), String.valueOf(user.getId())));
         }
     }
 
     @Override
     public int moveFromMasterToUserFilestore(final Context ctx, User user, User masterUser, Filestore dstFilestore, long maxQuota, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
-        Credentials auth = credentials == null ? new Credentials("", "") : credentials;
         try {
-            doNullCheck(user);
-        } catch (InvalidDataException e2) {
-            final InvalidDataException invalidDataException = new InvalidDataException("One of the given arguments for moving file storage data is null");
-            LOGGER.error("", invalidDataException);
-            throw invalidDataException;
-        }
-
-        try {
+            Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+            try {
+                doNullCheck(user);
+            } catch (InvalidDataException e2) {
+                final InvalidDataException invalidDataException = new InvalidDataException("One of the given arguments for moving file storage data is null", e2);
+                log(LogLevel.ERROR, LOGGER, credentials, invalidDataException, "");
+                throw invalidDataException;
+            }
             basicauth.doAuthentication(auth, ctx);
             checkContextAndSchema(ctx);
             try {
@@ -764,7 +648,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     if (null == executionError) {
                         oxuser.enableUser(userId, ctx);
                     } else {
-                        LOGGER.warn("An execution error occurred during \"movefrommastertouserfilestore\" for user {} in context {}. User will stay disabled.", I(userId), ctx.getId(), executionError.getCause());
+                        log(LogLevel.WARNING, LOGGER, credentials, ctx.getIdAsString(), String.valueOf(userId), null, "An execution error occurred during \"movefrommastertouserfilestore\" for user {} in context {}. User will stay disabled.", I(userId), ctx.getId(), executionError.getCause());
                     }
                 }
             });
@@ -772,27 +656,8 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             // Schedule task
             oxuser.disableUser(userId, ctx);
             return TaskManager.getInstance().addJob(fsdm, "movefrommastertouserfilestore", "move user " + userId + " from context " + ctx.getIdAsString() + " from master to individual filestore " + destFilestore.getId(), ctx.getId().intValue());
-        } catch (StorageException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (InvalidDataException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (InvalidCredentialsException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (DatabaseUpdateException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (NoSuchContextException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (NoSuchUserException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (RuntimeException e) {
-            LOGGER.error("", e);
-            throw convertException(e);
+        } catch (Exception e) {
+            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString(), String.valueOf(user.getId())));
         }
     }
 
@@ -801,17 +666,17 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         return moveFromContextToUserFilestore(ctx, user, dstFilestore, maxQuota, credentials, false);
     }
 
-    private int moveFromContextToUserFilestore(final Context ctx, User user, Filestore dstFilestore, long maxQuota, Credentials credentials, boolean inline) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
-        Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+    private int moveFromContextToUserFilestore(final Context ctx, User user, Filestore dstFilestore, long maxQuota, Credentials credentials, boolean inline) throws RemoteException {
         try {
-            doNullCheck(user);
-        } catch (InvalidDataException e2) {
-            final InvalidDataException invalidDataException = new InvalidDataException("One of the given arguments for moving file storage data is null");
-            LOGGER.error("", invalidDataException);
-            throw invalidDataException;
-        }
+            Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+            try {
+                doNullCheck(user);
+            } catch (InvalidDataException e2) {
+                final InvalidDataException invalidDataException = new InvalidDataException("One of the given arguments for moving file storage data is null", e2);
+                log(LogLevel.ERROR, LOGGER, credentials, invalidDataException, "");
+                throw invalidDataException;
+            }
 
-        try {
             if (false == inline) {
                 basicauth.doAuthentication(auth, ctx);
                 checkContextAndSchema(ctx);
@@ -899,7 +764,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     if (null == executionError) {
                         oxuser.enableUser(user_id, ctx);
                     } else {
-                        LOGGER.warn("An execution error occurred during \"movefromcontexttouserfilestore\" for user {} in context {}. User will stay disabled.", I(user_id), ctx.getId(), executionError.getCause());
+                        log(LogLevel.WARNING, LOGGER, credentials, ctx.getIdAsString(), String.valueOf(user_id), null, "An execution error occurred during \"movefromcontexttouserfilestore\" for user {} in context {}. User will stay disabled.", I(user_id), ctx.getId(), executionError.getCause());
                     }
                 }
             });
@@ -914,44 +779,8 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             // Execute with current thread
             fsdm.call();
             return -1;
-        } catch (StorageException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (InvalidDataException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (InvalidCredentialsException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (DatabaseUpdateException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (NoSuchContextException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (NoSuchUserException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (RemoteException e) {
-            LOGGER.error("", e);
-            throw new StorageException(e);
-        } catch (OXException e) {
-            LOGGER.error("", e);
-            throw StorageException.wrapForRMI(e);
-        } catch (IOException e) {
-            LOGGER.error("", e);
-            throw new StorageException(e);
-        } catch (InterruptedException e) {
-            // Keep interrupted state
-            Thread.currentThread().interrupt();
-            LOGGER.error("", e);
-            throw new StorageException(e);
-        } catch (ProgrammErrorException e) {
-            LOGGER.error("", e);
-            throw new StorageException(e);
-        } catch (RuntimeException e) {
-            LOGGER.error("", e);
-            throw convertException(e);
+        } catch (Exception e) {
+            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString(), String.valueOf(user.getId())));
         }
     }
 
@@ -960,17 +789,16 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         return moveFromUserToContextFilestore(ctx, user, credentials, false);
     }
 
-    private int moveFromUserToContextFilestore(final Context ctx, User user, Credentials credentials, boolean inline) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
-        Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+    private int moveFromUserToContextFilestore(final Context ctx, User user, Credentials credentials, boolean inline) throws RemoteException {
         try {
-            doNullCheck(user);
-        } catch (InvalidDataException e2) {
-            final InvalidDataException invalidDataException = new InvalidDataException("One of the given arguments for moving file storage data is null");
-            LOGGER.error("", invalidDataException);
-            throw invalidDataException;
-        }
-
-        try {
+            Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+            try {
+                doNullCheck(user);
+            } catch (InvalidDataException e2) {
+                final InvalidDataException invalidDataException = new InvalidDataException("One of the given arguments for moving file storage data is null", e2);
+                log(LogLevel.ERROR, LOGGER, credentials, invalidDataException, "");
+                throw invalidDataException;
+            }
             if (false == inline) {
                 basicauth.doAuthentication(auth, ctx);
                 checkContextAndSchema(ctx);
@@ -1066,7 +894,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     if (null == executionError) {
                         oxuser.enableUser(userId, ctx);
                     } else {
-                        LOGGER.warn("An execution error occurred during \"movefromusertocontextfilestore\" for user {} in context {}. User will stay disabled.", I(userId), ctx.getId(), executionError.getCause());
+                        log(LogLevel.WARNING, LOGGER, credentials, ctx.getIdAsString(), String.valueOf(userId), null, "An execution error occurred during \"movefromusertocontextfilestore\" for user {} in context {}. User will stay disabled.", I(userId), ctx.getId(), executionError.getCause());
                     }
                 }
             });
@@ -1081,59 +909,22 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             // Execute with current thread
             fsdm.call();
             return -1;
-        } catch (StorageException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (InvalidDataException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (InvalidCredentialsException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (DatabaseUpdateException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (NoSuchContextException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (NoSuchUserException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (RemoteException e) {
-            LOGGER.error("", e);
-            throw new StorageException(e);
-        } catch (OXException e) {
-            LOGGER.error("", e);
-            throw StorageException.wrapForRMI(e);
-        } catch (IOException e) {
-            LOGGER.error("", e);
-            throw new StorageException(e);
-        } catch (InterruptedException e) {
-            // Keep interrupted state
-            Thread.currentThread().interrupt();
-            LOGGER.error("", e);
-            throw new StorageException(e);
-        } catch (ProgrammErrorException e) {
-            LOGGER.error("", e);
-            throw new StorageException(e);
-        } catch (RuntimeException e) {
-            LOGGER.error("", e);
-            throw convertException(e);
+        } catch (Exception e) {
+            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString(), String.valueOf(user.getId())));
         }
     }
 
     @Override
     public void change(final Context ctx, final User usrdata, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
-        Credentials auth = credentials == null ? new Credentials("", "") : credentials;
         try {
-            doNullCheck(usrdata);
-        } catch (InvalidDataException e2) {
-            final InvalidDataException invalidDataException = new InvalidDataException("One of the given arguments for change is null");
-            LOGGER.error("", invalidDataException);
-            throw invalidDataException;
-        }
-
-        try {
+            Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+            try {
+                doNullCheck(usrdata);
+            } catch (InvalidDataException e2) {
+                final InvalidDataException invalidDataException = new InvalidDataException("One of the given arguments for change is null", e2);
+                log(LogLevel.ERROR, LOGGER, credentials, invalidDataException, "");
+                throw invalidDataException;
+            }
             if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
                 auth.setLogin(auth.getLogin().toLowerCase());
             }
@@ -1142,76 +933,67 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             // check if credentials are from oxadmin or from an user
             Integer userid = null;
 
+            contextcheck(ctx);
+
+            checkContextAndSchema(ctx);
+
             try {
-                contextcheck(ctx);
+                setIdOrGetIDFromNameAndIdObject(ctx, usrdata);
+            } catch (NoSuchObjectException e) {
+                throw new NoSuchUserException(e);
+            }
+            usrdata.testMandatoryCreateFieldsNull();
+            userid = usrdata.getId();
 
-                checkContextAndSchema(ctx);
-
-                try {
-                    setIdOrGetIDFromNameAndIdObject(ctx, usrdata);
-                } catch (NoSuchObjectException e) {
-                    throw new NoSuchUserException(e);
-                }
-                usrdata.testMandatoryCreateFieldsNull();
-                userid = usrdata.getId();
-
-                if (!cache.contextAuthenticationDisabled()) {
-                    if (basicauth.isMasterOfContext(auth, ctx)) {
+            if (!cache.contextAuthenticationDisabled()) {
+                if (basicauth.isMasterOfContext(auth, ctx)) {
+                    basicauth.doAuthentication(auth, ctx);
+                } else {
+                    final int auth_user_id = tool.getUserIDByUsername(ctx, auth.getLogin());
+                    // check if given user is admin
+                    if (tool.isContextAdmin(ctx, auth_user_id)) {
                         basicauth.doAuthentication(auth, ctx);
                     } else {
-                        final int auth_user_id = tool.getUserIDByUsername(ctx, auth.getLogin());
-                        // check if given user is admin
-                        if (tool.isContextAdmin(ctx, auth_user_id)) {
-                            basicauth.doAuthentication(auth, ctx);
-                        } else {
-                            basicauth.doUserAuthentication(auth, ctx);
-                            // now check if user which authed has the same id as the user he
-                            // wants to change,else fail,
-                            // cause then he/she wants to change not his own data!
-                            if (userid.intValue() != auth_user_id) {
-                                throw new InvalidCredentialsException("Permission denied");
-                            }
+                        basicauth.doUserAuthentication(auth, ctx);
+                        // now check if user which authed has the same id as the user he
+                        // wants to change,else fail,
+                        // cause then he/she wants to change not his own data!
+                        if (userid.intValue() != auth_user_id) {
+                            throw new InvalidCredentialsException("Permission denied");
                         }
                     }
                 }
+            }
 
-                LOGGER.debug("{} - {} - {}", ctx, usrdata, auth);
+            log(LogLevel.DEBUG, LOGGER, credentials, ctx.getIdAsString(), String.valueOf(userid), null, "{} - {} - {}", ctx, usrdata, auth);
 
-                if (!tool.existsUser(ctx, userid.intValue())) {
-                    final NoSuchUserException noSuchUserException = new NoSuchUserException("No such user " + userid + " in context " + ctx.getId());
-                    LOGGER.error("", noSuchUserException);
-                    throw noSuchUserException;
-                }
-                if (tool.getIsGuestByUserID(ctx, userid.intValue())) {
-                    final InvalidDataException invalidDataException = new InvalidDataException("User to change (user id " + userid + " , context id " + ctx.getId() + ") is a guest user. Guests cannot be changed via provisioning.");
-                    LOGGER.error("", invalidDataException);
-                    throw invalidDataException;
-                }
+            if (!tool.existsUser(ctx, userid.intValue())) {
+                final NoSuchUserException noSuchUserException = new NoSuchUserException("No such user " + userid + " in context " + ctx.getId());
+                log(LogLevel.ERROR, LOGGER, credentials, ctx.getIdAsString(), String.valueOf(userid), noSuchUserException, "");
+                throw noSuchUserException;
+            }
+            if (tool.getIsGuestByUserID(ctx, userid.intValue())) {
+                final InvalidDataException invalidDataException = new InvalidDataException("User to change (user id " + userid + " , context id " + ctx.getId() + ") is a guest user. Guests cannot be changed via provisioning.");
+                log(LogLevel.ERROR, LOGGER, credentials, ctx.getIdAsString(), String.valueOf(userid), invalidDataException, "");
+                throw invalidDataException;
+            }
 
-                if (tool.existsDisplayName(ctx, usrdata, i(usrdata.getId()))) {
-                    try {
-                        ConfigViewFactory configViewFactory = AdminServiceRegistry.getInstance().getService(ConfigViewFactory.class, true);
-                        ConfigView view = configViewFactory.getView(-1, ctx.getId().intValue());
-                        if (null == view || view.opt("com.openexchange.user.enforceUniqueDisplayName", Boolean.class, Boolean.TRUE).booleanValue()) {
-                            // Do enforce unique display names
-                            throw new InvalidDataException("The displayname is already used");
-                        }
-                    } catch (OXException e) {
-                        LOGGER.debug("Unable to get \"com.openexchange.user.enforceUniqueDisplayName\". Fallback to enforce display name uniqueness.", e);
+            if (tool.existsDisplayName(ctx, usrdata, i(usrdata.getId()))) {
+                try {
+                    ConfigViewFactory configViewFactory = AdminServiceRegistry.getInstance().getService(ConfigViewFactory.class, true);
+                    ConfigView view = configViewFactory.getView(-1, ctx.getId().intValue());
+                    if (null == view || view.opt("com.openexchange.user.enforceUniqueDisplayName", Boolean.class, Boolean.TRUE).booleanValue()) {
+                        // Do enforce unique display names
                         throw new InvalidDataException("The displayname is already used");
                     }
+                } catch (OXException e) {
+                    log(LogLevel.DEBUG, LOGGER, credentials, ctx.getIdAsString(), String.valueOf(userid), e, "Unable to get \"com.openexchange.user.enforceUniqueDisplayName\". Fallback to enforce display name uniqueness.");
+                    throw new InvalidDataException("The displayname is already used");
                 }
-                final User[] dbuser = oxu.getData(ctx, new User[] { usrdata });
-
-                checkChangeUserData(ctx, usrdata, dbuser[0], this.prop);
-
-            } catch (InvalidDataException e1) {
-                LOGGER.error("", e1);
-                throw e1;
-            } catch (StorageException e1) {
-                LOGGER.error("", e1);
-                throw e1;
             }
+            final User[] dbuser = oxu.getData(ctx, new User[] { usrdata });
+
+            checkChangeUserData(ctx, usrdata, dbuser[0], this.prop);
 
             // Check if he wants to change the filestore id
             {
@@ -1219,19 +1001,19 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 if (filestoreId != null) {
                     if (!tool.existsStore(filestoreId.intValue())) {
                         final InvalidDataException inde = new InvalidDataException("No such filestore with id " + filestoreId.intValue());
-                        LOGGER.error("", inde);
+                        log(LogLevel.ERROR, LOGGER, credentials, ctx.getIdAsString(), String.valueOf(userid), inde, "");
                         throw inde;
                     }
 
                     Integer fsId = getData(ctx, usrdata, auth).getFilestoreId();
                     if (fsId == null || fsId.intValue() <= 0) {
                         final InvalidDataException inde = new InvalidDataException("Not allowed to change the filestore for user " + userid + " in context " + ctx.getId() + ". Please use appropriate method instead.");
-                        LOGGER.error("", inde);
+                        log(LogLevel.ERROR, LOGGER, credentials, ctx.getIdAsString(), String.valueOf(userid), inde, "");
                         throw inde;
                     }
                     if (fsId.intValue() != filestoreId.intValue()) {
                         final InvalidDataException inde = new InvalidDataException("Not allowed to change the filestore for user " + userid + " in context " + ctx.getId() + ". Please use appropriate method instead.");
-                        LOGGER.error("", inde);
+                        log(LogLevel.ERROR, LOGGER, credentials, ctx.getIdAsString(), String.valueOf(userid), inde, "");
                         throw inde;
                     }
                 }
@@ -1266,11 +1048,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                         }
 
                         // (Synchronous) Move from context to individual user file storage
-                        try {
-                            moveFromContextToUserFilestore(ctx, usrdata, filestoreForUser, quota_max_temp, auth, true);
-                        } catch (NoSuchFilestoreException e) {
-                            throw new StorageException(e);
-                        }
+                        moveFromContextToUserFilestore(ctx, usrdata, filestoreForUser, quota_max_temp, auth, true);
                     } else {
                         if (!OXToolStorageInterface.getInstance().existsStore(i(fsId))) {
                             throw new StorageException("Filestore with identifier " + fsId + " does not exist.");
@@ -1296,13 +1074,10 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                         if ((oxuser instanceof OXUserPluginInterfaceExtended) && (oxuser.canHandleContextAdmin() || (!oxuser.canHandleContextAdmin() && !isContextAdmin))) {
                             OXUserPluginInterfaceExtended oxuserExtended = (OXUserPluginInterfaceExtended) oxuser;
                             try {
-                                LOGGER.debug("Calling change for plugin: {}", oxuser.getClass().getName());
+                                log(LogLevel.DEBUG, LOGGER, credentials, ctx.getIdAsString(), String.valueOf(userid), null, "Calling change for plugin: {}", oxuser.getClass().getName());
                                 oxuserExtended.beforeChange(ctx, usrdata, auth);
-                            } catch (PluginException e) {
-                                LOGGER.error("Error while calling change for plugin: {}", oxuser.getClass().getName(), e);
-                                throw StorageException.wrapForRMI(e);
-                            } catch (RuntimeException e) {
-                                LOGGER.error("Error while calling change for plugin: {}", oxuser.getClass().getName(), e);
+                            } catch (PluginException | RuntimeException e) {
+                                log(LogLevel.ERROR, LOGGER, credentials, ctx.getIdAsString(), String.valueOf(userid), e, "Error while calling change for plugin: {}", oxuser.getClass().getName());
                                 throw StorageException.wrapForRMI(e);
                             }
                         }
@@ -1319,13 +1094,10 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     for (final OXUserPluginInterface oxuser : pluginInterfaces.getUserPlugins().getServiceList()) {
                         if (oxuser.canHandleContextAdmin() || (!oxuser.canHandleContextAdmin() && !isContextAdmin)) {
                             try {
-                                LOGGER.debug("Calling change for plugin: {}", oxuser.getClass().getName());
+                                log(LogLevel.DEBUG, LOGGER, credentials, ctx.getIdAsString(), String.valueOf(userid), null, "Calling change for plugin: {}", oxuser.getClass().getName());
                                 oxuser.change(ctx, usrdata, auth);
-                            } catch (PluginException e) {
-                                LOGGER.error("Error while calling change for plugin: {}", oxuser.getClass().getName(), e);
-                                throw StorageException.wrapForRMI(e);
-                            } catch (RuntimeException e) {
-                                LOGGER.error("Error while calling change for plugin: {}", oxuser.getClass().getName(), e);
+                            } catch (PluginException | RuntimeException e) {
+                                log(LogLevel.ERROR, LOGGER, credentials, ctx.getIdAsString(), String.valueOf(userid), e, "Error while calling change for plugin: {}", oxuser.getClass().getName());
                                 throw StorageException.wrapForRMI(e);
                             }
                         }
@@ -1352,38 +1124,36 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                         cauth.setPasswordMech(passwordDetails.getPasswordMech());
                     } else {
                         IllegalStateException e = new IllegalStateException("There must be a useable password mechanism.");
-                        LOGGER.error("Error encrypting password for credential cache.", e);
+                        log(LogLevel.ERROR, LOGGER, credentials, ctx.getIdAsString(), String.valueOf(userid), e, "Error encrypting password for credential cache.");
                         throw new StorageException(e);
                     }
                 } catch (OXException e) {
-                    LOGGER.error("Error encrypting password for credential cache.", e);
+                    log(LogLevel.ERROR, LOGGER, credentials, ctx.getIdAsString(), String.valueOf(userid), e, "Error encrypting password for credential cache.");
                     throw StorageException.wrapForRMI(e);
                 }
                 cache.setAdminCredentials(ctx, mech, cauth);
             }
-        } catch (RuntimeException e) {
-            LOGGER.error("", e);
-            throw convertException(e);
+        } catch (Exception e) {
+            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString(), String.valueOf(usrdata.getId())));
         }
     }
 
     @Override
     public void changeModuleAccess(final Context ctx, final User user, final UserModuleAccess moduleAccess, final Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
-        final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
         try {
-            doNullCheck(user, moduleAccess);
-        } catch (InvalidDataException e1) {
-            final InvalidDataException invalidDataException = new InvalidDataException("User or UserModuleAccess is null");
-            LOGGER.error("", invalidDataException);
-            throw invalidDataException;
-        }
-
-        try {
+            final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+            try {
+                doNullCheck(user, moduleAccess);
+            } catch (InvalidDataException e1) {
+                final InvalidDataException invalidDataException = new InvalidDataException("User or UserModuleAccess is null", e1);
+                log(LogLevel.ERROR, LOGGER, credentials, e1, "");
+                throw invalidDataException;
+            }
             if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
                 auth.setLogin(auth.getLogin().toLowerCase());
             }
 
-            LOGGER.debug("{} - {} - {} - {}", ctx, user, moduleAccess, auth);
+            log(LogLevel.DEBUG, LOGGER, credentials, ctx.getIdAsString(), String.valueOf(user.getId()), null, "{} - {} - {} - {}", ctx, user, moduleAccess, auth);
 
             basicauth.doAuthentication(auth, ctx);
             checkContextAndSchema(ctx);
@@ -1410,71 +1180,48 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     for (final OXUserPluginInterface oxuser : pluginInterfaces.getUserPlugins().getServiceList()) {
                         if (oxuser.canHandleContextAdmin() || (!oxuser.canHandleContextAdmin() && !isContextAdmin)) {
                             try {
-                                LOGGER.debug("Calling changeModuleAccess for plugin: {}", oxuser.getClass().getName());
+                                log(LogLevel.DEBUG, LOGGER, credentials, ctx.getIdAsString(), String.valueOf(user_id), null, "Calling changeModuleAccess for plugin: {}", oxuser.getClass().getName());
                                 oxuser.changeModuleAccess(ctx, user, moduleAccess, auth);
-                            } catch (PluginException e) {
-                                LOGGER.error("Error while calling change for plugin: {}", oxuser.getClass().getName(), e);
-                                throw StorageException.wrapForRMI(e);
-                            } catch (RuntimeException e) {
-                                LOGGER.error("Error while calling change for plugin: {}", oxuser.getClass().getName(), e);
+                            } catch (PluginException | RuntimeException e) {
+                                log(LogLevel.ERROR, LOGGER, credentials, ctx.getIdAsString(), String.valueOf(user_id), e, "Error while calling change for plugin: {}", oxuser.getClass().getName());
                                 throw StorageException.wrapForRMI(e);
                             }
                         }
                     }
                 }
             }
-        } catch (StorageException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (InvalidDataException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (InvalidCredentialsException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (DatabaseUpdateException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (NoSuchContextException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (NoSuchUserException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (RuntimeException e) {
-            LOGGER.error("", e);
-            throw convertException(e);
+        } catch (Exception e) {
+            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString(), String.valueOf(user.getId())));
         }
 
         //      JCS
         try {
             UserConfigurationStorage.getInstance().invalidateCache(user.getId().intValue(), new ContextImpl(ctx.getId().intValue()));
         } catch (OXException e) {
-            LOGGER.error("Error removing user {} in context {} from configuration storage", user.getId(), ctx.getId(), e);
+            log(LogLevel.ERROR, LOGGER, credentials, ctx.getIdAsString(), String.valueOf(user.getId()), e, "Error removing user {} in context {} from configuration storage", user.getId(), ctx.getId());
         }
         // END OF JCS
     }
 
     @Override
     public void changeModuleAccess(final Context ctx, final User user, final String access_combination_name, final Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
-        final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
         try {
-            doNullCheck(user, access_combination_name);
-            if (access_combination_name.trim().length() == 0) {
-                throw new InvalidDataException("Invalid access combination name");
+            final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+            try {
+                doNullCheck(user, access_combination_name);
+                if (access_combination_name.trim().length() == 0) {
+                    throw new InvalidDataException("Invalid access combination name");
+                }
+            } catch (InvalidDataException e1) {
+                final InvalidDataException invalidDataException = new InvalidDataException("User or UserModuleAccess is null", e1);
+                log(LogLevel.ERROR, LOGGER, credentials, invalidDataException, "");
+                throw invalidDataException;
             }
-        } catch (InvalidDataException e1) {
-            final InvalidDataException invalidDataException = new InvalidDataException("User or UserModuleAccess is null");
-            LOGGER.error("", invalidDataException);
-            throw invalidDataException;
-        }
-
-        try {
             if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
                 auth.setLogin(auth.getLogin().toLowerCase());
             }
 
-            LOGGER.debug("{} - {} - {} - {}", ctx, user, access_combination_name, auth);
+            log(LogLevel.DEBUG, LOGGER, credentials, ctx.getIdAsString(), String.valueOf(user.getId()), null, "{} - {} - {} - {}", ctx, user, access_combination_name, auth);
 
             basicauth.doAuthentication(auth, ctx);
             checkContextAndSchema(ctx);
@@ -1509,49 +1256,28 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     for (final OXUserPluginInterface oxuser : pluginInterfaces.getUserPlugins().getServiceList()) {
                         if (oxuser.canHandleContextAdmin() || (!oxuser.canHandleContextAdmin() && !isContextAdmin)) {
                             try {
-                                LOGGER.debug("Calling changeModuleAccess for plugin: {}", oxuser.getClass().getName());
+                                log(LogLevel.DEBUG, LOGGER, credentials, ctx.getIdAsString(), String.valueOf(user_id), null, "Calling changeModuleAccess for plugin: {}", oxuser.getClass().getName());
                                 oxuser.changeModuleAccess(ctx, user, access_combination_name, auth);
-                            } catch (PluginException e) {
-                                LOGGER.error("Error while calling change for plugin: {}", oxuser.getClass().getName(), e);
-                                throw StorageException.wrapForRMI(e);
-                            } catch (RuntimeException e) {
-                                LOGGER.error("Error while calling change for plugin: {}", oxuser.getClass().getName(), e);
+                            } catch (PluginException | RuntimeException e) {
+                                log(LogLevel.ERROR, LOGGER, credentials, ctx.getIdAsString(), String.valueOf(user_id), e, "Error while calling change for plugin: {}", oxuser.getClass().getName());
                                 throw StorageException.wrapForRMI(e);
                             }
                         }
                     }
                 }
             }
-        } catch (StorageException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (InvalidDataException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (InvalidCredentialsException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (DatabaseUpdateException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (NoSuchContextException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (NoSuchUserException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (RuntimeException e) {
-            LOGGER.error("", e);
-            throw convertException(e);
+        } catch (Exception e) {
+            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString(), String.valueOf(user.getId())));
         }
 
         // JCS
         try {
             UserConfigurationStorage.getInstance().invalidateCache(user.getId().intValue(), new ContextImpl(ctx.getId().intValue()));
         } catch (OXException e) {
-            LOGGER.error("Error removing user {} in context {} from configuration storage", user.getId(), ctx.getId(), e);
+            log(LogLevel.ERROR, LOGGER, credentials, ctx.getIdAsString(), String.valueOf(user.getId()), e, "Error removing user {} in context {} from configuration storage", user.getId(), ctx.getId());
+            throw convertException(e);
         } catch (RuntimeException e) {
-            LOGGER.error("", e);
+            log(LogLevel.ERROR, LOGGER, credentials, ctx.getIdAsString(), String.valueOf(user.getId()), e, "");
             throw convertException(e);
         }
 
@@ -1574,11 +1300,11 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     try {
                         UserConfigurationStorage.getInstance().invalidateCache(user.getId().intValue(), new ContextImpl(ctx.getId().intValue()));
                     } catch (OXException e) {
-                        LOGGER.error("Error removing user {} in context {} from configuration storage", user.getId(), ctx.getId(), e);
+                        log(LogLevel.ERROR, LOGGER, credentials, ctx.getIdAsString(), String.valueOf(user.getId()), e, "Error removing user {} in context {} from configuration storage", user.getId(), ctx.getId());
                     }
                 }
             } catch (Exception e) {
-                LOGGER.error("", e);
+                log(LogLevel.ERROR, LOGGER, credentials, ctx.getIdAsString(), String.valueOf(user.getId()), e, "");
             }
         }
         // END OF JCS
@@ -1592,115 +1318,130 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
     @Override
     public User create(final Context ctx, final User usrdata, final String access_combination_name, final Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
-        // Resolve the access rights by the specified combination name. If combination name does not exists, throw error as it is described
-        // in the spec!
-        final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
         try {
-            doNullCheck(usrdata, access_combination_name);
-            if (access_combination_name.trim().length() == 0) {
-                throw new InvalidDataException("Invalid access combination name");
+            // Resolve the access rights by the specified combination name. If combination name does not exists, throw error as it is described
+            // in the spec!
+            final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+            try {
+                doNullCheck(usrdata, access_combination_name);
+                if (access_combination_name.trim().length() == 0) {
+                    throw new InvalidDataException("Invalid access combination name");
+                }
+            } catch (InvalidDataException e3) {
+                log(LogLevel.ERROR, LOGGER, credentials, e3, "One of the given arguments for create is null");
+                throw e3;
             }
-        } catch (InvalidDataException e3) {
-            LOGGER.error("One of the given arguments for create is null", e3);
-            throw e3;
+
+            if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+                auth.setLogin(auth.getLogin().toLowerCase());
+            }
+
+            log(LogLevel.DEBUG, LOGGER, credentials, ctx.getIdAsString(), String.valueOf(usrdata.getId()), null, "{} - {} - {} - {}", ctx, usrdata, access_combination_name, auth);
+
+            basicauth.doAuthentication(auth, ctx);
+
+            UserModuleAccess access = cache.getNamedAccessCombination(access_combination_name.trim(), false);
+            if (access == null) {
+                // no such access combination name defined in configuration
+                // throw error!
+                throw new InvalidDataException("No such access combination name \"" + access_combination_name.trim() + "\"");
+            }
+            access = access.clone();
+
+            // Call main create user method with resolved access rights
+            return createUserCommon(ctx, usrdata, access, auth);
+        } catch (Exception e) {
+            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString(), String.valueOf(usrdata.getId())));
         }
-
-        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
-            auth.setLogin(auth.getLogin().toLowerCase());
-        }
-
-        LOGGER.debug("{} - {} - {} - {}", ctx, usrdata, access_combination_name, auth);
-
-        basicauth.doAuthentication(auth, ctx);
-
-        UserModuleAccess access = cache.getNamedAccessCombination(access_combination_name.trim(), false);
-        if (access == null) {
-            // no such access combination name defined in configuration
-            // throw error!
-            throw new InvalidDataException("No such access combination name \"" + access_combination_name.trim() + "\"");
-        }
-        access = access.clone();
-
-        // Call main create user method with resolved access rights
-        return createUserCommon(ctx, usrdata, access, auth);
     }
 
     @Override
     public User create(final Context ctx, final User usrdata, final Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
+        try {
+            /*
+             * Resolve current access rights from the specified context (admin) as
+             * it is described in the spec and then call the main create user method
+             * with the access rights!
+             */
+            final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
 
-        /*
-         * Resolve current access rights from the specified context (admin) as
-         * it is described in the spec and then call the main create user method
-         * with the access rights!
-         */
+            try {
+                doNullCheck(usrdata);
+            } catch (InvalidDataException e3) {
+                log(LogLevel.ERROR, LOGGER, credentials, e3, "One of the given arguments for create is null");
+                throw e3;
+            }
+
+            if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+                auth.setLogin(auth.getLogin().toLowerCase());
+            }
+
+            log(LogLevel.DEBUG, LOGGER, credentials, ctx.getIdAsString(), String.valueOf(usrdata.getId()), null, "{} - {} - {}", ctx, usrdata, auth);
+
+            basicauth.doAuthentication(auth, ctx);
+
+            /*
+             * Resolve admin user of specified context via tools and then get his current module access rights
+             */
+
+            final int admin_id = tool.getAdminForContext(ctx);
+            final UserModuleAccess access = oxu.getModuleAccess(ctx, admin_id);
+
+            if (access.isPublicFolderEditable()) {
+                // publicFolderEditable can only be applied to the context administrator.
+                access.setPublicFolderEditable(false);
+            }
+
+            return createUserCommon(ctx, usrdata, access, auth);
+        } catch (Exception e) {
+            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString(), String.valueOf(usrdata.getId())));
+        }
+    }
+
+    @Override
+    public User getContextAdmin(final Context ctx, final Credentials credentials) throws InvalidCredentialsException, StorageException, InvalidDataException, RemoteException {
         final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
 
         try {
-            doNullCheck(usrdata);
-        } catch (InvalidDataException e3) {
-            LOGGER.error("One of the given arguments for create is null", e3);
-            throw e3;
+            basicauth.doAuthentication(auth, ctx);
+            return (oxu.getData(ctx, new User[] { new User(tool.getAdminForContext(ctx)) }))[0];
+        } catch (Exception e) {
+            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString()));
         }
-
-        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
-            auth.setLogin(auth.getLogin().toLowerCase());
-        }
-
-        LOGGER.debug("{} - {} - {}", ctx, usrdata, auth);
-
-        basicauth.doAuthentication(auth, ctx);
-
-        /*
-         * Resolve admin user of specified context via tools and then get his current module access rights
-         */
-
-        final int admin_id = tool.getAdminForContext(ctx);
-        final UserModuleAccess access = oxu.getModuleAccess(ctx, admin_id);
-
-        if (access.isPublicFolderEditable()) {
-            // publicFolderEditable can only be applied to the context administrator.
-            access.setPublicFolderEditable(false);
-        }
-
-        return createUserCommon(ctx, usrdata, access, auth);
     }
 
     @Override
-    public User getContextAdmin(final Context ctx, final Credentials credentials) throws InvalidCredentialsException, StorageException, InvalidDataException {
+    public UserModuleAccess getContextAdminUserModuleAccess(final Context ctx, final Credentials credentials) throws StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, RemoteException {
         final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
 
-        basicauth.doAuthentication(auth, ctx);
-        return (oxu.getData(ctx, new User[] { new User(tool.getAdminForContext(ctx)) }))[0];
-    }
+        try {
+            basicauth.doAuthentication(auth, ctx);
 
-    @Override
-    public UserModuleAccess getContextAdminUserModuleAccess(final Context ctx, final Credentials credentials) throws StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
-        final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
-        basicauth.doAuthentication(auth, ctx);
+            /*
+             * Resolve admin user of specified context via tools and then get his current module access rights
+             */
 
-        /*
-         * Resolve admin user of specified context via tools and then get his current module access rights
-         */
-
-        final int admin_id = tool.getAdminForContext(ctx);
-        final UserModuleAccess access = oxu.getModuleAccess(ctx, admin_id);
-        return access;
+            final int admin_id = tool.getAdminForContext(ctx);
+            final UserModuleAccess access = oxu.getModuleAccess(ctx, admin_id);
+            return access;
+        } catch (Exception e) {
+            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString()));
+        }
     }
 
     /*
      * Main method to create a user. Which all inner create methods MUST use after resolving the access rights!
      */
-    private User createUserCommon(final Context ctx, final User usr, final UserModuleAccess access, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
+    private User createUserCommon(final Context ctx, final User usr, final UserModuleAccess access, final Credentials auth) throws RemoteException {
         try {
-            doNullCheck(usr, access);
-        } catch (InvalidDataException e3) {
-            LOGGER.error("One of the given arguments for create is null", e3);
-            throw e3;
-        }
+            try {
+                doNullCheck(usr, access);
+            } catch (InvalidDataException e3) {
+                log(LogLevel.ERROR, LOGGER, auth, e3, "One of the given arguments for create is null");
+                throw e3;
+            }
 
-        LOGGER.debug("{} - {} - {} - {}", ctx, usr, access, auth);
-
-        try {
+            log(LogLevel.DEBUG, LOGGER, auth, ctx.getIdAsString(), String.valueOf(usr.getId()), null, "{} - {} - {} - {}", ctx, usr, access, auth);
             try {
                 basicauth.doAuthentication(auth, ctx);
 
@@ -1715,10 +1456,10 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 // validate email adresss
                 tool.primaryMailExists(ctx, usr.getPrimaryEmail());
             } catch (InvalidDataException e2) {
-                LOGGER.error("", e2);
+                log(LogLevel.ERROR, LOGGER, auth, ctx.getIdAsString(), String.valueOf(usr.getId()), e2, "");
                 throw e2;
             } catch (EnforceableDataObjectException e) {
-                LOGGER.error("", e);
+                log(LogLevel.ERROR, LOGGER, auth, ctx.getIdAsString(), String.valueOf(usr.getId()), e, "");
                 throw new InvalidDataException(e.getMessage());
             }
 
@@ -1736,64 +1477,41 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                             final boolean canHandleContextAdmin = oxuser.canHandleContextAdmin();
                             if (canHandleContextAdmin || (!canHandleContextAdmin && !tool.isContextAdmin(ctx, usr.getId().intValue()))) {
                                 try {
-                                    LOGGER.debug("Calling create for plugin: {}", bundlename);
+                                    log(LogLevel.DEBUG, LOGGER, auth, ctx.getIdAsString(), String.valueOf(usr.getId()), null, "Calling create for plugin: {}", bundlename);
                                     oxuser.create(ctx, usr, access, auth);
                                     interfacelist.add(oxuser);
-                                } catch (PluginException e) {
-                                    LOGGER.error("Error while calling create for plugin: {}", bundlename, e);
-                                    LOGGER.info("Now doing rollback for everything until now...");
+                                } catch (PluginException | RuntimeException e) {
+                                    log(LogLevel.ERROR, LOGGER, auth, ctx.getIdAsString(), String.valueOf(usr.getId()), e, "Error while calling create for plugin: {}", bundlename);
+                                    log(LogLevel.INFO, LOGGER, auth, ctx.getIdAsString(), String.valueOf(usr.getId()), null, "Now doing rollback for everything until now...");
                                     for (final OXUserPluginInterface oxuserinterface : interfacelist) {
                                         try {
                                             oxuserinterface.delete(ctx, new User[] { usr }, auth);
-                                        } catch (PluginException e1) {
-                                            LOGGER.error("Error doing rollback for plugin: {}", bundlename, e1);
-                                        } catch (RuntimeException e1) {
-                                            LOGGER.error("Error doing rollback for plugin: {}", bundlename, e1);
-                                        }
-                                    }
-                                    try {
-
-                                        oxu.delete(ctx, usr, I(-1));
-                                    } catch (StorageException e1) {
-                                        LOGGER.error("Error doing rollback for creating user in database", e1);
-                                    }
-                                    throw StorageException.wrapForRMI(e);
-                                } catch (RuntimeException e) {
-                                    LOGGER.error("Error while calling create for plugin: {}", bundlename, e);
-                                    LOGGER.info("Now doing rollback for everything until now...");
-                                    for (final OXUserPluginInterface oxuserinterface : interfacelist) {
-                                        try {
-                                            oxuserinterface.delete(ctx, new User[] { usr }, auth);
-                                        } catch (PluginException e1) {
-                                            LOGGER.error("Error doing rollback for plugin: {}", bundlename, e1);
-                                        } catch (RuntimeException e1) {
-                                            LOGGER.error("Error doing rollback for plugin: {}", bundlename, e1);
+                                        } catch (PluginException | RuntimeException e1) {
+                                            log(LogLevel.ERROR, LOGGER, auth, ctx.getIdAsString(), String.valueOf(usr.getId()), e1, "Error doing rollback for plugin: {}", bundlename);
                                         }
                                     }
                                     try {
                                         oxu.delete(ctx, usr, I(-1));
                                     } catch (StorageException e1) {
-                                        LOGGER.error("Error doing rollback for creating user in database", e1);
+                                        log(LogLevel.ERROR, LOGGER, auth, ctx.getIdAsString(), String.valueOf(usr.getId()), e1, "Error doing rollback for creating user in database");
                                     }
                                     throw StorageException.wrapForRMI(e);
                                 }
                             }
                         } catch (RuntimeException e) {
-                            LOGGER.error("Error while calling canHandleContextAdmin for plugin: {}", bundlename, e);
-                            LOGGER.info("Now doing rollback for everything until now...");
+                            log(LogLevel.ERROR, LOGGER, auth, ctx.getIdAsString(), String.valueOf(usr.getId()), e, "Error while calling canHandleContextAdmin for plugin: {}", bundlename);
+                            log(LogLevel.INFO, LOGGER, auth, ctx.getIdAsString(), String.valueOf(usr.getId()), null, "Now doing rollback for everything until now...");
                             for (final OXUserPluginInterface oxuserinterface : interfacelist) {
                                 try {
                                     oxuserinterface.delete(ctx, new User[] { usr }, auth);
-                                } catch (PluginException e1) {
-                                    LOGGER.error("Error doing rollback for plugin: {}", bundlename, e1);
-                                } catch (RuntimeException e1) {
-                                    LOGGER.error("Error doing rollback for plugin: {}", bundlename, e1);
+                                } catch (PluginException | RuntimeException e1) {
+                                    log(LogLevel.ERROR, LOGGER, auth, ctx.getIdAsString(), String.valueOf(usr.getId()), e1, "Error doing rollback for plugin: {}", bundlename);
                                 }
                             }
                             try {
                                 oxu.delete(ctx, usr, I(-1));
                             } catch (StorageException e1) {
-                                LOGGER.error("Error doing rollback for creating user in database", e1);
+                                log(LogLevel.ERROR, LOGGER, auth, ctx.getIdAsString(), String.valueOf(usr.getId()), e1, "Error doing rollback for creating user in database");
                             }
                             throw StorageException.wrapForRMI(e);
                         }
@@ -1819,7 +1537,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     cacheKey = cacheService.newCacheKey(ctx.getId().intValue(), FolderObject.SYSTEM_LDAP_FOLDER_ID);
                     folderCache.remove(cacheKey);
                 } catch (OXException e) {
-                    LOGGER.error("", e);
+                    log(LogLevel.ERROR, LOGGER, auth, ctx.getIdAsString(), String.valueOf(usr.getId()), e, "");
                 }
             }
 
@@ -1837,15 +1555,14 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     }
 
                 } catch (OXException e) {
-                    LOGGER.error("Unable to set special use check property!", e);
+                    log(LogLevel.ERROR, LOGGER, auth, ctx.getIdAsString(), String.valueOf(usr.getId()), e, "Unable to set special use check property!");
                 }
             }
 
             // Return created user
             return usr;
-        } catch (RuntimeException e) {
-            LOGGER.error("", e);
-            throw convertException(e);
+        } catch (Exception e) {
+            throw convertException(logAndEnhanceException(LOGGER, e, auth, ctx.getIdAsString(), String.valueOf(usr.getId())));
         }
     }
 
@@ -1856,135 +1573,116 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
     @Override
     public void delete(final Context ctx, final User[] users, Integer destUser, final Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
-        final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
-
         try {
-            doNullCheck((Object[]) users);
-        } catch (InvalidDataException e1) {
-            LOGGER.error("One of the given arguments for delete is null", e1);
-            throw e1;
-        }
+            final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+            try {
+                doNullCheck((Object[]) users);
+            } catch (InvalidDataException e1) {
+                log(LogLevel.ERROR, LOGGER, credentials, e1, "One of the given arguments for delete is null");
+                throw e1;
+            }
 
-        if (users.length == 0) {
-            final InvalidDataException e = new InvalidDataException("User array is empty");
-            LOGGER.error("", e);
-            throw e;
-        }
-
-        try {
+            if (users.length == 0) {
+                final InvalidDataException e = new InvalidDataException("User array is empty");
+                log(LogLevel.ERROR, LOGGER, credentials, e, "");
+                throw e;
+            }
             if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
                 auth.setLogin(auth.getLogin().toLowerCase());
             }
 
             basicauth.doAuthentication(auth, ctx);
 
-            LOGGER.debug("{} - {} - {}", ctx, Arrays.toString(users), auth);
+            log(LogLevel.DEBUG, LOGGER, credentials, ctx.getIdAsString(), getObjectIds(users), null, "{} - {} - {}", ctx, Arrays.toString(users), auth);
             checkContextAndSchema(ctx);
 
             try {
-                try {
-                    setUserIdInArrayOfUsers(ctx, users);
-                } catch (NoSuchObjectException e) {
-                    throw new NoSuchUserException(e);
-                }
-                // FIXME: Change function from int to user object
-                if (!tool.existsUser(ctx, users)) {
-                    final NoSuchUserException noSuchUserException = new NoSuchUserException("No such user(s) " + getUserIdArrayFromUsersAsString(users) + " in context " + ctx.getId());
-                    LOGGER.error("No such user(s) {} in context {}", Arrays.toString(users), ctx.getId(), noSuchUserException);
-                    throw noSuchUserException;
-                }
+                setUserIdInArrayOfUsers(ctx, users);
+            } catch (NoSuchObjectException e) {
+                throw new NoSuchUserException(e);
+            }
+            // FIXME: Change function from int to user object
+            if (!tool.existsUser(ctx, users)) {
+                final NoSuchUserException noSuchUserException = new NoSuchUserException("No such user(s) " + getUserIdArrayFromUsersAsString(users) + " in context " + ctx.getId());
+                log(LogLevel.ERROR, LOGGER, credentials, ctx.getIdAsString(), getObjectIds(users), noSuchUserException, "No such user(s) {} in context {}", Arrays.toString(users), ctx.getId());
+                throw noSuchUserException;
+            }
 
-                int contextAdminId = tool.getAdminForContext(ctx);
-                List<User> filestoreOwners = new java.util.LinkedList<User>();
-                {
-                    Set<Integer> dubCheck = new HashSet<Integer>();
-                    for (final User user : users) {
-                        if (destUser != null && user.getId().intValue() == destUser.intValue()) {
-                            throw new InvalidDataException("It is not allowed to reassign the shared data to the user which should be deleted. Please choose a different reassign user.");
-                        }
-                        if (false == dubCheck.add(user.getId())) {
-                            throw new InvalidDataException("User " + user.getId() + " is contained multiple times in delete request.");
-                        }
-
-                        if (contextAdminId == user.getId().intValue()) {
-                            throw new InvalidDataException("Admin delete not supported");
-                        }
-
-                        if (tool.isMasterFilestoreOwner(ctx, user.getId().intValue())) {
-                            Map<Integer, List<Integer>> slaveUsers = tool.fetchSlaveUsersOfMasterFilestore(ctx, user.getId().intValue());
-                            if (!slaveUsers.isEmpty()) {
-                                String affectedUsers = mapToString(slaveUsers);
-                                throw new InvalidDataException("The user " + user.getId() + " is the owner of a master filestore which other users are using. "
-                                    + "Before deleting this user you must move the filestores of the affected users either to the context filestore, "
-                                    + "to another master filestore or to a user filestore with the appropriate commandline tools. "
-                                    + "Affected users are: " + affectedUsers);
-                            }
-
-                            filestoreOwners.add(user);
-                        }
-
+            int contextAdminId = tool.getAdminForContext(ctx);
+            List<User> filestoreOwners = new java.util.LinkedList<User>();
+            {
+                Set<Integer> dubCheck = new HashSet<Integer>();
+                for (final User user : users) {
+                    if (destUser != null && user.getId().intValue() == destUser.intValue()) {
+                        throw new InvalidDataException("It is not allowed to reassign the shared data to the user which should be deleted. Please choose a different reassign user.");
                     }
+                    if (false == dubCheck.add(user.getId())) {
+                        throw new InvalidDataException("User " + user.getId() + " is contained multiple times in delete request.");
+                    }
+
+                    if (contextAdminId == user.getId().intValue()) {
+                        throw new InvalidDataException("Admin delete not supported");
+                    }
+
+                    if (tool.isMasterFilestoreOwner(ctx, user.getId().intValue())) {
+                        Map<Integer, List<Integer>> slaveUsers = tool.fetchSlaveUsersOfMasterFilestore(ctx, user.getId().intValue());
+                        if (!slaveUsers.isEmpty()) {
+                            String affectedUsers = mapToString(slaveUsers);
+                            throw new InvalidDataException("The user " + user.getId() + " is the owner of a master filestore which other users are using. " + "Before deleting this user you must move the filestores of the affected users either to the context filestore, " + "to another master filestore or to a user filestore with the appropriate commandline tools. " + "Affected users are: " + affectedUsers);
+                        }
+
+                        filestoreOwners.add(user);
+                    }
+
                 }
+            }
 
-                ConfigViewFactory configViewFactory = AdminServiceRegistry.getInstance().getService(ConfigViewFactory.class);
-                if (destUser == null) {
-                    // Move to store of context administrator
-                    User adminUser = oxu.getData(ctx, new User[] { new User(contextAdminId) })[0];
-                    if (adminUser.getFilestoreId().intValue() > 0) {
-                        // Context administrator uses a dedicated store
-                        for (User filestoreOwner : filestoreOwners) {
-                            // Disable Unified Quota first (if enabled); otherwise 'c.o.filestore.impl.groupware.unified.UnifiedQuotaFilestoreDataMoveListener' kicks-in and will throw an exception
-                            disableUnifiedQuotaIfEnabled(filestoreOwner, ctx, configViewFactory);
+            ConfigViewFactory configViewFactory = AdminServiceRegistry.getInstance().getService(ConfigViewFactory.class);
+            if (destUser == null) {
+                // Move to store of context administrator
+                User adminUser = oxu.getData(ctx, new User[] { new User(contextAdminId) })[0];
+                if (adminUser.getFilestoreId().intValue() > 0) {
+                    // Context administrator uses a dedicated store
+                    for (User filestoreOwner : filestoreOwners) {
+                        // Disable Unified Quota first (if enabled); otherwise 'c.o.filestore.impl.groupware.unified.UnifiedQuotaFilestoreDataMoveListener' kicks-in and will throw an exception
+                        disableUnifiedQuotaIfEnabled(filestoreOwner, ctx, configViewFactory);
 
-                            // Move files...
-                            LOGGER.info("User {} has an individual filestore set. Hence, moving user-associated files to filestore of context administrator...", filestoreOwner.getId());
-                            moveFromUserFilestoreToMaster(ctx, filestoreOwner, adminUser, credentials, true);
-                            LOGGER.info("Moved all files from user {} to filestore of context administrator.", filestoreOwner.getId());
-                        }
-                    } else {
-                        // Context administrator uses general context store
-                        for (User filestoreOwner : filestoreOwners) {
-                            // Disable Unified Quota first (if enabled); otherwise 'c.o.filestore.impl.groupware.unified.UnifiedQuotaFilestoreDataMoveListener' kicks-in and will throw an exception
-                            disableUnifiedQuotaIfEnabled(filestoreOwner, ctx, configViewFactory);
-
-                            // Move files...
-                            LOGGER.info("User {} has an individual filestore set. Hence, moving user-associated files to context filestore...", filestoreOwner.getId());
-                            moveFromUserToContextFilestore(ctx, filestoreOwner, credentials, true);
-                            LOGGER.info("Moved all files from user {} to context filestore.", filestoreOwner.getId());
-                        }
+                        // Move files...
+                        log(LogLevel.INFO, LOGGER, credentials, ctx.getIdAsString(), String.valueOf(filestoreOwner.getId()), null, "User {} has an individual filestore set. Hence, moving user-associated files to filestore of context administrator...", filestoreOwner.getId());
+                        moveFromUserFilestoreToMaster(ctx, filestoreOwner, adminUser, credentials, true);
+                        log(LogLevel.INFO, LOGGER, credentials, ctx.getIdAsString(), String.valueOf(filestoreOwner.getId()), null, "Moved all files from user {} to filestore of context administrator.", filestoreOwner.getId());
                     }
                 } else {
-                    if (destUser.intValue() > 0) { // Move to master store
-                        if (!tool.existsUser(ctx, destUser.intValue())) {
-                            throw new InvalidDataException(String.format("The reassign user with id %1$s does not exist in context %2$s. Please choose a different reassign user.", destUser, ctx.getId()));
-                        }
-                        if (!tool.isMasterFilestoreOwner(ctx, destUser.intValue())) {
-                            throw new InvalidDataException(String.format("The reassign user with id %1$s is not an owner of a filestore. Please choose a different reassign user.", destUser));
-                        }
-                        User masterUser = new User(destUser.intValue());
-                        for (User filestoreOwner : filestoreOwners) {
-                            // Disable Unified Quota first (if enabled); otherwise 'c.o.filestore.impl.groupware.unified.UnifiedQuotaFilestoreDataMoveListener' kicks-in and will throw an exception
-                            disableUnifiedQuotaIfEnabled(filestoreOwner, ctx, configViewFactory);
+                    // Context administrator uses general context store
+                    for (User filestoreOwner : filestoreOwners) {
+                        // Disable Unified Quota first (if enabled); otherwise 'c.o.filestore.impl.groupware.unified.UnifiedQuotaFilestoreDataMoveListener' kicks-in and will throw an exception
+                        disableUnifiedQuotaIfEnabled(filestoreOwner, ctx, configViewFactory);
 
-                            // Move files...
-                            LOGGER.info("User {} has an individual filestore set. Hence, moving user-associated files to filestore of user {}", filestoreOwner.getId(), masterUser.getId());
-                            moveFromUserFilestoreToMaster(ctx, filestoreOwner, masterUser, credentials);
-                            LOGGER.info("Moved all files from user {} to filestore of user {}.", filestoreOwner.getId(), masterUser.getId());
-                        }
+                        // Move files...
+                        log(LogLevel.INFO, LOGGER, credentials, ctx.getIdAsString(), String.valueOf(filestoreOwner.getId()), null, "User {} has an individual filestore set. Hence, moving user-associated files to context filestore...", filestoreOwner.getId());
+                        moveFromUserToContextFilestore(ctx, filestoreOwner, credentials, true);
+                        log(LogLevel.INFO, LOGGER, credentials, ctx.getIdAsString(), String.valueOf(filestoreOwner.getId()), null, "Moved all files from user {} to context filestore.", filestoreOwner.getId());
                     }
                 }
-            } catch (InvalidDataException e) {
-                LOGGER.error("", e);
-                throw e;
-            } catch (StorageException e) {
-                LOGGER.error("", e);
-                throw e;
-            } catch (RemoteException e) {
-                LOGGER.error("", e);
-                throw new StorageException(e);
-            } catch (NoSuchFilestoreException e) {
-                LOGGER.error("", e);
-                throw new StorageException(e);
+            } else {
+                if (destUser.intValue() > 0) { // Move to master store
+                    if (!tool.existsUser(ctx, destUser.intValue())) {
+                        throw new InvalidDataException(String.format("The reassign user with id %1$s does not exist in context %2$s. Please choose a different reassign user.", destUser, ctx.getId()));
+                    }
+                    if (!tool.isMasterFilestoreOwner(ctx, destUser.intValue())) {
+                        throw new InvalidDataException(String.format("The reassign user with id %1$s is not an owner of a filestore. Please choose a different reassign user.", destUser));
+                    }
+                    User masterUser = new User(destUser.intValue());
+                    for (User filestoreOwner : filestoreOwners) {
+                        // Disable Unified Quota first (if enabled); otherwise 'c.o.filestore.impl.groupware.unified.UnifiedQuotaFilestoreDataMoveListener' kicks-in and will throw an exception
+                        disableUnifiedQuotaIfEnabled(filestoreOwner, ctx, configViewFactory);
+
+                        // Move files...
+                        log(LogLevel.INFO, LOGGER, credentials, ctx.getIdAsString(), String.valueOf(filestoreOwner.getId()), null, "User {} has an individual filestore set. Hence, moving user-associated files to filestore of user {}", filestoreOwner.getId(), masterUser.getId());
+                        moveFromUserFilestoreToMaster(ctx, filestoreOwner, masterUser, credentials);
+                        log(LogLevel.INFO, LOGGER, credentials, ctx.getIdAsString(), String.valueOf(filestoreOwner.getId()), null, "Moved all files from user {} to filestore of user {}.", filestoreOwner.getId(), masterUser.getId());
+                    }
+                }
             }
 
             User[] retusers = oxu.getData(ctx, users);
@@ -2003,14 +1701,14 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                         if (!oxuser.canHandleContextAdmin()) {
                             retusers = removeContextAdmin(ctx, retusers);
                             if (retusers.length > 0) {
-                                LOGGER.debug("Calling delete for plugin: {}", oxuser.getClass().getName());
+                                log(LogLevel.DEBUG, LOGGER, credentials, ctx.getIdAsString(), getObjectIds(retusers), null, "Calling delete for plugin: {}", oxuser.getClass().getName());
                                 final Exception exception = callDeleteForPlugin(ctx, auth, retusers, interfacelist, oxuser.getClass().getName(), oxuser);
                                 if (null != exception) {
                                     exceptionlist.add(exception);
                                 }
                             }
                         } else {
-                            LOGGER.debug("Calling delete for plugin: {}", oxuser.getClass().getName());
+                            log(LogLevel.DEBUG, LOGGER, credentials, ctx.getIdAsString(), getObjectIds(retusers), null, "Calling delete for plugin: {}", oxuser.getClass().getName());
                             final Exception exception = callDeleteForPlugin(ctx, auth, retusers, interfacelist, oxuser.getClass().getName(), oxuser);
                             if (null != exception) {
                                 exceptionlist.add(exception);
@@ -2026,7 +1724,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 try {
                     Filestore2UserUtil.removeFilestore2UserEntry(ctx.getId().intValue(), user.getId().intValue(), cache);
                 } catch (Exception e) {
-                    LOGGER.error("Failed to remove filestore2User entry for user {} in context {}", ctx.getId(), user.getId(), e);
+                    log(LogLevel.ERROR, LOGGER, credentials, ctx.getIdAsString(), String.valueOf(user.getId()), e, "Failed to remove filestore2User entry for user {} in context {}", ctx.getId(), user.getId());
                 }
             }
 
@@ -2050,11 +1748,11 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                         try {
                             UserConfigurationStorage.getInstance().invalidateCache(user.getId().intValue(), new ContextImpl(ctx.getId().intValue()));
                         } catch (OXException e) {
-                            LOGGER.error("Error removing user {} in context {} from configuration storage", user.getId(), ctx.getId(), e);
+                            log(LogLevel.ERROR, LOGGER, credentials, ctx.getIdAsString(), String.valueOf(user.getId()), e, "Error removing user {} in context {} from configuration storage", user.getId(), ctx.getId());
                         }
                     }
                 } catch (OXException e) {
-                    LOGGER.error("", e);
+                    log(LogLevel.ERROR, LOGGER, credentials, ctx.getIdAsString(), getObjectIds(users), e, "");
                 }
             }
             // END OF JCS
@@ -2067,9 +1765,8 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 }
                 throw new StorageException(sb.toString());
             }
-        } catch (RuntimeException e) {
-            LOGGER.error("", e);
-            throw convertException(e);
+        } catch (Exception e) {
+            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString(), getObjectIds(users)));
         }
     }
 
@@ -2085,7 +1782,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     user.setUserAttribute("config", property, Boolean.FALSE.toString());
                 }
             } catch (Exception e) {
-                LOGGER.warn("Failed to disable Unified Quota for user {} in context {}", user.getId(), ctx.getId(), e);
+                log(LogLevel.WARNING, LOGGER, null, ctx.getIdAsString(), String.valueOf(user.getId()), e, "Failed to disable Unified Quota for user {} in context {}", user.getId(), ctx.getId());
             }
         }
     }
@@ -2110,108 +1807,99 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
     @Override
     public User[] getData(final Context ctx, final User[] users, final Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException, DatabaseUpdateException {
-        Credentials auth = credentials == null ? new Credentials("", "") : credentials;
         try {
-            doNullCheck((Object[]) users);
-        } catch (InvalidDataException e1) {
-            LOGGER.error("One of the given arguments for getData is null", e1);
-            throw e1;
-        }
-        try {
-            checkContext(ctx);
-            if (users.length <= 0) {
-                throw new InvalidDataException();
+            Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+            try {
+                doNullCheck((Object[]) users);
+            } catch (InvalidDataException e1) {
+                log(LogLevel.ERROR, LOGGER, credentials, e1, "One of the given arguments for getData is null");
+                throw e1;
             }
-        } catch (InvalidDataException e) {
-            LOGGER.error("", e);
-            throw e;
-        }
-
-        try {
+            try {
+                checkContext(ctx);
+                if (users.length <= 0) {
+                    throw new InvalidDataException();
+                }
+            } catch (InvalidDataException e) {
+                log(LogLevel.ERROR, LOGGER, credentials, e, "");
+                throw e;
+            }
             if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
                 auth.setLogin(auth.getLogin().toLowerCase());
             }
 
-            LOGGER.debug("{} - {} - {}", ctx, Arrays.toString(users), auth);
-            try {
-                // enable check who wants to get data if authentication is enabled
-                if (!cache.contextAuthenticationDisabled()) {
-                    // ok here its possible that a user wants to get his own data
-                    // SPECIAL USER AUTH CHECK FOR THIS METHOD!
-                    // check if credentials are from oxadmin or from an user
-                    // check if given user is not admin, if he is admin, the
-                    final User authuser = new User();
-                    authuser.setName(auth.getLogin());
-                    if (basicauth.isMasterOfContext(auth, ctx)) {
-                        basicauth.doAuthentication(auth, ctx);
-                    } else if (!tool.isContextAdmin(ctx, authuser)) {
-                        final InvalidCredentialsException invalidCredentialsException = new InvalidCredentialsException("Permission denied");
-                        if (users.length == 1) {
-                            final int auth_user_id = authuser.getId().intValue();
-                            basicauth.doUserAuthentication(auth, ctx);
-                            // its possible that he wants his own data
-                            final Integer userid = users[0].getId();
-                            if (userid != null) {
-                                if (userid.intValue() != auth_user_id) {
+            log(LogLevel.DEBUG, LOGGER, credentials, ctx.getIdAsString(), getObjectIds(users), null, "{} - {} - {}", ctx, Arrays.toString(users), auth);
+            // enable check who wants to get data if authentication is enabled
+            if (!cache.contextAuthenticationDisabled()) {
+                // ok here its possible that a user wants to get his own data
+                // SPECIAL USER AUTH CHECK FOR THIS METHOD!
+                // check if credentials are from oxadmin or from an user
+                // check if given user is not admin, if he is admin, the
+                final User authuser = new User();
+                authuser.setName(auth.getLogin());
+                if (basicauth.isMasterOfContext(auth, ctx)) {
+                    basicauth.doAuthentication(auth, ctx);
+                } else if (!tool.isContextAdmin(ctx, authuser)) {
+                    final InvalidCredentialsException invalidCredentialsException = new InvalidCredentialsException("Permission denied");
+                    if (users.length == 1) {
+                        final int auth_user_id = authuser.getId().intValue();
+                        basicauth.doUserAuthentication(auth, ctx);
+                        // its possible that he wants his own data
+                        final Integer userid = users[0].getId();
+                        if (userid != null) {
+                            if (userid.intValue() != auth_user_id) {
+                                throw invalidCredentialsException;
+                            }
+                        } else {
+                            // id not set, try to resolv id by username and then check again
+                            final String username = users[0].getName();
+                            if (username != null) {
+                                final int check_user_id = tool.getUserIDByUsername(ctx, username);
+                                if (check_user_id != auth_user_id) {
+                                    log(LogLevel.DEBUG, LOGGER, credentials, ctx.getIdAsString(), String.valueOf(userid), null, "user[0].getId() does not match id from Credentials.getLogin()");
                                     throw invalidCredentialsException;
                                 }
                             } else {
-                                // id not set, try to resolv id by username and then check again
-                                final String username = users[0].getName();
-                                if (username != null) {
-                                    final int check_user_id = tool.getUserIDByUsername(ctx, username);
-                                    if (check_user_id != auth_user_id) {
-                                        LOGGER.debug("user[0].getId() does not match id from Credentials.getLogin()");
-                                        throw invalidCredentialsException;
-                                    }
-                                } else {
-                                    LOGGER.debug("Cannot resolv user[0]`s internal id because the username is not set!");
-                                    throw new InvalidDataException("Username and userid missing.");
-                                }
+                                log(LogLevel.DEBUG, LOGGER, credentials, ctx.getIdAsString(), String.valueOf(userid), null, "Cannot resolv user[0]`s internal id because the username is not set!");
+                                throw new InvalidDataException("Username and userid missing.");
                             }
-                        } else {
-                            LOGGER.error("User sent {} users to get data for. Only context admin is allowed to do that", Integer.valueOf(users.length), invalidCredentialsException);
-                            throw invalidCredentialsException;
-                            // one user cannot edit more than his own data
                         }
                     } else {
-                        basicauth.doAuthentication(auth, ctx);
+                        log(LogLevel.ERROR, LOGGER, credentials, ctx.getIdAsString(), getObjectIds(users), invalidCredentialsException, "User sent {} users to get data for. Only context admin is allowed to do that", Integer.valueOf(users.length));
+                        throw invalidCredentialsException;
+                        // one user cannot edit more than his own data
                     }
                 } else {
                     basicauth.doAuthentication(auth, ctx);
                 }
+            } else {
+                basicauth.doAuthentication(auth, ctx);
+            }
 
-                checkContextAndSchema(ctx);
+            checkContextAndSchema(ctx);
 
-                for (final User usr : users) {
-                    final String username = usr.getName();
-                    final Integer userid = usr.getId();
-                    if (null != userid && !tool.existsUser(ctx, i(userid))) {
-                        if (username != null) {
-                            throw new NoSuchUserException("No such user " + username + " in context " + ctx.getId());
-                        }
-                        throw new NoSuchUserException("No such user " + userid + " in context " + ctx.getId());
-                    }
-                    if (null != username && !tool.existsUserName(ctx, username)) {
+            for (final User usr : users) {
+                final String username = usr.getName();
+                final Integer userid = usr.getId();
+                if (null != userid && !tool.existsUser(ctx, i(userid))) {
+                    if (username != null) {
                         throw new NoSuchUserException("No such user " + username + " in context " + ctx.getId());
                     }
-                    if (username == null && userid == null) {
-                        throw new InvalidDataException("Username and userid missing.");
-                    }
-                    // ok , try to get the username by id or username
-                    if (username == null && null != userid) {
-                        usr.setName(tool.getUsernameByUserID(ctx, userid.intValue()));
-                    }
-                    if (userid == null) {
-                        usr.setId(new Integer(tool.getUserIDByUsername(ctx, username)));
-                    }
+                    throw new NoSuchUserException("No such user " + userid + " in context " + ctx.getId());
                 }
-            } catch (InvalidDataException e) {
-                LOGGER.error("", e);
-                throw (e);
-            } catch (InvalidCredentialsException e) {
-                LOGGER.error("", e);
-                throw (e);
+                if (null != username && !tool.existsUserName(ctx, username)) {
+                    throw new NoSuchUserException("No such user " + username + " in context " + ctx.getId());
+                }
+                if (username == null && userid == null) {
+                    throw new InvalidDataException("Username and userid missing.");
+                }
+                // ok , try to get the username by id or username
+                if (username == null && null != userid) {
+                    usr.setName(tool.getUsernameByUserID(ctx, userid.intValue()));
+                }
+                if (userid == null) {
+                    usr.setId(new Integer(tool.getUserIDByUsername(ctx, username)));
+                }
             }
 
             User[] retusers = oxu.getData(ctx, users);
@@ -2221,17 +1909,16 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
                 if (null != pluginInterfaces) {
                     for (final OXUserPluginInterface oxuserplugin : pluginInterfaces.getUserPlugins().getServiceList()) {
-                        LOGGER.debug("Calling getData for plugin: {}", oxuserplugin.getClass().getName());
+                        log(LogLevel.DEBUG, LOGGER, credentials, ctx.getIdAsString(), getObjectIds(retusers), null, "Calling getData for plugin: {}", oxuserplugin.getClass().getName());
                         retusers = oxuserplugin.getData(ctx, retusers, auth);
                     }
                 }
             }
 
-            LOGGER.debug(Arrays.toString(retusers));
+            log(LogLevel.DEBUG, LOGGER, credentials, ctx.getIdAsString(), getObjectIds(retusers), null, Arrays.toString(retusers));
             return retusers;
-        } catch (RuntimeException e) {
-            LOGGER.error("", e);
-            throw convertException(e);
+        } catch (Exception e) {
+            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString(), getObjectIds(users)));
         }
     }
 
@@ -2246,21 +1933,20 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
     @Override
     public UserModuleAccess getModuleAccess(final Context ctx, final User user, final Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
-        final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
         try {
-            doNullCheck(user);
-        } catch (InvalidDataException e) {
-            final InvalidDataException invalidDataException = new InvalidDataException("User object is null");
-            LOGGER.error("", invalidDataException);
-            throw invalidDataException;
-        }
-
-        try {
+            final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+            try {
+                doNullCheck(user);
+            } catch (InvalidDataException e) {
+                final InvalidDataException invalidDataException = new InvalidDataException("User object is null", e);
+                log(LogLevel.ERROR, LOGGER, credentials, invalidDataException, "");
+                throw invalidDataException;
+            }
             if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
                 auth.setLogin(auth.getLogin().toLowerCase());
             }
 
-            LOGGER.debug("{} - {} - {}", ctx, user, auth);
+            log(LogLevel.DEBUG, LOGGER, credentials, ctx.getIdAsString(), String.valueOf(user.getId()), null, "{} - {} - {}", ctx, user, auth);
 
             basicauth.doAuthentication(auth, ctx);
             checkContextAndSchema(ctx);
@@ -2274,48 +1960,27 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 throw new NoSuchUserException("No such user " + user_id + " in context " + ctx.getId());
             }
             return oxu.getModuleAccess(ctx, user_id);
-        } catch (StorageException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (InvalidDataException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (InvalidCredentialsException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (DatabaseUpdateException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (NoSuchContextException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (NoSuchUserException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (RuntimeException e) {
-            LOGGER.error("", e);
-            throw convertException(e);
+        } catch (Exception e) {
+            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString(), String.valueOf(user.getId())));
         }
     }
 
     @Override
     public String getAccessCombinationName(final Context ctx, final User user, final Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
-        final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
-
         try {
-            doNullCheck(user);
-        } catch (InvalidDataException e) {
-            final InvalidDataException invalidDataException = new InvalidDataException("User object is null");
-            LOGGER.error("", invalidDataException);
-            throw invalidDataException;
-        }
-
-        try {
+            final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+            try {
+                doNullCheck(user);
+            } catch (InvalidDataException e) {
+                final InvalidDataException invalidDataException = new InvalidDataException("User object is null", e);
+                log(LogLevel.ERROR, LOGGER, credentials, invalidDataException, "");
+                throw invalidDataException;
+            }
             if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
                 auth.setLogin(auth.getLogin().toLowerCase());
             }
 
-            LOGGER.debug("{} - {} - {}", ctx, user, auth);
+            log(LogLevel.DEBUG, LOGGER, credentials, ctx.getIdAsString(), String.valueOf(user.getId()), null, "{} - {} - {}", ctx, user, auth);
 
             basicauth.doAuthentication(auth, ctx);
             checkContextAndSchema(ctx);
@@ -2331,27 +1996,8 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             }
 
             return cache.getNameForAccessCombination(oxu.getModuleAccess(ctx, user_id));
-        } catch (StorageException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (InvalidDataException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (InvalidCredentialsException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (DatabaseUpdateException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (NoSuchContextException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (NoSuchUserException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (RuntimeException e) {
-            LOGGER.error("", e);
-            throw convertException(e);
+        } catch (Exception e) {
+            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString(), String.valueOf(user.getId())));
         }
     }
 
@@ -2367,7 +2013,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             try {
                 doNullCheck(ctx, search_pattern);
             } catch (InvalidDataException e1) {
-                LOGGER.error("One of the given arguments for list is null", e1);
+                log(LogLevel.ERROR, LOGGER, credentials, e1, "One of the given arguments for list is null");
                 throw e1;
             }
 
@@ -2375,7 +2021,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 auth.setLogin(auth.getLogin().toLowerCase());
             }
 
-            LOGGER.debug("{} - {}", ctx, auth);
+            log(LogLevel.DEBUG, LOGGER, credentials, ctx.getIdAsString(), null, "{} - {}", ctx, auth);
 
             basicauth.doAuthentication(auth, ctx);
 
@@ -2384,9 +2030,8 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             final User[] retval = oxu.list(ctx, search_pattern, includeGuests, excludeUsers);
 
             return retval;
-        } catch (RuntimeException e) {
-            LOGGER.error("", e);
-            throw convertException(e);
+        } catch (Exception e) {
+            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString()));
         }
     }
 
@@ -2402,7 +2047,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             try {
                 doNullCheck(ctx, search_pattern);
             } catch (InvalidDataException e1) {
-                LOGGER.error("One of the given arguments for list is null", e1);
+                log(LogLevel.ERROR, LOGGER, credentials, e1, "One of the given arguments for list is null");
                 throw e1;
             }
 
@@ -2410,7 +2055,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 auth.setLogin(auth.getLogin().toLowerCase());
             }
 
-            LOGGER.debug("{} - {}", ctx, auth);
+            log(LogLevel.DEBUG, LOGGER, credentials, ctx.getIdAsString(), null, "{} - {}", ctx, auth);
 
             basicauth.doAuthentication(auth, ctx);
 
@@ -2419,35 +2064,36 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             final User[] retval = oxu.listCaseInsensitive(ctx, search_pattern, includeGuests, excludeUsers);
 
             return retval;
-        } catch (RuntimeException e) {
-            LOGGER.error("", e);
-            throw convertException(e);
+        } catch (Exception e) {
+            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString()));
         }
     }
 
     @Override
     public User[] listUsersWithOwnFilestore(final Context context, final Credentials credentials, final Integer filestore_id) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
-        final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
         try {
-            doNullCheck(context);
-        } catch (InvalidDataException e1) {
-            LOGGER.error("One of the given arguments for list is null", e1);
-            throw e1;
+            final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+            try {
+                doNullCheck(context);
+            } catch (InvalidDataException e1) {
+                log(LogLevel.ERROR, LOGGER, credentials, e1, "One of the given arguments for list is null");
+                throw e1;
+            }
+
+            if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+                auth.setLogin(auth.getLogin().toLowerCase());
+            }
+            log(LogLevel.DEBUG, LOGGER, credentials, context.getIdAsString(), null, "{} - {}", context, auth);
+            basicauth.doAuthentication(auth, context);
+
+            checkContextAndSchema(context);
+            if (null == filestore_id || filestore_id.intValue() <= 0) {
+                return oxu.listUsersWithOwnFilestore(context, null);
+            }
+            return oxu.listUsersWithOwnFilestore(context, filestore_id);
+        } catch (Exception e) {
+            throw convertException(logAndEnhanceException(LOGGER, e, credentials, context.getIdAsString()));
         }
-
-        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
-            auth.setLogin(auth.getLogin().toLowerCase());
-        }
-
-        LOGGER.debug("{} - {}", context, auth);
-
-        basicauth.doAuthentication(auth, context);
-
-        checkContextAndSchema(context);
-        if (null == filestore_id || filestore_id.intValue() <= 0) {
-            return oxu.listUsersWithOwnFilestore(context, null);
-        }
-        return oxu.listUsersWithOwnFilestore(context, filestore_id);
     }
 
     @Override
@@ -2462,15 +2108,12 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
     private Exception callDeleteForPlugin(final Context ctx, final Credentials auth, final User[] retusers, final List<OXUserPluginInterface> interfacelist, final String bundlename, final OXUserPluginInterface oxuser) {
         try {
-            LOGGER.debug("Calling delete for plugin: {}", bundlename);
+            log(LogLevel.DEBUG, LOGGER, auth, ctx.getIdAsString(), getObjectIds(retusers), null, "Calling delete for plugin: {}", bundlename);
             oxuser.delete(ctx, retusers, auth);
             interfacelist.add(oxuser);
             return null;
-        } catch (PluginException e) {
-            LOGGER.error("Error while calling delete for plugin: {}", bundlename, e);
-            return e;
-        } catch (RuntimeException e) {
-            LOGGER.error("Error while calling delete for plugin: {}", bundlename, e);
+        } catch (PluginException | RuntimeException e) {
+            log(LogLevel.ERROR, LOGGER, auth, ctx.getIdAsString(), getObjectIds(retusers), e, "Error while calling delete for plugin: {}", bundlename);
             return e;
         }
     }
@@ -2675,8 +2318,8 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             try {
                 doNullCheck(addAccess, removeAccess);
             } catch (InvalidDataException e1) {
-                final InvalidDataException invalidDataException = new InvalidDataException("Some parameters are null");
-                LOGGER.error("", invalidDataException);
+                final InvalidDataException invalidDataException = new InvalidDataException("Some parameters are null", e1);
+                log(LogLevel.ERROR, LOGGER, credentials, invalidDataException, "");
                 throw invalidDataException;
             }
 
@@ -2688,17 +2331,17 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 checkForGABRestriction(addAccess);
                 checkForGABRestriction(removeAccess);
             } catch (InvalidDataException e1) {
-                final InvalidDataException invalidDataException = new InvalidDataException("\"GlobalAddressBookDisabled\" can not be changed with this method.");
-                LOGGER.error("", invalidDataException);
+                final InvalidDataException invalidDataException = new InvalidDataException("\"GlobalAddressBookDisabled\" can not be changed with this method.", e1);
+                log(LogLevel.ERROR, LOGGER, credentials, invalidDataException, "");
                 throw invalidDataException;
             }
 
-            LOGGER.debug("{} - {} - {} - {}", filter, addAccess, removeAccess, auth);
+            log(LogLevel.DEBUG, LOGGER, credentials, null, "{} - {} - {} - {}", filter, addAccess, removeAccess, auth);
 
             try {
                 basicauth.doAuthentication(auth);
             } catch (InvalidCredentialsException e) {
-                LOGGER.error("", e);
+                log(LogLevel.ERROR, LOGGER, credentials, e, "");
                 throw e;
             }
 
@@ -2709,7 +2352,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 } catch (NumberFormatException nfe) {
                     final UserModuleAccess namedAccessCombination = cache.getNamedAccessCombination(filter);
                     if (namedAccessCombination == null) {
-                        throw new InvalidDataException("No such access combination name \"" + filter.trim() + "\"");
+                        throw new InvalidDataException("No such access combination name \"" + filter.trim() + "\"", nfe);
                     }
                     permissionBits = getPermissionBits(namedAccessCombination);
                 }
@@ -2717,7 +2360,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
             final int addBits = getPermissionBits(addAccess);
             final int removeBits = getPermissionBits(removeAccess);
-            LOGGER.debug("Adding {} removing {} to filter {}", I(addBits), I(removeBits), filter);
+            log(LogLevel.DEBUG, LOGGER, credentials, null, "Adding {} removing {} to filter {}", I(addBits), I(removeBits), filter);
 
             try {
                 tool.changeAccessCombination(permissionBits, addBits, removeBits);
@@ -2727,17 +2370,13 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 cacheService.getCache("UserConfiguration").clear();
                 cacheService.getCache("UserSettingMail").clear();
                 cacheService.getCache("Capabilities").clear();
-            } catch (StorageException e) {
-                LOGGER.error("", e);
-                throw e;
             } catch (OXException e) {
-                LOGGER.error("", e);
+                log(LogLevel.ERROR, LOGGER, credentials, null, "");
             }
 
             // TODO: How to notify via EventSystemService ?
-        } catch (RuntimeException e) {
-            LOGGER.error("", e);
-            throw convertException(e);
+        } catch (Exception e) {
+            throw convertException(logAndEnhanceException(LOGGER, e, credentials));
         }
     }
 
@@ -2760,8 +2399,8 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             try {
                 doNullCheck(user);
             } catch (InvalidDataException e2) {
-                final InvalidDataException invalidDataException = new InvalidDataException("One of the given arguments for change is null");
-                LOGGER.error("", invalidDataException);
+                final InvalidDataException invalidDataException = new InvalidDataException("One of the given arguments for change is null", e2);
+                log(LogLevel.ERROR, LOGGER, credentials, invalidDataException, "");
                 throw invalidDataException;
             }
 
@@ -2772,40 +2411,25 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             try {
                 basicauth.doAuthentication(auth, ctx);
             } catch (InvalidCredentialsException e) {
-                LOGGER.error("", e);
+                log(LogLevel.ERROR, LOGGER, credentials, e, "");
                 throw e;
             }
 
-            try {
-                contextcheck(ctx);
+            contextcheck(ctx);
 
-                checkContextAndSchema(ctx);
+            checkContextAndSchema(ctx);
 
-                if (null != user.getId()) {
-                    return tool.existsUser(ctx, user);
-                } else if (null != user.getName()) {
-                    return tool.existsUserName(ctx, user.getName());
-                } else if (null != user.getDisplay_name()) {
-                    return tool.existsDisplayName(ctx, user.getDisplay_name());
-                } else {
-                    throw new InvalidDataException("Neither identifier, name nor display name set in given user object");
-                }
-            } catch (InvalidCredentialsException e) {
-                LOGGER.error("", e);
-                throw e;
-            } catch (StorageException e) {
-                LOGGER.error("", e);
-                throw e;
-            } catch (DatabaseUpdateException e) {
-                LOGGER.error("", e);
-                throw e;
-            } catch (NoSuchContextException e) {
-                LOGGER.error("", e);
-                throw e;
+            if (null != user.getId()) {
+                return tool.existsUser(ctx, user);
+            } else if (null != user.getName()) {
+                return tool.existsUserName(ctx, user.getName());
+            } else if (null != user.getDisplay_name()) {
+                return tool.existsDisplayName(ctx, user.getDisplay_name());
+            } else {
+                throw new InvalidDataException("Neither identifier, name nor display name set in given user object");
             }
-        } catch (RuntimeException e) {
-            LOGGER.error("", e);
-            throw convertException(e);
+        } catch (Exception e) {
+            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString(), String.valueOf(user.getId())));
         }
     }
 
@@ -2917,7 +2541,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
             final CapabilityService capabilityService = AdminServiceRegistry.getInstance().getService(CapabilityService.class);
             if (capabilityService == null) {
-                LOGGER.warn("CapabilityService absent. Unable to retrieve user configuration.");
+                log(LogLevel.WARNING, LOGGER, credentials, ctx.getIdAsString(), String.valueOf(user_id), null, "CapabilityService absent. Unable to retrieve user configuration.");
                 return userProperties;
             }
             List<ConfigurationProperty> capabilitiesSource = capabilityService.getConfigurationSource(user_id, ctx.getId().intValue(), searchPattern);
@@ -2931,25 +2555,9 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             Collections.sort(userProperties, new OXUserPropertySorter());
 
             return userProperties;
-        } catch (StorageException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (InvalidDataException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (InvalidCredentialsException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (NoSuchUserException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (OXException e) {
-            LOGGER.error("Error retrieving configuration source for user {} in context {}.", user.getId(), ctx.getId(), e);
-        } catch (RuntimeException e) {
-            LOGGER.error("", e);
-            throw convertException(e);
+        } catch (Exception e) {
+            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString(), String.valueOf(user.getId())));
         }
-        return userProperties;
     }
 
     /**
@@ -2981,59 +2589,32 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
             final CapabilityService capabilityService = AdminServiceRegistry.getInstance().getService(CapabilityService.class);
             if (capabilityService == null) {
-                LOGGER.warn("CapabilityService absent. Unable to retrieve user configuration.");
+                log(LogLevel.WARNING, LOGGER, credentials, ctx.getIdAsString(), String.valueOf(user_id), null, "CapabilityService absent. Unable to retrieve user configuration.");
                 return capabilitiesSource;
             }
             capabilitiesSource = capabilityService.getCapabilitiesSource(user_id, ctx.getId().intValue());
-
-        } catch (StorageException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (InvalidDataException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (InvalidCredentialsException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (NoSuchUserException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (OXException e) {
-            LOGGER.error("Error retrieving configuration source for user {} in context {}.", user.getId(), ctx.getId(), e);
-        } catch (RuntimeException e) {
-            LOGGER.error("", e);
-            throw convertException(e);
+            return capabilitiesSource;
+        } catch (Exception e) {
+            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString(), String.valueOf(user.getId())));
         }
-        return capabilitiesSource;
     }
 
     @Override
     public User[] listByAliasDomain(Context context, String aliasDomain, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException {
-        if (aliasDomain == null) {
-            throw new InvalidDataException("Invalid alias domain");
-        }
-        if (context == null) {
-            throw new InvalidDataException("Invalid context id.");
-        }
-
-        Credentials auth = credentials == null ? new Credentials("", "") : credentials;
-
         try {
+            if (aliasDomain == null) {
+                throw new InvalidDataException("Invalid alias domain");
+            }
+            if (context == null) {
+                throw new InvalidDataException("Invalid context id.");
+            }
+
+            Credentials auth = credentials == null ? new Credentials("", "") : credentials;
             basicauth.doAuthentication(auth, context);
             contextcheck(context);
             return oxu.listUsersByAliasDomain(context, aliasDomain);
-        } catch (StorageException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (InvalidDataException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (InvalidCredentialsException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (RuntimeException e) {
-            LOGGER.error("", e);
-            throw convertException(e);
+        } catch (Exception e) {
+            throw convertException(logAndEnhanceException(LOGGER, e, credentials, context.getIdAsString()));
         }
     }
 
