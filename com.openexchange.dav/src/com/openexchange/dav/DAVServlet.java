@@ -155,7 +155,7 @@ public class DAVServlet extends OXServlet {
 
     @Override
     protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        long start = System.nanoTime();
+        long start = System.currentTimeMillis();
         /*
          * ensure to have a HTTP session when using cookies
          */
@@ -172,6 +172,7 @@ public class DAVServlet extends OXServlet {
         incrementRequests();
         RequestContextHolder.set(new WebDAVRequestContext(request, session));
         LogProperties.putSessionProperties(session);
+        WebdavMethod method = null;
         try {
             /*
              * wrap into counting request to check rate limit
@@ -185,7 +186,6 @@ public class DAVServlet extends OXServlet {
             /*
              * get targeted action
              */
-            WebdavMethod method;
             try {
                 method = WebdavMethod.valueOf(WebdavMethod.class, request.getMethod());
             } catch (IllegalArgumentException | NullPointerException e) {
@@ -210,7 +210,7 @@ public class DAVServlet extends OXServlet {
             LogProperties.removeSessionProperties();
             RequestContextHolder.reset();
             decrementRequests();
-            recordMetric(Duration.ofNanos(System.nanoTime() - start), request.getMethod(), response.getStatus());
+            recordMetric(Duration.ofMillis(System.currentTimeMillis() - start), method == null ? "INVALID": method.name(), response.getStatus());
         }
     }
     
