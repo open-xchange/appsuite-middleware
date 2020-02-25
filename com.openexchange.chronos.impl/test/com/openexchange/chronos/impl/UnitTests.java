@@ -52,10 +52,11 @@ package com.openexchange.chronos.impl;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.chronos.impl.performer.NeedsActionPerformerTest;
 import com.openexchange.chronos.impl.performer.UpdatesPerformerTest;
 
 /**
- * {@link ChronosTestSuite}
+ * {@link UnitTests}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
@@ -64,15 +65,9 @@ import com.openexchange.chronos.impl.performer.UpdatesPerformerTest;
     //@formatter:off
     CombineAvailabilitiesTest.class,
     CalculateFreeBusyTimeTest.class,
-    UpdatesPerformerTest.class
+    UpdatesPerformerTest.class,
+    NeedsActionPerformerTest.class
     //@formatter:on
 })
-public class ChronosTestSuite {
-
-    /**
-     * Initialises a new {@link ChronosTestSuite}.
-     */
-    public ChronosTestSuite() {
-        super();
-    }
+public class UnitTests {
 }

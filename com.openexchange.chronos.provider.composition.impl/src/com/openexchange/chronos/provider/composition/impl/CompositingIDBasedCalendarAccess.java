@@ -182,12 +182,10 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
             CalendarAccess access = getAccess(account.getAccountId());
             Event event;
             if (FolderCalendarAccess.class.isInstance(access)) {
-                event = ((FolderCalendarAccess) access).getEvent(
-                    relativeEventID.getFolderID(), relativeEventID.getObjectID(), relativeEventID.getRecurrenceID());
+                event = ((FolderCalendarAccess) access).getEvent(relativeEventID.getFolderID(), relativeEventID.getObjectID(), relativeEventID.getRecurrenceID());
             } else if (BasicCalendarAccess.class.isInstance(access)) {
                 Check.parentFolderMatches(relativeEventID, BasicCalendarAccess.FOLDER_ID);
-                event = ((BasicCalendarAccess) access).getEvent(
-                    relativeEventID.getObjectID(), relativeEventID.getRecurrenceID());
+                event = ((BasicCalendarAccess) access).getEvent(relativeEventID.getObjectID(), relativeEventID.getRecurrenceID());
             } else {
                 throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(account.getProviderId());
             }
@@ -296,6 +294,15 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
     }
 
     @Override
+    public List<Event> getEventsNeedingAction() throws OXException {
+        try {
+            return withUniqueIDs(getGroupwareAccess(DEFAULT_ACCOUNT).getEventsNeedingAction(), DEFAULT_ACCOUNT.getAccountId());
+        } catch (OXException e) {
+            throw withUniqueIDs(e, DEFAULT_ACCOUNT.getAccountId());
+        }
+    }
+
+    @Override
     public Event resolveEvent(String eventId, Integer sequence) throws OXException {
         try {
             Event event = getGroupwareAccess(DEFAULT_ACCOUNT).resolveEvent(eventId, sequence);
@@ -333,7 +340,7 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
         return getOrderedResults(eventsResults, folderIds);
     }
 
-    public Map<String, EventsResult> searchEvents(List<SearchFilter> filters, List<String> queries) throws OXException {
+    private Map<String, EventsResult> searchEvents(List<SearchFilter> filters, List<String> queries) throws OXException {
         List<CalendarAccount> accounts = getAccounts(CalendarCapability.SEARCH);
         if (accounts.isEmpty()) {
             return Collections.emptyMap();
@@ -570,7 +577,7 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
             throw withUniqueIDs(e, account.getAccountId());
         }
     }
-    
+
     @Override
     public CalendarResult changeOrganizer(EventID eventID, Organizer organizer, long clientTimestamp) throws OXException {
         int accountId = getAccountId(eventID.getFolderID());
@@ -1066,8 +1073,8 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
         folder.setName(settings.getName());
         folder.setLastModified(settings.getLastModified());
         folder.setSubscribed(settings.isSubscribed());
-        folder.setPermissions(Collections.singletonList(new DefaultCalendarPermission(session.getUserId(),
-            CalendarPermission.READ_FOLDER, CalendarPermission.READ_ALL_OBJECTS, CalendarPermission.NO_PERMISSIONS,
+        folder.setPermissions(Collections.singletonList(new DefaultCalendarPermission(session.getUserId(), 
+            CalendarPermission.READ_FOLDER, CalendarPermission.READ_ALL_OBJECTS, CalendarPermission.NO_PERMISSIONS, 
             CalendarPermission.NO_PERMISSIONS, false == autoProvisioned, false, 0)));
         folder.setSupportedCapabilites(CalendarCapability.getCapabilities(calendarAccess.getClass()));
         if (null != accountError) {
@@ -1080,8 +1087,8 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
         DefaultCalendarFolder folder = new DefaultCalendarFolder();
         folder.setId(BasicCalendarAccess.FOLDER_ID);
         folder.setLastModified(account.getLastModified());
-        folder.setPermissions(Collections.singletonList(new DefaultCalendarPermission(session.getUserId(),
-            CalendarPermission.READ_FOLDER, CalendarPermission.READ_ALL_OBJECTS, CalendarPermission.NO_PERMISSIONS,
+        folder.setPermissions(Collections.singletonList(new DefaultCalendarPermission(session.getUserId(), 
+            CalendarPermission.READ_FOLDER, CalendarPermission.READ_ALL_OBJECTS, CalendarPermission.NO_PERMISSIONS, 
             CalendarPermission.NO_PERMISSIONS, true, false, 0)));
         folder.setAccountError(accountError);
         folder.setName(getAccountName(account));

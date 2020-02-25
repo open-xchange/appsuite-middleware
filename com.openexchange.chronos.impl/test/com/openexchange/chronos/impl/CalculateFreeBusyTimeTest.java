@@ -59,7 +59,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import org.dmfs.rfc5545.DateTime;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.BDDMockito;
@@ -104,20 +103,9 @@ public class CalculateFreeBusyTimeTest extends AbstractCombineTest {
     private final Date from = PropsFactory.createDate(2017, 0, 1);
     private final Date until = PropsFactory.createDate(2017, 5, 30);
 
-    /**
-     * Initialises a new {@link CalculateFreeBusyTimeTest}.
-     */
-    public CalculateFreeBusyTimeTest() {
-        super();
-    }
-
-    /**
-     * Initialise mocks
-     */
     @Override
-    @Before
-    public void init() throws OXException {
-        super.init();
+    public void setUp() throws OXException {
+        super.setUp();
         // Initialise maps and lists
         attendees = new ArrayList<>();
         freeBusyTimes = new ArrayList<>();

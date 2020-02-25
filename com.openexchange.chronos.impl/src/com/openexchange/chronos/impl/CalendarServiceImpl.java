@@ -80,6 +80,7 @@ import com.openexchange.chronos.impl.performer.GetPerformer;
 import com.openexchange.chronos.impl.performer.ImportPerformer;
 import com.openexchange.chronos.impl.performer.ListPerformer;
 import com.openexchange.chronos.impl.performer.MovePerformer;
+import com.openexchange.chronos.impl.performer.NeedsActionPerformer;
 import com.openexchange.chronos.impl.performer.SearchPerformer;
 import com.openexchange.chronos.impl.performer.SequenceNumberPerformer;
 import com.openexchange.chronos.impl.performer.SplitPerformer;
@@ -257,6 +258,17 @@ public class CalendarServiceImpl implements CalendarService {
             @Override
             protected List<Event> execute(CalendarSession session, CalendarStorage storage) throws OXException {
                 return new AllPerformer(session, storage).perform(rsvp, partStats);
+            }
+        }.executeQuery();
+    }
+
+    @Override
+    public List<Event> getEventsNeedingAction(final CalendarSession session) throws OXException {
+        return new InternalCalendarStorageOperation<List<Event>>(session) {
+
+            @Override
+            protected List<Event> execute(CalendarSession session, CalendarStorage storage) throws OXException {
+                return new NeedsActionPerformer(session, storage).perform();
             }
         }.executeQuery();
     }

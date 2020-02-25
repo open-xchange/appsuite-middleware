@@ -55,15 +55,21 @@ import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.tools.arrays.Arrays.contains;
 import static com.openexchange.tools.arrays.Arrays.remove;
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
+import java.util.TreeSet;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.EventFlag;
+import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.SelfProtectionFactory;
 import com.openexchange.chronos.common.SelfProtectionFactory.SelfProtection;
+import com.openexchange.chronos.common.mapping.EventMapper;
+import com.openexchange.chronos.impl.Consistency;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.service.CalendarSession;
@@ -214,4 +220,26 @@ public abstract class AbstractQueryPerformer {
         return getFields(remove(requestedFields, EventField.FLAGS), EventField.STATUS, EventField.TRANSP);
     }
 
+    /**
+     * Prepares a new change exception for a recurring event series.
+     *
+     * @param originalMasterEvent The original master event
+     * @param recurrenceId The recurrence identifier
+     * @param objectId The object identifier to take over for the prepared exception
+     * @param timestamp The timestamp of the change
+     * @return The prepared exception event
+     */
+    protected Event prepareException(Event originalMasterEvent, RecurrenceId recurrenceId, String objectId, Date timestamp) throws OXException {
+        Event exceptionEvent = EventMapper.getInstance().copy(originalMasterEvent, new Event(), true, (EventField[]) null);
+        exceptionEvent.setId(objectId);
+        exceptionEvent.setRecurrenceId(recurrenceId);
+        exceptionEvent.setRecurrenceRule(null);
+        exceptionEvent.setDeleteExceptionDates(null);
+        exceptionEvent.setChangeExceptionDates(new TreeSet<RecurrenceId>(Collections.singleton(recurrenceId)));
+        exceptionEvent.setStartDate(CalendarUtils.calculateStart(originalMasterEvent, recurrenceId));
+        exceptionEvent.setEndDate(CalendarUtils.calculateEnd(originalMasterEvent, recurrenceId));
+        Consistency.setCreated(timestamp, exceptionEvent, originalMasterEvent.getCreatedBy());
+        Consistency.setModified(session, timestamp, exceptionEvent, session.getUserId());
+        return exceptionEvent;
+    }
 }

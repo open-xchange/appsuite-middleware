@@ -105,12 +105,10 @@ import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.UnmodifiableEvent;
 import com.openexchange.chronos.common.AlarmPreparator;
 import com.openexchange.chronos.common.AlarmUtils;
-import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.common.mapping.AlarmMapper;
 import com.openexchange.chronos.common.mapping.AttendeeEventUpdate;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
-import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.impl.Check;
@@ -214,18 +212,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
      * @return The prepared exception event
      */
     protected Event prepareException(Event originalMasterEvent, RecurrenceId recurrenceId, String objectId) throws OXException {
-        Event exceptionEvent = EventMapper.getInstance().copy(originalMasterEvent, new Event(), true, (EventField[]) null);
-        exceptionEvent.setId(objectId);
-        exceptionEvent.setRecurrenceId(recurrenceId);
-        exceptionEvent.setRecurrenceRule(null);
-        exceptionEvent.setDeleteExceptionDates(null);
-        exceptionEvent.setChangeExceptionDates(new TreeSet<RecurrenceId>(Collections.singleton(recurrenceId)));
-        exceptionEvent.setStartDate(CalendarUtils.calculateStart(originalMasterEvent, recurrenceId));
-        exceptionEvent.setEndDate(CalendarUtils.calculateEnd(originalMasterEvent, recurrenceId));
-        Consistency.setCreated(timestamp, exceptionEvent, originalMasterEvent.getCreatedBy());
-        Consistency.setModified(session, timestamp, exceptionEvent, session.getUserId());
-        Consistency.normalizeRecurrenceIDs(originalMasterEvent.getStartDate(), exceptionEvent);
-        return exceptionEvent;
+        return prepareException(originalMasterEvent, recurrenceId, objectId, timestamp);
     }
 
     /**
@@ -487,8 +474,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
             if (null == masterAlarms || masterAlarms.isEmpty()) {
                 continue;
             }
-            AlarmField[] copiedFields = com.openexchange.tools.arrays.Arrays.remove(
-                AlarmField.values(), AlarmField.ID, AlarmField.UID, AlarmField.RELATED_TO, AlarmField.ACKNOWLEDGED);
+            AlarmField[] copiedFields = com.openexchange.tools.arrays.Arrays.remove(AlarmField.values(), AlarmField.ID, AlarmField.UID, AlarmField.RELATED_TO, AlarmField.ACKNOWLEDGED);
             List<Alarm> copiedAlarms = new ArrayList<Alarm>(masterAlarms.size());
             for (Alarm alarm : masterAlarms) {
                 copiedAlarms.add(AlarmMapper.getInstance().copy(alarm, null, copiedFields));
@@ -592,7 +578,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         if (0 < removedItems.size()) {
             int[] alarmIDs = getAlarmIDs(removedItems);
             storage.getAlarmStorage().deleteAlarms(event.getId(), userId, alarmIDs);
-            for(int i: alarmIDs) {
+            for (int i : alarmIDs) {
                 toDelete.add(I(i));
             }
         }
@@ -636,7 +622,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
          * insert new alarms
          */
         List<Alarm> insertAlarms = insertAlarms(event, userId, alarmUpdates.getAddedItems(), false);
-        for(Alarm alarm: insertAlarms) {
+        for (Alarm alarm : insertAlarms) {
             toAdd.add(I(alarm.getId()));
         }
         List<Alarm> loadAlarms = storage.getAlarmStorage().loadAlarms(event, userId);
@@ -806,7 +792,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
             requireOrganizerSchedulingResource(originalEvent, assumeExternalOrganizerUpdate);
         }
     }
-    
+
     /**
      * Checks that data of a specific attendee of an event can be deleted by the current session's user under the perspective of the
      * current folder.
@@ -1009,19 +995,17 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         }
         /*
          * check general write permissions for attendee
-         */        
+         */
         Attendee originalAttendee = attendeeUpdate.getOriginal();
         requireWritePermissions(originalEvent, originalAttendee, assumeExternalOrganizerUpdate);
         /*
          * deny setting the participation status to a value other than NEEDS-ACTION for other attendees: RFC 6638, section 3.2.1
          */
-        if (false == matches(originalAttendee, calendarUserId) && 
-            false == assumeExternalOrganizerUpdate && attendeeUpdate.getUpdatedFields().contains(AttendeeField.PARTSTAT) &&
-            false == ParticipationStatus.NEEDS_ACTION.matches(attendeeUpdate.getUpdate().getPartStat())) {
+        if (false == matches(originalAttendee, calendarUserId) && false == assumeExternalOrganizerUpdate && attendeeUpdate.getUpdatedFields().contains(AttendeeField.PARTSTAT) && false == ParticipationStatus.NEEDS_ACTION.matches(attendeeUpdate.getUpdate().getPartStat())) {
             throw CalendarExceptionCodes.FORBIDDEN_ATTENDEE_CHANGE.create(originalEvent.getId(), originalAttendee, AttendeeField.PARTSTAT);
         }
     }
-    
+
     /**
      * Checks that data of one or more attendees of an event can be updated by the current session's user under the perspective of the
      * current folder.
@@ -1072,11 +1056,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
      * @return <code>true</code> if a deletion would lead to a removal of the event, <code>false</code>, otherwise
      */
     protected boolean deleteRemovesEvent(Event originalEvent) {
-        return PublicType.getInstance().equals(folder.getType()) ||
-            false == isGroupScheduled(originalEvent) ||
-            isOrganizer(originalEvent, calendarUserId) ||
-            isLastNonHiddenUserAttendee(originalEvent.getAttendees(), calendarUserId)
-        ;
+        return PublicType.getInstance().equals(folder.getType()) || false == isGroupScheduled(originalEvent) || isOrganizer(originalEvent, calendarUserId) || isLastNonHiddenUserAttendee(originalEvent.getAttendees(), calendarUserId);
     }
 
     /**
@@ -1088,8 +1068,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
      * @return <code>true</code> if the event's recurrence set yields at least one further occurrence, <code>false</code>, otherwise
      */
     protected boolean hasFurtherOccurrences(Event seriesMaster, SortedSet<RecurrenceId> recurrenceIds) throws OXException {
-        RecurrenceData recurrenceData = new DefaultRecurrenceData(
-            seriesMaster.getRecurrenceRule(), seriesMaster.getStartDate(), getExceptionDates(recurrenceIds), getExceptionDates(seriesMaster.getRecurrenceDates()));
+        RecurrenceData recurrenceData = new DefaultRecurrenceData(seriesMaster.getRecurrenceRule(), seriesMaster.getStartDate(), getExceptionDates(recurrenceIds), getExceptionDates(seriesMaster.getRecurrenceDates()));
         try {
             return session.getRecurrenceService().iterateRecurrenceIds(recurrenceData).hasNext();
         } catch (OXException e) {
@@ -1100,7 +1079,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
             throw e;
         }
     }
-    
+
     /**
      * If <code>TRACE</code> logging is enabled, the original and the updated event
      * will be logged as JSON

@@ -429,6 +429,8 @@ So, similarly as updates of the event data may get propagated, also an updated p
 
 If these preconditions are met, the updated participation status in the series master event is taken over in overridden instances, too. In the participation status update comes along with a certain comment, this attendee comment is also updated in overridden instances, if its value has been equal to the series master event before, too.
 
+Due to the fact that the participation status is also propagated to overriden instances, the notification area will only show those events the user really has to reply to and leave out those technical exceptions matching the circumstances mentioned above.
+
 ***
 
 **_References / further reading:_**

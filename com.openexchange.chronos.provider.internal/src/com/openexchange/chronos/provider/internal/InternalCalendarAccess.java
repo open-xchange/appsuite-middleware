@@ -91,7 +91,6 @@ import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.compat.Appointment2Event;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
-import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarCapability;
 import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.CalendarFolderProperty;
@@ -145,10 +144,9 @@ public class InternalCalendarAccess implements FolderCalendarAccess, SubscribeAw
      * Initializes a new {@link InternalCalendarAccess}.
      *
      * @param session The calendar session
-     * @param account The calendar account
      * @param services A service lookup reference
      */
-    public InternalCalendarAccess(CalendarSession session, CalendarAccount account, ServiceLookup services) {
+    public InternalCalendarAccess(CalendarSession session, ServiceLookup services) {
         super();
         this.session = session;
         this.services = services;
@@ -298,6 +296,11 @@ public class InternalCalendarAccess implements FolderCalendarAccess, SubscribeAw
     }
 
     @Override
+    public List<Event> getEventsNeedingAction() throws OXException {
+        return getCalendarService().getEventsNeedingAction(session);
+    }
+
+    @Override
     public Event resolveEvent(String eventId, Integer sequence) throws OXException {
         return getCalendarService().getUtilities().resolveByID(session, eventId, sequence);
     }
@@ -351,7 +354,7 @@ public class InternalCalendarAccess implements FolderCalendarAccess, SubscribeAw
     public CalendarResult updateAlarms(EventID eventID, List<Alarm> alarms, long clientTimestamp) throws OXException {
         return getCalendarService().updateAlarms(session, eventID, alarms, clientTimestamp);
     }
-    
+
     @Override
     public CalendarResult changeOrganizer(EventID eventID, Organizer organizer, long clientTimestamp) throws OXException {
         return getCalendarService().changeOrganizer(session, eventID, organizer, clientTimestamp);
@@ -639,5 +642,4 @@ public class InternalCalendarAccess implements FolderCalendarAccess, SubscribeAw
         }
         return allFolders;
     }
-
 }
