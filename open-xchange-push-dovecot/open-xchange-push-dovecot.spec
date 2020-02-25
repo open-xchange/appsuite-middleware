@@ -15,7 +15,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 27
+%define        ox_release 28
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -70,6 +70,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/hazelcast/*
 
 %changelog
+* Tue Feb 25 2020 Thorben Betten <thorben.betten@open-xchange.com>
+Build for patch 2020-03-02 (5621)
 * Mon Feb 03 2020 Thorben Betten <thorben.betten@open-xchange.com>
 Build for patch 2020-02-10 (5570)
 * Mon Jan 13 2020 Thorben Betten <thorben.betten@open-xchange.com>
