@@ -206,10 +206,9 @@ public class Multiple extends SessionServlet {
         } catch (JSONException | OXException | RuntimeException e) {
             logError(session, e);
             sendError(resp);
-            if(e instanceof OXException) {
-                recordRequest(((OXException)e).getCategory().toString(), System.currentTimeMillis() - startTime);
-            }
-            else {
+            if (e instanceof OXException) {
+                recordRequest(((OXException) e).getCategory().toString(), System.currentTimeMillis() - startTime);
+            } else {
                 recordRequest(Integer.toString(HttpServletResponse.SC_INTERNAL_SERVER_ERROR), System.currentTimeMillis() - startTime);
             }
         } finally {

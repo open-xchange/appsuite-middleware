@@ -832,8 +832,7 @@ public class LoginServlet extends AJAXServlet {
                 // Regular login handling
                 try {
                     doJSONAuth(req, resp, action, requestContext);
-                }
-                catch (IOException e) {
+                } catch (IOException e) {
                     requestContext.getMetricProvider().recordErrorCode(LoginExceptionCodes.UNKNOWN);
                     throw e;
                 }
