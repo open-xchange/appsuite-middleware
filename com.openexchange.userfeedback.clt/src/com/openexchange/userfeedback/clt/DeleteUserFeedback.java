@@ -143,14 +143,4 @@ public class DeleteUserFeedback extends AbstractUserFeedback {
     protected String getHeader() {
         return "deleteuserfeedback -U <user:password> [-t type] [-g ctx_grp] [-s time] [-e time]\n" + "deleteuserfeedback -s 1487348317";
     }
-
-    @Override
-    protected String getStartDesceription() {
-        return super.getStartDesceription() + " Only feedback given after this time is deleted. If not set, all feedback up to -e is deleted.";
-    }
-
-    @Override
-    protected String getEndDesceription() {
-        return super.getEndDesceription() + " Only feedback given before this time is deleted. If not set, all feedback since -s is deleted.";
-    }
 }

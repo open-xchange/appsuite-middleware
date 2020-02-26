@@ -80,33 +80,15 @@ public abstract class AbstractUserFeedback extends AbstractRestCLI<Void> {
     protected static final String ENDPOINT_DEFAULT = "http://localhost:8009/userfeedback/v1/";
 
     /**
-     * Gets the description for the start time
-     *
-     * @return The description
-     */
-    protected String getStartDesceription() {
-        return "Start time in seconds since 1970-01-01 00:00:00 UTC.";
-    }
-
-    /**
-     * Gets the description for the end time
-     *
-     * @return The description
-     */
-    protected String getEndDesceription() {
-        return "End time in seconds since 1970-01-01 00:00:00 UTC.";
-    }
-
-    /**
      * Adds generic options to the given {@link Options}
      *
      * @param options The {@link Options} object
      */
     protected void addGenericOptions(Options options) {
-        options.addOption(TYPE_SHORT, TYPE_LONG, true, "The feedback type. Default: 'star-rating-v1'.");
+        options.addOption(TYPE_SHORT, TYPE_LONG, true, "The feedback type. Default: 'star-rating-v1'. Alternative value: 'nps-v1'.");
         options.addOption(CONTEXT_GROUP_SHORT, CONTEXT_GROUP_LONG, true, "The context group identifying the global DB where the feedback is stored. Default: 'default'.");
-        options.addOption(START_SHORT, START_LONG, true, getStartDesceription());
-        options.addOption(END_SHORT, END_LONG, true, getEndDesceription());
+        options.addOption(START_SHORT, START_LONG, true, "Start time in seconds since 1970-01-01 00:00:00 UTC. Only feedback given after this time is considered. If not set, all feedback up to -e is considered.");
+        options.addOption(END_SHORT, END_LONG, true, "End time in seconds since 1970-01-01 00:00:00 UTC. Only feedback given before this time is considered. If not set, all feedback since -s is considered.");
     }
 
     @Override
