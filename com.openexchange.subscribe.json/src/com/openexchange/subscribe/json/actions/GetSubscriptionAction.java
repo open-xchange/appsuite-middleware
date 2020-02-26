@@ -95,7 +95,7 @@ public class GetSubscriptionAction extends AbstractSubscribeAction {
             subscribeRequest.getServerSession(),
             source,
             services.getService(SecretService.class).getSecret(subscribeRequest.getServerSession()));
-        if (subscription == null) {
+        if (subscription == null || checkPermission(subscribeRequest.getServerSession(), subscription) == false) {
             throw SubscriptionJSONErrorMessages.UNKNOWN_SUBSCRIPTION.create();
         }
 
