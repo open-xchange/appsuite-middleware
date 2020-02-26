@@ -50,16 +50,23 @@
 package com.openexchange.rest.client.httpclient.internal;
 
 import static com.openexchange.java.Autoboxing.I;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.RemovalListener;
+import com.google.common.cache.RemovalNotification;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
@@ -127,7 +134,7 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
     private final BundleContext context;
     private final ServiceLookup serviceLookup;
 
-    final ConcurrentMap<String, ManagedHttpClientImpl> httpClients = new ConcurrentHashMap<>(30, 0.9f); // Core knows about 15 providers, 1 generic
+    final Cache<String, ManagedHttpClientImpl> httpClients;
     final ConcurrentMap<String, SpecificHttpClientConfigProvider> providers = new ConcurrentHashMap<>(20, 0.9f); // Core knows about 15
     final ConcurrentMap<String, PatternEnhancedWildcardHttpClientConfigProvider> wildcardProviders = new ConcurrentHashMap<>(16, 0.9F, 1);
     final Map<String, ServiceRegistration<Reloadable>> reloadableRegistrations = new ConcurrentHashMap<>(30, 0.9f);
@@ -143,6 +150,24 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
         this.context = context;
         this.serviceLookup = serviceLookup;
         this.isShutdown = new AtomicBoolean(false);
+        RemovalListener<String, ManagedHttpClientImpl> removalListener = new RemovalListener<String, ManagedHttpClientImpl>() {
+
+            @Override
+            public void onRemoval(RemovalNotification<String, ManagedHttpClientImpl> notification) {
+                String clientId = notification.getKey();
+                ManagedHttpClientImpl client = notification.getValue();
+
+                if (notification.wasEvicted()) {
+                    close(clientId, client);
+                    client.unset();
+                } else {
+                    // Either explicitly removed through e.g. Cache.invalidate() or replaced through e.g. Cache.put()
+                    removeReloadable(reloadableRegistrations.remove(clientId));
+                    client.unset();
+                }
+            }
+        };
+        httpClients = CacheBuilder.newBuilder().initialCapacity(30).expireAfterAccess(2, TimeUnit.DAYS).removalListener(removalListener).build();
     }
 
     @Override
@@ -155,7 +180,7 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
         /*
          * Get HTTP client from cache
          */
-        ManagedHttpClientImpl optHttpClient = httpClients.get(httpClientId);
+        ManagedHttpClientImpl optHttpClient = httpClients.getIfPresent(httpClientId);
         if (optHttpClient != null) {
             LOGGER.trace("Getting client with ID {} from cache", httpClientId);
             return optHttpClient;
@@ -169,15 +194,15 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
         {
             SpecificHttpClientConfigProvider provider = providers.get(httpClientId);
             if (provider != null) {
-                HttpBasicConfig config = adjustConfig(httpClientId, provider.configureHttpBasicConfig(httpBasicConfigImpl));
-                return putIntoCache(httpClientId, createHttpClient(httpClientId, provider, config), config, forProvider(httpClientId, provider));
+                SpecificManagedHttpClientImplLoader loader = new SpecificManagedHttpClientImplLoader(httpClientId, provider, httpBasicConfigImpl, this);
+                return putIntoCache(httpClientId, loader, forProvider(httpClientId, provider));
             }
         }
 
         WildcardHttpClientConfigProvider provider = getWildcardProvider(httpClientId);
         if (null != provider) {
-            HttpBasicConfig config = adjustConfig(httpClientId, provider.configureHttpBasicConfig(httpClientId, httpBasicConfigImpl));
-            return putIntoCache(httpClientId, createHttpClient(httpClientId, provider, config), config, forProvider(httpClientId, provider));
+            WildcardManagedHttpClientImplLoader loader = new WildcardManagedHttpClientImplLoader(httpClientId, provider, httpBasicConfigImpl, this);
+            return putIntoCache(httpClientId, loader, forProvider(httpClientId, provider));
         }
 
         throw HttpClientExceptionCodes.MISSING_PROVIDER.create(httpClientId);
@@ -232,7 +257,7 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
             SpecificHttpClientConfigProvider provider = (SpecificHttpClientConfigProvider) service;
             String clientId = provider.getClientId();
             if (providers.remove(clientId) != null) {
-                close(clientId, httpClients.get(clientId));
+                close(clientId, httpClients.getIfPresent(clientId));
                 LOGGER.trace("Removed provider for {}", clientId);
             }
         } else if (service instanceof WildcardHttpClientConfigProvider) {
@@ -247,7 +272,7 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
              * Remove HTTP clients, which matches the regex and are not provided by a SpecificHttpClientConfigProvider
              */
             Pattern pattern = removed.getRegularExpressionPattern();
-            for (Map.Entry<String, ManagedHttpClientImpl> entry : httpClients.entrySet()) {
+            for (Map.Entry<String, ManagedHttpClientImpl> entry : httpClients.asMap().entrySet()) {
                 if (false == providers.containsKey(entry.getKey()) && pattern.matcher(entry.getKey()).matches()) {
                     close(entry.getKey(), entry.getValue());
                 }
@@ -265,7 +290,7 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
      */
     public synchronized void shutdown() {
         if (isShutdown.compareAndSet(false, true)) {
-            for (Map.Entry<String, ManagedHttpClientImpl> entry : httpClients.entrySet()) {
+            for (Map.Entry<String, ManagedHttpClientImpl> entry : httpClients.asMap().entrySet()) {
                 close(entry.getKey(), entry.getValue());
             }
         }
@@ -286,7 +311,7 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
      * @return A {@link CloseableHttpClient}
      * @throws OXException
      */
-    private CloseableHttpClient createHttpClient(String clientId, HttpClientBuilderModifier modifier, HttpBasicConfig config) throws OXException {
+    CloseableHttpClient createHttpClient(String clientId, HttpClientBuilderModifier modifier, HttpBasicConfig config) throws OXException {
         SSLSocketFactoryProvider factoryProvider = serviceLookup.getServiceSafe(SSLSocketFactoryProvider.class);
         SSLConfigurationService sslConfig = serviceLookup.getServiceSafe(SSLConfigurationService.class);
 
@@ -297,25 +322,27 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
      * Puts a HTTP client into the cache.
      *
      * @param httpClientId The HTTP client identifier. Will be used as cache key.
-     * @param closeableHttpClient The HTTP client
-     * @param config The basic configuration.
+     * @param loader The callable instance to use for initializing the managed HTTP client
      * @param reloadable The {@link Reloadable} to register for the HTTP client
      * @return A {@link ManagedHttpClient}
+     * @throws OXException If initialization of a managed HTTP client fails
      */
-    private ManagedHttpClient putIntoCache(String httpClientId, CloseableHttpClient closeableHttpClient, HttpBasicConfig config, Reloadable reloadable) {
-        ManagedHttpClientImpl managedClient = new ManagedHttpClientImpl(httpClientId, config.hashCode(), closeableHttpClient);
-
-        ManagedHttpClientImpl previous = httpClients.putIfAbsent(httpClientId, managedClient);
-        if (previous != null) {
-            // Another thread alread put client into map
-            LOGGER.trace("Closing redundant HTTP client.");
-            close(httpClientId, managedClient);
-            return previous;
+    private <P extends HttpClientBuilderModifier> ManagedHttpClient putIntoCache(String httpClientId, ManagedHttpClientImplLoader<P> loader, Reloadable reloadable) throws OXException {
+        try {
+            ManagedHttpClientImpl managedClient = httpClients.get(httpClientId, loader);
+            if (managedClient == loader.getManagedHttpClient()) {
+                // This thread put into cache
+                removeReloadable(reloadableRegistrations.put(httpClientId, context.registerService(Reloadable.class, reloadable, null)));
+                LOGGER.trace("Initialized HTTP client for {} and put it into cache", httpClientId);
+            }
+            return managedClient;
+        } catch (ExecutionException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof OXException) {
+                throw (OXException) cause;
+            }
+            throw OXException.general("Failed to initialize managed HTTP client.", cause == null ? e : cause);
         }
-
-        removeReloadable(reloadableRegistrations.put(httpClientId, context.registerService(Reloadable.class, reloadable, null)));
-        LOGGER.trace("Initialized HTTP client for {} and put it into cache", httpClientId);
-        return managedClient;
     }
 
     /**
@@ -469,7 +496,7 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
      * @param clientId The client identifier
      * @param managedClient The client to close
      */
-    private void close(String clientId, ManagedHttpClientImpl managedClient) {
+    void close(String clientId, ManagedHttpClientImpl managedClient) {
         /*
          * The ClientConnectionManager will be closed implicit by the
          * HTTP client itself.
@@ -541,11 +568,7 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
         @Override
         public void close() throws IOException {
             LOGGER.debug("Client has been closed. Remove client for {} from cache.", clientId);
-            ManagedHttpClientImpl client = httpClients.remove(clientId);
-            if (null != client) {
-                removeReloadable(reloadableRegistrations.remove(clientId));
-                client.unset();
-            }
+            httpClients.invalidate(clientId);
         }
     }
 
@@ -634,7 +657,7 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
             return;
         }
 
-        ManagedHttpClientImpl managedHttpClient = httpClients.get(clientId);
+        ManagedHttpClientImpl managedHttpClient = httpClients.getIfPresent(clientId);
         if (managedHttpClient == null) {
             LOGGER.error("No HTTP client to reload found", HttpClientExceptionCodes.MISSING_HTTP_CLIENT.create(clientId));
             return;
@@ -700,6 +723,74 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
 
         Pattern getRegularExpressionPattern() {
             return pattern;
+        }
+    }
+
+    private static abstract class ManagedHttpClientImplLoader<P extends HttpClientBuilderModifier> implements Callable<ManagedHttpClientImpl> {
+
+        protected final String httpClientId;
+        protected final HttpBasicConfigImpl httpBasicConfigImpl;
+        protected final HttpClientServiceImpl service;
+        protected final AtomicReference<ManagedHttpClientImpl> managedHttpClientReference;
+        protected final P provider;
+
+        protected ManagedHttpClientImplLoader(String httpClientId, P provider, HttpBasicConfigImpl httpBasicConfigImpl, HttpClientServiceImpl service) {
+            super();
+            this.httpClientId = httpClientId;
+            this.provider = provider;
+            this.httpBasicConfigImpl = httpBasicConfigImpl;
+            this.service = service;
+            managedHttpClientReference = new AtomicReference<>();
+        }
+
+        @Override
+        public ManagedHttpClientImpl call() throws OXException {
+            HttpBasicConfig config = getHttpBasicConfig();
+            CloseableHttpClient httpClient = service.createHttpClient(httpClientId, provider, config);
+            ManagedHttpClientImpl managedHttpClient = new ManagedHttpClientImpl(httpClientId, config.hashCode(), httpClient);
+            managedHttpClientReference.set(managedHttpClient);
+            return managedHttpClient;
+        }
+
+        /**
+         * Gets the managed HTTP client instance created by this loader(if any).
+         *
+         * @return The managed HTTP client instance or <code>null</code>
+         */
+        ManagedHttpClientImpl getManagedHttpClient() {
+            return managedHttpClientReference.get();
+        }
+
+        abstract HttpBasicConfig getHttpBasicConfig();
+    }
+
+    private static class SpecificManagedHttpClientImplLoader extends ManagedHttpClientImplLoader<SpecificHttpClientConfigProvider> {
+
+        /**
+         * Initializes a new {@link HttpClientServiceImpl.ManagedHttpClientImplLoader}.
+         */
+        SpecificManagedHttpClientImplLoader(String httpClientId, SpecificHttpClientConfigProvider provider, HttpBasicConfigImpl httpBasicConfigImpl, HttpClientServiceImpl service) {
+            super(httpClientId, provider, httpBasicConfigImpl, service);
+        }
+
+        @Override
+        HttpBasicConfig getHttpBasicConfig() {
+            return service.adjustConfig(httpClientId, provider.configureHttpBasicConfig(httpBasicConfigImpl));
+        }
+    }
+
+    private static class WildcardManagedHttpClientImplLoader extends ManagedHttpClientImplLoader<WildcardHttpClientConfigProvider> {
+
+        /**
+         * Initializes a new {@link HttpClientServiceImpl.ManagedHttpClientImplLoader}.
+         */
+        WildcardManagedHttpClientImplLoader(String httpClientId, WildcardHttpClientConfigProvider provider, HttpBasicConfigImpl httpBasicConfigImpl, HttpClientServiceImpl service) {
+            super(httpClientId, provider, httpBasicConfigImpl, service);
+        }
+
+        @Override
+        HttpBasicConfig getHttpBasicConfig() {
+            return service.adjustConfig(httpClientId, provider.configureHttpBasicConfig(httpClientId, httpBasicConfigImpl));
         }
     }
 

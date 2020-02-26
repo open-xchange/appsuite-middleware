@@ -49,6 +49,8 @@
 
 package com.openexchange.webdav.client;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import org.apache.http.impl.client.CloseableHttpClient;
 import com.openexchange.exception.OXException;
 import com.openexchange.webdav.client.jackrabbit.WebDAVClientImpl;
@@ -69,7 +71,23 @@ public interface WebDAVClientFactory {
      * @return An initialized WebDAV client
      * @throws If WebDAV client cannot be created
      */
-    WebDAVClient create(CloseableHttpClient client, String baseUrl) throws OXException;
+    WebDAVClient create(CloseableHttpClient client, URI baseUrl) throws OXException;
+
+    /**
+     * Initializes a new {@link WebDAVClientImpl}.
+     *
+     * @param client The underlying HTTP client to use
+     * @param baseUrl The URL of the WebDAV host to connect to
+     * @return An initialized WebDAV client
+     * @throws If WebDAV client cannot be created
+     */
+    default WebDAVClient create(CloseableHttpClient client, String baseUrl) throws OXException {
+        try {
+            return create(client, new URI(baseUrl));
+        } catch (URISyntaxException e) {
+            throw WebDAVClientExceptionCodes.UNABLE_TO_PARSE_URI.create(baseUrl, e);
+        }
+    }
 
     /**
      * Initializes a new {@link WebDAVClientImpl}.
@@ -80,7 +98,24 @@ public interface WebDAVClientFactory {
      * @return An initialized WebDAV client
      * @throws If WebDAV client cannot be created
      */
-    WebDAVClient create(String baseUrl, String login, String password) throws OXException;
+    WebDAVClient create(URI baseUrl, String login, String password) throws OXException;
+
+    /**
+     * Initializes a new {@link WebDAVClientImpl}.
+     *
+     * @param baseUrl The URL of the WebDAV host to connect to
+     * @param login The username to use for authentication
+     * @param password The password to use for authentication
+     * @return An initialized WebDAV client
+     * @throws If WebDAV client cannot be created
+     */
+    default WebDAVClient create(String baseUrl, String login, String password) throws OXException {
+        try {
+            return create(new URI(baseUrl), login, password);
+        } catch (URISyntaxException e) {
+            throw WebDAVClientExceptionCodes.UNABLE_TO_PARSE_URI.create(baseUrl, e);
+        }
+    }
 
 }
 

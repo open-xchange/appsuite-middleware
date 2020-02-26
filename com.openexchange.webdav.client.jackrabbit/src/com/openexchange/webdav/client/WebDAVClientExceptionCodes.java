@@ -55,7 +55,7 @@ import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
 
 /**
- * {@link WebDAVClientExceptionCodes}
+ * {@link WebDAVClientExceptionCodes} - Error codes for WebDAV clients.
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v7.10.4
@@ -66,29 +66,29 @@ public enum WebDAVClientExceptionCodes implements OXExceptionCode {
      * Unable to parse the following URI: '%1$s'
      */
     UNABLE_TO_PARSE_URI("Unable to parse the following URI: '%1$s'", Category.CATEGORY_CONFIGURATION, 1),
-
     /**
      * "An I/O error occurred: %1$s
      */
     IO_ERROR("An I/O error occurred: %1$s", Category.CATEGORY_ERROR, 2),
-
     /**
      * The resource already exists: %1$s
      */
     RESOURCE_EXISTS("The resource already exists: %1$s", Category.CATEGORY_ERROR, 3),
-
     /**
      * The given pre-condition failed
      */
     PRECONDITION_FAILED("The given pre-condition failed", Category.CATEGORY_ERROR, 4),
-
+    /**
+     * An unexpected error occurred: %1$s
+     */
     UNEXPECTED_ERROR("An unexpected error occurred: %1$s", Category.CATEGORY_ERROR, 5),
 
     ;
 
-    private static final String PREFIX = "DAV-CLI";
+    private static final String PREFIX = "DAV-CLIENT";
+
     /**
-     * Gets the <code>"FLS"</code> prefix for this error code.
+     * Gets the <code>"DAV-CLIENT"</code> prefix for this error code class.
      *
      * @return The prefix
      */
@@ -101,9 +101,9 @@ public enum WebDAVClientExceptionCodes implements OXExceptionCode {
     private final int number;
 
     /**
-     * Initializes a new {@link FileStorageCodes}.
+     * Initializes a new {@link WebDAVClientExceptionCodes}.
      */
-    private WebDAVClientExceptionCodes(final String message, final Category category, final int detailNumber) {
+    private WebDAVClientExceptionCodes(String message, Category category, int detailNumber) {
         this.message = message;
         this.category = category;
         this.number = detailNumber;

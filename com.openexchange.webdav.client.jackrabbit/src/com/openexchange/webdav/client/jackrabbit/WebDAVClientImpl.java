@@ -57,6 +57,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -68,20 +69,26 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.AuthCache;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.FileEntity;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.auth.BasicScheme;
+import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.protocol.HttpContext;
@@ -128,12 +135,15 @@ import com.openexchange.webdav.client.functions.ErrorAwareFunction;
  */
 public class WebDAVClientImpl implements WebDAVClient {
 
-    /** The identifier for obtaining a WebDAV-associated HTTP client */
-    public final static String HTTP_CLIENT_ID = "webdavclient";
+    /** The identifier prefix for obtaining a WebDAV-associated HTTP client */
+    private final static String HTTP_CLIENT_ID_PREFIX = "webdavclient";
+
+    /** The identifier pattern for obtaining a WebDAV-associated HTTP client */
+    public final static String HTTP_CLIENT_ID_PATTERN = HTTP_CLIENT_ID_PREFIX + "*";
 
     private final HttpClientProvider clientProvider;
     private final HttpContext context;
-    private final String baseUrl;
+    private final URI baseUrl;
 
     /**
      * Initializes a new {@link WebDAVClientImpl}.
@@ -142,7 +152,7 @@ public class WebDAVClientImpl implements WebDAVClient {
      * @param context The context to pass when executing an HTTP request
      * @param baseUrl The URL of the WebDAV host to connect to
      */
-    private WebDAVClientImpl(HttpClientProvider clientProvider, HttpContext context, String baseUrl) {
+    private WebDAVClientImpl(HttpClientProvider clientProvider, HttpContext context, URI baseUrl) {
         super();
         this.clientProvider = clientProvider;
         this.context = context;
@@ -156,7 +166,7 @@ public class WebDAVClientImpl implements WebDAVClient {
      * @param baseUrl The URL of the WebDAV host to connect to
      * @param services The service look-up providing OSGi services
      */
-    public WebDAVClientImpl(CloseableHttpClient client, String baseUrl) {
+    public WebDAVClientImpl(CloseableHttpClient client, URI baseUrl) {
         this(new InstanceHttpClientProvider(client), null, baseUrl);
     }
 
@@ -169,8 +179,8 @@ public class WebDAVClientImpl implements WebDAVClient {
      * @param services The service look-up providing OSGi services
      * @throws OXException If initialization fails
      */
-    public WebDAVClientImpl(String baseUrl, String login, String password, ServiceLookup services) throws IllegalStateException, OXException {
-        this(new ManagedHttpClientProvider(initDefaultClient(services)), initDefaultContext(login, password), baseUrl);
+    public WebDAVClientImpl(URI baseUrl, String login, String password, ServiceLookup services) throws IllegalStateException, OXException {
+        this(new ManagedHttpClientProvider(initDefaultClient(baseUrl, services)), initDefaultContext(baseUrl, login, password), baseUrl);
     }
 
     private HttpResponse execute(HttpUriRequest request) throws IOException, ClientProtocolException {
@@ -463,23 +473,52 @@ public class WebDAVClientImpl implements WebDAVClient {
         }
     }
 
-    private URI getUri(String href) {
-        return URI.create(baseUrl + href);
+    private URI getUri(String href) throws OXException {
+        try {
+            URIBuilder uriBuilder = new URIBuilder();
+            if (null != baseUrl.getScheme()) {
+                uriBuilder.setScheme(baseUrl.getScheme());
+            }
+            if (null != baseUrl.getHost()) {
+                uriBuilder.setHost(baseUrl.getHost());
+            }
+            if (0 < baseUrl.getPort()) {
+                uriBuilder.setPort(baseUrl.getPort());
+            }
+            uriBuilder.setPath(href);
+            return uriBuilder.build();
+        } catch (URISyntaxException e) {
+            throw WebDAVClientExceptionCodes.UNABLE_TO_PARSE_URI.create(baseUrl.toString() + href, e);
+        }
     }
 
     // ------------------------------------------------ Static helpers ----------------------------------------------------------------------
 
-    private static ManagedHttpClient initDefaultClient(ServiceLookup services) throws OXException {
-        return services.getServiceSafe(HttpClientService.class).getHttpClient(HTTP_CLIENT_ID);
+    private static ManagedHttpClient initDefaultClient(URI baseUrl, ServiceLookup services) throws OXException {
+        return services.getServiceSafe(HttpClientService.class).getHttpClient(HTTP_CLIENT_ID_PREFIX + baseUrl.toString().hashCode());
     }
 
-    private static HttpContext initDefaultContext(String login, String password) {
-        BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-        credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(login, password));
+    private static HttpContext initDefaultContext(URI baseUrl, String login, String password) {
+        HttpHost targetHost = new HttpHost(baseUrl.getHost(), determinePort(baseUrl), baseUrl.getScheme());
+        CredentialsProvider credsProvider = new BasicCredentialsProvider();
+        credsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(login, password));
 
+        AuthCache authCache = new BasicAuthCache();
+        authCache.put(targetHost, new BasicScheme());
+
+        // Add AuthCache to the execution context
         HttpClientContext context = HttpClientContext.create();
-        context.setCredentialsProvider(credentialsProvider);
+        context.setCredentialsProvider(credsProvider);
+        context.setAuthCache(authCache);
         return context;
+    }
+
+    private static int determinePort(URI baseUrl) {
+        int port = baseUrl.getPort();
+        if (port > 0) {
+            return port;
+        }
+        return "https".equals(baseUrl.getScheme()) ? 443 : 80;
     }
 
     private static interface HttpClientProvider {

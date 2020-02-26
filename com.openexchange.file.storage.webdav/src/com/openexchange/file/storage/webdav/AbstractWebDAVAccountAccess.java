@@ -49,9 +49,8 @@
 
 package com.openexchange.file.storage.webdav;
 
-import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.Map;
 import java.util.Optional;
 import org.apache.http.client.utils.URIBuilder;
@@ -134,20 +133,20 @@ public abstract class AbstractWebDAVAccountAccess implements CapabilityAware {
         String login = (String) configuration.get("login");
         String password = (String) configuration.get("password");
         try {
-            URL url = new URL(configUrl);
+            URI uri = new URI(configUrl);
             URIBuilder uriBuilder = new URIBuilder();
-            if (null != url.getProtocol()) {
-                uriBuilder.setScheme(url.getProtocol());
+            if (null != uri.getScheme()) {
+                uriBuilder.setScheme(uri.getScheme());
             }
-            if (null != url.getHost()) {
-                uriBuilder.setHost(url.getHost());
+            if (null != uri.getHost()) {
+                uriBuilder.setHost(uri.getHost());
             }
-            if (0 < url.getPort()) {
-                uriBuilder.setPort(url.getPort());
+            if (0 < uri.getPort()) {
+                uriBuilder.setPort(uri.getPort());
             }
             String baseUrl = uriBuilder.build().toString();
             return service.getClientFactory().create(baseUrl, login, password);
-        } catch (MalformedURLException | URISyntaxException e) {
+        } catch (URISyntaxException e) {
             throw FileStorageExceptionCodes.INVALID_URL.create(configUrl, e.getMessage());
         }
     }
