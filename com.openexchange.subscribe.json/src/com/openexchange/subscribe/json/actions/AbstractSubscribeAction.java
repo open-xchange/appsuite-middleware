@@ -102,6 +102,17 @@ public abstract class AbstractSubscribeAction extends AbstractSubscribeSourcesAc
         return subscription;
     }
 
+    /**
+     * Checks if the user has the permission to see the given {@link Subscription}
+     *
+     * @param session The users session
+     * @param sub The {@link Subscription} to check
+     * @return <code>true</code> if the user is allowed to see the subscription, <code>false</code> otherwise
+     */
+    protected boolean checkPermission(ServerSession session, Subscription sub) {
+        return sub.containsUserId() ? session.getUserId() == sub.getUserId() : false;
+    }
+
     protected SubscriptionSourceDiscoveryService getDiscovery(final ServerSession session) throws OXException {
         return services.getService(SubscriptionSourceDiscoveryService.class).filter(session.getUserId(), session.getContextId());
     }
