@@ -282,6 +282,8 @@ MailDestinationData:
   $ref: ./mail/MailDestinationData.yaml
 MailDestinationResponse:
   $ref: ./mail/MailDestinationResponse.yaml
+MailMoveAllBody:
+  $ref: ./mail/MailMoveAllBody.yaml
 MailUpdateBody:
   $ref: ./mail/MailUpdateBody.yaml
 MailsAllSeenResponse:
