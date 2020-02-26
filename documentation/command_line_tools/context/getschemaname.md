@@ -2,6 +2,7 @@
 title: getschemaname
 icon: far fa-circle
 tags: Administration, Command Line tools, Context, Schema
+package: open-xchange-admin
 ---
 
 # NAME

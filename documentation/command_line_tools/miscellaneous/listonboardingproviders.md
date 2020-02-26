@@ -2,6 +2,7 @@
 title: listonboardingproviders
 icon: far fa-circle
 tags: Administration, Command Line tools
+package: open-xchange-client-onboarding
 ---
 
 # NAME

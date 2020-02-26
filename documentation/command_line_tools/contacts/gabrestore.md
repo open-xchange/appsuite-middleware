@@ -2,6 +2,7 @@
 title: restoregabdefaults
 icon: far fa-circle
 tags: Administration, Command Line tools, Contacts, Global Address Book
+package: open-xchange-core
 ---
 
 # NAME

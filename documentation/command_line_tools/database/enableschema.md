@@ -2,6 +2,7 @@
 title: enableschema
 icon: far fa-circle
 tags: Administration, Command Line tools, Database, Schema
+package: open-xchange-admin
 ---
 
 # NAME

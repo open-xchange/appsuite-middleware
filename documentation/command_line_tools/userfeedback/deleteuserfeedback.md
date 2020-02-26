@@ -2,6 +2,7 @@
 title: deleteuserfeedback
 icon: far fa-circle
 tags: Administration, Command Line tools, User, Feedback
+package: open-xchange-userfeedback
 ---
 
 # NAME

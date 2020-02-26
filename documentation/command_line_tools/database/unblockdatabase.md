@@ -2,6 +2,7 @@
 title: unblockdatabase
 icon: far fa-circle
 tags: Administration, Command Line tools, Database
+package: open-xchange-admin
 ---
 
 # NAME

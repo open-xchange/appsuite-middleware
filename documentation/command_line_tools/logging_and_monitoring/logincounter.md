@@ -2,6 +2,7 @@
 title: logincounter
 icon: far fa-circle
 tags: Administration, Command Line tools, Monitoring
+package: open-xchange-core
 ---
 
 # NAME

@@ -2,6 +2,7 @@
 title: seteventorganizer
 icon: far fa-circle
 tags: Administration, Command Line tools, Calendar
+package: open-xchange-core
 ---
 
 # NAME

@@ -2,6 +2,7 @@
 title: registerserver
 icon: far fa-circle
 tags: Administration, Command Line tools, Server
+package: open-xchange-admin
 ---
 
 # NAME

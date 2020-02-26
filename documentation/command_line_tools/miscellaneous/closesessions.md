@@ -2,6 +2,7 @@
 title: closesessions
 icon: far fa-circle
 tags: Administration, Command Line tools, Session
+package: open-xchange-core
 ---
 
 # NAME

@@ -2,6 +2,7 @@
 title: existsuser
 icon: fa fa-question-circle
 tags: Administration, Command Line tools, User
+package: open-xchange-admin
 ---
 
 # NAME

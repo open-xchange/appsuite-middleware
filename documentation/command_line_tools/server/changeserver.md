@@ -2,6 +2,7 @@
 title: changeserver
 icon: far fa-circle
 tags: Administration, Command Line tools, Server, Schema
+package: open-xchange-admin
 ---
 
 # NAME

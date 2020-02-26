@@ -2,6 +2,7 @@
 title: reloadconfiguration
 icon: far fa-circle
 tags: Administration, Command Line tools, Configuration
+package: open-xchange-core
 ---
 
 # NAME

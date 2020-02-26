@@ -2,6 +2,7 @@
 title: updatebundle
 icon: far fa-circle
 tags: Administration, Command Line tools, Bundle
+package: open-xchange-core
 ---
 
 # NAME

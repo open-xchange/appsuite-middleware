@@ -2,6 +2,7 @@
 title: calculatefilechecksums
 icon: far fa-circle
 tags: Administration, Command Line tools, Filestore
+package: open-xchange-core
 ---
 
 # NAME

@@ -2,6 +2,7 @@
 title: moveuserfilestore2context
 icon: far fa-circle
 tags: Administration, Command Line tools, User, Context, Filestore
+package: open-xchange-admin
 ---
 
 # NAME

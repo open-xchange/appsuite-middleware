@@ -2,6 +2,7 @@
 title: reloaddriveclients
 icon: far fa-circle
 tags: Administration, Command Line tools, Drive
+package: open-xchange-drive-client-windows
 ---
 
 # NAME

@@ -2,6 +2,7 @@
 title: clearpreviewcache
 icon: far fa-circle
 tags: Administration, Command Line tools, Caching
+package: open-xchange-core
 ---
 
 # NAME
