@@ -120,7 +120,7 @@ properties:
       tags: ["IMAP", "Circuit Breaker"]
     - key: com.openexchange.imap.breaker.[breaker-name].successExecutions
       description: |
-        he number of executions to measure the successes against. The default is the same value as for [[com.openexchange.imap.breaker.[breaker-name].successThreshold]]
+        The number of executions to measure the successes against. The default is the same value as for [[com.openexchange.imap.breaker.[breaker-name].successThreshold]]
 
         [breaker-name] must be replaced with a valid breaker name or primary for the primary account.
       defaultValue: 2
