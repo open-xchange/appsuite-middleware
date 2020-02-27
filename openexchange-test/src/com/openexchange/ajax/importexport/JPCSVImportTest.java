@@ -164,7 +164,7 @@ public class JPCSVImportTest extends AbstractConfigAwareAPIClientSession {
      */
     @SuppressWarnings("unchecked")
     private String getDefaultFolder(String session) throws Exception {
-        FoldersVisibilityResponse visibleFolders = foldersApi.getVisibleFolders(session, "contacts", "1,308", "0", null);
+        FoldersVisibilityResponse visibleFolders = foldersApi.getVisibleFolders(session, "contacts", "1,308", "0", null, Boolean.TRUE);
         if (visibleFolders.getError() != null) {
             throw new OXException(new Exception(visibleFolders.getErrorDesc()));
         }

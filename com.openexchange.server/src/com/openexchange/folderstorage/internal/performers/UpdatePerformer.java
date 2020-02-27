@@ -250,6 +250,20 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                     changeSubscription = (storageFolder.isSubscribed() != folder.isSubscribed());
                 }
             }
+            boolean changeUsedForSync = false;
+            {
+                if (folder.getUsedForSync() != null) {
+                    if (folder instanceof SetterAwareFolder) {
+                        if (((SetterAwareFolder) folder).containsUsedForSync() && folder.getUsedForSync().isUsedForSync() != storageFolder.getUsedForSync().isUsedForSync()) {
+                            changeUsedForSync = true;
+                        }
+                    } else {
+                        if (folder.getUsedForSync().isUsedForSync() != storageFolder.getUsedForSync().isUsedForSync()) {
+                            changeUsedForSync = true;
+                        }
+                    }
+                }
+            }
             final boolean changedMetaInfo;
             {
                 Map<String, Object> meta = folder.getMeta();
@@ -324,7 +338,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                         }
                         throw e;
                     }
-                } else if (changeSubscription || changedMetaInfo || changedProperties) {
+                } else if (changeSubscription || changeUsedForSync || changedMetaInfo || changedProperties) {
                     /*
                      * Change subscription, meta, properties either in real or in virtual storage
                      */

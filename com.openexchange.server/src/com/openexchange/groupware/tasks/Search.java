@@ -62,7 +62,7 @@ import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
-import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
+import com.openexchange.tools.oxfolder.OXSubscribeAwareFolderSQL;
 import com.openexchange.tools.sql.SearchStrings;
 import com.openexchange.user.User;
 
@@ -91,6 +91,17 @@ public class Search {
 
     protected final List<Integer> all = new ArrayList<Integer>(), own = new ArrayList<Integer>(), shared = new ArrayList<Integer>();
 
+    /**
+     * Initializes a new {@link Search}.
+     *
+     * @param ctx
+     * @param user
+     * @param permissionBits
+     * @param search
+     * @param orderBy
+     * @param order
+     * @param columns
+     */
     public Search(final Context ctx, final User user, final UserPermissionBits permissionBits, final TaskSearchObject search, final int orderBy, final Order order, final int[] columns) {
         super();
         this.permissionBits = permissionBits;
@@ -102,6 +113,12 @@ public class Search {
         this.columns = columns;
     }
 
+    /**
+     * Performs the search
+     *
+     * @return The search results
+     * @throws OXException
+     */
     public SearchIterator<Task> perform() throws OXException {
         checkConditions();
         prepareFolder();
@@ -111,6 +128,11 @@ public class Search {
         return TaskStorage.getInstance().search(ctx, getUserId(), search, orderBy, order, columns, all, own, shared);
     }
 
+    /**
+     * Checks conditions on the search pattern
+     *
+     * @throws OXException
+     */
     protected void checkConditions() throws OXException {
         if (SearchObject.NO_PATTERN == search.getPattern()) {
             return;
@@ -124,13 +146,18 @@ public class Search {
         }
     }
 
+    /**
+     * Prepares the folder
+     *
+     * @throws OXException
+     */
     protected void prepareFolder() throws OXException {
-        SearchIterator<FolderObject> folders;
+        List<FolderObject> folders;
         if (search.hasFolders()) {
             folders = loadFolder(ctx, search.getFolders());
         } else {
             try {
-                folders = OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(
+                folders = OXSubscribeAwareFolderSQL.getAllVisibleFoldersOfModule(
                     getUserId(),
                     user.getGroups(),
                     permissionBits.getAccessibleModules(),
@@ -141,8 +168,7 @@ public class Search {
             }
         }
         try {
-            while (folders.hasNext()) {
-                final FolderObject folder = folders.next();
+            for(FolderObject folder: folders) {
                 if (!Permission.isFolderVisible(ctx, user, permissionBits, folder) || Permission.canOnlySeeFolder(ctx, user, permissionBits, folder)) {
                     continue;
                 }
@@ -161,14 +187,27 @@ public class Search {
         LOG.trace("Search tasks, all: {}, own: {}, shared: {}", all, own, shared);
     }
 
-    private static SearchIterator<FolderObject> loadFolder(final Context ctx, final int[] folderIds) throws OXException {
+    /**
+     * Loads the given folders
+     *
+     * @param ctx The {@link Context}
+     * @param folderIds The folder ids to load
+     * @return The folders
+     * @throws OXException
+     */
+    private static List<FolderObject> loadFolder(final Context ctx, final int[] folderIds) throws OXException {
         final List<FolderObject> retval = new ArrayList<FolderObject>(folderIds.length);
         for (final int folderId : folderIds) {
             retval.add(Tools.getFolder(ctx, folderId));
         }
-        return new SearchIteratorAdapter<FolderObject>(retval.iterator());
+        return retval;
     }
 
+    /**
+     * Gets the user id
+     *
+     * @return The user id
+     */
     private int getUserId() {
         return user.getId();
     }

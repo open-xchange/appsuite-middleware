@@ -50,6 +50,7 @@
 package com.openexchange.chronos.provider.schedjoules.osgi;
 
 import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -101,6 +102,22 @@ public final class Services {
             throw new IllegalStateException("Missing ServiceLookup instance.");
         }
         return serviceLookup.getService(clazz);
+    }
+
+    /**
+     * Gets the service of specified type safely
+     *
+     * @param clazz The service's class
+     * @return The service
+     * @throws OXException in case the service is missing
+     * @throws IllegalStateException If an error occurs while returning the demanded service
+     */
+    public static <S extends Object> S getServiceSafe(final Class<? extends S> clazz) throws OXException {
+        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException("Missing ServiceLookup instance.");
+        }
+        return serviceLookup.getServiceSafe(clazz);
     }
 
     /**

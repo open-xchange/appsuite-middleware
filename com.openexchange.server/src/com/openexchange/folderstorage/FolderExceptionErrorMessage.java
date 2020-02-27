@@ -243,6 +243,10 @@ public enum FolderExceptionErrorMessage implements DisplayableOXExceptionCode {
      * Process was interrupted. Please try again.
      */
     INTERRUPT_ERROR("Process was interrupted. Please try again.", CATEGORY_TRY_AGAIN, 1043, OXExceptionStrings.MESSAGE_RETRY),
+    /**
+     * Changing the subscription or the used_for_sync state is not allowed for default folders.
+     */
+    SUBSCRIBE_NOT_ALLOWED("Changing the subscription or the used_for_sync state is not allowed for default folders.", CATEGORY_USER_INPUT, 1044, OXExceptionStrings.MESSAGE_DENIED),
 
     ;
 

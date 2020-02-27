@@ -147,3 +147,13 @@ com.openexchange.calendar.config:
 com.openexchange.calendar.provider:
   type: string
   description: Denotes the identifier of the underlying calendar provider.
+used_for_sync:
+  type: object
+  description: Indicates whether this folder should used for sync or not. Standard folders cannot be changed.
+  properties:
+    value:
+      type: string
+      description: The actual used_for_sync value. Either 'true' or 'false'.
+    protected:
+      type: string
+      description: Whether this value is protected and can't be changed by the client or not. Either 'true' or 'false'

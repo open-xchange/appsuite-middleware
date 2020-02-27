@@ -49,7 +49,6 @@
 
 package com.openexchange.chronos.provider.google.access;
 
-import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_SYNC;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -71,6 +70,7 @@ import com.openexchange.chronos.common.DataHandlers;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarFolderProperty;
+import com.openexchange.chronos.provider.UsedForSync;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarAccess;
@@ -336,7 +336,7 @@ public class GoogleCalendarAccess extends BasicCachingCalendarAccess {
     @Override
     public CalendarSettings getSettings() {
         CalendarSettings settings = super.getSettings();
-        settings.getExtendedProperties().replace(USED_FOR_SYNC(Boolean.FALSE, true)); // never synchronizable
+        settings.setUsedForSync(UsedForSync.DEACTIVATED);
         return settings;
     }
 

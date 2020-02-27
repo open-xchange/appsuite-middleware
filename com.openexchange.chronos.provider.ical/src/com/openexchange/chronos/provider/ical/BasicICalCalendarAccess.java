@@ -113,7 +113,6 @@ public class BasicICalCalendarAccess extends BasicCachingCalendarAccess implemen
 
         CalendarSettings settings = getCalendarSettings(getExtendedProperties());
         settings.setSubscribed(internalConfig.optBoolean("subscribed", true));
-
         return settings;
     }
 

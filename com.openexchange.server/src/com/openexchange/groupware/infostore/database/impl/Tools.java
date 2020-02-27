@@ -51,7 +51,6 @@ package com.openexchange.groupware.infostore.database.impl;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -77,7 +76,6 @@ import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
-import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.User;
@@ -184,9 +182,8 @@ public class Tools {
      *
      * @param documents The documents to get the object identifiers for
      * @return A list of corresponding object identifiers
-     * @throws OXException
      */
-    public static List<Integer> getIDs(List<DocumentMetadata> documents) throws OXException {
+    public static List<Integer> getIDs(List<DocumentMetadata> documents) {
         if (null == documents) {
             return null;
         }
@@ -309,8 +306,6 @@ public class Tools {
                  */
                 permissionsByFolderID.putAll(gatherVisibleFolders(security, connection, context, user, userPermissions, folder.getObjectID(), ignoreTrash, all, own));
             }
-        } catch (SQLException e) {
-            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             SearchIterators.close(searchIterator);
         }
@@ -468,7 +463,7 @@ public class Tools {
      * @param all A collection to add the IDs of folders the user is able to read "all" items from
      * @param own A collection to add the IDs of folders the user is able to read only "own" items from
      */
-    private static void trackEffectivePermission(EffectiveInfostoreFolderPermission infostorePermission, Map<Integer, EffectiveInfostoreFolderPermission> permissionsByFolderID, Collection<Integer> all, Collection<Integer> own) throws OXException {
+    private static void trackEffectivePermission(EffectiveInfostoreFolderPermission infostorePermission, Map<Integer, EffectiveInfostoreFolderPermission> permissionsByFolderID, Collection<Integer> all, Collection<Integer> own) {
         Integer id = I(infostorePermission.getFuid());
         if (infostorePermission.canReadAllObjects()) {
             all.add(id);

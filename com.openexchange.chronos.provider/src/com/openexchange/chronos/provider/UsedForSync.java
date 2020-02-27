@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,81 +47,71 @@
  *
  */
 
-package com.openexchange.dav.internal;
-
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.folderstorage.AbstractFolder;
-import com.openexchange.folderstorage.FolderField;
-import com.openexchange.folderstorage.FolderProperty;
-import com.openexchange.folderstorage.ParameterizedFolder;
-import com.openexchange.folderstorage.SetterAwareFolder;
-import com.openexchange.folderstorage.UsedForSync;
+package com.openexchange.chronos.provider;
 
 /**
- * {@link FolderUpdate}
+ * {@link UsedForSync}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.10.0
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.4
  */
-public class FolderUpdate extends AbstractFolder implements ParameterizedFolder, SetterAwareFolder {
-
-    private static final long serialVersionUID = -367640273380922433L;
-
-    private final Map<FolderField, FolderProperty> properties;
-
-    private boolean containsSubscribed;
-    private boolean containsUsedForSync;
+public class UsedForSync {
 
     /**
-     * Initializes a new {@link FolderUpdate}.
+     * The default {@link UsedForSync} value
      */
-    public FolderUpdate() {
+    public static final UsedForSync DEFAULT = new UsedForSync(true, false);
+    /**
+     * The {@link UsedForSync} value in case it is deactivated
+     */
+    public static final UsedForSync DEACTIVATED = new UsedForSync(false, true);
+
+    /**
+     * The {@link UsedForSync} value for always activated
+     */
+    public static final UsedForSync FORCED_ACTIVE = new UsedForSync(true, true);
+
+    private final boolean value;
+    private final boolean isProtected;
+    
+    /**
+     * Initializes a new {@link UsedForSync}.
+     * 
+     * @param isUsedForSync Whether the folder is used for sync or not
+     * @param isProtected Whether this field is protected or not
+     */
+    public UsedForSync(boolean isUsedForSync, boolean isProtected) {
         super();
-        subscribed = true;
-        usedForSync = UsedForSync.DEFAULT;
-        this.properties = new HashMap<FolderField, FolderProperty>();
+        this.value = isUsedForSync;
+        this.isProtected = isProtected;
     }
 
-    @Override
-    public boolean isGlobalID() {
-        return false;
-    }
-
-    @Override
-    public void setProperty(FolderField name, Object value) {
-        if (null == value) {
-            properties.remove(name);
-        } else {
-            properties.put(name, new FolderProperty(name.getName(), value));
-        }
-    }
-
-    @Override
-    public Map<FolderField, FolderProperty> getProperties() {
-        return properties;
-    }
-
-    @Override
-    public void setSubscribed(boolean subscribed) {
-        super.setSubscribed(subscribed);
-        containsSubscribed = true;
-    }
-
-    @Override
-    public boolean containsSubscribed() {
-        return containsSubscribed;
+    /**
+     * Whether the folder is used for sync or not
+     * 
+     * @return <code>true</code> if the folder is used for sync, <code>false</code> otherwise
+     */
+    public boolean isUsedForSync() {
+        return value;
     }
     
-    @Override
-    public void setUsedForSync(UsedForSync usedForSync) {
-        super.setUsedForSync(usedForSync);
-        containsUsedForSync=true;
+    /**
+     * Whether this value is protected
+     *
+     * @return <code>true</code> if this value is protected, <code>false</code> otherwise
+     */
+    public boolean isProtected() {
+        return isProtected;
     }
-
-    @Override
-    public boolean containsUsedForSync() {
-        return containsUsedForSync;
+    
+    /**
+     * Creates an unprotected {@link UsedForSync} object with the given value
+     *
+     * @param isUsedForSync Whether the folder is used for sync or not
+     * @return The unprotected {@link UsedForSync} value
+     */
+    public static UsedForSync of(boolean isUsedForSync) {
+        return new UsedForSync(isUsedForSync, false);
     }
-
+    
 }

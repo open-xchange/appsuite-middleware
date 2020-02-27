@@ -53,8 +53,6 @@ import static com.openexchange.chronos.common.CalendarUtils.optTimeZone;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.DESCRIPTION;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.SCHEDULE_TRANSP;
-import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_SYNC;
-import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.arrays.Arrays.contains;
 import java.util.ArrayList;
@@ -85,8 +83,10 @@ import com.openexchange.chronos.common.DefaultCalendarEvent;
 import com.openexchange.chronos.common.DefaultCalendarResult;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
+import com.openexchange.chronos.provider.UsedForSync;
 import com.openexchange.chronos.provider.basic.BasicCalendarAccess;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
+import com.openexchange.chronos.provider.basic.CommonCalendarConfigurationFields;
 import com.openexchange.chronos.provider.caching.AlarmHelper;
 import com.openexchange.chronos.provider.caching.CachingCalendarUtils;
 import com.openexchange.chronos.provider.extensions.BasicCTagAware;
@@ -229,13 +229,13 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
         ExtendedProperties extendedProperties = new ExtendedProperties();
         extendedProperties.add(SCHEDULE_TRANSP(TimeTransparency.TRANSPARENT, true));
         extendedProperties.add(DESCRIPTION(stringHelper.getString(BirthdaysCalendarStrings.CALENDAR_DESCRIPTION), true));
-        if (CachingCalendarUtils.canBeUsedForSync(BirthdaysCalendarProvider.PROVIDER_ID, session, true)) {
-            extendedProperties.add(USED_FOR_SYNC(B(internalConfig.optBoolean("usedForSync", false)), false));
-        } else {
-            extendedProperties.add(USED_FOR_SYNC(Boolean.FALSE, true));
-        }
         extendedProperties.add(COLOR(internalConfig.optString("color", null), false));
         settings.setExtendedProperties(extendedProperties);
+        if (CachingCalendarUtils.canBeUsedForSync(BirthdaysCalendarProvider.PROVIDER_ID, session, true)) {
+            settings.setUsedForSync(UsedForSync.of(internalConfig.optBoolean(CommonCalendarConfigurationFields.USED_FOR_SYNC, true)));
+        } else {
+            settings.setUsedForSync(UsedForSync.DEACTIVATED);
+        }
         return settings;
     }
 
@@ -301,7 +301,7 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
             throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(eventID.getObjectID(), eventID.getRecurrenceID());
         }
         Event originalEvent = eventConverter.getSeriesMaster(getBirthdayContact(eventID.getObjectID()));
-        AlarmPreparator.getInstance().prepareEMailAlarms(session, services.getOptionalService(CalendarUtilities.class), alarms);
+        AlarmPreparator.getInstance().prepareEMailAlarms(session, services.getServiceSafe(CalendarUtilities.class), alarms);
         UpdateResult updateResult = getAlarmHelper().updateAlarms(originalEvent, alarms, false);
         DefaultCalendarResult result = new DefaultCalendarResult(session, session.getUserId(), FOLDER_ID, null, null == updateResult ? null : Collections.singletonList(updateResult), null);
         return notifyHandlers(result);

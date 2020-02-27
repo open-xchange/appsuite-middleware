@@ -64,5 +64,12 @@ public interface SetterAwareFolder extends Folder {
      * @return <code>true</code> if subscribed flag has been set; otherwise <code>false</code>
      */
     boolean containsSubscribed();
+    
+    /**
+     * Signals if usedForSync flag has been set.
+     *
+     * @return <code>true</code> if usedForSync flag has been set; otherwise <code>false</code>
+     */
+    boolean containsUsedForSync();
 
 }

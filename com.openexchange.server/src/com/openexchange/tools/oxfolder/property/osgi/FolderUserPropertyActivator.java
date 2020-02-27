@@ -54,11 +54,15 @@ import java.util.Arrays;
 import com.openexchange.caching.CacheService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.folder.FolderDeleteListenerService;
+import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.tools.oxfolder.property.FolderSubscriptionHelper;
 import com.openexchange.tools.oxfolder.property.FolderUserPropertyStorage;
 import com.openexchange.tools.oxfolder.property.impl.CachingFolderUserPropertyStorage;
+import com.openexchange.tools.oxfolder.property.impl.FolderUserPropertyDeleteListener;
 import com.openexchange.tools.oxfolder.property.impl.RdbFolderUserPropertyStorage;
 import com.openexchange.tools.oxfolder.property.sql.CreateFolderUserPropertyTable;
 import com.openexchange.tools.oxfolder.property.sql.CreateFolderUserPropertyTask;
@@ -116,6 +120,13 @@ public class FolderUserPropertyActivator extends HousekeepingActivator {
         }
 
         // Register FolderUserPropertyStorage
-        registerService(FolderUserPropertyStorage.class, new CachingFolderUserPropertyStorage(new RdbFolderUserPropertyStorage(this)));
+        RdbFolderUserPropertyStorage rdbStorage = new RdbFolderUserPropertyStorage(this);
+        FolderUserPropertyStorage storage = new CachingFolderUserPropertyStorage(rdbStorage);
+
+        registerService(FolderSubscriptionHelper.class, new FolderSubscriptionHelper(storage));
+        registerService(FolderUserPropertyStorage.class, storage);
+        FolderUserPropertyDeleteListener delListener = new FolderUserPropertyDeleteListener(rdbStorage);
+        registerService(FolderDeleteListenerService.class, delListener);
+        registerService(DeleteListener.class, delListener);
     }
 }

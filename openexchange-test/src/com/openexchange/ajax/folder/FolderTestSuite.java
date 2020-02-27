@@ -141,6 +141,7 @@ import com.openexchange.test.concurrent.ParallelSuite;
     // API Client tests
     MailFolderCountTest.class,
     CheckLimitsTest.class,
+    SubscribeTest.class
 
 })
 public final class FolderTestSuite {

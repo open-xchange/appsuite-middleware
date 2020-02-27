@@ -914,8 +914,6 @@ public class FolderObject extends FolderChildObject implements Cloneable {
             return (iter = OXFolderIteratorSQL.getVisibleSubfoldersIterator(objectId, userId, groups, ctx, userConfig.getUserPermissionBits(), null)).hasNext();
         } catch (OXException e) {
             throw e;
-        } catch (SQLException e) {
-            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             SearchIterators.close(iter);
         }

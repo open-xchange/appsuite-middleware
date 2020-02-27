@@ -49,6 +49,7 @@
 
 package com.openexchange.contact.internal;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -95,7 +96,7 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
-import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
+import com.openexchange.tools.oxfolder.OXSubscribeAwareFolderSQL;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.userconf.UserConfigurationService;
 import com.openexchange.userconf.UserPermissionService;
@@ -442,19 +443,18 @@ public final class Tools {
 	 * @return The search folders
 	 * @throws OXException
 	 */
-	public static List<String> getSearchFolders(int contextID, int userID, boolean emailAutoComplete) throws OXException {
-		if (emailAutoComplete && false == ContactConfig.getInstance().getBoolean(Property.ALL_FOLDERS_FOR_AUTOCOMPLETE).booleanValue()) {
+    public static List<String> getSearchFolders(int contextID, int userID, boolean emailAutoComplete) throws OXException {
+        if (emailAutoComplete && false == ContactConfig.getInstance().getBoolean(Property.ALL_FOLDERS_FOR_AUTOCOMPLETE).booleanValue()) {
             /*
              * use default set of folders for search
              */
             return getBasicFolders(contextID, userID);
-		} else {
-            /*
-             * use all visible folders for search
-             */
-            return getVisibleFolders(contextID, userID);
-		}
-	}
+        }
+        /*
+         * use all visible folders for search
+         */
+        return getVisibleFolders(contextID, userID);
+    }
 
 	/**
 	 * Gets all contact folders where the user at least has permissions to read
@@ -465,33 +465,23 @@ public final class Tools {
 	 * @return the folder IDs
 	 * @throws OXException
 	 */
-	public static List<String> getVisibleFolders(final int contextID, final int userID) throws OXException {
-		final List<String> folderIDs = new ArrayList<String>();
-        final UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfiguration(
-        		userID, Tools.getContext(contextID));
-        SearchIterator<FolderObject> searchIterator = null;
-        try {
-        	searchIterator = OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(userID, userConfig.getGroups(),
-        			userConfig.getAccessibleModules(), FolderObject.CONTACT, Tools.getContext(contextID));
-            while (searchIterator.hasNext()) {
-                final FolderObject folder = searchIterator.next();
-    			if (FolderObject.CONTACT != folder.getModule()) {
-    				continue;
-    			}
-    			final EffectivePermission permission = Tools.getPermission(
-    					contextID, Integer.toString(folder.getObjectID()), userID);
-    			if (null == permission || false == permission.canReadOwnObjects()) {
-    				continue;
-    			}
-    			folderIDs.add(Integer.toString(folder.getObjectID()));
+    public static List<String> getVisibleFolders(final int contextID, final int userID) throws OXException {
+        final List<String> folderIDs = new ArrayList<String>();
+        final UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfiguration(userID, Tools.getContext(contextID));
+        Context context = Tools.getContext(contextID);
+        List<FolderObject> folders = OXSubscribeAwareFolderSQL.getAllVisibleFoldersOfModule(userID, userConfig.getGroups(), userConfig.getAccessibleModules(), FolderObject.CONTACT, context);
+        for (FolderObject folder : folders) {
+            if (FolderObject.CONTACT != folder.getModule()) {
+                continue;
             }
-        } finally {
-        	if (null != searchIterator) {
-        		searchIterator.close();
-        	}
-		}
+            final EffectivePermission permission = Tools.getPermission(contextID, Integer.toString(folder.getObjectID()), userID);
+            if (null == permission || false == permission.canReadOwnObjects()) {
+                continue;
+            }
+            folderIDs.add(Integer.toString(folder.getObjectID()));
+        }
         return folderIDs;
-	}
+    }
 
 	/**
 	 * Gets a default set of folders used for searches of an user.
@@ -541,7 +531,7 @@ public final class Tools {
 	public static List<Integer> parse(List<String> ids) throws OXException {
 		List<Integer> intIDs = new ArrayList<Integer>();
 		for (String id : ids) {
-			intIDs.add(parse(id));
+			intIDs.add(I(parse(id)));
 		}
 		return intIDs;
 	}
@@ -653,18 +643,17 @@ public final class Tools {
 	 * @param contactSearch
 	 * @return
 	 */
-	public static ContactSearchObject prepareContactSearch(ContactSearchObject contactSearch) {
+    public static ContactSearchObject prepareContactSearch(ContactSearchObject contactSearch) {
         if (null != contactSearch.getPattern() && 0 < contactSearch.getPattern().length()) {
             /*
              * "Search contacts"
              */
             return prepareSearchContacts(contactSearch);
-        } else {
-            /*
-             * "Search contacts alternative"
-             */
-            return prepareSearchContactsAlternative(contactSearch);
         }
+        /*
+         * "Search contacts alternative"
+         */
+        return prepareSearchContactsAlternative(contactSearch);
     }
 
     /**

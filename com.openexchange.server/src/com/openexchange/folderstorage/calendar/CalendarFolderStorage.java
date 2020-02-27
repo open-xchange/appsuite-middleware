@@ -71,6 +71,7 @@ import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderType;
+import com.openexchange.folderstorage.ParameterizedFolder;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.StoragePriority;
@@ -320,7 +321,8 @@ public class CalendarFolderStorage implements SubfolderListingFolderStorage {
             throw FolderExceptionErrorMessage.UNSUPPORTED_STORAGE_TYPE.create(storageType);
         }
         List<AccountAwareCalendarFolder> calendarFolders = getCalendarAccess(storageParameters).getFolders(folderIds);
-        return getStorageFolders(treeId, getDefaultContentType(), calendarFolders);
+        List<Folder> result = getStorageFolders(treeId, getDefaultContentType(), calendarFolders);
+        return result;
     }
 
     @Override
@@ -334,7 +336,8 @@ public class CalendarFolderStorage implements SubfolderListingFolderStorage {
             throw FolderExceptionErrorMessage.UNSUPPORTED_STORAGE_TYPE.create(storageType);
         }
         AccountAwareCalendarFolder calendarFolder = getCalendarAccess(storageParameters).getFolder(folderId);
-        return getStorageFolder(treeId, getDefaultContentType(), calendarFolder, calendarFolder.getAccount());
+        ParameterizedFolder result = getStorageFolder(treeId, getDefaultContentType(), calendarFolder, calendarFolder.getAccount());
+        return result;
     }
 
     @Override
@@ -354,13 +357,13 @@ public class CalendarFolderStorage implements SubfolderListingFolderStorage {
     @Override
     public Folder[] getSubfolderObjects(String treeId, String parentId, StorageParameters storageParameters) throws OXException {
         if (PRIVATE_ID.equals(parentId)) {
-            return getFolders(treeId, getVisibleFolders(GroupwareFolderType.PRIVATE, storageParameters));
+            return getSubFolders(treeId, getVisibleFolders(GroupwareFolderType.PRIVATE, storageParameters));
         }
         if (SHARED_ID.equals(parentId)) {
-            return getFolders(treeId, getVisibleFolders(GroupwareFolderType.SHARED, storageParameters));
+            return getSubFolders(treeId, getVisibleFolders(GroupwareFolderType.SHARED, storageParameters));
         }
         if (PUBLIC_ID.equals(parentId)) {
-            return getFolders(treeId, getVisibleFolders(GroupwareFolderType.PUBLIC, storageParameters));
+            return getSubFolders(treeId, getVisibleFolders(GroupwareFolderType.PUBLIC, storageParameters));
         }
         return new Folder[0];
     }
@@ -407,7 +410,7 @@ public class CalendarFolderStorage implements SubfolderListingFolderStorage {
         return calendarAccess;
     }
 
-    private Folder[] getFolders(String treeId, List<AccountAwareCalendarFolder> calendarFolders) {
+    private Folder[] getSubFolders(String treeId, List<AccountAwareCalendarFolder> calendarFolders) {
         if (null == calendarFolders || 0 == calendarFolders.size()) {
             return new Folder[0];
         }

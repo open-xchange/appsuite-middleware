@@ -17,6 +17,14 @@
           type: string
       - $ref: '#/components/parameters/gblQueryParamFolderColumns'
       - $ref: '#/components/parameters/gblQueryParamLanguage'
+      - in: query
+        name: all
+        description: >-
+          Whether or not to include subscribed folders.
+        required: false
+        schema:
+          type: boolean
+          default: false
     responses:
       '200':
         description: >

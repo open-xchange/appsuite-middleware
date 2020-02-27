@@ -51,6 +51,7 @@ package com.openexchange.folderstorage;
 
 import static com.openexchange.chronos.provider.CalendarCapability.getCapabilities;
 import static com.openexchange.chronos.provider.CalendarCapability.getCapabilityNames;
+import static com.openexchange.java.Autoboxing.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -63,6 +64,7 @@ import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.CalendarPermission;
 import com.openexchange.chronos.provider.DefaultCalendarPermission;
+import com.openexchange.chronos.provider.UsedForSync;
 import com.openexchange.chronos.provider.groupware.DefaultGroupwareCalendarFolder;
 import com.openexchange.chronos.provider.groupware.GroupwareCalendarFolder;
 import com.openexchange.chronos.provider.groupware.GroupwareFolderType;
@@ -120,7 +122,8 @@ public class CalendarFolderConverter {
         folder.setLastModified(calendarFolder.getLastModified());
         folder.setName(calendarFolder.getName());
         folder.setPermissions(getStoragePermissions(calendarFolder.getPermissions()));
-        folder.setSubscribed(calendarFolder.isSubscribed());
+        folder.setSubscribed(null == calendarFolder.isSubscribed() || b(calendarFolder.isSubscribed()));
+        folder.setUsedForSync(getStorageUsedForSync(calendarFolder.getUsedForSync()));
         folder.setSubfolderIDs(new String[0]);
         folder.setSubscribedSubfolders(false);
         folder.setProperty(EXTENDED_PROPERTIES_FIELD, calendarFolder.getExtendedProperties());
@@ -224,6 +227,16 @@ public class CalendarFolderConverter {
         }
         return permissions;
     }
+    
+    /**
+     * Converts the calendar used-for-sync settings into its folder-storage compatible counterpart.
+     *
+     * @param usedForSync The calendar used-for-sync to convert
+     * @return The folder-storage compatible used-for-sync
+     */
+    public static com.openexchange.folderstorage.UsedForSync getStorageUsedForSync(UsedForSync usedForSync) {
+        return null == usedForSync ? null : new com.openexchange.folderstorage.UsedForSync(usedForSync.isUsedForSync(), usedForSync.isProtected());
+    }
 
     /**
      * Converts a calendar permission into a folder-storage compatible permission.
@@ -268,7 +281,14 @@ public class CalendarFolderConverter {
         calendarFolder.setExtendedProperties(optExtendedProperties(folder));
         calendarFolder.setAccountError(optAccountError(folder));
         calendarFolder.setSupportedCapabilites(getCapabilities(folder.getSupportedCapabilities()));
-        calendarFolder.setSubscribed(folder.isSubscribed());
+        if(folder instanceof SetterAwareFolder) {
+            if(((SetterAwareFolder) folder).containsSubscribed()) {
+                calendarFolder.setSubscribed(B(folder.isSubscribed()));
+            }
+        } else {
+            calendarFolder.setSubscribed(B(folder.isSubscribed()));
+        }
+        calendarFolder.setUsedForSync(getCalendarUsedForSync(folder.getUsedForSync()));
         calendarFolder.setMeta(folder.getMeta());
         return calendarFolder;
     }
@@ -342,6 +362,16 @@ public class CalendarFolderConverter {
             calendarPermissions.add(getCalendarPermission(permission));
         }
         return calendarPermissions;
+    }
+
+    /**
+     * Converts the folder-storage's used-for-sync settings into its calendar provider compatible counterpart.
+     *
+     * @param usedForSync The storage folder's used-for-sync to convert
+     * @return The calendar provider compatible used-for-sync
+     */
+    public static UsedForSync getCalendarUsedForSync(com.openexchange.folderstorage.UsedForSync usedForSync) {
+        return null == usedForSync ? null : new UsedForSync(usedForSync.isUsedForSync(), usedForSync.isProtected());
     }
 
     /**

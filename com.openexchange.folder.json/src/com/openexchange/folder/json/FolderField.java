@@ -165,6 +165,10 @@ public enum FolderField {
      */
     ORIGIN(320, "origin"),
     /**
+     * The folder's origin path
+     */
+    USED_FOR_SYNC(321, "used_for_sync"),
+    /**
      * The permissions bits
      */
     BITS(-1, "bits"),

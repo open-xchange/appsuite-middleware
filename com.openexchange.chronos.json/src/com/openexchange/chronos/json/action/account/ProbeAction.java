@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.json.action.account;
 
+import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.folderstorage.CalendarFolderConverter.CALENDAR_CONFIG_FIELD;
 import static com.openexchange.folderstorage.CalendarFolderConverter.CALENDAR_PROVIDER_FIELD;
 import static com.openexchange.folderstorage.CalendarFolderConverter.EXTENDED_PROPERTIES_FIELD;
@@ -59,6 +60,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.json.action.ChronosAction;
 import com.openexchange.chronos.json.oauth.ChronosOAuthScope;
+import com.openexchange.chronos.provider.CalendarFolderProperty;
 import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
@@ -101,8 +103,7 @@ public class ProbeAction extends ChronosAction {
          * parse & probe client-supplied calendar settings
          */
         CalendarSettings parsedSettings = parseSettings(jsonObject);
-        CalendarSettings proposedSettings = services.getService(CalendarAccountService.class).probeAccountSettings(
-            calendarAccess.getSession(), providerId, parsedSettings, calendarAccess);
+        CalendarSettings proposedSettings = services.getService(CalendarAccountService.class).probeAccountSettings(calendarAccess.getSession(), providerId, parsedSettings, calendarAccess);
         /*
          *  return appropriate result
          */
@@ -146,9 +147,14 @@ public class ProbeAction extends ChronosAction {
                 jsonObject.put(CALENDAR_CONFIG_FIELD.getName(), CALENDAR_CONFIG_FIELD.write(property));
             }
             if (settings.containsExtendedProperties()) {
-                FolderProperty property = new FolderProperty(EXTENDED_PROPERTIES_FIELD.getName(), settings.getExtendedProperties());
+                ExtendedProperties clone = (ExtendedProperties) settings.getExtendedProperties().clone();
+                settings.getUsedForSync().ifPresent((ufs) -> {
+                    clone.add(CalendarFolderProperty.USED_FOR_SYNC(B(ufs.isUsedForSync()), ufs.isProtected()));
+                });
+                FolderProperty property = new FolderProperty(EXTENDED_PROPERTIES_FIELD.getName(), clone);
                 jsonObject.put(EXTENDED_PROPERTIES_FIELD.getName(), EXTENDED_PROPERTIES_FIELD.write(property));
             }
+
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }

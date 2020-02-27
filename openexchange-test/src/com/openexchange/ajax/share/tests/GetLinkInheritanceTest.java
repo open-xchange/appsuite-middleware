@@ -287,7 +287,7 @@ public class GetLinkInheritanceTest extends AbstractAPIClientSession {
      * @throws ApiException
      */
     private String findInfostoreRoot() throws ApiException {
-        FoldersVisibilityData allFolders = folderManager.getAllFolders("infostore", "1,20,300,301,302");
+        FoldersVisibilityData allFolders = folderManager.getAllFolders("infostore", "1,20,300,301,302", Boolean.TRUE);
         Object folders = allFolders.getPublic();
         assertNotNull(folders);
         @SuppressWarnings("unchecked") List<List<?>> folderArray = (List<List<?>>) folders;

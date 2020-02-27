@@ -470,6 +470,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
      * @param options The options to respect for this check
      * @return <code>null</code> if the folder name does not or no longer conflict due to auto-rename, or the conflicting reserved folder name, otherwise
      */
+    @SuppressWarnings("unused")
     protected String checkForReservedName(String treeId, String targetFolderId, Folder folderToSave, ContentType contentType, CheckOptions options) throws OXException {
         if (false == check4Duplicates || null == folderToSave.getName() ||
             InfostoreContentType.getInstance().toString().equals(contentType.toString())) {

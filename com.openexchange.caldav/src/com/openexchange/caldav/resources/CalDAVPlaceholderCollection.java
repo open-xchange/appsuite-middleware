@@ -49,7 +49,6 @@
 
 package com.openexchange.caldav.resources;
 
-import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_SYNC;
 import static com.openexchange.dav.DAVProtocol.protocolException;
 import static com.openexchange.folderstorage.CalendarFolderConverter.CALENDAR_PROVIDER_FIELD;
 import java.util.Collection;
@@ -118,7 +117,7 @@ public class CalDAVPlaceholderCollection<T> extends CalDAVFolderCollection<T> {
         folderToCreate.setName(url.name());
         folderToCreate.getMeta().put("resourceName", getUrl().name());
         folderToCreate.setTreeID(treeID);
-        CalendarFolderConverter.setExtendedProperty(folderToCreate, USED_FOR_SYNC(Boolean.TRUE, false));
+        folderToCreate.setSubscribed(true);
     }
 
     @Override

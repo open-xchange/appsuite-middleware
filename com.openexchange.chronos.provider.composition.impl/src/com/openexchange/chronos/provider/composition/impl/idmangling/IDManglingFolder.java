@@ -56,6 +56,7 @@ import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.provider.CalendarCapability;
 import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.CalendarPermission;
+import com.openexchange.chronos.provider.UsedForSync;
 import com.openexchange.exception.OXException;
 
 /**
@@ -92,7 +93,7 @@ public class IDManglingFolder implements CalendarFolder {
     }
 
     @Override
-    public boolean isSubscribed() {
+    public Boolean isSubscribed() {
         return delegate.isSubscribed();
     }
 
@@ -124,6 +125,11 @@ public class IDManglingFolder implements CalendarFolder {
     @Override
     public String toString() {
         return "IDManglingFolder [newId=" + newId + ", delegate=" + delegate + "]";
+    }
+
+    @Override
+    public UsedForSync getUsedForSync() {
+        return delegate.getUsedForSync();
     }
 
 }

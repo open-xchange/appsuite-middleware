@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,81 +47,52 @@
  *
  */
 
-package com.openexchange.dav.internal;
+package com.openexchange.tools.oxfolder.property.impl;
 
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.folderstorage.AbstractFolder;
-import com.openexchange.folderstorage.FolderField;
-import com.openexchange.folderstorage.FolderProperty;
-import com.openexchange.folderstorage.ParameterizedFolder;
-import com.openexchange.folderstorage.SetterAwareFolder;
-import com.openexchange.folderstorage.UsedForSync;
+import java.sql.Connection;
+import com.openexchange.exception.OXException;
+import com.openexchange.folder.FolderDeleteListenerService;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.delete.DeleteEvent;
+import com.openexchange.groupware.delete.DeleteListener;
 
 /**
- * {@link FolderUpdate}
+ * {@link FolderUserPropertyDeleteListener}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.10.0
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.4
  */
-public class FolderUpdate extends AbstractFolder implements ParameterizedFolder, SetterAwareFolder {
+public class FolderUserPropertyDeleteListener implements FolderDeleteListenerService, DeleteListener {
 
-    private static final long serialVersionUID = -367640273380922433L;
-
-    private final Map<FolderField, FolderProperty> properties;
-
-    private boolean containsSubscribed;
-    private boolean containsUsedForSync;
+    private final RdbFolderUserPropertyStorage storage;
 
     /**
-     * Initializes a new {@link FolderUpdate}.
+     * Initializes a new {@link FolderUserPropertyDeleteListener}.
      */
-    public FolderUpdate() {
+    public FolderUserPropertyDeleteListener(RdbFolderUserPropertyStorage storage) {
         super();
-        subscribed = true;
-        usedForSync = UsedForSync.DEFAULT;
-        this.properties = new HashMap<FolderField, FolderProperty>();
+        this.storage = storage;
     }
 
     @Override
-    public boolean isGlobalID() {
-        return false;
+    public void onFolderDelete(int folderId, Context context) throws OXException {
+       storage.deleteFolderProperties(context.getContextId(), folderId);
     }
 
     @Override
-    public void setProperty(FolderField name, Object value) {
-        if (null == value) {
-            properties.remove(name);
-        } else {
-            properties.put(name, new FolderProperty(name.getName(), value));
+    public void deletePerformed(DeleteEvent event, Connection readCon, Connection writeCon) throws OXException {
+        switch(event.getType()) {
+            case DeleteEvent.TYPE_CONTEXT:
+                storage.deleteContextProperties(event.getId(), writeCon);
+                return;
+            case DeleteEvent.TYPE_USER:
+                storage.deleteUserProperties(event.getContext().getContextId(), event.getId(), writeCon);
+                return;
+            default:
+                // ignore other events
+                return;
         }
-    }
 
-    @Override
-    public Map<FolderField, FolderProperty> getProperties() {
-        return properties;
-    }
-
-    @Override
-    public void setSubscribed(boolean subscribed) {
-        super.setSubscribed(subscribed);
-        containsSubscribed = true;
-    }
-
-    @Override
-    public boolean containsSubscribed() {
-        return containsSubscribed;
-    }
-    
-    @Override
-    public void setUsedForSync(UsedForSync usedForSync) {
-        super.setUsedForSync(usedForSync);
-        containsUsedForSync=true;
-    }
-
-    @Override
-    public boolean containsUsedForSync() {
-        return containsUsedForSync;
     }
 
 }

@@ -276,6 +276,7 @@ import com.openexchange.textxtraction.TextXtractService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
 import com.openexchange.tools.oxfolder.GABRestorerRMIServiceImpl;
+import com.openexchange.tools.oxfolder.property.FolderSubscriptionHelper;
 import com.openexchange.tools.strings.StringParser;
 import com.openexchange.uadetector.UserAgentParser;
 import com.openexchange.uploaddir.UploadDirService;
@@ -692,6 +693,7 @@ public final class ServerActivator extends HousekeepingActivator {
         track(ObjectUseCountService.class, new ObjectUseCountServiceTracker(context));
         track(CalendarService.class, new RegistryCustomizer<CalendarService>(context, CalendarService.class));
         track(ICalService.class, new RegistryCustomizer<ICalService>(context, ICalService.class));
+        track(FolderSubscriptionHelper.class, new RegistryCustomizer<FolderSubscriptionHelper>(context, FolderSubscriptionHelper.class));
 
         CommonResultConverterRegistry resultConverterRegistry = new CommonResultConverterRegistry(context);
         track(ResultConverter.class, resultConverterRegistry);

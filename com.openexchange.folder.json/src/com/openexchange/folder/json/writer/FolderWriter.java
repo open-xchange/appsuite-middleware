@@ -85,6 +85,7 @@ import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.folderstorage.Type;
+import com.openexchange.folderstorage.UsedForSync;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
 import com.openexchange.groupware.container.FolderObject;
@@ -695,6 +696,17 @@ public final class FolderWriter {
                 jsonPutter.put(jsonPutter.withKey() ? FolderField.SUBSCR_SUBFLDS.getName() : null, null == obj ? JSONObject.NULL : Boolean.valueOf(obj.length > 0));
                  */
                 jsonPutter.put(jsonPutter.withKey() ? FolderField.SUBSCR_SUBFLDS.getName() : null, Boolean.valueOf(folder.hasSubscribedSubfolders()));
+            }
+        });
+        m.put(FolderField.USED_FOR_SYNC.getColumn(), new FolderFieldWriter() {
+
+            @Override
+            public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder, Map<String, Object> state, ServerSession session) throws JSONException {
+                JSONObject value = new JSONObject();
+                UsedForSync usedForSync = folder.getUsedForSync();
+                value.put("value", String.valueOf(usedForSync==null ? Boolean.TRUE : Boolean.valueOf(usedForSync.isUsedForSync())));
+                value.put("protected", String.valueOf(usedForSync==null ? Boolean.FALSE : Boolean.valueOf(usedForSync.isProtected())));
+                jsonPutter.put(jsonPutter.withKey() ? FolderField.USED_FOR_SYNC.getName() : null, value);
             }
         });
         // Capabilities

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,85 +47,58 @@
  *
  */
 
-package com.openexchange.chronos.provider;
+package com.openexchange.tools.oxfolder;
 
-import java.util.Date;
-import java.util.EnumSet;
+import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.List;
-import com.openexchange.chronos.ExtendedProperties;
+import java.util.Optional;
+import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.server.impl.DBPool;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.oxfolder.property.FolderSubscriptionHelper;
 
 /**
- * {@link CalendarFolder}
+ * {@link OXSubscribeAwareFolderSQL}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.10.0
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.4
  */
-public interface CalendarFolder {
+public class OXSubscribeAwareFolderSQL {
+
 
     /**
-     * Gets the identifier of the calendar folder.
+     * Gets all visible folders for the given module. Unsubscribed folders are ignored.
      *
-     * @return The folder identifier
+     * @param userId The user id
+     * @param memberInGroups The memberInGroups
+     * @param accessibleModules The accessible modules
+     * @param module The module to retrieve
+     * @param ctx The context
+     * @return A list of available folders in the given module
+     * @throws OXException
      */
-    String getId();
-
-    /**
-     * Gets the name of the calendar folder.
-     *
-     * @return The folder name
-     */
-    String getName();
-
-    /**
-     * Gets a value indicating whether the folder is actually subscribed or not.
-     *
-     * @return <code>true</code> if the folder is subscribed, <code>false</code>, otherwise
-     */
-    Boolean isSubscribed();
-
-    /**
-     * Gets a value indicating whether the folder is used for sync or not.
-     *
-     * @return the {@link UsedForSync} value
-     */
-    UsedForSync getUsedForSync();
-
-    /**
-     * Gets the last modification date of the calendar.
-     *
-     * @return The last modification date, or <code>null</code> if not defined
-     */
-    Date getLastModified();
-
-    /**
-     * Gets the permissions
-     *
-     * @return The permissions
-     */
-    List<CalendarPermission> getPermissions();
-
-    /**
-     * Gets the extended properties of the folder.
-     * <p/>
-     * See {@link CalendarFolderProperty} for a list of common folder properties evaluated by clients.
-     *
-     * @return The extended properties, or <code>null</code> if not defined
-     */
-    ExtendedProperties getExtendedProperties();
-
-    /**
-     * Gets the supported capabilities for a calendar access in this folder, describing the usable extended feature set.
-     *
-     * @return The supported calendar capabilities, or an empty set if no extended functionality is available
-     */
-    EnumSet<CalendarCapability> getSupportedCapabilites();
-
-    /**
-     * Gets a possible error in the underlying calendar account that prevents this calendar folder from operating normally.
-     *
-     * @return The account error, or <code>null</code> if there is none
-     */
-    OXException getAccountError();
+    public static List<FolderObject> getAllVisibleFoldersOfModule(final int userId, final int[] memberInGroups, final int[] accessibleModules, final int module, final Context ctx) throws OXException {
+        Connection con = DBPool.pickup(ctx);
+        SearchIterator<FolderObject> iter = OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(userId, memberInGroups, accessibleModules, module, ctx, con);
+        try {
+            List<FolderObject> result = new ArrayList<>();
+            while (iter.hasNext()) {
+                FolderObject folder = iter.next();
+                if (ServerServiceRegistry.getServize(FolderSubscriptionHelper.class, true).isSubscribed(Optional.ofNullable(con), ctx.getContextId(), userId, folder.getObjectID(), folder.getModule()).orElse(Boolean.TRUE) == Boolean.FALSE) {
+                    continue;
+                }
+                result.add(folder);
+            }
+            return result;
+        } finally {
+            iter.close();
+            Database.back(ctx.getContextId(), false, con);
+        }
+    }
 
 }

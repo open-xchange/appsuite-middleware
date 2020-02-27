@@ -49,8 +49,6 @@
 
 package com.openexchange.caldav.resources;
 
-import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_SYNC_LITERAL;
-import static com.openexchange.chronos.provider.CalendarFolderProperty.optPropertyValue;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -72,7 +70,6 @@ import com.openexchange.dav.resources.DAVCollection;
 import com.openexchange.dav.resources.DAVRootCollection;
 import com.openexchange.dav.resources.FolderCollection;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.CalendarFolderConverter;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
@@ -296,8 +293,8 @@ public class CalDAVRootCollection extends DAVRootCollection {
                 return false;
             }
         }
-        Object value = optPropertyValue(CalendarFolderConverter.getExtendedProperties(folder), USED_FOR_SYNC_LITERAL);
-        return null == value || Boolean.parseBoolean(String.valueOf(value));
+
+        return folder.isSubscribed() && folder.getUsedForSync().isUsedForSync();
     }
 
     /**

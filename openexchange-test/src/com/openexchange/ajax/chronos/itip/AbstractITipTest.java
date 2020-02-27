@@ -166,7 +166,7 @@ public abstract class AbstractITipTest extends AbstractChronosTest {
 
     protected EnhancedApiClient enhancedApiClientC2;
 
-    private List<TearDownOperation> operations = new LinkedList<>();
+    private final List<TearDownOperation> operations = new LinkedList<>();
 
     @Override
     public void setUp() throws Exception {

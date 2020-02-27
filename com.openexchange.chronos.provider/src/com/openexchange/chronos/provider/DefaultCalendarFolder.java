@@ -65,7 +65,8 @@ public class DefaultCalendarFolder implements CalendarFolder {
 
     private String id;
     private String name;
-    private boolean subscribed;
+    private Boolean subscribed;
+    private UsedForSync usedForSync;
     private Date lastModified;
     private List<CalendarPermission> permissions;
     private ExtendedProperties extendedProperties;
@@ -77,7 +78,8 @@ public class DefaultCalendarFolder implements CalendarFolder {
      */
     public DefaultCalendarFolder() {
         super();
-        subscribed = true;
+        subscribed = null;
+        usedForSync = UsedForSync.DEFAULT;
     }
 
     /**
@@ -94,6 +96,7 @@ public class DefaultCalendarFolder implements CalendarFolder {
         extendedProperties = folder.getExtendedProperties();
         supportedCapabilites = folder.getSupportedCapabilites();
         subscribed = folder.isSubscribed();
+        usedForSync = folder.getUsedForSync();
     }
 
     /**
@@ -127,12 +130,21 @@ public class DefaultCalendarFolder implements CalendarFolder {
     }
 
     @Override
-    public boolean isSubscribed() {
+    public Boolean isSubscribed() {
         return subscribed;
     }
 
-    public void setSubscribed(boolean subscribed) {
+    public void setSubscribed(Boolean subscribed) {
         this.subscribed = subscribed;
+    }
+
+    @Override
+    public UsedForSync getUsedForSync() {
+        return usedForSync;
+    }
+
+    public void setUsedForSync(UsedForSync usedForSync) {
+        this.usedForSync = usedForSync;
     }
 
     @Override

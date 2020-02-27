@@ -151,4 +151,10 @@ public class ExtendedProperties extends ArrayList<ExtendedProperty> {
         return add(e);
     }
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public Object clone() {
+        return new ExtendedProperties((ArrayList<ExtendedProperty>)super.clone());
+    }
+
 }
