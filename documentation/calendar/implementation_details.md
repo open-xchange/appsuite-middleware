@@ -425,7 +425,7 @@ While these are all change exception events from a technical point of view, user
 So, similarly as updates of the event data may get propagated, also an updated participation status of an attendee in the series master event may get applied to existing change exceptions under certain circumstances, which are: 
 
 - The original participation status of a change exception must be equal to the original participation status of the series master event
-- The change exception must not be a *real* exception from the series, i.e. it must not be considered as *re-scheduled* compared to the original occurrence
+- The change exception must not be a *real* exception from the series, i.e. it must not be considered as *re-scheduled* compared to the original occurrence. In particular, the following event fields are considered to distinguish between *real* and *synthetic* change exceptions: ``SUMMARY``, ``LOCATION``, ``DESCRIPTION``, ``ATTACHMENTS``, ``GEO``, ``ORGANIZER``, ``START_DATE``, ``END_DATE``, ``TRANSP``, ``RECURRENCE_RULE``. On top, any change in the attendee line-up (in terms of added or removed participants) qualifies an overridden instance as *real* exception.  
 
 If these preconditions are met, the updated participation status in the series master event is taken over in overridden instances, too. In the participation status update comes along with a certain comment, this attendee comment is also updated in overridden instances, if its value has been equal to the series master event before, too.
 
