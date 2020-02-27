@@ -1,3 +1,9 @@
+open-xchange-authorization-standard (7.10.3-7) stable; urgency=medium
+
+  * Build for patch 2020-03-02 (5623)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 27 Feb 2020 10:26:10 +0000
+
 open-xchange-authorization-standard (7.10.3-6) stable; urgency=medium
 
   * Build for patch 2020-02-19 (5588)
