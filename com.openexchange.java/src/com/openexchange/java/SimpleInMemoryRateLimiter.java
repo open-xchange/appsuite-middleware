@@ -181,7 +181,6 @@ public class SimpleInMemoryRateLimiter {
         private final ReentrantLock lock;
         private final Condition available;
         private Thread leader = null;
-        private long lastPolled;
 
         /**
          * Creates a new {@code Bucket} that is initially empty.
