@@ -245,7 +245,7 @@ public class EditCopy extends AbstractOpener {
             }
 
             // Add mail's inline images
-            if (TEXT_HTML == state.message.getContentType() && null != contentIds && !contentIds.isEmpty()) {
+            if (state.message.getContentType().isImpliesHtml() && null != contentIds && !contentIds.isEmpty()) {
                 InlineContentHandler inlineHandler = new InlineContentHandler(contentIds);
                 new MailMessageParser().setInlineDetectorBehavior(true).parseMailMessage(originalMail, inlineHandler);
                 Map<String, MailPart> inlineParts = inlineHandler.getInlineContents();
