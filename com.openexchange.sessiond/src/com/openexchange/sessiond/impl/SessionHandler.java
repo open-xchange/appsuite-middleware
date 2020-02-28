@@ -254,7 +254,7 @@ public final class SessionHandler {
          */
         final SessionStorageService storageService = Services.optService(SessionStorageService.class);
         if (null == storageService) {
-            LOG.info("Local removal of user sessions: User={}, Context={}", Integer.valueOf(userId), Integer.valueOf(contextId));
+            LOG.info("Local removal of user sessions: User={}, Context={}", I(userId), I(contextId));
             return retval;
         }
         Session[] retval2 = null;
@@ -270,7 +270,7 @@ public final class SessionHandler {
         } catch (RuntimeException e) {
             LOG.error("", e);
         }
-        LOG.info("Remote removal of user sessions: User={}, Context={}", Integer.valueOf(userId), Integer.valueOf(contextId));
+        LOG.info("Remote removal of user sessions: User={}, Context={}", I(userId), I(contextId));
         return merge(retval, retval2);
     }
 
@@ -501,10 +501,10 @@ public final class SessionHandler {
                 }
             } catch (TimeoutException e) {
                 future.cancel(true);
-                LOG.error("Executing callable {} on remote node {} took to longer than {} seconds and was aborted!", callable, member.getSocketAddress().toString(), Integer.valueOf(hzExecutionTimeout), e);
+                LOG.error("Executing callable {} on remote node {} took to longer than {} seconds and was aborted!", callable, member.getSocketAddress().toString(), I(hzExecutionTimeout), e);
             } catch (InterruptedException e) {
                 future.cancel(true);
-                LOG.error("Executing callable {} on remote node {} took to longer than {} seconds and was aborted!", callable, member.getSocketAddress().toString(), Integer.valueOf(hzExecutionTimeout), e);
+                LOG.error("Executing callable {} on remote node {} took to longer than {} seconds and was aborted!", callable, member.getSocketAddress().toString(), I(hzExecutionTimeout), e);
             } catch (ExecutionException e) {
                 future.cancel(true);
                 LOG.error("Executing callable {} on remote node {} failed!", callable, member.getSocketAddress().toString(), e.getCause());
@@ -561,7 +561,7 @@ public final class SessionHandler {
                     cs.loadContext(contextId);
                 } catch (OXException e) {
                     if (2 == e.getCode() && "CTX".equals(e.getPrefix())) { // See com.openexchange.groupware.contexts.impl.ContextExceptionCodes.NOT_FOUND
-                        LOG.info("No such context {}", Integer.valueOf(contextId));
+                        LOG.info("No such context {}", I(contextId));
                         return;
                     }
                 }
@@ -1102,10 +1102,10 @@ public final class SessionHandler {
 
                             @Override
                             public Integer call() throws Exception {
-                                return Integer.valueOf(storageService.getUserSessionCount(userId, contextId));
+                                return I(storageService.getUserSessionCount(userId, contextId));
                             }
                         };
-                        count = getFrom(c, Integer.valueOf(0)).intValue();
+                        count = getFrom(c, I(0)).intValue();
                         if (count >= maxSessPerUser) {
                             throw SessionExceptionCodes.MAX_SESSION_PER_USER_EXCEPTION.create(I(userId), I(contextId));
                         }
@@ -1821,10 +1821,10 @@ public final class SessionHandler {
     private static void postLastSessionGone(int userId, int contextId, EventAdmin eventAdmin) {
         if (eventAdmin != null) {
             Dictionary<String, Object> dic = new Hashtable<String, Object>(2);
-            dic.put(SessiondEventConstants.PROP_USER_ID, Integer.valueOf(userId));
-            dic.put(SessiondEventConstants.PROP_CONTEXT_ID, Integer.valueOf(contextId));
+            dic.put(SessiondEventConstants.PROP_USER_ID, I(userId));
+            dic.put(SessiondEventConstants.PROP_CONTEXT_ID, I(contextId));
             eventAdmin.postEvent(new Event(SessiondEventConstants.TOPIC_LAST_SESSION, dic));
-            LOG.debug("Posted event for last removed session for user {} in context {}", Integer.valueOf(userId), Integer.valueOf(contextId));
+            LOG.debug("Posted event for last removed session for user {} in context {}", I(userId), I(contextId));
 
             SessionData sessionData = SESSION_DATA_REF.get();
             if (null != sessionData) {
@@ -1838,9 +1838,9 @@ public final class SessionHandler {
     private static void postContextLastSessionGone(int contextId, EventAdmin eventAdmin) {
         if (eventAdmin != null) {
             Dictionary<String, Object> dic = new Hashtable<String, Object>(2);
-            dic.put(SessiondEventConstants.PROP_CONTEXT_ID, Integer.valueOf(contextId));
+            dic.put(SessiondEventConstants.PROP_CONTEXT_ID, I(contextId));
             eventAdmin.postEvent(new Event(SessiondEventConstants.TOPIC_LAST_SESSION_CONTEXT, dic));
-            LOG.debug("Posted event for last removed session for context {}", Integer.valueOf(contextId));
+            LOG.debug("Posted event for last removed session for context {}", I(contextId));
         }
     }
 
@@ -2070,7 +2070,7 @@ public final class SessionHandler {
                     postSessionStored(session);
                 }
             } catch (Exception e) {
-                LOG.warn("Failed to put session {} with Auth-Id {} into session storage (user={}, context={})", session.getSessionID(), session.getAuthId(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), e);
+                LOG.warn("Failed to put session {} with Auth-Id {} into session storage (user={}, context={})", session.getSessionID(), session.getAuthId(), I(session.getUserId()), I(session.getContextId()), e);
             }
             return null;
         }
@@ -2091,7 +2091,7 @@ public final class SessionHandler {
                 if (null == tmp) {
                     ConfigurationService service = Services.optService(ConfigurationService.class);
                     int defaultTimeout = 3000;
-                    tmp = Integer.valueOf(null == service ? defaultTimeout : service.getIntProperty("com.openexchange.sessiond.sessionstorage.timeout", defaultTimeout));
+                    tmp = I(null == service ? defaultTimeout : service.getIntProperty("com.openexchange.sessiond.sessionstorage.timeout", defaultTimeout));
                     timeout = tmp;
                 }
             }
