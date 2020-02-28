@@ -16,7 +16,7 @@ BuildRequires: java-1.8.0-openjdk-devel
 BuildRequires: open-xchange-core >= @OXVERSION@
 BuildRequires: pandoc >= 2.0.0
 Version:       @OXVERSION@
-%define        ox_release 7
+%define        ox_release 6
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -61,8 +61,6 @@ sed -i -e 's;%{buildroot};;' %{manlist}
 /opt/open-xchange/lib/com.openexchange.advertisement.clt.jar
 
 %changelog
-* Thu Feb 27 2020 Kevin Ruthmann <kevin.ruthmann@open-xchange.com>
-Build for patch 2020-03-02 (5623)
 * Wed Feb 12 2020 Kevin Ruthmann <kevin.ruthmann@open-xchange.com>
 Build for patch 2020-02-19 (5588)
 * Wed Feb 12 2020 Kevin Ruthmann <kevin.ruthmann@open-xchange.com>
