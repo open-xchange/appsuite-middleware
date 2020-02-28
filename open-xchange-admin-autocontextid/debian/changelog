@@ -1,3 +1,9 @@
+open-xchange-admin-autocontextid (7.10.3-7) stable; urgency=medium
+
+  * Build for patch 2020-03-02 (5623)
+
+ -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Fri, 28 Feb 2020 15:10:58 +0000
+
 open-xchange-admin-autocontextid (7.10.3-6) stable; urgency=medium
 
   * Build for patch 2020-02-19 (5588)

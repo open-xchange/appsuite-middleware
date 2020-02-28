@@ -16,7 +16,7 @@ BuildRequires: java-1.8.0-openjdk-devel
 %endif
 BuildRequires: pandoc >= 2.0.0
 Version:       @OXVERSION@
-%define        ox_release 6
+%define        ox_release 7
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -172,6 +172,8 @@ fi
 %doc com.openexchange.client.onboarding/doc/examples
 
 %changelog
+* Fri Feb 28 2020 Thorben Betten <thorben.betten@open-xchange.com>
+Build for patch 2020-03-02 (5623)
 * Wed Feb 12 2020 Thorben Betten <thorben.betten@open-xchange.com>
 Build for patch 2020-02-19 (5588)
 * Wed Feb 12 2020 Thorben Betten <thorben.betten@open-xchange.com>
