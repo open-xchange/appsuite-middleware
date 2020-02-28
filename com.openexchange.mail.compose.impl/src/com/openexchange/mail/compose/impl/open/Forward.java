@@ -233,57 +233,54 @@ public class Forward extends AbstractOpener {
                 }
             }
 
-            // Check if original mail may contain attachments
-            if (multipart) {
-                // Add mail's non-inline parts
-                {
-                    NonInlineForwardPartHandler handler = new NonInlineForwardPartHandler();
-                    if (null != contentIds && !contentIds.isEmpty()) {
-                        handler.setImageContentIds(contentIds);
-                    }
-                    new MailMessageParser().setInlineDetectorBehavior(true).parseMailMessage(forwardedMail, handler);
-                    List<MailPart> nonInlineParts = handler.getNonInlineParts();
-                    if (null != nonInlineParts && !nonInlineParts.isEmpty()) {
-                        state.attachmentStorage = getAttachmentStorage(session);
-                        state.attachments = new ArrayList<>(nonInlineParts.size());
-                        int i = 0;
-                        for (MailPart mailPart : nonInlineParts) {
-                            // Compile & store attachment
-                            AttachmentDescription attachment = AttachmentStorages.createAttachmentDescriptionFor(mailPart, i + 1, state.compositionSpaceId, session);
-                            Attachment partAttachment = AttachmentStorages.saveAttachment(mailPart.getInputStream(), attachment, session, state.attachmentStorage);
-                            state.attachments.add(partAttachment);
-                            i++;
-                        }
+            // Add mail's non-inline parts
+            {
+                NonInlineForwardPartHandler handler = new NonInlineForwardPartHandler();
+                if (null != contentIds && !contentIds.isEmpty()) {
+                    handler.setImageContentIds(contentIds);
+                }
+                new MailMessageParser().setInlineDetectorBehavior(true).parseMailMessage(forwardedMail, handler);
+                List<MailPart> nonInlineParts = handler.getNonInlineParts();
+                if (null != nonInlineParts && !nonInlineParts.isEmpty()) {
+                    state.attachmentStorage = getAttachmentStorage(session);
+                    state.attachments = new ArrayList<>(nonInlineParts.size());
+                    int i = 0;
+                    for (MailPart mailPart : nonInlineParts) {
+                        // Compile & store attachment
+                        AttachmentDescription attachment = AttachmentStorages.createAttachmentDescriptionFor(mailPart, i + 1, state.compositionSpaceId, session);
+                        Attachment partAttachment = AttachmentStorages.saveAttachment(mailPart.getInputStream(), attachment, session, state.attachmentStorage);
+                        state.attachments.add(partAttachment);
+                        i++;
                     }
                 }
+            }
 
-                // Add mail's inline images
-                if (TEXT_HTML == state.message.getContentType() && null != contentIds && !contentIds.isEmpty()) {
-                    InlineContentHandler inlineHandler = new InlineContentHandler(contentIds);
-                    new MailMessageParser().setInlineDetectorBehavior(true).parseMailMessage(originalMail, inlineHandler);
-                    Map<String, MailPart> inlineParts = inlineHandler.getInlineContents();
-                    if (null != inlineParts && !inlineParts.isEmpty()) {
-                        if (null == state.attachmentStorage) {
-                            state.attachmentStorage = getAttachmentStorage(session);
-                        }
-                        if (null == state.attachments) {
-                            state.attachments = new ArrayList<>(inlineParts.size());
-                        }
-
-                        Map<String, Attachment> inlineAttachments = new HashMap<String, Attachment>(inlineParts.size());
-                        int i = 0;
-                        for (Map.Entry<String, MailPart> inlineEntry : inlineParts.entrySet()) {
-                            // Compile & store attachment
-                            MailPart mailPart = inlineEntry.getValue();
-                            AttachmentDescription attachment = AttachmentStorages.createInlineAttachmentDescriptionFor(mailPart, inlineEntry.getKey(), i + 1, state.compositionSpaceId);
-                            Attachment partAttachment = AttachmentStorages.saveAttachment(mailPart.getInputStream(), attachment, session, state.attachmentStorage);
-                            state.attachments.add(partAttachment);
-                            inlineAttachments.put(inlineEntry.getKey(), partAttachment);
-                            i++;
-                        }
-
-                        state.message.setContent(CompositionSpaces.replaceCidInlineImages(state.message.getContent(), inlineAttachments, AttachmentImageDataSource.getInstance(), session));
+            // Add mail's inline images
+            if (multipart && state.message.getContentType().isImpliesHtml() && null != contentIds && !contentIds.isEmpty()) {
+                InlineContentHandler inlineHandler = new InlineContentHandler(contentIds);
+                new MailMessageParser().setInlineDetectorBehavior(true).parseMailMessage(originalMail, inlineHandler);
+                Map<String, MailPart> inlineParts = inlineHandler.getInlineContents();
+                if (null != inlineParts && !inlineParts.isEmpty()) {
+                    if (null == state.attachmentStorage) {
+                        state.attachmentStorage = getAttachmentStorage(session);
                     }
+                    if (null == state.attachments) {
+                        state.attachments = new ArrayList<>(inlineParts.size());
+                    }
+
+                    Map<String, Attachment> inlineAttachments = new HashMap<String, Attachment>(inlineParts.size());
+                    int i = 0;
+                    for (Map.Entry<String, MailPart> inlineEntry : inlineParts.entrySet()) {
+                        // Compile & store attachment
+                        MailPart mailPart = inlineEntry.getValue();
+                        AttachmentDescription attachment = AttachmentStorages.createInlineAttachmentDescriptionFor(mailPart, inlineEntry.getKey(), i + 1, state.compositionSpaceId);
+                        Attachment partAttachment = AttachmentStorages.saveAttachment(mailPart.getInputStream(), attachment, session, state.attachmentStorage);
+                        state.attachments.add(partAttachment);
+                        inlineAttachments.put(inlineEntry.getKey(), partAttachment);
+                        i++;
+                    }
+
+                    state.message.setContent(CompositionSpaces.replaceCidInlineImages(state.message.getContent(), inlineAttachments, AttachmentImageDataSource.getInstance(), session));
                 }
             }
         }
