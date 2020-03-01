@@ -1690,7 +1690,15 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     mail.setOriginalFolder(new FullnameArgument(accountId, origFolder));
                 }
                 mail.setMailId(Long.toString(msgUID));
-                mail.setUnreadMessages(numUnreadMessages >= 0 ? numUnreadMessages : IMAPCommandsCollection.getUnread(imapFolder));
+                if (numUnreadMessages >= 0) {
+                    mail.setUnreadMessages(numUnreadMessages);
+                } else {                    
+                    try {
+                        mail.setUnreadMessages(IMAPCommandsCollection.getUnread(imapFolder));
+                    } catch (Exception e) {
+                        LOG.error("Failed to retrieve count for unread/unseen messages from folder '{}'", fullName, e);
+                    }
+                }
             } catch (OXException e) {
                 if (MimeMailExceptionCode.MESSAGE_REMOVED.equals(e) || MailExceptionCode.MAIL_NOT_FOUND.equals(e) || MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.equals(e)) {
                     /*
