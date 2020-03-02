@@ -62,6 +62,7 @@ import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.java.Strings;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
@@ -384,7 +385,12 @@ public final class UnifiedInboxManagementImpl implements UnifiedInboxManagement 
 
     private static String getUserLogin(int userId, Context ctx) throws OXException {
         UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class, true);
-        return userService.getUser(userId, ctx).getLoginInfo();
+        String loginInfo = userService.getUser(userId, ctx).getLoginInfo();
+        if (Strings.isEmpty(loginInfo)) {
+            return loginInfo;
+        }
+        int pos = loginInfo.indexOf('@');
+        return pos > 0 ? loginInfo.substring(0, pos) : loginInfo;
     }
 
 }
