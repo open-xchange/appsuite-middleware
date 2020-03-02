@@ -55,6 +55,7 @@ import com.openexchange.drive.events.DriveEvent;
 import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
 import com.openexchange.drive.events.subscribe.Subscription;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.threadpool.AbstractTask;
 import com.turo.pushy.apns.ApnsClient;
@@ -130,7 +131,7 @@ public abstract class SubscriptionDeliveryTask extends AbstractTask<Void> {
             if (pushNotificationResponse.isAccepted()) {
                 LOG.debug("Push notification for drive event accepted by APNs gateway for device token: {}", subscription.getToken());
             } else {
-                if (pushNotificationResponse.getTokenInvalidationTimestamp() != null) {
+                if (pushNotificationResponse.getTokenInvalidationTimestamp() != null || isInvalidToken(pushNotificationResponse.getRejectionReason())) {
                     LOG.warn("Unsuccessful notification for drive event due to inactive or invalid device token: {}", subscription.getToken());
                     removeSubscription(subscription, services.getService(DriveSubscriptionStore.class));
                 } else {
@@ -140,6 +141,15 @@ public abstract class SubscriptionDeliveryTask extends AbstractTask<Void> {
         } catch (ExecutionException e) {
             LOG.warn("Failed to send push notification for drive event for device token {}", subscription.getToken(), e.getCause());
         }
+    }
+
+    // Checks if rejectionReason is because of invalid token
+    // see section 'Understand Error Codes' https://developer.apple.com/documentation/usernotifications/setting_up_a_remote_notification_server/handling_notification_responses_from_apns
+    private boolean isInvalidToken(String rejectionReason) {
+        if (Strings.isEmpty(rejectionReason)) {
+            return false;
+        }
+        return "BadDeviceToken".equals(rejectionReason) || "Unregistered".equals(rejectionReason);
     }
 
     private boolean removeSubscription(Subscription subscription, DriveSubscriptionStore subscriptionStore) {
