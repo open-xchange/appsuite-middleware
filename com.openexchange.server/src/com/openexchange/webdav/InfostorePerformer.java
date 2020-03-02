@@ -170,7 +170,6 @@ public final class InfostorePerformer implements SessionHolder {
             FolderObject.SYSTEM_INFOSTORE_FOLDER_ID);
 
 
-
         final InfostoreWebdavFactory infoFactory = new InfostoreWebdavFactory();
         final InfostoreFacadeImpl database = new EventFiringInfostoreFacadeImpl();
         infoFactory.setDatabase(database);

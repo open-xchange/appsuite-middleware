@@ -51,7 +51,7 @@ package com.openexchange.file.storage.infostore.internal;
 
 import java.io.InputStream;
 import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
@@ -63,7 +63,6 @@ import com.openexchange.groupware.infostore.DocumentAndMetadata;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.InfostoreFacade;
-import com.openexchange.groupware.infostore.InfostoreFolderPath;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.Results;
@@ -180,12 +179,12 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
     }
 
     @Override
-    public TimedResult<DocumentMetadata> getVersions(final int id, final Metadata[] columns, ServerSession session) {
+    public TimedResult<DocumentMetadata> getVersions(final long folderId, final int id, final Metadata[] columns, ServerSession session) {
         return Results.emptyTimedResult();
     }
 
     @Override
-    public TimedResult<DocumentMetadata> getVersions(final int id, final Metadata[] columns, final Metadata sort, final int order, ServerSession session) {
+    public TimedResult<DocumentMetadata> getVersions(final long folderId, final int id, final Metadata[] columns, final Metadata sort, final int order, ServerSession session) {
         return Results.emptyTimedResult();
     }
 
@@ -205,22 +204,22 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
     }
 
     @Override
-    public void removeDocument(final long folderId, final long date, final ServerSession session) throws OXException {
+    public void removeDocument(final long folderId, final long date, final ServerSession session, boolean hardDelete) throws OXException {
         virtualFolder();
     }
 
     @Override
-    public List<IDTuple> removeDocument(final List<IDTuple> ids, final long date, final ServerSession session) {
+    public List<IDTuple> removeDocument(final List<IDTuple> ids, final long date, final ServerSession session, boolean hardDelete) {
         return ids;
+    }
+
+    @Override
+    public IDTuple copyDocument(ServerSession session, IDTuple id, int version, DocumentMetadata update, Metadata[] modifiedFields, InputStream newFile, long sequenceNumber, String targetFolderID) throws OXException {
+        throw virtualFolder();
     }
 
     @Override
     public List<IDTuple> moveDocuments(ServerSession session, List<IDTuple> ids, long sequenceNumber, String targetFolderID, boolean adjustFilenamesAsNeeded) throws OXException {
-        return ids;
-    }
-
-    @Override
-    public List<IDTuple> moveDocuments(ServerSession session, List<IDTuple> ids, long sequenceNumber, String targetFolderID, boolean adjustFilenamesAsNeeded, Map<String, InfostoreFolderPath> originPath) throws OXException {
         return ids;
     }
 
@@ -374,12 +373,11 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
     }
 
     @Override
-    public List<IDTuple> restore(Map<String, List<IDTuple>> toRestore, ServerSession session) throws OXException {
-        List<IDTuple> tuples = new LinkedList<>();
-        for (Map.Entry<String, List<IDTuple>> entry : toRestore.entrySet()) {
-            tuples.addAll(entry.getValue());
+    public Map<IDTuple, String> restore(List<IDTuple> toRestore, long destFolderId, ServerSession session) throws OXException {
+        LinkedHashMap<IDTuple, String> ret = new LinkedHashMap<IDTuple, String>(toRestore.size());
+        for (IDTuple t : toRestore) {
+            ret.put(t, String.valueOf(destFolderId));
         }
-        return tuples;
+        return ret;
     }
-
 }

@@ -65,6 +65,7 @@ import org.junit.Before;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.framework.AbstractAPIClientSession;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.junit.Assert;
 import com.openexchange.testing.httpclient.invoker.ApiException;
@@ -75,6 +76,7 @@ import com.openexchange.testing.httpclient.models.InfoItemData;
 import com.openexchange.testing.httpclient.models.InfoItemListElement;
 import com.openexchange.testing.httpclient.models.InfoItemResponse;
 import com.openexchange.testing.httpclient.models.InfoItemUpdateResponse;
+import com.openexchange.testing.httpclient.models.InfoItemsMovedResponse;
 import com.openexchange.testing.httpclient.models.InfoItemsResponse;
 import com.openexchange.testing.httpclient.models.InfoItemsRestoreResponse;
 import com.openexchange.testing.httpclient.models.InfoItemsRestoreResponseData;
@@ -257,6 +259,22 @@ public class InfostoreApiClientTest extends AbstractAPIClientSession {
         assertEquals(0, arrayData.size());
     }
 
+    protected String copyInfoItem(String id, InfoItemData modifiedData) throws ApiException {
+        InfoItemUpdateResponse response = infostoreApi.copyInfoItem(getApiClient().getSession(), id, modifiedData, null);
+        Assert.assertNull(response.getError());
+        Assert.assertNotNull(response.getData());
+        timestamp = response.getTimestamp();
+        return response.getData();
+    }
+
+    protected List<String> moveInfoItems(String id, List<InfoItemListElement> toMove) throws ApiException {
+        InfoItemsMovedResponse response = infostoreApi.moveInfoItems(getApiClient().getSession(), id, toMove, null);
+        Assert.assertNull(response.getError());
+        Assert.assertNotNull(response.getData());
+        timestamp = response.getTimestamp();
+        return response.getData();
+    }
+
     protected List<InfoItemsRestoreResponseData> restoreInfoItems(List<InfoItemListElement> toRestore) throws ApiException {
         InfoItemsRestoreResponse restoredItems = infostoreApi.restoreInfoItemsFromTrash(getApiClient().getSession(), toRestore, null);
         Assert.assertNull(restoredItems.getError());
@@ -265,4 +283,17 @@ public class InfostoreApiClientTest extends AbstractAPIClientSession {
         return restoredItems.getData();
     }
 
+    protected void assertFileExistsInFolder(String folderId, String itemId) throws Exception {
+        InfoItemsResponse allInfoItems = infostoreApi.getAllInfoItems(getApiClient().getSession(),
+            folderId,
+            Integer.toString(Metadata.ID),
+            null,
+            null,
+            null,
+            null,
+            null,
+            null);
+        List<List<String>> ret = (List<List<String>>)checkResponse(allInfoItems.getError(), allInfoItems.getErrorDesc(), allInfoItems.getData());
+        Assert.assertTrue("The item is not present in the given folder", ret.stream().filter( l -> l.contains(itemId)).count() == 1);
+    }
 }

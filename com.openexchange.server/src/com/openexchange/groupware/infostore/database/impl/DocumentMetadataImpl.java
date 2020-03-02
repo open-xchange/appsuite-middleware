@@ -94,6 +94,16 @@ public class DocumentMetadataImpl extends DefaultDocumentMetadata {
 		}
 	}
 
+	public DocumentMetadataImpl(final DocumentMetadata dm, Metadata[] values) {
+	    this();
+		final SetSwitch setSwitch = new SetSwitch(this);
+		final GetSwitch getSwitch = new GetSwitch(dm);
+		for(final Metadata attr : values) {
+			setSwitch.setValue(attr.doSwitch(getSwitch));
+			attr.doSwitch(setSwitch);
+		}
+	}
+
 	@Override
 	public int hashCode(){
 		return getId();

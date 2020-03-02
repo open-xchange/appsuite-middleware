@@ -139,6 +139,8 @@ public class InfostoreExceptionMessages implements LocalizableStrings {
     // Your search took too long in order to be accomplished.
     public static final String SEARCH_TOOK_TOO_LONG_MSG_DISPLAY = "Your search took too long in order to be accomplished.";
 
+    // The folder you requested does not exist.
+    public static final String FOLDER_NOT_EXISTS_MSG = "The folder you requested does not exist.";
 
     private InfostoreExceptionMessages() {
         super();

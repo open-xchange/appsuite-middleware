@@ -60,9 +60,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import com.google.common.collect.Lists;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.Document;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
@@ -73,12 +71,10 @@ import com.openexchange.file.storage.FileStorageCountableFolderFileAccess;
 import com.openexchange.file.storage.FileStorageEfficientRetrieval;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageExtendedMetadata;
-import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageLockedFileAccess;
 import com.openexchange.file.storage.FileStorageMultiMove;
-import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.FileStoragePersistentIDs;
 import com.openexchange.file.storage.FileStorageRandomFileAccess;
 import com.openexchange.file.storage.FileStorageRangeFileAccess;
@@ -93,25 +89,19 @@ import com.openexchange.file.storage.infostore.InfostoreFile;
 import com.openexchange.file.storage.infostore.InfostoreSearchIterator;
 import com.openexchange.file.storage.infostore.ToInfostoreTermVisitor;
 import com.openexchange.file.storage.search.SearchTerm;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentAndMetadata;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
-import com.openexchange.groupware.infostore.InfostoreFolderPath;
 import com.openexchange.groupware.infostore.InfostoreSearchEngine;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
-import com.openexchange.java.Streams;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.User;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
 
 /**
  * {@link InfostoreAdapterFileAccess}
@@ -279,74 +269,8 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
 
     @Override
     public List<IDTuple> removeDocument(final List<IDTuple> ids, final long sequenceNumber, boolean hardDelete) throws OXException {
-        final int[] infostoreIDs = new int[ids.size()];
-        final Map<Integer, IDTuple> id2folder = new HashMap<>(ids.size());
-        for (int i = 0; i < infostoreIDs.length; i++) {
-            final IDTuple tuple = ids.get(i);
-            infostoreIDs[i] = ID(tuple.getId());
-            id2folder.put(Integer.valueOf(infostoreIDs[i]), tuple);
-        }
-        InfostoreFacade infostore = getInfostore(null);
-        List<IDTuple> conflicted = null;
-        if (hardDelete) {
-            /*
-             * perform hard-deletion independently of file's parent folders
-             */
-            conflicted = infostore.removeDocument(ids, sequenceNumber, session);
-        } else {
-            /*
-             * check for presence of trash folder
-             */
-            String trashFolderID = getTrashFolderID();
-            if (null == trashFolderID) {
-                /*
-                 * perform hard-deletion instead
-                 */
-                conflicted = infostore.removeDocument(ids, sequenceNumber, session);
-            } else {
-                /*
-                 * distinguish between files already in or below trash folder
-                 */
-                List<IDTuple> filesToDelete = new ArrayList<>();
-                List<IDTuple> filesToMove = new ArrayList<>();
-                Map<String, InfostoreFolderPath> originPaths = new HashMap<>();
-                String personalFolderId = getPersonalFolderID();
-                for (IDTuple tuple : ids) {
-                    String folderID = tuple.getFolder();
-                    if (isBelowTrashFolder(folderID, trashFolderID)) {
-                        filesToDelete.add(tuple);
-                    } else {
-                        filesToMove.add(tuple);
-                        InfostoreFolderPath originFolderPath = generateOriginPathIfTrashed(folderID, trashFolderID, personalFolderId);
-                        if (null != originFolderPath) {
-                            originPaths.put(tuple.getId(), originFolderPath);
-                        }
-                    }
-                }
-                /*
-                 * hard-delete already deleted files
-                 */
-                if (!filesToDelete.isEmpty()) {
-                    conflicted = infostore.removeDocument(filesToDelete, sequenceNumber, session);
-                }
-                /*
-                 * move other files to trash folder
-                 */
-                if (!filesToMove.isEmpty()) {
-                    List<IDTuple> conflicted2 = infostore.moveDocuments(session, filesToMove, sequenceNumber, trashFolderID, true, originPaths);
-                    if (null == conflicted || 0 == conflicted.size()) {
-                        conflicted = conflicted2;
-                    } else if (null != conflicted2 && 0 < conflicted2.size()) {
-                        List<IDTuple> temp = new ArrayList<>(conflicted.size() + conflicted2.size());
-                        temp.addAll(conflicted);
-                        temp.addAll(conflicted2);
-                        conflicted = temp;
-                    }
-                }
-            }
-        }
-
-        return conflicted;
+        final InfostoreFacade infostore = getInfostore(null);
+        return infostore.removeDocument(ids, sequenceNumber, session, hardDelete);
     }
 
     @Override
@@ -381,10 +305,7 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
     @Override
     public IDTuple saveDocument(final File file, final InputStream data, final long sequenceNumber) throws OXException {
         checkUrl(file);
-
         FileMetadata metadata = new FileMetadata(file);
-        addOriginPathIfNecessary(file, metadata);
-
         return getInfostore(file.getFolderId()).saveDocument(metadata, data, sequenceNumber, session);
     }
 
@@ -395,8 +316,6 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
         }
 
         FileMetadata metadata = new FileMetadata(file);
-        modifiedFields = addOriginPathIfNecessary(file, modifiedFields, metadata);
-
         return getInfostore(file.getFolderId()).saveDocument(metadata, data, sequenceNumber, FieldMapping.getMatching(modifiedFields), session);
     }
 
@@ -407,8 +326,6 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
         }
 
         FileMetadata metadata = new FileMetadata(file);
-        modifiedFields = addOriginPathIfNecessary(file, modifiedFields, metadata);
-
         return getInfostore(file.getFolderId()).saveDocument(metadata, data, sequenceNumber, FieldMapping.getMatching(modifiedFields), offset, session);
     }
 
@@ -419,8 +336,6 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
         }
 
         FileMetadata metadata = new FileMetadata(file);
-        modifiedFields = addOriginPathIfNecessary(file, modifiedFields, metadata);
-
         return getInfostore(file.getFolderId()).saveDocument(metadata, data, sequenceNumber, FieldMapping.getMatching(modifiedFields), ignoreVersion, session);
     }
 
@@ -431,18 +346,13 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
         }
 
         FileMetadata metadata = new FileMetadata(file);
-        modifiedFields = addOriginPathIfNecessary(file, modifiedFields, metadata);
-
         return getInfostore(file.getFolderId()).saveDocumentTryAddVersion(metadata, data, sequenceNumber, FieldMapping.getMatching(modifiedFields), session);
     }
 
     @Override
     public IDTuple saveFileMetadata(final File file, final long sequenceNumber) throws OXException {
         checkUrl(file);
-
         FileMetadata metadata = new FileMetadata(file);
-        addOriginPathIfNecessary(file, metadata);
-
         return getInfostore(file.getFolderId()).saveDocumentMetadata(metadata, sequenceNumber, session);
     }
 
@@ -453,93 +363,7 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
         }
 
         FileMetadata metadata = new FileMetadata(file);
-        modifiedFields = addOriginPathIfNecessary(file, modifiedFields, metadata);
-
         return getInfostore(file.getFolderId()).saveDocumentMetadata(metadata, sequenceNumber, FieldMapping.getMatching(modifiedFields), session);
-    }
-
-    private static final String INFOSTORE_FOLDER_ID = String.valueOf(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID);
-    private static final String USER_INFOSTORE_FOLDER_ID = String.valueOf(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID);
-    private static final String PUBLIC_INFOSTORE_FOLDER_ID = String.valueOf(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID);
-
-    private void addOriginPathIfNecessary(File file, FileMetadata metadata) throws OXException {
-        if (null == file.getOrigin() && FileStorageFileAccess.NEW != file.getId() && null != file.getFolderId() && isBelowTrashFolder(file.getFolderId(), null)) {
-            // File is supposed to be moved to a Trash folder
-            DocumentMetadata loaded = getInfostore(null).getDocumentMetadata(-1, metadata.getId(), metadata.getVersion(), session);
-            if (loaded.getFolderId() != metadata.getFolderId()) {
-                InfostoreFolderPath originPath = generateOriginPathIfTrashed(Long.toString(loaded.getFolderId()), null, null);
-                if (null != originPath) {
-                    metadata.setOriginFolderPath(originPath);
-                }
-            }
-        }
-    }
-
-    private List<Field> addOriginPathIfNecessary(File file, List<Field> modifiedFields, FileMetadata metadata) throws OXException {
-        List<Field> fieldsToReturn = modifiedFields;
-        if (fieldsToReturn.contains(Field.FOLDER_ID) && false == fieldsToReturn.contains(Field.ORIGIN)) {
-            // File's folder is supposed to be changed and no origin path is set
-            if (FileStorageFileAccess.NEW != file.getId() && null != file.getFolderId() && isBelowTrashFolder(file.getFolderId(), null)) {
-                // File is supposed to be moved to a Trash folder
-                DocumentMetadata loaded = getInfostore(null).getDocumentMetadata(-1, metadata.getId(), metadata.getVersion(), session);
-                if (loaded.getFolderId() != metadata.getFolderId()) {
-                    InfostoreFolderPath originPath = generateOriginPathIfTrashed(Long.toString(loaded.getFolderId()), null, null);
-                    if (null != originPath) {
-                        metadata.setOriginFolderPath(originPath);
-                        fieldsToReturn = Field.enhanceBy(fieldsToReturn, Field.ORIGIN);
-                    }
-                }
-            }
-        }
-        return fieldsToReturn;
-    }
-
-    private boolean isBelowTrashFolder(String folderId, String optTrashFolderId) throws OXException {
-        if (null == folderId) {
-            return false;
-        }
-
-        FileStorageFolderAccess folderAccess = getAccountAccess().getFolderAccess();
-        String rootFolderId = INFOSTORE_FOLDER_ID;
-        String trashFolderId = null == optTrashFolderId ? getTrashFolderID() : optTrashFolderId;
-        while (null != folderId) {
-            if (folderId.equals(trashFolderId)) {
-                return true;
-            }
-            if (folderId.equals(rootFolderId)) {
-                return false;
-            }
-            folderId = folderAccess.getFolder(folderId).getParentId();
-        }
-        return false;
-    }
-
-    private InfostoreFolderPath generateOriginPathIfTrashed(String oldFolderId, String optTrashFolderId, String optPersonalFolder) throws OXException {
-        FileStorageFolderAccess folderAccess = getAccountAccess().getFolderAccess();
-        String personalFolder = null == optPersonalFolder ? folderAccess.getPersonalFolder().getId() : optPersonalFolder;
-        String rootFolderId = INFOSTORE_FOLDER_ID;
-        String trashFolderId = null == optTrashFolderId ? getTrashFolderID() : optTrashFolderId;
-
-        List<String> result = null;
-        while (null != oldFolderId && false == rootFolderId.equals(oldFolderId)) {
-            if (trashFolderId.equals(oldFolderId)) {
-                // Obviously already located in/below Trash folder. No original path required.
-                return null;
-            }
-
-            FileStorageFolder folder = folderAccess.getFolder(oldFolderId);
-            if (null == result) {
-                result = new ArrayList<>(6);
-            }
-            if (oldFolderId.equals(USER_INFOSTORE_FOLDER_ID) || oldFolderId.equals(PUBLIC_INFOSTORE_FOLDER_ID) || oldFolderId.equals(personalFolder)) {
-                result.add(oldFolderId);
-                oldFolderId = null; // force termination of while loop
-            } else {
-                result.add(folder.getName());
-                oldFolderId = folder.getParentId();
-            }
-        }
-        return null == result ? null : InfostoreFolderPath.copyOf(Lists.reverse(result));
     }
 
     @Override
@@ -554,23 +378,13 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
 
     @Override
     public Delta<File> getDelta(final String folderId, final long updateSince, final List<Field> fields, final boolean ignoreDeleted) throws OXException {
-        List<Field> effectiveFields = fields;
-        if (Field.contains(effectiveFields, Field.ORIGIN) && false == isBelowTrashFolder(folderId, null)) {
-            effectiveFields = Field.reduceBy(effectiveFields, Field.ORIGIN);
-        }
-
-        final Delta<DocumentMetadata> delta = getInfostore(folderId).getDelta(FOLDERID(folderId), updateSince, FieldMapping.getMatching(effectiveFields), ignoreDeleted, session);
+        final Delta<DocumentMetadata> delta = getInfostore(folderId).getDelta(FOLDERID(folderId), updateSince, FieldMapping.getMatching(fields), ignoreDeleted, session);
         return new InfostoreDeltaWrapper(delta);
     }
 
     @Override
     public Delta<File> getDelta(final String folderId, final long updateSince, final List<Field> fields, final Field sort, final SortDirection order, final boolean ignoreDeleted) throws OXException {
-        List<Field> effectiveFields = fields;
-        if (Field.contains(effectiveFields, Field.ORIGIN) && false == isBelowTrashFolder(folderId, null)) {
-            effectiveFields = Field.reduceBy(effectiveFields, Field.ORIGIN);
-        }
-
-        final Delta<DocumentMetadata> delta = getInfostore(folderId).getDelta(FOLDERID(folderId), updateSince, FieldMapping.getMatching(effectiveFields), FieldMapping.getMatching(sort), FieldMapping.getSortDirection(order), ignoreDeleted, session);
+        final Delta<DocumentMetadata> delta = getInfostore(folderId).getDelta(FOLDERID(folderId), updateSince, FieldMapping.getMatching(fields), FieldMapping.getMatching(sort), FieldMapping.getSortDirection(order), ignoreDeleted, session);
         return new InfostoreDeltaWrapper(delta);
     }
 
@@ -609,23 +423,13 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
 
     @Override
     public TimedResult<File> getDocuments(final String folderId, final List<Field> fields) throws OXException {
-        List<Field> effectiveFields = fields;
-        if (Field.contains(effectiveFields, Field.ORIGIN) && false == isBelowTrashFolder(folderId, null)) {
-            effectiveFields = Field.reduceBy(effectiveFields, Field.ORIGIN);
-        }
-
-        final TimedResult<DocumentMetadata> documents = getInfostore(folderId).getDocuments(FOLDERID(folderId), FieldMapping.getMatching(effectiveFields), session);
+        final TimedResult<DocumentMetadata> documents = getInfostore(folderId).getDocuments(FOLDERID(folderId), FieldMapping.getMatching(fields), session);
         return new InfostoreTimedResult(documents);
     }
 
     @Override
     public TimedResult<File> getDocuments(final String folderId, final List<Field> fields, final Field sort, final SortDirection order) throws OXException {
-        List<Field> effectiveFields = fields;
-        if (Field.contains(effectiveFields, Field.ORIGIN) && false == isBelowTrashFolder(folderId, null)) {
-            effectiveFields = Field.reduceBy(effectiveFields, Field.ORIGIN);
-        }
-
-        final TimedResult<DocumentMetadata> documents = getInfostore(folderId).getDocuments(FOLDERID(folderId), FieldMapping.getMatching(effectiveFields), FieldMapping.getMatching(sort), FieldMapping.getSortDirection(order), session);
+        final TimedResult<DocumentMetadata> documents = getInfostore(folderId).getDocuments(FOLDERID(folderId), FieldMapping.getMatching(fields), FieldMapping.getMatching(sort), FieldMapping.getSortDirection(order), session);
         return new InfostoreTimedResult(documents);
     }
 
@@ -663,23 +467,13 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
 
     @Override
     public TimedResult<File> getVersions(final String folderId, final String id, List<Field> fields) throws OXException {
-        List<Field> effectiveFields = fields;
-        if (Field.contains(effectiveFields, Field.ORIGIN) && false == isBelowTrashFolder(folderId, null)) {
-            effectiveFields = Field.reduceBy(effectiveFields, Field.ORIGIN);
-        }
-
-        final TimedResult<DocumentMetadata> versions = getInfostore(folderId).getVersions(ID(id), FieldMapping.getMatching(effectiveFields), session);
+        final TimedResult<DocumentMetadata> versions = getInfostore(folderId).getVersions(FOLDERID(folderId), ID(id), FieldMapping.getMatching(fields), session);
         return new InfostoreTimedResult(versions);
     }
 
     @Override
     public TimedResult<File> getVersions(final String folderId, final String id, final List<Field> fields, final Field sort, final SortDirection order) throws OXException {
-        List<Field> effectiveFields = fields;
-        if (Field.contains(effectiveFields, Field.ORIGIN) && false == isBelowTrashFolder(folderId, null)) {
-            effectiveFields = Field.reduceBy(effectiveFields, Field.ORIGIN);
-        }
-
-        final TimedResult<DocumentMetadata> versions = getInfostore(folderId).getVersions(ID(id), FieldMapping.getMatching(effectiveFields), FieldMapping.getMatching(sort), FieldMapping.getSortDirection(order), session);
+        final TimedResult<DocumentMetadata> versions = getInfostore(folderId).getVersions(FOLDERID(folderId), ID(id), FieldMapping.getMatching(fields), FieldMapping.getMatching(sort), FieldMapping.getSortDirection(order), session);
         return new InfostoreTimedResult(versions);
     }
 
@@ -690,13 +484,8 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
 
     @Override
     public SearchIterator<File> search(final String pattern, final List<Field> fields, final String folderId, boolean includeSubfolders, final Field sort, final SortDirection order, final int start, final int end) throws OXException {
-        List<Field> effectiveFields = fields;
-        if (folderId != null && Field.contains(effectiveFields, Field.ORIGIN) && false == isBelowTrashFolder(folderId, null)) {
-            effectiveFields = Field.reduceBy(effectiveFields, Field.ORIGIN);
-        }
-
         int folder = (folderId == null) ? InfostoreSearchEngine.NO_FOLDER : Utils.parseUnsignedInt(folderId);
-        return new InfostoreSearchIterator(search.search(session, pattern, folder, includeSubfolders, getMatching(effectiveFields), getMatching(sort), getSortDirection(order), start, end));
+        return new InfostoreSearchIterator(search.search(session, pattern, folder, includeSubfolders, getMatching(fields), getMatching(sort), getSortDirection(order), start, end));
     }
 
     @Override
@@ -719,11 +508,6 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
 
     @Override
     public SearchIterator<File> search(String folderId, boolean includeSubfolders, SearchTerm<?> searchTerm, List<Field> fields, Field sort, SortDirection order, int start, int end) throws OXException {
-        List<Field> effectiveFields = fields;
-        if (folderId != null && Field.contains(effectiveFields, Field.ORIGIN) && false == isBelowTrashFolder(folderId, null)) {
-            effectiveFields = Field.reduceBy(effectiveFields, Field.ORIGIN);
-        }
-
         int fid;
         try {
             fid = Utils.parseUnsignedInt(folderId);
@@ -733,7 +517,7 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
 
         ToInfostoreTermVisitor visitor = new ToInfostoreTermVisitor();
         searchTerm.visit(visitor);
-        return new InfostoreSearchIterator(search.search(session, visitor.getInfostoreTerm(), fid, includeSubfolders, getMatching(effectiveFields), getMatching(sort), getSortDirection(order), start, end));
+        return new InfostoreSearchIterator(search.search(session, visitor.getInfostoreTerm(), fid, includeSubfolders, getMatching(fields), getMatching(sort), getSortDirection(order), start, end));
     }
 
     @Override
@@ -778,40 +562,11 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
 
     @Override
     public IDTuple copy(final IDTuple source, String version, final String destFolder, final File update, final InputStream newFile, final List<File.Field> modifiedFields) throws OXException {
-        InputStream in = newFile;
-        try {
-            final File orig = getFileMetadata(source.getFolder(), source.getId(), version);
-            if (in == null && orig.getFileName() != null) {
-                in = getDocument(source.getFolder(), source.getId(), version);
-            }
-            if (update != null) {
-                orig.copyFrom(update, modifiedFields.toArray(new File.Field[modifiedFields.size()]));
-                /*
-                 * remove creation date of original file so that the current time will be assigned during creation
-                 */
-                if (false == modifiedFields.contains(File.Field.CREATED)) {
-                    orig.setCreated(null);
-                }
-            }
-            orig.setId(NEW);
-            orig.setFolderId(destFolder);
-            orig.setObjectPermissions(null);
-            checkUrl(orig);
-            InfostoreFacade infostoreFacade = getInfostore(destFolder);
-            FileMetadata document = new FileMetadata(orig);
-            String trashFolderId = getTrashFolderID();
-            if (isBelowTrashFolder(destFolder, trashFolderId)) {
-                document.setOriginFolderPath(generateOriginPathIfTrashed(source.getFolder(), trashFolderId, null));
-            }
-            if (in == null) {
-                infostoreFacade.saveDocumentMetadata(document, UNDEFINED_SEQUENCE_NUMBER, session);
-            } else {
-                infostoreFacade.saveDocument(document, in, UNDEFINED_SEQUENCE_NUMBER, session);
-            }
-            return new IDTuple(destFolder, orig.getId());
-        } finally {
-            Streams.close(in);
-        }
+        InfostoreFacade infostoreFacade = getInfostore(destFolder);
+        Metadata[] modifiedColumns = FieldMapping.getMatching(modifiedFields);
+
+        FileMetadata updateDocument = null != update ? new FileMetadata(update) : null;
+        return infostoreFacade.copyDocument(session, source, null == version ? -1 : Utils.parseUnsignedInt(version), updateDocument, modifiedColumns, newFile, UNDEFINED_SEQUENCE_NUMBER, destFolder);
     }
 
     @Override
@@ -828,15 +583,6 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
 
         FileMetadata document = new FileMetadata(update);
         Metadata[] modifiedColumns = FieldMapping.getMatching(modifiedFields);
-
-        String trashFolderId = getTrashFolderID();
-        if (isBelowTrashFolder(destFolder, trashFolderId)) {
-            document.setOriginFolderPath(generateOriginPathIfTrashed(source.getFolder(), trashFolderId, null));
-            Metadata[] tmp = modifiedColumns;
-            modifiedColumns = new Metadata[tmp.length + 1];
-            System.arraycopy(tmp, 0, modifiedColumns, 0, tmp.length);
-            modifiedColumns[tmp.length] = Metadata.ORIGIN_LITERAL;
-        }
 
         getInfostore(update.getFolderId()).saveDocumentMetadata(document, sequenceNumber, modifiedColumns, session);
         return new IDTuple(update.getFolderId(), update.getId());
@@ -855,13 +601,10 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
             sameFolder = sources.get(i).getFolder().equals(sources.get(i - 1).getFolder());
         }
 
-        // Determine trash folder identifier
-        String trashFolderID = getTrashFolderID();
-
         // All in the same folder...
         if (sameFolder) {
             // ... yes
-            return doMove(sources.get(0).getFolder(), sources, destFolder, sequenceNumber, adjustFilenamesAsNeeded, trashFolderID);
+            return doMove(sources.get(0).getFolder(), sources, destFolder, sequenceNumber, adjustFilenamesAsNeeded);
         }
 
         // ... no, different folders. Split by folder identifiers,
@@ -878,226 +621,31 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
 
         List<IDTuple> retval = new ArrayList<>(size);
         for (Map.Entry<String, List<IDTuple>> filesInFolder : folder2ids.entrySet()) {
-            retval.addAll(doMove(filesInFolder.getKey(), filesInFolder.getValue(), destFolder, sequenceNumber, adjustFilenamesAsNeeded, trashFolderID));
+            retval.addAll(doMove(filesInFolder.getKey(), filesInFolder.getValue(), destFolder, sequenceNumber, adjustFilenamesAsNeeded));
         }
         return retval;
     }
 
-    private List<IDTuple> doMove(String folderId, List<IDTuple> filesInFolder, String destFolder, long sequenceNumber, boolean adjustFilenamesAsNeeded, String trashFolderID) throws OXException {
-        if (null == trashFolderID) {
-            return getInfostore(folderId).moveDocuments(session, filesInFolder, sequenceNumber, destFolder, adjustFilenamesAsNeeded);
-        }
-
-        if (!isBelowTrashFolder(destFolder, trashFolderID)) {
-            return getInfostore(folderId).moveDocuments(session, filesInFolder, sequenceNumber, destFolder, adjustFilenamesAsNeeded);
-        }
-
-        // Move to (sub-)trash folder
-        String personalFolderId = getPersonalFolderID();
-        Map<String, InfostoreFolderPath> originPaths = new HashMap<>(filesInFolder.size());
-        for (IDTuple tuple : filesInFolder) {
-            String folderID = tuple.getFolder();
-            InfostoreFolderPath originFolderPath = generateOriginPathIfTrashed(folderID, trashFolderID, personalFolderId);
-            if (null != originFolderPath) {
-                originPaths.put(tuple.getId(), originFolderPath);
-            }
-        }
-        return getInfostore(folderId).moveDocuments(session, filesInFolder, sequenceNumber, destFolder, adjustFilenamesAsNeeded, originPaths);
+    private List<IDTuple> doMove(String folderId, List<IDTuple> filesInFolder, String destFolder, long sequenceNumber, boolean adjustFilenamesAsNeeded) throws OXException {
+        return getInfostore(folderId).moveDocuments(session, filesInFolder, sequenceNumber, destFolder, adjustFilenamesAsNeeded);
     }
 
     @Override
     public Map<IDTuple, FileStorageFolder[]> restore(List<IDTuple> tuples, String destFolderId) throws OXException {
-        if (null == tuples || tuples.isEmpty()) {
-            return Collections.emptyMap();
-        }
-
-        // The result map
-        int size = tuples.size();
-        Map<IDTuple, FileStorageFolder[]> result = new LinkedHashMap<>(size);
-
-        // Check trash folder existence
-        String trashFolderID = getTrashFolderID();
-        if (null == trashFolderID) {
-            // Unable to restore w/o trash folder
-            for (IDTuple tuple : tuples) {
-                result.put(IDTuple.copy(tuple), null);
-            }
-            return result;
-        }
-
-        // Checks tuples to restore
-        for (IDTuple tuple : tuples) {
-            if (false == isBelowTrashFolder(tuple.getFolder(), trashFolderID)) {
-                throw FileStorageExceptionCodes.INVALID_FOLDER_IDENTIFIER.create("File does not reside in trash folder");
-            }
-        }
-
-        // Load origin paths
-        InfostoreFacade infostoreFacade = getInfostore(destFolderId);
-        TIntObjectMap<InfostoreFolderPath> originPaths;
-        if (size > 1) {
-            SearchIterator<DocumentMetadata> iterator = null;
-            try {
-                TimedResult<DocumentMetadata> documents = infostoreFacade.getDocuments(tuples, new Metadata[] { Metadata.ID_LITERAL, Metadata.ORIGIN_LITERAL, Metadata.FOLDER_ID_LITERAL }, session);
-                iterator = documents.results();
-                originPaths = new TIntObjectHashMap<>(size);
-                while (iterator.hasNext()) {
-                    DocumentMetadata metadata = iterator.next();
-                    InfostoreFolderPath originPath = metadata.getOriginFolderPath();
-                    if (null != originPath) {
-                        originPaths.put(metadata.getId(), originPath);
-                    }
-                }
-            } catch (IllegalAccessException e) {
-                throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-            } finally {
-                SearchIterators.close(iterator);
-            }
-        } else {
-            IDTuple tuple = tuples.get(0);
-            DocumentMetadata metadata = infostoreFacade.getDocumentMetadata(Utils.parseUnsignedLong(tuple.getFolder()), Utils.parseUnsignedInt(tuple.getId()), InfostoreFacade.CURRENT_VERSION, session);
-            InfostoreFolderPath originPath = metadata.getOriginFolderPath();
-            originPaths = new TIntObjectHashMap<>(1);
-            if (originPath != null) {
-                originPaths.put(metadata.getId(), originPath);
-            }
-        }
-
-        // Iterate tuples to restore
-        Map<String, List<IDTuple>> toRestore = new LinkedHashMap<>(size);
-        boolean[] pathRecreated = new boolean[] { false };
         FileStorageFolderAccess folderAccess = getAccountAccess().getFolderAccess();
-        String personalFolderId = null;
-        for (IDTuple tuple : tuples) {
-            InfostoreFolderPath originPath = originPaths.get(Utils.parseUnsignedInt(tuple.getId()));
-            if (null == originPath) {
-                originPath = InfostoreFolderPath.EMPTY_PATH;
-            }
-
-            String folderId;
-            try {
-                switch (originPath.getType()) {
-                    case PRIVATE:
-                        if (null == personalFolderId) {
-                            personalFolderId = folderAccess.getPersonalFolder().getId();
-                        }
-                        folderId = personalFolderId;
-                        break;
-                    case PUBLIC:
-                        folderId = PUBLIC_INFOSTORE_FOLDER_ID;
-                        break;
-                    case SHARED:
-                        folderId = USER_INFOSTORE_FOLDER_ID;
-                        break;
-                    case UNDEFINED: /*fall-through*/
-                    default:
-                        folderId = destFolderId;
-                        originPath = InfostoreFolderPath.EMPTY_PATH;
-                        break;
-                }
-                if (!originPath.isEmpty()) {
-                    pathRecreated[0] = false;
-                    for (String name : originPath.getPathForRestore()) {
-                        folderId = ensureFolderExistsForName(name, folderId, pathRecreated, folderAccess);
-                    }
-                }
-            } catch (OXException e) {
-                if (!"FLD".equals(e.getPrefix()) || 6 != e.getCode()) {
-                    throw e;
-                }
-
-                folderId = destFolderId;
-            }
-
-            List<IDTuple> tuplesToRestore = toRestore.get(folderId);
-            if (null == tuplesToRestore) {
-                tuplesToRestore = new ArrayList<>();
-                toRestore.put(folderId, tuplesToRestore);
-            }
-            tuplesToRestore.add(tuple);
-            FileStorageFolder[] restoredPath = folderAccess.getPath2DefaultFolder(folderId);
-            result.put(IDTuple.copy(tuple), restoredPath);
-        }
-
-        List<IDTuple> restoreResult = infostoreFacade.restore(toRestore, session);
-        for (IDTuple id : restoreResult) {
-            result.remove(id);
+        Map<IDTuple, String> restored = getInfostore(destFolderId).restore(tuples, FOLDERID(destFolderId), session);
+        Map<IDTuple, FileStorageFolder[]> result = new LinkedHashMap<>(restored.size());
+        for (Map.Entry<IDTuple, String> r : restored.entrySet()) {
+            FileStorageFolder[] restoredPath = r.getValue() != null ? folderAccess.getPath2DefaultFolder(r.getValue()) : null;
+            result.put(IDTuple.copy(r.getKey()), restoredPath);
         }
         return result;
     }
 
-    private String ensureFolderExistsForName(String name, String parentFolderId, boolean[] pathRecreated, FileStorageFolderAccess folderAccess) throws OXException {
-        if (false == pathRecreated[0]) {
-            FileStorageFolder[] sub = folderAccess.getSubfolders(parentFolderId, true);
-            for (int i = 0; i < sub.length; i++) {
-                FileStorageFolder f = sub[i];
-                if (f.getName().equals(name)) {
-                    return f.getId();
-                }
-            }
-        }
-
-        // Does no more exist; re-create the folder
-        List<FileStoragePermission> perms = folderAccess.getFolder(parentFolderId).getPermissions();
-        DefaultFileStorageFolder toCreate = new DefaultFileStorageFolder();
-        toCreate.setName(name);
-        toCreate.setParentId(parentFolderId);
-        if (null != perms && perms.size() > 0) {
-            for (FileStoragePermission perm : perms) {
-                toCreate.addPermission(perm);
-            }
-        }
-        String createdFolder = folderAccess.createFolder(toCreate);
-        pathRecreated[0] = true;
-        return createdFolder;
-    }
 
     @Override
     public List<Field> getSupportedFields() {
         // all supported
         return Arrays.asList(File.Field.values());
     }
-
-    /**
-     * Gets the ID of the trash folder.
-     *
-     * @return The trash folder ID, or <code>null</code> if not found
-     * @throws OXException
-     */
-    private String getTrashFolderID() throws OXException {
-        FileStorageFolderAccess folderAccess = getAccountAccess().getFolderAccess();
-        try {
-            FileStorageFolder trashFolder = folderAccess.getTrashFolder();
-            if (null != trashFolder) {
-                return trashFolder.getId();
-            }
-        } catch (OXException e) {
-            if (false == FileStorageExceptionCodes.NO_SUCH_FOLDER.equals(e)) {
-                throw e;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Gets the ID of the personal folder.
-     *
-     * @return The personal folder ID, or <code>null</code> if not found
-     * @throws OXException
-     */
-    private String getPersonalFolderID() throws OXException {
-        FileStorageFolderAccess folderAccess = getAccountAccess().getFolderAccess();
-        try {
-            FileStorageFolder personalFolder = folderAccess.getPersonalFolder();
-            if (null != personalFolder) {
-                return personalFolder.getId();
-            }
-        } catch (OXException e) {
-            if (false == FileStorageExceptionCodes.NO_SUCH_FOLDER.equals(e)) {
-                throw e;
-            }
-        }
-        return null;
-    }
-
 }
