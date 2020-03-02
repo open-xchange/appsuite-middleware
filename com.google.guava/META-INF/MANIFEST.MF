@@ -31,8 +31,8 @@ Export-Package: com.google.common.annotations;version="28.2.0",
  com.google.common.reflect;version="28.2.0";uses:="com.google.common.collect,com.google.common.io",
  com.google.common.util.concurrent;version="28.2.0";uses:="com.google.common.base,com.google.common.collect,com.google.common.util.concurrent.internal",
  com.google.common.xml;version="28.2.0";uses:="com.google.common.escape",
- com.google.errorprone.annotations;version="2.2.0",
- com.google.errorprone.annotations.concurrent;version="2.2.0"
+ com.google.errorprone.annotations;version="2.3.4",
+ com.google.errorprone.annotations.concurrent;version="2.3.4"
 Comment: Fix for bug 61029 Add errorprone to exported packages.
 Import-Package: javax.annotation;version="[3.0,4)";resolution:=optional,
  javax.crypto;resolution:=optional,
