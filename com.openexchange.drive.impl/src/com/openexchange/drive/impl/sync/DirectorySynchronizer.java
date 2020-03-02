@@ -89,7 +89,7 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion> {
 
     private Map<String, Set<String>> normalizedFilesnamesPerFolder;
 
-    public DirectorySynchronizer(SyncSession session, VersionMapper<DirectoryVersion> mapper) throws OXException {
+    public DirectorySynchronizer(SyncSession session, VersionMapper<DirectoryVersion> mapper) {
         super(session, mapper);
     }
 

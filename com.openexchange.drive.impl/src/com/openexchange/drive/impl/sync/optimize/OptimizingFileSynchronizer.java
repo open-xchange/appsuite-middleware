@@ -64,7 +64,7 @@ import com.openexchange.exception.OXException;
  */
 public class OptimizingFileSynchronizer extends FileSynchronizer {
 
-    public OptimizingFileSynchronizer(SyncSession session, VersionMapper<FileVersion> mapper, String path) throws OXException {
+    public OptimizingFileSynchronizer(SyncSession session, VersionMapper<FileVersion> mapper, String path) {
         super(session, mapper, path);
     }
 

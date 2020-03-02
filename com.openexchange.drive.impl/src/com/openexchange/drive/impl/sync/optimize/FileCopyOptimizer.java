@@ -275,7 +275,7 @@ public class FileCopyOptimizer extends FileActionOptimizer {
      * @param checksumsToQuery The checksums to construct the search term for
      * @return The search term, or <code>null</code> if supplied checksums were empty
      */
-    private static SearchTerm<?> getSearchTermForChecksums(List<String> checksumsToQuery) {
+    static SearchTerm<?> getSearchTermForChecksums(List<String> checksumsToQuery) {
         if (null == checksumsToQuery || 0 == checksumsToQuery.size()) {
             return null;
         } else if (1 == checksumsToQuery.size()) {

@@ -76,7 +76,7 @@ public abstract class AbstractJsonMetadata  {
      * @param session The sync session
      * @throws OXException
      */
-    protected AbstractJsonMetadata(SyncSession session) throws OXException {
+    protected AbstractJsonMetadata(SyncSession session) {
         super();
         this.session = session;
     }

@@ -97,7 +97,7 @@ public class DriveMetadata extends DefaultFile {
      * @param session The sync session
      * @param folder The folder to create the metadata for.
      */
-    public DriveMetadata(SyncSession session, FileStorageFolder folder) throws OXException {
+    public DriveMetadata(SyncSession session, FileStorageFolder folder) {
         this(session, folder, null);
     }
 
@@ -108,7 +108,7 @@ public class DriveMetadata extends DefaultFile {
      * @param folder The folder to create the metadata for
      * @param contentsSequenceNumber The sequence number for the folder's contents, or <code>null</code> if not available
      */
-    public DriveMetadata(SyncSession session, FileStorageFolder folder, Long contentsSequenceNumber) throws OXException {
+    public DriveMetadata(SyncSession session, FileStorageFolder folder, Long contentsSequenceNumber) {
         super();
         this.session = session;
         this.folder = folder;

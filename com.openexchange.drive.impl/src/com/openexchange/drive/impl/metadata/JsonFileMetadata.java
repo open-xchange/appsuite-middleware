@@ -95,9 +95,8 @@ public class JsonFileMetadata extends AbstractJsonMetadata {
      *
      * @param session The sync session
      * @param folder The file to create the metadata for
-     * @throws OXException
      */
-    public JsonFileMetadata(SyncSession session, File file) throws OXException {
+    public JsonFileMetadata(SyncSession session, File file) {
         super(session);
         this.file = file;
     }
@@ -205,7 +204,7 @@ public class JsonFileMetadata extends AbstractJsonMetadata {
         return jsonArray;
     }
 
-    private JSONObject getJSONFileVersion(File file) throws JSONException, OXException {
+    private JSONObject getJSONFileVersion(File file) throws JSONException {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("name", file.getFileName());
         jsonObject.put("file_size", file.getFileSize());
@@ -278,7 +277,7 @@ public class JsonFileMetadata extends AbstractJsonMetadata {
         return jsonArray;
     }
 
-    private JSONObject getJSONObjectPermission(FileStorageObjectPermission permission) throws JSONException, OXException {
+    private JSONObject getJSONObjectPermission(FileStorageObjectPermission permission) throws JSONException {
         JSONObject jsonObject = new JSONObject(4);
         jsonObject.put("entity", permission.getEntity());
         jsonObject.put("group", permission.isGroup());

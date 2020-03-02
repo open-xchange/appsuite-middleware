@@ -96,7 +96,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
     private FileStoragePermission folderPermission;
     private Set<String> normalizedDirectoryNames;
 
-    public FileSynchronizer(SyncSession session, VersionMapper<FileVersion> mapper, String path) throws OXException {
+    public FileSynchronizer(SyncSession session, VersionMapper<FileVersion> mapper, String path) {
         super(session, mapper);
         this.path = path;
     }

@@ -78,7 +78,7 @@ public abstract class FileActionOptimizer extends AbstractActionOptimizer<FileVe
         if (null == v1) {
             return null == v2;
         } else if (null == v2) {
-            return null == v1;
+            return false;
         } else {
             return null == v1.getName() ? null == v2.getName() : v1.getName().equals(v2.getName());
         }

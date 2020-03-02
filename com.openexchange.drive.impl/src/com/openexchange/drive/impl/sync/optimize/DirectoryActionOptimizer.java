@@ -77,7 +77,7 @@ public abstract class DirectoryActionOptimizer extends AbstractActionOptimizer<D
         if (null == v1) {
             return null == v2;
         } else if (null == v2) {
-            return null == v1;
+            return false;
         } else {
             return null == v1.getPath() ? null == v2.getPath() : v1.getPath().equals(v2.getPath());
         }

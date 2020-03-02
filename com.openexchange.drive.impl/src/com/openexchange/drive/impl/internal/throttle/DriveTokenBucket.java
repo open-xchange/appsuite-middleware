@@ -84,7 +84,7 @@ public class DriveTokenBucket implements TokenBucket {
      *
      * @throws OXException
      */
-    public DriveTokenBucket() throws OXException {
+    public DriveTokenBucket() {
         this(DriveConfig.getInstance().getMaxBandwidth(), DriveConfig.getInstance().getMaxBandwidthPerClient());
     }
 
@@ -95,7 +95,7 @@ public class DriveTokenBucket implements TokenBucket {
      * @param clientBytesPerSecond The allowed bytes per second and client, or <code>-1</code> if unlimited
      * @throws OXException
      */
-    public DriveTokenBucket(int overallBytesPerSecond, int clientBytesPerSecond) throws OXException {
+    public DriveTokenBucket(int overallBytesPerSecond, int clientBytesPerSecond) {
         super();
         /*
          * init client / overall bucket semaphores
@@ -177,7 +177,7 @@ public class DriveTokenBucket implements TokenBucket {
         return true;
     }
 
-    private void fillBuckets() {
+    void fillBuckets() {
         /*
          * release permits for overall bucket
          */
