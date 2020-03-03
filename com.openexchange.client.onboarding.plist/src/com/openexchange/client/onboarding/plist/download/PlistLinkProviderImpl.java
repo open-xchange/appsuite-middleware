@@ -49,11 +49,9 @@
 
 package com.openexchange.client.onboarding.plist.download;
 
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.rmi.server.UID;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import java.util.Optional;
 import com.google.common.io.BaseEncoding;
 import com.openexchange.client.onboarding.OnboardingExceptionCodes;
 import com.openexchange.client.onboarding.download.DownloadLinkProvider;
@@ -67,6 +65,7 @@ import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.user.UserService;
+import com.planetj.math.rabinhash.RabinHashFunction32;
 
 /**
  * {@link PlistLinkProviderImpl}
@@ -78,94 +77,47 @@ public class PlistLinkProviderImpl implements DownloadLinkProvider {
 
     private static final String USER_SECRET_ATTRIBUTE = "user_sms_link_secret";
     private static final String SERVLET_PATH = PListDownloadServlet.SERVLET_PATH;
-    private static final char SLASH = '/';
 
     private final ServiceLookup services;
 
+    /**
+     * Initializes a new {@link PlistLinkProviderImpl}.
+     *
+     * @param services The service look-up providing tracked OSGi services
+     */
     public PlistLinkProviderImpl(ServiceLookup services) {
         super();
         this.services = services;
     }
 
-    /**
-     * Retrieves the user's SMS-link-secret or creates one if none is available.
-     *
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @return The SMS-link-secret
-     * @throws OXException If SMS-link-secret cannot be returned
-     */
-    private String getOrCreateSecret(int userId, int contextId) throws OXException {
-        UserService userService = services.getService(UserService.class);
-        Context context = userService.getContext(contextId);
-
-        String secret = null;
-        try {
-            secret = userService.getUserAttribute(USER_SECRET_ATTRIBUTE, userId, context);
-        } catch (OXException ex) {
-            //do nothing
-        }
-        if (secret != null) {
-            return secret;
-        }
-
-        secret = new UID().toString();
-        userService.setUserAttribute(USER_SECRET_ATTRIBUTE, secret, userId, context);
-        return secret;
-    }
-
-    private char[] toHash(int userId, int contextId, String scenario, String device) throws OXException {
-        try {
-            String secret = getOrCreateSecret(userId, contextId);
-            String challenge = userId + contextId + device + scenario + secret;
-
-            MessageDigest md = MessageDigest.getInstance("SHA-1");
-            byte[] challengeBytes = challenge.getBytes("UTF-8");
-            md.update(challengeBytes, 0, challengeBytes.length);
-
-            byte[] sha1hash = md.digest();
-            return Strings.asHexChars(sha1hash);
-        } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
-            throw OnboardingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    private static byte[] toAsciiBytes(String s) {
-        int size = s.length();
-        byte[] bytes = new byte[size];
-        for (int i = size; i-- > 0;) {
-            bytes[i] = (byte) s.charAt(i);
-        }
-        return bytes;
-    }
+    private static final char SLASH = '/';
 
     @Override
     public String getLink(HostData hostData, int userId, int contextId, String scenario, String device) throws OXException {
-        StringBuilder url;
-        {
-            String serverUrl = (hostData.isSecure() ? "https://" : "http://") + hostData.getHost();
-            url = new StringBuilder(serverUrl).append(getServletPrefix()).append(SERVLET_PATH);
-        }
+        StringBuilder url = new StringBuilder(256);
+        url.append(hostData.isSecure() ? "https://" : "http://");
+        url.append(hostData.getHost());
+        url.append(getServletPrefix()).append(SERVLET_PATH);
 
         BaseEncoding encoder = BaseEncoding.base64().omitPadding();
         {
-            String userString = new String(encoder.encode(toAsciiBytes(Integer.toString(userId))));
+            String userString = encoder.encode(toAsciiBytes(Integer.toString(userId)));
             url.append(SLASH).append(userString);
         }
         {
-            String contextString = new String(encoder.encode(toAsciiBytes(Integer.toString(contextId))));
+            String contextString = encoder.encode(toAsciiBytes(Integer.toString(contextId)));
             url.append(SLASH).append(contextString);
         }
         {
-            String deviceString = new String(encoder.encode(device.getBytes(StandardCharsets.UTF_8)));
+            String deviceString = encoder.encode(device.getBytes(StandardCharsets.UTF_8));
             url.append(SLASH).append(deviceString);
         }
         {
-            String scenarioString = new String(encoder.encode(scenario.getBytes(StandardCharsets.UTF_8)));
+            String scenarioString = encoder.encode(scenario.getBytes(StandardCharsets.UTF_8));
             url.append(SLASH).append(scenarioString);
         }
         {
-            char[] challenge = toHash(userId, contextId, scenario, device);
+            String challenge = toHash(userId, contextId, scenario, device, true).get();
             url.append(SLASH).append(challenge);
         }
 
@@ -204,28 +156,73 @@ public class PlistLinkProviderImpl implements DownloadLinkProvider {
         }
     }
 
+    @Override
+    public boolean validateChallenge(int userId, int contextId, String scenario, String device, String challenge) throws OXException {
+        Optional<String> hash = toHash(userId, contextId, scenario, device, false);
+        return hash.isPresent() && hash.get().equals(challenge);
+    }
+
+    // ----------------------------------------------------- HELPERS ------------------------------------------------------------------------
+
     private String getServletPrefix() {
         DispatcherPrefixService prefixService = services.getService(DispatcherPrefixService.class);
         return prefixService == null ? DispatcherPrefixService.DEFAULT_PREFIX : prefixService.getPrefix();
     }
 
-    @Override
-    public boolean validateChallenge(int userId, int contextId, String scenario, String device, String challenge) throws OXException {
-        char[] hash = toHash(userId, contextId, scenario, device);
-
-        int n = hash.length;
-        if (n != challenge.length()) {
-            return false;
-        }
-
-        int i = 0;
-        while (n-- != 0) {
-            if (hash[i] != challenge.charAt(i)) {
-                return false;
+    private Optional<String> toHash(int userId, int contextId, String scenario, String device, boolean createSecretIfAbsent) throws OXException {
+        try {
+            String secret = getOrCreateSecret(userId, contextId, createSecretIfAbsent);
+            if (secret == null) {
+                return Optional.empty();
             }
-            i++;
+
+            String challenge = userId + contextId + device + scenario + secret;
+
+            int hash = Math.abs(RabinHashFunction32.DEFAULT_HASH_FUNCTION.hash(challenge));
+            return Optional.of(Integer.toString(hash));
+        } catch (OXException e) {
+            throw e;
+        } catch (Exception e) {
+            throw OnboardingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
-        return true;
+    }
+
+    /**
+     * Retrieves the user's SMS-link-secret or creates one if none is available (provided that <code>createIfAbsent</code> is <code>true</code>).
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param createIfAbsent <code>true</code> to create a secret of absent; otherwise <code>false</code>
+     * @return The SMS-link-secret
+     * @throws OXException If SMS-link-secret cannot be returned
+     */
+    private String getOrCreateSecret(int userId, int contextId, boolean createIfAbsent) throws OXException {
+        UserService userService = services.getService(UserService.class);
+        Context context = userService.getContext(contextId);
+
+        // Read secret (if any)
+        String secret = null;
+        try {
+            secret = userService.getUserAttribute(USER_SECRET_ATTRIBUTE, userId, context);
+        } catch (OXException ex) {
+            //do nothing
+        }
+
+        // Create if absent
+        if (createIfAbsent && secret == null) {
+            secret = new UID().toString();
+            userService.setUserAttribute(USER_SECRET_ATTRIBUTE, secret, userId, context);
+        }
+        return secret;
+    }
+
+    private static byte[] toAsciiBytes(String s) {
+        int size = s.length();
+        byte[] bytes = new byte[size];
+        for (int i = size; i-- > 0;) {
+            bytes[i] = (byte) s.charAt(i);
+        }
+        return bytes;
     }
 
 }
