@@ -124,8 +124,10 @@ public class ResellerServiceImpl implements ResellerService {
     }
 
     private ResellerAdmin[] getData(final ResellerAdmin[] admins, Connection con) throws SQLException, OXException {
+        boolean connectionInit = false;
         if (con == null) {
             con = dbService.getReadOnly();
+            connectionInit = true;
         }
         PreparedStatement prep = null;
         ResultSet rs = null;
@@ -165,7 +167,9 @@ public class ResellerServiceImpl implements ResellerService {
             return ret.toArray(new ResellerAdmin[ret.size()]);
         } finally {
             Databases.closeSQLStuff(rs, prep);
-            dbService.backReadOnly(con);
+            if (connectionInit) {
+                dbService.backReadOnly(con);
+            }
         }
     }
 
