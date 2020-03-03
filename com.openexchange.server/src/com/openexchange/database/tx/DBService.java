@@ -303,33 +303,34 @@ public abstract class DBService implements TransactionAware, DBProviderUser, DBP
     }
 
     protected void perform(final UndoableAction action, final boolean dbTransaction) throws OXException {
-        try {
-            if (dbTransaction) {
+        if (dbTransaction) {
+            int rollback = 0;
+            try {
                 startDBTransaction();
-            }
-            action.perform();
-            if (dbTransaction) {
+                rollback = 1;
+                
+                action.perform();
+                
                 commitDBTransaction(action);
-            } else {
-                addUndoable(action);
-            }
-        } catch (OXException e) {
-            if (dbTransaction) {
-                try {
-                    rollbackDBTransaction();
-                } catch (OXException x) {
-                    log(x);
+                rollback = 2;
+            } finally {
+                if (rollback == 1) {
+                    try {
+                        rollbackDBTransaction();
+                    } catch (OXException x) {
+                        log(x);
+                    }
                 }
-            }
-            throw e;
-        } finally {
-            if (dbTransaction) {
+                
                 try {
                     finishDBTransaction();
                 } catch (OXException e) {
                     log(e);
                 }
             }
+        } else {
+            action.perform();
+            addUndoable(action);
         }
     }
 
