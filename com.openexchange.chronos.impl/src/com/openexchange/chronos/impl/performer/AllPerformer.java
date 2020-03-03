@@ -104,6 +104,8 @@ public class AllPerformer extends AbstractQueryPerformer {
     /** The synthetic identifier of the virtual 'all my events in public folders' calendar */
     private static final String VIRTUAL_ALL_PUBLIC = "allPublic";
 
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AllPerformer.class);
+
     /**
      * Initializes a new {@link AllPerformer}.
      *
@@ -222,6 +224,7 @@ public class AllPerformer extends AbstractQueryPerformer {
                     eventsForCalendarUser.addAll(eventsInFolder);
                     eventsPerFolder.put(folder, eventsInFolder);
                 } catch (OXException e) {
+                    LOG.debug("Error loading events for folder {}", folder, e);
                     resultsPerFolderId.put(folder.getId(), new DefaultEventsResult(e));
                 }
             }
@@ -234,7 +237,15 @@ public class AllPerformer extends AbstractQueryPerformer {
              * post process events per folder, based on each requested folder's perspective
              */
             for (Entry<CalendarFolder, List<Event>> eventsInFolder : eventsPerFolder.entrySet()) {
-                resultsPerFolderId.put(eventsInFolder.getKey().getId(), postProcessor.process(eventsInFolder.getValue(), eventsInFolder.getKey()).getEventsResult());
+                CalendarFolder folder = eventsInFolder.getKey();
+                try {
+                    resultsPerFolderId.put(folder.getId(), postProcessor.process(eventsInFolder.getValue(), folder).getEventsResult());
+                } catch (OXException e) {
+                    LOG.debug("Error loading events for folder {}", folder, e);
+                    resultsPerFolderId.put(folder.getId(), new DefaultEventsResult(e));
+                } finally {
+                    postProcessor.reset();
+                }
                 Check.resultSizeNotExceeded(getSelfProtection(), resultsPerFolderId, requestedFields);
             }
         }
