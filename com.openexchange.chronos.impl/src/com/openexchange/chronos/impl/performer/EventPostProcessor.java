@@ -65,6 +65,7 @@ import static com.openexchange.chronos.impl.Utils.getFrom;
 import static com.openexchange.chronos.impl.Utils.getTimeZone;
 import static com.openexchange.chronos.impl.Utils.getUntil;
 import static com.openexchange.chronos.impl.Utils.isResolveOccurrences;
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -106,6 +107,8 @@ import com.openexchange.tools.arrays.Arrays;
  * @since v7.10.0
  */
 public class EventPostProcessor {
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(EventPostProcessor.class);
 
     private final CalendarSession session;
     private final CalendarStorage storage;
@@ -381,18 +384,26 @@ public class EventPostProcessor {
                 /*
                  * add resolved occurrences; no need to apply individual exception dates here, as a removed attendee can only occur in exceptions
                  */
-                if (events.addAll(resolveOccurrences(event))) {
-                    maximumTimestamp = Math.max(maximumTimestamp, event.getTimestamp());
-                    return true;
+                try {
+                    if (events.addAll(resolveOccurrences(event))) {
+                        maximumTimestamp = Math.max(maximumTimestamp, event.getTimestamp());
+                        return true;
+                    }
+                } catch (OXException e) {
+                    LOG.warn("Unexpected error resolving occurrences for {}", event, e);
                 }
                 return false;
             }
             if (getFrom(session) != null && getUntil(session) != null) {
-                if (false == session.getRecurrenceService().iterateEventOccurrences(event, getFrom(session), getUntil(session)).hasNext()) {
-                    /*
-                     * exclude series master event if there are no occurrences in requested range
-                     */
-                    return false;
+                try {
+                    if (false == session.getRecurrenceService().iterateEventOccurrences(event, getFrom(session), getUntil(session)).hasNext()) {
+                        /*
+                         * exclude series master event if there are no occurrences in requested range
+                         */
+                        return false;
+                    }
+                } catch (OXException e) {
+                    LOG.warn("Unexpected error iterating recurrence data for {}", event, e);
                 }
             }
             /*
@@ -401,7 +412,11 @@ public class EventPostProcessor {
             maximumTimestamp = Math.max(maximumTimestamp, event.getTimestamp());
             if (null == requestedFields || Arrays.contains(requestedFields, EventField.CHANGE_EXCEPTION_DATES) || 
                 Arrays.contains(requestedFields, EventField.DELETE_EXCEPTION_DATES)) {
-                return events.add(applyExceptionDates(storage, event, folder.getCalendarUserId()));
+                try {
+                    return events.add(applyExceptionDates(storage, event, folder.getCalendarUserId()));
+                } catch (OXException e) {
+                    LOG.warn("Unexpected error applying userized exception dates for {} in {}", I(folder.getCalendarUserId()), event, e);
+                }
             }
             return events.add(event);
         }
@@ -439,7 +454,7 @@ public class EventPostProcessor {
         return events.add(event);
     }
 
-    protected EnumSet<EventFlag> getFlags(Event event, CalendarFolder folder) throws OXException {
+    protected EnumSet<EventFlag> getFlags(Event event, CalendarFolder folder) {
         /*
          * get default flags for event data & derive recurrence position info
          */
@@ -447,11 +462,15 @@ public class EventPostProcessor {
         if (isSeriesException(event)) {
             RecurrenceData recurrenceData = optRecurrenceData(event);
             if (null != recurrenceData) {
-                if (isLastOccurrence(event.getRecurrenceId(), recurrenceData, session.getRecurrenceService())) {
-                    flags.add(EventFlag.LAST_OCCURRENCE);
-                }
-                if (isFirstOccurrence(event.getRecurrenceId(), recurrenceData, session.getRecurrenceService())) {
-                    flags.add(EventFlag.FIRST_OCCURRENCE);
+                try {
+                    if (isLastOccurrence(event.getRecurrenceId(), recurrenceData, session.getRecurrenceService())) {
+                        flags.add(EventFlag.LAST_OCCURRENCE);
+                    }
+                    if (isFirstOccurrence(event.getRecurrenceId(), recurrenceData, session.getRecurrenceService())) {
+                        flags.add(EventFlag.FIRST_OCCURRENCE);
+                    }
+                } catch (OXException e) {
+                    LOG.warn("Unexpected error determining position in recurrence set for {} with {}", event, recurrenceData, e);
                 }
             }
         }
@@ -473,7 +492,7 @@ public class EventPostProcessor {
         return flags;
     }
 
-    private RecurrenceData optRecurrenceData(Event event) throws OXException {
+    private RecurrenceData optRecurrenceData(Event event) {
         String seriesId = event.getSeriesId();
         if (null == seriesId) {
             return null;
@@ -484,7 +503,12 @@ public class EventPostProcessor {
         RecurrenceData recurrenceData = knownRecurrenceData.get(seriesId);
         if (null == recurrenceData) {
             EventField[] fields = new EventField[] { EventField.RECURRENCE_RULE, EventField.START_DATE, EventField.RECURRENCE_DATES, EventField.CHANGE_EXCEPTION_DATES, EventField.DELETE_EXCEPTION_DATES };
-            Event seriesMaster = storage.getEventStorage().loadEvent(seriesId, fields);
+            Event seriesMaster = null;
+            try {
+                seriesMaster = storage.getEventStorage().loadEvent(seriesId, fields);
+            } catch (OXException e) {
+                LOG.warn("Unexpected error loading series master for {}", event, e);
+            }
             if (null != seriesMaster) {
                 recurrenceData = new DefaultRecurrenceData(seriesMaster);
                 knownRecurrenceData.put(seriesId, recurrenceData);
