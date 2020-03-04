@@ -54,6 +54,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -114,6 +115,7 @@ import com.openexchange.share.servlet.handler.HttpAuthShareHandler;
 import com.openexchange.share.servlet.handler.ResolvedShare;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
+import com.openexchange.tools.servlet.http.MIMEParse;
 import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
@@ -155,6 +157,9 @@ public class ICalHandler extends HttpAuthShareHandler {
      * The event fields being exported for event tombstones
      */
     private final static EventField[] EVENT_TOMBSTONE_FIELDS = { EventField.UID, EventField.TIMESTAMP, EventField.SEQUENCE, EventField.RECURRENCE_ID };
+
+    /** Mime types to check against the "Accept" request header */
+    private static final List<String> ICAL_TYPES = Arrays.asList("text/calendar", "text/iCal");
 
     private final ServiceLookup services;
 
@@ -517,7 +522,13 @@ public class ICalHandler extends HttpAuthShareHandler {
 
     private static boolean acceptsICal(HttpServletRequest request) {
         String acceptHeader = request.getHeader("Accept");
-        return "text/calendar".equals(acceptHeader) || "text/iCal".equals(acceptHeader);
+        if (Strings.isNotEmpty(acceptHeader)) {
+            float[] qualities = MIMEParse.qualities(ICAL_TYPES, acceptHeader);
+            if (1f == qualities[0] || 1f == qualities[1]) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static boolean indicatesICalClient(HttpServletRequest request) {
@@ -527,7 +538,8 @@ public class ICalHandler extends HttpAuthShareHandler {
             userAgentHeader.contains("Lightning") && userAgentHeader.contains("Thunderbird") ||
             userAgentHeader.contains("OutlookComCalendar") ||
             userAgentHeader.contains("Google-Calendar-Importer") ||
-            userAgentHeader.contains("org.dmfs.caldav.lib")
+            userAgentHeader.contains("org.dmfs.caldav.lib") ||
+            userAgentHeader.contains("ICSx5") || userAgentHeader.contains("ICSdroid") 
         );
     }
 
