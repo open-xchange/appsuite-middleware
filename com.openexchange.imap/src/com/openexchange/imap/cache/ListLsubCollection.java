@@ -2054,12 +2054,13 @@ final class ListLsubCollection implements Serializable {
             listResponse.skip(2);
         }
 
-        // Read full name; decode the name (using RFC2060's modified UTF7)
+        // Read full name
         listResponse.skipSpaces();
         String name;
         if (null == predefinedName) {
             name = listResponse.readAtomString();
             if (!listResponse.supportsUtf8()) {
+                // Decode the name (using RFC2060's modified UTF7)
                 name = BASE64MailboxDecoder.decode(name);
             }
         } else {
