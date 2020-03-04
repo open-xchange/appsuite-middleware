@@ -72,7 +72,7 @@ public class TaskCollection extends CalDAVFolderCollection<Task> {
 
     private static final int[] BASIC_COLUMNS = {
         Task.UID, Task.FILENAME, Task.FOLDER_ID, Task.OBJECT_ID, Task.PARTICIPANTS, Task.LAST_MODIFIED, Task.CREATION_DATE,
-        Task.CREATED_BY, Task.MODIFIED_BY
+        Task.CREATED_BY, Task.MODIFIED_BY, Task.RECURRENCE_TYPE
     };
 
     public TaskCollection(GroupwareCaldavFactory factory, WebdavPath url, UserizedFolder folder, int order) throws OXException {
