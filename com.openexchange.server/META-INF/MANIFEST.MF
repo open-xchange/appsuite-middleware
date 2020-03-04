@@ -5,11 +5,10 @@ Bundle-SymbolicName: com.openexchange.server
 Bundle-Version: 7.10.4
 Bundle-Activator: com.openexchange.server.osgi.ServerCompositeActivator
 Bundle-Vendor: OX Software GmbH
-Import-Package: com.adobe.xmp,
- com.adobe.xmp.impl,
- com.adobe.xmp.impl.xpath,
- com.adobe.xmp.options,
- com.adobe.xmp.properties,
+Import-Package: com.adobe.internal.xmp,
+ com.adobe.internal.xmp.options,
+ com.adobe.internal.xmp.properties,
+ com.adobe.internal.xmp.utils,
  com.davekoelle,
  com.drew.imaging,
  com.drew.imaging.avi,
