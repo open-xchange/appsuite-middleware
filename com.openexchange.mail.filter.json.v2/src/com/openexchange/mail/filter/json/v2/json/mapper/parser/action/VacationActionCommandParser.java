@@ -65,6 +65,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.common.base.CharMatcher;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.tools.alias.UserAliasUtility;
 import com.openexchange.java.Strings;
 import com.openexchange.jsieve.commands.ActionCommand;
 import com.openexchange.jsieve.commands.ActionCommand.Commands;
@@ -75,6 +76,7 @@ import com.openexchange.mail.filter.json.v2.json.mapper.parser.exceptions.Comman
 import com.openexchange.mail.filter.json.v2.mapper.ArgumentUtil;
 import com.openexchange.mail.json.parser.MessageParser;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
+import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -146,6 +148,9 @@ public class VacationActionCommandParser extends AbstractActionCommandParser {
             }
 
             if (Strings.isNotEmpty(from)) {
+                if(UserAliasUtility.isAlias(from, session.getUser().getAliases()) == false) {
+                    throw MailFilterExceptionCode.INVALID_SIEVE_RULE3.create();
+                }
                 arrayList.add(ArgumentUtil.createTagArgument(VacationActionField.from));
                 arrayList.add(CommandParserJSONUtil.stringToList(from));
             }
