@@ -12,6 +12,10 @@ local overviewRow = row.new(
   title='Overview'
 );
 
+local threadPoolRow = row.new(
+  title='ThreadPool'
+);
+
 local httpApiRow = row.new(
   title='HTTP API'
 );
@@ -20,8 +24,20 @@ local restApiRow = row.new(
   title='REST API'
 );
 
+local soapApiRow = row.new(
+  title='SOAP API'
+);
+
+local webdavApiRow = row.new(
+  title='WebDAV API'
+);
+
 local circuitBreakerRow = row.new(
   title='Circuit Breaker'
+);
+
+local dbRow = row.new(
+  title='DB'
 );
 
 local overviewTotalSessions = singlestat.new(
@@ -30,6 +46,13 @@ local overviewTotalSessions = singlestat.new(
   datasource='Prometheus',
   decimals=0,
   valueName='avg',
+  valueMaps=[
+    {
+      op: '=',
+      text: '0',
+      value: 'null',
+    },
+  ],
   sparklineShow=true
 ).addTarget(
   prometheus.target(
@@ -44,6 +67,13 @@ local overviewActiveSessions = singlestat.new(
   datasource='Prometheus',
   decimals=0,
   valueName='avg',
+  valueMaps=[
+    {
+      op: '=',
+      text: '0',
+      value: 'null',
+    },
+  ],
   sparklineShow=true
 ).addTarget(
   prometheus.target(
@@ -58,6 +88,13 @@ local overviewShortTermSessions = singlestat.new(
   datasource='Prometheus',
   decimals=0,
   valueName='avg',
+  valueMaps=[
+    {
+      op: '=',
+      text: '0',
+      value: 'null',
+    },
+  ],
   sparklineShow=true
 ).addTarget(
   prometheus.target(
@@ -72,6 +109,13 @@ local overviewLongTermSessions = singlestat.new(
   datasource='Prometheus',
   decimals=0,
   valueName='avg',
+  valueMaps=[
+    {
+      op: '=',
+      text: '0',
+      value: 'null',
+    },
+  ],
   sparklineShow=true
 ).addTarget(
   prometheus.target(
@@ -80,8 +124,56 @@ local overviewLongTermSessions = singlestat.new(
   )
 );
 
+local threadPoolTasks = graphPanel.new(
+  title='ThreadPool Tasks',
+  datasource='Prometheus',
+  description='',
+  decimals=0,
+  nullPointMode='null as zero',
+  labelY1='Tasks/s',
+  legend_alignAsTable=true,
+  legend_rightSide=true,
+  min='0'
+).addTarget(
+  prometheus.target(
+    'executor_queue_remaining_tasks{name="ox.executor.service",instance="$instance"}',
+    legendFormat='Remaining'
+  )
+).addTarget(
+  prometheus.target(
+    'executor_queued_tasks{name="ox.executor.service",instance="$instance"}',
+    legendFormat='Queued'
+  )
+).addTarget(
+  prometheus.target(
+    'rate(executor_completed_tasks_total{name="ox.executor.service",instance="$instance"}[5m])',
+    legendFormat='Completed'
+  )
+);
+
+local threadPool = graphPanel.new(
+  title='ThreadPool',
+  datasource='Prometheus',
+  description='',
+  labelY1='Threads',
+  nullPointMode='null as zero',
+  legend_alignAsTable=true,
+  legend_rightSide=true,
+  min='0'
+).addTarget(
+  prometheus.target(
+    'executor_active_threads{name="ox.executor.service",instance="$instance"}',
+    legendFormat='ActiveCount'
+  )
+).addTarget(
+  prometheus.target(
+    'executor_pool_size_threads{name="ox.executor.service",instance="$instance"}',
+    legendFormat='PoolSize'
+  )
+);
+
 local httpApiRequestsSeconds = graphPanel.new(
-  title='Latencies: Percentiles & Max',
+  title='Latencies: Percentiles, Avg & Max',
   description='HTTP API request times.',
   datasource='Prometheus',
   nullPointMode='null as zero',
@@ -119,6 +211,11 @@ local httpApiRequestsSeconds = graphPanel.new(
     'sum(appsuite_httpapi_requests_seconds_max{instance="$instance"})',
     legendFormat='max'
   )
+).addTarget(
+  prometheus.target(
+    'sum(rate(appsuite_httpapi_requests_seconds_sum{instance="$instance"}[5m]))/sum(rate(appsuite_httpapi_requests_seconds_count{instance="$instance"}[5m]))',
+    legendFormat='avg'
+  )
 );
 
 local httpApiRequestsPercentilesByAction = graphPanel.new(
@@ -126,6 +223,7 @@ local httpApiRequestsPercentilesByAction = graphPanel.new(
   description='',
   datasource='Prometheus',
   nullPointMode='null as zero',
+  legend_hideZero=true,
   min='0',
   format='s'
 ).addTarget(
@@ -140,6 +238,7 @@ local httpApiRequestsPercentilesByModule = graphPanel.new(
   description='',
   datasource='Prometheus',
   nullPointMode='null as zero',
+  legend_hideZero=true,
   min='0',
   format='s'
 ).addTarget(
@@ -257,6 +356,45 @@ local restApiRequestsByStatus = graphPanel.new(
   )
 );
 
+local circuitBreakerDenials = graphPanel.new(
+  title='Average Denials Rate (per-second)',
+  description='',
+  datasource='Prometheus',
+  nullPointMode='null as zero',
+  min='0',
+  labelY1='denials/s'
+).addTarget(
+  prometheus.target(
+    'rate(appsuite_circuit_breakers_denialsMeter_total{instance="$instance", protocol="imap"}[5m])',
+    legendFormat='{{protocol}}'
+  )
+).addTarget(
+  prometheus.target(
+    'rate(appsuite_circuit_breakers_denialsMeter_total{instance="$instance", protocol="mailfilter"}[5m])',
+    legendFormat='{{protocol}}'
+  )
+);
+
+local circuitBreakerRequestRate = graphPanel.new(
+  title='Average Error & Request Rate (per-second)',
+  description='',
+  datasource='Prometheus',
+  nullPointMode='null as zero',
+  min='0',
+  labelY1='event/s'
+).addTarget(
+  prometheus.target(
+    'sum(rate(appsuite_imap_requestRate_seconds_sum{instance="$instance"}[5m]) / rate(appsuite_imap_requestRate_seconds_count{instance="$instance"}[5m]))',
+    legendFormat='Requests'
+  )
+).addTarget(
+  prometheus.target(
+    'sum(rate(appsuite_imap_errorRate_total{instance="$instance"}[5m]))',
+    legendFormat='Errors'
+  )
+);
+
+
 local circuitBreakerIMAPStatus = table.new(
   title='IMAP Status',
   styles=[
@@ -276,6 +414,329 @@ local circuitBreakerIMAPStatus = table.new(
     'count(appsuite_circuit_breakers_status{protocol="imap"}) by (account, status)',
     format='table',
     instant=true
+  )
+);
+
+local soapApiRequestsByOperation = graphPanel.new(
+  title='Average Response Time (group by operation)',
+  description='',
+  datasource='Prometheus',
+  nullPointMode='null as zero',
+  min='0',
+  format='s'
+).addTarget(
+  prometheus.target(
+    'sum(rate(appsuite_soapapi_requests_timer_seconds_sum{instance="$instance"}[5m]) / rate(appsuite_soapapi_requests_timer_seconds_count{instance="$instance"}[5m])) by (operation)',
+    legendFormat='{{operation}}'
+  )
+);
+
+local soapApiRequestsByService = graphPanel.new(
+  title='Average Response Time (group by service)',
+  description='',
+  datasource='Prometheus',
+  nullPointMode='null as zero',
+  min='0',
+  format='s'
+).addTarget(
+  prometheus.target(
+    'sum(rate(appsuite_soapapi_requests_timer_seconds_sum{instance="$instance"}[5m]) / rate(appsuite_soapapi_requests_timer_seconds_count{instance="$instance"}[5m])) by (service)',
+    legendFormat='{{service}}'
+  )
+);
+
+local webdavApiRequestsOK = singlestat.new(
+  title='OKs',
+  description='Successful WebDAV API Requests.',
+  datasource='Prometheus',
+  decimals=0,
+  valueName='avg',
+  valueMaps=[
+    {
+      op: '=',
+      text: '0',
+      value: 'null',
+    },
+  ],
+  colorValue=true,
+  sparklineShow=true
+).addTarget(
+  prometheus.target(
+    'sum(increase(appsuite_webdav_requests_seconds_count{status=~"OK|0", instance="$instance"}[5m]))',
+    legendFormat='OKs'
+  )
+);
+
+local webdavApiRequestsKO = singlestat.new(
+  title='KOs',
+  description='Failed WebDAV API Requests.',
+  datasource='Prometheus',
+  decimals=0,
+  valueName='avg',
+  valueMaps=[
+    {
+      op: '=',
+      text: '0',
+      value: 'null',
+    },
+  ],
+  colorValue=true,
+  colors=[
+    '#d44a3a',
+    'rgba(237, 129, 40, 0.89)',
+    '#299c46',
+  ],
+  sparklineShow=true
+).addTarget(
+  prometheus.target(
+    'sum(increase(appsuite_webdav_requests_seconds_count{status!~"OK|0", instance="$instance"}[5m]))',
+    legendFormat='KOs'
+  )
+);
+
+local webdavApiRequestsTotal = singlestat.new(
+  title='Total',
+  description='The total number of WebDAV API Requests.',
+  datasource='Prometheus',
+  decimals=0,
+  valueName='avg',
+  valueMaps=[
+    {
+      op: '=',
+      text: '0',
+      value: 'null',
+    },
+  ],
+  sparklineShow=true
+).addTarget(
+  prometheus.target(
+    'sum(increase(appsuite_webdav_requests_seconds_count{instance="$instance"}[5m]))',
+    legendFormat='Total'
+  )
+);
+
+
+local webdavApiRequestsByInterface = graphPanel.new(
+  title='Average Response Time (group by interface)',
+  description='',
+  datasource='Prometheus',
+  nullPointMode='null as zero',
+  min='0',
+  format='s'
+).addTarget(
+  prometheus.target(
+    'sum(rate(appsuite_webdav_requests_seconds_sum{instance="$instance"}[5m]) / rate(appsuite_webdav_requests_seconds_count{instance="$instance"}[5m])) by (interface)',
+    legendFormat='{{interface}}'
+  )
+);
+
+local webdavApiRequestsByMethod = graphPanel.new(
+  title='Average Response Time (group by method)',
+  description='',
+  datasource='Prometheus',
+  nullPointMode='null as zero',
+  min='0',
+  format='s'
+).addTarget(
+  prometheus.target(
+    'sum(rate(appsuite_webdav_requests_seconds_sum{instance="$instance"}[5m]) / rate(appsuite_webdav_requests_seconds_count{instance="$instance"}[5m])) by (method)',
+    legendFormat='{{method}}'
+  )
+);
+
+local configDBReadConnections = graphPanel.new(
+  title='ConfigDB Read Connections',
+  datasource='Prometheus',
+  description='The total number of pooled and active connections of this db pool.',
+  decimals=0,
+  nullPointMode='null as zero',
+  min='0'
+).addTarget(
+  prometheus.target(
+    'appsuite_mysql_connections_total_Connections{class="ConfigDB",type="read",instance="$instance"}',
+    legendFormat='Pooled'
+  )
+).addTarget(
+  prometheus.target(
+    'appsuite_mysql_connections_active_Connections{class="ConfigDB",type="read",instance="$instance"}',
+    legendFormat='Active'
+  )
+).addTarget(
+  prometheus.target(
+    'appsuite_mysql_connections_idle_Connections{class="ConfigDB",type="read",instance="$instance"}',
+    legendFormat='Idle'
+  )
+);
+
+local configDBWriteConnections = graphPanel.new(
+  title='ConfigDB Write Connections',
+  datasource='Prometheus',
+  description='The total number of pooled and active connections of this db pool.',
+  decimals=0,
+  nullPointMode='null as zero',
+  min='0'
+).addTarget(
+  prometheus.target(
+    'appsuite_mysql_connections_total_Connections{class="ConfigDB",type="write",instance="$instance"}',
+    legendFormat='Pooled'
+  )
+).addTarget(
+  prometheus.target(
+    'appsuite_mysql_connections_active_Connections{class="ConfigDB",type="write",instance="$instance"}',
+    legendFormat='Active'
+  )
+).addTarget(
+  prometheus.target(
+    'appsuite_mysql_connections_idle_Connections{class="ConfigDB",type="write",instance="$instance"}',
+    legendFormat='Idle'
+  )
+);
+
+local userDBReadConnections = graphPanel.new(
+  title='UserDB Read Connections',
+  datasource='Prometheus',
+  description='The total number of pooled and active connections of this db pool.',
+  decimals=0,
+  nullPointMode='null as zero',
+  min='0'
+).addTarget(
+  prometheus.target(
+    'appsuite_mysql_connections_total_Connections{class!="ConfigDB",type="read",instance="$instance"}',
+    legendFormat='Pooled'
+  )
+).addTarget(
+  prometheus.target(
+    'appsuite_mysql_connections_active_Connections{class!="ConfigDB",type="read",instance="$instance"}',
+    legendFormat='Active'
+  )
+).addTarget(
+  prometheus.target(
+    'appsuite_mysql_connections_idle_Connections{class!="ConfigDB",type="read",instance="$instance"}',
+    legendFormat='Idle'
+  )
+);
+
+local userDBWriteConnections = graphPanel.new(
+  title='UserDB Write Connections',
+  datasource='Prometheus',
+  description='The total number of pooled and active connections of this db pool.',
+  decimals=0,
+  nullPointMode='null as zero',
+  min='0'
+).addTarget(
+  prometheus.target(
+    'appsuite_mysql_connections_total_Connections{class!="ConfigDB",type="write",instance="$instance"}',
+    legendFormat='Pooled'
+  )
+).addTarget(
+  prometheus.target(
+    'appsuite_mysql_connections_active_Connections{class!="ConfigDB",type="write",instance="$instance"}',
+    legendFormat='Active'
+  )
+).addTarget(
+  prometheus.target(
+    'appsuite_mysql_connections_idle_Connections{class!="ConfigDB",type="write",instance="$instance"}',
+    legendFormat='Idle'
+  )
+);
+
+local configDBReadTimes = graphPanel.new(
+  title='ConfigDB Read Times',
+  datasource='Prometheus',
+  description='',
+  decimals=0,
+  nullPointMode='null as zero',
+  min='0',
+  format='s'
+).addTarget(
+  prometheus.target(
+    'rate(appsuite_mysql_connections_acquire_seconds_sum{class="ConfigDB",type="read",instance="$instance"}[5m])/rate(appsuite_mysql_connections_acquire_seconds_count{class="ConfigDB",type="read",instance="$instance"}[5m])',
+    legendFormat='acquire'
+  )
+).addTarget(
+  prometheus.target(
+    'rate(appsuite_mysql_connections_usage_seconds_sum{class="ConfigDB",type="read",instance="$instance"}[5m])/rate(appsuite_mysql_connections_usage_seconds_count{class="ConfigDB",type="read",instance="$instance"}[5m])',
+    legendFormat='usage'
+  )
+).addTarget(
+  prometheus.target(
+    'rate(appsuite_mysql_connections_create_seconds_sum{class="ConfigDB",type="read",instance="$instance"}[5m])/rate(appsuite_mysql_connections_create_seconds_count{class="ConfigDB",type="read",instance="$instance"}[5m])',
+    legendFormat='create'
+  )
+);
+
+local configDBWriteTimes = graphPanel.new(
+  title='ConfigDB Read Times',
+  datasource='Prometheus',
+  description='',
+  decimals=0,
+  nullPointMode='null as zero',
+  min='0',
+  format='s'
+).addTarget(
+  prometheus.target(
+    'rate(appsuite_mysql_connections_acquire_seconds_sum{class="ConfigDB",type="write",instance="$instance"}[5m])/rate(appsuite_mysql_connections_acquire_seconds_count{class="ConfigDB",type="write",instance="$instance"}[5m])',
+    legendFormat='acquire'
+  )
+).addTarget(
+  prometheus.target(
+    'rate(appsuite_mysql_connections_usage_seconds_sum{class="ConfigDB",type="write",instance="$instance"}[5m])/rate(appsuite_mysql_connections_usage_seconds_count{class="ConfigDB",type="write",instance="$instance"}[5m])',
+    legendFormat='usage'
+  )
+).addTarget(
+  prometheus.target(
+    'rate(appsuite_mysql_connections_create_seconds_sum{class="ConfigDB",type="write",instance="$instance"}[5m])/rate(appsuite_mysql_connections_create_seconds_count{class="ConfigDB",type="write",instance="$instance"}[5m])',
+    legendFormat='create'
+  )
+);
+
+local userDBReadTimes = graphPanel.new(
+  title='UserDB Read Times',
+  datasource='Prometheus',
+  description='',
+  decimals=0,
+  nullPointMode='null as zero',
+  min='0',
+  format='s'
+).addTarget(
+  prometheus.target(
+    'rate(appsuite_mysql_connections_acquire_seconds_sum{class!="ConfigDB",type="read",instance="$instance"}[5m])/rate(appsuite_mysql_connections_acquire_seconds_count{class!="ConfigDB",type="read",instance="$instance"}[5m])',
+    legendFormat='acquire'
+  )
+).addTarget(
+  prometheus.target(
+    'rate(appsuite_mysql_connections_usage_seconds_sum{class!="ConfigDB",type="read",instance="$instance"}[5m])/rate(appsuite_mysql_connections_usage_seconds_count{class!="ConfigDB",type="read",instance="$instance"}[5m])',
+    legendFormat='usage'
+  )
+).addTarget(
+  prometheus.target(
+    'rate(appsuite_mysql_connections_create_seconds_sum{class!="ConfigDB",type="read",instance="$instance"}[5m])/rate(appsuite_mysql_connections_create_seconds_count{class!="ConfigDB",type="read",instance="$instance"}[5m])',
+    legendFormat='create'
+  )
+);
+
+local userDBWriteTimes = graphPanel.new(
+  title='UserDB Write Times',
+  datasource='Prometheus',
+  description='',
+  decimals=0,
+  nullPointMode='null as zero',
+  min='0',
+  format='s'
+).addTarget(
+  prometheus.target(
+    'rate(appsuite_mysql_connections_acquire_seconds_sum{class!="ConfigDB",type="write",instance="$instance"}[5m])/rate(appsuite_mysql_connections_acquire_seconds_count{class!="ConfigDB",type="write",instance="$instance"}[5m])',
+    legendFormat='acquire'
+  )
+).addTarget(
+  prometheus.target(
+    'rate(appsuite_mysql_connections_usage_seconds_sum{class!="ConfigDB",type="write",instance="$instance"}[5m])/rate(appsuite_mysql_connections_usage_seconds_count{class!="ConfigDB",type="write",instance="$instance"}[5m])',
+    legendFormat='usage'
+  )
+).addTarget(
+  prometheus.target(
+    'rate(appsuite_mysql_connections_create_seconds_sum{class!="ConfigDB",type="write",instance="$instance"}[5m])/rate(appsuite_mysql_connections_create_seconds_count{class!="ConfigDB",type="write",instance="$instance"}[5m])',
+    legendFormat='create'
   )
 );
 
@@ -321,20 +782,50 @@ dashboard.new(
     overviewShortTermSessions { gridPos: { h: 6, w: 4, x: 8, y: 1 } },
     overviewLongTermSessions { gridPos: { h: 6, w: 4, x: 12, y: 1 } },
 
-    httpApiRow { gridPos: { h: 1, w: 24, x: 0, y: 7 } },
-    httpApiRequestsOK { gridPos: { h: 6, w: 4, x: 0, y: 7 } },
-    httpApiRequestsKO { gridPos: { h: 6, w: 4, x: 4, y: 7 } },
-    httpApiRequestsTotal { gridPos: { h: 6, w: 4, x: 8, y: 7 } },
+    threadPoolRow { gridPos: { h: 1, w: 24, x: 0, y: 7 } },
+    threadPool { gridPos: { h: 8, w: 12, x: 0, y: 8 } },
+    threadPoolTasks { gridPos: { h: 8, w: 12, x: 12, y: 8 } },
 
-    httpApiRequestsSeconds { gridPos: { h: 8, w: 24, x: 0, y: 13 } },
-    httpApiRequestsPercentilesByAction { gridPos: { h: 8, w: 12, x: 0, y: 21 } },
-    httpApiRequestsPercentilesByModule { gridPos: { h: 8, w: 12, x: 12, y: 21 } },
+    dbRow { gridPos: { h: 1, w: 24, x: 0, y: 16 } },
+    configDBReadConnections { gridPos: { h: 8, w: 6, x: 0, y: 17 } },
+    configDBWriteConnections { gridPos: { h: 8, w: 6, x: 6, y: 17 } },
+    userDBReadConnections { gridPos: { h: 8, w: 6, x: 12, y: 17 } },
+    userDBWriteConnections { gridPos: { h: 8, w: 6, x: 18, y: 17 } },
 
-    restApiRow { gridPos: { h: 1, w: 24, x: 0, y: 29 } },
-    restApiRequestsByMethod { gridPos: { h: 8, w: 12, x: 0, y: 30 } },
-    restApiRequestsByStatus { gridPos: { h: 8, w: 12, x: 12, y: 30 } },
+    configDBReadTimes { gridPos: { h: 8, w: 6, x: 0, y: 25 } },
+    configDBWriteTimes { gridPos: { h: 8, w: 6, x: 6, y: 25 } },
+    userDBReadTimes { gridPos: { h: 8, w: 6, x: 12, y: 25 } },
+    userDBWriteTimes { gridPos: { h: 8, w: 6, x: 18, y: 25 } },
 
-    circuitBreakerRow { gridPos: { h: 1, w: 24, x: 0, y: 38 } },
-    circuitBreakerIMAPStatus { gridPos: { h: 8, w: 24, x: 0, y: 39 } },
+    httpApiRow { gridPos: { h: 1, w: 24, x: 0, y: 33 } },
+    httpApiRequestsOK { gridPos: { h: 6, w: 4, x: 0, y: 34 } },
+    httpApiRequestsKO { gridPos: { h: 6, w: 4, x: 4, y: 34 } },
+    httpApiRequestsTotal { gridPos: { h: 6, w: 4, x: 8, y: 34 } },
+
+    httpApiRequestsSeconds { gridPos: { h: 8, w: 24, x: 0, y: 40 } },
+
+    httpApiRequestsPercentilesByAction { gridPos: { h: 8, w: 12, x: 0, y: 48 } },
+    httpApiRequestsPercentilesByModule { gridPos: { h: 8, w: 12, x: 12, y: 48 } },
+
+    restApiRow { gridPos: { h: 1, w: 24, x: 0, y: 56 } },
+    restApiRequestsByMethod { gridPos: { h: 8, w: 12, x: 0, y: 57 } },
+    restApiRequestsByStatus { gridPos: { h: 8, w: 12, x: 12, y: 57 } },
+
+    webdavApiRow { gridPos: { h: 1, w: 24, x: 0, y: 65 } },
+    webdavApiRequestsOK { gridPos: { h: 6, w: 4, x: 0, y: 66 } },
+    webdavApiRequestsKO { gridPos: { h: 6, w: 4, x: 4, y: 66 } },
+    webdavApiRequestsTotal { gridPos: { h: 6, w: 4, x: 12, y: 66 } },
+
+    webdavApiRequestsByInterface { gridPos: { h: 8, w: 12, x: 0, y: 72 } },
+    webdavApiRequestsByMethod { gridPos: { h: 8, w: 12, x: 12, y: 72 } },
+
+    soapApiRow { gridPos: { h: 1, w: 24, x: 0, y: 80 } },
+    soapApiRequestsByOperation { gridPos: { h: 8, w: 12, x: 0, y: 81 } },
+    soapApiRequestsByService { gridPos: { h: 8, w: 12, x: 12, y: 81 } },
+
+    circuitBreakerRow { gridPos: { h: 1, w: 24, x: 0, y: 89 } },
+    circuitBreakerDenials { gridPos: { h: 8, w: 12, x: 0, y: 90 } },
+    circuitBreakerRequestRate { gridPos: { h: 8, w: 12, x: 12, y: 90 } },
+    circuitBreakerIMAPStatus { gridPos: { h: 8, w: 24, x: 0, y: 98 } },
   ]
 )
