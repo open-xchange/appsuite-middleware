@@ -998,19 +998,43 @@ public final class QuotedInternetAddress extends InternetAddress {
         if (addr.charAt(start) == '.') {
             throw new AddressException("Domain starts with dot", addr.toString());
         }
+        boolean inliteral = false;
         for (i = start; i < len; i++) {
             c = addr.charAt(i);
             if (c == '[') {
-                return; // domain literal, don't validate
-            }
-            if (c <= 32 || c >= 127) {
-                throw new AddressException("Domain contains control or whitespace", addr.toString());
-            }
-            if (SPECIALS_NO_DOT.indexOf(c) >= 0) {
-                throw new AddressException("Domain contains illegal character", addr.toString());
-            }
-            if (c == '.' && lastc == '.') {
-                throw new AddressException("Domain contains dot-dot", addr.toString());
+                if (i != start) {
+                    throw new AddressException("Domain literal not at start of domain", addr);
+                }
+                inliteral = true;   // domain literal, don't validate
+            } else if (c == ']') {
+                if (i != len - 1) {
+                    throw new AddressException("Domain literal end not at end of domain", addr);
+                }
+                inliteral = false;
+            } else if (c <= 040 || c == 0177) {
+                throw new AddressException("Domain contains control or whitespace", addr);
+            } else {
+                // RFC 2822 rule
+                //if (specialsNoDot.indexOf(c) >= 0)
+                /*
+                 * RFC 1034 rule is more strict
+                 * the full rule is:
+                 *
+                 * <domain> ::= <subdomain> | " "
+                 * <subdomain> ::= <label> | <subdomain> "." <label>
+                 * <label> ::= <letter> [ [ <ldh-str> ] <let-dig> ]
+                 * <ldh-str> ::= <let-dig-hyp> | <let-dig-hyp> <ldh-str>
+                 * <let-dig-hyp> ::= <let-dig> | "-"
+                 * <let-dig> ::= <letter> | <digit>
+                 */
+                if (!inliteral) {
+                    if (!(Character.isLetterOrDigit(c) || c == '-' || c == '.')) {
+                        throw new AddressException("Domain contains illegal character", addr);
+                    }
+                    if (c == '.' && lastc == '.') {
+                        throw new AddressException("Domain contains dot-dot", addr);
+                    }
+                }
             }
             lastc = c;
         }
