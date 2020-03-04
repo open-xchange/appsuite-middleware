@@ -389,7 +389,10 @@ public class ExtAccountFolderField implements AdditionalFolderField {
         }
         // Read full name; decode the name (using RFC2060's modified UTF7)
         metadataResponse.skipSpaces();
-        final String fullName = BASE64MailboxDecoder.decode(metadataResponse.readAtomString());
+        String fullName = metadataResponse.readAtomString();
+        if (!metadataResponse.supportsUtf8()) {
+            fullName = BASE64MailboxDecoder.decode(metadataResponse.readAtomString());
+        }
 
         // Read until opening parenthesis or EOF
         byte b = 0;

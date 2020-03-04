@@ -2056,7 +2056,15 @@ final class ListLsubCollection implements Serializable {
 
         // Read full name; decode the name (using RFC2060's modified UTF7)
         listResponse.skipSpaces();
-        String name = null == predefinedName ? BASE64MailboxDecoder.decode(listResponse.readAtomString()) : predefinedName;
+        String name;
+        if (null == predefinedName) {
+            name = listResponse.readAtomString();
+            if (!listResponse.supportsUtf8()) {
+                name = BASE64MailboxDecoder.decode(name);
+            }
+        } else {
+            name = predefinedName;
+        }
 
         // Return
         return new ListLsubEntryImpl(name, attributes, separator, changeState, hasInferiors, canOpen, hasChildren, lsubMap).setNamespace(isNamespace(name));
