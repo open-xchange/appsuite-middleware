@@ -87,7 +87,7 @@ public class TaskCollection extends CalDAVFolderCollection<Task> {
 
     private static final int[] BASIC_COLUMNS = {
         Task.UID, Task.FILENAME, Task.FOLDER_ID, Task.OBJECT_ID, Task.PARTICIPANTS, Task.LAST_MODIFIED, Task.CREATION_DATE,
-        Task.CREATED_BY, Task.MODIFIED_BY
+        Task.CREATED_BY, Task.MODIFIED_BY, Task.RECURRENCE_TYPE
     };
 
     private final int folderID;
@@ -247,7 +247,7 @@ public class TaskCollection extends CalDAVFolderCollection<Task> {
     }
 
     private boolean isSupported(Task task) throws WebdavProtocolException {
-        return null != task && null == task.getParticipants() && isInInterval(task, minDateTime.getMinDateTime(), maxDateTime.getMaxDateTime());
+        return null != task && null == task.getParticipants() && task.getRecurrenceType() == CalendarObject.NO_RECURRENCE &&  isInInterval(task, minDateTime.getMinDateTime(), maxDateTime.getMaxDateTime());
     }
 
     private static <T extends CalendarObject> boolean isInInterval(T object, Date intervalStart, Date intervalEnd) {
