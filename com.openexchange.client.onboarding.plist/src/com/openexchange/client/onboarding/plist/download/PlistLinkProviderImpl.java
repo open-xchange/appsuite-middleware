@@ -51,6 +51,7 @@ package com.openexchange.client.onboarding.plist.download;
 
 import java.nio.charset.StandardCharsets;
 import java.rmi.server.UID;
+import java.security.MessageDigest;
 import java.util.Optional;
 import com.google.common.io.BaseEncoding;
 import com.openexchange.client.onboarding.OnboardingExceptionCodes;
@@ -65,7 +66,6 @@ import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.user.UserService;
-import com.planetj.math.rabinhash.RabinHashFunction32;
 
 /**
  * {@link PlistLinkProviderImpl}
@@ -171,15 +171,20 @@ public class PlistLinkProviderImpl implements DownloadLinkProvider {
 
     private Optional<String> toHash(int userId, int contextId, String scenario, String device, boolean createSecretIfAbsent) throws OXException {
         try {
-            String secret = getOrCreateSecret(userId, contextId, createSecretIfAbsent);
-            if (secret == null) {
+            Optional<String> optionalSecret = getOrCreateSecret(userId, contextId, createSecretIfAbsent);
+            if (!optionalSecret.isPresent()) {
                 return Optional.empty();
             }
 
-            String challenge = userId + contextId + device + scenario + secret;
+            String challenge = new StringBuilder(128).append(userId).append(contextId)
+                .append(device).append(scenario).append(optionalSecret.get()).toString();
 
-            int hash = Math.abs(RabinHashFunction32.DEFAULT_HASH_FUNCTION.hash(challenge));
-            return Optional.of(Integer.toString(hash));
+            MessageDigest md = MessageDigest.getInstance("SHA-1");
+            byte[] challengeBytes = challenge.getBytes(StandardCharsets.UTF_8);
+            md.update(challengeBytes, 0, challengeBytes.length);
+
+            byte[] sha1hash = md.digest();
+            return Optional.of(Strings.asHex(sha1hash));
         } catch (OXException e) {
             throw e;
         } catch (Exception e) {
@@ -193,10 +198,10 @@ public class PlistLinkProviderImpl implements DownloadLinkProvider {
      * @param userId The user identifier
      * @param contextId The context identifier
      * @param createIfAbsent <code>true</code> to create a secret of absent; otherwise <code>false</code>
-     * @return The SMS-link-secret
+     * @return The SMS-link-secret or empty (if there is none and <code>createIfAbsent</code> is <code>false</code>)
      * @throws OXException If SMS-link-secret cannot be returned
      */
-    private String getOrCreateSecret(int userId, int contextId, boolean createIfAbsent) throws OXException {
+    private Optional<String> getOrCreateSecret(int userId, int contextId, boolean createIfAbsent) throws OXException {
         UserService userService = services.getService(UserService.class);
         Context context = userService.getContext(contextId);
 
@@ -213,7 +218,7 @@ public class PlistLinkProviderImpl implements DownloadLinkProvider {
             secret = new UID().toString();
             userService.setUserAttribute(USER_SECRET_ATTRIBUTE, secret, userId, context);
         }
-        return secret;
+        return Optional.ofNullable(secret);
     }
 
     private static byte[] toAsciiBytes(String s) {
