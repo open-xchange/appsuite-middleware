@@ -106,8 +106,7 @@ public class WebdavLockAction extends AbstractAction {
                 copyOldValues(originalLock, lock);
             }
 
-            final int status = HttpServletResponse.SC_OK;
-
+            final int status = resource.exists() ? HttpServletResponse.SC_OK : HttpServletResponse.SC_CREATED;
 
 			resource.lock(lock);
 
