@@ -326,10 +326,9 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion> {
                  * same directory version, let client update it's metadata
                  */
                 result.addActionForClient(new AcknowledgeDirectoryAction(comparison.getOriginalVersion(), comparison.getClientVersion(), comparison));
-                if (false == DriveConstants.EMPTY_MD5.equals(comparison.getClientVersion().getChecksum()) &&
-                    Change.NEW.equals(comparison.getClientChange()) && Change.NEW.equals(comparison.getServerChange())) {
+                if (false == DriveConstants.EMPTY_MD5.equals(comparison.getClientVersion().getChecksum())) {
                     /*
-                     * first-time synchronization of identical, but non-empty directory, let client sync directory to acknowledge the contents
+                     * conflicting change of identical, but non-empty directory, let client sync directory to acknowledge the contents
                      */
                     result.addActionForClient(new SyncDirectoryAction(comparison.getServerVersion(), comparison));
                     return 1;
