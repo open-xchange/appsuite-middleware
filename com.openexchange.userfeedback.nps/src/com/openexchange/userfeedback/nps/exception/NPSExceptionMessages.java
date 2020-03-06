@@ -47,51 +47,32 @@
  *
  */
 
-package com.openexchange.saml.spi;
+package com.openexchange.userfeedback.nps.exception;
 
-import com.openexchange.saml.SAMLConfig;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link SAMLConfigRegistry}
+ * 
+ * {@link NPSExceptionMessages}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.4
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.10.4
  */
-public interface SAMLConfigRegistry {
+public final class NPSExceptionMessages implements LocalizableStrings {
 
-    /**
-     * Retrieves the default {@link SAMLConfig}
-     *
-     * @return the default {@link SAMLConfig}
-     */
-    public SAMLConfig getDefaultConfig();
+    // The provided feedback for '%s' is invalid.
+    public static final String INVALID_VALUE_MSG = "The provided feedback for '%s' is invalid.";
 
-    /**
-     * Registers a {@link SAMLConfig} under a given id
-     *
-     * @param id The id of the config
-     * @param config The {@link SAMLConfig}
-     */
-    public void registerSAMLConfig(String id, SAMLConfig config);
+    // The provided feedback for key '%s' has an invalid type.
+    public static final String INVALID_TYPE_MSG = "The provided feedback for key '%s' has an invalid type.";
 
-    /**
-     * Removes the {@link SAMLConfig} with the given id
-     *
-     * @param id The id of the config
-     */
-    public void removeSAMLConfig(String id);
+    // The provided feedback does not contain required key '%s'.
+    public static final String KEY_MISSING_MSG = "The provided feedback does not contain required key '%s'.";
 
-    /**
-     * Retrieves the {@link SAMLConfig} for the given id
-     * 
-     * @param id The id of the config
-     * @return the {@link SAMLConfig}
-     */
-    public SAMLConfig getConfigById(String id);
+    // The provided feedback for key '%s' cannot be parsed.
+    public static final String BAD_VALUE_MSG = "The provided feedback for key '%s' cannot be parsed.";
 
-    /**
-     * Removes all configs
-     */
-    public void clear();
-
+    private NPSExceptionMessages() {
+        super();
+    }
 }

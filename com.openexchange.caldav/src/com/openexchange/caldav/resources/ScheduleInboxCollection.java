@@ -171,6 +171,11 @@ public class ScheduleInboxCollection extends DAVCollection implements FilteringR
     }
 
     @Override
+    public String getSyncToken() throws WebdavProtocolException {
+        return "0";
+    }
+
+    @Override
     public AbstractResource getChild(String name) throws WebdavProtocolException {
         return new ScheduleInboxResource(getFactory(), constructPathForChildResource(name));
     }

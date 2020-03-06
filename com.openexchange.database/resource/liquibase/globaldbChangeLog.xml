@@ -426,5 +426,27 @@
             <dropColumn tableName="dataExportTaskWorklist" columnName="failCount" />
         </rollback>
     </changeSet>
-    
+
+
+    <changeSet id="7.10.4:feedback_nps_v1:create" author="martin.schneider@open-xchange.com" failOnError="false">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="feedback_nps_v1" />
+            </not>
+        </preConditions>
+        <comment>
+            Add table 'feedback_nps_v1' to save feedback data.
+        </comment>
+        <sql>
+            CREATE TABLE feedback_nps_v1 (
+                id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+                data BLOB NOT NULL,
+                PRIMARY KEY (id)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        </sql>
+        <rollback>
+            <dropTable tableName="feedback_nps_v1" />
+        </rollback>
+    </changeSet>
+
 </databaseChangeLog>

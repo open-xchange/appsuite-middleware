@@ -57,16 +57,15 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import org.json.JSONException;
@@ -78,13 +77,12 @@ import com.openexchange.java.AsciiReader;
 import com.openexchange.java.AsciiWriter;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
-import com.openexchange.java.util.TimeZones;
-import com.openexchange.tools.validate.ParameterValidator;
-import com.openexchange.userfeedback.AbstractFeedbackType;
-import com.openexchange.userfeedback.ExportResultConverter;
+import com.openexchange.userfeedback.AbstractJSONFeedbackType;
 import com.openexchange.userfeedback.Feedback;
 import com.openexchange.userfeedback.FeedbackMetaData;
 import com.openexchange.userfeedback.exception.FeedbackExceptionCodes;
+import com.openexchange.userfeedback.export.ExportResultConverter;
+import com.openexchange.userfeedback.fields.UserFeedbackField;
 import com.openexchange.userfeedback.starrating.exception.StarRatingExceptionCodes;
 
 /**
@@ -93,7 +91,7 @@ import com.openexchange.userfeedback.starrating.exception.StarRatingExceptionCod
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.4
  */
-public class StarRatingV1 extends AbstractFeedbackType {
+public class StarRatingV1 extends AbstractJSONFeedbackType {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(StarRatingV1.class);
 
@@ -103,22 +101,13 @@ public class StarRatingV1 extends AbstractFeedbackType {
     private static final String DELETE_SQL = "DELETE FROM feedback_star_rating_v1 WHERE id = ?";
 
     @Override
-    protected void checkFeedback(Object feedback) throws OXException {
-        JSONObject jsonFeedback = getFeedback(feedback);
-
-        ParameterValidator.checkJSON(jsonFeedback);
-    }
-
-    @Override
-    protected void validate(Object feedback) throws OXException {
-        JSONObject jsonFeedback = getFeedback(feedback);
-
-        if (!jsonFeedback.has("score")) {
-            throw StarRatingExceptionCodes.PARAMETER_MISSING.create("score");
+    protected void validate(JSONObject jsonFeedback) throws OXException {
+        if (!jsonFeedback.has(StarRatingV1ExportFields.SCORE.getName())) {
+            throw StarRatingExceptionCodes.PARAMETER_MISSING.create(StarRatingV1ExportFields.SCORE.getName());
         }
 
         try {
-            String score = jsonFeedback.getString("score");
+            String score = jsonFeedback.getString(StarRatingV1ExportFields.SCORE.getName());
             if (Strings.isEmpty(score)) {
                 throw StarRatingExceptionCodes.INVALID_SCORE_TYPE.create(score);
             }
@@ -128,65 +117,15 @@ public class StarRatingV1 extends AbstractFeedbackType {
             }
         } catch (JSONException e) {
             LOG.error("Unable to retrieve 'score' from feedback.", e);
-            throw StarRatingExceptionCodes.PARAMETER_MISSING.create("score");
+            throw StarRatingExceptionCodes.PARAMETER_MISSING.create(StarRatingV1ExportFields.SCORE.getName());
         } catch (NumberFormatException e) {
             LOG.error("Unable to parse 'score' value from feedback.", e);
-            throw StarRatingExceptionCodes.BAD_PARAMETER.create("score");
+            throw StarRatingExceptionCodes.BAD_PARAMETER.create(StarRatingV1ExportFields.SCORE.getName());
         }
-    }
-
-    /**
-     * Limits the data column to have at most 21000 UTF-8 characters as the blob column is able to take 65535 bytes and an UTF-8 character can be up to 3 bytes. Therefor values will be cut off after defined lengths.
-     *
-     * @param jsonFeedback
-     */
-    protected JSONObject ensureSizeLimits(JSONObject jsonFeedback) {
-        JSONObject limitedFeedback = new JSONObject(jsonFeedback);
-
-        limit(limitedFeedback, StarRatingV1Fields.app.name(), 50);
-        limit(limitedFeedback, StarRatingV1Fields.browser.name(), 50);
-        limit(limitedFeedback, StarRatingV1Fields.browser_version.name(), 10);
-        limit(limitedFeedback, StarRatingV1Fields.client_version.name(), 20);
-        limit(limitedFeedback, StarRatingV1Fields.comment.name(), 20000);
-        limit(limitedFeedback, StarRatingV1Fields.entry_point.name(), 50);
-        limit(limitedFeedback, StarRatingV1Fields.language.name(), 20);
-        limit(limitedFeedback, StarRatingV1Fields.operating_system.name(), 50);
-        limit(limitedFeedback, StarRatingV1Fields.screen_resolution.name(), 20);
-        limit(limitedFeedback, StarRatingV1Fields.user_agent.name(), 200);
-        limit(limitedFeedback, StarRatingV1Fields.score.name(), 5);
-        return limitedFeedback;
-    }
-
-    protected void limit(JSONObject feedback, String key, int allowed) {
-        if ((feedback == null) || (Strings.isEmpty(key)) || (allowed <= 10)) {
-            return;
-        }
-        if (!feedback.has(key)) {
-            return;
-        }
-        try {
-            String value = feedback.getString(key);
-            if (value.length() > allowed) {
-                String limitedValue = org.apache.commons.lang.StringUtils.substring(value, 0, allowed - 4).concat(" ...");
-                feedback.put(key, limitedValue);
-            }
-        } catch (JSONException e) {
-            LOG.warn("Unable to limit json value.", e);
-        }
-    }
-
-    private JSONObject getFeedback(Object feedback) throws OXException {
-        if (!(feedback instanceof JSONObject)) {
-            throw FeedbackExceptionCodes.INVALID_DATA_TYPE.create("JSONObject");
-        }
-        JSONObject jsonFeedback = (JSONObject) feedback;
-        return jsonFeedback;
     }
 
     @Override
-    public long storeFeedbackInternal(Object feedback, Connection con) throws OXException {
-        JSONObject jsonFeedback = getFeedback(feedback);
-
+    public long storeFeedbackInternal(JSONObject jsonFeedback, Connection con) throws OXException {
         ResultSet rs = null;
         PreparedStatement stmt = null;
         try {
@@ -295,12 +234,12 @@ public class StarRatingV1 extends AbstractFeedbackType {
     private void enrichContent(AsciiReader asciiReader, Feedback current) throws JSONException {
         JSONObject content = new JSONObject(asciiReader);
 
-        SimpleDateFormat sdfmt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        sdfmt.setTimeZone(TimeZones.UTC);
-        content.put("date", sdfmt.format(new Date(current.getDate())));
+        Instant ofEpochMilli = Instant.ofEpochMilli(current.getDate());
+        LocalDateTime date = LocalDateTime.ofInstant(ofEpochMilli, ZoneId.of("Z"));
+        content.put("date", date.format(dateTimeFormatter));
 
         String userContextTupel = current.getCtxId() + ":" + current.getUserId();
-        String hashedTupel = Hashing.md5().hashString(userContextTupel, StandardCharsets.UTF_8).toString();
+        @SuppressWarnings("deprecation") String hashedTupel = Hashing.md5().hashString(userContextTupel, StandardCharsets.UTF_8).toString();
         content.put("user", hashedTupel);
         content.put("server_version", current.getServerVersion());
         content.put("client_version", current.getUiVersion());
@@ -335,104 +274,8 @@ public class StarRatingV1 extends AbstractFeedbackType {
     }
 
     @Override
-    protected Object cleanUp(Object feedback) throws OXException {
-        return cleanUpFeedback(getFeedback(feedback), StarRatingV1Fields.requiredJsonKeys());
+    protected List<UserFeedbackField> getRequiredFields() throws OXException {
+        return StarRatingV1ExportFields.getFieldsRequiredByClient();
     }
 
-    /**
-     * Aligns the feedback to store (provided via the jsonFeedback parameter) against the JSON keys provided within the given Set<String>
-     *
-     * @param jsonFeedback The JSON object provided by the client
-     * @return {@link JSONObject} that is aligned to be stored
-     */
-    protected final JSONObject cleanUpFeedback(JSONObject jsonFeedback, Set<String> keys) {
-        JSONObject returnFeedback = new JSONObject(jsonFeedback);
-
-        JSONObject removeAdditional = remove(returnFeedback, keys);
-        JSONObject cleanedFeedback = addRequired(removeAdditional, keys);
-
-        JSONObject ensureSizeLimits = ensureSizeLimits(cleanedFeedback);
-
-        return ensureSizeLimits;
-    }
-
-    /**
-     * Enhances the given JSON by dummy entries for every missing key defined in the parameter list. If keys parameter is empty the origin object will be returned.<br>
-     * <br>
-     * <b>Caution:</> this check is case sensitive. Having 'comment' in keys parameter will add it even 'Comment' is available within the provided {@link JSONObject}.
-     *
-     * @param feedback The provided feedback that will be adapted.
-     * @param keys The keys that should be available within the object
-     */
-    protected final JSONObject addRequired(final JSONObject feedback, Set<String> keys) {
-        if ((keys == null) || (keys.isEmpty())) {
-            return feedback;
-        }
-
-        JSONObject processed = new JSONObject(feedback);
-        for (String key : keys) {
-            if (feedback.has(key)) {
-                continue;
-            }
-            LOG.info("Desired key {} not contained within the request. They will be stored as empty.", Strings.concat(",", keys));
-            try {
-                processed.put(key, "");
-            } catch (JSONException e) {
-                LOG.error("Error while adding new key.", e);
-            }
-        }
-        return processed;
-    }
-
-    /**
-     * Removes JSON entries from provided object that aren't expected. Expected keys are defined by the 'keys' parameter). If keys parameter is empty the origin object will be returned.<br>
-     * <br>
-     * <b>Caution:</> this check is case sensitive. Having 'comment' in keys parameter will remove 'Comment' from provided {@link JSONObject} as it is not expected.
-     *
-     * @param feedback The provided feedback that will be adapted
-     * @param expectedKeys The keys that are expected
-     */
-    protected final JSONObject remove(final JSONObject feedback, Set<String> expectedKeys) {
-        if ((expectedKeys == null) || (expectedKeys.isEmpty())) {
-            return feedback;
-        }
-
-        JSONObject processed = new JSONObject(feedback);
-        Iterator<?> jsonKeys = feedback.keys();
-        while (jsonKeys.hasNext()) {
-            String key = (String) jsonKeys.next();
-            if (!expectedKeys.contains(key)) {
-                LOG.info("An unknown key '{}' has been provided. It will be removed before persisting.", key);
-                processed.remove(key);
-                continue;
-            }
-            expectedKeys.remove(key);
-        }
-        return processed;
-    }
-
-    /**
-     * Ensures that the provided feedback only has lower case keys!
-     *
-     * @param feedback The feedback that should be normalized
-     * @return {@link JSONObject} with lower case keys
-     * @throws OXException
-     */
-    @Override
-    protected Object normalize(Object feedback) throws OXException {
-        JSONObject jsonFeedback = getFeedback(feedback);
-        Iterator<?> jsonKeys = jsonFeedback.keys();
-        JSONObject processed = new JSONObject(jsonFeedback.length());
-        while (jsonKeys.hasNext()) {
-            try {
-                String unnormalizedKey = (String) jsonKeys.next();
-                String value = jsonFeedback.getString(unnormalizedKey);
-                String key = unnormalizedKey.toLowerCase();
-                processed.put(key, value);
-            } catch (JSONException e) {
-                LOG.warn("Error while updating json keys.", e);
-            }
-        }
-        return processed;
-    }
 }

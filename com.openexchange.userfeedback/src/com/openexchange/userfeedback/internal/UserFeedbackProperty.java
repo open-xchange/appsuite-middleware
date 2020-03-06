@@ -49,6 +49,7 @@
 
 package com.openexchange.userfeedback.internal;
 
+import static com.openexchange.java.Autoboxing.B;
 import com.openexchange.config.lean.Property;
 
 /**
@@ -58,7 +59,7 @@ import com.openexchange.config.lean.Property;
  * @since v7.8.4
  */
 public enum UserFeedbackProperty implements Property{
-    enabled(true, UserFeedbackProperty.PREFIX),
+    enabled(B(true), UserFeedbackProperty.PREFIX),
     mode("star-rating-v1", UserFeedbackProperty.PREFIX);
 
     private static final String EMPTY = "";

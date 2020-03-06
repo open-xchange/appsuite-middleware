@@ -47,57 +47,30 @@
  *
  */
 
-package com.openexchange.saml.impl;
+package com.openexchange.userfeedback.nps.v1;
 
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import com.openexchange.saml.SAMLConfig;
-import com.openexchange.saml.spi.SAMLConfigRegistry;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+import com.openexchange.userfeedback.fields.GenericUserFeedbackExportFields;
+import com.openexchange.userfeedback.fields.UserFeedbackField;
 
 /**
- * A registry for {@link SAMLConfig}s
+ * 
+ * {@link NPSv1ExportFields}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.4
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.10.4
  */
-public class SAMLConfigRegistryImpl implements SAMLConfigRegistry {
+public class NPSv1ExportFields extends GenericUserFeedbackExportFields {
 
-    private static final SAMLConfigRegistryImpl INSTANCE = new SAMLConfigRegistryImpl();
+    public static final UserFeedbackField SCORE = new UserFeedbackField("Score", "score", true, 5);
+    public static final UserFeedbackField COMMENT = new UserFeedbackField("Comment", "comment", true, 20000);
+    public static final UserFeedbackField QUESTION_ID = new UserFeedbackField("Question", "questionid", true, 5);
 
-    public static SAMLConfigRegistryImpl getInstance(){
-        return INSTANCE;
+    public static final List<UserFeedbackField> ALL = Arrays.asList(DATE, SCORE, QUESTION_ID, COMMENT, APP, ENTRY_POINT, OPERATING_SYSTEM, BROWSER, BROWSER_VERSION, USER_AGENT, SCREEN_RESOLUTION, LANGUAGE, USER, SERVER_VERSION, CLIENT_VERSION);
+
+    public static List<UserFeedbackField> getFieldsRequiredByClient() {
+        return ALL.stream().filter(x -> x.isProvidedByClient()).collect(Collectors.toList());
     }
-
-    private final ConcurrentMap<String,SAMLConfig> configs = new ConcurrentHashMap<String, SAMLConfig>();
-    public static final String DEFAULT_KEY = "";
-
-    @Override
-    public SAMLConfig getDefaultConfig() {
-        SAMLConfig defaultConfig = configs.get(DEFAULT_KEY);
-        if (null == defaultConfig) {
-            throw new IllegalArgumentException("DefaultConfig not started");
-        }
-        return defaultConfig;
-    }
-
-    @Override
-    public void registerSAMLConfig(String id, SAMLConfig config){
-        configs.put(id, config);
-    }
-
-    @Override
-    public SAMLConfig getConfigById(String id){
-        return configs.get(id);
-    }
-
-    @Override
-    public void clear() {
-        configs.clear();
-    }
-
-    @Override
-    public void removeSAMLConfig(String id) {
-        configs.remove(id);
-    }
-
 }

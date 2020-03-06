@@ -130,6 +130,11 @@ public class ResourcePrincipalCollection extends DAVCollection {
     }
 
     @Override
+    public String getSyncToken() throws WebdavProtocolException {
+        return "0";
+    }
+
+    @Override
     public String getDisplayName() throws WebdavProtocolException {
         return "Resources";
     }

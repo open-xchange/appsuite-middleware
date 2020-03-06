@@ -49,22 +49,12 @@
 
 package com.openexchange.userfeedback.starrating.v1;
 
-import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.container.ThresholdFileHolder;
-import com.openexchange.exception.OXException;
-import com.openexchange.java.Charsets;
-import com.openexchange.userfeedback.ExportResult;
-import com.openexchange.userfeedback.ExportResultConverter;
-import com.openexchange.userfeedback.ExportType;
 import com.openexchange.userfeedback.Feedback;
+import com.openexchange.userfeedback.export.AbstractExportResultConverter;
+import com.openexchange.userfeedback.fields.UserFeedbackField;
 
 /**
  * {@link StarRatingV1ExportResultConverter}
@@ -72,178 +62,18 @@ import com.openexchange.userfeedback.Feedback;
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.4
  */
-public class StarRatingV1ExportResultConverter implements ExportResultConverter {
+public class StarRatingV1ExportResultConverter extends AbstractExportResultConverter {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(StarRatingV1ExportResultConverter.class);
-
-    private static final char TEXT_QUALIFIER = '"';
-    private static final char CELL_DELIMITER = ';';
-    private static final char CARRIAGE_RETURN = '\r';
-
-    private final Collection<Feedback> feedbacks;
-
-    private final char delimiter;
-
-    public StarRatingV1ExportResultConverter(Collection<Feedback> feedbacks, Map<String, String> configuration) {
-        this.feedbacks = feedbacks;
-
-        String lDelimiter = configuration.get("delimiter");
-        this.delimiter = lDelimiter != null ? lDelimiter.charAt(0) : CELL_DELIMITER;
+    public StarRatingV1ExportResultConverter(Collection<Feedback> lFeedbacks, Map<String, String> configuration) {
+        super(lFeedbacks, configuration);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public ExportResult get(ExportType type) {
-        switch (type) {
-            case CSV:
-                return createCsvStream();
-            case RAW:
-            default:
-                return createRaw();
-        }
-    }
-
-    private ExportResult createRaw() {
-        StarRatingV1ExportResult exportResult = new StarRatingV1ExportResult();
-        JSONArray result = new JSONArray(feedbacks.size());
-        for (Feedback feedback : feedbacks) {
-            JSONObject current = (JSONObject) feedback.getContent();
-            result.put(current);
-        }
-        exportResult.setRAW(result);
-        return exportResult;
-    }
-
-    private ExportResult createCsvStream() {
-        StarRatingV1ExportResult exportResult = new StarRatingV1ExportResult();
-        ThresholdFileHolder sink = new ThresholdFileHolder();
-        OutputStreamWriter writer = new OutputStreamWriter(sink.asOutputStream(), Charsets.UTF_8);
-        boolean error = true;
-        try {
-            final StarRatingV1Fields[] jsonFields = StarRatingV1Fields.values();
-            StringBuilder bob = new StringBuilder(1024);
-
-            writer.write('\ufeff'); // BOM for UTF-*
-            // Writer header line
-            writer.write(convertToLine(jsonFields, null, bob));
-
-            for (Feedback feedback : feedbacks) {
-                // Write entry line
-                String convertToLine = convertToLine(jsonFields, (JSONObject) feedback.getContent(), bob);
-                writer.write(convertToLine);
-            }
-            writer.flush();
-            exportResult.setCSV(sink.getClosingStream());
-            error = false;
-        } catch (IOException | OXException | JSONException | RuntimeException e) {
-            LOG.error("Failed to create CSV stream", e);
-        } finally {
-            if (error) {
-                sink.close();
-            }
-        }
-        return exportResult;
-    }
-
-    private String convertToLine(StarRatingV1Fields[] jsonFields, JSONObject object, StringBuilder sb) throws JSONException {
-        StringBuilder bob;
-        if (null == sb) {
-            bob = new StringBuilder(1024);
-        } else {
-            bob = sb;
-            bob.setLength(0);
-        }
-
-        if (null == object) {
-            // Header line
-            for (StarRatingV1Fields token : jsonFields) {
-                bob.append(TEXT_QUALIFIER);
-                bob.append(sanitize(token.getDisplayName()));
-                bob.append(TEXT_QUALIFIER);
-                bob.append(this.delimiter);
-            }
-        } else {
-            for (StarRatingV1Fields token : jsonFields) {
-                bob.append(TEXT_QUALIFIER);
-                String sanitizedLineBreaks = correctLineBreaks(object, token);
-                String replaced = useSingleQuotes(sanitizedLineBreaks);
-                String sanitizedValue = sanitize(replaced);
-                bob.append(sanitizedValue);
-                bob.append(TEXT_QUALIFIER);
-                bob.append(this.delimiter);
-            }
-        }
-        bob.setCharAt(bob.length() - 1, CARRIAGE_RETURN);
-        return bob.toString();
-    }
-
-    private String useSingleQuotes(String sanitizedLineBreaks) {
-        return sanitizedLineBreaks.replace("\"", "'");
-    }
-
-    private final Pattern p = Pattern.compile("\r?\n");
-
-    private String correctLineBreaks(JSONObject object, StarRatingV1Fields token) throws JSONException {
-        String content = object.getString(token.name());
-
-        Matcher m = p.matcher(content);
-        StringBuffer buffer = new StringBuffer(content.length());
-        while (m.find()) {
-            m.appendReplacement(buffer, "\r\n");
-        }
-        m.appendTail(buffer);
-        return buffer.toString();
-    }
-
-    private String sanitize(String value) {
-        int length = value.length();
-        if (length <= 0) {
-            return value;
-        }
-
-        StringBuilder builder = null;
-
-        char firstChar = value.charAt(0);
-        if (needsSanitizing(firstChar)) {
-            builder = new StringBuilder(length);
-            builder.append('\'').append(firstChar);
-        }
-
-        for (int i = 1; i < length; i++) {
-            char c = value.charAt(i);
-            if (null == builder) {
-                if (c == '|') {
-                    builder = new StringBuilder(length);
-                    if (i > 0) {
-                        builder.append(value, 0, i);
-                    }
-                    builder.append("\\").append(c);
-                }
-            } else {
-                if (c == '|') {
-                    builder.append("\\").append(c);
-                } else {
-                    builder.append(c);
-                }
-            }
-        }
-        return null == builder ? value : builder.toString();
-    }
-
-    private boolean needsSanitizing(char c) {
-        switch (c) {
-            case '=':
-                return true;
-            case '+':
-                return true;
-            case '-':
-                return true;
-            case '@':
-                return true;
-            case '|':
-                return true;
-            default:
-                return false;
-        }
+    protected List<UserFeedbackField> getExportFields() {
+        return StarRatingV1ExportFields.ALL;
     }
 
 }

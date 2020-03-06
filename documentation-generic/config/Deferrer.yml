@@ -1,0 +1,24 @@
+feature_name: Deferrer
+properties:
+    - key: com.openexchange.http.deferrer.url
+      description: |
+        Set this option in a multidomain setup to allow certain operations to jump an extra step in a singular domain
+      defaultValue: 
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: deferrer.properties
+      packageName: open-xchange-core
+      tags: ["HTTP"]
+    - key: com.openexchange.http.deferrer.maxParameterLength
+      description: |
+        Specifies the max. size in bytes allowed for parameters of requests targetted at deferrer end-point 
+      defaultValue: 10240
+      version: 7.10.4
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: deferrer.properties
+      packageName: open-xchange-core
+      tags: ["HTTP"]

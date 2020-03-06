@@ -51,6 +51,7 @@ package com.openexchange.saml.spi;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.bouncycastle.util.encoders.Base64;
@@ -65,11 +66,10 @@ import com.openexchange.ajax.login.LoginTools;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.java.Strings;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.saml.SAMLConfig;
 import com.openexchange.saml.SAMLExceptionCode;
-import com.openexchange.saml.impl.SAMLConfigRegistryImpl;
+import com.openexchange.saml.impl.DefaultConfig;
 import com.openexchange.saml.state.AuthnRequestInfo;
 import com.openexchange.saml.state.DefaultAuthnRequestInfo;
 import com.openexchange.saml.state.StateManagement;
@@ -90,6 +90,13 @@ import com.openexchange.user.User;
 public abstract class AbstractSAMLBackend implements SAMLBackend {
 
     private static final Logger LOG_ABSTRACT = LoggerFactory.getLogger(AbstractSAMLBackend.class);
+
+    /**
+     * Initializes a new {@link AbstractSAMLBackend}.
+     */
+    protected AbstractSAMLBackend() {
+        super();
+    }
 
     /**
      * Initializes the credential provider and returns it.
@@ -250,7 +257,8 @@ public abstract class AbstractSAMLBackend implements SAMLBackend {
 
     @Override
     public SAMLConfig getConfig() {
-        return SAMLConfigRegistryImpl.getInstance().getDefaultConfig();
+        Optional<DefaultConfig> optionalDefaultConfig = DefaultConfig.getDefaultConfig();
+        return optionalDefaultConfig.orElseThrow(() -> new IllegalStateException("Default configuration not yet initialized"));
     }
 
     @Override
@@ -280,16 +288,4 @@ public abstract class AbstractSAMLBackend implements SAMLBackend {
         return null;
     }
 
-    /**
-     * Retrieves the {@link SAMLConfig} with the given id from the {@link SAMLConfigRegistry}.
-     *
-     * @param path The {@link SAMLConfig} id
-     * @return the {@link SAMLConfig} or the default configuration if path is empty
-     */
-    public SAMLConfig getConfig(String path) {
-        if (Strings.isEmpty(path)) {
-            return SAMLConfigRegistryImpl.getInstance().getDefaultConfig();
-        }
-        return SAMLConfigRegistryImpl.getInstance().getConfigById(path);
-    }
 }

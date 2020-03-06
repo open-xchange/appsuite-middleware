@@ -47,71 +47,21 @@
  *
  */
 
-package com.openexchange.userfeedback.starrating.v1;
-
-import java.util.HashSet;
-import java.util.Set;
-import org.json.JSONObject;
-import com.google.common.collect.ImmutableSet;
+package com.openexchange.userfeedback.export;
 
 /**
- * {@link StarRatingV1Fields}
+ * {@link ExportResultConverter}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.4
  */
-public enum StarRatingV1Fields {
-    date("Date"), // only for export
-    score("Score"),
-    comment("Comment"),
-    app("App"),
-    entry_point("Entry Point"),
-    operating_system("Operating System"),
-    browser("Browser"),
-    browser_version("Browser Version"),
-    user_agent("User Agent"),
-    screen_resolution("Screen Resolution"),
-    language("Language"),
-    user("User"), // only for export
-    server_version("Server Version"), // only for export
-    client_version("Client Version"),
-    ;
-
-    private static final Set<String> INTERNAL_KEYS;
-
-    static {
-        ImmutableSet.Builder<String> keys = ImmutableSet.builder();
-        for (StarRatingV1Fields field : StarRatingV1Fields.values()) {
-            keys.add(field.name().toLowerCase());
-        }
-        INTERNAL_KEYS = keys.build();
-    }
-
-    private String displayName;
-
-    StarRatingV1Fields(String displayName) {
-        this.displayName = displayName;
-    }
+public interface ExportResultConverter {
 
     /**
-     * Gets the displayName
-     *
-     * @return The displayName
+     * Exports the feedback to the given {@link ExportType}
+     * 
+     * @param type {@link ExportType} defining the type of the exported feedback
+     * @return the result of an export
      */
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    /**
-     * Returns keys that are required within the to persist JSONObject. Those removed from {@link com.openexchange.userfeedback.starrating.v1.StarRatingV1Fields#values()} are retrieved from other tables.
-     *
-     * @return Set of {@link String} that are required within the {@link JSONObject}
-     */
-    public static Set<String> requiredJsonKeys() {
-        Set<String> copy = new HashSet<>(INTERNAL_KEYS);
-        copy.remove("date");
-        copy.remove("user");
-        copy.remove("server_version");
-        return copy;
-    }
+    ExportResult get(ExportType type);
 }

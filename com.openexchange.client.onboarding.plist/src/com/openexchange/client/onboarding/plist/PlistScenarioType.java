@@ -47,20 +47,71 @@
  *
  */
 
-package com.openexchange.userfeedback;
+package com.openexchange.client.onboarding.plist;
+
+import java.util.Optional;
+import com.openexchange.java.Strings;
 
 /**
- * {@link ExportResultConverter}
+ * {@link PlistScenarioType} - An enumeration of types (or identifiers) for synthetic (non-configured) scenarios that yield a PLIST dictionary.
  *
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since v7.8.4
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.4
  */
-public interface ExportResultConverter {
+public enum PlistScenarioType {
 
     /**
-     * 
-     * @param type
-     * @return the result of an export
+     * The synthetic scenario identifier for yielding a PLIST dictionary for a CalDAV profile.
      */
-    ExportResult get(ExportType type);
+    CALDAV("caldav"),
+    /**
+     * The synthetic scenario identifier for yielding a PLIST dictionary for a CardDAV profile.
+     */
+    CARDDAV("carddav"),
+    /**
+     * The synthetic scenario identifier for yielding a PLIST dictionary for a CalDAV &amp; CardDAV profile.
+     */
+    DAV("dav"),
+    /**
+     * The synthetic scenario identifier for yielding a PLIST dictionary for an Email profile.
+     */
+    MAIL("mail"),
+    ;
+
+    private final String scenarioId;
+
+    private PlistScenarioType(String scenarioId) {
+        this.scenarioId = scenarioId;
+    }
+
+    /**
+     * Gets the identifier for this synthetic scenario.
+     *
+     * @return The scenario identifier
+     */
+    public String getScenarioId() {
+        return scenarioId;
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Gets the suitable synthetic PLIST scenario type for given scenario identifier.
+     *
+     * @param scenarioId The scenario identifier to look-up by
+     * @return The PLIST scenario type or empty
+     */
+    public static Optional<PlistScenarioType> plistScenarioTypeFor(String scenarioId) {
+        if (Strings.isEmpty(scenarioId)) {
+            return Optional.empty();
+        }
+
+        String lookUp = Strings.asciiLowerCase(scenarioId).trim();
+        for (PlistScenarioType plistScenarioType : PlistScenarioType.values()) {
+            if (lookUp.equals(plistScenarioType.scenarioId)) {
+                return Optional.of(plistScenarioType);
+            }
+        }
+        return Optional.empty();
+    }
 }

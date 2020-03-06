@@ -15,7 +15,7 @@ properties:
     tags: ["Feedback"]
   - key: com.openexchange.userfeedback.mode
     description: |
-      Determine which feedback mode should be used.
+      Determine which feedback mode should be used. Possible values are 'star-rating-v1' and 'nps-v1'.
     defaultValue: star-rating-v1
     version: 7.8.4
     reloadable: true

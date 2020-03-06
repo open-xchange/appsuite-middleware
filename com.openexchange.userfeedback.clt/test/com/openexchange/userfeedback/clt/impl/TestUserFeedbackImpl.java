@@ -66,43 +66,34 @@ public class TestUserFeedbackImpl extends AbstractUserFeedback {
 
     @Override
     protected void checkArguments(CommandLine cmd) {
-        // TODO Auto-generated method stub
-
     }
 
     @Override
     protected void addOptions(Options options) {
-        // TODO Auto-generated method stub
-
     }
 
     @Override
     protected WebTarget getEndpoint(CommandLine cmd) {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     protected Void invoke(Options option, CommandLine cmd, Builder context) throws Exception {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     protected void checkOptions(CommandLine cmd) {
-        // TODO Auto-generated method stub
 
     }
 
     @Override
     protected String getFooter() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     protected String getName() {
-        // TODO Auto-generated method stub
         return null;
     }
 

@@ -52,6 +52,7 @@ package com.openexchange.mail.compose.impl.storage.inmemory;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -206,8 +207,8 @@ public class InMemoryCompositionSpaceStorageService implements NonCryptoComposit
     }
 
     @Override
-    public CompositionSpace openCompositionSpace(Session session, CompositionSpaceDescription compositionSpaceDesc) throws OXException {
-        CompositionSpace persistentCompositionSpace = persistentStorage.openCompositionSpace(session, compositionSpaceDesc);
+    public CompositionSpace openCompositionSpace(Session session, CompositionSpaceDescription compositionSpaceDesc, Optional<Boolean> optionalEncrypt) throws OXException {
+        CompositionSpace persistentCompositionSpace = persistentStorage.openCompositionSpace(session, compositionSpaceDesc, optionalEncrypt);
 
         MessageDescription messageDesc = compositionSpaceDesc.getMessage();
         InMemoryCompositionSpace compositionSpace = new InMemoryCompositionSpace(persistentCompositionSpace.getId(), messageDesc, bufferingQueue, session.getUserId(), session.getContextId());
@@ -217,7 +218,7 @@ public class InMemoryCompositionSpaceStorageService implements NonCryptoComposit
     }
 
     @Override
-    public CompositionSpace updateCompositionSpace(Session session, CompositionSpaceDescription compositionSpaceDesc) throws OXException {
+    public CompositionSpace updateCompositionSpace(Session session, CompositionSpaceDescription compositionSpaceDesc, Optional<CompositionSpace> optionalOriginalSpace) throws OXException {
         if (compositionSpaceDesc == null) {
             return null;
         }

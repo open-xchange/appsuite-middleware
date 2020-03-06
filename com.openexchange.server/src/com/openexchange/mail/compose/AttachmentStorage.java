@@ -52,6 +52,7 @@ package com.openexchange.mail.compose;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.exception.OXException;
@@ -101,6 +102,27 @@ public interface AttachmentStorage {
     Attachment getAttachment(UUID id, Session session) throws OXException;
 
     /**
+     * Gets the attachments associated with given identifiers
+     *
+     * @param ids The attachment identifiers
+     * @param session The session providing user information
+     * @return The attachments as an array. If a certain attachment does not exist, the appropriate index position in returned array is <code>null</code>
+     * @throws OXException If attachment cannot be returned
+     */
+    default Attachment[] getAttachments(List<UUID> ids, Session session) throws OXException {
+        if (ids == null || ids.isEmpty()) {
+            return new Attachment[0];
+        }
+
+        Attachment[] retval = new Attachment[ids.size()];
+        int index = 0;
+        for (UUID id : ids) {
+            retval[index++] = getAttachment(id, session);
+        }
+        return retval;
+    }
+
+    /**
      * Gets the attachments associated with given composition space.
      *
      * @param compositionSpaceId The composition space identifier
@@ -121,16 +143,21 @@ public interface AttachmentStorage {
     SizeReturner getSizeOfAttachmentsByCompositionSpace(UUID compositionSpaceId, Session session) throws OXException;
 
     /**
-     * Saves the specified attachment binary data and meta data
+     * Saves the specified attachment binary data and meta data.
      *
      * @param input The input stream providing binary data
      * @param attachment The attachment providing meta data
      * @param sizeProvider The optional size provider
+     * @param optionalEncrypt The optional encryption flag on initial opening of a composition space. If present and <code>true</code> the
+     *                        attachment to save is supposed to be encrypted according to caller. If present and <code>false</code>  the
+     *                        attachment to save is <b>not</b> supposed to be encrypted according to caller. If absent, encryption is
+     *                        automatically determined.<br>
+     *                        <b>Note</b>: The flag MUST be aligned to associated composition space
      * @param session The session providing user information
      * @return The resulting attachment
      * @throws OXException If saving attachment fails
      */
-    Attachment saveAttachment(InputStream input, AttachmentDescription attachment, SizeProvider sizeProvider, Session session) throws OXException;
+    Attachment saveAttachment(InputStream input, AttachmentDescription attachment, SizeProvider sizeProvider, Optional<Boolean> optionalEncrypt, Session session) throws OXException;
 
     /**
      * Deletes the attachment associated with given identifier

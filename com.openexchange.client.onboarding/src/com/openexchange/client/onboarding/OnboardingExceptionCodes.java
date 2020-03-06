@@ -162,7 +162,11 @@ public enum OnboardingExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Key with alias '%1$s' not found in keystore.
      */
-    SIGN_ERROR("Key with alias '%1$s' not found in keystore.", null, Category.CATEGORY_ERROR, 25)
+    SIGN_ERROR("Key with alias '%1$s' not found in keystore.", null, Category.CATEGORY_ERROR, 25),
+    /**
+     * Provider '%1$s' is not suitable to generate a PLIST dictionary.
+     */
+    NO_PLIST_PROVIDER("Provider '%1$s' is not suitable to generate a PLIST dictionary", null, Category.CATEGORY_ERROR, 26),
     ;
 
     /** The error code prefix for on-boarding module */

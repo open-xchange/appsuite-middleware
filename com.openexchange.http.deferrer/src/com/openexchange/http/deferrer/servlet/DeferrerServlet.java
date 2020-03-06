@@ -51,6 +51,9 @@ package com.openexchange.http.deferrer.servlet;
 
 import static com.openexchange.ajax.AJAXUtility.encodeUrl;
 import static com.openexchange.java.Strings.isEmpty;
+import com.openexchange.config.lean.DefaultProperty;
+import com.openexchange.config.lean.LeanConfigurationService;
+import com.openexchange.config.lean.Property;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Collections;
@@ -81,16 +84,21 @@ public class DeferrerServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1358634554782437089L;
 
+    private static final Property MAX_PARAMETER_LENGTH_PROP = DefaultProperty.valueOf("com.openexchange.http.deferrer.maxParameterLength", Long.valueOf(1024*10l)); // 10 KB
+
     /**
      * The listing for custom handlers.
      */
     public static final List<CustomRedirectURLDetermination> CUSTOM_HANDLERS = new CopyOnWriteArrayList<CustomRedirectURLDetermination>();
 
+    private final long maxParameterLength;
+
     /**
      * Initializes a new {@link DeferrerServlet}.
      */
-    public DeferrerServlet() {
+    public DeferrerServlet(LeanConfigurationService lean) {
         super();
+        this.maxParameterLength = null != lean ? lean.getLongProperty(MAX_PARAMETER_LENGTH_PROP) : -1;
     }
 
     @Override
@@ -133,6 +141,8 @@ public class DeferrerServlet extends HttpServlet {
 
         Map<String, String> params = parseQueryStringFromUrl(redirectURL);
         StringBuilder builder = new StringBuilder(encodeUrl(redirectURL, true, false));
+        String defaultCharEnc = maxParameterLength > 0 ? ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding) : null;
+        long size = 0;
         for (Enumeration<?> parameterNames = req.getParameterNames(); parameterNames.hasMoreElements();) {
             String name = (String) parameterNames.nextElement();
             if ("redirect".equals(name) || params.containsKey(name)) {
@@ -140,6 +150,15 @@ public class DeferrerServlet extends HttpServlet {
             }
 
             String parameter = req.getParameter(name);
+            if (maxParameterLength > 0) {
+                // Add both the parameter's name size and the parameter's content size
+                size += ((name != null ? name.getBytes(defaultCharEnc).length : 0) + (parameter != null ? parameter.getBytes(defaultCharEnc).length : 0));
+                if (size >= maxParameterLength) {
+                    Tools.sendErrorPage(resp, HttpServletResponse.SC_REQUEST_URI_TOO_LONG, "Request parameters contain too much data");
+                    return;
+                }
+            }
+
             builder.append(concat);
             concat = '&';
             builder.append(name).append('=').append(encodeUrl(parameter, true, false));

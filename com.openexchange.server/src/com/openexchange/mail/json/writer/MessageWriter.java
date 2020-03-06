@@ -682,7 +682,10 @@ public final class MessageWriter {
                 try {
                     String subject = mail.getSubject();
                     if (withKey) {
-                        if (subject != null) {
+                        if (subject == null) {
+                            // Fall-back to an empty string
+                            jsonContainer.toObject().put(MailJSONField.SUBJECT.getKey(), "");
+                        } else {
                             // This is a work-around for broken MAL implementations that fail to perform mail-safe decoding, but might mess up already decoded subjects
                             if (false == mail.isSubjectDecoded()) {
                                 subject = decodeMultiEncodedHeader(subject);
@@ -691,7 +694,8 @@ public final class MessageWriter {
                         }
                     } else {
                         if (subject == null) {
-                            jsonContainer.toArray().put(JSONObject.NULL);
+                            // Fall-back to an empty string
+                            jsonContainer.toArray().put("");
                         } else {
                             // This is a work-around for broken MAL implementations that fail to perform mail-safe decoding, but might mess up already decoded subjects
                             if (false == mail.isSubjectDecoded()) {

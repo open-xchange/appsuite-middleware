@@ -47,31 +47,24 @@
  *
  */
 
-package com.openexchange.userfeedback;
+package com.openexchange.userfeedback.export;
 
 /**
- * {@link ExportType}
+ * {@link UserFeedbackExportResult}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.4
  */
-public enum ExportType {
-    RAW("application", "json"),
-    CSV("text", "csv");
+public class UserFeedbackExportResult implements ExportResult {
 
-    private final String mediaType;
-    private final String mediaSubType;
+    private final Object result;
 
-    private ExportType(String mediaType, String mediaSubType) {
-        this.mediaType = mediaType;
-        this.mediaSubType = mediaSubType;
+    public UserFeedbackExportResult(Object lResult) {
+        this.result = lResult;
     }
 
-    public String getMediaType() {
-        return mediaType;
-    }
-
-    public String getMediaSubType() {
-        return mediaSubType;
+    @Override
+    public Object getResult() {
+        return result;
     }
 }

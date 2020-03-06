@@ -49,6 +49,7 @@
 
 package com.openexchange.caldav.resources;
 
+import static com.openexchange.dav.DAVProtocol.protocolException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -168,6 +169,28 @@ public class TaskCollection extends CalDAVFolderCollection<Task> {
             fileExtension = "." + fileExtension;
         }
         return constructPathForChildResource(fileName + fileExtension);
+    }
+
+    @Override
+    public String getSyncToken() throws WebdavProtocolException {
+        Date lastModified = folder.getLastModifiedUTC(); 
+        try {
+            /*
+             * new and modified objects
+             */
+            for (Task object : getModifiedObjects(lastModified)) {
+                lastModified = Tools.getLatestModified(lastModified, object);
+            }
+            /*
+             * deleted objects
+             */
+            for (Task object : getDeletedObjects(lastModified)) {
+                lastModified = Tools.getLatestModified(lastModified, object);
+            }
+        } catch (OXException e) {
+            throw protocolException(getUrl(), e);
+        }
+        return null == lastModified ? "0" : String.valueOf(lastModified.getTime());
     }
 
     @Override

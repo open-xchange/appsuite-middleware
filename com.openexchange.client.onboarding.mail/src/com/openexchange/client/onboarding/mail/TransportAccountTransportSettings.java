@@ -49,6 +49,7 @@
 
 package com.openexchange.client.onboarding.mail;
 
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.TransportAuth;
 
@@ -60,14 +61,30 @@ import com.openexchange.mailaccount.TransportAuth;
  */
 public class TransportAccountTransportSettings implements TransportSettings {
 
+    private static final int PRIMARY = MailAccount.DEFAULT_ID;
+
     private final MailAccount mailAccount;
+    private final Boolean needAuth;
 
     /**
      * Initializes a new {@link TransportAccountTransportSettings}.
      */
-    public TransportAccountTransportSettings(MailAccount mailAccount) {
+    public TransportAccountTransportSettings(MailAccount mailAccount, ConfigurationService configService) {
         super();
         this.mailAccount = mailAccount;
+        if (mailAccount.getId() == PRIMARY) {
+            String smtpAuthStr = configService.getProperty("com.openexchange.smtp.primary.smtpAuthentication");
+            if (null != smtpAuthStr) {
+                this.needAuth = Boolean.valueOf(smtpAuthStr.trim());
+                return;
+            }
+        }
+        String smtpAuthStr = configService.getProperty("com.openexchange.smtp.smtpAuthentication");
+        if (null != smtpAuthStr) {
+            this.needAuth = Boolean.valueOf(smtpAuthStr.trim());
+        } else {
+            this.needAuth = null;
+        }
     }
 
     @Override
@@ -98,7 +115,7 @@ public class TransportAccountTransportSettings implements TransportSettings {
 
     @Override
     public boolean needsAuthentication() {
-        return (TransportAuth.NONE != mailAccount.getTransportAuth());
+        return needAuth != null ? needAuth.booleanValue() : (TransportAuth.NONE != mailAccount.getTransportAuth());
     }
 
 }

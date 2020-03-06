@@ -50,7 +50,9 @@
 package com.openexchange.saml.impl;
 
 import static com.openexchange.saml.SAMLProperties.*;
+import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import com.google.common.collect.ImmutableSet;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
@@ -68,61 +70,60 @@ public class DefaultConfig implements SAMLConfig {
 
     private static final ImmutableSet<String> ALL_HOSTS_SET = ImmutableSet.of("all");
 
-    private String providerName;
+    private static final AtomicReference<DefaultConfig> DEFAULT_CONFIG_REFERENCE = new AtomicReference<>();
 
-    private String entityID;
-
-    private String acsURL;
-
-    private Binding logoutResponseBinding;
-
-    private String idpAuthnURL;
-
-    private String idpEntityID;
-
-    private String idpLogoutURL;
-
-    private String slsURL;
-
-    private boolean supportSingleLogout;
-
-    private boolean enableMetadataService;
-
-    private String logoutResponseTemplate;
-
-    private boolean autoLoginEnabled;
-
-    private boolean allowUnsolicitedResponses;
-
-    private boolean sessionIndexAutoLoginEnabled;
-
-    private DefaultConfig() {
-        super();
+    /**
+     * Gets the default configuration instance if yet initialized; otherwise empty.
+     *
+     * @return The optional default configuration instance
+     * @see #init(ConfigurationService)
+     */
+    public static Optional<DefaultConfig> getDefaultConfig() {
+        return Optional.ofNullable(DEFAULT_CONFIG_REFERENCE.get());
     }
 
+    /**
+     * Releases the default configuration instance.
+     */
+    public static void release() {
+        DEFAULT_CONFIG_REFERENCE.set(null);
+    }
+
+    /**
+     * Initializes the default configuration using given service.
+     *
+     * @param configService The configuration service to use
+     * @return The initialized default configuration
+     * @throws OXException If initialization fails
+     */
     public static DefaultConfig init(ConfigurationService configService) throws OXException {
-        DefaultConfig config = new DefaultConfig();
-        config.setProviderName(checkProperty(configService, PROVIDER_NAME));
-        config.setEntityID(checkProperty(configService, ENTITY_ID));
-        config.setAcsURL(checkProperty(configService, ACS_URL));
-        config.setIdpEntityID(checkProperty(configService, IDP_ENTITY_ID));
-        config.setIdpURL(checkProperty(configService, IDP_LOGIN_URL));
+        String providerName = checkProperty(configService, PROVIDER_NAME);
+        String entityID = checkProperty(configService, ENTITY_ID);
+        String acsURL = checkProperty(configService, ACS_URL);
+        String idpEntityID = checkProperty(configService, IDP_ENTITY_ID);
+        String idpAuthnURL = checkProperty(configService, IDP_LOGIN_URL);
         boolean supportSingleLogout = configService.getBoolProperty(ENABLE_SINGLE_LOGOUT, false);
+        String slsURL = null;
+        String idpLogoutURL = null;
+        Binding logoutResponseBinding = null;
+        String logoutResponseTemplate = null;
         if (supportSingleLogout) {
-            config.setSupportSingleLogout(supportSingleLogout);
-            config.setSingleLogoutServiceURL(checkProperty(configService, SLS_URL));
-            config.setIdentityProviderLogoutURL(checkProperty(configService, IDP_LOGOUT_URL));
-            Binding logoutResponseBinding = checkBinding(configService, LOGOUT_RESPONSE_BINDING);
-            config.setLogoutResponseBinding(logoutResponseBinding);
+            slsURL = checkProperty(configService, SLS_URL);
+            idpLogoutURL = checkProperty(configService, IDP_LOGOUT_URL);
+            logoutResponseBinding = checkBinding(configService, LOGOUT_RESPONSE_BINDING);
             if (logoutResponseBinding == Binding.HTTP_POST) {
-                config.setLogoutResponseTemplate(checkProperty(configService, LOGOUT_RESPONSE_POST_TEMPLATE));
+                logoutResponseTemplate = checkProperty(configService, LOGOUT_RESPONSE_POST_TEMPLATE);
             }
         }
+        boolean enableMetadataService = configService.getBoolProperty(ENABLE_METADATA_SERVICE, false);
+        boolean autoLoginEnabled = configService.getBoolProperty(ENABLE_AUTO_LOGIN, false);
+        boolean allowUnsolicitedResponses = configService.getBoolProperty(ALLOW_UNSOLICITED_RESPONSES, true);
+        boolean sessionIndexAutoLoginEnabled = configService.getBoolProperty(ENABLE_SESSION_INDEX_AUTO_LOGIN, false);
 
-        config.setEnableMetadataService(configService.getBoolProperty(ENABLE_METADATA_SERVICE, false));
-        config.setAutoLoginEnabled(configService.getBoolProperty(ENABLE_AUTO_LOGIN, false));
-        config.setAllowUnsolicitedResponses(configService.getBoolProperty(ALLOW_UNSOLICITED_RESPONSES, true));
-        config.setSessionIndexAutoLoginEnabled(configService.getBoolProperty(ENABLE_SESSION_INDEX_AUTO_LOGIN, false));
+        DefaultConfig config = new DefaultConfig(providerName, entityID, acsURL, logoutResponseBinding, idpAuthnURL, idpEntityID,
+            idpLogoutURL, slsURL, supportSingleLogout, enableMetadataService, logoutResponseTemplate, autoLoginEnabled,
+            allowUnsolicitedResponses, sessionIndexAutoLoginEnabled);
+        DEFAULT_CONFIG_REFERENCE.set(config);
         return config;
     }
 
@@ -144,6 +145,46 @@ public class DefaultConfig implements SAMLConfig {
         }
 
         return property;
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    private final String providerName;
+    private final String entityID;
+    private final String acsURL;
+    private final Binding logoutResponseBinding;
+    private final String idpAuthnURL;
+    private final String idpEntityID;
+    private final String idpLogoutURL;
+    private final String slsURL;
+    private final boolean supportSingleLogout;
+    private final boolean enableMetadataService;
+    private final String logoutResponseTemplate;
+    private final boolean autoLoginEnabled;
+    private final boolean allowUnsolicitedResponses;
+    private final boolean sessionIndexAutoLoginEnabled;
+
+    /**
+     * Initializes a new {@link DefaultConfig}.
+     */
+    private DefaultConfig(String providerName, String entityID, String acsURL, Binding logoutResponseBinding, String idpAuthnURL,
+            String idpEntityID, String idpLogoutURL, String slsURL, boolean supportSingleLogout, boolean enableMetadataService,
+            String logoutResponseTemplate, boolean autoLoginEnabled, boolean allowUnsolicitedResponses, boolean sessionIndexAutoLoginEnabled) {
+        super();
+        this.providerName = providerName;
+        this.entityID = entityID;
+        this.acsURL = acsURL;
+        this.logoutResponseBinding = logoutResponseBinding;
+        this.idpAuthnURL = idpAuthnURL;
+        this.idpEntityID = idpEntityID;
+        this.idpLogoutURL = idpLogoutURL;
+        this.slsURL = slsURL;
+        this.supportSingleLogout = supportSingleLogout;
+        this.enableMetadataService = enableMetadataService;
+        this.logoutResponseTemplate = logoutResponseTemplate;
+        this.autoLoginEnabled = autoLoginEnabled;
+        this.allowUnsolicitedResponses = allowUnsolicitedResponses;
+        this.sessionIndexAutoLoginEnabled = sessionIndexAutoLoginEnabled;
     }
 
     @Override
@@ -206,70 +247,14 @@ public class DefaultConfig implements SAMLConfig {
         return autoLoginEnabled;
     }
 
-    private void setProviderName(String providerName) {
-        this.providerName = providerName;
-    }
-
-    private void setEntityID(String entityID) {
-        this.entityID = entityID;
-    }
-
-    private void setAcsURL(String acsURL) {
-        this.acsURL = acsURL;
-    }
-
-    private void setSingleLogoutServiceURL(String slsURL) {
-        this.slsURL = slsURL;
-    }
-
-    private void setLogoutResponseBinding(Binding logoutResponseBinding) {
-        this.logoutResponseBinding = logoutResponseBinding;
-    }
-
-    private void setIdpEntityID(String idpEntityID) {
-        this.idpEntityID = idpEntityID;
-    }
-
-    private void setIdpURL(String idpURL) {
-        this.idpAuthnURL = idpURL;
-    }
-
-    private void setIdentityProviderLogoutURL(String idpLogoutURL) {
-        this.idpLogoutURL = idpLogoutURL;
-    }
-
-    private void setSupportSingleLogout(boolean supportSingleLogout) {
-        this.supportSingleLogout = supportSingleLogout;
-    }
-
-    private void setEnableMetadataService(boolean enableMetadataService) {
-        this.enableMetadataService = enableMetadataService;
-    }
-
-    private void setLogoutResponseTemplate(String logoutResponseTemplate) {
-        this.logoutResponseTemplate = logoutResponseTemplate;
-    }
-
-    private void setAutoLoginEnabled(boolean autoLoginEnabled) {
-        this.autoLoginEnabled = autoLoginEnabled;
-    }
-
     @Override
     public boolean isAllowUnsolicitedResponses() {
         return allowUnsolicitedResponses;
     }
 
-    public void setAllowUnsolicitedResponses(boolean allowUnsolicitedResponses) {
-        this.allowUnsolicitedResponses = allowUnsolicitedResponses;
-    }
-
     @Override
     public boolean isSessionIndexAutoLoginEnabled() {
         return sessionIndexAutoLoginEnabled;
-    }
-
-    private void setSessionIndexAutoLoginEnabled(boolean sessionIndexAutoLoginEnabled) {
-        this.sessionIndexAutoLoginEnabled = sessionIndexAutoLoginEnabled;
     }
 
     @Override

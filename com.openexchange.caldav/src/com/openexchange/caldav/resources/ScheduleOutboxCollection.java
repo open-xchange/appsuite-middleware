@@ -313,6 +313,11 @@ public class ScheduleOutboxCollection extends DAVCollection {
     }
 
     @Override
+    public String getSyncToken() throws WebdavProtocolException {
+        return "0";
+    }
+
+    @Override
     public AbstractResource getChild(String name) throws WebdavProtocolException {
         return null;
     }
