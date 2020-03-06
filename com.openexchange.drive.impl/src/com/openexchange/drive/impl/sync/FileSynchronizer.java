@@ -419,6 +419,10 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                     comparison.getClientVersion(), comparison.getServerVersion(), comparison, path));
                 return 1;
             } else {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Non-trivial conflicting change detected [root={}, path={}]:\n{}", 
+                        session.getRootFolderID(), path, dumpComparisonDetails(comparison));
+                }
                 /*
                  * keep both client- and server versions, let client first rename it's file...
                  */
