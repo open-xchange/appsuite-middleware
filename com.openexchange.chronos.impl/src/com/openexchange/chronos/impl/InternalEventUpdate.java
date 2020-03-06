@@ -923,7 +923,7 @@ public class InternalEventUpdate implements EventUpdate {
 
     /**
      * Resets the participation status of all individual attendees - excluding the current calendar user - to
-     * {@link ParticipationStatus#NEEDS_ACTION} for a specific event, including a previously set attendee comment.
+     * {@link ParticipationStatus#NEEDS_ACTION} for a specific event.
      *
      * @param attendees The event's attendees
      */
@@ -932,7 +932,6 @@ public class InternalEventUpdate implements EventUpdate {
             if (calendarUser.getEntity() != attendee.getEntity()) {
                 attendee.setPartStat(ParticipationStatus.NEEDS_ACTION); //TODO: or reset to initial partstat based on folder type?
                 attendee.setTimestamp(timestamp.getTime());
-                attendee.setComment(null);
                 attendee.setHidden(false);
                 continue;
             }
