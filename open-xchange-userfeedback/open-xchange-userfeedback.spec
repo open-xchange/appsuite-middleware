@@ -16,7 +16,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 67
+%define        ox_release 68
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -60,6 +60,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/lib/com.openexchange.userfeedback.clt.jar
 
 %changelog
+* Wed Feb 26 2020 Martin Schneider <martin.schneider@open-xchange.com>
+Build for patch 2020-03-02 (5624)
 * Mon Feb 03 2020 Martin Schneider <martin.schneider@open-xchange.com>
 Build for patch 2020-02-10 (5578)
 * Mon Dec 09 2019 Martin Schneider <martin.schneider@open-xchange.com>

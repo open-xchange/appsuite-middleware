@@ -125,7 +125,7 @@ public class DefaultDeferringURLServiceTest {
         resp.setOutputStream(servletOutputStream);
         resp.setCharacterEncoding("UTF-8");
 
-        DeferrerServlet deferrerServlet = new DeferrerServlet();
+        DeferrerServlet deferrerServlet = new DeferrerServlet(null);
         deferrerServlet.service(req, resp);
 
         int status = resp.getStatus();

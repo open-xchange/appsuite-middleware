@@ -55,6 +55,7 @@ import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.http.deferrer.CustomRedirectURLDetermination;
 import com.openexchange.http.deferrer.DeferringURLService;
@@ -62,6 +63,7 @@ import com.openexchange.http.deferrer.impl.DefaultDeferringURLService;
 import com.openexchange.http.deferrer.servlet.DeferrerServlet;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
+import com.openexchange.server.ServiceExceptionCode;
 
 /**
  * {@link HTTPDeferrerActivator}
@@ -74,7 +76,7 @@ public class HTTPDeferrerActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigViewFactory.class, ConfigurationService.class, HttpService.class, DispatcherPrefixService.class };
+        return new Class<?>[] { LeanConfigurationService.class, ConfigViewFactory.class, ConfigurationService.class, HttpService.class, DispatcherPrefixService.class };
     }
 
     @Override
@@ -85,7 +87,11 @@ public class HTTPDeferrerActivator extends HousekeepingActivator {
         final DispatcherPrefixService prefixService = getService(DispatcherPrefixService.class);
         DefaultDeferringURLService.PREFIX.set(prefixService);
         String alias = prefixService.getPrefix() + "defer";
-        getService(HttpService.class).registerServlet(alias, new DeferrerServlet(), null, null);
+        LeanConfigurationService leanConfigurationService = getService(LeanConfigurationService.class);
+        if(leanConfigurationService == null) {
+            throw ServiceExceptionCode.absentService(LeanConfigurationService.class);
+        }
+        getService(HttpService.class).registerServlet(alias, new DeferrerServlet(leanConfigurationService), null, null);
         this.alias = alias;
 
         registerService(DeferringURLService.class, new DefaultDeferringURLService() {

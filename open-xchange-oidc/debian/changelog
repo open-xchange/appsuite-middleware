@@ -1,3 +1,9 @@
+open-xchange-oidc (7.8.4-27) stable; urgency=medium
+
+  * Build for patch 2020-03-02 (5624)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 26 Feb 2020 11:22:08 +0000
+
 open-xchange-oidc (7.8.4-26) stable; urgency=medium
 
   * Build for patch 2020-02-10 (5578)
