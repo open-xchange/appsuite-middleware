@@ -388,9 +388,6 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
 
     @Override
     protected int processConflictingChange(IntermediateSyncResult<FileVersion> result, ThreeWayComparison<FileVersion> comparison) throws OXException {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Conflicting change detected [root={}, path={}]:\n{}", session.getRootFolderID(), path, dumpComparisonDetails(comparison));
-        }
         if (Change.DELETED == comparison.getServerChange() && Change.DELETED == comparison.getClientChange()) {
             /*
              * both deleted, just let client remove it's metadata
@@ -427,6 +424,10 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                     comparison.getClientVersion(), comparison.getServerVersion(), comparison, path));
                 return 1;
             } else {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Non-trivial conflicting change detected [root={}, path={}]:\n{}", 
+                        session.getRootFolderID(), path, dumpComparisonDetails(comparison));
+                }
                 /*
                  * keep both client- and server versions, let client first rename it's file...
                  */
