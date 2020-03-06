@@ -73,6 +73,7 @@ public interface DriveAction<T extends DriveVersion> extends Comparable<DriveAct
     static final String PARAMETER_STOP = "stop";
     static final String PARAMETER_ACKNOWLEDGE = "acknowledge";
     static final String PARAMETER_ROOT = "root";
+    static final String PARAMETER_NO_CHUNKS = "noChunks";
 
     static final String PARAMETER_DIRECT_LINK = "directLink";
     static final String PARAMETER_DIRECT_LINK_FRAGMENTS = "directLinkFragments";
@@ -85,7 +86,7 @@ public interface DriveAction<T extends DriveVersion> extends Comparable<DriveAct
         PARAMETER_PATH, PARAMETER_TOTAL_LENGTH, PARAMETER_OFFSET, PARAMETER_CONTENT_TYPE, PARAMETER_ERROR, PARAMETER_QUARANTINE,
         PARAMETER_MODIFIED, PARAMETER_CREATED, PARAMETER_RESET, PARAMETER_LENGTH, PARAMETER_STOP, PARAMETER_ACKNOWLEDGE,
         PARAMETER_DIRECT_LINK, PARAMETER_DIRECT_LINK_FRAGMENTS, PARAMETER_PREVIEW_LINK, PARAMETER_THUMBNAIL_LINK, PARAMETER_DATA,
-        PARAMETER_ROOT
+        PARAMETER_ROOT, PARAMETER_NO_CHUNKS
     );
 
     /**
