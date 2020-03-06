@@ -40,12 +40,15 @@ error:
 quarantine:
   type: boolean
   description: The flag to indicate whether the versions need to be excluded from synchronization.
+noChunks:
+  type: boolean
+  description: The flag to indicate that no partial uploads are possible due to missing support for temporary files.
 reset:
   type: boolean
   description: The flag to indicate whether locally stored checksums should be invalidated.
 stop:
   type: boolean
-  description: The flag to signal that the client should stop the current sychronization cycle.
+  description: The flag to signal that the client should stop the current synchronization cycle.
 acknowledge:
   type: boolean
   description: The flag to signal if the client should not update it's stored checksums when performing an `edit` action.
@@ -54,7 +57,7 @@ thumbnailLink:
   description: A direct link to a small thumbnail image of the file if available (deprecated, available until API version 2).
 previewLink:
   type: string
-  description: A direct link to a medium-sized preview image of the file if available (deprected, available until API version 2).
+  description: A direct link to a medium-sized preview image of the file if available (deprecated, available until API version 2).
 directLink:
   type: string
   description: A direct link to the detail view of the file in the web interface (deprecated, available until API version 2).
