@@ -130,14 +130,11 @@ public abstract class DAVCollection extends AbstractCollection {
     }
 
     /**
-     * Gets the collection's sync token based on the last modification timestamp.
+     * Gets the collection's sync token based.
      *
      * @return The sync token
      */
-    public String getSyncToken() throws WebdavProtocolException {
-        Date lastModified = getLastModified();
-        return null == lastModified ? "0" : String.valueOf(lastModified.getTime());
-    }
+    public abstract String getSyncToken() throws WebdavProtocolException;
 
     /**
      * Gets a child resource from this collection by name. If the resource

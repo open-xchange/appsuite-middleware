@@ -131,6 +131,11 @@ public class GroupPrincipalCollection extends DAVCollection {
     }
 
     @Override
+    public String getSyncToken() throws WebdavProtocolException {
+        return "0";
+    }
+
+    @Override
     public String getDisplayName() {
         return "Groups";
     }

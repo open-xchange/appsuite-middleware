@@ -205,22 +205,27 @@ public class TaskCopyTask implements CopyUserTaskService {
                                 final UserParticipant tmp = new UserParticipant(p.getIdentifier());
                                 tmp.setDisplayName(p.getDisplayName());
                                 tmp.setEmailAddress(p.getEmailAddress());
-                                final InternalParticipant internal = new InternalParticipant(tmp, null);
-                                internals.add(internal);
+                                internals.add(new InternalParticipant(tmp, null));
                             } else {
                                 final User user = service.getUser(p.getIdentifier(), srcCtx);
-                                final ExternalUserParticipant extParticipant = new ExternalUserParticipant(user.getMail());
-                                extParticipant.setDisplayName(user.getDisplayName());
-                                extParticipant.setIdentifier(p.getIdentifier());
-                                final ExternalParticipant ext = new ExternalParticipant(extParticipant);
-                                externals.add(ext);
+                                String emailAddress = user.getMail();
+                                if (emailAddress != null) {
+                                    // EMail address is required for an external participant
+                                    final ExternalUserParticipant extParticipant = new ExternalUserParticipant(emailAddress);
+                                    extParticipant.setDisplayName(user.getDisplayName());
+                                    extParticipant.setIdentifier(p.getIdentifier());
+                                    externals.add(new ExternalParticipant(extParticipant));
+                                }
                             }
                         } else if (p.getType() == Participant.EXTERNAL_USER) {
-                            final ExternalUserParticipant extParticipant = new ExternalUserParticipant(p.getEmailAddress());
-                            extParticipant.setDisplayName(p.getDisplayName());
-                            extParticipant.setIdentifier(p.getIdentifier());
-                            final ExternalParticipant ext = new ExternalParticipant(extParticipant);
-                            externals.add(ext);
+                            String emailAddress = p.getEmailAddress();
+                            if (emailAddress != null) {
+                                // EMail address is required for an external participant
+                                final ExternalUserParticipant extParticipant = new ExternalUserParticipant(emailAddress);
+                                extParticipant.setDisplayName(p.getDisplayName());
+                                extParticipant.setIdentifier(p.getIdentifier());
+                                externals.add(new ExternalParticipant(extParticipant));
+                            }
                         } else {
                             continue;
                         }
