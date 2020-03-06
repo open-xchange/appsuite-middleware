@@ -1,3 +1,9 @@
+open-xchange-passwordchange-script (7.10.1-28) stable; urgency=medium
+
+  * Build for patch 2020-03-02 (5621)
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 25 Feb 2020 14:05:45 +0000
+
 open-xchange-passwordchange-script (7.10.1-27) stable; urgency=medium
 
   * Build for patch 2020-02-10 (5570)
