@@ -337,7 +337,7 @@ Therefore, some information might currently get lost when converting a recurrenc
 
 # Reset of Participation Status
 
-Whenever an existing event with attendees is *rescheduled*, each attendee's participation status is reset to ``NEEDS-ACTION``. A reschedule occurs, when any ``DTSTART``, ``DTEND``, ``DURATION``, ``RRULE``, ``RDATE``, or ``EXDATE`` property changes such that existing recurrence instances are impacted by the changes (RFC 6638, 3.2.8) - i.e., whenever the period of an event changes. 
+Whenever an existing event with attendees is *rescheduled*, each attendee's participation status is reset to ``NEEDS-ACTION``. The optional comment, however, is persisted if present. A reschedule occurs, when any ``DTSTART``, ``DTEND``, ``DURATION``, ``RRULE``, ``RDATE``, or ``EXDATE`` property changes such that existing recurrence instances are impacted by the changes (RFC 6638, 3.2.8) - i.e., whenever the period of an event changes. 
 
 ## Internal Handling
 
