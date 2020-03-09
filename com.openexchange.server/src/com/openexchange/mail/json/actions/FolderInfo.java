@@ -63,6 +63,14 @@ import com.openexchange.mail.dataobjects.MailFolder;
  */
 class FolderInfo {
 
+    /**
+     * Yields the folder info for given arguments.
+     *
+     * @param fullName The full name; e.g. "INBOX/My Folder"
+     * @param folderStorage The associated folder storage
+     * @return The folder info
+     * @throws OXException If folder info cannot be returned
+     */
     static FolderInfo getFolderInfo(String fullName, IMailFolderStorage folderStorage) throws OXException {
         IMailFolderStorageEnhanced2 storageEnhanced2 = folderStorage.supports(IMailFolderStorageEnhanced2.class);
         if (null != storageEnhanced2) {
