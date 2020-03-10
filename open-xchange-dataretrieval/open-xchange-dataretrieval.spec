@@ -1,17 +1,6 @@
 %define __jar_repack %{nil}
 Name:          open-xchange-dataretrieval
 BuildArch:     noarch
-%if 0%{?rhel_version} && 0%{?rhel_version} >= 700
-BuildRequires: ant
-%else
-BuildRequires: ant-nodeps
-%endif
-BuildRequires: open-xchange-core
-%if 0%{?suse_version}
-BuildRequires: java-1_8_0-openjdk-devel
-%else
-BuildRequires: java-1.8.0-openjdk-devel
-%endif
 Version:       @OXVERSION@
 %define        ox_release 0
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>

@@ -1,20 +1,8 @@
 %define __jar_repack %{nil}
 %define use_systemd (0%{?rhel} && 0%{?rhel} >= 7) || (0%{?suse_version} && 0%{?suse_version} >=1210)
+
 Name:             open-xchange
 BuildArch:        noarch
-%if 0%{?rhel_version} && 0%{?rhel_version} >= 700
-BuildRequires:    ant
-%else
-BuildRequires:    ant-nodeps
-%endif
-%if 0%{?suse_version}
-BuildRequires: java-1_8_0-openjdk-devel
-%else
-BuildRequires: java-1.8.0-openjdk-devel
-%endif
-%if (0%{?suse_version} && 0%{?suse_version} >= 1210)
-BuildRequires:    systemd-rpm-macros
-%endif
 Version:          @OXVERSION@
 %define           ox_release 0
 Release:          %{ox_release}_<CI_CNT>.<B_CNT>
