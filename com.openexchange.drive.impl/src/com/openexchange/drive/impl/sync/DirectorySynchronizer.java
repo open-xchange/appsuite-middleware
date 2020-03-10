@@ -330,7 +330,7 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion> {
                     /*
                      * conflicting change of identical, but non-empty directory, let client sync directory to acknowledge the contents
                      */
-                    result.addActionForClient(new SyncDirectoryAction(comparison.getServerVersion(), comparison));
+                    result.addActionForClient(new SyncDirectoryAction(comparison.getClientVersion(), comparison));
                     return 1;
                 } else {
                     return 0;
