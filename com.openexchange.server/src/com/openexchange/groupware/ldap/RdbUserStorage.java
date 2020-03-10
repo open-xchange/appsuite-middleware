@@ -689,6 +689,20 @@ public class RdbUserStorage extends UserStorage {
         setAttributeAndReturnUser(name, value, userId, context, false);
     }
 
+    @Override
+    public void setAttribute(Connection con, String name, String value, int userId, Context context) throws OXException {
+        if (value == null) {
+            deleteAttribute(name, userId, context, con);
+        } else {
+            insertOrUpdateAttribute(name, value, userId, context, con);
+        }
+    }
+
+    @Override
+    public void setAttribute(Connection con, String name, String value, int userId, Context context, boolean invalidate) throws OXException {
+        setAttribute(con, name, value, userId, context);
+    }
+
     /**
      * Stores an internal user attribute. Internal user attributes must not be exposed to clients through the HTTP/JSON API.
      * <p>

@@ -6,7 +6,7 @@ BuildRequires: ant
 BuildRequires: ant-nodeps
 BuildRequires: java-devel >= 1.6.0
 Version:	   @OXVERSION@
-%define        ox_release 49
+%define        ox_release 50
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GNU General Public License (GPL)
@@ -69,6 +69,8 @@ exit 0
 %config(noreplace) /etc/munin/plugin-conf.d/*
 
 %changelog
+* Tue Mar 03 2020 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2020-03-06 (5637)
 * Wed Jan 08 2020 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2020-01-13 (5537)
 * Tue Jul 09 2019 Carsten Hoeger <choeger@open-xchange.com>
