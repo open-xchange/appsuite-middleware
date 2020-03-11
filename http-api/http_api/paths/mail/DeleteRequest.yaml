@@ -21,7 +21,7 @@
           type: boolean
       - in: query
         name: returnAffectedFolders
-        description: 'Flag to generate an JSON reponse as described below. If set to `false` just an empty JSON Array is returned.'
+        description: 'Flag to generate an JSON response as described below. If set to `false` just an empty JSON Array is returned.'
         required: false
         schema:
           type: boolean

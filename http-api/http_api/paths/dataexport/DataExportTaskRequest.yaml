@@ -31,7 +31,7 @@
           application/json:
             schema:
               type: object
-              title: cancelDataExportTaskReponse
+              title: cancelDataExportTaskResponse
               properties:
                 success:
                   type: boolean
@@ -62,7 +62,7 @@
           application/json:
             schema:
               type: object
-              title: submitDataExportTaskReponse
+              title: submitDataExportTaskResponse
               properties:
                 success:
                   type: boolean
