@@ -51,20 +51,28 @@ package com.openexchange.socketio.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
+import javax.management.NotCompliantMBeanException;
+import javax.servlet.ServletException;
 import org.osgi.service.http.HttpService;
+import org.osgi.service.http.NamespaceException;
 import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.management.ManagementService;
 import com.openexchange.management.osgi.HousekeepingManagementTracker;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.socketio.monitoring.SocketIOMBean;
 import com.openexchange.socketio.monitoring.impl.SocketIOMBeanImpl;
 import com.openexchange.socketio.server.SocketIOManager;
+import com.openexchange.socketio.server.io.socket.WebSocketRegistry;
 import com.openexchange.socketio.websocket.WsSocketIOServlet;
 import com.openexchange.socketio.websocket.WsTransport;
 import com.openexchange.socketio.websocket.WsTransportConnectionRegistry;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
 import com.openexchange.websockets.WebSocketListener;
+import io.socket.engineio.server.EngineIoServer;
+import io.socket.engineio.server.EngineIoServerOptions;
+import io.socket.socketio.server.SocketIoServer;
 
 /**
  * {@link SocketIoActivator}
@@ -74,8 +82,12 @@ import com.openexchange.websockets.WebSocketListener;
  */
 public class SocketIoActivator extends HousekeepingActivator {
 
+    private boolean startNewServer;
+
     private WsTransportConnectionRegistry connectionRegistry;
     private ServiceTracker<ManagementService, ManagementService> mgmtTracker;
+
+    private WebSocketRegistry registry;
 
     /**
      * Initializes a new {@link SocketIoActivator}.
@@ -91,11 +103,60 @@ public class SocketIoActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HttpService.class, TimerService.class, ThreadPoolService.class };
+        return new Class<?>[] { HttpService.class, TimerService.class, ThreadPoolService.class, ConfigurationService.class };
     }
 
     @Override
     protected synchronized void startBundle() throws Exception {
+        ConfigurationService configurationService = getService(ConfigurationService.class);
+        boolean startNewServer = configurationService.getBoolProperty("com.openexchange.socketio.startNewServer", false);
+        this.startNewServer = startNewServer;
+
+        if (startNewServer) {
+            startSocketIOServer();
+        } else {
+            startOldSocketIOServer();
+        }
+    }
+
+    @Override
+    protected synchronized void stopBundle() throws Exception {
+        boolean startNewServer = this.startNewServer;
+
+        if (startNewServer) {
+            stopSocketIOServer();
+        } else {
+            stopOldSocketIOServer();
+        }
+
+        super.stopBundle();
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    private void startSocketIOServer() {
+        EngineIoServer engineIoServer =  new EngineIoServer(EngineIoServerOptions.newFromDefault());
+        SocketIoServer socketIoServer = new SocketIoServer(engineIoServer);
+
+        WebSocketRegistry registry = new WebSocketRegistry(socketIoServer, engineIoServer);
+        this.registry = registry;
+        registerService(WebSocketListener.class, registry);
+    }
+
+    private void stopSocketIOServer() {
+        WebSocketRegistry registry = this.registry;
+        if (registry != null) {
+            this.registry = null;
+            registry.shutDown();
+        }
+
+        HttpService httpService = getService(HttpService.class);
+        if (null != httpService) {
+            httpService.unregister("/socket.io");
+        }
+    }
+
+    private void startOldSocketIOServer() throws ServletException, NamespaceException, NotCompliantMBeanException {
         TimerService timerService = getService(TimerService.class);
 
         WsTransportConnectionRegistry connectionRegistry = new WsTransportConnectionRegistry();
@@ -117,8 +178,7 @@ public class SocketIoActivator extends HousekeepingActivator {
         this.mgmtTracker = mgmtTracker;
     }
 
-    @Override
-    protected synchronized void stopBundle() throws Exception {
+    private void stopOldSocketIOServer() {
         ServiceTracker<ManagementService, ManagementService> mgmtTracker = this.mgmtTracker;
         if (null != mgmtTracker) {
             this.mgmtTracker = null;
@@ -135,8 +195,6 @@ public class SocketIoActivator extends HousekeepingActivator {
         if (null != httpService) {
             httpService.unregister("/socket.io");
         }
-
-        super.stopBundle();
     }
 
 }
