@@ -187,7 +187,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
                 stringBuilder.append(" AND triggerDate<?");
             }
             if (null != from) {
-                stringBuilder.append(" AND (recurrence IS NULL OR triggerDate>=?)");
+                stringBuilder.append(" AND (recurrence IS NOT NULL OR triggerDate>=?)");
             }
             stringBuilder.append(" ORDER BY triggerDate");
 

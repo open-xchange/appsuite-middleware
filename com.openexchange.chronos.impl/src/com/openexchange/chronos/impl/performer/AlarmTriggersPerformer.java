@@ -187,7 +187,7 @@ public class AlarmTriggersPerformer extends AbstractQueryPerformer {
                         /*
                          * shift the trigger to a more recent occurrence if trigger time is before requested range as needed
                          */
-                        if (iterator.hasNext() && null != rangeFrom && rangeFrom.after(new Date(l(trigger.getTime())))) {
+                        if (recurrenceIterator.hasNext() && null != rangeFrom && rangeFrom.after(new Date(l(trigger.getTime())))) {
                             Alarm alarm = storage.getAlarmStorage().loadAlarm(i(trigger.getAlarm()));
                             if (null == alarm) {
                                 throw CalendarExceptionCodes.ALARM_NOT_FOUND.create(trigger.getAlarm(), trigger.getEventId());
