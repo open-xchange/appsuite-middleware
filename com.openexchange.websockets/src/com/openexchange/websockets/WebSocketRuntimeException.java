@@ -49,37 +49,27 @@
 
 package com.openexchange.websockets;
 
+
 /**
- * {@link WebSocketListener} - A Web Socket listener for receiving various call-backs on certain Web Socket events.
- * <p>
- * Listeners simply need to be OSGi-wise registered.
+ * {@link WebSocketRuntimeException}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.3
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.10.4
  */
-public interface WebSocketListener {
+public class WebSocketRuntimeException extends RuntimeException {
 
-    /**
-     * Invoked when a new session-bound Web Socket gets connected
-     *
-     * @param socket The connected Web Socket
-     * @throws WebSocketConnectException to abort the client handshake with an HTTP error
-     */
-    void onWebSocketConnect(WebSocket socket);
+    private static final long serialVersionUID = 3803312530641370688L;
 
-    /**
-     * Invoked when an existing session-bound Web Socket is about to be closed
-     *
-     * @param socket The socket to close
-     */
-    void onWebSocketClose(WebSocket socket);
+    public WebSocketRuntimeException(String message) {
+        super(message);
+    }
 
-    /**
-     * Invoked when {@link WebSocket#onMessage(String)} has been called on a  particular {@link WebSocket} instance.
-     *
-     * @param socket The {@link WebSocket} that received a message.
-     * @param text The message received.
-     */
-    void onMessage(WebSocket socket, String text);
+    public WebSocketRuntimeException(String message, Throwable t) {
+        super(message, t);
+    }
+
+    public WebSocketRuntimeException(Throwable t) {
+        super(t);
+    }
 
 }

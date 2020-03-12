@@ -47,39 +47,59 @@
  *
  */
 
-package com.openexchange.websockets;
+package com.openexchange.socketio.server.io.socket;
+
+import com.openexchange.websockets.IndividualWebSocketListener;
+import com.openexchange.websockets.WebSocket;
+import com.openexchange.websockets.WebSocketListener;
+import io.socket.engineio.server.EngineIoServer;
+import io.socket.engineio.server.EngineIoServerOptions;
+import io.socket.socketio.server.SocketIoServer;
+
 
 /**
- * {@link WebSocketListener} - A Web Socket listener for receiving various call-backs on certain Web Socket events.
- * <p>
- * Listeners simply need to be OSGi-wise registered.
+ * {@link SocketIOWebSocketBridge}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.3
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.10.4
  */
-public interface WebSocketListener {
+public class SocketIOWebSocketBridge implements IndividualWebSocketListener {
+
+    private final EngineIoServer engineIoServer;
+    private final SocketIoServer socketIoServer;
 
     /**
-     * Invoked when a new session-bound Web Socket gets connected
-     *
-     * @param socket The connected Web Socket
-     * @throws WebSocketConnectException to abort the client handshake with an HTTP error
+     * Initializes a new {@link SocketIOWebSocketBridge}.
      */
-    void onWebSocketConnect(WebSocket socket);
+    public SocketIOWebSocketBridge() {
+        super();
+        this.engineIoServer = new EngineIoServer(EngineIoServerOptions.newFromDefault());
+        socketIoServer = new SocketIoServer(engineIoServer);
+    }
 
-    /**
-     * Invoked when an existing session-bound Web Socket is about to be closed
-     *
-     * @param socket The socket to close
-     */
-    void onWebSocketClose(WebSocket socket);
+    @Override
+    public void onWebSocketConnect(WebSocket socket) {
+        throw new IllegalAccessError();
+    }
 
-    /**
-     * Invoked when {@link WebSocket#onMessage(String)} has been called on a  particular {@link WebSocket} instance.
-     *
-     * @param socket The {@link WebSocket} that received a message.
-     * @param text The message received.
-     */
-    void onMessage(WebSocket socket, String text);
+    @Override
+    public void onWebSocketClose(WebSocket socket) {
+        throw new IllegalAccessError();
+
+    }
+
+    @Override
+    public void onMessage(WebSocket socket, String text) {
+        throw new IllegalAccessError();
+    }
+
+    @Override
+    public WebSocketListener newInstance() {
+        return new SocketIOSocketAdapter(engineIoServer, socketIoServer);
+    }
+
+    public void shutDown() {
+        // TODO: do we need to close all created instances on bundle shutdown?
+    }
 
 }

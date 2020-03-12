@@ -63,12 +63,13 @@ import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.socketio.monitoring.SocketIOMBean;
 import com.openexchange.socketio.monitoring.impl.SocketIOMBeanImpl;
 import com.openexchange.socketio.server.SocketIOManager;
-import com.openexchange.socketio.server.io.socket.WebSocketRegistry;
+import com.openexchange.socketio.server.io.socket.SocketIOWebSocketBridge;
 import com.openexchange.socketio.websocket.WsSocketIOServlet;
 import com.openexchange.socketio.websocket.WsTransport;
 import com.openexchange.socketio.websocket.WsTransportConnectionRegistry;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
+import com.openexchange.websockets.IndividualWebSocketListener;
 import com.openexchange.websockets.WebSocketListener;
 
 /**
@@ -84,7 +85,7 @@ public class SocketIoActivator extends HousekeepingActivator {
     private WsTransportConnectionRegistry connectionRegistry;
     private ServiceTracker<ManagementService, ManagementService> mgmtTracker;
 
-    private WebSocketRegistry registry;
+    private SocketIOWebSocketBridge bridge;
 
     /**
      * Initializes a new {@link SocketIoActivator}.
@@ -132,16 +133,16 @@ public class SocketIoActivator extends HousekeepingActivator {
     // -------------------------------------------------------------------------------------------------------------------------------------
 
     private void startSocketIOServer() {
-        WebSocketRegistry registry = new WebSocketRegistry();
-        this.registry = registry;
-        registerService(WebSocketListener.class, registry);
+        SocketIOWebSocketBridge bridge = new SocketIOWebSocketBridge();
+        this.bridge = bridge;
+        registerService(IndividualWebSocketListener.class, bridge);
     }
 
     private void stopSocketIOServer() {
-        WebSocketRegistry registry = this.registry;
-        if (registry != null) {
-            this.registry = null;
-            registry.shutDown();
+        SocketIOWebSocketBridge bridge = this.bridge;
+        if (bridge != null) {
+            this.bridge = null;
+            bridge.shutDown();
         }
     }
 

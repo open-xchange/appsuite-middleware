@@ -50,36 +50,56 @@
 package com.openexchange.websockets;
 
 /**
- * {@link WebSocketListener} - A Web Socket listener for receiving various call-backs on certain Web Socket events.
- * <p>
- * Listeners simply need to be OSGi-wise registered.
+ * This exception is meant to be thrown during {@link WebSocketListener#onWebSocketConnect(WebSocket)}
+ * to abort the websocket handshake between server and client.
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.3
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.10.4
  */
-public interface WebSocketListener {
+public class WebSocketConnectException extends WebSocketRuntimeException {
+
+    private static final long serialVersionUID = -167921331329598079L;
+
+    private final int code;
 
     /**
-     * Invoked when a new session-bound Web Socket gets connected
+     * Initializes a new {@link WebSocketConnectException}.
      *
-     * @param socket The connected Web Socket
-     * @throws WebSocketConnectException to abort the client handshake with an HTTP error
+     * @param message The message
      */
-    void onWebSocketConnect(WebSocket socket);
+    public WebSocketConnectException(String message) {
+        this(500, message);
+    }
 
     /**
-     * Invoked when an existing session-bound Web Socket is about to be closed
+     * Initializes a new {@link WebSocketConnectException}.
      *
-     * @param socket The socket to close
+     * @param code The HTTP status code to abort the handshake with
+     * @param message The message
      */
-    void onWebSocketClose(WebSocket socket);
+    public WebSocketConnectException(int code, String message) {
+        this(code, message, null);
+    }
 
     /**
-     * Invoked when {@link WebSocket#onMessage(String)} has been called on a  particular {@link WebSocket} instance.
+     * Initializes a new {@link WebSocketConnectException}.
      *
-     * @param socket The {@link WebSocket} that received a message.
-     * @param text The message received.
+     * @param code The HTTP status code to abort the handshake with
+     * @param message The message
+     * @param cause The cause
      */
-    void onMessage(WebSocket socket, String text);
+    public WebSocketConnectException(int code, String message, Throwable cause) {
+        super(message, cause);
+        this.code = code;
+    }
+
+    /**
+     * Get the error code.
+     *
+     * @return the error code.
+     */
+    public int getCode() {
+        return code;
+    }
 
 }

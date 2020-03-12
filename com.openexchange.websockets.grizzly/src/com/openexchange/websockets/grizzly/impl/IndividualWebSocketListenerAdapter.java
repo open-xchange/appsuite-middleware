@@ -72,7 +72,16 @@ public class IndividualWebSocketListenerAdapter extends WebSocketListenerAdapter
      * @return The new adapter
      */
     public WebSocketListenerAdapter newAdapter() {
-        return new WebSocketListenerAdapter(((IndividualWebSocketListener) webSocketListener).newInstance());
+        return new WebSocketListenerAdapter(((IndividualWebSocketListener) webSocketListener).newInstance(), this);
+    }
+
+    /**
+     * Gets the runtime class of the adapted {@link com.openexchange.websockets.IndividualWebSocketListener}.
+     *
+     * @return The runtime class
+     */
+    public Class<? extends IndividualWebSocketListener> getListenerClass() {
+        return ((IndividualWebSocketListener) webSocketListener).getClass();
     }
 
 }
