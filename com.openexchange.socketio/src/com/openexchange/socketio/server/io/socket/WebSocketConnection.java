@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -62,34 +63,42 @@ import com.openexchange.socketio.protocol.SocketIOProtocol;
 import com.openexchange.websockets.MessageTranscoder;
 import com.openexchange.websockets.WebSocket;
 import io.socket.engineio.server.EngineIoWebSocket;
-import io.socket.socketio.server.SocketIoNamespace;
-import io.socket.socketio.server.SocketIoServer;
+import io.socket.socketio.server.SocketIoSocket;
 
 /**
- * {@link WebSocketHandler} - Socket.IO adapter for WebSocket.
+ * {@link WebSocketConnection} - Represents an Engine.IO Web Socket connection.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.4
  */
-public class WebSocketHandler extends EngineIoWebSocket implements MessageTranscoder {
+public class WebSocketConnection extends EngineIoWebSocket implements MessageTranscoder {
 
     /** Simple class to delay initialization until needed */
     private static class LoggerHolder {
-        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(WebSocketHandler.class);
+        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(WebSocketConnection.class);
     }
 
-    private final SocketIoServer socketIoServer;
+    private final AtomicReference<SocketIoSocket> socketRef;
     private volatile WebSocket endpoint;
     private final Map<String, String> query;
 
     /**
-     * Initializes a new {@link WebSocketHandler}.
+     * Initializes a new {@link WebSocketConnection}.
      */
-    public WebSocketHandler(WebSocket socket, SocketIoServer socketIoServer) {
+    public WebSocketConnection(WebSocket socket) {
         super();
+        socketRef = new AtomicReference<>(null);
         this.endpoint = socket;
-        this.socketIoServer = socketIoServer;
         query = socket.getParameters();
+    }
+
+    /**
+     * Sets the Socket.IO socket.
+     *
+     * @param socket The socket to set
+     */
+    public void setSocketIoSocket(SocketIoSocket socket) {
+        socketRef.set(socket);
     }
 
     /**
@@ -162,10 +171,15 @@ public class WebSocketHandler extends EngineIoWebSocket implements MessageTransc
 
     @Override
     public String onOutboundMessage(WebSocket socket, String message) {
+        SocketIoSocket socketIoSocket = socketRef.get();
+        if (socketIoSocket == null) {
+            LoggerHolder.LOG.warn("Missing Socket.IO socket");
+            return message;
+        }
+
         String ns = SocketIOProtocol.DEFAULT_NAMESPACE;
         String name;
         Object[] args;
-
         try {
             JSONObject jEvent = new JSONObject(message);
             name = jEvent.getString("name");
@@ -177,8 +191,7 @@ public class WebSocketHandler extends EngineIoWebSocket implements MessageTransc
             return message;
         }
 
-        SocketIoNamespace namespace = socketIoServer.namespace(ns);
-        namespace.broadcast((String[]) null, name, args);
+        socketIoSocket.send(name, args);
         return null;
     }
 

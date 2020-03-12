@@ -70,9 +70,6 @@ import com.openexchange.socketio.websocket.WsTransportConnectionRegistry;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
 import com.openexchange.websockets.WebSocketListener;
-import io.socket.engineio.server.EngineIoServer;
-import io.socket.engineio.server.EngineIoServerOptions;
-import io.socket.socketio.server.SocketIoServer;
 
 /**
  * {@link SocketIoActivator}
@@ -135,10 +132,7 @@ public class SocketIoActivator extends HousekeepingActivator {
     // -------------------------------------------------------------------------------------------------------------------------------------
 
     private void startSocketIOServer() {
-        EngineIoServer engineIoServer =  new EngineIoServer(EngineIoServerOptions.newFromDefault());
-        SocketIoServer socketIoServer = new SocketIoServer(engineIoServer);
-
-        WebSocketRegistry registry = new WebSocketRegistry(socketIoServer, engineIoServer);
+        WebSocketRegistry registry = new WebSocketRegistry();
         this.registry = registry;
         registerService(WebSocketListener.class, registry);
     }
@@ -148,11 +142,6 @@ public class SocketIoActivator extends HousekeepingActivator {
         if (registry != null) {
             this.registry = null;
             registry.shutDown();
-        }
-
-        HttpService httpService = getService(HttpService.class);
-        if (null != httpService) {
-            httpService.unregister("/socket.io");
         }
     }
 

@@ -52,11 +52,14 @@ package com.openexchange.socketio.server.io.socket;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.slf4j.Logger;
+import org.slf4j.MDC;
 import com.openexchange.websockets.ConnectionId;
 import com.openexchange.websockets.WebSocket;
 import com.openexchange.websockets.WebSocketListener;
 import io.socket.engineio.server.EngineIoServer;
+import io.socket.engineio.server.EngineIoServerOptions;
 import io.socket.socketio.server.SocketIoServer;
+import io.socket.socketio.server.SocketIoSocket;
 
 /**
  * {@link WebSocketRegistry} - Socket.IO adapter for WebSocket.
@@ -72,17 +75,34 @@ public class WebSocketRegistry implements WebSocketListener {
     }
 
     private final EngineIoServer engineIoServer;
-    private final SocketIoServer socketIoServer;
-    private final ConcurrentMap<ConnectionId, WebSocketHandler> handlers;
+    private final ConcurrentMap<ConnectionId, WebSocketConnection> connections;
 
     /**
      * Initializes a new {@link WebSocketRegistry}.
      */
-    public WebSocketRegistry(SocketIoServer socketIoServer, EngineIoServer engineIoServer) {
+    public WebSocketRegistry() {
         super();
-        this.socketIoServer = socketIoServer;
+        // Initialize Engine.IO server
+        EngineIoServer engineIoServer =  new EngineIoServer(EngineIoServerOptions.newFromDefault());
         this.engineIoServer = engineIoServer;
-        handlers = new ConcurrentHashMap<ConnectionId, WebSocketHandler>(128, 0.9F, 1);
+
+        // Initialize Socket.IO server
+        SocketIoServer socketIoServer = new SocketIoServer(engineIoServer);
+
+        // Initialize mapping
+        final ConcurrentMap<ConnectionId, WebSocketConnection> connections = new ConcurrentHashMap<>(128, 0.9F, 1);
+        this.connections = connections;
+
+        // Register listener
+        socketIoServer.namespace("/").on("connection", args -> {
+            final SocketIoSocket socket = (SocketIoSocket) args[0];
+
+            String sConnectionId = MDC.get("socketio.connectionid");
+            if (sConnectionId != null) {
+                WebSocketConnection webSocketConnection = connections.get(ConnectionId.newInstance(sConnectionId));
+                webSocketConnection.setSocketIoSocket(socket);
+            }
+        });
     }
 
     private boolean isAppropriateWebSocket(WebSocket socket) {
@@ -90,27 +110,38 @@ public class WebSocketRegistry implements WebSocketListener {
         return (null != path && path.startsWith("/socket.io"));
     }
 
-    /* WebSocketListener */
-
     @Override
     public void onWebSocketConnect(WebSocket socket) {
         if (!isAppropriateWebSocket(socket)) {
             return;
         }
 
-        WebSocketHandler handler = new WebSocketHandler(socket, socketIoServer);
-        handlers.put(socket.getConnectionId(), handler);
-        socket.setMessageTranscoder(handler);
-        engineIoServer.handleWebSocket(handler);
+        // Create connection instance for accepted Web Socket
+        WebSocketConnection connection = new WebSocketConnection(socket);
+        connections.put(socket.getConnectionId(), connection);
 
+        // Initialize & connect connection instance
+        boolean error = true;
+        try {
+            socket.setMessageTranscoder(connection);
 
+            // Connect...
+            MDC.put("socketio.connectionid", socket.getConnectionId().getId());
+            engineIoServer.handleWebSocket(connection);
+            error = false;
+        } finally {
+            MDC.remove("socketio.connectionid");
+            if (error) {
+                connections.remove(socket.getConnectionId());
+            }
+        }
     }
 
     @Override
     public void onWebSocketClose(WebSocket socket) {
-        WebSocketHandler handler = handlers.remove(socket.getConnectionId());
-        if (handler != null) {
-            handler.onWebSocketClose();
+        WebSocketConnection connection = connections.remove(socket.getConnectionId());
+        if (connection != null) {
+            connection.onWebSocketClose();
         }
     }
 
@@ -123,10 +154,10 @@ public class WebSocketRegistry implements WebSocketListener {
      * Shuts-down this registry.
      */
     public void shutDown() {
-        for (WebSocketHandler handler : handlers.values()) {
-            String connectionId = handler.getEndpoint().getConnectionId().getId();
+        for (WebSocketConnection connection : connections.values()) {
+            String connectionId = connection.getEndpoint().getConnectionId().getId();
             try {
-                handler.onWebSocketClose();
+                connection.onWebSocketClose();
             } catch (Exception e) {
                 LoggerHolder.LOG.warn("Failed to close Web Socket {}", connectionId, e);
             }
