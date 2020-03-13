@@ -21,7 +21,7 @@ The first level is introduced with this feature
 ## Level 1 - General configuration
 
 To be able to configure all HTTP clients without a specific namespace, general properties were introduced. 
-Those general properties will begin with `com.openexchange.httpclients` and can be extended with the property to set. 
+Those general properties will begin with `com.openenexchange.httpclient` and can be extended with the property to set. 
 Following list covers all properties that can be set, with their default values:
 
 ```
@@ -41,18 +41,18 @@ Properties defined with this manner will be applied to all HTTP clients configur
 ## Level 2 - Legacy properties
 
 Previous versions of the Open Xchange Server had problematically defaults for HTT clients. 
-These defaults will still be applied on top of the default configuration, efficiently overwrite the defaults set with `com.openexchange.httpclients.*`.
+These defaults will still be applied on top of the default configuration, efficiently overwrite the defaults set with `com.openenexchange.httpclient.*`.
 This will avoid that HTTP clients will change their behavior when updating from a version 7.10.3 or earlier.
 To make those problematically defaults visible, they got documented [here](https://documentation.open-xchange.com/components/middleware/config/latest/#mode=features&feature=HTTP%20Client%20Configuration%20legacy%20values)
 
 Further previous version of the Open Xchange Server have already properties configuring HTTP clients. 
 Just to given an example, the configuration for the iCAL feed feature can be found [here](https://documentation.open-xchange.com/components/middleware/config/latest/#mode=tags&tag=ICal%20Calendar%20Provider). 
-These properties will stay untouched and will overwrite the defaults set with {{com.openexchange.httpclients.*}}, like described above, too.
+These properties will stay untouched and will overwrite the defaults set with {{com.openenexchange.httpclient.*}}, like described above, too.
 
 ## Level 3 - Client specific configuration
 
-To be able to configure special clients, it possible to add a client identifier to `com.openexchange.httpclients.*`. 
-Frankly speaking, it is possible to configure clients with e.g. `com.openexchange.httpclients.icalfeed.*`, overwriting the default configuration. 
+To be able to configure special clients, it possible to add a client identifier to `com.openenexchange.httpclient.*`. 
+Frankly speaking, it is possible to configure clients with e.g. `com.openenexchange.httpclient.icalfeed.*`, overwriting the default configuration. 
 This specialized configuration always "wins". It will be applied on top of all other configuration.
 The list of all available client identifier can be found below.
 
