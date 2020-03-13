@@ -94,6 +94,7 @@ import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.filestore.FileStorageUnregisterListenerRegistry;
 import com.openexchange.groupware.filestore.FileLocationHandler;
+import com.openexchange.groupware.userconfiguration.PermissionConfigurationChecker;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
@@ -154,6 +155,7 @@ public class AdminActivator extends HousekeepingActivator {
         track(CacheService.class, new RegistryServiceTrackerCustomizer<CacheService>(context, AdminServiceRegistry.getInstance(), CacheService.class));
         track(CapabilityService.class, new RegistryServiceTrackerCustomizer<CapabilityService>(context, AdminServiceRegistry.getInstance(), CapabilityService.class));
         track(SessiondService.class, new RegistryServiceTrackerCustomizer<SessiondService>(context, AdminServiceRegistry.getInstance(), SessiondService.class));
+        track(PermissionConfigurationChecker.class, new RegistryServiceTrackerCustomizer<PermissionConfigurationChecker>(context, AdminServiceRegistry.getInstance(), PermissionConfigurationChecker.class));
         track(Remote.class, new OXContextInterfaceTracker(context)).open();
         UserServiceInterceptorRegistry interceptorRegistry = new UserServiceInterceptorRegistry(context);
         track(UserServiceInterceptor.class, interceptorRegistry);

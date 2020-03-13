@@ -78,6 +78,7 @@ import com.openexchange.lock.impl.AccessControlImplTest;
     com.openexchange.mail.utils.MsisdnUtilityTest.class,
     com.openexchange.groupware.userconfiguration.AllowAllUserConfigurationTest.class,
     com.openexchange.groupware.userconfiguration.UserConfigurationTest.class,
+    com.openexchange.groupware.userconfiguration.PermissionConfigurationCheckerTest.class,
     com.openexchange.mail.api.MailConfigTest.class,
     com.openexchange.mail.mime.ContentDispositionTest.class,
     com.openexchange.mail.mime.ContentTypeTest.class,

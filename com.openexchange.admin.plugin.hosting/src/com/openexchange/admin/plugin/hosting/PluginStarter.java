@@ -83,7 +83,7 @@ public class PluginStarter {
             Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
             properties.put("RMIName", com.openexchange.admin.rmi.OXContextInterface.RMI_NAME);
             services.add(context.registerService(Remote.class, oxctx_v2, properties));
-            
+
             // Register RMI interface for ContextGroup
             properties = new Hashtable<String, Object>(2);
             properties.put("RMIName", OXContextGroupInterface.RMI_NAME);

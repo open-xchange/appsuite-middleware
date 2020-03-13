@@ -62,6 +62,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
@@ -298,6 +299,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             }
             log(LogLevel.DEBUG, LOGGER, credentials, ctx.getIdAsString(), null, "{} - {} | {}", ctx, capasToAdd.toString(), capasToRemove.toString());
             checkExistence(ctx);
+            checkCapabilities(Optional.ofNullable(capsToAdd), Optional.ofNullable(capsToRemove));
 
             // Trigger plugin extensions
             {
@@ -312,7 +314,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
             oxcox.changeCapabilities(ctx, capasToAdd, capasToRemove, capasToDrop, auth);
         } catch (PluginException e) {
-            throw logAndReturnException(LOGGER, StorageException.wrapForRMI(e), credentials, null != ctx ? ctx.getIdAsString() : null);
+            throw logAndReturnException(LOGGER, StorageException.wrapForRMI(e), credentials, ctx.getIdAsString());
         } catch (Throwable e) {
             logAndEnhanceException(e, credentials, ctx);
             throw e;
@@ -330,6 +332,9 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         try {
             Credentials auth = credentials == null ? new Credentials("", "") : credentials;
             BasicAuthenticator.createPluginAwareAuthenticator().doAuthentication(auth);
+
+            checkUserAttributes(ctx.getUserAttributes());
+
             validateloginmapping(ctx);
 
             callBeforeDbLookupPluginMethods(new Context[] { ctx }, credentials);

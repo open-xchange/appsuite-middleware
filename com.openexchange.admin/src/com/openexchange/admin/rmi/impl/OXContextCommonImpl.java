@@ -114,6 +114,8 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
         }
 
         GenericChecks.checkValidMailAddress(admin_user.getPrimaryEmail());
+
+        checkUserAttributes(admin_user);
     }
 
     protected abstract Context createmaincall(final Context ctx, final User admin_user, Database db, UserModuleAccess access, final Credentials auth, SchemaSelectStrategy schemaSelectStrategy) throws StorageException, InvalidDataException, ContextExistsException;

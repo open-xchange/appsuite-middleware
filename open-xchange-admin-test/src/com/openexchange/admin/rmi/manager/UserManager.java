@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.rmi.manager;
 
+import java.util.Set;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -69,7 +70,7 @@ public class UserManager extends AbstractManager {
 
     /**
      * Gets the instance of the {@link UserManager}
-     * 
+     *
      * @param host
      * @param masterCredentials
      * @return
@@ -83,7 +84,7 @@ public class UserManager extends AbstractManager {
 
     /**
      * Initialises a new {@link UserManager}.
-     * 
+     *
      * @param rmiEndPointURL
      * @param masterCredentials
      */
@@ -93,11 +94,11 @@ public class UserManager extends AbstractManager {
 
     /**
      * Creates the specified {@link User} in the specified {@link Context}
-     * 
+     *
      * @param context The {@link Context}
      * @param user The {@link User}
      * @param contextAdminCredentials The context admin {@link Credentials}
-     * 
+     *
      * @return The newly created {@link User}
      * @throws Exception if an error is occurred
      */
@@ -108,11 +109,11 @@ public class UserManager extends AbstractManager {
 
     /**
      * Creates the specified {@link User} in the specified {@link Context}
-     * 
+     *
      * @param context The {@link Context}
      * @param user The {@link User}
      * @param contextAdminCredentials The context admin {@link Credentials}
-     * 
+     *
      * @return The newly created {@link User}
      * @throws Exception if an error is occurred
      */
@@ -123,11 +124,11 @@ public class UserManager extends AbstractManager {
 
     /**
      * Creates the specified {@link User} in the specified {@link Context}
-     * 
+     *
      * @param context The {@link Context}
      * @param user The {@link User}
      * @param contextAdminCredentials The context admin {@link Credentials}
-     * 
+     *
      * @return The newly created {@link User}
      * @throws Exception if an error is occurred
      */
@@ -138,11 +139,11 @@ public class UserManager extends AbstractManager {
 
     /**
      * Retrieves all data of the specified {@link User} in the specified {@link Context}
-     * 
+     *
      * @param context The {@link Context}
      * @param User The {@link User}
      * @param contextAdminCredentials The context admin {@link Credentials}
-     * 
+     *
      * @return The {@link User} with all its data loaded
      * @throws Exception if an error is occurred
      */
@@ -153,11 +154,11 @@ public class UserManager extends AbstractManager {
 
     /**
      * Retrieves all data of the specified {@link User}s in the specified {@link Context}
-     * 
+     *
      * @param context The {@link Context}
      * @param User The {@link User}s
      * @param contextAdminCredentials The context admin {@link Credentials}
-     * 
+     *
      * @return The {@link User}s with all its data loaded
      * @throws Exception if an error is occurred
      */
@@ -169,7 +170,7 @@ public class UserManager extends AbstractManager {
     /**
      * Retrieves an array with all found {@link User} in the specified {@link Context}
      * that match the specified search pattern.
-     * 
+     *
      * @param context The {@link Context}
      * @param searchPattern The search pattern
      * @param contextAdminCredentials The context admin {@link Credentials}
@@ -183,7 +184,7 @@ public class UserManager extends AbstractManager {
 
     /**
      * Returns an array with all {@link User}s in the specified {@link Context}
-     * 
+     *
      * @param context The context
      * @param contextAdminCredentials The context admin credentials
      * @return An array with all {@link User}s
@@ -196,11 +197,11 @@ public class UserManager extends AbstractManager {
 
     /**
      * Changes the specified {@link User} in the specified {@link Context}
-     * 
+     *
      * @param context The {@link Context}
-     * @param User The {@link User} to change
+     * @param user The {@link User} to change
      * @param contextAdminCredentials The context admin {@link Credentials}
-     * 
+     *
      * @throws Exception if an error is occurred
      */
     public void change(Context context, User user, Credentials contextAdminCredentials) throws Exception {
@@ -209,13 +210,30 @@ public class UserManager extends AbstractManager {
     }
 
     /**
+     * Changes the capabilities of the specified {@link User} in the specified {@link Context}
+     *
+     * @param context The {@link Context}
+     * @param user The {@link User} to change
+     * @param capsToAdd The capabilities to add
+     * @param capsToRemove The capabilities to remove
+     * @param capsToDrop The capabilities to drop
+     * @param contextAdminCredentials The context admin {@link Credentials}
+     *
+     * @throws Exception if an error is occurred
+     */
+    public void change(Context context, User user, Set<String> capsToAdd, Set<String> capsToRemove, Set<String> capsToDrop, Credentials contextAdminCredentials) throws Exception {
+        OXUserInterface userInterface = getUserInterface();
+        userInterface.changeCapabilities(context, user, capsToAdd, capsToRemove, capsToDrop, contextAdminCredentials);
+    }
+
+    /**
      * Checks whether the specified {@link User} exists in the specified {@link Context}
-     * 
+     *
      * @param context The {@link Context}
      * @param user The {@link User}
      * @param contextAdminCredentials The context admin {@link Credentials}
      * @return <code>true</code> if the user exists; <code>false</code> otherwise
-     * 
+     *
      * @throws Exception if an error is occurred
      */
     public boolean exists(Context context, User user, Credentials contextAdminCredentials) throws Exception {
@@ -225,9 +243,9 @@ public class UserManager extends AbstractManager {
 
     /**
      * Moves a user's files from a context to his own storage.
-     * 
+     *
      * This operation is quota-aware and thus transfers current quota usage from context to user.
-     * 
+     *
      * @param context The context
      * @param user The user
      * @param filestore The {@link Filestore}
@@ -244,7 +262,7 @@ public class UserManager extends AbstractManager {
      * Retrieve all user objects with given filestore for a given context.
      * If <code>filestoreId</code> is <code>null</code> all user objects with
      * a dedicated filestore for a given context are retrieved instead.
-     * 
+     *
      * @param context The context
      * @param filestoreId The {@link Filestore} identifier
      * @param contextAdminCredentials The context admin credentials
@@ -258,7 +276,7 @@ public class UserManager extends AbstractManager {
 
     /**
      * Retrieves the {@link UserModuleAccess} for the specified {@link User}
-     * 
+     *
      * @param context The {@link Context}
      * @param user The {@link User}
      * @param contextAdminCredentials The context admin credentials
@@ -273,7 +291,7 @@ public class UserManager extends AbstractManager {
     /**
      * Changes the {@link UserModuleAccess} for the specified {@link User} in the specified
      * {@link Context}
-     * 
+     *
      * @param context The {@link Context}
      * @param user The {@link User}
      * @param access The {@link UserModuleAccess}
@@ -288,7 +306,7 @@ public class UserManager extends AbstractManager {
     /**
      * Copies/Moves the specified {@link User} from the <code>source</code> to the
      * <code>destination</code> {@link Context}
-     * 
+     *
      * @param user The {@link User} to move/copy
      * @param source The source {@link Context}
      * @param destination The destination {@link Context}
@@ -302,11 +320,11 @@ public class UserManager extends AbstractManager {
 
     /**
      * Deletes the specified {@link User} from the specified {@link Context}
-     * 
+     *
      * @param context The {@link Context}
      * @param user The {@link User} to delete
      * @param contextAdminCredentials The context's admin {@link Credentials}
-     * 
+     *
      * @throws Exception if an error is occurred
      */
     public void delete(Context context, User user, Credentials contextAdminCredentials) throws Exception {
@@ -316,11 +334,11 @@ public class UserManager extends AbstractManager {
 
     /**
      * Deletes the specified {@link User} from the specified {@link Context}
-     * 
+     *
      * @param context The {@link Context}
      * @param user The {@link User} to delete
      * @param contextAdminCredentials The context's admin {@link Credentials}
-     * 
+     *
      * @throws Exception if an error is occurred
      */
     public void delete(Context context, User[] user, Credentials contextAdminCredentials) throws Exception {
@@ -335,7 +353,7 @@ public class UserManager extends AbstractManager {
 
     /**
      * Retrieves the remote {@link OXUserInterface}
-     * 
+     *
      * @return the remote {@link OXUserInterface}
      * @throws Exception if the remote interface cannot be retrieved
      */

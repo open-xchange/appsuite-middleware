@@ -170,6 +170,8 @@ import com.openexchange.groupware.settings.tree.JsonMaxSize;
 import com.openexchange.groupware.settings.tree.ShardingSubdomains;
 import com.openexchange.groupware.upgrade.SegmentedUpdateService;
 import com.openexchange.groupware.upload.impl.UploadUtility;
+import com.openexchange.groupware.userconfiguration.PermissionConfigurationChecker;
+import com.openexchange.groupware.userconfiguration.internal.PermissionConfigurationCheckerImpl;
 import com.openexchange.groupware.userconfiguration.osgi.CapabilityRegistrationListener;
 import com.openexchange.guest.GuestService;
 import com.openexchange.html.HtmlService;
@@ -694,8 +696,20 @@ public final class ServerActivator extends HousekeepingActivator {
         CommonResultConverterRegistry resultConverterRegistry = new CommonResultConverterRegistry(context);
         track(ResultConverter.class, resultConverterRegistry);
 
+        ConfigViewFactory configViewFactory = getService(ConfigViewFactory.class);
+        ConfigurationService configService = getService(ConfigurationService.class);
+
+        // Permission checker
+        {
+            PermissionConfigurationCheckerImpl checker = new PermissionConfigurationCheckerImpl(configService);
+            checker.checkConfig(configService);
+            registerService(PermissionConfigurationChecker.class, checker);
+            registerService(Reloadable.class, checker);
+        }
+
         // Start up server the usual way
         starter.start();
+
         // Open service trackers
         for (final ServiceTracker<?, ?> tracker : serviceTrackerList) {
             tracker.open();
@@ -756,7 +770,6 @@ public final class ServerActivator extends HousekeepingActivator {
                 }
             });
         }
-        ConfigViewFactory configViewFactory = getService(ConfigViewFactory.class);
         registerService(NoReplyConfigFactory.class, new DefaultNoReplyConfigFactory(contextService, configViewFactory));
         // TODO: Register server's login handler here until its encapsulated in an own bundle
         registerService(LoginHandlerService.class, new MailLoginHandler());

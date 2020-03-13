@@ -112,6 +112,7 @@ public class Activator implements BundleActivator, Reloadable {
     private LogbackConfigurationRMIServiceImpl logbackConfigurationRMIService;
     private LogbackLogConfigurationService logbackConfigService;
 
+
     /*
      * Do not implement HousekeepingActivator, track services if you need them!
      * This bundle must start as early as possible to configure the java.util.logging bridge.
