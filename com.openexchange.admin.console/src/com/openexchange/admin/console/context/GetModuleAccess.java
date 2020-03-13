@@ -60,9 +60,18 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 
+/**
+ * {@link GetModuleAccess} gets the module access informations for a given context
+ *
+ */
 public class GetModuleAccess extends ContextAbstraction {
 
-    public GetModuleAccess(final String[] args2) {
+    /**
+     * Executes this clt
+     *
+     * @param args The arguments
+     */
+    public void execute(final String[] args) {
 
         final AdminParser parser = new AdminParser("getmoduleaccessforcontext");
 
@@ -71,7 +80,7 @@ public class GetModuleAccess extends ContextAbstraction {
         String successtext = null;
 
         try {
-            parser.ownparse(args2);
+            parser.ownparse(args);
             final Context ctx = contextparsing(parser);
 
             parseAndSetContextName(parser, ctx);
@@ -96,6 +105,12 @@ public class GetModuleAccess extends ContextAbstraction {
         }
     }
 
+    /**
+     * Outputs the result in the csv format
+     *
+     * @param access The {@link UserModuleAccess}
+     * @throws InvalidDataException
+     */
     private void doCsvOutput(final UserModuleAccess access) throws InvalidDataException {
         final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
         final ArrayList<String> datarow = new ArrayList<String>();
@@ -129,6 +144,11 @@ public class GetModuleAccess extends ContextAbstraction {
         doCSVOutput(getAccessColums(), false, data);
     }
 
+    /**
+     * Gets the column names
+     *
+     * @return An {@link ArrayList} of column names
+     */
     private static ArrayList<String> getAccessColums() {
         final ArrayList<String> columnnames = new ArrayList<String>(32);
         columnnames.add(UserAbstraction.OPT_ACCESS_CALENDAR);
@@ -150,6 +170,7 @@ public class GetModuleAccess extends ContextAbstraction {
         columnnames.add(UserAbstraction.OPT_ACCESS_COLLECT_EMAIL_ADDRESSES);
         columnnames.add(UserAbstraction.OPT_ACCESS_MULTIPLE_MAIL_ACCOUNTS);
         columnnames.add(UserAbstraction.OPT_ACCESS_SUBSCRIPTION);
+        columnnames.add(UserAbstraction.OPT_ACCESS_PUBLICATION);
         columnnames.add(UserAbstraction.OPT_ACCESS_ACTIVE_SYNC);
         columnnames.add(UserAbstraction.OPT_ACCESS_USM);
         columnnames.add(UserAbstraction.OPT_ACCESS_OLOX20);
@@ -160,9 +181,14 @@ public class GetModuleAccess extends ContextAbstraction {
     }
 
     public static void main(final String args[]) {
-        new GetModuleAccess(args);
+        new GetModuleAccess().execute(args);
     }
 
+    /**
+     * Sets the options for this clt
+     *
+     * @param parser The {@link AdminParser}
+     */
     private void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptionsWithoutContextID(parser);
         setContextOption(parser, NeededQuadState.eitheror);
