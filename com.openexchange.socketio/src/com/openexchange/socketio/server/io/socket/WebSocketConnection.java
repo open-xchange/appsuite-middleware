@@ -51,9 +51,9 @@ package com.openexchange.socketio.server.io.socket;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -183,8 +183,13 @@ public class WebSocketConnection extends EngineIoWebSocket implements MessageTra
         try {
             JSONObject jEvent = new JSONObject(message);
             name = jEvent.getString("name");
-            List<Object> list = jEvent.getJSONArray("args").asList();
-            args = list.toArray(new Object[list.size()]);
+
+            JSONArray jArgs = jEvent.getJSONArray("args");
+            args = new Object[jArgs.length()];
+            for (int i = 0; i < args.length; i++) {
+                args[i] = jArgs.get(i);
+            }
+
             ns = jEvent.optString("namespace", SocketIOProtocol.DEFAULT_NAMESPACE);
         } catch (JSONException e) {
             LoggerHolder.LOG.warn("Invalid message to send: {}", message, e);
