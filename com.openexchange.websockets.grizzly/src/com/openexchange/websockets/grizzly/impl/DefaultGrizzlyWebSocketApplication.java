@@ -51,7 +51,6 @@ package com.openexchange.websockets.grizzly.impl;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -130,7 +129,7 @@ public class DefaultGrizzlyWebSocketApplication extends AbstractGrizzlyWebSocket
     private final WebSocketListenerRegistry listenerRegistry;
     private final RemoteWebSocketDistributor remoteDistributor;
 
-    private GrizzlyConfig config;
+    private final GrizzlyConfig config;
 
     /**
      * Initializes a new {@link DefaultGrizzlyWebSocketApplication}.
@@ -342,19 +341,7 @@ public class DefaultGrizzlyWebSocketApplication extends AbstractGrizzlyWebSocket
 
     @Override
     protected void onConnectedSocket(DefaultSessionBoundWebSocket sessionBoundSocket) {
-        synchronized (sessionBoundSocket) {
-            Collection<WebSocketListener> listeners = sessionBoundSocket.getListeners();
-            for (WebSocketListener grizzlyWebSocketListener : listenerRegistry.getListeners()) {
-                if (!listeners.contains(grizzlyWebSocketListener)) {
-                    if (grizzlyWebSocketListener instanceof IndividualWebSocketListenerAdapter) {
-                        // Pass individual instance
-                        listeners.add(((IndividualWebSocketListenerAdapter) grizzlyWebSocketListener).newAdapter());
-                    } else {
-                        listeners.add(grizzlyWebSocketListener);
-                    }
-                }
-            }
-        }
+        sessionBoundSocket.addListenersIfAbsent(listenerRegistry.getListeners());
 
         WebSocketInfo socketInfo = WebSocketInfo.builder().connectionId(sessionBoundSocket.getConnectionId()).contextId(sessionBoundSocket.getContextId()).path(sessionBoundSocket.getPath()).userId(sessionBoundSocket.getUserId()).build();
         ThreadPools.submitElseExecute(new RemoteWebSocketModifierTask(socketInfo, remoteDistributor, true));
@@ -375,30 +362,20 @@ public class DefaultGrizzlyWebSocketApplication extends AbstractGrizzlyWebSocket
     public void addWebSocketListener(WebSocketListener grizzlyWebSocketListener) {
         for (ConcurrentMap<ConnectionId, DefaultSessionBoundWebSocket> userSockets : openSockets.values()) {
             for (DefaultSessionBoundWebSocket sessionBoundSocket : userSockets.values()) {
-                synchronized (sessionBoundSocket) {
-                    Collection<WebSocketListener> listeners = sessionBoundSocket.getListeners();
-                    if (!listeners.contains(grizzlyWebSocketListener)) {
-                        if (grizzlyWebSocketListener instanceof IndividualWebSocketListenerAdapter) {
-                            // Pass individual instance
-                            listeners.add(((IndividualWebSocketListenerAdapter) grizzlyWebSocketListener).newAdapter());
-                        } else {
-                            listeners.add(grizzlyWebSocketListener);
-                        }
-                    }
-                }
+                sessionBoundSocket.addListenerIfAbsent(grizzlyWebSocketListener);
             }
         }
     }
 
     /**
-     * Removes specified listener to existing Web Sockets
+     * Removes specified listener from existing Web Sockets
      *
      * @param grizzlyWebSocketListener The listener to remove
      */
     public void removeWebSocketListener(WebSocketListener grizzlyWebSocketListener) {
         for (ConcurrentMap<ConnectionId, DefaultSessionBoundWebSocket> userSockets : openSockets.values()) {
             for (DefaultSessionBoundWebSocket sessionBoundSocket : userSockets.values()) {
-                sessionBoundSocket.remove(grizzlyWebSocketListener);
+                sessionBoundSocket.removeListener(grizzlyWebSocketListener);
             }
         }
     }
