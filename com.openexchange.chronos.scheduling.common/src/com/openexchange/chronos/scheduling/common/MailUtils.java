@@ -55,7 +55,6 @@ import java.util.List;
 import javax.mail.internet.MimeMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.openexchange.annotation.NonNull;
 import com.openexchange.annotation.Nullable;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUser;
@@ -107,18 +106,9 @@ public class MailUtils {
      * @param timestamp <code>true></code> to add a timestamp to the value, <code>false</code> otherwise
      * @return The header value
      */
-    public static String generateHeaderValue(@NonNull String uid, boolean timestamp) {
+    public static String generateHeaderValue(String uid, boolean timestamp) {
         StringBuilder builder = new StringBuilder("<Appointment.");
-        if (uid.contains("@")) {
-            /*
-             * Remove the domain part from the UID to construct a valid address
-             */
-            builder.append(uid.substring(0, uid.lastIndexOf("@")));
-            builder.append("(at)");
-            builder.append(uid.substring(uid.lastIndexOf("@") + 1, uid.length()));
-        } else {
-            builder.append(uid);
-        }
+        builder.append(uid);
         if (timestamp) {
             builder.append(".");
             builder.append(String.valueOf(System.currentTimeMillis()));

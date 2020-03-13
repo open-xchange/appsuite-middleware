@@ -16,7 +16,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.chronos.provider.birthdays"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.chronos.provider.caching"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.chronos.recurrence"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.chronos.scheduling.common"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.chronos.scheduling.changes.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.common"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.configread"/>
