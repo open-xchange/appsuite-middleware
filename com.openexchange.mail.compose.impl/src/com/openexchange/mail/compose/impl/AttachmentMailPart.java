@@ -65,6 +65,7 @@ import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.compose.Attachment;
+import com.openexchange.mail.compose.AttachmentOrigin;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailPart;
 import com.openexchange.mail.mime.ContentDisposition;
@@ -265,6 +266,26 @@ public class AttachmentMailPart extends MailPart implements ComposedMailPart {
 
     @Override
     public ComposedPartType getType() {
+        AttachmentOrigin origin = attachment.getOrigin();
+        if (origin == null) {
+            return ComposedMailPart.ComposedPartType.FILE;
+        }
+
+        switch (origin) {
+            case UPLOAD:
+                return ComposedMailPart.ComposedPartType.FILE;
+            case CONTACT:
+                return ComposedMailPart.ComposedPartType.DOCUMENT;
+            case DRIVE:
+                return ComposedMailPart.ComposedPartType.DOCUMENT;
+            case MAIL:
+                return ComposedMailPart.ComposedPartType.REFERENCE;
+            case VCARD:
+                return ComposedMailPart.ComposedPartType.DOCUMENT;
+            default:
+                break;
+        }
+
         return ComposedMailPart.ComposedPartType.FILE;
     }
 
