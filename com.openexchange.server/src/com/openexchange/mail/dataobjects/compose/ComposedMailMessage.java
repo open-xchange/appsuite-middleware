@@ -64,7 +64,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.SecuritySettings;
-import com.openexchange.mail.dataobjects.compose.ComposedMailPart.ComposedPartType;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.filler.MimeMessageFiller;
 import com.openexchange.mail.usersetting.UserSettingMail;
@@ -300,18 +299,32 @@ public abstract class ComposedMailMessage extends MailMessage {
         try {
             final int count = getEnclosedCount();
             for (int i = 0; i < count; i++) {
-                if (getEnclosedMailPart(i) instanceof ComposedMailPart) {
-                    final ComposedMailPart composedMailPart = (ComposedMailPart) getEnclosedMailPart(i);
-                    if (ComposedPartType.REFERENCE.equals(composedMailPart.getType())) {
-                        ((ReferencedMailPart) (composedMailPart)).close();
-                    } else if (ComposedPartType.DATA.equals(composedMailPart.getType())) {
-                        ((DataMailPart) (composedMailPart)).close();
-                    } else if (ComposedPartType.FILE.equals(composedMailPart.getType())) {
-                        if (composedMailPart instanceof UploadFileMailPart) {
-                            final File f = ((UploadFileMailPart) (composedMailPart)).getUploadFile();
-                            if (f.exists() && !f.delete()) {
-                                LOG.warn("Temporary store file '{}' could not be deleted.", f.getName());
-                            }
+                MailPart enclosedMailPart = getEnclosedMailPart(i);
+                if (enclosedMailPart instanceof ComposedMailPart) {
+                    ComposedMailPart composedMailPart = (ComposedMailPart) enclosedMailPart;
+
+                    if (composedMailPart.getType() != null) {
+                        switch (composedMailPart.getType()) {
+                            case REFERENCE:
+                                if (composedMailPart instanceof ReferencedMailPart) {
+                                    ((ReferencedMailPart) (composedMailPart)).close();
+                                }
+                                break;
+                            case DATA:
+                                if (composedMailPart instanceof DataMailPart) {
+                                    ((DataMailPart) (composedMailPart)).close();
+                                }
+                                break;
+                            case FILE:
+                                if (composedMailPart instanceof UploadFileMailPart) {
+                                    final File f = ((UploadFileMailPart) (composedMailPart)).getUploadFile();
+                                    if (f.exists() && !f.delete()) {
+                                        LOG.warn("Temporary store file '{}' could not be deleted.", f.getName());
+                                    }
+                                }
+                                break;
+                            default:
+                                break;
                         }
                     }
                 }
