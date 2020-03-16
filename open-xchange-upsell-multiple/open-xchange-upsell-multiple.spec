@@ -15,7 +15,7 @@ BuildRequires: java-1.8.0-openjdk-devel
 BuildRequires:  open-xchange-core
 BuildRequires:  open-xchange-admin
 Version:        @OXVERSION@
-%define        ox_release 22
+%define        ox_release 23
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -66,6 +66,8 @@ ox_update_permissions "/opt/open-xchange/etc/upsell.properties" root:open-xchang
 %doc com.openexchange.upsell.multiple/ChangeLog
 
 %changelog
+* Mon Mar 16 2020 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2020-03-23 (5652)
 * Wed Feb 26 2020 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2020-03-02 (5622)
 * Wed Feb 12 2020 Carsten Hoeger <choeger@open-xchange.com>
