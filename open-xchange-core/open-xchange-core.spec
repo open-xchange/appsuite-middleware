@@ -53,8 +53,8 @@ Authors:
 %build
 
 %install
-export NO_BRP_CHECK_BYTECODE_VERSION=true
-ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
+cp -rv --preserve=all ./opt ./usr %{buildroot}/
+(cd %{buildroot}/opt/open-xchange/bundles/com.openexchange.logback.configuration && ln -s ../../etc/logback.xml)
 mkdir -p %{buildroot}/var/log/open-xchange
 mkdir -p %{buildroot}/var/spool/open-xchange/uploads
 rm -f %{configfiles}

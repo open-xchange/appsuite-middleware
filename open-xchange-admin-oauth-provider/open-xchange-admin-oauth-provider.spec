@@ -31,7 +31,15 @@ Authors:
 
 %install
 export NO_BRP_CHECK_BYTECODE_VERSION=true
-ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
+cp -rv --preserve=all ./opt %{buildroot}/
+(cd %{buildroot}/opt/open-xchange/lib/ && ln -s com.openexchange.oauth.provider.clt.jar com.openexchange.oauth.provider.rmi.jar)
+(cd %{buildroot}/opt/open-xchange/sbin/ && ln -s createoauthclient disableoauthclient)
+(cd %{buildroot}/opt/open-xchange/sbin/ && ln -s createoauthclient enableoauthclient)
+(cd %{buildroot}/opt/open-xchange/sbin/ && ln -s createoauthclient getoauthclient)
+(cd %{buildroot}/opt/open-xchange/sbin/ && ln -s createoauthclient listoauthclient)
+(cd %{buildroot}/opt/open-xchange/sbin/ && ln -s createoauthclient removeoauthclient)
+(cd %{buildroot}/opt/open-xchange/sbin/ && ln -s createoauthclient revokeoauthclient)
+(cd %{buildroot}/opt/open-xchange/sbin/ && ln -s createoauthclient updateoauthclient)
 
 %clean
 %{__rm} -rf %{buildroot}

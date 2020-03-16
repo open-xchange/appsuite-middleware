@@ -40,7 +40,8 @@ Authors:
 
 %install
 export NO_BRP_CHECK_BYTECODE_VERSION=true
-ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
+cp -rv --preserve=all ./opt %{buildroot}/
+(cd %{buildroot}/opt/open-xchange/lib/ && ln -s ../bundles/com.openexchange.admin.user.copy.rmi.jar)
 
 %clean
 %{__rm} -rf %{buildroot}

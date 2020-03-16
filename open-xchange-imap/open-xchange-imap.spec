@@ -30,7 +30,7 @@ Authors:
 
 %install
 export NO_BRP_CHECK_BYTECODE_VERSION=true
-ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml build
+cp -rv --preserve=all ./opt ./usr %{buildroot}/
 
 %post
 if [ ${1:-0} -eq 2 ]; then

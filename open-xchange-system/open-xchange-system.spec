@@ -36,13 +36,10 @@ Authors:
 %build
 
 %install
-export NO_BRP_CHECK_BYTECODE_VERSION=true
-mkdir -p %{buildroot}/opt/open-xchange/lib
 # for %ghost file
-mkdir %{buildroot}/opt/open-xchange/etc
+mkdir -p %{buildroot}/opt/open-xchange/etc
 touch %{buildroot}/opt/open-xchange/etc/scr_db
-
-ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
+cp -rv --preserve=all ./opt %{buildroot}/
 
 %clean
 %{__rm} -rf %{buildroot}

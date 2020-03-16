@@ -35,7 +35,7 @@ export NO_BRP_CHECK_BYTECODE_VERSION=true
 %define docroot /srv/www/htdocs
 %endif
 
-ant -lib build/lib -Dbasedir=build -Dhtdoc=%{docroot} -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml build
+cp -rv --preserve=all ./opt %{buildroot}/
 
 %clean
 %{__rm} -rf %{buildroot}
