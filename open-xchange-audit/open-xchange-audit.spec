@@ -35,12 +35,9 @@ cp -rv --preserve=all ./opt ./usr %{buildroot}/
 
 %files
 %defattr(-,root,root)
-%dir /opt/open-xchange/bundles/
-/opt/open-xchange/bundles/*
-%dir /opt/open-xchange/osgi/bundle.d/
-/opt/open-xchange/osgi/bundle.d/*
-%dir /opt/open-xchange/etc/
-/opt/open-xchange/etc/*
+/opt/open-xchange
+/usr/share
+%doc /usr/share/doc/open-xchange-audit/properties/
 
 
 %changelog

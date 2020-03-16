@@ -132,11 +132,8 @@ fi
 
 %files
 %defattr(-,root,root)
-%dir /opt/open-xchange/bundles/
-/opt/open-xchange/bundles/*
-%dir /opt/open-xchange/osgi/bundle.d/
-/opt/open-xchange/osgi/bundle.d/*
-%dir /opt/open-xchange/etc/
+/opt/open-xchange
+%dir %attr(750,open-xchange,open-xchange) /opt/open-xchange/osgi/
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/client-onboarding.properties
 %config(noreplace) /opt/open-xchange/etc/client-onboarding-caldav.properties
 %config(noreplace) /opt/open-xchange/etc/client-onboarding-carddav.properties
@@ -147,13 +144,9 @@ fi
 %config(noreplace) /opt/open-xchange/etc/client-onboarding-mailapp.properties
 %config(noreplace) /opt/open-xchange/etc/client-onboarding-scenarios.yml
 %config(noreplace) /opt/open-xchange/etc/client-onboarding-syncapp.properties
-%dir /opt/open-xchange/templates/
-/opt/open-xchange/templates/*
-%dir /opt/open-xchange/lib/
-/opt/open-xchange/lib/*
-%dir /opt/open-xchange/sbin/
-/opt/open-xchange/sbin/*
-%doc com.openexchange.client.onboarding/doc/examples
+%dir /usr/share/doc/open-xchange-client-onboarding
+%doc /usr/share/doc/open-xchange-client-onboarding/examples
+%doc /usr/share/doc/open-xchange-client-onboarding/properties/
 
 %changelog
 * Mon Jun 17 2019 Thorben Betten <thorben.betten@open-xchange.com>

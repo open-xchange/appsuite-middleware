@@ -38,10 +38,7 @@ cp -rv --preserve=all ./opt %{buildroot}/
 
 %files
 %defattr(-,root,root)
-%dir /opt/open-xchange
-%dir /opt/open-xchange/etc
-%dir /opt/open-xchange/etc/settings
-%dir /opt/open-xchange/etc/meta
+/opt/open-xchange
 %config(noreplace) /opt/open-xchange/etc/settings/*
 %config(noreplace) /opt/open-xchange/etc/meta/*
 

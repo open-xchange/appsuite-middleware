@@ -46,15 +46,16 @@ cp -rv --preserve=all ./opt %{buildroot}/
 
 %files
 %defattr(-,root,root)
+%dir /opt/open-xchange/
 %dir /opt/open-xchange/bundles/
 /opt/open-xchange/bundles/*
+%dir /opt/open-xchange/osgi/
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
 %dir /opt/open-xchange/lib/
 /opt/open-xchange/lib/*
 %dir /opt/open-xchange/sbin/
 /opt/open-xchange/sbin/*
-%doc com.openexchange.oauth.provider.rmi/javadoc
 
 %changelog
 * Mon Jun 17 2019 Steffen Templin <steffen.templin@open-xchange.com>

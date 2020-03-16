@@ -64,16 +64,10 @@ fi
 
 %files
 %defattr(-,root,root)
-%dir /opt/open-xchange/bundles/
-/opt/open-xchange/bundles/*
-%dir /opt/open-xchange/osgi/bundle.d/
-/opt/open-xchange/osgi/bundle.d/*
-%dir /opt/open-xchange/etc/
-%config(noreplace) /opt/open-xchange/etc/*
-%dir /opt/open-xchange/etc/hazelcast
+/opt/open-xchange
 %config(noreplace) /opt/open-xchange/etc/hazelcast/*
-%dir /opt/open-xchange/templates
-/opt/open-xchange/templates/*
+/usr/share
+%doc /usr/share/doc/open-xchange-saml-core/properties/
 
 %files -n open-xchange-saml
 %defattr(-,root,root)

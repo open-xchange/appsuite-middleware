@@ -44,12 +44,15 @@ cp -rv --preserve=all ./opt %{buildroot}/
 
 %files
 %defattr(-,root,root)
+%dir /opt/open-xchange/
 %dir /opt/open-xchange/bundles
 /opt/open-xchange/bundles/*
+%dir /opt/open-xchange/osgi/
 %dir /opt/open-xchange/osgi/bundle.d
 /opt/open-xchange/osgi/bundle.d/*
 %dir /opt/open-xchange/lib
 /opt/open-xchange/lib/*
+%dir /opt/open-xchange/etc/
 %dir /opt/open-xchange/etc/plugin
 %config(noreplace) /opt/open-xchange/etc/plugin/*
 

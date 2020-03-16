@@ -39,13 +39,11 @@ ox_update_permissions /opt/open-xchange/etc/sipgate.properties root:open-xchange
 
 %files
 %defattr(-,root,root)
-%dir /opt/open-xchange/bundles/
-/opt/open-xchange/bundles/*
-%dir /opt/open-xchange/osgi/bundle.d/
-/opt/open-xchange/osgi/bundle.d/*
-%dir /opt/open-xchange/etc/
+/opt/open-xchange
 %config(noreplace) /opt/open-xchange/etc/*
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/sipgate.properties
+/usr/share
+%doc /usr/share/doc/open-xchange-sms-sipgate/properties/
 
 %changelog
 * Mon Jun 17 2019 Jan Bauerdick <jan.bauerdick@open-xchange.com>

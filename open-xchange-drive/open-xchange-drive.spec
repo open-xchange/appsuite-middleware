@@ -55,12 +55,11 @@ fi
 
 %files
 %defattr(-,root,root)
-%dir /opt/open-xchange/bundles/
-/opt/open-xchange/bundles/*
-%dir /opt/open-xchange/etc/
+/opt/open-xchange/
+%dir %attr(750,open-xchange,open-xchange) /opt/open-xchange/osgi/
 %config(noreplace) /opt/open-xchange/etc/contextSets/drive.yml
-%dir /opt/open-xchange/osgi/bundle.d/
-/opt/open-xchange/osgi/bundle.d/*
+/usr/share
+%doc /usr/share/doc/open-xchange-drive/properties/
 
 %changelog
 * Mon Jun 17 2019 Tobias Friedrich <tobias.friedrich@open-xchange.com>

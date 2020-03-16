@@ -39,10 +39,8 @@ cp -rv ./opt %{buildroot}/
 
 %files
 %defattr(-,root,root)
-%dir /opt/open-xchange/lib/
-/opt/open-xchange/lib/*
-%dir /opt/open-xchange/sbin/
-/opt/open-xchange/sbin/*
+/opt/open-xchange
+%dir %attr(750,open-xchange,open-xchange) /opt/open-xchange/osgi/
 
 %changelog
 * Tue Jan 26 2016 Kevin Ruthmann <kevin.ruthmann@open-xchange.com>

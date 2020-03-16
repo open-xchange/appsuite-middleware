@@ -43,12 +43,8 @@ cp -rv --preserve=all ./opt %{buildroot}/
 
 %files
 %defattr(-,root,root)
-%dir /opt/open-xchange/etc/settings
-%dir /opt/open-xchange/osgi/bundle.d/
-/opt/open-xchange/osgi/bundle.d/*
-/opt/open-xchange/bundles/*
-%config(noreplace) /opt/open-xchange/etc/settings/*
-%doc com.openexchange.blackwhitelist/ChangeLog
+/opt/open-xchange
+%config(noreplace) /opt/open-xchange/etc/settings
 
 %changelog
 * Mon Jun 17 2019 Carsten Hoeger <choeger@open-xchange.com>

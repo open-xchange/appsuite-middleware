@@ -41,10 +41,7 @@ GLOBIGNORE='*'
 
 %files
 %defattr(-,root,root)
-%dir /opt/open-xchange/lib/
-/opt/open-xchange/lib
-%dir /opt/open-xchange/sbin/
-/opt/open-xchange/sbin/*
+/opt/open-xchange
 
 %changelog
 * Mon Jun 17 2019 Karsten Will <karsten.will@open-xchange.com>

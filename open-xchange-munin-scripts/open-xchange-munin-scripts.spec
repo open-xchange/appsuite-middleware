@@ -101,8 +101,11 @@ exit 0
 
 %files
 %defattr(-,root,root)
+%dir /usr/
+%dir /usr/share/
 %dir /usr/share/munin
 /usr/share/munin/plugins/
+%dir /etc/
 %dir /etc/munin/
 %dir /etc/munin/plugin-conf.d/
 %config(noreplace) /etc/munin/plugin-conf.d/ox

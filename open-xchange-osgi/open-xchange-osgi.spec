@@ -51,6 +51,10 @@ cp -rv --preserve=all ./opt ./usr %{buildroot}/
 /opt/open-xchange/bundles/*
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
+%dir /usr/share/doc/open-xchange-osgi/
+%dir /usr/share/doc/open-xchange-osgi/docs/
+%dir /usr/share/doc/open-xchange-osgi/docs/3rd_party_licenses/
+/usr/share/doc/open-xchange-osgi/docs/3rd_party_licenses/*
 
 %changelog
 * Mon Jun 17 2019 Marcus Klein <marcus.klein@open-xchange.com>

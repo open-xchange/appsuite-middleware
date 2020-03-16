@@ -743,35 +743,14 @@ exit 0
 
 %files -f %{configfiles}
 %defattr(-,root,root)
-%dir /opt/open-xchange/bundles/
-/opt/open-xchange/bundles/*
-%dir /opt/open-xchange/documentation
-%dir /opt/open-xchange/documentation/etc
-/opt/open-xchange/documentation/etc/*.yml
-%dir /opt/open-xchange/etc
-%dir /opt/open-xchange/etc/contextSets
-%dir /opt/open-xchange/etc/meta
-%dir /opt/open-xchange/etc/security
-%dir /opt/open-xchange/etc/settings
-%dir /opt/open-xchange/i18n/
-%dir /opt/open-xchange/importCSV/
-%dir /opt/open-xchange/lib/
-/opt/open-xchange/lib/*
-%dir /opt/open-xchange/osgi/bundle.d/
-/opt/open-xchange/osgi/bundle.d/*
-/opt/open-xchange/osgi/config.ini.template
-%dir /opt/open-xchange/sbin/
-/opt/open-xchange/sbin/*
-%dir /opt/open-xchange/templates/
-/opt/open-xchange/templates/*
-%dir /opt/open-xchange/etc/hazelcast
-%config(noreplace) /opt/open-xchange/etc/hazelcast/*
+/opt/open-xchange
+%dir %attr(750,open-xchange,open-xchange) /opt/open-xchange/osgi/
+%config(noreplace) /opt/open-xchange/etc/hazelcast
 %dir %attr(750, open-xchange, root) /var/log/open-xchange
-%dir /var/spool/open-xchange
+%dir %attr(750, open-xchange, root) /var/spool/open-xchange/
 %dir %attr(750, open-xchange, root) /var/spool/open-xchange/uploads
-%doc docs/
-%doc com.openexchange.server/doc/examples
-%doc com.openexchange.database/doc/examples
+/usr/share
+%doc /usr/share/doc/open-xchange-core/properties/
 
 %changelog
 * Mon Jun 17 2019 Marcus Klein <marcus.klein@open-xchange.com>

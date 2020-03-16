@@ -37,12 +37,10 @@ cp -rv --preserve=all ./opt ./usr %{buildroot}/
 
 %files
 %defattr(-,root,root)
-%dir /opt/open-xchange/bundles/
-/opt/open-xchange/bundles/*
-%dir /opt/open-xchange/etc/
+/opt/open-xchange
 %config(noreplace) /opt/open-xchange/etc/soap-cxf.properties
-%dir /opt/open-xchange/osgi/bundle.d/
-/opt/open-xchange/osgi/bundle.d/*
+/usr/share
+%doc /usr/share/doc/open-xchange-soap-cxf/properties/
 
 %changelog
 * Mon Jun 17 2019 Marcus Klein <marcus.klein@open-xchange.com>

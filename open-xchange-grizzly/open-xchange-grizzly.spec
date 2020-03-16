@@ -78,12 +78,11 @@ fi
 
 %files
 %defattr(-,root,root)
-%dir /opt/open-xchange/bundles/
-/opt/open-xchange/bundles/*
-%dir /opt/open-xchange/osgi/bundle.d/
-/opt/open-xchange/osgi/bundle.d/*
-%dir /opt/open-xchange/etc/
+/opt/open-xchange/
+%dir %attr(750,open-xchange,open-xchange) /opt/open-xchange/osgi/
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/grizzly.properties
+/usr/share
+%doc /usr/share/doc/open-xchange-grizzly/properties/
 
 %changelog
 * Mon Jun 17 2019 Marc Arens <marc.arens@open-xchange.com>

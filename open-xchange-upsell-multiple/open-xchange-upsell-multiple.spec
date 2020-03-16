@@ -44,16 +44,10 @@ ox_update_permissions "/opt/open-xchange/etc/upsell.properties" root:open-xchang
 
 %files
 %defattr(-,root,root)
-%dir /opt/open-xchange/bundles/
-/opt/open-xchange/bundles/*
-%dir /opt/open-xchange/osgi/bundle.d/
-/opt/open-xchange/osgi/bundle.d/*
-%dir /opt/open-xchange/etc
-%dir /opt/open-xchange/etc/settings
+/opt/open-xchange
 %config(noreplace) /opt/open-xchange/etc/*
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/upsell.properties
 %config(noreplace) /opt/open-xchange/etc/settings/*
-%doc com.openexchange.upsell.multiple/ChangeLog
 
 %changelog
 * Mon Jun 17 2019 Carsten Hoeger <choeger@open-xchange.com>

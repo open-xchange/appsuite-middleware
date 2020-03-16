@@ -42,10 +42,7 @@ cp -rv --preserve=all ./opt %{buildroot}/
 
 %files
 %defattr(-,root,root)
-%dir /opt/open-xchange/osgi/bundle.d/
-/opt/open-xchange/osgi/bundle.d/*
-/opt/open-xchange/bundles/*
-%doc com.openexchange.messaging.sms/ChangeLog
+/opt/open-xchange
 
 %changelog
 * Mon Jun 17 2019 Marcus Klein <marcus.klein@open-xchange.com>

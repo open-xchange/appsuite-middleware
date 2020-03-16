@@ -50,12 +50,7 @@ cp -rv --preserve=all ./opt %{buildroot}/
 
 %files
 %defattr(-,root,root)
-%dir /opt/open-xchange/
-%dir /opt/open-xchange/etc
-%dir /opt/open-xchange/lib/
-/opt/open-xchange/lib/oxfunctions.sh
-%dir /opt/open-xchange/sbin/
-/opt/open-xchange/sbin/*
+/opt/open-xchange/
 %ghost /opt/open-xchange/etc/scr_db
 
 %changelog

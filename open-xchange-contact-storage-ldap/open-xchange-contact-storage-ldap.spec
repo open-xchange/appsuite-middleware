@@ -37,10 +37,7 @@ cp -rv --preserve=all ./opt %{buildroot}/
 
 %files
 %defattr(-,root,root)
-%dir /opt/open-xchange/bundles/
-/opt/open-xchange/bundles/*
-%dir /opt/open-xchange/osgi/bundle.d/
-/opt/open-xchange/osgi/bundle.d/*
+/opt/open-xchange
 %dir %attr(750,root,open-xchange) /opt/open-xchange/etc/contact-storage-ldap
 %attr(640,root,open-xchange) /opt/open-xchange/etc/contact-storage-ldap/*.example
 %config(noreplace) /opt/open-xchange/etc/contact-storage-ldap/cache.properties

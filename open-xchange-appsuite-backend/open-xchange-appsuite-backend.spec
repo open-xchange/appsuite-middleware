@@ -52,17 +52,14 @@ fi
 
 %files
 %defattr(-,root,root)
-%dir /opt/open-xchange/bundles/
-/opt/open-xchange/bundles/*
-%dir /opt/open-xchange/osgi/bundle.d/
-/opt/open-xchange/osgi/bundle.d/*
-%dir /opt/open-xchange/etc/
-/opt/open-xchange/etc/as-config-defaults.yml
+/opt/open-xchange/
 %config(noreplace) /opt/open-xchange/etc/as-config.yml
 %config(noreplace) /opt/open-xchange/etc/manifests.properties
 %config(noreplace) /opt/open-xchange/etc/meta/appsuite.yaml
 %config(noreplace) /opt/open-xchange/etc/settings/appsuite.properties
 %config(noreplace) /opt/open-xchange/etc/settings/upsell-appsuite.properties
+/usr/share/
+%doc /usr/share/doc/open-xchange-appsuite-backend/properties/
 
 %changelog
 * Mon Jun 17 2019 Marcus Klein <marcus.klein@open-xchange.com>

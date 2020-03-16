@@ -42,10 +42,7 @@ GLOBIGNORE='*'
 
 %files
 %defattr(-,root,root)
-%dir /opt/open-xchange/bundles/
-/opt/open-xchange/bundles/*
-%dir /opt/open-xchange/osgi/bundle.d/
-/opt/open-xchange/osgi/bundle.d/*
+/opt/open-xchange
 
 %changelog
 * Mon Jun 17 2019 Thorben Betten <thorben.betten@open-xchange.com>

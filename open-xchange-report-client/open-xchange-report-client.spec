@@ -40,12 +40,10 @@ ox_update_permissions /opt/open-xchange/etc/reportclient.properties root:open-xc
 
 %files
 %defattr(-,root,root)
-%dir /opt/open-xchange/lib/
-/opt/open-xchange/lib/*
-%dir /opt/open-xchange/sbin/
-/opt/open-xchange/sbin/*
-%dir /opt/open-xchange/etc/
+/opt/open-xchange
 %config(noreplace) /opt/open-xchange/etc/*
+/usr/share
+%doc /usr/share/doc/open-xchange-report-client/properties/
 
 %changelog
 * Mon Jun 17 2019 Carsten Hoeger <choeger@open-xchange.com>

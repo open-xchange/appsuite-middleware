@@ -51,13 +51,11 @@ fi
 
 %files
 %defattr(-,root,root)
-%dir /opt/open-xchange/bundles/
-/opt/open-xchange/bundles/*
-%dir /opt/open-xchange/osgi/bundle.d/
-/opt/open-xchange/osgi/bundle.d/*
-%dir /opt/open-xchange/etc/
+/opt/open-xchange
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/filestorage-maildrive.properties
 %config(noreplace) /opt/open-xchange/etc/*
+/usr/share
+%doc /usr/share/doc/open-xchange-file-storage-mail/properties/
 
 %changelog
 * Mon Jun 17 2019 Thorben Betten <thorben.betten@open-xchange.com>

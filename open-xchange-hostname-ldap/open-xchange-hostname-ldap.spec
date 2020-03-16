@@ -49,11 +49,7 @@ fi
 
 %files
 %defattr(-,root,root)
-%dir /opt/open-xchange/bundles/
-/opt/open-xchange/bundles/*
-%dir /opt/open-xchange/osgi/bundle.d/
-/opt/open-xchange/osgi/bundle.d/*
-%dir /opt/open-xchange/etc/
+/opt/open-xchange
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
