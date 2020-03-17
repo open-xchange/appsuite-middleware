@@ -27,6 +27,7 @@ Authors:
 %package core
 Group:         Applications/Productivity
 Summary:       Backend extension to provision synchronization with mobile phones
+Requires(post): open-xchange-system >= @OXVERSION@
 Requires:      open-xchange-core >= @OXVERSION@
 Provides:      open-xchange-mobile-configuration-generator = %{version}
 Obsoletes:     open-xchange-mobile-configuration-generator < %{version}

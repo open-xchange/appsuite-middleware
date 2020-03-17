@@ -12,6 +12,7 @@ URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       Module for authenticating users using a LDAP server
 Autoreqprov:   no
+Requires(post): open-xchange-system >= @OXVERSION@
 Requires:      open-xchange-core >= @OXVERSION@
 Provides:      open-xchange-authentication
 Conflicts:     open-xchange-authentication-database

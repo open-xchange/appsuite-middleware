@@ -13,6 +13,7 @@ URL:            http://www.open-xchange.com/
 Source:         %{name}_%{version}.orig.tar.bz2
 Summary:        Extensions for integration with Parallels
 Autoreqprov:    no
+Requires(post): open-xchange-system >= @OXVERSION@
 Requires:       open-xchange-admin-soap >= @OXVERSION@
 Requires:       open-xchange-spamhandler
 Provides:       open-xchange-authentication

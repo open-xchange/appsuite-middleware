@@ -12,7 +12,7 @@ URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       Xerces Compat for Sun Java
 Autoreqprov:   no
-Requires:      open-xchange-osgi >= @OXVERSION@
+Requires:      open-xchange-osgi >= 7.10.1
 Obsoletes:     open-xchange-xerces-ibm
 Obsoletes:     open-xchange-xerces-sun
 

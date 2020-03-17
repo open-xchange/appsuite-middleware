@@ -12,6 +12,7 @@ URL:            http://www.open-xchange.com/
 Source:         %{name}_%{version}.orig.tar.bz2
 Summary:        The Open Xchange backend Virtual Mail Attachment file storage extension
 Autoreqprov:   no
+Requires(post): open-xchange-system >= @OXVERSION@
 Requires:       open-xchange-core >= @OXVERSION@
 Requires:       open-xchange-imap >= @OXVERSION@
 

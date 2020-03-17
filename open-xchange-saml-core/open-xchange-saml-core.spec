@@ -12,6 +12,7 @@ URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       Core package to support SAML authentication
 Autoreqprov:   no
+Requires(post): open-xchange-system >= @OXVERSION@
 Requires:      open-xchange-core >= @OXVERSION@
 
 %description

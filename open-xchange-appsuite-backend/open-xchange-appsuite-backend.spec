@@ -12,6 +12,7 @@ URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       Backend extensions to serve OX App Suite frontend
 Autoreqprov:   no
+Requires(post): open-xchange-system >= @OXVERSION@
 Requires:      open-xchange-core >= @OXVERSION@
 Requires:      open-xchange-halo
 Requires:      open-xchange-appsuite-manifest

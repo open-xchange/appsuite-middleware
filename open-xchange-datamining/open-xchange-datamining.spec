@@ -12,6 +12,7 @@ URL:            http://www.open-xchange.com/
 Source:         %{name}_%{version}.orig.tar.bz2
 Summary:        This bundle provides a datamining tool (described at http://oxpedia.org/wiki/index.php?title=Datamining)
 Autoreqprov:    no
+Requires(post): open-xchange-system >= @OXVERSION@
 Requires:       open-xchange-core >= @OXVERSION@
 
 %description

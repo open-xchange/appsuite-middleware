@@ -12,6 +12,7 @@ URL:            http://www.open-xchange.com/
 Source:         %{name}_%{version}.orig.tar.bz2
 Summary:        Server module for Open-Xchange Drive file synchronization
 Autoreqprov:    no
+Requires(post): open-xchange-system >= @OXVERSION@
 Requires:       open-xchange-core >= @OXVERSION@
 
 %description
