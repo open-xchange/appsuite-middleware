@@ -819,7 +819,7 @@ public class EventManager extends AbstractManager {
      * @throws ApiException if an API error is occurred
      */
     public List<AlarmTrigger> getAlarmTrigger(long until, String actions) throws ApiException {
-        AlarmTriggerResponse triggerResponse = userApi.getChronosApi().getAlarmTrigger(userApi.getSession(), DateTimeUtil.getZuluDateTime(until).getValue(), actions);
+        AlarmTriggerResponse triggerResponse = userApi.getChronosApi().getAlarmTrigger(userApi.getSession(), DateTimeUtil.getZuluDateTime(until).getValue(), DateTimeUtil.getZuluDateTime(0).getValue(), actions);
         return checkResponse(triggerResponse.getError(), triggerResponse.getErrorDesc(), triggerResponse.getCategories(), triggerResponse.getData());
     }
 

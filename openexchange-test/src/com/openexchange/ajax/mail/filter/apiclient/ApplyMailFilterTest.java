@@ -95,7 +95,7 @@ public class ApplyMailFilterTest extends AbstractMailFilterTest {
         folder.setTitle(ApplyMailFilterTest.class.getSimpleName() + "_" + System.currentTimeMillis());
         folder.setModule("mail");
         body.setFolder(folder);
-        FolderUpdateResponse createFolder = folderApi.createFolder("default0/INBOX", getSessionId(), body, "0", null, null);
+        FolderUpdateResponse createFolder = folderApi.createFolder("default0/INBOX", getSessionId(), body, "0", null, null, null);
         assertNull(createFolder.getErrorDesc(), createFolder.getError());
         String folderId = rememberFolder(createFolder.getData());
 

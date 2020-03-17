@@ -143,7 +143,7 @@ public abstract class AbstractMailComposeTest extends AbstractAPIClientSession {
         folder.setModule("mail");
         folder.setPermissions(null);
         body.setFolder(folder);
-        FolderUpdateResponse createFolder = foldersApi.createFolder(FOLDER, getApiClient().getSession(), body, "0", null, null);
+        FolderUpdateResponse createFolder = foldersApi.createFolder(FOLDER, getApiClient().getSession(), body, "0", null, null, null);
         folderId = createFolder.getData();
 
         MailImportResponse response = mailApi.importMail(getApiClient().getSession(), folderId, mailWithAttachmentFile, null, Boolean.TRUE);
@@ -180,7 +180,7 @@ public abstract class AbstractMailComposeTest extends AbstractAPIClientSession {
             mailListElement.setId(dest.getId());
             body.add(mailListElement);
         }
-        mailApi.deleteMails(getApiClient().getSession(), body, timestamp);
+        mailApi.deleteMails(getApiClient().getSession(), body, timestamp, null, null);
         foldersApi.deleteFolders(getApiClient().getSession(), Collections.singletonList(folderId), "0", timestamp, null, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null);
         super.tearDown();
     }

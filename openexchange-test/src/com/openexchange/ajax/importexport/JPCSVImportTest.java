@@ -134,7 +134,7 @@ public class JPCSVImportTest extends AbstractConfigAwareAPIClientSession {
         NewFolderBody body = new NewFolderBody();
         body.setFolder(folderData);
 
-        FolderUpdateResponse createFolder = api.createFolder(parent, getSessionId(), body, "0", null, null);
+        FolderUpdateResponse createFolder = api.createFolder(parent, getSessionId(), body, "0", null, null, null);
         checkResponse(createFolder.getError(), createFolder.getErrorDesc(), createFolder.getData());
 
         String result = createFolder.getData();

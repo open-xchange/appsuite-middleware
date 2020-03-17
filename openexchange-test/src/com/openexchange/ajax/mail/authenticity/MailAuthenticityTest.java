@@ -145,7 +145,7 @@ public class MailAuthenticityTest extends AbstractConfigAwareAPIClientSession {
                 mailListElement.setId(dest.getId());
                 body.add(mailListElement);
             }
-            MailsCleanUpResponse deleteMails = api.deleteMails(getApiClient().getSession(), body, timestamp);
+            MailsCleanUpResponse deleteMails = api.deleteMails(getApiClient().getSession(), body, timestamp, null, null);
             Assert.assertNull(deleteMails.getErrorDesc(), deleteMails.getError());
         } finally {
             super.tearDown();

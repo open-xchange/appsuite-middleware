@@ -234,7 +234,7 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
         NewFolderBody body = new NewFolderBody();
         body.setFolder(folderData);
 
-        FolderUpdateResponse createFolder = api.getFoldersApi().createFolder(parent, session, body, "0", CALENDAR_MODULE, null);
+        FolderUpdateResponse createFolder = api.getFoldersApi().createFolder(parent, session, body, "0", CALENDAR_MODULE, null, null);
         checkResponse(createFolder.getError(), createFolder.getErrorDesc(), createFolder.getData());
 
         String result = createFolder.getData();

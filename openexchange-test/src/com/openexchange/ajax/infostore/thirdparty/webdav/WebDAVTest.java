@@ -49,6 +49,27 @@
 
 package com.openexchange.ajax.infostore.thirdparty.webdav;
 
+import static com.openexchange.java.Autoboxing.B;
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.isEmptyOrNullString;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.assertThat;
+import java.io.File;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 import org.jcodec.common.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -78,22 +99,6 @@ import com.openexchange.testing.httpclient.modules.ConfigApi;
 import com.openexchange.testing.httpclient.modules.FilestorageApi;
 import com.openexchange.testing.httpclient.modules.FoldersApi;
 import com.openexchange.testing.httpclient.modules.InfostoreApi;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertThat;
-import java.io.File;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.java.Autoboxing.L;
-import static com.openexchange.java.Autoboxing.B;
 
 /**
  * {@link WebDAVTest} - Tests the integration of an external WebDAV server as FileStorageAccount
@@ -361,7 +366,7 @@ public class WebDAVTest extends AbstractConfigAwareAPIClientSession {
         folder.setModule(Module.INFOSTORE.getName());
         folder.setTitle(title);
         body.setFolder(folder);
-        FolderUpdateResponse response = foldersApi.createFolder(parentFolder, getSessionId(), body, null, null, null);
+        FolderUpdateResponse response = foldersApi.createFolder(parentFolder, getSessionId(), body, null, null, null, null);
         return checkResponse(response.getError(), response.getErrorDesc(), response.getData());
     }
 
@@ -594,7 +599,7 @@ public class WebDAVTest extends AbstractConfigAwareAPIClientSession {
         FolderData folderData = new FolderData();
         folderData.setFolderId(newFolderId);
         folderBody.setFolder(folderData);
-        FolderUpdateResponse updateResponse = foldersApi.updateFolder(getSessionId(), newFolderId2, folderBody, null, null, null, null, null, null);
+        FolderUpdateResponse updateResponse = foldersApi.updateFolder(getSessionId(), newFolderId2, folderBody, null, null, null, null, null, null, null);
         String movedFolderId = checkResponse(updateResponse.getError(), updateResponse.getErrorDesc(), updateResponse.getData());
 
         //Folder present?

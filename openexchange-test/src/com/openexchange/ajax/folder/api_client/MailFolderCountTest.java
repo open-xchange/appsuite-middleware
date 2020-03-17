@@ -105,7 +105,7 @@ public class MailFolderCountTest extends AbstractConfigAwareAPIClientSession {
         folder.setTitle(this.getClass().getSimpleName() + "_" + new UID().toString());
         folder.setModule("mail");
         body.setFolder(folder);
-        FolderUpdateResponse createFolder = folderApi.createFolder(FOLDER, getApiClient().getSession(), body, "1", null, null);
+        FolderUpdateResponse createFolder = folderApi.createFolder(FOLDER, getApiClient().getSession(), body, "1", null, null, null);
         Assert.assertNull(createFolder.getError());
         Assert.assertNotNull(createFolder.getData());
 
@@ -144,7 +144,7 @@ public class MailFolderCountTest extends AbstractConfigAwareAPIClientSession {
                 mailListElement.setId(dest.getId());
                 body.add(mailListElement);
             }
-            api.deleteMails(getApiClient().getSession(), body, timestamp);
+            api.deleteMails(getApiClient().getSession(), body, timestamp, null, null);
             folderApi.deleteFolders(getApiClient().getSession(), Collections.singletonList(folderId), "1", timestamp, null, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null);
         } finally {
             super.tearDown();

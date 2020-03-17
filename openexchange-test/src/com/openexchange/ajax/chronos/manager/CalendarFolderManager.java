@@ -136,7 +136,7 @@ public class CalendarFolderManager extends AbstractManager {
      */
     public String createFolder(String module, String providerId, String title, JSONObject config, JSONObject extendedProperties, boolean expectedException) throws ApiException, ChronosApiException {
         NewFolderBody body = CalendarFolderFactory.createFolderBody(module, providerId, title, Boolean.TRUE, config, extendedProperties);
-        FolderUpdateResponse response = foldersApi.createFolder(DEFAULT_FOLDER_ID, userApi.getSession(), body, TREE_ID, module, null);
+        FolderUpdateResponse response = foldersApi.createFolder(DEFAULT_FOLDER_ID, userApi.getSession(), body, TREE_ID, module, null, null);
         if (expectedException) {
             assertNotNull("An error was expected", response.getError());
             throw new ChronosApiException(response.getCode(), response.getError());
@@ -145,7 +145,7 @@ public class CalendarFolderManager extends AbstractManager {
     }
 
     public String createFolder(NewFolderBody body) throws ApiException {
-        FolderUpdateResponse response = foldersApi.createFolder(DEFAULT_FOLDER_ID, userApi.getSession(), body, CalendarFolderManager.TREE_ID, CalendarFolderManager.MODULE, null);
+        FolderUpdateResponse response = foldersApi.createFolder(DEFAULT_FOLDER_ID, userApi.getSession(), body, CalendarFolderManager.TREE_ID, CalendarFolderManager.MODULE, null, null);
         return handleCreation(response).getData();
     }
 
@@ -202,7 +202,7 @@ public class CalendarFolderManager extends AbstractManager {
         FolderBody body = new FolderBody();
         body.setFolder(folderData);
 
-        FolderUpdateResponse response = foldersApi.updateFolder(userApi.getSession(), folderData.getId(), body, Boolean.FALSE, folderData.getLastModifiedUtc(), TREE_ID, CALENDAR_MODULE, Boolean.TRUE, null);
+        FolderUpdateResponse response = foldersApi.updateFolder(userApi.getSession(), folderData.getId(), body, Boolean.FALSE, folderData.getLastModifiedUtc(), TREE_ID, CALENDAR_MODULE, Boolean.TRUE, null, null);
         if (expectedException) {
             assertNotNull("An error was expected", response.getError());
             throw new ChronosApiException(response.getCode(), response.getError());

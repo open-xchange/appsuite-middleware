@@ -207,7 +207,7 @@ public class InfostoreApiClientTest extends AbstractAPIClientSession {
         folder.setSubscribed(Boolean.TRUE);
         folder.setPermissions(null);
         body.setFolder(folder);
-        FolderUpdateResponse folderUpdateResponse = folderApi.createFolder(parent, getApiClient().getSession(), body, "1", null, null);
+        FolderUpdateResponse folderUpdateResponse = folderApi.createFolder(parent, getApiClient().getSession(), body, "1", null, null, null);
         return checkResponse(folderUpdateResponse);
     }
 

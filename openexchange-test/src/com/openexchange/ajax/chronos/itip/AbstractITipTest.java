@@ -335,7 +335,7 @@ public abstract class AbstractITipTest extends AbstractChronosTest {
         elm.setId(data.getId());
         elm.setFolder(data.getFolderId());
         operations.add(() -> {
-            mailApi.deleteMails(apiClient.getSession(), Collections.singletonList(elm), now());
+            mailApi.deleteMails(apiClient.getSession(), Collections.singletonList(elm), now(), null, null);
         });
     }
 
@@ -348,7 +348,7 @@ public abstract class AbstractITipTest extends AbstractChronosTest {
         elm.setId(data.getId());
         elm.setFolder(data.getFolderId());
         operations.add(() -> {
-            mailApi.deleteMails(apiClient.getSession(), Collections.singletonList(elm), now());
+            mailApi.deleteMails(apiClient.getSession(), Collections.singletonList(elm), now(), null, null);
         });
     }
 
