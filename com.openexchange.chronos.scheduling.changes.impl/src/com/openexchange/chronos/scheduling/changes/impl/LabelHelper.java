@@ -422,7 +422,11 @@ public class LabelHelper {
                 msg = Messages.NONE_ON_BEHALF_INTRO;
                 statusString = Messages.NONE;
             }
-            return new SentenceImpl(msg).add(originator.getSentBy().getCn(), ArgumentType.PARTICIPANT).add(statusString, ArgumentType.STATUS, status).add(originator.getCn(), ArgumentType.PARTICIPANT).getMessage(messageContext);
+            return new SentenceImpl(msg)
+                .add(originator.getSentBy().getCn(), ArgumentType.PARTICIPANT)
+                .add(statusString, ArgumentType.STATUS, status)
+                .add(originator.getCn(), ArgumentType.PARTICIPANT)
+                .getMessage(messageContext);
         }
 
         @Override
@@ -443,10 +447,10 @@ public class LabelHelper {
                 statusString = Messages.NONE;
             }
             return new SentenceImpl(msg)
-                .add(originator.getCn(), ArgumentType.PARTICIPANT)
+                .add(originator.getSentBy().getCn(), ArgumentType.PARTICIPANT)
                 .add(statusString, ArgumentType.STATUS, status)
                 .add(ofSeries, ArgumentType.ITALIC)
-                .add(originator.getSentBy().getCn(), ArgumentType.PARTICIPANT)
+                .add(originator.getCn(), ArgumentType.PARTICIPANT)
                 .getMessage(messageContext)
             ;
         }
