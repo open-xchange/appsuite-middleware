@@ -1,17 +1,16 @@
 #!/usr/bin/make -f
 
-# Uncomment this to turn on verbose mode.
-#export DH_VERBOSE=1
+DH_VERBOSE := 1
 
-include /usr/share/cdbs/1/rules/debhelper.mk
+override_dh_systemd_enable:
+	dh_systemd_enable
 
-# Which distribution is this?
-DIST_CODE := $(shell lsb_release -sc)
+override_dh_systemd_start:
+	dh_systemd_start --no-start
 
-# On Redhat and SuSE start scripts are not automatically added to system start. This is wanted behavior and standard. Do the same for Debian.
-ifeq "$(DIST_CODE)" "jessie"
-  DEB_DH_SYSTEMD_START_ARGS := --no-start
-  DEB_DH_INSTALLINIT_ARGS := -n -o
-else
-  DEB_DH_INSTALLINIT_ARGS := --no-start
-endif
+override_dh_installinit:
+	dh_installinit --noscripts
+
+%:
+	dh $@ --with systemd --without 
+
