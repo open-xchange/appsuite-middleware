@@ -45,5 +45,4 @@ cp -rv ./opt %{buildroot}/
 %changelog
 * Tue Jan 26 2016 Kevin Ruthmann <kevin.ruthmann@open-xchange.com>
 First candidate for 7.8.1 release
-* Tue Nov 17 2015 Kevin Ruthmann <kevin.ruthmann@open-xchange.com>
-Initial packaging
+

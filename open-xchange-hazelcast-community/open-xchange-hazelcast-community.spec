@@ -45,17 +45,4 @@ cp -rv --preserve=all ./opt %{buildroot}/
 %changelog
 * Mon Jun 17 2019 Martin Schneider <martin.schneider@open-xchange.com>
 prepare for 7.10.3 release
-* Fri May 10 2019 Martin Schneider <martin.schneider@open-xchange.com>
-Second candidate for 7.10.2 release
-* Fri May 10 2019 Martin Schneider <martin.schneider@open-xchange.com>
-First candidate for 7.10.2 release
-* Tue Apr 30 2019 Martin Schneider <martin.schneider@open-xchange.com>
-Second preview for 7.10.2 release
-* Thu Mar 28 2019 Martin Schneider <martin.schneider@open-xchange.com>
-First preview for 7.10.2 release
-* Thu Oct 18 2018 Martin Schneider <martin.schneider@open-xchange.com>
-prepare for 7.10.2 release
-* Thu Oct 11 2018 Martin Schneider <martin.schneider@open-xchange.com>
-First candidate for 7.10.1 release
-* Mon Aug 13 2018 Martin Schneider <martin.schneider@open-xchange.com>
-Initial release
+

@@ -44,33 +44,3 @@ cp -rv --preserve=all ./opt ./usr %{buildroot}/
 %changelog
 * Mon Jun 17 2019 Marcus Klein <marcus.klein@open-xchange.com>
 prepare for 7.10.3 release
-* Fri May 10 2019 Marcus Klein <marcus.klein@open-xchange.com>
-Second candidate for 7.10.2 release
-* Fri May 10 2019 Marcus Klein <marcus.klein@open-xchange.com>
-First candidate for 7.10.2 release
-* Tue Apr 30 2019 Marcus Klein <marcus.klein@open-xchange.com>
-Second preview for 7.10.2 release
-* Thu Mar 28 2019 Marcus Klein <marcus.klein@open-xchange.com>
-First preview for 7.10.2 release
-* Thu Oct 18 2018 Marcus Klein <marcus.klein@open-xchange.com>
-prepare for 7.10.2 release
-* Thu Oct 11 2018 Marcus Klein <marcus.klein@open-xchange.com>
-First candidate for 7.10.1 release
-* Thu Sep 06 2018 Marcus Klein <marcus.klein@open-xchange.com>
-prepare for 7.10.1 release
-* Fri Jun 29 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Fourth candidate for 7.10.0 release
-* Wed Jun 27 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Third candidate for 7.10.0 release
-* Mon Jun 25 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Second candidate for 7.10.0 release
-* Mon Jun 11 2018 Marcus Klein <marcus.klein@open-xchange.com>
-First candidate for 7.10.0 release
-* Fri May 18 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Sixth preview of 7.10.0 release
-* Thu Apr 19 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Fifth preview of 7.10.0 release
-* Tue Apr 03 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Fourth preview of 7.10.0 release
-* Thu Feb 01 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Initial release

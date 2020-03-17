@@ -51,13 +51,3 @@ GLOBIGNORE='*'
 %changelog
 * Mon Jun 17 2019 Thorben Betten <thorben.betten@open-xchange.com>
 prepare for 7.10.3 release
-* Fri May 10 2019 Thorben Betten <thorben.betten@open-xchange.com>
-Second candidate for 7.10.2 release
-* Fri May 10 2019 Thorben Betten <thorben.betten@open-xchange.com>
-First candidate for 7.10.2 release
-* Tue Apr 30 2019 Thorben Betten <thorben.betten@open-xchange.com>
-Second preview for 7.10.2 release
-* Thu Mar 28 2019 Thorben Betten <thorben.betten@open-xchange.com>
-First preview for 7.10.2 release
-* Thu Oct 18 2018 Thorben Betten <thorben.betten@open-xchange.com>
-prepare for 7.10.2 release
