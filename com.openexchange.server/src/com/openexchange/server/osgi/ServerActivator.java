@@ -341,6 +341,7 @@ public final class ServerActivator extends HousekeepingActivator {
     private static final String STR_IDENTIFIER = "identifier";
 
     private static final Class<?>[] NEEDED_SERVICES_SERVER = {
+        // @formatter:off
         ConfigurationService.class, DatabaseService.class, CacheService.class, EventAdmin.class, SessiondService.class, SpringParser.class,
         JDOMParser.class, TimerService.class, ThreadPoolService.class,
         MessagingServiceRegistry.class, HtmlService.class,
@@ -348,6 +349,7 @@ public final class ServerActivator extends HousekeepingActivator {
         CryptoService.class, HttpService.class, SystemNameService.class, ConfigViewFactory.class, StringParser.class, PreviewService.class,
         TextXtractService.class, SecretEncryptionFactoryService.class, SearchService.class, DispatcherPrefixService.class,
         UserAgentParser.class, PasswordMechRegistry.class, LeanConfigurationService.class, VersionService.class };
+        // @formatter:on
 
     private static volatile BundleContext CONTEXT;
 
@@ -663,6 +665,7 @@ public final class ServerActivator extends HousekeepingActivator {
          */
         CachingAliasStorage aliasStorage;
         {
+            // @formatter:off
             String regionName = "UserAlias";
             byte[] ccf = (  "jcs.region." + regionName + "=LTCP\n" +
                             "jcs.region." + regionName + ".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" +
@@ -673,6 +676,7 @@ public final class ServerActivator extends HousekeepingActivator {
                             "jcs.region." + regionName + ".elementattributes.IsEternal=false\n" + "jcs.region." + regionName + ".elementattributes.MaxLifeSeconds=-1\n" +
                             "jcs.region." + regionName + ".elementattributes.IdleTime=360\n" + "jcs.region." + regionName + ".elementattributes.IsSpool=false\n" +
                             "jcs.region." + regionName + ".elementattributes.IsRemote=false\n" + "jcs.region." + regionName + ".elementattributes.IsLateral=false\n").getBytes();
+            // @formatter:on
             getService(CacheService.class).loadConfiguration(new ByteArrayInputStream(ccf));
 
             aliasStorage = new CachingAliasStorage(new RdbAliasStorage());

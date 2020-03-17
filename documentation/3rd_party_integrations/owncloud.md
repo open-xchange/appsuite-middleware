@@ -1,6 +1,6 @@
 ---
 title: OwnCloud
-icon: fab fa-cloud
+icon: fas fa-cloud
 tags: 3rd Party, ownCloud, Installation, Configuration, Filestore
 ---
 

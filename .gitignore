@@ -3,6 +3,7 @@
 *.pmd
 .DS_Store
 .lint4jprefs
+.attach*
 bin
 bin/
 .git-rewrite/

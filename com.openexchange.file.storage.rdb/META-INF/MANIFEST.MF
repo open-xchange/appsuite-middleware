@@ -6,6 +6,7 @@ Bundle-Version: 7.10.4
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.google.common.collect,
+ com.openexchange.annotation,
  com.openexchange.cache,
  com.openexchange.caching,
  com.openexchange.context,
@@ -14,6 +15,7 @@ Import-Package: com.google.common.collect,
  com.openexchange.datatypes.genericonf,
  com.openexchange.datatypes.genericonf.storage,
  com.openexchange.exception,
+ com.openexchange.external.account,
  com.openexchange.file.storage,
  com.openexchange.file.storage.generic,
  com.openexchange.file.storage.registry,

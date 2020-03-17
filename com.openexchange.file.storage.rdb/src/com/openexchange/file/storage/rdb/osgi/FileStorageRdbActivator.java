@@ -58,6 +58,8 @@ import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
+import com.openexchange.external.account.ExternalAccountProvider;
+import com.openexchange.file.storage.AdministrativeFileStorageAccountStorage;
 import com.openexchange.file.storage.FileStorageAccountDeleteListener;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.FileStorageService;
@@ -67,6 +69,8 @@ import com.openexchange.file.storage.rdb.groupware.FileStorageRdbCreateTableTask
 import com.openexchange.file.storage.rdb.groupware.FileStorageRdbDeleteListener;
 import com.openexchange.file.storage.rdb.internal.CachingFileStorageAccountStorage;
 import com.openexchange.file.storage.rdb.internal.DeleteListenerRegistry;
+import com.openexchange.file.storage.rdb.internal.FileStorageExternalAccountProvider;
+import com.openexchange.file.storage.rdb.internal.RdbAdministrativeFileStorageAccountStorage;
 import com.openexchange.file.storage.rdb.internal.RdbFileStorageAccountManagerProvider;
 import com.openexchange.file.storage.rdb.secret.RdbFileStorageSecretHandling;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
@@ -103,9 +107,11 @@ public class FileStorageRdbActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
+        // @formatter:off
         return new Class<?>[] {
             DatabaseService.class, GenericConfigurationStorageService.class, ContextService.class, FileStorageServiceRegistry.class,
             CacheService.class, SecretEncryptionFactoryService.class, IDGeneratorService.class, CryptoService.class, FolderCacheInvalidationService.class };
+        // @formatter:on
     }
 
     @Override
@@ -122,6 +128,7 @@ public class FileStorageRdbActivator extends HousekeepingActivator {
                  * FileStorageAccount region with 5 minutes time-out
                  */
                 final String regionName = CachingFileStorageAccountStorage.getRegionName();
+                // @formatter:off
                 final byte[] ccf = ("jcs.region."+regionName+"=LTCP\n" +
                 		"jcs.region."+regionName+".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" +
                 		"jcs.region."+regionName+".cacheattributes.MaxObjects=10000000\n" +
@@ -137,6 +144,7 @@ public class FileStorageRdbActivator extends HousekeepingActivator {
                 		"jcs.region."+regionName+".elementattributes.IsRemote=false\n" +
                 		"jcs.region."+regionName+".elementattributes.IsLateral=false\n").getBytes();
                 getService(CacheService.class).loadConfiguration(new ByteArrayInputStream(ccf));
+                // @formatter:on
             }
             /*
              * Initialize and start service trackers
@@ -149,6 +157,9 @@ public class FileStorageRdbActivator extends HousekeepingActivator {
              * Initialize and register services
              */
             registerService(FileStorageAccountManagerProvider.class, new RdbFileStorageAccountManagerProvider());
+            AdministrativeFileStorageAccountStorage adminAccountStorage = new RdbAdministrativeFileStorageAccountStorage(this);
+            registerService(AdministrativeFileStorageAccountStorage.class, adminAccountStorage);
+            registerService(ExternalAccountProvider.class, new FileStorageExternalAccountProvider(adminAccountStorage));
             /*
              * The update task/create table service
              */

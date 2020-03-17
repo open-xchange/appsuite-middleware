@@ -1,6 +1,6 @@
 ---
-title: HTTP Client configuration
-icon: fa fa-exchange
+title: HTTP Client Configuration
+icon: fa fa-exchange-alt
 tags: Administration, HTTP Client, Monitoring
 ---
 
@@ -40,7 +40,7 @@ Properties defined with this manner will be applied to all HTTP clients configur
 
 ## Level 2 - Legacy properties
 
-Previous versions of the Open Xchange Server had problematically defaults for HTT clients. 
+Previous versions of the Open Xchange Server had problematically defaults for HTTP clients. 
 These defaults will still be applied on top of the default configuration, efficiently overwrite the defaults set with `com.openenexchange.httpclient.*`.
 This will avoid that HTTP clients will change their behavior when updating from a version 7.10.3 or earlier.
 To make those problematically defaults visible, they got documented [here](https://documentation.open-xchange.com/components/middleware/config/latest/#mode=features&feature=HTTP%20Client%20Configuration%20legacy%20values)

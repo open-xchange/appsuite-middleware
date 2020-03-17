@@ -136,15 +136,29 @@ final class Sanitizer {
     }
 
     /**
-     * Sanitizes specified user's mail accounts.
+     * Sanitizes all user mail accounts in the specified context.
      *
-     * @param user The user identifier
      * @param contextId The context identifier
      * @param storageService The storage service
      * @throws OXException If sanitizing fails
      */
-    protected static void sanitize(final int user, final int contextId, final MailAccountStorageService storageService) throws OXException {
-        sanitize(user, contextId, storageService, URIDefaults.IMAP, "imap://localhost:143");
+    protected static void sanitize(int contextId, MailAccountStorageService storageService) throws OXException {
+        Connection connection = Database.get(contextId, true);
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = connection.prepareStatement("SELECT id FROM user WHERE cid = ?");
+            stmt.setInt(1, contextId);
+            rs = stmt.executeQuery();
+            while (rs.next()) {
+                sanitize(rs.getInt(1), contextId, storageService, URIDefaults.IMAP, "imap://localhost:143", connection);
+            }
+        } catch (SQLException e) {
+            throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+            Database.back(contextId, true, connection);
+        }
     }
 
     /**
@@ -155,14 +169,25 @@ final class Sanitizer {
      * @param storageService The storage service
      * @throws OXException If sanitizing fails
      */
-    protected static void sanitize(final int user, final int contextId, final MailAccountStorageService storageService, final URIDefaults defaults, final String fallbackUri) throws OXException {
-        final Connection con;
+    protected static void sanitize(final int user, final int contextId, final MailAccountStorageService storageService) throws OXException {
+        Connection connection = Database.get(contextId, true);
         try {
-            con = Database.get(contextId, true);
-            con.setAutoCommit(false);
-        } catch (SQLException e) {
-            throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+            sanitize(user, contextId, storageService, URIDefaults.IMAP, "imap://localhost:143", connection);
+        } finally {
+            Database.back(contextId, true, connection);
         }
+    }
+
+    /**
+     * Sanitizes specified user's mail accounts.
+     *
+     * @param user The user identifier
+     * @param contextId The context identifier
+     * @param storageService The storage service
+     * @param connection The writeable connection
+     * @throws OXException If sanitizing fails
+     */
+    private static void sanitize(final int user, final int contextId, final MailAccountStorageService storageService, final URIDefaults defaults, final String fallbackUri, Connection connection) throws OXException {
         /*
          * A map to store broken accounts
          */
@@ -173,7 +198,8 @@ final class Sanitizer {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT url, id FROM user_mail_account WHERE cid = ? AND user = ?");
+            connection.setAutoCommit(false);
+            stmt = connection.prepareStatement("SELECT url, id FROM user_mail_account WHERE cid = ? AND user = ?");
             stmt.setInt(1, contextId);
             stmt.setInt(2, user);
             rs = stmt.executeQuery();
@@ -196,7 +222,7 @@ final class Sanitizer {
                 /*
                  * Batch update broken accounts
                  */
-                stmt = con.prepareStatement("UPDATE user_mail_account SET url = ? WHERE cid = ? AND user = ? AND id = ?");
+                stmt = connection.prepareStatement("UPDATE user_mail_account SET url = ? WHERE cid = ? AND user = ? AND id = ?");
                 map.forEachEntry(new AddBatchProcedure(contextId, user, stmt));
                 stmt.executeBatch();
                 /*
@@ -207,24 +233,22 @@ final class Sanitizer {
             /*
              * Commit possible changes
              */
-            con.commit();
+            connection.commit();
         } catch (SQLException e) {
-            Databases.rollback(con);
+            Databases.rollback(connection);
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (IllegalStateException e) {
-            Databases.rollback(con);
+            Databases.rollback(connection);
             final Throwable cause = e.getCause();
             if (null != cause) {
                 throw MailAccountExceptionCodes.SQL_ERROR.create(cause, cause.getMessage());
             }
             throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (RuntimeException e) {
-            Databases.rollback(con);
+            Databases.rollback(connection);
             throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
-            Database.back(contextId, true, con);
         }
     }
-
 }

@@ -55,8 +55,11 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.storage.AdministrativeAlarmTriggerStorage;
+import com.openexchange.chronos.storage.AdministrativeCalendarAccountStorage;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.chronos.storage.rdb.AdministrativeRdbAlarmTriggerStorage;
+import com.openexchange.chronos.storage.rdb.AdministrativeRdbCalendarAccountStorage;
+import com.openexchange.chronos.storage.rdb.CalendarExternalAccountProvider;
 import com.openexchange.chronos.storage.rdb.groupware.CalendarAlarmAddTimestampColumnTask;
 import com.openexchange.chronos.storage.rdb.groupware.CalendarAlarmTriggerCorrectFolderTask;
 import com.openexchange.chronos.storage.rdb.groupware.CalendarAlarmTriggerRemoveOrphanedTask;
@@ -81,6 +84,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.provider.DatabaseServiceDBProvider;
+import com.openexchange.external.account.ExternalAccountProvider;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -108,7 +112,7 @@ public class RdbCalendarStorageActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class, ContextService.class, RecurrenceService.class, ConfigurationService.class, QuotaService.class};
+        return new Class<?>[] { DatabaseService.class, ContextService.class, RecurrenceService.class, ConfigurationService.class, QuotaService.class };
     }
 
     @Override
@@ -132,6 +136,7 @@ public class RdbCalendarStorageActivator extends HousekeepingActivator {
              * register services for infrastructure
              */
             registerService(CreateTableService.class, new ChronosCreateTableService());
+            // @formatter:off
             registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(
                 new ChronosCreateTableTask(),
                 new CalendarEventAddRDateColumnTask(),
@@ -150,6 +155,7 @@ public class RdbCalendarStorageActivator extends HousekeepingActivator {
                 new CalendarEventAdjustRecurrenceColumnTask(),
                 new CalendarAttendeeAddTimestampColumnTask()
             ));
+            // @formatter:on
             if (getService(ConfigurationService.class).getBoolProperty("com.openexchange.calendar.migration.purgeLegacyData", true)) {
                 registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new ChronosStoragePurgeLegacyDataTask()));
             }
@@ -159,6 +165,9 @@ public class RdbCalendarStorageActivator extends HousekeepingActivator {
              */
             registerService(CalendarStorageFactory.class, storageFactory);
             registerService(AdministrativeAlarmTriggerStorage.class, new AdministrativeRdbAlarmTriggerStorage());
+            registerService(AdministrativeCalendarAccountStorage.class, new AdministrativeRdbCalendarAccountStorage(this));
+            registerService(ExternalAccountProvider.class, new CalendarExternalAccountProvider(this));
+            trackService(AdministrativeCalendarAccountStorage.class);
             // Availability disabled until further notice
             //registerService(CalendarAvailabilityStorageFactory.class, new com.openexchange.chronos.storage.rdb.RdbCalendarAvailabilityStorageFactory());
         } catch (Exception e) {

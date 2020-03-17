@@ -123,6 +123,22 @@ public class Enums {
     }
 
     /**
+     * Generates a comma-separated string for specified enumeration names.
+     *
+     * @param <E> The enumeration type
+     * @param enumeration The enumeration
+     * @return The resulting comma-separated string
+     */
+    public static <E extends Enum<E>> String toCommaSeparatedList(E enumeration[]) {
+        StringBuilder sb = new StringBuilder(enumeration.length << 3);
+        for (E e : enumeration) {
+            sb.append(e.name()).append(", ");
+        }
+        sb.setLength(sb.length() - 2);
+        return sb.toString();
+    }
+
+    /**
      * Parses specified comma-separated names to enumeration constants, ignore-case.
      *
      * @param enumeration The enumeration class from which to return a constant

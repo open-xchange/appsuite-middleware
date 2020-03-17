@@ -290,6 +290,14 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     }
 
     @Override
+    public void deleteAllMailAccounts(int userId, int contextId, Connection connection) throws OXException {
+        dropSessionParameter(userId, contextId);
+
+        delegate.deleteAllMailAccounts(userId, contextId, connection);
+        invalidateMailAccounts(userId, contextId);
+    }
+
+    @Override
     public void deleteMailAccount(int id, Map<String, Object> properties, int userId, int contextId, boolean deletePrimary) throws OXException {
         dropSessionParameter(userId, contextId);
 
@@ -486,6 +494,11 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     }
 
     @Override
+    public List<MailAccount> getUserMailAccounts(int contextId) throws OXException {
+        return delegate.getUserMailAccounts(contextId);
+    }
+
+    @Override
     public MailAccount getRawMailAccount(int id, int userId, int contextId) throws OXException {
         return delegate.getRawMailAccount(id, userId, contextId);
     }
@@ -580,6 +593,7 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     @Override
     public MailAccount[] resolveLogin(String login, int contextId) throws OXException {
         int[][] idsAndUsers = resolveFromCache(login, contextId, new FromDelegate() {
+
             @Override
             public int[][] getFromDelegate(String pattern, int contextId) throws OXException {
                 return getDelegate().resolveLogin2IDs(pattern, contextId);
@@ -596,6 +610,7 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     @Override
     public MailAccount[] resolveLogin(String login, String serverUrl, int contextId) throws OXException {
         int[][] idsAndUsers = resolveFromCache(login, contextId, new FromDelegate() {
+
             @Override
             public int[][] getFromDelegate(String pattern, int contextId) throws OXException {
                 return getDelegate().resolveLogin2IDs(pattern, contextId);
@@ -632,7 +647,7 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
             throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             if (rollback > 0) {
-                if (rollback==1) {
+                if (rollback == 1) {
                     rollback(con);
                 }
                 autocommit(con);
@@ -718,6 +733,7 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     @Override
     public MailAccount[] resolvePrimaryAddr(String primaryAddress, int contextId) throws OXException {
         int[][] idsAndUsers = resolveFromCache(primaryAddress, contextId, new FromDelegate() {
+
             @Override
             public int[][] getFromDelegate(String pattern, int contextId) throws OXException {
                 return getDelegate().resolvePrimaryAddr2IDs(pattern, contextId);
@@ -731,6 +747,7 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     }
 
     private static interface FromDelegate {
+
         int[][] getFromDelegate(String pattern, int contextId) throws OXException;
     }
 

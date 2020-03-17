@@ -68,7 +68,6 @@ import com.openexchange.chronos.storage.CalendarAccountStorage;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
 
-
 /**
  * {@link CachingCalendarAccountStorage}
  *
@@ -84,6 +83,15 @@ public class CachingCalendarAccountStorage implements CalendarAccountStorage {
     private final int contextId;
     private final CacheService cacheService;
     private final Cache cache;
+
+    /**
+     * Gets the cache region name.
+     *
+     * @return The cache region name
+     */
+    public static String getRegionName() {
+        return REGION_NAME;
+    }
 
     /**
      * Initializes a new {@link CachingCalendarAccountStorage}.

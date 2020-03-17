@@ -1,6 +1,6 @@
 ---
 title: WebDAV
-icon: fab fa-cloud
+icon: fas fa-cloud
 tags: 3rd Party, WebDAV, Installation, Configuration, Filestore
 ---
 

@@ -1,6 +1,6 @@
 ---
 title: Nextcloud
-icon: fab fa-cloud
+icon: fas fa-cloud
 tags: 3rd Party, nextcloud, Installation, Configuration, Filestore
 ---
 

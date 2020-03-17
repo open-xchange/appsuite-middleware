@@ -89,6 +89,8 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.dovecot.doveadm.client"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.download.limit"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.events.remote"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.external.account"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.external.account.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.file.storage"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.file.storage.composition"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.file.storage.config"/>

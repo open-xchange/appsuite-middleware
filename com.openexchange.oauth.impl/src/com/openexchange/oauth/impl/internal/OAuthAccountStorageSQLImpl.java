@@ -172,6 +172,19 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
     }
 
     @Override
+    public OAuthAccount getAccount(int contextId, int userId, int accountId) throws OXException {
+        Context context = getContext(contextId);
+        Connection connection = getConnection(true, context);
+        try {
+            return getAccount(contextId, userId, accountId, connection);
+        } catch (SQLException e) {
+            throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            provider.releaseReadConnection(context, connection);
+        }
+    }
+
+    @Override
     public void deleteAccount(Session session, int accountId) throws OXException {
         int userId = session.getUserId();
         int contextId = session.getContextId();
@@ -198,7 +211,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
 
             final DeleteListenerRegistry deleteListenerRegistry = DeleteListenerRegistry.getInstance();
             final Map<String, Object> properties = new HashMap<>(2);
-            // Hint to not update the scopes since it's an oauth account deletion
+            // Hint to not update the scopes since it's an OAuth account deletion
             // This hint has to be passed via the delete listener
             properties.put(OAuthConstants.SESSION_PARAM_UPDATE_SCOPES, Boolean.FALSE);
 
@@ -732,7 +745,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
 
     ////////////////////////////////////// HELPERS //////////////////////////////////////////
 
-    private boolean deleteAccount(Session session, int accountId, Connection connection) throws SQLException {
+    protected boolean deleteAccount(Session session, int accountId, Connection connection) throws SQLException {
         PreparedStatement stmt = null;
         try {
             stmt = connection.prepareStatement("DELETE FROM oauthAccounts WHERE cid = ? AND user = ? and id = ?");
@@ -859,6 +872,35 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
         }
     }
 
+    private OAuthAccount getAccount(int contextId, int userId, int accountId, Connection connection) throws SQLException, OXException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = connection.prepareStatement("SELECT displayName, serviceId, scope FROM oauthAccounts WHERE cid = ? AND user = ? and id = ?");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, userId);
+            stmt.setInt(3, accountId);
+            rs = stmt.executeQuery();
+            if (!rs.next()) {
+                throw OAuthExceptionCodes.ACCOUNT_NOT_FOUND.create(Integer.valueOf(accountId), Integer.valueOf(userId), Integer.valueOf(contextId));
+            }
+
+            DefaultOAuthAccount account = new DefaultOAuthAccount();
+            account.setId(accountId);
+            String displayName = rs.getString(1);
+            account.setDisplayName(displayName);
+
+            account.setMetaData(registry.getService(rs.getString(2), userId, contextId));
+            String scopes = rs.getString(3);
+            OAuthScopeRegistry scopeRegistry = Services.getService(OAuthScopeRegistry.class);
+            Set<OAuthScope> enabledScopes = scopeRegistry.getAvailableScopes(account.getMetaData().getAPI(), OXScope.valuesOf(scopes));
+            account.setEnabledScopes(enabledScopes);
+            return account;
+        } finally {
+            closeSQLStuff(rs, stmt);
+        }
+    }
+
     /**
      *
      * @param session
@@ -908,12 +950,32 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
      * @return The {@link Context}
      * @throws OXException if the {@link Context} cannot be retrieved
      */
-    private Context getContext(final int contextId) throws OXException {
+    Context getContext(final int contextId) throws OXException {
         try {
             return contextService.getContext(contextId);
         } catch (OXException e) {
             throw e;
         }
+    }
+
+    /**
+     * Releases specified read-only connection.
+     *
+     * @param ctx The associated context
+     * @param con The connection to release
+     */
+    void releaseReadConnection(Context context, Connection connection) {
+        provider.releaseReadConnection(context, connection);
+    }
+
+    /**
+     * Releases specified read-write connection.
+     *
+     * @param ctx The associated context
+     * @param con The connection to release
+     */
+    void releaseWriteConnection(Context context, Connection connection) {
+        provider.releaseWriteConnection(context, connection);
     }
 
     /**
@@ -924,7 +986,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
      * @return The {@link Connection}
      * @throws OXException if the {@link Connection} cannot be retrieved
      */
-    private Connection getConnection(final boolean readOnly, final Context context) throws OXException {
+    Connection getConnection(final boolean readOnly, final Context context) throws OXException {
         return readOnly ? provider.getReadConnection(context) : provider.getWriteConnection(context);
     }
 
