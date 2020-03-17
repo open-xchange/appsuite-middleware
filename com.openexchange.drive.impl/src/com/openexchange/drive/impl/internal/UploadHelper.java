@@ -73,6 +73,7 @@ import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.impl.DriveConstants;
 import com.openexchange.drive.impl.DriveUtils;
 import com.openexchange.drive.impl.checksum.ChecksumProvider;
+import com.openexchange.drive.impl.comparison.ServerFileVersion;
 import com.openexchange.drive.impl.storage.StorageOperation;
 import com.openexchange.drive.impl.sync.RenameTools;
 import com.openexchange.exception.OXException;
@@ -82,6 +83,7 @@ import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageCapability;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
+import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
@@ -114,18 +116,21 @@ public class UploadHelper {
         super();
         this.session = session;
     }
-
+    
     public File perform(final String path, final FileVersion originalVersion, final FileVersion newVersion, final InputStream uploadStream,
         final String contentType, final long offset, final long totalLength, final Date created, final Date modified) throws OXException {
         /*
-         * Try to save directly if applicable (no upload resume, no replace, total length is known and smaller than threshold)
+         * Try to save directly if applicable or required
          */
-        if (null == originalVersion && 0 >= offset && 0 < totalLength && session.getOptimisticSaveThreshold() >= totalLength) {
-
+        if (false == useSeparateUpload(path, originalVersion, newVersion, offset, totalLength)) {
             Entry<File, String> uploadEntry = session.getStorage().wrapInTransaction(new StorageOperation<Entry<File, String>>() {
 
                 @Override
                 public Entry<File, String> call() throws OXException {
+                    if (null != originalVersion) {
+                        File originalFile = ServerFileVersion.valueOf(originalVersion, path, session).getFile();
+                        return saveOptimistically(path, newVersion, uploadStream, contentType, created, modified, originalFile.getId(), originalFile.getSequenceNumber());
+                    }
                     return saveOptimistically(path, newVersion, uploadStream, contentType, created, modified);
                 }
             });
@@ -278,8 +283,16 @@ public class UploadHelper {
     }
 
     private Entry<File, String> saveOptimistically(String path, FileVersion newVersion, InputStream uploadStream, String contentType, Date created, Date modified) throws OXException {
+        return saveOptimistically(path, newVersion, uploadStream, contentType, created, modified, FileStorageFileAccess.NEW, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER);
+    }
+
+    private Entry<File, String> saveOptimistically(String path, FileVersion newVersion, InputStream uploadStream, String contentType, Date created, Date modified, String existingFileId, long sequenceNumber) throws OXException {
         File file = new DefaultFile();
         List<Field> fields = new ArrayList<File.Field>();
+        if (null != existingFileId) {
+            file.setId(existingFileId);
+            fields.add(Field.ID);
+        }
         file.setFolderId(session.getStorage().getFolderID(path, true));
         fields.add(Field.FOLDER_ID);
         file.setFileName(newVersion.getName());
@@ -306,7 +319,7 @@ public class UploadHelper {
             }
             session.trace(session.getStorage().toString() + ">> " + fullPath);
         }
-        String checksum = saveDocumentAndChecksum(file, uploadStream, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, fields, false).getKey();
+        String checksum = saveDocumentAndChecksum(file, uploadStream, sequenceNumber, fields, false).getKey();
         return new AbstractMap.SimpleEntry<File, String>(file, checksum);
     }
 
@@ -673,6 +686,51 @@ public class UploadHelper {
             SearchIterators.close(searchIterator);
         }
         return files;
+    }
+
+    /**
+     * Gets a value indicating whether the upload should be stored in a separate temporary upload file or not, depending on the target 
+     * folder and indicated file. 
+     *
+     * @param path The path of the destination directory
+     * @param originalVersion The original file version being replaced, or <code>null</code> for new file versions
+     * @param newVersion The new file version
+     * @param offset The offset as indicated by the client
+     * @param totalLength The total length as indicated by the client
+     * @return <code>true</code> if a separate upload file should be used, <code>false</code>, otherwise
+     */
+    private boolean useSeparateUpload(String path, FileVersion originalVersion, FileVersion newVersion, long offset, long totalLength) throws OXException {
+        /*
+         * use separate file when appending to an existing file
+         */
+        if (0 < offset) {
+            return true;
+        }
+        /*
+         * do save directly, if no permissions in folder and no alternative upload location available          
+         */
+        FileStoragePermission permission = session.getStorage().getFolder(path, true).getOwnPermission();
+        if ((FileStoragePermission.CREATE_OBJECTS_IN_FOLDER > permission.getFolderPermission() ||
+            FileStoragePermission.WRITE_OWN_OBJECTS > permission.getWritePermission()) && 
+            false == session.getTemp().supported()) {
+            return false;
+        }
+        /*
+         * use separate file when replacing an existing file
+         */
+        if (null == originalVersion) {
+            return true;
+        }
+        /*
+         * do save directly, if total length is known and smaller than configured threshold
+         */
+        if (0 < totalLength && session.getOptimisticSaveThreshold() >= totalLength) {
+            return false;
+        }
+        /*
+         * upload to spearate file, otherwise
+         */
+        return true;
     }
 
     /**
