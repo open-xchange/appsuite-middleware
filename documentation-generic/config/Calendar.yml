@@ -495,3 +495,14 @@ properties:
       file: calendar.properties
       packageName: open-xchange-core
       tags: ["Calendar", "Notification"]
+    - key: com.openexchange.calendar.preferNoReplyForNotifications
+      description: |
+        If set to 'true' then internal notifications are sent via the no-reply mail account.
+      defaultValue: false
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: true
+      file: calendar.properties
+      packageName: open-xchange-core
+      related: com.openexchange.noreply.address
+      tags: ["Calendar", "Notification", "No-Reply"]

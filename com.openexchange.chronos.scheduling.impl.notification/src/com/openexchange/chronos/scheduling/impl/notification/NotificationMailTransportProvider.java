@@ -69,6 +69,9 @@ import com.openexchange.chronos.scheduling.changes.ScheduleChange;
 import com.openexchange.chronos.scheduling.common.AbstractMailTransportProvider;
 import com.openexchange.chronos.scheduling.common.MimeMessageBuilder;
 import com.openexchange.chronos.scheduling.common.Utils;
+import com.openexchange.config.lean.DefaultProperty;
+import com.openexchange.config.lean.LeanConfigurationService;
+import com.openexchange.config.lean.Property;
 import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
 import com.openexchange.i18n.tools.StringHelper;
@@ -86,9 +89,11 @@ public class NotificationMailTransportProvider extends AbstractMailTransportProv
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NotificationMailTransportProvider.class);
 
+    private static final Property PREFER_NO_REPLY_PROPERTY = DefaultProperty.valueOf("com.openexchange.calendar.preferNoReplyForNotifications", Boolean.FALSE);
+
     /**
      * Initializes a new {@link NotificationMailTransportProvider}.
-     * 
+     *
      * @param serviceLookup The {@link ServiceLookup}
      */
     public NotificationMailTransportProvider(@NonNull ServiceLookup serviceLookup) {
@@ -175,4 +180,9 @@ public class NotificationMailTransportProvider extends AbstractMailTransportProv
         return subject;
     }
 
+
+    @Override
+    public boolean preferNoReplyAccount(Session session) throws OXException {
+        return serviceLookup.getServiceSafe(LeanConfigurationService.class).getBooleanProperty(PREFER_NO_REPLY_PROPERTY);
+    }
 }

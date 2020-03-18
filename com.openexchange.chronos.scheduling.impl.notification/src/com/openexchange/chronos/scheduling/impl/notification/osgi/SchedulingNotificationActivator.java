@@ -56,6 +56,7 @@ import com.openexchange.chronos.scheduling.TransportProvider;
 import com.openexchange.chronos.scheduling.impl.notification.NotificationMailTransportProvider;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.contact.ContactService;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.html.HtmlService;
@@ -75,7 +76,7 @@ public class SchedulingNotificationActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { ICalService.class, RecurrenceService.class };
+        return new Class[] { ICalService.class, RecurrenceService.class, LeanConfigurationService.class };
     }
 
     @Override

@@ -68,6 +68,7 @@ import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ContentAwareComposedMailMessage;
 import com.openexchange.mail.transport.MailTransport;
+import com.openexchange.mail.transport.TransportProviderRegistry;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
@@ -83,7 +84,7 @@ public abstract class AbstractMailTransportProvider implements TransportProvider
 
     /**
      * Initializes a new {@link AbstractMailTransportProvider}.
-     * 
+     *
      * @param serviceLookup The {@link ServiceLookup}
      */
     public AbstractMailTransportProvider(@NonNull ServiceLookup serviceLookup) {
@@ -93,8 +94,14 @@ public abstract class AbstractMailTransportProvider implements TransportProvider
 
     protected @NonNull ScheduleStatus transportMail(Session session, MimeMessage mime) throws OXException {
         saveChangesSafe(serviceLookup.getOptionalService(HostnameService.class), mime, session.getContextId(), session.getUserId());
+        MailTransport transport;
+        com.openexchange.mail.transport.TransportProvider provider = TransportProviderRegistry.getTransportProvider("smtp");
+        if(preferNoReplyAccount(session)) {
+            transport = provider.createNewNoReplyTransport(session.getContextId(), false);
+        } else {
+            transport = provider.createNewMailTransport(session);
+        }
 
-        final MailTransport transport = MailTransport.getInstance(session);
         try {
             transport.sendMailMessage(new ContentAwareComposedMailMessage(mime, session, null), ComposeType.NEW);
         } finally {
@@ -103,11 +110,20 @@ public abstract class AbstractMailTransportProvider implements TransportProvider
 
         return ScheduleStatus.SENT;
     }
-    
+
+    /**
+     * Whether the no reply account should be used instead of the users account
+     *
+     * @param session The users session
+     * @return <code>true</code> if the no reply account should be used instead of the user account, <code>false</code> otherwise
+     * @throws OXException
+     */
+    protected abstract boolean preferNoReplyAccount(Session session) throws OXException;
+
     protected Map<String, String> getAdditionalHeaders(ChangeNotification notification) {
         return notification.getAdditional(Constants.ADDITIONAL_HEADER_MAIL_HEADERS, Map.class);
     }
-    
+
     protected Map<String, String> getAdditionalHeaders(SchedulingMessage message) {
         return message.getAdditional(Constants.ADDITIONAL_HEADER_MAIL_HEADERS, Map.class);
     }
@@ -125,9 +141,9 @@ public abstract class AbstractMailTransportProvider implements TransportProvider
         //@formatter:off
         StringHelper helper = StringHelper.valueOf(locale);
         return String.format(
-            helper.getString(Messages.SUBJECT_STATE_CHANGED), 
+            helper.getString(Messages.SUBJECT_STATE_CHANGED),
             Utils.getDisplayName(originator),
-            com.openexchange.chronos.itip.ContextSensitiveMessages.partStat(partStat, locale, Context.VERB), 
+            com.openexchange.chronos.itip.ContextSensitiveMessages.partStat(partStat, locale, Context.VERB),
             summary);
         //@formatter:on
     }

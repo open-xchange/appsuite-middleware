@@ -197,4 +197,9 @@ public class IMipTransportProvider extends AbstractMailTransportProvider {
         subject = String.format(helper.getString(subject), summary);
         return subject;
     }
+
+    @Override
+    protected boolean preferNoReplyAccount(Session session) {
+        return false;
+    }
 }
