@@ -460,9 +460,13 @@ public class CalendarServiceImpl implements CalendarService {
 
     @Override
     public List<ImportResult> importEvents(CalendarSession session, String folderID, List<Event> events) throws OXException {
+        /*
+         * assign adjusted default values and perform the import
+         */
         SchedulingControl oldScheduling = session.get(CalendarParameters.PARAMETER_SCHEDULING, SchedulingControl.class);
         Boolean oldIgnoreStorageWarnings = session.get(CalendarParameters.PARAMETER_IGNORE_STORAGE_WARNINGS, Boolean.class);
         Boolean oldCheckConflicts = session.get(CalendarParameters.PARAMETER_CHECK_CONFLICTS, Boolean.class);
+        List<InternalImportResult> results;
         try {
             if (null == oldScheduling) {
                 session.set(CalendarParameters.PARAMETER_SCHEDULING, SchedulingControl.NONE);
@@ -473,30 +477,20 @@ public class CalendarServiceImpl implements CalendarService {
             if (null == oldCheckConflicts) {
                 session.set(CalendarParameters.PARAMETER_CHECK_CONFLICTS, Boolean.FALSE);
             }
-            /*
-             * import events
-             */
-            List<InternalImportResult> results = new InternalCalendarStorageOperation<List<InternalImportResult>>(session) {
-
-                @Override
-                protected List<InternalImportResult> execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                    return new ImportPerformer(storage, session, getFolder(session, folderID)).perform(events);
-                }
-
-            }.executeUpdate();
-            /*
-             * notify handlers & return userized result
-             */
-            List<ImportResult> importResults = new ArrayList<ImportResult>(results.size());
-            for (InternalImportResult result : results) {
-                importResults.add(postProcess(result).getImportResult());
-            }
-            return importResults;
+            results = new ImportPerformer(session, getFolder(session, folderID)).perform(events);
         } finally {
             session.set(CalendarParameters.PARAMETER_SCHEDULING, oldScheduling);
             session.set(CalendarParameters.PARAMETER_IGNORE_STORAGE_WARNINGS, oldIgnoreStorageWarnings);
             session.set(CalendarParameters.PARAMETER_CHECK_CONFLICTS, oldCheckConflicts);
         }
+        /*
+         * notify handlers & return userized result
+         */
+        List<ImportResult> importResults = new ArrayList<ImportResult>(results.size());
+        for (InternalImportResult result : results) {
+            importResults.add(postProcess(result).getImportResult());
+        }
+        return importResults;
     }
 
     @Override
