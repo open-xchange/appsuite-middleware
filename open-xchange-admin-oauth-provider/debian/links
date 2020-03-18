@@ -1,0 +1,8 @@
+opt/open-xchange/bundles/com.openexchange.oauth.provider.rmi.jar opt/open-xchange/lib/com.openexchange.oauth.provider.rmi.jar
+opt/open-xchange/sbin/createoauthclient opt/open-xchange/sbin/disableoauthclient
+opt/open-xchange/sbin/createoauthclient opt/open-xchange/sbin/enableoauthclient
+opt/open-xchange/sbin/createoauthclient opt/open-xchange/sbin/getoauthclient
+opt/open-xchange/sbin/createoauthclient opt/open-xchange/sbin/listoauthclient
+opt/open-xchange/sbin/createoauthclient opt/open-xchange/sbin/removeoauthclient
+opt/open-xchange/sbin/createoauthclient opt/open-xchange/sbin/revokeoauthclient
+opt/open-xchange/sbin/createoauthclient opt/open-xchange/sbin/updateoauthclient

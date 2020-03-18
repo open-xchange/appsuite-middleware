@@ -1,0 +1,9 @@
+opt/open-xchange/bundles/com.openexchange.admin.reseller.rmi.jar opt/open-xchange/lib/com.openexchange.admin.reseller.rmi.jar
+opt/open-xchange/sbin/createadmin opt/open-xchange/sbin/changeadmin
+opt/open-xchange/sbin/createadmin opt/open-xchange/sbin/deleteadmin
+opt/open-xchange/sbin/createadmin opt/open-xchange/sbin/listadmin
+opt/open-xchange/sbin/createadmin opt/open-xchange/sbin/updaterestrictions
+opt/open-xchange/sbin/createadmin opt/open-xchange/sbin/removerestrictions
+opt/open-xchange/sbin/createadmin opt/open-xchange/sbin/initrestrictions
+opt/open-xchange/sbin/createadmin opt/open-xchange/sbin/listrestrictions
+opt/open-xchange/sbin/createadmin opt/open-xchange/sbin/updatemoduleaccessrestrictions
