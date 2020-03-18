@@ -52,13 +52,13 @@ package com.openexchange.chronos.impl.performer;
 import static com.openexchange.chronos.common.CalendarUtils.getEventID;
 import static com.openexchange.chronos.common.CalendarUtils.getEventsByUID;
 import static com.openexchange.chronos.common.CalendarUtils.sortSeriesMasterFirst;
+import static com.openexchange.chronos.impl.Utils.getCalendarUser;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.UUID;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
@@ -67,6 +67,7 @@ import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.ical.ImportedComponent;
 import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.impl.InternalCalendarResult;
+import com.openexchange.chronos.impl.InternalCalendarStorageOperation;
 import com.openexchange.chronos.impl.InternalImportResult;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
@@ -83,77 +84,119 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public class ImportPerformer extends AbstractUpdatePerformer {
+public class ImportPerformer {
+
+    private final CalendarSession session;
+    private final CalendarFolder folder;
+    private final int calendarUserId;
 
     /**
      * Initializes a new {@link ImportPerformer}.
      *
-     * @param storage The underlying calendar storage
      * @param session The calendar session
      * @param folder The calendar folder representing the current view on the events
      */
-    public ImportPerformer(CalendarStorage storage, CalendarSession session, CalendarFolder folder) throws OXException {
-        super(storage, session, folder);
+    public ImportPerformer(CalendarSession session, CalendarFolder folder) throws OXException {
+        super();
+        this.session = session;
+        this.folder = folder;
+        this.calendarUserId = getCalendarUser(session, folder).getEntity();
     }
-
+    
     /**
      * Performs the import of one or more events.
+     * <p/>
+     * For each calendar object resource, a separate calendar storage operation is used implicitly.
      *
      * @param events The events to import
      * @return The import result
      * @throws OXException In case of error
      */
-    public List<InternalImportResult> perform(List<Event> events) throws OXException {
-        /*
-         * set UIDConflict strategy. Use THROW as default
-         */
-        UIDConflictStrategy strategy = session.get(CalendarParameters.UID_CONFLICT_STRATEGY, UIDConflictStrategy.class);
-        if (null == strategy) {
-            strategy = UIDConflictStrategy.THROW;
+    public List<InternalImportResult> perform(List<Event> events) {
+        if (null == events || events.isEmpty()) {
+            return Collections.emptyList();
         }
         /*
          * import events (and possible associated overridden instances) grouped by UID event groups
          */
-        List<InternalImportResult> results = new ArrayList<InternalImportResult>();
-        for (Entry<String, List<Event>> entry : getEventsByUID(events, true).entrySet()) {
-            /*
-             * (re-) assign new UID to imported event if required
-             */
-            List<Event> eventGroup = sortSeriesMasterFirst(entry.getValue());
-            if (UIDConflictStrategy.REASSIGN.equals(strategy)) {
-                results.addAll(handleUIDConflict(strategy, eventGroup));
-                continue;
-            }
-
-            /*
-             * create first event (master or non-recurring)
-             *
-             * It is NOT possible to add event with another internal organizer
-             */
-            InternalImportResult result;
-            result = createEvent(eventGroup.get(0));
-
-            /*
-             * Check if UID Conflict needs to be handled
-             */
-            OXException e = result.getImportResult().getError();
-            if (null != e && CalendarExceptionCodes.UID_CONFLICT.equals(e)) {
-                if (false == UIDConflictStrategy.THROW.equals(strategy) && false == UIDConflictStrategy.REASSIGN.equals(strategy)) {
-                    results.addAll(handleUIDConflict(strategy, eventGroup));
-                    continue;
-                }
-                throw e;
-            }
-
-            results.add(result);
-            /*
-             * create further events as change exceptions
-             */
-            addEventExceptions(eventGroup, results, result);
+        List<InternalImportResult> results = new ArrayList<InternalImportResult>(events.size());
+        for (List<Event> eventGroup : getEventsByUID(events, true).values()) {
+            results.addAll(importEventGroup(sortSeriesMasterFirst(eventGroup)));
         }
         return results;
-
     }
+    
+    private List<InternalImportResult> importEventGroup(List<Event> eventGroup) {
+        if (null == eventGroup || eventGroup.isEmpty()) {
+            return Collections.emptyList();
+        }
+        /*
+         * import events for a single calendar object resource within a dedicated storage operation
+         */
+        try {            
+            return new InternalCalendarStorageOperation<List<InternalImportResult>>(session) {
+
+                @Override
+                protected List<InternalImportResult> execute(CalendarSession session, CalendarStorage storage) throws OXException {
+                    return importEventGroup(storage, eventGroup);
+                }
+            }.executeUpdate();            
+        } catch (OXException e) {
+            /*
+             * return appropriate error result for first event of group when import fails
+             */
+            return Collections.singletonList(new InternalImportResult(new InternalCalendarResult(session, calendarUserId, folder), 
+                extractIndex(eventGroup.get(0)), extractWarnings(eventGroup.get(0)), e));
+        }        
+    }
+    
+    List<InternalImportResult> importEventGroup(CalendarStorage storage, List<Event> eventGroup) throws OXException {
+        if (null == eventGroup || eventGroup.isEmpty()) {
+            return Collections.emptyList();
+        }
+        /*
+         * set UIDConflict strategy. Use THROW as default
+         */
+        UIDConflictStrategy strategy = session.get(CalendarParameters.UID_CONFLICT_STRATEGY, UIDConflictStrategy.class, UIDConflictStrategy.THROW);
+        /*
+         * import events (and possible associated overridden instances) grouped by UID event groups
+         */
+        List<InternalImportResult> results = new ArrayList<InternalImportResult>(eventGroup.size());
+        /*
+         * (re-) assign new UID to imported event if required
+         */
+        if (UIDConflictStrategy.REASSIGN.equals(strategy)) {
+            results.addAll(handleUIDConflict(storage, strategy, eventGroup));
+            return results;
+        }
+
+        /*
+         * create first event (master or non-recurring)
+         *
+         * It is NOT possible to add event with another internal organizer
+         */
+        InternalImportResult result;
+        result = createEvent(storage, eventGroup.get(0));
+
+        /*
+         * Check if UID Conflict needs to be handled
+         */
+        OXException e = result.getImportResult().getError();
+        if (null != e && CalendarExceptionCodes.UID_CONFLICT.equals(e)) {
+            if (false == UIDConflictStrategy.THROW.equals(strategy) && false == UIDConflictStrategy.REASSIGN.equals(strategy)) {
+                results.addAll(handleUIDConflict(storage, strategy, eventGroup));
+                return results;
+            }
+            throw e;
+        }
+
+        results.add(result);
+        /*
+         * create further events as change exceptions
+         */
+        addEventExceptions(storage, eventGroup, results, result);
+        return results;
+    }    
 
     /**
      * Resolves UID conflicts based on the strategy
@@ -163,18 +206,18 @@ public class ImportPerformer extends AbstractUpdatePerformer {
      * @return The imported results
      * @throws OXException Various
      */
-    private List<InternalImportResult> handleUIDConflict(UIDConflictStrategy strategy, List<Event> eventGroup) throws OXException {
+    private List<InternalImportResult> handleUIDConflict(CalendarStorage storage, UIDConflictStrategy strategy, List<Event> eventGroup) throws OXException {
         List<InternalImportResult> results = new LinkedList<InternalImportResult>();
         Event masterEvent = eventGroup.get(0);
         switch (strategy) {
             case REASSIGN: {
                 String uid = UUID.randomUUID().toString();
                 eventGroup.forEach(e -> e.setUid(uid));
-                InternalImportResult result = createEvent(masterEvent);
+                InternalImportResult result = createEvent(storage, masterEvent);
                 results.add(result);
                 if (isSuccess(result) && 1 < eventGroup.size()) {
                     // Event was created, add exceptions
-                    addEventExceptions(eventGroup, results, result);
+                    addEventExceptions(storage, eventGroup, results, result);
                 } // else; Failed to create event, return failure
                 return results;
             }
@@ -211,14 +254,14 @@ public class ImportPerformer extends AbstractUpdatePerformer {
             case UPDATE_OR_REASSIGN: {
                 List<InternalImportResult> list;
                 try {
-                    list = handleUIDConflict(UIDConflictStrategy.UPDATE, eventGroup);
+                    list = handleUIDConflict(storage, UIDConflictStrategy.UPDATE, eventGroup);
                 } catch (OXException e) {
-                    LOG.warn("Could not update all events. Try to reassign event UID.", e);
+                    org.slf4j.LoggerFactory.getLogger(ImportPerformer.class).warn("Could not update all events. Try to reassign event UID.", e);
                     list = Collections.emptyList();
                 }
                 if (list.isEmpty() || !isSuccess(list.get(0))) {
                     // Updated failed, try reassign
-                    return handleUIDConflict(UIDConflictStrategy.REASSIGN, eventGroup);
+                    return handleUIDConflict(storage, UIDConflictStrategy.REASSIGN, eventGroup);
                 }
                 return list;
             }
@@ -238,54 +281,43 @@ public class ImportPerformer extends AbstractUpdatePerformer {
      * @param results The results to return by the import action
      * @param result The {@link InternalImportResult} of the master event
      */
-    private void addEventExceptions(List<Event> events, List<InternalImportResult> results, InternalImportResult result) {
+    private void addEventExceptions(CalendarStorage storage, List<Event> events, List<InternalImportResult> results, InternalImportResult result) throws OXException {
         if (1 < events.size()) {
             EventID masterEventID = result.getImportResult().getId();
             long clientTimestamp = result.getImportResult().getTimestamp();
             for (int i = 1; i < events.size(); i++) {
-                result = createEventException(masterEventID, events.get(i), clientTimestamp);
+                result = createEventException(storage, masterEventID, events.get(i), clientTimestamp);
                 results.add(result);
                 clientTimestamp = result.getImportResult().getTimestamp();
             }
         }
     }
 
-    private InternalImportResult createEvent(Event importedEvent) {
+    private InternalImportResult createEvent(CalendarStorage storage, Event importedEvent) throws OXException {
         List<OXException> warnings = new ArrayList<OXException>();
         warnings.addAll(extractWarnings(importedEvent));
-        try {
-            InternalCalendarResult calendarResult = new CreatePerformer(storage, session, folder).perform(importedEvent);
-            warnings.addAll(extractWarnings(storage));
-            Event createdEvent = getFirstCreatedEvent(calendarResult);
-            if (null == createdEvent) {
-                OXException error = CalendarExceptionCodes.UNEXPECTED_ERROR.create("No event created for \"" + importedEvent + "\"");
-                return new InternalImportResult(calendarResult, extractIndex(importedEvent), warnings, error);
-            }
-            return new InternalImportResult(calendarResult, getEventID(createdEvent), extractIndex(importedEvent), warnings);
-        } catch (OXException e) {
-            return new InternalImportResult(new InternalCalendarResult(session, calendarUserId, folder), extractIndex(importedEvent), warnings, e);
+        InternalCalendarResult calendarResult = new CreatePerformer(storage, session, folder).perform(importedEvent);
+        warnings.addAll(extractWarnings(storage));
+        Event createdEvent = getFirstCreatedEvent(calendarResult);
+        if (null == createdEvent) {
+            throw CalendarExceptionCodes.UNEXPECTED_ERROR.create("No event created for \"" + importedEvent + "\"");
         }
+        return new InternalImportResult(calendarResult, getEventID(createdEvent), extractIndex(importedEvent), warnings);
     }
 
-    private InternalImportResult createEventException(EventID masterEventID, Event importedException, long clientTimestamp) {
+    private InternalImportResult createEventException(CalendarStorage storage, EventID masterEventID, Event importedException, long clientTimestamp) throws OXException {
         if (null == masterEventID) {
-            OXException error = CalendarExceptionCodes.UNEXPECTED_ERROR.create("Cannot create exception for  \"" + importedException + "\" due to missing master event.");
-            return new InternalImportResult(new InternalCalendarResult(session, calendarUserId, folder), extractIndex(importedException), Collections.emptyList(), error);
+            throw CalendarExceptionCodes.UNEXPECTED_ERROR.create("Cannot create exception for  \"" + importedException + "\" due to missing master event.");
         }
         List<OXException> warnings = new ArrayList<OXException>();
         warnings.addAll(extractWarnings(importedException));
-        try {
-            InternalCalendarResult calendarResult = new UpdatePerformer(storage, session, folder).perform(masterEventID.getObjectID(), null, importedException, clientTimestamp);
-            warnings.addAll(extractWarnings(storage));
-            Event createdEvent = getFirstCreatedEvent(calendarResult);
-            if (null == createdEvent) {
-                OXException error = CalendarExceptionCodes.UNEXPECTED_ERROR.create("No event created for \"" + importedException + "\"");
-                return new InternalImportResult(calendarResult, extractIndex(importedException), warnings, error);
-            }
-            return new InternalImportResult(calendarResult, getEventID(createdEvent), extractIndex(importedException), warnings);
-        } catch (OXException e) {
-            return new InternalImportResult(new InternalCalendarResult(session, calendarUserId, folder), extractIndex(importedException), warnings, e);
+        InternalCalendarResult calendarResult = new UpdatePerformer(storage, session, folder).perform(masterEventID.getObjectID(), null, importedException, clientTimestamp);
+        warnings.addAll(extractWarnings(storage));
+        Event createdEvent = getFirstCreatedEvent(calendarResult);
+        if (null == createdEvent) {
+            throw CalendarExceptionCodes.UNEXPECTED_ERROR.create("No event created for \"" + importedException + "\"");
         }
+        return new InternalImportResult(calendarResult, getEventID(createdEvent), extractIndex(importedException), warnings);
     }
 
     private static List<OXException> extractWarnings(Event importedEvent) {
@@ -314,7 +346,7 @@ public class ImportPerformer extends AbstractUpdatePerformer {
         return warnings;
     }
 
-    private static int extractIndex(Event importedEvent) {
+    static int extractIndex(Event importedEvent) {
         if (ImportedComponent.class.isInstance(importedEvent)) {
             return ((ImportedComponent) importedEvent).getIndex();
         }
