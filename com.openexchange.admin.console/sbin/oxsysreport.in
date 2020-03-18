@@ -613,6 +613,11 @@ exclude_secret_entries() {
     local _separator='@SEPARATOR@'
     local _pattern='[[:blank:]]*(=|:)'
     local _whitelist='enabledMailCapableKey|UserAttributePassword|forgotPassword|secretSource'
+    local _whitelist="${_whitelist}|webmail_editpassword|jcs\.region\.User"
+    local _whitelist="${_whitelist}|com\.openexchange\.capability\.edit_password"
+    local _whitelist="${_whitelist}|com\.openexchange\.plugins\.onboarding\.login"
+    local _whitelist="${_whitelist}|com\.openexchange\.cloudplugins\.password\.updateUserPassword"
+    local _whitelist="${_whitelist}|com\.openexchange\.capability\.password_change_without_old_password"
     local _blacklist="pass(word|wd|crypt)*${_pattern}"
     local _blacklist="${_blacklist}|secret(source|random)*${_pattern}"
     local _blacklist="${_blacklist}|accountSID${_pattern}"
