@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.socketio.server.io.socket;
+package com.openexchange.socketio;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -72,14 +72,14 @@ import io.socket.socketio.server.SocketIoSocket;
 
 
 /**
- * {@link SocketIOSocketAdapter}
+ * {@link SocketIoSocketAdapter}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.10.4
  */
-public class SocketIOSocketAdapter extends EngineIoWebSocket implements WebSocketListener, MessageTranscoder {
+public class SocketIoSocketAdapter extends EngineIoWebSocket implements WebSocketListener, MessageTranscoder {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SocketIOSocketAdapter.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SocketIoSocketAdapter.class);
 
     private static final String DEFAULT_NAMESPACE = "/";
 
@@ -92,11 +92,11 @@ public class SocketIOSocketAdapter extends EngineIoWebSocket implements WebSocke
 
 
     /**
-     * Initializes a new {@link SocketIOSocketAdapter}.
+     * Initializes a new {@link SocketIoSocketAdapter}.
      * @param engineIoServer
      * @param socketIoServer
      */
-    public SocketIOSocketAdapter(EngineIoServer engineIoServer, SocketIoServer socketIoServer) {
+    public SocketIoSocketAdapter(EngineIoServer engineIoServer, SocketIoServer socketIoServer) {
         super();
         this.engineIoServer = engineIoServer;
         this.socketIoServer = socketIoServer;

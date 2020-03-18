@@ -47,45 +47,55 @@
  *
  */
 
-package com.openexchange.socketio.websocket;
+package com.openexchange.socketio;
 
-import org.slf4j.Logger;
-import com.openexchange.socketio.protocol.EngineIOPacket;
-import com.openexchange.socketio.server.Session;
-import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.websockets.IndividualWebSocketListener;
+import com.openexchange.websockets.WebSocket;
+import com.openexchange.websockets.WebSocketListener;
+import io.socket.engineio.server.EngineIoServer;
+import io.socket.engineio.server.EngineIoServerOptions;
+import io.socket.socketio.server.SocketIoServer;
+
 
 /**
- * {@link PacketHandlerTask} - Invokes handling of received Socket.IO packets.
+ * {@link SocketIoWebSocketBridge}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.3
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.10.4
  */
-public class PacketHandlerTask extends AbstractTask<Void> {
+public class SocketIoWebSocketBridge implements IndividualWebSocketListener {
 
-    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(PacketHandlerTask.class);
-
-    private final EngineIOPacket packet;
-    private final WsTransportConnection transportConnection;
-    private final Session session;
+    private final EngineIoServer engineIoServer;
+    private final SocketIoServer socketIoServer;
 
     /**
-     * Initializes a new {@link PacketHandlerTask}.
+     * Initializes a new {@link SocketIoWebSocketBridge}.
      */
-    public PacketHandlerTask(EngineIOPacket packet, WsTransportConnection transportConnection, Session session) {
+    public SocketIoWebSocketBridge() {
         super();
-        this.packet = packet;
-        this.transportConnection = transportConnection;
-        this.session = session;
+        this.engineIoServer = new EngineIoServer(EngineIoServerOptions.newFromDefault());
+        socketIoServer = new SocketIoServer(engineIoServer);
     }
 
     @Override
-    public Void call() {
-        try {
-            session.onPacket(packet, transportConnection);
-        } catch (Exception e) {
-            LOGGER.error("Failed to handle incoming packet {} for Socket.IO session {}", packet, session.getSessionId(), e);
-        }
-        return null;
+    public void onWebSocketConnect(WebSocket socket) {
+        throw new IllegalAccessError();
+    }
+
+    @Override
+    public void onWebSocketClose(WebSocket socket) {
+        throw new IllegalAccessError();
+
+    }
+
+    @Override
+    public void onMessage(WebSocket socket, String text) {
+        throw new IllegalAccessError();
+    }
+
+    @Override
+    public WebSocketListener newInstance() {
+        return new SocketIoSocketAdapter(engineIoServer, socketIoServer);
     }
 
 }
