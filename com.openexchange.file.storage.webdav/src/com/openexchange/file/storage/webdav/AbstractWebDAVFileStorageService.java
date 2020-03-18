@@ -72,6 +72,7 @@ import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
+import com.openexchange.file.storage.LoginAwareFileStorageServiceExtension;
 import com.openexchange.file.storage.webdav.exception.WebdavExceptionCodes;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -82,7 +83,7 @@ import com.openexchange.webdav.client.WebDAVClientFactory;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class AbstractWebDAVFileStorageService implements AccountAware {
+public abstract class AbstractWebDAVFileStorageService implements AccountAware, LoginAwareFileStorageServiceExtension {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractWebDAVFileStorageService.class);
     public static final String CAPABILITY_PREFIX = "filestorage_";
@@ -173,6 +174,14 @@ public abstract class AbstractWebDAVFileStorageService implements AccountAware {
     @Override
     public List<FileStorageAccount> getAccounts(Session session) throws OXException {
         return getAccounts0(session, true);
+    }
+
+    @Override
+    public void testConnection(FileStorageAccount account, Session session) throws OXException {
+        boolean ping = getAccountAccess(account.getId(), session).ping();
+        if (!ping) {
+            throw WebdavExceptionCodes.PING_FAILED.create();
+        }
     }
 
     /**

@@ -70,6 +70,7 @@ import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageCapability;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.file.storage.LoginAwareFileStorageServiceExtension;
 import com.openexchange.file.storage.json.FileStorageAccountConstants;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
@@ -96,6 +97,7 @@ public class AllAction extends AbstractFileStorageAccountAction {
     @Override
     protected AJAXRequestResult doIt(AJAXRequestData request, ServerSession session) throws JSONException, OXException {
         String fsServiceId = request.getParameter(FileStorageAccountConstants.FILE_STORAGE_SERVICE);
+        Boolean connectionCheck = request.getParameter(FileStorageAccountConstants.CONNECTION_CHECK, Boolean.class, true);
 
         List<FileStorageService> services = new ArrayList<FileStorageService>();
         if (fsServiceId != null) {
@@ -124,11 +126,17 @@ public class AllAction extends AbstractFileStorageAccountAction {
                     access = fsService.getAccountAccess(account.getId(), session);
                     FileStorageFolder rootFolder = access.getRootFolder();
 
+                    //Extended connection check if requested by the client and supported by the FileStorage
+                    if (connectionCheck == Boolean.TRUE  && account.getFileStorageService() instanceof LoginAwareFileStorageServiceExtension) {
+                        ((LoginAwareFileStorageServiceExtension) account.getFileStorageService()).testConnection(account, session);
+                    }
+
                     if (null != rootFolder) {
                         // Check file storage capabilities
                         Set<String> caps = determineCapabilities(access);
                         result.put(writer.write(account, rootFolder, caps));
                     }
+
                 } catch (OXException e) {
                     LOG.debug(e.getMessage(), e);
                     if (e.equalsCode(6, "OAUTH")) {

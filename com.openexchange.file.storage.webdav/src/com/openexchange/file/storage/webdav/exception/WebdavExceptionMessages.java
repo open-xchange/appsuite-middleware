@@ -67,4 +67,7 @@ public class WebdavExceptionMessages implements LocalizableStrings {
 
     // The document could not be updated because it was modified. Please try again.
     public static final String MODIFIED_CONCURRENTLY_MSG_DISPLAY = "The document could not be updated because it was modified. Please try again.";
+
+    // The connection check failed
+    public static final String PING_FAILED = "The connection check failed.";
 }

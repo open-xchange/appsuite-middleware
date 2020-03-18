@@ -173,8 +173,15 @@ public abstract class AbstractWebDAVAccountAccess implements CapabilityAware {
 
     @Override
     public boolean ping() throws OXException {
-        // TODO: Cheap WebDAV call
-        return true;
+        try {
+            connect();
+            WebDAVFolder rootFolder = getFolderAccess().getRootFolder();
+            getFolderAccess().getFolder(rootFolder.getId());
+            return true;
+        }
+        finally {
+            close();
+        }
     }
 
     @Override

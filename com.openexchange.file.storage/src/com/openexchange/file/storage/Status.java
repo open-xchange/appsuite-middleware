@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,47 +47,38 @@
  *
  */
 
-package com.openexchange.file.storage.json.actions.accounts;
+package com.openexchange.file.storage;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import java.util.Locale;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.FileStorageAccount;
-import com.openexchange.file.storage.LoginAwareFileStorageServiceExtension;
-import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
-import com.openexchange.tools.session.ServerSession;
-
 
 /**
- * Creates a new MessagingAccount. The body of the request must contain the JSON representation of the given account.
+ * {@link Status} - Represents a status for a file storage account
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
+ * @since v7.10.4
  */
-public class NewAction extends AbstractFileStorageAccountAction {
+public interface Status {
 
-    public NewAction(final FileStorageServiceRegistry registry) {
-        super(registry);
-    }
+    /**
+     * Gets the identifier; such as "ok" or "invalid_credentials"
+     *
+     * @return The identifier
+     */
+    String getId();
 
-    @Override
-    protected AJAXRequestResult doIt(final AJAXRequestData request, final ServerSession session) throws JSONException, OXException {
-        FileStorageAccount account = parser.parse((JSONObject) request.requireData());
-        final String id = account.getFileStorageService().getAccountManager().addAccount(account, session);
-        if (account.getFileStorageService() instanceof LoginAwareFileStorageServiceExtension) {
-            try {
-                //load account and test connection
-                account = account.getFileStorageService().getAccountManager().getAccount(id, session);
-                ((LoginAwareFileStorageServiceExtension) account.getFileStorageService()).testConnection(account, session);
-            }
-            catch(OXException e) {
-               account.getFileStorageService().getAccountManager().deleteAccount(account, session);
-               throw e;
-            }
-        }
-        return new AJAXRequestResult(id);
-    }
+    /**
+     * Gets the accompanying human-readable message (optional) for given locale.
+     *
+     * @param locale The locale
+     * @return The human-readable message or <code>null</code>
+     */
+    String getMessage(Locale locale);
 
+    /**
+     * Gets an optional error providing further details in case an erroneous status is represented.
+     *
+     * @return The error, or <code>null</code> if not available
+     */
+    OXException getError();
 }

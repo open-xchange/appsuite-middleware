@@ -68,7 +68,7 @@ import com.openexchange.webdav.client.WebDAVClientFactory;
 public class GenericWebDAVFileStorageService extends AbstractWebDAVFileStorageService {
 
     public static final String CAPABILITY = CAPABILITY_PREFIX + "webdav";
-    
+
     /**
      * Initializes a new {@link GenericWebDAVFileStorageService}.
      * <p/>
@@ -86,10 +86,9 @@ public class GenericWebDAVFileStorageService extends AbstractWebDAVFileStorageSe
         FileStorageAccount account = getAccountAccess(session, accountId);
         return new GenericWebDAVAccountAccess(this, account, session);
     }
-    
+
     @Override
     public Optional<String> getCapability() {
         return Optional.of(CAPABILITY);
     }
-    
 }

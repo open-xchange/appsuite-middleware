@@ -166,7 +166,7 @@ public class FileStorageAccountWriter {
      * @throws JSONException If writing JSON fails
      */
     public JSONObject write(FileStorageAccount account, FileStorageFolder rootFolder, Set<String> capabilities, OXException exception, Session session, boolean includeStackTraceOnError) throws JSONException {
-        JSONObject accountJSON = new JSONObject(12 + exception.getLogArgs().length);
+        JSONObject accountJSON = new JSONObject(12 + (exception.getLogArgs() != null ? exception.getLogArgs().length : 0));
         accountJSON.put(FileStorageAccountConstants.ID, account.getId());
         final FileStorageService fsService = account.getFileStorageService();
         accountJSON.put(FileStorageAccountConstants.QUALIFIED_ID, FileStorageAccounts.getQualifiedID(account));

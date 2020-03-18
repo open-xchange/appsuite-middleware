@@ -70,6 +70,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.stream.Collectors;
 import org.jcodec.common.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -82,6 +83,7 @@ import com.openexchange.testing.httpclient.models.ConfigResponse;
 import com.openexchange.testing.httpclient.models.FileAccountCreationResponse;
 import com.openexchange.testing.httpclient.models.FileAccountData;
 import com.openexchange.testing.httpclient.models.FileAccountUpdateResponse;
+import com.openexchange.testing.httpclient.models.FileAccountsResponse;
 import com.openexchange.testing.httpclient.models.FolderBody;
 import com.openexchange.testing.httpclient.models.FolderData;
 import com.openexchange.testing.httpclient.models.FolderResponse;
@@ -190,12 +192,11 @@ public class WebDAVTest extends AbstractConfigAwareAPIClientSession {
         //Register a new WebDAV FileAccount
         testFileAccount = new FileAccountData();
         testFileAccount.setFilestorageService(getFileStorageService());
-        testFileAccount.setDisplayName("WebDAV test storage");
+        testFileAccount.setDisplayName(getFileStorageServiceDisplayName());
         testFileAccount.setConfiguration(new WebDAVFileAccountConfiguration(WEB_DAV_URL, testUser.getUser(), testUser.getPassword()));
         FileAccountCreationResponse response = filestorageApi.createFileAccount(getSessionId(), testFileAccount);
         String newAccountId = checkResponse(response.getError(), response.getErrorDesc(), response.getData());
         testFileAccount.setId(newAccountId);
-
     }
 
     @Override
@@ -417,6 +418,40 @@ public class WebDAVTest extends AbstractConfigAwareAPIClientSession {
         }
         return privateInfostoreFolder;
     }
+
+    @Test
+    public void testGetAllFileAccounts() throws Exception {
+        final boolean connectionCheck = true;
+        FileAccountsResponse response = filestorageApi.getAllFileAccounts(getSessionId(), null, connectionCheck);
+        List<FileAccountData> allAccounts = checkResponse(response.getError(), response.getErrorDesc(), response.getData());
+        assertThat(allAccounts, is(not(empty())));
+        List<FileAccountData> accountData = allAccounts.stream().filter(a -> a.getId().equals(testFileAccount.getId())).collect(Collectors.toList());
+        assertThat(accountData, is(not(nullValue())));
+        FileAccountData fileAccount = accountData.get(0);
+        assertThat(fileAccount.getHasError(), is(nullValue()));
+        assertThat(fileAccount.getError(), isEmptyOrNullString());
+    }
+
+    @Test
+    public void testRegisterIncorrectAccountNotPossible() throws Exception {
+        final String incorrectURL = "http://notExisting.example.org/servlet/webdav.infostore";
+        final String incorrectDisplayName = "IncorrectAccount";
+
+        FileAccountData incorrectFileAccount = new FileAccountData();
+        incorrectFileAccount.setFilestorageService(getFileStorageService());
+        incorrectFileAccount.setDisplayName(incorrectDisplayName);
+        incorrectFileAccount.setConfiguration(new WebDAVFileAccountConfiguration(incorrectURL, testUser.getUser(), testUser.getPassword()));
+        FileAccountCreationResponse response = filestorageApi.createFileAccount(getSessionId(), incorrectFileAccount);
+        assertThat(response.getError(), not(isEmptyOrNullString()));
+
+        final boolean connectionCheck = true;
+        FileAccountsResponse allResponse = filestorageApi.getAllFileAccounts(getSessionId(), null, B(connectionCheck));
+        List<FileAccountData> allAccounts = checkResponse(allResponse.getError(), allResponse.getErrorDesc(), allResponse.getData());
+        List<FileAccountData> shouldBeEmpty = allAccounts.stream().filter(
+            a -> a.getDisplayName().equals(incorrectDisplayName)).collect(Collectors.toList());
+        assertThat(shouldBeEmpty, is(empty()));
+    }
+
     /**
      * Tests to create and delete a file
      *
