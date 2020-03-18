@@ -79,6 +79,7 @@ import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.Mapping;
+import com.openexchange.java.Strings;
 
 /**
  * {@link Check}
@@ -266,28 +267,35 @@ public class Check {
         /*
          * action and trigger are both required for any type of alarm
          */
-        if (null == alarm.getAction() && (null == fields || contains(fields, AlarmField.ACTION))) {
-            throw CalendarExceptionCodes.MANDATORY_FIELD.create(AlarmField.ACTION.toString());
+        if (null == fields || contains(fields, AlarmField.ACTION)) {
+            if (null == alarm.getAction() || Strings.isEmpty(alarm.getAction().getValue())) {
+                Exception cause = CalendarExceptionCodes.MANDATORY_FIELD.create(AlarmField.ACTION.toString());
+                throw CalendarExceptionCodes.INVALID_ALARM.create(cause, String.valueOf(alarm.getId()));
+            }
         }
         if ((null == alarm.getTrigger() || null == alarm.getTrigger().getDateTime() && null == alarm.getTrigger().getDuration()) &&
             (null == fields || contains(fields, AlarmField.TRIGGER))) {
-            throw CalendarExceptionCodes.MANDATORY_FIELD.create(AlarmField.TRIGGER.toString());
+            Exception cause = CalendarExceptionCodes.MANDATORY_FIELD.create(AlarmField.TRIGGER.toString());
+            throw CalendarExceptionCodes.INVALID_ALARM.create(cause, String.valueOf(alarm.getId()));
         }
         /*
          * check further properties based on alarm type
          */
         if (AlarmAction.DISPLAY.equals(alarm.getAction())) {
             if (null == alarm.getDescription() && (null == fields || contains(fields, AlarmField.DESCRIPTION))) {
-                throw CalendarExceptionCodes.MANDATORY_FIELD.create(AlarmField.DESCRIPTION.toString());
+                Exception cause = CalendarExceptionCodes.MANDATORY_FIELD.create(AlarmField.DESCRIPTION.toString());
+                throw CalendarExceptionCodes.INVALID_ALARM.create(cause, String.valueOf(alarm.getId()));
             }
         }
         if ( AlarmAction.SMS.equals(alarm.getAction())) {
             if (!alarm.containsAttendees()) {
-                throw CalendarExceptionCodes.MANDATORY_FIELD.create(AlarmField.ATTENDEES.toString());
+                Exception cause = CalendarExceptionCodes.MANDATORY_FIELD.create(AlarmField.ATTENDEES.toString());
+                throw CalendarExceptionCodes.INVALID_ALARM.create(cause, String.valueOf(alarm.getId()));
             }
             for(Attendee att : alarm.getAttendees()) {
                 if (!att.containsUri() || !att.getUri().toLowerCase().contains("tel:")) {
-                    throw CalendarExceptionCodes.INVALID_ALARM.create(alarm);
+                    Exception cause = CalendarExceptionCodes.INVALID_CALENDAR_USER.create(att.getUri(), I(att.getEntity()), String.valueOf(att.getCuType()));
+                    throw CalendarExceptionCodes.INVALID_ALARM.create(cause, String.valueOf(alarm.getId()));
                 }
             }
         }
