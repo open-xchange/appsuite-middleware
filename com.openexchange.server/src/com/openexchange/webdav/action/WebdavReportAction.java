@@ -88,9 +88,9 @@ public class WebdavReportAction extends AbstractAction {
             reportAction.perform(req, res);
 
         } catch (JDOMException e) {
-        	throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), HttpServletResponse.SC_BAD_REQUEST);
+            throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), HttpServletResponse.SC_BAD_REQUEST, e);
         } catch (IOException e) {
-        	throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
         }
     }
 }
