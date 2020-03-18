@@ -766,6 +766,12 @@ public class AlarmUtils extends CalendarUtils {
         do {
             Event shiftedOccurrence = iterator.next();
             Date shiftedTriggerTime = getTriggerTime(alarm.getTrigger(), shiftedOccurrence, timeZone);
+            if (null == shiftedTriggerTime) {
+                /*
+                 * no trigger time calculated, cancel check
+                 */
+                break;
+            }
             if (null != rangeUntil && rangeUntil.before(shiftedTriggerTime)) {
                 /*
                  * outside requested range
