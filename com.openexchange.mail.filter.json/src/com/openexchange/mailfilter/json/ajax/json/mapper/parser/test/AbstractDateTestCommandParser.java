@@ -222,7 +222,7 @@ abstract class AbstractDateTestCommandParser {
         jsonObject.put(GeneralField.id.name(), command.getCommand().getCommandName());
         final String comparison = command.getMatchType().substring(1);
         if ("value".equals(comparison)) {
-            int compPos = command.getTagArguments().size() == 1 ? 1 : 3;
+            int compPos = command.getArgumentPosition(ArgumentUtil.createTagArgument("value")) + 1;
             jsonObject.put(DateTestField.comparison.name(), ((List<String>) command.getArguments().get(compPos)).get(0));
         } else {
             jsonObject.put(DateTestField.comparison.name(), comparison);
