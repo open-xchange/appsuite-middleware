@@ -132,7 +132,7 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
         private final OIDCBackend backend;
 
         @SuppressWarnings("hiding")
-        private static final Logger LOG = LoggerFactory.getLogger(OIDCLoginRequestHandler.OIDCHandler.class);
+        static final Logger LOG = LoggerFactory.getLogger(OIDCLoginRequestHandler.OIDCHandler.class);
 
         public OIDCHandler(OIDCBackend backend) {
             this.backend = backend;
@@ -212,7 +212,7 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
             return false;
         }
 
-        private void performLogin(HttpServletRequest request, HttpServletResponse response, boolean respondWithJson, LoginRequestContext requestContext) throws IOException, OXException, JSONException {
+        void performLogin(HttpServletRequest request, HttpServletResponse response, boolean respondWithJson, LoginRequestContext requestContext) throws IOException, OXException, JSONException {
             LOG.trace("performLogin(HttpServletRequest request: {}, HttpServletResponse response)", request.getRequestURI());
             String sessionToken = request.getParameter(OIDCTools.SESSION_TOKEN);
             LOG.trace("Login user with session token: {}", sessionToken);
