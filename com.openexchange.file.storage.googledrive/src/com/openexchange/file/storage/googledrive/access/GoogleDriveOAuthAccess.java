@@ -115,7 +115,7 @@ public class GoogleDriveOAuthAccess extends AbstractOAuthAccess {
     public boolean ping() throws OXException {
         try {
             Drive drive = this.<Drive> getClient().client;
-            drive.about().get().execute();
+            drive.about().get().setFields("user/displayName").execute();
             return true;
         } catch (HttpResponseException e) {
             if (401 == e.getStatusCode() || 403 == e.getStatusCode()) {
