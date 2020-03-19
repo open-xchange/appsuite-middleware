@@ -1,9 +1,3 @@
-open-xchange-authentication-ucs-common (7.10.3-8) stable; urgency=medium
-
-  * Build for patch 2020-03-23 (5653)
-
- -- Felix Marx <felix.marx@open-xchange.com>  Tue, 17 Mar 2020 08:59:37 +0000
-
 open-xchange-authentication-ucs-common (7.10.3-7) stable; urgency=medium
 
   * Build for patch 2020-03-02 (5623)
