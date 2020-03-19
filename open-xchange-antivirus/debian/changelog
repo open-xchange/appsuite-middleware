@@ -1,3 +1,9 @@
+open-xchange-antivirus (7.10.2-23) stable; urgency=medium
+
+  * Build for patch 2020-03-23 (5652)
+
+ -- Ioannis Chouklis <ioannis.chouklis@open-xchange.com>  Thu, 19 Mar 2020 14:48:53 +0000
+
 open-xchange-antivirus (7.10.2-22) stable; urgency=medium
 
   * Build for patch 2020-03-02 (5622)

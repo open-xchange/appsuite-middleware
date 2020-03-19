@@ -1,3 +1,9 @@
+open-xchange-realtime-events (7.10.2-23) stable; urgency=medium
+
+  * Build for patch 2020-03-23 (5652)
+
+ -- Marc Arens <marc.arens@open-xchange.com>  Thu, 19 Mar 2020 14:49:43 +0000
+
 open-xchange-realtime-events (7.10.2-22) stable; urgency=medium
 
   * Build for patch 2020-03-02 (5622)
