@@ -157,7 +157,7 @@ public abstract class AbstractNonCryptoAttachmentStorage implements AttachmentSt
     }
 
     @Override
-    public Attachment getAttachment(UUID id, Session session) throws OXException {
+    public Attachment getAttachment(UUID id, Optional<Boolean> optionalEncrypt, Session session) throws OXException {
         DatabaseService databaseService = requireDatabaseService();
         Connection con = databaseService.getReadOnly(session.getContextId());
         try {
@@ -178,7 +178,7 @@ public abstract class AbstractNonCryptoAttachmentStorage implements AttachmentSt
      */
     public Attachment getAttachment(UUID id, Session session, Connection con) throws OXException {
         if (null == con) {
-            return getAttachment(id, session);
+            return getAttachment(id, Optional.empty(), session);
         }
 
         PreparedStatement stmt = null;
