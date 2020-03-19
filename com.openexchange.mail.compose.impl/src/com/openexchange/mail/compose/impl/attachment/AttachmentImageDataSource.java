@@ -52,6 +52,7 @@ package com.openexchange.mail.compose.impl.attachment;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Optional;
 import java.util.UUID;
 import com.drew.imaging.FileType;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -175,7 +176,7 @@ public class AttachmentImageDataSource implements ImageDataSource {
             return new SimpleData<D>((D) (new UnsynchronizedByteArrayInputStream(new byte[0])), properties);
         }
 
-        Attachment attachment = attachmentStorage.getAttachment(attachmentId, session);
+        Attachment attachment = attachmentStorage.getAttachment(attachmentId, Optional.empty(), session);
         if (null == attachment) {
             LOG.warn("Requested a non-existing image attachment {} for user {} in context {}. Returning an empty image as fallback.", sAttachmentId, Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
             DataProperties properties = new DataProperties(4);

@@ -2061,7 +2061,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
         }
 
         // Look-up attachment in attachment storage
-        Attachment attachment = attachmentStorage.getAttachment(attachmentId, session);
+        Attachment attachment = attachmentStorage.getAttachment(attachmentId, Optional.empty(), session);
         if (null == attachment) {
             // No such attachment. Delete non-existent attachment from composition space's references
             boolean retry = true;

@@ -95,21 +95,31 @@ public interface AttachmentStorage {
      * Gets the attachment associated with given identifier
      *
      * @param id The attachment identifier
+     * @param optionalEncrypt The optional encryption flag on initial opening of a composition space. If present and <code>true</code> the
+     *                        attachment to save is supposed to be encrypted according to caller. If present and <code>false</code>  the
+     *                        attachment to save is <b>not</b> supposed to be encrypted according to caller. If absent, encryption is
+     *                        automatically determined.<br>
+     *                        <b>Note</b>: The flag MUST be aligned to associated composition space
      * @param session The session providing user information
      * @return The attachment or <code>null</code> if no such attachment exists
      * @throws OXException If attachment cannot be returned
      */
-    Attachment getAttachment(UUID id, Session session) throws OXException;
+    Attachment getAttachment(UUID id, Optional<Boolean> optionalEncrypt, Session session) throws OXException;
 
     /**
      * Gets the attachments associated with given identifiers
      *
      * @param ids The attachment identifiers
+     * @param optionalEncrypt The optional encryption flag on initial opening of a composition space. If present and <code>true</code> the
+     *                        attachment to save is supposed to be encrypted according to caller. If present and <code>false</code>  the
+     *                        attachment to save is <b>not</b> supposed to be encrypted according to caller. If absent, encryption is
+     *                        automatically determined.<br>
+     *                        <b>Note</b>: The flag MUST be aligned to associated composition space
      * @param session The session providing user information
      * @return The attachments as an array. If a certain attachment does not exist, the appropriate index position in returned array is <code>null</code>
      * @throws OXException If attachment cannot be returned
      */
-    default Attachment[] getAttachments(List<UUID> ids, Session session) throws OXException {
+    default Attachment[] getAttachments(List<UUID> ids, Optional<Boolean> optionalEncrypt, Session session) throws OXException {
         if (ids == null || ids.isEmpty()) {
             return new Attachment[0];
         }
@@ -117,7 +127,7 @@ public interface AttachmentStorage {
         Attachment[] retval = new Attachment[ids.size()];
         int index = 0;
         for (UUID id : ids) {
-            retval[index++] = getAttachment(id, session);
+            retval[index++] = getAttachment(id, optionalEncrypt, session);
         }
         return retval;
     }

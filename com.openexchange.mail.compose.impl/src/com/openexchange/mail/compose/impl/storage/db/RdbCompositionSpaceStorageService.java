@@ -138,7 +138,7 @@ public class RdbCompositionSpaceStorageService extends AbstractCompositionSpaceS
         }
 
         MessageDescription m = cs.getMessage();
-        List<Attachment> attachmentsToUpdate = resolveAttachments(m, session);
+        List<Attachment> attachmentsToUpdate = resolveAttachments(m, Optional.empty(), session);
         Message message = ImmutableMessage.builder().fromMessageDescription(m).build();
         ImmutableCompositionSpace ics = new ImmutableCompositionSpace(id, message, cs.getLastModified().getTime());
 
@@ -169,7 +169,7 @@ public class RdbCompositionSpaceStorageService extends AbstractCompositionSpaceS
         for (CompositionSpaceContainer cs : containers) {
             MessageDescription m = cs.getMessage();
             if (attachmentsQueried) {
-                List<Attachment> attachmentsToUpdate = resolveAttachments(m, session);
+                List<Attachment> attachmentsToUpdate = resolveAttachments(m, Optional.empty(), session);
                 if (!attachmentsToUpdate.isEmpty()) {
                     if (toUpdate == null) {
                         toUpdate = new ArrayList<>(size);
@@ -215,7 +215,7 @@ public class RdbCompositionSpaceStorageService extends AbstractCompositionSpaceS
         dbStorage.insert(csc, maxSpacesPerUser);
 
         MessageDescription m = csc.getMessage();
-        resolveAttachments(m, session);
+        resolveAttachments(m, optionalEncrypt, session);
         Message message = ImmutableMessage.builder().fromMessageDescription(m).build();
         return new ImmutableCompositionSpace(csc.getUuid(), message, csc.getLastModified().getTime());
     }
@@ -230,7 +230,7 @@ public class RdbCompositionSpaceStorageService extends AbstractCompositionSpaceS
         CompositionSpaceContainer cs = dbStorage.updateCompositionSpace(CompositionSpaceContainer.fromCompositionSpaceDescription(compositionSpaceDesc), true);
 
         MessageDescription m = cs.getMessage();
-        List<Attachment> attachmentsToUpdate = resolveAttachments(m, session);
+        List<Attachment> attachmentsToUpdate = resolveAttachments(m, Optional.empty(), session);
         Message message = ImmutableMessage.builder().fromMessageDescription(m).build();
         ImmutableCompositionSpace ics = new ImmutableCompositionSpace(compositionSpaceDesc.getUuid(), message, cs.getLastModified().getTime());
 
@@ -286,11 +286,16 @@ public class RdbCompositionSpaceStorageService extends AbstractCompositionSpaceS
      * (Re-)loads all attachments in a Message by the the real data from the AttachmentStorage. Might be necessary if only the attachment id is set.
      *
      * @param messageDescription The message description
+     * @param optionalEncrypt The optional encryption flag on initial opening of a composition space. If present and <code>true</code> the
+     *                        attachment to save is supposed to be encrypted according to caller. If present and <code>false</code>  the
+     *                        attachment to save is <b>not</b> supposed to be encrypted according to caller. If absent, encryption is
+     *                        automatically determined.<br>
+     *                        <b>Note</b>: The flag MUST be aligned to associated composition space
      * @param session The session
      * @return The attachments to update
      * @throws OXException If attachments cannot be resolved
      */
-    private List<Attachment> resolveAttachments(MessageDescription messageDescription, Session session) throws OXException {
+    private List<Attachment> resolveAttachments(MessageDescription messageDescription, Optional<Boolean> optionalEncrypt, Session session) throws OXException {
         if (null == messageDescription) {
             return Collections.emptyList();
         }
@@ -308,7 +313,7 @@ public class RdbCompositionSpaceStorageService extends AbstractCompositionSpaceS
         AttachmentStorage attachmentStorage = attachmentStorageService.getAttachmentStorageFor(session);
         List<Attachment> attachmentsToSet = new ArrayList<>(size);
         boolean modified = false;
-        for (Attachment attachment : attachmentStorage.getAttachments(getIdsFrom(availableAttachments, size), session)) {
+        for (Attachment attachment : attachmentStorage.getAttachments(getIdsFrom(availableAttachments, size), optionalEncrypt, session)) {
             if (null == attachment) {
                 modified = true;
             } else {
