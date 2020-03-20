@@ -111,6 +111,7 @@ public abstract class DAVFactory extends AbstractWebdavFactory implements Sessio
         return sessionHolder.getSessionObject();
     }
 
+    @Override
     public Session getSession() {
         return getSessionObject();
     }

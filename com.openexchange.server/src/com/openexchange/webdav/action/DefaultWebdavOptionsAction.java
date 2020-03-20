@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,24 +49,56 @@
 
 package com.openexchange.webdav.action;
 
+import static com.openexchange.webdav.action.WebdavOption.ACCESS_CONTROL;
+import static com.openexchange.webdav.action.WebdavOption.ONE;
+import static com.openexchange.webdav.action.WebdavOption.THREE;
+import static com.openexchange.webdav.action.WebdavOption.TWO;
+import java.util.EnumSet;
+import java.util.stream.Collectors;
+import org.apache.http.HttpStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 
-public class WebdavOptionsAction extends AbstractAction {
+/**
+ * {@link DefaultWebdavOptionsAction} is the default webdav action which only returns the basic {@link WebdavOption}s. Other implementations can extend this class and overwrite {@link #getDAVOptions(ServerSession)}.
+ */
+public class DefaultWebdavOptionsAction extends AbstractAction {
 
-    static final String DAV_OPTIONS =
-        "1, 2, 3, access-control, calendar-access, addressbook, extended-mkcol, calendar-auto-schedule, calendar-schedule, " +
-        "calendarserver-sharing, calendarserver-principal-search, calendarserver-principal-property-search, calendarserver-subscribed, " +
-        "resource-sharing, calendar-managed-attachments, calendarserver-private-events, calendarserver-recurrence-split"
-    ;
+    public static final Logger LOG = LoggerFactory.getLogger(DefaultWebdavOptionsAction.class);
+
+    protected static final EnumSet<WebdavOption> GENERAL_DAV_OPTIONS = EnumSet.of(ONE, TWO, THREE, ACCESS_CONTROL);
 
 	@Override
     public void perform(WebdavRequest request, WebdavResponse response) throws WebdavProtocolException {
 		response.setHeader("Content-Length", "0");
 		response.setHeader("Allow", Strings.join(request.getResource().getOptions(), ","));
-        response.setHeader("DAV", DAV_OPTIONS);
+        try {
+            response.setHeader("DAV", toCommaSeparatedList(getDAVOptions(ServerSessionAdapter.valueOf(request.getFactory().getSession()))));
+        } catch (OXException e) {
+            throw WebdavProtocolException.generalError(e, request.getDestinationUrl(), HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        }
 		response.setHeader("Accept-Ranges", "bytes");
 		response.setHeader("MS-Author-Via", "DAV"); // Hack for Windows Webfolder
+	}
+
+	@SuppressWarnings("unused")
+    protected EnumSet<WebdavOption> getDAVOptions(ServerSession session) throws OXException {
+	    return GENERAL_DAV_OPTIONS;
+	}
+
+	/**
+	 * Converts the available options into a comma separated string
+	 *
+	 * @param options The {@link EnumSet} of available options
+	 * @return the options as a comma separated list
+	 */
+	protected static String toCommaSeparatedList(EnumSet<WebdavOption> options) {
+	    return options.stream().map((o) -> o.getName()).collect(Collectors.joining(","));
 	}
 
 }

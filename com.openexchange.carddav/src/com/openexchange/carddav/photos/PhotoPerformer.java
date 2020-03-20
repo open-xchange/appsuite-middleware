@@ -54,6 +54,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.dav.DAVFactory;
 import com.openexchange.dav.DAVPerformer;
+import com.openexchange.dav.actions.OPTIONSAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.webdav.action.WebdavAction;
 import com.openexchange.webdav.action.WebdavExistsAction;
@@ -61,7 +62,6 @@ import com.openexchange.webdav.action.WebdavGetAction;
 import com.openexchange.webdav.action.WebdavHeadAction;
 import com.openexchange.webdav.action.WebdavIfAction;
 import com.openexchange.webdav.action.WebdavIfMatchAction;
-import com.openexchange.webdav.action.WebdavOptionsAction;
 import com.openexchange.webdav.action.WebdavPropfindAction;
 import com.openexchange.webdav.action.WebdavReportAction;
 import com.openexchange.webdav.action.WebdavTraceAction;
@@ -94,7 +94,7 @@ public class PhotoPerformer extends DAVPerformer {
 
     private EnumMap<WebdavMethod, WebdavAction> initActions() {
         EnumMap<WebdavMethod, WebdavAction> actions = new EnumMap<WebdavMethod, WebdavAction>(WebdavMethod.class);
-        actions.put(WebdavMethod.OPTIONS, prepare(new WebdavOptionsAction(), true, true, new WebdavIfAction(0, false, false)));
+        actions.put(WebdavMethod.OPTIONS, prepare(new OPTIONSAction(factory), true, true, new WebdavIfAction(0, false, false)));
         actions.put(WebdavMethod.PROPFIND, prepare(new WebdavPropfindAction(PROTOCOL), true, true, new WebdavExistsAction(), new WebdavIfAction(0, false, false)));
         actions.put(WebdavMethod.GET, prepare(new WebdavGetAction(), true, true, false, null, new WebdavExistsAction(), new WebdavIfMatchAction(HttpServletResponse.SC_NOT_MODIFIED)));
         actions.put(WebdavMethod.HEAD, prepare(new WebdavHeadAction(), true, true, false, null, new WebdavExistsAction(), new WebdavIfMatchAction(HttpServletResponse.SC_NOT_MODIFIED)));

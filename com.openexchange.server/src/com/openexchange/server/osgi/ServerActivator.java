@@ -167,7 +167,6 @@ import com.openexchange.groupware.reminder.ReminderService;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.tree.JsonMaxSize;
 import com.openexchange.groupware.settings.tree.ShardingSubdomains;
-import com.openexchange.groupware.settings.tree.modules.mail.MaliciousCheck;
 import com.openexchange.groupware.upgrade.SegmentedUpdateService;
 import com.openexchange.groupware.upload.impl.UploadUtility;
 import com.openexchange.groupware.userconfiguration.osgi.CapabilityRegistrationListener;

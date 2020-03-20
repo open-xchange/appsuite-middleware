@@ -5,10 +5,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import org.junit.Test;
-import com.openexchange.java.Strings;
 import com.openexchange.webdav.protocol.WebdavPath;
 
 public class OptionsTest extends ActionTestCase {
@@ -22,7 +20,7 @@ public class OptionsTest extends ActionTestCase {
 
         req.setUrl(INDEX_HTML_URL);
 
-        final WebdavAction action = new WebdavOptionsAction();
+        final WebdavAction action = new DefaultWebdavOptionsAction();
 
         action.perform(req, res);
 
@@ -37,8 +35,8 @@ public class OptionsTest extends ActionTestCase {
         }
         assertTrue(expected.toString(), expected.isEmpty());
 
-        List<String> davHeaders = Strings.splitAndTrim(res.getHeader("DAV"), ",");
-        List<String> expectedDavHeaders = Strings.splitAndTrim(WebdavOptionsAction.DAV_OPTIONS, ",");
+        String davHeaders = res.getHeader("DAV");
+        String expectedDavHeaders = DefaultWebdavOptionsAction.toCommaSeparatedList(DefaultWebdavOptionsAction.GENERAL_DAV_OPTIONS);
         assertTrue(expectedDavHeaders.equals(davHeaders));
 
         assertEquals("bytes", res.getHeader("Accept-Ranges"));

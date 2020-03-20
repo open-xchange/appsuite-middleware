@@ -111,6 +111,13 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
         public final TIntObjectMap<FolderCollection> collectionsById = new TIntObjectHashMap<FolderCollection>();
         public final TIntObjectMap<DocumentMetadataResource> resourcesById = new TIntObjectHashMap<DocumentMetadataResource>();
 
+        /**
+         * Initializes a new {@link State}.
+         */
+        public State() {
+            super();
+        }
+
         public void addResource(final OXWebdavResource res) {
             if (res.isCollection()) {
                 addCollection((FolderCollection)res);
@@ -323,7 +330,7 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
         }
     }
 
-    private FolderCollection loadCollection(final WebdavPath url, final int id, final State s) throws WebdavProtocolException {
+    private FolderCollection loadCollection(final WebdavPath url, final int id, final State s) {
         final FolderCollection collection = new FolderCollection(url, this);
         collection.setId(id);
         collection.setExists(true);
@@ -452,7 +459,7 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
         return aliases;
     }
 
-    public Collection<? extends OXWebdavResource> getCollections(final List<Integer> subfolderIds) throws WebdavProtocolException {
+    public Collection<? extends OXWebdavResource> getCollections(final List<Integer> subfolderIds) {
         final State s = state.get();
         final Set<Integer> toLoad = new HashSet<Integer>(subfolderIds);
         final List<OXWebdavResource> retVal = new ArrayList<OXWebdavResource>(subfolderIds.size());
@@ -467,20 +474,13 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
         }
 
         for(final int id : toLoad) {
-            try {
-                retVal.add(loadCollection(null, id, s)); // FIXME 101 SELECT PROBLEM
-            } catch (WebdavProtocolException x) {
-                //System.out.println(x.getStatus());
-                if (x.getStatus() != HttpServletResponse.SC_FORBIDDEN) {
-                    throw x;
-                }
-            }
+            retVal.add(loadCollection(null, id, s)); // FIXME 101 SELECT PROBLEM
         }
 
         return retVal;
     }
 
-    public Collection<? extends OXWebdavResource> getResourcesInFolder(final FolderCollection collection, final int folderId) throws OXException, IllegalAccessException {
+    public Collection<? extends OXWebdavResource> getResourcesInFolder(final FolderCollection collection, final int folderId) throws OXException {
         if (folderId == FolderObject.SYSTEM_INFOSTORE_FOLDER_ID) {
             return new ArrayList<OXWebdavResource>();
         }
@@ -593,6 +593,7 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
         s.remove(resource);
     }
 
+    @Override
     public ServerSession getSession() throws OXException {
         try {
             return ServerSessionAdapter.valueOf(sessionHolder.getSessionObject());

@@ -65,11 +65,9 @@ import com.openexchange.dav.carddav.CardDAVTest;
  */
 public class OptionsTest extends CardDAVTest {
 
-    private static final String[] EXPECTED_ALLOW_HEADERS = { "PROPFIND", "OPTIONS", "REPORT", "PUT", "DELETE", "ACL"
-    };
+    private static final String[] EXPECTED_ALLOW_HEADERS = { "PROPFIND", "OPTIONS", "REPORT", "PUT", "DELETE", "ACL" };
 
-    private static final String[] EXPECTED_DAV_HEADERS = { "1", "2", "3", "addressbook", "access-control", "extended-mkcol"
-    };
+    private static final String[] EXPECTED_DAV_HEADERS = { "1", "2", "3", "addressbook", "access-control", "calendar-access" };
 
     public OptionsTest() {
         super();
@@ -77,7 +75,7 @@ public class OptionsTest extends CardDAVTest {
 
     /**
      * Tests if the necessary 'Allow' header elements are present in the OPTIONS response.
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -94,7 +92,7 @@ public class OptionsTest extends CardDAVTest {
 
     /**
      * Tests if the necessary 'DAV' header elements are present in the OPTIONS response.
-     * 
+     *
      * @throws Exception
      */
     @Test

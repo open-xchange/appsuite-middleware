@@ -53,6 +53,7 @@ import static com.openexchange.dav.DAVTools.getExternalPath;
 import static com.openexchange.dav.DAVTools.getInternalPath;
 import org.osgi.service.http.HttpService;
 import org.slf4j.Logger;
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.carddav.Tools;
 import com.openexchange.carddav.photos.PhotoPerformer;
@@ -99,7 +100,7 @@ public class CarddavActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class[] {
             HttpService.class, FolderService.class, ConfigViewFactory.class, UserService.class, ContactService.class,
-            ResourceService.class, VCardService.class, GroupService.class
+            ResourceService.class, VCardService.class, GroupService.class, CapabilityService.class
         };
     }
 
