@@ -56,8 +56,10 @@ import static com.openexchange.webdav.client.jackrabbit.Utils.getPropertySet;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -116,6 +118,7 @@ import org.w3c.dom.Element;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.rest.client.httpclient.HttpClientService;
 import com.openexchange.rest.client.httpclient.HttpClients;
 import com.openexchange.rest.client.httpclient.ManagedHttpClient;
@@ -485,9 +488,11 @@ public class WebDAVClientImpl implements WebDAVClient {
             if (0 < baseUrl.getPort()) {
                 uriBuilder.setPort(baseUrl.getPort());
             }
-            uriBuilder.setPath(href);
+            if (Strings.isNotEmpty(href)) {
+                uriBuilder.setPath(URLDecoder.decode(href, "UTF-8"));
+            }
             return uriBuilder.build();
-        } catch (URISyntaxException e) {
+        } catch (URISyntaxException | UnsupportedEncodingException e) {
             throw WebDAVClientExceptionCodes.UNABLE_TO_PARSE_URI.create(baseUrl.toString() + href, e);
         }
     }
