@@ -1,12 +1,12 @@
 local grafana = import 'grafonnet/grafana.libsonnet';
-local dashboard = grafana.dashboard;
-local template = grafana.template;
 local singlestat = grafana.singlestat;
 local graphPanel = grafana.graphPanel;
 local gauge = grafana.gauge;
 local row = grafana.row;
 local prometheus = grafana.prometheus;
 local table = grafana.tablePanel;
+
+local oxFunctions = import './lib/ox_functions.libsonnet';
 
 local overviewRow = row.new(
   title='Overview'
@@ -146,7 +146,7 @@ local threadPoolTasks = graphPanel.new(
   )
 ).addTarget(
   prometheus.target(
-    'rate(executor_completed_tasks_total{name="ox.executor.service",instance="$instance"}[5m])',
+    'rate(executor_completed_tasks_total{name="ox.executor.service",instance="$instance"}[$interval])',
     legendFormat='Completed'
   )
 );
@@ -183,27 +183,27 @@ local httpApiRequestsSeconds = graphPanel.new(
   format='s'
 ).addTarget(
   prometheus.target(
-    'histogram_quantile(0.5, sum(rate(appsuite_httpapi_requests_seconds_bucket{instance="$instance"}[5m])) by (le))',
+    'histogram_quantile(0.5, sum(rate(appsuite_httpapi_requests_seconds_bucket{instance="$instance"}[$interval])) by (le))',
     legendFormat='p50'
   )
 ).addTarget(
   prometheus.target(
-    'histogram_quantile(0.75, sum(rate(appsuite_httpapi_requests_seconds_bucket{instance="$instance"}[5m])) by (le))',
+    'histogram_quantile(0.75, sum(rate(appsuite_httpapi_requests_seconds_bucket{instance="$instance"}[$interval])) by (le))',
     legendFormat='p75'
   )
 ).addTarget(
   prometheus.target(
-    'histogram_quantile(0.9, sum(rate(appsuite_httpapi_requests_seconds_bucket{instance="$instance"}[5m])) by (le))',
+    'histogram_quantile(0.9, sum(rate(appsuite_httpapi_requests_seconds_bucket{instance="$instance"}[$interval])) by (le))',
     legendFormat='p90'
   )
 ).addTarget(
   prometheus.target(
-    'histogram_quantile(0.95, sum(rate(appsuite_httpapi_requests_seconds_bucket{instance="$instance"}[5m])) by (le))',
+    'histogram_quantile(0.95, sum(rate(appsuite_httpapi_requests_seconds_bucket{instance="$instance"}[$interval])) by (le))',
     legendFormat='p95'
   )
 ).addTarget(
   prometheus.target(
-    'histogram_quantile(0.99, sum(rate(appsuite_httpapi_requests_seconds_bucket{instance="$instance"}[5m])) by (le))',
+    'histogram_quantile(0.99, sum(rate(appsuite_httpapi_requests_seconds_bucket{instance="$instance"}[$interval])) by (le))',
     legendFormat='p99'
   )
 ).addTarget(
@@ -213,7 +213,7 @@ local httpApiRequestsSeconds = graphPanel.new(
   )
 ).addTarget(
   prometheus.target(
-    'sum(rate(appsuite_httpapi_requests_seconds_sum{instance="$instance"}[5m]))/sum(rate(appsuite_httpapi_requests_seconds_count{instance="$instance"}[5m]))',
+    'sum(rate(appsuite_httpapi_requests_seconds_sum{instance="$instance"}[$interval]))/sum(rate(appsuite_httpapi_requests_seconds_count{instance="$instance"}[$interval]))',
     legendFormat='avg'
   )
 );
@@ -228,7 +228,7 @@ local httpApiRequestsPercentilesByAction = graphPanel.new(
   format='s'
 ).addTarget(
   prometheus.target(
-    'histogram_quantile(0.99, sum(rate(appsuite_httpapi_requests_seconds_bucket{instance="$instance"}[5m])) by (le, action))',
+    'histogram_quantile(0.99, sum(rate(appsuite_httpapi_requests_seconds_bucket{instance="$instance"}[$interval])) by (le, action))',
     legendFormat='{{action}}'
   )
 );
@@ -243,7 +243,7 @@ local httpApiRequestsPercentilesByModule = graphPanel.new(
   format='s'
 ).addTarget(
   prometheus.target(
-    'histogram_quantile(0.99, sum(rate(appsuite_httpapi_requests_seconds_bucket{instance="$instance"}[5m])) by (le, module))',
+    'histogram_quantile(0.99, sum(rate(appsuite_httpapi_requests_seconds_bucket{instance="$instance"}[$interval])) by (le, module))',
     legendFormat='{{module}}'
   )
 );
@@ -265,7 +265,7 @@ local httpApiRequestsOK = singlestat.new(
   sparklineShow=true
 ).addTarget(
   prometheus.target(
-    'sum(increase(appsuite_httpapi_requests_seconds_count{status="OK", instance="$instance"}[5m]))',
+    'sum(increase(appsuite_httpapi_requests_seconds_count{status="OK", instance="$instance"}[$interval]))',
     legendFormat='OKs'
   )
 );
@@ -292,7 +292,7 @@ local httpApiRequestsKO = singlestat.new(
   sparklineShow=true
 ).addTarget(
   prometheus.target(
-    'sum(increase(appsuite_httpapi_requests_seconds_count{status!="OK", instance="$instance"}[5m]))',
+    'sum(increase(appsuite_httpapi_requests_seconds_count{status!="OK", instance="$instance"}[$interval]))',
     legendFormat='KOs'
   )
 );
@@ -313,7 +313,7 @@ local httpApiRequestsTotal = singlestat.new(
   sparklineShow=true
 ).addTarget(
   prometheus.target(
-    'sum(increase(appsuite_httpapi_requests_seconds_count{instance="$instance"}[5m]))',
+    'sum(increase(appsuite_httpapi_requests_seconds_count{instance="$instance"}[$interval]))',
     legendFormat='Total'
   )
 );
@@ -327,7 +327,7 @@ local restApiRequestsByMethod = graphPanel.new(
   format='s'
 ).addTarget(
   prometheus.target(
-    'sum(rate(appsuite_restapi_requests_timer_seconds_sum{instance="$instance"}[5m]) / rate(appsuite_restapi_requests_timer_seconds_count{instance="$instance"}[5m])) by (method)',
+    'sum(rate(appsuite_restapi_requests_timer_seconds_sum{instance="$instance"}[$interval]) / rate(appsuite_restapi_requests_timer_seconds_count{instance="$instance"}[$interval])) by (method)',
     legendFormat='{{method}}'
   )
 ).addTarget(
@@ -346,7 +346,7 @@ local restApiRequestsByStatus = graphPanel.new(
   format='s'
 ).addTarget(
   prometheus.target(
-    'sum(rate(appsuite_restapi_requests_timer_seconds_sum{instance="$instance"}[5m]) / rate(appsuite_restapi_requests_timer_seconds_count{instance="$instance"}[5m])) by (status)',
+    'sum(rate(appsuite_restapi_requests_timer_seconds_sum{instance="$instance"}[$interval]) / rate(appsuite_restapi_requests_timer_seconds_count{instance="$instance"}[$interval])) by (status)',
     legendFormat='{{status}}'
   )
 ).addTarget(
@@ -365,12 +365,12 @@ local circuitBreakerDenials = graphPanel.new(
   labelY1='denials/s'
 ).addTarget(
   prometheus.target(
-    'rate(appsuite_circuit_breakers_denialsMeter_total{instance="$instance", protocol="imap"}[5m])',
+    'rate(appsuite_circuit_breakers_denialsMeter_total{instance="$instance", protocol="imap"}[$interval])',
     legendFormat='{{protocol}}'
   )
 ).addTarget(
   prometheus.target(
-    'rate(appsuite_circuit_breakers_denialsMeter_total{instance="$instance", protocol="mailfilter"}[5m])',
+    'rate(appsuite_circuit_breakers_denialsMeter_total{instance="$instance", protocol="mailfilter"}[$interval])',
     legendFormat='{{protocol}}'
   )
 );
@@ -384,12 +384,12 @@ local circuitBreakerRequestRate = graphPanel.new(
   labelY1='event/s'
 ).addTarget(
   prometheus.target(
-    'sum(rate(appsuite_imap_requestRate_seconds_sum{instance="$instance"}[5m]) / rate(appsuite_imap_requestRate_seconds_count{instance="$instance"}[5m]))',
+    'sum(rate(appsuite_imap_requestRate_seconds_sum{instance="$instance"}[$interval]) / rate(appsuite_imap_requestRate_seconds_count{instance="$instance"}[$interval]))',
     legendFormat='Requests'
   )
 ).addTarget(
   prometheus.target(
-    'sum(rate(appsuite_imap_errorRate_total{instance="$instance"}[5m]))',
+    'sum(rate(appsuite_imap_errorRate_total{instance="$instance"}[$interval]))',
     legendFormat='Errors'
   )
 );
@@ -426,7 +426,7 @@ local soapApiRequestsByOperation = graphPanel.new(
   format='s'
 ).addTarget(
   prometheus.target(
-    'sum(rate(appsuite_soapapi_requests_timer_seconds_sum{instance="$instance"}[5m]) / rate(appsuite_soapapi_requests_timer_seconds_count{instance="$instance"}[5m])) by (operation)',
+    'sum(rate(appsuite_soapapi_requests_timer_seconds_sum{instance="$instance"}[$interval]) / rate(appsuite_soapapi_requests_timer_seconds_count{instance="$instance"}[$interval])) by (operation)',
     legendFormat='{{operation}}'
   )
 );
@@ -440,7 +440,7 @@ local soapApiRequestsByService = graphPanel.new(
   format='s'
 ).addTarget(
   prometheus.target(
-    'sum(rate(appsuite_soapapi_requests_timer_seconds_sum{instance="$instance"}[5m]) / rate(appsuite_soapapi_requests_timer_seconds_count{instance="$instance"}[5m])) by (service)',
+    'sum(rate(appsuite_soapapi_requests_timer_seconds_sum{instance="$instance"}[$interval]) / rate(appsuite_soapapi_requests_timer_seconds_count{instance="$instance"}[$interval])) by (service)',
     legendFormat='{{service}}'
   )
 );
@@ -462,7 +462,7 @@ local webdavApiRequestsOK = singlestat.new(
   sparklineShow=true
 ).addTarget(
   prometheus.target(
-    'sum(increase(appsuite_webdav_requests_seconds_count{status=~"OK|0", instance="$instance"}[5m]))',
+    'sum(increase(appsuite_webdav_requests_seconds_count{status=~"OK|0", instance="$instance"}[$interval]))',
     legendFormat='OKs'
   )
 );
@@ -489,7 +489,7 @@ local webdavApiRequestsKO = singlestat.new(
   sparklineShow=true
 ).addTarget(
   prometheus.target(
-    'sum(increase(appsuite_webdav_requests_seconds_count{status!~"OK|0", instance="$instance"}[5m]))',
+    'sum(increase(appsuite_webdav_requests_seconds_count{status!~"OK|0", instance="$instance"}[$interval]))',
     legendFormat='KOs'
   )
 );
@@ -510,7 +510,7 @@ local webdavApiRequestsTotal = singlestat.new(
   sparklineShow=true
 ).addTarget(
   prometheus.target(
-    'sum(increase(appsuite_webdav_requests_seconds_count{instance="$instance"}[5m]))',
+    'sum(increase(appsuite_webdav_requests_seconds_count{instance="$instance"}[$interval]))',
     legendFormat='Total'
   )
 );
@@ -525,7 +525,7 @@ local webdavApiRequestsByInterface = graphPanel.new(
   format='s'
 ).addTarget(
   prometheus.target(
-    'sum(rate(appsuite_webdav_requests_seconds_sum{instance="$instance"}[5m]) / rate(appsuite_webdav_requests_seconds_count{instance="$instance"}[5m])) by (interface)',
+    'sum(rate(appsuite_webdav_requests_seconds_sum{instance="$instance"}[$interval]) / rate(appsuite_webdav_requests_seconds_count{instance="$instance"}[$interval])) by (interface)',
     legendFormat='{{interface}}'
   )
 );
@@ -539,7 +539,7 @@ local webdavApiRequestsByMethod = graphPanel.new(
   format='s'
 ).addTarget(
   prometheus.target(
-    'sum(rate(appsuite_webdav_requests_seconds_sum{instance="$instance"}[5m]) / rate(appsuite_webdav_requests_seconds_count{instance="$instance"}[5m])) by (method)',
+    'sum(rate(appsuite_webdav_requests_seconds_sum{instance="$instance"}[$interval]) / rate(appsuite_webdav_requests_seconds_count{instance="$instance"}[$interval])) by (method)',
     legendFormat='{{method}}'
   )
 );
@@ -650,17 +650,17 @@ local configDBReadTimes = graphPanel.new(
   format='s'
 ).addTarget(
   prometheus.target(
-    'rate(appsuite_mysql_connections_acquire_seconds_sum{class="ConfigDB",type="read",instance="$instance"}[5m])/rate(appsuite_mysql_connections_acquire_seconds_count{class="ConfigDB",type="read",instance="$instance"}[5m])',
+    'rate(appsuite_mysql_connections_acquire_seconds_sum{class="ConfigDB",type="read",instance="$instance"}[$interval])/rate(appsuite_mysql_connections_acquire_seconds_count{class="ConfigDB",type="read",instance="$instance"}[$interval])',
     legendFormat='acquire'
   )
 ).addTarget(
   prometheus.target(
-    'rate(appsuite_mysql_connections_usage_seconds_sum{class="ConfigDB",type="read",instance="$instance"}[5m])/rate(appsuite_mysql_connections_usage_seconds_count{class="ConfigDB",type="read",instance="$instance"}[5m])',
+    'rate(appsuite_mysql_connections_usage_seconds_sum{class="ConfigDB",type="read",instance="$instance"}[$interval])/rate(appsuite_mysql_connections_usage_seconds_count{class="ConfigDB",type="read",instance="$instance"}[$interval])',
     legendFormat='usage'
   )
 ).addTarget(
   prometheus.target(
-    'rate(appsuite_mysql_connections_create_seconds_sum{class="ConfigDB",type="read",instance="$instance"}[5m])/rate(appsuite_mysql_connections_create_seconds_count{class="ConfigDB",type="read",instance="$instance"}[5m])',
+    'rate(appsuite_mysql_connections_create_seconds_sum{class="ConfigDB",type="read",instance="$instance"}[$interval])/rate(appsuite_mysql_connections_create_seconds_count{class="ConfigDB",type="read",instance="$instance"}[$interval])',
     legendFormat='create'
   )
 );
@@ -675,17 +675,17 @@ local configDBWriteTimes = graphPanel.new(
   format='s'
 ).addTarget(
   prometheus.target(
-    'rate(appsuite_mysql_connections_acquire_seconds_sum{class="ConfigDB",type="write",instance="$instance"}[5m])/rate(appsuite_mysql_connections_acquire_seconds_count{class="ConfigDB",type="write",instance="$instance"}[5m])',
+    'rate(appsuite_mysql_connections_acquire_seconds_sum{class="ConfigDB",type="write",instance="$instance"}[$interval])/rate(appsuite_mysql_connections_acquire_seconds_count{class="ConfigDB",type="write",instance="$instance"}[$interval])',
     legendFormat='acquire'
   )
 ).addTarget(
   prometheus.target(
-    'rate(appsuite_mysql_connections_usage_seconds_sum{class="ConfigDB",type="write",instance="$instance"}[5m])/rate(appsuite_mysql_connections_usage_seconds_count{class="ConfigDB",type="write",instance="$instance"}[5m])',
+    'rate(appsuite_mysql_connections_usage_seconds_sum{class="ConfigDB",type="write",instance="$instance"}[$interval])/rate(appsuite_mysql_connections_usage_seconds_count{class="ConfigDB",type="write",instance="$instance"}[$interval])',
     legendFormat='usage'
   )
 ).addTarget(
   prometheus.target(
-    'rate(appsuite_mysql_connections_create_seconds_sum{class="ConfigDB",type="write",instance="$instance"}[5m])/rate(appsuite_mysql_connections_create_seconds_count{class="ConfigDB",type="write",instance="$instance"}[5m])',
+    'rate(appsuite_mysql_connections_create_seconds_sum{class="ConfigDB",type="write",instance="$instance"}[$interval])/rate(appsuite_mysql_connections_create_seconds_count{class="ConfigDB",type="write",instance="$instance"}[$interval])',
     legendFormat='create'
   )
 );
@@ -700,17 +700,17 @@ local userDBReadTimes = graphPanel.new(
   format='s'
 ).addTarget(
   prometheus.target(
-    'rate(appsuite_mysql_connections_acquire_seconds_sum{class!="ConfigDB",type="read",instance="$instance"}[5m])/rate(appsuite_mysql_connections_acquire_seconds_count{class!="ConfigDB",type="read",instance="$instance"}[5m])',
+    'rate(appsuite_mysql_connections_acquire_seconds_sum{class!="ConfigDB",type="read",instance="$instance"}[$interval])/rate(appsuite_mysql_connections_acquire_seconds_count{class!="ConfigDB",type="read",instance="$instance"}[$interval])',
     legendFormat='acquire'
   )
 ).addTarget(
   prometheus.target(
-    'rate(appsuite_mysql_connections_usage_seconds_sum{class!="ConfigDB",type="read",instance="$instance"}[5m])/rate(appsuite_mysql_connections_usage_seconds_count{class!="ConfigDB",type="read",instance="$instance"}[5m])',
+    'rate(appsuite_mysql_connections_usage_seconds_sum{class!="ConfigDB",type="read",instance="$instance"}[$interval])/rate(appsuite_mysql_connections_usage_seconds_count{class!="ConfigDB",type="read",instance="$instance"}[$interval])',
     legendFormat='usage'
   )
 ).addTarget(
   prometheus.target(
-    'rate(appsuite_mysql_connections_create_seconds_sum{class!="ConfigDB",type="read",instance="$instance"}[5m])/rate(appsuite_mysql_connections_create_seconds_count{class!="ConfigDB",type="read",instance="$instance"}[5m])',
+    'rate(appsuite_mysql_connections_create_seconds_sum{class!="ConfigDB",type="read",instance="$instance"}[$interval])/rate(appsuite_mysql_connections_create_seconds_count{class!="ConfigDB",type="read",instance="$instance"}[$interval])',
     legendFormat='create'
   )
 );
@@ -725,56 +725,26 @@ local userDBWriteTimes = graphPanel.new(
   format='s'
 ).addTarget(
   prometheus.target(
-    'rate(appsuite_mysql_connections_acquire_seconds_sum{class!="ConfigDB",type="write",instance="$instance"}[5m])/rate(appsuite_mysql_connections_acquire_seconds_count{class!="ConfigDB",type="write",instance="$instance"}[5m])',
+    'rate(appsuite_mysql_connections_acquire_seconds_sum{class!="ConfigDB",type="write",instance="$instance"}[$interval])/rate(appsuite_mysql_connections_acquire_seconds_count{class!="ConfigDB",type="write",instance="$instance"}[$interval])',
     legendFormat='acquire'
   )
 ).addTarget(
   prometheus.target(
-    'rate(appsuite_mysql_connections_usage_seconds_sum{class!="ConfigDB",type="write",instance="$instance"}[5m])/rate(appsuite_mysql_connections_usage_seconds_count{class!="ConfigDB",type="write",instance="$instance"}[5m])',
+    'rate(appsuite_mysql_connections_usage_seconds_sum{class!="ConfigDB",type="write",instance="$instance"}[$interval])/rate(appsuite_mysql_connections_usage_seconds_count{class!="ConfigDB",type="write",instance="$instance"}[$interval])',
     legendFormat='usage'
   )
 ).addTarget(
   prometheus.target(
-    'rate(appsuite_mysql_connections_create_seconds_sum{class!="ConfigDB",type="write",instance="$instance"}[5m])/rate(appsuite_mysql_connections_create_seconds_count{class!="ConfigDB",type="write",instance="$instance"}[5m])',
+    'rate(appsuite_mysql_connections_create_seconds_sum{class!="ConfigDB",type="write",instance="$instance"}[$interval])/rate(appsuite_mysql_connections_create_seconds_count{class!="ConfigDB",type="write",instance="$instance"}[$interval])',
     legendFormat='create'
   )
 );
 
-
-dashboard.new(
-  'AppSuite',
+oxFunctions.newDashboard(
+  title='AppSuite',
   tags=['java', 'appsuite-mw'],
-  schemaVersion=22,
-  refresh='1m',
-  editable=true,
-  graphTooltip='shared_crosshair',
-).addTemplate(
-  template.new(
-    name='job',
-    label='Job',
-    hide='variable',
-    datasource='Prometheus',
-    query='label_values(jvm_info,job)',
-    refresh='load'
-  )
-).addTemplate(
-  template.new(
-    name='host',
-    label='Host',
-    datasource='Prometheus',
-    query='label_values(up{job=~"$job"}, job)',
-    refresh='time',
-  )
-).addTemplate(
-  template.new(
-    name='instance',
-    label='Instance',
-    datasource='Prometheus',
-    query='label_values(up{job=~"$host"}, instance)',
-    refresh='time',
-  )
-)
-.addPanels(
+  metric='jvm_info'
+).addPanels(
   [
     overviewRow { gridPos: { h: 1, w: 24, x: 0, y: 1 } },
     overviewTotalSessions { gridPos: { h: 6, w: 4, x: 0, y: 1 } },

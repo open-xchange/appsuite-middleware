@@ -1,10 +1,10 @@
 local grafana = import 'grafonnet/grafana.libsonnet';
-local dashboard = grafana.dashboard;
-local template = grafana.template;
 local singlestat = grafana.singlestat;
 local graphPanel = grafana.graphPanel;
 local row = grafana.row;
 local prometheus = grafana.prometheus;
+
+local oxFunctions = import './lib/ox_functions.libsonnet';
 
 local overviewRow = row.new(
   title='Overview'
@@ -143,7 +143,7 @@ local gcDuration = graphPanel.new(
   format='s'
 ).addTarget(
   prometheus.target(
-    'rate(jvm_gc_collection_seconds_sum{instance="$instance"}[5m])/rate(jvm_gc_collection_seconds_count{instance="$instance"}[5m])',
+    'rate(jvm_gc_collection_seconds_sum{instance="$instance"}[$interval])/rate(jvm_gc_collection_seconds_count{instance="$instance"}[$interval])',
     legendFormat='{{gc}}'
   )
 );
@@ -157,45 +157,16 @@ local gcDurationCount = graphPanel.new(
   format='ops'
 ).addTarget(
   prometheus.target(
-    'rate(jvm_gc_collection_seconds_count{instance="$instance"}[5m])',
+    'rate(jvm_gc_collection_seconds_count{instance="$instance"}[$interval])',
     legendFormat='{{gc}}'
   )
 );
 
-dashboard.new(
-  'JVM',
+oxFunctions.newDashboard(
+  title='JVM',
   tags=['java'],
-  schemaVersion=22,
-  refresh='1m',
-  editable=true,
-  graphTooltip='shared_crosshair',
-).addTemplate(
-  template.new(
-    name='job',
-    label='Job',
-    hide='variable',
-    datasource='Prometheus',
-    query='label_values(jvm_info,job)',
-    refresh='load'
-  )
-).addTemplate(
-  template.new(
-    name='host',
-    label='Host',
-    datasource='Prometheus',
-    query='label_values(up{job=~"$job"}, job)',
-    refresh='time',
-  )
-).addTemplate(
-  template.new(
-    name='instance',
-    label='Instance',
-    datasource='Prometheus',
-    query='label_values(up{job=~"$host"}, instance)',
-    refresh='time',
-  )
-)
-.addPanels(
+  metric='jvm_info'
+).addPanels(
   [
     overviewRow { gridPos: { h: 1, w: 24, x: 0, y: 0 } },
     overviewThreads { gridPos: { h: 6, w: 4, x: 0, y: 1 } },
