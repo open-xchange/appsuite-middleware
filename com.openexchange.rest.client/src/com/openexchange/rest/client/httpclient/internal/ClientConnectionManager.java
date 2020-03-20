@@ -107,6 +107,15 @@ public class ClientConnectionManager extends PoolingHttpClientConnectionManager 
     public void setIdleConnectionCloser(IdleConnectionCloser idleConnectionCloser) {
         this.idleConnectionCloser = idleConnectionCloser;
     }
+    
+    /**
+     * Gets a value whether this connection manager has been shut down or not.
+     *
+     * @return <code>true</code> if the manager is shutting down, <code>false</code> if not
+     */
+    public boolean isShutdown() {
+        return shuttingDown.get();
+    }
 
     @Override
     public ConnectionRequest requestConnection(HttpRoute route, Object state) {

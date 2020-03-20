@@ -49,11 +49,8 @@
 
 package com.openexchange.rest.client.httpclient.internal;
 
+import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.RemovalListener;
-import com.google.common.cache.RemovalNotification;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -95,6 +92,10 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.RemovalListener;
+import com.google.common.cache.RemovalNotification;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.DefaultInterests;
@@ -303,22 +304,6 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
      */
 
     /**
-     * Creates a HTTP client based on the given configuration.
-     *
-     * @param clientId The identifier of the client
-     * @param modifier The modifier to adjust the HTTP builder
-     * @param config The basic HTTP configuration
-     * @return A {@link CloseableHttpClient}
-     * @throws OXException
-     */
-    CloseableHttpClient createHttpClient(String clientId, HttpClientBuilderModifier modifier, HttpBasicConfig config) throws OXException {
-        SSLSocketFactoryProvider factoryProvider = serviceLookup.getServiceSafe(SSLSocketFactoryProvider.class);
-        SSLConfigurationService sslConfig = serviceLookup.getServiceSafe(SSLConfigurationService.class);
-
-        return initializeHttpClient(clientId, modifier, config, initializeClientConnectionManagerUsing(clientId, config, factoryProvider, sslConfig));
-    }
-
-    /**
      * Puts a HTTP client into the cache.
      *
      * @param httpClientId The HTTP client identifier. Will be used as cache key.
@@ -343,6 +328,18 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
             }
             throw OXException.general("Failed to initialize managed HTTP client.", cause == null ? e : cause);
         }
+    }
+
+    /**
+     * Initializes a new {@link ClientConnectionManager} managing monitoring for the HTTP client
+     *
+     * @param clientId The client identifier of the HTTP client. Will be used as dimension within the monitoring, too.
+     * @param config The HTTP configuration
+     */
+    ClientConnectionManager initializeClientConnectionManager(String clientId, HttpBasicConfig config) throws OXException {
+        SSLSocketFactoryProvider factoryProvider = serviceLookup.getServiceSafe(SSLSocketFactoryProvider.class);
+        SSLConfigurationService sslConfig = serviceLookup.getServiceSafe(SSLConfigurationService.class);
+        return initializeClientConnectionManagerUsing(clientId, config, factoryProvider, sslConfig);
     }
 
     /**
@@ -602,7 +599,7 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
 
             @Override
             public void reloadConfiguration(ConfigurationService configService) {
-                reloadClient(httpClientId, adjustConfig(httpClientId, provider.configureHttpBasicConfig(createNewDefaultConfig())), provider);
+                reloadClient(httpClientId, adjustConfig(httpClientId, provider.configureHttpBasicConfig(createNewDefaultConfig())), provider, true);
             }
 
             @Override
@@ -624,7 +621,7 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
 
             @Override
             public void reloadConfiguration(ConfigurationService configService) {
-                reloadClient(httpClientId, adjustConfig(httpClientId, provider.configureHttpBasicConfig(httpClientId, createNewDefaultConfig())), provider);
+                reloadClient(httpClientId, adjustConfig(httpClientId, provider.configureHttpBasicConfig(httpClientId, createNewDefaultConfig())), provider, true);
             }
 
             @Override
@@ -650,36 +647,44 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
      *
      * @param clientId The identifier
      * @param config The configuration to check. Can be <code>null</code>
+     * @param modifier The modifer to use
+     * @param checkHash <code>true</code> to check if and stop processing on equal hash codes of the configuration, <code>false</code> to avoid the check
+     * @return <code>true</code> if the client has been reloaded, <code>false</code> otherwise
      */
-    synchronized void reloadClient(String clientId, HttpBasicConfig config, HttpClientBuilderModifier modifier) {
+    synchronized boolean reloadClient(String clientId, HttpBasicConfig config, HttpClientBuilderModifier modifier, boolean checkHash) {
         checkShutdownStatus();
         if (null == config) {
-            return;
+            return false;
         }
 
         ManagedHttpClientImpl managedHttpClient = httpClients.getIfPresent(clientId);
         if (managedHttpClient == null) {
             LOGGER.error("No HTTP client to reload found", HttpClientExceptionCodes.MISSING_HTTP_CLIENT.create(clientId));
-            return;
+            return false;
         }
-        if (config.hashCode() == managedHttpClient.getConfigHash()) {
-            return;
+        if (checkHash) {
+            if (config.hashCode() == managedHttpClient.getConfigHash()) {
+                return false;
+            }
+            LOGGER.trace("Configuration for client {} has changed.", clientId);
         }
 
-        LOGGER.trace("Configuration for client {} has changed.", clientId);
         /*
          * Create new client and replace it in managed object
          */
         boolean close = true;
         CloseableHttpClient newHttpClient = null;
         try {
-            newHttpClient = createHttpClient(clientId, modifier, config);
+            ClientConnectionManager ccm = initializeClientConnectionManager(clientId, config);
+            newHttpClient = initializeHttpClient(clientId, modifier, config, ccm);
             int configHash = managedHttpClient.getConfigHash();
-            closeWithDelay(clientId, configHash, managedHttpClient.reload(newHttpClient, config.hashCode()));
+            closeWithDelay(clientId, configHash, managedHttpClient.reload(newHttpClient, ccm, config.hashCode()));
             LOGGER.trace("Replaced HTTP client for ID {}. Original configuration had the hashCode {}. New configuration has the hash code {}", I(configHash), I(config.hashCode()));
             close = false;
+            return true;
         } catch (OXException e) {
             LOGGER.error("Unable to reload HTTP client for {}", clientId, e);
+            return false;
         } finally {
             if (close) {
                 Streams.close(newHttpClient);
@@ -746,8 +751,11 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
         @Override
         public ManagedHttpClientImpl call() throws OXException {
             HttpBasicConfig config = getHttpBasicConfig();
-            CloseableHttpClient httpClient = service.createHttpClient(httpClientId, provider, config);
-            ManagedHttpClientImpl managedHttpClient = new ManagedHttpClientImpl(httpClientId, config.hashCode(), httpClient);
+            ClientConnectionManager ccm = service.initializeClientConnectionManager(httpClientId, config);
+            CloseableHttpClient httpClient = service.initializeHttpClient(httpClientId, provider, config, ccm);
+            ManagedHttpClientImpl managedHttpClient = new ManagedHttpClientImpl(
+                httpClientId, config.hashCode(), httpClient, ccm,
+                () -> B(service.reloadClient(httpClientId, getHttpBasicConfig(), provider, false)));
             managedHttpClientReference.set(managedHttpClient);
             return managedHttpClient;
         }
