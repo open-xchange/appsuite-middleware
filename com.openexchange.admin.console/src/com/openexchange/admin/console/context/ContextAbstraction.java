@@ -118,11 +118,6 @@ public abstract class ContextAbstraction extends UserAbstraction {
             return required;
         }
 
-        @Override
-        public void setRequired(final boolean required) {
-            throw new UnsupportedOperationException("setRequired() is not supported for ContextConstants." + this.name() + " enum constant");
-        }
-
     }
 
     private final static char OPT_NAME_DATABASE_ID_SHORT = 'd';

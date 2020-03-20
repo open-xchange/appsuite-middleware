@@ -102,11 +102,6 @@ public class ContextConsoleCreateImpl implements ContextConsoleCreateInterface {
             return required;
         }
 
-        @Override
-        public void setRequired(boolean required) {
-            throw new UnsupportedOperationException("setRequired() is not supported for ResellerConstants." + this.name() + " enum constant");
-        }
-
     }
 
     protected CLIOption addRestrictionsOption = null;
