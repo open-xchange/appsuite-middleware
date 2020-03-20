@@ -169,12 +169,10 @@
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/commons-validator-1.6.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.chronos.ical"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.chronos.ical.ical4j"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/commons-codec-1.12.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/joda-time-2.10.5.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.http.client"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.sms.tools"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/httpcore-osgi-4.4.13.jar"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/httpclient-osgi-4.5.11.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/commons-collections-3.2.2.jar"/>
 	<classpathentry kind="lib" path="/org.apache.tika/lib/tika-core-1.20.jar" sourcepath="/org.apache.tika/lib/source/tika-core-1.20-sources.jar"/>
 	<classpathentry kind="lib" path="/org.apache.tika/lib/tika-parsers-1.20.jar" sourcepath="/org.apache.tika/lib/source/tika-parsers-1.20-sources.jar"/>
@@ -211,5 +209,7 @@
 	<classpathentry kind="lib" path="lib/jersey-test-framework-provider-grizzly2-2.26.jar" sourcepath="lib/source/jersey-test-framework-provider-grizzly2-2.26-sources.jar"/>
 	<classpathentry kind="lib" path="lib/jersey-test-framework-core-2.26.jar" sourcepath="lib/source/jersey-test-framework-core-2.26-sources.jar"/>
 	<classpathentry kind="lib" path="lib/commons-httpclient-3.1.jar" sourcepath="lib/source/commons-httpclient-3.1-sources.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/commons-codec-1.14.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/httpclient-osgi-4.5.12.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

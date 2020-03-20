@@ -8,9 +8,9 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.management.impl"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.common"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/commons-cli-1.4.jar" sourcepath="/com.openexchange.bundles/source/commons-cli-1.4-sources.jar"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/httpclient-osgi-4.5.11.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/httpcore-osgi-4.4.13.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.gdpr.dataexport"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.gdpr.dataexport.impl"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/httpclient-osgi-4.5.12.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
