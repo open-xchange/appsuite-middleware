@@ -50,7 +50,7 @@
 package com.openexchange.saml.spi;
 
 import java.util.List;
-import org.opensaml.xml.security.credential.Credential;
+import org.opensaml.security.credential.Credential;
 
 
 /**

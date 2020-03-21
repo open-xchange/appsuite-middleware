@@ -52,13 +52,14 @@ package com.openexchange.saml.ucs.impl;
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.opensaml.saml2.core.Assertion;
-import org.opensaml.saml2.core.AttributeStatement;
-import org.opensaml.saml2.core.LogoutRequest;
-import org.opensaml.saml2.core.Response;
-import org.opensaml.xml.XMLObject;
-import org.opensaml.xml.schema.XSString;
-import org.opensaml.xml.schema.impl.XSAnyImpl;
+import org.opensaml.saml.saml2.core.Assertion;
+import org.opensaml.saml.saml2.core.Attribute;
+import org.opensaml.saml.saml2.core.AttributeStatement;
+import org.opensaml.saml.saml2.core.LogoutRequest;
+import org.opensaml.saml.saml2.core.Response;
+import org.opensaml.core.xml.XMLObject;
+import org.opensaml.core.xml.schema.XSString;
+import org.opensaml.core.xml.schema.impl.XSAnyImpl;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.authentication.ucs.common.UCSLookup;
@@ -149,7 +150,7 @@ public class UCSSamlBackend extends AbstractSAMLBackend {
         String samlId = leanConfig.getProperty(UCSSamlProperty.id);
         String identifier = null;
         outer: for (AttributeStatement statement : assertion.getAttributeStatements()) {
-            for (org.opensaml.saml2.core.Attribute attribute : statement.getAttributes()) {
+            for (Attribute attribute : statement.getAttributes()) {
                 if (samlId.equals(attribute.getName())) {
                     identifier = getAttributeValue(attribute.getAttributeValues().get(0));
                     break outer;

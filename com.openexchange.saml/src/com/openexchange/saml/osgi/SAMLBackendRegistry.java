@@ -61,9 +61,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.xml.parsers.DocumentBuilderFactory;
-import org.opensaml.Configuration;
-import org.opensaml.DefaultBootstrap;
-import org.opensaml.xml.ConfigurationException;
+import org.opensaml.core.config.InitializationException;
+import org.opensaml.core.config.InitializationService;
+import org.opensaml.xmlsec.config.impl.JavaCryptoValidationInitializer;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
@@ -397,7 +397,9 @@ public final class SAMLBackendRegistry extends ServiceTracker<SAMLBackend, SAMLB
     }
 
     private OpenSAML initOpenSAML() throws BundleException {
-        if (!Configuration.validateJCEProviders()) {
+        try {
+            new JavaCryptoValidationInitializer().init();
+        } catch (InitializationException e1) {
             LOG.error("The necessary JCE providers for OpenSAML could not be found. SAML 2.0 integration will be disabled!");
             throw new BundleException("The necessary JCE providers for OpenSAML could not be found.", BundleException.ACTIVATOR_ERROR);
         }
@@ -408,8 +410,8 @@ public final class SAMLBackendRegistry extends ServiceTracker<SAMLBackend, SAMLB
         }
 
         try {
-            DefaultBootstrap.bootstrap();
-        } catch (ConfigurationException e) {
+            InitializationService.initialize();
+        } catch (InitializationException e) {
             LOG.error("Error while bootstrapping OpenSAML library", e);
             throw new BundleException("Error while bootstrapping OpenSAML library", BundleException.ACTIVATOR_ERROR, e);
         }

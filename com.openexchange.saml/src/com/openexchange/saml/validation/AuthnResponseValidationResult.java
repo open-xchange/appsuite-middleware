@@ -49,7 +49,7 @@
 
 package com.openexchange.saml.validation;
 
-import org.opensaml.saml2.core.Assertion;
+import org.opensaml.saml.saml2.core.Assertion;
 
 
 /**

@@ -52,22 +52,23 @@ package com.openexchange.saml;
 import java.io.StringReader;
 import javax.xml.namespace.QName;
 import org.joda.time.format.DateTimeFormatter;
-import org.opensaml.Configuration;
-import org.opensaml.saml1.binding.artifact.SAML1ArtifactBuilderFactory;
-import org.opensaml.saml2.binding.artifact.SAML2ArtifactBuilderFactory;
-import org.opensaml.xml.XMLObject;
-import org.opensaml.xml.XMLObjectBuilderFactory;
-import org.opensaml.xml.io.MarshallerFactory;
-import org.opensaml.xml.io.MarshallingException;
-import org.opensaml.xml.io.UnmarshallerFactory;
-import org.opensaml.xml.io.UnmarshallingException;
-import org.opensaml.xml.parse.ParserPool;
-import org.opensaml.xml.parse.XMLParserException;
-import org.opensaml.xml.security.SecurityConfiguration;
-import org.opensaml.xml.util.XMLHelper;
-import org.opensaml.xml.validation.ValidatorSuite;
+import org.opensaml.core.config.Configuration;
+import org.opensaml.core.xml.XMLObject;
+import org.opensaml.core.xml.XMLObjectBuilderFactory;
+import org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport;
+import org.opensaml.core.xml.io.MarshallerFactory;
+import org.opensaml.core.xml.io.MarshallingException;
+import org.opensaml.core.xml.io.UnmarshallerFactory;
+import org.opensaml.core.xml.io.UnmarshallingException;
+import org.opensaml.saml.config.SAMLConfigurationSupport;
+import org.opensaml.saml.saml1.binding.artifact.SAML1ArtifactBuilderFactory;
+import org.opensaml.saml.saml2.binding.artifact.SAML2ArtifactBuilderFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import com.openexchange.exception.OXException;
+import net.shibboleth.utilities.java.support.xml.ParserPool;
+import net.shibboleth.utilities.java.support.xml.SerializeSupport;
+import net.shibboleth.utilities.java.support.xml.XMLParserException;
 
 /**
  * A wrapper class around {@link Configuration} combined with some utility methods.
@@ -78,21 +79,12 @@ import org.w3c.dom.Element;
 public final class OpenSAML {
 
     /**
-     * Gets the date format used to string'ify SAML's {@link org.joda.time.DateTime} objects.
-     *
-     * @return date format used to string'ify date objects
-     */
-    public DateTimeFormatter getSAMLDateFormatter() {
-        return Configuration.getSAMLDateFormatter();
-    }
-
-    /**
      * Gets the artifact factory for the library.
      *
      * @return artifact factory for the library
      */
     public SAML1ArtifactBuilderFactory getSAML1ArtifactBuilderFactory() {
-        return Configuration.getSAML1ArtifactBuilderFactory();
+        return SAMLConfigurationSupport.getSAML1ArtifactBuilderFactory();
     }
 
     /**
@@ -101,7 +93,7 @@ public final class OpenSAML {
      * @return artifact factory for the library
      */
     public SAML2ArtifactBuilderFactory getSAML2ArtifactBuilderFactory() {
-        return Configuration.getSAML2ArtifactBuilderFactory();
+        return SAMLConfigurationSupport.getSAML2ArtifactBuilderFactory();
     }
 
     /**
@@ -110,7 +102,7 @@ public final class OpenSAML {
      * @return the currently ParserPool
      */
     public ParserPool getParserPool() {
-        return Configuration.getParserPool();
+        return XMLObjectProviderRegistrySupport.getParserPool();
     }
 
     /**
@@ -119,7 +111,7 @@ public final class OpenSAML {
      * @return the QName for the default object provider
      */
     public QName getDefaultProviderQName() {
-        return Configuration.getDefaultProviderQName();
+        return XMLObjectProviderRegistrySupport.getDefaultProviderQName();
     }
 
     /**
@@ -128,7 +120,7 @@ public final class OpenSAML {
      * @return the XMLObject builder factory
      */
     public XMLObjectBuilderFactory getBuilderFactory() {
-        return Configuration.getBuilderFactory();
+        return XMLObjectProviderRegistrySupport.getBuilderFactory();
     }
 
     /**
@@ -137,7 +129,7 @@ public final class OpenSAML {
      * @return the XMLObject marshaller factory
      */
     public MarshallerFactory getMarshallerFactory() {
-        return Configuration.getMarshallerFactory();
+        return XMLObjectProviderRegistrySupport.getMarshallerFactory();
     }
 
     /**
@@ -146,26 +138,7 @@ public final class OpenSAML {
      * @return the XMLObject unmarshaller factory
      */
     public UnmarshallerFactory getUnmarshallerFactory() {
-        return Configuration.getUnmarshallerFactory();
-    }
-
-    /**
-     * Gets a configured ValidatorSuite by its ID.
-     *
-     * @param suiteId the suite's ID
-     * @return the ValidatorSuite or null if no suite was registered under that ID
-     */
-    public ValidatorSuite getValidatorSuite(String suiteId) {
-        return Configuration.getValidatorSuite(suiteId);
-    }
-
-    /**
-     * Get the global security configuration.
-     *
-     * @return the global security configuration instance
-     */
-    public SecurityConfiguration getGlobalSecurityConfiguration() {
-        return Configuration.getGlobalSecurityConfiguration();
+        return XMLObjectProviderRegistrySupport.getUnmarshallerFactory();
     }
 
     /**
@@ -197,14 +170,15 @@ public final class OpenSAML {
      *
      * @param object The XML object
      * @return The XML string
+     * @throws OXException
      */
     public String marshall(XMLObject object) throws MarshallingException {
         Element authRequestElement = getMarshallerFactory().getMarshaller(object).marshall(object);
-        return XMLHelper.nodeToString(authRequestElement);
+        return SerializeSupport.prettyPrintXML(authRequestElement);
     }
 
     @SuppressWarnings("unchecked")
-    public <T> T unmarshall(@SuppressWarnings("unused") Class<T> clazz, String xml) throws XMLParserException, UnmarshallingException, ClassCastException {
+    public <T> T unmarshall(@SuppressWarnings("unused") Class<T> clazz, String xml) throws UnmarshallingException, ClassCastException, XMLParserException {
         Document doc = getParserPool().parse(new StringReader(xml));
         Element element = doc.getDocumentElement();
         return (T) getUnmarshallerFactory().getUnmarshaller(element).unmarshall(element);
