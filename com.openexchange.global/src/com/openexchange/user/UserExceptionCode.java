@@ -225,7 +225,7 @@ public enum UserExceptionCode implements DisplayableOXExceptionCode {
         UserExceptionMessage.MISSING_CURRENT_PASSWORD_DISPLAY, Category.CATEGORY_USER_INPUT, 28),
 
     /**
-     * The current password is incorrect. Please enter your correct current password and try again.
+     * The new password is missing. Please enter your new password and try again.
      */
     MISSING_NEW_PASSWORD("The new password is incorrect.",
     UserExceptionMessage.MISSING_NEW_PASSWORD_DISPLAY, Category.CATEGORY_USER_INPUT, 29),
