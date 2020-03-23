@@ -117,6 +117,7 @@ import com.openexchange.mail.compose.security.CompositionSpaceKeyStorage;
 import com.openexchange.mail.compose.security.CompositionSpaceKeyStorageService;
 import com.openexchange.mail.json.compose.ComposeHandlerRegistry;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.session.ObfuscatorService;
 import com.openexchange.session.Session;
@@ -213,6 +214,8 @@ public class CompositionSpaceActivator extends HousekeepingActivator {
 
         AttachmentStorageServiceImpl attachmentStorageService = new AttachmentStorageServiceImpl(keyStorageService, this, context);
         rememberTracker(attachmentStorageService);
+
+        trackService(UnifiedInboxManagement.class);
 
         openTrackers();
 
