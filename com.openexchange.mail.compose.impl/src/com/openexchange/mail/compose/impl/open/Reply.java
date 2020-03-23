@@ -257,34 +257,63 @@ public class Reply extends AbstractOpener {
             } else {
                 // Check for Unified Mail account
                 UnifiedInboxManagement management = services.getService(UnifiedInboxManagement.class);
-                if ((null != management) && (accountId == management.getUnifiedINBOXAccountID(session))) {
-                    int realAccountId;
-                    try {
-                        UnifiedInboxUID uid = new UnifiedInboxUID(originalMail.getMailId());
-                        realAccountId = uid.getAccountId();
-                    } catch (OXException e) {
-                        // No Unified Mail identifier
-                        LoggerHolder.LOG.trace("", e);
-                        FullnameArgument fa = UnifiedInboxUID.parsePossibleNestedFullName(originalMail.getFolder());
-                        realAccountId = null == fa ? MailAccount.DEFAULT_ID : fa.getAccountId();
-                    }
-
-                    if (realAccountId == MailAccount.DEFAULT_ID) {
+                if (null == management) {
+                    MailAccountStorageService mass = services.getService(MailAccountStorageService.class);
+                    if (null == mass) {
                         MimeProcessingUtility.addUserAliases(filter, session, context);
+                    } else {
+                        String primaryAddress = mass.getMailAccount(accountId, session.getUserId(), session.getContextId()).getPrimaryAddress();
+                        if (primaryAddress.indexOf(UnifiedInboxManagement.MAIL_ADDRESS_DOMAIN_PART) > 0) {
+                            int realAccountId;
+                            try {
+                                UnifiedInboxUID uid = new UnifiedInboxUID(originalMail.getMailId());
+                                realAccountId = uid.getAccountId();
+                            } catch (OXException e) {
+                                // No Unified Mail identifier
+                                LoggerHolder.LOG.trace("", e);
+                                FullnameArgument fa = UnifiedInboxUID.parsePossibleNestedFullName(originalMail.getFolder());
+                                realAccountId = null == fa ? MailAccount.DEFAULT_ID : fa.getAccountId();
+                            }
+
+                            if (realAccountId == MailAccount.DEFAULT_ID) {
+                                MimeProcessingUtility.addUserAliases(filter, session, context);
+                            } else {
+                                filter.add(new QuotedInternetAddress(mass.getMailAccount(realAccountId, session.getUserId(), session.getContextId()).getPrimaryAddress(), false));
+                            }
+                        } else {
+                            filter.add(new QuotedInternetAddress(primaryAddress, false));
+                        }
+                    }
+                } else {
+                    if (accountId == management.getUnifiedINBOXAccountID(session)) {
+                        int realAccountId;
+                        try {
+                            UnifiedInboxUID uid = new UnifiedInboxUID(originalMail.getMailId());
+                            realAccountId = uid.getAccountId();
+                        } catch (OXException e) {
+                            // No Unified Mail identifier
+                            LoggerHolder.LOG.trace("", e);
+                            FullnameArgument fa = UnifiedInboxUID.parsePossibleNestedFullName(originalMail.getFolder());
+                            realAccountId = null == fa ? MailAccount.DEFAULT_ID : fa.getAccountId();
+                        }
+
+                        if (realAccountId == MailAccount.DEFAULT_ID) {
+                            MimeProcessingUtility.addUserAliases(filter, session, context);
+                        } else {
+                            MailAccountStorageService mass = services.getService(MailAccountStorageService.class);
+                            if (null == mass) {
+                                MimeProcessingUtility.addUserAliases(filter, session, context);
+                            } else {
+                                filter.add(new QuotedInternetAddress(mass.getMailAccount(realAccountId, session.getUserId(), session.getContextId()).getPrimaryAddress(), false));
+                            }
+                        }
                     } else {
                         MailAccountStorageService mass = services.getService(MailAccountStorageService.class);
                         if (null == mass) {
                             MimeProcessingUtility.addUserAliases(filter, session, context);
                         } else {
-                            filter.add(new QuotedInternetAddress(mass.getMailAccount(realAccountId, session.getUserId(), session.getContextId()).getPrimaryAddress(), false));
+                            filter.add(new QuotedInternetAddress(mass.getMailAccount(accountId, session.getUserId(), session.getContextId()).getPrimaryAddress(), false));
                         }
-                    }
-                } else {
-                    MailAccountStorageService mass = services.getService(MailAccountStorageService.class);
-                    if (null == mass) {
-                        MimeProcessingUtility.addUserAliases(filter, session, context);
-                    } else {
-                        filter.add(new QuotedInternetAddress(mass.getMailAccount(accountId, session.getUserId(), session.getContextId()).getPrimaryAddress(), false));
                     }
                 }
             }
