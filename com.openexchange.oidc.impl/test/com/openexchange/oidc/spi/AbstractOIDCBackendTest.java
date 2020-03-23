@@ -161,6 +161,21 @@ public class AbstractOIDCBackendTest {
 
     @Test
     public void getScope_MultipleTest() {
+        Mockito.when(mockedBackendConfig.getScope()).thenReturn(SCOPE_ONE + ' ' + SCOPE_TWO);
+        List<String> scopeList = this.testBackend.getScope().toStringList();
+        assertTrue("Not the number of scopes that were expected, should be two", scopeList.size() == 2);
+        assertTrue("Scope is not what expected", scopeList.get(0).equals(SCOPE_ONE));
+        assertTrue("Scope is not what expected", scopeList.get(1).equals(SCOPE_TWO));
+    }
+
+    @Test
+    public void getScope_MultipleTest_Semicolon() {
+        /*
+         * Initially the config value was expected to have a semi-colon separated list
+         * of scope values. As this is a very unusual separator, it has been replaced by a space (' ')
+         * in newer releases, which matches the OAuth standard. Still we need to cope with semi-colons
+         * for compatibility...
+         */
         Mockito.when(mockedBackendConfig.getScope()).thenReturn(SCOPE_ONE + ";" + SCOPE_TWO);
         List<String> scopeList = this.testBackend.getScope().toStringList();
         assertTrue("Not the number of scopes that were expected, should be two", scopeList.size() == 2);

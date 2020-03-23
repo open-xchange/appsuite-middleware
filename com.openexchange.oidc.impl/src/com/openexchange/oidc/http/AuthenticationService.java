@@ -89,8 +89,8 @@ public class AuthenticationService extends OIDCServlet {
         try {
             this.provider.authenticateUser(request, response);
         } catch (OXException e) {
+            LOG.error("", e);
             exceptionHandler.handleAuthenticationFailed(request, response, e);
-            LOG.error(e.getLocalizedMessage(), e);
         }
     }
 

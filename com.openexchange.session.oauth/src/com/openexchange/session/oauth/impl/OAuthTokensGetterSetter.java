@@ -110,25 +110,28 @@ public class OAuthTokensGetterSetter {
         String expiryString = (String) session.getParameter(Session.PARAM_OAUTH_ACCESS_TOKEN_EXPIRY_DATE);
         String refreshToken = (String) session.getParameter(Session.PARAM_OAUTH_REFRESH_TOKEN);
 
+        if (accessToken == null) {
+            LOG.info("Missing OAuth access token in session");
+            return Optional.empty();
+        }
+
         Date expiryDate = null;
         if (expiryString != null) {
             try {
                 long expiryMillis = Long.parseLong(expiryString);
                 expiryDate = new Date(expiryMillis);
             } catch (NumberFormatException e) {
-                LOG.warn("Illegal format of session parameter '{}': {}", Session.PARAM_OAUTH_ACCESS_TOKEN_EXPIRY_DATE, expiryString , e);
+                LOG.warn("Invalid expiry date string for OAuth access token in session: {}", expiryString);
             }
         }
 
-        if (accessToken == null) {
-            LOG.warn("Stored session doesn't contain valid oauth parameters: {}", session.getSessionID());
-            return Optional.empty();
-        }
-
-        return Optional.of(new OAuthTokens(accessToken, expiryDate, refreshToken));
+        OAuthTokens tokens = new OAuthTokens(accessToken, expiryDate, refreshToken);
+        LOG.debug("Getting OAuth tokens from session: {}", tokens);
+        return Optional.of(tokens);
     }
 
     public void setInSession(Session session, OAuthTokens tokens) {
+        LOG.debug("Setting OAuth tokens in session: {}", tokens);
         session.setParameter(Session.PARAM_OAUTH_ACCESS_TOKEN, tokens.getAccessToken());
         if (tokens.hasExpiryDate()) {
             session.setParameter(Session.PARAM_OAUTH_ACCESS_TOKEN_EXPIRY_DATE, Long.toString(tokens.getExpiryDate().getTime()));
@@ -139,6 +142,7 @@ public class OAuthTokensGetterSetter {
     }
 
     public void removeFromSession(Session session) {
+        LOG.debug("Removing OAuth tokens from session");
         session.setParameter(Session.PARAM_OAUTH_ACCESS_TOKEN, null);
         session.setParameter(Session.PARAM_OAUTH_ACCESS_TOKEN_EXPIRY_DATE, null);
         session.setParameter(Session.PARAM_OAUTH_REFRESH_TOKEN, null);
@@ -268,7 +272,6 @@ public class OAuthTokensGetterSetter {
         if (null != accessControl) {
             try {
                 accessControl.release();
-                accessControl.close();
             } catch (Exception e) {
                 // Ignore
             }
@@ -279,7 +282,6 @@ public class OAuthTokensGetterSetter {
         if (null != accessControl) {
             try {
                 accessControl.release(aquired);
-                accessControl.close();
             } catch (Exception e) {
                 // Ignore
             }

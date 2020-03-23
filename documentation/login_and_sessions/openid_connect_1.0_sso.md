@@ -42,6 +42,15 @@ part of the OAuth 2.0 Core Framework. This is an optional feature that needs to 
 
 **Important:** Internally, this feature registers an according `AuthenticationService`. It is therefore required that no other package providing `open-xchange-authentication` is installed. For compatibility reasons `open-xchange-oidc` will not conflict with according packages like `open-xchange-authentication-database`!
 
+## OAuth Tokens
+
+**An OAuth bearer access token is always required to be issued along with the ID token!**
+
+Note that OAuth tokens contained in token responses are always set as session parameters and internally validated on each request. If the Authorization Server issues an access token with expiry date, this date will determine how long the App Suite session can be used. OIDC sessions will be terminated on the first request that happens after `expires_in - (com.openexchange.oidc.oauthRefreshTime / 1000)` seconds.
+
+If a refresh token is contained in the token response, access tokens will be refreshed during the first request that happens after `expires_in - (com.openexchange.oidc.oauthRefreshTime / 1000)` seconds. A failed refreshed due an invalid/revoked refresh token or an `invalid_grant` response will lead to the session being terminated.
+
+If `expires_in` is not contained in the token response, the session will live as long as the configured short-term session lifetime, no matter if a refresh token is contained or not. The access token will never be refreshed in that case.
 
 ## Autologin with check for a valid OP session
 ![Autologin via OP](openid_connect_1.0_sso/Autologin via OP.png "Autologin via OP")
