@@ -105,7 +105,7 @@ public class MWB161Test extends ManagedAppointmentTest {
             " chieben\\, klicken Sie auf den folgenden Link :\\nhttp://www.doctolib.de/app\r\n" +
             " ointments/anonymous/...\\n\r\n" +
             "GEO:52.4880182;13.3405172\r\n" +
-            "LOCATION:Innsbrucker Straße 58\\, 10825 Berlin\r\n" +
+            "LOCATION:Innsbrucker Strasse 58\\, 10825 Berlin\r\n" +
             "PRIORITY:2\r\n" +
             "SUMMARY:Termin bei Gastroenterologie am Bayerischen Platz\r\n" +
             "BEGIN:VALARM\r\n" +
