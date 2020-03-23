@@ -49,7 +49,6 @@
 
 package com.openexchange.oidc.impl.tests;
 
-import static com.openexchange.java.Autoboxing.B;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -71,6 +70,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.oauth2.sdk.ErrorObject;
+import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.oauth2.sdk.TokenErrorResponse;
 import com.nimbusds.oauth2.sdk.TokenRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
@@ -78,6 +78,7 @@ import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.oauth2.sdk.token.AccessToken;
 import com.nimbusds.oauth2.sdk.token.AccessTokenType;
+import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import com.nimbusds.oauth2.sdk.token.RefreshToken;
 import com.nimbusds.openid.connect.sdk.LogoutRequest;
 import com.nimbusds.openid.connect.sdk.Nonce;
@@ -88,10 +89,12 @@ import com.nimbusds.openid.connect.sdk.token.OIDCTokens;
 import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.SimConfigurationService;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.oidc.AuthenticationInfo;
 import com.openexchange.oidc.OIDCBackend;
 import com.openexchange.oidc.OIDCBackendConfig;
+import com.openexchange.oidc.OIDCBackendProperty;
 import com.openexchange.oidc.OIDCExceptionCode;
 import com.openexchange.oidc.impl.OIDCWebSSOProviderImpl;
 import com.openexchange.oidc.osgi.Services;
@@ -100,6 +103,7 @@ import com.openexchange.oidc.state.LogoutRequestInfo;
 import com.openexchange.oidc.state.StateManagement;
 import com.openexchange.oidc.state.impl.DefaultLogoutRequestInfo;
 import com.openexchange.oidc.tools.OIDCTools;
+import com.openexchange.oidc.tools.TestBackendConfig;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -113,14 +117,11 @@ import com.openexchange.session.reservation.SimSessionReservationService;
  * @since v7.10.0
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ LoginConfiguration.class, Services.class, OIDCWebSSOProviderImpl.class, OIDCTokenResponseParser.class, OIDCTools.class,
+@PrepareForTest({ LoginConfiguration.class, Services.class, OIDCWebSSOProviderImpl.class, OIDCTokenResponseParser.class,
     ServerServiceRegistry.class, ConfigurationService.class, SimHttpServletResponse.class })
 public class OIDCWebSSoProviderImplTest {
 
     private static final String STATE_VALUE = "stateValue";
-
-    @Mock
-    private OIDCBackendConfig mockedBackendConfig;
 
     @Mock
     private StateManagement mockedStateManagement;
@@ -147,6 +148,9 @@ public class OIDCWebSSoProviderImplTest {
     private SimSessionReservationService mockedSimSessionReservation;
 
     @Mock
+    private DispatcherPrefixService mockedDispatcherPrefixService;
+
+    @Mock
     private AuthenticationRequestInfo mockedAuthRequestInfo;
 
     @Mock
@@ -160,15 +164,19 @@ public class OIDCWebSSoProviderImplTest {
     @Mock
     private ServerServiceRegistry serverServiceRegistry;
 
+    private TestBackendConfig testBackendConfig;
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         PowerMockito.mockStatic(Services.class);
-        PowerMockito.mockStatic(OIDCTools.class);
         PowerMockito.when(Services.getService(SessionReservationService.class)).thenReturn(mockedSimSessionReservation);
+        PowerMockito.when(Services.getService(DispatcherPrefixService.class)).thenReturn(mockedDispatcherPrefixService);
+
+        testBackendConfig = new TestBackendConfig();
 
         PowerMockito.mockStatic(OIDCTokenResponseParser.class);
-        Mockito.when(mockedBackend.getBackendConfig()).thenReturn(mockedBackendConfig);
+        Mockito.when(mockedBackend.getBackendConfig()).thenReturn(testBackendConfig);
 
         this.provider = PowerMockito.spy(new OIDCWebSSOProviderImpl(mockedBackend, mockedStateManagement, mockedServices, mockedLoginConfiguration));
         PowerMockito.mockStatic(ServerServiceRegistry.class);
@@ -185,15 +193,7 @@ public class OIDCWebSSoProviderImplTest {
         PowerMockito.doReturn(mockedTokenRequest).when(this.provider, PowerMockito.method(OIDCWebSSOProviderImpl.class, "createTokenRequest", HttpServletRequest.class)).withArguments(mockedRequest);
 
         JWT mockedIdToken = Mockito.mock(JWT.class);
-        OIDCTokenResponse mockedTokenResponse = new OIDCTokenResponse(new OIDCTokens(mockedIdToken, new AccessToken(AccessTokenType.BEARER) {
-
-            private static final long serialVersionUID = 8087263960430794478L;
-
-            @Override
-            public String toAuthorizationHeader() {
-                return null;
-            }
-        }, new RefreshToken()));
+        OIDCTokenResponse mockedTokenResponse = new OIDCTokenResponse(new OIDCTokens(mockedIdToken, new BearerAccessToken("12345", 3600, new Scope()), new RefreshToken("2345")));
 
         PowerMockito.doReturn(mockedTokenResponse).when(this.provider, PowerMockito.method(OIDCWebSSOProviderImpl.class, "getTokenResponse", TokenRequest.class)).withArguments(mockedTokenRequest);
 
@@ -221,7 +221,8 @@ public class OIDCWebSSoProviderImplTest {
     @Test
     public void getLoginRedirectRequest_LoginRedirectSuccessTest() throws Exception {
         String loginRequest = "loginRequest";
-        Mockito.when(mockedBackendConfig.autologinCookieMode()).thenReturn(null);
+
+        testBackendConfig.setProperty(OIDCBackendProperty.autologinCookieMode, null);
 
         PowerMockito.doReturn(loginRequest).when(this.provider, PowerMockito.method(OIDCWebSSOProviderImpl.class, "buildLoginRequest", State.class, Nonce.class, HttpServletRequest.class)).withArguments(ArgumentMatchers.any(State.class), ArgumentMatchers.any(Nonce.class), ArgumentMatchers.any(HttpServletRequest.class));
 
@@ -240,7 +241,7 @@ public class OIDCWebSSoProviderImplTest {
     public void getLoginRedirectRequest_AutologinSuccessTest() throws Exception {
 
         String loginRequest = "loginRequest";
-        Mockito.when(mockedBackendConfig.autologinCookieMode()).thenReturn(OIDCBackendConfig.AutologinMode.OX_DIRECT.getValue());
+        testBackendConfig.setProperty(OIDCBackendProperty.autologinCookieMode, OIDCBackendConfig.AutologinMode.OX_DIRECT.getValue());
 
         PowerMockito.doReturn(loginRequest).when(this.provider, PowerMockito.method(OIDCWebSSOProviderImpl.class, "getAutologinURLFromOIDCCookie", HttpServletRequest.class, HttpServletResponse.class)).withArguments(ArgumentMatchers.any(HttpServletRequest.class), ArgumentMatchers.any(HttpServletResponse.class));
 
@@ -255,7 +256,7 @@ public class OIDCWebSSoProviderImplTest {
 
     @Test
     public void getLoginRedirectRequest_LoginRequestEmptyTest() throws Exception {
-        Mockito.when(mockedBackendConfig.autologinCookieMode()).thenReturn(null);
+        testBackendConfig.setProperty(OIDCBackendProperty.autologinCookieMode, null);
 
         PowerMockito.doReturn(null).when(this.provider, PowerMockito.method(OIDCWebSSOProviderImpl.class, "buildLoginRequest", State.class, Nonce.class, HttpServletRequest.class)).withArguments(ArgumentMatchers.any(State.class), ArgumentMatchers.any(Nonce.class), ArgumentMatchers.any(HttpServletRequest.class));
 
@@ -272,10 +273,8 @@ public class OIDCWebSSoProviderImplTest {
 
     @Test
     public void getLoginRedirectRequest_AutologinNoCookieTest() throws Exception {
-        Mockito.when(mockedBackend.getBackendConfig()).thenReturn(mockedBackendConfig);
-
         String loginRequest = "loginRequest";
-        Mockito.when(mockedBackendConfig.autologinCookieMode()).thenReturn(OIDCBackendConfig.AutologinMode.OX_DIRECT.getValue());
+        testBackendConfig.setProperty(OIDCBackendProperty.autologinCookieMode, OIDCBackendConfig.AutologinMode.OX_DIRECT.getValue());
 
         PowerMockito.doReturn(null).when(this.provider, PowerMockito.method(OIDCWebSSOProviderImpl.class, "getAutologinURLFromOIDCCookie", HttpServletRequest.class, HttpServletResponse.class)).withArguments(ArgumentMatchers.any(HttpServletRequest.class), ArgumentMatchers.any(HttpServletResponse.class));
 
@@ -399,11 +398,11 @@ public class OIDCWebSSoProviderImplTest {
 
     @Test
     public void getLogoutRedirectRequest_viaSSOLogoutTest() throws Exception {
-        Mockito.when(B(mockedBackendConfig.isSSOLogout())).thenReturn(B(true));
+        testBackendConfig.setProperty(OIDCBackendProperty.ssoLogout, Boolean.TRUE);
+        testBackendConfig.setProperty(OIDCBackendProperty.rpRedirectURILogout, "firstRequest");
+        testBackendConfig.setProperty(OIDCBackendProperty.uiWebPath, "/appsuite");
         Session mockedSession = Mockito.mock(Session.class);
         PowerMockito.doReturn(mockedSession).when(this.provider, PowerMockito.method(OIDCWebSSOProviderImpl.class, "extractSessionFromRequest", HttpServletRequest.class)).withArguments(ArgumentMatchers.any(HttpServletRequest.class));
-        String logoutRequest = "firstRequest";
-        Mockito.when(mockedBackendConfig.getRpRedirectURILogout()).thenReturn(logoutRequest);
         LogoutRequest backendLogout = Mockito.mock(LogoutRequest.class);
         Mockito.when(backendLogout.getState()).thenReturn(new State());
         Mockito.when(mockedBackend.getLogoutFromIDPRequest(mockedSession)).thenReturn(backendLogout);
@@ -411,14 +410,13 @@ public class OIDCWebSSoProviderImplTest {
         URI resultUri = new URI("logoutRequest");
         PowerMockito.when(backendLogout.toURI()).thenReturn(resultUri);
         String result = provider.getLogoutRedirectRequest(mockedRequest, mockedResponse);
-        PowerMockito.doReturn("path").when(OIDCTools.class, "buildFrontendRedirectLocation", ArgumentMatchers.any(Session.class), ArgumentMatchers.anyString(), ArgumentMatchers.anyString());
         assertTrue("Wrong request as result", result.equals("logoutRequest"));
     }
 
     @Test
     public void getLogoutRedirectRequest_NoSSOLogoutTest() throws Exception {
         String logoutRequest = "correctLogoutRequest";
-        Mockito.when(B(mockedBackendConfig.isSSOLogout())).thenReturn(B(false));
+        testBackendConfig.setProperty(OIDCBackendProperty.ssoLogout, Boolean.FALSE);
         PowerMockito.doReturn(mockedSession).when(this.provider, PowerMockito.method(OIDCWebSSOProviderImpl.class, "extractSessionFromRequest", HttpServletRequest.class)).withArguments(mockedRequest);
         PowerMockito.doReturn(logoutRequest).when(this.provider, PowerMockito.method(OIDCWebSSOProviderImpl.class, "getRedirectForLogoutFromOXServer", Session.class, HttpServletRequest.class, HttpServletResponse.class, LogoutRequestInfo.class)).withArguments(mockedSession, mockedRequest, mockedResponse, null);
         String result = provider.getLogoutRedirectRequest(mockedRequest, mockedResponse);
@@ -507,7 +505,7 @@ public class OIDCWebSSoProviderImplTest {
     @Test
     public void validateThirdPartyRequest_NoMatchingIssParameterTest() {
         Mockito.when(mockedRequest.getParameter("iss")).thenReturn("wrong");
-        Mockito.when(mockedBackendConfig.getOpIssuer()).thenReturn("correct");
+        testBackendConfig.setProperty(OIDCBackendProperty.opIssuer, "correct");
         boolean result = provider.validateThirdPartyRequest(mockedRequest);
         assertFalse("Input should not have passed validation", result);
     }
@@ -515,7 +513,7 @@ public class OIDCWebSSoProviderImplTest {
     @Test
     public void validateThirdPartyRequest_PassTest() {
         Mockito.when(mockedRequest.getParameter("iss")).thenReturn("correct");
-        Mockito.when(mockedBackendConfig.getOpIssuer()).thenReturn("correct");
+        testBackendConfig.setProperty(OIDCBackendProperty.opIssuer, "correct");
         boolean result = provider.validateThirdPartyRequest(mockedRequest);
         assertTrue("Input should have passed validation", result);
     }

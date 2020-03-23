@@ -253,9 +253,14 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
 
     @Override
     public Scope getScope() {
-        String scopes = this.getBackendConfig().getScope().toLowerCase();
-        String[] scopeArray = Strings.splitBySemiColon(scopes);
-        return new Scope(scopeArray);
+        String scope = this.getBackendConfig().getScope();
+        if (scope.contains(";")) {
+            // legacy compatibility
+            String[] scopeValues = Strings.splitBySemiColon(scope.toLowerCase());
+            return new Scope(scopeValues);
+        }
+
+        return Scope.parse(scope);
     }
 
     @Override
@@ -373,6 +378,8 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
                 Thread.currentThread().interrupt();
                 throw OXException.general("Interrupted", e);
             }
+        } else {
+            LOG.warn("Cannot update OAuth tokens session due to missing access token");
         }
 
         OIDCTools.addParameterToSession(session, tokenMap, OIDCTools.IDTOKEN, OIDCTools.IDTOKEN);

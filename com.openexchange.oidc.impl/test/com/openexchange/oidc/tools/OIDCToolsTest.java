@@ -50,14 +50,18 @@
 package com.openexchange.oidc.tools;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import org.junit.After;
@@ -80,6 +84,7 @@ import com.openexchange.oidc.OIDCBackend;
 import com.openexchange.oidc.OIDCBackendConfig;
 import com.openexchange.oidc.OIDCExceptionCode;
 import com.openexchange.session.Session;
+import com.openexchange.session.oauth.OAuthTokens;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.tools.servlet.http.Cookies;
 
@@ -331,4 +336,66 @@ public class OIDCToolsTest {
         String result = OIDCTools.getUiClient(mockedRequest);
         assertTrue("Wrong UI client loaded", testClient.equals(result));
     }
+
+    @Test
+    public void convertTokenMap_NotPresentMissingAccessToken() {
+        Optional<OAuthTokens> tokens = OIDCTools.convertTokenMap(Collections.<String, String>emptyMap());
+        assertFalse(tokens.isPresent());
+    }
+
+    @Test
+    public void convertTokenMap_PresentOnAccessTokenAlone() {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put(OIDCTools.ACCESS_TOKEN, "test");
+        Optional<OAuthTokens> tokens = OIDCTools.convertTokenMap(params);
+        assertTrue(tokens.isPresent());
+        OAuthTokens oAuthTokens = tokens.get();
+        assertEquals(oAuthTokens.getAccessToken(), params.get(OIDCTools.ACCESS_TOKEN));
+        assertFalse(oAuthTokens.hasExpiryDate());
+        assertFalse(oAuthTokens.hasRefreshToken());
+    }
+
+    @Test
+    public void convertTokenMap_AccessTokenWithExpiry() {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put(OIDCTools.ACCESS_TOKEN, "test");
+        params.put(OIDCTools.ACCESS_TOKEN_EXPIRY, String.valueOf(new Date(System.currentTimeMillis() + 3600000).getTime()));
+        Optional<OAuthTokens> tokens = OIDCTools.convertTokenMap(params);
+        assertTrue(tokens.isPresent());
+        OAuthTokens oAuthTokens = tokens.get();
+        assertEquals(oAuthTokens.getAccessToken(), params.get(OIDCTools.ACCESS_TOKEN));
+        assertTrue(oAuthTokens.hasExpiryDate());
+        assertTrue(oAuthTokens.getExpiryDate().getTime() >= System.currentTimeMillis() && oAuthTokens.getExpiryDate().getTime() <= (System.currentTimeMillis() + (3600 * 1000)));
+        assertFalse(oAuthTokens.hasRefreshToken());
+
+    }
+
+    @Test
+    public void convertTokenMap_EverythingProvided() {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put(OIDCTools.ACCESS_TOKEN, "test");
+        params.put(OIDCTools.ACCESS_TOKEN_EXPIRY, String.valueOf(new Date(System.currentTimeMillis() + 3600000).getTime()));
+        params.put(OIDCTools.REFRESH_TOKEN, "refresh-test");
+        Optional<OAuthTokens> tokens = OIDCTools.convertTokenMap(params);
+        assertTrue(tokens.isPresent());
+        OAuthTokens oAuthTokens = tokens.get();
+        assertEquals(oAuthTokens.getAccessToken(), params.get(OIDCTools.ACCESS_TOKEN));
+        assertTrue(oAuthTokens.hasExpiryDate());
+        assertTrue(oAuthTokens.getExpiryDate().getTime() >= System.currentTimeMillis() && oAuthTokens.getExpiryDate().getTime() <= (System.currentTimeMillis() + (3600 * 1000)));
+        assertEquals(oAuthTokens.getRefreshToken(), params.get(OIDCTools.REFRESH_TOKEN));
+    }
+
+    @Test
+    public void convertTokenMap_MissingExpiryDateOnInvalidValue() {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put(OIDCTools.ACCESS_TOKEN, "test");
+        params.put(OIDCTools.ACCESS_TOKEN_EXPIRY, "foo");
+        Optional<OAuthTokens> tokens = OIDCTools.convertTokenMap(params);
+        assertTrue(tokens.isPresent());
+        OAuthTokens oAuthTokens = tokens.get();
+        assertEquals(oAuthTokens.getAccessToken(), params.get(OIDCTools.ACCESS_TOKEN));
+        assertFalse(oAuthTokens.hasExpiryDate());
+        assertFalse(oAuthTokens.hasRefreshToken());
+    }
+
 }

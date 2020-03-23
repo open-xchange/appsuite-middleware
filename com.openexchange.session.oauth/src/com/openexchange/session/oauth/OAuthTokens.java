@@ -220,7 +220,15 @@ public class OAuthTokens {
 
     @Override
     public String toString() {
-        return "OAuthTokens [accessToken=******, expiryDate=" + expiryDate + ", refreshToken=******]";
+        StringBuilder sb = new StringBuilder("[access_token=").append(Integer.toHexString(accessToken.hashCode()));
+        if (expiryDate != null) {
+            sb.append(", expires_in=").append(expiryDate.getTime() - System.currentTimeMillis()).append(" seconds");
+        }
+        if (refreshToken != null) {
+            sb.append(", refresh_token=").append(Integer.toHexString(refreshToken.hashCode()));
+        }
+        sb.append(']');
+        return sb.toString();
     }
 
 }
