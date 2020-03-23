@@ -283,11 +283,11 @@ public class WebDAVTest extends AbstractConfigAwareAPIClientSession {
         //for example: webdav://18/VXNlcnN0b3JlL2FudG9uJTIwYW50b24v
         testFileAccount.getId();
         testFileAccount.getFilestorageService();
-        String rootFolder = String.format("Userstore/%s%s%s/", testUser.getUser(), "%20", testUser.getUser());
+        String rootFolder = String.format("Userstore/%s%s%s/", testUser.getUser(), ",%20", testUser.getUser());
         if (Strings.isNotEmpty(path)) {
             rootFolder += path;
         }
-        rootFolder = Base64.getUrlEncoder().encodeToString(rootFolder.getBytes(StandardCharsets.UTF_8));
+        rootFolder = Base64.getUrlEncoder().withoutPadding().encodeToString(rootFolder.getBytes(StandardCharsets.UTF_8));
         return String.format("%s://%s/%s", testFileAccount.getFilestorageService(), testFileAccount.getId(), rootFolder);
     }
 
