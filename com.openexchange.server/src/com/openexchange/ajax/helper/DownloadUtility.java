@@ -238,6 +238,9 @@ public final class DownloadUtility {
                 // Treat all JavaScript content as harmful
                 harmful = true;
                 sContentDisposition = "attachment";
+            } else if (Strings.containsAny(toLowerCase(contentType.getSubType()), "rdf") || fileNameImpliesRdf(fileName)) {
+                harmful = true;
+                sContentDisposition = "attachment";
             } else if (Strings.containsAny(toLowerCase(contentType.getSubType()), "svg") || fileNameImpliesSvg(fileName)) {
                 // Treat all SVG content as harmful
                 harmful = true;
@@ -556,6 +559,10 @@ public final class DownloadUtility {
 
     private static boolean fileNameImpliesXml(final String fileName) {
         return null != fileName && MimeType2ExtMap.getContentType(fileName).indexOf("xml") >= 0;
+    }
+
+    private static boolean fileNameImpliesRdf(final String fileName) {
+        return null != fileName && MimeType2ExtMap.getContentType(fileName).indexOf("rdf") >= 0;
     }
 
     private static boolean checkFileNameFor(String fileName, ContentTypeTest contentTypeTest, String... fileNameTests) {
