@@ -59,8 +59,8 @@ import static com.openexchange.webdav.client.PropertyName.DAV_CREATIONDATE;
 import static com.openexchange.webdav.client.PropertyName.DAV_DISPLAYNAME;
 import static com.openexchange.webdav.client.PropertyName.DAV_GETCONTENTLENGTH;
 import static com.openexchange.webdav.client.PropertyName.DAV_GETCONTENTTYPE;
-import static com.openexchange.webdav.client.PropertyName.DAV_GETLASTMODIFIED;
 import static com.openexchange.webdav.client.PropertyName.DAV_GETETAG;
+import static com.openexchange.webdav.client.PropertyName.DAV_GETLASTMODIFIED;
 import static com.openexchange.webdav.client.PropertyName.DAV_LOCKDISCOVERY;
 import static com.openexchange.webdav.client.WebDAVClient.DEPTH_0;
 import static com.openexchange.webdav.client.WebDAVClient.DEPTH_1;
@@ -803,7 +803,7 @@ public abstract class AbstractWebDAVFileAccess extends AbstractWebDAVAccess impl
 
     protected Map<QName, Object> getPropertiesToSet(File file, Collection<Field> indicatedFields) {
         Map<QName, Object> props = new HashMap<QName, Object>();
-        Set<Field> fields = null == indicatedFields ? EnumSet.allOf(Field.class) : EnumSet.copyOf(indicatedFields);
+        Set<Field> fields = null == indicatedFields ? EnumSet.allOf(Field.class) : indicatedFields.isEmpty() ? EnumSet.noneOf(Field.class) : EnumSet.copyOf(indicatedFields);
         for (Field field : fields) {
             switch (field) {
                 case TITLE:
