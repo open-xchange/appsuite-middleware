@@ -50,6 +50,7 @@
 package com.openexchange.oidc.osgi;
 
 import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -72,6 +73,10 @@ public class Services {
 
     public static <T> T getService(Class<T> klass) {
         return services.get().getService(klass);
+    }
+
+    public static <T> T getServiceSafe(Class<T> klass) throws OXException {
+        return services.get().getServiceSafe(klass);
     }
 
     public static <T> T getOptionalService(Class<T> klass) {
