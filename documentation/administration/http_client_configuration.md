@@ -71,15 +71,26 @@ Following clients can be configured:
 | Dropbox | dropbox |
 | iCAL Feed | icalfeed |
 | Microsoft Graph | msgraph |
+| Nextcloud | nextcloud |
+| Owncloud | owncloud |
 | Proxy | proxy|
 | RestExecutor | rest |
 | SAML OAuth | saml-oauth |
 | Schedjoules | schedjoules |
 | Sipgate | sipgate |
 | Spam experts | spamexperts |
-| SProxyD | sproxyd-[filestoreID] |
+| WebDAV | webdav |
 | XING | xing |
 
+### Wildcard identifier
+
+Additionally to the specific HTTP client identifier above the server is capable to configure HTTP clients for groups of clients. Following clients fall into this category:
+
+| Service name | Identifier |
+|--------------|:----------:|
+| SProxyD | sproxyd-[filestoreID] |
+
+The difference to the specific identifier is that you can either A) configure the complete group of HTTP clients by removing the wildcard from the identifier or B) specify configuration for each client of the group explicit. For an example see below.
 
 # Examples
 
@@ -172,6 +183,24 @@ com.openenexchange.httpclient.icalfeed.socketBufferSize=8192
 ```
 
 It is *not recommended* to use this mixed configuration setup.
+
+## Example 4: Wildcard configuration
+
+As mentioned above it is also possible to configure complete groups of HTTP clients. For `SProxyD` this can looks like this
+
+```
+com.openenexchange.httpclient.sproxyd.totalConnections=50
+com.openenexchange.httpclient.sproxyd.connectionPerRoute=10
+```
+
+With this configuration all HTTP clients that are generated to communicate to `SProxyD` will have a maximum of 50 connections with a maximum of 10 connections per route. 
+Let's say you noticed for the filestore with the ID 5 that request need more time to be successfully answered. Therefore you want to increase the request timeout. This can be done like followed:
+
+```
+com.openenexchange.httpclient.sproxyd-5.requestTimeout=100000
+```
+
+Please note that the configuration for the basic HTTP clients will still be applied. Therefore the maximum connections and the connections per route are also increased for the HTTP client communicating with the filestore 5.
 
 # Legacy properties
 

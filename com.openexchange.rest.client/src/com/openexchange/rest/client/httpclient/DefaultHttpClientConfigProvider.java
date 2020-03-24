@@ -50,6 +50,7 @@
 package com.openexchange.rest.client.httpclient;
 
 import java.util.Optional;
+import com.openexchange.annotation.Nullable;
 import com.openexchange.version.VersionService;
 
 /**
@@ -66,9 +67,9 @@ public class DefaultHttpClientConfigProvider extends AbstractHttpClientModifer i
      * Initializes a new {@link DefaultHttpClientConfigProvider}.
      *
      * @param clientId The identifier of the HTTP client
-     * @param userAgent The user agent to use for the client
+     * @param userAgent The user agent to set; may be <code>null</code>
      */
-    public DefaultHttpClientConfigProvider(String clientId, String userAgent) {
+    public DefaultHttpClientConfigProvider(String clientId, @Nullable String userAgent) {
         super(userAgent);
         this.clientId = clientId;
     }
@@ -77,10 +78,10 @@ public class DefaultHttpClientConfigProvider extends AbstractHttpClientModifer i
      * Initializes a new {@link DefaultHttpClientConfigProvider}.
      *
      * @param clientId The identifier of the HTTP client
-     * @param userAgent The user agent to use for the client
+     * @param userAgent The user agent to set; may be <code>null</code>
      * @param optionalVersionService The optional version service. Will be used to append the version to the user agent
      */
-    public DefaultHttpClientConfigProvider(String clientId, String userAgent, Optional<VersionService> optionalVersionService) {
+    public DefaultHttpClientConfigProvider(String clientId, @Nullable String userAgent, Optional<VersionService> optionalVersionService) {
         super(userAgent + getVersion(optionalVersionService));
         this.clientId = clientId;
     }

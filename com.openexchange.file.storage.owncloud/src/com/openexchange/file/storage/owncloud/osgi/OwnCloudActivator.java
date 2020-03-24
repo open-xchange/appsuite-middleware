@@ -64,6 +64,7 @@ import com.openexchange.config.lean.Property;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.file.storage.owncloud.NextCloudAccountAccess;
 import com.openexchange.file.storage.owncloud.NextCloudFileStorageService;
 import com.openexchange.file.storage.owncloud.OwnCloudAccountAccess;
 import com.openexchange.file.storage.owncloud.OwnCloudEntityResolver;
@@ -99,6 +100,7 @@ public class OwnCloudActivator extends HousekeepingActivator {
         openTrackers();
 
         registerService(SpecificHttpClientConfigProvider.class, new DefaultHttpClientConfigProvider(OwnCloudAccountAccess.HTTP_CLIENT_ID, "Open-Xchange OwnCloud HTTP client"));
+        registerService(SpecificHttpClientConfigProvider.class, new DefaultHttpClientConfigProvider(NextCloudAccountAccess.HTTP_CLIENT_ID, "Open-Xchange NextCloud HTTP client"));
 
         registerSimpleResolver();
 

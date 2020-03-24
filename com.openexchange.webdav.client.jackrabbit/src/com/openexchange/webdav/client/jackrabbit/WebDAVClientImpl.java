@@ -139,10 +139,7 @@ import com.openexchange.webdav.client.functions.ErrorAwareFunction;
 public class WebDAVClientImpl implements WebDAVClient {
 
     /** The identifier prefix for obtaining a WebDAV-associated HTTP client */
-    private final static String HTTP_CLIENT_ID_PREFIX = "webdavclient";
-
-    /** The identifier pattern for obtaining a WebDAV-associated HTTP client */
-    public final static String HTTP_CLIENT_ID_PATTERN = HTTP_CLIENT_ID_PREFIX + "*";
+    public final static String HTTP_CLIENT_ID = "webdav";
 
     private final HttpClientProvider clientProvider;
     private final HttpContext context;
@@ -183,7 +180,7 @@ public class WebDAVClientImpl implements WebDAVClient {
      * @throws OXException If initialization fails
      */
     public WebDAVClientImpl(URI baseUrl, String login, String password, ServiceLookup services) throws IllegalStateException, OXException {
-        this(new ManagedHttpClientProvider(initDefaultClient(baseUrl, services)), initDefaultContext(baseUrl, login, password), baseUrl);
+        this(new ManagedHttpClientProvider(initDefaultClient(services)), initDefaultContext(baseUrl, login, password), baseUrl);
     }
 
     private HttpResponse execute(HttpUriRequest request) throws IOException, ClientProtocolException {
@@ -499,8 +496,8 @@ public class WebDAVClientImpl implements WebDAVClient {
 
     // ------------------------------------------------ Static helpers ----------------------------------------------------------------------
 
-    private static ManagedHttpClient initDefaultClient(URI baseUrl, ServiceLookup services) throws OXException {
-        return services.getServiceSafe(HttpClientService.class).getHttpClient(HTTP_CLIENT_ID_PREFIX + baseUrl.toString().hashCode());
+    private static ManagedHttpClient initDefaultClient(ServiceLookup services) throws OXException {
+        return services.getServiceSafe(HttpClientService.class).getHttpClient(HTTP_CLIENT_ID);
     }
 
     private static HttpContext initDefaultContext(URI baseUrl, String login, String password) {

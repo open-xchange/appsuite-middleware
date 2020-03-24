@@ -190,8 +190,17 @@ public class OwnCloudAccountAccess extends AbstractWebDAVAccountAccess {
         }
     }
 
-    private static ManagedHttpClient initDefaultClient() throws OXException {
-        return Services.getServiceLookup().getServiceSafe(HttpClientService.class).getHttpClient(HTTP_CLIENT_ID);
+    protected ManagedHttpClient initDefaultClient() throws OXException {
+        return Services.getServiceLookup().getServiceSafe(HttpClientService.class).getHttpClient(getHttpClientId());
+    }
+    
+    /**
+     * Get the HTTP client identifier.
+     * 
+     * @return The identifier
+     */
+    protected String getHttpClientId() {
+        return HTTP_CLIENT_ID;
     }
 
 }
