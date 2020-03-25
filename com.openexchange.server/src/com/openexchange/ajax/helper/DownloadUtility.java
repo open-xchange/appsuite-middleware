@@ -234,8 +234,8 @@ public final class DownloadUtility {
                         in = new ByteArrayRandomAccess(tmp);
                     }
                 }
-            } else if (Strings.startsWithAny(toLowerCase(contentType.getSubType()), "javascript") || fileNameImpliesJavascript(fileName)) {
-                // Treat all JavaScript content as harmful
+            } else if (Strings.containsAny(toLowerCase(contentType.getSubType()), "script") || fileNameImpliesJavascript(fileName)) {
+                // Treat all script content as harmful
                 harmful = true;
                 sContentDisposition = "attachment";
             } else if (Strings.containsAny(toLowerCase(contentType.getSubType()), "rdf") || fileNameImpliesRdf(fileName)) {
@@ -554,7 +554,7 @@ public final class DownloadUtility {
     }
 
     private static boolean fileNameImpliesJavascript(final String fileName) {
-        return null != fileName && MimeType2ExtMap.getContentType(fileName).indexOf("javascript") >= 0;
+        return null != fileName && MimeType2ExtMap.getContentType(fileName).indexOf("script") >= 0;
     }
 
     private static boolean fileNameImpliesXml(final String fileName) {
