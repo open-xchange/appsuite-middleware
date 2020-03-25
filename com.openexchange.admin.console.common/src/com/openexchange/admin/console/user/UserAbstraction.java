@@ -3815,14 +3815,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
      * @throws InvalidDataException
      */
     protected void checkRequired(final int[] idarray) throws InvalidDataException {
-        for (final Constants value : Constants.values()) {
-            if (value.isRequired()) {
-                if (-1 == idarray[value.getIndex()]) {
-                    throw new InvalidDataException("The required column \"" + value.getString() + "\" is missing");
-                }
-            }
-        }
-        for (final AccessCombinations value : AccessCombinations.values()) {
+        for (final CSVConstants value : constantsMap.values()) {
             if (value.isRequired()) {
                 if (-1 == idarray[value.getIndex()]) {
                     throw new InvalidDataException("The required column \"" + value.getString() + "\" is missing");
