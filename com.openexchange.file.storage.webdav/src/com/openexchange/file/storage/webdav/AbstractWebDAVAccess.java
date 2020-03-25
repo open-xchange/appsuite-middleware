@@ -245,8 +245,18 @@ public abstract class AbstractWebDAVAccess {
             case HttpStatus.SC_UNAUTHORIZED:
                 return FileStorageExceptionCodes.AUTHENTICATION_FAILED.create(e, account.getId(), account.getFileStorageService().getId(), e.getMessage());
             default:
+                if (indicatesInvalidUrl(e.getCause())) {
+                    String endpoint = (String) account.getConfiguration().get(WebDAVFileStorageConstants.WEBDAV_URL);
+                    return FileStorageExceptionCodes.INVALID_URL.create(e.getCause(), endpoint, e.getCause().getMessage());
+                }
                 return FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
+    }
+    
+    private static boolean indicatesInvalidUrl(Throwable t) {
+        return null != t && (
+            java.net.UnknownHostException.class.isInstance(t) || java.net.MalformedURLException.class.isInstance(t) ||
+            java.net.NoRouteToHostException.class.isInstance(t));
     }
 
 }

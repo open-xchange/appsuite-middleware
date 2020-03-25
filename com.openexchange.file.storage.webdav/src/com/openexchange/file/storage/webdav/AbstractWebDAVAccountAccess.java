@@ -131,7 +131,13 @@ public abstract class AbstractWebDAVAccountAccess implements CapabilityAware {
             throw FileStorageExceptionCodes.INVALID_URL.create(configUrl, "empty");
         }
         String login = (String) configuration.get("login");
+        if (Strings.isEmpty(login)) {
+            throw FileStorageExceptionCodes.MISSING_CONFIG.create("login", account.getId());
+        }
         String password = (String) configuration.get("password");
+        if (Strings.isEmpty(login)) {
+            throw FileStorageExceptionCodes.MISSING_CONFIG.create("password", account.getId());
+        }
         try {
             URI uri = new URI(configUrl);
             URIBuilder uriBuilder = new URIBuilder();

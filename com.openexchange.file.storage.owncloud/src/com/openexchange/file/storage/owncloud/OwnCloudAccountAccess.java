@@ -121,6 +121,8 @@ public class OwnCloudAccountAccess extends AbstractWebDAVAccountAccess {
                     } catch (OXException e) {
                         LOG.error(e.getMessage(), e);
                         return Boolean.FALSE;
+                    } finally {
+                        close();
                     }
                 }
                 try {
