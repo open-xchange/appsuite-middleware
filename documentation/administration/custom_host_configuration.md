@@ -178,7 +178,8 @@ This list provides some other properties, that influence the login page itself o
 | pageHeader  | String  | The header of the login mask.  | pageHeader: Company  |
 | pageHeaderPrefix  | String  | A Text written before the page header.  | pageHeader: My  |
 | pageTitle  | String  | Sets the page title, visible as a prefix in the tab name.  | pageTitle: My Company  |
-| serverVersion  | String  | Bottom of the login screen, next to the copyright information <br>also inside the about dialog.  | serverVersion: 1.1.0  |
+| serverVersion  | String  | Shown in the about dialog as "Server version".  | serverVersion: 1.1.0  |
+| version  | String  | UI/client version. Shown at the bottom of the login screen (next to copyright) and in the About dialog as "UI version".  | version: 1.1.0  |
 | staySignedIn  | Boolean  | Sets wether the stay signed in checkbox is selected or not on initial view of the login page  | staySignedIn: true  |
 
 ###Theming the about dialog
