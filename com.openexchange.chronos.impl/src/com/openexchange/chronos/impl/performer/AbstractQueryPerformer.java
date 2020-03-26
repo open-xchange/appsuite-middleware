@@ -230,16 +230,18 @@ public abstract class AbstractQueryPerformer {
      * @return The prepared exception event
      */
     protected Event prepareException(Event originalMasterEvent, RecurrenceId recurrenceId, String objectId, Date timestamp) throws OXException {
+        RecurrenceId normalizedRecurrenceId = CalendarUtils.normalizeRecurrenceID(originalMasterEvent.getStartDate(), recurrenceId);
         Event exceptionEvent = EventMapper.getInstance().copy(originalMasterEvent, new Event(), true, (EventField[]) null);
         exceptionEvent.setId(objectId);
-        exceptionEvent.setRecurrenceId(recurrenceId);
+        exceptionEvent.setRecurrenceId(normalizedRecurrenceId);
         exceptionEvent.setRecurrenceRule(null);
         exceptionEvent.setDeleteExceptionDates(null);
-        exceptionEvent.setChangeExceptionDates(new TreeSet<RecurrenceId>(Collections.singleton(recurrenceId)));
-        exceptionEvent.setStartDate(CalendarUtils.calculateStart(originalMasterEvent, recurrenceId));
-        exceptionEvent.setEndDate(CalendarUtils.calculateEnd(originalMasterEvent, recurrenceId));
+        exceptionEvent.setChangeExceptionDates(new TreeSet<RecurrenceId>(Collections.singleton(normalizedRecurrenceId)));
+        exceptionEvent.setStartDate(CalendarUtils.calculateStart(originalMasterEvent, normalizedRecurrenceId));
+        exceptionEvent.setEndDate(CalendarUtils.calculateEnd(originalMasterEvent, normalizedRecurrenceId));
         Consistency.setCreated(timestamp, exceptionEvent, originalMasterEvent.getCreatedBy());
         Consistency.setModified(session, timestamp, exceptionEvent, session.getUserId());
         return exceptionEvent;
     }
+
 }
