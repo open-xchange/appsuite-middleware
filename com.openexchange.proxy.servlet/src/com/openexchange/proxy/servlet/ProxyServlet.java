@@ -227,7 +227,7 @@ public class ProxyServlet extends SessionServlet {
     }
 
     private HttpClient getHttpClient() throws OXException {
-        return Services.requireService(HttpClientService.class).getHttpClient("proxy").getHttpClient();
+        return Services.requireService(HttpClientService.class).getHttpClient("proxy");
     }
 
 }

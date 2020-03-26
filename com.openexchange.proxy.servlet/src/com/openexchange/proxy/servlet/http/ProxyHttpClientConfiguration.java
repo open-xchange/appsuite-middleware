@@ -67,7 +67,7 @@ public class ProxyHttpClientConfiguration extends DefaultHttpClientConfigProvide
      *
      */
     public ProxyHttpClientConfiguration() {
-        super("proxy", null);
+        super("proxy");
     }
 
     @Override

@@ -63,7 +63,7 @@ import com.openexchange.osgi.annotation.SingletonService;
 public interface HttpClientService {
 
     /**
-     * Get the {@link CloseableHttpClient} for the provided identifier
+     * Get the {@link ManagedHttpClient} for the provided identifier
      * <p>
      * The HTTP client obtained by this service will be either
      * <li> Received from a cache holding the HTTP client instance</li>
@@ -72,21 +72,19 @@ public interface HttpClientService {
      * The client will be created from a configuration which is provided by registered service of classes
      * <li> {@link SpecificHttpClientConfigProvider}</li>
      * <li> {@link WildcardHttpClientConfigProvider}</li>
+     * If none of these providers is registered for the given client identifier, default configuration
+     * is applied.
      * Created clients will be put into the cache.
      * <p>
      * The client will be closed and removed if the corresponding service of above classes is removed via
      * OSGi. This will unset the HTTP client reference in the returned {@link ManagedHttpClient}, too.
      * <p>
-     * Further the client will be removed if a caller explicit closes the HTTP client reference in the
-     * returned {@link ManagedHttpClient}. The service will then auto-clean the reference from the cache,
-     * efficiently avoiding to return a HTTP client which has been closed.
-     * <p>
      * Cached HTTP clients will be renewed if there are configuration changes after a reload configuration.
      * Therefore the HTTP client wrapped in the managed object will be replaces with a new instance. The old
      * instance will be closed after a short period of time, so that all operations running on the old client
-     * can successfully finish, before the client is closed. 
+     * can successfully finish, before the client is closed.
      * <p>
-     * To make sure a HTTP client can be obtained via this service, add a provider like e.g.
+     * A provider for contibuting configuration for a special
      * <br>
      * <code>
      * registerService(HttpClientConfigProvider.class, new DefaultHttpClientConfigProvider("MyClient", "MyClient User Agent"));
@@ -96,9 +94,29 @@ public interface HttpClientService {
      * @return The {@link ManagedHttpClient} from which a {@link CloseableHttpClient} can be obtained.
      *         It is strongly recommended to fetch the client each time from the service instead of using it as
      *         class member because this service ensures that the underlying HTTP client can be used.
-     * @throws OXException If no HTTP client with the provided identifier exists or client configuration is invalid
+     * @throws OXException In case the given identifier is empty or creating of the HTTP client fails
+     * @throws RuntimeException In case service is shutting down, an unexpected error occurred during creation of the HTTP client
+     *             or issues while using the cache
      * @see {@link ManagedHttpClient#getHttpClient()}
      */
-    ManagedHttpClient getHttpClient(String httpClientId) throws OXException;
+    ManagedHttpClient getHttpClient(String httpClientId) throws OXException, RuntimeException;
+
+    /**
+     * Removes cached client instances and closes it. This method is supposed to be called, when
+     * no HTTP client instance with the given ID is needed anymore. Not needed means <b>either at all</b>
+     * or for a <b>long (minutes and more) time</b>.
+     * <p>
+     * <strong>IMPORTANT: Do not call this regularly after every request performed!</strong>
+     * <p>
+     * For example bundle shutdown would be a good occasion to call this. However if you registered a
+     * <li> {@link SpecificHttpClientConfigProvider}</li>
+     * or
+     * <li> {@link WildcardHttpClientConfigProvider}</li>
+     * this method must not be called. The clients will be removed when the services is removed
+     *
+     * @param httpClientId The identifier of named HTTP client to close and remove from cache 
+     * @throws OXException In case the given identifier is empty
+     */
+    void destroyHttpClient(String httpClientId) throws OXException;
 
 }

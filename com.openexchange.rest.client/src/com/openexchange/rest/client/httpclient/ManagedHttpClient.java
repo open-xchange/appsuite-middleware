@@ -50,30 +50,21 @@
 package com.openexchange.rest.client.httpclient;
 
 import org.apache.http.client.HttpClient;
-import com.openexchange.annotation.NonNull;
 
 /**
- * {@link ManagedHttpClient}
+ * {@link ManagedHttpClient} - Gets a {@link HttpClient} that is <i>managed</i> by the {@link HttpClientService}, which will take
+ * care of closing the client
+ * <p>
+ * The client obtained by this call <b>SHOULD NOT</b> be closed.
+ * <p>
+ * The HTTP client is wrapped into this class, so that this class <b>CAN</b> be used as
+ * a class member. It is ensured, that a caller will always receive a usable HTTP client
+ * when calling this method, expect the managing service is shutting down.
+ * <p>
+ * All methods will throw an {@link IllegalStateException} if the managing service has been shutdown and the client is unavailable
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.4
  */
-public interface ManagedHttpClient {
-
-    /**
-     * Get the HTTP client.
-     * <p>
-     * The {@link HttpClient} obtained by this call <b>SHOULD NOT</b> be closed.
-     * The HTTP client is <i>managed</i> by the {@link HttpClientService}, which will take
-     * care of closing the client.
-     * <p>
-     * The HTTP client is wrapped into this class, so that this class <b>CAN</b> be used as
-     * a class member. It is ensured, that a caller will always receive a usable HTTP client
-     * when calling this method, expect the managing service is shutting down.
-     *
-     * @return The {@link HttpClient}
-     * @throws IllegalStateException If the managing service has been shutdown and the client is unavailable
-     */
-    @NonNull
-    HttpClient getHttpClient() throws IllegalStateException;
+public interface ManagedHttpClient extends HttpClient {
 }

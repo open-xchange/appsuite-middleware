@@ -525,7 +525,7 @@ public class RESTUtility {
             if (null == httpClientService) {
                 throw new XingException("Internal server error. Missing service " + HttpClientService.class.getSimpleName());
             }
-            return httpClientService.getHttpClient("xing").getHttpClient();
+            return httpClientService.getHttpClient("xing");
         } catch (OXException e) {
             throw new XingException("Internal server error. Unable to get HTTP client", e);
         }

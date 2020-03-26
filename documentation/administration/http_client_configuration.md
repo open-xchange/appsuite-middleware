@@ -118,7 +118,6 @@ To adjust configuration for example the HTTP client for iCAL feeds on top of the
 >Note: The following example still uses the default values for the iCAL feed HTTP client. 
 
 ```
-
 com.openenexchange.httpclient.readTimeout=30000
 com.openenexchange.httpclient.connectionTimeout=30000
 com.openenexchange.httpclient.requestTimeout=30000

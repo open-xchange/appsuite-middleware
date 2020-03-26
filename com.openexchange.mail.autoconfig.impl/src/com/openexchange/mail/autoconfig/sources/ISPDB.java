@@ -142,7 +142,7 @@ public class ISPDB extends AbstractProxyAwareConfigSource {
         }
 
         ProxyInfo proxy = getHttpProxyIfEnabled(view);
-        HttpClient httpclient = services.getServiceSafe(HttpClientService.class).getHttpClient("autoconfig-ispdb").getHttpClient();
+        HttpClient httpclient = services.getServiceSafe(HttpClientService.class).getHttpClient("autoconfig-ispdb");
         try {
             int port = url.getPort();
             if (port < 0) {

@@ -55,11 +55,10 @@ import com.openexchange.context.ContextService;
 import com.openexchange.groupware.generic.FolderUpdaterRegistry;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.rest.client.httpclient.DefaultHttpClientConfigProvider;
-import com.openexchange.rest.client.httpclient.SpecificHttpClientConfigProvider;
-import com.openexchange.rest.client.httpclient.HttpClientService;
 import com.openexchange.rest.client.httpclient.HttpBasicConfig;
+import com.openexchange.rest.client.httpclient.HttpClientService;
+import com.openexchange.rest.client.httpclient.SpecificHttpClientConfigProvider;
 import com.openexchange.subscribe.SubscriptionExecutionService;
-import com.openexchange.subscribe.dav.AbstractDAVSubscribeService;
 import com.openexchange.threadpool.ThreadPoolService;
 
 /**

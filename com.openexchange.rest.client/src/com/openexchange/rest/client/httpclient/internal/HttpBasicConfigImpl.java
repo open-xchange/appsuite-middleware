@@ -53,8 +53,8 @@ import static com.openexchange.java.Autoboxing.I;
 import java.util.Optional;
 import javax.annotation.concurrent.NotThreadSafe;
 import com.openexchange.config.lean.LeanConfigurationService;
-import com.openexchange.rest.client.httpclient.HttpClientProperty;
 import com.openexchange.rest.client.httpclient.HttpBasicConfig;
+import com.openexchange.rest.client.httpclient.HttpClientProperty;
 
 /**
  * {@link HttpBasicConfigImpl} - Represents the basic configuration for a HTTP client.
@@ -97,192 +97,89 @@ public class HttpBasicConfigImpl implements HttpBasicConfig {
         }
     }
 
-    /**
-     * Sets the socket read timeout in milliseconds. A timeout value of zero
-     * is interpreted as an infinite timeout.
-     * Default: {@link HttpClientProperty#SOCKET_READ_TIMEOUT_MILLIS}
-     *
-     * @param socketReadTimeout The timeout
-     * @return This instance for chaining
-     */
     @Override
-    public HttpBasicConfigImpl setSocketReadTimeout(int socketReadTimeout) {
+    public HttpBasicConfig setSocketReadTimeout(int socketReadTimeout) {
         this.socketReadTimeout = socketReadTimeout;
         return this;
     }
 
-    /**
-     * Sets the connection timeout in milliseconds. A timeout value of zero
-     * is interpreted as an infinite timeout.
-     * Default: {@link HttpClientProperty#CONNTECTION_TIMEOUT_MILLIS}
-     *
-     * @param connectionTimeout The timeout
-     * @return This instance for chaining
-     */
     @Override
-    public HttpBasicConfigImpl setConnectionTimeout(int connectionTimeout) {
+    public HttpBasicConfig setConnectionTimeout(int connectionTimeout) {
         this.connectionTimeout = connectionTimeout;
         return this;
     }
 
-    /**
-     * Sets the connection request timeout in milliseconds defining the maximum time to wait for a connection from the pool. A timeout
-     * value of zero is interpreted as an infinite timeout.
-     * <p/>
-     * Default: {@link HttpClientProperty#CONNECTION_REQUEST_TIMEOUT_MILLIS}
-     *
-     * @param connectionRequestTimeout The timeout in milliseconds
-     * @return This instance for chaining
-     */
     @Override
     public HttpBasicConfig setConnectionRequestTimeout(int connectionRequestTimeout) {
         this.connectionRequestTimeout = connectionRequestTimeout;
         return this;
     }
 
-    /**
-     * Sets the max. number of concurrent connections that can be opened by the
-     * client instance.
-     * Default: {@link HttpClientProperty#MAX_TOTAL_CONNECTIONS}
-     *
-     * @param maxTotalConnections The number of connections
-     * @return This instance for chaining
-     */
     @Override
     public HttpBasicConfig setMaxTotalConnections(int maxTotalConnections) {
         this.maxTotalConnections = maxTotalConnections;
         return this;
     }
 
-    /**
-     * Sets the max. number of concurrent connections that can be opened by the
-     * client instance per route.
-     * Default: {@link HttpClientProperty#MAX_CONNECTIONS_PER_ROUTE}
-     *
-     * @param maxConnectionsPerRoute The number of connections
-     * @return This instance for chaining
-     */
     @Override
     public HttpBasicConfig setMaxConnectionsPerRoute(int maxConnectionsPerRoute) {
         this.maxConnectionsPerRoute = maxConnectionsPerRoute;
         return this;
     }
 
-    /**
-     * Sets the number of seconds that connections shall be kept alive.
-     * Default: {@link HttpClientProperty#KEEP_ALIVE_DURATION_SECS}.
-     *
-     * @param keepAliveDuration The keep alive duration
-     * @return This instance for chaining
-     */
     @Override
     public HttpBasicConfig setKeepAliveDuration(int keepAliveDuration) {
         this.keepAliveDuration = keepAliveDuration;
         return this;
     }
 
-    /**
-     * The interval in seconds between two monitoring runs that close stale connections
-     * which exceeded the keep-alive duration.
-     * Default: {@link HttpClientProperty#KEEP_ALIVE_MONITOR_INTERVAL_SECS}
-     *
-     * @param keepAliveMonitorInterval The interval
-     * @return This instance for chaining
-     */
     @Override
     public HttpBasicConfig setKeepAliveMonitorInterval(int keepAliveMonitorInterval) {
         this.keepAliveMonitorInterval = keepAliveMonitorInterval;
         return this;
     }
 
-    /**
-     * Sets the socket buffer size in bytes.
-     * Default: {@link HttpClientProperty#DEFAULT_SOCKET_BUFFER_SIZE}
-     *
-     * @param socketBufferSize The buffer size.
-     * @return This instance for chaining
-     */
     @Override
     public HttpBasicConfig setSocketBufferSize(int socketBufferSize) {
         this.socketBufferSize = socketBufferSize;
         return this;
     }
 
-    /**
-     * Gets the socketReadTimeout
-     *
-     * @return The socketReadTimeout
-     */
     @Override
     public int getSocketReadTimeout() {
         return socketReadTimeout;
     }
 
-    /**
-     * Gets the connectionTimeout
-     *
-     * @return The connectionTimeout
-     */
     @Override
     public int getConnectionTimeout() {
         return connectionTimeout;
     }
 
-    /**
-     * Gets the connectionRequestTimeout
-     *
-     * @return The connectionRequestTimeout
-     */
     @Override
     public int getConnectionRequestTimeout() {
         return connectionRequestTimeout;
     }
 
-    /**
-     * Gets the maxTotalConnections
-     *
-     * @return The maxTotalConnections
-     */
     @Override
     public int getMaxTotalConnections() {
         return maxTotalConnections;
     }
 
-    /**
-     * Gets the maxConnectionsPerRoute
-     *
-     * @return The maxConnectionsPerRoute
-     */
     @Override
     public int getMaxConnectionsPerRoute() {
         return maxConnectionsPerRoute;
     }
 
-    /**
-     * Gets the keepAliveDuration
-     *
-     * @return The keepAliveDuration
-     */
     @Override
     public int getKeepAliveDuration() {
         return keepAliveDuration;
     }
 
-    /**
-     * Gets the keepAliveMonitorInterval
-     *
-     * @return The keepAliveMonitorInterval
-     */
     @Override
     public int getKeepAliveMonitorInterval() {
         return keepAliveMonitorInterval;
     }
 
-    /**
-     * Gets the socketBufferSize
-     *
-     * @return The socketBufferSize
-     */
     @Override
     public int getSocketBufferSize() {
         return socketBufferSize;

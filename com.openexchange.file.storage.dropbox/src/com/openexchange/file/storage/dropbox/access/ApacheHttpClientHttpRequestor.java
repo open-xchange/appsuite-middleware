@@ -313,7 +313,7 @@ public class ApacheHttpClientHttpRequestor extends HttpRequestor {
     }
 
     static HttpClient getHttpClient() throws OXException {
-        return getService(HttpClientService.class).getHttpClient(HTTP_CLIENT_DROPBOX).getHttpClient();
+        return getService(HttpClientService.class).getHttpClient(HTTP_CLIENT_DROPBOX);
     }
 
     private static final class PipedStream implements Closeable {

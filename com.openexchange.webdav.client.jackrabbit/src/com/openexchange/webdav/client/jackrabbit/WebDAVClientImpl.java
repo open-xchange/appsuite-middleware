@@ -92,7 +92,6 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.protocol.HttpContext;
 import org.apache.jackrabbit.webdav.DavException;
 import org.apache.jackrabbit.webdav.DavServletResponse;
@@ -141,7 +140,7 @@ public class WebDAVClientImpl implements WebDAVClient {
     /** The identifier prefix for obtaining a WebDAV-associated HTTP client */
     public final static String HTTP_CLIENT_ID = "webdav";
 
-    private final HttpClientProvider clientProvider;
+    private final HttpClient httpClient;
     private final HttpContext context;
     private final URI baseUrl;
 
@@ -152,9 +151,9 @@ public class WebDAVClientImpl implements WebDAVClient {
      * @param context The context to pass when executing an HTTP request
      * @param baseUrl The URL of the WebDAV host to connect to
      */
-    private WebDAVClientImpl(HttpClientProvider clientProvider, HttpContext context, URI baseUrl) {
+    private WebDAVClientImpl(HttpClient httpClient, HttpContext context, URI baseUrl) {
         super();
-        this.clientProvider = clientProvider;
+        this.httpClient = httpClient;
         this.context = context;
         this.baseUrl = baseUrl;
     }
@@ -166,8 +165,8 @@ public class WebDAVClientImpl implements WebDAVClient {
      * @param baseUrl The URL of the WebDAV host to connect to
      * @param services The service look-up providing OSGi services
      */
-    public WebDAVClientImpl(CloseableHttpClient client, URI baseUrl) {
-        this(new InstanceHttpClientProvider(client), null, baseUrl);
+    public WebDAVClientImpl(HttpClient client, URI baseUrl) {
+        this(client, null, baseUrl);
     }
 
     /**
@@ -180,12 +179,11 @@ public class WebDAVClientImpl implements WebDAVClient {
      * @throws OXException If initialization fails
      */
     public WebDAVClientImpl(URI baseUrl, String login, String password, ServiceLookup services) throws IllegalStateException, OXException {
-        this(new ManagedHttpClientProvider(initDefaultClient(services)), initDefaultContext(baseUrl, login, password), baseUrl);
+        this(initDefaultClient(services), initDefaultContext(baseUrl, login, password), baseUrl);
     }
 
     private HttpResponse execute(HttpUriRequest request) throws IOException, ClientProtocolException {
-        HttpClient client = clientProvider.getHttpClient();
-        return context == null ? client.execute(request) : client.execute(request, context);
+        return context == null ? httpClient.execute(request) : httpClient.execute(request, context);
     }
 
     @Override
@@ -570,73 +568,5 @@ public class WebDAVClientImpl implements WebDAVClient {
             return port;
         }
         return "https".equals(baseUrl.getScheme()) ? 443 : 80;
-    }
-
-    /**
-     * {@link HttpClientProvider} is a provider for {@link HttpClient}s
-     *
-     * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
-     * @since v7.10.4
-     */
-    private static interface HttpClientProvider {
-
-        /**
-         * Gets the {@link HttpClient}
-         *
-         * @return The {@link HttpClient}
-         */
-        HttpClient getHttpClient();
-    }
-
-    /**
-     * {@link InstanceHttpClientProvider} is a basic implementation of {@link HttpClientProvider}
-     *
-     * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
-     * @since v7.10.4
-     */
-    private static class InstanceHttpClientProvider implements HttpClientProvider {
-
-        private final HttpClient client;
-
-        /**
-         * Initializes a new {@link InstanceHttpClientProvider}.
-         *
-         * @param client The {@link HttpClient}
-         */
-        InstanceHttpClientProvider(HttpClient client) {
-            super();
-            this.client = client;
-        }
-
-        @Override
-        public HttpClient getHttpClient() {
-            return client;
-        }
-    }
-
-    /**
-     * {@link ManagedHttpClientProvider} is a implementation of {@link HttpClientProvider} which uses {@link ManagedHttpClient}s
-     *
-     * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
-     * @since v7.10.4
-     */
-    private static class ManagedHttpClientProvider implements HttpClientProvider {
-
-        private final ManagedHttpClient managedHttpClient;
-
-        /**
-         * Initializes a new {@link ManagedHttpClientProvider}.
-         *
-         * @param managedHttpClient The {@link ManagedHttpClient}
-         */
-        ManagedHttpClientProvider(ManagedHttpClient managedHttpClient) {
-            super();
-            this.managedHttpClient = managedHttpClient;
-        }
-
-        @Override
-        public HttpClient getHttpClient() {
-            return managedHttpClient.getHttpClient();
-        }
     }
 }

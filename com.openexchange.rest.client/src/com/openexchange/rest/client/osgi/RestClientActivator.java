@@ -51,15 +51,16 @@ package com.openexchange.rest.client.osgi;
 
 import static com.openexchange.osgi.Tools.generateServiceFilter;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.ForcedReloadable;
 import com.openexchange.metrics.MetricService;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.rest.client.endpointpool.EndpointManagerFactory;
 import com.openexchange.rest.client.endpointpool.internal.EndpointManagerFactoryImpl;
-import com.openexchange.rest.client.httpclient.WildcardHttpClientConfigProvider;
-import com.openexchange.rest.client.httpclient.SpecificHttpClientConfigProvider;
 import com.openexchange.rest.client.httpclient.HttpClientService;
+import com.openexchange.rest.client.httpclient.SpecificHttpClientConfigProvider;
+import com.openexchange.rest.client.httpclient.WildcardHttpClientConfigProvider;
 import com.openexchange.rest.client.httpclient.internal.HttpClientServiceImpl;
 import com.openexchange.timer.TimerService;
 import com.openexchange.version.VersionService;
@@ -102,6 +103,7 @@ public class RestClientActivator extends HousekeepingActivator {
         openTrackers();
 
         registerService(HttpClientService.class, httpClientService);
+        registerService(ForcedReloadable.class, httpClientService);
         // Avoid annoying WARN logging
         //System.setProperty("org.apache.commons.logging.simplelog.log.org.apache.http.client.protocol.ResponseProcessCookies", "fatal");
     }

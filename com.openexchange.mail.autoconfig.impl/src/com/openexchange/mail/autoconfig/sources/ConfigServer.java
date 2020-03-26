@@ -109,7 +109,7 @@ public class ConfigServer extends AbstractProxyAwareConfigSource {
 
         HttpContext httpContext = httpContextFor(contextId, userId);
         httpContext.setAttribute(OX_TARGET_ID, url);
-        HttpClient httpclient = services.getServiceSafe(HttpClientService.class).getHttpClient("autoconfig-server").getHttpClient();
+        HttpClient httpclient = services.getServiceSafe(HttpClientService.class).getHttpClient("autoconfig-server");
         try {
 
             HttpHost target = new HttpHost(url.getHost(), -1, url.getProtocol());

@@ -247,7 +247,7 @@ public class SproxydClient {
     }
 
     private HttpClient getHttpClient() throws OXException {
-        return Services.getService(HttpClientService.class).getHttpClient(filestoreID).getHttpClient();
+        return Services.getService(HttpClientService.class).getHttpClient(filestoreID);
     }
 
 }

@@ -189,7 +189,7 @@ public class SipgateSMSService implements SMSServiceSPI {
     }
 
     private HttpClient getHttpClient() throws OXException {
-        return services.getServiceSafe(HttpClientService.class).getHttpClient("sipgate").getHttpClient();
+        return services.getServiceSafe(HttpClientService.class).getHttpClient("sipgate");
     }
 
 }

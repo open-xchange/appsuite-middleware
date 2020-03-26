@@ -612,7 +612,7 @@ public class HttpDoveAdmClient implements DoveAdmClient {
     protected HttpResponse execute(HttpDoveAdmCall call, HttpRequestBase method, HttpHost targetHost, BasicHttpContext context) throws ClientProtocolException, IOException {
         try {
             HttpClientService httpClientService = services.getServiceSafe(HttpClientService.class);
-            return httpClientService.getHttpClient(getClientId(call)).getHttpClient().execute(targetHost, method, context);
+            return httpClientService.getHttpClient(getClientId(call)).execute(targetHost, method, context);
         } catch (OXException e) {
             throw new IOException("Unable to obtain connection", e);
         }

@@ -421,7 +421,7 @@ public class DavPushGateway implements PushNotificationTransport {
         if (httpClientService == null) {
             throw ServiceExceptionCode.absentService(HttpClientService.class);
         }
-        return httpClientService.getHttpClient(HTTP_CLIENT_ID).getHttpClient();
+        return httpClientService.getHttpClient(HTTP_CLIENT_ID);
     }
 
     /**

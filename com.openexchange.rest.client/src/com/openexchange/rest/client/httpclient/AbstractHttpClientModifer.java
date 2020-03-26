@@ -70,10 +70,19 @@ import com.openexchange.java.Strings;
  * @since v7.10.4
  */
 public abstract class AbstractHttpClientModifer implements HttpClientBuilderModifier {
+    
+    protected final static String DEFAULT_UA = "OX App Suite HTTP client";
 
     private final String userAgent;
     private final AtomicBoolean isContentCompressionDisabled;
 
+    /**
+     * Initializes a new {@link AbstractHttpClientModifer}.
+     */
+    protected AbstractHttpClientModifer() {
+        this(null);
+    }
+    
     /**
      * Initializes a new {@link AbstractHttpClientModifer}.
      *

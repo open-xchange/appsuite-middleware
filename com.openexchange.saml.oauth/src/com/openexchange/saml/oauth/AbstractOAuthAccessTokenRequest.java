@@ -196,7 +196,7 @@ public abstract class AbstractOAuthAccessTokenRequest {
     }
 
     private HttpClient getHttpClient() throws IllegalStateException, OXException {
-        return services.getServiceSafe(HttpClientService.class).getHttpClient(clientId).getHttpClient();
+        return services.getServiceSafe(HttpClientService.class).getHttpClient(clientId);
     }
 
     /**

@@ -50,12 +50,22 @@
 package com.openexchange.rest.client.httpclient.internal;
 
 import static com.openexchange.java.Autoboxing.b;
+import java.io.IOException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
+import org.apache.http.HttpHost;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.ResponseHandler;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.params.HttpParams;
+import org.apache.http.protocol.HttpContext;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.rest.client.httpclient.ManagedHttpClient;
+
 
 /**
  * {@link ManagedHttpClientImpl}
@@ -63,6 +73,7 @@ import com.openexchange.rest.client.httpclient.ManagedHttpClient;
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.4
  */
+@SuppressWarnings("deprecation")
 public class ManagedHttpClientImpl implements ManagedHttpClient {
 
     private final String clientId;
@@ -102,8 +113,7 @@ public class ManagedHttpClientImpl implements ManagedHttpClient {
         this.reloadCallback = reloadCallback;
     }
 
-    @Override
-    public @NonNull HttpClient getHttpClient() throws IllegalStateException {
+    private @NonNull HttpClient getHttpClient() throws IllegalStateException {
         CloseableHttpClient httpClient = httpClientReference.get();
         if (null == httpClient) {
             throw new IllegalStateException("HttpClient is null.");
@@ -159,6 +169,58 @@ public class ManagedHttpClientImpl implements ManagedHttpClient {
     @Override
     public String toString() {
         return "managedHttpClient[clientId=" + clientId + ", configHashCode=" + String.valueOf(configHashCode) + "]";
+    }
+
+    // ------------------------------------------------ HTTP client methods --------------------------------------------------------------
+
+    @Override
+    public HttpResponse execute(HttpUriRequest request) throws IOException, ClientProtocolException {
+        return getHttpClient().execute(request);
+    }
+
+    @Override
+    public HttpResponse execute(HttpUriRequest request, HttpContext context) throws IOException, ClientProtocolException {
+        return getHttpClient().execute(request, context);
+    }
+
+    @Override
+    public HttpResponse execute(HttpHost target, HttpRequest request) throws IOException, ClientProtocolException {
+        return getHttpClient().execute(target, request);
+    }
+
+    @Override
+    public HttpResponse execute(HttpHost target, HttpRequest request, HttpContext context) throws IOException, ClientProtocolException {
+        return getHttpClient().execute(target, request, context);
+    }
+
+    @Override
+    public <T> T execute(HttpUriRequest request, ResponseHandler<? extends T> responseHandler) throws IOException, ClientProtocolException {
+        return getHttpClient().execute(request, responseHandler);
+    }
+
+    @Override
+    public <T> T execute(HttpUriRequest request, ResponseHandler<? extends T> responseHandler, HttpContext context) throws IOException, ClientProtocolException {
+        return getHttpClient().execute(request, responseHandler, context);
+    }
+
+    @Override
+    public <T> T execute(HttpHost target, HttpRequest request, ResponseHandler<? extends T> responseHandler) throws IOException, ClientProtocolException {
+        return getHttpClient().execute(target, request, responseHandler);
+    }
+
+    @Override
+    public <T> T execute(HttpHost target, HttpRequest request, ResponseHandler<? extends T> responseHandler, HttpContext context) throws IOException, ClientProtocolException {
+        return getHttpClient().execute(target, request, responseHandler, context);
+    }
+
+    @Override
+    public HttpParams getParams() {
+        return getHttpClient().getParams();
+    }
+
+    @Override
+    public org.apache.http.conn.ClientConnectionManager getConnectionManager() {
+        return getHttpClient().getConnectionManager();
     }
 
 }

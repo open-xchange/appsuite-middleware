@@ -266,7 +266,7 @@ public class EndpointPool {
 
                 LOG.debug("Sproxyd endpoint pool [{}]: Heartbeat - blacklist contains {} endpoints", filestoreId, I(blacklist.size()));
                 for (String endpoint : blacklist) {
-                    HttpClient httpClient = Services.getService(HttpClientService.class).getHttpClient(filestoreId).getHttpClient();
+                    HttpClient httpClient = Services.getService(HttpClientService.class).getHttpClient(filestoreId);
                     if (Utils.endpointUnavailable(endpoint, httpClient)) {
                         LOG.warn("Sproxyd endpoint pool [{}]: Endpoint {} is still unavailable", filestoreId, endpoint);
                     } else {

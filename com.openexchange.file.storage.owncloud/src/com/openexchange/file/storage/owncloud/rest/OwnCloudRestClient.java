@@ -234,7 +234,7 @@ public class OwnCloudRestClient {
         HttpResponse response = null;
         try {
             request.addHeader(OCS_APIREQUEST_HEADER, "true");
-            response = client.getHttpClient().execute(request, context);
+            response = client.execute(request, context);
             String json = EntityUtils.toString(response.getEntity());
             return handler.apply(new JSONObject(json));
         } catch (JSONException e) {

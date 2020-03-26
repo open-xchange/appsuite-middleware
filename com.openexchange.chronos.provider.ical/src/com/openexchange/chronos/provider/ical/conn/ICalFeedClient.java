@@ -212,7 +212,7 @@ public class ICalFeedClient {
 
     private HttpClient getHttpClient() throws OXException {
         HttpClientService httpClientService = Services.getServiceLookup().getServiceSafe(HttpClientService.class);
-        return httpClientService.getHttpClient("icalfeed").getHttpClient();
+        return httpClientService.getHttpClient("icalfeed");
     }
 
     private GetResponse prepareResponse(URI uri, HttpResponse httpResponse) throws OXException {

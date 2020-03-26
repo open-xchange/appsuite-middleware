@@ -285,6 +285,6 @@ public abstract class AbstractRESTClient {
     }
 
     private HttpClient getHttpClient() throws OXException {
-        return services.getServiceSafe(HttpClientService.class).getHttpClient(httpClientId).getHttpClient();
+        return services.getServiceSafe(HttpClientService.class).getHttpClient(httpClientId);
     }
 }

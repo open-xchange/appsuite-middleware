@@ -50,6 +50,7 @@
 package com.openexchange.rest.client.httpclient;
 
 import java.util.Optional;
+import com.openexchange.annotation.NonNull;
 import com.openexchange.annotation.Nullable;
 import com.openexchange.version.VersionService;
 
@@ -64,25 +65,33 @@ public class DefaultHttpClientConfigProvider extends AbstractHttpClientModifer i
     private final String clientId;
 
     /**
-     * Initializes a new {@link DefaultHttpClientConfigProvider}.
+     * Initializes a new {@link DefaultHttpClientConfigProvider} with the default user agent
      *
      * @param clientId The identifier of the HTTP client
-     * @param userAgent The user agent to set; may be <code>null</code>
      */
-    public DefaultHttpClientConfigProvider(String clientId, @Nullable String userAgent) {
-        super(userAgent);
-        this.clientId = clientId;
+    public DefaultHttpClientConfigProvider(String clientId) {
+        this(clientId, null, Optional.empty());
     }
 
     /**
      * Initializes a new {@link DefaultHttpClientConfigProvider}.
      *
      * @param clientId The identifier of the HTTP client
-     * @param userAgent The user agent to set; may be <code>null</code>
+     * @param userAgent The user agent to set "as-is", never <code>null</code>
+     */
+    public DefaultHttpClientConfigProvider(String clientId, @NonNull String userAgent) {
+        this(clientId, userAgent, Optional.empty());
+    }
+
+    /**
+     * Initializes a new {@link DefaultHttpClientConfigProvider}.
+     *
+     * @param clientId The identifier of the HTTP client
+     * @param userAgent The user agent to set; or <code>null</code> to use the default user agent string
      * @param optionalVersionService The optional version service. Will be used to append the version to the user agent
      */
     public DefaultHttpClientConfigProvider(String clientId, @Nullable String userAgent, Optional<VersionService> optionalVersionService) {
-        super(userAgent + getVersion(optionalVersionService));
+        super(getUserAgent(userAgent, optionalVersionService));
         this.clientId = clientId;
     }
 
@@ -91,8 +100,20 @@ public class DefaultHttpClientConfigProvider extends AbstractHttpClientModifer i
         return clientId;
     }
 
-    private static String getVersion(Optional<VersionService> optionalVersionService) {
-        return optionalVersionService.isPresent() ? optionalVersionService.get().getVersionString() : "<unknown version>";
+    private static String getUserAgent(String userAgent, Optional<VersionService> optionalVersionService) {
+        StringBuilder sb = new StringBuilder();
+        if (null == userAgent) {
+            sb.append(DEFAULT_UA);
+            if (optionalVersionService.isPresent()) {
+                sb.append('/');
+            }
+        } else {
+            sb.append(userAgent);
+        }
+        if (optionalVersionService.isPresent()) {
+            sb.append(optionalVersionService.get().getVersionString());
+        }
+        return sb.toString();
     }
 
 }

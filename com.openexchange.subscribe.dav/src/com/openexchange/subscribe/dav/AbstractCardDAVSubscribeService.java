@@ -615,7 +615,7 @@ public abstract class AbstractCardDAVSubscribeService extends AbstractDAVSubscri
     }
 
     private HttpClient getHttpClient() throws OXException {
-        return services.getServiceSafe(HttpClientService.class).getHttpClient(CLIENT_ID).getHttpClient();
+        return services.getServiceSafe(HttpClientService.class).getHttpClient(CLIENT_ID);
     }
 
     /**
