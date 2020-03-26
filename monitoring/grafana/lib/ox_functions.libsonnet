@@ -2,6 +2,8 @@ local grafana = import 'grafonnet/grafana.libsonnet';
 local dashboard = grafana.dashboard;
 local template = grafana.template;
 
+local prometheus_ds = 'Prometheus';
+
 {
   newDashboard(title, metric, tags=[]):: dashboard.new(
     title=title,
@@ -24,7 +26,7 @@ local template = grafana.template;
       name='job',
       label='Job',
       hide='variable',
-      datasource='Prometheus',
+      datasource=prometheus_ds,
       query='label_values(' + metric + ',job)',
       refresh='load'
     )
@@ -32,7 +34,7 @@ local template = grafana.template;
     template.new(
       name='host',
       label='Host',
-      datasource='Prometheus',
+      datasource=prometheus_ds,
       query='label_values(up{job=~"$job"}, job)',
       refresh='time',
     )
@@ -40,7 +42,7 @@ local template = grafana.template;
     template.new(
       name='instance',
       label='Instance',
-      datasource='Prometheus',
+      datasource=prometheus_ds,
       query='label_values(up{job=~"$host"}, instance)',
       refresh='time',
     )

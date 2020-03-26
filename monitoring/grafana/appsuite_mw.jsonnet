@@ -1,12 +1,11 @@
-local grafana = import 'grafonnet/grafana.libsonnet';
+local grafana = (import 'grafonnet/grafana.libsonnet')
+                + (import './lib/ox_functions.libsonnet');
 local singlestat = grafana.singlestat;
 local graphPanel = grafana.graphPanel;
 local gauge = grafana.gauge;
 local row = grafana.row;
 local prometheus = grafana.prometheus;
 local table = grafana.tablePanel;
-
-local oxFunctions = import './lib/ox_functions.libsonnet';
 
 local overviewRow = row.new(
   title='Overview'
@@ -740,7 +739,7 @@ local userDBWriteTimes = graphPanel.new(
   )
 );
 
-oxFunctions.newDashboard(
+grafana.newDashboard(
   title='AppSuite',
   tags=['java', 'appsuite-mw'],
   metric='jvm_info'

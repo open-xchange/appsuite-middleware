@@ -1,10 +1,9 @@
-local grafana = import 'grafonnet/grafana.libsonnet';
+local grafana = (import 'grafonnet/grafana.libsonnet')
+                + (import './lib/ox_functions.libsonnet');
 local singlestat = grafana.singlestat;
 local graphPanel = grafana.graphPanel;
 local row = grafana.row;
 local prometheus = grafana.prometheus;
-
-local oxFunctions = import './lib/ox_functions.libsonnet';
 
 local overviewRow = row.new(
   title='Overview'
