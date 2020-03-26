@@ -999,9 +999,11 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         Attendee originalAttendee = attendeeUpdate.getOriginal();
         requireWritePermissions(originalEvent, originalAttendee, assumeExternalOrganizerUpdate);
         /*
-         * deny setting the participation status to a value other than NEEDS-ACTION for other attendees: RFC 6638, section 3.2.1
+         * if configured, deny setting the participation status to a value other than NEEDS-ACTION for other attendees: RFC 6638, section 3.2.1
          */
-        if (false == matches(originalAttendee, calendarUserId) && false == assumeExternalOrganizerUpdate && attendeeUpdate.getUpdatedFields().contains(AttendeeField.PARTSTAT) && false == ParticipationStatus.NEEDS_ACTION.matches(attendeeUpdate.getUpdate().getPartStat())) {
+        if (false == session.getConfig().isAllowOrganizerPartStatChanges() && false == matches(originalAttendee, calendarUserId) && 
+            false == assumeExternalOrganizerUpdate && attendeeUpdate.getUpdatedFields().contains(AttendeeField.PARTSTAT) && 
+            false == ParticipationStatus.NEEDS_ACTION.matches(attendeeUpdate.getUpdate().getPartStat())) {
             throw CalendarExceptionCodes.FORBIDDEN_ATTENDEE_CHANGE.create(originalEvent.getId(), originalAttendee, AttendeeField.PARTSTAT);
         }
     }
