@@ -50,7 +50,18 @@
 package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.AlarmUtils.filterRelativeTriggers;
-import static com.openexchange.chronos.common.CalendarUtils.*;
+import static com.openexchange.chronos.common.CalendarUtils.find;
+import static com.openexchange.chronos.common.CalendarUtils.getAlarmIDs;
+import static com.openexchange.chronos.common.CalendarUtils.getExceptionDates;
+import static com.openexchange.chronos.common.CalendarUtils.getFolderView;
+import static com.openexchange.chronos.common.CalendarUtils.getRecurrenceIds;
+import static com.openexchange.chronos.common.CalendarUtils.hasAttendeePrivileges;
+import static com.openexchange.chronos.common.CalendarUtils.hasExternalOrganizer;
+import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
+import static com.openexchange.chronos.common.CalendarUtils.isLastNonHiddenUserAttendee;
+import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
+import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
+import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.impl.Check.classificationAllowsUpdate;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Utils.getCalendarUser;
@@ -999,10 +1010,10 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         Attendee originalAttendee = attendeeUpdate.getOriginal();
         requireWritePermissions(originalEvent, originalAttendee, assumeExternalOrganizerUpdate);
         /*
-         * deny setting the participation status to a value other than NEEDS-ACTION for other attendees: RFC 6638, section 3.2.1
+         * if configured, deny setting the participation status to a value other than NEEDS-ACTION for other attendees: RFC 6638, section 3.2.1
          */
-        if (false == matches(originalAttendee, calendarUserId) && 
-            false == assumeExternalOrganizerUpdate && attendeeUpdate.getUpdatedFields().contains(AttendeeField.PARTSTAT) &&
+        if (false == session.getConfig().isAllowOrganizerPartStatChanges() && false == matches(originalAttendee, calendarUserId) && 
+            false == assumeExternalOrganizerUpdate && attendeeUpdate.getUpdatedFields().contains(AttendeeField.PARTSTAT) && 
             false == ParticipationStatus.NEEDS_ACTION.matches(attendeeUpdate.getUpdate().getPartStat())) {
             throw CalendarExceptionCodes.FORBIDDEN_ATTENDEE_CHANGE.create(originalEvent.getId(), originalAttendee, AttendeeField.PARTSTAT);
         }
