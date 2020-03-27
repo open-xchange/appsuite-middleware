@@ -54,6 +54,8 @@ import static com.openexchange.java.Autoboxing.i;
 import java.lang.reflect.Constructor;
 import java.rmi.RemoteException;
 import java.security.SecureRandom;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -96,7 +98,7 @@ public abstract class OXCommonImpl {
 
     /**
      * Checks whether the given context exists or not
-     * 
+     *
      * @param ctx The context to check
      * @throws NoSuchContextException In case the context doesn't exist
      * @throws StorageException In case of errors with the storage
@@ -195,14 +197,11 @@ public abstract class OXCommonImpl {
      * @return The admin/reseller name
      */
     protected static String getAdminName(Credentials credentials) {
-        if (null != credentials) {
-            return credentials.getLogin();
-        }
-        return null;
+        return null == credentials ? null : credentials.getLogin();
     }
 
     /**
-     * Add exception identfier to exception message, helping to trace errors across client and server
+     * Add exception identifier to exception message, helping to trace errors across client and server
      *
      * @param e The exception whose message should be enhanced
      * @param exceptionId The exception identifier
@@ -212,6 +211,8 @@ public abstract class OXCommonImpl {
         StringBuilder sb = new StringBuilder(e.getMessage()).append("; exceptionId ").append(exceptionId);
         return sb.toString();
     }
+
+    private static final ConcurrentMap<Class<?>, Constructor<?>> CONSTRUCTORS = new ConcurrentHashMap<>();
 
     /**
      * Adds the exception identifier to exception message
@@ -225,21 +226,58 @@ public abstract class OXCommonImpl {
         if (null == e) {
             return null;
         }
+
+        // Build message
         String message = enhanceExceptionMessage(e, exceptionId);
-        Constructor<T> constructor;
+
+        // Detect appropriate constructor
+        Class<? extends Exception> clazz = e.getClass();
+        Constructor<T> constructor = (Constructor<T>) CONSTRUCTORS.get(clazz);
+        if (constructor == null) {
+            try {
+                Constructor<T> newConstructor = (Constructor<T>) clazz.getConstructor(String.class, Throwable.class);
+                constructor = (Constructor<T>) CONSTRUCTORS.putIfAbsent(clazz, newConstructor);
+                if (constructor == null) {
+                    constructor = newConstructor;
+                }
+            } catch (NoSuchMethodException x) {
+                // Maybe OXResellerException, wrap in RemoteExeption
+                LOGGER.debug("", x);
+                RemoteException cme = new RemoteException(message, e.getCause());
+                cme.setStackTrace(e.getStackTrace());
+                return cme;
+            } catch (Exception x) {
+                LOGGER.error("", x);
+                return e;
+            }
+        }
+
+        // Yield new exception instance
         try {
-            constructor = (Constructor<T>) e.getClass().getConstructor(String.class, Throwable.class);
             T result = constructor.newInstance(message, e.getCause());
             result.setStackTrace(e.getStackTrace());
             return result;
-        } catch (NoSuchMethodException x) {
-            // Maybe OXResellerException, wrap in RemoteExeption
-            LOGGER.debug("", x);
-            return new RemoteException(message, e);
         } catch (Exception x) {
             LOGGER.error("", x);
-            return null;
+            return e;
         }
+    }
+
+    /**
+     * Generates a unique exception identifier.
+     *
+     * @return The generated exception identifier
+     */
+    private static String generateExceptionId() {
+        int count = COUNTER.incrementAndGet();
+        while ((count = COUNTER.incrementAndGet()) <= 0) {
+            if (COUNTER.compareAndSet(count, 1)) {
+                count = 1;
+                break;
+            }
+        }
+
+        return new StringBuilder().append(EXCEPTION_ID).append("-").append(count).toString();
     }
 
     /**
@@ -253,10 +291,16 @@ public abstract class OXCommonImpl {
      * @return The enhanced exception
      */
     protected static Exception logAndEnhanceException(org.slf4j.Logger logger, Exception e, Credentials creds, String contextId, String objectId) {
-        String exceptionId = new StringBuilder().append(EXCEPTION_ID).append("-").append(COUNTER.incrementAndGet()).toString();
+        // Generate a unique exception identifier
+        String exceptionId = generateExceptionId();
+
+        // Enhance by provisioning log properties & log exception
         LogProperties.putProvisioningLogProperties(getAdminName(creds), exceptionId, contextId, objectId);
-        logger.error("", e);
-        LogProperties.removeProvisioningLogProperties();
+        try {
+            logger.error("", e);
+        } finally {
+            LogProperties.removeProvisioningLogProperties();
+        }
         return enhanceException(e, exceptionId);
     }
 
@@ -286,18 +330,20 @@ public abstract class OXCommonImpl {
     }
 
     /**
-     * Creates a comma-separated list of object identifiers 
+     * Creates a comma-separated list of object identifiers
      *
      * @param objects The array of object
      * @return The identifiers as comma-separated list
      */
     protected String getObjectIds(NameAndIdObject[] objects) {
+        if (null == objects || 0 >= objects.length) {
+            return "";
+        }
+
         StringBuilder sb = new StringBuilder();
-        if (null != objects && 0 < objects.length) {
-            for (NameAndIdObject object : objects) {
-                sb.append(object.getId()).append(",");
-            }
-            sb.deleteCharAt(sb.length() - 1);
+        sb.append(objects[0].getId()).append(",");
+        for (int j = 1; j < objects.length; j++) {
+            sb.append(',').append(objects[j].getId());
         }
         return sb.toString();
     }

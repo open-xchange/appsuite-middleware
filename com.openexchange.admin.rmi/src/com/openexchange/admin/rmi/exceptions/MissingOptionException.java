@@ -57,4 +57,12 @@ public class MissingOptionException extends Exception {
     public MissingOptionException(final String msg) {
         super(msg);
     }
+
+    /**
+     * @param message
+     * @param cause
+     */
+    public MissingOptionException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

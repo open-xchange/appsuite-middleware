@@ -55,7 +55,10 @@ package com.openexchange.logging;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.2
+ * @deprecated The according <code>MDCEnablerTurboFilter</code> class has been removed, thus this thread group is nowhere used and is
+ *             subject for being removed
  */
+@Deprecated
 public class MDCEnabledThreadGroup extends ThreadGroup {
 
     /**

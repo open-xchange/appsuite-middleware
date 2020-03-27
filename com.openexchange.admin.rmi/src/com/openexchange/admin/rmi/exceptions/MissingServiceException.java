@@ -57,4 +57,12 @@ public class MissingServiceException extends Exception {
     public MissingServiceException(final String msg) {
         super(msg);
     }
+
+    /**
+     * @param message
+     * @param cause
+     */
+    public MissingServiceException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }
