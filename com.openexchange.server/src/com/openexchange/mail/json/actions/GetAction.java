@@ -83,6 +83,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.converters.preview.AbstractPreviewResultConverter;
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Charsets;
@@ -95,6 +96,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.json.converters.MailConverter;
+import com.openexchange.mail.json.osgi.MailJSONActivator;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeFilter;
@@ -427,7 +429,7 @@ public final class GetAction extends AbstractMailAction {
                 /*
                  * Check whether preview should be pre-generated
                  */
-                if (AJAXRequestDataTools.parseBoolParameter(req.getParameter(PARAMETER_PREGENERATE_PREVIEWS))) {
+                if (AJAXRequestDataTools.parseBoolParameter(req.getParameter(PARAMETER_PREGENERATE_PREVIEWS)) && hasPreviewEnabled(req)) {                        
                     PreviewService previewService = ServerServiceRegistry.getInstance().getService(PreviewService.class);
                     ThreadPoolService threadPool = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
                     if (null != previewService && null != threadPool) {
@@ -501,6 +503,11 @@ public final class GetAction extends AbstractMailAction {
         } catch (RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
+    }
+
+    private boolean hasPreviewEnabled(MailRequest req) throws OXException {
+        CapabilityService capabilityService = MailJSONActivator.SERVICES.get().getService(CapabilityService.class);
+        return null != capabilityService && capabilityService.getCapabilities(req.getSession()).contains("document_preview");
     }
 
     private ThresholdFileHolder getMimeSource(final MailMessage mail, final MimeFilter mimeFilter) throws OXException, MessagingException, IOException {
@@ -630,24 +637,9 @@ public final class GetAction extends AbstractMailAction {
                 }
 
                 // Determine non-inline parts
-                List<MailPart> nonInlineParts;
-                if (mail.getContentType().startsWith("multipart/")) {
-                    // Grab first seen text from original message and check for possible referenced inline images
-                    List<String> contentIds = new ArrayList<String>();
-                    MimeProcessingUtility.getTextForForward(mail, true, false, contentIds, session);
-
-                    // Get mail's non-inline parts
-                    NonInlineForwardPartHandler handler = new NonInlineForwardPartHandler();
-                    if (false == contentIds.isEmpty()) {
-                        handler.setImageContentIds(contentIds);
-                    }
-                    new MailMessageParser().setInlineDetectorBehavior(true).parseMailMessage(mail, handler);
-                    nonInlineParts = handler.getNonInlineParts();
-                } else {
-                    NonInlineForwardPartHandler handler = new NonInlineForwardPartHandler();
-                    new MailMessageParser().setInlineDetectorBehavior(true).parseMailMessage(mail, handler);
-                    nonInlineParts = handler.getNonInlineParts();
-                }
+                NonInlineForwardPartHandler handler = new NonInlineForwardPartHandler();
+                new MailMessageParser().setInlineDetectorBehavior(true).parseMailMessage(mail, handler);
+                List<MailPart> nonInlineParts = handler.getNonInlineParts();
 
                 // Check non-inline parts
                 if (null == nonInlineParts || nonInlineParts.isEmpty()) {

@@ -679,6 +679,8 @@ public class DataExportServiceImpl implements DataExportService {
                     schedule(startDelay, stopDelay, currentTimeMillis, timerService);
                     return;
                 }
+
+                dayOfWeekTimeRanges = null;
             }
 
             // Find follow-up day's time range
@@ -715,6 +717,12 @@ public class DataExportServiceImpl implements DataExportService {
     }
 
     private void schedule(long startDelay, long stopDelay, long currentTimeMillis, TimerService timerService) {
+        if (startDelay < 0) {
+            throw new IllegalArgumentException("Start delay must not be less than 0 (zero): " + startDelay);
+        }
+        if (stopDelay < startDelay) {
+            throw new IllegalArgumentException("Stop delay (" + startDelay + ") must be greater than start delay (" + stopDelay + ")");
+        }
         final long endTimeMillis = currentTimeMillis + stopDelay;
         Runnable startTask = new Runnable() {
 
