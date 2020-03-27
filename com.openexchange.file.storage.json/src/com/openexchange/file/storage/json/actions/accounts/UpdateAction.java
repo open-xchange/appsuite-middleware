@@ -82,12 +82,26 @@ public class UpdateAction extends AbstractFileStorageAccountAction {
         if (!data.has(FileStorageAccountConstants.ID)) {
             throw FileStorageExceptionCodes.MISSING_PARAMETER.create(FileStorageAccountConstants.ID);
         }
+
         final FileStorageAccount account = parser.parse(data);
-        if (account.getFileStorageService() instanceof LoginAwareFileStorageServiceExtension) {
-            //test connection
-            ((LoginAwareFileStorageServiceExtension) account.getFileStorageService()).testConnection(account, session);
-        }
+
+        //load existing account for resetting if the connection check failed
+        FileStorageAccount existingAccount = account.getFileStorageService().getAccountManager().getAccount(account.getId(), session);
+
+        //perform update
         account.getFileStorageService().getAccountManager().updateAccount(account, session);
+
+        if (account.getFileStorageService() instanceof LoginAwareFileStorageServiceExtension) {
+            try {
+                //test connection
+                ((LoginAwareFileStorageServiceExtension) account.getFileStorageService()).testConnection(account, session);
+            }
+            catch(OXException e) {
+                //reset
+                account.getFileStorageService().getAccountManager().updateAccount(existingAccount, session);
+                throw e;
+            }
+        }
         return new AJAXRequestResult(Integer.valueOf(1));
     }
 
