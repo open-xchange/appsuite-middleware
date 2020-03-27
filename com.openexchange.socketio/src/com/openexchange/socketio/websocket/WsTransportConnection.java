@@ -117,12 +117,13 @@ public final class WsTransportConnection extends AbstractTransportConnection imp
     public void onWebSocketClose(WebSocket socket) {
         // If close is unexpected then try to guess the reason based on closeCode, otherwise the reason is already set
         Session session = getSession();
-        if (session.getConnectionState() != ConnectionState.CLOSING) {
-            session.setDisconnectReason(fromCloseCode(false));
+        synchronized (session) {
+            if (session.getConnectionState() != ConnectionState.CLOSING) {
+                session.setDisconnectReason(fromCloseCode(false));
+            }
+            session.setDisconnectMessage("Closing");
+            session.onShutdown();
         }
-
-        session.setDisconnectMessage("Closing");
-        session.onShutdown();
     }
 
     /**

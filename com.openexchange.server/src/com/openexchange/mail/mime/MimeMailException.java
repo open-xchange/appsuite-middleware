@@ -321,7 +321,15 @@ public class MimeMailException extends OXException {
                 SmtpInfo smtpInfo = getSmtpInfo(failedException);
 
                 // Message too large?
-                if ((smtpInfo.retCode == 552) || (toLowerCase(smtpInfo.message, "").indexOf(ERR_MSG_TOO_LARGE) > -1)) {
+                if (smtpInfo.retCode == 552) {
+                    if (Strings.containsAny(toLowerCase(smtpInfo.message, ""), "virus", "spam")) {
+                        // Return code incorrectly used to signal message has been blocked due to triggering a filter such as a URL in the
+                        // message being found in a domain black list.
+                        return MimeMailExceptionCode.MESSAGE_REJECTED_EXT.create(failedException, smtpInfo.toString());
+                    }
+                    return MimeMailExceptionCode.MESSAGE_TOO_LARGE_EXT.create(failedException, smtpInfo.toString());
+                }
+                if (toLowerCase(smtpInfo.message, "").indexOf(ERR_MSG_TOO_LARGE) > -1) {
                     return MimeMailExceptionCode.MESSAGE_TOO_LARGE_EXT.create(failedException, smtpInfo.toString());
                 }
                 return MimeMailExceptionCode.SEND_FAILED_MSG_EXT_ERROR.create(failedException, failedException.getMessage(), smtpInfo.toString());
@@ -330,7 +338,15 @@ public class MimeMailException extends OXException {
                 SmtpInfo smtpInfo = getSmtpInfo(failedException);
 
                 // Message too large?
-                if ((smtpInfo.retCode == 552) || (toLowerCase(smtpInfo.message, "").indexOf(ERR_MSG_TOO_LARGE) > -1)) {
+                if (smtpInfo.retCode == 552) {
+                    if (Strings.containsAny(toLowerCase(smtpInfo.message, ""), "virus", "spam")) {
+                        // Return code incorrectly used to signal message has been blocked due to triggering a filter such as a URL in the
+                        // message being found in a domain black list.
+                        return MimeMailExceptionCode.MESSAGE_REJECTED_EXT.create(failedException, smtpInfo.toString());
+                    }
+                    return MimeMailExceptionCode.MESSAGE_TOO_LARGE_EXT.create(failedException, smtpInfo.toString());
+                }
+                if (toLowerCase(smtpInfo.message, "").indexOf(ERR_MSG_TOO_LARGE) > -1) {
                     return MimeMailExceptionCode.MESSAGE_TOO_LARGE_EXT.create(failedException, smtpInfo.toString());
                 }
                 return MimeMailExceptionCode.SEND_FAILED_MSG_EXT_ERROR.create(failedException, failedException.getMessage(), smtpInfo.toString());
@@ -339,7 +355,15 @@ public class MimeMailException extends OXException {
                 SmtpInfo smtpInfo = getSmtpInfo(sendFailedError);
 
                 // Message too large?
-                if ((smtpInfo.retCode == 552) || (toLowerCase(smtpInfo.message, "").indexOf(ERR_MSG_TOO_LARGE) > -1)) {
+                if (smtpInfo.retCode == 552) {
+                    if (Strings.containsAny(toLowerCase(smtpInfo.message, ""), "virus", "spam")) {
+                        // Return code incorrectly used to signal message has been blocked due to triggering a filter such as a URL in the
+                        // message being found in a domain black list.
+                        return MimeMailExceptionCode.MESSAGE_REJECTED_EXT.create(sendFailedError, smtpInfo.toString());
+                    }
+                    return MimeMailExceptionCode.MESSAGE_TOO_LARGE_EXT.create(sendFailedError, smtpInfo.toString());
+                }
+                if (toLowerCase(smtpInfo.message, "").indexOf(ERR_MSG_TOO_LARGE) > -1) {
                     return MimeMailExceptionCode.MESSAGE_TOO_LARGE_EXT.create(sendFailedError, smtpInfo.toString());
                 }
                 // 452 - 452 4.1.0 ... temporary failure
@@ -394,8 +418,18 @@ public class MimeMailException extends OXException {
                 }
 
                 // Message too large?
-                if (null != smtpInfo && ((smtpInfo.retCode == 552) || (toLowerCase(smtpInfo.message, "").indexOf(ERR_MSG_TOO_LARGE) > -1))) {
-                    return MimeMailExceptionCode.MESSAGE_TOO_LARGE_EXT.create(exc, smtpInfo.toString());
+                if (null != smtpInfo) {
+                    if (smtpInfo.retCode == 552) {
+                        if (Strings.containsAny(toLowerCase(smtpInfo.message, ""), "virus", "spam")) {
+                            // Return code incorrectly used to signal message has been blocked due to triggering a filter such as a URL in the
+                            // message being found in a domain black list.
+                            return MimeMailExceptionCode.MESSAGE_REJECTED_EXT.create(exc, smtpInfo.toString());
+                        }
+                        return MimeMailExceptionCode.MESSAGE_TOO_LARGE_EXT.create(exc, smtpInfo.toString());
+                    }
+                    if (toLowerCase(smtpInfo.message, "").indexOf(ERR_MSG_TOO_LARGE) > -1) {
+                        return MimeMailExceptionCode.MESSAGE_TOO_LARGE_EXT.create(exc, smtpInfo.toString());
+                    }
                 }
 
                 // Others...

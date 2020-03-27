@@ -659,8 +659,15 @@ public class IMAPDefaultFolderChecker {
                         toSet.put(index, checkedFullName);
                         added = true;
                     } else if (!checkedFullName.equals(fullName)) {
-                        // Strange...
-                        LOG.warn("Invalid {} full-name in settings of external account for login {} (account={}) on IMAP server {}. Should be \"{}\", but is \"{}\" (user={}, context={})", getFallbackName(index), imapConfig.getLogin(), Integer.valueOf(accountId), imapConfig.getServer(), fullName, checkedFullName, Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
+                        // Checked full name is not equal to expected full name...
+                        if (checkedFullName.equalsIgnoreCase(fullName)) {
+                            // But equals ignore-case
+                            toSet.put(index, checkedFullName);
+                            added = true;
+                        } else {
+                            // Strange...
+                            LOG.warn("Invalid {} full-name in settings of external account for login {} (account={}) on IMAP server {}. Should be \"{}\", but is \"{}\" (user={}, context={})", getFallbackName(index), imapConfig.getLogin(), Integer.valueOf(accountId), imapConfig.getServer(), fullName, checkedFullName, Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
+                        }
                     }
                 }
             }
@@ -965,6 +972,8 @@ public class IMAPDefaultFolderChecker {
                 f = (IMAPFolder) candidates.get(0);
                 desiredFullName = f.getFullName();
             }
+        } else {
+            desiredFullName = f.getFullName();
         }
         checkSubscriptionStatus(subscribe, f,  checkSpecialUse, namespace, index, modified);
         return desiredFullName;

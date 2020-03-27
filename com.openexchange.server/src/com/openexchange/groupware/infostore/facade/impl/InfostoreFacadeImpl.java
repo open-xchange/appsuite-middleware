@@ -1866,7 +1866,8 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                 if (id != NEW && checkAutodeleteCapabilitySafe(folderAdmin, session)) {
                     int maxVersions = InfostoreAutodeleteSettings.getMaxNumberOfFileVersions(folderAdmin, session.getContextId());
                     if (maxVersions > 0) {
-                        new InfostoreAutodeletePerformer(this).removeVersionsByMaxCount(id, maxVersions, session);
+                        int currentVersion = parameters.getDocument().getVersion();
+                        new InfostoreAutodeletePerformer(this).removeVersionsByMaxCount(id, currentVersion, maxVersions, session);
                     }
                 }
             }
@@ -2454,8 +2455,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             versions.append(v).append(',');
             versionSet.add(Integer.valueOf(v));
         }
-        versions.setLength(versions.length() - 1);
-        versions.append(')');
+        versions.setCharAt(versions.length() - 1, ')');
 
         List<DocumentMetadata> allVersions = SearchIterators.asList(InfostoreIterator.allVersionsWhere("infostore_document.infostore_id = " + id + " AND infostore_document.version_number IN " + versions.toString() + " and infostore_document.version_number != 0 ", Metadata.VALUES_ARRAY, this, context));
 

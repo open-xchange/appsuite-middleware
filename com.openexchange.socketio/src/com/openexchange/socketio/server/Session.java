@@ -348,7 +348,7 @@ public class Session implements DisconnectListener {
      * @param packet The packet
      * @param connection The connection that received the packet
      */
-    public synchronized void onPacket(EngineIOPacket packet, TransportConnection connection) {
+    public void onPacket(EngineIOPacket packet, TransportConnection connection) {
         switch (packet.getType()) {
             case OPEN:
             case PONG:
@@ -411,12 +411,12 @@ public class Session implements DisconnectListener {
                     }
                 } catch (SocketIOException e) {
                     LOGGER.debug("Cannot send packet to the client", e);
-                    closeConnection(DisconnectReason.CONNECT_FAILED, activeConnection);
+                    closeConnection(DisconnectReason.CONNECT_FAILED, getConnection());
                 }
                 return;
 
             case DISCONNECT:
-                closeConnection(DisconnectReason.CLOSED_REMOTELY, activeConnection);
+                closeConnection(DisconnectReason.CLOSED_REMOTELY, getConnection());
                 return;
 
             case EVENT:
@@ -448,7 +448,7 @@ public class Session implements DisconnectListener {
     }
 
     private void onEvent(EventPacket packet) {
-        if (state != ConnectionState.CONNECTED) {
+        if (getConnectionState() != ConnectionState.CONNECTED) {
             return;
         }
 
@@ -459,9 +459,12 @@ public class Session implements DisconnectListener {
                 return;
             }
 
-            Socket socket = sockets.get(ns.getId());
+            Socket socket;
+            synchronized (this) {
+                socket = sockets.get(ns.getId());
+            }
             if (socket == null) {
-                activeConnection.send(SocketIOProtocol.createErrorPacket(packet.getNamespace(), "No socket is connected to the namespace"));
+                getConnection().send(SocketIOProtocol.createErrorPacket(packet.getNamespace(), "No socket is connected to the namespace"));
                 return;
             }
 
@@ -476,14 +479,14 @@ public class Session implements DisconnectListener {
                     args = new Object[] { ack };
                 }
 
-                activeConnection.send(SocketIOProtocol.createACKPacket(packet.getId(), packet.getNamespace(), args));
+                getConnection().send(SocketIOProtocol.createACKPacket(packet.getId(), packet.getNamespace(), args));
             }
         } catch (Throwable e) {
             LOGGER.warn("Session[{}]: Exception thrown by one of the event listeners", sessionId, e);
         }
     }
 
-    private void onACK(ACKPacket packet) {
+    private synchronized void onACK(ACKPacket packet) {
         if (state != ConnectionState.CONNECTED) {
             return;
         }
@@ -499,7 +502,7 @@ public class Session implements DisconnectListener {
         }
     }
 
-    private void upgradeConnection(TransportConnection connection) {
+    private synchronized void upgradeConnection(TransportConnection connection) {
         LOGGER.debug("Upgrading from {} to {}", activeConnection.getTransport(), connection.getTransport());
         activeConnection = connection;
     }
@@ -507,7 +510,7 @@ public class Session implements DisconnectListener {
     /**
      * Remembers the disconnect reason and closes underlying transport activeConnection
      */
-    private void closeConnection(DisconnectReason reason, TransportConnection connection) {
+    private synchronized void closeConnection(DisconnectReason reason, TransportConnection connection) {
         if (this.activeConnection == connection) {
             setDisconnectReason(reason);
         }

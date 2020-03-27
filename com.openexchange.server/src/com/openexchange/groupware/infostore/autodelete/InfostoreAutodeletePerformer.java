@@ -60,6 +60,7 @@ import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.database.impl.InfostoreIterator;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.infostore.utils.Metadata;
@@ -154,6 +155,10 @@ public class InfostoreAutodeletePerformer {
                 public boolean execute(int folderId) {
                     try {
                         cleanupVersionsByMaxLastModified(folderId, 0, maxLastModified, session);
+                    } catch (OXException e) {
+                        if (!InfostoreExceptionCodes.DOCUMENT_NOT_EXIST.equals(e)) {
+                            LoggerHolder.LOG.error("Failed to remove elapsed document versions from folder {}", Integer.valueOf(folderId), e);
+                        }
                     } catch (Exception e) {
                         LoggerHolder.LOG.error("Failed to remove elapsed document versions from folder {}", Integer.valueOf(folderId), e);
                     }
@@ -169,6 +174,10 @@ public class InfostoreAutodeletePerformer {
                 public boolean execute(int folderId) {
                     try {
                         cleanupVersionsByMaxLastModified(folderId, userId, maxLastModified, session);
+                    } catch (OXException e) {
+                        if (!InfostoreExceptionCodes.DOCUMENT_NOT_EXIST.equals(e)) {
+                            LoggerHolder.LOG.error("Failed to remove elapsed document versions from folder {}", Integer.valueOf(folderId), e);
+                        }
                     } catch (Exception e) {
                         LoggerHolder.LOG.error("Failed to remove elapsed document versions from folder {}", Integer.valueOf(folderId), e);
                     }
@@ -211,11 +220,12 @@ public class InfostoreAutodeletePerformer {
      * Removes all versions of a certain document, which exceed the given max. number of versions.
      *
      * @param id The document identifier
+     * @param currentVersion The number of the current version
      * @param maxVersions The max. number of versions
      * @param session The session
      * @throws OXException If remove operation fails
      */
-    public void removeVersionsByMaxCount(int id, int maxVersions, ServerSession session) throws OXException {
+    public void removeVersionsByMaxCount(int id, int currentVersion, int maxVersions, ServerSession session) throws OXException {
         /*
          * query versions
          */
@@ -225,25 +235,7 @@ public class InfostoreAutodeletePerformer {
          */
         int numberOfVersionsToDelete = versionsOfDocument.size() - maxVersions;
         if (numberOfVersionsToDelete > 0) {
-            Collections.sort(versionsOfDocument, new Comparator<DocumentMetadata>() {
-
-                @Override
-                public int compare(DocumentMetadata d1, DocumentMetadata d2) {
-                    if (d1.isCurrentVersion()) {
-                        if (!d2.isCurrentVersion()) {
-                            return 1;
-                        }
-                    } else if (d2.isCurrentVersion()) {
-                        if (!d1.isCurrentVersion()) {
-                            return -1;
-                        }
-                    }
-
-                    int x = d1.getVersion();
-                    int y = d2.getVersion();
-                    return (x < y) ? -1 : ((x == y) ? 0 : 1);
-                }
-            });
+            Collections.sort(versionsOfDocument, new VersionComparator(currentVersion));
 
             TIntList versionsToDelete = new TIntArrayList(numberOfVersionsToDelete);
             Iterator<DocumentMetadata> versionsOfDocumentIter = versionsOfDocument.iterator();
@@ -263,6 +255,39 @@ public class InfostoreAutodeletePerformer {
     private static boolean isNotVirtual(FolderObject fo) {
         final int id = fo.getObjectID();
         return id != FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID && id != FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID;
+    }
+    
+    // -------------------------------------------------------------------------------------------------------------------------------------
+    
+    private static class VersionComparator implements Comparator<DocumentMetadata> {
+
+        private final int currentVersion;
+
+        VersionComparator(int currentVersion) {
+            super();
+            this.currentVersion = currentVersion;
+        }
+
+        @Override
+        public int compare(DocumentMetadata d1, DocumentMetadata d2) {
+            if (isCurrentVersion(d1)) {
+                if (!isCurrentVersion(d2)) {
+                    return 1;
+                }
+            } else if (isCurrentVersion(d2)) {
+                if (!isCurrentVersion(d1)) {
+                    return -1;
+                }
+            }
+
+            int x = d1.getVersion();
+            int y = d2.getVersion();
+            return (x < y) ? -1 : ((x == y) ? 0 : 1);
+        }
+
+        private boolean isCurrentVersion(DocumentMetadata d) {
+            return currentVersion == d.getVersion();
+        }
     }
 
 }
