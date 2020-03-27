@@ -15,7 +15,7 @@
         schema:
           type: string
       - in: query
-        name: conectionCheck
+        name: connectionCheck
         description: >-
           If set to true, a connection check is performed for each queried file storage account.
           In case the connection check failed, the hasError flag is set to true in the returned response object,
