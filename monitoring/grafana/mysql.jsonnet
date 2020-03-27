@@ -705,7 +705,7 @@ local overviewRowDBVersion = singlestat.new(
 
 grafana.newDashboard(
   title='MySQL',
-  tags=['MySQL', 'database'],
+  tags=['MySQL', 'MariaDB'],
   metric='mysql_up'
 ).addPanels(
   [
