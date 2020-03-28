@@ -212,7 +212,7 @@ public abstract class OXCommonImpl {
         return sb.toString();
     }
 
-    private static final ConcurrentMap<Class<?>, Constructor<?>> CONSTRUCTORS = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<Class<?>, CachedConstructor> CONSTRUCTORS = new ConcurrentHashMap<>();
 
     /**
      * Adds the exception identifier to exception message
@@ -230,36 +230,48 @@ public abstract class OXCommonImpl {
         // Build message
         String message = enhanceExceptionMessage(e, exceptionId);
 
-        // Detect appropriate constructor
+        // Detect appropriate constructor by Exception class
         Class<? extends Exception> clazz = e.getClass();
-        Constructor<T> constructor = (Constructor<T>) CONSTRUCTORS.get(clazz);
+        CachedConstructor constructor = CONSTRUCTORS.get(clazz);
         if (constructor == null) {
             try {
-                Constructor<T> newConstructor = (Constructor<T>) clazz.getConstructor(String.class, Throwable.class);
-                constructor = (Constructor<T>) CONSTRUCTORS.putIfAbsent(clazz, newConstructor);
+                CachedConstructor newConstructor = determineConstructorFor(clazz);
+                constructor = CONSTRUCTORS.putIfAbsent(clazz, newConstructor);
                 if (constructor == null) {
                     constructor = newConstructor;
                 }
-            } catch (NoSuchMethodException x) {
-                // Maybe OXResellerException, wrap in RemoteExeption
-                LOGGER.debug("", x);
-                RemoteException cme = new RemoteException(message, e.getCause());
-                cme.setStackTrace(e.getStackTrace());
-                return cme;
             } catch (Exception x) {
                 LOGGER.error("", x);
                 return e;
             }
         }
 
+        // No such constructor available
+        if (constructor == NON_EXISTENT) {
+            // Maybe OXResellerException, wrap in RemoteExeption
+            RemoteException cme = new RemoteException(message, e.getCause());
+            cme.setStackTrace(e.getStackTrace());
+            return cme;
+        }
+
         // Yield new exception instance
         try {
-            T result = constructor.newInstance(message, e.getCause());
+            Constructor<T> constr = (Constructor<T>) constructor.constructor;
+            T result = constr.newInstance(message, e.getCause());
             result.setStackTrace(e.getStackTrace());
             return result;
         } catch (Exception x) {
             LOGGER.error("", x);
             return e;
+        }
+    }
+
+    private static CachedConstructor determineConstructorFor(Class<? extends Exception> clazz) {
+        try {
+            return new CachedConstructor(clazz.getConstructor(String.class, Throwable.class));
+        } catch (NoSuchMethodException x) {
+            LOGGER.debug("No such constructor Constructor(String, Throwable) available in class '{}'", clazz.getName(), x);
+            return NON_EXISTENT;
         }
     }
 
@@ -325,7 +337,7 @@ public abstract class OXCommonImpl {
      * @param creds The credentials used for this call
      * @return The enhanced exception
      */
-    protected Exception logAndEnhanceException(org.slf4j.Logger logger, Exception e, Credentials creds) {
+    protected static Exception logAndEnhanceException(org.slf4j.Logger logger, Exception e, Credentials creds) {
         return logAndEnhanceException(logger, e, creds, null, null);
     }
 
@@ -335,7 +347,7 @@ public abstract class OXCommonImpl {
      * @param objects The array of object
      * @return The identifiers as comma-separated list
      */
-    protected String getObjectIds(NameAndIdObject[] objects) {
+    protected static String getObjectIds(NameAndIdObject[] objects) {
         if (null == objects || 0 >= objects.length) {
             return "";
         }
@@ -457,6 +469,25 @@ public abstract class OXCommonImpl {
      */
     public static void log(LogLevel level, org.slf4j.Logger logger, Credentials creds, Exception e, String message) {
         log(level, logger, creds, null, null, e, message, new Object[] {});
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    private static final CachedConstructor NON_EXISTENT = new CachedConstructor(null);
+
+    private static class CachedConstructor {
+
+        final Constructor<?> constructor;
+
+        /**
+         * Initializes a new {@link CachedConstructor}.
+         *
+         * @param constructor The cached constructor
+         */
+        CachedConstructor(Constructor<?> constructor) {
+            super();
+            this.constructor = constructor;
+        }
     }
 
 }
