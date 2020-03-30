@@ -302,6 +302,15 @@ If a share is consumed &quot;directly&quot;, e.g. by downloading the binary cont
 
 * The logout location for guest accounts can be customized via <code>guestLogoutLocation</code> in the file <code>as-config.yml</code> (see file <code>as-config-default.yml</code> for an example)
 
+## Limits
+
+Due to their nature, for sessions spawned by guest users, separate limitations towards the maximum number of concurrent sessions are used, in contrast to the settings in <code>com.openexchange.sessiond.maxSessionPerUser</code>, which are considered for sessions of regular users. For invited guest users, by default a limit of 20 concurrent sessions applies, while for anonymous users / share links, the default limit is 250. Please mind that all limits are checked node-local, i.e. existing sessions on other middleware nodes are not accounted here. 
+
+#### Administrator Notes:
+
+* The maximum number of concurrent sessions per anonymous link can be configured via the property <code>com.openexchange.sessiond.maxSessionPerLink</code>, and defaults to <code>250</code>. The limit can be disabled by setting this to a value less than or equal to zero.
+* The maximum number of concurrent sessions per invited guest can be configured via the property <code>com.openexchange.sessiond.maxSessionPerGuest</code>, and defaults to <code>20</code>. The limit can be disabled by setting this to a value less than or equal to zero.
+
 # Share Notifications
 
 With the new sharing concept, notification mails can be sent out to the permission entities (i.e. internal or guest users) of folders or items. Mechanisms exist to send out such mails implicitly or explicitly. Notifications are sent out implicitly, if externals are invited as guests and can also be sent out for internal invitations, if configured so. The client (e.g. App Suite UI) decides on its own whether implicit notifications shall be sent when updating a folders or items permissions. Besides there are separate API calls for sending out notification messages explicitly. Its on the client to provide this functionality to its users. This makes it possible to re-send a link to a folder or item to an existing permission entity.
