@@ -84,19 +84,19 @@ public class UpdateAction extends AbstractFileStorageAccountAction {
         }
 
         final FileStorageAccount account = parser.parse(data);
+        final boolean doConnectionCheck = account.getFileStorageService() instanceof LoginAwareFileStorageServiceExtension;
 
         //load existing account for resetting if the connection check failed
-        FileStorageAccount existingAccount = account.getFileStorageService().getAccountManager().getAccount(account.getId(), session);
+        FileStorageAccount existingAccount = doConnectionCheck ? account.getFileStorageService().getAccountManager().getAccount(account.getId(), session) : null;
 
         //perform update
         account.getFileStorageService().getAccountManager().updateAccount(account, session);
 
-        if (account.getFileStorageService() instanceof LoginAwareFileStorageServiceExtension) {
+        if (doConnectionCheck) {
             try {
                 //test connection
                 ((LoginAwareFileStorageServiceExtension) account.getFileStorageService()).testConnection(account, session);
-            }
-            catch(OXException e) {
+            } catch (OXException e) {
                 //reset
                 account.getFileStorageService().getAccountManager().updateAccount(existingAccount, session);
                 throw e;
