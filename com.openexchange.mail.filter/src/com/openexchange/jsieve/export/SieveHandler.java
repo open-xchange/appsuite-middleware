@@ -547,7 +547,7 @@ public class SieveHandler {
      *
      * @return The {@link MetricHelper}
      */
-    private MetricHelper createMetricHelper() {
+    public MetricHelper createMetricHelper() {
         return new MetricHelper(this);
     }
 
@@ -555,7 +555,7 @@ public class SieveHandler {
         java.net.SocketTimeoutException.class,
         java.io.EOFException.class);
 
-    private String readResponseLine(MetricHelper helper) throws IOException {
+    public String readResponseLine(MetricHelper helper) throws IOException {
         if (helper == null || helper.dontMeasureRead()) {
             return bis_sieve.readLine();
         }
@@ -1931,7 +1931,7 @@ public class SieveHandler {
     /** The key for server dimension */
     private static final String METRICS_DIMENSION_SERVER_KEY = "server";
 
-    private static class MetricHelper {
+    public static class MetricHelper {
 
         private boolean firstRead;
         private final Timer requestTimer;

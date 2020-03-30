@@ -915,7 +915,7 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
     public void executeCommand(Credentials credentials, MailFilterCommand command) throws OXException {
         Object lock = lockFor(credentials);
         synchronized (lock) {
-            SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials, getOptionalCircuitBreaker(), getOptionalMetricService());
+            SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials, getOptionalCircuitBreaker());
             try {
                 handlerConnect(sieveHandler, credentials.getSubject());
                 command.execute(new SieveProtocolImpl(sieveHandler, credentials, useSIEVEResponseCodes(credentials.getUserid(), credentials.getContextid())));
