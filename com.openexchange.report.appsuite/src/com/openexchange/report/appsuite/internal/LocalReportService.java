@@ -266,6 +266,41 @@ public class LocalReportService extends AbstractReportService {
         pendingReports.put(uuid, report);
         reportCache.asMap().put(PENDING_REPORTS_PRE_KEY + reportConfig.getType(), pendingReports);
 
+        try {
+            report.setOperatingSystemName(System.getProperty("os.name"));
+        } catch (SecurityException e) {
+            LOG.warn("Operating system name cannot be read for report: {}", e.getMessage());
+        }
+        try {
+            report.setOperatingSystemVersion(System.getProperty("os.version"));
+        } catch (SecurityException e) {
+            LOG.warn("Operating system version cannot be read for report: {}", e.getMessage());
+        }
+        try {
+            report.setJavaVersion(System.getProperty("java.version"));
+        } catch (SecurityException e) {
+            LOG.warn("Java version cannot be read for report: {}", e.getMessage());
+        }
+
+        report.setDistribution(ReportInformation.getDistributionName());
+
+        report.setDatabaseVersion(ReportInformation.getDatabaseVersion());
+
+        List<String> installedPackages = ReportInformation.getInstalledPackages();
+            for (String pkg : installedPackages) {
+                report.addInstalledOXPackage(pkg);
+            }
+
+        List<ThirdPartyAPI> configuredAPIsOAuth = ReportInformation.getConfiguredThirdPartyAPIsViaOAuth();
+            for (ThirdPartyAPI api : configuredAPIsOAuth) {
+                report.addConfiguredThirdPartyAPIOAuth(api.getDisplayName());
+            }
+
+        List<ThirdPartyAPI> configuredAPIsOthers = ReportInformation.getConfiguredThirdPartyAPIsNotOAuth();
+            for (ThirdPartyAPI api : configuredAPIsOthers) {
+                report.addConfiguredThirdPartyAPIOthers(api.getDisplayName());
+            }
+
         setUpContextAnalyzer(allContextIds, report);
         return uuid;
     }

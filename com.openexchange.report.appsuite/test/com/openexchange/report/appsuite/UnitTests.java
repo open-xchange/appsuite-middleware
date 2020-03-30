@@ -54,6 +54,7 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 import com.openexchange.report.appsuite.defaultHandlers.CapabilityHandlerTest;
 import com.openexchange.report.appsuite.defaultHandlers.TotalTest;
+import com.openexchange.report.appsuite.internal.ReportInformationTest;
 
 /**
  * Unit tests for the project com.openexchange.report.client
@@ -65,6 +66,7 @@ import com.openexchange.report.appsuite.defaultHandlers.TotalTest;
 @SuiteClasses({
     CapabilityHandlerTest.class,
     TotalTest.class,
+    ReportInformationTest.class,
 })
 public class UnitTests {
 

@@ -62,6 +62,7 @@ import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
@@ -69,6 +70,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -152,6 +154,26 @@ public class Report implements Serializable {
 
     public static final String IGNORED = "ignored";
 
+    public static final String OPERATINGSYSTEM = "operating-system";
+
+    public static final String OPERATINGSYSTEM_NAME = "name";
+
+    public static final String OPERATINGSYSTEM_VERSION = "version";
+
+    public static final String OPERATINGSYSTEM_DISTRIBUTION = "distribution";
+
+    public static final String JAVA_VERSION = "java-version";
+
+    public static final String DATABASE_VERSION = "database-version";
+
+    public static final String INSTALLED_OX_PACKAGES = "installed-ox-packages";
+
+    public static final String CONFIGURED_3RD_PARTY_APIS = "configured-3rd-party-APIs";
+
+    public static final String APIS_OAUTH = "oauth";
+
+    public static final String APIS_OTHERS = "others";
+
     //--------------------Report attributes--------------------
 
     private final String uuid;
@@ -181,6 +203,22 @@ public class Report implements Serializable {
     private String storageFolderPath;
 
     private boolean needsComposition;
+
+    private String operatingSystemName;
+
+    private String operatingSystemVersion;
+
+    private String distribution;
+
+    private String javaVersion;
+
+    private String databaseVersion;
+
+    private List<String> installedOXPackages;
+
+    private List<String> configuredThirdPartyAPIsOAuth;
+
+    private List<String> configuredThirdPartyAPIsOthers;
 
     /**
      * Initializes a new {@link Report}.
@@ -451,6 +489,106 @@ public class Report implements Serializable {
 
     public void setNeedsComposition(boolean needsComposition) {
         this.needsComposition = needsComposition;
+    }
+
+    public String getOperatingSystemName() {
+        if (this.operatingSystemName == null) {
+            return "unavailable";
+        }
+        return this.operatingSystemName;
+    }
+
+    public void setOperatingSystemName(String name) {
+        this.operatingSystemName = name;
+    }
+
+    public String getOperatingSystemVersion() {
+        if (this.operatingSystemVersion == null) {
+            return "unavailable";
+        }
+        return this.operatingSystemVersion;
+    }
+
+    public void setOperatingSystemVersion(String version) {
+        this.operatingSystemVersion = version;
+    }
+
+    public String getDistribution() {
+        if (this.distribution == null || this.distribution.isEmpty()) {
+            return "unavailable";
+        }
+        return this.distribution;
+    }
+
+    public void setDistribution(String distribution) {
+        this.distribution = distribution;
+    }
+
+    public String getJavaVersion() {
+        if (this.javaVersion == null) {
+            return "unavailable";
+        }
+        return this.javaVersion;
+    }
+
+    public void setJavaVersion(String version) {
+        this.javaVersion = version;
+    }
+
+    public String getDatabaseVersion() {
+        if (this.databaseVersion == null) {
+            return "unavailable";
+        }
+        return this.databaseVersion;
+    }
+
+    public void setDatabaseVersion(String version) {
+        this.databaseVersion = version;
+    }
+
+    public List<String> getInstalledOXPackages() {
+        return this.installedOXPackages;
+    }
+
+    public void setInstalledOXPackages(List<String> packages) {
+        this.installedOXPackages = packages;
+    }
+
+    public void addInstalledOXPackage(String oXpackage) {
+        if (this.installedOXPackages == null) {
+            this.installedOXPackages = new ArrayList<String>();
+        }
+        this.installedOXPackages.add(oXpackage);
+    }
+
+    public List<String> getConfiguredThirdPartyAPIsOAuth() {
+        return this.configuredThirdPartyAPIsOAuth;
+    }
+
+    public void setConfiguredThirdPartyAPIsOAuth(List<String> integrations) {
+        this.configuredThirdPartyAPIsOAuth = integrations;
+    }
+
+    public void addConfiguredThirdPartyAPIOAuth(String integration) {
+        if (this.configuredThirdPartyAPIsOAuth == null) {
+            this.configuredThirdPartyAPIsOAuth = new ArrayList<String>();
+        }
+        this.configuredThirdPartyAPIsOAuth.add(integration);
+    }
+
+    public List<String> getConfiguredThirdPartyAPIsOthers() {
+        return this.configuredThirdPartyAPIsOthers;
+    }
+
+    public void setConfiguredThirdPartyAPIsOthers(List<String> integrations) {
+        this.configuredThirdPartyAPIsOthers = integrations;
+    }
+
+    public void addConfiguredThirdPartyAPIOthers(String integration) {
+        if (this.configuredThirdPartyAPIsOthers == null) {
+            this.configuredThirdPartyAPIsOthers = new ArrayList<String>();
+        }
+        this.configuredThirdPartyAPIsOthers.add(integration);
     }
 
     // Attention, if you add values, also correct the composeReportFromStoredPats(...) method

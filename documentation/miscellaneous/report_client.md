@@ -271,6 +271,18 @@ Report was finished: Tue Jun 07 11:31:30 CEST 2016
   "version" : {
     "version" : "7.8.2-Rev0",
     "buildDate" : "develop"
+  },
+  "operating-system" : {
+    "name" : "Linux",
+    "version" : "4.9.184-linuxkit",
+    "distribution" : "CentOS Linux 7 (Core)"
+  },
+  "database-version" : "MySQL 5.7.26",
+  "java-version" : "1.8.0_242",
+  "installed-ox-packages" : [ "open-xchange", "open-xchange-admin", "open-xchange-admin-soap", "open-xchange-appsuite", "open-xchange-appsuite-backend","open-xchange-appsuite-help-common", "open-xchange-appsuite-help-de-de", "open-xchange-appsuite-help-en-gb", "open-xchange-appsuite-help-en-us", "open-xchange-appsuite-help-es-es", "open-xchange-appsuite-help-es-mx", "open-xchange-appsuite-help-fr-fr", "open-xchange-appsuite-help-it-it", "open-xchange-appsuite-help-ja-jp", "open-xchange-appsuite-help-nl-nl", "open-xchange-appsuite-help-pl-pl", "open-xchange-appsuite-help-tr-tr", "open-xchange-appsuite-help-zh-cn", "open-xchange-appsuite-help-zh-tw", "open-xchange-appsuite-l10n-de-de", "open-xchange-appsuite-l10n-en-us", "open-xchange-appsuite-manifest", "open-xchange-authentication-database", "open-xchange-authorization-standard", "open-xchange-calendar-printing", "open-xchange-core", "open-xchange-dataretrieval", "open-xchange-dav", "open-xchange-drive", "open-xchange-drive-comet", "open-xchange-file-distribution", "open-xchange-grizzly", "open-xchange-guidedtours", "open-xchange-halo", "open-xchange-hazelcast-community", "open-xchange-imap", "open-xchange-l10n-de-de", "open-xchange-l10n-en-us", "open-xchange-mailfilter", "open-xchange-manage-group-resource", "open-xchange-messaging", "open-xchange-multifactor", "open-xchange-oauth", "open-xchange-osgi", "open-xchange-passwordchange-database", "open-xchange-pns-impl", "open-xchange-pns-transport-websockets", "open-xchange-pop3", "open-xchange-push-imapidle", "open-xchange-report-client", "open-xchange-rest", "open-xchange-sessionstorage-hazelcast", "open-xchange-smtp", "open-xchange-soap-cxf", "open-xchange-subscribe", "open-xchange-system", "open-xchange-unifiedmail", "open-xchange-websockets-grizzly", "open-xchange-xerces" ],
+  "configured-3rd-party-APIs" : {
+    "oauth" : [ "Twitter" ],
+    "others" : [ "SchedJoules" ]
   }
 }
 ------ end -------
@@ -329,6 +341,23 @@ Report was finished: Tue Jun 07 11:31:30 CEST 2016
 - **contexts**: total number of contexts
 - **quota**: cumulated quota in byte
 
+**operating-system**:
+- **name**: name of the operating system
+- **version**: version of the operating system
+- **distribution**: name and version of the Linux distribution
+
+**database-version**:
+- version of the database
+
+**java-version**:
+- version of the installed java
+
+**installed-ox-packages**:
+- list of the installed Open-Xchange packages
+
+**configured-3rd-party-APIs**:
+- **oauth**: 3rd party APIs configured via OAuth e.g. Boxcom, Dropbox, Google, Microsoft, Twitter, XING and Yahoo.
+- **others**: 3rd party APIs configured via other ways e.g. SchedJoules.
 
 
 ### Report-type: extended

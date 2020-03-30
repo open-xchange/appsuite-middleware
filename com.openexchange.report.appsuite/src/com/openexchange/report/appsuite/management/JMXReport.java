@@ -51,6 +51,7 @@ package com.openexchange.report.appsuite.management;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.tools.JSONCoercion;
@@ -112,6 +113,11 @@ public class JMXReport {
             jsonData.put("version", new JSONObject().put("version", versionService.getVersionString()).put("buildDate", versionService.getBuildDate()));
             jsonData.put("needsComposition", isNeedsComposition);
             jsonData.put("storageFolderPath", storageFolderPath);
+            jsonData.put(Report.OPERATINGSYSTEM, new JSONObject().put(Report.OPERATINGSYSTEM_NAME, report.getOperatingSystemName()).put(Report.OPERATINGSYSTEM_VERSION, report.getOperatingSystemVersion()).put(Report.OPERATINGSYSTEM_DISTRIBUTION, report.getDistribution()));
+            jsonData.put(Report.DATABASE_VERSION, report.getDatabaseVersion());
+            jsonData.put(Report.JAVA_VERSION, report.getJavaVersion());
+            jsonData.put(Report.INSTALLED_OX_PACKAGES, new JSONArray(report.getInstalledOXPackages()));
+            jsonData.put(Report.CONFIGURED_3RD_PARTY_APIS, new JSONObject().put(Report.APIS_OAUTH, new JSONArray(report.getConfiguredThirdPartyAPIsOAuth())).put(Report.APIS_OTHERS, new JSONArray(report.getConfiguredThirdPartyAPIsOthers())));
 
             this.data = jsonData.toString();
         } catch (JSONException e) {
