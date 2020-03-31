@@ -63,6 +63,8 @@ import org.apache.commons.codec.binary.Base64;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
@@ -94,6 +96,8 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MessagingMessageWriter {
+
+    private static final Logger LOG = LoggerFactory.getLogger(MessagingMessageWriter.class);
 
     private static final class SimpleEntry<K, V> implements Map.Entry<K, V> {
 
@@ -256,7 +260,7 @@ public class MessagingMessageWriter {
         public Object write(final MessagingPart part, final MessagingContent content, final ServerSession session, final DisplayMode mode) throws OXException {
             final BinaryContent binContent = (BinaryContent) content;
             final ByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream();
-            {
+            try {
                 final InputStream is = binContent.getData();
                 try {
                     final byte[] buf = new byte[BUFLEN];
@@ -271,11 +275,13 @@ public class MessagingMessageWriter {
                 } finally {
                     Streams.close(is);
                 }
+                /*
+                 * Return as base64-encoded string
+                 */
+                return Charsets.toAsciiString(Base64.encodeBase64(baos.toByteArray(), false));
+            } finally {
+                Streams.close(baos);
             }
-            /*
-             * Return as base64-encoded string
-             */
-            return Charsets.toAsciiString(Base64.encodeBase64(baos.toByteArray(), false));
         }
 
         @Override
@@ -498,7 +504,7 @@ public class MessagingMessageWriter {
             if (receivedDate > 0) {
                 final long dateWithOffset = addTimeZoneOffset(receivedDate, session.getUser().getTimeZone());
 
-                System.out.println("date: " + receivedDate + ", date-with-offset: " + dateWithOffset);
+                LOG.debug("date: " + receivedDate + ", date-with-offset: " + dateWithOffset);
 
                 messageJSON.put("receivedDate", dateWithOffset);
             }

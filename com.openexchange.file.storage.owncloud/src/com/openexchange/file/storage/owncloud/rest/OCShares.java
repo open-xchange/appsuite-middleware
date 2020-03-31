@@ -54,6 +54,8 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 
 /**
@@ -64,11 +66,13 @@ import com.openexchange.exception.OXException;
  */
 public class OCShares extends AbstractOCJSONResponse {
 
+    private static final Logger LOG = LoggerFactory.getLogger(OCShares.class);
+
     JSONArray shares;
-    
+
     /**
      * Initializes a new {@link OCShares}.
-     * 
+     *
      * @param json
      * @throws OXException
      */
@@ -78,16 +82,16 @@ public class OCShares extends AbstractOCJSONResponse {
 
     /**
      * Parses the {@link JSONObject}
-     * 
+     *
      * @param json
-     * @throws OXException 
+     * @throws OXException
      */
     public static OCShares parse(JSONObject json) throws OXException {
         OCShares result = new OCShares(json);
         result.shares = (JSONArray) result.getData();
         return result;
     }
-    
+
     /**
      * Gets the shares
      *
@@ -98,7 +102,7 @@ public class OCShares extends AbstractOCJSONResponse {
         shares.forEach((share) -> {
             JSONObject s = (JSONObject) share;
             try {
-                result.add(new OCShare( s.getString("id"), 
+                result.add(new OCShare( s.getString("id"),
                                         s.getInt("share_type"),
                                         s.getString("uid_owner"),
                                         s.getInt("permissions"),
@@ -107,12 +111,12 @@ public class OCShares extends AbstractOCJSONResponse {
                                         s.getInt("mail_send")));
             } catch (JSONException e) {
               // TODO Handle error
-                System.out.println("Fail:"+ e.getMessage());
+                LOG.error(e.getMessage(), e);
             }
         });
         return result;
     }
-    
+
     /**
      * {@link OCShare}
      *
@@ -120,8 +124,8 @@ public class OCShares extends AbstractOCJSONResponse {
      * @since v7.10.4
      */
     public static class OCShare {
-        
-        final String id; 
+
+        final String id;
         final int share_type;
         final String owner;
         final int permission;
@@ -130,7 +134,7 @@ public class OCShares extends AbstractOCJSONResponse {
         final String share_with;
         // share_with_additional_info
         final int mail_send;
-        
+
         /**
          * Initializes a new {@link OCShare}.
          * @param id
@@ -151,7 +155,7 @@ public class OCShares extends AbstractOCJSONResponse {
             this.share_with = share_with;
             this.mail_send = mail_send;
         }
-        
+
         /**
          * Gets the id
          *
@@ -160,7 +164,7 @@ public class OCShares extends AbstractOCJSONResponse {
         public String getId() {
             return id;
         }
-        
+
         /**
          * Gets the share_type
          *
@@ -169,7 +173,7 @@ public class OCShares extends AbstractOCJSONResponse {
         public int getShare_type() {
             return share_type;
         }
-        
+
         /**
          * Gets the owner
          *
@@ -178,7 +182,7 @@ public class OCShares extends AbstractOCJSONResponse {
         public String getOwner() {
             return owner;
         }
-        
+
         /**
          * Gets the permission
          *
@@ -187,7 +191,7 @@ public class OCShares extends AbstractOCJSONResponse {
         public int getPermission() {
             return permission;
         }
-        
+
         /**
          * Gets the stime
          *
@@ -196,7 +200,7 @@ public class OCShares extends AbstractOCJSONResponse {
         public long getStime() {
             return stime;
         }
-        
+
         /**
          * Gets the share_with
          *
@@ -205,7 +209,7 @@ public class OCShares extends AbstractOCJSONResponse {
         public String getShare_with() {
             return share_with;
         }
-        
+
         /**
          * Gets the mail_send
          *

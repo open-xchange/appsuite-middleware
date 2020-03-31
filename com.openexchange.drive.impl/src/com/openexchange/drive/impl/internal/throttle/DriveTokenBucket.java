@@ -155,10 +155,10 @@ public class DriveTokenBucket implements TokenBucket {
         int acquired = 0;
         do {
             int permits = Math.min(count - acquired, maxPermits);
-            System.out.println("acquire: " + permits + "/" + count);
+            LOG.debug("acquire: " + permits + "/" + count);
             semaphore.acquire(permits);
             acquired += permits;
-            System.out.println("acquired: " + acquired + "/" + count);
+            LOG.debug("acquired: " + acquired + "/" + count);
         } while (acquired < count);
     }
 
