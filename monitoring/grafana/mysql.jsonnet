@@ -21,15 +21,15 @@ local connectionRowConnections = graphPanel.new(
 ).addTargets(
   [
     prometheus.target(
-      expr='max(max_over_time(mysql_global_status_threads_connected{instance="$instance"}[$interval]) or mysql_global_status_threads_connected{instance="$instance"})',
+      expr='max(max_over_time(mysql_global_status_threads_connected{instance=~"$instance"}[$interval]) or mysql_global_status_threads_connected{instance=~"$instance"})',
       legendFormat='Connections',
     ),
     prometheus.target(
-      expr='mysql_global_status_max_used_connections{instance="$instance"}',
+      expr='mysql_global_status_max_used_connections{instance=~"$instance"}',
       legendFormat='Max Used Connections',
     ),
     prometheus.target(
-      expr='mysql_global_variables_max_connections{instance="$instance"}',
+      expr='mysql_global_variables_max_connections{instance=~"$instance"}',
       legendFormat='Max Connections',
     ),
   ],
@@ -57,15 +57,15 @@ local connectionRowActivity = graphPanel.new(
 ).addTargets(
   [
     prometheus.target(
-      expr='max_over_time(mysql_global_status_threads_connected{instance="$instance"}[$interval])',
+      expr='max_over_time(mysql_global_status_threads_connected{instance=~"$instance"}[$interval])',
       legendFormat='Peak Threads Connected',
     ),
     prometheus.target(
-      expr='max_over_time(mysql_global_status_threads_running{instance="$instance"}[$interval])',
+      expr='max_over_time(mysql_global_status_threads_running{instance=~"$instance"}[$interval])',
       legendFormat='Peak Threads Running',
     ),
     prometheus.target(
-      expr='avg_over_time(mysql_global_status_threads_running{instance="$instance"}[$interval])',
+      expr='avg_over_time(mysql_global_status_threads_running{instance=~"$instance"}[$interval])',
       legendFormat='Avg Threads Running',
     ),
   ],
@@ -106,7 +106,7 @@ local commandRowCounters = graphPanel.new(
   legend_values=true,
 ).addTarget(
   prometheus.target(
-    expr='topk(5, rate(mysql_global_status_commands_total{instance="$instance"}[$interval])>0) or irate(mysql_global_status_commands_total{instance="$instance"}[$interval])>0',
+    expr='topk(5, rate(mysql_global_status_commands_total{instance=~"$instance"}[$interval])>0) or irate(mysql_global_status_commands_total{instance=~"$instance"}[$interval])>0',
     legendFormat='Com_{{ command }}',
   )
 );
@@ -131,7 +131,7 @@ local commandRowCountersHourly = graphPanel.new(
   time_from='24h',
 ).addTarget(
   prometheus.target(
-    expr='topk(5, increase(mysql_global_status_commands_total{instance="$instance"}[1h])>0)',
+    expr='topk(5, increase(mysql_global_status_commands_total{instance=~"$instance"}[1h])>0)',
     legendFormat='Com_{{ command }}',
     interval='1h',
     intervalFactor=1,
@@ -154,7 +154,7 @@ local commandRowHandlers = graphPanel.new(
   legend_values=true,
 ).addTarget(
   prometheus.target(
-    expr='rate(mysql_global_status_handlers_total{instance="$instance", handler!~"commit|rollback|savepoint.*|prepare"}[$interval]) or irate(mysql_global_status_handlers_total{instance="$instance", handler!~"commit|rollback|savepoint.*|prepare"}[5m])',
+    expr='rate(mysql_global_status_handlers_total{instance=~"$instance", handler!~"commit|rollback|savepoint.*|prepare"}[$interval]) or irate(mysql_global_status_handlers_total{instance=~"$instance", handler!~"commit|rollback|savepoint.*|prepare"}[5m])',
     legendFormat='{{ handler }}',
     interval='$interval',
     intervalFactor=1,
@@ -177,7 +177,7 @@ local commandRowTransactionHandlers = graphPanel.new(
   legend_values=true,
 ).addTarget(
   prometheus.target(
-    expr='rate(mysql_global_status_handlers_total{instance="$instance", handler=~"commit|rollback|savepoint.*|prepare"}[$interval]) or irate(mysql_global_status_handlers_total{instance=~"$host", handler=~"commit|rollback|savepoint.*|prepare"}[5m])',
+    expr='rate(mysql_global_status_handlers_total{instance=~"$instance", handler=~"commit|rollback|savepoint.*|prepare"}[$interval]) or irate(mysql_global_status_handlers_total{instance=~"$host", handler=~"commit|rollback|savepoint.*|prepare"}[5m])',
     legendFormat='{{ handler }}',
     interval='$interval',
     intervalFactor=1,
@@ -203,43 +203,43 @@ local memoryRowOverview = graphPanel.new(
 ).addTargets(
   [
     prometheus.target(
-      expr='mysql_global_status_innodb_page_size{instance="$instance"} * on (instance) mysql_global_status_buffer_pool_pages{instance="$instance",state="data"}',
+      expr='mysql_global_status_innodb_page_size{instance=~"$instance"} * on (instance) mysql_global_status_buffer_pool_pages{instance=~"$instance",state="data"}',
       legendFormat='InnoDB Buffer Pool Data',
       interval='$interval',
       intervalFactor=1,
     ),
     prometheus.target(
-      expr='mysql_global_variables_innodb_log_buffer_size{instance="$instance"}',
+      expr='mysql_global_variables_innodb_log_buffer_size{instance=~"$instance"}',
       legendFormat='InnoDB Log Buffer Size',
       interval='$interval',
       intervalFactor=1,
     ),
     prometheus.target(
-      expr='mysql_global_variables_innodb_additional_mem_pool_size{instance="$instance"}',
+      expr='mysql_global_variables_innodb_additional_mem_pool_size{instance=~"$instance"}',
       legendFormat='InnoDB Additional Memory Pool Size',
       interval='$interval',
       intervalFactor=2,
     ),
     prometheus.target(
-      expr='mysql_global_status_innodb_mem_dictionary{instance="$instance"}',
+      expr='mysql_global_status_innodb_mem_dictionary{instance=~"$instance"}',
       legendFormat='InnoDB Dictionary Size',
       interval='$interval',
       intervalFactor=1,
     ),
     prometheus.target(
-      expr='mysql_global_variables_key_buffer_size{instance="$instance"}',
+      expr='mysql_global_variables_key_buffer_size{instance=~"$instance"}',
       legendFormat='Key Buffer Size',
       interval='$interval',
       intervalFactor=1,
     ),
     prometheus.target(
-      expr='mysql_global_variables_query_cache_size{instance="$instance"}',
+      expr='mysql_global_variables_query_cache_size{instance=~"$instance"}',
       legendFormat='Query Cache Size',
       interval='$interval',
       intervalFactor=1,
     ),
     prometheus.target(
-      expr='mysql_global_status_innodb_mem_adaptive_hash{instance="$instance"}',
+      expr='mysql_global_status_innodb_mem_adaptive_hash{instance=~"$instance"}',
       legendFormat='Adaptive Hash Index Size',
       interval='$interval',
       intervalFactor=1,
@@ -263,7 +263,7 @@ local tableLocksRowQuestions = graphPanel.new(
   legend_values=true,
 ).addTarget(
   prometheus.target(
-    expr='rate(mysql_global_status_questions{instance="$instance"}[$interval]) or irate(mysql_global_status_questions{instance="$instance"}[5m])',
+    expr='rate(mysql_global_status_questions{instance=~"$instance"}[$interval]) or irate(mysql_global_status_questions{instance=~"$instance"}[5m])',
     legendFormat='Questions',
     interval='$interval',
     intervalFactor=1,
@@ -287,19 +287,19 @@ local tableLocksRowThreadCache = graphPanel.new(
 ).addTargets(
   [
     prometheus.target(
-      expr='mysql_global_variables_thread_cache_size{instance="$instance"}',
+      expr='mysql_global_variables_thread_cache_size{instance=~"$instance"}',
       legendFormat='Thread Cache Size',
       interval='$interval',
       intervalFactor=1,
     ),
     prometheus.target(
-      expr='mysql_global_status_threads_cached{instance="$instance"}',
+      expr='mysql_global_status_threads_cached{instance=~"$instance"}',
       legendFormat='Threads Cached',
       interval='$interval',
       intervalFactor=1,
     ),
     prometheus.target(
-      expr='rate(mysql_global_status_threads_created{instance="$instance"}[$interval]) or irate(mysql_global_status_threads_created{instance="$instance"}[5m])',
+      expr='rate(mysql_global_status_threads_created{instance=~"$instance"}[$interval]) or irate(mysql_global_status_threads_created{instance=~"$instance"}[5m])',
       legendFormat='Threads Created',
       interval='$interval',
       intervalFactor=1,
@@ -329,19 +329,19 @@ local temporaryObjectsRowSorts = graphPanel.new(
 ).addTargets(
   [
     prometheus.target(
-      expr='rate(mysql_global_status_created_tmp_tables{instance="$instance"}[$interval]) or irate(mysql_global_status_created_tmp_tables{instance="$instance"}[5m])',
+      expr='rate(mysql_global_status_created_tmp_tables{instance=~"$instance"}[$interval]) or irate(mysql_global_status_created_tmp_tables{instance=~"$instance"}[5m])',
       legendFormat='Created Tmp Tables',
       interval='$interval',
       intervalFactor=1,
     ),
     prometheus.target(
-      expr='rate(mysql_global_status_created_tmp_disk_tables{instance="$instance"}[$interval]) or irate(mysql_global_status_created_tmp_disk_tables{instance="$instance"}[5m])',
+      expr='rate(mysql_global_status_created_tmp_disk_tables{instance=~"$instance"}[$interval]) or irate(mysql_global_status_created_tmp_disk_tables{instance=~"$instance"}[5m])',
       legendFormat='Created Tmp Disk Tables',
       interval='$interval',
       intervalFactor=1,
     ),
     prometheus.target(
-      expr='rate(mysql_global_status_created_tmp_files{instance="$instance"}[$interval]) or irate(mysql_global_status_created_tmp_files{instance="$instance"}[5m])',
+      expr='rate(mysql_global_status_created_tmp_files{instance=~"$instance"}[$interval]) or irate(mysql_global_status_created_tmp_files{instance=~"$instance"}[5m])',
       legendFormat='Created Tmp Files',
       interval='$interval',
       intervalFactor=1,
@@ -366,31 +366,31 @@ local temporaryObjectsRowSlowQueries = graphPanel.new(
 ).addTargets(
   [
     prometheus.target(
-      expr='rate(mysql_global_status_select_full_join{instance="$instance"}[$interval]) or irate(mysql_global_status_select_full_join{instance="$instance"}[5m])',
+      expr='rate(mysql_global_status_select_full_join{instance=~"$instance"}[$interval]) or irate(mysql_global_status_select_full_join{instance=~"$instance"}[5m])',
       legendFormat='Select Full Join',
       interval='$interval',
       intervalFactor=1,
     ),
     prometheus.target(
-      expr='rate(mysql_global_status_select_full_range_join{instance="$instance"}[$interval]) or irate(mysql_global_status_select_full_range_join{instance="$instance"}[5m])',
+      expr='rate(mysql_global_status_select_full_range_join{instance=~"$instance"}[$interval]) or irate(mysql_global_status_select_full_range_join{instance=~"$instance"}[5m])',
       legendFormat='Select Full Range Join',
       interval='$interval',
       intervalFactor=1,
     ),
     prometheus.target(
-      expr='rate(mysql_global_status_select_range{instance="$instance"}[$interval]) or irate(mysql_global_status_select_range{instance="$instance"}[5m])',
+      expr='rate(mysql_global_status_select_range{instance=~"$instance"}[$interval]) or irate(mysql_global_status_select_range{instance=~"$instance"}[5m])',
       legendFormat='Select Range',
       interval='$interval',
       intervalFactor=1,
     ),
     prometheus.target(
-      expr='rate(mysql_global_status_select_range_check{instance="$instance"}[$interval]) or irate(mysql_global_status_select_range_check{instance="$instance"}[5m])',
+      expr='rate(mysql_global_status_select_range_check{instance=~"$instance"}[$interval]) or irate(mysql_global_status_select_range_check{instance=~"$instance"}[5m])',
       legendFormat='Select Range Check',
       interval='$interval',
       intervalFactor=1,
     ),
     prometheus.target(
-      expr='rate(mysql_global_status_select_scan{instance="$instance"}[$interval]) or irate(mysql_global_status_select_scan{instance="$instance"}[5m])',
+      expr='rate(mysql_global_status_select_scan{instance=~"$instance"}[$interval]) or irate(mysql_global_status_select_scan{instance=~"$instance"}[5m])',
       legendFormat='Select Scan',
       interval='$interval',
       intervalFactor=1,
@@ -416,13 +416,13 @@ local queryCacheRowMemory = graphPanel.new(
 ).addTargets(
   [
     prometheus.target(
-      expr='mysql_global_status_qcache_free_memory{instance="$instance"}',
+      expr='mysql_global_status_qcache_free_memory{instance=~"$instance"}',
       legendFormat='Free Memory',
       interval='$interval',
       intervalFactor=1,
     ),
     prometheus.target(
-      expr='mysql_global_variables_query_cache_size{instance="$instance"}',
+      expr='mysql_global_variables_query_cache_size{instance=~"$instance"}',
       legendFormat='Query Cache Size',
       interval='$interval',
       intervalFactor=1,
@@ -447,31 +447,31 @@ local queryCacheRowActivity = graphPanel.new(
 ).addTargets(
   [
     prometheus.target(
-      expr='rate(mysql_global_status_qcache_hits{instance="$instance"}[$interval]) or irate(mysql_global_status_qcache_hits{instance="$instance"}[5m])',
+      expr='rate(mysql_global_status_qcache_hits{instance=~"$instance"}[$interval]) or irate(mysql_global_status_qcache_hits{instance=~"$instance"}[5m])',
       legendFormat='Hits',
       interval='$interval',
       intervalFactor=1,
     ),
     prometheus.target(
-      expr='rate(mysql_global_status_qcache_inserts{instance="$instance"}[$interval]) or irate(mysql_global_status_qcache_inserts{instance="$instance"}[5m])',
+      expr='rate(mysql_global_status_qcache_inserts{instance=~"$instance"}[$interval]) or irate(mysql_global_status_qcache_inserts{instance=~"$instance"}[5m])',
       legendFormat='Inserts',
       interval='$interval',
       intervalFactor=1,
     ),
     prometheus.target(
-      expr='rate(mysql_global_status_qcache_not_cached{instance="$instance"}[$interval]) or irate(mysql_global_status_qcache_not_cached{instance="$instance"}[5m])',
+      expr='rate(mysql_global_status_qcache_not_cached{instance=~"$instance"}[$interval]) or irate(mysql_global_status_qcache_not_cached{instance=~"$instance"}[5m])',
       legendFormat='Not Cached',
       interval='$interval',
       intervalFactor=1,
     ),
     prometheus.target(
-      expr='rate(mysql_global_status_qcache_lowmem_prunes{instance="$instance"}[$interval]) or irate(mysql_global_status_qcache_lowmem_prunes{instance="$instance"}[5m])',
+      expr='rate(mysql_global_status_qcache_lowmem_prunes{instance=~"$instance"}[$interval]) or irate(mysql_global_status_qcache_lowmem_prunes{instance=~"$instance"}[5m])',
       legendFormat='Prunes',
       interval='$interval',
       intervalFactor=1,
     ),
     prometheus.target(
-      expr='rate(mysql_global_status_qcache_queries_in_cache{instance="$instance"}[$interval]) or irate(mysql_global_status_qcache_queries_in_cache{instance="$instance"}[5m])',
+      expr='rate(mysql_global_status_qcache_queries_in_cache{instance=~"$instance"}[$interval]) or irate(mysql_global_status_qcache_queries_in_cache{instance=~"$instance"}[5m])',
       legendFormat='Queries in Cache',
       interval='$interval',
       intervalFactor=1,
@@ -497,31 +497,31 @@ local tableOpeningsRowCacheStatus = graphPanel.new(
 ).addTargets(
   [
     prometheus.target(
-      expr='rate(mysql_global_status_opened_tables{instance="$instance"}[$interval]) or irate(mysql_global_status_opened_tables{instance="$instance"}[5m])',
+      expr='rate(mysql_global_status_opened_tables{instance=~"$instance"}[$interval]) or irate(mysql_global_status_opened_tables{instance=~"$instance"}[5m])',
       legendFormat='Openings',
       interval='$interval',
       intervalFactor=1,
     ),
     prometheus.target(
-      expr='rate(mysql_global_status_table_open_cache_hits{instance="$instance"}[$interval]) or irate(mysql_global_status_table_open_cache_hits{instance="$instance"}[5m])',
+      expr='rate(mysql_global_status_table_open_cache_hits{instance=~"$instance"}[$interval]) or irate(mysql_global_status_table_open_cache_hits{instance=~"$instance"}[5m])',
       legendFormat='Hits',
       interval='$interval',
       intervalFactor=1,
     ),
     prometheus.target(
-      expr='rate(mysql_global_status_table_open_cache_misses{instance="$instance"}[$interval]) or irate(mysql_global_status_table_open_cache_misses{instance="$instance"}[5m])',
+      expr='rate(mysql_global_status_table_open_cache_misses{instance=~"$instance"}[$interval]) or irate(mysql_global_status_table_open_cache_misses{instance=~"$instance"}[5m])',
       legendFormat='Misses',
       interval='$interval',
       intervalFactor=1,
     ),
     prometheus.target(
-      expr='rate(mysql_global_status_table_open_cache_overflows{instance="$instance"}[$interval]) or irate(mysql_global_status_table_open_cache_overflows{instance="$instance"}[5m])',
+      expr='rate(mysql_global_status_table_open_cache_overflows{instance=~"$instance"}[$interval]) or irate(mysql_global_status_table_open_cache_overflows{instance=~"$instance"}[5m])',
       legendFormat='Misses due to Overflows',
       interval='$interval',
       intervalFactor=1,
     ),
     prometheus.target(
-      expr='(rate(mysql_global_status_table_open_cache_hits{instance="$instance"}[$interval]) or irate(mysql_global_status_table_open_cache_hits{instance="$instance"}[5m]))/((rate(mysql_global_status_table_open_cache_hits{instance="$instance"}[$interval]) or irate(mysql_global_status_table_open_cache_hits{instance="$instance"}[5m]))+(rate(mysql_global_status_table_open_cache_misses{instance="$instance"}[$interval]) or irate(mysql_global_status_table_open_cache_misses{instance="$instance"}[5m])))',
+      expr='(rate(mysql_global_status_table_open_cache_hits{instance=~"$instance"}[$interval]) or irate(mysql_global_status_table_open_cache_hits{instance=~"$instance"}[5m]))/((rate(mysql_global_status_table_open_cache_hits{instance=~"$instance"}[$interval]) or irate(mysql_global_status_table_open_cache_hits{instance=~"$instance"}[5m]))+(rate(mysql_global_status_table_open_cache_misses{instance=~"$instance"}[$interval]) or irate(mysql_global_status_table_open_cache_misses{instance=~"$instance"}[5m])))',
       legendFormat='Table Open Cache Hit Ratio',
       interval='$interval',
       intervalFactor=1,
@@ -552,13 +552,13 @@ local tableOpeningsRowOpenTables = graphPanel.new(
 ).addTargets(
   [
     prometheus.target(
-      expr='mysql_global_status_open_tables{instance="$instance"}',
+      expr='mysql_global_status_open_tables{instance=~"$instance"}',
       legendFormat='Open Tables',
       interval='$interval',
       intervalFactor=1,
     ),
     prometheus.target(
-      expr='mysql_global_variables_table_open_cache{instance="$instance"}',
+      expr='mysql_global_variables_table_open_cache{instance=~"$instance"}',
       legendFormat='Table Open Cache',
       interval='$interval',
       intervalFactor=1,
@@ -590,13 +590,13 @@ local networkRowTraffic = graphPanel.new(
 ).addTargets(
   [
     prometheus.target(
-      expr='rate(mysql_global_status_bytes_received{instance="$instance"}[$interval]) or irate(mysql_global_status_bytes_received{instance="$instance"}[5m])',
+      expr='rate(mysql_global_status_bytes_received{instance=~"$instance"}[$interval]) or irate(mysql_global_status_bytes_received{instance=~"$instance"}[5m])',
       legendFormat='Inbound',
       interval='$interval',
       intervalFactor=1,
     ),
     prometheus.target(
-      expr='rate(mysql_global_status_bytes_sent{instance="$instance"}[$interval]) or irate(mysql_global_status_bytes_sent{instance="$instance"}[5m])',
+      expr='rate(mysql_global_status_bytes_sent{instance=~"$instance"}[$interval]) or irate(mysql_global_status_bytes_sent{instance=~"$instance"}[5m])',
       legendFormat='Outbound',
       interval='$interval',
       intervalFactor=1,
@@ -631,13 +631,13 @@ local networkRowTrafficHourly = graphPanel.new(
 ).addTargets(
   [
     prometheus.target(
-      expr='increase(mysql_global_status_bytes_received{instance="$instance"}[1h])',
+      expr='increase(mysql_global_status_bytes_received{instance=~"$instance"}[1h])',
       legendFormat='Received',
       interval='1h',
       intervalFactor=1,
     ),
     prometheus.target(
-      expr='increase(mysql_global_status_bytes_sent{instance="$instance"}[1h])',
+      expr='increase(mysql_global_status_bytes_sent{instance=~"$instance"}[1h])',
       legendFormat='Sent',
       interval='1h',
       intervalFactor=1,
@@ -668,7 +668,7 @@ local overviewRowUptime = singlestat.new(
   thresholds='300,3600',
 ).addTarget(
   prometheus.target(
-    expr='mysql_global_status_uptime{instance="$instance"}',
+    expr='mysql_global_status_uptime{instance=~"$instance"}',
   )
 );
 
@@ -679,7 +679,7 @@ local overviewRowQPS = singlestat.new(
   sparklineShow=true,
 ).addTarget(
   prometheus.target(
-    expr='rate(mysql_global_status_queries{instance="$instance"}[$interval]) or irate(mysql_global_status_queries{instance="$instance"}[$interval])',
+    expr='rate(mysql_global_status_queries{instance=~"$instance"}[$interval]) or irate(mysql_global_status_queries{instance=~"$instance"}[$interval])',
   )
 );
 
@@ -689,7 +689,7 @@ local overviewRowInnoDB = singlestat.new(
   format='bytes',
 ).addTarget(
   prometheus.target(
-    expr='mysql_global_variables_innodb_buffer_pool_size{instance="$instance"}',
+    expr='mysql_global_variables_innodb_buffer_pool_size{instance=~"$instance"}',
   )
 );
 
@@ -698,7 +698,7 @@ local overviewRowDBVersion = singlestat.new(
   valueName='name',
 ).addTarget(
   prometheus.target(
-    expr='mysql_version_info{instance="$instance"}',
+    expr='mysql_version_info{instance=~"$instance"}',
     legendFormat='{{version}}',
   )
 );

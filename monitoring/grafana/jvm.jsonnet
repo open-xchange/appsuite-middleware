@@ -5,22 +5,6 @@ local graphPanel = grafana.graphPanel;
 local row = grafana.row;
 local prometheus = grafana.prometheus;
 
-local overviewRow = row.new(
-  title='Overview'
-);
-
-local memoryRow = row.new(
-  title='Memory'
-);
-
-local memoryPoolRow = row.new(
-  title='Memory Pool'
-);
-
-local gcRow = row.new(
-  title='Garbage Collector'
-);
-
 local memoryHeapUsage = graphPanel.new(
   title='Heap',
   description='Used bytes of a given JVM memory area.',
@@ -32,17 +16,17 @@ local memoryHeapUsage = graphPanel.new(
   min='0'
 ).addTarget(
   prometheus.target(
-    'jvm_memory_bytes_used{instance="$instance", area="heap"}',
+    'jvm_memory_bytes_used{instance=~"$instance", area="heap"}',
     legendFormat='Used',
   )
 ).addTarget(
   prometheus.target(
-    'jvm_memory_bytes_committed{instance="$instance", area="heap"}',
+    'jvm_memory_bytes_committed{instance=~"$instance", area="heap"}',
     legendFormat='Committed',
   )
 ).addTarget(
   prometheus.target(
-    'jvm_memory_bytes_max{instance="$instance", area="heap"}',
+    'jvm_memory_bytes_max{instance=~"$instance", area="heap"}',
     legendFormat='Max',
   )
 );
@@ -58,17 +42,17 @@ local memoryNonHeapUsage = graphPanel.new(
   min='0'
 ).addTarget(
   prometheus.target(
-    'jvm_memory_bytes_used{instance="$instance", area="nonheap"}',
+    'jvm_memory_bytes_used{instance=~"$instance", area="nonheap"}',
     legendFormat='Used',
   )
 ).addTarget(
   prometheus.target(
-    'jvm_memory_bytes_committed{instance="$instance", area="nonheap"}',
+    'jvm_memory_bytes_committed{instance=~"$instance", area="nonheap"}',
     legendFormat='Committed',
   )
 ).addTarget(
   prometheus.target(
-    'jvm_memory_bytes_max{instance="$instance", area="nonheap"}',
+    'jvm_memory_bytes_max{instance=~"$instance", area="nonheap"}',
     legendFormat='Max',
   )
 );
@@ -84,12 +68,12 @@ local memoryPoolOldNewGen = graphPanel.new(
   min='0'
 ).addTarget(
   prometheus.target(
-    'jvm_memory_pool_bytes_used{instance="$instance", pool="CMS Old Gen"}',
+    'jvm_memory_pool_bytes_used{instance=~"$instance", pool="CMS Old Gen"}',
     legendFormat='Old-Gen',
   )
 ).addTarget(
   prometheus.target(
-    'jvm_memory_pool_bytes_used{instance="$instance", pool="Par Eden Space"}',
+    'jvm_memory_pool_bytes_used{instance=~"$instance", pool="Par Eden Space"}',
     legendFormat='New-Gen',
   )
 );
@@ -105,7 +89,7 @@ local memoryPools = graphPanel.new(
   min='0'
 ).addTarget(
   prometheus.target(
-    'jvm_memory_pool_bytes_used{instance="$instance"}',
+    'jvm_memory_pool_bytes_used{instance=~"$instance"}',
     legendFormat='{{pool}}',
   )
 );
@@ -118,7 +102,7 @@ local overviewThreads = singlestat.new(
   sparklineShow=true
 ).addTarget(
   prometheus.target(
-    'jvm_threads_current{instance="$instance"}'
+    'jvm_threads_current{instance=~"$instance"}'
   )
 );
 
@@ -130,7 +114,7 @@ local overviewClassesLoaded = singlestat.new(
   sparklineShow=true
 ).addTarget(
   prometheus.target(
-    'jvm_classes_loaded{instance="$instance"}'
+    'jvm_classes_loaded{instance=~"$instance"}'
   )
 );
 
@@ -142,7 +126,7 @@ local gcDuration = graphPanel.new(
   format='s'
 ).addTarget(
   prometheus.target(
-    'rate(jvm_gc_collection_seconds_sum{instance="$instance"}[$interval])/rate(jvm_gc_collection_seconds_count{instance="$instance"}[$interval])',
+    'rate(jvm_gc_collection_seconds_sum{instance=~"$instance"}[$interval])/rate(jvm_gc_collection_seconds_count{instance=~"$instance"}[$interval])',
     legendFormat='{{gc}}'
   )
 );
@@ -156,30 +140,38 @@ local gcDurationCount = graphPanel.new(
   format='ops'
 ).addTarget(
   prometheus.target(
-    'rate(jvm_gc_collection_seconds_count{instance="$instance"}[$interval])',
+    'rate(jvm_gc_collection_seconds_count{instance=~"$instance"}[$interval])',
     legendFormat='{{gc}}'
   )
 );
 
-oxFunctions.newDashboard(
+grafana.newDashboard(
   title='JVM',
   tags=['java'],
   metric='jvm_info'
 ).addPanels(
   [
-    overviewRow { gridPos: { h: 1, w: 24, x: 0, y: 0 } },
+    row.new(
+      title='Overview'
+    ) + { gridPos: { h: 1, w: 24, x: 0, y: 0 } },
     overviewThreads { gridPos: { h: 6, w: 4, x: 0, y: 1 } },
     overviewClassesLoaded { gridPos: { h: 6, w: 4, x: 4, y: 1 } },
-
-    memoryRow { gridPos: { h: 1, w: 24, x: 0, y: 7 } },
+  ] + [
+    row.new(
+      title='Memory'
+    ) + { gridPos: { h: 1, w: 24, x: 0, y: 7 } },
     memoryHeapUsage { gridPos: { h: 8, w: 12, x: 0, y: 8 } },
     memoryNonHeapUsage { gridPos: { h: 8, w: 12, x: 12, y: 8 } },
-
-    memoryPoolRow { gridPos: { h: 1, w: 24, x: 0, y: 16 } },
+  ] + [
+    row.new(
+      title='Memory Pool'
+    ) + { gridPos: { h: 1, w: 24, x: 0, y: 16 } },
     memoryPoolOldNewGen { gridPos: { h: 8, w: 12, x: 0, y: 17 } },
     memoryPools { gridPos: { h: 8, w: 12, x: 12, y: 17 } },
-
-    gcRow { gridPos: { h: 1, w: 24, x: 0, y: 25 } },
+  ] + [
+    row.new(
+      title='Garbage Collector'
+    ) + { gridPos: { h: 1, w: 24, x: 0, y: 25 } },
     gcDuration { gridPos: { h: 8, w: 12, x: 0, y: 26 } },
     gcDurationCount { gridPos: { h: 8, w: 12, x: 12, y: 26 } },
   ]
