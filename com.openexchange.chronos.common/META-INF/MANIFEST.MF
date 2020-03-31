@@ -6,7 +6,6 @@ Bundle-Version: 7.10.4
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: .,
- lib/vinnie-2.0.0.jar,
  lib/lib-recur-0.10.jar
 Import-Package: com.openexchange.annotation,
  com.openexchange.chronos,
@@ -33,9 +32,7 @@ Import-Package: com.openexchange.annotation,
  org.json,
  org.osgi.framework,
  org.slf4j
-Export-Package: com.github.mangstadt.vinnie,
- com.github.mangstadt.vinnie.io,
- com.openexchange.chronos.common,
+Export-Package: com.openexchange.chronos.common,
  com.openexchange.chronos.common.mapping,
  org.dmfs.rfc5545.recur,
  org.dmfs.rfc5545.recurrenceset

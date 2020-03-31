@@ -75,6 +75,7 @@ import com.openexchange.contact.vcard.VCardParameters;
 import com.openexchange.contact.vcard.VCardService;
 import com.openexchange.contact.vcard.storage.VCardStorageService;
 import com.openexchange.dav.DAVProtocol;
+import com.openexchange.dav.DAVUserAgent;
 import com.openexchange.dav.PreconditionException;
 import com.openexchange.dav.SimilarityException;
 import com.openexchange.dav.mixins.CurrentUserPrivilegeSet;
@@ -264,8 +265,7 @@ public class CardDAVCollection extends FolderCollection<Contact> {
             VCardStorageService vCardStorageService = factory.getVCardStorageService(factory.getSession().getContextId());
             if (null != vCardStorageService) {
                 try {
-                    isStoreOriginalVCard = Boolean.valueOf(
-                        factory.requireService(ContactService.class).supports(factory.getSession(), folder.getID(), ContactField.VCARD_ID));
+                    isStoreOriginalVCard = Boolean.valueOf(factory.requireService(ContactService.class).supports(factory.getSession(), folder.getID(), ContactField.VCARD_ID));
                 } catch (OXException e) {
                     LOG.warn("Error checking if storing the vCard ID is supported, assuming \"false\".", e);
                     isStoreOriginalVCard = Boolean.FALSE;
@@ -278,12 +278,16 @@ public class CardDAVCollection extends FolderCollection<Contact> {
     }
 
     /**
-     * Gets a value indicating whether synchronization of distribution lists is enabled or not.
+     * Gets a value indicating whether synchronization of distribution lists is enabled for the used client or not.
      * 
-     * @return <code>true</code> if distribution lists can be synchronized, <code>false</code>, otherwise
+     * @return <code>true</code> if distribution lists can be synchronized with the used client, <code>false</code>, otherwise
      */
     public boolean isSyncDistributionLists() {
-        return false;
+        DAVUserAgent davUserAgent = getUserAgent();
+        return davUserAgent.equals(DAVUserAgent.EM_CLIENT) || 
+            davUserAgent.equals(DAVUserAgent.EM_CLIENT_FOR_APPSUITE) ||
+            davUserAgent.equals(DAVUserAgent.OUTLOOK_CALDAV_SYNCHRONIZER) 
+            ;
     }
 
     /**
@@ -315,6 +319,7 @@ public class CardDAVCollection extends FolderCollection<Contact> {
             if (false == isSyncDistributionLists()) {
                 searchTerm.addSearchTerm(getExcludeDistributionlistTerm());
             }
+
             searchTerm.addSearchTerm(term);
             searchIterator = factory.getContactService().searchContacts(factory.getSession(), searchTerm);
             while (searchIterator.hasNext()) {
@@ -419,6 +424,7 @@ public class CardDAVCollection extends FolderCollection<Contact> {
                 .addSearchTerm(getExcludeDistributionlistTerm())
             ;
         }
+
         SortOptions sortOptions = new SortOptions(ContactField.OBJECT_ID, Order.ASCENDING);
         sortOptions.setLimit(factory.getState().getContactLimit());
         /*
@@ -468,14 +474,14 @@ public class CardDAVCollection extends FolderCollection<Contact> {
         return ContactResource.EXTENSION_VCF;
     }
 
-	@Override
-	public Date getLastModified() throws WebdavProtocolException {
-	    try {
-    	    Date lastModified = new Date(0);
+    @Override
+    public Date getLastModified() throws WebdavProtocolException {
+        try {
+            Date lastModified = new Date(0);
             List<UserizedFolder> folders = getFolders();
-    	    for (UserizedFolder folder : folders) {
-    	        lastModified = Tools.getLatestModified(lastModified, folder);
-    	    }
+            for (UserizedFolder folder : folders) {
+                lastModified = Tools.getLatestModified(lastModified, folder);
+            }
             SortOptions sortOptions = new SortOptions(ContactField.LAST_MODIFIED, Order.DESCENDING);
             sortOptions.setLimit(1);
             for (UserizedFolder folder : folders) {
@@ -504,10 +510,10 @@ public class CardDAVCollection extends FolderCollection<Contact> {
                 }
             }
             return lastModified;
-	    } catch (OXException e) {
-	        throw protocolException(getUrl(), e);
-	    }
-	}
+        } catch (OXException e) {
+            throw protocolException(getUrl(), e);
+        }
+    }
 
     @Override
     public String getSyncToken() throws WebdavProtocolException {

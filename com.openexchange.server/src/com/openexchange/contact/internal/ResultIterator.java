@@ -81,7 +81,8 @@ public class ResultIterator implements SearchIterator<Contact> {
     private static final ContactField[] DLISTMEMBER_FIELDS = {
     	ContactField.FOLDER_ID, ContactField.OBJECT_ID, ContactField.CREATED_BY, ContactField.PRIVATE_FLAG, ContactField.LAST_MODIFIED,
     	ContactField.DISPLAY_NAME, ContactField.SUR_NAME, ContactField.GIVEN_NAME,
-        ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3, ContactField.YOMI_FIRST_NAME, ContactField.YOMI_LAST_NAME };
+        ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3, ContactField.YOMI_FIRST_NAME, ContactField.YOMI_LAST_NAME,
+        ContactField.UID };
 
     private final SearchIterator<Contact> delegate;
     private final boolean needsAttachmentInfo;
@@ -217,6 +218,7 @@ public class ResultIterator implements SearchIterator<Contact> {
 			LOG.warn("Error setting e-mail address for updated distribution list member", e);
 		}
         member.setSortName(getSortedName(contact));
+        member.setContactUid(contact.getUid());
 	}
 	
     private String getSortedName(Contact con) {

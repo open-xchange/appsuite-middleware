@@ -457,7 +457,7 @@ public class BasicTest extends VCardTest {
         contact = getMapper().importVCard(vCards.get(2), null, null, null);
         assertNotNull(contact);
         Assert.assertEquals("\u00d1 \u00d1 \u00d1 \u00d1 \u00d1 ", contact.getDisplayName());
-        Assert.assertEquals("\u00d1 \u00d1 \u00d1 \u00d1", contact.getSurName());
+        Assert.assertEquals("\u00d1 \u00d1 \u00d1 \u00d1 ", contact.getSurName());
         Assert.assertEquals("123456789", contact.getCellularTelephone1());
         Assert.assertEquals("My Contacts", contact.getCategories());
         /*
@@ -479,8 +479,8 @@ public class BasicTest extends VCardTest {
         contact = getMapper().importVCard(vCards.get(4), null, null, null);
         assertNotNull(contact);
         Assert.assertEquals("\u00d1 \u00d1 \u00d1 \u00d1 ", contact.getDisplayName());
-        Assert.assertEquals("\u00d1 \u00d1", contact.getSurName());
-        Assert.assertEquals("\u00d1 \u00d1 \u00d1", contact.getGivenName());
+        Assert.assertEquals("\u00d1 \u00d1 ", contact.getSurName());
+        Assert.assertEquals("\u00d1 \u00d1 \u00d1 ", contact.getGivenName());
         Assert.assertEquals("123456", contact.getCellularTelephone1());
         Assert.assertEquals("123456", contact.getTelephoneBusiness1());
         Assert.assertEquals("123456", contact.getFaxBusiness());
@@ -2063,7 +2063,7 @@ public class BasicTest extends VCardTest {
         assertNotNull(contact);
         Assert.assertEquals("Doe", contact.getSurName());
         Assert.assertEquals("John", contact.getGivenName());
-        Assert.assertEquals("Richter James", contact.getMiddleName());
+        Assert.assertEquals("Richter,James", contact.getMiddleName());
         Assert.assertEquals("Mr.", contact.getTitle());
         Assert.assertEquals("Sr.", contact.getSuffix());
         Assert.assertEquals("Mr. John Richter James Doe Sr.", contact.getDisplayName());
@@ -2089,7 +2089,7 @@ public class BasicTest extends VCardTest {
         Assert.assertEquals("12345", contact.getPostalCodeBusiness());
         Assert.assertEquals("United States of America", contact.getCountryBusiness());
         Assert.assertEquals("Cresent moon drive\r\nAlbaney, New York 12345", contact.getAddressBusiness());
-        Assert.assertEquals("Silicon Alley 5", contact.getStreetHome());
+        Assert.assertEquals("Silicon Alley 5,", contact.getStreetHome());
         Assert.assertEquals("New York", contact.getCityHome());
         Assert.assertEquals("New York", contact.getStateHome());
         Assert.assertEquals("12345", contact.getPostalCodeHome());

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,52 +47,20 @@
  *
  */
 
-package com.openexchange.contact.vcard.impl.internal;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map.Entry;
-import com.openexchange.exception.OXException;
-import ezvcard.ValidationWarning;
-import ezvcard.ValidationWarnings;
-import ezvcard.io.ParseWarning;
-import ezvcard.property.VCardProperty;
+package com.openexchange.contact.vcard;
 
 /**
- * {@link VCardExceptionUtils}
+ * {@link VCardFormat}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.10.4
  */
-public class VCardExceptionUtils {
+public enum VCardFormat {
 
-    public static List<OXException> getParserWarnings(List<ParseWarning> parserWarnings) {
-        if (null != parserWarnings && 0 < parserWarnings.size()) {
-            List<OXException> warnings = new ArrayList<OXException>();
-            for (ParseWarning warning : parserWarnings) {
-                warnings.add(VCardExceptionCodes.PARSER_ERROR.create(warning.toString()));
-            }
-            return warnings;
-        }
-        return Collections.emptyList();
-    }
+    VERSION_4,
 
-    public static List<OXException> getValidationWarnings(ValidationWarnings validationWarnings) {
-        if (null != validationWarnings && false == validationWarnings.isEmpty()) {
-            List<OXException> warnings = new ArrayList<OXException>();
-            for (Entry<VCardProperty, List<ValidationWarning>> entry : validationWarnings) {
-                VCardProperty property = entry.getKey();
-                List<ValidationWarning> propViolations = entry.getValue();
-                String propertyName = null != property ? property.getClass().getSimpleName() : "";
-                if (null != propViolations && 0 < propViolations.size()) {
-                    for (ValidationWarning propViolation : propViolations) {
-                        warnings.add(VCardExceptionCodes.VALIDATION_FAILED.create(propertyName, propViolation.getMessage(), propViolation.getCode()));
-                    }
-                }
-            }
-            return warnings;
-        }
-        return Collections.emptyList();
-    }
+    VERSION_3,
+
+    APPLE
 
 }

@@ -47,52 +47,28 @@
  *
  */
 
-package com.openexchange.contact.vcard.impl.internal;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map.Entry;
-import com.openexchange.exception.OXException;
-import ezvcard.ValidationWarning;
-import ezvcard.ValidationWarnings;
-import ezvcard.io.ParseWarning;
-import ezvcard.property.VCardProperty;
+package com.openexchange.contact.vcard;
 
 /**
- * {@link VCardExceptionUtils}
+ * {@link DistributionListMode}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.10.4
  */
-public class VCardExceptionUtils {
+public enum DistributionListMode {
 
-    public static List<OXException> getParserWarnings(List<ParseWarning> parserWarnings) {
-        if (null != parserWarnings && 0 < parserWarnings.size()) {
-            List<OXException> warnings = new ArrayList<OXException>();
-            for (ParseWarning warning : parserWarnings) {
-                warnings.add(VCardExceptionCodes.PARSER_ERROR.create(warning.toString()));
-            }
-            return warnings;
-        }
-        return Collections.emptyList();
-    }
+    /**
+     * Contacts marked as distribution list will be exported to vCards using the <i>Apple</i>-style properties
+     * <code>X-ADDRESSBOOKSERVER-KIND</code> and <code>X-ADDRESSBOOKSERVER-MEMBER</code>.
+     */
+    ADDRESSBOOKSERVER,
 
-    public static List<OXException> getValidationWarnings(ValidationWarnings validationWarnings) {
-        if (null != validationWarnings && false == validationWarnings.isEmpty()) {
-            List<OXException> warnings = new ArrayList<OXException>();
-            for (Entry<VCardProperty, List<ValidationWarning>> entry : validationWarnings) {
-                VCardProperty property = entry.getKey();
-                List<ValidationWarning> propViolations = entry.getValue();
-                String propertyName = null != property ? property.getClass().getSimpleName() : "";
-                if (null != propViolations && 0 < propViolations.size()) {
-                    for (ValidationWarning propViolation : propViolations) {
-                        warnings.add(VCardExceptionCodes.VALIDATION_FAILED.create(propertyName, propViolation.getMessage(), propViolation.getCode()));
-                    }
-                }
-            }
-            return warnings;
-        }
-        return Collections.emptyList();
-    }
+    /**
+     * Contacts marked as distribution list will be exported to vCards using the <i>version 4</i>-style properties
+     * <code>KIND</code> and <code>MEMBER</code>, but still within a vCard version 3.0 container.
+     */
+    V4_IN_V3_EXPORT,
+
+    ;
 
 }
