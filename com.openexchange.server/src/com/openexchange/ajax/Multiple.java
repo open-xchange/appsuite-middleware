@@ -316,7 +316,7 @@ public class Multiple extends SessionServlet {
     }
 
     /** If a module identifier is contained in this set, serial execution is mandatory */
-    private static final Set<String> SERIAL_MODULES = ImmutableSet.of(MODULE_MAIL, "templating");
+    private static final Set<String> SERIAL_MODULES = ImmutableSet.of(MODULE_MAIL, "templating", "drive");
 
     /** If a module identifier is contained in this set, serial execution is mandatory in case action hints to a {@link #MODIFYING_ACTIONS modifying operation} */
     private static final Set<String> SERIAL_ON_MODIFICATION_MODULES = ImmutableSet.of(MODULE_CALENDAR, MODULE_TASK, MODULE_FOLDER, MODULE_FOLDERS, MODULE_CONTACT);
