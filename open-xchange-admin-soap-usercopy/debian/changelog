@@ -1,3 +1,9 @@
+open-xchange-admin-soap-usercopy (7.10.2-24) stable; urgency=medium
+
+  * Build for patch 2020-04-02 (5672)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 01 Apr 2020 08:23:53 +0000
+
 open-xchange-admin-soap-usercopy (7.10.2-23) stable; urgency=medium
 
   * Build for patch 2020-03-23 (5652)

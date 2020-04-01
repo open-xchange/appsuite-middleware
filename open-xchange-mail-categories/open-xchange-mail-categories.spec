@@ -15,7 +15,7 @@ BuildRequires: java-1.8.0-openjdk-devel
 BuildRequires: open-xchange-core >= @OXVERSION@
 BuildRequires: open-xchange-mailfilter >= @OXVERSION@
 Version:       @OXVERSION@
-%define        ox_release 23
+%define        ox_release 24
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -56,6 +56,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %config(noreplace) /opt/open-xchange/etc/mail-categories.properties
 
 %changelog
+* Wed Apr 01 2020 Kevin Ruthmann <kevin.ruthmann@open-xchange.com>
+Build for patch 2020-04-02 (5672)
 * Thu Mar 19 2020 Kevin Ruthmann <kevin.ruthmann@open-xchange.com>
 Build for patch 2020-03-23 (5652)
 * Wed Feb 26 2020 Kevin Ruthmann <kevin.ruthmann@open-xchange.com>
