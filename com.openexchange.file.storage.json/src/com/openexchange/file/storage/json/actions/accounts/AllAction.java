@@ -127,7 +127,7 @@ public class AllAction extends AbstractFileStorageAccountAction {
                     FileStorageFolder rootFolder = access.getRootFolder();
 
                     //Extended connection check if requested by the client and supported by the FileStorage
-                    if (connectionCheck.equals(Boolean.TRUE) && account.getFileStorageService() instanceof LoginAwareFileStorageServiceExtension) {
+                    if (Boolean.TRUE.equals(connectionCheck) && account.getFileStorageService() instanceof LoginAwareFileStorageServiceExtension) {
                         ((LoginAwareFileStorageServiceExtension) account.getFileStorageService()).testConnection(account, session);
                     }
 
