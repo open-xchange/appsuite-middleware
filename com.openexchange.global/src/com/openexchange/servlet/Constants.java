@@ -86,4 +86,12 @@ public interface Constants {
      */
     public static final String FILTER_PATHS = "filter.paths";
 
+    /**
+     * The name of the HTTP session attribute containing the authenticated status of the Open-Xchange application.
+     * <p>
+     * An HTTP session is marked as authenticated by Open-Xchange application if this attribute is not <code>null</code> and equals to
+     * {@link Boolean#TRUE}.
+     */
+    public static final String HTTP_SESSION_ATTR_AUTHENTICATED = "ox.authenticated";
+
 }
