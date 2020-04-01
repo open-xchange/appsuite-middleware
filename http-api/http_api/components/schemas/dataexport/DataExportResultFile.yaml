@@ -4,7 +4,7 @@ properties:
     type: string
     description: The work item identifier
   number:
-    type: int
+    type: integer
     description: The package number
   contentType:
     type: string
