@@ -17,7 +17,7 @@
         description: The number of the package
         required: true
         schema:
-          type: int
+          type: integer
     responses:
       '200':
         description: A ZIP archive.
