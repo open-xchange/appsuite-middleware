@@ -84,8 +84,7 @@ public final class SpamExpertsServlet extends DataServlet {
 
     private final transient SpamExpertsConfig config;
 
-    private ServiceLookup serviceLookup;
-
+    private transient ServiceLookup serviceLookup;
 
     /**
      * Initializes a new {@link SpamExpertsServlet}.
