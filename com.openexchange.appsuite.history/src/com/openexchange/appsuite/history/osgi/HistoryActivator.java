@@ -110,10 +110,10 @@ public class HistoryActivator extends HousekeepingActivator implements ForcedRel
         Dictionary<String, Object> dictionary = new Hashtable<String, Object>(1);
         dictionary.put(SecurityManagerPropertyProvider.PROPS_SERVICE_KEY, Strings.concat(C(','), APPSUITE_PROP.getFQPropertyName(), MANIFEST_PROP.getFQPropertyName()));
         registerService(SecurityManagerPropertyProvider.class, (property) -> {
-            if(APPSUITE_PROP.getFQPropertyName().contentEquals(property)) {
+            if (APPSUITE_PROP.getFQPropertyName().contentEquals(property)) {
                 return Optional.of(configService.getProperty(APPSUITE_PROP));
             }
-            if(MANIFEST_PROP.getFQPropertyName().contentEquals(property)) {
+            if (MANIFEST_PROP.getFQPropertyName().contentEquals(property)) {
                 return Optional.of(configService.getProperty(MANIFEST_PROP));
             }
             return Optional.empty();
@@ -129,7 +129,7 @@ public class HistoryActivator extends HousekeepingActivator implements ForcedRel
      * @throws OXException in case {@link LeanConfigurationService} couldn't be loaded
      */
     private void init(LeanConfigurationService configService) {
-        new Thread(() ->  {
+        new Thread(() -> {
             LOG.info("Checking history for {}", History.appsuite);
             try {
                 checkHistory(configService, History.appsuite);
@@ -172,7 +172,7 @@ public class HistoryActivator extends HousekeepingActivator implements ForcedRel
         }
         File historyFolder = new File(path);
         File installedFolder = getInstalledPath(installed, history);
-        if (historyFolder.exists() == false || installedFolder.exists() == false) {
+        if (historyFolder.exists() == false || (installedFolder != null && installedFolder.exists() == false)) {
             LOG.debug("Either history folder or installed folder doesn't exist for history {}", history.name());
             // History is deactivated
             return;
@@ -296,12 +296,12 @@ public class HistoryActivator extends HousekeepingActivator implements ForcedRel
      * @return The folder containing the data for the given history
      */
     private File getContentFolder(File parent, History history) {
-        switch(history) {
+        switch (history) {
             default:
             case appsuite:
                 return new File(parent, "apps");
             case manifest:
-                if(parent.getName().equals("manifests")) {
+                if (parent.getName().equals("manifests")) {
                     return parent;
                 }
                 return new File(parent, "manifests");
@@ -316,7 +316,7 @@ public class HistoryActivator extends HousekeepingActivator implements ForcedRel
      */
     private enum History {
         /**
-         * The history of the appsuite apps
+         * The history of the AppSuite apps
          */
         appsuite,
         /**
@@ -330,6 +330,7 @@ public class HistoryActivator extends HousekeepingActivator implements ForcedRel
         return Reloadables.getInterestsForAll();
     }
 
+    @SuppressWarnings("unused")
     @Override
     public void reloadConfiguration(ConfigurationService configService) {
         try {
@@ -339,5 +340,4 @@ public class HistoryActivator extends HousekeepingActivator implements ForcedRel
             LOG.error("Unable to reinit history", e);
         }
     }
-
 }
