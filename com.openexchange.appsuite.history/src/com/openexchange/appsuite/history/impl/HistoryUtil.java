@@ -111,11 +111,14 @@ public class HistoryUtil {
         LOG.info("Current files missing or have been rotated. Copying installed files to history folder ({})", destFolder.getAbsolutePath());
         if (destFolder.exists()) {
             LOG.debug("Current files already present. Starting to delete them before copying installed files ({}).", destFolder.getAbsolutePath());
-            destFolder.delete();
-            LOG.debug("Current files deleted successfully ({}).", destFolder.getAbsolutePath());
+            if (destFolder.delete()) {
+                LOG.debug("Current files deleted successfully ({}).", destFolder.getAbsolutePath());
+            } else {
+                LOG.debug("Could not delete file ({}).", destFolder.getAbsolutePath());
+            }
         }
         boolean failed = !destFolder.mkdirs();
-        if(failed) {
+        if (failed) {
             LOG.error("Unable to create current folder in folder {}", history.getAbsolutePath());
             throw new IOException("Unable to create current folder");
         }
