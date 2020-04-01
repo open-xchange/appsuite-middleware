@@ -59,6 +59,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.LoginServlet;
@@ -313,14 +314,14 @@ public class AutoLogin extends AbstractLoginRequestHandler {
         final String userAgent = LoginTools.parseUserAgent(req);
         final Map<String, List<String>> headers = copyHeaders(req);
         final com.openexchange.authentication.Cookie[] cookies = Tools.getCookieFromHeader(req);
-        final String httpSessionId = req.getSession(true).getId();
+        final HttpSession httpSession = req.getSession(true);
 
         LoginRequestImpl.Builder b = new LoginRequestImpl.Builder().login(null).password(null).clientIP(clientIP);
         b.userAgent(userAgent).authId(authId).client(client).version(null);
         b.hash(HashCalculator.getInstance().getHash(req, client));
         b.iface(HTTP_JSON).headers(headers).requestParameter(req.getParameterMap());
         b.cookies(cookies).secure(Tools.considerSecure(req, conf.isCookieForceHTTPS()));
-        b.serverName(req.getServerName()).serverPort(req.getServerPort()).httpSessionID(httpSessionId);
+        b.serverName(req.getServerName()).serverPort(req.getServerPort()).httpSession(httpSession);
         return b.build();
     }
 

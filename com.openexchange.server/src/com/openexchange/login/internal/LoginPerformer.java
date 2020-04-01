@@ -326,6 +326,9 @@ public final class LoginPerformer {
                 listener.onSucceededAuthentication(retval);
             }
 
+            // Mark HTTP session
+            request.markHttpSessionAuthenticated();
+
             return retval;
         } catch (OXException e) {
             if (DBPoolingExceptionCodes.PREFIX.equals(e.getPrefix())) {

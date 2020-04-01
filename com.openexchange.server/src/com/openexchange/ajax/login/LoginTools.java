@@ -72,6 +72,7 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.fields.Header;
@@ -275,7 +276,7 @@ public final class LoginTools {
         final String userAgent = parseUserAgent(req);
         final Map<String, List<String>> headers = copyHeaders(req);
         final com.openexchange.authentication.Cookie[] cookies = Tools.getCookieFromHeader(req);
-        final String httpSessionId = req.getSession(true).getId();
+        final HttpSession httpSession = req.getSession(true);
         // Add properties
         {
             LogProperties.putProperty(LogProperties.Name.LOGIN_LOGIN, Strings.abbreviate(login, 256));
@@ -291,7 +292,7 @@ public final class LoginTools {
         b.hash(HashCalculator.getInstance().getHash(req, userAgent, client, additionalsForHash));
         b.iface(HTTP_JSON).headers(headers).requestParameter(req.getParameterMap());
         b.cookies(cookies).secure(Tools.considerSecure(req, forceHTTPS));
-        b.serverName(req.getServerName()).serverPort(req.getServerPort()).httpSessionID(httpSessionId);
+        b.serverName(req.getServerName()).serverPort(req.getServerPort()).httpSession(httpSession);
         b.language(parseLanguage(req)).storeLanguage(parseStoreLanguage(req)).tranzient(parseTransient(req));
         b.staySignedIn(parseStaySignedIn(req));
         return b.build();

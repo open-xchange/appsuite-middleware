@@ -175,6 +175,11 @@ public class LoginPerformerTest {
                 return null;
             }
 
+            @Override
+            public boolean markHttpSessionAuthenticated() {
+                return false;
+            }
+
             @SuppressWarnings("serial")
             @Override
             public Map<String, List<String>> getHeaders() {
@@ -242,6 +247,7 @@ public class LoginPerformerTest {
                 return false;
             }
 
+            @Override
             public boolean isStaySignedIn() {
                 return false;
             }

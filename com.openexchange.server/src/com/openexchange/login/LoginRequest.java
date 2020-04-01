@@ -126,6 +126,13 @@ public interface LoginRequest {
     String getHttpSessionID();
 
     /**
+     * Propagates authenticated status to request-associated HTTP session.
+     *
+     * @return <code>true</code> if status has been successfully propagated; otherwise <code>false</code> (if no such HTTP session is available)
+     */
+    boolean markHttpSessionAuthenticated();
+
+    /**
      * Gets a value indicating whether the session should be created in a transient way or not, i.e. the session should not be distributed
      * to other nodes in the cluster or put into another persistent storage.
      *
@@ -136,9 +143,9 @@ public interface LoginRequest {
     String getLanguage();
 
     boolean isStoreLanguage();
-    
+
     String getLocale();
-    
+
     boolean isStoreLocale();
 
     /**
