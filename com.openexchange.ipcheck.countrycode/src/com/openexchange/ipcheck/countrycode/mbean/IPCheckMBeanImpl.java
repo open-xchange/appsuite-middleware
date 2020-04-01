@@ -178,31 +178,43 @@ public class IPCheckMBeanImpl extends AnnotatedDynamicStandardMBean implements I
         long total = metricCollector.getMeter(IPCheckMetric.totalIPChanges.getMetricName()).getCount();
         long totalAccepted = metricCollector.getMeter(IPCheckMetric.acceptedIPChanges.getMetricName()).getCount();
         long totalDenied = metricCollector.getMeter(IPCheckMetric.deniedIPChanges.getMetricName()).getCount();
-        acceptedPercentage = ((float) totalAccepted / total) * 100;
-        deniedPercentage = ((float) totalDenied / total) * 100;
 
-        // Accepted percentages
-        long acceptedPrivate = metricCollector.getMeter(IPCheckMetric.acceptedPrivateIP.getMetricName()).getCount();
-        acceptedPrivatePercentage = ((float) acceptedPrivate / totalAccepted) * 100;
-        long acceptedWL = metricCollector.getMeter(IPCheckMetric.acceptedWhiteListed.getMetricName()).getCount();
-        acceptedWhiteListedPercentage = ((float) acceptedWL / totalAccepted) * 100;
-        long acceptedEligible = metricCollector.getMeter(IPCheckMetric.acceptedEligibleIPChanges.getMetricName()).getCount();
-        acceptedEligilePercentage = ((float) acceptedEligible / totalAccepted) * 100;
+        long acceptedPrivate = 0;
+        long acceptedWL = 0;
+        long acceptedEligible = 0;
+        if (totalAccepted > 0) {
+            // Accepted percentages
+            acceptedPrivate = metricCollector.getMeter(IPCheckMetric.acceptedPrivateIP.getMetricName()).getCount();
+            acceptedPrivatePercentage = ((float) acceptedPrivate / totalAccepted) * 100;
+            acceptedWL = metricCollector.getMeter(IPCheckMetric.acceptedWhiteListed.getMetricName()).getCount();
+            acceptedWhiteListedPercentage = ((float) acceptedWL / totalAccepted) * 100;
+            acceptedEligible = metricCollector.getMeter(IPCheckMetric.acceptedEligibleIPChanges.getMetricName()).getCount();
+            acceptedEligilePercentage = ((float) acceptedEligible / totalAccepted) * 100;
+        }
 
-        // Overall accepted percentages
-        acceptedPrivateOverallPercentage = ((float) acceptedPrivate / total) * 100;
-        acceptedWhiteListedOverallPercentage = ((float) acceptedWL / total) * 100;
-        acceptedEligileOverallPercentage = ((float) acceptedEligible / total) * 100;
-
+        long deniedEx = 0;
+        long deniedCC = 0;
         // Denied percentages
-        long deniedEx = metricCollector.getMeter(IPCheckMetric.deniedException.getMetricName()).getCount();
-        deniedExceptionPercentage = ((float) deniedEx / totalDenied) * 100;
-        long deniedCC = metricCollector.getMeter(IPCheckMetric.deniedCountryChanged.getMetricName()).getCount();
-        deniedCountryChangedPercentage = ((float) deniedCC / totalDenied) * 100;
+        if (totalDenied > 0) {
+            deniedEx = metricCollector.getMeter(IPCheckMetric.deniedException.getMetricName()).getCount();
+            deniedExceptionPercentage = ((float) deniedEx / totalDenied) * 100;
+            deniedCC = metricCollector.getMeter(IPCheckMetric.deniedCountryChanged.getMetricName()).getCount();
+            deniedCountryChangedPercentage = ((float) deniedCC / totalDenied) * 100;
+        }
 
-        // Overall denied percentages
-        deniedExceptionOverallPercentage = ((float) deniedEx / total) * 100;
-        deniedCountryChangedOverallPercentage = ((float) deniedCC / total) * 100;
+        if (total > 0) {
+            acceptedPercentage = ((float) totalAccepted / total) * 100;
+            deniedPercentage = ((float) totalDenied / total) * 100;
+
+            // Overall accepted percentages
+            acceptedPrivateOverallPercentage = ((float) acceptedPrivate / total) * 100;
+            acceptedWhiteListedOverallPercentage = ((float) acceptedWL / total) * 100;
+            acceptedEligileOverallPercentage = ((float) acceptedEligible / total) * 100;
+
+            // Overall denied percentages
+            deniedExceptionOverallPercentage = ((float) deniedEx / total) * 100;
+            deniedCountryChangedOverallPercentage = ((float) deniedCC / total) * 100;
+        }
     }
 
     /**
