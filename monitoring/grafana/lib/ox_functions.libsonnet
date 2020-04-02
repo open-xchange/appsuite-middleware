@@ -1,6 +1,7 @@
 local grafana = import 'grafonnet/grafana.libsonnet';
 local dashboard = grafana.dashboard;
 local template = grafana.template;
+local annotation = grafana.annotation;
 
 local prometheus_ds = 'Prometheus';
 
@@ -38,5 +39,18 @@ local prometheus_ds = 'Prometheus';
       query='label_values(up{job=~"$job"}, instance)',
       refresh='time',
     )
+  ).addAnnotations(
+    [
+      annotation.default,
+      annotation.datasource(
+        name='OX Events',
+        datasource=annotation.default.datasource,
+        iconColor='rgba(255, 96, 96, 1)',
+        type='tags',
+        tags=[
+          'OX',
+        ],
+      ),
+    ]
   ),
 }
