@@ -49,11 +49,13 @@
 
 package com.openexchange.appsuite.history.clt;
 
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -137,7 +139,7 @@ public class HistoryCLT {
 
         try {
             CommandLine cmd = new DefaultParser().parse(options, args);
-            if(cmd.hasOption(HELP_CHAR)) {
+            if (cmd.hasOption(HELP_CHAR)) {
                 printHelp(options);
                 System.exit(0);
             }
@@ -147,7 +149,7 @@ public class HistoryCLT {
             File manifestFolder = getFile(mFolder == null ? DEFAULT_MANIFESTS_PATH : mFolder);
 
             // Update version uid ---------------------------------------------------------------------------------------------------
-            if(cmd.hasOption(TIMESTAMP_CHAR)) {
+            if (cmd.hasOption(TIMESTAMP_CHAR)) {
                 String newUID = cmd.getOptionValue(TIMESTAMP_CHAR);
                 System.out.print(String.format("Updating the version files with the the version identifier '%s'... ", newUID));
                 updateVersionFile(appsFolder, newUID);
@@ -171,22 +173,21 @@ public class HistoryCLT {
             HistoryUtil.handleVersions(historyAppFolder, appsFolder, installedVersion.get(), currentVersion);
             System.out.println(" Finished");
 
-
             // Handle manifests folder ---------------------------------------------------------------------------------------------------
             System.out.println("Checking manifests folder...");
             installedVersion = HistoryUtil.readVersion(new File(manifestFolder, "version.txt").toPath());
             if (installedVersion.isPresent() == false) {
-                error(options,"Installed folder doesn't contains a version file.", 1);
+                error(options, "Installed folder doesn't contains a version file.", 1);
             }
             currentVersion = HistoryUtil.readVersion(new File(historyManifestFolder, "current/version.txt").toPath());
             if (installedVersion.isPresent() == false) {
-                error(options,"Current folder doesn't contains a version file.", 1);
+                error(options, "Current folder doesn't contains a version file.", 1);
             }
             HistoryUtil.handleVersions(historyManifestFolder, manifestFolder, installedVersion.get(), currentVersion);
             System.out.println(" finished");
             System.out.println("Finished checking all history folders");
         } catch (IOException | ParseException e) {
-            error(Optional.of(e), options,"Error: " + e.getMessage(), 1);
+            error(Optional.of(e), options, "Error: " + e.getMessage(), 1);
         }
     }
 
@@ -198,7 +199,7 @@ public class HistoryCLT {
      * @throws IOException
      */
     private static File getAppsFolder(String appsPath) throws IOException {
-        if(appsPath==null) {
+        if (appsPath == null) {
             return new File(DEFAULT_APPS_PATH);
         }
         return appsPathMatcher.matcher(appsPath).matches() ? getFile(appsPath) : getFile(appsPath, Optional.of("apps"));
@@ -237,7 +238,6 @@ public class HistoryCLT {
         formatter.setOptionComparator(null);
         formatter.printHelp("appsuiteui-history", CLT_DESC, options, null, true);
     }
-
 
     /**
      * Prints the error and the help text and exits the application with the given error code
@@ -306,15 +306,14 @@ public class HistoryCLT {
     private static void updateVersionFile(File folder, String uid) throws IOException, FileNotFoundException {
         File file = new File(folder, "version.txt");
         Optional<String> version = HistoryUtil.readVersion(file.toPath());
-        Matcher matcher = p.matcher(version.orElseThrow(() -> new FileNotFoundException("Can't find version file: "+file.toPath().toString())));
+        Matcher matcher = p.matcher(version.orElseThrow(() -> new FileNotFoundException("Can't find version file: " + file.toPath().toString())));
         if (matcher.matches()) {
             String prefix = matcher.group(1);
             String newVersion = prefix + uid;
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))){
+            try (Writer writer = new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8)) {
                 writer.write(newVersion);
             }
         }
     }
-
 
 }
