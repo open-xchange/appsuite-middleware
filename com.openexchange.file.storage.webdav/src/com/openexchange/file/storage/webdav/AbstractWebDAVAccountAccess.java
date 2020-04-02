@@ -163,6 +163,7 @@ public abstract class AbstractWebDAVAccountAccess implements CapabilityAware {
      * @return The {@link WebDAVClient} or {@link Optional#empty()} if not applicable
      * @throws OXException In case of an error while connecting
      */
+    @SuppressWarnings("unused")
     protected Optional<WebDAVClient> connectInternal() throws OXException {
         return Optional.empty();
     }

@@ -227,6 +227,13 @@ public class WebDAVClientImpl implements WebDAVClient {
         }
     }
 
+    /**
+     * Converts the given document into a string
+     *
+     * @param doc The {@link Document} to convert
+     * @return The String representation
+     * @throws OXException
+     */
     private static String convertDocumentToString(Document doc) throws OXException {
         try {
             final TransformerFactory tf = TransformerFactory.newInstance();
@@ -441,6 +448,13 @@ public class WebDAVClientImpl implements WebDAVClient {
         }
     }
 
+    /**
+     * Parses the given {@link MultiStatus} into a list of {@link WebDAVResource}s
+     *
+     * @param multiStatus The {@link MultiStatus}
+     * @param status The overall status
+     * @return A list of {@link WebDAVResource}s
+     */
     private static List<WebDAVResource> parseResources(MultiStatus multiStatus, int status) {
         List<WebDAVResource> resources = new ArrayList<WebDAVResource>();
         MultiStatusResponse[] responses = multiStatus.getResponses();
@@ -453,7 +467,14 @@ public class WebDAVClientImpl implements WebDAVClient {
         return resources;
     }
 
-
+    /**
+     * Performs a put operation
+     *
+     * @param href The target
+     * @param entity The {@link HttpEntity}
+     * @param headers A map of header values
+     * @throws WebDAVClientException
+     */
     private void put(String href, HttpEntity entity, Map<String, String> headers) throws WebDAVClientException {
         HttpPut request = null;
         HttpResponse response = null;
@@ -473,6 +494,13 @@ public class WebDAVClientImpl implements WebDAVClient {
         }
     }
 
+    /**
+     * Converts the href into a {@link URI}
+     *
+     * @param href The href to convert
+     * @return The {@link URI}
+     * @throws OXException
+     */
     private URI getUri(String href) throws OXException {
         try {
             URIBuilder uriBuilder = new URIBuilder();
@@ -496,10 +524,25 @@ public class WebDAVClientImpl implements WebDAVClient {
 
     // ------------------------------------------------ Static helpers ----------------------------------------------------------------------
 
+    /**
+     * Initializes the default client
+     *
+     * @param services The {@link ServiceLookup}
+     * @return The {@link ManagedHttpClient}
+     * @throws OXException in case of errors
+     */
     private static ManagedHttpClient initDefaultClient(ServiceLookup services) throws OXException {
         return services.getServiceSafe(HttpClientService.class).getHttpClient(HTTP_CLIENT_ID);
     }
 
+    /**
+     * Initializes the default {@link HttpContext}
+     *
+     * @param baseUrl The base url
+     * @param login The login name
+     * @param password The login password
+     * @return The {@link HttpContext}
+     */
     private static HttpContext initDefaultContext(URI baseUrl, String login, String password) {
         HttpHost targetHost = new HttpHost(baseUrl.getHost(), determinePort(baseUrl), baseUrl.getScheme());
         CredentialsProvider credsProvider = new BasicCredentialsProvider();
@@ -515,6 +558,12 @@ public class WebDAVClientImpl implements WebDAVClient {
         return context;
     }
 
+    /**
+     * Determines the port
+     *
+     * @param baseUrl The url
+     * @return The port
+     */
     private static int determinePort(URI baseUrl) {
         int port = baseUrl.getPort();
         if (port > 0) {
@@ -523,15 +572,37 @@ public class WebDAVClientImpl implements WebDAVClient {
         return "https".equals(baseUrl.getScheme()) ? 443 : 80;
     }
 
+    /**
+     * {@link HttpClientProvider} is a provider for {@link HttpClient}s
+     *
+     * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+     * @since v7.10.4
+     */
     private static interface HttpClientProvider {
 
+        /**
+         * Gets the {@link HttpClient}
+         *
+         * @return The {@link HttpClient}
+         */
         HttpClient getHttpClient();
     }
 
+    /**
+     * {@link InstanceHttpClientProvider} is a basic implementation of {@link HttpClientProvider}
+     *
+     * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+     * @since v7.10.4
+     */
     private static class InstanceHttpClientProvider implements HttpClientProvider {
 
         private final HttpClient client;
 
+        /**
+         * Initializes a new {@link InstanceHttpClientProvider}.
+         *
+         * @param client The {@link HttpClient}
+         */
         InstanceHttpClientProvider(HttpClient client) {
             super();
             this.client = client;
@@ -543,10 +614,21 @@ public class WebDAVClientImpl implements WebDAVClient {
         }
     }
 
+    /**
+     * {@link ManagedHttpClientProvider} is a implementation of {@link HttpClientProvider} which uses {@link ManagedHttpClient}s
+     *
+     * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+     * @since v7.10.4
+     */
     private static class ManagedHttpClientProvider implements HttpClientProvider {
 
         private final ManagedHttpClient managedHttpClient;
 
+        /**
+         * Initializes a new {@link ManagedHttpClientProvider}.
+         *
+         * @param managedHttpClient The {@link ManagedHttpClient}
+         */
         ManagedHttpClientProvider(ManagedHttpClient managedHttpClient) {
             super();
             this.managedHttpClient = managedHttpClient;
