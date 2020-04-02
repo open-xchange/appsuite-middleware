@@ -49,10 +49,12 @@
 
 package com.openexchange.appsuite.history.clt;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
@@ -310,10 +312,36 @@ public class HistoryCLT {
         if (matcher.matches()) {
             String prefix = matcher.group(1);
             String newVersion = prefix + uid;
-            try (Writer writer = new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8)) {
+
+            OutputStream out = null;
+            Writer writer = null;
+            try {
+                out = new FileOutputStream(file);
+                writer = new OutputStreamWriter(out, StandardCharsets.UTF_8);
                 writer.write(newVersion);
+                writer.flush();
+            } finally {
+                close(writer, out);
             }
         }
     }
 
+    /**
+     * Safely closes specified {@link Closeable} instances.
+     *
+     * @param closeables The {@link Closeable} instances
+     */
+    private static void close(final Closeable... closeables) {
+        if (null != closeables) {
+            for (final Closeable toClose : closeables) {
+                if (null != toClose) {
+                    try {
+                        toClose.close();
+                    } catch (Exception e) {
+                        // Ignore
+                    }
+                }
+            }
+        }
+    }
 }
