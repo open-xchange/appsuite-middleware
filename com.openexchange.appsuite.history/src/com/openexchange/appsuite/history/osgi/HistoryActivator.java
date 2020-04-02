@@ -52,8 +52,9 @@ package com.openexchange.appsuite.history.osgi;
 import static com.openexchange.java.Autoboxing.C;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -77,7 +78,7 @@ import com.openexchange.config.lean.DefaultProperty;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.config.lean.Property;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Streams;
+import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.security.manager.SecurityManagerPropertyProvider;
@@ -257,17 +258,13 @@ public class HistoryActivator extends HousekeepingActivator implements ForcedRel
             if (null != filesInDir) {
                 JSONArray manifests = new JSONArray();
                 for (File f : filesInDir) {
-                    BufferedReader r = null;
-                    try {
-                        r = new BufferedReader(new FileReader(f));
+                    try (BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(f), Charsets.UTF_8))) {
                         JSONArray fileManifests = new JSONArray(r);
                         for (int i = 0, size = fileManifests.length(); i < size; i++) {
                             manifests.put(fileManifests.get(i));
                         }
                     } catch (Exception e) {
                         LOG.error("Unable to read history manifest files", e);
-                    } finally {
-                        Streams.close(r);
                     }
                 }
                 return manifests;
