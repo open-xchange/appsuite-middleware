@@ -97,7 +97,7 @@ public class QueryAction extends AbstractFindAction implements EnqueuableAJAXAct
             JSONObject data = (JSONObject) request.requireData();
             long start = data.getLong("start");
             long size = data.getLong("size");
-            JSONArray jFacets = data.getJSONArray("factes");
+            JSONArray jFacets = data.getJSONArray("facets");
 
             JSONObject jKeyDesc = new JSONObject(4);
             jKeyDesc.put("module", "find");
