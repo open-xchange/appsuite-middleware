@@ -49,7 +49,6 @@
 
 package org.glassfish.grizzly.http.server;
 
-import static com.openexchange.servlet.Constants.HTTP_SESSION_ATTR_AUTHENTICATED;
 import java.util.Iterator;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
@@ -83,6 +82,7 @@ public class OXSessionManager implements SessionManager {
     // -----------------------------------------------------------------------------------------------
 
     private final GrizzlyConfig grizzlyConfig;
+    private final TimerService timerService;
     private final ConcurrentMap<String, Session> sessions;
     private final Random rnd;
     private final ScheduledTimerTask sessionExpirer;
@@ -99,6 +99,7 @@ public class OXSessionManager implements SessionManager {
     public OXSessionManager(GrizzlyConfig grizzlyConfig, TimerService timerService) {
         super();
         this.grizzlyConfig = grizzlyConfig;
+        this.timerService = timerService;
         int max = grizzlyConfig.getMaxNumberOfHttpSessions();
         this.max = max;
         this.considerSessionCount = max > 0;
@@ -121,46 +122,29 @@ public class OXSessionManager implements SessionManager {
         this.sessionExpirer = timerService.scheduleAtFixedRate(newTaskForPeriodicChecks(lock), periodSeconds, periodSeconds, TimeUnit.SECONDS);
     }
 
+    private void scheduleCleanUpNow(long currentTime) {
+        timerService.schedule(newTaskForOneTimeCheck(currentTime, lock), 0, TimeUnit.MILLISECONDS);
+    }
+
     /**
      * Cleans-up the session collection. Drops invalid/expired sessions.
      * <p>
      * <b>Must only be called when holding lock.</b>
      *
      * @param currentTime The current time stamp
-     * @return <code>true</code> if any session has been removed; otherwise <code>false</code>
      */
-    boolean cleanUp(long currentTime) {
-        boolean anyRemoved = false;
+    void cleanUp(long currentTime) {
         Session session;
         for (Iterator<Session> it = sessions.values().iterator(); it.hasNext();) {
             session = it.next();
-            if (isInvalid(session) || isNotAuthenticated(session) || isTimedOut(currentTime, session)) {
+            if (!session.isValid() || ((session.getSessionTimeout() > 0) && ((currentTime - session.getTimestamp()) > session.getSessionTimeout()))) {
                 session.setValid(false);
                 it.remove();
                 sessionsCount--;
-                anyRemoved = true;
             }
         }
 
         lastCleanUp = System.currentTimeMillis();
-        return anyRemoved;
-    }
-
-    private static boolean isInvalid(Session session) {
-        return !session.isValid();
-    }
-
-//    private static boolean isUnjoined(Session session) {
-//        return session.isNew() && !Boolean.TRUE.equals(session.getAttribute(HTTP_SESSION_ATTR_AUTHENTICATED));
-//    }
-
-    private static boolean isNotAuthenticated(Session session) {
-        return !Boolean.TRUE.equals(session.getAttribute(HTTP_SESSION_ATTR_AUTHENTICATED));
-    }
-
-    private static boolean isTimedOut(long currentTime, Session session) {
-        long timeout = session.getSessionTimeout();
-        return (timeout > 0) && ((currentTime - session.getTimestamp()) > timeout);
     }
 
     /**
@@ -216,19 +200,13 @@ public class OXSessionManager implements SessionManager {
     public Session createSession(Request request) {
         lock.lock();
         try {
-            if (considerSessionCount) {
-                while (sessionsCount >= max) {
-                    boolean anyRemoved = false;
-
-                    long currentTime = System.currentTimeMillis();
-                    if ((currentTime - lastCleanUp) >= (MIN_PERIOD_SECONDS * 1000)) {
-                        anyRemoved = cleanUp(currentTime);
-                    }
-
-                    if (!anyRemoved) {
-                        throw onMaxSessionCountExceeded();
-                    }
+            if (considerSessionCount && sessionsCount >= max) {
+                long currentTime = System.currentTimeMillis();
+                if ((currentTime - lastCleanUp) >= (MIN_PERIOD_SECONDS * 1000)) {
+                    scheduleCleanUpNow(currentTime);
                 }
+
+                throw onMaxSessionCountExceeded();
             }
 
             Session session = new Session();
@@ -419,23 +397,29 @@ public class OXSessionManager implements SessionManager {
     // ---------------------------------------------------------------------------------------------------------------------
 
     private ExpirerTask newTaskForPeriodicChecks(Lock lock) {
-        return new ExpirerTask(lock);
+        return new ExpirerTask(-1L, lock);
+    }
+
+    private ExpirerTask newTaskForOneTimeCheck(long currentTime, Lock lock) {
+        return new ExpirerTask(currentTime, lock);
     }
 
     private final class ExpirerTask implements Runnable {
 
         private final Lock tlock;
+        private final long currentTime;
 
-        ExpirerTask(Lock lock) {
+        ExpirerTask(long currentTime, Lock lock) {
             super();
             this.tlock = lock;
+            this.currentTime = currentTime;
         }
 
         @Override
         public void run() {
             tlock.lock();
             try {
-                cleanUp(System.currentTimeMillis());
+                cleanUp(currentTime < 0 ? System.currentTimeMillis() : currentTime);
             } finally {
                 tlock.unlock();
             }

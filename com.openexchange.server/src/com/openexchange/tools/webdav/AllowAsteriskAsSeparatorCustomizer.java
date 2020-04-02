@@ -147,11 +147,6 @@ public class AllowAsteriskAsSeparatorCustomizer implements LoginCustomizer {
             }
 
             @Override
-            public boolean markHttpSessionAuthenticated() {
-                return loginReq.markHttpSessionAuthenticated();
-            }
-
-            @Override
             public String getClientToken() {
                 return loginReq.getClientToken();
             }
@@ -181,7 +176,6 @@ public class AllowAsteriskAsSeparatorCustomizer implements LoginCustomizer {
                 return loginReq.isStoreLocale();
             }
 
-            @Override
             public boolean isStaySignedIn() {
                 return loginReq.isStaySignedIn();
             }

@@ -310,7 +310,7 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
             .secure(Tools.considerSecure(request, true))
             .serverName(serverName)
             .serverPort(request.getServerPort())
-            .httpSession(request.getSession(true))
+            .httpSessionID(request.getSession(true).getId())
             .tranzient(true)
             .build();
 

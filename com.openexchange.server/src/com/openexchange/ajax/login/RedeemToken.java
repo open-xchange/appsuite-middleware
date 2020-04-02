@@ -63,7 +63,6 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.java.Strings;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.servlet.Constants;
 import com.openexchange.session.Session;
 import com.openexchange.tokenlogin.TokenLoginSecret;
 import com.openexchange.tokenlogin.TokenLoginService;
@@ -123,7 +122,6 @@ public class RedeemToken implements LoginRequestHandler {
             LoginServlet.logAndSendException(resp, e);
             return;
         }
-        req.getSession().setAttribute(Constants.HTTP_SESSION_ATTR_AUTHENTICATED, Boolean.TRUE);
         TokenLoginSecret tokenLoginSecret = service.getTokenLoginSecret(appSecret);
         Boolean writePassword = (Boolean) tokenLoginSecret.getParameters().get("accessPassword");
         try {

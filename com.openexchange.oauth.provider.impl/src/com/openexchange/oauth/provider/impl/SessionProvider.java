@@ -209,6 +209,10 @@ public class SessionProvider {
         Cookie[] cookies = getCookies(httpRequest);
         Map<String, List<String>> headers = getHeaders(httpRequest);
         HttpSession session = httpRequest.getSession(false);
+        String route = null;
+        if (session != null) {
+            route = com.openexchange.tools.servlet.http.Tools.getRoute(session.getId());
+        }
         LoginRequestImpl req = new LoginRequestImpl(
             user.getLoginInfo(),
             null,                                   /* password */
@@ -225,7 +229,7 @@ public class SessionProvider {
             forceHTTPS,
             httpRequest.getServerName(),
             httpRequest.getServerPort(),
-            session);
+            route);
         req.setTransient(true);
 
         return req;

@@ -259,7 +259,6 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
                         throw LoginExceptionCodes.UNKNOWN.create("Session could not be created.");
                     }
                     LogProperties.putSessionProperties(session);
-                    request.markHttpSessionAuthenticated();
                 }
 
                 // Generate the login result
