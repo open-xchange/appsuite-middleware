@@ -83,12 +83,12 @@ public class AutocompleteAction extends AbstractFindAction {
         SearchService searchService = getSearchService();
         String prefix = request.requirePrefix();
         int limit = request.getIntParameter("limit");
-        List<ActiveFacet> activeFactes = request.getActiveFacets();
+        List<ActiveFacet> activeFacets = request.getActiveFacets();
         Map<String, String> options = request.getOptions();
 
         // Do the auto-complete
         AutocompleteResult result = searchService.autocomplete(
-            new AutocompleteRequest(prefix, activeFactes, options, limit > 0 ? limit : 0),
+            new AutocompleteRequest(prefix, activeFacets, options, limit > 0 ? limit : 0),
             request.requireModule(),
             request.getServerSession());
         return new AJAXRequestResult(result, AutocompleteResult.class.getName());

@@ -111,26 +111,32 @@ public class AutocompleteRequest extends AbstractFindRequest {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (!super.equals(obj))
+        }
+        if (!super.equals(obj)) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         AutocompleteRequest other = (AutocompleteRequest) obj;
-        if (limit != other.limit)
+        if (limit != other.limit) {
             return false;
+        }
         if (prefix == null) {
-            if (other.prefix != null)
+            if (other.prefix != null) {
                 return false;
-        } else if (!prefix.equals(other.prefix))
+            }
+        } else if (!prefix.equals(other.prefix)) {
             return false;
+        }
         return true;
     }
 
     @Override
     public String toString() {
-        return "AutocompleteRequest [prefix=" + prefix + ", limit=" + limit + ", activeFactes=" + getActiveFacets() + ", options=" + getOptions() + "]";
+        return "AutocompleteRequest [prefix=" + prefix + ", limit=" + limit + ", activeFacets=" + getActiveFacets() + ", options=" + getOptions() + "]";
     }
 
 }
