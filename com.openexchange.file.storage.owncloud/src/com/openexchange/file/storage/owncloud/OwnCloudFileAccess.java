@@ -351,7 +351,7 @@ public class OwnCloudFileAccess extends AbstractWebDAVFileAccess implements File
     @Override
     public TimedResult<File> getVersions(String folderId, String id, List<Field> fields, Field sort, SortDirection order) throws OXException {
         checkVersioningSupport();
-        WebDAVFile master = getMetadata(folderId, id, CURRENT_VERSION, Collections.singletonList(Field.TITLE));
+        WebDAVFile master = getMetadata(folderId, id, CURRENT_VERSION, null);
         String fileId = ((OwnCloudFile) master).getFileId();
         Set<QName> props = getPropertiesToQuery(fields);
         List<WebDAVResource> resources = client.propFind(getVersionsPath(fileId), 1, props, null);
@@ -361,6 +361,8 @@ public class OwnCloudFileAccess extends AbstractWebDAVFileAccess implements File
                 ret.add(getVersionFile(master, r));
             }
         }
+        master.setVersion(String.valueOf(-1));
+        ret.add(master);
         sort(ret, sort, order);
         return new FileTimedResult(ret);
     }
