@@ -62,6 +62,7 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Charsets;
 
 /**
  * Contains static methods that collect information for the report client.
@@ -73,8 +74,7 @@ public class ReportInformation {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ReportInformation.class);
 
-    private ReportInformation() {
-    }
+    private ReportInformation() {}
 
     /**
      * 
@@ -92,8 +92,7 @@ public class ReportInformation {
             version = metaData.getDatabaseProductName() + " " + metaData.getDatabaseProductVersion();
         } catch (SQLException | OXException e) {
             LOGGER.warn("Unable to get database version: {}", e.getMessage());
-        }
-        finally {
+        } finally {
             if (con != null) {
                 service.backReadOnly(con);
             }
@@ -252,13 +251,15 @@ public class ReportInformation {
         /*
          * Read output
          */
-        try (BufferedReader stdInput = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            BufferedReader stdError = new BufferedReader(new InputStreamReader(process.getErrorStream()));) {
+        // @formatter:off
+        try (BufferedReader stdInput = new BufferedReader(new InputStreamReader(process.getInputStream(), Charsets.UTF_8));
+            BufferedReader stdError = new BufferedReader(new InputStreamReader(process.getErrorStream(), Charsets.UTF_8));) {
             results = readCommandOutput(stdInput);
             logWarnings(stdError, commands);
         } catch (IOException | SecurityException e) {
             LOGGER.error("The command \"{}\" cannot be executed: {}", concatenateCommandParts(commands), e.getMessage());
         }
+        // @formatter:on
         return results;
     }
 
@@ -337,7 +338,7 @@ public class ReportInformation {
     }
 
     protected static List<String> formatPackageList(List<String> commandOutput, Distribution distribution) {
-        if (commandOutput != null && !commandOutput.isEmpty()){
+        if (commandOutput != null && !commandOutput.isEmpty()) {
             switch (distribution) {
                 /*
                  * Format output of yum command
@@ -381,11 +382,13 @@ public class ReportInformation {
         String enabledValue = service.getProperty(apiProperty);
         String apiKey = service.getProperty(apiProperty + ".apiKey");
         String apiSecret = service.getProperty(apiProperty + ".apiSecret");
+        // @formatter:off
         if (enabledValue != null && enabledValue.equals("true") &&
             apiKey != null && !apiKey.startsWith("REPLACE") && !apiKey.startsWith("INSERT") &&
             apiSecret != null && !apiSecret.startsWith("REPLACE") && !apiSecret.startsWith("INSERT")) {
             return true;
         }
+        // @formatter:on
         return false;
     }
 }
@@ -409,8 +412,9 @@ enum Distribution {
 
 /**
  * 
- * Represents the possible 3rd party APIs that are configured via OAuth (see <a href="https://documentation.open-xchange.com/7.10.3/middleware/3rd_party_integrations.html">Documentation 3rd Party Integrations</a>) and via other ways
- * (e.g. SchedJoules).
+ * Represents the possible 3rd party APIs that are configured via OAuth (see
+ * <a href="https://documentation.open-xchange.com/7.10.3/middleware/3rd_party_integrations.html">Documentation 3rd Party Integrations</a>)
+ * and via other ways (e.g. SchedJoules).
  *
  * @author <a href="mailto:anna.ottersbach@open-xchange.com">Anna Ottersbach</a>
  * @since v7.10.4
