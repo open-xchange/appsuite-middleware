@@ -58,6 +58,7 @@ Requires:      grep
 Requires:      gzip
 Requires:      file
 Requires:      findutils
+Requires:      rsync
 Requires:      sed
 Requires:      tar
 
