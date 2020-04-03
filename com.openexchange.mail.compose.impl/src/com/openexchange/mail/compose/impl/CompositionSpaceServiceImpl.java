@@ -66,6 +66,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -184,11 +185,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public class CompositionSpaceServiceImpl implements CompositionSpaceService {
 
-    /** Simple class to delay initialization until needed */
-    private static class LoggerHolder {
-
-        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(CompositionSpaceServiceImpl.class);
-    }
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(CompositionSpaceServiceImpl.class);
 
     private static final com.openexchange.mail.compose.Message.ContentType TEXT_PLAIN = com.openexchange.mail.compose.Message.ContentType.TEXT_PLAIN;
     private static final com.openexchange.mail.compose.Message.ContentType TEXT_HTML = com.openexchange.mail.compose.Message.ContentType.TEXT_HTML;
@@ -286,7 +283,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                 // Re-throw
                 throw e;
             }
-            LoggerHolder.LOG.warn("{}. Using default account's transport.", e.getMessage());
+            LOG.warn("{}. Using default account's transport.", e.getMessage());
             // Send with default account's transport provider
             accountId = MailAccount.DEFAULT_ID;
         }
@@ -295,7 +292,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
         List<Attachment> attachments = m.getAttachments();
         String content = m.getContent();
         if (null == content) {
-            LoggerHolder.LOG.warn("Missing content in composition space {}. Using empty text instead.", getUnformattedString(compositionSpaceId));
+            LOG.warn("Missing content in composition space {}. Using empty text instead.", getUnformattedString(compositionSpaceId));
             content = "";
         }
         if (m.getContentType().isImpliesHtml()) {
@@ -530,14 +527,25 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
 
             // Reply or (inline) forward?
             Meta meta = m.getMeta();
+            Optional<MailMessage> originalMail = null;
             {
                 MetaType metaType = meta.getType();
                 if (metaType == MetaType.REPLY || metaType == MetaType.REPLY_ALL) {
-                    MailMessage originalMail = requireMailMessage(meta.getReplyFor(), mailInterface);
-                    setReplyHeaders(originalMail, sourceMessage);
+                    MailPath replyFor = meta.getReplyFor();
+                    originalMail = optionalMailMessage(replyFor, mailInterface);
+                    if (originalMail.isPresent()) {
+                        setReplyHeaders(originalMail.get(), sourceMessage);
+                    } else {
+                        warnings.add(MailExceptionCode.ORIGINAL_MAIL_NOT_FOUND.create(replyFor.getMailID(), replyFor.getFolder()));
+                    }
                 } else if (metaType == MetaType.FORWARD_INLINE) {
-                    MailMessage originalMail = requireMailMessage(meta.getForwardsFor().get(0), mailInterface);
-                    setReplyHeaders(originalMail, sourceMessage);
+                    MailPath forwardFor = meta.getForwardsFor().get(0);
+                    originalMail = optionalMailMessage(forwardFor, mailInterface);
+                    if (originalMail.isPresent()) {
+                        setReplyHeaders(originalMail.get(), sourceMessage);
+                    } else {
+                        warnings.add(MailExceptionCode.ORIGINAL_MAIL_NOT_FOUND.create(forwardFor.getMailID(), forwardFor.getFolder()));
+                    }
                 }
             }
 
@@ -550,7 +558,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                 try {
                     sentMailPath = MailPath.getMailPathFor(msgIdentifier);
                 } catch (Exception x) {
-                    LoggerHolder.LOG.warn("Failed toi parse mail path from {}", msgIdentifier, x);
+                    LOG.warn("Failed to parse mail path from {}", msgIdentifier, x);
                 }
             }
 
@@ -565,18 +573,24 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
             {
                 MetaType metaType = meta.getType();
                 if (metaType == MetaType.REPLY || metaType == MetaType.REPLY_ALL) {
-                    MailPath replyFor = meta.getReplyFor();
-                    try {
-                        mailInterface.updateMessageFlags(replyFor.getFolderArgument(), new String[] { replyFor.getMailID() }, MailMessage.FLAG_ANSWERED, null, true);
-                    } catch (Exception e) {
-                        LoggerHolder.LOG.warn("Failed to mark original mail '{}' as answered", replyFor, e);
+                    if (originalMail == null || originalMail.isPresent()) {
+                        MailPath replyFor = meta.getReplyFor();
+                        try {
+                            mailInterface.updateMessageFlags(replyFor.getFolderArgument(), new String[] { replyFor.getMailID() }, MailMessage.FLAG_ANSWERED, null, true);
+                        } catch (Exception e) {
+                            LOG.warn("Failed to mark original mail '{}' as answered", replyFor, e);
+                            warnings.add(MailExceptionCode.FLAG_FAIL.create());
+                        }
                     }
                 } else if (metaType == MetaType.FORWARD_INLINE) {
-                    MailPath forwardFor = meta.getForwardsFor().get(0);
-                    try {
-                        mailInterface.updateMessageFlags(forwardFor.getFolderArgument(), new String[] { forwardFor.getMailID() }, MailMessage.FLAG_FORWARDED, null, true);
-                    } catch (Exception e) {
-                        LoggerHolder.LOG.warn("Failed to mark original mail '{}' as forwarded", forwardFor, e);
+                    if (originalMail == null || originalMail.isPresent()) {
+                        MailPath forwardFor = meta.getForwardsFor().get(0);
+                        try {
+                            mailInterface.updateMessageFlags(forwardFor.getFolderArgument(), new String[] { forwardFor.getMailID() }, MailMessage.FLAG_FORWARDED, null, true);
+                        } catch (Exception e) {
+                            LOG.warn("Failed to mark original mail '{}' as forwarded", forwardFor, e);
+                            warnings.add(MailExceptionCode.FLAG_FAIL.create());
+                        }
                     }
                 }
                 MailPath editFor = meta.getEditFor();
@@ -584,7 +598,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                     try {
                         mailInterface.deleteMessages(editFor.getFolderArgument(), new String[] { editFor.getMailID() }, true);
                     } catch (Exception e) {
-                        LoggerHolder.LOG.warn("Failed to delete edited draft mail '{}'", editFor, e);
+                        LOG.warn("Failed to delete edited draft mail '{}'", editFor, e);
                     }
                 }
             }
@@ -596,7 +610,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                 boolean memorizeAddresses = ServerUserSetting.getInstance().isContactCollectOnMailTransport(session.getContextId(), session.getUserId()).booleanValue();
                 ContactCollectorUtility.triggerContactCollector(session, composedMails, memorizeAddresses, true);
             } catch (Exception e) {
-                LoggerHolder.LOG.warn("Contact collector could not be triggered.", e);
+                LOG.warn("Contact collector could not be triggered.", e);
             }
 
         } finally {
@@ -614,7 +628,9 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
             boolean closed = closeCompositionSpace(compositionSpaceId, session);
             if (!closed) {
                 String sCompositionSpaceId = getUnformattedString(compositionSpaceId);
-                LoggerHolder.LOG.warn("Compositon space {} could not be closed after transport.", sCompositionSpaceId);
+                LOG.warn("Compositon space {} could not be closed after transport.", sCompositionSpaceId);
+            } else {
+                LOG.debug("Closed composition space '{}' after transport", getUnformattedString(compositionSpaceId));
             }
         }
 
@@ -700,7 +716,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                             // Re-throw
                             throw e;
                         }
-                        LoggerHolder.LOG.warn("{}. Using default account's transport.", e.getMessage());
+                        LOG.warn("{}. Using default account's transport.", e.getMessage());
                         // Send with default account's transport provider
                         accountId = MailAccount.DEFAULT_ID;
                     }
@@ -808,7 +824,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                     try {
                         mailInterface.deleteMessages(editFor.getFolderArgument(), new String[] { editFor.getMailID() }, true);
                     } catch (Exception e) {
-                        LoggerHolder.LOG.warn("Failed to delete edited draft mail '{}'", editFor, e);
+                        LOG.warn("Failed to delete edited draft mail '{}'", editFor, e);
                     }
                 }
             }
@@ -821,7 +837,9 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                 boolean closed = closeCompositionSpace(compositionSpaceId, session);
                 if (!closed) {
                     String sCompositionSpaceId = getUnformattedString(compositionSpaceId);
-                    LoggerHolder.LOG.warn("Compositon space {} could not be closed after saving it to a draft mail.", sCompositionSpaceId);
+                    LOG.warn("Compositon space {} could not be closed after saving it to a draft mail.", sCompositionSpaceId);
+                } else {
+                    LOG.debug("Closed composition space '{}' after saved as draft", getUnformattedString(compositionSpaceId));
                 }
             }
 
@@ -1249,6 +1267,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                 getStorageService().closeCompositionSpace(session, compositionSpace.getId());
                 throw CompositionSpaceErrorCode.OPEN_FAILED.create();
             }
+            LOG.debug("Opened composition space '{}'", getUnformattedString(compositionSpace.getId()));
             attachments = null; // Avoid premature deletion
             return compositionSpace;
         } finally {
@@ -1264,7 +1283,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
         try {
             attachmentStorage.deleteAttachment(attachmentToDelete.getId(), session);
         } catch (Exception e) {
-            LoggerHolder.LOG.error("Failed to delete attachment with ID {} from storage {}", getUnformattedString(attachmentToDelete.getId()), attachmentStorage.getClass().getName(), e);
+            LOG.error("Failed to delete attachment with ID {} from storage {}", getUnformattedString(attachmentToDelete.getId()), attachmentStorage.getClass().getName(), e);
         }
     }
 
@@ -1330,7 +1349,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
             if (null == attachments || attachments.isEmpty()) {
                 String sAttachmentId = getUnformattedString(attachmentId);
                 String sCompositionSpaceId = getUnformattedString(compositionSpaceId);
-                LoggerHolder.LOG.debug("No such attachment {} in compositon space {}. Available attachments are: []", sAttachmentId, sCompositionSpaceId);
+                LOG.debug("No such attachment {} in compositon space {}. Available attachments are: []", sAttachmentId, sCompositionSpaceId);
                 throw CompositionSpaceErrorCode.NO_SUCH_ATTACHMENT_IN_COMPOSITION_SPACE.create(sAttachmentId, sCompositionSpaceId);
             }
 
@@ -1345,8 +1364,8 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                 // No such attachment
                 String sCompositionSpaceId = getUnformattedString(compositionSpaceId);
                 String sAttachmentId = getUnformattedString(attachmentId);
-                if (LoggerHolder.LOG.isDebugEnabled()) {
-                    LoggerHolder.LOG.debug("No such attachment {} in compositon space {}. Available attachments are: {}", sAttachmentId, sCompositionSpaceId, generateAttachmentIdListing(compositionSpace.getMessage().getAttachments()));
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("No such attachment {} in compositon space {}. Available attachments are: {}", sAttachmentId, sCompositionSpaceId, generateAttachmentIdListing(compositionSpace.getMessage().getAttachments()));
                 }
                 throw CompositionSpaceErrorCode.NO_SUCH_ATTACHMENT_IN_COMPOSITION_SPACE.create(sAttachmentId, sCompositionSpaceId);
             }
@@ -1396,8 +1415,8 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                         // No such attachment
                         String sCompositionSpaceId = getUnformattedString(compositionSpaceId);
                         String sAttachmentId = getUnformattedString(attachmentId);
-                        if (LoggerHolder.LOG.isDebugEnabled()) {
-                            LoggerHolder.LOG.debug("No such attachment {} in compositon space {}. Available attachments are: {}", sAttachmentId, sCompositionSpaceId, generateAttachmentIdListing(compositionSpace.getMessage().getAttachments()));
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("No such attachment {} in compositon space {}. Available attachments are: {}", sAttachmentId, sCompositionSpaceId, generateAttachmentIdListing(compositionSpace.getMessage().getAttachments()));
                         }
                         throw CompositionSpaceErrorCode.NO_SUCH_ATTACHMENT_IN_COMPOSITION_SPACE.create(sAttachmentId, sCompositionSpaceId);
                     }
@@ -1702,12 +1721,15 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
     public void closeExpiredCompositionSpaces(long maxIdleTimeMillis, Session session) throws OXException {
         List<UUID> deleted = getStorageService().deleteExpiredCompositionSpaces(session, maxIdleTimeMillis);
         if (null != deleted && !deleted.isEmpty()) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Closed expired composition spaces: {}", toStringFor(deleted));
+            }
             AttachmentStorage attachmentStorage = getAttachmentStorage(session);
             for (UUID compositionSpaceId : deleted) {
                 try {
                     attachmentStorage.deleteAttachmentsByCompositionSpace(compositionSpaceId, session);
                 } catch (Exception e) {
-                    LoggerHolder.LOG.warn("Failed to delete attachments associated with composition space {}", getUnformattedString(compositionSpaceId), e);
+                    LOG.warn("Failed to delete attachments associated with composition space {}", getUnformattedString(compositionSpaceId), e);
                 }
             }
         }
@@ -1820,7 +1842,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
             if (null == attachments) {
                 String sAttachmentId = getUnformattedString(attachmentId);
                 String sCompositionSpaceId = getUnformattedString(compositionSpaceId);
-                LoggerHolder.LOG.debug("No such attachment {} in compositon space {}. Available attachments are: []", sAttachmentId, sCompositionSpaceId);
+                LOG.debug("No such attachment {} in compositon space {}. Available attachments are: []", sAttachmentId, sCompositionSpaceId);
                 throw CompositionSpaceErrorCode.NO_SUCH_ATTACHMENT_IN_COMPOSITION_SPACE.create(sAttachmentId, sCompositionSpaceId);
             }
 
@@ -1835,8 +1857,8 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                 // No such attachment
                 String sCompositionSpaceId = getUnformattedString(compositionSpaceId);
                 String sAttachmentId = getUnformattedString(attachmentId);
-                if (LoggerHolder.LOG.isDebugEnabled()) {
-                    LoggerHolder.LOG.debug("No such attachment {} in compositon space {}. Available attachments are: {}", sAttachmentId, sCompositionSpaceId, generateAttachmentIdListing(compositionSpace.getMessage().getAttachments()));
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("No such attachment {} in compositon space {}. Available attachments are: {}", sAttachmentId, sCompositionSpaceId, generateAttachmentIdListing(compositionSpace.getMessage().getAttachments()));
                 }
                 throw CompositionSpaceErrorCode.NO_SUCH_ATTACHMENT_IN_COMPOSITION_SPACE.create(sAttachmentId, sCompositionSpaceId);
             }
@@ -1871,11 +1893,11 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                         // Reload & retry
                         compositionSpace = getCompositionSpace(compositionSpaceId, session);
                     } else {
-                        LoggerHolder.LOG.warn("Failed to delete non-existent attachment {} from composition space {}", getUnformattedString(attachmentId), getUnformattedString(compositionSpaceId), e);
+                        LOG.warn("Failed to delete non-existent attachment {} from composition space {}", getUnformattedString(attachmentId), getUnformattedString(compositionSpaceId), e);
                         retry = false;
                     }
                 } catch (Exception e) {
-                    LoggerHolder.LOG.warn("Failed to delete non-existent attachment {} from composition space {}", getUnformattedString(attachmentId), getUnformattedString(compositionSpaceId), e);
+                    LOG.warn("Failed to delete non-existent attachment {} from composition space {}", getUnformattedString(attachmentId), getUnformattedString(compositionSpaceId), e);
                     retry = false;
                 }
             } while (retry);
@@ -1904,7 +1926,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                     if (null == existingAttachments) {
                         String sAttachmentId = getUnformattedString(attachmentId);
                         String sCompositionSpaceId = getUnformattedString(compositionSpaceId);
-                        LoggerHolder.LOG.debug("No such attachment {} in compositon space {}. Available attachments are: []", sAttachmentId, sCompositionSpaceId);
+                        LOG.debug("No such attachment {} in compositon space {}. Available attachments are: []", sAttachmentId, sCompositionSpaceId);
                         throw CompositionSpaceErrorCode.NO_SUCH_ATTACHMENT_IN_COMPOSITION_SPACE.create(sAttachmentId, sCompositionSpaceId);
                     }
 
@@ -1924,8 +1946,8 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                     // No such attachment
                     String sAttachmentId = getUnformattedString(attachmentId);
                     String sCompositionSpaceId = getUnformattedString(compositionSpaceId);
-                    if (LoggerHolder.LOG.isDebugEnabled()) {
-                        LoggerHolder.LOG.debug("No such attachment {} in compositon space {}. Available attachments are: {}", sAttachmentId, sCompositionSpaceId, generateAttachmentIdListing(compositionSpace.getMessage().getAttachments()));
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("No such attachment {} in compositon space {}. Available attachments are: {}", sAttachmentId, sCompositionSpaceId, generateAttachmentIdListing(compositionSpace.getMessage().getAttachments()));
                     }
                     throw CompositionSpaceErrorCode.NO_SUCH_ATTACHMENT_IN_COMPOSITION_SPACE.create(sAttachmentId, sCompositionSpaceId);
                 }
@@ -2023,11 +2045,27 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
      * @throws OXException If mail cannot be returned
      */
     private MailMessage requireMailMessage(MailPath mailPath, MailServletInterface mailInterface) throws OXException {
-        MailMessage mailMessage = mailInterface.getMessage(mailPath.getFolderArgument(), mailPath.getMailID(), false);
-        if (null == mailMessage) {
+        Optional<MailMessage> optionalMailMessage = optionalMailMessage(mailPath, mailInterface);
+        if (!optionalMailMessage.isPresent()) {
             throw MailExceptionCode.MAIL_NOT_FOUND.create(mailPath.getMailID(), mailPath.getFolderArgument());
         }
-        return mailMessage;
+        return optionalMailMessage.get();
+    }
+
+    /**
+     * Gets the optional referenced mail
+     *
+     * @param mailPath The mail path for the mail
+     * @param mailInterface The service to use
+     * @return The optional mail
+     * @throws OXException If mail cannot be returned
+     */
+    private Optional<MailMessage> optionalMailMessage(MailPath mailPath, MailServletInterface mailInterface) throws OXException {
+        MailMessage mailMessage = mailInterface.getMessage(mailPath.getFolderArgument(), mailPath.getMailID(), false);
+        if (null == mailMessage) {
+            return Optional.empty();
+        }
+        return Optional.of(mailMessage);
     }
 
     // -------------------------------------------------------------------------------------------------------------------------------------
@@ -2071,21 +2109,43 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
 
     // -------------------------------------------------------------------------------------------------------------------------------------
 
-    private static String generateAttachmentIdListing(List<Attachment> existingAttachments) {
-        if (null == existingAttachments) {
+    private static String generateAttachmentIdListing(List<Attachment> attachments) {
+        if (null == attachments) {
             return "null";
         }
 
-        int size = existingAttachments.size();
+        int size = attachments.size();
         if (size <= 0) {
             return "[]";
         }
 
         StringBuilder sb = new StringBuilder(size << 4);
         sb.append('[');
-        sb.append(getUnformattedString(existingAttachments.get(0).getId()));
-        for (int i = 1; i < size; i++) {
-            sb.append(", ").append(getUnformattedString(existingAttachments.get(i).getId()));
+        Iterator<Attachment> it = attachments.iterator();
+        sb.append(getUnformattedString(it.next().getId()));
+        while (it.hasNext()) {
+            sb.append(", ").append(getUnformattedString(it.next().getId()));
+        }
+        sb.append(']');
+        return sb.toString();
+    }
+
+    private static String toStringFor(List<UUID> uuids) {
+        if (null == uuids) {
+            return "null";
+        }
+
+        int size = uuids.size();
+        if (size <= 0) {
+            return "[]";
+        }
+
+        StringBuilder sb = new StringBuilder((size << 4) + 32);
+        sb.append('[');
+        Iterator<UUID> it = uuids.iterator();
+        sb.append(getUnformattedString(it.next()));
+        while (it.hasNext()) {
+            sb.append(", ").append(getUnformattedString(it.next()));
         }
         sb.append(']');
         return sb.toString();

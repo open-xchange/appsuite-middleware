@@ -68,6 +68,8 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class DeleteCompositionSpaceAction extends AbstractMailComposeAction {
 
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DeleteCompositionSpaceAction.class);
+
     /**
      * Initializes a new {@link DeleteCompositionSpaceAction}.
      *
@@ -85,6 +87,7 @@ public class DeleteCompositionSpaceAction extends AbstractMailComposeAction {
         UUID uuid = parseCompositionSpaceId(sId);
 
         boolean closed = compositionSpaceStorageService.closeCompositionSpace(uuid, session);
+        LOG.debug("Closed composition space '{}' as per client request", sId);
 
         return new AJAXRequestResult(new JSONObject(2).put("success", closed), "json");
     }
