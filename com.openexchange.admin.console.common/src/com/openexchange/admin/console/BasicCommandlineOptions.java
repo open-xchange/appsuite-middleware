@@ -57,6 +57,7 @@ import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.ExtendableDataObject;
+import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.MissingOptionException;
 import com.openexchange.admin.rmi.extensions.OXCommonExtensionInterface;
@@ -553,13 +554,24 @@ public abstract class BasicCommandlineOptions {
         return ctx;
     }
 
-    protected final Credentials credentialsparsing(final AdminParser parser) {
+    /**
+     * Parses the credentials from the given {@link AdminParser}
+     *
+     * @param parser The {@link AdminParser}
+     * @return The {@link Credentials}
+     * @throws InvalidCredentialsException in case the credentials are missing
+     */
+    protected final Credentials credentialsparsing(final AdminParser parser) throws InvalidCredentialsException {
         // prefer password from options
         String password = (String) parser.getOptionValue(this.adminPassOption);
         if (null == password && null != ADMIN_PASSWORD) {
             password = ADMIN_PASSWORD;
         }
-        return new Credentials((String) parser.getOptionValue(this.adminUserOption), password);
+        String user = (String) parser.getOptionValue(this.adminUserOption);
+        if(user == null || password == null) {
+            throw new InvalidCredentialsException("Missing credentials");
+        }
+        return new Credentials(user, password);
     }
 
     /**

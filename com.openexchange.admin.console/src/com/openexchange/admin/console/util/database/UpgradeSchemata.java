@@ -469,8 +469,9 @@ public class UpgradeSchemata extends ObjectNamingAbstraction {
      * Checks the arguments
      *
      * @param parser The {@link AdminParser}
+     * @throws InvalidCredentialsException
      */
-    private void checkAndSetArguments(AdminParser parser) {
+    private void checkAndSetArguments(AdminParser parser) throws InvalidCredentialsException {
         // Parse the server name
         String serverName = (String) parser.getOptionValue(serverNameOption);
         server = new Server();
