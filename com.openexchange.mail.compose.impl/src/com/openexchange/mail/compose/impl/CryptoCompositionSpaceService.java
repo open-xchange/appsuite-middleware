@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.compose.impl;
 
+import static com.openexchange.java.util.UUIDs.getUnformattedString;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Optional;
@@ -113,6 +114,7 @@ public class CryptoCompositionSpaceService extends AbstractCryptoAware implement
         try {
             if (autoDeleteIfKeyIsMissing(session)) {
                 delegate.closeCompositionSpace(compositionSpaceId, session);
+                LoggerHolder.LOG.debug("Closed composition space '{}' due to missing key and enabled option \"com.openexchange.mail.compose.security.autoDeleteIfKeyIsMissing\"", getUnformattedString(compositionSpaceId));
             }
         } catch (Exception e) {
             LoggerHolder.LOG.debug("Failed to delete compositon space {} due to missing key", UUIDs.getUnformattedString(compositionSpaceId), e);
