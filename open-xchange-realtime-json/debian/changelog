@@ -1,3 +1,9 @@
+open-xchange-realtime-json (7.8.4-69) stable; urgency=medium
+
+  * Build for patch 2020-04-14 (5674)
+
+ -- Steffen Templin <steffen.templin@open-xchange.com>  Mon, 06 Apr 2020 08:46:06 +0000
+
 open-xchange-realtime-json (7.8.4-68) stable; urgency=medium
 
   * Build for patch 2020-03-02 (5624)
