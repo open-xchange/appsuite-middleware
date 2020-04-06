@@ -183,6 +183,18 @@ properties:
       file: drive.properties
       packageName: open-xchange-drive
       tags: ["Drive", "Limit", "Folder"]
+    - key: com.openexchange.drive.maxConcurrentSyncFiles
+      description: |
+        Specifies the configured limit for concurrent syncFiles-Operation that 
+        is indicated to clients. 
+      defaultValue: 10
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: drive.properties
+      packageName: open-xchange-drive
+      tags: ["Drive", "Limit"]
     - key: com.openexchange.drive.enabledServices
       description: |
         Configures a list of allowed file storage services where synchronization via OX Drive should be enabled. 

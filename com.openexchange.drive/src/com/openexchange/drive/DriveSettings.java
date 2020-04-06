@@ -70,6 +70,7 @@ public class DriveSettings {
     private int minSearchChars;
     private boolean hasTrashFolder;
     private String pathToRoot;
+    private int maxConcurrentSyncFiles;
 
     /**
      * Initializes a new {@link DriveSettings}.
@@ -274,6 +275,24 @@ public class DriveSettings {
      */
     public void setPathToRoot(String pathToRoot) {
         this.pathToRoot = pathToRoot;
+    }
+
+    /**
+     * Gets the maxConcurrentSyncFiles
+     *
+     * @return The maxConcurrentSyncFiles
+     */
+    public int getMaxConcurrentSyncFiles() {
+        return maxConcurrentSyncFiles;
+    }
+
+    /**
+     * Sets the maxConcurrentSyncFiles
+     *
+     * @param maxConcurrentSyncFiles The maxConcurrentSyncFiles to set
+     */
+    public void setMaxConcurrentSyncFiles(int maxConcurrentSyncFiles) {
+        this.maxConcurrentSyncFiles = maxConcurrentSyncFiles;
     }
 
 }

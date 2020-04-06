@@ -502,6 +502,7 @@ public class DriveServiceImpl implements DriveService {
         settings.setMinUploadChunk(Long.valueOf(syncSession.getOptimisticSaveThreshold()));
         settings.setHasTrashFolder(storage.hasTrashFolder());
         settings.setPathToRoot(storage.getInternalPath(session.getRootFolderID()));
+        settings.setMaxConcurrentSyncFiles(DriveConfig.getInstance().getMaxConcurrentSyncFiles(serverSession.getContextId(), serverSession.getUserId()));
         /*
          * add any localized folder names (up to a certain depth after which no localized names are expected anymore)
          */

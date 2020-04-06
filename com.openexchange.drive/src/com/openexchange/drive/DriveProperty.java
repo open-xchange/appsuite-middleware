@@ -155,6 +155,13 @@ public enum DriveProperty implements Property {
     MAX_CONCURRENT_SYNC_OPERATIONS("maxConcurrentSyncOperations", I(-1)),
 
     /**
+     * Gets the configured limit for concurrent syncFiles-Operation that is indicated
+     * to clients.
+     * Default: 10
+     */
+    MAX_CONCURRENT_SYNCFILES("maxConcurrentSyncFiles", I(10)),
+
+    /**
      * Defines the maximum number of synchronizable directories per root folder. A
      * value of "-1" disables the limitation.
      * Default: 65535 (2^16 - 1)
