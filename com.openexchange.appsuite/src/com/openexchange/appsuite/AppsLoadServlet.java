@@ -54,12 +54,14 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.http.HttpStatus;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.appsuite.DefaultFileCache.Filter;
 import com.openexchange.java.Charsets;
@@ -75,9 +77,12 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class AppsLoadServlet extends SessionServlet {
 
-    private static final String VERSION_PARAM = "version";
+	/**
+     * The hardcoded appsuite ui uri limit in characters
+     */
+    private static final int UI_URI_LIMIT = 8190;
 
-	private static final long serialVersionUID = -8909104490806162791L;
+    private static final long serialVersionUID = -8909104490806162791L;
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AppsLoadServlet.class);
 
@@ -200,12 +205,25 @@ public class AppsLoadServlet extends SessionServlet {
 	@Override
 	protected void doGet(final HttpServletRequest req, final HttpServletResponse resp)
 			throws ServletException, IOException {
+	    if(req.getRequestURL().length() > UI_URI_LIMIT) {
+	        LOG.error("Url length exceeds maximum allowed characters.");
+	        writeErrorPage(HttpStatus.SC_REQUEST_URI_TOO_LONG, "The request is too long", resp);
+	        return;
+	    }
 		ServerSession session = getSessionObject(req, true);
-		final String[] modules = Strings.splitByComma(req.getPathInfo());
+		String[] modules = Strings.splitByComma(req.getPathInfo());
 		if (null == modules) {
 			return; // no actual files requested
 		}
-		final int length = modules.length;
+
+		int length = modules.length;
+        if (length < 2) {
+            return; // no actual files requested
+        }
+		// Filter duplicates
+        modules = Arrays.asList(modules).stream().distinct().toArray(String[]::new);
+        // Check length again
+		length = modules.length;
 		if (length < 2) {
 			return; // no actual files requested
 		}
