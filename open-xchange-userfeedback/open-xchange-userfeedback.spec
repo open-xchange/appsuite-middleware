@@ -16,7 +16,7 @@ BuildRequires: java-1.8.0-openjdk-devel
 %endif
 BuildRequires: pandoc >= 2.0.0
 Version:       @OXVERSION@
-%define        ox_release 8
+%define        ox_release 9
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -62,6 +62,8 @@ sed -i -e 's;%{buildroot};;' %{manlist}
 /opt/open-xchange/lib/com.openexchange.userfeedback.clt.jar
 
 %changelog
+* Mon Apr 06 2020 Martin Schneider <martin.schneider@open-xchange.com>
+Build for patch 2020-04-14 (5677)
 * Thu Mar 19 2020 Martin Schneider <martin.schneider@open-xchange.com>
 Build for patch 2020-03-23 (5653)
 * Fri Feb 28 2020 Martin Schneider <martin.schneider@open-xchange.com>

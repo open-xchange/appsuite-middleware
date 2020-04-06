@@ -1,3 +1,9 @@
+open-xchange-oauth-provider (7.10.3-9) stable; urgency=medium
+
+  * Build for patch 2020-04-14 (5677)
+
+ -- Steffen Templin <steffen.templin@open-xchange.com>  Mon, 06 Apr 2020 09:09:02 +0000
+
 open-xchange-oauth-provider (7.10.3-8) stable; urgency=medium
 
   * Build for patch 2020-03-23 (5653)
