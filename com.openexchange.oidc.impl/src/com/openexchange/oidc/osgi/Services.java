@@ -72,14 +72,23 @@ public class Services {
     }
 
     public static <T> T getService(Class<T> klass) {
-        return services.get().getService(klass);
+        final ServiceLookup serviceLookup = services.get();
+        if (serviceLookup == null) {
+            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.oidc.impl\" not started?");
+        }
+        return serviceLookup.getService(klass);
     }
 
     public static <T> T getServiceSafe(Class<T> klass) throws OXException {
-        return services.get().getServiceSafe(klass);
+        final ServiceLookup serviceLookup = services.get();
+        if (serviceLookup == null) {
+            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.oidc.impl\" not started?");
+        }
+        return serviceLookup.getServiceSafe(klass);
     }
 
     public static <T> T getOptionalService(Class<T> klass) {
-        return services.get().getOptionalService(klass);
+        final ServiceLookup serviceLookup = services.get();
+        return serviceLookup != null ? services.get().getOptionalService(klass) : null;
     }
 }
