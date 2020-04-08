@@ -5,3 +5,4 @@ requests:
   - DeclineRequest.yaml
   - TentativeRequest.yaml
   - UpdateRequest.yaml
+  - DeleteRequest.yaml

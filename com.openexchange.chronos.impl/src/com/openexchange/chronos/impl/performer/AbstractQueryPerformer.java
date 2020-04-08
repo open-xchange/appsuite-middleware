@@ -86,6 +86,11 @@ import com.openexchange.quota.Quota;
  * @since v7.10.0
  */
 public abstract class AbstractQueryPerformer {
+    
+    /** <i>Meta</i>-fields of events that are always skipped when applying updated event data */
+    protected static final EventField[] SKIPPED_FIELDS = {
+        EventField.CREATED, EventField.CREATED_BY, EventField.LAST_MODIFIED, EventField.TIMESTAMP, EventField.MODIFIED_BY, EventField.FLAGS
+    };
 
     protected final CalendarSession session;
     protected final CalendarStorage storage;

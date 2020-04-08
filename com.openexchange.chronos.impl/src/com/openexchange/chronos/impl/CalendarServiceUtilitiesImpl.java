@@ -197,6 +197,17 @@ public class CalendarServiceUtilitiesImpl implements CalendarServiceUtilities {
             }
         }.executeQuery();
     }
+    
+    @Override
+    public Event resolveByID(CalendarSession session, String id, Integer sequence, int calendarUserId) throws OXException {
+        return new InternalCalendarStorageOperation<Event>(session) {
+            
+            @Override
+            protected Event execute(CalendarSession session, CalendarStorage storage) throws OXException {
+                return new ResolvePerformer(session, storage).resolveById(id, sequence, calendarUserId);
+            }
+        }.executeQuery();
+    }
 
     @Override
     public List<Event> resolveResource(CalendarSession session, String folderId, String resourceName) throws OXException {

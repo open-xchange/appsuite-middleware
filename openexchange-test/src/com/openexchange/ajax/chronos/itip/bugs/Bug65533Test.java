@@ -153,7 +153,7 @@ public class Bug65533Test extends AbstractITipTest {
         /*
          * reply with "accepted"
          */
-        EventData eventData = assertSingleEvent(accept(constructBody(iMipRequestData.getId())));
+        EventData eventData = assertSingleEvent(accept(constructBody(iMipRequestData.getId()), null));
         assertEquals(uid, eventData.getUid());
         assertAttendeePartStat(eventData.getAttendees(), recipientMail, "ACCEPTED");
         /*
@@ -181,7 +181,7 @@ public class Bug65533Test extends AbstractITipTest {
          */
         MailData iMipReplyData = receiveIMip(apiClientC2, recipientMail, summary, 0, SchedulingMethod.REPLY);
         assertNotNull(iMipReplyData);
-        rememberMail(iMipReplyData);
+        rememberMail(apiClientC2, iMipReplyData);
         ImportedCalendar iTipReply = parseICalAttachment(apiClientC2, iMipReplyData);
         assertEquals("REPLY", iTipReply.getMethod());
         assertTrue(null != iTipReply.getEvents() && 1 == iTipReply.getEvents().size());

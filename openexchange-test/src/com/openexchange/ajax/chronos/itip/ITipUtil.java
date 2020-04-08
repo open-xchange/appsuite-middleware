@@ -55,8 +55,10 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import java.io.File;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
+import javax.jms.IllegalStateException;
 import org.apache.commons.io.output.FileWriterWithEncoding;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -75,7 +77,9 @@ import com.openexchange.test.pool.TestUser;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.models.Attendee;
 import com.openexchange.testing.httpclient.models.Attendee.CuTypeEnum;
+import com.openexchange.testing.httpclient.models.AttendeeAndAlarm;
 import com.openexchange.testing.httpclient.models.ConversionDataSource;
+import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.MailAttachment;
 import com.openexchange.testing.httpclient.models.MailData;
 import com.openexchange.testing.httpclient.models.MailDestinationData;
@@ -131,7 +135,6 @@ public class ITipUtil {
     public static Attendee convertToAttendee(TestUser convertee, Integer userId) {
         Attendee attendee = AttendeeFactory.createAttendee(userId, CuTypeEnum.INDIVIDUAL);
         attendee.cn(convertee.getUser());
-        attendee.comment("Comment for user " + convertee.getUser());
         attendee.email(convertee.getLogin());
         attendee.setUri("mailto:" + convertee.getLogin());
         return attendee;
@@ -361,6 +364,48 @@ public class ITipUtil {
         json.put("event", event);
 
         return json.toString();
+    }
+
+    /**
+     * prepares the given attendee with the given participant status for an update via the updateAttendee action
+     *
+     * @param event The event to get the attendee from
+     * @param mailAddress The mail address of the desired attendee
+     * @param participantStatus The participant status to set
+     * @param comment The comment to set to the updated attendee
+     * @return The attendee prepared for a update vie updateAttendee action
+     * @throws IllegalStateException If the attendee can't be found
+     */
+    public static AttendeeAndAlarm prepareForAttendeeUpdate(EventData event, String mailAddress, String participantStatus, String comment) throws IllegalStateException {
+        Optional<Attendee> matchingAttendee = event.getAttendees().stream().filter(a -> a.getEmail().equals(mailAddress)).findFirst();
+        Attendee originalAttendee = matchingAttendee.orElseThrow(() -> new IllegalStateException("Attendee not found"));
+
+        Attendee attendee = copyAtttendee(originalAttendee);
+        attendee.setPartStat(participantStatus);
+        attendee.setMember(null); // Hack to avoid this being recognized as change
+        attendee.setComment(comment);
+
+        AttendeeAndAlarm attendeeAndAlarm = new AttendeeAndAlarm();
+        attendeeAndAlarm.attendee(attendee);
+        return attendeeAndAlarm;
+    }
+
+    /**
+     * Copies all values from the original attendee to a new attendee object
+     *
+     * @param originalAttendee The attendee to copy
+     * @return A new Attendee object with the same values
+     */
+    public static Attendee copyAtttendee(Attendee originalAttendee) {
+        Attendee attendee = new Attendee();
+        attendee.cn(originalAttendee.getCn());
+        attendee.comment(originalAttendee.getComment());
+        attendee.email(originalAttendee.getEmail());
+        attendee.setUri(originalAttendee.getUri());
+        attendee.setEntity(originalAttendee.getEntity());
+        attendee.setPartStat(originalAttendee.getPartStat());
+        attendee.setMember(originalAttendee.getMember());
+        return attendee;
     }
 
 }

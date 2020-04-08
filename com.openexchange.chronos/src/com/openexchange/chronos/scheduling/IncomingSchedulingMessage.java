@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,55 +47,68 @@
  *
  */
 
-package com.openexchange.chronos.scheduling.impl.osgi;
+package com.openexchange.chronos.scheduling;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.openexchange.chronos.scheduling.SchedulingBroker;
-import com.openexchange.chronos.scheduling.TransportProvider;
-import com.openexchange.chronos.scheduling.impl.SchedulingBrokerImpl;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.osgi.HousekeepingActivator;
+import java.util.Date;
+import java.util.Optional;
+import com.openexchange.annotation.NonNull;
+import com.openexchange.chronos.CalendarObjectResource;
 
 /**
- * {@link SchedulingActivator}
+ * {@link IncomingSchedulingMessage} - Object containing information about an external triggered update of an calendar resource
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
- * @since v7.10.3
+ * @since v7.10.4
  */
-public class SchedulingActivator extends HousekeepingActivator {
+public interface IncomingSchedulingMessage {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SchedulingActivator.class);
+    /**
+     * The {@link SchedulingMethod} to process
+     * 
+     * @return The {@link SchedulingMethod}
+     */
+    @NonNull
+    SchedulingMethod getMethod();
 
-    private SchedulingBrokerImpl broker;
+    /**
+     * Get the user identifier for whom to apply the change for
+     *
+     * @return The identifier of the target user.
+     */
+    int getTargetUser();
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { ConfigurationService.class };
-    }
+    /**
+     * Get the object that triggered the scheduling
+     *
+     * @return The object
+     */
+    @NonNull
+    IncomingSchedulingObject getSchedulingObject();
 
-    @Override
-    protected void startBundle() throws Exception {
-        LOGGER.info("Starting calendar scheduling related services");
+    /**
+     * Get a the {@link CalendarObjectResource} as transmitted by the external
+     * entity scheduling the change.
+     * 
+     * @return {@link CalendarObjectResource}
+     */
+    @NonNull
+    CalendarObjectResource getResource();
 
-        broker = new SchedulingBrokerImpl(context, this);
-        /*
-         * Register service tracker
-         */
-        track(TransportProvider.class, broker);
-        openTrackers();
+    /**
+     * The date when the change was created
+     *
+     * @return The date of the change
+     */
+    @NonNull
+    Date getTimeStamp();
 
-        /*
-         * Register broker as service
-         */
-        registerService(SchedulingBroker.class, broker);
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        broker.close();
-        unregisterService(SchedulingBroker.class);
-        super.stopBundle();
-    }
+    /**
+     * Get additional information.
+     * 
+     * @param key The key for the value
+     * @param clazz The class the value has
+     * @return An Optional holding the value casted to the given class
+     */
+    <T> Optional<T> getAdditional(String key, Class<T> clazz);
 
 }

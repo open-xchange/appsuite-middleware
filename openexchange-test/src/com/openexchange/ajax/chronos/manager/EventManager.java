@@ -532,6 +532,21 @@ public class EventManager extends AbstractManager {
         EventsResponse listResponse = userApi.getChronosApi().getEventList(userApi.getSession(), ids, null, Boolean.FALSE);
         return checkResponse(listResponse.getErrorDesc(), listResponse.getError(), listResponse.getCategories(), listResponse.getData());
     }
+    
+    /**
+     * Deletes the event with the specified identifier
+     *
+     * @param event The event to delete
+     * @param folderId The folder to delete the event from, optional, can be <code>null</code> to use the default folder
+     * @throws ApiException if an API error is occurred
+     */
+    public void deleteEvent(EventData event, String folderId) throws ApiException {
+        EventId eventId = new EventId();
+        eventId.setFolder(null == folderId ? defaultFolder : folderId);
+        eventId.setId(event.getId());
+        eventId.setRecurrenceId(event.getRecurrenceId());
+        deleteEvent(eventId);
+    }
 
     /**
      * Deletes the event with the specified identifier
@@ -827,7 +842,8 @@ public class EventManager extends AbstractManager {
      * Updates the attendee status of the event with the specified identifier.
      *
      * @param eventId The event identifier
-     * @param reccurenceId The recurrence id or null for the master event
+     * @param reccurenceId The recurrence id or <code>null</code> for the master event
+     * @param folderId The folder identifier or <code>null</code>
      * @param attendeeAndAlarm The status of the attendee
      * @param expectException If an error is expected when updating the attendee
      * @throws ApiException if an API error occurs

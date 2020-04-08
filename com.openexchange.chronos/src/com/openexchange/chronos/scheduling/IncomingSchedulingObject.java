@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,55 +47,39 @@
  *
  */
 
-package com.openexchange.chronos.scheduling.impl.osgi;
+package com.openexchange.chronos.scheduling;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.openexchange.chronos.scheduling.SchedulingBroker;
-import com.openexchange.chronos.scheduling.TransportProvider;
-import com.openexchange.chronos.scheduling.impl.SchedulingBrokerImpl;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.osgi.HousekeepingActivator;
+import java.util.Optional;
+import com.openexchange.annotation.NonNull;
+import com.openexchange.chronos.Attachment;
+import com.openexchange.chronos.CalendarUser;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link SchedulingActivator}
+ * {@link IncomingSchedulingObject}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
- * @since v7.10.3
+ * @since v7.10.4
  */
-public class SchedulingActivator extends HousekeepingActivator {
+public interface IncomingSchedulingObject {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SchedulingActivator.class);
+    /**
+     * Get the originator of the incoming scheduling message
+     *
+     * @return The originator
+     * @throws OXException in case originator can't be found
+     */
+    @NonNull
+    CalendarUser getOriginator() throws OXException;
 
-    private SchedulingBrokerImpl broker;
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { ConfigurationService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        LOGGER.info("Starting calendar scheduling related services");
-
-        broker = new SchedulingBrokerImpl(context, this);
-        /*
-         * Register service tracker
-         */
-        track(TransportProvider.class, broker);
-        openTrackers();
-
-        /*
-         * Register broker as service
-         */
-        registerService(SchedulingBroker.class, broker);
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        broker.close();
-        unregisterService(SchedulingBroker.class);
-        super.stopBundle();
-    }
+    /**
+     * Get an attachment for the supplied identifier that was received
+     * along the incoming scheduling change
+     * 
+     * @param attachmentIdentifier The attachment identifier. Can be e.g.
+     *            the URL of the attachment in the corresponding mail
+     * @return An optional that may contain the parsed attachment
+     */
+    Optional<Attachment> getAttachment(String attachmentIdentifier);
 
 }

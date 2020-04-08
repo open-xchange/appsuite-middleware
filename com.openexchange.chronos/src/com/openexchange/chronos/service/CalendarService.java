@@ -100,6 +100,14 @@ public interface CalendarService {
      * @return The calendar service utilities
      */
     CalendarServiceUtilities getUtilities();
+    
+    /**
+     * Provides access to additional utilities for scheduling.
+     * 
+     * @return The scheduling utilities
+     * @see com.openexchange.chronos.scheduling.SchedulingBroker
+     */
+    SchedulingUtilities getSchedulingUtilities();
 
     /**
      * Gets the sequence number of a calendar folder, which is the highest last-modification timestamp of the folder itself and his

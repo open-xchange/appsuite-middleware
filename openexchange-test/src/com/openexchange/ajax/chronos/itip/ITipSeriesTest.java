@@ -62,16 +62,12 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import java.util.Calendar;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 import java.util.UUID;
 import org.junit.Test;
 import com.openexchange.ajax.chronos.factory.EventFactory;
 import com.openexchange.chronos.scheduling.SchedulingMethod;
-import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.AnalysisChange;
 import com.openexchange.testing.httpclient.models.AnalysisChangeNewEvent;
 import com.openexchange.testing.httpclient.models.AnalyzeResponse;
@@ -109,13 +105,13 @@ public class ITipSeriesTest extends AbstractITipAnalyzeTest {
         EventData event = EventFactory.createSeriesEvent(getUserId(), summary, 10, defaultFolderId);
         replyingAttendee = prepareCommonAttendees(event);
 
-        createdEvent = createEvent(event);
+        createdEvent = eventManager.createEvent(event);
 
         /*
          * Receive mail as attendee
          */
         MailData inviteMail = receiveIMip(apiClientC2, userResponseC1.getData().getEmail1(), summary, 0, SchedulingMethod.REQUEST);
-        rememberMail(inviteMail);
+        rememberMail(apiClientC2, inviteMail);
         AnalysisChangeNewEvent newEvent = assertSingleChange(analyze(apiClientC2, inviteMail)).getNewEvent();
         assertNotNull(newEvent);
         assertEquals(createdEvent.getUid(), newEvent.getUid());
@@ -124,7 +120,7 @@ public class ITipSeriesTest extends AbstractITipAnalyzeTest {
         /*
          * reply with "accepted"
          */
-        EventData attendeeEvent = assertSingleEvent(accept(apiClientC2, constructBody(inviteMail)), createdEvent.getUid());
+        EventData attendeeEvent = assertSingleEvent(accept(apiClientC2, constructBody(inviteMail), null), createdEvent.getUid());
         assertAttendeePartStat(attendeeEvent.getAttendees(), replyingAttendee.getEmail(), PartStat.ACCEPTED.status);
         rememberForCleanup(apiClientC2, attendeeEvent);
 
@@ -134,7 +130,7 @@ public class ITipSeriesTest extends AbstractITipAnalyzeTest {
         /*
          * Take over accept and check in calendar
          */
-        assertSingleEvent(update(constructBody(reply)));
+        assertSingleEvent(update(constructBody(reply)), createdEvent.getUid());
         EventResponse eventResponse = chronosApi.getEvent(apiClient.getSession(), createdEvent.getId(), createdEvent.getFolder(), createdEvent.getRecurrenceId(), null, null);
         assertNull(eventResponse.getError(), eventResponse.getError());
         createdEvent = eventResponse.getData();
@@ -216,18 +212,5 @@ public class ITipSeriesTest extends AbstractITipAnalyzeTest {
         analyze(analyzeResponse, CustomConsumers.ALL);
         AnalysisChange change = assertSingleChange(analyzeResponse);
         assertSingleDescription(change, "The appointment description has changed");
-    }
-
-    private List<EventData> getAllEventsOfCreatedEvent() throws ApiException {
-        Calendar instance = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        instance.setTimeInMillis(System.currentTimeMillis());
-        instance.add(Calendar.DAY_OF_MONTH, -1);
-        Date from = instance.getTime();
-        instance.add(Calendar.DAY_OF_MONTH, 7);
-        Date until = instance.getTime();
-        instance.add(Calendar.DAY_OF_MONTH, -7);
-        List<EventData> allEvents = eventManager.getAllEvents(defaultFolderId, from, until, true);
-        allEvents = getEventsByUid(allEvents, createdEvent.getUid()); // Filter by series uid
-        return allEvents;
     }
 }

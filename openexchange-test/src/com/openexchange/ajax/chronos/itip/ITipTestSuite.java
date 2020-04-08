@@ -63,13 +63,13 @@ import com.openexchange.ajax.chronos.itip.bugs.ReplyBugsTest;
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
     ITipRequestTests.class,
-    ITipAnalyzeReplyTest.class,
+    ITipReplyTest.class,
     ReplyBugsTest.class,
     Bug65533Test.class,
     ITipAnalyzeChangesTest.class,
     ITipSeriesTest.class,
     ITipSeriesExceptionTest.class,
-    ITipOnBehalfTest.class
+    ITipOnBehalfTest.class,
 })
 public class ITipTestSuite {
 

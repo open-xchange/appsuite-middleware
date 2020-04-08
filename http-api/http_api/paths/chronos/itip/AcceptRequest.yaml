@@ -7,6 +7,12 @@
     parameters:
       - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
+        name: message
+        description: The comment the attendee wants to transmit
+        required: false
+        schema:
+          type: String
+      - in: query
         name: dataSource
         description: >-
           The identifier of the data source. Currently only

@@ -56,6 +56,7 @@ import static com.openexchange.ajax.chronos.itip.ITipAssertion.assertSingleEvent
 import static com.openexchange.ajax.chronos.itip.ITipUtil.constructBody;
 import static com.openexchange.ajax.chronos.itip.ITipUtil.prepareJsonForFileUpload;
 import static com.openexchange.ajax.chronos.itip.ITipUtil.receiveIMip;
+import static com.openexchange.java.Autoboxing.i;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -92,7 +93,6 @@ import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventData.TranspEnum;
 import com.openexchange.testing.httpclient.models.EventResponse;
 import com.openexchange.testing.httpclient.models.MailData;
-import com.openexchange.testing.httpclient.modules.ChronosApi;
 
 /**
  * {@link ITipAnalyzeChangesTest} - Updates different parts of an event and checks changes on attendee side.
@@ -122,7 +122,7 @@ public class ITipAnalyzeChangesTest extends AbstractITipAnalyzeTest {
          */
         EventData eventToCreate = EventFactory.createSingleTwoHourEvent(0, summary);
         replyingAttendee = prepareCommonAttendees(eventToCreate);
-        createdEvent = createEvent(eventToCreate);
+        createdEvent = eventManager.createEvent(eventToCreate, true);
 
         /*
          * Receive mail as attendee
@@ -137,7 +137,7 @@ public class ITipAnalyzeChangesTest extends AbstractITipAnalyzeTest {
         /*
          * reply with "accepted"
          */
-        attendeeEvent = assertSingleEvent(accept(apiClientC2, constructBody(iMip)), createdEvent.getUid());
+        attendeeEvent = assertSingleEvent(accept(apiClientC2, constructBody(iMip), null), createdEvent.getUid());
         rememberForCleanup(apiClientC2, attendeeEvent);
         assertAttendeePartStat(attendeeEvent.getAttendees(), replyingAttendee.getEmail(), PartStat.ACCEPTED.status);
 
@@ -151,7 +151,7 @@ public class ITipAnalyzeChangesTest extends AbstractITipAnalyzeTest {
         /*
          * Take over accept and check in calendar
          */
-        assertSingleEvent(update(constructBody(reply)));
+        assertSingleEvent(update(constructBody(reply)), createdEvent.getUid());
         EventResponse eventResponse = chronosApi.getEvent(apiClient.getSession(), createdEvent.getId(), createdEvent.getFolder(), createdEvent.getRecurrenceId(), null, null);
         assertNull(eventResponse.getError(), eventResponse.getError());
         createdEvent = eventResponse.getData();
@@ -308,7 +308,11 @@ public class ITipAnalyzeChangesTest extends AbstractITipAnalyzeTest {
          */
         Asset asset = assetManager.getRandomAsset(AssetType.jpg);
         File file = new File(asset.getAbsolutePath());
-        String callbackHtml = chronosApi.updateEventWithAttachments(apiClient.getSession(), createdEvent.getFolder(), createdEvent.getId(), now(), prepareJsonForFileUpload(createdEvent.getId(), null == createdEvent.getFolder() ? defaultFolderId : createdEvent.getFolder(), asset.getFilename()), file, createdEvent.getRecurrenceId(), null, null, null, null);
+        String callbackHtml = chronosApi.updateEventWithAttachments( //@formatter:off
+            apiClient.getSession(), createdEvent.getFolder(), createdEvent.getId(), now(), 
+            prepareJsonForFileUpload(createdEvent.getId(), 
+            null == createdEvent.getFolder() ? defaultFolderId : createdEvent.getFolder(), asset.getFilename()), 
+            file, null, null, null, null, null); //@formatter:on
         assertNotNull(callbackHtml);
         assertTrue("Should contain attachment name: " + asset.getFilename(), callbackHtml.contains("\"filename\":\"" + asset.getFilename() + "\""));
 
@@ -326,10 +330,7 @@ public class ITipAnalyzeChangesTest extends AbstractITipAnalyzeTest {
         assertSingleDescription(change, "The appointment has a new attachment");
         AnalysisChangeCurrentEvent current = analyzeResponse.getData().get(0).getChanges().get(0).getCurrentEvent();
 
-        ChronosApi chronosApiC2 = new ChronosApi(apiClientC2);
-        EventResponse eventResponse = chronosApiC2.getEvent(apiClientC2.getSession(), current.getId(), current.getFolder(), current.getRecurrenceId(), null, null);
-        assertNull(eventResponse.getError(), eventResponse.getError());
-        EventData eventData = eventResponse.getData();
+        EventData eventData = eventManagerC2.getEvent(current.getFolder(), current.getId());
         rememberForCleanup(eventData);
         assertEquals(createdEvent.getUid(), eventData.getUid());
         assertAttendeePartStat(eventData.getAttendees(), replyingAttendee.getEmail(), PartStat.ACCEPTED.getStatus());
@@ -341,7 +342,7 @@ public class ITipAnalyzeChangesTest extends AbstractITipAnalyzeTest {
         ChronosAttachment attachment = attachments.get(0);
         assertEquals(asset.getFilename(), attachment.getFilename());
         assertEquals("image/jpeg", attachment.getFmtType());
-        byte[] attachmentData = chronosApiC2.getEventAttachment(apiClientC2.getSession(), eventData.getId(), eventData.getFolder(), attachment.getManagedId());
+        byte[] attachmentData = eventManagerC2.getAttachment(eventData.getId(), i(attachment.getManagedId()),  eventData.getFolder());
         assertNotNull(attachmentData);
     }
 
@@ -401,9 +402,7 @@ public class ITipAnalyzeChangesTest extends AbstractITipAnalyzeTest {
          */
         EventData deltaEvent = prepareDeltaEvent(createdEvent);
         TestUser testUser3 = context2.acquireUser();
-        addTearDownOperation(() -> {
-            context2.backUser(testUser3);
-        });
+        addTearDownOperation(() -> context2.backUser(testUser3));
 
         Attendee addedAttendee = ITipUtil.convertToAttendee(testUser3, Integer.valueOf(0));
         addedAttendee.setPartStat(PartStat.NEEDS_ACTION.getStatus());

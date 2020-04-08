@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,55 +47,19 @@
  *
  */
 
-package com.openexchange.chronos.scheduling.impl.osgi;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.openexchange.chronos.scheduling.SchedulingBroker;
-import com.openexchange.chronos.scheduling.TransportProvider;
-import com.openexchange.chronos.scheduling.impl.SchedulingBrokerImpl;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.osgi.HousekeepingActivator;
+package com.openexchange.chronos.scheduling;
 
 /**
- * {@link SchedulingActivator}
+ * {@link SchedulingSource} - Enumeration containing all known sources that can trigger a scheduling
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
- * @since v7.10.3
+ * @since v7.10.4
  */
-public class SchedulingActivator extends HousekeepingActivator {
+public enum SchedulingSource {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SchedulingActivator.class);
-
-    private SchedulingBrokerImpl broker;
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { ConfigurationService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        LOGGER.info("Starting calendar scheduling related services");
-
-        broker = new SchedulingBrokerImpl(context, this);
-        /*
-         * Register service tracker
-         */
-        track(TransportProvider.class, broker);
-        openTrackers();
-
-        /*
-         * Register broker as service
-         */
-        registerService(SchedulingBroker.class, broker);
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        broker.close();
-        unregisterService(SchedulingBroker.class);
-        super.stopBundle();
-    }
+    /**
+     * The scheduling has been triggered by an API call explicitly by a user
+     */
+    API;
 
 }

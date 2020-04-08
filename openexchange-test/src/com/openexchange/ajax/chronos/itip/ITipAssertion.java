@@ -49,12 +49,14 @@
 
 package com.openexchange.ajax.chronos.itip;
 
+import static com.openexchange.java.Autoboxing.I;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.ajax.chronos.itip.AbstractITipTest.PartStat;
 import com.openexchange.testing.httpclient.models.ActionResponse;
@@ -87,6 +89,22 @@ public class ITipAssertion {
         Analysis analysis = analyzeResponse.getData().get(0);
         assertEquals("unexpected number of changes in analysis", 1, analysis.getChanges().size());
         return analysis.getChanges().get(0);
+    }
+    
+    /**
+     * Asserts that only one analyze with exact one change was provided in the response
+     *
+     * @param analyzeResponse The response to check
+     * @param size The expected size of events
+     * @param index The index of events to return
+     * @return The {@link AnalysisChange} provided by the server
+     */
+    public static AnalysisChange assertChanges(AnalyzeResponse analyzeResponse, int size, int index) {
+        assertNull("error during analysis: " + analyzeResponse.getError(), analyzeResponse.getCode());
+        assertEquals("unexpected analysis number in response", 1, analyzeResponse.getData().size());
+        Analysis analysis = analyzeResponse.getData().get(0);
+        assertEquals("unexpected number of changes in analysis", size, analysis.getChanges().size());
+        return analysis.getChanges().get(index);
     }
 
     /**
@@ -170,13 +188,28 @@ public class ITipAssertion {
      * @return The {@link EventData} of the handled event
      */
     public static EventData assertSingleEvent(ActionResponse actionResponse, String uid) {
+        return assertEvents(actionResponse, uid, 1).get(0);
+    }
+
+    /**
+     * Asserts that the given count on events was handled by the server
+     *
+     * @param actionResponse The {@link ActionResponse} from the server
+     * @param uid The uid the event should have or <code>null</code>
+     * @param size The expected size of the returned events
+     * @return The {@link EventData} of the handled event
+     */
+    public static List<EventData> assertEvents(ActionResponse actionResponse, String uid, int size) {
+        List<EventData> events = new LinkedList<>();
         assertNotNull(actionResponse.getData());
-        assertThat("Only one object should have been handled", Integer.valueOf(actionResponse.getData().size()), is(Integer.valueOf(1)));
-        EventData eventData = actionResponse.getData().get(0);
-        if (null != uid) {
-            assertEquals(uid, eventData.getUid());
+        assertThat("Only one object should have been handled", Integer.valueOf(actionResponse.getData().size()), is(I(size)));
+        for (EventData eventData : actionResponse.getData()) {
+            if (null != uid) {
+                assertEquals(uid, eventData.getUid());
+            }
+            events.add(eventData);
         }
-        return eventData;
+        return events;
     }
 
     /**

@@ -1,9 +1,9 @@
-/chronos/itip?action=decline:
+/chronos/itip?action=delete:
   put:
-    operationId: decline
+    operationId: cancel
     tags:
       - Chronos
-    summary: Declines an itip invitation.
+    summary: Deletes an event that has been cancled via iTIP
     parameters:
       - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
@@ -20,7 +20,6 @@
         required: true
         schema:
           type: string
-          default: com.openexchange.mail.ical
       - in: query
         name: descriptionFormat
         description: The desired output fromat. Currently only "html" is valid.

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,55 +47,55 @@
  *
  */
 
-package com.openexchange.chronos.scheduling.impl.osgi;
+package com.openexchange.chronos.impl;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.openexchange.chronos.scheduling.SchedulingBroker;
-import com.openexchange.chronos.scheduling.TransportProvider;
-import com.openexchange.chronos.scheduling.impl.SchedulingBrokerImpl;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.osgi.HousekeepingActivator;
+import static com.openexchange.chronos.impl.Utils.getCalendarFolder;
+import static com.openexchange.chronos.impl.Utils.postProcess;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.impl.performer.CancelPerformer;
+import com.openexchange.chronos.impl.performer.ReplyPerformer;
+import com.openexchange.chronos.scheduling.IncomingSchedulingMessage;
+import com.openexchange.chronos.scheduling.SchedulingSource;
+import com.openexchange.chronos.service.CalendarResult;
+import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.SchedulingUtilities;
+import com.openexchange.chronos.storage.CalendarStorage;
+import com.openexchange.exception.OXException;
+import com.openexchange.osgi.annotation.SingletonService;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link SchedulingActivator}
+ * {@link SchedulingUtilitiesImpl} - Class providing utility method for processing and updating the calendar based
+ * on am incoming scheduling message
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
- * @since v7.10.3
+ * @since v7.10.4
  */
-public class SchedulingActivator extends HousekeepingActivator {
+@SingletonService
+public class SchedulingUtilitiesImpl implements SchedulingUtilities {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SchedulingActivator.class);
+    private final ServiceLookup serviceLookup;
 
-    private SchedulingBrokerImpl broker;
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { ConfigurationService.class };
+    /**
+     * Initializes a new {@link SchedulingUtilitiesImpl}.
+     * 
+     * @param serviceLookup The {@link ServiceLookup}
+     *
+     */
+    public SchedulingUtilitiesImpl(ServiceLookup serviceLookup) {
+        super();
+        this.serviceLookup = serviceLookup;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        LOGGER.info("Starting calendar scheduling related services");
+    public CalendarResult processReply(CalendarSession session, SchedulingSource source, IncomingSchedulingMessage message) throws OXException {
+        return postProcess(serviceLookup, new InternalCalendarStorageOperation<InternalCalendarResult>(session) {
 
-        broker = new SchedulingBrokerImpl(context, this);
-        /*
-         * Register service tracker
-         */
-        track(TransportProvider.class, broker);
-        openTrackers();
-
-        /*
-         * Register broker as service
-         */
-        registerService(SchedulingBroker.class, broker);
+            @Override
+            protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
+                Event event = message.getResource().getFirstEvent();
+                return new ReplyPerformer(storage, session, getCalendarFolder(session, storage, event.getUid(), event.getRecurrenceId(), message.getTargetUser()), source).perform(message);
+            }
+        }.executeUpdate()).getUserizedResult();
     }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        broker.close();
-        unregisterService(SchedulingBroker.class);
-        super.stopBundle();
-    }
-
 }

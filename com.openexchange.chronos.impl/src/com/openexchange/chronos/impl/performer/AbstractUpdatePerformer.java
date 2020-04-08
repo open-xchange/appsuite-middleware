@@ -50,6 +50,7 @@
 package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.AlarmUtils.filterRelativeTriggers;
+import static com.openexchange.chronos.common.CalendarUtils.contains;
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.getAlarmIDs;
 import static com.openexchange.chronos.common.CalendarUtils.getExceptionDates;
@@ -57,11 +58,13 @@ import static com.openexchange.chronos.common.CalendarUtils.getFolderView;
 import static com.openexchange.chronos.common.CalendarUtils.getRecurrenceIds;
 import static com.openexchange.chronos.common.CalendarUtils.hasAttendeePrivileges;
 import static com.openexchange.chronos.common.CalendarUtils.hasExternalOrganizer;
+import static com.openexchange.chronos.common.CalendarUtils.initRecurrenceRule;
 import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
 import static com.openexchange.chronos.common.CalendarUtils.isLastNonHiddenUserAttendee;
 import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.matches;
+import static com.openexchange.chronos.common.CalendarUtils.splitExceptionDates;
 import static com.openexchange.chronos.impl.Check.classificationAllowsUpdate;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Utils.getCalendarUser;
@@ -90,25 +93,33 @@ import java.util.Map.Entry;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.UUID;
+import org.dmfs.rfc5545.DateTime;
+import org.dmfs.rfc5545.Duration;
+import org.dmfs.rfc5545.recur.RecurrenceRule;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmField;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUser;
+import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.DefaultAttendeePrivileges;
 import com.openexchange.chronos.DelegatingEvent;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.RecurrenceRange;
 import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.UnmodifiableEvent;
 import com.openexchange.chronos.common.AlarmPreparator;
 import com.openexchange.chronos.common.AlarmUtils;
+import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.DefaultCalendarObjectResource;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.common.mapping.AlarmMapper;
 import com.openexchange.chronos.common.mapping.AttendeeEventUpdate;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
+import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.impl.Check;
@@ -1091,5 +1102,164 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
     protected void logPerform(EventUpdate update) {
         LOG.trace("Original: >\n{}\nUpdated: >\n{}", new JSONPrintableEvent(session, update.getOriginal()), new JSONPrintableEvent(session, update.getUpdate()));
     }
+    
+    /**
+     * Deletes an existing change exception. Besides the removal of the change exception data via {@link #delete(Event)}, this also
+     * includes adjusting the master event's change- and delete exception date arrays.
+     *
+     * @param originalSeriesMaster The original series master event
+     * @param originalExceptionEvent The original exception event
+     * @return A list holding the deleted exception event
+     */
+    protected List<Event> deleteException(Event originalSeriesMaster, Event originalExceptionEvent) throws OXException {
+        /*
+         * delete the exception
+         */
+        RecurrenceId recurrenceId = originalExceptionEvent.getRecurrenceId();
+        List<Event> deletedEvents = delete(originalExceptionEvent);
+        /*
+         * update the series master accordingly
+         */
+        addDeleteExceptionDate(originalSeriesMaster, recurrenceId);
+        return deletedEvents;
+    }
+    
+    /**
+     * Adds a specific recurrence identifier to the series master's delete exception array, i.e. creates a new delete exception. A
+     * previously existing entry for the recurrence identifier in the master's change exception date array is removed implicitly. In case
+     * there are no occurrences remaining at all after the deletion, the whole series event is deleted.
+     *
+     * @param originalMasterEvent The original series master event
+     * @param recurrenceId The recurrence identifier of the occurrence to add
+     * @return The updated master event, or <code>null</code> if it's gone after the last occurrence was deleted
+     */
+    protected Event addDeleteExceptionDate(Event originalMasterEvent, RecurrenceId recurrenceId) throws OXException {
+        /*
+         * build new set of delete exception dates
+         */
+        SortedSet<RecurrenceId> deleteExceptionDates = new TreeSet<RecurrenceId>();
+        if (null != originalMasterEvent.getDeleteExceptionDates()) {
+            deleteExceptionDates.addAll(originalMasterEvent.getDeleteExceptionDates());
+        }
+        if (false == deleteExceptionDates.add(recurrenceId)) {
+            /*
+             * delete exception data already exists, ignore
+             */
+            LOG.warn("Delete exeception data for {} already exists, ignoring.", recurrenceId);
+        }
+        /*
+         * check if there are any further occurrences left
+         */
+        if (false == hasFurtherOccurrences(originalMasterEvent, deleteExceptionDates)) {
+            /*
+             * delete series master
+             */
+            delete(originalMasterEvent);
+            return null;
+        }
+        /*
+         * re-build exception date lists based on existing series master to guarantee consistency
+         */
+        SortedSet<RecurrenceId> changeExceptionDates = loadChangeExceptionDates(originalMasterEvent.getSeriesId());
+        for (RecurrenceId changeExceptionDate : changeExceptionDates) {
+            RecurrenceId matchingChangeExceptionDate = find(deleteExceptionDates, changeExceptionDate);
+            if (null != matchingChangeExceptionDate && deleteExceptionDates.remove(matchingChangeExceptionDate)) {
+                LOG.warn("Skipping {} in delete exception date collection due to existing change exception event.", matchingChangeExceptionDate);
+            }
+        }
+        /*
+         * update series master accordingly
+         */
+        resultTracker.rememberOriginalEvent(originalMasterEvent);
+        Event eventUpdate = new Event();
+        eventUpdate.setId(originalMasterEvent.getId());
+        eventUpdate.setDeleteExceptionDates(deleteExceptionDates);
+        if (false == changeExceptionDates.equals(originalMasterEvent.getChangeExceptionDates())) {
+            eventUpdate.setChangeExceptionDates(changeExceptionDates);
+        }
+        if (CalendarUtils.isInternal(originalMasterEvent.getOrganizer(), CalendarUserType.INDIVIDUAL)) {
+            eventUpdate.setSequence(originalMasterEvent.getSequence() + 1);
+        }
+        Consistency.setModified(session, timestamp, eventUpdate, calendarUserId);
+        Consistency.normalizeRecurrenceIDs(originalMasterEvent.getStartDate(), eventUpdate);
+        storage.getEventStorage().updateEvent(eventUpdate);
+        Event updatedMasterEvent = loadEventData(originalMasterEvent.getId());
 
+        /*
+         * update alarms
+         */
+        updateAlarmTrigger(originalMasterEvent, updatedMasterEvent);
+        
+        /*
+         * track update of master in result
+         */
+        resultTracker.trackUpdate(originalMasterEvent, updatedMasterEvent);
+        return updatedMasterEvent;
+    }
+    
+    /**
+     * Deletes all future occurrences by updating the recurrence rule. Efficiently shortens the series. 
+     *
+     * @param originalMasterEvent The original series master event
+     * @param recurrenceId The recurrence identifier of the occurrence to add, containing the {@link RecurrenceRange}
+     * @param trackOrphanedAttendees If scheduling messages to orphaned attendees should be sent or not.
+     * @return The updated series master
+     * @throws OXException
+     */
+    protected Event deleteFutureRecurrences(Event originalMasterEvent, RecurrenceId recurrenceId, boolean trackOrphanedAttendees) throws OXException {
+        /*
+         * delete "this and future" recurrences; adjust recurrence rule to have a fixed UNTIL one second or day prior the targeted occurrence
+         */
+        Check.recurrenceRangeMatches(recurrenceId, RecurrenceRange.THISANDFUTURE);
+        Event eventUpdate = EventMapper.getInstance().copy(originalMasterEvent, null, EventField.ID, EventField.SERIES_ID, EventField.START_DATE, EventField.END_DATE);
+        RecurrenceRule rule = initRecurrenceRule(originalMasterEvent.getRecurrenceRule());
+        DateTime until = recurrenceId.getValue().addDuration(recurrenceId.getValue().isAllDay() ? new Duration(-1, 1, 0) : new Duration(-1, 0, 1));
+        rule.setUntil(until);
+        eventUpdate.setRecurrenceRule(rule.toString());
+        /*
+         * remove any change- and delete exceptions after the occurrence & remember one-off attendees not attending the series master event
+         */
+        Entry<SortedSet<RecurrenceId>, SortedSet<RecurrenceId>> splittedDeleteExceptionDates = splitExceptionDates(originalMasterEvent.getDeleteExceptionDates(), until);
+        if (false == splittedDeleteExceptionDates.getValue().isEmpty()) {
+            eventUpdate.setDeleteExceptionDates(splittedDeleteExceptionDates.getKey());
+        }
+        List<Event> deletedChangeExceptions = new ArrayList<Event>();
+        List<Attendee> orphanedAttendees = new ArrayList<Attendee>();
+        Entry<SortedSet<RecurrenceId>, SortedSet<RecurrenceId>> splittedChangeExceptionDates = splitExceptionDates(originalMasterEvent.getChangeExceptionDates(), until);
+        if (false == splittedChangeExceptionDates.getValue().isEmpty()) {
+            for (Event changeException : loadExceptionData(originalMasterEvent, splittedChangeExceptionDates.getValue())) {
+                deletedChangeExceptions.addAll(delete(changeException));
+                for (Attendee attendee : changeException.getAttendees()) {
+                    if (false == contains(originalMasterEvent.getAttendees(), attendee) && false == contains(orphanedAttendees, attendee)) {
+                        orphanedAttendees.add(attendee);
+                    }
+                }
+            }
+            eventUpdate.setChangeExceptionDates(splittedChangeExceptionDates.getKey());
+        }
+        /*
+         * update series master in storage & track results as updated request for adjusted event series, or as cancel message for orphaned attendees
+         */
+        eventUpdate.setSequence(originalMasterEvent.getSequence() + 1);
+        Consistency.setModified(session, timestamp, eventUpdate, session.getUserId());
+        storage.getEventStorage().updateEvent(eventUpdate);
+        Event updatedEvent = loadEventData(originalMasterEvent.getId());
+        updateAlarmTrigger(originalMasterEvent, updatedEvent);
+        resultTracker.trackUpdate(originalMasterEvent, updatedEvent);
+        
+        /*
+         * send CANCEL mails for orphaned attendees
+         */
+        if (trackOrphanedAttendees && 0 < orphanedAttendees.size()) {
+            schedulingHelper.trackDeletion(new DefaultCalendarObjectResource(deletedChangeExceptions), null, orphanedAttendees);
+        }
+        
+        return updatedEvent;
+    }
+    
+    private void updateAlarmTrigger(Event originalMasterEvent, Event updatedMasterEvent) throws OXException {
+        Map<Integer, List<Alarm>> alarms = storage.getAlarmStorage().loadAlarms(updatedMasterEvent);
+        storage.getAlarmTriggerStorage().deleteTriggers(originalMasterEvent.getId());
+        storage.getAlarmTriggerStorage().insertTriggers(updatedMasterEvent, alarms);
+    }
 }

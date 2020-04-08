@@ -89,6 +89,7 @@ import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeSet;
 import com.google.common.collect.ImmutableMap;
+import com.openexchange.annotation.NonNull;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarObjectResource;
@@ -112,14 +113,21 @@ import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.impl.performer.AttendeeUsageTracker;
+import com.openexchange.chronos.impl.performer.ResolvePerformer;
 import com.openexchange.chronos.impl.session.DefaultEntityResolver;
 import com.openexchange.chronos.provider.CalendarAccount;
+import com.openexchange.chronos.scheduling.ChangeNotification;
+import com.openexchange.chronos.scheduling.SchedulingBroker;
+import com.openexchange.chronos.scheduling.SchedulingMessage;
 import com.openexchange.chronos.service.CalendarConfig;
 import com.openexchange.chronos.service.CalendarEvent;
+import com.openexchange.chronos.service.CalendarEventNotificationService;
+import com.openexchange.chronos.service.CalendarHandler;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.EntityResolver;
+import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.EventUpdate;
 import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.chronos.service.RecurrenceData;
@@ -146,8 +154,10 @@ import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
 import com.openexchange.search.internal.operands.ColumnFieldOperand;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.user.User;
 import com.openexchange.user.UserService;
@@ -638,6 +648,56 @@ public class Utils {
             return folder.getCreatedBy();
         }
         return folder.getSession().getUserId();
+    }
+    
+    /**
+     * Resolves the event ID for the given UID and the given calendar user. In case the recurrence ID is unknown,
+     * the master event will be returned.
+     * 
+     * @param session The session to use
+     * @param storage The storage to lookup the event from
+     * @param uid The event UID to load
+     * @param recurrenceId The recurrence identifier of the event, can be <code>null</code>
+     * @param calendarUserId The identifier of the calendar user the unique identifier should be resolved for
+     * @return The eventID The event ID of the resolved event, userized for the calendar user
+     * @throws OXException If the event can not be found
+     */
+    public static @NonNull EventID resolveEventId(CalendarSession session, CalendarStorage storage, String uid, RecurrenceId recurrenceId, int calendarUserId) throws OXException {
+        ResolvePerformer resolvePerformer = new ResolvePerformer(session, storage);
+        return resolveEventId(session, storage, uid, recurrenceId, calendarUserId, resolvePerformer);
+    }
+
+    private static @NonNull EventID resolveEventId(CalendarSession session, CalendarStorage storage, String uid, RecurrenceId recurrenceId, int calendarUserId, ResolvePerformer resolvePerformer) throws OXException {
+        EventID eventID = resolvePerformer.resolveByUid(uid, recurrenceId, calendarUserId);
+        if (null == eventID) {
+            if (null != recurrenceId) {
+                /*
+                 * Might be a new exception, try to resolve the master event instead
+                 */
+                return resolveEventId(session, storage, uid, null, calendarUserId, resolvePerformer);
+            }
+            throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(uid);
+        }
+        return eventID;
+    }
+
+    /**
+     * Get the calendar folder to use based on the first event obtained from the scheduled resource provided by the message
+     *
+     * @param session The session to use
+     * @param storage The storage to lookup the event from
+     * @param uid The UID of the event to get the folder for
+     * @param recurrenceId The recurrence identifier of the event, can be <code>null</code>
+     * @param calendarUserId The identifier of the calendar user the unique identifier should be resolved for
+     * @return The {@link CalendarFolder}
+     * @throws OXException If folder can't be determined or is not visible for the user
+     */
+    public static CalendarFolder getCalendarFolder(CalendarSession session, CalendarStorage storage, String uid, RecurrenceId recurrenceId, int calendarUserId) throws OXException {
+        EventID eventID = resolveEventId(session, storage, uid, recurrenceId, calendarUserId);
+        if (Strings.isEmpty(eventID.getFolderID())) {
+            throw CalendarExceptionCodes.FOLDER_NOT_FOUND.create();
+        }
+        return getFolder(session, eventID.getFolderID(), true);
     }
 
     /**
@@ -1446,7 +1506,63 @@ public class Utils {
     }
 
     /**
-     * Gets the whitelist of identifiers of those entities that should be resolved automatically when data of the event is passed to the 
+     * 
+     * Processes an {@link InternalCalendarResult}. Informs {@link CalendarHandler} and triggers the {@link SchedulingBroker} to send messages.
+     * <p>
+     * Does <b>NOT</b> track attendee usage as per {@link #trackAttendeeUsage(CalendarSession, CalendarEvent)}
+     * 
+     * @param <T> The type of the {@link InternalCalendarResult}
+     * @param services The {@link ServiceLookup} to obtain the {@link CalendarEventNotificationService} and the {@link SchedulingBroker} from
+     * @param result The actual result
+     * @return The given result, unmodified.
+     */
+    public static <T extends InternalCalendarResult> T postProcess(ServiceLookup services, T result) {
+        return postProcess(services, result, false);
+    }
+
+    /**
+     * Processes an {@link InternalCalendarResult}. Tracks attendee usage, informs {@link CalendarHandler} and triggers
+     * the {@link SchedulingBroker} to send messages.
+     *
+     * @param <T> The type of the {@link InternalCalendarResult}
+     * @param services The {@link ServiceLookup} to obtain the {@link CalendarEventNotificationService} and the {@link SchedulingBroker} from
+     * @param result The actual result
+     * @param trackAttendeeUsage whether to track the attendee usage as per {@link #trackAttendeeUsage(CalendarSession, CalendarEvent)} or not.
+     * @return The given result, unmodified.
+     */
+    public static <T extends InternalCalendarResult> T postProcess(ServiceLookup services, T result, boolean trackAttendeeUsage) {
+        ThreadPools.submitElseExecute(ThreadPools.task(() -> {
+            /*
+             * track attendee usage as needed & notify registered calendar handlers
+             */
+            CalendarEvent calendarEvent = result.getCalendarEvent();
+            if (trackAttendeeUsage) {
+                trackAttendeeUsage(result.getSession(), calendarEvent);
+            }
+            CalendarEventNotificationService notificationService = services.getService(CalendarEventNotificationService.class);
+            if (null != notificationService) {
+                notificationService.notifyHandlers(calendarEvent, false);
+            }
+            /*
+             * handle pending scheduling messages
+             */
+            SchedulingBroker schedulingBroker = services.getService(SchedulingBroker.class);
+            if (null != schedulingBroker) {
+                List<SchedulingMessage> messages = result.getSchedulingMessages();
+                if (null != messages && 0 < messages.size()) {
+                    schedulingBroker.handleScheduling(result.getSession().getSession(), messages);
+                }
+                List<ChangeNotification> notifications = result.getChangeNotifications();
+                if (null != notifications && 0 < notifications.size()) {
+                    schedulingBroker.handleNotifications(result.getSession().getSession(), notifications);
+                }
+            }
+        }));
+        return result;
+    }
+
+    /**
+     * Gets the whitelist of identifiers of those entities that should be resolved automatically when data of the event is passed to the
      * entity resolver.
      * <p/>
      * For externally organized events, only the calendar user itself should be resolved, otherwise, there are no restrictions.

@@ -77,15 +77,27 @@ import com.openexchange.java.Strings;
  */
 public class ICal4JITipParser {
 
-    public List<ITipMessage> parseMessage(InputStream ical, int owner, CalendarSession session) throws OXException {
-        List<ITipMessage> messages = new ArrayList<ITipMessage>();
-        Map<String, ITipMessage> messagesPerUID = new HashMap<String, ITipMessage>();
+    /**
+     * Initializes a new {@link ICal4JITipParser}.
+     */
+    private ICal4JITipParser() {}
+
+    public static ImportedCalendar importCalendar(InputStream ical) throws OXException {
         ICalService iCalService = Services.getService(ICalService.class);
         ICalParameters parameters = iCalService.initParameters();
         parameters.set(ICalParameters.IGNORE_UNSET_PROPERTIES, Boolean.TRUE);
         parameters.set(ICalParameters.IGNORE_ALARM, Boolean.TRUE);
         ImportedCalendar calendar = iCalService.importICal(ical, parameters);
+        return calendar;
+    }
 
+    public static List<ITipMessage> parseMessage(InputStream ical, int owner, CalendarSession session) throws OXException {
+        return parseMessage(importCalendar(ical), owner, session);
+    }
+
+    public static List<ITipMessage> parseMessage(ImportedCalendar calendar, int owner, CalendarSession session) throws OXException {
+        List<ITipMessage> messages = new ArrayList<ITipMessage>();
+        Map<String, ITipMessage> messagesPerUID = new HashMap<String, ITipMessage>();
         boolean microsoft = looksLikeMicrosoft(calendar);
 
         ITipMethod methodValue = (calendar.getMethod() == null) ? ITipMethod.NO_METHOD : ITipMethod.get(calendar.getMethod());
@@ -106,7 +118,7 @@ public class ICal4JITipParser {
             resolveAttendees(event, session, methodValue);
             resolveOrganizer(event, session);
             event.setFlags(CalendarUtils.getFlags(event, session.getUserId()));
-            
+
             if (event.containsRecurrenceId()) {
                 message.addException(event);
             } else {
@@ -118,7 +130,7 @@ public class ICal4JITipParser {
         return messages;
     }
 
-    private void resolveAttendees(Event event, CalendarSession session, ITipMethod methodValue) throws OXException {
+    private static void resolveAttendees(Event event, CalendarSession session, ITipMethod methodValue) throws OXException {
         if (event.getAttendees() == null || event.getAttendees().isEmpty()) {
             return;
         }
@@ -137,7 +149,7 @@ public class ICal4JITipParser {
         }
     }
 
-    private void resolveOrganizer(Event event, CalendarSession session) throws OXException {
+    private static void resolveOrganizer(Event event, CalendarSession session) throws OXException {
         if (event.getOrganizer() == null) {
             return;
         }
@@ -145,7 +157,7 @@ public class ICal4JITipParser {
         session.getEntityResolver().prepare(event.getOrganizer(), CalendarUserType.INDIVIDUAL, new int[] { session.getUserId() });
     }
 
-    private boolean looksLikeMicrosoft(ImportedCalendar calendar) {
+    private static boolean looksLikeMicrosoft(ImportedCalendar calendar) {
         String property = calendar.getProdId();
         return null != property && Strings.toLowerCase(property).indexOf("microsoft") >= 0;
     }

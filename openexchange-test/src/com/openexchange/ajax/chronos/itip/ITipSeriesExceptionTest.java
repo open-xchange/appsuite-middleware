@@ -55,15 +55,11 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 import java.util.UUID;
 import org.junit.Test;
 import com.openexchange.ajax.chronos.factory.EventFactory;
 import com.openexchange.chronos.scheduling.SchedulingMethod;
-import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.AnalyzeResponse;
 import com.openexchange.testing.httpclient.models.Attendee;
 import com.openexchange.testing.httpclient.models.CalendarUser;
@@ -97,7 +93,7 @@ public class ITipSeriesExceptionTest extends AbstractITipAnalyzeTest {
         c.entity(Integer.valueOf(userResponseC1.getData().getId()));
         event.setOrganizer(c);
         event.setCalendarUser(c);
-        createdEvent = createEvent(event);
+        createdEvent = eventManager.createEvent(event);
 
         /*
          * Prepare replying attendee
@@ -138,7 +134,7 @@ public class ITipSeriesExceptionTest extends AbstractITipAnalyzeTest {
          * Receive mail as attendee
          */
         MailData iMip = receiveIMip(apiClientC2, userResponseC1.getData().getEmail1(), summary, 1, SchedulingMethod.REQUEST);
-        rememberMail(iMip);
+        rememberMail(apiClientC2, iMip);
         AnalyzeResponse analyzeResponse = analyze(apiClientC2, iMip);
         assertNull("error during analysis: " + analyzeResponse.getError(), analyzeResponse.getCode());
         assertEquals("unexpected analysis number in response", 1, analyzeResponse.getData().size());
@@ -172,18 +168,5 @@ public class ITipSeriesExceptionTest extends AbstractITipAnalyzeTest {
 //        for (Attendee attendee : event.getAttendees()) {
 //            assertThat("Participant status is not correct.", PartStat.ACCEPTED.status, is(attendee.getPartStat()));
 //        }
-    }
-
-    private List<EventData> getAllEventsOfCreatedEvent() throws ApiException {
-        Calendar instance = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        instance.setTimeInMillis(System.currentTimeMillis());
-        instance.add(Calendar.DAY_OF_MONTH, -1);
-        Date from = instance.getTime();
-        instance.add(Calendar.DAY_OF_MONTH, 7);
-        Date until = instance.getTime();
-        instance.add(Calendar.DAY_OF_MONTH, -7);
-        List<EventData> allEvents = eventManager.getAllEvents(defaultFolderId, from, until, true);
-        allEvents = getEventsByUid(allEvents, createdEvent.getUid()); // Filter by series uid
-        return allEvents;
     }
 }

@@ -56,6 +56,7 @@ import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.chronos.ical.ImportedCalendar;
 import com.openexchange.chronos.itip.ITipAnalysis;
 import com.openexchange.chronos.itip.ITipAnalyzer;
 import com.openexchange.chronos.itip.ITipAnalyzerService;
@@ -102,13 +103,16 @@ public class DefaultITipAnalyzerService implements ITipAnalyzerService {
 
     @Override
     public List<ITipAnalysis> analyze(InputStream ical, String format, CalendarSession session, Map<String, String> mailHeader) throws OXException {
-        ICal4JITipParser itipParser = new ICal4JITipParser();
+        return analyze(ICal4JITipParser.importCalendar(ical), format, session, mailHeader);
+    }
+
+    public List<ITipAnalysis> analyze(ImportedCalendar calendar, String format, CalendarSession session, Map<String, String> mailHeader) throws OXException {
         int owner = 0;
         if (mailHeader.containsKey("com.openexchange.conversion.owner")) {
             owner = Integer.parseInt(mailHeader.get("com.openexchange.conversion.owner"));
         }
 
-        List<ITipMessage> messages = itipParser.parseMessage(ical, owner, session);
+        List<ITipMessage> messages = ICal4JITipParser.parseMessage(calendar, owner, session);
 
         List<ITipAnalysis> result = new ArrayList<ITipAnalysis>(messages.size());
         for (ITipMessage message : messages) {

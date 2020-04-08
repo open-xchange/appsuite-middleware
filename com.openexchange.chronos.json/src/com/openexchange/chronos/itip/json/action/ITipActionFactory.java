@@ -67,13 +67,14 @@ import com.openexchange.server.ServiceLookup;
  */
 public class ITipActionFactory implements AJAXActionServiceFactory {
 
+    /** The <code>analyze</code> call path */
+    public static final String ANALYZE = "analyze";
+
     private final Map<String, AJAXActionService> actions;
 
     public ITipActionFactory(ServiceLookup services, RankingAwareNearRegistryServiceTracker<ITipAnalyzerService> analyzerListing, RankingAwareNearRegistryServiceTracker<ITipActionPerformerFactoryService> factoryListing) throws OXException {
         ImmutableMap.Builder<String, AJAXActionService> actions = ImmutableMap.builder();
-
-        actions.put("analyze", new AnalyzeAction(services, analyzerListing));
-
+        actions.put(ANALYZE, new AnalyzeAction(services, analyzerListing));
         ActionPerformerAction dingeMacherAction = new ActionPerformerAction(services, analyzerListing, factoryListing);
         for (String actionName : dingeMacherAction.getActionNames()) {
             actions.put(actionName, dingeMacherAction);

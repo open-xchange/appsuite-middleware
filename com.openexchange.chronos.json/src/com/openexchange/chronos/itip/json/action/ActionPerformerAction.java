@@ -49,26 +49,23 @@
 
 package com.openexchange.chronos.itip.json.action;
 
+import static com.openexchange.chronos.itip.json.action.Utils.initCalendarSession;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
-import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.itip.ITipAction;
 import com.openexchange.chronos.itip.ITipActionPerformer;
 import com.openexchange.chronos.itip.ITipActionPerformerFactoryService;
@@ -76,7 +73,6 @@ import com.openexchange.chronos.itip.ITipAnalysis;
 import com.openexchange.chronos.itip.ITipAnalyzerService;
 import com.openexchange.chronos.itip.ITipAttributes;
 import com.openexchange.chronos.itip.ITipChange;
-import com.openexchange.chronos.json.converter.mapper.EventMapper;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.Data;
@@ -89,7 +85,6 @@ import com.openexchange.java.Strings;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -112,36 +107,22 @@ public class ActionPerformerAction extends AbstractITipAction {
     protected AJAXRequestResult process(List<ITipAnalysis> analysis, AJAXRequestData request, ServerSession session, TimeZone tz) throws JSONException, OXException {
         ITipAnalysis analysisToProcess = analysis.get(0);
         ITipActionPerformerFactoryService factory = getFactory();
-        ITipAction action = ITipAction.valueOf(request.getParameter("action").toUpperCase());
+        ITipAction action = ITipAction.valueOf(request.getParameter("action", String.class).toUpperCase());
         ITipAttributes attributes = new ITipAttributes();
         if (request.containsParameter("message")) {
             String message = request.getParameter("message", String.class);
-            if (message != null && !message.trim().equals("")) {
+            if (!message.trim().equals("")) {
                 attributes.setConfirmationMessage(message);
             }
         }
         ITipActionPerformer performer = factory.getPerformer(action);
-        CalendarSession calendarSession = initCalendarSession(session);
+        CalendarSession calendarSession = initCalendarSession(services, session);
 
         // Parse for attachments
-        attach(request, analysisToProcess, session);
+        attach(request, analysisToProcess);
 
         List<Event> list = performer.perform(action, analysisToProcess, calendarSession, attributes);
-
-        if (list != null) {
-            JSONArray array = new JSONArray(list.size());
-            for (Event event : list) {
-                event = EventMapper.getInstance().copy(event, null, (EventField[]) null);
-                event.setFolderId(CalendarUtils.prependDefaultAccount(event.getFolderId()));
-                JSONObject object = EventMapper.getInstance().serialize(event, EventMapper.getInstance().getAssignedFields(event), tz, session);
-                array.put(object);
-            }
-            return new AJAXRequestResult(array, new Date(), "json");
-        }
-
-        JSONObject object = new JSONObject();
-        object.put("msg", "Done");
-        return new AJAXRequestResult(object, new Date(), "json");
+        return Utils.convertToResult(session, tz, list);
     }
 
     private static final EventField[] ATTACH = new EventField[] { EventField.ATTACHMENTS };
@@ -152,7 +133,7 @@ public class ActionPerformerAction extends AbstractITipAction {
      * @param analysisToProcess The analysis already made
      * @param session The {@link CalendarSession}
      */
-    private void attach(AJAXRequestData request, ITipAnalysis analysisToProcess, Session session) throws OXException {
+    private void attach(AJAXRequestData request, ITipAnalysis analysisToProcess) throws OXException {
         for (ITipChange change : analysisToProcess.getChanges()) {
             // Changed attachments? No diff means no original event, so we have a new event
             if (null == change.getDiff() || containsAttachmentChange(change)) {

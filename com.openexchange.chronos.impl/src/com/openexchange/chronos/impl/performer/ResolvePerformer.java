@@ -123,6 +123,19 @@ public class ResolvePerformer extends AbstractQueryPerformer {
      * @return The resolved event, or <code>null</code> if not found
      */
     public Event resolveById(String eventId, Integer sequence) throws OXException {
+        return resolveById(eventId, sequence, session.getUserId());
+    }
+    
+    /**
+     * Performs the resolve by id operation.
+     *
+     * @param eventId The identifier of the event to resolve
+     * @param sequence The expected sequence number to match, or <code>null</code> to resolve independently of the event's sequence number
+     * @param calendarUserId The identifier of the calendar user the unique identifier should be resolved for
+     * @return The resolved event, or <code>null</code> if not found
+     * @throws OXException In case permissions are missing
+     */
+    public Event resolveById(String eventId, Integer sequence, int calendarUserId) throws OXException {
         /*
          * load event data, check permissions & apply folder identifier
          */
@@ -130,7 +143,6 @@ public class ResolvePerformer extends AbstractQueryPerformer {
         if (null == event || null != sequence && i(sequence) != event.getSequence()) {
             return null;
         }
-        int calendarUserId = session.getUserId();
         event = storage.getUtilities().loadAdditionalEventData(calendarUserId, event, null);
         String folderId = CalendarUtils.getFolderView(event, calendarUserId);
         CalendarFolder folder = getFolder(session, folderId, false);

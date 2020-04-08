@@ -56,11 +56,16 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.function.Consumer;
+import com.openexchange.ajax.chronos.manager.EventManager;
 import com.openexchange.java.Strings;
 import com.openexchange.junit.Assert;
+import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.Analysis;
 import com.openexchange.testing.httpclient.models.Analysis.ActionsEnum;
 import com.openexchange.testing.httpclient.models.AnalyzeResponse;
@@ -152,6 +157,39 @@ public abstract class AbstractITipAnalyzeTest extends AbstractITipTest {
         return delta;
     }
 
+    /**
+     * Get all events of of a series
+     * <p>
+     * Note: The {@link #createdEvent} must be a series
+     *
+     * @return All events of the series
+     * @throws ApiException
+     */
+    protected List<EventData> getAllEventsOfCreatedEvent() throws ApiException {
+        return getAllEventsOfEvent(eventManager, createdEvent);
+    }
+
+    /**
+     * Get all events of of a series
+     * <p>
+     * Note: The {@link #createdEvent} must be a series
+     *
+     * @return All events of the series
+     * @throws ApiException
+     */
+    protected List<EventData> getAllEventsOfEvent(EventManager eventManager, EventData event) throws ApiException {
+        Calendar instance = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        instance.setTimeInMillis(System.currentTimeMillis());
+        instance.add(Calendar.DAY_OF_MONTH, -1);
+        Date from = instance.getTime();
+        instance.add(Calendar.DAY_OF_MONTH, 7);
+        Date until = instance.getTime();
+        instance.add(Calendar.DAY_OF_MONTH, -7);
+        List<EventData> allEvents = eventManager.getAllEvents(defaultFolderId, from, until, true);
+        allEvents = getEventsByUid(allEvents, event.getUid()); // Filter by series uid
+        return allEvents;
+    }
+
     protected void analyze(String mailId) throws Exception {
         analyze(mailId, CustomConsumers.UPDATE.getConsumer());
     }
@@ -184,6 +222,7 @@ public abstract class AbstractITipAnalyzeTest extends AbstractITipTest {
     }
 
     public enum CustomConsumers {
+
         /** Validates that the response does contain all actions */
         ALL((Analysis t) -> {
             assertTrue("Missing action!", t.getActions().contains(ActionsEnum.ACCEPT) || t.getActions().contains(ActionsEnum.ACCEPT_AND_IGNORE_CONFLICTS));
