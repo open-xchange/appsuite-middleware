@@ -51,6 +51,7 @@ package com.openexchange.threadpool.internal;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -78,6 +79,7 @@ import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.CorePoolSize.Behavior;
 import io.micrometer.core.instrument.Metrics;
 import io.micrometer.core.instrument.binder.jvm.ExecutorServiceMetrics;
+import io.micrometer.core.instrument.config.MeterFilter;
 
 /**
  * {@link ThreadPoolServiceImpl} - A thread pool backed by a {@link ThreadPoolExecutor} instance which is accessible via
@@ -216,7 +218,30 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
             threadPoolExecutor.setRejectedExecutionHandler(reh);
             threadPoolExecutor.setBlocking(blocking);
         }
+        //rename common executor metrics to "appsuite.*"
+        Metrics.globalRegistry.config().meterFilter(createPrefixFilter("appsuite."));
         new ExecutorServiceMetrics(threadPoolExecutor, "main", IterableUtils.emptyIterable()).bindTo(Metrics.globalRegistry);
+    }
+
+    /**
+     * Creates a prefix filter which will rename common executor metrics by prefixing the given value
+     *
+     * @return The prefix to add to the executor metrics
+     */
+    private static MeterFilter createPrefixFilter(String prefix) {
+        // @formatter:off
+        List<String> metricsToPrefix = Arrays.asList(
+            "executor.completed",
+            "executor.active",
+            "executor.queued",
+            "executor.queue.remaining",
+            "executor.pool.size",
+            "executor.steals",
+            "executor.queued",
+            "executor.active",
+            "executor.running");
+        // @formatter:on
+        return new PrefixFilter(prefix, metricsToPrefix);
     }
 
     private static int getCorePoolSize(CorePoolSize corePoolSize) {

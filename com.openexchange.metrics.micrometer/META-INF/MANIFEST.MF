@@ -23,7 +23,8 @@ Import-Package: com.openexchange.config.lean,
 Export-Package: 
  io.micrometer.core.instrument,
  io.micrometer.core.instrument.binder.jvm,
- io.micrometer.core.instrument.composite
+ io.micrometer.core.instrument.composite,
+ io.micrometer.core.instrument.config
 Bundle-ClassPath: .,
  lib/HdrHistogram-2.1.11.jar,
  lib/LatencyUtils-2.0.3.jar,
