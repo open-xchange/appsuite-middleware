@@ -70,6 +70,7 @@ import com.openexchange.ajax.chronos.itip.bugs.ReplyBugsTest;
     ITipSeriesTest.class,
     ITipSeriesExceptionTest.class,
     ITipOnBehalfTest.class,
+    ITipCancelTest.class
 })
 public class ITipTestSuite {
 

@@ -47,7 +47,11 @@ Please note that when an reply is processed it is possible that further mails wi
 The [ADD][D] method is implemented as recommended by the RFC.
 
 ## CANCEL
-The [CANCEL][E] method is implemented as recommended by the RFC.
+The [CANCEL][E] method is mostly implemented as recommended by the RFC.
+
+Please note that following conditions slightly differs from the RFC and must also be met before a CANCEL is applied:
+* The sequence number of the transmitted event is *equal* or [greater than][E] the sequence number of the event known by the server
+* The sender of the mail is the [organizer][E1] or someone acting *on behalf of the organizer*, announced by a set sent-by field in the corresponding organizer field
 
 ## REFRESH
 The [REFRESH][F] method is implemented as recommended by the RFC.
@@ -77,6 +81,7 @@ The [DECLINECOUNTER][H] method is implemented as recommended by the RFC.
 [C1]: https://tools.ietf.org/html/rfc5545#section-3.8.4.1
 [D]: https://tools.ietf.org/html/rfc5546#section-3.2.4
 [E]: https://tools.ietf.org/html/rfc5546#section-3.2.5
+[E1]: https://tools.ietf.org/html/rfc6047#section-2.2.1
 [F]: https://tools.ietf.org/html/rfc5546#section-3.2.6
 [G]: https://tools.ietf.org/html/rfc5546#section-3.2.7
 [H]: https://tools.ietf.org/html/rfc5546#section-3.2.7

@@ -88,6 +88,18 @@ public class SchedulingUtilitiesImpl implements SchedulingUtilities {
     }
 
     @Override
+    public CalendarResult processCancel(CalendarSession session, SchedulingSource source, IncomingSchedulingMessage message) throws OXException {
+        return postProcess(serviceLookup, new InternalCalendarStorageOperation<InternalCalendarResult>(session) {
+
+            @Override
+            protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
+                Event event = message.getResource().getFirstEvent();
+                return new CancelPerformer(storage, session, getCalendarFolder(session, storage, event.getUid(), event.getRecurrenceId(), message.getTargetUser())).perform(message);
+            }
+        }.executeUpdate()).getUserizedResult();
+    }
+
+    @Override
     public CalendarResult processReply(CalendarSession session, SchedulingSource source, IncomingSchedulingMessage message) throws OXException {
         return postProcess(serviceLookup, new InternalCalendarStorageOperation<InternalCalendarResult>(session) {
 
