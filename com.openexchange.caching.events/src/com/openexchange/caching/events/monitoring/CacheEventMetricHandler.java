@@ -50,6 +50,7 @@
 package com.openexchange.caching.events.monitoring;
 
 import java.util.concurrent.atomic.AtomicLong;
+import com.openexchange.java.Strings;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
 
@@ -61,10 +62,11 @@ import io.micrometer.core.instrument.Metrics;
  */
 public final class CacheEventMetricHandler implements CacheEventMonitor {
 
-    private static final String UNIT = "events";
     private static final String GROUP = "appsuite.cache.events";
     private static final String OFFERED = GROUP + ".offered";
     private static final String DELIVERED = GROUP + ".delivered";
+    private static final String TAG_REGION = "region";
+    private static final String ALL_REGION = "all";
 
     private final AtomicLong numOfferedEvents;
     private final AtomicLong numDeliveredEvents;
@@ -101,13 +103,20 @@ public final class CacheEventMetricHandler implements CacheEventMonitor {
         if (numOfferedEvents.incrementAndGet() < 0L) {
             numOfferedEvents.set(0L);
         }
+
+        if (Strings.isEmpty(region)) {
+            region = ALL_REGION;
+        }
+
         /*
          * increment overall and region-specific metrics
          */
-        Counter.builder(OFFERED).baseUnit(UNIT).description("Offered events for all cache regions").register(Metrics.globalRegistry).increment();
-        if (null != region) {
-            Counter.builder(OFFERED + "." + region).baseUnit(UNIT).description(String.format("Offered events for cache region \"{}\"", region)).register(Metrics.globalRegistry).increment();
-        }
+        //@formatter:off
+        Counter.builder(OFFERED)
+            .description("Offered events for cache regions")
+            .tag(TAG_REGION, region)
+            .register(Metrics.globalRegistry).increment();
+        //@formatter:on
     }
 
     /**
@@ -122,13 +131,21 @@ public final class CacheEventMetricHandler implements CacheEventMonitor {
         if (numDeliveredEvents.incrementAndGet() < 0L) {
             numDeliveredEvents.set(0L);
         }
+
+        if (Strings.isEmpty(region)) {
+            region = ALL_REGION;
+        }
+
         /*
          * increment overall and region-specific metrics
          */
-        Counter.builder(DELIVERED).baseUnit(UNIT).description("Delivered events for all cache regions").register(Metrics.globalRegistry).increment();
-        if (null != region) {
-            Counter.builder(DELIVERED + "." + region).baseUnit(UNIT).description(String.format("Delivered events for cache region \"{}\"", region)).register(Metrics.globalRegistry).increment();
-        }
+        //@formatter:off
+        Counter.builder(DELIVERED)
+            .description("Delivered events for cache regions")
+            .tag(TAG_REGION, region)
+            .register(Metrics.globalRegistry)
+            .increment();
+        //@formatter:on
     }
 
 }

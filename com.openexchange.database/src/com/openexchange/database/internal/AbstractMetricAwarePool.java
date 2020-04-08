@@ -71,34 +71,34 @@ import io.micrometer.core.instrument.Timer;
 public abstract class AbstractMetricAwarePool<T extends ConnectionTypeAware> extends AbstractConfigurationReloadAwareConnectionPool<T> {
 
     private static final String GROUP = "appsuite.mysql.connections.";
-    
-    private ConnectionType type;
+
+    private final ConnectionType type;
 
     private Counter timeout;
     private Timer createTimer;
     private Timer usage;
     private Timer acquireTimer;
-    
+
     /**
      * Initializes a new {@link AbstractMetricAwarePool}.
-     * 
+     *
      * @param poolId
      * @param data
      * @param urlConverter
      * @param connectionArgumentsConverter
      * @param poolConfigConverter
      */
-    protected AbstractMetricAwarePool(int poolId, 
-                                      T data, 
-                                      Function<T, String> urlConverter, 
-                                      Function<T, Properties> connectionArgumentsConverter, 
+    protected AbstractMetricAwarePool(int poolId,
+                                      T data,
+                                      Function<T, String> urlConverter,
+                                      Function<T, Properties> connectionArgumentsConverter,
                                       Function<T, PoolConfig> poolConfigConverter
                                       ) {
         super(poolId, data, urlConverter, connectionArgumentsConverter, poolConfigConverter);
         type = data.getConnectionType();
         initMetrics();
     }
-    
+
     /**
      * Initializes the metrics for this pool
      */
@@ -106,22 +106,18 @@ public abstract class AbstractMetricAwarePool<T extends ConnectionTypeAware> ext
         // @formatter:off
         Gauge.builder(GROUP + "active", () -> I(getNumActive()))
              .description("The currently active connections of this db pool")
-             .baseUnit("Connections")
              .tags("class", getPoolClass(), "type", type.getTagName(), "pool", String.valueOf(getPoolId()))
              .register(Metrics.globalRegistry);
         Gauge.builder(GROUP + "max", () -> I(getMaxActive()))
              .description("The maximum number of active connections of this db pool")
-             .baseUnit("Connections")
              .tags("class", getPoolClass(), "type", type.getTagName(), "pool", String.valueOf(getPoolId()))
              .register(Metrics.globalRegistry);
         Gauge.builder(GROUP + "total", () -> I(getNumActive() + getNumIdle()))
              .description("The total number of pooled connections of this db pool")
-             .baseUnit("Connections")
              .tags("class", getPoolClass(), "type", type.getTagName(), "pool", String.valueOf(getPoolId()))
              .register(Metrics.globalRegistry);
         Gauge.builder(GROUP + "idle", () -> I(getNumIdle()))
              .description("The number of idle connections of this db pool")
-             .baseUnit("Connections")
              .tags("class", getPoolClass(), "type", type.getTagName(), "pool", String.valueOf(getPoolId()))
              .register(Metrics.globalRegistry);
         createTimer = Timer.builder(GROUP + "create")
@@ -142,18 +138,18 @@ public abstract class AbstractMetricAwarePool<T extends ConnectionTypeAware> ext
                          .register(Metrics.globalRegistry);
         // @formatter:on
     }
-    
+
     @Override
     public Connection get() throws PoolingException {
         long start = System.nanoTime();
-        
+
         try {
             return new ConnectionWrapper(super.get());
         } finally {
             acquireTimer.record(Duration.ofNanos(System.nanoTime() - start));
         }
     }
-    
+
     @Override
     public Connection getWithoutTimeout() throws PoolingException {
         long start = System.nanoTime();
@@ -164,7 +160,7 @@ public abstract class AbstractMetricAwarePool<T extends ConnectionTypeAware> ext
             acquireTimer.record(Duration.ofNanos(System.nanoTime() - start));
         }
     }
-    
+
     @Override
     public void back(Connection pooled) throws PoolingException {
         if(pooled instanceof ConnectionWrapper) {
@@ -178,7 +174,7 @@ public abstract class AbstractMetricAwarePool<T extends ConnectionTypeAware> ext
             super.back(pooled);
         }
     }
-    
+
     /**
      * Tracks connections with timeouts
      *
@@ -189,7 +185,7 @@ public abstract class AbstractMetricAwarePool<T extends ConnectionTypeAware> ext
             timeout.increment();
         }
     }
-    
+
     @Override
     public void backWithoutTimeout(Connection pooled) {
         if(pooled instanceof ConnectionWrapper) {
@@ -203,7 +199,7 @@ public abstract class AbstractMetricAwarePool<T extends ConnectionTypeAware> ext
             super.backWithoutTimeout(pooled);
         }
     }
-    
+
     @Override
     protected Connection createPooledObject() throws Exception {
         long start = System.nanoTime();
@@ -213,14 +209,14 @@ public abstract class AbstractMetricAwarePool<T extends ConnectionTypeAware> ext
             createTimer.record(Duration.ofNanos(System.nanoTime() - start));
         }
     }
-    
+
     /**
      * Gets the pool class
      *
      * @return The name of the pool class
      */
     protected abstract String getPoolClass();
-    
+
     /**
      * Gets the {@link ConnectionType}
      *

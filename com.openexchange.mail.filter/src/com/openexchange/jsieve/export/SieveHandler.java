@@ -1920,13 +1920,13 @@ public class SieveHandler {
     // -------------------------------------------------------------------------------------------------------------------------------------
 
     /** The group name for mail filter metrics */
-    private static final String METRICS_GROUP = "mailfilter.";
+    private static final String METRICS_GROUP = "appsuite.mailfilter.";
 
     /** The name for request rate metric */
-    private static final String METRICS_REQUEST_RATE_NAME = "requestRate";
+    private static final String METRICS_REQUEST_RATE_NAME = "requests";
 
     /** The name for error rate metric */
-    private static final String METRICS_ERROR_RATE_NAME = "errorRate";
+    private static final String METRICS_ERROR_RATE_NAME = "errors";
 
     /** The key for server dimension */
     private static final String METRICS_DIMENSION_SERVER_KEY = "server";
@@ -1945,7 +1945,7 @@ public class SieveHandler {
 
             firstRead = true;
 
-            String serverInfo = new StringBuilder(sieveHandler.sieve_host).append('@').append(sieveHandler.sieve_host_port).toString();
+            String serverInfo = new StringBuilder(sieveHandler.sieve_host).append(':').append(sieveHandler.sieve_host_port).toString();
 
             requestTimer = Timer.builder(METRICS_GROUP+METRICS_REQUEST_RATE_NAME)
                                 .description("Overall mail filter requests per target server")

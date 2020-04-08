@@ -62,6 +62,7 @@ import static com.openexchange.metrics.circuitbreaker.MetricCircuitBreakerConsta
 import static com.openexchange.metrics.circuitbreaker.MetricCircuitBreakerConstants.METRICS_FAILURE_THRESHOLD_NAME;
 import static com.openexchange.metrics.circuitbreaker.MetricCircuitBreakerConstants.METRICS_GROUP;
 import static com.openexchange.metrics.circuitbreaker.MetricCircuitBreakerConstants.METRICS_STATUS_NAME;
+import static com.openexchange.metrics.circuitbreaker.MetricCircuitBreakerConstants.METRICS_STATUS_DESC;
 import static com.openexchange.metrics.circuitbreaker.MetricCircuitBreakerConstants.METRICS_SUCCESS_THRESHOLD_DESC;
 import static com.openexchange.metrics.circuitbreaker.MetricCircuitBreakerConstants.METRICS_SUCCESS_THRESHOLD_NAME;
 import static com.openexchange.metrics.circuitbreaker.MetricCircuitBreakerConstants.METRICS_TRIP_COUNT_DESC;
@@ -344,6 +345,7 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor extends Abst
     protected void initMetricsFor(String account, CircuitBreakerInfo info) {
         // @formatter:off
         Gauge.builder(METRICS_GROUP+METRICS_STATUS_NAME, () -> I(info.getCircuitBreaker().getState().ordinal()))
+            .description(METRICS_STATUS_DESC)
             .tags(METRICS_DIMENSION_PROTOCOL_KEY, METRICS_DIMENSION_PROTOCOL_VALUE, METRICS_DIMENSION_ACCOUNT_KEY, account,
                 METRICS_STATUS_NAME, info.getCircuitBreaker().getState().toString())
             .register(Metrics.globalRegistry);

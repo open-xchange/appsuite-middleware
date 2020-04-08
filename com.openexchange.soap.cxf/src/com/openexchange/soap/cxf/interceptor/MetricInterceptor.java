@@ -84,7 +84,7 @@ public class MetricInterceptor extends AbstractPhaseInterceptor<Message> {
             getTimer(service.getLocalPart(), operation.getLocalPart()).record(Duration.ofMillis(timing));
         }
     }
-    
+
     /**
      * Gets the timer for the given service and operation
      *
@@ -94,7 +94,7 @@ public class MetricInterceptor extends AbstractPhaseInterceptor<Message> {
      */
     private Timer getTimer(String service, String operation) {
         // @formatter:off
-        return Timer.builder("appsuite.soapapi.requests.timer").description("Records the timing of the soap calls.")
+        return Timer.builder("appsuite.soapapi.requests").description("Records the timing of the soap calls.")
                                   .tags("service", service, "operation", operation, "status", "OK")
                                   .register(Metrics.globalRegistry);
         // @formatter:on

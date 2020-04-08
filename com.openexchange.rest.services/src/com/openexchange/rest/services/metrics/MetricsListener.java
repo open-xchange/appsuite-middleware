@@ -74,8 +74,8 @@ import io.micrometer.core.instrument.Timer;
 @Provider
 public class MetricsListener implements ApplicationEventListener  {
 
-    private static final String NAME = "appsuite.restapi.requests.timer";
-    
+    private static final String NAME = "appsuite.restapi.requests";
+
     @Override
     public void onEvent(ApplicationEvent event) {
         // do nothing
@@ -85,30 +85,30 @@ public class MetricsListener implements ApplicationEventListener  {
     public RequestEventListener onRequest(RequestEvent requestEvent) {
         return new RequestListener(System.currentTimeMillis());
     }
-    
+
     /**
-     * 
+     *
      * {@link RequestListener}
      *
      * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
      * @since v7.10.4
      */
     private static class RequestListener implements RequestEventListener {
-        
+
         private static final String METHOD_NOT_ALLOWED = "METHOD_NOT_ALLOWED";
         private static final String INVALID = "INVALID";
         private final long start;
 
         /**
          * Initializes a new {@link MetricsListener.RequestListener}.
-         * 
+         *
          * @param startMillis The start time in milliseconds
          */
         public RequestListener(long startMillis) {
             super();
             this.start = startMillis;
         }
-        
+
         @Override
         public void onEvent(RequestEvent event) {
             Type type = event.getType();
@@ -141,7 +141,7 @@ public class MetricsListener implements ApplicationEventListener  {
                 getTimer(path, status.equals(Status.METHOD_NOT_ALLOWED) ? METHOD_NOT_ALLOWED : event.getContainerRequest().getMethod(), status.getStatusCode()).record(duration);
             }
         }
-        
+
         /**
          * Gets the timer with the given values
          *

@@ -1660,12 +1660,31 @@ public final class SessionHandler {
     }
 
     /**
+     * Gets the maximum number of sessions
+     *
+     * @return The maximum number of sessions
+     */
+    public static int getMaxNumberOfSessions() {
+        SessionData sessionData = SESSION_DATA_REF.get();
+        return null == sessionData ? 0 : sessionData.getMaxSessions();
+    }
+
+    /**
      * Gets the total number of sessions
      *
      * @return The total number of sessions
      */
     public static int getMetricTotalSessions() {
         return getNumberOfActiveSessions();
+    }
+
+    /**
+     * Gets the maximum number of sessions allowed
+     *
+     * @return The max. number of sessions
+     */
+    public static int getMetricMaxSession() {
+        return getMaxNumberOfSessions();
     }
 
     /**

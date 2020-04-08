@@ -69,7 +69,7 @@ public final class ConfigDatabaseLifeCycle implements PoolLifeCycle {
     ConfigDatabaseLifeCycle(final Configuration configuration, final Management management, final Timer timer, ConnectionReloaderImpl reloader) {
         super();
 
-        configDBWrite = new ConfigPoolAdapter(Constants.CONFIGDB_WRITE_ID, new ConnectionTypeAwareConfigurationWrapper(ConnectionType.WRITABLE, configuration), 
+        configDBWrite = new ConfigPoolAdapter(Constants.CONFIGDB_WRITE_ID, new ConnectionTypeAwareConfigurationWrapper(ConnectionType.WRITABLE, configuration),
             (c) -> c.getConfig().getWriteUrl(),
             (c) -> c.getConfig().getConfigDbWriteProps(),
             (c) -> c.getConfig().getPoolConfig());
@@ -112,7 +112,7 @@ public final class ConfigDatabaseLifeCycle implements PoolLifeCycle {
 
         /**
          * Initializes a new {@link ConfigPoolAdapter}.
-         * 
+         *
          * @param poolId The pool id
          * @param configuration A {@link ConnectionTypeAwareConfigurationWrapper} containing the configuration and the {@link ConnectionType}
          * @param toUrl A function for getting the url
@@ -135,7 +135,7 @@ public final class ConfigDatabaseLifeCycle implements PoolLifeCycle {
 
         @Override
         protected String getPoolClass() {
-            return "ConfigDB";
+            return "configdb";
         }
     }
 }

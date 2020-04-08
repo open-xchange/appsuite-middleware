@@ -197,17 +197,17 @@ public class MonitoringCommandExecutor extends AbstractMetricAwareCommandExecuto
     private static final String METRICS_GROUP = "appsuite.imap.";
 
     /** The name for request rate metric */
-    private static final String METRICS_REQUEST_RATE_NAME = "requestRate";
+    private static final String METRICS_REQUEST_RATE_NAME = "requests";
 
     /** The name for error rate metric */
-    private static final String METRICS_ERROR_RATE_NAME = "errorRate";
+    private static final String METRICS_ERROR_RATE_NAME = "errors";
 
     /** The key for server dimension */
     private static final String METRICS_DIMENSION_SERVER_KEY = "server";
 
 
     private static MetricsHelper initMetrics(Protocol protocol) {
-        String serverInfo = new StringBuilder(protocol.getHost()).append('@').append(protocol.getPort()).toString();
+        String serverInfo = new StringBuilder(protocol.getHost()).append(':').append(protocol.getPort()).toString();
 
         Timer requestTimer = Timer.builder(METRICS_GROUP+METRICS_REQUEST_RATE_NAME)
             .description("Overall mail filter requests per target server")

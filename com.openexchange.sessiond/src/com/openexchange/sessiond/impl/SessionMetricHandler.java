@@ -64,20 +64,23 @@ import io.micrometer.core.instrument.Metrics;
  */
 public final class SessionMetricHandler {
 
-    private static final String SESSIONS = "sessions";
-    private static final String GROUP = "appsuite.sessiond.";
+    private static final String GROUP = "appsuite.sessions.";
 
-    private static final String COUNT_TOTAL = "TotalCount";
+    private static final String COUNT_TOTAL = "total.count";
     private static final String COUNT_TOTAL_DESC = "The number of total sessions";
 
-    private static final String COUNT_LONG = "LongTermCount";
+    private static final String COUNT_LONG = "long.term.count";
     private static final String COUNT_LONG_DESC = "The number of sessions in the long term containers";
 
-    private static final String COUNT_SHORT = "ShortTermCount";
+    private static final String COUNT_SHORT = "short.term.count";
     private static final String COUNT_SHORT_DESC = "The number of sessions in the short term containers";
 
-    private static final String COUNT_ACTIVE = "ActiveCount";
+    private static final String COUNT_ACTIVE = "active.count";
     private static final String COUNT_ACTIVE_DESC = "The number of active sessions or in other words the number of sessions within the first two short term containers.";
+
+    private static final String COUNT_MAX = "max.count";
+    private static final String COUNT_MAX_DESC = "The maximum number of sessions for this node.";
+
 
     private static final List<Gauge> METERS = new ArrayList<>(4);
 
@@ -90,24 +93,30 @@ public final class SessionMetricHandler {
     public static void init() {
         // @formatter:off
         METERS.add(Gauge.builder(GROUP+COUNT_TOTAL, () -> I(SessionHandler.getMetricTotalSessions()))
-                          .baseUnit(SESSIONS).description(COUNT_TOTAL_DESC)
+                          .description(COUNT_TOTAL_DESC)
                           .tags(CLIENT_DIMENSION_KEY, CLIENT_DIMENSION_VALUE)
                           .register(Metrics.globalRegistry));
 
         METERS.add(Gauge.builder(GROUP+COUNT_LONG, () -> I(SessionHandler.getMetricLongSessions()))
-            .baseUnit(SESSIONS).description(COUNT_LONG_DESC)
+            .description(COUNT_LONG_DESC)
             .tags(CLIENT_DIMENSION_KEY, CLIENT_DIMENSION_VALUE)
             .register(Metrics.globalRegistry));
 
         METERS.add(Gauge.builder(GROUP+COUNT_SHORT, () -> I(SessionHandler.getMetricShortSessions()))
-            .baseUnit(SESSIONS).description(COUNT_SHORT_DESC)
+            .description(COUNT_SHORT_DESC)
             .tags(CLIENT_DIMENSION_KEY, CLIENT_DIMENSION_VALUE)
             .register(Metrics.globalRegistry));
 
         METERS.add(Gauge.builder(GROUP+COUNT_ACTIVE, () -> I(SessionHandler.getMetricActiveSessions()))
-            .baseUnit(SESSIONS).description(COUNT_ACTIVE_DESC)
+            .description(COUNT_ACTIVE_DESC)
             .tags(CLIENT_DIMENSION_KEY, CLIENT_DIMENSION_VALUE)
             .register(Metrics.globalRegistry));
+
+        METERS.add(Gauge.builder(GROUP+COUNT_MAX, () -> I(SessionHandler.getMaxNumberOfSessions()))
+            .description(COUNT_MAX_DESC)
+            .tags(CLIENT_DIMENSION_KEY, CLIENT_DIMENSION_VALUE)
+            .register(Metrics.globalRegistry));
+
         // @formatter:on
     }
 
