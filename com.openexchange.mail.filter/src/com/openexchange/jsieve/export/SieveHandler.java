@@ -1949,6 +1949,7 @@ public class SieveHandler {
 
             requestTimer = Timer.builder(METRICS_GROUP+METRICS_REQUEST_RATE_NAME)
                                 .description("Overall mail filter requests per target server")
+                                .publishPercentileHistogram()
                                 .tags(METRICS_DIMENSION_SERVER_KEY, serverInfo)
                                 .register(Metrics.globalRegistry);
 

@@ -213,7 +213,7 @@ public class DAVServlet extends OXServlet {
             recordMetric(Duration.ofMillis(System.currentTimeMillis() - start), method == null ? "INVALID": method.name(), response.getStatus());
         }
     }
-    
+
     /**
      * Records the duration
      *
@@ -230,10 +230,11 @@ public class DAVServlet extends OXServlet {
             res = res.substring(0, res.length() - 1);
         }
         String status = HttpStatusFamily.SUCCESSFUL.equals(HttpStatusFamily.of(statusCode)) ? "OK" : String.valueOf(statusCode);
-        
+
         // @formatter:off
         Timer.builder("appsuite.webdav.requests")
              .description("Records the timing of webdav requests")
+             .publishPercentileHistogram()
              .tags("interface", interfaze.name(), "resource", res, "method", method, "status", status)
              .register(Metrics.globalRegistry).record(duration);
         // @formatter:on

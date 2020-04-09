@@ -155,6 +155,7 @@ public class MetricsListener implements ApplicationEventListener  {
             return Timer.builder(NAME)
                         .tags("path", path, "method", method, "status", String.valueOf(status))
                         .description("Records the duration of rest calls.")
+                        .publishPercentileHistogram()
                         .register(Metrics.globalRegistry);
             // @formatter:on
         }

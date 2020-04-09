@@ -171,7 +171,7 @@ public class Infostore extends OXServlet {
             recordMetric(Duration.ofNanos(System.nanoTime() - start), req.getMethod(), resp.getStatus());
         }
     }
-    
+
     /**
      * Records the duration
      *
@@ -181,10 +181,11 @@ public class Infostore extends OXServlet {
      */
     private void recordMetric(Duration duration, String method, int statusCode) {
         String status = HttpStatusFamily.SUCCESSFUL.equals(HttpStatusFamily.of(statusCode)) ? "OK" : String.valueOf(statusCode);
-        
+
         // @formatter:off
         Timer.builder("appsuite.webdav.requests")
              .description("Records the timing of webdav requests")
+             .publishPercentileHistogram()
              .tags("interface", "infostore", "resource", "webdav/infostore", "method", method, "status", status)
              .register(Metrics.globalRegistry).record(duration);
         // @formatter:on

@@ -94,9 +94,11 @@ public class MetricInterceptor extends AbstractPhaseInterceptor<Message> {
      */
     private Timer getTimer(String service, String operation) {
         // @formatter:off
-        return Timer.builder("appsuite.soapapi.requests").description("Records the timing of the soap calls.")
-                                  .tags("service", service, "operation", operation, "status", "OK")
-                                  .register(Metrics.globalRegistry);
+        return Timer.builder("appsuite.soapapi.requests")
+            .description("Records the timing of the soap calls.")
+            .publishPercentileHistogram()
+            .tags("service", service, "operation", operation, "status", "OK")
+            .register(Metrics.globalRegistry);
         // @formatter:on
     }
 
