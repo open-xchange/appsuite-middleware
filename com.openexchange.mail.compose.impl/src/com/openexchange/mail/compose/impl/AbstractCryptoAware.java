@@ -129,7 +129,7 @@ public abstract class AbstractCryptoAware {
      * Currently encryption is needed for session-associated user when
      * <ul>
      * <li>Property "com.openexchange.mail.compose.security.encryptionEnabled" is set to "true" (default)</li>
-     * <li>Capability "guard" is available</li>
+     * <li>Capability "guard" is available (also set via configuration; see <a href="https://www.oxpedia.org/wiki/index.php?title=AppSuite:OX_Guard#Open-Xchange_Middleware_Configuration">here</a>)</li>
      * </ul>
      *
      * @param session The session
