@@ -63,6 +63,7 @@ import com.openexchange.java.Strings;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.4
  */
+@SuppressWarnings("unused")
 public class BasicAuthHttpContext implements HttpContext {
 
     private static final String AUTH_HEADER = "Authorization";
@@ -115,7 +116,7 @@ public class BasicAuthHttpContext implements HttpContext {
                 return false;
             }
             return creds[0].equals(this.login) && creds[1].equals(this.password);
-        } catch (@SuppressWarnings("unused") IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             return false;
         }
     }
@@ -129,9 +130,5 @@ public class BasicAuthHttpContext implements HttpContext {
     public String getMimeType(String name) {
         return null;
     }
-
-
-
-
 
 }

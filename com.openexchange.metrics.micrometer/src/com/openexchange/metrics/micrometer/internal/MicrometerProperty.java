@@ -58,6 +58,7 @@ import com.openexchange.config.lean.Property;
  * @since v7.10.4
  */
 public enum MicrometerProperty implements Property {
+
     /**
      * The basic-auth login name
      */
@@ -78,5 +79,4 @@ public enum MicrometerProperty implements Property {
     public Object getDefaultValue() {
         return null;
     }
-
 }

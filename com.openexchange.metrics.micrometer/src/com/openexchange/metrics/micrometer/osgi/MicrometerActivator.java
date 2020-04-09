@@ -54,6 +54,7 @@ import org.osgi.service.http.HttpService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.config.lean.LeanConfigurationService;
+import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.metrics.micrometer.internal.BasicAuthHttpContext;
 import com.openexchange.metrics.micrometer.internal.MicrometerProperty;
@@ -72,6 +73,8 @@ import io.prometheus.client.hotspot.DefaultExports;
  */
 public class MicrometerActivator extends HousekeepingActivator {
 
+    private static final String SERVLET_BIND_POINT = "/metrics";
+
     private static final Logger LOG = LoggerFactory.getLogger(MicrometerActivator.class);
 
     @Override
@@ -81,20 +84,34 @@ public class MicrometerActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        HttpService httpService = getServiceSafe(HttpService.class);
         PrometheusMeterRegistry prometheusRegistry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
         Metrics.addRegistry(prometheusRegistry);
         DefaultExports.register(prometheusRegistry.getPrometheusRegistry());
 
-        LeanConfigurationService lean = getServiceSafe(LeanConfigurationService.class);
-        String login = lean.getProperty(MicrometerProperty.LOGIN);
-        String password = lean.getProperty(MicrometerProperty.PASSWORD);
-        HttpContext ctx = null;
-        if(Strings.isNotEmpty(login) && Strings.isNotEmpty(password)) {
-            ctx = new BasicAuthHttpContext(login, password);
-        }
-        httpService.registerServlet("/metrics", new MetricsServlet(prometheusRegistry.getPrometheusRegistry()), null, ctx);
+        HttpService httpService = getServiceSafe(HttpService.class);
+        httpService.registerServlet(SERVLET_BIND_POINT, new MetricsServlet(prometheusRegistry.getPrometheusRegistry()), null, withHttpContext());
         LOG.info("Bundle {} successfully started", this.context.getBundle().getSymbolicName());
     }
 
+    @Override
+    protected void stopBundle() throws Exception {
+        HttpService httpService = getServiceSafe(HttpService.class);
+        httpService.unregister(SERVLET_BIND_POINT);
+        LOG.info("Bundle {} successfully stopped", this.context.getBundle().getSymbolicName());
+    }
+
+    /**
+     * Creates a {@link BasicAuthHttpContext} if the login and password properties are set,
+     * otherwise returns <code>null</code>.
+     *
+     * @return The {@link BasicAuthHttpContext} if the login and password properties are set,
+     *         otherwise returns <code>null</code>.
+     * @throws OXException if an error is occurred
+     */
+    private HttpContext withHttpContext() throws OXException {
+        LeanConfigurationService lean = getServiceSafe(LeanConfigurationService.class);
+        String login = lean.getProperty(MicrometerProperty.LOGIN);
+        String password = lean.getProperty(MicrometerProperty.PASSWORD);
+        return (Strings.isNotEmpty(login) && Strings.isNotEmpty(password)) ? new BasicAuthHttpContext(login, password) : null;
+    }
 }
