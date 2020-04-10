@@ -226,15 +226,17 @@ public class CryptoCompositionSpaceStorageService extends AbstractCryptoAware im
 
         MessageDescription messageDesc = compositionSpaceDesc.getMessage();
 
-        if (messageDesc.containsContent()) {
-            String content = messageDesc.getContent();
-            if (null != content) {
-                messageDesc.setContent(encrypt(content, optionalKey.get(), services.getService(CryptoService.class)));
+        if (messageDesc != null) {
+            if (messageDesc.containsContent()) {
+                String content = messageDesc.getContent();
+                if (null != content) {
+                    messageDesc.setContent(encrypt(content, optionalKey.get(), services.getService(CryptoService.class)));
+                }
             }
-        }
 
-        // Mark to have encrypted content
-        messageDesc.setContentEncrypted(true);
+            // Mark to have encrypted content
+            messageDesc.setContentEncrypted(true);
+        }
     }
 
     @Override
