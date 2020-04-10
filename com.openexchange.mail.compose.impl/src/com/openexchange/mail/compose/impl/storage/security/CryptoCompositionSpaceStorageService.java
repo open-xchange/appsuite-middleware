@@ -301,7 +301,10 @@ public class CryptoCompositionSpaceStorageService extends AbstractCryptoAware im
         CompositionSpace originalSpace = optionalOriginalSpace.isPresent() ? optionalOriginalSpace.get() : getCompositionSpace(session, compositionSpaceDesc.getUuid());
         if (!hasEncryptedContent(originalSpace)) {
             // Mark to have NO encrypted content
-            compositionSpaceDesc.getMessage().setContentEncrypted(false);
+            MessageDescription message = compositionSpaceDesc.getMessage();
+            if (message != null) {
+                message.setContentEncrypted(false);
+            }
             return delegate.updateCompositionSpace(session, compositionSpaceDesc, Optional.of(originalSpace));
         }
 
