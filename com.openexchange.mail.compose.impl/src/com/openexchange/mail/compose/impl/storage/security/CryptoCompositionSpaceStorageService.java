@@ -278,7 +278,10 @@ public class CryptoCompositionSpaceStorageService extends AbstractCryptoAware im
 
         if (!encrypt) {
             // Mark to have NO encrypted content
-            compositionSpaceDesc.getMessage().setContentEncrypted(false);
+            MessageDescription message = compositionSpaceDesc.getMessage();
+            if (message != null) {
+                message.setContentEncrypted(false);
+            }
             CompositionSpace compositionSpace = delegate.openCompositionSpace(session, compositionSpaceDesc, Optional.empty());
             LoggerHolder.LOG.debug("Opened composition space {}: encrypted=false", UUIDs.getUnformattedString(compositionSpace.getId()));
             return compositionSpace;
