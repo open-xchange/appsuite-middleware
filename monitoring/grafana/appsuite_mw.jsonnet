@@ -9,6 +9,7 @@ local table = grafana.tablePanel;
 local template = grafana.template;
 
 local dbPoolName = 'dbpool';
+local davInterfaceName = 'davinterface';
 
 local overviewTotalSessions = singlestat.new(
   title='Total Sessions',
@@ -254,57 +255,84 @@ local httpApiRequestsPerSecond = graphPanel.new(
   ]
 );
 
-local restApiRequestsByMethod = graphPanel.new(
-  title='Average Response Time (group by method)',
+local restApiRequestsPerSecond = graphPanel.new(
+  title='Requests (per-second)',
   description='',
   datasource='Prometheus',
+  //decimals=0,
+  aliasColors={
+    KO: 'dark-red',
+    OK: 'dark-green',
+    Total: 'dark-yellow',
+  },
+  nullPointMode='null as zero',
   fill=2,
   linewidth=2,
-  nullPointMode='null as zero',
   min='0',
-  format='s',
-  aliasColors={
-    max: 'dark-red',
-  },
+  format='cps',
+  labelY1='Counts/s',
 ).addTargets(
   [
     prometheus.target(
-      'sum(rate(appsuite_restapi_requests_seconds_sum{instance=~"$instance"}[$interval]) / rate(appsuite_restapi_requests_seconds_count{instance=~"$instance"}[$interval])) by (method)',
-      legendFormat='{{method}}'
+      'sum(rate(appsuite_restapi_requests_seconds_count{instance=~"$instance"}[$interval]))',
+      legendFormat='Total'
     ),
     prometheus.target(
-      'sum(appsuite_restapi_requests_seconds_max{instance=~"$instance"})',
-      legendFormat='max'
+      'sum(rate(appsuite_restapi_requests_seconds_count{status=~"([45][0-9][0-9])",instance=~"$instance"}[$interval]))',
+      legendFormat='OK'
+    ),
+    prometheus.target(
+      'sum(rate(appsuite_restapi_requests_seconds_count{status!~"([45][0-9][0-9])",instance=~"$instance"}[$interval]))',
+      legendFormat='KO'
     ),
   ]
-).addSeriesOverride(
-  {
-    alias: 'max',
-    fill: 0,
-  },
 );
 
-local restApiRequestsByStatus = graphPanel.new(
-  title='Average Response Time (group by status)',
-  description='',
+local restApiResponsePercentiles = graphPanel.new(
+  title='Response Time Percentiles',
+  description='REST API response time percentiles.',
   datasource='Prometheus',
-  fill=2,
-  linewidth=2,
-  nullPointMode='null as zero',
-  min='0',
-  format='s',
   aliasColors={
     max: 'dark-red',
   },
+  fill=2,
+  linewidth=2,
+  labelY1='Response Time',
+  min='0',
+  format='s',
 ).addTargets(
   [
     prometheus.target(
-      'sum(rate(appsuite_restapi_requests_seconds_sum{instance=~"$instance"}[$interval]) / rate(appsuite_restapi_requests_seconds_count{instance=~"$instance"}[$interval])) by (status)',
-      legendFormat='{{status}}'
+      'histogram_quantile(0.5, sum(rate(appsuite_restapi_requests_seconds_bucket{instance=~"$instance"}[$interval])) by (le, instance))',
+      legendFormat='p50',
+    ),
+    prometheus.target(
+      'histogram_quantile(0.75, sum(rate(appsuite_restapi_requests_seconds_bucket{instance=~"$instance"}[$interval])) by (le, instance))',
+      legendFormat='p75',
+    ),
+    prometheus.target(
+      'histogram_quantile(0.9, sum(rate(appsuite_restapi_requests_seconds_bucket{instance=~"$instance"}[$interval])) by (le, instance))',
+      legendFormat='p90',
+    ),
+    prometheus.target(
+      'histogram_quantile(0.95, sum(rate(appsuite_restapi_requests_seconds_bucket{instance=~"$instance"}[$interval])) by (le, instance))',
+      legendFormat='p95',
+    ),
+    prometheus.target(
+      'histogram_quantile(0.99, sum(rate(appsuite_restapi_requests_seconds_bucket{instance=~"$instance"}[$interval])) by (le, instance))',
+      legendFormat='p99',
+    ),
+    prometheus.target(
+      'histogram_quantile(0.999, sum(rate(appsuite_restapi_requests_seconds_bucket{instance=~"$instance"}[$interval])) by (le, instance))',
+      legendFormat='p999',
+    ),
+    prometheus.target(
+      'sum(rate(appsuite_restapi_requests_seconds_sum{instance=~"$instance"}[$interval]))/sum(rate(appsuite_restapi_requests_seconds_count{instance=~"$instance"}[$interval]))',
+      legendFormat='avg',
     ),
     prometheus.target(
       'sum(appsuite_restapi_requests_seconds_max{instance=~"$instance"})',
-      legendFormat='max'
+      legendFormat='max',
     ),
   ]
 ).addSeriesOverride(
@@ -381,139 +409,170 @@ local circuitBreakerIMAPStatus = table.new(
   )
 );
 
-local soapApiRequestsByOperation = graphPanel.new(
-  title='Average Response Time (group by operation)',
-  description='',
+local soapApiResponsePercentiles = graphPanel.new(
+  title='Response Time Percentiles',
   datasource='Prometheus',
+  description='',
+  aliasColors={
+    max: 'dark-red',
+  },
   fill=2,
   linewidth=2,
-  nullPointMode='null as zero',
   min='0',
-  format='s'
-).addTarget(
-  prometheus.target(
-    'sum(rate(appsuite_soapapi_requests_seconds_sum{instance=~"$instance"}[$interval]) / rate(appsuite_soapapi_requests_seconds_count{instance=~"$instance"}[$interval])) by (operation)',
-    legendFormat='{{operation}}'
-  )
+  format='s',
+  labelY1='Response Time',
+).addTargets(
+  [
+    prometheus.target(
+      'histogram_quantile(0.5, sum(rate(appsuite_soapapi_requests_seconds_bucket{instance=~"$instance"}[$interval])) by (le, instance))',
+      legendFormat='p50',
+    ),
+    prometheus.target(
+      'histogram_quantile(0.75, sum(rate(appsuite_soapapi_requests_seconds_bucket{instance=~"$instance"}[$interval])) by (le, instance))',
+      legendFormat='p75',
+    ),
+    prometheus.target(
+      'histogram_quantile(0.9, sum(rate(appsuite_soapapi_requests_seconds_bucket{instance=~"$instance"}[$interval])) by (le, instance))',
+      legendFormat='p90',
+    ),
+    prometheus.target(
+      'histogram_quantile(0.95, sum(rate(appsuite_soapapi_requests_seconds_bucket{instance=~"$instance"}[$interval])) by (le, instance))',
+      legendFormat='p95',
+    ),
+    prometheus.target(
+      'histogram_quantile(0.99, sum(rate(appsuite_soapapi_requests_seconds_bucket{instance=~"$instance"}[$interval])) by (le, instance))',
+      legendFormat='p99',
+    ),
+    prometheus.target(
+      'histogram_quantile(0.999, sum(rate(appsuite_soapapi_requests_seconds_bucket{instance=~"$instance"}[$interval])) by (le, instance))',
+      legendFormat='p999',
+    ),
+    prometheus.target(
+      'sum(rate(appsuite_soapapi_requests_seconds_sum{instance=~"$instance"}[$interval]))/sum(rate(appsuite_webdav_requests_seconds_count{instance=~"$instance"}[$interval]))',
+      legendFormat='avg',
+    ),
+    prometheus.target(
+      'sum(appsuite_soapapi_requests_seconds_max{instance=~"$instance"})',
+      legendFormat='max',
+    ),
+  ]
 );
 
-local soapApiRequestsByService = graphPanel.new(
-  title='Average Response Time (group by service)',
+local soapApiRequestsPerSecond = graphPanel.new(
+  title='Requests (per-second)',
   description='',
   datasource='Prometheus',
+  //decimals=0,
+  aliasColors={
+    KO: 'dark-red',
+    OK: 'dark-green',
+    Total: 'dark-yellow',
+  },
+  nullPointMode='null as zero',
   fill=2,
   linewidth=2,
-  nullPointMode='null as zero',
   min='0',
-  format='s'
-).addTarget(
-  prometheus.target(
-    'sum(rate(appsuite_soapapi_requests_seconds_sum{instance=~"$instance"}[$interval]) / rate(appsuite_soapapi_requests_seconds_count{instance=~"$instance"}[$interval])) by (service)',
-    legendFormat='{{service}}'
-  )
+  format='cps',
+  labelY1='Counts/s',
+).addTargets(
+  [
+    prometheus.target(
+      'sum(rate(appsuite_soapapi_requests_seconds_count{instance=~"$instance"}[$interval]))',
+      legendFormat='Total'
+    ),
+    prometheus.target(
+      'sum(rate(appsuite_soapapi_requests_seconds_count{status=~"([45][0-9][0-9]|OK|0)",instance=~"$instance"}[$interval]))',
+      legendFormat='OK'
+    ),
+    prometheus.target(
+      'sum(rate(appsuite_soapapi_requests_seconds_count{status!~"([45][0-9][0-9]|OK|0)",instance=~"$instance"}[$interval]))',
+      legendFormat='KO'
+    ),
+  ]
 );
 
-local webdavApiRequestsOK = singlestat.new(
-  title='OKs',
-  description='Successful WebDAV API Requests.',
+local webdavApiResponsePercentiles = graphPanel.new(
+  title='Response Time Percentiles $davinterface',
   datasource='Prometheus',
-  decimals=0,
-  valueName='avg',
-  valueMaps=[
-    {
-      op: '=',
-      text: '0',
-      value: 'null',
-    },
-  ],
-  colorValue=true,
-  sparklineShow=true
-).addTarget(
-  prometheus.target(
-    'sum(increase(appsuite_webdav_requests_seconds_count{status=~"OK|0", instance=~"$instance"}[$interval]))',
-    legendFormat='OKs'
-  )
+  description='',
+  aliasColors={
+    max: 'dark-red',
+  },
+  fill=2,
+  linewidth=2,
+  min='0',
+  format='s',
+  labelY1='Response Time',
+  repeat=davInterfaceName,
+  repeatDirection='h',
+).addTargets(
+  [
+    prometheus.target(
+      'histogram_quantile(0.5, sum(rate(appsuite_webdav_requests_seconds_bucket{instance=~"$instance",interface="$' + davInterfaceName + '"}[$interval])) by (le, interface, instance))',
+      legendFormat='p50',
+    ),
+    prometheus.target(
+      'histogram_quantile(0.75, sum(rate(appsuite_webdav_requests_seconds_bucket{instance=~"$instance",interface="$' + davInterfaceName + '"}[$interval])) by (le, interface, instance))',
+      legendFormat='p75',
+    ),
+    prometheus.target(
+      'histogram_quantile(0.9, sum(rate(appsuite_webdav_requests_seconds_bucket{instance=~"$instance",interface="$' + davInterfaceName + '"}[$interval])) by (le, interface, instance))',
+      legendFormat='p90',
+    ),
+    prometheus.target(
+      'histogram_quantile(0.95, sum(rate(appsuite_webdav_requests_seconds_bucket{instance=~"$instance",interface="$' + davInterfaceName + '"}[$interval])) by (le, interface, instance))',
+      legendFormat='p95',
+    ),
+    prometheus.target(
+      'histogram_quantile(0.99, sum(rate(appsuite_webdav_requests_seconds_bucket{instance=~"$instance",interface="$' + davInterfaceName + '"}[$interval])) by (le, interface, instance))',
+      legendFormat='p99',
+    ),
+    prometheus.target(
+      'histogram_quantile(0.999, sum(rate(appsuite_webdav_requests_seconds_bucket{instance=~"$instance",interface="$' + davInterfaceName + '"}[$interval])) by (le, interface, instance))',
+      legendFormat='p999',
+    ),
+    prometheus.target(
+      'sum(rate(appsuite_webdav_requests_seconds_sum{instance=~"$instance",interface="$' + davInterfaceName + '"}[$interval]))/sum(rate(appsuite_webdav_requests_seconds_count{instance=~"$instance",interface="$' + davInterfaceName + '"}[$interval]))',
+      legendFormat='avg',
+    ),
+    prometheus.target(
+      'sum(appsuite_webdav_requests_seconds_max{instance=~"$instance",interface="$' + davInterfaceName + '"})',
+      legendFormat='max',
+    ),
+  ]
 );
 
-local webdavApiRequestsKO = singlestat.new(
-  title='KOs',
-  description='Failed WebDAV API Requests.',
-  datasource='Prometheus',
-  decimals=0,
-  valueName='avg',
-  valueMaps=[
-    {
-      op: '=',
-      text: '0',
-      value: 'null',
-    },
-  ],
-  colorValue=true,
-  colors=[
-    '#d44a3a',
-    'rgba(237, 129, 40, 0.89)',
-    '#299c46',
-  ],
-  sparklineShow=true
-).addTarget(
-  prometheus.target(
-    'sum(increase(appsuite_webdav_requests_seconds_count{status!~"OK|0", instance=~"$instance"}[$interval]))',
-    legendFormat='KOs'
-  )
-);
-
-local webdavApiRequestsTotal = singlestat.new(
-  title='Total',
-  description='The total number of WebDAV API Requests.',
-  datasource='Prometheus',
-  decimals=0,
-  valueName='avg',
-  valueMaps=[
-    {
-      op: '=',
-      text: '0',
-      value: 'null',
-    },
-  ],
-  sparklineShow=true
-).addTarget(
-  prometheus.target(
-    'sum(increase(appsuite_webdav_requests_seconds_count{instance=~"$instance"}[$interval]))',
-    legendFormat='Total'
-  )
-);
-
-
-local webdavApiRequestsByInterface = graphPanel.new(
-  title='Average Response Time (group by interface)',
+local webdavApiRequestsPerSecond = graphPanel.new(
+  title='Requests (per-second)',
   description='',
   datasource='Prometheus',
+  //decimals=0,
+  aliasColors={
+    KO: 'dark-red',
+    OK: 'dark-green',
+    Total: 'dark-yellow',
+  },
+  nullPointMode='null as zero',
   fill=2,
   linewidth=2,
-  nullPointMode='null as zero',
   min='0',
-  format='s'
-).addTarget(
-  prometheus.target(
-    'sum(rate(appsuite_webdav_requests_seconds_sum{instance=~"$instance"}[$interval]) / rate(appsuite_webdav_requests_seconds_count{instance=~"$instance"}[$interval])) by (interface)',
-    legendFormat='{{interface}}'
-  )
-);
-
-local webdavApiRequestsByMethod = graphPanel.new(
-  title='Average Response Time (group by method)',
-  description='',
-  datasource='Prometheus',
-  fill=2,
-  linewidth=2,
-  nullPointMode='null as zero',
-  min='0',
-  format='s'
-).addTarget(
-  prometheus.target(
-    'sum(rate(appsuite_webdav_requests_seconds_sum{instance=~"$instance"}[$interval]) / rate(appsuite_webdav_requests_seconds_count{instance=~"$instance"}[$interval])) by (method)',
-    legendFormat='{{method}}'
-  )
+  format='cps',
+  labelY1='Counts/s',
+).addTargets(
+  [
+    prometheus.target(
+      'sum(rate(appsuite_webdav_requests_seconds_count{instance=~"$instance"}[$interval]))',
+      legendFormat='Total'
+    ),
+    prometheus.target(
+      'sum(rate(appsuite_webdav_requests_seconds_count{status=~"([45][0-9][0-9]|OK|0)",instance=~"$instance"}[$interval]))',
+      legendFormat='OK'
+    ),
+    prometheus.target(
+      'sum(rate(appsuite_webdav_requests_seconds_count{status!~"([45][0-9][0-9]|OK|0)",instance=~"$instance"}[$interval]))',
+      legendFormat='KO'
+    ),
+  ]
 );
 
 local configDBConnections = graphPanel.new(
@@ -580,15 +639,15 @@ local userDBConnections = graphPanel.new(
 ).addTargets(
   [
     prometheus.target(
-      'appsuite_mysql_connections_total_Connections{class!="configdb",instance=~"$instance",pool="$dbpool"}',
+      'appsuite_mysql_connections_total_Connections{class!="configdb",instance=~"$instance",pool="$' + dbPoolName + '"}',
       legendFormat='Pooled {{type}}'
     ),
     prometheus.target(
-      'appsuite_mysql_connections_active_Connections{class!="configdb",instance=~"$instance",pool="$dbpool"}',
+      'appsuite_mysql_connections_active_Connections{class!="configdb",instance=~"$instance",pool="$' + dbPoolName + '"}',
       legendFormat='Active {{type}}'
     ),
     prometheus.target(
-      'appsuite_mysql_connections_idle_Connections{class!="configdb",instance=~"$instance",pool="$dbpool"}',
+      'appsuite_mysql_connections_idle_Connections{class!="configdb",instance=~"$instance",pool="$' + dbPoolName + '"}',
       legendFormat='Idle {{type}}'
     ),
   ]
@@ -608,15 +667,15 @@ local userDBTimes = graphPanel.new(
 ).addTargets(
   [
     prometheus.target(
-      'rate(appsuite_mysql_connections_acquire_seconds_sum{class!="configdb",instance=~"$instance",pool="$dbpool"}[$interval])/rate(appsuite_mysql_connections_acquire_seconds_count{class!="configdb",instance=~"$instance",pool="$dbpool"}[$interval])',
+      'rate(appsuite_mysql_connections_acquire_seconds_sum{class!="configdb",instance=~"$instance",pool="$' + dbPoolName + '"}[$interval])/rate(appsuite_mysql_connections_acquire_seconds_count{class!="configdb",instance=~"$instance",pool="$' + dbPoolName + '"}[$interval])',
       legendFormat='Acquire {{type}}',
     ),
     prometheus.target(
-      'rate(appsuite_mysql_connections_usage_seconds_sum{class!="configdb",instance=~"$instance",pool="$dbpool"}[$interval])/rate(appsuite_mysql_connections_usage_seconds_count{class!="configdb",instance=~"$instance",pool="$dbpool"}[$interval])',
+      'rate(appsuite_mysql_connections_usage_seconds_sum{class!="configdb",instance=~"$instance",pool="$' + dbPoolName + '"}[$interval])/rate(appsuite_mysql_connections_usage_seconds_count{class!="configdb",instance=~"$instance",pool="$' + dbPoolName + '"}[$interval])',
       legendFormat='Usage {{type}}',
     ),
     prometheus.target(
-      'rate(appsuite_mysql_connections_create_seconds_sum{class!="configdb",instance=~"$instance",pool="$dbpool"}[$interval])/rate(appsuite_mysql_connections_create_seconds_count{class!="configdb",instance=~"$instance",pool="$dbpool"}[$interval])',
+      'rate(appsuite_mysql_connections_create_seconds_sum{class!="configdb",instance=~"$instance",pool="$' + dbPoolName + '"}[$interval])/rate(appsuite_mysql_connections_create_seconds_count{class!="configdb",instance=~"$instance",pool="$' + dbPoolName + '"}[$interval])',
       legendFormat='Create {{type}}',
     ),
   ]
@@ -637,6 +696,17 @@ grafana.newDashboard(
     refresh='load',
     regex='([0-9]+)',
     sort=3,
+  )
+).addTemplate(
+  template.new(
+    name=davInterfaceName,
+    label='DAV Interface',
+    hide='variable',
+    includeAll=true,
+    datasource='Prometheus',
+    query='label_values(appsuite_webdav_requests_seconds_count,interface)',
+    refresh='load',
+    sort=1,
   )
 ).addPanels(
   [
@@ -675,24 +745,20 @@ grafana.newDashboard(
     row.new(
       title='REST API'
     ) + { gridPos: { h: 1, w: 24, x: 0, y: 64 } },
-    restApiRequestsByMethod { gridPos: { h: 8, w: 12, x: 0, y: 65 } },
-    restApiRequestsByStatus { gridPos: { h: 8, w: 12, x: 12, y: 65 } },
+    restApiRequestsPerSecond { gridPos: { h: 8, w: 12, x: 0, y: 65 } },
+    restApiResponsePercentiles { gridPos: { h: 8, w: 12, x: 12, y: 65 } },
   ] + [
     row.new(
       title='WebDAV API'
     ) + { gridPos: { h: 1, w: 24, x: 0, y: 73 } },
-    webdavApiRequestsOK { gridPos: { h: 6, w: 4, x: 0, y: 74 } },
-    webdavApiRequestsKO { gridPos: { h: 6, w: 4, x: 4, y: 74 } },
-    webdavApiRequestsTotal { gridPos: { h: 6, w: 4, x: 12, y: 74 } },
-    //
-    webdavApiRequestsByInterface { gridPos: { h: 8, w: 12, x: 0, y: 80 } },
-    webdavApiRequestsByMethod { gridPos: { h: 8, w: 12, x: 12, y: 80 } },
+    webdavApiRequestsPerSecond { gridPos: { h: 8, w: 12, x: 0, y: 74 } },
+    webdavApiResponsePercentiles { gridPos: { h: 8, w: 6, x: 0, y: 82 } },
   ] + [
     row.new(
       title='SOAP API'
     ) + { gridPos: { h: 1, w: 24, x: 0, y: 88 } },
-    soapApiRequestsByOperation { gridPos: { h: 8, w: 12, x: 0, y: 89 } },
-    soapApiRequestsByService { gridPos: { h: 8, w: 12, x: 12, y: 89 } },
+    soapApiRequestsPerSecond { gridPos: { h: 8, w: 12, x: 0, y: 89 } },
+    soapApiResponsePercentiles { gridPos: { h: 8, w: 12, x: 12, y: 89 } },
   ] + [
     row.new(
       title='Circuit Breaker'
