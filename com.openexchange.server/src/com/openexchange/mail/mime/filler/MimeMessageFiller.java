@@ -77,6 +77,7 @@ import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
 import javax.mail.internet.AddressException;
+import javax.mail.internet.HeaderTokenizer;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.InternetHeaders;
 import javax.mail.internet.MailDateFormat;
@@ -1697,7 +1698,7 @@ public class MimeMessageFiller {
         // htmlContent), false, usm.getAutoLinebreak()),
         // MailConfig.getDefaultMimeCharset());
         text.setHeader(HDR_MIME_VERSION, VERSION_1_0);
-        text.setHeader(MessageHeaders.HDR_CONTENT_TYPE, new StringBuilder("text/plain; charset=").append(charset).toString());
+        text.setHeader(MessageHeaders.HDR_CONTENT_TYPE, new StringBuilder("text/plain; charset=").append(MimeUtility.quote(charset, HeaderTokenizer.MIME)).toString());
         try {
             if (Streams.isAscii(textContent.getBytes(charset))) {
                 text.setHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC, "7bit");
@@ -1722,7 +1723,7 @@ public class MimeMessageFiller {
      */
     protected final BodyPart createHtmlBodyPart(final String wellFormedHTMLContent, final String charset) throws MessagingException, OXException {
         try {
-            final String contentType = new StringBuilder("text/html; charset=").append(charset).toString();
+            final String contentType = new StringBuilder("text/html; charset=").append(MimeUtility.quote(charset, HeaderTokenizer.MIME)).toString();
             final MimeBodyPart html = new MimeBodyPart();
             if (wellFormedHTMLContent == null || wellFormedHTMLContent.length() == 0) {
                 html.setDataHandler(new DataHandler(new MessageDataSource(
