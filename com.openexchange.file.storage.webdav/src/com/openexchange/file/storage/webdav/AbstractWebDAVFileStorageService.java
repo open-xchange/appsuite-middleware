@@ -79,7 +79,7 @@ import com.openexchange.session.Session;
 import com.openexchange.webdav.client.WebDAVClientFactory;
 
 /**
- * {@link AbstractWebDAVFileStorageService} - The Google Drive file storage service.
+ * {@link AbstractWebDAVFileStorageService} - The WebDAV file storage service.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
