@@ -47,36 +47,30 @@
  *
  */
 
-package com.openexchange.metrics.micrometer.internal;
+package com.openexchange.metrics.micrometer.internal.property.filter;
 
-import com.openexchange.config.lean.Property;
+import com.openexchange.config.PropertyFilter;
+import com.openexchange.exception.OXException;
+import com.openexchange.metrics.micrometer.internal.property.MicrometerFilterProperty;
 
 /**
- * {@link MicrometerProperty}
+ * {@link EnableMetricPropertyFilter}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.4
  */
-public enum MicrometerProperty implements Property {
+public class EnableMetricPropertyFilter implements PropertyFilter {
 
     /**
-     * The basic-auth login name
+     * Initializes a new {@link EnableMetricPropertyFilter}.
      */
-    LOGIN,
-    /**
-     * The basic-auth login password
-     */
-    PASSWORD;
-
-    private static final String BASE = "com.openexchange.metrics.micrometer.basicauth.";
-
-    @Override
-    public String getFQPropertyName() {
-        return BASE + this.name().toLowerCase();
+    public EnableMetricPropertyFilter() {
+        super();
     }
 
     @Override
-    public Object getDefaultValue() {
-        return null;
+    public boolean accept(String name, String value) throws OXException {
+        return name.startsWith(MicrometerFilterProperty.BASE);
+            //MicrometerFilterProperty.ENABLE.getFQPropertyName());
     }
 }

@@ -7,11 +7,13 @@ Bundle-Vendor: OX Software GmbH
 Automatic-Module-Name: com.openexchange.metrics.micrometer
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Activator: com.openexchange.metrics.micrometer.osgi.MicrometerActivator
-Import-Package: com.openexchange.config.lean,
+Import-Package: com.openexchange.config,
+ com.openexchange.config.lean,
  com.openexchange.exception,
  com.openexchange.java,
  com.openexchange.osgi,
  com.openexchange.server,
+ com.openexchange.tools.strings,
  javax.management,
  javax.net,
  javax.net.ssl,
