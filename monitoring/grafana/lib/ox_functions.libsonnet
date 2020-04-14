@@ -45,7 +45,7 @@ local prometheus_ds = 'Prometheus';
       annotation.datasource(
         name='OX Events',
         datasource=annotation.default.datasource,
-        iconColor='rgba(255, 96, 96, 1)',
+        iconColor='rgb(255, 255, 255)',
         type='tags',
         tags=[
           'OX',
