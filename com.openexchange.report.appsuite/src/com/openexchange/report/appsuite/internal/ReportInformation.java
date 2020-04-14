@@ -208,6 +208,18 @@ public class ReportInformation {
         if (isOAUthAPIConfigured(ThirdPartyAPI.YAHOO.getPropertyName())) {
             configuredAPIs.add(ThirdPartyAPI.YAHOO);
         }
+        /*
+         * Flickr properties
+         */
+        if (isSettingConfigured(ThirdPartyAPI.FLICKR.getPropertyName())) {
+            configuredAPIs.add(ThirdPartyAPI.FLICKR);
+        }
+        /*
+         * Tumblr properties
+         */
+        if (isSettingConfigured(ThirdPartyAPI.TUMBLR.getPropertyName())) {
+            configuredAPIs.add(ThirdPartyAPI.TUMBLR);
+        }
 
         return configuredAPIs;
     }
@@ -391,6 +403,15 @@ public class ReportInformation {
         // @formatter:on
         return false;
     }
+
+    private static boolean isSettingConfigured(String apiProperty) {
+        ConfigurationService service = Services.getService(ConfigurationService.class);
+        String propertyKey = service.getProperty(apiProperty);
+        if (propertyKey != null && !propertyKey.isEmpty() && !propertyKey.startsWith("REPLACE") && !propertyKey.startsWith("INSERT")) {
+            return true;
+        }
+        return false;
+    }
 }
 
 /**
@@ -428,7 +449,9 @@ enum ThirdPartyAPI {
     TWITTER("Twitter", "com.openexchange.oauth.twitter"),
     XING("XING", "com.openexchange.oauth.xing"),
     YAHOO("yahoo", "com.openexchange.oauth.yahoo"),
-    SCHEDJOULES("SchedJoules", "com.openexchange.calendar.schedjoules");
+    SCHEDJOULES("SchedJoules", "com.openexchange.calendar.schedjoules"),
+    FLICKR("Flickr", "io.ox/portal//apiKeys/flickr"),
+    TUMBLR("Tumblr", "io.ox/portal//apiKeys/tumblr");
 
     private String displayName;
     private String propertyName;

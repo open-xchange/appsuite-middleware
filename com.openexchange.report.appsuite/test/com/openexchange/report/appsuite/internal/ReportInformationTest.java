@@ -230,8 +230,14 @@ public class ReportInformationTest {
             when(mockedConfigurationService.getProperty(api.getPropertyName() + ".apiKey")).thenReturn(apiKey);
             when(mockedConfigurationService.getProperty(api.getPropertyName() + ".apiSecret")).thenReturn(apiSecret);
         }
+        List<ThirdPartyAPI> settings = Arrays.asList(ThirdPartyAPI.TUMBLR, ThirdPartyAPI.FLICKR);
+        for (ThirdPartyAPI api : settings) {
+            String apiKey = "TestKey";
+            when(mockedConfigurationService.getProperty(api.getPropertyName())).thenReturn(apiKey);
+        }
+
         List<ThirdPartyAPI> configuredAPIs = ReportInformation.getConfiguredThirdPartyAPIsViaOAuth();
-        assertEquals(oAuthAPIs.size(), configuredAPIs.size());
+        assertEquals(oAuthAPIs.size() + settings.size(), configuredAPIs.size());
         for (ThirdPartyAPI api : oAuthAPIs) {
             assertTrue(configuredAPIs.contains(api));
         }
