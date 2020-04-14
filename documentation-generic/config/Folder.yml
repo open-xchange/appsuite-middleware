@@ -43,11 +43,57 @@ properties:
     - key: com.openexchange.folderstorage.inheritParentPermissions
       description: |
         Specifies if permissions of new parent folder should be applied when moving a folder into the public folder tree.
+        Will only be considered if com.openexchange.folderstorage.permissions.moveToPublic is NOT set
       defaultValue: false
       version: 7.8.4
       reloadable: false
       configcascadeAware: false
-      related: 
+      related: com.openexchange.folderstorage.permissions.moveToPublic
+      file: folder.properties
+      packageName: open-xchange-core
+      tags: ["Folder","Permission"]
+    - key: com.openexchange.folderstorage.permissions.moveToPublic
+      description: |
+        Specifies if permissions of new parent folder should be applied when moving a folder into the public folder tree.
+        Three different modes are supported: <code>keep</code>, <code>inherit</code> or <code>merge</code>.
+        <code>keep</code>: The permissions of moved folder and of its subfolders remain unchanged.
+        <code>inherit</code>: The permissions of new parent folder are applied to the moved folder and all of its subfolders.
+        <code>merge</code>: The permissions of new parent folder and moved folder are first merged, then applied to moved folder and all of its subfolders.
+      defaultValue: keep
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: true
+      related: com.openexchange.folderstorage.inheritParentPermissions
+      file: folder.properties
+      packageName: open-xchange-core
+      tags: ["Folder","Permission"]
+    - key: com.openexchange.folderstorage.permissions.moveToShared
+      description: |
+        Specifies if permissions of new parent folder should be applied when moving a folder into the public folder tree.
+        Three different modes are supported: <code>keep</code>, <code>inherit</code> or <code>merge</code>.
+        <code>keep</code>: The permissions of moved folder and of its subfolders remain unchanged.
+        <code>inherit</code>: The permissions of new parent folder are applied to the moved folder and all of its subfolders.
+        <code>merge</code>: The permissions of new parent folder and moved folder are first merged, then applied to moved folder and all of its subfolders.
+      defaultValue: keep
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: folder.properties
+      packageName: open-xchange-core
+      tags: ["Folder","Permission"]
+    - key: com.openexchange.folderstorage.permissions.moveToPrivate
+      description: |
+        Specifies if permissions of new parent folder should be applied when moving a folder into the public folder tree.
+        Three different modes are supported: <code>keep</code>, <code>inherit</code> or <code>merge</code>.
+        <code>keep</code>: The permissions of moved folder and of its subfolders remain unchanged.
+        <code>inherit</code>: The permissions of new parent folder are applied to the moved folder and all of its subfolders.
+        <code>merge</code>: The permissions of new parent folder and moved folder are first merged, then applied to moved folder and all of its subfolders.
+      defaultValue: keep
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: true
+      related:
       file: folder.properties
       packageName: open-xchange-core
       tags: ["Folder","Permission"]

@@ -84,12 +84,14 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.stream.Collectors;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.capabilities.CapabilityService;
-import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
@@ -1899,29 +1901,33 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
             Permission[] perms = folder.getPermissions();
             UpdatedFolderHandler handler = updatedFolderHandlerFor(storageParameters);
             final OXFolderManager folderManager = OXFolderManager.getInstance(session, Collections.singleton(handler), con, con);
+            FolderObject parent = getFolderObject(updateMe.getParentFolderID(), context, con, storageParameters);
             if (null != perms) {
-                final OCLPermission[] oclPermissions = new OCLPermission[perms.length];
-                for (int i = 0; i < perms.length; i++) {
-                    final Permission p = perms[i];
-                    final OCLPermission oclPerm = newOCLPermissionFor(p);
-                    oclPermissions[i] = oclPerm;
-                }
-                updateMe.setPermissionsAsArray(oclPermissions);
-                changedFolder = changedFolder || false == updateMe.getPermissions().equals(originalFolder.getPermissions());
+                    final List<OCLPermission> oclPermissions = new ArrayList<>(perms.length);
+                    for (Permission p: perms) {
+                        oclPermissions.add(newOCLPermissionFor(p));
+                    }
+                    Optional<List<OCLPermission>> optNewPermissions = processInheritedPermissions(parent, Optional.of(oclPermissions), Optional.empty());
+                    updateMe.setPermissions(optNewPermissions.orElse(oclPermissions));
             } else {
-                ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-                boolean applyParentPermissions = configurationService.getBoolProperty("com.openexchange.folderstorage.inheritParentPermissions", false);
-                if (applyParentPermissions && isInPublicTree(folder.getParentID(), context, con, storageParameters)) {
-                    FolderObject parent = getFolderObject(updateMe.getParentFolderID(), context, con, storageParameters);
-                    inheritPublicFolderPermissions(updateMe, parent, context, con, storageParameters, folderManager, millis);
-                    changedFolder = true;
+                MoveFolderPermissionMode mode = getMoveFolderPermissionMode(folder, storageParameters);
+
+                switch (mode) {
+                    case INHERIT:
+                        inheritFolderPermissions(updateMe, parent, context, con, storageParameters, folderManager, millis, false);
+                        break;
+                    case MERGE:
+                        inheritFolderPermissions(updateMe, parent, context, con, storageParameters, folderManager, millis, true);
+                        break;
+                    case KEEP:
+                    default:
+                        cascadeInheritedPermissions(context, con, folderManager, storageParameters, updateMe, parent, millis);
+                        break;
                 }
             }
 
             // Perform update of folder in storage if actually changed
-            if (changedFolder) {
-                folderManager.updateFolder(updateMe, true, StorageParametersUtility.isHandDownPermissions(storageParameters), millis.getTime());
-            }
+            folderManager.updateFolder(updateMe, true, StorageParametersUtility.isHandDownPermissions(storageParameters), millis.getTime());
 
             // Store updated user properties for folder as needed
             storeUserProperties(Optional.ofNullable(con), session, originalFolder, folder);
@@ -1975,16 +1981,144 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
         }
     }
 
-    private void inheritPublicFolderPermissions(FolderObject folder, FolderObject parent, Context context, Connection con, StorageParameters storageParameters, OXFolderManager folderManager, Date millis) throws OXException {
-        List<OCLPermission> compiledPerms = getCombinedFolderPermissions(folder, parent);
+    /**
+     * Checks whether the given folder needs any adjustments concerning inherited permissions and cascade those permissions to subfolders
+     *
+     * For example it removes previous inherited permissions in case of a move out or add new one in case of a move in.
+     *
+     * @param context The context
+     * @param con The {@link Connection} to use
+     * @param folderManager The {@link OXFolderManager}
+     * @param storageParameters The storage parameters
+     * @param folder The folder to check
+     * @param parent The parent folder
+     * @param millis The last modified date of the client
+     * @throws OXException in case of errors
+     */
+    private void cascadeInheritedPermissions(Context context, Connection con, OXFolderManager folderManager, StorageParameters storageParameters, FolderObject folder, FolderObject parent, Date millis) throws OXException {
+        FolderObject storageFolder = folder;
+        if (folder.containsPermissions() == false) {
+            storageFolder = getFolderObject(folder.getObjectID(), context, con, storageParameters);
+        }
+        Optional<List<OCLPermission>> optPermissions = processInheritedPermissions(parent, Optional.empty(), Optional.of(storageFolder));
+        if (optPermissions.isPresent()) {
+            folder.setPermissions(optPermissions.get());
+            folderManager.updateFolder(folder, false, false, millis.getTime());
+            if (folder.hasSubfolders()) {
+                SortableId[] subFolderIds = getSubfolders(FolderStorage.REAL_TREE_ID, String.valueOf(folder.getObjectID()), storageParameters);
+                for (SortableId subfolderId : subFolderIds) {
+                    FolderObject subfolder = getFolderObject(Integer.parseInt(subfolderId.getId()), context, con, storageParameters);
+                    cascadeInheritedPermissions(context, con, folderManager, storageParameters, subfolder, folder, millis);
+                }
+            }
+        }
+    }
 
-        folder.setPermissions(compiledPerms);
+    /**
+     * Processes inherited permissions and returns a new list of permissions in case the they need to change
+     *
+     * @param parent The parent folder
+     * @param optPerms The optional permissions to check
+     * @param storageFolder The optional storage folder in case the permissions are empty
+     * @return An optional list of {@link OCLPermission}s in case they need to be changed
+     */
+    private Optional<List<OCLPermission>> processInheritedPermissions(FolderObject parent, Optional<List<OCLPermission>> optPerms, Optional<FolderObject> storageFolder) {
+        if (parent.getModule() != FolderObject.INFOSTORE || (optPerms.isPresent() == false && storageFolder.isPresent() == false)) {
+            return Optional.empty();
+        }
+        // Get parent permissions
+        List<OCLPermission> permissionsToInherit = parent.getPermissions().stream().filter((p) -> FolderPermissionType.NORMAL.equals(p.getType()) == false).collect(Collectors.toList());
+        List<OCLPermission> perms = optPerms.isPresent() ? optPerms.get() : storageFolder.get().getPermissions();
+        if (permissionsToInherit.isEmpty()) {
+            if (perms.parallelStream().filter((p) -> FolderPermissionType.INHERITED.equals(p.getType())).findAny().isPresent()) {
+                // Remove existing permissions
+                return Optional.of(perms.parallelStream().filter((p) -> p.getType().equals(FolderPermissionType.INHERITED) == false).collect(Collectors.toList()));
+            }
+            return Optional.empty();
+        }
+        // Add inherited permissions and transform legator permissions
+        List<OCLPermission> result = new ArrayList<>(perms.size() + permissionsToInherit.size());
+        for (OCLPermission p : permissionsToInherit) {
+            OCLPermission cloned;
+            try {
+                cloned = (OCLPermission) p.clone();
+            } catch (@SuppressWarnings("unused") CloneNotSupportedException e) {
+                // use original instead
+                cloned = p;
+            }
+            cloned.setType(FolderPermissionType.INHERITED);
+            if (FolderPermissionType.LEGATOR.equals(p.getType())) {
+                cloned.setPermissionLegator(String.valueOf(parent.getObjectID()));
+            }
+            result.add(cloned);
+        }
+        // Add previous not inherited permissions
+        result.addAll(perms.parallelStream().filter((p) -> p.getType().equals(FolderPermissionType.INHERITED) == false).collect(Collectors.toList()));
+        // Return new permissions
+        return Optional.of(result);
+    }
+
+    private void inheritFolderPermissions(FolderObject folder, FolderObject parent, Context context, Connection con, StorageParameters storageParameters, OXFolderManager folderManager, Date millis, boolean mergePermissions) throws OXException {
+        if (mergePermissions) {
+            // Load permissions
+            FolderObject folder2 = getFolderObject(folder.getObjectID(), context, con, storageParameters);
+            List<OCLPermission> compiledPerms = getCombinedFolderPermissions(folder2, parent);
+            folder.setPermissions(compiledPerms);
+        } else {
+            folder.setPermissions(parent.getPermissions());
+        }
+        Optional<List<OCLPermission>> optPermissions = processInheritedPermissions(parent, Optional.of(folder.getPermissions()), Optional.empty());
+        optPermissions.ifPresent(p -> folder.setPermissions(p));
+
         folderManager.updateFolder(folder, false, false, millis.getTime());
         if (folder.hasSubfolders()) {
             SortableId[] subFolderIds = getSubfolders(FolderStorage.REAL_TREE_ID, String.valueOf(folder.getObjectID()), storageParameters);
             for (SortableId subfolderId : subFolderIds) {
                 FolderObject subfolder = getFolderObject(Integer.parseInt(subfolderId.getId()), context, con, storageParameters);
-                inheritPublicFolderPermissions(subfolder, parent, context, con, storageParameters, folderManager, millis);
+                inheritFolderPermissions(subfolder, parent, context, con, storageParameters, folderManager, millis, mergePermissions);
+            }
+        }
+    }
+
+    private MoveFolderPermissionMode getMoveFolderPermissionMode(Folder folder, StorageParameters storageParameters) throws OXException {
+        ConfigViewFactory configViewFactory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
+        ConfigView view = configViewFactory.getView(storageParameters.getUserId(), storageParameters.getContextId());
+        String mode = "keep";
+        if (isInPublicTree(folder, storageParameters)) {
+            mode = view.get("com.openexchange.folderstorage.permissions.moveToPublic", String.class);
+            if (Strings.isEmpty(mode) && b(view.opt("com.openexchange.folderstorage.inheritParentPermissions", Boolean.class, Boolean.FALSE))) {
+                // Use old behaviour for public folders...
+                mode = "merge";
+            }
+        } else if (isInPrivateTree(folder, storageParameters)) {
+            mode = view.get("com.openexchange.folderstorage.permissions.moveToPrivate", String.class);
+        } else if (isInSharedTree(folder, storageParameters)) {
+            mode = view.get("com.openexchange.folderstorage.permissions.moveToShared", String.class);
+        }
+        return MoveFolderPermissionMode.getByName(mode);
+    }
+
+    private enum MoveFolderPermissionMode {
+        KEEP,
+        INHERIT,
+        MERGE
+        ;
+
+        public static MoveFolderPermissionMode getByName(String name) {
+            if (Strings.isEmpty(name)) {
+                LOG.warn("Move folder permission mode was not set, using fallback \"keep\".");
+                return MoveFolderPermissionMode.KEEP;
+            }
+            switch (name.toLowerCase()) {
+                case "keep":
+                    return MoveFolderPermissionMode.KEEP;
+                case "inherit":
+                    return MoveFolderPermissionMode.INHERIT;
+                case "merge":
+                    return MoveFolderPermissionMode.MERGE;
+                default:
+                    LOG.warn("Invalid move folder permission mode: {}. Using fallback \"keep\".", name);
+                    return MoveFolderPermissionMode.KEEP;
             }
         }
     }
@@ -2072,18 +2206,60 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
         }
     }
 
-    private boolean isInPublicTree(String folderParentId, Context context, Connection con, StorageParameters storageParameters) throws OXException {
-        if (Strings.isEmpty(folderParentId)) {
+    private boolean isInPublicTree(Folder folder, StorageParameters storageParameters) throws OXException {
+        if (null == folder) {
             return false;
         }
-        int parentId = Integer.parseInt(folderParentId);
-        while (parentId > 0) {
-            if (parentId == FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID || parentId == FolderObject.SYSTEM_PUBLIC_FOLDER_ID) {
+        String parentId = folder.getParentID();
+        Folder current = getFolder(folder.getTreeID(), parentId, storageParameters);
+        int id = 0;
+        do {
+            parentId = current.getParentID();
+            try {
+                id = Integer.parseInt(parentId);
+            } catch (NumberFormatException e) {
+                return false;
+            }
+            if (id == FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID) {
                 return true;
             }
-            FolderObject parent = getFolderObject(parentId, context, con, storageParameters);
-            parentId = parent.getParentFolderID();
+            current = getFolder(folder.getTreeID(), parentId, storageParameters);
+        } while (id > 0);
+        return false;
+    }
+
+    private boolean isInPrivateTree(Folder folder, StorageParameters storageParameters) throws OXException {
+        return checkFolder(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, folder, storageParameters, true);
+    }
+
+    private boolean isInSharedTree(Folder folder, StorageParameters storageParameters) throws OXException {
+        return checkFolder(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, folder, storageParameters, false);
+    }
+
+    private boolean checkFolder(int type, Folder folder, StorageParameters storageParameters, boolean checkCreatedBy) throws OXException {
+        if (null == folder) {
+            return false;
         }
+        String parentId = folder.getParentID();
+        Folder current = getFolder(folder.getTreeID(), parentId, storageParameters);
+        int id = 0;
+        do {
+            parentId = current.getParentID();
+            try {
+                id = Integer.parseInt(parentId);
+            } catch (NumberFormatException e) {
+                return false;
+            }
+            if (id == type) {
+                if (checkCreatedBy) {
+                    // own private root folder
+                    return current.getCreatedBy() == storageParameters.getUserId();
+                }
+                // shared root folder
+                return current.getCreatedBy() != storageParameters.getUserId();
+            }
+            current = getFolder(folder.getTreeID(), parentId, storageParameters);
+        } while (id > 0);
         return false;
     }
 
