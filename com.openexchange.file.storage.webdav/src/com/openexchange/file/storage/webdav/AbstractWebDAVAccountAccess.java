@@ -49,10 +49,12 @@
 
 package com.openexchange.file.storage.webdav;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import org.apache.http.client.utils.URIBuilder;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.CapabilityAware;
@@ -62,6 +64,7 @@ import com.openexchange.file.storage.FileStorageCapabilityTools;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.file.storage.webdav.exception.WebdavExceptionCodes;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 import com.openexchange.webdav.client.WebDAVClient;
@@ -139,7 +142,7 @@ public abstract class AbstractWebDAVAccountAccess implements CapabilityAware {
             throw FileStorageExceptionCodes.MISSING_CONFIG.create("password", account.getId());
         }
         try {
-            URI uri = new URI(configUrl);
+            URI uri = verifyURL(new URI(configUrl));
             URIBuilder uriBuilder = new URIBuilder();
             if (null != uri.getScheme()) {
                 uriBuilder.setScheme(uri.getScheme());
@@ -155,6 +158,88 @@ public abstract class AbstractWebDAVAccountAccess implements CapabilityAware {
         } catch (URISyntaxException e) {
             throw FileStorageExceptionCodes.INVALID_URL.create(configUrl, e.getMessage());
         }
+    }
+
+    /**
+     * Verifies that the given URI is allowed to be used by the session
+     *
+     * @param uri The URI to verify
+     * @return The given URI if allowed to be used
+     * @throws OXException if the given URI is not allowed to be used
+     */
+    protected URI verifyURL(URI uri) throws OXException {
+        if (isBlacklisted(session, uri)) {
+            throw WebdavExceptionCodes.PING_FAILED.create();
+        }
+
+        if (!verifyPort(session, uri)) {
+            throw WebdavExceptionCodes.PING_FAILED.create();
+        }
+        return uri;
+    }
+
+    /**
+     * Checks if the host specified in given URL is blacklisted for a session
+     *
+     * @param session The session to check
+     * @param uri The URI to check
+     * @return <code>true</code>, if the uri's host is blacklisted, <code>false</code> otherwise
+     * @throws OXException
+     */
+    protected boolean isBlacklisted(Session session, URI uri) throws OXException {
+        if (uri != null) {
+            return isBlacklisted(session, uri.getHost());
+        }
+        return false;
+    }
+
+    /**
+     * Checks if the given host is blacklisted
+     *
+     * @param session The session to get the black listed hosts for
+     * @param host The host to check
+     * @return <code>true</code> , if the given host is blacklisted, <code>false</code> otherwise
+     * @throws OXException
+     */
+    protected boolean isBlacklisted(Session session, String host) throws OXException {
+        return service.getBlackListedHosts(session).contains(host);
+    }
+
+    /**
+     * Verifies that the port of the given URI is allowed
+     *
+     * @param session The session
+     * @param uri The URI to verify
+     * @return <code>true</code> if the URI's port is allowed <code>false</code> otherwise
+     * @throws OXException
+     */
+    protected boolean verifyPort(Session session, URI uri) throws OXException {
+        if (uri != null) {
+            return isAllowed(session, uri.getPort());
+        }
+        return false;
+    }
+
+    /**
+     * Checks if the given port is allowed
+     *
+     * @param session The session to check
+     * @param port The port to check
+     * @return <code>true</code> if the given port is allowed <code>false</code> otherwise
+     * @throws OXException
+     */
+    protected boolean isAllowed(Session session, int port) throws OXException {
+        if (port < 0) {
+            // port not set; always allow
+            return true;
+        }
+
+        if (port > 65535) {
+            // invalid port
+            return false;
+        }
+        Optional<Set<Integer>> optAllowedPorts = service.getAllowedPorts(session);
+        return optAllowedPorts.isPresent() ? optAllowedPorts.get().contains(I(port)) : true;
     }
 
     /**

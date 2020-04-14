@@ -215,6 +215,7 @@ public class WebDAVTest extends AbstractConfigAwareAPIClientSession {
     protected Map<String, String> getNeededConfigurations() {
         HashMap<String, String> configuration = new HashMap<String, String>();
         configuration.put("com.openexchange.capability.filestorage_webdav", Boolean.TRUE.toString());
+        configuration.put("com.openexchange.file.storage.webdav.blacklistedHosts", "");
         return configuration;
     }
 

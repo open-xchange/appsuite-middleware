@@ -53,6 +53,7 @@ import static com.openexchange.file.storage.SecretAwareFileStorageAccountManager
 import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,6 +62,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.datatypes.genericonf.ReadOnlyDynamicFormDescription;
@@ -74,6 +76,8 @@ import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.LoginAwareFileStorageServiceExtension;
 import com.openexchange.file.storage.webdav.exception.WebdavExceptionCodes;
+import com.openexchange.java.Strings;
+import com.openexchange.net.HostList;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.webdav.client.WebDAVClientFactory;
@@ -287,6 +291,57 @@ public abstract class AbstractWebDAVFileStorageService implements AccountAware, 
     }
 
     /**
+     * Returns a list of blacklisted hosts (names or addresses) for a session to which a connection is not allowed
+     *
+     * @param session The session to get the blacklisted hosts for
+     * @return A {@link HostList} of blacklisted hosts
+     * @throws OXException If the {@link LeanConfigurationService} service is missing
+     * @throws IllegalArgumentException If hosts list is invalid, see {@link HostList#valueOf(String)}
+     */
+    public HostList getBlackListedHosts(Session session) throws OXException {
+        final LeanConfigurationService leanConfiguration = services.getServiceSafe(LeanConfigurationService.class);
+        String blacklist = leanConfiguration.getProperty(session.getUserId(), session.getContextId(), WebDAVFileStorageProperties.BLACKLISTED_HOSTS);
+        return HostList.valueOf(blacklist.trim());
+    }
+
+    /**
+     * Returns an optional set of allowed ports for a session to which a connection is allowed in case ports are restricted.
+     *
+     * @param session The session to get the allowed ports for
+     * @return An optional set of allowed ports.
+     * @throws OXException In case of missing service
+     */
+    public Optional<Set<Integer>> getAllowedPorts(Session session) throws OXException {
+        final LeanConfigurationService leanConfiguration = services.getServiceSafe(LeanConfigurationService.class);
+        String portString = leanConfiguration.getProperty(session.getUserId(), session.getContextId(), WebDAVFileStorageProperties.ALLOWED_PORTS);
+        return parsePortString(portString);
+    }
+
+    /**
+     * Parses the given port string which contains the allowed ports as a comma separated list to a {@link Set} of ports.
+     *
+     * @param portString The comma separated ports
+     * @return An optional {@link Set} of ports
+     */
+    private Optional<Set<Integer>> parsePortString(String portString) {
+        if (Strings.isEmpty(portString)) {
+            return Optional.empty();
+        }
+        String[] ports = Strings.splitByComma(portString);
+        HashSet<Integer> ret = new HashSet<Integer>(ports.length);
+        for (String port : ports) {
+            if (Strings.isNotEmpty(port)) {
+                try {
+                    ret.add(Integer.valueOf(port.trim()));
+                } catch (NumberFormatException e) {
+                    LOG.error("Ignored unkown port number " + port, e);
+                }
+            }
+        }
+        return ret.isEmpty() ? Optional.empty() : Optional.of(ret);
+    }
+
+    /**
      * Gets the optional capability for this file store
      *
      * @return The optional capability
@@ -295,12 +350,11 @@ public abstract class AbstractWebDAVFileStorageService implements AccountAware, 
         return Optional.empty();
     }
 
-
-
     /**
+     * Gets the {@link FileStorageAccountManager}
      *
-     * @param secretAware
-     * @return
+     * @param secretAware Whether the account manager is secret aware or not
+     * @return The {@link FileStorageAccountManager}
      * @throws OXException
      */
     private FileStorageAccountManager getAccountManager0(boolean secretAware) throws OXException {

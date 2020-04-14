@@ -77,10 +77,10 @@ public enum WebdavExceptionCodes implements DisplayableOXExceptionCode {
      */
     MODIFIED_CONCURRENTLY("The document could not be updated because it was modified. Reload the view.", CATEGORY_CONFLICT, 3, WebdavExceptionMessages.MODIFIED_CONCURRENTLY_MSG_DISPLAY),
 
-    /*
+    /**
      * The connection check failed
      */
-    PING_FAILED("The connection check failed.", CATEGORY_CONNECTIVITY, 4, WebdavExceptionMessages.PING_FAILED)
+    PING_FAILED("The connection check failed.", CATEGORY_CONNECTIVITY, 4, WebdavExceptionMessages.PING_FAILED),
 
     ;
 
