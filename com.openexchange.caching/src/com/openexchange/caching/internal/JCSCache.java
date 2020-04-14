@@ -598,4 +598,8 @@ public final class JCSCache extends AbstractCache implements Cache, SupportsLoca
         }
     }
 
+    MemoryCache getMemCache() {
+        return this.memCache;
+    }
+
 }

@@ -50,10 +50,14 @@
 package com.openexchange.caching.internal;
 
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.apache.jcs.JCS;
+import org.apache.jcs.engine.memory.MemoryCache;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheExceptionCode;
 import com.openexchange.caching.CacheService;
@@ -61,6 +65,9 @@ import com.openexchange.caching.DefaultCacheKeyService;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceExceptionCode;
+import io.micrometer.core.instrument.Gauge;
+import io.micrometer.core.instrument.Meter;
+import io.micrometer.core.instrument.Metrics;
 
 /**
  * {@link JCSCacheService} - Cache service implementation through JCS cache.
@@ -83,14 +90,14 @@ public final class JCSCacheService extends DefaultCacheKeyService implements Cac
     /**
      * Holds references to already initialized caches
      */
-    private final ConcurrentMap<String, Cache> caches;
+    private final ConcurrentMap<String, MeteredCache> caches;
 
     /**
      * Initializes a new {@link JCSCacheService}
      */
     private JCSCacheService() {
         super();
-        this.caches = new ConcurrentHashMap<String, Cache>();
+        this.caches = new ConcurrentHashMap<>();
     }
 
     @Override
@@ -110,7 +117,10 @@ public final class JCSCacheService extends DefaultCacheKeyService implements Cac
             return;
         }
         JCSCacheServiceInit.getInstance().freeCache(name);
-        this.caches.remove(name);
+        MeteredCache meteredCache = this.caches.remove(name);
+        if (meteredCache != null) {
+            meteredCache.unregisterMeters();
+        }
         /*-
          * try {
         	final Cache c = getCache(name);
@@ -125,13 +135,14 @@ public final class JCSCacheService extends DefaultCacheKeyService implements Cac
 
     @Override
     public Cache getCache(final String name) throws OXException {
-        Cache cache = caches.get(name);
+        MeteredCache cache = caches.get(name);
         if (null == cache) {
             try {
                 /*
                  * The JCS cache manager already tracks initialized caches though the same region name always points to the same cache
                  */
-                cache = new JCSCache(JCS.getInstance(name), name);
+                JCSCache newJCSCache = new JCSCache(JCS.getInstance(name), name);
+                cache = new MeteredCache(name, newJCSCache);
                 /*
                  * Wrap with notifying cache if configured
                  */
@@ -140,7 +151,7 @@ public final class JCSCacheService extends DefaultCacheKeyService implements Cac
                     if (null == eventService) {
                         throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(CacheEventService.class.getName());
                     }
-                    cache = new NotifyingCache(name, cache, eventService);
+                    cache.setNotifyingCache(new NotifyingCache(name, newJCSCache, eventService));
                 }
             } catch (org.apache.jcs.access.exception.CacheException e) {
                 throw CacheExceptionCode.CACHE_ERROR.create(e, e.getMessage());
@@ -151,12 +162,14 @@ public final class JCSCacheService extends DefaultCacheKeyService implements Cac
                  */
                 throw CacheExceptionCode.MISSING_CACHE_REGION.create(npe, name);
             }
-            Cache existingCache = caches.putIfAbsent(name, cache);
-            if (null != existingCache) {
+            MeteredCache existingCache = caches.putIfAbsent(name, cache);
+            if (null == existingCache) {
+                cache.registerMeters();
+            } else {
                 cache = existingCache;
             }
         }
-        return cache;
+        return cache.getEffectiveCache();
     }
 
     @Override
@@ -182,6 +195,84 @@ public final class JCSCacheService extends DefaultCacheKeyService implements Cac
     @Override
     public void loadDefaultConfiguration() throws OXException {
         JCSCacheServiceInit.getInstance().loadDefaultConfiguration();
+    }
+
+    private static final class MeteredCache {
+
+        private final String region;
+        private final JCSCache jcsCache;
+        private final List<Meter> meters;
+        private NotifyingCache notifyingCache;
+
+        MeteredCache(String region, JCSCache cache) {
+            super();
+            this.region = region;
+            this.jcsCache = cache;
+            this.meters = new ArrayList<>(7);
+        }
+
+        Cache getEffectiveCache() {
+            if (notifyingCache == null) {
+                return jcsCache;
+            }
+            return notifyingCache;
+        }
+
+        void setNotifyingCache(NotifyingCache notifyingCache) {
+            this.notifyingCache = notifyingCache;
+        }
+
+        void registerMeters() {
+            MemoryCache memCache = jcsCache.getMemCache();
+            if (memCache == null) {
+                return;
+            }
+
+            meters.add(Gauge.builder("appsuite.cache.elements.max", () -> memCache.getCacheAttributes().getMaxObjects())
+                .description("Max. number of cached elements")
+                .tag("region", region)
+                .register(Metrics.globalRegistry));
+
+            meters.add(Gauge.builder("appsuite.cache.elements.total", () -> memCache.getSize())
+                .description("Current number of cached elements")
+                .tag("region", region)
+                .register(Metrics.globalRegistry));
+
+            meters.add(Gauge.builder("appsuite.cache.puts.total", () -> memCache.getCompositeCache().getUpdateCount())
+                .description("Number of cache put operations")
+                .tag("region", region)
+                .register(Metrics.globalRegistry));
+
+            meters.add(Gauge.builder("appsuite.cache.removals.total", () -> memCache.getCompositeCache().getRemoveCount())
+                .description("Number of remove from cache operations")
+                .tag("region", region)
+                .register(Metrics.globalRegistry));
+
+            meters.add(Gauge.builder("appsuite.cache.hits.total", () -> memCache.getCompositeCache().getHitCountRam())
+                .description("Number of cache hits")
+                .tag("region", region)
+                .register(Metrics.globalRegistry));
+
+            meters.add(Gauge.builder("appsuite.cache.misses.total", () -> memCache.getCompositeCache().getMissCountNotFound())
+                .description("Number of cache misses (element not in cache)")
+                .tag("region", region)
+                .register(Metrics.globalRegistry));
+
+            meters.add(Gauge.builder("appsuite.cache.misses.expired.total", () -> memCache.getCompositeCache().getMissCountExpired())
+                .description("Number of cache misses (element in cache but expired)")
+                .tag("region", region)
+                .register(Metrics.globalRegistry));
+        }
+
+        void unregisterMeters() {
+            Iterator<Meter> it = meters.iterator();
+            while (it.hasNext()) {
+                Meter meter = it.next();
+                Metrics.globalRegistry.remove(meter);
+                it.remove();
+            }
+        }
+
     }
 
 }
