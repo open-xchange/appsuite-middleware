@@ -188,7 +188,7 @@ public final class UpdateAction extends AbstractMailAccountAction implements Mai
             // Don't check for POP3 account due to access restrictions (login only allowed every n minutes)
             boolean pop3 = Strings.toLowerCase(accountDescription.getMailProtocol()).startsWith("pop3");
 
-            if (fieldsToUpdate.contains(Attribute.MAIL_URL_LITERAL) && !toUpdate.generateMailServerURL().equals(accountDescription.generateMailServerURL())) {
+            if ((fieldsToUpdate.contains(Attribute.MAIL_SERVER_LITERAL) || fieldsToUpdate.contains(Attribute.MAIL_URL_LITERAL)) && !toUpdate.generateMailServerURL().equals(accountDescription.generateMailServerURL())) {
                 if (!pop3 && !ValidateAction.checkMailServerURL(accountDescription, session, warnings, true)) {
                     final OXException warning = MimeMailExceptionCode.CONNECT_ERROR.create(accountDescription.getMailServer(), accountDescription.getLogin());
                     warning.setCategory(Category.CATEGORY_WARNING);
@@ -196,7 +196,7 @@ public final class UpdateAction extends AbstractMailAccountAction implements Mai
                 }
                 clearStamp |= (pop3 && !toUpdate.getMailServer().equals(accountDescription.getMailServer()));
             }
-            if (fieldsToUpdate.contains(Attribute.TRANSPORT_URL_LITERAL) && !toUpdate.generateTransportServerURL().equals(accountDescription.generateTransportServerURL())) {
+            if ((fieldsToUpdate.contains(Attribute.TRANSPORT_SERVER_LITERAL) || fieldsToUpdate.contains(Attribute.TRANSPORT_URL_LITERAL)) && !toUpdate.generateTransportServerURL().equals(accountDescription.generateTransportServerURL())) {
                 if (!pop3 && !ValidateAction.checkTransportServerURL(accountDescription, session, warnings, true)) {
                     final String transportLogin = accountDescription.getTransportLogin();
                     final OXException warning = MimeMailExceptionCode.CONNECT_ERROR.create(accountDescription.getTransportServer(), transportLogin == null ? accountDescription.getLogin() : transportLogin);

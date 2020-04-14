@@ -53,7 +53,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.HostList;
 
@@ -134,9 +136,13 @@ public class MailAccountUtils {
      * @param hostName The host name; either a machine name or a textual representation of its IP address
      * @param port The port number
      * @return <code>true</code> if denied; otherwise <code>false</code>
+     * @throws OXException in case the host is blacklisted
      */
-    public static boolean isDenied(String hostName, int port) {
-        return false == isAllowed(port) || isBlacklisted(hostName);
+    public static boolean isDenied(String hostName, int port) throws OXException {
+        if(isBlacklisted(hostName)) {
+            throw MailAccountExceptionCodes.BLACKLISTED_SERVER.create(hostName);
+        }
+        return false == isAllowed(port);
     }
 
     /**
