@@ -50,6 +50,7 @@
 package com.openexchange.chronos.impl.session;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.b;
 import java.util.List;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Available;
@@ -199,6 +200,11 @@ public class CalendarConfigImpl implements CalendarConfig {
         return getConfigValue("com.openexchange.calendar.allowChangeOfOrganizer", Boolean.class, Boolean.FALSE).booleanValue();
     }
 
+    @Override
+    public boolean isAllowOrganizerPartStatChanges() {
+        return b(getConfigValue("com.openexchange.calendar.allowOrganizerPartStatChanges", Boolean.class, Boolean.FALSE));
+    }
+
     private CalendarUserSettings getUserSettings(int userId) {
         if (null != optSession) {
             return new CalendarUserSettings(optSession, userId, services);
@@ -212,7 +218,7 @@ public class CalendarConfigImpl implements CalendarConfig {
             ConfigView configView = Services.getService(ConfigViewFactory.class, true).getView(userId, contextId);
             return configView.opt(property, coerceTo, defaultValue);
         } catch (OXException e) {
-            LOG.warn("Error getting \"{}\", falling back to \"{}\"", property, defaultValue);
+            LOG.warn("Error getting \"{}\", falling back to \"{}\"", property, defaultValue, e);
             return defaultValue;
         }
     }

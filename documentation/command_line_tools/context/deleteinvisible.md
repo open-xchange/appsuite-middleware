@@ -10,7 +10,7 @@ deleteinvisible - Deletes unreachable data of a contexts.
 
 # SYNOPSIS
 
-**disablecontext** [OPTION]...
+**deleteinvisible** [OPTION]...
 
 # DESCRIPTION
 
@@ -50,9 +50,9 @@ up the data.
 
 # EXAMPLES
 
-**disablecontext -A masterAdmin -P secret -c 1138**
+**deleteinvisible -A masterAdmin -P secret -c 1138**
 
-Disables the context with the specified identifier.
+Deletes all invisible or rather superfluous data of the context with the specified identifier.
 
 # SEE ALSO
 

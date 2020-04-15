@@ -259,7 +259,7 @@ public class Forward extends AbstractOpener {
             }
 
             // Add mail's inline images
-            if (multipart && TEXT_HTML == state.message.getContentType() && null != contentIds && !contentIds.isEmpty()) {
+            if (multipart && state.message.getContentType().isImpliesHtml() && null != contentIds && !contentIds.isEmpty()) {
                 InlineContentHandler inlineHandler = new InlineContentHandler(contentIds);
                 new MailMessageParser().setInlineDetectorBehavior(true).parseMailMessage(originalMail, inlineHandler);
                 Map<String, MailPart> inlineParts = inlineHandler.getInlineContents();

@@ -14,7 +14,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:	@OXVERSION@
-%define        ox_release 8
+%define        ox_release 9
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL_2.0
@@ -55,6 +55,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Mon Apr 06 2020 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2020-04-14 (5677)
 * Thu Mar 19 2020 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2020-03-23 (5653)
 * Fri Feb 28 2020 Marcus Klein <marcus.klein@open-xchange.com>

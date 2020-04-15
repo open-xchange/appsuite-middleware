@@ -105,6 +105,11 @@ public interface UnifiedInboxManagement {
     public static final String NAME_UNIFIED_INBOX = "Unified Mail".intern();
 
     /**
+     * The domain part of the virtual E-Mail address for a Unified Mail account.
+     */
+    public static final String MAIL_ADDRESS_DOMAIN_PART = "@unifiedinbox.com";
+
+    /**
      * Creates the Unified Mail account for given user in specified context.
      *
      * @param userId The user ID

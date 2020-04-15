@@ -1,3 +1,9 @@
+open-xchange-file-storage-mail (7.10.3-9) stable; urgency=medium
+
+  * Build for patch 2020-04-14 (5677)
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Mon, 06 Apr 2020 09:08:40 +0000
+
 open-xchange-file-storage-mail (7.10.3-8) stable; urgency=medium
 
   * Build for patch 2020-03-23 (5653)
