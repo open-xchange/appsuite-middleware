@@ -1,3 +1,9 @@
+open-xchange-pns-mobile-api-facade (7.10.1-30) stable; urgency=medium
+
+  * Build for patch 2020-04-14 (5675)
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Mon, 06 Apr 2020 10:52:30 +0000
+
 open-xchange-pns-mobile-api-facade (7.10.1-29) stable; urgency=medium
 
   * Build for patch 2020-03-23 (5651)
