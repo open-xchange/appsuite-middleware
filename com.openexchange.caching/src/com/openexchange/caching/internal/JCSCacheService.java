@@ -65,6 +65,7 @@ import com.openexchange.caching.DefaultCacheKeyService;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceExceptionCode;
+import io.micrometer.core.instrument.FunctionCounter;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.Meter;
 import io.micrometer.core.instrument.Metrics;
@@ -228,38 +229,44 @@ public final class JCSCacheService extends DefaultCacheKeyService implements Cac
                 return;
             }
 
-            meters.add(Gauge.builder("appsuite.cache.elements.max", () -> memCache.getCacheAttributes().getMaxObjects())
+            meters.add(Gauge.builder("appsuite.cache.elements.max", memCache, (c) -> c.getCacheAttributes().getMaxObjects())
                 .description("Max. number of cached elements")
                 .tag("region", region)
                 .register(Metrics.globalRegistry));
 
-            meters.add(Gauge.builder("appsuite.cache.elements.total", () -> memCache.getSize())
+            meters.add(Gauge.builder("appsuite.cache.elements.total", memCache, (c) -> c.getSize())
                 .description("Current number of cached elements")
                 .tag("region", region)
                 .register(Metrics.globalRegistry));
 
-            meters.add(Gauge.builder("appsuite.cache.puts.total", () -> memCache.getCompositeCache().getUpdateCount())
+            meters.add(FunctionCounter.builder("appsuite.cache.puts.total", memCache, (c) -> c.getCompositeCache().getUpdateCount())
                 .description("Number of cache put operations")
                 .tag("region", region)
                 .register(Metrics.globalRegistry));
 
-            meters.add(Gauge.builder("appsuite.cache.removals.total", () -> memCache.getCompositeCache().getRemoveCount())
+            meters.add(FunctionCounter.builder("appsuite.cache.removals.total", memCache, (c) -> c.getCompositeCache().getRemoveCount())
                 .description("Number of remove from cache operations")
                 .tag("region", region)
                 .register(Metrics.globalRegistry));
 
-            meters.add(Gauge.builder("appsuite.cache.hits.total", () -> memCache.getCompositeCache().getHitCountRam())
+            meters.add(FunctionCounter.builder("appsuite.cache.hits.total", memCache, (c) -> c.getCompositeCache().getHitCountRam())
                 .description("Number of cache hits")
                 .tag("region", region)
                 .register(Metrics.globalRegistry));
 
-            meters.add(Gauge.builder("appsuite.cache.misses.total", () -> memCache.getCompositeCache().getMissCountNotFound())
+            meters.add(FunctionCounter.builder("appsuite.cache.misses.notfound.total", memCache, (c) -> c.getCompositeCache().getMissCountNotFound())
                 .description("Number of cache misses (element not in cache)")
                 .tag("region", region)
                 .register(Metrics.globalRegistry));
 
-            meters.add(Gauge.builder("appsuite.cache.misses.expired.total", () -> memCache.getCompositeCache().getMissCountExpired())
+            meters.add(FunctionCounter.builder("appsuite.cache.misses.expired.total", memCache, (c) -> c.getCompositeCache().getMissCountExpired())
                 .description("Number of cache misses (element in cache but expired)")
+                .tag("region", region)
+                .register(Metrics.globalRegistry));
+
+            meters.add(FunctionCounter.builder("appsuite.cache.misses.total", memCache, (c) ->
+                    c.getCompositeCache().getMissCountNotFound() + c.getCompositeCache().getMissCountExpired())
+                .description("Number of cache misses (not in cache + in cache but expired)")
                 .tag("region", region)
                 .register(Metrics.globalRegistry));
         }
