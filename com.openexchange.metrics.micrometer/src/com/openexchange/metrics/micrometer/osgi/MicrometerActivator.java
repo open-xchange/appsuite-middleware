@@ -88,7 +88,8 @@ public class MicrometerActivator extends HousekeepingActivator implements Reload
     private static final Logger LOG = LoggerFactory.getLogger(MicrometerActivator.class);
 
     private static final String SERVLET_BIND_POINT = "/metrics";
-    private PrometheusMeterRegistry prometheusRegistry;
+
+    private volatile PrometheusMeterRegistry prometheusRegistry;
 
     /**
      * Initializes a new {@link MicrometerActivator}.
@@ -139,17 +140,15 @@ public class MicrometerActivator extends HousekeepingActivator implements Reload
     private void applyMeterFilters(ConfigurationService configService) throws OXException, ServletException, NamespaceException {
         Metrics.removeRegistry(prometheusRegistry);
         prometheusRegistry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
-        //In that order
+        // Apply filters
         new ActivateMetricMicrometerFilterPerformer().applyFilter(prometheusRegistry, configService);
         new DistributionHistogramMicrometerFilterPerformer().applyFilter(prometheusRegistry, configService);
         new DistributionMinimumMicrometerFilterPerformer().applyFilter(prometheusRegistry, configService);
         new DistributionMaximumMicrometerFilterPerformer().applyFilter(prometheusRegistry, configService);
         new DistributionPercentilesMicrometerFilterPerformer().applyFilter(prometheusRegistry, configService);
         new DistributionSLAMicrometerFilterPerformer().applyFilter(prometheusRegistry, configService);
+        // Must applied last one for the 'all' wildcard
         new DenyAllMetricMicrometerFilterPerformer().applyFilter(prometheusRegistry, configService);
-
-        // Enable for default metrics such as jvm.*, process.*, etc.
-        //DefaultExports.register(prometheusRegistry.getPrometheusRegistry());
 
         Metrics.addRegistry(prometheusRegistry);
     }

@@ -49,7 +49,6 @@
 
 package com.openexchange.metrics.micrometer.internal.filter;
 
-import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.config.ConfigurationService;
@@ -78,8 +77,7 @@ public class DistributionMaximumMicrometerFilterPerformer extends AbstractMicrom
 
     @Override
     public void applyFilter(MeterRegistry meterRegistry, ConfigurationService configurationService) throws OXException {
-        Map<String, String> properties = getPropertiesStartingWith(configurationService, MicrometerFilterProperty.MAXIMUM);
-        properties.entrySet().stream().forEach(entry -> {
+        applyFilterFor(MicrometerFilterProperty.MAXIMUM, configurationService, (entry) -> {
             String metricId = extractMetricId(entry.getKey(), MicrometerFilterProperty.MAXIMUM);
             LOG.debug("Applying maximum meter filter for '{}'", metricId);
             meterRegistry.config().meterFilter(MeterFilter.maxExpected(metricId, Long.parseLong(entry.getValue())));

@@ -49,7 +49,6 @@
 
 package com.openexchange.metrics.micrometer.internal.filter;
 
-import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.config.ConfigurationService;
@@ -81,8 +80,7 @@ public class DistributionPercentilesMicrometerFilterPerformer extends AbstractMi
 
     @Override
     public void applyFilter(MeterRegistry meterRegistry, ConfigurationService configurationService) throws OXException {
-        Map<String, String> properties = getPropertiesStartingWith(configurationService, MicrometerFilterProperty.PERCENTILES);
-        properties.entrySet().stream().forEach(entry -> {
+        applyFilterFor(MicrometerFilterProperty.PERCENTILES, configurationService, (entry) -> {
             meterRegistry.config().meterFilter(new MeterFilter() {
 
                 public DistributionStatisticConfig configure(Meter.Id id, DistributionStatisticConfig config) {
@@ -94,7 +92,11 @@ public class DistributionPercentilesMicrometerFilterPerformer extends AbstractMi
                     double[] percentiles = new double[p.length];
                     int index = 0;
                     for (String s : p) {
-                        percentiles[index++] = Double.parseDouble(s);
+                        try {
+                            percentiles[index++] = Double.parseDouble(s);
+                        } catch (NumberFormatException e) {
+                            LOG.warn("Percentile '{}' cannot be parsed as double. Will be ignored.", s);
+                        }
                     }
                     return DistributionStatisticConfig.builder().percentiles(percentiles).build().merge(config);
                 }

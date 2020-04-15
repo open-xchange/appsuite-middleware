@@ -78,7 +78,6 @@ public class DenyAllMetricMicrometerFilterPerformer extends AbstractMicrometerFi
 
     @Override
     public void applyFilter(MeterRegistry meterRegistry, ConfigurationService configurationService) throws OXException {
-        //Map<String, String> properties = (configurationService, MicrometerFilterProperty.ENABLE);
         String value = configurationService.getProperty(MicrometerFilterProperty.ENABLE.getFQPropertyName() + ".all");
         if (false == Boolean.parseBoolean(value)) {
             meterRegistry.config().meterFilter(MeterFilter.deny());

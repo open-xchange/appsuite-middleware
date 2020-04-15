@@ -49,7 +49,6 @@
 
 package com.openexchange.metrics.micrometer.internal.filter;
 
-import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.config.ConfigurationService;
@@ -82,8 +81,7 @@ public class DistributionSLAMicrometerFilterPerformer extends AbstractMicrometer
 
     @Override
     public void applyFilter(MeterRegistry meterRegistry, ConfigurationService configurationService) throws OXException {
-        Map<String, String> properties = getPropertiesStartingWith(configurationService, MicrometerFilterProperty.SLA);
-        properties.entrySet().stream().forEach(entry -> {
+        applyFilterFor(MicrometerFilterProperty.SLA, configurationService, (entry) -> {
             meterRegistry.config().meterFilter(new MeterFilter() {
 
                 public DistributionStatisticConfig configure(Meter.Id id, DistributionStatisticConfig config) {

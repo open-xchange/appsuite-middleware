@@ -50,6 +50,8 @@
 package com.openexchange.metrics.micrometer.internal.filter;
 
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.function.Consumer;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.metrics.micrometer.internal.property.MicrometerFilterProperty;
@@ -70,7 +72,20 @@ abstract class AbstractMicrometerFilterPerformer {
     }
 
     /**
-     * Returns all properties that start with the specified prefix
+     * Applies the MeterFilter by the specified meter filter consumer to the specified meter registry.
+     *
+     * @param property The property
+     * @param configurationService The configuration service to read the property's value
+     * @param meterFilterConsumer The consumer which dictates the application of the meter filter
+     * @throws OXException if an error is occurred
+     */
+    void applyFilterFor(MicrometerFilterProperty property, ConfigurationService configurationService, Consumer<Entry<String, String>> meterFilterConsumer) throws OXException {
+        Map<String, String> properties = getPropertiesStartingWith(configurationService, property);
+        properties.entrySet().parallelStream().forEach(entry -> meterFilterConsumer.accept(entry));
+    }
+
+    /**
+     * Returns all properties that start with the specified prefix.
      *
      * @param configurationService The configuration service
      * @param property The prefix of the property
@@ -93,6 +108,4 @@ abstract class AbstractMicrometerFilterPerformer {
         String prop = property.name().toLowerCase();
         return propertyName.substring(propertyName.indexOf(prop) + prop.length() + 1);
     }
-
-    //void applyFilterFor(MicrometerFilterProperty property, ConfigurationService configurationSerivce, Funtion<>)
 }
