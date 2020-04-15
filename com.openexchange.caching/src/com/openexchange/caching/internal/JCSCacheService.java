@@ -198,6 +198,10 @@ public final class JCSCacheService extends DefaultCacheKeyService implements Cac
         JCSCacheServiceInit.getInstance().loadDefaultConfiguration();
     }
 
+    /**
+     * Wrapper that holds the actual cache instance and takes care to manage
+     * the caches Micrometer monitoring metrics.
+     */
     private static final class MeteredCache {
 
         private final String region;
@@ -212,6 +216,9 @@ public final class JCSCacheService extends DefaultCacheKeyService implements Cac
             this.meters = new ArrayList<>(7);
         }
 
+        /**
+         * Gets the effective cache instance, either {@link JCSCache} or - if set - the {@link NotifyingCache}.
+         */
         Cache getEffectiveCache() {
             if (notifyingCache == null) {
                 return jcsCache;
@@ -219,58 +226,69 @@ public final class JCSCacheService extends DefaultCacheKeyService implements Cac
             return notifyingCache;
         }
 
+        /**
+         * Sets the optional {@link NotifyingCache} instance
+         *
+         * @param notifyingCache
+         */
         void setNotifyingCache(NotifyingCache notifyingCache) {
             this.notifyingCache = notifyingCache;
         }
 
+        /**
+         * Registers all cache-specific monitoring metrics
+         */
         void registerMeters() {
             MemoryCache memCache = jcsCache.getMemCache();
             if (memCache == null) {
                 return;
             }
 
-            meters.add(Gauge.builder("appsuite.cache.elements.max", memCache, (c) -> c.getCacheAttributes().getMaxObjects())
+            meters.add(Gauge.builder("appsuite.cache.elements.max", memCache, (c) -> new Integer(c.getCacheAttributes().getMaxObjects()).doubleValue())
                 .description("Max. number of cached elements")
                 .tag("region", region)
                 .register(Metrics.globalRegistry));
 
-            meters.add(Gauge.builder("appsuite.cache.elements.total", memCache, (c) -> c.getSize())
+            meters.add(Gauge.builder("appsuite.cache.elements.total", memCache, (c) -> new Integer(c.getSize()).doubleValue())
                 .description("Current number of cached elements")
                 .tag("region", region)
                 .register(Metrics.globalRegistry));
 
-            meters.add(FunctionCounter.builder("appsuite.cache.puts.total", memCache, (c) -> c.getCompositeCache().getUpdateCount())
+            meters.add(FunctionCounter.builder("appsuite.cache.puts.total", memCache, (c) -> new Integer(c.getCompositeCache().getUpdateCount()).doubleValue())
                 .description("Number of cache put operations")
                 .tag("region", region)
                 .register(Metrics.globalRegistry));
 
-            meters.add(FunctionCounter.builder("appsuite.cache.removals.total", memCache, (c) -> c.getCompositeCache().getRemoveCount())
+            meters.add(FunctionCounter.builder("appsuite.cache.removals.total", memCache, (c) -> new Integer(c.getCompositeCache().getRemoveCount()).doubleValue())
                 .description("Number of remove from cache operations")
                 .tag("region", region)
                 .register(Metrics.globalRegistry));
 
-            meters.add(FunctionCounter.builder("appsuite.cache.hits.total", memCache, (c) -> c.getCompositeCache().getHitCountRam())
+            meters.add(FunctionCounter.builder("appsuite.cache.hits.total", memCache, (c) -> new Integer(c.getCompositeCache().getHitCountRam()).doubleValue())
                 .description("Number of cache hits")
                 .tag("region", region)
                 .register(Metrics.globalRegistry));
 
-            meters.add(FunctionCounter.builder("appsuite.cache.misses.notfound.total", memCache, (c) -> c.getCompositeCache().getMissCountNotFound())
+            meters.add(FunctionCounter.builder("appsuite.cache.misses.notfound.total", memCache, (c) -> new Integer(c.getCompositeCache().getMissCountNotFound()).doubleValue())
                 .description("Number of cache misses (element not in cache)")
                 .tag("region", region)
                 .register(Metrics.globalRegistry));
 
-            meters.add(FunctionCounter.builder("appsuite.cache.misses.expired.total", memCache, (c) -> c.getCompositeCache().getMissCountExpired())
+            meters.add(FunctionCounter.builder("appsuite.cache.misses.expired.total", memCache, (c) -> new Integer(c.getCompositeCache().getMissCountExpired()).doubleValue())
                 .description("Number of cache misses (element in cache but expired)")
                 .tag("region", region)
                 .register(Metrics.globalRegistry));
 
             meters.add(FunctionCounter.builder("appsuite.cache.misses.total", memCache, (c) ->
-                    c.getCompositeCache().getMissCountNotFound() + c.getCompositeCache().getMissCountExpired())
+                    new Integer(c.getCompositeCache().getMissCountNotFound() + c.getCompositeCache().getMissCountExpired()).doubleValue())
                 .description("Number of cache misses (not in cache + in cache but expired)")
                 .tag("region", region)
                 .register(Metrics.globalRegistry));
         }
 
+        /**
+         * Unregisters all monitoring metrics for the contained cache
+         */
         void unregisterMeters() {
             Iterator<Meter> it = meters.iterator();
             while (it.hasNext()) {
