@@ -496,4 +496,15 @@ properties:
       configcascadeAware: true
       file: calendar.properties
       packageName: open-xchange-core
-      tags: ["Calendar"]      
+      tags: ["Calendar"]
+    - key: com.openexchange.calendar.allowOrganizerPartStatChanges
+      description: |
+        Configures whether organizer changes of the participation status property of other attendees are allowed beyond the recommended 
+        restrictions mentioned in RFC 6638, section 3.2.1. Otherwise, only transitions to NEEDS-ACTION are possible. 
+      defaultValue: false
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: true
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar"]

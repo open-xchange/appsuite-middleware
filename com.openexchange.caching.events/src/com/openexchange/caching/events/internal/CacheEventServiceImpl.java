@@ -213,12 +213,22 @@ public final class CacheEventServiceImpl implements CacheEventService, CacheEven
          * perform notifications
          */
         if (false == listenersToNotify.isEmpty()) {
-            if (delayedEvents.offerIfAbsentElseReset(listenersToNotify, sender, event, fromRemote)) {
-                /*
-                 * increment offered events
-                 */
-                if (numOfferedEvents.incrementAndGet() < 0L) {
-                    numOfferedEvents.set(0L);
+            if (fromRemote) {
+                // Deliver remotely received event immediately to local cache listeners to prevent event being aggregated into another local
+                // event and thus re-distributed remotely again
+                try {
+                    ThreadPoolService threadPool = threadPoolRef.get();
+                    CacheEventServiceImpl.notify(listenersToNotify, sender, event, fromRemote, numDeliveredEvents, threadPool);
+                } catch (Exception e) {
+                    LOG.warn("Failed to notify cache listeners about {} event: {}", fromRemote ? "remote" : "local", event, e);
+                }
+            } else {
+                // Schedule locally received event for being processed. Possibly aggregate it into another event.
+                if (delayedEvents.offerIfAbsentElseReset(listenersToNotify, sender, event, fromRemote)) {
+                    // Increment offered events
+                    if (numOfferedEvents.incrementAndGet() < 0L) {
+                        numOfferedEvents.set(0L);
+                    }
                 }
             }
         }
@@ -234,9 +244,9 @@ public final class CacheEventServiceImpl implements CacheEventService, CacheEven
         List<CacheListener> listeners = cacheRegionListeners.get(region);
         if (null == listeners) {
             listeners = new CopyOnWriteArrayList<CacheListener>();
-            List<CacheListener> exitingListeners = cacheRegionListeners.putIfAbsent(region, listeners);
-            if (null != exitingListeners) {
-                return exitingListeners;
+            List<CacheListener> existingListeners = cacheRegionListeners.putIfAbsent(region, listeners);
+            if (null != existingListeners) {
+                return existingListeners;
             }
         }
         return listeners;

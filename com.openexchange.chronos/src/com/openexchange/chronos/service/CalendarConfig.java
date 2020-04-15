@@ -163,4 +163,13 @@ public interface CalendarConfig {
      */
     boolean isOrganizerChangeAllowed();
 
+    /**
+     * Gets a value indicating whether organizer changes of the participation status property of other attendees are allowed beyond the
+     * recommended restrictions mentioned in <a href="https://tools.ietf.org/html/rfc6638#section-3.2.1">RFC 6638, section 3.2.1</a>.
+     * Otherwise, only transitions to <code>NEEDS-ACTION</code> are possible.
+     *
+     * @return <code>true</code> if changing <code>PARTSTAT</code>s of other attendees is allowed, <code>false</code>, otherwise
+     */
+    boolean isAllowOrganizerPartStatChanges();
+
 }
