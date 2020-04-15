@@ -46,7 +46,8 @@ Export-Package: com.nimbusds.jose,
 Bundle-ClassPath: lib/oauth2-oidc-sdk-5.30.jar,
  lib/nimbus-jose-jwt-4.41.2.jar,
  lib/json-smart-1.0.6.3.jar,
- lib/lang-tag-1.4.jar
+ lib/lang-tag-1.4.jar,
+ .
 Import-Package: com.openexchange.java,
  javax.activation,
  javax.crypto,
