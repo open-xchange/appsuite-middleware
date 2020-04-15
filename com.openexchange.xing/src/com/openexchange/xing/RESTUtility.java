@@ -87,7 +87,6 @@ import org.json.JSONException;
 import org.json.JSONInputStream;
 import org.json.JSONObject;
 import org.json.JSONValue;
-import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.rest.client.httpclient.HttpClientService;
@@ -526,7 +525,7 @@ public class RESTUtility {
                 throw new XingException("Internal server error. Missing service " + HttpClientService.class.getSimpleName());
             }
             return httpClientService.getHttpClient("xing");
-        } catch (OXException e) {
+        } catch (Exception e) {
             throw new XingException("Internal server error. Unable to get HTTP client", e);
         }
     }
