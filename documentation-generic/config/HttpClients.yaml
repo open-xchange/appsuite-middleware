@@ -6,7 +6,7 @@ feature_description: |
 properties:
   - key: com.openenexchange.httpclient.[serviceIdentifer].readTimeout
     description: |
-       The read time-out in milliseconds.
+       Specifies the socket timeout in milliseconds, which is the timeout for waiting for data.
     defaultValue: 30000
     version: 7.10.4
     reloadable: true
@@ -14,9 +14,9 @@ properties:
     file: 
     packageName: open-xchange-core
     tags: ["Server", "HTTP Client"]
-  - key: com.openenexchange.httpclient.[serviceIdentifer].connectionTimeout
+  - key: com.openenexchange.httpclient.[serviceIdentifer].connectTimeout
     description: |
-      The connection time-out in milliseconds.
+      Specifies the timeout in milliseconds until a connection is established.
     defaultValue: 30000
     version: 7.10.4
     reloadable: true
@@ -24,9 +24,9 @@ properties:
     file: 
     packageName: open-xchange-core
     tags: ["Server", "HTTP Client"]
-  - key: com.openenexchange.httpclient.[serviceIdentifer].requestTimeout
+  - key: com.openenexchange.httpclient.[serviceIdentifer].connectionRequestTimeout
     description: |
-       The request time-out in milliseconds.
+       Specifies the timeout in milliseconds used when requesting a connection from the HTTP connection pool.
     defaultValue: 30000
     version: 7.10.4
     reloadable: true
@@ -46,7 +46,7 @@ properties:
     tags: ["Server", "HTTP Client"]
   - key: com.openenexchange.httpclient.[serviceIdentifer].keepAlive.monitorInterval
     description: |
-       The interval time in seconds to check for connections that has passed the keep alive duration.
+       The frequency in seconds to check for connections that have passed the keep-alive duration.
     defaultValue: 5
     version: 7.10.4
     reloadable: true
@@ -64,7 +64,7 @@ properties:
     file: 
     packageName: open-xchange-core
     tags: ["Server", "HTTP Client"]
-  - key: com.openenexchange.httpclient.[serviceIdentifer].connectionPerRoute
+  - key: com.openenexchange.httpclient.[serviceIdentifer].connectionsPerRoute
     description: |
         The number of connections per route held in HTTP connection pool by each client
     defaultValue: 10
@@ -76,7 +76,7 @@ properties:
     tags: ["Server", "HTTP Client"]
   - key: com.openenexchange.httpclient.[serviceIdentifer].socketBufferSize
     description: |
-       The buffer size of the underlying socket connection. Default is alignd with org.apache.http.config.ConnectionConfig
+       The buffer size of the underlying socket connection.
     defaultValue: 8192
     version: 7.10.4
     reloadable: true

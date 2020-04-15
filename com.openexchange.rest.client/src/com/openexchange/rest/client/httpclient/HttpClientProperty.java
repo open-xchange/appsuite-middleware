@@ -16,12 +16,12 @@ import com.openexchange.config.lean.Property;
 public enum HttpClientProperty implements Property {
 
     SOCKET_READ_TIMEOUT_MILLIS("readTimeout", I(30000), (config, in) -> config.setSocketReadTimeout(i(in))),
-    CONNTECTION_TIMEOUT_MILLIS("connectionTimeout", I(30000), (config, in) -> config.setConnectionTimeout(i(in))),
-    CONNECTION_REQUEST_TIMEOUT_MILLIS("requestTimeout", I(30000), (config, in) -> config.setConnectionRequestTimeout(i(in))),
+    CONNTECTION_TIMEOUT_MILLIS("connectTimeout", I(30000), (config, in) -> config.setConnectionTimeout(i(in))),
+    CONNECTION_REQUEST_TIMEOUT_MILLIS("connectionRequestTimeout", I(30000), (config, in) -> config.setConnectionRequestTimeout(i(in))),
     KEEP_ALIVE_DURATION_SECS("keepAlive.duration", I(20), (config, in) -> config.setKeepAliveDuration(i(in))),
     KEEP_ALIVE_MONITOR_INTERVAL_SECS("keepAlive.monitorInterval", I(5), (config, in) -> config.setKeepAliveMonitorInterval(i(in))),
     MAX_TOTAL_CONNECTIONS("totalConnections", I(20), (config, in) -> config.setMaxTotalConnections(i(in))),
-    MAX_CONNECTIONS_PER_ROUTE("connectionPerRoute", I(10), (config, in) -> config.setMaxConnectionsPerRoute(i(in))),
+    MAX_CONNECTIONS_PER_ROUTE("connectionsPerRoute", I(10), (config, in) -> config.setMaxConnectionsPerRoute(i(in))),
     DEFAULT_SOCKET_BUFFER_SIZE("socketBufferSize", I(8192), (config, in) -> config.setSocketBufferSize(i(in)));
 
     /** The wildcard name for the properties */

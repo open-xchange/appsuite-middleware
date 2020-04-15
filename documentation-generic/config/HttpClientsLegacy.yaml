@@ -14,7 +14,7 @@ properties:
     file: 
     packageName: open-xchange-core
     tags: ["Server", "HTTP Client", "Autoconfig"]
-  - key: com.openenexchange.httpclient.autoconfig-server.connectionTimeout
+  - key: com.openenexchange.httpclient.autoconfig-server.connectTimeout
     description: |
       The connection time-out in milliseconds.
     defaultValue: 3000
@@ -44,7 +44,7 @@ properties:
     file: 
     packageName: open-xchange-core
     tags: ["Server", "HTTP Client", "DavPush"]
-  - key: com.openenexchange.httpclient.davpush.connectionPerRoute
+  - key: com.openenexchange.httpclient.davpush.connectionsPerRoute
     description: |
         The number of connections per route held in HTTP connection pool by each client
     defaultValue: 100
@@ -64,7 +64,7 @@ properties:
     file: 
     packageName: open-xchange-core
     tags: ["Server", "HTTP Client", "DropBox"]
-  - key: com.openenexchange.httpclient.dropbox.connectionTimeout
+  - key: com.openenexchange.httpclient.dropbox.connectTimeout
     description: |
       The connection time-out in milliseconds.
     defaultValue: 20000
@@ -84,7 +84,7 @@ properties:
     file: 
     packageName: open-xchange-core
     tags: ["Server", "HTTP Client", "Proxy"]
-  - key: com.openenexchange.httpclient.proxy.connectionTimeout
+  - key: com.openenexchange.httpclient.proxy.connectTimeout
     description: |
       The connection time-out in milliseconds.
     defaultValue: 3000
@@ -94,7 +94,7 @@ properties:
     file: 
     packageName: open-xchange-core
     tags: ["Server", "HTTP Client", "Proxy"]
-  - key: com.openenexchange.httpclient.spamexperts.connectionTimeout
+  - key: com.openenexchange.httpclient.spamexperts.connectTimeout
     description: |
       The connection time-out in milliseconds.
     defaultValue: 5000
@@ -114,7 +114,7 @@ properties:
     file: 
     packageName: open-xchange-core
     tags: ["Server", "HTTP Client", "Spam Experts"]
-  - key: com.openenexchange.httpclient.spamexperts.connectionPerRoute
+  - key: com.openenexchange.httpclient.spamexperts.connectionsPerRoute
     description: |
         The number of connections per route held in HTTP connection pool by each client
     defaultValue: 32
@@ -134,7 +134,7 @@ properties:
     file: 
     packageName: open-xchange-core
     tags: ["Server", "HTTP Client", "DAV Subscription"]
-  - key: com.openenexchange.httpclient.davsub.connectionTimeout
+  - key: com.openenexchange.httpclient.davsub.connectTimeout
     description: |
       The connection time-out in milliseconds.
     defaultValue: 5000
@@ -154,7 +154,7 @@ properties:
     file: 
     packageName: open-xchange-core
     tags: ["Server", "HTTP Client", "DAV Subscription"]
-  - key: com.openenexchange.httpclient.davsub.connectionPerRoute
+  - key: com.openenexchange.httpclient.davsub.connectionsPerRoute
     description: |
         The number of connections per route held in HTTP connection pool by each client
     defaultValue: 5

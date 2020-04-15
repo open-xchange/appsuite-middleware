@@ -246,7 +246,7 @@ properties:
       packageName: open-xchange-authentication-oauth
       tags: ["Authentication", "OAuth", "Limit"]
       
-    - key: com.openenexchange.httpclient.oauth-authentication.connectionPerRoute
+    - key: com.openenexchange.httpclient.oauth-authentication.connectionsPerRoute
       description: |
         The max. number of concurrent HTTP connections that may be established with a certain endpoint.
       defaultValue: 100
@@ -258,7 +258,7 @@ properties:
       packageName: open-xchange-authentication-oauth
       tags: ["Authentication", "OAuth", "Limit"]
       
-    - key: com.openenexchange.httpclient.oauth-authentication.connectionTimeout
+    - key: com.openenexchange.httpclient.oauth-authentication.connectTimeout
       description: |
         The connection timeout in milliseconds. If establishing a new HTTP connection to a certain
         host exceeds this value, a timeout exception is thrown.
@@ -284,7 +284,7 @@ properties:
       packageName: open-xchange-authentication-oauth
       tags: ["Authentication", "OAuth", "Timeout"]
 
-    - key: com.openenexchange.httpclient.oauth-authentication.requestTimeout
+    - key: com.openenexchange.httpclient.oauth-authentication.connectionRequestTimeout
       description: |
         The pool timeout in milliseconds. If waiting for the next available HTTP connection from pool exceeds
         this value, a timeout exception is thrown.
