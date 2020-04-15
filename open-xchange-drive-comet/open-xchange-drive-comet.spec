@@ -2,16 +2,8 @@
 
 Name:          open-xchange-drive-comet
 BuildArch:     noarch
-%if 0%{?rhel_version} && 0%{?rhel_version} >= 700
 BuildRequires: ant
-%else
-BuildRequires: ant-nodeps
-%endif
-%if 0%{?suse_version}
-BuildRequires: java-1_8_0-openjdk-devel
-%else
 BuildRequires: java-1.8.0-openjdk-devel
-%endif
 BuildRequires: open-xchange-drive
 BuildRequires: open-xchange-grizzly
 Version:       @OXVERSION@

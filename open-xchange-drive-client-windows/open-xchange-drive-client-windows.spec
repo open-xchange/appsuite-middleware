@@ -3,16 +3,8 @@
 
 Name:          open-xchange-drive-client-windows
 BuildArch:     noarch
-%if 0%{?rhel_version} && 0%{?rhel_version} >= 700
 BuildRequires: ant
-%else
-BuildRequires: ant-nodeps
-%endif
-%if 0%{?suse_version}
-BuildRequires: java-1_8_0-openjdk-devel
-%else
 BuildRequires: java-1.8.0-openjdk-devel
-%endif
 BuildRequires: open-xchange-admin
 BuildRequires: open-xchange-core >= @OXVERSION@, open-xchange-client-onboarding >= @OXVERSION@, open-xchange-drive >= @OXVERSION@
 BuildRequires: pandoc >= 2.0.0

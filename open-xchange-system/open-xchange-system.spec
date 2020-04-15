@@ -3,16 +3,8 @@
 
 Name:          open-xchange-system
 BuildArch:     noarch
-%if 0%{?rhel_version} && 0%{?rhel_version} >= 700
 BuildRequires: ant
-%else
-BuildRequires: ant-nodeps
-%endif
-%if 0%{?suse_version}
-BuildRequires: java-1_8_0-openjdk-devel
-%else
 BuildRequires: java-1.8.0-openjdk-devel
-%endif
 BuildRequires: coreutils
 BuildRequires: pandoc >= 2.0.0
 Version:       @OXVERSION@
@@ -26,11 +18,7 @@ Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       System integration specific infrastructure
 Autoreqprov:   no
 PreReq:        /usr/sbin/useradd
-%if 0%{?suse_version} && 0%{?suse_version} <= 1210
-Requires:      util-linux
-%else
 Requires:      which
-%endif
 Requires:      sed
 Requires:      coreutils
 Requires:      perl

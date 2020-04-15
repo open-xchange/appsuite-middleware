@@ -2,17 +2,9 @@
 
 Name:           open-xchange-spamsettings-generic
 BuildArch:      noarch
-%if 0%{?rhel_version} && 0%{?rhel_version} >= 700
-BuildRequires:  ant
-%else
-BuildRequires:  ant-nodeps
-%endif
+BuildRequires: ant
 BuildRequires:  open-xchange-core >= @OXVERSION@
-%if 0%{?suse_version}
-BuildRequires: java-1_8_0-openjdk-devel
-%else
 BuildRequires: java-1.8.0-openjdk-devel
-%endif
 Version:        @OXVERSION@
 %define        ox_release 0
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
@@ -40,11 +32,7 @@ Authors:
 
 %install
 export NO_BRP_CHECK_BYTECODE_VERSION=true
-%if 0%{?rhel_version} || 0%{?fedora_version}
 %define docroot /var/www/html
-%else
-%define docroot /srv/www/htdocs
-%endif
 
 ant -lib build/lib -Dbasedir=build -Dhtdoc=%{docroot} -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml build
 

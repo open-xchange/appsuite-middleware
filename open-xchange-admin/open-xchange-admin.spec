@@ -3,17 +3,9 @@
 
 Name:          open-xchange-admin
 BuildArch:     noarch
-%if 0%{?rhel_version} && 0%{?rhel_version} >= 700
 BuildRequires: ant
-%else
-BuildRequires: ant-nodeps
-%endif
 BuildRequires: open-xchange-core
-%if 0%{?suse_version}
-BuildRequires: java-1_8_0-openjdk-devel
-%else
 BuildRequires: java-1.8.0-openjdk-devel
-%endif
 BuildRequires: pandoc >= 2.0.0
 Version:       @OXVERSION@
 %define        ox_release 0
@@ -40,17 +32,8 @@ Provides:      open-xchange-admin-plugin-hosting-lib = %{version}
 Obsoletes:     open-xchange-admin-plugin-hosting-lib < %{version}
 Provides:      open-xchange-admin-doc = %{version}
 Obsoletes:     open-xchange-admin-doc < %{version}
-%if 0%{?suse_version}
-Requires:      mysql-client >= 5.0.0
-%endif
-%if 0%{?fedora_version} || 0%{?rhel_version}
 Requires:      mysql >= 5.0.0
-%endif
-%if 0%{?rhel_version} && 0%{?rhel_version} == 600
-Requires:      util-linux-ng
-%else
 Requires:      util-linux
-%endif
 Requires:      bzip2
 Requires:      coreutils
 Requires:      gawk

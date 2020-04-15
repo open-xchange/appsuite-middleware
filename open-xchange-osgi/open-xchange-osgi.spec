@@ -2,16 +2,8 @@
 
 Name:          open-xchange-osgi
 BuildArch:     noarch
-%if 0%{?rhel_version} && 0%{?rhel_version} >= 700
 BuildRequires: ant
-%else
-BuildRequires: ant-nodeps
-%endif
-%if 0%{?suse_version}
-BuildRequires: java-1_8_0-openjdk-devel
-%else
 BuildRequires: java-1.8.0-openjdk-devel
-%endif
 Version:       @OXVERSION@
 %define        ox_release 0
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
@@ -26,11 +18,7 @@ Provides:      open-xchange-common = %{version}
 Obsoletes:     open-xchange-common < %{version}
 Provides:      open-xchange-activation = %{version}
 Obsoletes:     open-xchange-activation < %{version}
-%if 0%{?rhel_version}
 Requires:      java-1.8.0-openjdk-headless
-%else
-Requires:      java-1_8_0-openjdk-headless
-%endif
 # No ibm java on RHEL and on SLE, please
 Conflicts:     java-ibm
 

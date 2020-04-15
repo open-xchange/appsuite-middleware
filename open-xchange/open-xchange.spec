@@ -1,20 +1,8 @@
 %define __jar_repack %{nil}
-%define use_systemd (0%{?rhel} && 0%{?rhel} >= 7) || (0%{?suse_version} && 0%{?suse_version} >=1210)
 Name:             open-xchange
 BuildArch:        noarch
-%if 0%{?rhel_version} && 0%{?rhel_version} >= 700
-BuildRequires:    ant
-%else
-BuildRequires:    ant-nodeps
-%endif
-%if 0%{?suse_version}
-BuildRequires: java-1_8_0-openjdk-devel
-%else
+BuildRequires: ant
 BuildRequires: java-1.8.0-openjdk-devel
-%endif
-%if (0%{?suse_version} && 0%{?suse_version} >= 1210)
-BuildRequires:    systemd-rpm-macros
-%endif
 Version:          @OXVERSION@
 %define           ox_release 0
 Release:          %{ox_release}_<CI_CNT>.<B_CNT>
@@ -23,7 +11,6 @@ License:          GPL-2.0
 BuildRoot:        %{_tmppath}/%{name}-%{version}-build
 URL:              http://www.open-xchange.com/
 Source:           %{name}_%{version}.orig.tar.bz2
-Source1:          open-xchange.init
 Source2:          open-xchange.service
 %define           dropin_dir /etc/systemd/system/open-xchange.service.d
 %define           dropin_example limits.conf
@@ -35,16 +22,10 @@ Requires:         open-xchange-authorization
 Requires:         open-xchange-mailstore
 Requires:         open-xchange-httpservice
 Requires:         open-xchange-smtp >= @OXVERSION@
-%if (0%{?rhel_version} && 0%{?rhel_version} >= 700) || (0%{?suse_version} && 0%{?suse_version} >= 1210)
 Requires(pre):    systemd
 Requires(post):   systemd
 Requires(preun):  systemd
 Requires(postun): systemd
-%endif
-%if 0%{?rhel_version} && 0%{?rhel_version} < 700
-# Bug #23216
-Requires:         redhat-lsb
-%endif
 
 %description
 This package provides the dependencies to install a working Open-Xchange backend system. By installing this package a minimal backend is
@@ -62,33 +43,16 @@ Authors:
 %install
 export NO_BRP_CHECK_BYTECODE_VERSION=true
 mkdir -p %{buildroot}%{_sbindir}
-%if (0%{?rhel_version} && 0%{?rhel_version} >= 700) || (0%{?suse_version} && 0%{?suse_version} >= 1210)
 %__install -D -m 444 %{SOURCE2} %{buildroot}/usr/lib/systemd/system/open-xchange.service
 ln -sf /usr/sbin/service %{buildroot}%{_sbindir}/rcopen-xchange
-%else
-mkdir -p %{buildroot}/etc/init.d
-install -m 755 %{SOURCE1} %{buildroot}/etc/init.d/open-xchange
-ln -sf /etc/init.d/open-xchange %{buildroot}%{_sbindir}/rcopen-xchange
-%endif
 
 # On Redhat and SuSE start scripts are not automatically added to system start. This is wanted behavior and standard.
 
 %post
-%if (0%{?suse_version} && 0%{?suse_version} >= 1210)
-%service_add_post open-xchange.service
-%endif
-%if (0%{?rhel_version} && 0%{?rhel_version} >= 700)
 if [ ! -f %{dropin_dir}/%{dropin_example} ]
 then
   install -D -m 644 %{_defaultdocdir}/%{name}-%{version}/%{dropin_example} %{dropin_dir}/%{dropin_example}
 fi
-%endif
-%if (0%{?suse_version} && 0%{?suse_version} >= 1210)
-if [ ! -f %{dropin_dir}/%{dropin_example} ]
-then
-  install -D -m 644 %{_defaultdocdir}/%{name}/%{dropin_example} %{dropin_dir}/%{dropin_example}
-fi
-%endif
 
 # SoftwareChange_Request-3859
 drop_in=%{dropin_dir}/%{dropin_example}
@@ -105,36 +69,20 @@ then
 fi
 
 # Trigger a service definition/config reload
-%if %{use_systemd}
 systemctl daemon-reload &> /dev/null || :
-%endif
 
 %preun
-%if (0%{?suse_version} && 0%{?suse_version} >= 1210)
-%service_del_preun open-xchange.service
-%endif
 
 %postun
-%if (0%{?suse_version} && 0%{?suse_version} >= 1210)
-%service_del_postun open-xchange.service
-%endif
 
 %clean
 %{__rm} -rf %{buildroot}
 
 %files
 %defattr(-,root,root)
-%if (0%{?rhel_version} && 0%{?rhel_version} >= 700) || (0%{?suse_version} && 0%{?suse_version} >= 1210)
 /usr/lib/systemd/system/open-xchange.service
 /usr/sbin/rcopen-xchange
-%else
-/etc/init.d/open-xchange
-/usr/sbin/rcopen-xchange
-%endif
-
-%if (0%{?rhel_version} && 0%{?rhel_version} >= 700) || (0%{?suse_version} && 0%{?suse_version} >= 1210)
 %doc docs/%{dropin_example}
-%endif
 
 %changelog
 * Thu Jan 16 2020 Marcus Klein <marcus.klein@open-xchange.com>
