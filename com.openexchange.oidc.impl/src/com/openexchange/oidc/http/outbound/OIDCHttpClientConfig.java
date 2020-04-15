@@ -50,9 +50,6 @@
 package com.openexchange.oidc.http.outbound;
 
 import java.util.Optional;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.java.Strings;
-import com.openexchange.java.util.Tools;
 import com.openexchange.oidc.osgi.Services;
 import com.openexchange.rest.client.httpclient.DefaultHttpClientConfigProvider;
 import com.openexchange.rest.client.httpclient.HttpBasicConfig;
@@ -60,7 +57,7 @@ import com.openexchange.version.VersionService;
 
 
 /**
- * {@link OIDCHttpClientConfig} - The HTTP client configuration for outbound HTTP communication of the OpenID module.
+ * {@link OIDCHttpClientConfig} - The HTTP client configuration for out-bound HTTP communication of the OpenID module.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.4
@@ -80,7 +77,7 @@ public class OIDCHttpClientConfig extends DefaultHttpClientConfigProvider {
     private static final String CLIENT_ID_OIDC = "oidc";
 
     /**
-     * Gets the identifier for the HTTP client configuration for outbound HTTP communication of the OpenID module.
+     * Gets the identifier for the HTTP client configuration for out-bound HTTP communication of the OpenID module.
      *
      * @return The client identifier
      */
@@ -97,40 +94,12 @@ public class OIDCHttpClientConfig extends DefaultHttpClientConfigProvider {
 
     @Override
     public HttpBasicConfig configureHttpBasicConfig(HttpBasicConfig config) {
-        ConfigurationService configService = Services.getOptionalService(ConfigurationService.class);
-
-        int maxConnections = optIntProperty("com.openexchange.oidc.http.outbound.maxConnections", DEFAULT_MAX_CONNECTIONS, configService);
-        int maxConnectionsPerHost = optIntProperty("com.openexchange.oidc.http.outbound.maxConnectionsPerHost", DEFAULT_MAX_CONNECTIONS_PER_HOST, configService);
-        int connectTimeout = optIntProperty("com.openexchange.oidc.http.outbound.connectTimeout", DEFAULT_CONNECT_TIMEOUT, configService);
-        int readTimeout = optIntProperty("com.openexchange.oidc.http.outbound.readTimeout", DEFAULT_READ_TIMEOUT, configService);
-        int poolTimeout = optIntProperty("com.openexchange.oidc.http.outbound.poolTimeout", DEFAULT_POOL_TIMEOUT, configService);
-
-        config.setSocketReadTimeout(readTimeout);
-        config.setMaxConnectionsPerRoute(maxConnections);
-        config.setMaxConnectionsPerRoute(maxConnectionsPerHost);
-        config.setConnectionTimeout(connectTimeout);
-        config.setConnectionRequestTimeout(poolTimeout);
+        config.setSocketReadTimeout(DEFAULT_READ_TIMEOUT);
+        config.setMaxConnectionsPerRoute(DEFAULT_MAX_CONNECTIONS);
+        config.setMaxConnectionsPerRoute(DEFAULT_MAX_CONNECTIONS_PER_HOST);
+        config.setConnectionTimeout(DEFAULT_CONNECT_TIMEOUT);
+        config.setConnectionRequestTimeout(DEFAULT_POOL_TIMEOUT);
         return config;
-    }
-
-    /**
-     * Gets the specified integer property.
-     *
-     * @param property The suffix/name of the property
-     * @param def The default integer value to return if no such property exists
-     * @param nameBuilder The name builder to use
-     * @param config The configuration service to retrieve the value from
-     * @return The integer property value or <code>def</code>
-     */
-    private static int optIntProperty(String property, int def, ConfigurationService configService) {
-        String value = configService.getProperty(property);
-        if (Strings.isNotEmpty(value)) {
-            int intVal = Tools.getUnsignedInteger(value.trim());
-            if (intVal >= 0) {
-                return intVal;
-            }
-        }
-        return def;
     }
 
 }

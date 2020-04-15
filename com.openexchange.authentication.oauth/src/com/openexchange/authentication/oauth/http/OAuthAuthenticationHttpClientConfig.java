@@ -50,9 +50,6 @@
 package com.openexchange.authentication.oauth.http;
 
 import java.util.Optional;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.java.Strings;
-import com.openexchange.java.util.Tools;
 import com.openexchange.rest.client.httpclient.DefaultHttpClientConfigProvider;
 import com.openexchange.rest.client.httpclient.HttpBasicConfig;
 import com.openexchange.server.ServiceLookup;
@@ -60,7 +57,7 @@ import com.openexchange.version.VersionService;
 
 
 /**
- * {@link OAuthAuthenticationHttpClientConfig} - The HTTP client configuration for outbound HTTP communication of the OAuth authentication module.
+ * {@link OAuthAuthenticationHttpClientConfig} - The HTTP client configuration for out-bound HTTP communication of the OAuth authentication module.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.4
@@ -80,15 +77,13 @@ public class OAuthAuthenticationHttpClientConfig extends DefaultHttpClientConfig
     private static final String CLIENT_ID_OAUTH_AUTHENTICATION = "oauth-authentication";
 
     /**
-     * Gets the identifier for the HTTP client configuration for outbound HTTP communication of the OAuth authentication module.
+     * Gets the identifier for the HTTP client configuration for out-bound HTTP communication of the OAuth authentication module.
      *
      * @return The client identifier
      */
     public static String getClientIdOAuthAuthentication() {
         return CLIENT_ID_OAUTH_AUTHENTICATION;
     }
-
-    private final ServiceLookup services;
 
     /**
      * Initializes a new {@link OAuthAuthenticationHttpClientConfig}.
@@ -97,45 +92,16 @@ public class OAuthAuthenticationHttpClientConfig extends DefaultHttpClientConfig
      */
     public OAuthAuthenticationHttpClientConfig(ServiceLookup services) {
         super(CLIENT_ID_OAUTH_AUTHENTICATION, "Open-Xchange OAuth Authentication HTTP Client v", Optional.ofNullable(services.getOptionalService(VersionService.class)));
-        this.services = services;
     }
 
     @Override
     public HttpBasicConfig configureHttpBasicConfig(HttpBasicConfig config) {
-        ConfigurationService configService = services.getOptionalService(ConfigurationService.class);
-
-        int maxConnections = optIntProperty("com.openexchange.authentication.oauth.http.maxConnections", DEFAULT_MAX_CONNECTIONS, configService);
-        int maxConnectionsPerHost = optIntProperty("com.openexchange.authentication.oauth.http.maxConnectionsPerHost", DEFAULT_MAX_CONNECTIONS_PER_HOST, configService);
-        int connectTimeout = optIntProperty("com.openexchange.authentication.oauth.http.connectTimeout", DEFAULT_CONNECT_TIMEOUT, configService);
-        int readTimeout = optIntProperty("com.openexchange.authentication.oauth.http.readTimeout", DEFAULT_READ_TIMEOUT, configService);
-        int poolTimeout = optIntProperty("com.openexchange.authentication.oauth.http.poolTimeout", DEFAULT_POOL_TIMEOUT, configService);
-
-        config.setSocketReadTimeout(readTimeout);
-        config.setMaxConnectionsPerRoute(maxConnections);
-        config.setMaxConnectionsPerRoute(maxConnectionsPerHost);
-        config.setConnectionTimeout(connectTimeout);
-        config.setConnectionRequestTimeout(poolTimeout);
+        config.setSocketReadTimeout(DEFAULT_READ_TIMEOUT);
+        config.setMaxConnectionsPerRoute(DEFAULT_MAX_CONNECTIONS);
+        config.setMaxConnectionsPerRoute(DEFAULT_MAX_CONNECTIONS_PER_HOST);
+        config.setConnectionTimeout(DEFAULT_CONNECT_TIMEOUT);
+        config.setConnectionRequestTimeout(DEFAULT_POOL_TIMEOUT);
         return config;
-    }
-
-    /**
-     * Gets the specified integer property.
-     *
-     * @param property The suffix/name of the property
-     * @param def The default integer value to return if no such property exists
-     * @param nameBuilder The name builder to use
-     * @param config The configuration service to retrieve the value from
-     * @return The integer property value or <code>def</code>
-     */
-    private static int optIntProperty(String property, int def, ConfigurationService configService) {
-        String value = configService.getProperty(property);
-        if (Strings.isNotEmpty(value)) {
-            int intVal = Tools.getUnsignedInteger(value.trim());
-            if (intVal >= 0) {
-                return intVal;
-            }
-        }
-        return def;
     }
 
 }

@@ -420,7 +420,7 @@ properties:
       packageName: open-xchange-oidc
       tags: ["OpenID"]
 
-    - key: com.openexchange.oidc.http.outbound.maxConnections
+    - key: com.openenexchange.httpclient.oidc.totalConnections
       description: |
         The max. number of concurrent HTTP connections that may be established. If you have specified more
         than one hosts, this setting should be configured so that  
@@ -434,7 +434,7 @@ properties:
       packageName: open-xchange-oidc
       tags: ["OpenID", "Limit"]
       
-    - key: com.openexchange.oidc.http.outbound.maxConnectionsPerHost
+    - key: com.openenexchange.httpclient.oidc.connectionPerRoute
       description: |
         The max. number of concurrent HTTP connections that may be established with a certain endpoint.
       defaultValue: 100
@@ -446,7 +446,7 @@ properties:
       packageName: open-xchange-oidc
       tags: ["OpenID", "Limit"]
       
-    - key: com.openexchange.oidc.http.outbound.connectTimeout
+    - key: com.openenexchange.httpclient.oidc.connectionTimeout
       description: |
         The connection timeout in milliseconds. If establishing a new HTTP connection to a certain
         host exceeds this value, a timeout exception is thrown.
@@ -459,7 +459,7 @@ properties:
       packageName: open-xchange-oidc
       tags: ["OpenID", "Timeout"]
       
-    - key: com.openexchange.oidc.http.outbound.readTimeout
+    - key: com.openenexchange.httpclient.oidc.readTimeout
       description: |
         The socket read timeout in milliseconds. If waiting for the next expected TCP packet exceeds
         this value, a timeout exception is thrown.
@@ -472,7 +472,7 @@ properties:
       packageName: oopen-xchange-oidc
       tags: ["OpenID", "Timeout"]
 
-    - key: com.openexchange.oidc.http.outbound.poolTimeout
+    - key: com.openenexchange.httpclient.oidc.requestTimeout
       description: |
         The pool timeout in milliseconds. If waiting for the next available HTTP connection from pool exceeds
         this value, a timeout exception is thrown.

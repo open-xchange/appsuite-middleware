@@ -64,58 +64,59 @@ import javax.annotation.concurrent.NotThreadSafe;
 public interface HttpBasicConfig {
 
     /**
-     * Gets the socketReadTimeout
+     * Gets the socket timeout ({@code SO_TIMEOUT}) in milliseconds, which is the timeout for waiting for data or, put differently,
+     * a maximum period inactivity between two consecutive data packets).
      *
-     * @return The socketReadTimeout
+     * @return The read timeout
      */
     int getSocketReadTimeout();
 
     /**
-     * Gets the connectionTimeout
+     * Gets the timeout in milliseconds until a connection is established.
      *
-     * @return The connectionTimeout
+     * @return The connection timeout
      */
     int getConnectionTimeout();
 
     /**
-     * Gets the connectionRequestTimeout
+     * Gets the timeout in milliseconds used when requesting a connection from the connection manager.
      *
-     * @return The connectionRequestTimeout
+     * @return The connection request timeout
      */
     int getConnectionRequestTimeout();
 
     /**
-     * Gets the maxTotalConnections
+     * Gets the max. number of total connections being concurrently managed in connection manager.
      *
-     * @return The maxTotalConnections
+     * @return The max. number of total connections
      */
     int getMaxTotalConnections();
 
     /**
-     * Gets the maxConnectionsPerRoute
+     * Gets the max. number of connections per route being concurrently managed in connection manager.
      *
-     * @return The maxConnectionsPerRoute
+     * @return The max. number of connections per route
      */
     int getMaxConnectionsPerRoute();
 
     /**
-     * Gets the keepAliveDuration
+     * Gets the keep-alive duration in seconds.
      *
-     * @return The keepAliveDuration
+     * @return The keep-alive duration in seconds
      */
     int getKeepAliveDuration();
 
     /**
-     * Gets the keepAliveMonitorInterval
+     * Gets the keep-alive monitor interval in seconds.
      *
-     * @return The keepAliveMonitorInterval
+     * @return The keep-alive monitor interval
      */
     int getKeepAliveMonitorInterval();
 
     /**
-     * Gets the socketBufferSize
+     * Gets the socket buffer size in bytes.
      *
-     * @return The socketBufferSize
+     * @return The socket buffer size
      */
     int getSocketBufferSize();
 
