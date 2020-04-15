@@ -49,16 +49,20 @@
 
 package com.openexchange.metrics.micrometer.internal.filter;
 
-import java.util.Map;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.metrics.micrometer.internal.property.MicrometerFilterProperty;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.config.MeterFilter;
+import io.micrometer.prometheus.PrometheusMeterRegistry;
+import io.prometheus.client.hotspot.DefaultExports;
 
 /**
  * {@link DenyAllMetricMicrometerFilterPerformer} - Applies metric filters for
- * properties <code>com.openexchange.metrics.micrometer.enable.all</code>
+ * properties <code>com.openexchange.metrics.micrometer.enable.all</code>,
+ * Note that if this property is enabled, then all JVM and OS metrics
+ * will be enabled as well, i.e. the <code>jvm.*</code> and <code>process.*</code>
+ * metrics.
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.4
@@ -74,11 +78,12 @@ public class DenyAllMetricMicrometerFilterPerformer extends AbstractMicrometerFi
 
     @Override
     public void applyFilter(MeterRegistry meterRegistry, ConfigurationService configurationService) throws OXException {
-        Map<String, String> properties = getPropertiesStartingWith(configurationService, MicrometerFilterProperty.ENABLE);
-        properties.entrySet().stream().forEach(entry -> {
-            if (entry.getKey().endsWith("all") && false == Boolean.parseBoolean(entry.getValue())) {
-                meterRegistry.config().meterFilter(MeterFilter.deny());
-            }
-        });
+        //Map<String, String> properties = (configurationService, MicrometerFilterProperty.ENABLE);
+        String value = configurationService.getProperty(MicrometerFilterProperty.ENABLE.getFQPropertyName() + ".all");
+        if (false == Boolean.parseBoolean(value)) {
+            meterRegistry.config().meterFilter(MeterFilter.deny());
+        } else {
+            DefaultExports.register(((PrometheusMeterRegistry) meterRegistry).getPrometheusRegistry());
+        }
     }
 }

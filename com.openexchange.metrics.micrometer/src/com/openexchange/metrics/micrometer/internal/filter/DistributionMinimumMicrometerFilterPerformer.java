@@ -80,9 +80,7 @@ public class DistributionMinimumMicrometerFilterPerformer extends AbstractMicrom
     public void applyFilter(MeterRegistry meterRegistry, ConfigurationService configurationService) throws OXException {
         Map<String, String> properties = getPropertiesStartingWith(configurationService, MicrometerFilterProperty.MINIMUM);
         properties.entrySet().stream().forEach(entry -> {
-            String key = entry.getKey();
-            String prop = MicrometerFilterProperty.MINIMUM.name().toLowerCase();
-            String metricId = key.substring(key.indexOf(prop) + prop.length() + 1);
+            String metricId = extractMetricId(entry.getKey(), MicrometerFilterProperty.MINIMUM);
             LOG.debug("Applying minimum meter filter for '{}'", metricId);
             meterRegistry.config().meterFilter(MeterFilter.minExpected(metricId, Long.parseLong(entry.getValue())));
         });

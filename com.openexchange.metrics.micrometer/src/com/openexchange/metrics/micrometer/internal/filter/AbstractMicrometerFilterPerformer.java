@@ -81,5 +81,18 @@ abstract class AbstractMicrometerFilterPerformer {
         return configurationService.getProperties((name, value) -> name.startsWith(property.getFQPropertyName()));
     }
 
+    /**
+     * Extracts the metric id from the specified propertyName
+     * by using the property as a base.
+     *
+     * @param propertyName The property name
+     * @param property The base
+     * @return The metric id
+     */
+    String extractMetricId(String propertyName, MicrometerFilterProperty property) {
+        String prop = property.name().toLowerCase();
+        return propertyName.substring(propertyName.indexOf(prop) + prop.length() + 1);
+    }
+
     //void applyFilterFor(MicrometerFilterProperty property, ConfigurationService configurationSerivce, Funtion<>)
 }

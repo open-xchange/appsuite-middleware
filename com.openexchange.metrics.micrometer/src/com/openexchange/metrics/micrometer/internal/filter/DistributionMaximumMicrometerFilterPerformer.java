@@ -80,9 +80,7 @@ public class DistributionMaximumMicrometerFilterPerformer extends AbstractMicrom
     public void applyFilter(MeterRegistry meterRegistry, ConfigurationService configurationService) throws OXException {
         Map<String, String> properties = getPropertiesStartingWith(configurationService, MicrometerFilterProperty.MAXIMUM);
         properties.entrySet().stream().forEach(entry -> {
-            String key = entry.getKey();
-            String prop = MicrometerFilterProperty.MINIMUM.name().toLowerCase();
-            String metricId = key.substring(key.indexOf(prop) + prop.length());
+            String metricId = extractMetricId(entry.getKey(), MicrometerFilterProperty.MAXIMUM);
             LOG.debug("Applying maximum meter filter for '{}'", metricId);
             meterRegistry.config().meterFilter(MeterFilter.maxExpected(metricId, Long.parseLong(entry.getValue())));
         });
