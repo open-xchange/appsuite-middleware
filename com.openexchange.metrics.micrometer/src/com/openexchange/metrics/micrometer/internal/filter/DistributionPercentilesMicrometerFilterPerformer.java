@@ -47,84 +47,58 @@
  *
  */
 
-package com.openexchange.metrics.micrometer.internal.property;
+package com.openexchange.metrics.micrometer.internal.filter;
 
-import com.openexchange.config.lean.Property;
+import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
+import com.openexchange.metrics.micrometer.internal.property.MicrometerFilterProperty;
+import io.micrometer.core.instrument.Meter;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.config.MeterFilter;
+import io.micrometer.core.instrument.distribution.DistributionStatisticConfig;
 
 /**
- * {@link MicrometerFilterProperty}
+ * {@link DistributionPercentilesMicrometerFilterPerformer} - Applies metric filters for
+ * properties <code>com.openexchange.metrics.micrometer.distribution.percentiles.*</code>
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.4
  */
-public enum MicrometerFilterProperty implements Property {
+public class DistributionPercentilesMicrometerFilterPerformer extends AbstractMicrometerFilterPerformer implements MicrometerFilterPerformer {
+
+    private static final Logger LOG = LoggerFactory.getLogger(DistributionPercentilesMicrometerFilterPerformer.class);
 
     /**
-     * Enable metrics
+     * Initializes a new {@link DistributionPercentilesMicrometerFilterPerformer}.
      */
-    ENABLE(true),
-    /**
-     * Distribution configurations
-     */
-    DISTRIBUTION,
-    HISTOGRAM("distribution.", ""),
-    MINIMUM("distribution.", ""),
-    MAXIMUM("distribution.", ""),
-    PERCENTILES("distribution.", ""),
-    /**
-     * The SLA configurations
-     */
-    SLA("distribution.", ""),
-    ;
-
-    public static final String BASE = "com.openexchange.metrics.micrometer.";
-    private static final String EMPTY = "";
-    private final Object defaultValue;
-    private final String midfix;
-
-    /**
-     * Initializes a new {@link MicrometerFilterProperty}.
-     */
-    private MicrometerFilterProperty() {
-        this(EMPTY, null);
-    }
-
-    /**
-     * Initializes a new {@link MicrometerFilterProperty}.
-     * 
-     * @param defaultValue The default value
-     */
-    private MicrometerFilterProperty(Object defaultValue) {
-        this(EMPTY, defaultValue);
-    }
-
-    /**
-     * Initializes a new {@link MicrometerFilterProperty}.
-     * 
-     * @param midfix The midfix
-     * @param defaultValue The default value
-     */
-    private MicrometerFilterProperty(String midfix, Object defaultValue) {
-        this.defaultValue = defaultValue;
-        this.midfix = midfix;
-    }
-
-    /**
-     * Returns the midfix of the property
-     *
-     * @return the midfix of the property
-     */
-    public String getMidFix() {
-        return midfix;
+    public DistributionPercentilesMicrometerFilterPerformer() {
+        super();
     }
 
     @Override
-    public String getFQPropertyName() {
-        return BASE + midfix + name().toLowerCase();
-    }
+    public void applyFilter(MeterRegistry meterRegistry, ConfigurationService configurationService) throws OXException {
+        Map<String, String> properties = getPropertiesStartingWith(configurationService, MicrometerFilterProperty.PERCENTILES);
+        properties.entrySet().stream().forEach(entry -> {
+            meterRegistry.config().meterFilter(new MeterFilter() {
 
-    @Override
-    public Object getDefaultValue() {
-        return defaultValue;
+                public DistributionStatisticConfig configure(Meter.Id id, DistributionStatisticConfig config) {
+                    LOG.debug("Applying percentiles meter filter for '{}'", id);
+                    if (false == entry.getKey().contains(id.getName())) {
+                        return config;
+                    }
+                    String[] p = Strings.splitByComma(entry.getValue());
+                    double[] percentiles = new double[p.length];
+                    int index = 0;
+                    for (String s : p) {
+                        percentiles[index++] = Double.parseDouble(s);
+                    }
+                    return DistributionStatisticConfig.builder().percentiles(percentiles).build().merge(config);
+                }
+            });
+        });
     }
 }

@@ -49,10 +49,6 @@
 
 package com.openexchange.metrics.micrometer.osgi;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
 import javax.servlet.ServletException;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
@@ -67,15 +63,16 @@ import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.metrics.micrometer.internal.BasicAuthHttpContext;
-import com.openexchange.metrics.micrometer.internal.property.MicrometerFilterProperty;
+import com.openexchange.metrics.micrometer.internal.filter.ActivateMetricMicrometerFilterPerformer;
+import com.openexchange.metrics.micrometer.internal.filter.DenyAllMetricMicrometerFilterPerformer;
+import com.openexchange.metrics.micrometer.internal.filter.DistributionHistogramMicrometerFilterPerformer;
+import com.openexchange.metrics.micrometer.internal.filter.DistributionMaximumMicrometerFilterPerformer;
+import com.openexchange.metrics.micrometer.internal.filter.DistributionMinimumMicrometerFilterPerformer;
+import com.openexchange.metrics.micrometer.internal.filter.DistributionPercentilesMicrometerFilterPerformer;
+import com.openexchange.metrics.micrometer.internal.filter.DistributionSLAMicrometerFilterPerformer;
 import com.openexchange.metrics.micrometer.internal.property.MicrometerProperty;
-import com.openexchange.metrics.micrometer.internal.property.filter.EnableMetricPropertyFilter;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.tools.strings.TimeSpanParser;
-import io.micrometer.core.instrument.Meter;
 import io.micrometer.core.instrument.Metrics;
-import io.micrometer.core.instrument.config.MeterFilter;
-import io.micrometer.core.instrument.distribution.DistributionStatisticConfig;
 import io.micrometer.prometheus.PrometheusConfig;
 import io.micrometer.prometheus.PrometheusMeterRegistry;
 import io.prometheus.client.exporter.MetricsServlet;
@@ -142,93 +139,18 @@ public class MicrometerActivator extends HousekeepingActivator implements Reload
     private void applyMeterFilters(ConfigurationService configService) throws OXException, ServletException, NamespaceException {
         Metrics.removeRegistry(prometheusRegistry);
         prometheusRegistry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
+        //In that order
+        new ActivateMetricMicrometerFilterPerformer().applyFilter(prometheusRegistry, configService);
+        new DistributionHistogramMicrometerFilterPerformer().applyFilter(prometheusRegistry, configService);
+        new DistributionMinimumMicrometerFilterPerformer().applyFilter(prometheusRegistry, configService);
+        new DistributionMaximumMicrometerFilterPerformer().applyFilter(prometheusRegistry, configService);
+        new DistributionPercentilesMicrometerFilterPerformer().applyFilter(prometheusRegistry, configService);
+        new DistributionSLAMicrometerFilterPerformer().applyFilter(prometheusRegistry, configService);
+        new DenyAllMetricMicrometerFilterPerformer().applyFilter(prometheusRegistry, configService);
+
         // Enable for default metrics such as jvm.*, process.*, etc.
         //DefaultExports.register(prometheusRegistry.getPrometheusRegistry());
-        Map<String, String> enableMetrics = configService.getProperties(new EnableMetricPropertyFilter());
-        final AtomicBoolean denyAll = new AtomicBoolean();
-        enableMetrics.entrySet().stream().forEach(m -> {
-            String k = m.getKey().replaceAll(MicrometerFilterProperty.BASE, "");
-            String stripped = k.replaceAll(MicrometerFilterProperty.ENABLE.name().toLowerCase() + ".", "");
-            if (k.startsWith("enable") && !k.endsWith("all")) {
-                /////////////////////////////
-                // Enable/Disable property //
-                /////////////////////////////
-                boolean enable = Boolean.parseBoolean(m.getValue());
-                if (enable) {
-                    prometheusRegistry.config().meterFilter(MeterFilter.acceptNameStartsWith(stripped));
-                } else {
-                    prometheusRegistry.config().meterFilter(MeterFilter.denyNameStartsWith(stripped));
-                }
-            } else if (k.startsWith("distribution")) {
-                /////////////////////////////
-                // Distribution statistics //
-                /////////////////////////////
 
-                // enable/disable percentiles histogram: boolean
-                if (k.contains("histogram")) {
-                    String distStripped = k.replaceAll(MicrometerFilterProperty.DISTRIBUTION.name().toLowerCase() + ".histogram.", "");
-                    prometheusRegistry.config().meterFilter(new MeterFilter() {
-
-                        public DistributionStatisticConfig configure(Meter.Id id, DistributionStatisticConfig config) {
-                            if (id.getName().startsWith(distStripped)) {
-                                return DistributionStatisticConfig.builder().percentilesHistogram(Boolean.parseBoolean(m.getValue())).build().merge(config);
-                            }
-                            return config;
-                        }
-                    });
-                } else if (k.contains("min")) {
-                    //minimum expected value: long
-                    String distStripped = k.replaceAll(MicrometerFilterProperty.DISTRIBUTION.name().toLowerCase() + ".min.", "");
-                    prometheusRegistry.config().meterFilter(MeterFilter.minExpected(distStripped, Long.parseLong(m.getValue())));
-                } else if (k.contains("max")) {
-                    //maximum expected value: long
-                    String distStripped = k.replaceAll(MicrometerFilterProperty.DISTRIBUTION.name().toLowerCase() + ".max.", "");
-                    prometheusRegistry.config().meterFilter(MeterFilter.maxExpected(distStripped, Long.parseLong(m.getValue())));
-                } else if (k.contains("percentiles")) {
-                    //publish concrete percentiles: list of double (example: 0.5, 0.75, 0.9, 0.95, 0.99, 0.999)
-                    String distStripped = k.replaceAll(MicrometerFilterProperty.DISTRIBUTION.name().toLowerCase() + ".percentiles.", "");
-                    prometheusRegistry.config().meterFilter(new MeterFilter() {
-
-                        public DistributionStatisticConfig configure(Meter.Id id, DistributionStatisticConfig config) {
-                            if (id.getName().startsWith(distStripped)) {
-                                String[] p = Strings.splitByComma(m.getValue());
-                                double[] percentiles = new double[p.length];
-                                int index = 0;
-                                for (String s : p) {
-                                    percentiles[index++] = Double.parseDouble(s);
-                                }
-                                return DistributionStatisticConfig.builder().percentiles(percentiles).build().merge(config);
-                            }
-                            return config;
-                        }
-                    });
-                } else if (k.contains("sla")) {
-                    //sla to publish concrete value buckets: list of time values (example: 50ms, 100ms, 250ms, 500ms, 1s, 1m)
-                    String distStripped = k.replaceAll(MicrometerFilterProperty.DISTRIBUTION.name().toLowerCase() + ".sla.", "");
-                    prometheusRegistry.config().meterFilter(new MeterFilter() {
-
-                        public DistributionStatisticConfig configure(Meter.Id id, DistributionStatisticConfig config) {
-                            if (id.getName().startsWith(distStripped)) {
-                                String[] p = Strings.splitByComma(m.getValue());
-                                long[] sla = new long[p.length];
-                                int index = 0;
-                                for (String s : p) {
-                                    sla[index++] = TimeSpanParser.parseTimespanToPrimitive(s);
-                                }
-                                return DistributionStatisticConfig.builder().sla(sla).build().merge(config);
-                            }
-                            return config;
-                        }
-                    });
-                }
-            } else if (k.endsWith("all")) {
-                //Match all the properties as prefixes of the meter names, like Spring does, including a possible fallback named all.
-                denyAll.set(!Boolean.parseBoolean(m.getValue()));
-            }
-        });
-        if (denyAll.get()) {
-            prometheusRegistry.config().meterFilter(MeterFilter.deny());
-        }
         Metrics.addRegistry(prometheusRegistry);
     }
 

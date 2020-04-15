@@ -47,84 +47,47 @@
  *
  */
 
-package com.openexchange.metrics.micrometer.internal.property;
+package com.openexchange.metrics.micrometer.internal.filter;
 
-import com.openexchange.config.lean.Property;
+import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.exception.OXException;
+import com.openexchange.metrics.micrometer.internal.property.MicrometerFilterProperty;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.config.MeterFilter;
 
 /**
- * {@link MicrometerFilterProperty}
+ * {@link ActivateMetricMicrometerFilterPerformer} - Applies metric filters for
+ * properties <code>com.openexchange.metrics.micrometer.enable.*</code>
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.4
  */
-public enum MicrometerFilterProperty implements Property {
+public class ActivateMetricMicrometerFilterPerformer extends AbstractMicrometerFilterPerformer implements MicrometerFilterPerformer {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ActivateMetricMicrometerFilterPerformer.class);
 
     /**
-     * Enable metrics
+     * Initializes a new {@link ActivateMetricMicrometerFilterPerformer}.
      */
-    ENABLE(true),
-    /**
-     * Distribution configurations
-     */
-    DISTRIBUTION,
-    HISTOGRAM("distribution.", ""),
-    MINIMUM("distribution.", ""),
-    MAXIMUM("distribution.", ""),
-    PERCENTILES("distribution.", ""),
-    /**
-     * The SLA configurations
-     */
-    SLA("distribution.", ""),
-    ;
-
-    public static final String BASE = "com.openexchange.metrics.micrometer.";
-    private static final String EMPTY = "";
-    private final Object defaultValue;
-    private final String midfix;
-
-    /**
-     * Initializes a new {@link MicrometerFilterProperty}.
-     */
-    private MicrometerFilterProperty() {
-        this(EMPTY, null);
-    }
-
-    /**
-     * Initializes a new {@link MicrometerFilterProperty}.
-     * 
-     * @param defaultValue The default value
-     */
-    private MicrometerFilterProperty(Object defaultValue) {
-        this(EMPTY, defaultValue);
-    }
-
-    /**
-     * Initializes a new {@link MicrometerFilterProperty}.
-     * 
-     * @param midfix The midfix
-     * @param defaultValue The default value
-     */
-    private MicrometerFilterProperty(String midfix, Object defaultValue) {
-        this.defaultValue = defaultValue;
-        this.midfix = midfix;
-    }
-
-    /**
-     * Returns the midfix of the property
-     *
-     * @return the midfix of the property
-     */
-    public String getMidFix() {
-        return midfix;
+    public ActivateMetricMicrometerFilterPerformer() {
+        super();
     }
 
     @Override
-    public String getFQPropertyName() {
-        return BASE + midfix + name().toLowerCase();
-    }
-
-    @Override
-    public Object getDefaultValue() {
-        return defaultValue;
+    public void applyFilter(MeterRegistry meterRegistry, ConfigurationService configurationService) throws OXException {
+        Map<String, String> properties = getPropertiesStartingWith(configurationService, MicrometerFilterProperty.ENABLE);
+        properties.entrySet().stream().forEach(entry -> {
+            String key = entry.getKey();
+            if (key.endsWith("all")) {
+                return;
+            }
+            String prop = MicrometerFilterProperty.ENABLE.name().toLowerCase();
+            String metricId = key.substring(key.indexOf(prop) + prop.length() + 1);
+            LOG.debug("Applying enable/disable meter filter for '{}'", metricId);
+            meterRegistry.config().meterFilter(Boolean.parseBoolean(entry.getValue()) ? MeterFilter.acceptNameStartsWith(metricId) : MeterFilter.denyNameStartsWith(metricId));
+        });
     }
 }

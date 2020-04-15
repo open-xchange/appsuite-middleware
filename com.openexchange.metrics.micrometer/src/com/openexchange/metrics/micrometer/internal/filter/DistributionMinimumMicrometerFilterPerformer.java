@@ -47,30 +47,44 @@
  *
  */
 
-package com.openexchange.metrics.micrometer.internal.property.filter;
+package com.openexchange.metrics.micrometer.internal.filter;
 
-import com.openexchange.config.PropertyFilter;
+import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.metrics.micrometer.internal.property.MicrometerFilterProperty;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.config.MeterFilter;
 
 /**
- * {@link EnableMetricPropertyFilter}
+ * {@link DistributionMinimumMicrometerFilterPerformer} - Applies metric filters for
+ * properties <code>com.openexchange.metrics.micrometer.distribution.minimum.*</code>
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.4
  */
-public class EnableMetricPropertyFilter implements PropertyFilter {
+public class DistributionMinimumMicrometerFilterPerformer extends AbstractMicrometerFilterPerformer implements MicrometerFilterPerformer {
+
+    private static final Logger LOG = LoggerFactory.getLogger(DistributionMinimumMicrometerFilterPerformer.class);
 
     /**
-     * Initializes a new {@link EnableMetricPropertyFilter}.
+     * Initializes a new {@link DistributionMinimumMicrometerFilterPerformer}.
      */
-    public EnableMetricPropertyFilter() {
+    public DistributionMinimumMicrometerFilterPerformer() {
         super();
     }
 
     @Override
-    public boolean accept(String name, String value) throws OXException {
-        return name.startsWith(MicrometerFilterProperty.BASE);
-            //MicrometerFilterProperty.ENABLE.getFQPropertyName());
+    public void applyFilter(MeterRegistry meterRegistry, ConfigurationService configurationService) throws OXException {
+        Map<String, String> properties = getPropertiesStartingWith(configurationService, MicrometerFilterProperty.MINIMUM);
+        properties.entrySet().stream().forEach(entry -> {
+            String key = entry.getKey();
+            String prop = MicrometerFilterProperty.MINIMUM.name().toLowerCase();
+            String metricId = key.substring(key.indexOf(prop) + prop.length() + 1);
+            LOG.debug("Applying minimum meter filter for '{}'", metricId);
+            meterRegistry.config().meterFilter(MeterFilter.minExpected(metricId, Long.parseLong(entry.getValue())));
+        });
     }
 }
