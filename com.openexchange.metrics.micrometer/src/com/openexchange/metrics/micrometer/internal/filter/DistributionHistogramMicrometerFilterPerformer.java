@@ -53,7 +53,6 @@ import static io.micrometer.core.instrument.distribution.DistributionStatisticCo
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.exception.OXException;
 import com.openexchange.metrics.micrometer.internal.property.MicrometerFilterProperty;
 import io.micrometer.core.instrument.Meter;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -79,7 +78,7 @@ public class DistributionHistogramMicrometerFilterPerformer extends AbstractMicr
     }
 
     @Override
-    public void applyFilter(MeterRegistry meterRegistry, ConfigurationService configurationService) throws OXException {
+    public void applyFilter(MeterRegistry meterRegistry, ConfigurationService configurationService) {
         applyFilterFor(MicrometerFilterProperty.HISTOGRAM, configurationService, (entry) -> {
             meterRegistry.config().meterFilter(new MeterFilter() {
 

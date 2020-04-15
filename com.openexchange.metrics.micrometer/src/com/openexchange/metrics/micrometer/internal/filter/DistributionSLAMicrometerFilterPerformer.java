@@ -52,7 +52,6 @@ package com.openexchange.metrics.micrometer.internal.filter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.metrics.micrometer.internal.property.MicrometerFilterProperty;
 import com.openexchange.tools.strings.TimeSpanParser;
@@ -80,7 +79,7 @@ public class DistributionSLAMicrometerFilterPerformer extends AbstractMicrometer
     }
 
     @Override
-    public void applyFilter(MeterRegistry meterRegistry, ConfigurationService configurationService) throws OXException {
+    public void applyFilter(MeterRegistry meterRegistry, ConfigurationService configurationService) {
         applyFilterFor(MicrometerFilterProperty.SLA, configurationService, (entry) -> {
             meterRegistry.config().meterFilter(new MeterFilter() {
 

@@ -50,7 +50,6 @@
 package com.openexchange.metrics.micrometer.internal.filter;
 
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.exception.OXException;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.config.MeterFilter;
 
@@ -69,7 +68,6 @@ public interface MicrometerFilterPerformer {
      *
      * @param meterRegistry The {@link MeterRegistry}
      * @param configurationService the {@link ConfigurationService}
-     * @throws OXException if the filter cannot be applied
      */
-    void applyFilter(MeterRegistry meterRegistry, ConfigurationService configurationService) throws OXException;
+    void applyFilter(MeterRegistry meterRegistry, ConfigurationService configurationService);
 }

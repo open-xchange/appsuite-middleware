@@ -52,7 +52,6 @@ package com.openexchange.metrics.micrometer.internal.filter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.exception.OXException;
 import com.openexchange.metrics.micrometer.internal.property.MicrometerFilterProperty;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.config.MeterFilter;
@@ -76,7 +75,7 @@ public class DistributionMinimumMicrometerFilterPerformer extends AbstractMicrom
     }
 
     @Override
-    public void applyFilter(MeterRegistry meterRegistry, ConfigurationService configurationService) throws OXException {
+    public void applyFilter(MeterRegistry meterRegistry, ConfigurationService configurationService) {
         applyFilterFor(MicrometerFilterProperty.MINIMUM, configurationService, (entry) -> {
             String metricId = extractMetricId(entry.getKey(), MicrometerFilterProperty.MINIMUM);
             LOG.debug("Applying minimum meter filter for '{}'", metricId);

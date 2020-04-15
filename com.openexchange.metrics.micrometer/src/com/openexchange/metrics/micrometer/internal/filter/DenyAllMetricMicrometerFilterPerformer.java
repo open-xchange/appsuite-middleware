@@ -50,7 +50,6 @@
 package com.openexchange.metrics.micrometer.internal.filter;
 
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.exception.OXException;
 import com.openexchange.metrics.micrometer.internal.property.MicrometerFilterProperty;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.config.MeterFilter;
@@ -77,7 +76,7 @@ public class DenyAllMetricMicrometerFilterPerformer extends AbstractMicrometerFi
     }
 
     @Override
-    public void applyFilter(MeterRegistry meterRegistry, ConfigurationService configurationService) throws OXException {
+    public void applyFilter(MeterRegistry meterRegistry, ConfigurationService configurationService) {
         String value = configurationService.getProperty(MicrometerFilterProperty.ENABLE.getFQPropertyName() + ".all");
         if (false == Boolean.parseBoolean(value)) {
             meterRegistry.config().meterFilter(MeterFilter.deny());

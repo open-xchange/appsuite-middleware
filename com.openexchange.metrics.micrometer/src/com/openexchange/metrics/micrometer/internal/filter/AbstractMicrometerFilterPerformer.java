@@ -52,6 +52,9 @@ package com.openexchange.metrics.micrometer.internal.filter;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.metrics.micrometer.internal.property.MicrometerFilterProperty;
@@ -63,6 +66,8 @@ import com.openexchange.metrics.micrometer.internal.property.MicrometerFilterPro
  * @since v7.10.4
  */
 abstract class AbstractMicrometerFilterPerformer {
+
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractMicrometerFilterPerformer.class);
 
     /**
      * Initializes a new {@link AbstractMicrometerFilterPerformer}.
@@ -77,9 +82,8 @@ abstract class AbstractMicrometerFilterPerformer {
      * @param property The property
      * @param configurationService The configuration service to read the property's value
      * @param meterFilterConsumer The consumer which dictates the application of the meter filter
-     * @throws OXException if an error is occurred
      */
-    void applyFilterFor(MicrometerFilterProperty property, ConfigurationService configurationService, Consumer<Entry<String, String>> meterFilterConsumer) throws OXException {
+    void applyFilterFor(MicrometerFilterProperty property, ConfigurationService configurationService, Consumer<Entry<String, String>> meterFilterConsumer) {
         Map<String, String> properties = getPropertiesStartingWith(configurationService, property);
         properties.entrySet().parallelStream().forEach(entry -> meterFilterConsumer.accept(entry));
     }
@@ -89,11 +93,15 @@ abstract class AbstractMicrometerFilterPerformer {
      *
      * @param configurationService The configuration service
      * @param property The prefix of the property
-     * @return The found property
-     * @throws OXException if an error is occurred
+     * @return The found properties or an empty map
      */
-    Map<String, String> getPropertiesStartingWith(ConfigurationService configurationService, MicrometerFilterProperty property) throws OXException {
-        return configurationService.getProperties((name, value) -> name.startsWith(property.getFQPropertyName()));
+    Map<String, String> getPropertiesStartingWith(ConfigurationService configurationService, MicrometerFilterProperty property) {
+        try {
+            return configurationService.getProperties((name, value) -> name.startsWith(property.getFQPropertyName()));
+        } catch (OXException e) {
+            LOG.debug("", e);
+            return ImmutableMap.of();
+        }
     }
 
     /**

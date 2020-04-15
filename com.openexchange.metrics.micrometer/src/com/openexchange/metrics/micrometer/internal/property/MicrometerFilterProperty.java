@@ -60,19 +60,32 @@ import com.openexchange.config.lean.Property;
 public enum MicrometerFilterProperty implements Property {
 
     /**
-     * Enable metrics
+     * Enables/Disables metrics
      */
     ENABLE(true),
     /**
-     * Distribution configurations
+     * Enables/Disables the percentiles histograms.
+     * {@link Boolean}
      */
-    DISTRIBUTION,
     HISTOGRAM("distribution.", ""),
+    /**
+     * Sets the minimum expected value for the distribution.
+     * {@link Long}
+     */
     MINIMUM("distribution.", ""),
+    /**
+     * Sets the maximum expected value for the distribution.
+     * {@link Long}
+     */
     MAXIMUM("distribution.", ""),
+    /**
+     * Publishes concrete percentiles for the distribution.
+     * Comma-separated-list with {@link Double}s
+     */
     PERCENTILES("distribution.", ""),
     /**
-     * The SLA configurations
+     * SLA to publish concrete value buckets.
+     * Comma-separated-list with time values (e.g. 50ms, 100ms, etc.)
      */
     SLA("distribution.", ""),
     ;

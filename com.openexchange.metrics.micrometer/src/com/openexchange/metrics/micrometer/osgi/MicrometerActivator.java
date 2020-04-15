@@ -49,10 +49,10 @@
 
 package com.openexchange.metrics.micrometer.osgi;
 
-import javax.servlet.ServletException;
+import java.util.LinkedList;
+import java.util.List;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
-import org.osgi.service.http.NamespaceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.config.ConfigurationService;
@@ -70,6 +70,7 @@ import com.openexchange.metrics.micrometer.internal.filter.DistributionMaximumMi
 import com.openexchange.metrics.micrometer.internal.filter.DistributionMinimumMicrometerFilterPerformer;
 import com.openexchange.metrics.micrometer.internal.filter.DistributionPercentilesMicrometerFilterPerformer;
 import com.openexchange.metrics.micrometer.internal.filter.DistributionSLAMicrometerFilterPerformer;
+import com.openexchange.metrics.micrometer.internal.filter.MicrometerFilterPerformer;
 import com.openexchange.metrics.micrometer.internal.property.MicrometerProperty;
 import com.openexchange.osgi.HousekeepingActivator;
 import io.micrometer.core.instrument.Metrics;
@@ -91,11 +92,14 @@ public class MicrometerActivator extends HousekeepingActivator implements Reload
 
     private volatile PrometheusMeterRegistry prometheusRegistry;
 
+    private final List<MicrometerFilterPerformer> filterPerformers;
+
     /**
      * Initializes a new {@link MicrometerActivator}.
      */
     public MicrometerActivator() {
         super();
+        filterPerformers = new LinkedList<>();
     }
 
     @Override
@@ -105,6 +109,16 @@ public class MicrometerActivator extends HousekeepingActivator implements Reload
 
     @Override
     protected void startBundle() throws Exception {
+        // In that order
+        filterPerformers.add(new ActivateMetricMicrometerFilterPerformer());
+        filterPerformers.add(new DistributionHistogramMicrometerFilterPerformer());
+        filterPerformers.add(new DistributionMinimumMicrometerFilterPerformer());
+        filterPerformers.add(new DistributionMaximumMicrometerFilterPerformer());
+        filterPerformers.add(new DistributionPercentilesMicrometerFilterPerformer());
+        filterPerformers.add(new DistributionSLAMicrometerFilterPerformer());
+        // Must applied last one for the 'all' wildcard
+        filterPerformers.add(new DenyAllMetricMicrometerFilterPerformer());
+
         applyMeterFilters(getServiceSafe(ConfigurationService.class));
         registerService(Reloadable.class, this);
         registerServlet();
@@ -137,19 +151,15 @@ public class MicrometerActivator extends HousekeepingActivator implements Reload
 
     ///////////////////////////////////// HELPERS //////////////////////////////////////////
 
-    private void applyMeterFilters(ConfigurationService configService) throws OXException, ServletException, NamespaceException {
+    /**
+     * Applies the meter filters
+     *
+     * @param configService The configuration service
+     */
+    private void applyMeterFilters(ConfigurationService configService) {
         Metrics.removeRegistry(prometheusRegistry);
         prometheusRegistry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
-        // Apply filters
-        new ActivateMetricMicrometerFilterPerformer().applyFilter(prometheusRegistry, configService);
-        new DistributionHistogramMicrometerFilterPerformer().applyFilter(prometheusRegistry, configService);
-        new DistributionMinimumMicrometerFilterPerformer().applyFilter(prometheusRegistry, configService);
-        new DistributionMaximumMicrometerFilterPerformer().applyFilter(prometheusRegistry, configService);
-        new DistributionPercentilesMicrometerFilterPerformer().applyFilter(prometheusRegistry, configService);
-        new DistributionSLAMicrometerFilterPerformer().applyFilter(prometheusRegistry, configService);
-        // Must applied last one for the 'all' wildcard
-        new DenyAllMetricMicrometerFilterPerformer().applyFilter(prometheusRegistry, configService);
-
+        filterPerformers.stream().forEach(p -> p.applyFilter(prometheusRegistry, configService));
         Metrics.addRegistry(prometheusRegistry);
     }
 
