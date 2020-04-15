@@ -1,3 +1,9 @@
+open-xchange-mail-categories (7.8.4-69) stable; urgency=medium
+
+  * Build for patch 2020-04-14 (5674)
+
+ -- Kevin Ruthmann <kevin.ruthmann@open-xchange.com>  Mon, 06 Apr 2020 08:45:48 +0000
+
 open-xchange-mail-categories (7.8.4-68) stable; urgency=medium
 
   * Build for patch 2020-03-02 (5624)
