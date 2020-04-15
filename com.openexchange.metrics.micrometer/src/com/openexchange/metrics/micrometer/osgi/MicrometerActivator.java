@@ -71,6 +71,7 @@ import com.openexchange.metrics.micrometer.internal.filter.DistributionMinimumMi
 import com.openexchange.metrics.micrometer.internal.filter.DistributionPercentilesMicrometerFilterPerformer;
 import com.openexchange.metrics.micrometer.internal.filter.DistributionSLAMicrometerFilterPerformer;
 import com.openexchange.metrics.micrometer.internal.filter.MicrometerFilterPerformer;
+import com.openexchange.metrics.micrometer.internal.property.MicrometerFilterProperty;
 import com.openexchange.metrics.micrometer.internal.property.MicrometerProperty;
 import com.openexchange.osgi.HousekeepingActivator;
 import io.micrometer.core.instrument.Metrics;
@@ -159,7 +160,9 @@ public class MicrometerActivator extends HousekeepingActivator implements Reload
     private void applyMeterFilters(ConfigurationService configService) {
         Metrics.removeRegistry(prometheusRegistry);
         prometheusRegistry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
-        filterPerformers.stream().forEach(p -> p.applyFilter(prometheusRegistry, configService));
+        if (false == Boolean.parseBoolean(configService.getProperty(MicrometerFilterProperty.ENABLE.getFQPropertyName() +".all", "true"))) {
+            filterPerformers.stream().forEach(p -> p.applyFilter(prometheusRegistry, configService));
+        }
         Metrics.addRegistry(prometheusRegistry);
     }
 
