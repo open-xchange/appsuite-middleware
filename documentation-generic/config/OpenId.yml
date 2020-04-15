@@ -469,7 +469,7 @@ properties:
       configcascadeAware: false
       related: 
       file: openid.properties
-      packageName: oopen-xchange-oidc
+      packageName: open-xchange-oidc
       tags: ["OpenID", "Timeout"]
 
     - key: com.openenexchange.httpclient.oidc.requestTimeout
@@ -482,5 +482,5 @@ properties:
       configcascadeAware: false
       related: 
       file: openid.properties
-      packageName: oopen-xchange-oidc
+      packageName: open-xchange-oidc
       tags: ["OpenID", "Timeout"]

@@ -242,8 +242,8 @@ properties:
       reloadable: true
       configcascadeAware: false
       related: 
-      file: openid.properties
-      packageName: open-xchange-oidc
+      file: authentication-oauth.properties
+      packageName: open-xchange-authentication-oauth
       tags: ["Authentication", "OAuth", "Limit"]
       
     - key: com.openenexchange.httpclient.oauth-authentication.connectionPerRoute
@@ -254,8 +254,8 @@ properties:
       reloadable: true
       configcascadeAware: false
       related: 
-      file: openid.properties
-      packageName: open-xchange-oidc
+      file: authentication-oauth.properties
+      packageName: open-xchange-authentication-oauth
       tags: ["Authentication", "OAuth", "Limit"]
       
     - key: com.openenexchange.httpclient.oauth-authentication.connectionTimeout
@@ -267,8 +267,8 @@ properties:
       reloadable: true
       configcascadeAware: false
       related: 
-      file: openid.properties
-      packageName: open-xchange-oidc
+      file: authentication-oauth.properties
+      packageName: open-xchange-authentication-oauth
       tags: ["Authentication", "OAuth", "Timeout"]
       
     - key: com.openenexchange.httpclient.oauth-authentication.readTimeout
@@ -280,8 +280,8 @@ properties:
       reloadable: true
       configcascadeAware: false
       related: 
-      file: openid.properties
-      packageName: oopen-xchange-oidc
+      file: authentication-oauth.properties
+      packageName: open-xchange-authentication-oauth
       tags: ["Authentication", "OAuth", "Timeout"]
 
     - key: com.openenexchange.httpclient.oauth-authentication.requestTimeout
@@ -293,6 +293,6 @@ properties:
       reloadable: true
       configcascadeAware: false
       related: 
-      file: openid.properties
-      packageName: oopen-xchange-oidc
+      file: authentication-oauth.properties
+      packageName: open-xchange-authentication-oauth
       tags: ["Authentication", "OAuth", "Timeout"]
