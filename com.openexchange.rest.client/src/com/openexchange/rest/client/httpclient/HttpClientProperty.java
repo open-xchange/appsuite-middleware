@@ -24,19 +24,26 @@ public enum HttpClientProperty implements Property {
     MAX_CONNECTIONS_PER_ROUTE("connectionsPerRoute", I(10), (config, in) -> config.setMaxConnectionsPerRoute(i(in))),
     DEFAULT_SOCKET_BUFFER_SIZE("socketBufferSize", I(8192), (config, in) -> config.setSocketBufferSize(i(in)));
 
-    /** The wildcard name for the properties */
+    /** The wild-card name for the properties */
     public final static String SERVICE_IDENTIFIER = "serviceIdentifer";
+
+    /** The property name prefix */
     public final static String PREFIX = "com.openenexchange.httpclient.";
 
-    private final String name;
+    private final String fqn;
+    private final String defaultName;
     private final Integer value;
     private final BiConsumer<HttpBasicConfig, Integer> setter;
 
     /**
      * Initializes a new {@link HttpClientProperty}.
      */
-    private HttpClientProperty(String name, Integer value, BiConsumer<HttpBasicConfig, Integer> setter) {
-        this.name = name;
+    private HttpClientProperty(String propNameAppendix, Integer value, BiConsumer<HttpBasicConfig, Integer> setter) {
+        StringBuilder sb = new StringBuilder(PREFIX);
+        int reslen = sb.length();
+        this.fqn = sb.append('[').append(SERVICE_IDENTIFIER).append(']').append('.').append(propNameAppendix).toString();
+        sb.setLength(reslen);
+        this.defaultName = sb.append(propNameAppendix).toString();
         this.value = value;
         this.setter = setter;
     }
@@ -48,25 +55,17 @@ public enum HttpClientProperty implements Property {
 
     @Override
     public String getFQPropertyName() {
-        //@formatter:off
-        return new StringBuilder(PREFIX)
-            .append('[')
-            .append(SERVICE_IDENTIFIER)
-            .append(']')
-            .append('.')
-            .append(name)
-            .toString();
-        //@formatter:on
+        return fqn;
     }
 
     /**
      * Gets this instance of a {@link Property} without the placeholder
      * as defined per {@link #SERVICE_IDENTIFIER}
      *
-     * @return The property aka the default property
+     * @return The property aka. the default property
      */
     public Property getProperty() {
-        return DefaultProperty.valueOf(PREFIX + name, value);
+        return DefaultProperty.valueOf(defaultName, value);
     }
 
     /**
