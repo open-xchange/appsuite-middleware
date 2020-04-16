@@ -66,6 +66,22 @@ public interface OXResellerContextServicePortType {
         com.openexchange.admin.soap.reseller.context.rmi.dataobjects.Credentials auth
     ) throws InvalidCredentialsException_Exception, StorageException_Exception, RemoteException_Exception, InvalidDataException_Exception;
 
+    @WebResult(name = "return", targetNamespace = "http://soap.reseller.admin.openexchange.com")
+    @Action(input = "urn:listPage", output = "urn:listPageResponse", fault = {@FaultAction(className = StorageException_Exception.class, value = "urn:listPageStorageException"), @FaultAction(className = InvalidCredentialsException_Exception.class, value = "urn:listPageInvalidCredentialsException"), @FaultAction(className = InvalidDataException_Exception.class, value = "urn:listPageInvalidDataException"), @FaultAction(className = RemoteException_Exception.class, value = "urn:listPageRemoteException")})
+    @RequestWrapper(localName = "listPage", targetNamespace = "http://soap.reseller.admin.openexchange.com", className = "com.openexchange.admin.soap.reseller.context.reseller.soap.ListPage")
+    @WebMethod(action = "urn:listPage")
+    @ResponseWrapper(localName = "listPageResponse", targetNamespace = "http://soap.reseller.admin.openexchange.com", className = "com.openexchange.admin.soap.reseller.context.reseller.soap.ListPageResponse")
+    public java.util.List<com.openexchange.admin.soap.reseller.context.reseller.soap.dataobjects.ResellerContext> listPage(
+        @WebParam(name = "search_pattern", targetNamespace = "http://soap.reseller.admin.openexchange.com")
+        java.lang.String searchPattern,
+        @WebParam(name = "offset", targetNamespace = "http://soap.reseller.admin.openexchange.com")
+        String offset,
+        @WebParam(name = "length", targetNamespace = "http://soap.reseller.admin.openexchange.com")
+        String length,
+        @WebParam(name = "auth", targetNamespace = "http://soap.reseller.admin.openexchange.com")
+        com.openexchange.admin.soap.reseller.context.rmi.dataobjects.Credentials auth
+    ) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, RemoteException_Exception;
+
     @SOAPBinding(parameterStyle = SOAPBinding.ParameterStyle.BARE)
     @Action(input = "urn:changeModuleAccess", output = "urn:changeModuleAccessResponse", fault = {@FaultAction(className = InvalidCredentialsException_Exception.class, value = "urn:changeModuleAccessInvalidCredentialsException"), @FaultAction(className = DuplicateExtensionException_Exception.class, value = "urn:changeModuleAccessDuplicateExtensionException"), @FaultAction(className = NoSuchContextException_Exception.class, value = "urn:changeModuleAccessNoSuchContextException"), @FaultAction(className = StorageException_Exception.class, value = "urn:changeModuleAccessStorageException"), @FaultAction(className = RemoteException_Exception.class, value = "urn:changeModuleAccessRemoteException"), @FaultAction(className = InvalidDataException_Exception.class, value = "urn:changeModuleAccessInvalidDataException")})
     @WebMethod(action = "urn:changeModuleAccess")
@@ -121,6 +137,20 @@ public interface OXResellerContextServicePortType {
     ) throws InvalidCredentialsException_Exception, StorageException_Exception, RemoteException_Exception, InvalidDataException_Exception;
 
     @WebResult(name = "return", targetNamespace = "http://soap.reseller.admin.openexchange.com")
+    @Action(input = "urn:listPageAll", output = "urn:listPageAllResponse", fault = {@FaultAction(className = StorageException_Exception.class, value = "urn:listPageAllStorageException"), @FaultAction(className = InvalidCredentialsException_Exception.class, value = "urn:listPageAllInvalidCredentialsException"), @FaultAction(className = InvalidDataException_Exception.class, value = "urn:listPageAllInvalidDataException"), @FaultAction(className = RemoteException_Exception.class, value = "urn:listPageAllRemoteException")})
+    @RequestWrapper(localName = "listPageAll", targetNamespace = "http://soap.reseller.admin.openexchange.com", className = "com.openexchange.admin.soap.reseller.context.reseller.soap.ListPageAll")
+    @WebMethod(action = "urn:listPageAll")
+    @ResponseWrapper(localName = "listPageAllResponse", targetNamespace = "http://soap.reseller.admin.openexchange.com", className = "com.openexchange.admin.soap.reseller.context.reseller.soap.ListPageAllResponse")
+    public java.util.List<com.openexchange.admin.soap.reseller.context.reseller.soap.dataobjects.ResellerContext> listPageAll(
+        @WebParam(name = "offset", targetNamespace = "http://soap.reseller.admin.openexchange.com")
+        String offset,
+        @WebParam(name = "length", targetNamespace = "http://soap.reseller.admin.openexchange.com")
+        String length,
+        @WebParam(name = "auth", targetNamespace = "http://soap.reseller.admin.openexchange.com")
+        com.openexchange.admin.soap.reseller.context.rmi.dataobjects.Credentials auth
+    ) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, RemoteException_Exception;
+
+    @WebResult(name = "return", targetNamespace = "http://soap.reseller.admin.openexchange.com")
     @Action(input = "urn:listByFilestore", output = "urn:listByFilestoreResponse", fault = {@FaultAction(className = InvalidCredentialsException_Exception.class, value = "urn:listByFilestoreInvalidCredentialsException"), @FaultAction(className = NoSuchFilestoreException_Exception.class, value = "urn:listByFilestoreNoSuchFilestoreException"), @FaultAction(className = StorageException_Exception.class, value = "urn:listByFilestoreStorageException"), @FaultAction(className = RemoteException_Exception.class, value = "urn:listByFilestoreRemoteException"), @FaultAction(className = InvalidDataException_Exception.class, value = "urn:listByFilestoreInvalidDataException")})
     @RequestWrapper(localName = "listByFilestore", targetNamespace = "http://soap.reseller.admin.openexchange.com", className = "com.openexchange.admin.soap.reseller.context.reseller.soap.ListByFilestore")
     @WebMethod(action = "urn:listByFilestore")
@@ -133,6 +163,22 @@ public interface OXResellerContextServicePortType {
     ) throws InvalidCredentialsException_Exception, NoSuchFilestoreException_Exception, StorageException_Exception, RemoteException_Exception, InvalidDataException_Exception;
 
     @WebResult(name = "return", targetNamespace = "http://soap.reseller.admin.openexchange.com")
+    @Action(input = "urn:listPageByFilestore", output = "urn:listPageByFilestoreResponse", fault = {@FaultAction(className = StorageException_Exception.class, value = "urn:listPageByFilestoreStorageException"), @FaultAction(className = InvalidCredentialsException_Exception.class, value = "urn:listPageByFilestoreInvalidCredentialsException"), @FaultAction(className = InvalidDataException_Exception.class, value = "urn:listPageByFilestoreInvalidDataException"), @FaultAction(className = RemoteException_Exception.class, value = "urn:listPageByFilestoreRemoteException"), @FaultAction(className = NoSuchFilestoreException_Exception.class, value = "urn:listPageByFilestoreNoSuchFilestoreException")})
+    @RequestWrapper(localName = "listPageByFilestore", targetNamespace = "http://soap.reseller.admin.openexchange.com", className = "com.openexchange.admin.soap.reseller.context.reseller.soap.ListPageByFilestore")
+    @WebMethod(action = "urn:listPageByFilestore")
+    @ResponseWrapper(localName = "listPageByFilestoreResponse", targetNamespace = "http://soap.reseller.admin.openexchange.com", className = "com.openexchange.admin.soap.reseller.context.reseller.soap.ListPageByFilestoreResponse")
+    public java.util.List<com.openexchange.admin.soap.reseller.context.reseller.soap.dataobjects.ResellerContext> listPageByFilestore(
+        @WebParam(name = "fs", targetNamespace = "http://soap.reseller.admin.openexchange.com")
+        com.openexchange.admin.soap.reseller.context.rmi.dataobjects.Filestore fs,
+        @WebParam(name = "offset", targetNamespace = "http://soap.reseller.admin.openexchange.com")
+        String offset,
+        @WebParam(name = "length", targetNamespace = "http://soap.reseller.admin.openexchange.com")
+        String length,
+        @WebParam(name = "auth", targetNamespace = "http://soap.reseller.admin.openexchange.com")
+        com.openexchange.admin.soap.reseller.context.rmi.dataobjects.Credentials auth
+    ) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, RemoteException_Exception, NoSuchFilestoreException_Exception;
+
+    @WebResult(name = "return", targetNamespace = "http://soap.reseller.admin.openexchange.com")
     @Action(input = "urn:listByDatabase", output = "urn:listByDatabaseResponse", fault = {@FaultAction(className = InvalidCredentialsException_Exception.class, value = "urn:listByDatabaseInvalidCredentialsException"), @FaultAction(className = NoSuchDatabaseException_Exception.class, value = "urn:listByDatabaseNoSuchDatabaseException"), @FaultAction(className = StorageException_Exception.class, value = "urn:listByDatabaseStorageException"), @FaultAction(className = RemoteException_Exception.class, value = "urn:listByDatabaseRemoteException"), @FaultAction(className = InvalidDataException_Exception.class, value = "urn:listByDatabaseInvalidDataException")})
     @RequestWrapper(localName = "listByDatabase", targetNamespace = "http://soap.reseller.admin.openexchange.com", className = "com.openexchange.admin.soap.reseller.context.reseller.soap.ListByDatabase")
     @WebMethod(action = "urn:listByDatabase")
@@ -143,6 +189,22 @@ public interface OXResellerContextServicePortType {
         @WebParam(name = "auth", targetNamespace = "http://soap.reseller.admin.openexchange.com")
         com.openexchange.admin.soap.reseller.context.rmi.dataobjects.Credentials auth
     ) throws InvalidCredentialsException_Exception, NoSuchDatabaseException_Exception, StorageException_Exception, RemoteException_Exception, InvalidDataException_Exception;
+
+    @WebResult(name = "return", targetNamespace = "http://soap.reseller.admin.openexchange.com")
+    @Action(input = "urn:listPageByDatabase", output = "urn:listPageByDatabaseResponse", fault = {@FaultAction(className = StorageException_Exception.class, value = "urn:listPageByDatabaseStorageException"), @FaultAction(className = InvalidCredentialsException_Exception.class, value = "urn:listPageByDatabaseInvalidCredentialsException"), @FaultAction(className = InvalidDataException_Exception.class, value = "urn:listPageByDatabaseInvalidDataException"), @FaultAction(className = RemoteException_Exception.class, value = "urn:listPageByDatabaseRemoteException"), @FaultAction(className = NoSuchDatabaseException_Exception.class, value = "urn:listPageByDatabaseNoSuchDatabaseException")})
+    @RequestWrapper(localName = "listPageByDatabase", targetNamespace = "http://soap.reseller.admin.openexchange.com", className = "com.openexchange.admin.soap.reseller.context.reseller.soap.ListPageByDatabase")
+    @WebMethod(action = "urn:listPageByDatabase")
+    @ResponseWrapper(localName = "listPageByDatabaseResponse", targetNamespace = "http://soap.reseller.admin.openexchange.com", className = "com.openexchange.admin.soap.reseller.context.reseller.soap.ListPageByDatabaseResponse")
+    public java.util.List<com.openexchange.admin.soap.reseller.context.reseller.soap.dataobjects.ResellerContext> listPageByDatabase(
+        @WebParam(name = "db", targetNamespace = "http://soap.reseller.admin.openexchange.com")
+        com.openexchange.admin.soap.reseller.context.rmi.dataobjects.Database db,
+        @WebParam(name = "offset", targetNamespace = "http://soap.reseller.admin.openexchange.com")
+        String offset,
+        @WebParam(name = "length", targetNamespace = "http://soap.reseller.admin.openexchange.com")
+        String length,
+        @WebParam(name = "auth", targetNamespace = "http://soap.reseller.admin.openexchange.com")
+        com.openexchange.admin.soap.reseller.context.rmi.dataobjects.Credentials auth
+    ) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, RemoteException_Exception, NoSuchDatabaseException_Exception;
 
     @WebResult(name = "return", targetNamespace = "http://soap.reseller.admin.openexchange.com")
     @Action(input = "urn:create", output = "urn:createResponse", fault = {@FaultAction(className = InvalidCredentialsException_Exception.class, value = "urn:createInvalidCredentialsException"), @FaultAction(className = DuplicateExtensionException_Exception.class, value = "urn:createDuplicateExtensionException"), @FaultAction(className = StorageException_Exception.class, value = "urn:createStorageException"), @FaultAction(className = RemoteException_Exception.class, value = "urn:createRemoteException"), @FaultAction(className = InvalidDataException_Exception.class, value = "urn:createInvalidDataException"), @FaultAction(className = ContextExistsException_Exception.class, value = "urn:createContextExistsException")})
