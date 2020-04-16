@@ -150,7 +150,7 @@ public class ReplyPerformer extends AbstractUpdatePerformer {
              * Do not support auto adding of party crashers, allow only as user triggered
              */
             if (false == SchedulingSource.API.equals(source)) {
-                LOG.info("Found a \"party-crasher\". Stop– auto-processing.");
+                LOG.info("Found a \"party-crasher\". Stop auto-processing.");
                 return resultTracker.getResult();
             }
 
