@@ -56,6 +56,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.UndeclaredThrowableException;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Set;
@@ -857,7 +858,22 @@ public class LoginServlet extends AJAXServlet {
             Timer timer = Timer.builder("appsuite.httpapi.requests")
                 .tags("module", "login", "action", action, "status", status)
                 .description("HTTP API request times")
-                .publishPercentileHistogram()
+                .sla(
+                    Duration.ofMillis(50),
+                    Duration.ofMillis(100),
+                    Duration.ofMillis(150),
+                    Duration.ofMillis(200),
+                    Duration.ofMillis(250),
+                    Duration.ofMillis(300),
+                    Duration.ofMillis(400),
+                    Duration.ofMillis(500),
+                    Duration.ofMillis(750),
+                    Duration.ofSeconds(1),
+                    Duration.ofSeconds(2),
+                    Duration.ofSeconds(5),
+                    Duration.ofSeconds(10),
+                    Duration.ofSeconds(30),
+                    Duration.ofMinutes(1))
                 .register(Metrics.globalRegistry);
             timer.record(durationMillis, TimeUnit.MILLISECONDS);
         }

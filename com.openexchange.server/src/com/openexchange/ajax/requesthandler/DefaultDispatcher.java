@@ -52,6 +52,7 @@ package com.openexchange.ajax.requesthandler;
 import static com.openexchange.ajax.AJAXServlet.PARAMETER_ALLOW_ENQUEUE;
 import static com.openexchange.ajax.requesthandler.AJAXRequestDataTools.parseBoolParameter;
 import static com.openexchange.java.Autoboxing.I;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -545,7 +546,22 @@ public class DefaultDispatcher implements Dispatcher {
             Timer timer = Timer.builder("appsuite.httpapi.requests")
                 .tags("module", module, "action", action, "status", status)
                 .description("HTTP API request times")
-                .publishPercentileHistogram()
+                .sla(
+                    Duration.ofMillis(50),
+                    Duration.ofMillis(100),
+                    Duration.ofMillis(150),
+                    Duration.ofMillis(200),
+                    Duration.ofMillis(250),
+                    Duration.ofMillis(300),
+                    Duration.ofMillis(400),
+                    Duration.ofMillis(500),
+                    Duration.ofMillis(750),
+                    Duration.ofSeconds(1),
+                    Duration.ofSeconds(2),
+                    Duration.ofSeconds(5),
+                    Duration.ofSeconds(10),
+                    Duration.ofSeconds(30),
+                    Duration.ofMinutes(1))
                 .register(Metrics.globalRegistry);
             timer.record(durationMillis, TimeUnit.MILLISECONDS);
         }

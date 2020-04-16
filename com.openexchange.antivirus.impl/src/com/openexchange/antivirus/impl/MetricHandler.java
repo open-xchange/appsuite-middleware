@@ -64,7 +64,7 @@ import io.micrometer.core.instrument.Timer;
 final class MetricHandler {
 
     private static final String RESULTS = "results";
-    
+
     private static final String GROUP = "appsuite.antivirus.";
 
     /**
@@ -80,7 +80,7 @@ final class MetricHandler {
     private final static Counter TRANSFER_SIZE = Counter.builder(GROUP + "transfer.size").description("Measures the amount of bytes transfered to the anti-virus server").baseUnit("bytes").register(Metrics.globalRegistry);
 
     private final static Timer SCANNING_RATE = Timer.builder(GROUP + "scanning.rate").description("Measures the number of files scanned per second").register(Metrics.globalRegistry);
-    private final static Timer SCANNING_TIME = Timer.builder(GROUP + "scanning.time").description("Measures the time elapsed during scanning a file").publishPercentileHistogram().register(Metrics.globalRegistry);
+    private final static Timer SCANNING_TIME = Timer.builder(GROUP + "scanning.time").description("Measures the time elapsed during scanning a file").register(Metrics.globalRegistry);
 
     /**
      * Increments the cache hits metric

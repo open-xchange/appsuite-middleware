@@ -185,8 +185,23 @@ public class Infostore extends OXServlet {
         // @formatter:off
         Timer.builder("appsuite.webdav.requests")
              .description("Records the timing of webdav requests")
-             .publishPercentileHistogram()
-             .tags("interface", "infostore", "resource", "webdav/infostore", "method", method, "status", status)
+             .sla(
+                 Duration.ofMillis(50),
+                 Duration.ofMillis(100),
+                 Duration.ofMillis(150),
+                 Duration.ofMillis(200),
+                 Duration.ofMillis(250),
+                 Duration.ofMillis(300),
+                 Duration.ofMillis(400),
+                 Duration.ofMillis(500),
+                 Duration.ofMillis(750),
+                 Duration.ofSeconds(1),
+                 Duration.ofSeconds(2),
+                 Duration.ofSeconds(5),
+                 Duration.ofSeconds(10),
+                 Duration.ofSeconds(30),
+                 Duration.ofMinutes(1))
+             .tags("interface", "infostore", "resource", "infostore", "method", method, "status", status)
              .register(Metrics.globalRegistry).record(duration);
         // @formatter:on
     }

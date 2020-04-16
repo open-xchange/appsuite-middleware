@@ -51,6 +51,7 @@ package com.openexchange.imap.commandexecutor;
 
 import static com.openexchange.exception.ExceptionUtils.isEitherOf;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -211,7 +212,22 @@ public class MonitoringCommandExecutor extends AbstractMetricAwareCommandExecuto
 
         Timer requestTimer = Timer.builder(METRICS_GROUP+METRICS_REQUEST_RATE_NAME)
             .description("Overall mail filter requests per target server")
-            .publishPercentileHistogram()
+            .sla(
+                Duration.ofMillis(50),
+                Duration.ofMillis(100),
+                Duration.ofMillis(150),
+                Duration.ofMillis(200),
+                Duration.ofMillis(250),
+                Duration.ofMillis(300),
+                Duration.ofMillis(400),
+                Duration.ofMillis(500),
+                Duration.ofMillis(750),
+                Duration.ofSeconds(1),
+                Duration.ofSeconds(2),
+                Duration.ofSeconds(5),
+                Duration.ofSeconds(10),
+                Duration.ofSeconds(30),
+                Duration.ofMinutes(1))
             .tags(METRICS_DIMENSION_SERVER_KEY, serverInfo)
             .register(Metrics.globalRegistry);
 
