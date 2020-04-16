@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 /mail?action=delete:
   put:
     operationId: deleteMails
