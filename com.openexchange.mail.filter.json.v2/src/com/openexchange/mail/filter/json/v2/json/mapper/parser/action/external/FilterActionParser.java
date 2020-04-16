@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,37 +47,63 @@
  *
  */
 
-package com.openexchange.jsieve.commands.test;
+package com.openexchange.mail.filter.json.v2.json.mapper.parser.action.external;
 
-import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import org.apache.jsieve.SieveException;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.exception.OXException;
+import com.openexchange.jsieve.commands.ActionCommand;
+import com.openexchange.mail.filter.json.v2.json.mapper.parser.IdAwareParser;
+import com.openexchange.mail.filter.json.v2.json.mapper.parser.action.AbstractActionCommandParser;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link ICommand}
+ * {@link FilterActionParser} finds Filter actions in the registry and parses
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:greg.hill@open-xchange.com">Greg Hill</a>
+ * @since v7.10.4
  */
-public interface ICommand {
+public class FilterActionParser extends AbstractActionCommandParser implements IdAwareParser {
+
+    private final FilterActionRegistry registry;
 
     /**
-     * The name of the command
+     * Initializes a new {@link FilterActionRegistry}.
      *
-     * @return The command name
+     * @param services The {@link ServiceLookup}
+     * @param registry The {@link FilterActionRegistry} containing the actions
      */
-    String getCommandName();
-
-    /**
-     * The json name of the command
-     *
-     * @return The command name
-     */
-    default String getJsonName() {
-        return getCommandName();
+    public FilterActionParser(ServiceLookup services, FilterActionRegistry registry) {
+        super(services, registry);
+        this.registry = registry;
     }
 
-    /**
-     * The required sieve server capabilities
-     *
-     * @return The required capabilities
-     */
-    List<String> getRequired();
+    @Override
+    public ActionCommand parse(JSONObject jsonObject, ServerSession session) throws JSONException, SieveException, OXException {
+        Optional<SieveFilterAction> parser = registry.getApplicableParser(jsonObject);
+        if (parser.isPresent()) {
+            return parser.get().parse(jsonObject, session);
+        }
+        throw OXException.general("No suitable parser found for this sieve filter action");
+    }
+
+    @Override
+    public void parse(JSONObject jsonObject, ActionCommand command) throws JSONException, OXException {
+        Optional<SieveFilterAction> parser = registry.getApplicableParser(command);
+        if (parser.isPresent()) {
+            parser.get().parse(jsonObject, command);
+        }
+
+    }
+
+    @Override
+    public boolean isCommandSupported(Set<String> capabilities, String id) throws OXException {
+        return registry.isCommandSupported(capabilities, id);
+    }
+
+
 }

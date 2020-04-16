@@ -51,6 +51,7 @@ package com.openexchange.mail.filter.json.v2.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.capabilities.CapabilityChecker;
@@ -80,6 +81,9 @@ import com.openexchange.mail.filter.json.v2.json.mapper.parser.action.RemoveFlag
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.action.SetFlagActionCommandParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.action.StopActionCommandParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.action.VacationActionCommandParser;
+import com.openexchange.mail.filter.json.v2.json.mapper.parser.action.external.FilterActionParser;
+import com.openexchange.mail.filter.json.v2.json.mapper.parser.action.external.FilterActionRegistry;
+import com.openexchange.mail.filter.json.v2.json.mapper.parser.action.external.SieveFilterAction;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.action.simplified.SimplifiedAction;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.AddressTestCommandParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.AllOfTestCommandParser;
@@ -95,9 +99,13 @@ import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.NotTestComma
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.SizeTestCommandParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.StringTestCommandParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.TrueTestCommandParser;
+import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.external.ExecuteTestParser;
+import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.external.ExecuteTestRegistry;
+import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.external.SieveExecuteTest;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.simplified.SimplifiedHeaderTest;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.simplified.SimplifiedHeaderTestParser;
 import com.openexchange.mailfilter.MailFilterService;
+import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.sessiond.SessiondService;
 
 /**
@@ -118,7 +126,8 @@ public class MailFilterJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, MailFilterService.class, HttpService.class, SessiondService.class, DispatcherPrefixService.class, CapabilityService.class, TestCommandRegistry.class, ActionCommandRegistry.class, LeanConfigurationService.class };
+        return new Class<?>[] { ConfigurationService.class, MailFilterService.class, HttpService.class, SessiondService.class, DispatcherPrefixService.class, CapabilityService.class, TestCommandRegistry.class, ActionCommandRegistry.class,
+            LeanConfigurationService.class };
     }
 
     @Override
@@ -143,7 +152,7 @@ public class MailFilterJSONActivator extends AJAXModuleActivator {
     private void registerTestCommandParserRegistry() {
         SimplifiedHeaderTestParser simplifiedHeaderTestParser = SimplifiedHeaderTestParser.newInstance(this);
 
-        TestCommandParserRegistry registry = new TestCommandParserRegistry();
+        final TestCommandParserRegistry registry = new TestCommandParserRegistry();
         registry.register(Commands.ADDRESS.getCommandName(), new AddressTestCommandParser(this));
         registry.register(Commands.ALLOF.getCommandName(), new AllOfTestCommandParser(this));
         registry.register(Commands.ANYOF.getCommandName(), new AnyOfTestCommandParser(this));
@@ -159,6 +168,25 @@ public class MailFilterJSONActivator extends AJAXModuleActivator {
         registry.register(Commands.FALSE.getCommandName(), new FalseTestCommandParser(this));
         registry.register(Commands.HASFLAG.getCommandName(), new HasFlagCommandParser(this));
         registry.register(Commands.STRING.getCommandName(), new StringTestCommandParser(this));
+        // Commands that use the execute sieve action
+        final ExecuteTestRegistry executeRegistry = new ExecuteTestRegistry(this);
+        registerService(ExecuteTestRegistry.class, executeRegistry);
+        final ExecuteTestParser parser = new ExecuteTestParser(this, executeRegistry);
+        registry.register(executeRegistry.getCommandName(), parser);
+        getService(TestCommandRegistry.class).register(executeRegistry.getCommandName(), executeRegistry);
+        track(SieveExecuteTest.class, new SimpleRegistryListener<SieveExecuteTest>() {
+            @Override
+            public void added(final ServiceReference<SieveExecuteTest> ref, final SieveExecuteTest service) {
+                executeRegistry.registerService(service);
+                registry.register(service.getJsonName(), parser);
+            }
+
+            @Override
+            public void removed(final ServiceReference<SieveExecuteTest> ref, final SieveExecuteTest service) {
+                executeRegistry.unRegisterService(service);
+                registry.unregister(service.getJsonName());
+            }
+        });
 
         registry.register(SimplifiedHeaderTest.From.getCommandName(), simplifiedHeaderTestParser);
         registry.register(SimplifiedHeaderTest.To.getCommandName(), simplifiedHeaderTestParser);
@@ -189,8 +217,27 @@ public class MailFilterJSONActivator extends AJAXModuleActivator {
         registry.register(ActionCommand.Commands.ADDFLAG.getJsonName(), new AddFlagActionCommandParser(this));
         registry.register(ActionCommand.Commands.REMOVEFLAG.getJsonName(), new RemoveFlagActionCommandParser(this));
         registry.register(ActionCommand.Commands.PGP_ENCRYPT.getJsonName(), new PGPEncryptActionCommandParser(this));
-
         registry.register(SimplifiedAction.COPY.getCommandName(), new FileIntoActionCommandParser(this));
+        // Commands that use the sieve filter command
+        final FilterActionRegistry filterRegistry = new FilterActionRegistry();
+        registerService(FilterActionRegistry.class, filterRegistry);
+        final FilterActionParser filterParser = new FilterActionParser(this, filterRegistry);
+        registry.register(filterRegistry.getCommandName(), filterParser);
+        track(SieveFilterAction.class, new SimpleRegistryListener<SieveFilterAction>() {
+
+            @Override
+            public void added(final ServiceReference<SieveFilterAction> ref, final SieveFilterAction service) {
+                filterRegistry.registerService(service);
+                registry.register(service.getJsonName(), filterParser);
+            }
+
+            @Override
+            public void removed(final ServiceReference<SieveFilterAction> ref, final SieveFilterAction service) {
+                filterRegistry.unRegisterService(service);
+                registry.unregister(service.getJsonName());
+
+            }
+        });
 
         registerService(ActionCommandParserRegistry.class, registry);
         trackService(ActionCommandParserRegistry.class);

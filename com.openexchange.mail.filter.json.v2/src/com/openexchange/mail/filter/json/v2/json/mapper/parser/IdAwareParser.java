@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,37 +47,27 @@
  *
  */
 
-package com.openexchange.jsieve.commands.test;
+package com.openexchange.mail.filter.json.v2.json.mapper.parser;
 
-import java.util.List;
+import java.util.Set;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link ICommand}
+ * {@link IdAwareParser}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:greg.hill@open-xchange.com">Greg Hill</a>
+ * @since v7.10.4
  */
-public interface ICommand {
+public interface IdAwareParser {
 
     /**
-     * The name of the command
+     * Checks whether this command is supported or not
      *
-     * @return The command name
+     * @param capabilities The capabilities of the user
+     * @param id The id of the command
+     * @return <code>true</code> of this command is supported, <code>false</code> otherwise
+     * @throws OXException
      */
-    String getCommandName();
+    boolean isCommandSupported(Set<String> capabilities, String id) throws OXException;
 
-    /**
-     * The json name of the command
-     *
-     * @return The command name
-     */
-    default String getJsonName() {
-        return getCommandName();
-    }
-
-    /**
-     * The required sieve server capabilities
-     *
-     * @return The required capabilities
-     */
-    List<String> getRequired();
 }

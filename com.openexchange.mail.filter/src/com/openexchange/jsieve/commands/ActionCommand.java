@@ -89,6 +89,7 @@ public class ActionCommand extends ControlOrActionCommand {
      * </ul>
      */
     public enum Commands implements IActionCommand {
+
         /**
          * <p>The "keep" action is whatever action is taken in lieu of all other
          * actions, if no filtering happens at all; generally, this simply means
@@ -167,6 +168,7 @@ public class ActionCommand extends ControlOrActionCommand {
          */
         REMOVEFLAG("removeflag", 1, new Hashtable<String, Integer>(), "removeflags", Arrays.asList("imap4flags", "imapflags")),
         PGP_ENCRYPT("pgp_encrypt", 0, pgpEncryptTags(), "pgp", Collections.singletonList("vnd.dovecot.pgp-encrypt")),
+
         /**
          * <p>The addheader action adds a header field to the existing message header.</p>
          * <code>addheader [":last"] &lt;field-name: string&gt; &lt;value: string&gt;</code>
@@ -385,6 +387,7 @@ public class ActionCommand extends ControlOrActionCommand {
          *
          * @return the jsonname
          */
+        @Override
         public final String getJsonName() {
             return jsonName;
         }
@@ -411,7 +414,7 @@ public class ActionCommand extends ControlOrActionCommand {
 
     }
 
-    private final Commands command;
+    private final IActionCommand command;
 
     private final List<String> optRequired = new ArrayList<>();
 
@@ -433,7 +436,7 @@ public class ActionCommand extends ControlOrActionCommand {
      * @param arguments An {@link ArrayList} with arguments
      * @throws SieveException if the arguments are incorrect
      */
-    public ActionCommand(final Commands command, final ArrayList<Object> arguments) throws SieveException {
+    public ActionCommand(final IActionCommand command, final ArrayList<Object> arguments) throws SieveException {
         this.command = command;
         this.arguments = arguments;
         this.tagArguments = new Hashtable<String, List<String>>();
@@ -464,7 +467,7 @@ public class ActionCommand extends ControlOrActionCommand {
             } else {
                 for (String tag : command.getTagArgs().keySet()) {
                     Integer arg = command.getTagArgs().get(tag);
-                    if ( arg != null && arg .intValue()> 0 && i == 0) {
+                    if (arg != null && arg.intValue() > 0 && i == 0) {
                         throw new SieveException("The main arguments have to stand after the tag argument in the rule: " + this.toString());
                     }
                 }
@@ -530,7 +533,12 @@ public class ActionCommand extends ControlOrActionCommand {
         return this.getClass().getSimpleName() + " : " + this.command.getCommandName() + " : " + this.tagArguments + " : " + this.arguments;
     }
 
-    public final Commands getCommand() {
+    /**
+     * Gets the {@link IActionCommand} of this {@link ActionCommand}
+     *
+     * @return The {@link IActionCommand}
+     */
+    public final IActionCommand getCommand() {
         return command;
     }
 
