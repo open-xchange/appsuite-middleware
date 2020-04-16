@@ -52,7 +52,7 @@ package com.openexchange.rest.client.httpclient.internal;
 import static com.openexchange.rest.client.httpclient.internal.HttpClientMetrics.getInterruptedCounter;
 import static com.openexchange.rest.client.httpclient.internal.HttpClientMetrics.getPoolTimeoutCounter;
 import static com.openexchange.rest.client.httpclient.internal.HttpClientMetrics.getRefusedCounter;
-import static com.openexchange.rest.client.httpclient.internal.HttpClientMetrics.getTimeoutCount;
+import static com.openexchange.rest.client.httpclient.internal.HttpClientMetrics.getConnectTimeoutCounter;
 import static com.openexchange.rest.client.httpclient.internal.HttpClientMetrics.initPoolMetrics;
 import java.io.IOException;
 import java.net.ConnectException;
@@ -177,7 +177,7 @@ public class ClientConnectionManager extends PoolingHttpClientConnectionManager 
         try {
             super.connect(managedConn, route, connectTimeout, context);
         } catch (ConnectTimeoutException e) {
-            getTimeoutCount(clientName).increment();
+            getConnectTimeoutCounter(clientName).increment();
             throw e;
         } catch (ConnectException | NoRouteToHostException e) {
             getRefusedCounter(clientName).increment();

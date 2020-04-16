@@ -49,7 +49,7 @@
 
 package com.openexchange.rest.client.httpclient.internal;
 
-import static com.openexchange.rest.client.httpclient.internal.HttpClientMetrics.getTimer;
+import static com.openexchange.rest.client.httpclient.internal.HttpClientMetrics.getRequestTimer;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import org.apache.http.HttpClientConnection;
@@ -93,7 +93,7 @@ public class MeteredHttpRequestExecutor extends HttpRequestExecutor {
             status = "IO_ERROR";
             throw e;
         } finally {
-            getTimer(clientName, request.getRequestLine().getMethod(), status).record(System.nanoTime() - start, TimeUnit.NANOSECONDS);
+            getRequestTimer(clientName, request.getRequestLine().getMethod(), status).record(System.nanoTime() - start, TimeUnit.NANOSECONDS);
         }
     }
 }

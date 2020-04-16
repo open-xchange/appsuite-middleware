@@ -68,10 +68,14 @@ import io.micrometer.core.instrument.Timer;
  */
 class HttpClientMetrics {
 
+    /**
+     * The HttpClientMetrics.java.
+     */
+    private static final String REQUESTS = "requests";
     private final static String CLIENT_KEY = "client";
     private final static String PREFIX = "appsuite.httpclient.";
-    private static final String ERROR_SUFFIX = "connectionerrors.total";
-    private static final String CLIENT_SUFFIX = "connections.";
+    private static final String CONNECTION_ERRORS = "connectionerrors.total";
+    private static final String CONNECTIONS = "connections.";
 
     private HttpClientMetrics() {}
 
@@ -100,18 +104,18 @@ class HttpClientMetrics {
     /**
      * Gets the counter which counts {@link ConnectTimeoutException} errors for
      * the HTTP client identified by the clientName
-     * 
+     *
      * @param clientName The unique HTTP client identifier
      * @return The counter
      */
-    public static Counter getTimeoutCount(String clientName) {
+    public static Counter getConnectTimeoutCounter(String clientName) {
         return getCounter(clientName, "timeout");
     }
 
     /**
      * Gets the counter which counts {@link ConnectException} and {@link NoRouteToHostException}
      * errors for the HTTP client identified by the clientName
-     * 
+     *
      * @param clientName The unique HTTP client identifier
      * @return The counter
      */
@@ -122,7 +126,7 @@ class HttpClientMetrics {
     private static Counter getCounter(String clientName, String reason) {
         // @formatter:off
         return Counter
-            .builder(PREFIX + ERROR_SUFFIX)
+            .builder(PREFIX + CONNECTION_ERRORS)
             .tag(CLIENT_KEY, clientName)
             .tag("reason", reason)
             .description("Number of errors while establishing connections")
@@ -133,38 +137,38 @@ class HttpClientMetrics {
     /**
      * Initializes metrics for the connection pool.
      * Metrics are available for each client identified by its unique name
-     * 
+     *
      * @param clientName The unique HTTP client identifier
      * @param pool The {@link PoolingHttpClientConnectionManager}
      */
     public static void initPoolMetrics(String clientName, PoolingHttpClientConnectionManager pool) {
         // @formatter:off
-        Gauge.builder(PREFIX + CLIENT_SUFFIX + "max", () -> I(pool.getTotalStats().getMax()) )
+        Gauge.builder(PREFIX + CONNECTIONS + "max", () -> I(pool.getTotalStats().getMax()) )
             .tag(CLIENT_KEY, clientName)
             .description("The configured maximum number of allowed persistent connections for all routes.")
             .register(Metrics.globalRegistry);
 
-        Gauge.builder(PREFIX + CLIENT_SUFFIX + "route.max", () -> I(pool.getDefaultMaxPerRoute()))
+        Gauge.builder(PREFIX + CONNECTIONS + "route.max", () -> I(pool.getDefaultMaxPerRoute()))
             .tag(CLIENT_KEY, clientName)
             .description("The configured maximum number of allowed persistent connections per route.")
             .register(Metrics.globalRegistry);
 
-        Gauge.builder(PREFIX + CLIENT_SUFFIX + "available", () -> I(pool.getTotalStats().getAvailable()))
+        Gauge.builder(PREFIX + CONNECTIONS + "available", () -> I(pool.getTotalStats().getAvailable()))
             .tag(CLIENT_KEY, clientName)
             .description("The number of available persistent connections for all routes.")
             .register(Metrics.globalRegistry);
 
-        Gauge.builder(PREFIX + CLIENT_SUFFIX + "leased", () -> I(pool.getTotalStats().getLeased()))
+        Gauge.builder(PREFIX + CONNECTIONS + "leased", () -> I(pool.getTotalStats().getLeased()))
             .tag(CLIENT_KEY, clientName)
             .description("The number of leased persistent connections for all routes.")
             .register(Metrics.globalRegistry);
 
-        Gauge.builder(PREFIX + CLIENT_SUFFIX + "pending", () -> I(pool.getTotalStats().getPending()))
+        Gauge.builder(PREFIX + CONNECTIONS + "pending", () -> I(pool.getTotalStats().getPending()))
             .tag(CLIENT_KEY, clientName)
             .description("The number of pending threads waiting for a connection.")
             .register(Metrics.globalRegistry);
 
-        Gauge.builder(PREFIX + CLIENT_SUFFIX + "total", () -> I(pool.getTotalStats().getLeased() + pool.getTotalStats().getAvailable()))
+        Gauge.builder(PREFIX + CONNECTIONS + "total", () -> I(pool.getTotalStats().getLeased() + pool.getTotalStats().getAvailable()))
             .tag(CLIENT_KEY, clientName)
             .description("The total number of pooled connections for all routes.")
             .register(Metrics.globalRegistry);
@@ -179,14 +183,13 @@ class HttpClientMetrics {
      * @param status The response status
      * @return A {@link Timer} for the combination of all tree arguments
      */
-    public static Timer getTimer(String clientName, String method, String status) {
+    public static Timer getRequestTimer(String clientName, String method, String status) {
         // @formatter:off
-        return Timer.builder(PREFIX + "request")
-            .description("Duration of Apache HttpClient request execution")
+        return Timer.builder(PREFIX + REQUESTS)
+            .description("Duration of executed HTTP requests")
             .tag(CLIENT_KEY, clientName)
             .tag("method", method)
             .tag("status", status)
-            .publishPercentileHistogram()
             .register(Metrics.globalRegistry);
         // @formatter:on
     }
