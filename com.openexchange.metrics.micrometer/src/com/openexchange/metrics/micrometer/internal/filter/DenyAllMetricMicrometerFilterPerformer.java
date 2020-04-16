@@ -78,10 +78,10 @@ public class DenyAllMetricMicrometerFilterPerformer extends AbstractMicrometerFi
     @Override
     public void applyFilter(MeterRegistry meterRegistry, ConfigurationService configurationService) {
         String value = configurationService.getProperty(MicrometerFilterProperty.ENABLE.getFQPropertyName() + ".all");
-        if (false == Boolean.parseBoolean(value)) {
-            meterRegistry.config().meterFilter(MeterFilter.deny());
-        } else {
+        if (Boolean.parseBoolean(value)) {
             DefaultExports.register(((PrometheusMeterRegistry) meterRegistry).getPrometheusRegistry());
+            return;
         }
+        meterRegistry.config().meterFilter(MeterFilter.deny());
     }
 }

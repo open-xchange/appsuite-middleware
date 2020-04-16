@@ -129,6 +129,7 @@ public class MicrometerActivator extends HousekeepingActivator implements Reload
     @Override
     protected void stopBundle() throws Exception {
         unregisterServlet();
+        filterPerformers.clear();
         LOG.info("Bundle {} successfully stopped", this.context.getBundle().getSymbolicName());
     }
 
@@ -160,7 +161,7 @@ public class MicrometerActivator extends HousekeepingActivator implements Reload
     private void applyMeterFilters(ConfigurationService configService) {
         Metrics.removeRegistry(prometheusRegistry);
         prometheusRegistry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
-        if (false == Boolean.parseBoolean(configService.getProperty(MicrometerFilterProperty.ENABLE.getFQPropertyName() +".all", "true"))) {
+        if (false == Boolean.parseBoolean(configService.getProperty(MicrometerFilterProperty.ENABLE.getFQPropertyName() + ".all", "true"))) {
             filterPerformers.stream().forEach(p -> p.applyFilter(prometheusRegistry, configService));
         }
         Metrics.addRegistry(prometheusRegistry);
