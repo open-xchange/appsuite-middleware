@@ -841,7 +841,7 @@ public final class NewAction extends AbstractMailAction implements EnqueuableAJA
                     String[] uidArr;
                     try {
                         mailAccess.connect();
-                        sentFullname = MailFolderUtility.prepareMailFolderParam(mailAccess.getFolderStorage().getSentFolder()).getFullname();
+                        sentFullname = MailFolderUtility.prepareMailFolderParamOrElseReturn(mailAccess.getFolderStorage().getSentFolder());
                         /*
                          * Append to default "sent" folder
                          */
