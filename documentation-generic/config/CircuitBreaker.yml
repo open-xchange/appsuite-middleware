@@ -79,6 +79,32 @@ properties:
       file: circuit-breaker.properties
       packageName: open-xchange-imap
       tags: ["IMAP", "Circuit Breaker"]
+    - key: com.openexchange.imap.breaker.[breaker-name].hosts
+      description: |
+        A comma separated list of host names for which this circuit-breaker is applied to. Those host names are also excluded from the generic circuit-breaker.
+
+        [breaker-name] must be replaced with a valid breaker name or primary for the primary account.
+      defaultValue:
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: circuit-breaker.properties
+      packageName: open-xchange-imap
+      tags: ["IMAP", "Circuit Breaker", "Host"]
+    - key: com.openexchange.imap.breaker.[breaker-name].ports
+      description: |
+        A comma separated list of ports for which this circuit-breaker is applied to.
+
+        [breaker-name] must be replaced with a valid breaker name or primary for the primary account.
+      defaultValue:
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: circuit-breaker.properties
+      packageName: open-xchange-imap
+      tags: ["IMAP", "Circuit Breaker", "Port"]
     - key: com.openexchange.imap.breaker.[breaker-name].failureThreshold
       description: |
         The failure threshold; which is the number of successive failures that must occur in order to open the circuit.
