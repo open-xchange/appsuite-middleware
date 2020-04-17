@@ -118,7 +118,7 @@ public class MicrometerActivator extends HousekeepingActivator implements Reload
         filterPerformers.add(new DistributionPercentilesMicrometerFilterPerformer());
         filterPerformers.add(new DistributionSLAMicrometerFilterPerformer());
         // Must applied last one for the 'all' wildcard
-        filterPerformers.add(new DenyAllMetricMicrometerFilterPerformer());
+        //filterPerformers.add(new DenyAllMetricMicrometerFilterPerformer());
 
         applyMeterFilters(getServiceSafe(ConfigurationService.class));
         registerService(Reloadable.class, this);
@@ -161,8 +161,9 @@ public class MicrometerActivator extends HousekeepingActivator implements Reload
     private void applyMeterFilters(ConfigurationService configService) {
         Metrics.removeRegistry(prometheusRegistry);
         prometheusRegistry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
+        filterPerformers.stream().forEach(p -> p.applyFilter(prometheusRegistry, configService));
         if (false == Boolean.parseBoolean(configService.getProperty(MicrometerFilterProperty.ENABLE.getFQPropertyName() + ".all", "true"))) {
-            filterPerformers.stream().forEach(p -> p.applyFilter(prometheusRegistry, configService));
+            new DenyAllMetricMicrometerFilterPerformer().applyFilter(prometheusRegistry, configService);
         }
         Metrics.addRegistry(prometheusRegistry);
     }
