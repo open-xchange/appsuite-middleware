@@ -62,19 +62,16 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.TimeZone;
 import java.util.UUID;
 import java.util.regex.Pattern;
-import javax.ws.rs.core.GenericType;
 import org.junit.Test;
 import com.openexchange.ajax.chronos.itip.AbstractITipTest;
 import com.openexchange.chronos.Event;
@@ -86,16 +83,13 @@ import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
-import com.openexchange.testing.httpclient.invoker.ApiClient;
-import com.openexchange.testing.httpclient.invoker.ApiException;
-import com.openexchange.testing.httpclient.invoker.Pair;
 import com.openexchange.testing.httpclient.models.AnalysisChangeNewEvent;
 import com.openexchange.testing.httpclient.models.ChronosAttachment;
 import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventResponse;
 import com.openexchange.testing.httpclient.models.MailData;
-import com.openexchange.testing.httpclient.models.MailDestinationData;
 import com.openexchange.testing.httpclient.models.MailDestinationResponse;
+import com.openexchange.testing.httpclient.modules.MailApi;
 
 /**
  * {@link Bug65533Test}
@@ -104,6 +98,23 @@ import com.openexchange.testing.httpclient.models.MailDestinationResponse;
  * @since v7.10.3
  */
 public class Bug65533Test extends AbstractITipTest {
+
+    private File tmpFile = null;
+    private FileWriter writer = null;
+
+    @Override
+    public void tearDown() throws Exception {
+        try {
+            if (null != writer) {
+                writer.close();
+            }
+            if (null != tmpFile) {
+                tmpFile.delete();
+            }
+        } finally {
+            super.tearDown();
+        }
+    }
 
     @Test
     public void testImportIMipAttachment() throws Exception {
@@ -139,7 +150,12 @@ public class Bug65533Test extends AbstractITipTest {
         iMip = iMip.replaceAll(Pattern.quote("{{TO_CN}}"), quoteCN(recipientCn));
         iMip = iMip.replaceAll(Pattern.quote("{{UID}}"), uid);
         iMip = iMip.replaceAll(Pattern.quote("{{SUMMARY}}"), summary);
-        sendIMip(apiClientC2, iMip);
+        tmpFile = File.createTempFile("test", ".tmp");
+        writer = new FileWriter(tmpFile);
+        writer.write(iMip);
+        MailDestinationResponse response = new MailApi(apiClientC2).sendOrSaveMail(apiClientC2.getSession(), tmpFile, null, null);
+        // XXX Currently disable validation because of another bug
+        //        assertNull(response.getError(), response.getError());
 
         /*
          * receive & analyze iMIP request as user a
@@ -173,7 +189,7 @@ public class Bug65533Test extends AbstractITipTest {
         ChronosAttachment attachment = attachments.get(0);
         assertEquals("homer.jpg", attachment.getFilename());
         assertEquals("image/jpeg", attachment.getFmtType());
-        assertEquals(L(177549), attachment.getSize());
+        assertEquals(L(177115), attachment.getSize());
         byte[] attachmentData = chronosApi.getEventAttachment(apiClient.getSession(), eventData.getId(), eventData.getFolder(), attachment.getManagedId());
         assertNotNull(attachmentData);
         /*
@@ -213,40 +229,6 @@ public class Bug65533Test extends AbstractITipTest {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         return dateFormat.format(date);
-    }
-
-    private static MailDestinationData sendIMip(ApiClient apiClient, Object body) throws ApiException {
-        Object localVarPostBody = body;
-
-        // verify the required parameter 'session' is set
-        if (null == apiClient.getSession()) {
-            throw new ApiException(400, "Missing the required parameter 'session' when calling sendOrSaveMail");
-        }
-
-        // create path and map variables
-        String localVarPath = "/mail?action=new".replaceAll("\\{format\\}", "json");
-
-        // query params
-        List<Pair> localVarQueryParams = new ArrayList<Pair>();
-        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
-        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
-
-        localVarQueryParams.addAll(apiClient.parameterToPairs("", "session", apiClient.getSession()));
-
-        final String[] localVarAccepts = { "application/json"
-        };
-        final String localVarAccept = apiClient.selectHeaderAccept(localVarAccepts);
-
-        final String[] localVarContentTypes = { "text/plain"
-        };
-        final String localVarContentType = apiClient.selectHeaderContentType(localVarContentTypes);
-
-        String[] localVarAuthNames = new String[] {};
-
-        GenericType<MailDestinationResponse> localVarReturnType = new GenericType<MailDestinationResponse>() {};
-        MailDestinationResponse response = apiClient.invokeAPI(localVarPath, "PUT", localVarQueryParams, localVarPostBody, localVarHeaderParams, localVarFormParams, localVarAccept, localVarContentType, localVarAuthNames, localVarReturnType);
-        assertNull(response.getError(), response.getError());
-        return response.getData();
     }
 
     private String quoteCN(String cn) {
