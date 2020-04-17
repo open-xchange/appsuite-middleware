@@ -263,6 +263,22 @@ public class WebserviceCollector implements ServiceListener {
                         outInterceptors.add(index, new com.openexchange.soap.cxf.interceptor.XMLFaultOutInterceptor());
                     }
                 }
+                {
+                    final List<Interceptor<? extends Message>> inInterceptors = serverEndpoint.getInInterceptors();
+                    boolean found = false;
+                    int index = 0;
+                    for (final Interceptor<? extends Message> interceptor : inInterceptors) {
+                        if (interceptor instanceof org.apache.cxf.frontend.WSDLGetInterceptor) {
+                            found = true;
+                            break;
+                        }
+                        index++;
+                    }
+                    if (found) {
+                        inInterceptors.remove(index);
+                        inInterceptors.add(index, new com.openexchange.soap.cxf.interceptor.HttpsAwareWSDLGetInterceptor());
+                    }
+                }
                 // Add logging interceptors
                 serverEndpoint.getInInterceptors().add(new com.openexchange.soap.cxf.interceptor.LoggingInInterceptor());
                 serverEndpoint.getOutInterceptors().add(new com.openexchange.soap.cxf.interceptor.LoggingOutInterceptor());
