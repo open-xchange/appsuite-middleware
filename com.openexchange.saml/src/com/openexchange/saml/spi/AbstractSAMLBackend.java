@@ -50,6 +50,7 @@
 package com.openexchange.saml.spi;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
@@ -224,7 +225,7 @@ public abstract class AbstractSAMLBackend implements SAMLBackend {
         try {
             LOG_ABSTRACT.debug("RelayState: {}", relayState);
             DefaultAuthnRequestInfo defaultAuthnRequestInfo = new DefaultAuthnRequestInfo();
-            String string = new String(Base64.decode(relayState.getBytes()));
+            String string = new String(Base64.decode(relayState.getBytes(StandardCharsets.ISO_8859_1)));
             LOG_ABSTRACT.debug("decoded RelayState: {}", string);
             String[] splitRelayState = string.split(":");
             for (String s : splitRelayState) {
