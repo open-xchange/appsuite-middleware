@@ -55,11 +55,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.rmi.RemoteException;
+import java.rmi.ServerException;
 import java.util.HashSet;
 import org.junit.Test;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.User;
-import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.factory.ContextFactory;
 
 /**
@@ -141,8 +141,8 @@ public class Bug19379Test extends AbstractRMITest {
             context1.setLoginMappings(createMappings(Integer.toString(contextId1), "m1", "m2", "m3"));
             try {
                 getContextManager().change(context1);
-                fail("A StorageException must be thrown!");
-            } catch (StorageException e) {
+                fail("A ServerException must be thrown!");
+            } catch (ServerException e) {
                 // Found the duplicate login mapping
                 e.printStackTrace();
             }

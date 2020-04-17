@@ -62,6 +62,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.rmi.Naming;
 import java.rmi.RemoteException;
+import java.rmi.ServerException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -73,7 +74,6 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
-import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.factory.ContextFactory;
 import com.openexchange.admin.rmi.factory.UserFactory;
 import com.openexchange.admin.rmi.util.AssertUtil;
@@ -328,7 +328,7 @@ public class UserTest extends AbstractRMITest {
     /**
      * Tests providing an empty array to the remote interface when deleting users
      */
-    @Test(expected = InvalidDataException.class)
+    @Test(expected = ServerException.class)
     public void testDeleteEmptyUserList() throws Exception {
 
         UserModuleAccess access = new UserModuleAccess();
