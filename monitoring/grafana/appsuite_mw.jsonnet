@@ -24,11 +24,11 @@ local overviewTotalSessions = singlestat.new(
       value: 'null',
     },
   ],
-  sparklineShow=true
+  sparklineShow=true,
 ).addTarget(
   prometheus.target(
     'appsuite_sessions_total_count{client="all", instance=~"$instance"}',
-    legendFormat='Total Sessions'
+    legendFormat='Total Sessions',
   )
 );
 
@@ -45,11 +45,11 @@ local overviewActiveSessions = singlestat.new(
       value: 'null',
     },
   ],
-  sparklineShow=true
+  sparklineShow=true,
 ).addTarget(
   prometheus.target(
     'appsuite_sessions_active_count{client="all", instance=~"$instance"}',
-    legendFormat='Active Sessions'
+    legendFormat='Active Sessions',
   )
 );
 
@@ -66,11 +66,11 @@ local overviewShortTermSessions = singlestat.new(
       value: 'null',
     },
   ],
-  sparklineShow=true
+  sparklineShow=true,
 ).addTarget(
   prometheus.target(
     'appsuite_sessions_short_term_count{client="all", instance=~"$instance"}',
-    legendFormat='Short Term Sessions'
+    legendFormat='Short Term Sessions',
   )
 );
 
@@ -87,11 +87,11 @@ local overviewLongTermSessions = singlestat.new(
       value: 'null',
     },
   ],
-  sparklineShow=true
+  sparklineShow=true,
 ).addTarget(
   prometheus.target(
     'appsuite_sessions_long_term_count{client="all", instance=~"$instance"}',
-    legendFormat='Long Term Sessions'
+    legendFormat='Long Term Sessions',
   )
 );
 
@@ -106,20 +106,20 @@ local threadPoolTasks = graphPanel.new(
   labelY1='Tasks/s',
   legend_alignAsTable=true,
   legend_rightSide=true,
-  min='0'
+  min='0',
 ).addTargets(
   [
     prometheus.target(
       'appsuite_executor_queue_remaining_tasks{name="main",instance=~"$instance"}',
-      legendFormat='Remaining'
+      legendFormat='Remaining',
     ),
     prometheus.target(
       'appsuite_executor_queued_tasks{name="main",instance=~"$instance"}',
-      legendFormat='Queued'
+      legendFormat='Queued',
     ),
     prometheus.target(
       'rate(appsuite_executor_completed_tasks_total{name="main",instance=~"$instance"}[$interval])',
-      legendFormat='Completed'
+      legendFormat='Completed',
     ),
   ]
 );
@@ -135,16 +135,16 @@ local threadPool = graphPanel.new(
   nullPointMode='null as zero',
   legend_alignAsTable=true,
   legend_rightSide=true,
-  min='0'
+  min='0',
 ).addTargets(
   [
     prometheus.target(
       'appsuite_executor_active_threads{name="main",instance=~"$instance"}',
-      legendFormat='ActiveCount'
+      legendFormat='ActiveCount',
     ),
     prometheus.target(
       'appsuite_executor_pool_size_threads{name="main",instance=~"$instance"}',
-      legendFormat='PoolSize'
+      legendFormat='PoolSize',
     ),
   ]
 );
@@ -242,15 +242,15 @@ local httpApiRequestsPerSecond = graphPanel.new(
   [
     prometheus.target(
       'sum(rate(appsuite_httpapi_requests_seconds_count{instance=~"$instance"}[$interval]))',
-      legendFormat='Total'
+      legendFormat='Total',
     ),
     prometheus.target(
       'sum(rate(appsuite_httpapi_requests_seconds_count{status="OK",instance=~"$instance"}[$interval]))',
-      legendFormat='OK'
+      legendFormat='OK',
     ),
     prometheus.target(
       'sum(rate(appsuite_httpapi_requests_seconds_count{status!="OK",instance=~"$instance"}[$interval]))',
-      legendFormat='KO'
+      legendFormat='KO',
     ),
   ]
 );
@@ -275,15 +275,15 @@ local restApiRequestsPerSecond = graphPanel.new(
   [
     prometheus.target(
       'sum(rate(appsuite_restapi_requests_seconds_count{instance=~"$instance"}[$interval]))',
-      legendFormat='Total'
+      legendFormat='Total',
     ),
     prometheus.target(
       'sum(rate(appsuite_restapi_requests_seconds_count{status=~"([45][0-9][0-9])",instance=~"$instance"}[$interval]))',
-      legendFormat='OK'
+      legendFormat='OK',
     ),
     prometheus.target(
       'sum(rate(appsuite_restapi_requests_seconds_count{status!~"([45][0-9][0-9])",instance=~"$instance"}[$interval]))',
-      legendFormat='KO'
+      legendFormat='KO',
     ),
   ]
 );
@@ -355,11 +355,11 @@ local circuitBreakerDenials = graphPanel.new(
   [
     prometheus.target(
       'rate(appsuite_circuit_breaker_denials_total{instance=~"$instance", protocol="imap"}[$interval])',
-      legendFormat='{{protocol}}'
+      legendFormat='{{protocol}}',
     ),
     prometheus.target(
       'rate(appsuite_circuit_breaker_denials_total{instance=~"$instance", protocol="mailfilter"}[$interval])',
-      legendFormat='{{protocol}}'
+      legendFormat='{{protocol}}',
     ),
   ]
 );
@@ -377,11 +377,11 @@ local circuitBreakerRequestRate = graphPanel.new(
   [
     prometheus.target(
       'sum(rate(appsuite_imap_requests_seconds_sum{instance=~"$instance"}[$interval]) / rate(appsuite_imap_requests_seconds_count{instance=~"$instance"}[$interval]))',
-      legendFormat='Requests'
+      legendFormat='Requests',
     ),
     prometheus.target(
       'sum(rate(appsuite_imap_errors_total{instance=~"$instance"}[$interval]))',
-      legendFormat='Errors'
+      legendFormat='Errors',
     ),
   ]
 );
@@ -405,7 +405,7 @@ local circuitBreakerIMAPStatus = table.new(
   prometheus.target(
     'count(appsuite_circuit_breaker_status{protocol="imap"}) by (account, status)',
     format='table',
-    instant=true
+    instant=true,
   )
 );
 
@@ -478,15 +478,15 @@ local soapApiRequestsPerSecond = graphPanel.new(
   [
     prometheus.target(
       'sum(rate(appsuite_soapapi_requests_seconds_count{instance=~"$instance"}[$interval]))',
-      legendFormat='Total'
+      legendFormat='Total',
     ),
     prometheus.target(
       'sum(rate(appsuite_soapapi_requests_seconds_count{status=~"([45][0-9][0-9]|OK|0)",instance=~"$instance"}[$interval]))',
-      legendFormat='OK'
+      legendFormat='OK',
     ),
     prometheus.target(
       'sum(rate(appsuite_soapapi_requests_seconds_count{status!~"([45][0-9][0-9]|OK|0)",instance=~"$instance"}[$interval]))',
-      legendFormat='KO'
+      legendFormat='KO',
     ),
   ]
 );
@@ -562,15 +562,15 @@ local webdavApiRequestsPerSecond = graphPanel.new(
   [
     prometheus.target(
       'sum(rate(appsuite_webdav_requests_seconds_count{instance=~"$instance"}[$interval]))',
-      legendFormat='Total'
+      legendFormat='Total',
     ),
     prometheus.target(
       'sum(rate(appsuite_webdav_requests_seconds_count{status=~"([45][0-9][0-9]|OK|0)",instance=~"$instance"}[$interval]))',
-      legendFormat='OK'
+      legendFormat='OK',
     ),
     prometheus.target(
       'sum(rate(appsuite_webdav_requests_seconds_count{status!~"([45][0-9][0-9]|OK|0)",instance=~"$instance"}[$interval]))',
-      legendFormat='KO'
+      legendFormat='KO',
     ),
   ]
 );
@@ -582,20 +582,20 @@ local configDBConnections = graphPanel.new(
   fill=2,
   linewidth=2,
   decimals=0,
-  min='0'
+  min='0',
 ).addTargets(
   [
     prometheus.target(
       'appsuite_mysql_connections_total{class="configdb",instance=~"$instance"}',
-      legendFormat='Pooled {{type}}'
+      legendFormat='Pooled {{type}}',
     ),
     prometheus.target(
       'appsuite_mysql_connections_active{class="configdb",instance=~"$instance"}',
-      legendFormat='Active {{type}}'
+      legendFormat='Active {{type}}',
     ),
     prometheus.target(
       'appsuite_mysql_connections_idle{class="configdb",instance=~"$instance"}',
-      legendFormat='Idle {{type}}'
+      legendFormat='Idle {{type}}',
     ),
   ]
 );
@@ -613,15 +613,15 @@ local configDBTimes = graphPanel.new(
   [
     prometheus.target(
       'rate(appsuite_mysql_connections_acquire_seconds_sum{class="configdb",instance=~"$instance"}[$interval])/rate(appsuite_mysql_connections_acquire_seconds_count{class="configdb",instance=~"$instance"}[$interval])',
-      legendFormat='acquire {{type}}'
+      legendFormat='acquire {{type}}',
     ),
     prometheus.target(
       'rate(appsuite_mysql_connections_usage_seconds_sum{class="configdb",instance=~"$instance"}[$interval])/rate(appsuite_mysql_connections_usage_seconds_count{class="configdb",instance=~"$instance"}[$interval])',
-      legendFormat='usage {{type}}'
+      legendFormat='usage {{type}}',
     ),
     prometheus.target(
       'rate(appsuite_mysql_connections_create_seconds_sum{class="configdb",instance=~"$instance"}[$interval])/rate(appsuite_mysql_connections_create_seconds_count{class="configdb",instance=~"$instance"}[$interval])',
-      legendFormat='create {{type}}'
+      legendFormat='create {{type}}',
     ),
   ]
 );
@@ -639,16 +639,16 @@ local userDBConnections = graphPanel.new(
 ).addTargets(
   [
     prometheus.target(
-      'appsuite_mysql_connections_total_Connections{class!="configdb",instance=~"$instance",pool="$' + dbPoolName + '"}',
-      legendFormat='Pooled {{type}}'
+      'appsuite_mysql_connections_total{class!="configdb",instance=~"$instance",pool="$' + dbPoolName + '"}',
+      legendFormat='Pooled {{type}}',
     ),
     prometheus.target(
-      'appsuite_mysql_connections_active_Connections{class!="configdb",instance=~"$instance",pool="$' + dbPoolName + '"}',
-      legendFormat='Active {{type}}'
+      'appsuite_mysql_connections_active{class!="configdb",instance=~"$instance",pool="$' + dbPoolName + '"}',
+      legendFormat='Active {{type}}',
     ),
     prometheus.target(
-      'appsuite_mysql_connections_idle_Connections{class!="configdb",instance=~"$instance",pool="$' + dbPoolName + '"}',
-      legendFormat='Idle {{type}}'
+      'appsuite_mysql_connections_idle{class!="configdb",instance=~"$instance",pool="$' + dbPoolName + '"}',
+      legendFormat='Idle {{type}}',
     ),
   ]
 );
@@ -685,29 +685,30 @@ grafana.newDashboard(
   title='AppSuite',
   tags=['Java', 'AppSuite-MW'],
   metric='jvm_info'
-).addTemplate(
-  template.new(
-    name=dbPoolName,
-    label='DB Pool',
-    hide='variable',
-    includeAll=true,
-    datasource='Prometheus',
-    query='label_values(appsuite_mysql_connections_total,pool)',
-    refresh='load',
-    regex='([0-9]+)',
-    sort=3,
-  )
-).addTemplate(
-  template.new(
-    name=davInterfaceName,
-    label='DAV Interface',
-    hide='variable',
-    includeAll=true,
-    datasource='Prometheus',
-    query='label_values(appsuite_webdav_requests_seconds_count,interface)',
-    refresh='load',
-    sort=1,
-  )
+).addTemplates(
+  [
+    template.new(
+      name=dbPoolName,
+      label='DB Pool',
+      hide='variable',
+      includeAll=true,
+      datasource='Prometheus',
+      query='label_values(appsuite_mysql_connections_total,pool)',
+      refresh='load',
+      regex='([0-9]+)',
+      sort=3,
+    ),
+    template.new(
+      name=davInterfaceName,
+      label='DAV Interface',
+      hide='variable',
+      includeAll=true,
+      datasource='Prometheus',
+      query='label_values(appsuite_webdav_requests_seconds_count,interface)',
+      refresh='load',
+      sort=1,
+    ),
+  ]
 ).addPanels(
   [
     row.new(
