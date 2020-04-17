@@ -1,3 +1,9 @@
+open-xchange-dav (7.10.3-10) stable; urgency=medium
+
+  * Build for patch 2020-04-02 (5692)
+
+ -- Steffen Templin <marcus.klein@open-xchange.com>  Fri, 17 Apr 2020 08:57:24 +0000
+
 open-xchange-dav (7.10.3-9) stable; urgency=medium
 
   * Build for patch 2020-04-14 (5677)

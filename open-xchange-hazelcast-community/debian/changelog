@@ -1,3 +1,9 @@
+open-xchange-hazelcast-community (7.10.3-10) stable; urgency=medium
+
+  * Build for patch 2020-04-02 (5692)
+
+ -- Martin Schneider <martin.schneider@open-xchange.com>  Fri, 17 Apr 2020 08:56:33 +0000
+
 open-xchange-hazelcast-community (7.10.3-9) stable; urgency=medium
 
   * Build for patch 2020-04-14 (5677)
