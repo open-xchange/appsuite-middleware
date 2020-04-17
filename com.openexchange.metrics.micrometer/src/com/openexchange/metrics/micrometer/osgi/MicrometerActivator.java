@@ -64,7 +64,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.metrics.micrometer.internal.BasicAuthHttpContext;
 import com.openexchange.metrics.micrometer.internal.filter.ActivateMetricMicrometerFilterPerformer;
-import com.openexchange.metrics.micrometer.internal.filter.DenyAllMetricMicrometerFilterPerformer;
 import com.openexchange.metrics.micrometer.internal.filter.DistributionHistogramMicrometerFilterPerformer;
 import com.openexchange.metrics.micrometer.internal.filter.DistributionMaximumMicrometerFilterPerformer;
 import com.openexchange.metrics.micrometer.internal.filter.DistributionMinimumMicrometerFilterPerformer;
@@ -75,9 +74,11 @@ import com.openexchange.metrics.micrometer.internal.property.MicrometerFilterPro
 import com.openexchange.metrics.micrometer.internal.property.MicrometerProperty;
 import com.openexchange.osgi.HousekeepingActivator;
 import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.config.MeterFilter;
 import io.micrometer.prometheus.PrometheusConfig;
 import io.micrometer.prometheus.PrometheusMeterRegistry;
 import io.prometheus.client.exporter.MetricsServlet;
+import io.prometheus.client.hotspot.DefaultExports;
 
 /**
  * {@link MicrometerActivator}
@@ -110,15 +111,12 @@ public class MicrometerActivator extends HousekeepingActivator implements Reload
 
     @Override
     protected void startBundle() throws Exception {
-        // In that order
         filterPerformers.add(new ActivateMetricMicrometerFilterPerformer());
         filterPerformers.add(new DistributionHistogramMicrometerFilterPerformer());
         filterPerformers.add(new DistributionMinimumMicrometerFilterPerformer());
         filterPerformers.add(new DistributionMaximumMicrometerFilterPerformer());
         filterPerformers.add(new DistributionPercentilesMicrometerFilterPerformer());
         filterPerformers.add(new DistributionSLAMicrometerFilterPerformer());
-        // Must applied last one for the 'all' wildcard
-        //filterPerformers.add(new DenyAllMetricMicrometerFilterPerformer());
 
         applyMeterFilters(getServiceSafe(ConfigurationService.class));
         registerService(Reloadable.class, this);
@@ -162,8 +160,11 @@ public class MicrometerActivator extends HousekeepingActivator implements Reload
         Metrics.removeRegistry(prometheusRegistry);
         prometheusRegistry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
         filterPerformers.stream().forEach(p -> p.applyFilter(prometheusRegistry, configService));
-        if (false == Boolean.parseBoolean(configService.getProperty(MicrometerFilterProperty.ENABLE.getFQPropertyName() + ".all", "true"))) {
-            new DenyAllMetricMicrometerFilterPerformer().applyFilter(prometheusRegistry, configService);
+        String value = configService.getProperty(MicrometerFilterProperty.ENABLE.getFQPropertyName() + ".all", Boolean.TRUE.toString());
+        if (Boolean.parseBoolean(value)) {
+            DefaultExports.register(prometheusRegistry.getPrometheusRegistry());
+        } else {
+            prometheusRegistry.config().meterFilter(MeterFilter.deny());
         }
         Metrics.addRegistry(prometheusRegistry);
     }
