@@ -92,7 +92,11 @@ public class DistributionSLAMicrometerFilterPerformer extends AbstractMicrometer
                     long[] sla = new long[p.length];
                     int index = 0;
                     for (String s : p) {
-                        sla[index++] = TimeSpanParser.parseTimespanToPrimitive(s);
+                        try {
+                            sla[index++] = TimeSpanParser.parseTimespanToPrimitive(s);
+                        } catch (IllegalArgumentException e) {
+                            LOG.debug("Cannot parse {} as long. Ignoring.", s, e);
+                        }
                     }
                     return DistributionStatisticConfig.builder().sla(sla).build().merge(config);
                 }
