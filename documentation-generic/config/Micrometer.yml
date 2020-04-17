@@ -28,3 +28,73 @@ properties:
       file: micrometer.properties
       packageName: open-xchange-core
       tags: ["Micrometer", "Metrics"]
+    - key: com.openexchange.metrics.micrometer.enable.all
+      description: |
+        Enables/Disables publishing of all metrics.
+      defaultValue: true
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: false
+      file: micrometer.properties
+      packageName: open-xchange-core
+      tags: ["Micrometer", "Metrics"]
+    - key: com.openexchange.metrics.micrometer.enable.<METRIC_NAME>
+      description: |
+        Enables/Disables publishing of the specified metric.
+      defaultValue: 
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: false
+      file: micrometer.properties
+      packageName: open-xchange-core
+      tags: ["Micrometer", "Metrics"]
+    - key: com.openexchange.metrics.micrometer.distribution.histogram.<METRIC_NAME>
+      description: |
+        Enables/Disables publishing of all percentile histograms of the specified metric.
+      defaultValue: false 
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: false
+      file: micrometer.properties
+      packageName: open-xchange-core
+      tags: ["Micrometer", "Metrics"]
+    - key: com.openexchange.metrics.micrometer.distribution.percentiles.<METRIC_NAME>
+      description: |
+        Publishes specific percentile histograms of the specified metric.
+      defaultValue: true
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: false
+      file: micrometer.properties
+      packageName: open-xchange-core
+      tags: ["Micrometer", "Metrics"]
+    - key: com.openexchange.metrics.micrometer.distribution.sla.<METRIC_NAME>
+      description: |
+        Publishes specific SLAs of the specified metric.
+      defaultValue: 50ms,100ms,150ms,200ms,250ms,300ms,400ms,500ms,750ms,1s,2s,5s,10s,30s,1m
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: false
+      file: micrometer.properties
+      packageName: open-xchange-core
+      tags: ["Micrometer", "Metrics"]
+    - key: com.openexchange.metrics.micrometer.distribution.minimum.<METRIC_NAME>
+      description: |
+        Defines the lower bound of percentile histogram buckets to publish for that specific metric.
+      defaultValue: 
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: false
+      file: micrometer.properties
+      packageName: open-xchange-core
+      tags: ["Micrometer", "Metrics"]
+    - key: com.openexchange.metrics.micrometer.distribution.maximum.<METRIC_NAME>
+      description: |
+        Defines the upper bound of percentile histogram buckets to publish for that specific metric.
+      defaultValue: 
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: false
+      file: micrometer.properties
+      packageName: open-xchange-core
+      tags: ["Micrometer", "Metrics"]
