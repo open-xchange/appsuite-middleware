@@ -228,6 +228,9 @@ public abstract class AbstractITipAction implements AJAXActionService {
      * @throws OXException In case of an error while serving the request
      */
     private AJAXRequestResult performSchedulingAction(AJAXRequestData requestData, ServerSession session) throws OXException {
+        if (ITipActionFactory.ANALYZE.equals(requestData.getAction())) {
+            return null;
+        }
         CalendarSession calendarSession = Utils.initCalendarSession(services, session);
         ImportedCalendar calendar = getCalendar(requestData, calendarSession);
         if (false == isLegacyScheduling()) {
