@@ -88,6 +88,7 @@ public class CXFActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
+        Services.setServiceLookup(this);
         final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CXFActivator.class);
         try {
             log.info("Starting Bundle: com.openexchange.soap.cxf");
@@ -276,6 +277,12 @@ public class CXFActivator extends HousekeepingActivator {
             log.error("", e);
             throw e;
         }
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        super.stopBundle();
+        Services.setServiceLookup(null);
     }
 
 }
