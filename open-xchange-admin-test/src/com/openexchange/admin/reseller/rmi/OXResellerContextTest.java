@@ -52,6 +52,7 @@ package com.openexchange.admin.reseller.rmi;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import java.rmi.RemoteException;
+import java.rmi.ServerException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -59,8 +60,6 @@ import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.admin.rmi.exceptions.InvalidDataException;
-import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.factory.ResellerAdminFactory;
 
 public class OXResellerContextTest extends AbstractOXResellerTest {
@@ -134,7 +133,7 @@ public class OXResellerContextTest extends AbstractOXResellerTest {
         boolean failed_ctx3 = false;
         try {
             ctx3 = createContext(creds);
-        } catch (StorageException e) {
+        } catch (ServerException e) {
             failed_ctx3 = true;
         }
 
@@ -162,7 +161,7 @@ public class OXResellerContextTest extends AbstractOXResellerTest {
         boolean failed_ctx1 = false;
         try {
             ctx1 = createContextNoQuota(contextAdmin);
-        } catch (InvalidDataException e) {
+        } catch (ServerException e) {
             failed_ctx1 = true;
         }
 
@@ -188,7 +187,7 @@ public class OXResellerContextTest extends AbstractOXResellerTest {
         boolean failed_ctx3 = false;
         try {
             ctx3 = createContext(resellerRandomCredentials);
-        } catch (StorageException e) {
+        } catch (ServerException e) {
             failed_ctx3 = true;
         }
         deleteContext(ctx1, resellerRandomCredentials);

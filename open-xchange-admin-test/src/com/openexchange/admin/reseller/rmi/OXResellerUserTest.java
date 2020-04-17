@@ -50,6 +50,7 @@
 package com.openexchange.admin.reseller.rmi;
 
 import static org.junit.Assert.assertTrue;
+import java.rmi.ServerException;
 import java.util.Stack;
 import org.junit.After;
 import org.junit.Before;
@@ -62,7 +63,6 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.DuplicateExtensionException;
-import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.factory.ResellerAdminFactory;
 import com.openexchange.admin.rmi.factory.UserFactory;
 
@@ -112,7 +112,7 @@ public class OXResellerUserTest extends AbstractOXResellerTest {
                 try {
                     User contextAdmin = UserFactory.createContextAdmin();
                     createUser(ctxstack.firstElement(), new Credentials(contextAdmin.getName(), contextAdmin.getPassword()));
-                } catch (StorageException e) {
+                } catch (ServerException e) {
                     createFailed = true;
                 }
                 assertTrue("Create user must fail", createFailed);
@@ -154,7 +154,7 @@ public class OXResellerUserTest extends AbstractOXResellerTest {
                 boolean createFailed = false;
                 try {
                     createUser(ctx, ctxadmcreds);
-                } catch (StorageException e) {
+                } catch (ServerException e) {
                     createFailed = true;
                 }
                 assertTrue("Create user must fail", createFailed);
@@ -205,7 +205,7 @@ public class OXResellerUserTest extends AbstractOXResellerTest {
                 boolean createFailed = false;
                 try {
                     createUser(ctx, ctxadmcreds);
-                } catch (StorageException e) {
+                } catch (ServerException e) {
                     createFailed = true;
                 }
                 assertTrue("Create user must fail", createFailed);
@@ -236,7 +236,7 @@ public class OXResellerUserTest extends AbstractOXResellerTest {
                 createFailed = false;
                 try {
                     createUser(ctx, access, ctxadmcreds);
-                } catch (StorageException e) {
+                } catch (ServerException e) {
                     createFailed = true;
                 }
                 assertTrue("Create user must fail", createFailed);
