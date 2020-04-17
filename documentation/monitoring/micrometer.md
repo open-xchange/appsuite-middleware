@@ -77,7 +77,7 @@ com.openexchange.metrics.micrometer.enable.appsuite.httpapi.requests=true
 com.openexchange.metrics.micrometer.distribution.histogram.appsuite.http.requests=true
 ```
 
-With this configuration, the percentiles histogram for all value buckets is published. It will produce an output as follows:
+With this configuration, all but the `appsuite.httpapi.requests` metrics are published and for those metrics the percentiles histogram for all value buckets is published as well. It will produce an output as follows:
 
 ```bash
 # HELP appsuite_httpapi_requests_seconds HTTP API request times
@@ -112,8 +112,6 @@ As you can see, the percentiles histogram contains ALL recorded values.
 It is possible to narrow down and aggregate the value buckets in a more compact way. For this, the property `distribution.percentiles` comes into play. It accepts a comma-separated list of double values where each value should be between zero (0) and one (1) (both values exclusive).
 
 ```bash
-com.openexchange.metrics.micrometer.enable.all=false
-com.openexchange.metrics.micrometer.enable.appsuite.httpapi.requests=true
 com.openexchange.metrics.micrometer.distribution.histogram.appsuite.httpapi.requests=false
 com.openexchange.metrics.micrometer.distribution.percentiles.appsuite.http.requests=0.5,0.75,0.9,0.95,0.99,0.999
 ```
@@ -136,8 +134,6 @@ appsuite_httpapi_requests_seconds{action="autologin",module="login",status="TRY_
 Another useful configuration that can be applied to all `Timer` and `DistributionSummary` based metrics is that of the concrete SLA values. The property `distribution.sla` accepts values as a comma-separated list of timespan entries. For example:
 
 ```bash
-com.openexchange.metrics.micrometer.enable.all=false
-com.openexchange.metrics.micrometer.enable.appsuite.httpapi.requests=true
 com.openexchange.metrics.micrometer.distribution.sla.appsuite.httpapi.requests=50ms, 100ms, 150ms, 200ms, 250ms, 300ms, 400ms, 500ms, 750ms, 1s, 2s, 5s, 10s, 30s, 1m
 ```
 
@@ -178,8 +174,6 @@ The accepted timespan abbreviations are:
 The minimum and maximum expected values can also be configured for all `Timer` and `DistributionSummary` based metrics. The properties `distribution.minimum` and `distribution.maximum` accept long values. The minimum and maximum values define a lower and upper bound of percentile histogram buckets respectively. See following example:
 
 ```bash
-com.openexchange.metrics.micrometer.enable.all=false
-com.openexchange.metrics.micrometer.enable.appsuite.httpapi.requests=true
 com.openexchange.metrics.micrometer.distribution.minimum.appsuite.httpapi.requests=10
 com.openexchange.metrics.micrometer.distribution.maximum.appsuite.httpapi.requests=100
 ```
