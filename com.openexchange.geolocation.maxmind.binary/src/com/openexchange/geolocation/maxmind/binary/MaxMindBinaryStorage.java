@@ -52,12 +52,9 @@ package com.openexchange.geolocation.maxmind.binary;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.InetAddress;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.maxmind.db.CHMCache;
 import com.maxmind.geoip2.DatabaseReader;
 import com.maxmind.geoip2.exception.AddressNotFoundException;
-import com.maxmind.geoip2.exception.GeoIp2Exception;
 import com.maxmind.geoip2.model.CityResponse;
 import com.maxmind.geoip2.record.City;
 import com.maxmind.geoip2.record.Continent;
@@ -72,22 +69,44 @@ import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 
 /**
- * {@link MaxMindBinaryStorage2}
+ * {@link MaxMindBinaryStorage}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.3
  */
 public class MaxMindBinaryStorage implements GeoLocationStorageService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MaxMindBinaryStorage.class);
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(MaxMindBinaryStorage.class);
+    }
+
     private static final String SERVICE_PROVIDER_ID = "maxmind-bin";
     private static final String DATABASE_PATH_PROPERTY = "com.openexchange.geolocation.maxmind.databasePath";
+
+    /**
+     * Initializes the database reader
+     *
+     * @param databasePath The database path
+     * @return The new {@link DatabaseReader}
+     * @throws OXException if an error is occurred
+     */
+    private static DatabaseReader initReader(String databasePath) throws OXException {
+        try {
+            return new DatabaseReader.Builder(new FileInputStream(databasePath)).withCache(new CHMCache()).build();
+        } catch (Exception e) {
+            LoggerHolder.LOGGER.error("Error initializing reader for MaxMind database at {}: {}", databasePath, e.getMessage(), e);
+            throw GeoLocationExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage(), e);
+        }
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
 
     private final DatabaseReader databaseReader;
 
     /**
-     * Initialises a new {@link MaxMindBinaryStorage}.
-     * 
+     * Initializes a new {@link MaxMindBinaryStorage}.
+     *
      * @param databasePath The path to the MaxMind city database to use
      * @throws OXException if the database path property is empty or any other error is occurred
      */
@@ -112,10 +131,9 @@ public class MaxMindBinaryStorage implements GeoLocationStorageService {
             return parseCityResponse(databaseReader.city(address));
         } catch (IOException e) {
             throw GeoLocationExceptionCodes.IO_ERROR.create(e.getMessage(), e);
-        } catch (GeoIp2Exception e) {
-            if (e instanceof AddressNotFoundException) {
-                throw GeoLocationExceptionCodes.ADDRESS_NOT_FOUND.create(e, address);
-            }
+        } catch (AddressNotFoundException e) {
+            throw GeoLocationExceptionCodes.ADDRESS_NOT_FOUND.create(e, address);
+        } catch (Exception e) {
             throw GeoLocationExceptionCodes.UNEXPECTED_ERROR.create(e);
         }
     }
@@ -123,22 +141,6 @@ public class MaxMindBinaryStorage implements GeoLocationStorageService {
     @Override
     public String getProviderId() {
         return SERVICE_PROVIDER_ID;
-    }
-
-    /**
-     * Initialises the database reader
-     * 
-     * @param databasePath The database path
-     * @return The new {@link DatabaseReader}
-     * @throws OXException if an error is occurred
-     */
-    private DatabaseReader initReader(String databasePath) throws OXException {
-        try {
-            return new DatabaseReader.Builder(new FileInputStream(databasePath)).withCache(new CHMCache()).build();
-        } catch (Exception e) {
-            LOGGER.error("Error initializing reader for MaxMind database at {}: {}", databasePath, e.getMessage(), e);
-            throw GeoLocationExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage(), e);
-        }
     }
 
     /**
