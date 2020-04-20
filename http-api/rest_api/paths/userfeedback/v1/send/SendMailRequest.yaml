@@ -73,7 +73,7 @@
             schema:
               type: string
     x-ox-examples:
-      Example:
+      - Example:
         description: >-
           Export user feedback from 2016-01-01 to 2016-12-31 and send it via
           mail to user1@example.org and user2@example.org

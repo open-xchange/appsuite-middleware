@@ -18,6 +18,30 @@ pre {
   word-wrap: break-word; 
 }
 
+code{
+  font-family: monospace;
+  font-size: 16px;
+  color: #444;
+}
+
+.example-text {
+  margin-bottom: 10px;
+}
+
+.example-code-div{
+  margin-top: 5px;
+  width: auto;
+  border: 1px solid #e5e0c6;
+  background-color: #fcf6db;
+  padding: 7px;
+  max-height: 200px;
+  overflow: auto;
+}
+
+.example-text code{
+  white-space: pre-wrap;
+}
+
 .sidebar-icon{
   margin-left: 10px;
   margin-right: 10px;
