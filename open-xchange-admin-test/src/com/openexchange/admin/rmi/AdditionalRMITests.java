@@ -54,6 +54,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.rmi.RemoteException;
+import java.rmi.ServerException;
 import java.util.Arrays;
 import java.util.List;
 import org.junit.Assert;
@@ -64,7 +65,6 @@ import com.openexchange.admin.rmi.dataobjects.Group;
 import com.openexchange.admin.rmi.dataobjects.Resource;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
-import com.openexchange.admin.rmi.exceptions.ContextExistsException;
 import com.openexchange.admin.rmi.factory.ContextFactory;
 import com.openexchange.admin.rmi.factory.GroupFactory;
 import com.openexchange.admin.rmi.factory.ResourceFactory;
@@ -406,17 +406,22 @@ public class AdditionalRMITests extends AbstractRMITest {
         assertEquals("Query should return only one user", new Integer(1), Integer.valueOf(queriedUsers.length));
         User user = queriedUsers[0];
 
+        /**
+         * Besides contacts and webmail, all other accesses should be disabled, see com.openexchange.admin.tools.AdminCache.getDefaultUserModuleAccess()
+         * or ModuleAccessDefinitions.properties for <code>webmail_plus</cdoe> and <code>NEW_CONTEXT_DEFAULT_ACCESS_COMBINATION_NAME</code> in
+         * <code>hosting.properties</code>
+         */
         UserModuleAccess access = getUserManager().getModuleAccess(context, user, contextAdminCredentials);
-        assertEquals("Calendar access should be granted by default", Boolean.TRUE, access.getCalendar() ? Boolean.TRUE : Boolean.FALSE);
-        access.setCalendar(false);
-        getUserManager().changeModuleAccess(context, user, access, contextAdminCredentials);
-        access = getUserManager().getModuleAccess(context, user, contextAdminCredentials);
-        assertEquals("Calendar access should be turned off now", Boolean.FALSE, access.getCalendar() ? Boolean.TRUE : Boolean.FALSE);
-        // reset access and check again
+        assertFalse("Calendar access should be disabled by default", access.getCalendar());
         access.setCalendar(true);
         getUserManager().changeModuleAccess(context, user, access, contextAdminCredentials);
         access = getUserManager().getModuleAccess(context, user, contextAdminCredentials);
-        assertEquals("Calendar access should be granted again", Boolean.TRUE, access.getCalendar() ? Boolean.TRUE : Boolean.FALSE);
+        assertTrue("Calendar access should be enabled now", access.getCalendar());
+        // reset access and check again
+        access.setCalendar(false);
+        getUserManager().changeModuleAccess(context, user, access, contextAdminCredentials);
+        access = getUserManager().getModuleAccess(context, user, contextAdminCredentials);
+        assertFalse("Calendar access should be disabled again", access.getCalendar());
     }
 
     @Test
@@ -430,7 +435,7 @@ public class AdditionalRMITests extends AbstractRMITest {
             try {
                 getContextManager().create(newContext, newAdmin);
                 fail("Should throw ContextExistsException");
-            } catch (ContextExistsException e) {
+            } catch (ServerException e) {
                 assertTrue("Caught exception", true);
             }
         } finally {
