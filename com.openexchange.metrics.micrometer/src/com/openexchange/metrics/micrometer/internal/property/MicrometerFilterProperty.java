@@ -62,7 +62,7 @@ public enum MicrometerFilterProperty implements Property {
     /**
      * Enables/Disables metrics
      */
-    ENABLE(true),
+    ENABLE(Boolean.TRUE),
     /**
      * Enables/Disables the percentiles histograms.
      * {@link Boolean}
@@ -104,7 +104,7 @@ public enum MicrometerFilterProperty implements Property {
 
     /**
      * Initializes a new {@link MicrometerFilterProperty}.
-     * 
+     *
      * @param defaultValue The default value
      */
     private MicrometerFilterProperty(Object defaultValue) {
@@ -113,7 +113,7 @@ public enum MicrometerFilterProperty implements Property {
 
     /**
      * Initializes a new {@link MicrometerFilterProperty}.
-     * 
+     *
      * @param midfix The midfix
      * @param defaultValue The default value
      */

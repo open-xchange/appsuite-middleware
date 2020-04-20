@@ -68,7 +68,7 @@ import io.micrometer.core.instrument.distribution.DistributionStatisticConfig;
  */
 public class DistributionPercentilesMicrometerFilterPerformer extends AbstractMicrometerFilterPerformer implements MicrometerFilterPerformer {
 
-    private static final Logger LOG = LoggerFactory.getLogger(DistributionPercentilesMicrometerFilterPerformer.class);
+    static final Logger LOG = LoggerFactory.getLogger(DistributionPercentilesMicrometerFilterPerformer.class);
 
     /**
      * Initializes a new {@link DistributionPercentilesMicrometerFilterPerformer}.
@@ -82,6 +82,7 @@ public class DistributionPercentilesMicrometerFilterPerformer extends AbstractMi
         applyFilterFor(MicrometerFilterProperty.PERCENTILES, configurationService, (entry) -> {
             meterRegistry.config().meterFilter(new MeterFilter() {
 
+                @Override
                 public DistributionStatisticConfig configure(Meter.Id id, DistributionStatisticConfig config) {
                     LOG.debug("Applying percentiles meter filter for '{}'", id);
                     if (false == entry.getKey().contains(id.getName())) {
@@ -93,7 +94,7 @@ public class DistributionPercentilesMicrometerFilterPerformer extends AbstractMi
                     for (String s : p) {
                         try {
                             percentiles[index++] = Double.parseDouble(s);
-                        } catch (NumberFormatException e) {
+                        } catch (@SuppressWarnings("unused") NumberFormatException e) {
                             LOG.warn("Percentile '{}' cannot be parsed as double. Will be ignored.", s);
                         }
                     }

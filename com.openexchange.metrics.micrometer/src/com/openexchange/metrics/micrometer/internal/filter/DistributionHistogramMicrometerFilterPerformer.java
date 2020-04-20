@@ -68,7 +68,7 @@ import io.micrometer.core.instrument.distribution.DistributionStatisticConfig;
  */
 public class DistributionHistogramMicrometerFilterPerformer extends AbstractMicrometerFilterPerformer implements MicrometerFilterPerformer {
 
-    private static final Logger LOG = LoggerFactory.getLogger(DistributionHistogramMicrometerFilterPerformer.class);
+    static final Logger LOG = LoggerFactory.getLogger(DistributionHistogramMicrometerFilterPerformer.class);
 
     /**
      * Initializes a new {@link DistributionHistogramMicrometerFilterPerformer}.
@@ -82,9 +82,10 @@ public class DistributionHistogramMicrometerFilterPerformer extends AbstractMicr
         applyFilterFor(MicrometerFilterProperty.HISTOGRAM, configurationService, (entry) -> {
             meterRegistry.config().meterFilter(new MeterFilter() {
 
+                @Override
                 public DistributionStatisticConfig configure(Meter.Id id, DistributionStatisticConfig config) {
                     LOG.debug("Applying histogram meter filter for '{}'", id);
-                    return entry.getKey().contains(id.getName()) ? builder().percentilesHistogram(Boolean.parseBoolean(entry.getValue())).build().merge(config) : config;
+                    return entry.getKey().contains(id.getName()) ? builder().percentilesHistogram(Boolean.valueOf(entry.getValue())).build().merge(config) : config;
                 }
             });
         });

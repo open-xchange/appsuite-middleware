@@ -69,7 +69,7 @@ import io.micrometer.core.instrument.distribution.DistributionStatisticConfig;
  */
 public class DistributionSLAMicrometerFilterPerformer extends AbstractMicrometerFilterPerformer implements MicrometerFilterPerformer {
 
-    private static final Logger LOG = LoggerFactory.getLogger(DistributionSLAMicrometerFilterPerformer.class);
+    static final Logger LOG = LoggerFactory.getLogger(DistributionSLAMicrometerFilterPerformer.class);
 
     /**
      * Initializes a new {@link DistributionSLAMicrometerFilterPerformer}.
@@ -83,6 +83,7 @@ public class DistributionSLAMicrometerFilterPerformer extends AbstractMicrometer
         applyFilterFor(MicrometerFilterProperty.SLA, configurationService, (entry) -> {
             meterRegistry.config().meterFilter(new MeterFilter() {
 
+                @Override
                 public DistributionStatisticConfig configure(Meter.Id id, DistributionStatisticConfig config) {
                     LOG.debug("Applying SLA meter filter for '{}'", id);
                     if (false == entry.getKey().contains(id.getName())) {
