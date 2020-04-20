@@ -30,7 +30,7 @@ For most use cases Micrometer provides an adequate meter, but its framework does
 
 # Configuration
 
-All metrics the AppSuite registers (`appsuite.*`) can be individually enabled/disabled. The distribution statistics for metrics of type `Timer` and `DistributionSummnary` is also configurable. All metrics' properties share the same domain name, i.e. `com.openexchange.metrics.micrometer`. Note that the metrics' properties are all reloadable, however they have to be stored in a properties file called `micrometer.properties` for that to work. This is due to a limitation of the `ConfigurationService` and `Reloadable` functionality.
+All metrics the AppSuite registers (`appsuite.*`) can be individually enabled/disabled. The distribution statistics for metrics of type `Timer` and `DistributionSummnary` is also configurable. All metrics' properties share the same domain name, i.e. `com.openexchange.metrics.micrometer`. Note that all metrics' properties are reloadable.
 
 ## Enable/Disable
 

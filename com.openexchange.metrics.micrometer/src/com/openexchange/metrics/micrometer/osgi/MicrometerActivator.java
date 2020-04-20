@@ -135,7 +135,7 @@ public class MicrometerActivator extends HousekeepingActivator implements Reload
 
     @Override
     public Interests getInterests() {
-        return DefaultInterests.builder().configFileNames("micrometer.properties").build();
+        return DefaultInterests.builder().propertiesOfInterest(MicrometerFilterProperty.BASE + "*").build();
     }
 
     @Override
