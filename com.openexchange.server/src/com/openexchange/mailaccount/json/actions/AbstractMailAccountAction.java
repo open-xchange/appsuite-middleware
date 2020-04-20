@@ -557,12 +557,12 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
      * @param account The corresponding account
      * @param storageService The storage service (needed for update)
      * @param session The session providing needed user information
-     * @param folderNames Array of predefined folder names (e.g. Special-Use Folders) or null entries. If present, these names are used for creation.
+     * @param folderFullNames Array of predefined folder full names (e.g. IMAP SPECIAL-USE folders) or <code>null</code> entries. If present, these full names are used for creation.
      * @return The mail account with full names present
      * @throws OXException If check for full names fails
      */
-    public static MailAccount checkFullNames(final MailAccount account, final MailAccountStorageService storageService, final ServerSession session, final Connection con, final Map<String, String> folderNames) throws OXException {
-        return Tools.checkFullNames(account, storageService, session, con, folderNames);
+    public static MailAccount checkFullNames(final MailAccount account, final MailAccountStorageService storageService, final ServerSession session, final Connection con, final Map<String, String> folderFullNames) throws OXException {
+        return Tools.checkFullNames(account, storageService, session, con, folderFullNames);
     }
 
     /** Checks for an empty string */

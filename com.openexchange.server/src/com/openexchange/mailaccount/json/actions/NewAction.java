@@ -226,7 +226,7 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
                 if (null == newAccount) {
                     throw MailAccountExceptionCodes.NOT_FOUND.create(id, session.getUserId(), session.getContextId());
                 }
-                Map<String, String> defaultFolderNames = null;
+                Map<String, String> defaultFolderFullNames = null;
                 if (!pop3 && valid) {
                     MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
                     try {
@@ -235,7 +235,7 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
                         IMailFolderStorage storage = mailAccess.getFolderStorage();
                         IMailFolderStorageDefaultFolderAware defaultFolderAware = storage.supports(IMailFolderStorageDefaultFolderAware.class);
                         if (null != defaultFolderAware) {
-                            defaultFolderNames = defaultFolderAware.getSpecialUseFolder();
+                            defaultFolderFullNames = defaultFolderAware.getSpecialUseFolder();
                         }
                     } finally {
                         if (null != mailAccess) {
@@ -245,7 +245,7 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
                 }
 
                 if (valid) {
-                    newAccount = checkFullNames(newAccount, storageService, session, wcon, defaultFolderNames);
+                    newAccount = checkFullNames(newAccount, storageService, session, wcon, defaultFolderFullNames);
                 }
                 wcon.commit();
                 rollback = 2;
