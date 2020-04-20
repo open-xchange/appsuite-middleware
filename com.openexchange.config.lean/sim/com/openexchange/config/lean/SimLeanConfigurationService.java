@@ -50,7 +50,10 @@
 package com.openexchange.config.lean;
 
 import java.util.Map;
+import com.google.common.collect.ImmutableMap;
+import com.openexchange.config.PropertyFilter;
 import com.openexchange.config.SimConfigurationService;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link SimLeanConfigurationService}
@@ -169,4 +172,12 @@ public class SimLeanConfigurationService implements LeanConfigurationService {
         return Long.parseLong(delegateConfigurationService.getProperty(property.getFQPropertyName(), property.getDefaultValue(String.class)));
     }
 
+    @Override
+    public Map<String, String> getProperties(PropertyFilter propertyFilter) {
+        try {
+            return delegateConfigurationService.getProperties(propertyFilter);
+        } catch (OXException e) {
+            return ImmutableMap.of();
+        }
+    }
 }

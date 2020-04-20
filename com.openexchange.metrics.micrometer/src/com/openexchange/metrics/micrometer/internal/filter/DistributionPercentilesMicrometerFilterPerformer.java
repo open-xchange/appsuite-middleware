@@ -68,7 +68,7 @@ import io.micrometer.core.instrument.distribution.DistributionStatisticConfig;
  */
 public class DistributionPercentilesMicrometerFilterPerformer extends AbstractMicrometerFilterPerformer implements MicrometerFilterPerformer {
 
-    static final Logger LOG = LoggerFactory.getLogger(DistributionPercentilesMicrometerFilterPerformer.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DistributionPercentilesMicrometerFilterPerformer.class);
 
     /**
      * Initializes a new {@link DistributionPercentilesMicrometerFilterPerformer}.
@@ -94,8 +94,9 @@ public class DistributionPercentilesMicrometerFilterPerformer extends AbstractMi
                     for (String s : p) {
                         try {
                             percentiles[index++] = Double.parseDouble(s);
-                        } catch (@SuppressWarnings("unused") NumberFormatException e) {
-                            LOG.warn("Percentile '{}' cannot be parsed as double. Will be ignored.", s);
+                        } catch (NumberFormatException e) {
+                            LOG.error("Percentile '{}' cannot be parsed as double. Ignoring percentiles configuration.", s);
+                            return config;
                         }
                     }
                     return DistributionStatisticConfig.builder().percentiles(percentiles).build().merge(config);

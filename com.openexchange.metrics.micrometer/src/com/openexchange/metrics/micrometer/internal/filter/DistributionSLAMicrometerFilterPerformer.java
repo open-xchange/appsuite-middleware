@@ -69,7 +69,7 @@ import io.micrometer.core.instrument.distribution.DistributionStatisticConfig;
  */
 public class DistributionSLAMicrometerFilterPerformer extends AbstractMicrometerFilterPerformer implements MicrometerFilterPerformer {
 
-    static final Logger LOG = LoggerFactory.getLogger(DistributionSLAMicrometerFilterPerformer.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DistributionSLAMicrometerFilterPerformer.class);
 
     /**
      * Initializes a new {@link DistributionSLAMicrometerFilterPerformer}.
@@ -96,7 +96,8 @@ public class DistributionSLAMicrometerFilterPerformer extends AbstractMicrometer
                         try {
                             sla[index++] = TimeSpanParser.parseTimespanToPrimitive(s);
                         } catch (IllegalArgumentException e) {
-                            LOG.debug("Cannot parse {} as long. Ignoring.", s, e);
+                            LOG.error("Cannot parse {} as long. Ignoring SLAs configuration.", s, e);
+                            return config;
                         }
                     }
                     return DistributionStatisticConfig.builder().sla(sla).build().merge(config);

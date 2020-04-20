@@ -99,7 +99,7 @@ abstract class AbstractMicrometerFilterPerformer {
         try {
             return configurationService.getProperties((name, value) -> name.startsWith(property.getFQPropertyName()));
         } catch (OXException e) {
-            LOG.debug("", e);
+            LOG.error("", e);
             return ImmutableMap.of();
         }
     }

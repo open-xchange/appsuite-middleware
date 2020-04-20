@@ -68,7 +68,7 @@ import io.micrometer.core.instrument.distribution.DistributionStatisticConfig;
  */
 public class DistributionHistogramMicrometerFilterPerformer extends AbstractMicrometerFilterPerformer implements MicrometerFilterPerformer {
 
-    static final Logger LOG = LoggerFactory.getLogger(DistributionHistogramMicrometerFilterPerformer.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DistributionHistogramMicrometerFilterPerformer.class);
 
     /**
      * Initializes a new {@link DistributionHistogramMicrometerFilterPerformer}.

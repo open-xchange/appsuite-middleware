@@ -56,6 +56,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.PropertyFilter;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -67,6 +68,7 @@ import com.openexchange.config.lean.internal.parser.FloatPropertyValueParser;
 import com.openexchange.config.lean.internal.parser.IntegerPropertyValueParser;
 import com.openexchange.config.lean.internal.parser.LongPropertyValueParser;
 import com.openexchange.config.lean.internal.parser.StringPropertyValueParser;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link LeanConfigurationServiceImpl}
@@ -199,6 +201,17 @@ public class LeanConfigurationServiceImpl implements LeanConfigurationService {
         return getProperty(property, userId, contextId, Long.class, optionals).longValue();
     }
 
+    @Override
+    public Map<String, String> getProperties(PropertyFilter propertyFilter) {
+        try {
+            ConfigurationService configService = this.configService;
+            return configService.getProperties(propertyFilter);
+        } catch (OXException e) {
+            LOGGER.error("", e);
+            return ImmutableMap.of();
+        }
+    }
+
     ////////////////////////////////////////HELPERS ///////////////////////////////////////
 
     /**
@@ -271,6 +284,5 @@ public class LeanConfigurationServiceImpl implements LeanConfigurationService {
             return defaultValue;
         }
     }
-
 
 }
