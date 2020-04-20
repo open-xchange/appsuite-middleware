@@ -12,6 +12,8 @@ DriveFilePattern:
   $ref: ./DriveFilePattern.yaml
 DriveDirectoryPattern:
   $ref: ./DriveDirectoryPattern.yaml
+DriveSyncFolderBody:
+  $ref: ./DriveSyncFolderBody.yaml
 DriveSyncFoldersBody:
   $ref: ./DriveSyncFoldersBody.yaml
 DriveSyncErrorData:
