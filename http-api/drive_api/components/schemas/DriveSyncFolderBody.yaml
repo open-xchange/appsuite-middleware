@@ -1,0 +1,18 @@
+type: object
+required:
+  - clientVersion
+  - originalVersion
+properties:
+  clientVersion:
+    $ref: '#/components/schemas/DriveDirectoryVersion'
+    description: The client version of the directory to synchronize.
+  originalVersion:
+    $ref: '#/components/schemas/DriveDirectoryVersion'
+    description: The previously synchronized and acknowledged version of the directoy.
+  fileExclusions:
+    type: array
+    description: >-
+      Defines client-side exclusion filters for files (since API version 2). See
+      [Client side filtering](#client-side-filtering) for further information.
+    items:
+      $ref: '#/components/schemas/DriveFilePattern'
