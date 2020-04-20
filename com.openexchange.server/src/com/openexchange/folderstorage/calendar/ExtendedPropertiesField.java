@@ -99,7 +99,7 @@ public class ExtendedPropertiesField extends FolderField {
         try {
             DataHandler dataHandler = ServerServiceRegistry.getServize(ConversionService.class).getDataHandler(DataHandlers.JSON2XPROPERTIES);
             if (null == dataHandler) {
-                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create("No such data handler: " + DataHandlers.JSON2XPROPERTIES);
+                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DataHandlers.JSON2XPROPERTIES);
             }
             ConversionResult result = dataHandler.processData(new SimpleData<Object>(value), new DataArguments(), null);
             return new FolderProperty(getName(), result.getData());
@@ -115,7 +115,7 @@ public class ExtendedPropertiesField extends FolderField {
             try {
                 DataHandler dataHandler = ServerServiceRegistry.getServize(ConversionService.class).getDataHandler(DataHandlers.XPROPERTIES2JSON);
                 if (null == dataHandler) {
-                    throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create("No such data handler: " + DataHandlers.XPROPERTIES2JSON);
+                    throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DataHandlers.XPROPERTIES2JSON);
                 }
                 ConversionResult result = dataHandler.processData(new SimpleData<Object>(property.getValue()), new DataArguments(), null);
                 return result.getData();
