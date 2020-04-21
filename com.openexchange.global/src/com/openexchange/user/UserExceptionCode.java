@@ -64,7 +64,7 @@ import com.openexchange.exception.OXExceptionStrings;
 public enum UserExceptionCode implements DisplayableOXExceptionCode {
 
     /**
-     * A property from the ldap.properties file is missing.
+     * A property is missing.
      */
     PROPERTY_MISSING("Cannot find property %s.", null, Category.CATEGORY_CONFIGURATION, 1),
 
