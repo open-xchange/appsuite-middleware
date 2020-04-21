@@ -51,7 +51,6 @@ package com.sun.mail.imap;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.openexchange.java.ImmutableReference;
 import com.sun.mail.iap.Protocol;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -202,7 +201,7 @@ public abstract class CommandExecutorCollection implements Iterable<CommandExecu
 
             CommandExecutor matching = null;
             for (CommandExecutor commandExecutor : commandExecutors) {
-                if (commandExecutor.isApplicable(protocol) && (matching == null || commandExecutor.getRanking() > matching.getRanking())) {
+                if ((matching == null || commandExecutor.getRanking() > matching.getRanking()) && commandExecutor.isApplicable(protocol)) {
                     matching = commandExecutor;
                 }
             }
@@ -282,8 +281,8 @@ public abstract class CommandExecutorCollection implements Iterable<CommandExecu
             int prime = 31;
             int result = 1;
             result = prime * result + port;
-            result = prime * result + ((host == null) ? 0 : host.hashCode());
             result = prime * result + ((user == null) ? 0 : user.hashCode());
+            result = prime * result + ((host == null) ? 0 : host.hashCode());
             hash = result;
         }
 
@@ -307,18 +306,18 @@ public abstract class CommandExecutorCollection implements Iterable<CommandExecu
             if (port != other.port) {
                 return false;
             }
-            if (host == null) {
-                if (other.host != null) {
-                    return false;
-                }
-            } else if (!host.equals(other.host)) {
-                return false;
-            }
             if (user == null) {
                 if (other.user != null) {
                     return false;
                 }
             } else if (!user.equals(other.user)) {
+                return false;
+            }
+            if (host == null) {
+                if (other.host != null) {
+                    return false;
+                }
+            } else if (!host.equals(other.host)) {
                 return false;
             }
             return true;
