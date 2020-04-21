@@ -1224,6 +1224,12 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             return Optional.empty();
         }
 
+        boolean applyPerEndpoint;
+        {
+            propertyName = "com.openexchange.imap.breaker.primary.applyPerEndpoint";
+            applyPerEndpoint = configuration.getBoolProperty(propertyName, true);
+        }
+
         int failures;
         {
             propertyName = "com.openexchange.imap.breaker.primary.failureThreshold";
@@ -1312,7 +1318,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             }
         }
 
-        return Optional.of(new PrimaryFailsafeCircuitBreakerCommandExecutor(ratioOf(failures, failureExecutions), ratioOf(success, successExecutions), delayMillis, monitoringCommandExecutor));
+        return Optional.of(new PrimaryFailsafeCircuitBreakerCommandExecutor(ratioOf(failures, failureExecutions), ratioOf(success, successExecutions), delayMillis, applyPerEndpoint, monitoringCommandExecutor));
     }
 
     /**

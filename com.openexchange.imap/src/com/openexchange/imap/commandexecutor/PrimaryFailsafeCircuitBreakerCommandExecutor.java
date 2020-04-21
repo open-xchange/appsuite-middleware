@@ -62,23 +62,31 @@ import net.jodah.failsafe.util.Ratio;
  */
 public class PrimaryFailsafeCircuitBreakerCommandExecutor extends AbstractFailsafeCircuitBreakerCommandExecutor {
 
+    private final boolean applyPerEndpoint;
+
     /**
      * Initializes a new {@link PrimaryFailsafeCircuitBreakerCommandExecutor}.
      *
      * @param failureThreshold The ratio of successive failures that must occur in order to open the circuit
      * @param successThreshold The ratio of successive successful executions that must occur when in a half-open state in order to close the circuit
      * @param delayMillis The number of milliseconds to wait in open state before transitioning to half-open
+     * @param applyPerEndpoint Whether the CB shall be applied per endpoint (IP/port combination). Otherwise it applies per primary account host name.
      * @param delegate The delegate executor
      * @throws IllegalArgumentException If invalid/arguments are passed
      */
-    public PrimaryFailsafeCircuitBreakerCommandExecutor(Ratio failureThreshold, Ratio successThreshold, long delayMillis, MonitoringCommandExecutor delegate) {
+    public PrimaryFailsafeCircuitBreakerCommandExecutor(Ratio failureThreshold, Ratio successThreshold, long delayMillis, boolean applyPerEndpoint, MonitoringCommandExecutor delegate) {
         super(Optional.empty(), null, failureThreshold, successThreshold, delayMillis, 100, delegate);
+        this.applyPerEndpoint = applyPerEndpoint;
     }
 
     @Override
     protected Key getKey(Protocol protocol) {
-        InetAddress inetAddress = protocol.getInetAddress();
-        return Key.of("primary", inetAddress.getHostAddress() + ':' + protocol.getPort(), true);
+        if (applyPerEndpoint) {
+            InetAddress inetAddress = protocol.getInetAddress();
+            return Key.of("primary", inetAddress.getHostAddress() + ':' + protocol.getPort(), true);
+        }
+
+        return Key.of("primary", protocol.getHost(), false);
     }
 
     @Override

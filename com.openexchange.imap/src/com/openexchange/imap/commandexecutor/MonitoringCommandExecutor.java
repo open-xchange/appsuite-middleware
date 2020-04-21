@@ -325,15 +325,15 @@ public class MonitoringCommandExecutor implements CommandExecutor {
         String targetHost;
         if (isPrimaryAccount) {
             if (config.isGroupByPrimaryHosts()) {
+                targetHost = new StringBuilder(protocol.getHost()).toString();
+            } else if (config.isGroupByPrimaryEndpoints()) {
                 InetAddress inetAddress = protocol.getInetAddress();
                 targetHost = new StringBuilder(inetAddress.getHostAddress()).append(':').append(protocol.getPort()).toString();
-            } else if (config.isGroupByPrimaryEndpoints()) {
-                targetHost = new StringBuilder(protocol.getHost()).append(':').append(protocol.getPort()).toString();
             } else {
                 targetHost = "primary";
             }
         } else if (config.isGroupByExternalHosts()) {
-            targetHost = new StringBuilder(protocol.getHost()).append(':').append(protocol.getPort()).toString();
+            targetHost = new StringBuilder(protocol.getHost()).append(protocol.getPort()).toString();
         } else {
             targetHost = "external";
         }
