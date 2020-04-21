@@ -52,6 +52,7 @@ package com.openexchange.rest.client.osgi;
 import static com.openexchange.osgi.Tools.generateServiceFilter;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ForcedReloadable;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -99,6 +100,7 @@ public class RestClientActivator extends HousekeepingActivator {
         HttpClientServiceImpl httpClientService = new HttpClientServiceImpl(context, this);
         this.httpClientService = httpClientService;
         track(generateServiceFilter(context, SpecificHttpClientConfigProvider.class, WildcardHttpClientConfigProvider.class), httpClientService);
+        trackService(LeanConfigurationService.class);
         openTrackers();
 
         registerService(HttpClientService.class, httpClientService);
