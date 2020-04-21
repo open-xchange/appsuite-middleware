@@ -20,10 +20,13 @@ Import-Package: com.google.common.collect,
  javax.net.ssl,
  javax.servlet,
  javax.servlet.http,
+ net.jodah.failsafe;resolution:=optional,
+ net.jodah.failsafe.util;resolution:=optional,
  org.osgi.framework,
  org.osgi.service.http,
  org.slf4j
 Export-Package: 
+ com.openexchange.metrics.micrometer.binders,
  io.micrometer.core.instrument,
  io.micrometer.core.instrument.binder.jvm,
  io.micrometer.core.instrument.composite,
