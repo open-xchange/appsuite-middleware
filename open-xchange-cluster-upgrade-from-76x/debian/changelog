@@ -1,3 +1,9 @@
+open-xchange-cluster-upgrade-from-76x (7.10.3-10) stable; urgency=medium
+
+  * Build for patch 2020-04-02 (5692)
+
+ -- Tobias Friedrich <tobias.friedrich@open-xchange.com>  Fri, 17 Apr 2020 08:57:41 +0000
+
 open-xchange-cluster-upgrade-from-76x (7.10.3-9) stable; urgency=medium
 
   * Build for patch 2020-04-14 (5677)
