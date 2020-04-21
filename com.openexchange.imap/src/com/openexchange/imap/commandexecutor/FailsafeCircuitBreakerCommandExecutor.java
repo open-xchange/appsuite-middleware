@@ -51,7 +51,6 @@ package com.openexchange.imap.commandexecutor;
 
 import java.util.Optional;
 import java.util.Set;
-import org.slf4j.Logger;
 import com.openexchange.net.HostList;
 import com.sun.mail.iap.Protocol;
 import net.jodah.failsafe.util.Ratio;
@@ -64,9 +63,6 @@ import net.jodah.failsafe.util.Ratio;
  */
 public class FailsafeCircuitBreakerCommandExecutor extends AbstractFailsafeCircuitBreakerCommandExecutor {
 
-    /** The logger constant */
-    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(FailsafeCircuitBreakerCommandExecutor.class);
-
     private static HostList checkHostList(HostList hostList) {
         if (null == hostList || hostList.isEmpty()) {
             throw new IllegalArgumentException("hostList must not be null or empty.");
@@ -76,56 +72,30 @@ public class FailsafeCircuitBreakerCommandExecutor extends AbstractFailsafeCircu
 
     // -------------------------------------------------------------------------------------------------------------------------------------
 
-    private final String key;
+    private final String name;
 
     /**
      * Initializes a new {@link FailsafeCircuitBreakerCommandExecutor}.
      *
+     * @param name The circuit breaker name as specified in configuration
      * @param hostList The hosts to consider
      * @param optPorts The optional ports to consider
      * @param failureThreshold The ratio of successive failures that must occur in order to open the circuit
      * @param successThreshold The ratio of successive successful executions that must occur when in a half-open state in order to close the circuit
      * @param delayMillis The number of milliseconds to wait in open state before transitioning to half-open
      * @param ranking The ranking
+     * @param delegate The delegate executor
      * @throws IllegalArgumentException If invalid/arguments are passed
      */
-    public FailsafeCircuitBreakerCommandExecutor(HostList hostList, Set<Integer> optPorts, Ratio failureThreshold, Ratio successThreshold, long delayMillis, int ranking) {
-        super(Optional.of(checkHostList(hostList)), optPorts, failureThreshold, successThreshold, delayMillis, ranking);
-        key = hostList.getHostString();
+    public FailsafeCircuitBreakerCommandExecutor(String name, HostList hostList, Set<Integer> optPorts, Ratio failureThreshold,
+            Ratio successThreshold, long delayMillis, int ranking, MonitoringCommandExecutor delegate) {
+        super(Optional.of(checkHostList(hostList)), optPorts, failureThreshold, successThreshold, delayMillis, ranking, delegate);
+        this.name = name;
     }
 
     @Override
-    protected CircuitBreakerInfo circuitBreakerFor(Protocol protocol) {
-        CircuitBreakerInfo breakerInfo = circuitBreakers.get(key);
-        if (breakerInfo == null) {
-            CircuitBreakerInfo newBreakerInfo = createCircuitBreaker(key);
-            breakerInfo = circuitBreakers.putIfAbsent(key, newBreakerInfo);
-            if (breakerInfo == null) {
-                breakerInfo = newBreakerInfo;
-                initMetricsFor(key, newBreakerInfo);
-            }
-        }
-        return breakerInfo;
-    }
-
-    @Override
-    protected void onClose(CircuitBreakerInfo breakerInfo) throws Exception {
-        LOG.info("IMAP circuit breaker closed for {}", breakerInfo.getKey());
-    }
-
-    @Override
-    protected void onHalfOpen(CircuitBreakerInfo breakerInfo) throws Exception {
-        LOG.info("IMAP circuit breaker half-opened for {}", breakerInfo.getKey());
-    }
-
-    @Override
-    protected void onOpen(CircuitBreakerInfo breakerInfo) throws Exception {
-        LOG.info("IMAP circuit breaker opened for {}", breakerInfo.getKey());
-    }
-
-    @Override
-    public String getDescription() {
-        return optionalHostList.isPresent() ? optionalHostList.get().getHostString() : "";
+    protected Key getKey(Protocol protocol) {
+        return Key.of(name, getHostList().get().getHostString(), false);
     }
 
 }

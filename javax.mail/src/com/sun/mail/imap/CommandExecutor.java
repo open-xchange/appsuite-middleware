@@ -66,6 +66,13 @@ import com.sun.mail.iap.ResponseInterceptor;
 public interface CommandExecutor {
 
     /**
+     * Protocol property that denotes whether this executor is called for a primary mail account.
+     * If so, the property returns the string {@code true}. Otherwise {@code null} or any string different
+     * from {@code true}.
+     */
+    static final String PROP_PRIMARY_ACCOUNT = "mail.imap.primary";
+
+    /**
      * Checks if this executor is applicable to given protocol instance
      *
      * @param protocol The protocol instance

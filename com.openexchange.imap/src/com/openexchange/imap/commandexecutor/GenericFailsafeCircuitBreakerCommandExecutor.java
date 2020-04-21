@@ -52,7 +52,6 @@ package com.openexchange.imap.commandexecutor;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import org.slf4j.Logger;
 import com.openexchange.java.Strings;
 import com.openexchange.net.HostList;
 import com.sun.mail.iap.Protocol;
@@ -66,13 +65,6 @@ import net.jodah.failsafe.util.Ratio;
  */
 public class GenericFailsafeCircuitBreakerCommandExecutor extends AbstractFailsafeCircuitBreakerCommandExecutor {
 
-    /** The logger constant */
-    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(GenericFailsafeCircuitBreakerCommandExecutor.class);
-
-    private static final String PROP_PRIMARY_ACCOUNT = "mail.imap.primary";
-
-    // -------------------------------------------------------------------------------------------------------------------------------------
-
     private final AtomicReference<Optional<HostList>> optionalHostsToExclude;
     private final AtomicBoolean excludePrimaryAccount;
 
@@ -82,47 +74,18 @@ public class GenericFailsafeCircuitBreakerCommandExecutor extends AbstractFailsa
      * @param failureThreshold The ratio of successive failures that must occur in order to open the circuit
      * @param successThreshold The ratio of successive successful executions that must occur when in a half-open state in order to close the circuit
      * @param delayMillis The number of milliseconds to wait in open state before transitioning to half-open
+     * @param delegate The delegate executor
      * @throws IllegalArgumentException If invalid/arguments are passed
      */
-    public GenericFailsafeCircuitBreakerCommandExecutor(Ratio failureThreshold, Ratio successThreshold, long delayMillis) {
-        super(Optional.empty(), null, failureThreshold, successThreshold, delayMillis, 10);
+    public GenericFailsafeCircuitBreakerCommandExecutor(Ratio failureThreshold, Ratio successThreshold, long delayMillis, MonitoringCommandExecutor delegate) {
+        super(Optional.empty(), null, failureThreshold, successThreshold, delayMillis, 10, delegate);
         optionalHostsToExclude = new AtomicReference<>(Optional.empty());
         excludePrimaryAccount = new AtomicBoolean(false);
     }
 
     @Override
-    protected CircuitBreakerInfo circuitBreakerFor(Protocol protocol) {
-        String key = protocol.getHost();
-        CircuitBreakerInfo breakerInfo = circuitBreakers.get(key);
-        if (breakerInfo == null) {
-            CircuitBreakerInfo newBreakerInfo = createCircuitBreaker(key);
-            breakerInfo = circuitBreakers.putIfAbsent(key, newBreakerInfo);
-            if (breakerInfo == null) {
-                breakerInfo = newBreakerInfo;
-                initMetricsFor(key, newBreakerInfo);
-            }
-        }
-        return breakerInfo;
-    }
-
-    @Override
-    protected void onClose(CircuitBreakerInfo breakerInfo) throws Exception {
-        LOG.info("IMAP circuit breaker closed for {}", breakerInfo.getKey());
-    }
-
-    @Override
-    protected void onHalfOpen(CircuitBreakerInfo breakerInfo) throws Exception {
-        LOG.info("IMAP circuit breaker half-opened for {}", breakerInfo.getKey());
-    }
-
-    @Override
-    protected void onOpen(CircuitBreakerInfo breakerInfo) throws Exception {
-        LOG.info("IMAP circuit breaker opened for {}", breakerInfo.getKey());
-    }
-
-    @Override
-    public String getDescription() {
-        return "generic";
+    protected Key getKey(Protocol protocol) {
+        return Key.of("generic", protocol.getHost(), false);
     }
 
     /**

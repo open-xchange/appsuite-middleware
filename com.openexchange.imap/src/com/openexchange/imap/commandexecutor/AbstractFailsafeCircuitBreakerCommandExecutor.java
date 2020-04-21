@@ -51,23 +51,6 @@ package com.openexchange.imap.commandexecutor;
 
 import static com.openexchange.exception.ExceptionUtils.isEitherOf;
 import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.java.Autoboxing.L;
-import static com.openexchange.metrics.circuitbreaker.MetricCircuitBreakerConstants.METRICS_DELAY_MILLIS_DESC;
-import static com.openexchange.metrics.circuitbreaker.MetricCircuitBreakerConstants.METRICS_DELAY_MILLIS_NAME;
-import static com.openexchange.metrics.circuitbreaker.MetricCircuitBreakerConstants.METRICS_DENIALS_DESC;
-import static com.openexchange.metrics.circuitbreaker.MetricCircuitBreakerConstants.METRICS_DENIALS_NAME;
-import static com.openexchange.metrics.circuitbreaker.MetricCircuitBreakerConstants.METRICS_DIMENSION_ACCOUNT_KEY;
-import static com.openexchange.metrics.circuitbreaker.MetricCircuitBreakerConstants.METRICS_DIMENSION_PROTOCOL_KEY;
-import static com.openexchange.metrics.circuitbreaker.MetricCircuitBreakerConstants.METRICS_FAILURE_THRESHOLD_DESC;
-import static com.openexchange.metrics.circuitbreaker.MetricCircuitBreakerConstants.METRICS_FAILURE_THRESHOLD_NAME;
-import static com.openexchange.metrics.circuitbreaker.MetricCircuitBreakerConstants.METRICS_GROUP;
-import static com.openexchange.metrics.circuitbreaker.MetricCircuitBreakerConstants.METRICS_STATUS_NAME;
-import static com.openexchange.metrics.circuitbreaker.MetricCircuitBreakerConstants.METRICS_STATUS_DESC;
-import static com.openexchange.metrics.circuitbreaker.MetricCircuitBreakerConstants.METRICS_SUCCESS_THRESHOLD_DESC;
-import static com.openexchange.metrics.circuitbreaker.MetricCircuitBreakerConstants.METRICS_SUCCESS_THRESHOLD_NAME;
-import static com.openexchange.metrics.circuitbreaker.MetricCircuitBreakerConstants.METRICS_TRIP_COUNT_DESC;
-import static com.openexchange.metrics.circuitbreaker.MetricCircuitBreakerConstants.METRICS_TRIP_COUNT_NAME;
-import static com.openexchange.metrics.circuitbreaker.MetricCircuitBreakerConstants.METRICS_TRIP_COUNT_UNITS;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
@@ -76,16 +59,17 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
+import org.slf4j.Logger;
 import com.google.common.collect.ImmutableList;
+import com.openexchange.metrics.micrometer.binders.CircuitBreakerMetrics;
 import com.openexchange.net.HostList;
 import com.sun.mail.iap.Argument;
 import com.sun.mail.iap.Protocol;
 import com.sun.mail.iap.Response;
 import com.sun.mail.iap.ResponseInterceptor;
+import com.sun.mail.imap.CommandExecutor;
 import com.sun.mail.imap.ResponseEvent.Status;
 import com.sun.mail.imap.ResponseEvent.StatusResponse;
-import io.micrometer.core.instrument.Counter;
-import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.Metrics;
 import net.jodah.failsafe.CircuitBreaker;
 import net.jodah.failsafe.CircuitBreakerOpenException;
@@ -100,7 +84,9 @@ import net.jodah.failsafe.util.Ratio;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
-public abstract class AbstractFailsafeCircuitBreakerCommandExecutor extends AbstractMetricAwareCommandExecutor {
+public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements CommandExecutor {
+
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractFailsafeCircuitBreakerCommandExecutor.class);
 
     /** The failure threshold */
     protected final Ratio failureThreshold;
@@ -112,7 +98,7 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor extends Abst
     protected final long delayMillis;
 
     /** the existent circuit breakers */
-    protected final ConcurrentMap<Object, CircuitBreakerInfo> circuitBreakers;
+    protected final ConcurrentMap<Key, CircuitBreakerInfo> circuitBreakers;
 
     /** The optional listing of hosts to which the circuit breaker applies */
     protected final Optional<HostList> optionalHostList;
@@ -123,6 +109,9 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor extends Abst
     /** The ranking for this instance */
     protected final int ranking;
 
+    /** The actual executor to execute commands or read responses */
+    private final MonitoringCommandExecutor delegate;
+
     /**
      * Initializes a new {@link AbstractFailsafeCircuitBreakerCommandExecutor}.
      *
@@ -132,9 +121,10 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor extends Abst
      * @param successThreshold The ratio of successive successful executions that must occur when in a half-open state in order to close the circuit
      * @param delayMillis The number of milliseconds to wait in open state before transitioning to half-open
      * @param ranking The ranking
+     * @param delegate The actual executor to execute commands or read responses
      * @throws IllegalArgumentException If invalid/arguments are passed
      */
-    protected AbstractFailsafeCircuitBreakerCommandExecutor(Optional<HostList> optHostList, Set<Integer> optPorts, Ratio failureThreshold, Ratio successThreshold, long delayMillis, int ranking) {
+    protected AbstractFailsafeCircuitBreakerCommandExecutor(Optional<HostList> optHostList, Set<Integer> optPorts, Ratio failureThreshold, Ratio successThreshold, long delayMillis, int ranking, MonitoringCommandExecutor delegate) {
         super();
         if (failureThreshold.numerator <= 0) {
             throw new IllegalArgumentException("failureThreshold must be greater than 0 (zero).");
@@ -154,6 +144,40 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor extends Abst
         this.ranking = ranking;
         this.optionalHostList = optHostList;
         this.ports = null == optPorts || optPorts.isEmpty() ? null : optPorts;
+        this.delegate = delegate;
+    }
+
+    /**
+     * Gets the circuit breaker for specified IMAP protocol instance.
+     *
+     * @param protocol The IMAP protocol
+     * @return The associated circuit breaker
+     */
+    protected CircuitBreakerInfo circuitBreakerFor(Protocol protocol) {
+        Key key = getKey(protocol);
+        CircuitBreakerInfo breakerInfo = circuitBreakers.get(key);
+        if (breakerInfo == null) {
+            CircuitBreakerInfo newBreakerInfo = createCircuitBreaker(key);
+            breakerInfo = circuitBreakers.putIfAbsent(key, newBreakerInfo);
+            if (breakerInfo == null) {
+                breakerInfo = newBreakerInfo;
+                initMetricsFor(newBreakerInfo);
+            }
+        }
+        return breakerInfo;
+    }
+
+    /**
+     * Initializes monitoring metrics for this circuit breaker
+     *
+     * @param newBreakerInfo
+     */
+    protected void initMetricsFor(CircuitBreakerInfo newBreakerInfo) {
+        Key key = newBreakerInfo.getKey();
+        Optional<String> targetHost = key.isPerHost() ? Optional.of(key.getHost()) : Optional.empty();
+        CircuitBreakerMetrics metrics = new CircuitBreakerMetrics(newBreakerInfo.getCircuitBreaker(), "imap-" + key.getName(), targetHost);
+        metrics.bindTo(Metrics.globalRegistry);
+        newBreakerInfo.setMetrics(metrics);
     }
 
     /**
@@ -162,7 +186,7 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor extends Abst
      * @param key The key identifying the circuit breaker to create
      * @return The circuit breaker
      */
-    protected CircuitBreakerInfo createCircuitBreaker(String key) {
+    protected CircuitBreakerInfo createCircuitBreaker(Key key) {
         CircuitBreaker circuitBreaker = new CircuitBreaker();
         CircuitBreakerInfo breakerInfo = new CircuitBreakerInfo(key, circuitBreaker);
         circuitBreaker.withFailureThreshold(failureThreshold.numerator, failureThreshold.denominator)
@@ -172,14 +196,6 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor extends Abst
 
                 @Override
                 public void run() throws Exception {
-                    Runnable metricTask = breakerInfo.getOnOpenMetricTaskReference().get();
-                    if (metricTask != null) {
-                        try {
-                            metricTask.run();
-                        } catch (Exception e) {
-                            // Ignore
-                        }
-                    }
                     onOpen(breakerInfo);
                 }
             })
@@ -201,12 +217,12 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor extends Abst
     }
 
     /**
-     * Gets the circuit breaker for specified IMAP protocol instance.
+     * Gets a unique key to identify the circuit breaker for specified IMAP protocol instance.
      *
      * @param protocol The IMAP protocol
-     * @return The associated circuit breaker
+     * @return The key
      */
-    protected abstract CircuitBreakerInfo circuitBreakerFor(Protocol protocol);
+    protected abstract Key getKey(Protocol protocol);
 
     /**
      * Is called when the circuit breaker is opened: The circuit is opened and not allowing executions to occur.
@@ -214,7 +230,10 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor extends Abst
      * @param breakerInfo The circuit breaker that went into open state
      * @throws Exception If an error occurs
      */
-    protected abstract void onOpen(CircuitBreakerInfo breakerInfo) throws Exception;
+    protected void onOpen(CircuitBreakerInfo breakerInfo) throws Exception {
+        LOG.warn("IMAP circuit breaker opened for: {}", breakerInfo.getKey());
+        breakerInfo.getMetrics().getOpensCounter().ifPresent(c -> c.increment());
+    }
 
     /**
      * Is called when the circuit breaker is half-opened: The circuit is temporarily allowing executions to occur.
@@ -222,7 +241,9 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor extends Abst
      * @param breakerInfo The circuit breaker that went into half-open state
      * @throws Exception If an error occurs
      */
-    protected abstract void onHalfOpen(CircuitBreakerInfo breakerInfo) throws Exception;
+    protected void onHalfOpen(CircuitBreakerInfo breakerInfo) throws Exception {
+        LOG.info("IMAP circuit breaker half-opened for: {}", breakerInfo.getKey());
+    }
 
     /**
      * Is called when the circuit breaker is closed: The circuit is closed and fully functional, allowing executions to occur.
@@ -230,7 +251,9 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor extends Abst
      * @param breakerInfo The circuit breaker that went into closed state
      * @throws Exception If an error occurs
      */
-    protected abstract void onClose(CircuitBreakerInfo breakerInfo) throws Exception;
+    protected void onClose(CircuitBreakerInfo breakerInfo) throws Exception {
+        LOG.info("IMAP circuit breaker closed for: {}", breakerInfo.getKey());
+    }
 
     /**
      * Is called when the circuit breaker denied an access attempt because it is currently open and not allowing executions to occur.
@@ -239,10 +262,7 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor extends Abst
      * @param breakerInfo The circuit breaker that denied access attempt
      */
     protected void onDenied(@SuppressWarnings("unused") CircuitBreakerOpenException exception, CircuitBreakerInfo breakerInfo) {
-        Runnable metricTask = breakerInfo.getOnDeniedMetricTaskReference().get();
-        if (metricTask != null) {
-            metricTask.run();
-        }
+        breakerInfo.getMetrics().getDenialsCounter().ifPresent(c -> c.increment());
     }
 
     /**
@@ -272,7 +292,7 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor extends Abst
     public Response[] executeCommand(String command, Argument args, Optional<ResponseInterceptor> optionalInterceptor, Protocol protocol) {
         CircuitBreakerInfo breakerInfo = circuitBreakerFor(protocol);
         try {
-            return Failsafe.with(breakerInfo.getCircuitBreaker()).get(new CircuitBreakerCommandCallable(command, args, optionalInterceptor, protocol));
+            return Failsafe.with(breakerInfo.getCircuitBreaker()).get(new CircuitBreakerCommandCallable(delegate, command, args, optionalInterceptor, protocol));
         } catch (CircuitBreakerOpenException e) {
             // Circuit is open
             onDenied(e, breakerInfo);
@@ -298,7 +318,7 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor extends Abst
     public Response readResponse(Protocol protocol) throws IOException {
         CircuitBreakerInfo breakerInfo = circuitBreakerFor(protocol);
         try {
-            return Failsafe.with(breakerInfo.getCircuitBreaker()).get(new CircuitBreakerReadResponseCallable(protocol));
+            return Failsafe.with(breakerInfo.getCircuitBreaker()).get(new CircuitBreakerReadResponseCallable(delegate, protocol));
         } catch (CircuitBreakerOpenException e) {
             // Circuit is open
             onDenied(e, breakerInfo);
@@ -333,73 +353,128 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor extends Abst
         return sb.toString();
     }
 
-    private static final String METRICS_DIMENSION_PROTOCOL_VALUE = "imap";
-
+    // ------------------------------------------------------------------------------------------------------------------------
 
     /**
-     * Initializes the metrics for this {@link MailFilterService}
-     *
-     * @param account The account identifier
-     * @param info The {@link CircuitBreakerInfo}
+     * {@link Key} to uniquely identify a circuit breaker instance
      */
-    protected void initMetricsFor(String account, CircuitBreakerInfo info) {
-        // @formatter:off
-        Gauge.builder(METRICS_GROUP+METRICS_STATUS_NAME, () -> I(info.getCircuitBreaker().getState().ordinal()))
-            .description(METRICS_STATUS_DESC)
-            .tags(METRICS_DIMENSION_PROTOCOL_KEY, METRICS_DIMENSION_PROTOCOL_VALUE, METRICS_DIMENSION_ACCOUNT_KEY, account,
-                METRICS_STATUS_NAME, info.getCircuitBreaker().getState().toString())
-            .register(Metrics.globalRegistry);
+    protected static final class Key {
 
-        Gauge.builder(METRICS_GROUP+METRICS_FAILURE_THRESHOLD_NAME, () -> I(info.getCircuitBreaker().getFailureThreshold().numerator))
-            .description(METRICS_FAILURE_THRESHOLD_DESC)
-            .tags(METRICS_DIMENSION_PROTOCOL_KEY, METRICS_DIMENSION_PROTOCOL_VALUE, METRICS_DIMENSION_ACCOUNT_KEY, account)
-            .register(Metrics.globalRegistry);
+        private final String name;
 
-        Gauge.builder(METRICS_GROUP+METRICS_SUCCESS_THRESHOLD_NAME, () -> I(info.getCircuitBreaker().getSuccessThreshold().numerator))
-            .description(METRICS_SUCCESS_THRESHOLD_DESC)
-            .tags(METRICS_DIMENSION_PROTOCOL_KEY, METRICS_DIMENSION_PROTOCOL_VALUE, METRICS_DIMENSION_ACCOUNT_KEY, account)
-            .register(Metrics.globalRegistry);
+        private final String host;
 
-        Gauge.builder(METRICS_GROUP+METRICS_DELAY_MILLIS_NAME, () -> L(info.getCircuitBreaker().getDelay().toMillis()))
-            .description(METRICS_DELAY_MILLIS_DESC)
-            .tags(METRICS_DIMENSION_PROTOCOL_KEY, METRICS_DIMENSION_PROTOCOL_VALUE, METRICS_DIMENSION_ACCOUNT_KEY, account)
-            .register(Metrics.globalRegistry);
+        private boolean perHost;
 
+        private Key(String name, String host, boolean perHost) {
+            super();
+            this.name = name;
+            this.host = host;
+            this.perHost = perHost;
+        }
 
-        Counter TRIP_COUNT = Counter.builder(METRICS_GROUP + METRICS_TRIP_COUNT_NAME)
-            .description(METRICS_TRIP_COUNT_DESC)
-            .baseUnit(METRICS_TRIP_COUNT_UNITS)
-            .tags(METRICS_DIMENSION_PROTOCOL_KEY, METRICS_DIMENSION_PROTOCOL_VALUE, METRICS_DIMENSION_ACCOUNT_KEY, account)
-            .register(Metrics.globalRegistry);
-        info.getOnOpenMetricTaskReference().set(() -> TRIP_COUNT.increment());
+        /**
+         * Creates a new {@link Key} to uniquely identify a circuit breaker instance
+         *
+         * @param name The circuit breaker name
+         * @param host The target host which is guarded by the circuit breaker. Can be a host name (any endpoint of a service,
+         *             e.g. {@code imap.example.com(:993)) or IP and optional port combination (per endpoint, e.g. {@code 172.16.10.3(:993)})
+         * @param perHost <code>true</code> if the {@code host} param specifies a certain endpoint, <code>false</code> if not
+         * @return The key
+         */
+        public static Key of(String name, String host, boolean perHost) {
+            return new Key(name, host, perHost);
+        }
 
-        Counter DENIAL_METER = Counter.builder(METRICS_GROUP+METRICS_DENIALS_NAME)
-            .description(METRICS_DENIALS_DESC)
-            .tags(METRICS_DIMENSION_PROTOCOL_KEY, METRICS_DIMENSION_PROTOCOL_VALUE, METRICS_DIMENSION_ACCOUNT_KEY, account)
-            .register(Metrics.globalRegistry);
-        info.getOnDeniedMetricTaskReference().set(() -> DENIAL_METER.increment());
-        // @formatter:on
+        /**
+         * Gets the name
+         *
+         * @return The name
+         */
+        public String getName() {
+            return name;
+        }
+
+        /**
+         * Gets the host
+         *
+         * @return The host
+         */
+        public String getHost() {
+            return host;
+        }
+
+        /**
+         * Gets the perHost
+         *
+         * @return The perHost
+         */
+        public boolean isPerHost() {
+            return perHost;
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((host == null) ? 0 : host.hashCode());
+            result = prime * result + ((name == null) ? 0 : name.hashCode());
+            result = prime * result + (perHost ? 1231 : 1237);
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            Key other = (Key) obj;
+            if (host == null) {
+                if (other.host != null)
+                    return false;
+            } else if (!host.equals(other.host))
+                return false;
+            if (name == null) {
+                if (other.name != null)
+                    return false;
+            } else if (!name.equals(other.name))
+                return false;
+            if (perHost != other.perHost)
+                return false;
+            return true;
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder(name).append(" (").append(host).append(')');
+            return sb.toString();
+        }
+
     }
-
-    // ------------------------------------------------------------------------------------------------------------------------
 
     private static class CircuitBreakerReadResponseCallable implements Callable<Response> {
 
         private final Protocol protocol;
+        private final MonitoringCommandExecutor delegate;
 
         /**
          * Initializes a new {@link CircuitBreakerReadResponseCallable}.
          *
+         * @param delegate The delegate
          * @param protocol The protocol instance
          */
-        CircuitBreakerReadResponseCallable(Protocol protocol) {
+        CircuitBreakerReadResponseCallable(MonitoringCommandExecutor delegate, Protocol protocol) {
             super();
+            this.delegate = delegate;
             this.protocol = protocol;
         }
 
         @Override
         public Response call() throws Exception {
-            return MonitoringCommandExecutor.readResponseInternal(protocol);
+            return delegate.readResponse(protocol);
         }
     }
 
@@ -410,6 +485,7 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor extends Abst
             java.net.SocketTimeoutException.class,
             java.io.EOFException.class);
 
+        private final MonitoringCommandExecutor delegate;
         private final String command;
         private final Argument args;
         private final Optional<ResponseInterceptor> optionalInterceptor;
@@ -418,13 +494,15 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor extends Abst
         /**
          * Initializes a new {@link CircuitBreakerCommandCallable}.
          *
+         * @param delegate The delegate
          * @param command The command
          * @param args The optional arguments
          * @param optionalInterceptor The optional interceptor
          * @param protocol The protocol instance
          */
-        CircuitBreakerCommandCallable(String command, Argument args, Optional<ResponseInterceptor> optionalInterceptor, Protocol protocol) {
+        CircuitBreakerCommandCallable(MonitoringCommandExecutor delegate, String command, Argument args, Optional<ResponseInterceptor> optionalInterceptor, Protocol protocol) {
             super();
+            this.delegate = delegate;
             this.command = command;
             this.args = args;
             this.optionalInterceptor = optionalInterceptor;
@@ -435,7 +513,7 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor extends Abst
         public Response[] call() throws Exception {
 
             // Obtain responses
-            ExecutedCommand executedCommand = MonitoringCommandExecutor.executeCommandInternal(command, args, optionalInterceptor, protocol);
+            ExecutedCommand executedCommand = delegate.executeCommandExtended(command, args, optionalInterceptor, protocol);
             Response[] responses = executedCommand.responses;
 
             // Check status response
