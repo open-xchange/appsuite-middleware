@@ -50,8 +50,8 @@
 package com.openexchange.metrics.micrometer.binders;
 
 import java.util.Optional;
+import com.openexchange.metrics.micrometer.Micrometer;
 import io.micrometer.core.instrument.Counter;
-import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tags;
 import io.micrometer.core.instrument.binder.MeterBinder;
@@ -68,6 +68,21 @@ import net.jodah.failsafe.util.Ratio;
  * @since v7.10.3
  */
 public class CircuitBreakerMetrics implements MeterBinder {
+
+    private static final String STATE_NAME = "appsuite.circuitbreaker.state";
+    private static final String STATE_DESCRIPTION = "The current state of the circuit. 1.0 if so, otherwise 0.0.";
+
+    private static final String TIMEOUT_NAME = "appsuite.circuitbreaker.timeout.seconds";
+    private static final String TIMEOUT_DESCRIPTION = "The timeout for executions or negative if none has been configured.";
+
+    private static final String DELAY_NAME = "appsuite.circuitbreaker.delay.seconds";
+    private static final String DELAY_DESCRIPTION = "The delay before allowing another execution on the circuit.";
+
+    private static final String SUCCESS_THRESHOLD_NAME = "appsuite.circuitbreaker.success.threshold.ratio";
+    private static final String SUCCESS_THRESHOLD_DESCRIPTION = "The ratio of successive successful executions that must occur when in a half-open state in order to close the circuit.";
+
+    private static final String FAILURE_THRESHOLD_NAME = "appsuite.circuitbreaker.failure.threshold.ratio";
+    private static final String FAILURE_THRESHOLD_DESCRIPTION = "The ratio of successive failures that must occur when in a closed state in order to open the circuit.";
 
     private final CircuitBreaker circuitBreaker;
     private final String name;
@@ -98,56 +113,42 @@ public class CircuitBreakerMetrics implements MeterBinder {
             commonTags = commonTags.and("host", "all");
         }
 
+
         // @formatter:off
         for (State state : State.values()) {
-            Gauge.builder("appsuite.circuitbreaker.state", circuitBreaker,
-                    (cb) -> cb.getState() == state ? 1.0 : 0.0)
-                .description("The current state of the circuit. 1.0 if so, otherwise 0.0.")
-                .tags(commonTags.and("state", state.name()))
-                .register(registry);
+            Micrometer.registerOrUpdateGauge(registry, STATE_NAME, commonTags.and("state", state.name()), STATE_DESCRIPTION, null, circuitBreaker,
+                (cb) -> cb.getState() == state ? 1.0 : 0.0);
         }
 
-        Gauge.builder("appsuite.circuitbreaker.timeout.seconds", circuitBreaker,
-                (cb) -> {
-                    Duration timeout = cb.getTimeout();
-                    if (timeout == null) {
-                        return -1.0;
-                    }
-                    return (double) timeout.toSeconds();
-                })
-            .description("The timeout for executions or negative if none has been configured.")
-            .tags(commonTags)
-            .register(registry);
+        Micrometer.registerOrUpdateGauge(registry, TIMEOUT_NAME, commonTags, TIMEOUT_DESCRIPTION, null, circuitBreaker,
+            (cb) -> {
+                Duration timeout = cb.getTimeout();
+                if (timeout == null) {
+                    return -1.0;
+                }
+                return (double) timeout.toSeconds();
+            });
 
-        Gauge.builder("appsuite.circuitbreaker.delay.seconds", circuitBreaker,
-                (cb) -> cb.getDelay().toSeconds())
-            .description("The delay before allowing another execution on the circuit.")
-            .tags(commonTags)
-            .register(registry);
+        Micrometer.registerOrUpdateGauge(registry, DELAY_NAME, commonTags, DELAY_DESCRIPTION, null, circuitBreaker,
+            (cb) -> cb.getDelay().toSeconds());
 
-        Gauge.builder("appsuite.circuitbreaker.success.threshold.ratio", circuitBreaker,
-                (cb) -> {
-                    Ratio threshold = cb.getSuccessThreshold();
-                    if (threshold == null) {
-                        return 0.0;
-                    }
-                    return threshold.ratio;
-                })
-            .description("The ratio of successive successful executions that must occur when in a half-open state in order to close the circuit.")
-            .tags(commonTags)
-            .register(registry);
+        Micrometer.registerOrUpdateGauge(registry, SUCCESS_THRESHOLD_NAME, commonTags, SUCCESS_THRESHOLD_DESCRIPTION, null, circuitBreaker,
+            (cb) -> {
+                Ratio threshold = cb.getSuccessThreshold();
+                if (threshold == null) {
+                    return 0.0;
+                }
+                return threshold.ratio;
+            });
 
-        Gauge.builder("appsuite.circuitbreaker.failure.threshold.ratio", circuitBreaker,
+        Micrometer.registerOrUpdateGauge(registry, FAILURE_THRESHOLD_NAME, commonTags, FAILURE_THRESHOLD_DESCRIPTION, null, circuitBreaker,
             (cb) -> {
                 Ratio threshold = cb.getFailureThreshold();
                 if (threshold == null) {
                     return 0.0;
                 }
                 return threshold.ratio;
-            })
-        .description("The ratio of successive failures that must occur when in a closed state in order to open the circuit.")
-        .tags(commonTags)
-        .register(registry);
+            });
 
         opensCounter = Counter.builder("appsuite.circuitbreaker.opens.total")
             .description("The number of times the circuit was opened.")
