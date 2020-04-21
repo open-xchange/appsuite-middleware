@@ -59,12 +59,12 @@ import java.io.InputStreamReader;
 import java.io.PushbackReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.nio.charset.UnsupportedCharsetException;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -96,7 +96,6 @@ import com.openexchange.mailfilter.properties.MailFilterProperty;
 import com.openexchange.mailfilter.properties.PreferredSASLMech;
 import com.openexchange.mailfilter.services.Services;
 import com.openexchange.tools.encoding.Base64;
-import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
 import io.micrometer.core.instrument.Timer;
 
@@ -561,17 +560,19 @@ public class SieveHandler {
             return bis_sieve.readLine();
         }
 
+        long start = System.nanoTime();
         try {
-            long start = System.nanoTime();
             String responseLine = bis_sieve.readLine();
             if (responseLine != null) {
-                helper.updateRequestTimer(System.nanoTime() - start, TimeUnit.NANOSECONDS);
+                helper.updateRequestTimer(System.nanoTime() - start, TimeUnit.NANOSECONDS, "OK");
             }
             return responseLine;
         } catch (IOException e) {
+            String status = "UNKNOWN_ERROR";
             if (isEitherOf(e, NETWORK_COMMUNICATION_ERRORS)) {
-                helper.markError();
+                status = "COMMUNICATION_ERROR";
             }
+            helper.updateRequestTimer(System.nanoTime() - start, TimeUnit.NANOSECONDS, status);
             throw e;
         }
     }
@@ -585,17 +586,19 @@ public class SieveHandler {
             return reader.read();
         }
 
+        long start = System.nanoTime();
         try {
-            long start = System.nanoTime();
             int responseCharacter = reader.read();
             if (responseCharacter >= 0) {
-                helper.updateRequestTimer(System.nanoTime() - start, TimeUnit.NANOSECONDS);
+                helper.updateRequestTimer(System.nanoTime() - start, TimeUnit.NANOSECONDS, "OK");
             }
             return responseCharacter;
         } catch (IOException e) {
+            String status = "UNKNOWN_ERROR";
             if (isEitherOf(e, NETWORK_COMMUNICATION_ERRORS)) {
-                helper.markError();
+                status = "COMMUNICATION_ERROR";
             }
+            helper.updateRequestTimer(System.nanoTime() - start, TimeUnit.NANOSECONDS, status);
             throw e;
         }
     }
@@ -605,17 +608,19 @@ public class SieveHandler {
             return bis_sieve.read(buf, 0, len);
         }
 
+        long start = System.nanoTime();
         try {
-            long start = System.nanoTime();
             int read = bis_sieve.read(buf, 0, len);
             if (read >= 0) {
-                helper.updateRequestTimer(System.nanoTime() - start, TimeUnit.NANOSECONDS);
+                helper.updateRequestTimer(System.nanoTime() - start, TimeUnit.NANOSECONDS, "OK");
             }
             return read;
         } catch (IOException e) {
+            String status = "UNKNOWN_ERROR";
             if (isEitherOf(e, NETWORK_COMMUNICATION_ERRORS)) {
-                helper.markError();
+                status = "COMMUNICATION_ERROR";
             }
+            helper.updateRequestTimer(System.nanoTime() - start, TimeUnit.NANOSECONDS, status);
             throw e;
         }
     }
@@ -1920,67 +1925,37 @@ public class SieveHandler {
 
     // -------------------------------------------------------------------------------------------------------------------------------------
 
-    /** The group name for mail filter metrics */
-    private static final String METRICS_GROUP = "appsuite.mailfilter.";
-
-    /** The name for request rate metric */
-    private static final String METRICS_REQUEST_RATE_NAME = "requests";
-
-    /** The name for error rate metric */
-    private static final String METRICS_ERROR_RATE_NAME = "errors";
-
-    /** The key for server dimension */
-    private static final String METRICS_DIMENSION_SERVER_KEY = "server";
-
     public static class MetricHelper {
 
+        private final String host;
+
         private boolean firstRead;
-        private final Timer requestTimer;
-        private final Counter errorMeter;
+
+        MetricHelper(SieveHandler sieveHandler) {
+            this(sieveHandler, false);
+        }
 
         /**
          * Initializes a new {@link SieveHandler.MetricHelper}.
          */
-        MetricHelper(SieveHandler sieveHandler) {
+        MetricHelper(SieveHandler sieveHandler, boolean groupByEndpoints) {
             super();
 
             firstRead = true;
 
-            String serverInfo = new StringBuilder(sieveHandler.sieve_host).append(':').append(sieveHandler.sieve_host_port).toString();
-
-            requestTimer = Timer.builder(METRICS_GROUP+METRICS_REQUEST_RATE_NAME)
-                                .description("Overall mail filter requests per target server")
-                                .sla(
-                                    Duration.ofMillis(50),
-                                    Duration.ofMillis(100),
-                                    Duration.ofMillis(150),
-                                    Duration.ofMillis(200),
-                                    Duration.ofMillis(250),
-                                    Duration.ofMillis(300),
-                                    Duration.ofMillis(400),
-                                    Duration.ofMillis(500),
-                                    Duration.ofMillis(750),
-                                    Duration.ofSeconds(1),
-                                    Duration.ofSeconds(2),
-                                    Duration.ofSeconds(5),
-                                    Duration.ofSeconds(10),
-                                    Duration.ofSeconds(30),
-                                    Duration.ofMinutes(1))
-                                .tags(METRICS_DIMENSION_SERVER_KEY, serverInfo)
-                                .register(Metrics.globalRegistry);
-
-            errorMeter = Counter.builder(METRICS_GROUP+METRICS_ERROR_RATE_NAME)
-                                .description("Failed mail filter requests per target server")
-                                .tags(METRICS_DIMENSION_SERVER_KEY, serverInfo)
-                                .register(Metrics.globalRegistry);
-
+            String host = sieveHandler.sieve_host;
+            if (groupByEndpoints) {
+                String hostAddress;
+                try {
+                    hostAddress = InetAddress.getByName(sieveHandler.sieve_host).getHostAddress();
+                    host = hostAddress + ':' + sieveHandler.sieve_host_port;
+                } catch (UnknownHostException e) {
+                    // ignore;
+                }
+            }
+            this.host = host;
         }
 
-        /**
-         * measureRead
-         *
-         * @return
-         */
         public boolean measureRead() {
             if (firstRead) {
                 firstRead = false;
@@ -1993,16 +1968,11 @@ public class SieveHandler {
             return !measureRead();
         }
 
-        public void markError() {
-            if (errorMeter != null) {
-                errorMeter.increment();
-            }
-        }
-
-        public void updateRequestTimer(long duration, TimeUnit timeUnit) {
-            if (requestTimer != null) {
-                requestTimer.record(duration, timeUnit);
-            }
+        public void updateRequestTimer(long duration, TimeUnit timeUnit, String status) {
+            Timer.builder("appsuite.mailfilter.commands")
+            .description("Mail filter commands per host")
+            .tags("host", host, "status", status)
+            .register(Metrics.globalRegistry);
         }
     }
 
