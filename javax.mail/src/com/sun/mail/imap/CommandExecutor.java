@@ -103,6 +103,22 @@ public interface CommandExecutor {
     }
 
     /**
+     * Issues given command and returns its unique tag identifier.
+     * <p>
+     * Example: <code>"A1 LOGIN bob secret"</code>
+     *
+     * @param command The command
+     * @param args The arguments
+     * @param protocol The protocol instance
+     * @return The tag identifier
+     * @throws IOException If an I/O error occurs
+     * @throws ProtocolException If a protocol error occurs
+     */
+    default String writeCommand(String command, Argument args, Protocol protocol) throws IOException, ProtocolException {
+        return protocol.writeCommand(command, args);
+    }
+
+    /**
      * Gets the ranking for this command executor.
      * <p>
      * The higher the ranking, the more likely the executor will be invoked in preference over others.
