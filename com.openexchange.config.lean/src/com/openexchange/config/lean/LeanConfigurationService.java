@@ -310,7 +310,7 @@ public interface LeanConfigurationService {
     long getLongProperty(int userId, int contextId, Property property, Map<String, String> optionals);
 
     /**
-     * Returns all properties that fulfil the given filter's acceptance criteria.
+     * Returns all properties that fulfill the given filter's acceptance criteria.
      *
      * @param filter The property filter
      * @return The appropriate properties or an empty {@link Map} if no properties were matched

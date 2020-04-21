@@ -53,6 +53,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
 import org.junit.Test;
+import com.openexchange.config.PropertyFilter;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.config.lean.Property;
 import com.openexchange.oidc.OIDCBackendConfig;
@@ -81,7 +82,20 @@ public class AbstractOIDCBackendConfigTest {
         }
     }
 
+    /**
+     * {@link ReturnDefaultsLeanConfig}
+     *
+     * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+     * @since v7.10.3
+     */
     private static final class ReturnDefaultsLeanConfig implements LeanConfigurationService {
+
+        /**
+         * Initializes a new {@link ReturnDefaultsLeanConfig}.
+         */
+        public ReturnDefaultsLeanConfig() {
+            super();
+        }
 
         @Override
         public String getProperty(Property property) {
@@ -193,8 +207,15 @@ public class AbstractOIDCBackendConfigTest {
             return 0;
         }
 
+        @SuppressWarnings("unused")
         private <T> T getDefault(Property property, Class<T> coerceTo) {
             return property.getDefaultValue(coerceTo);
+        }
+
+        @Override
+        public Map<String, String> getProperties(PropertyFilter propertyFilter) {
+            // TODO Auto-generated method stub
+            return null;
         }
 
     }
