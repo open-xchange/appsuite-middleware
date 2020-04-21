@@ -50,23 +50,6 @@
 package com.openexchange.mailfilter.internal;
 
 import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.java.Autoboxing.L;
-import static com.openexchange.metrics.circuitbreaker.MetricCircuitBreakerConstants.METRICS_DELAY_MILLIS_DESC;
-import static com.openexchange.metrics.circuitbreaker.MetricCircuitBreakerConstants.METRICS_DELAY_MILLIS_NAME;
-import static com.openexchange.metrics.circuitbreaker.MetricCircuitBreakerConstants.METRICS_DENIALS_DESC;
-import static com.openexchange.metrics.circuitbreaker.MetricCircuitBreakerConstants.METRICS_DENIALS_NAME;
-import static com.openexchange.metrics.circuitbreaker.MetricCircuitBreakerConstants.METRICS_DIMENSION_ACCOUNT_KEY;
-import static com.openexchange.metrics.circuitbreaker.MetricCircuitBreakerConstants.METRICS_DIMENSION_PROTOCOL_KEY;
-import static com.openexchange.metrics.circuitbreaker.MetricCircuitBreakerConstants.METRICS_FAILURE_THRESHOLD_DESC;
-import static com.openexchange.metrics.circuitbreaker.MetricCircuitBreakerConstants.METRICS_FAILURE_THRESHOLD_NAME;
-import static com.openexchange.metrics.circuitbreaker.MetricCircuitBreakerConstants.METRICS_GROUP;
-import static com.openexchange.metrics.circuitbreaker.MetricCircuitBreakerConstants.METRICS_STATUS_NAME;
-import static com.openexchange.metrics.circuitbreaker.MetricCircuitBreakerConstants.METRICS_STATUS_DESC;
-import static com.openexchange.metrics.circuitbreaker.MetricCircuitBreakerConstants.METRICS_SUCCESS_THRESHOLD_DESC;
-import static com.openexchange.metrics.circuitbreaker.MetricCircuitBreakerConstants.METRICS_SUCCESS_THRESHOLD_NAME;
-import static com.openexchange.metrics.circuitbreaker.MetricCircuitBreakerConstants.METRICS_TRIP_COUNT_DESC;
-import static com.openexchange.metrics.circuitbreaker.MetricCircuitBreakerConstants.METRICS_TRIP_COUNT_NAME;
-import static com.openexchange.metrics.circuitbreaker.MetricCircuitBreakerConstants.METRICS_TRIP_COUNT_UNITS;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.PrivilegedActionException;
@@ -129,10 +112,9 @@ import com.openexchange.mailfilter.MailFilterService;
 import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
 import com.openexchange.mailfilter.properties.MailFilterProperty;
 import com.openexchange.mailfilter.properties.PasswordSource;
+import com.openexchange.metrics.micrometer.binders.CircuitBreakerMetrics;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
-import io.micrometer.core.instrument.Counter;
-import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.Metrics;
 import net.jodah.failsafe.CircuitBreaker;
 import net.jodah.failsafe.function.CheckedRunnable;
@@ -145,9 +127,6 @@ import net.jodah.failsafe.function.CheckedRunnable;
 public final class MailFilterServiceImpl implements MailFilterService, Reloadable {
 
     static final Logger LOGGER = LoggerFactory.getLogger(MailFilterServiceImpl.class);
-
-    private static final String METRICS_DIMENSION_PROTOCOL_VALUE = "mailfilter";
-    private static final String METRICS_DIMENSION_ACCOUNT_VALUE = "primary";
 
     private static final String CATEGORY_FLAG = "category";
     private static final String SYSTEM_CATEGORY_FLAG = "syscategory";
@@ -206,9 +185,6 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
     private final ServiceLookup services;
     private final AtomicReference<CircuitBreakerInfo> optionalCircuitBreaker;
 
-    private final AtomicReference<Runnable> onOpenMetricTask;
-    private final AtomicReference<Runnable> onDeniedMetricTask;
-
     /**
      * Initializes a new {@link MailFilterServiceImpl}.
      *
@@ -221,13 +197,9 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
         staticCapabilities = CacheBuilder.newBuilder().maximumSize(10).expireAfterWrite(30, TimeUnit.MINUTES).build();
         optionalCircuitBreaker = new AtomicReference<>(null);
 
-        onOpenMetricTask = new AtomicReference<>(null);
-        onDeniedMetricTask = new AtomicReference<>(null);
-
         ConfigurationService config = getService(ConfigurationService.class);
         checkConfigfile(config);
         reinitBreaker(config);
-        initMetrics();
     }
 
     /**
@@ -272,24 +244,14 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
                 if (delayMillis <= 0) {
                     throw new IllegalArgumentException("windowMillis must be greater than 0 (zero).");
                 }
-                AtomicReference<Runnable> onOpenMetricTask = this.onOpenMetricTask;
                 circuitBreaker = new CircuitBreaker()
                     .withFailureThreshold(failureThreshold, failureExecutions)
                     .withSuccessThreshold(successThreshold, successExecutions)
                     .withDelay(delayMillis, TimeUnit.MILLISECONDS)
-                    .onOpen(new CheckedRunnable() {
-
-                        @Override
-                        public void run() throws Exception {
-                            Runnable metricTask = onOpenMetricTask.get();
-                            if (metricTask != null) {
-                                try {
-                                    metricTask.run();
-                                } catch (Exception e) {
-                                    // Ignore
-                                }
-                            }
-                            LOGGER.info("Mail filter circuit breaker opened");
+                    .onOpen(() -> {
+                        CircuitBreakerInfo circuitBreakerInfo = optionalCircuitBreaker.get();
+                        if (circuitBreakerInfo != null) {
+                            circuitBreakerInfo.incrementOpens();
                         }
                     })
                     .onHalfOpen(new CheckedRunnable() {
@@ -306,11 +268,14 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
                             LOGGER.info("Mail filter circuit breaker closed");
                         }
                     });
+
+
             } catch (RuntimeException e) {
                 LOGGER.warn("Invalid configuration for mail filter circuit breaker", e);
                 circuitBreaker = null;
             }
-            optionalCircuitBreaker.set(new CircuitBreakerInfo(circuitBreaker, onDeniedMetricTask));
+
+            optionalCircuitBreaker.set(initCircuitBreakerInfo(circuitBreaker));
         } else {
             optionalCircuitBreaker.set(null);
         }
@@ -319,45 +284,20 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
 
 
     /**
-     * Initializes the metrics for this {@link MailFilterService}
+     * Creates a new {@link CircuitBreakerInfo} instance for given {@link CircuitBreaker} and initializes
+     * its monitoring metrics.
+     *
+     * @param circuitBreaker The breaker or <code>null</code>
+     * @return The info or <code>null</code>
      */
-    private void initMetrics() {
-        // @formatter:off
-        Gauge.builder(METRICS_GROUP+METRICS_STATUS_NAME, () -> getOptionalCircuitBreaker().map((info) -> I(info.getCircuitBreaker().getState().ordinal())).orElse((Integer) null))
-            .description(METRICS_STATUS_DESC)
-            .tags(METRICS_DIMENSION_PROTOCOL_KEY, METRICS_DIMENSION_PROTOCOL_VALUE, METRICS_DIMENSION_ACCOUNT_KEY, METRICS_DIMENSION_ACCOUNT_VALUE,
-                METRICS_STATUS_NAME, getOptionalCircuitBreaker().map(info -> info.getCircuitBreaker().getState().toString()).orElse("UNKNOWN"))
-            .register(Metrics.globalRegistry);
+    private CircuitBreakerInfo initCircuitBreakerInfo(CircuitBreaker circuitBreaker) {
+        if (circuitBreaker == null) {
+            return null;
+        }
 
-        Gauge.builder(METRICS_GROUP+METRICS_FAILURE_THRESHOLD_NAME, () -> getOptionalCircuitBreaker().map((info) -> I(info.getCircuitBreaker().getFailureThreshold().numerator)).orElse(I(0)))
-            .description(METRICS_FAILURE_THRESHOLD_DESC)
-            .tags(METRICS_DIMENSION_PROTOCOL_KEY, METRICS_DIMENSION_PROTOCOL_VALUE, METRICS_DIMENSION_ACCOUNT_KEY, METRICS_DIMENSION_ACCOUNT_VALUE)
-            .register(Metrics.globalRegistry);
-
-        Gauge.builder(METRICS_GROUP+METRICS_SUCCESS_THRESHOLD_NAME, () -> getOptionalCircuitBreaker().map((info) -> I(info.getCircuitBreaker().getSuccessThreshold().numerator)).orElse(I(0)))
-            .description(METRICS_SUCCESS_THRESHOLD_DESC)
-            .tags(METRICS_DIMENSION_PROTOCOL_KEY, METRICS_DIMENSION_PROTOCOL_VALUE, METRICS_DIMENSION_ACCOUNT_KEY, METRICS_DIMENSION_ACCOUNT_VALUE)
-            .register(Metrics.globalRegistry);
-
-        Gauge.builder(METRICS_GROUP+METRICS_DELAY_MILLIS_NAME, () -> getOptionalCircuitBreaker().map((info) -> L(info.getCircuitBreaker().getDelay().toMillis())).orElse(L(0l)))
-            .description(METRICS_DELAY_MILLIS_DESC)
-            .tags(METRICS_DIMENSION_PROTOCOL_KEY, METRICS_DIMENSION_PROTOCOL_VALUE, METRICS_DIMENSION_ACCOUNT_KEY, METRICS_DIMENSION_ACCOUNT_VALUE)
-            .register(Metrics.globalRegistry);
-
-
-        Counter TRIP_COUNT = Counter.builder(METRICS_GROUP + METRICS_TRIP_COUNT_NAME)
-            .description(METRICS_TRIP_COUNT_DESC)
-            .baseUnit(METRICS_TRIP_COUNT_UNITS)
-            .tags(METRICS_DIMENSION_PROTOCOL_KEY, METRICS_DIMENSION_PROTOCOL_VALUE, METRICS_DIMENSION_ACCOUNT_KEY, METRICS_DIMENSION_ACCOUNT_VALUE)
-            .register(Metrics.globalRegistry);
-        onOpenMetricTask.set(() -> TRIP_COUNT.increment());
-
-        Counter DENIAL_METER = Counter.builder(METRICS_GROUP+METRICS_DENIALS_NAME)
-            .description(METRICS_DENIALS_DESC)
-            .tags(METRICS_DIMENSION_PROTOCOL_KEY, METRICS_DIMENSION_PROTOCOL_VALUE, METRICS_DIMENSION_ACCOUNT_KEY, METRICS_DIMENSION_ACCOUNT_VALUE)
-            .register(Metrics.globalRegistry);
-        onDeniedMetricTask.set(() -> DENIAL_METER.increment());
-        // @formatter:on
+        CircuitBreakerMetrics metrics = new CircuitBreakerMetrics(circuitBreaker, "mailfilter", Optional.empty());
+        metrics.bindTo(Metrics.globalRegistry);
+        return new CircuitBreakerInfo(circuitBreaker, metrics);
     }
 
     /**
