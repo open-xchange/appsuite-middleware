@@ -64,7 +64,10 @@ import com.google.common.collect.ImmutableList;
 import com.openexchange.metrics.micrometer.binders.CircuitBreakerMetrics;
 import com.openexchange.net.HostList;
 import com.sun.mail.iap.Argument;
+import com.sun.mail.iap.BadCommandException;
+import com.sun.mail.iap.CommandFailedException;
 import com.sun.mail.iap.Protocol;
+import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.iap.ResponseInterceptor;
 import com.sun.mail.imap.CommandExecutor;
@@ -189,30 +192,25 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
     protected CircuitBreakerInfo createCircuitBreaker(Key key) {
         CircuitBreaker circuitBreaker = new CircuitBreaker();
         CircuitBreakerInfo breakerInfo = new CircuitBreakerInfo(key, circuitBreaker);
-        circuitBreaker.withFailureThreshold(failureThreshold.numerator, failureThreshold.denominator)
-            .withSuccessThreshold(successThreshold.numerator, successThreshold.denominator)
-            .withDelay(delayMillis, TimeUnit.MILLISECONDS)
-            .onOpen(new CheckedRunnable() {
+        circuitBreaker.withFailureThreshold(failureThreshold.numerator, failureThreshold.denominator).withSuccessThreshold(successThreshold.numerator, successThreshold.denominator).withDelay(delayMillis, TimeUnit.MILLISECONDS).onOpen(new CheckedRunnable() {
 
-                @Override
-                public void run() throws Exception {
-                    onOpen(breakerInfo);
-                }
-            })
-            .onHalfOpen(new CheckedRunnable() {
+            @Override
+            public void run() throws Exception {
+                onOpen(breakerInfo);
+            }
+        }).onHalfOpen(new CheckedRunnable() {
 
-                @Override
-                public void run() throws Exception {
-                    onHalfOpen(breakerInfo);
-                }
-            })
-            .onClose(new CheckedRunnable() {
+            @Override
+            public void run() throws Exception {
+                onHalfOpen(breakerInfo);
+            }
+        }).onClose(new CheckedRunnable() {
 
-                @Override
-                public void run() throws Exception {
-                    onClose(breakerInfo);
-                }
-            });
+            @Override
+            public void run() throws Exception {
+                onClose(breakerInfo);
+            }
+        });
         return breakerInfo;
     }
 
@@ -337,6 +335,64 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
     }
 
     @Override
+    public void authplain(String authzid, String u, String p, Protocol protocol) throws ProtocolException {
+        authWithScheme(AuthScheme.PLAIN, authzid, u, p, protocol);
+    }
+
+    @Override
+    public void authlogin(String u, String p, Protocol protocol) throws ProtocolException {
+        authWithScheme(AuthScheme.LOGIN, null, u, p, protocol);
+    }
+
+    @Override
+    public void authntlm(String authzid, String u, String p, Protocol protocol) throws ProtocolException {
+        authWithScheme(AuthScheme.NTLM, authzid, u, p, protocol);
+    }
+
+    @Override
+    public void authoauth2(String u, String p, Protocol protocol) throws ProtocolException {
+        authWithScheme(AuthScheme.XOAUTH2, null, u, p, protocol);
+    }
+
+    @Override
+    public void authoauthbearer(String u, String p, Protocol protocol) throws ProtocolException {
+        authWithScheme(AuthScheme.OAUTHBEARER, null, u, p, protocol);
+    }
+
+    /**
+     * Performs authentication according to given scheme.
+     *
+     * @param authzid The authorization identifier
+     * @param u The user name
+     * @param p The password
+     * @param protocol The protocol instance
+     * @throws ProtocolException If a protocol error occurs
+     */
+    private void authWithScheme(AuthScheme authScheme, String authzid, String u, String p, Protocol protocol) throws ProtocolException {
+        CircuitBreakerInfo breakerInfo = circuitBreakerFor(protocol);
+        try {
+            Optional<ProtocolException> optionalProtocolException = Failsafe.with(breakerInfo.getCircuitBreaker()).get(new CircuitBreakerAuthCallable(delegate, authScheme, authzid, u, p, protocol));
+            if (optionalProtocolException.isPresent()) {
+                throw optionalProtocolException.get();
+            }
+        } catch (CircuitBreakerOpenException e) {
+            // Circuit is open
+            onDenied(e, breakerInfo);
+            throw new ProtocolException("Denied authenticating against IMAP server since circuit breaker is open.");
+        } catch (FailsafeException e) {
+            // Runnable failed with a checked exception
+            Throwable failure = e.getCause();
+            if (failure instanceof ProtocolException) {
+                throw (ProtocolException) failure;
+            }
+            if (failure instanceof Error) {
+                throw (Error) failure;
+            }
+            throw new ProtocolException(failure.getMessage(), failure);
+        }
+    }
+
+    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder(128);
         if (optionalHostList.isPresent()) {
@@ -365,8 +421,8 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
          *
          * @param name The circuit breaker name
          * @param host The target host which is guarded by the circuit breaker. Can be a host name (any end-point of a service,
-         *             e.g. {@code imap.example.com(:993)) or IP and optional port combination (per end-point, e.g. {@code 172.16.10.3(:993)})
-         * @param perHost <code>true</code> if the {@code host} parameter specifies a certain end-point, <code>false</code> if not
+         *            e.g. {@code imap.example.com(:993)) or IP and optional port combination (per end-point, e.g. {@code 172.16.10.3(:993)})
+         *            @param perHost <code>true</code> if the {@code host} parameter specifies a certain end-point, <code>false</code> if not
          * @return The key
          */
         public static Key of(String name, String host, boolean perHost) {
@@ -462,6 +518,68 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
 
     }
 
+    private static class CircuitBreakerAuthCallable implements Callable<Optional<ProtocolException>> {
+
+        private final MonitoringCommandExecutor delegate;
+        private final String authzid;
+        private final String u;
+        private final String p;
+        private final Protocol protocol;
+        private final AuthScheme authScheme;
+
+        /**
+         * Initializes a new {@link CircuitBreakerAuthCallable}.
+         *
+         * @param delegate The delegate
+         * @param authzid The authorization identifier
+         * @param u The user name
+         * @param p The password
+         * @param protocol The protocol instance
+         */
+        CircuitBreakerAuthCallable(MonitoringCommandExecutor delegate, AuthScheme authScheme, String authzid, String u, String p, Protocol protocol) {
+            super();
+            this.delegate = delegate;
+            this.authScheme = authScheme;
+            this.authzid = authzid;
+            this.u = u;
+            this.p = p;
+            this.protocol = protocol;
+        }
+
+        @Override
+        public Optional<ProtocolException> call() throws Exception {
+            try {
+                switch (authScheme) {
+                    case LOGIN:
+                        delegate.authlogin(u, p, protocol);
+                        break;
+                    case NTLM:
+                        delegate.authntlm(authzid, u, p, protocol);
+                        break;
+                    case OAUTHBEARER:
+                        delegate.authoauthbearer(u, p, protocol);
+                        break;
+                    case PLAIN:
+                        delegate.authplain(authzid, u, p, protocol);
+                        break;
+                    case XOAUTH2:
+                        delegate.authoauth2(u, p, protocol);
+                        break;
+                    default:
+                        throw new IllegalArgumentException("No such authentication scheme: " + authScheme);
+                }
+            } catch (BadCommandException e) {
+                // Don't advertise BAD as failure
+                return Optional.of(e);
+            } catch (CommandFailedException e) {
+                // Don't advertise NO as failure
+                return Optional.of(e);
+            }
+            return Optional.empty();
+        }
+
+    }
+
     private static class CircuitBreakerReadResponseCallable implements Callable<Response> {
 
         private final Protocol protocol;
@@ -487,10 +605,7 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
 
     private static class CircuitBreakerCommandCallable implements Callable<Response[]> {
 
-        private static final List<Class<? extends Exception>> NETWORK_COMMUNICATION_ERRORS = ImmutableList.of(
-            com.sun.mail.iap.ByeIOException.class,
-            java.net.SocketTimeoutException.class,
-            java.io.EOFException.class);
+        private static final List<Class<? extends Exception>> NETWORK_COMMUNICATION_ERRORS = ImmutableList.of(com.sun.mail.iap.ByeIOException.class, java.net.SocketTimeoutException.class, java.io.EOFException.class);
 
         private final MonitoringCommandExecutor delegate;
         private final String command;

@@ -1264,20 +1264,40 @@ public class IMAPStore extends Store
 		continue;
 	    }
 
-	    if (m.equals("PLAIN")) {
-            p.authplain(authzid, user, password);
-        } else if (m.equals("LOGIN")) {
-            p.authlogin(user, password);
-        } else if (m.equals("NTLM")) {
-            p.authntlm(authzid, user, password);
-        } else if (m.equals("XOAUTH2")) {
-            p.authoauth2(user, password);
-        } else if (m.equals("OAUTHBEARER")) {
-            p.authoauthbearer(user, password);
+	    Optional<CommandExecutor> optionalCommandExecutor = IMAPStore.getMatchingCommandExecutor(p);
+        if (optionalCommandExecutor.isPresent()) {
+            CommandExecutor commandExecutor = optionalCommandExecutor.get();
+            if (m.equals("PLAIN")) {
+                commandExecutor.authplain(authzid, user, password, p);
+            } else if (m.equals("LOGIN")) {
+                commandExecutor.authlogin(user, password, p);
+            } else if (m.equals("NTLM")) {
+                commandExecutor.authntlm(authzid, user, password, p);
+            } else if (m.equals("XOAUTH2")) {
+                commandExecutor.authoauth2(user, password, p);
+            } else if (m.equals("OAUTHBEARER")) {
+                commandExecutor.authoauthbearer(user, password, p);
+            } else {
+                logger.log(Level.FINE, "no authenticator for mechanism {0}", m);
+                continue;
+            }
         } else {
-		logger.log(Level.FINE, "no authenticator for mechanism {0}", m);
-		continue;
-	    }
+            if (m.equals("PLAIN")) {
+                p.authplain(authzid, user, password);
+            } else if (m.equals("LOGIN")) {
+                p.authlogin(user, password);
+            } else if (m.equals("NTLM")) {
+                p.authntlm(authzid, user, password);
+            } else if (m.equals("XOAUTH2")) {
+                p.authoauth2(user, password);
+            } else if (m.equals("OAUTHBEARER")) {
+                p.authoauthbearer(user, password);
+            } else {
+                logger.log(Level.FINE, "no authenticator for mechanism {0}", m);
+                continue;
+            }
+        }
+
 	    return;
 	}
 

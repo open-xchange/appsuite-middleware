@@ -56,6 +56,7 @@ import com.sun.mail.iap.Protocol;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.iap.ResponseInterceptor;
+import com.sun.mail.imap.protocol.IMAPProtocol;
 
 /**
  * {@link CommandExecutor} - Is responsible for executing commands and reading responses.
@@ -123,6 +124,83 @@ public interface CommandExecutor {
      */
     default String writeCommand(String command, Argument args, Protocol protocol) throws IOException, ProtocolException {
         return protocol.writeCommand(command, args);
+    }
+
+    /**
+     * Issues the AUTHENTICATE command with AUTH=LOGIN authenticate scheme.
+     *
+     * @param u The user name
+     * @param p The password
+     * @param protocol The protocol instance
+     * @throws ProtocolException If a protocol error occurs
+     */
+    default void authlogin(String u, String p, Protocol protocol) throws ProtocolException {
+        if (!(protocol instanceof IMAPProtocol)) {
+            throw new ProtocolException("Invalid protocol instance: " + protocol.getClass().getName());
+        }
+        ((IMAPProtocol) protocol).authlogin(u, p);
+    }
+
+    /**
+     * Issues the AUTHENTICATE command with AUTH=PLAIN authentication scheme.
+     *
+     * @param authzid The authorization identifier
+     * @param u The user name
+     * @param p The password
+     * @param protocol The protocol instance
+     * @throws ProtocolException If a protocol error occurs
+     */
+    default void authplain(String authzid, String u, String p, Protocol protocol) throws ProtocolException {
+        if (!(protocol instanceof IMAPProtocol)) {
+            throw new ProtocolException("Invalid protocol instance: " + protocol.getClass().getName());
+        }
+        ((IMAPProtocol) protocol).authplain(authzid, u, p);
+    }
+
+    /**
+     * Issues the AUTHENTICATE command with AUTH=NTLM authentication scheme.
+     *
+     * @param authzid The authorization identifier
+     * @param u The user name
+     * @param p The password
+     * @param protocol The protocol instance
+     * @throws ProtocolException If a protocol error occurs
+     */
+    default void authntlm(String authzid, String u, String p, Protocol protocol) throws ProtocolException {
+        if (!(protocol instanceof IMAPProtocol)) {
+            throw new ProtocolException("Invalid protocol instance: " + protocol.getClass().getName());
+        }
+        ((IMAPProtocol) protocol).authntlm(authzid, u, p);
+    }
+
+    /**
+     * Issues the AUTHENTICATE command with AUTH=XOAUTH2 authenticate scheme.
+     *
+     * @param u The user name
+     * @param p The password
+     * @param protocol The protocol instance
+     * @throws ProtocolException If a protocol error occurs
+     */
+    default void authoauth2(String u, String p, Protocol protocol) throws ProtocolException {
+        if (!(protocol instanceof IMAPProtocol)) {
+            throw new ProtocolException("Invalid protocol instance: " + protocol.getClass().getName());
+        }
+        ((IMAPProtocol) protocol).authoauth2(u, p);
+    }
+
+    /**
+     * Issues the AUTHENTICATE command with AUTH=OAUTHBEARER authenticate scheme.
+     *
+     * @param u The user name
+     * @param p The password
+     * @param protocol The protocol instance
+     * @throws ProtocolException If a protocol error occurs
+     */
+    default void authoauthbearer(String u, String p, Protocol protocol) throws ProtocolException {
+        if (!(protocol instanceof IMAPProtocol)) {
+            throw new ProtocolException("Invalid protocol instance: " + protocol.getClass().getName());
+        }
+        ((IMAPProtocol) protocol).authoauthbearer(u, p);
     }
 
     /**

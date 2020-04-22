@@ -60,7 +60,11 @@ import java.util.stream.Collectors;
 import com.google.common.collect.ImmutableList;
 import com.openexchange.java.Strings;
 import com.sun.mail.iap.Argument;
+import com.sun.mail.iap.BadCommandException;
+import com.sun.mail.iap.CommandFailedException;
+import com.sun.mail.iap.ConnectionException;
 import com.sun.mail.iap.Protocol;
+import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.iap.ResponseInterceptor;
 import com.sun.mail.imap.CommandExecutor;
@@ -97,6 +101,89 @@ public class MonitoringCommandExecutor implements CommandExecutor {
     @Override
     public boolean isApplicable(Protocol protocol) {
         return true;
+    }
+
+    @Override
+    public void authlogin(String u, String p, Protocol protocol) throws ProtocolException {
+        authWithScheme(AuthScheme.LOGIN, null, u, p, protocol);
+    }
+
+    @Override
+    public void authntlm(String authzid, String u, String p, Protocol protocol) throws ProtocolException {
+        authWithScheme(AuthScheme.NTLM, authzid, u, p, protocol);
+    }
+
+    @Override
+    public void authoauth2(String u, String p, Protocol protocol) throws ProtocolException {
+        authWithScheme(AuthScheme.XOAUTH2, null, u, p, protocol);
+    }
+
+    @Override
+    public void authoauthbearer(String u, String p, Protocol protocol) throws ProtocolException {
+        authWithScheme(AuthScheme.OAUTHBEARER, null, u, p, protocol);
+    }
+
+    @Override
+    public void authplain(String authzid, String u, String p, Protocol protocol) throws ProtocolException {
+        authWithScheme(AuthScheme.PLAIN, authzid, u, p, protocol);
+    }
+
+    /**
+     * Performs authentication according to given scheme.
+     *
+     * @param authzid The authorization identifier
+     * @param u The user name
+     * @param p The password
+     * @param protocol The protocol instance
+     * @throws ProtocolException If a protocol error occurs
+     */
+    private void authWithScheme(AuthScheme authScheme, String authzid, String u, String p, Protocol protocol) throws ProtocolException {
+        long duration = -1;
+        String status = "UNKNOWN";
+
+        // Measure command execution
+        String command = null;
+        long start = System.nanoTime();
+        try {
+            switch (authScheme) {
+                case LOGIN:
+                    command = "AUTHENTICATE LOGIN";
+                    CommandExecutor.super.authlogin(u, p, protocol);
+                    break;
+                case NTLM:
+                    command = "AUTHENTICATE NTLM";
+                    CommandExecutor.super.authntlm(authzid, u, p, protocol);
+                    break;
+                case OAUTHBEARER:
+                    command = "AUTHENTICATE OAUTHBEARER";
+                    CommandExecutor.super.authoauthbearer(u, p, protocol);
+                    break;
+                case PLAIN:
+                    command = "AUTHENTICATE PLAIN";
+                    CommandExecutor.super.authplain(authzid, u, p, protocol);
+                    break;
+                case XOAUTH2:
+                    command = "AUTHENTICATE XOAUTH2";
+                    CommandExecutor.super.authoauth2(u, p, protocol);
+                    break;
+                default:
+                    throw new IllegalArgumentException("No such authentication scheme: " + authScheme);
+            }
+        } catch (BadCommandException e) {
+            status = "BAD";
+            throw e;
+        } catch (CommandFailedException e) {
+            status = "NO";
+            throw e;
+        } catch (ConnectionException e) {
+            status = "BYE";
+            throw e;
+        } finally {
+            duration = System.nanoTime() - start;
+            if (duration >= 0) {
+                recordStatus(protocol, command, status, Duration.ofNanos(duration));
+            }
+        }
     }
 
     @Override
