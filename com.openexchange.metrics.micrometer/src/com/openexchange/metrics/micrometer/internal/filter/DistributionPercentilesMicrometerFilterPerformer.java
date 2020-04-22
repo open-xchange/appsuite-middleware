@@ -93,7 +93,12 @@ public class DistributionPercentilesMicrometerFilterPerformer extends AbstractMi
                     int index = 0;
                     for (String s : p) {
                         try {
-                            percentiles[index++] = Double.parseDouble(s);
+                            double value = Double.parseDouble(s);
+                            if (value < 0 || value > 1) {
+                                LOG.error("Invalid percentile '{}' for '{}'. Only values between 0 and 1 are allowed.", value, id);
+                                return config;
+                            }
+                            percentiles[index++] = value;
                         } catch (NumberFormatException e) {
                             LOG.error("Percentile '{}' cannot be parsed as double. Ignoring percentiles configuration.", s);
                             return config;

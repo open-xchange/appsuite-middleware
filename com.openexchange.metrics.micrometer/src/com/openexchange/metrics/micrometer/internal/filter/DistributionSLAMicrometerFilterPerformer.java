@@ -96,7 +96,7 @@ public class DistributionSLAMicrometerFilterPerformer extends AbstractMicrometer
                         try {
                             sla[index++] = TimeSpanParser.parseTimespanToPrimitive(s);
                         } catch (IllegalArgumentException e) {
-                            LOG.error("Cannot parse {} as long. Ignoring SLAs configuration.", s, e);
+                            LOG.error("Cannot parse {} as long. Ignoring SLAs configuration for '{}'.", s, id, e);
                             return config;
                         }
                     }

@@ -67,6 +67,8 @@ public class DistributionMinimumMicrometerFilterPerformer extends AbstractMicrom
 
     private static final Logger LOG = LoggerFactory.getLogger(DistributionMinimumMicrometerFilterPerformer.class);
 
+    private static final MicrometerFilterProperty PROPERTY = MicrometerFilterProperty.MINIMUM;
+
     /**
      * Initializes a new {@link DistributionMinimumMicrometerFilterPerformer}.
      */
@@ -76,10 +78,14 @@ public class DistributionMinimumMicrometerFilterPerformer extends AbstractMicrom
 
     @Override
     public void applyFilter(MeterRegistry meterRegistry, ConfigurationService configurationService) {
-        applyFilterFor(MicrometerFilterProperty.MINIMUM, configurationService, (entry) -> {
-            String metricId = extractMetricId(entry.getKey(), MicrometerFilterProperty.MINIMUM);
-            LOG.debug("Applying minimum meter filter for '{}'", metricId);
-            meterRegistry.config().meterFilter(MeterFilter.minExpected(metricId, Long.parseLong(entry.getValue())));
+        applyFilterFor(PROPERTY, configurationService, (entry) -> {
+            String metricId = extractMetricId(entry.getKey(), PROPERTY);
+            LOG.debug("Applying {} meter filter for '{}'", PROPERTY.name().toLowerCase(), metricId);
+            Long value = distributionValueSanityCheck(PROPERTY, metricId, entry.getValue());
+            if (value == null) {
+                return;
+            }
+            meterRegistry.config().meterFilter(MeterFilter.minExpected(metricId, value.longValue()));
         });
     }
 }

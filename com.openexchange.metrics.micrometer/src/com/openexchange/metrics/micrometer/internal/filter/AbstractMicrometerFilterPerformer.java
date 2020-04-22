@@ -116,4 +116,28 @@ abstract class AbstractMicrometerFilterPerformer {
         String prop = property.name().toLowerCase();
         return propertyName.substring(propertyName.indexOf(prop) + prop.length() + 1);
     }
+
+    /**
+     * Performs a sanity check and returns the specified value as Long for
+     * the specified metric.
+     * If the sanity check fails, i.e. if the value cannot be parsed or is negative then <code>null</code> will be returned.
+     *
+     * @param property The property
+     * @param metricId The metric identifier
+     * @param value The string value
+     * @return The Long value or <code>null</code> if the sanity check fails.
+     */
+    Long distributionValueSanityCheck(MicrometerFilterProperty property, String metricId, String value) {
+        try {
+            long candidate = Long.parseLong(value);
+            if (candidate >= 0) {
+                return Long.valueOf(candidate);
+            }
+            LOG.error("Negative values for the {} bound of a distribution is not allowed. Metric: '{}'", property.name().toLowerCase(), metricId);
+            return null;
+        } catch (NumberFormatException e) {
+            LOG.error("Invalid value was specified for the {} bound of the {} distribution.", property.name().toLowerCase(), metricId);
+            return null;
+        }
+    }
 }

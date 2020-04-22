@@ -67,6 +67,8 @@ public class DistributionMaximumMicrometerFilterPerformer extends AbstractMicrom
 
     private static final Logger LOG = LoggerFactory.getLogger(DistributionMaximumMicrometerFilterPerformer.class);
 
+    private static final MicrometerFilterProperty PROPERTY = MicrometerFilterProperty.MAXIMUM;
+
     /**
      * Initializes a new {@link DistributionMaximumMicrometerFilterPerformer}.
      */
@@ -76,10 +78,14 @@ public class DistributionMaximumMicrometerFilterPerformer extends AbstractMicrom
 
     @Override
     public void applyFilter(MeterRegistry meterRegistry, ConfigurationService configurationService) {
-        applyFilterFor(MicrometerFilterProperty.MAXIMUM, configurationService, (entry) -> {
-            String metricId = extractMetricId(entry.getKey(), MicrometerFilterProperty.MAXIMUM);
-            LOG.debug("Applying maximum meter filter for '{}'", metricId);
-            meterRegistry.config().meterFilter(MeterFilter.maxExpected(metricId, Long.parseLong(entry.getValue())));
+        applyFilterFor(PROPERTY, configurationService, (entry) -> {
+            String metricId = extractMetricId(entry.getKey(), PROPERTY);
+            LOG.debug("Applying {} meter filter for '{}'", PROPERTY.name().toLowerCase(), metricId);
+            Long value = distributionValueSanityCheck(PROPERTY, metricId, entry.getValue());
+            if (value == null) {
+                return;
+            }
+            meterRegistry.config().meterFilter(MeterFilter.maxExpected(metricId, value));
         });
     }
 }
