@@ -360,30 +360,30 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
      */
     protected static final class Key {
 
+        /**
+         * Creates a new {@link Key} to uniquely identify a circuit breaker instance
+         *
+         * @param name The circuit breaker name
+         * @param host The target host which is guarded by the circuit breaker. Can be a host name (any end-point of a service,
+         *             e.g. {@code imap.example.com(:993)) or IP and optional port combination (per end-point, e.g. {@code 172.16.10.3(:993)})
+         * @param perHost <code>true</code> if the {@code host} parameter specifies a certain end-point, <code>false</code> if not
+         * @return The key
+         */
+        public static Key of(String name, String host, boolean perHost) {
+            return new Key(name, host, perHost);
+        }
+
+        // ---------------------------------------------------------------------------------------------------------------------------------
+
         private final String name;
-
         private final String host;
-
-        private boolean perHost;
+        private final boolean perHost;
 
         private Key(String name, String host, boolean perHost) {
             super();
             this.name = name;
             this.host = host;
             this.perHost = perHost;
-        }
-
-        /**
-         * Creates a new {@link Key} to uniquely identify a circuit breaker instance
-         *
-         * @param name The circuit breaker name
-         * @param host The target host which is guarded by the circuit breaker. Can be a host name (any endpoint of a service,
-         *             e.g. {@code imap.example.com(:993)) or IP and optional port combination (per endpoint, e.g. {@code 172.16.10.3(:993)})
-         * @param perHost <code>true</code> if the {@code host} param specifies a certain endpoint, <code>false</code> if not
-         * @return The key
-         */
-        public static Key of(String name, String host, boolean perHost) {
-            return new Key(name, host, perHost);
         }
 
         /**
@@ -405,9 +405,9 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
         }
 
         /**
-         * Gets the perHost
+         * Checks if the host information denotes a certain end-point (IP address)-
          *
-         * @return The perHost
+         * @return <code>true</code> if a certain end-point is specified; otherwise <code>false</code>
          */
         public boolean isPerHost() {
             return perHost;
@@ -417,40 +417,47 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
         public int hashCode() {
             final int prime = 31;
             int result = 1;
+            result = prime * result + (perHost ? 1231 : 1237);
             result = prime * result + ((host == null) ? 0 : host.hashCode());
             result = prime * result + ((name == null) ? 0 : name.hashCode());
-            result = prime * result + (perHost ? 1231 : 1237);
             return result;
         }
 
         @Override
         public boolean equals(Object obj) {
-            if (this == obj)
+            if (this == obj) {
                 return true;
-            if (obj == null)
+            }
+            if (obj == null) {
                 return false;
-            if (getClass() != obj.getClass())
+            }
+            if (getClass() != obj.getClass()) {
                 return false;
+            }
             Key other = (Key) obj;
+            if (perHost != other.perHost) {
+                return false;
+            }
             if (host == null) {
-                if (other.host != null)
+                if (other.host != null) {
                     return false;
-            } else if (!host.equals(other.host))
+                }
+            } else if (!host.equals(other.host)) {
                 return false;
+            }
             if (name == null) {
-                if (other.name != null)
+                if (other.name != null) {
                     return false;
-            } else if (!name.equals(other.name))
+                }
+            } else if (!name.equals(other.name)) {
                 return false;
-            if (perHost != other.perHost)
-                return false;
+            }
             return true;
         }
 
         @Override
         public String toString() {
-            StringBuilder sb = new StringBuilder(name).append(" (").append(host).append(')');
-            return sb.toString();
+            return new StringBuilder(name).append(" (").append(host).append(')').toString();
         }
 
     }

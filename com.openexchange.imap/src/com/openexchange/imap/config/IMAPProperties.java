@@ -949,6 +949,11 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         } // End of generic
 
         String infix = optionalInfix.get();
+
+        if ("generic".equals(infix)) {
+            return initGenericCircuitBreakerInternal(configuration, monitoringCommandExecutor);
+        } // End of generic
+
         if ("primary".equals(infix)) {
             return initPrimaryCircuitBreaker(configuration, genericBreaker, monitoringCommandExecutor);
         } // End of primary

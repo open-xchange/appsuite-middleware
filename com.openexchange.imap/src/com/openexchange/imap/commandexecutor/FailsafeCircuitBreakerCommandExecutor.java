@@ -51,6 +51,8 @@ package com.openexchange.imap.commandexecutor;
 
 import java.util.Optional;
 import java.util.Set;
+import com.google.common.collect.ImmutableSet;
+import com.openexchange.java.Strings;
 import com.openexchange.net.HostList;
 import com.sun.mail.iap.Protocol;
 import net.jodah.failsafe.util.Ratio;
@@ -68,6 +70,20 @@ public class FailsafeCircuitBreakerCommandExecutor extends AbstractFailsafeCircu
             throw new IllegalArgumentException("hostList must not be null or empty.");
         }
         return hostList;
+    }
+
+    private static final Set<String> RESERVED_NAMES = ImmutableSet.of("generic", "primary");
+
+    private static String checkName(String name) {
+        if (Strings.isEmpty(name)) {
+            throw new IllegalArgumentException("name must not be null or empty.");
+        }
+
+        String toCheck = Strings.asciiLowerCase(name.trim());
+        if (RESERVED_NAMES.contains(toCheck)) {
+            throw new IllegalArgumentException("name must not be equal to either of: " + RESERVED_NAMES);
+        }
+        return toCheck;
     }
 
     // -------------------------------------------------------------------------------------------------------------------------------------
@@ -90,7 +106,7 @@ public class FailsafeCircuitBreakerCommandExecutor extends AbstractFailsafeCircu
     public FailsafeCircuitBreakerCommandExecutor(String name, HostList hostList, Set<Integer> optPorts, Ratio failureThreshold,
             Ratio successThreshold, long delayMillis, int ranking, MonitoringCommandExecutor delegate) {
         super(Optional.of(checkHostList(hostList)), optPorts, failureThreshold, successThreshold, delayMillis, ranking, delegate);
-        this.name = name;
+        this.name = checkName(name);
     }
 
     @Override
