@@ -52,6 +52,7 @@ package com.openexchange.mail.config;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -256,8 +257,13 @@ public class MaliciousFolders {
         }
         if (null != fullNames) {
             for (String fullName : fullNames) {
-                FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(fullName);
-                builder.add(new FullNameFolderChecker(fa.getFullName(), fa.getAccountId()));
+                Optional<FullnameArgument> optionalFullnameArg = MailFolderUtility.optPrepareMailFolderParam(fullName);
+                if (optionalFullnameArg.isPresent()) {
+                    FullnameArgument fa = optionalFullnameArg.get();
+                    builder.add(new FullNameFolderChecker(fa.getFullName(), fa.getAccountId()));
+                } else {
+                    builder.add(new FullNameFolderChecker(fullName, MailAccount.DEFAULT_ID));
+                }
             }
         }
 
