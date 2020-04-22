@@ -51,7 +51,7 @@ package com.openexchange.imap.commandexecutor;
 
 import java.net.InetAddress;
 import java.util.Optional;
-import com.sun.mail.iap.Protocol;
+import com.sun.mail.imap.ProtocolAccess;
 import net.jodah.failsafe.util.Ratio;
 
 /**
@@ -70,7 +70,7 @@ public class PrimaryFailsafeCircuitBreakerCommandExecutor extends AbstractFailsa
      * @param failureThreshold The ratio of successive failures that must occur in order to open the circuit
      * @param successThreshold The ratio of successive successful executions that must occur when in a half-open state in order to close the circuit
      * @param delayMillis The number of milliseconds to wait in open state before transitioning to half-open
-     * @param applyPerEndpoint Whether the CB shall be applied per endpoint (IP/port combination). Otherwise it applies per primary account host name.
+     * @param applyPerEndpoint Whether the circuit breaker shall be applied per end-point (IP/port combination). Otherwise it applies per primary account host name.
      * @param delegate The delegate executor
      * @throws IllegalArgumentException If invalid/arguments are passed
      */
@@ -80,18 +80,18 @@ public class PrimaryFailsafeCircuitBreakerCommandExecutor extends AbstractFailsa
     }
 
     @Override
-    protected Key getKey(Protocol protocol) {
+    protected Key getKey(ProtocolAccess protocolAccess) {
         if (applyPerEndpoint) {
-            InetAddress inetAddress = protocol.getInetAddress();
-            return Key.of("primary", inetAddress.getHostAddress() + ':' + protocol.getPort(), true);
+            InetAddress inetAddress = protocolAccess.getInetAddress();
+            return Key.of("primary", inetAddress.getHostAddress() + ':' + protocolAccess.getPort(), true);
         }
 
-        return Key.of("primary", protocol.getHost(), false);
+        return Key.of("primary", protocolAccess.getHost(), false);
     }
 
     @Override
-    public boolean isApplicable(Protocol protocol) {
-        return "true".equals(protocol.getProps().getProperty(PROP_PRIMARY_ACCOUNT));
+    public boolean isApplicable(ProtocolAccess protocolAccess) {
+        return "true".equals(protocolAccess.getProps().getProperty(PROP_PRIMARY_ACCOUNT));
     }
 
 }

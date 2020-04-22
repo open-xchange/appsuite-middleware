@@ -66,11 +66,11 @@ import com.openexchange.net.HostList;
 import com.sun.mail.iap.Argument;
 import com.sun.mail.iap.BadCommandException;
 import com.sun.mail.iap.CommandFailedException;
-import com.sun.mail.iap.Protocol;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.iap.ResponseInterceptor;
 import com.sun.mail.imap.CommandExecutor;
+import com.sun.mail.imap.ProtocolAccess;
 import com.sun.mail.imap.ResponseEvent.Status;
 import com.sun.mail.imap.ResponseEvent.StatusResponse;
 import io.micrometer.core.instrument.Metrics;
@@ -153,11 +153,11 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
     /**
      * Gets the circuit breaker for specified IMAP protocol instance.
      *
-     * @param protocol The IMAP protocol
+     * @param protocolAccess The protocol access
      * @return The associated circuit breaker
      */
-    protected CircuitBreakerInfo circuitBreakerFor(Protocol protocol) {
-        Key key = getKey(protocol);
+    protected CircuitBreakerInfo circuitBreakerFor(ProtocolAccess protocolAccess) {
+        Key key = getKey(protocolAccess);
         CircuitBreakerInfo breakerInfo = circuitBreakers.get(key);
         if (breakerInfo == null) {
             CircuitBreakerInfo newBreakerInfo = createCircuitBreaker(key);
@@ -217,10 +217,10 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
     /**
      * Gets a unique key to identify the circuit breaker for specified IMAP protocol instance.
      *
-     * @param protocol The IMAP protocol
+     * @param protocolAccess The protocol access
      * @return The key
      */
-    protected abstract Key getKey(Protocol protocol);
+    protected abstract Key getKey(ProtocolAccess protocolAccess);
 
     /**
      * Is called when the circuit breaker is opened: The circuit is opened and not allowing executions to occur.
@@ -278,19 +278,19 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
     }
 
     @Override
-    public boolean isApplicable(Protocol protocol) {
+    public boolean isApplicable(ProtocolAccess protocolAccess) {
         if (!optionalHostList.isPresent()) {
             return true;
         }
 
-        return optionalHostList.get().contains(protocol.getHost()) && (null == ports || ports.contains(I(protocol.getPort())));
+        return optionalHostList.get().contains(protocolAccess.getHost()) && (null == ports || ports.contains(I(protocolAccess.getPort())));
     }
 
     @Override
-    public Response[] executeCommand(String command, Argument args, Optional<ResponseInterceptor> optionalInterceptor, Protocol protocol) {
-        CircuitBreakerInfo breakerInfo = circuitBreakerFor(protocol);
+    public Response[] executeCommand(String command, Argument args, Optional<ResponseInterceptor> optionalInterceptor, ProtocolAccess protocolAccess) {
+        CircuitBreakerInfo breakerInfo = circuitBreakerFor(protocolAccess);
         try {
-            return Failsafe.with(breakerInfo.getCircuitBreaker()).get(new CircuitBreakerCommandCallable(delegate, command, args, optionalInterceptor, protocol));
+            return Failsafe.with(breakerInfo.getCircuitBreaker()).get(new CircuitBreakerCommandCallable(delegate, command, args, optionalInterceptor, protocolAccess));
         } catch (CircuitBreakerOpenException e) {
             // Circuit is open
             onDenied(e, breakerInfo);
@@ -313,10 +313,10 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
     }
 
     @Override
-    public Response readResponse(Protocol protocol) throws IOException {
-        CircuitBreakerInfo breakerInfo = circuitBreakerFor(protocol);
+    public Response readResponse(ProtocolAccess protocolAccess) throws IOException {
+        CircuitBreakerInfo breakerInfo = circuitBreakerFor(protocolAccess);
         try {
-            return Failsafe.with(breakerInfo.getCircuitBreaker()).get(new CircuitBreakerReadResponseCallable(delegate, protocol));
+            return Failsafe.with(breakerInfo.getCircuitBreaker()).get(new CircuitBreakerReadResponseCallable(delegate, protocolAccess));
         } catch (CircuitBreakerOpenException e) {
             // Circuit is open
             onDenied(e, breakerInfo);
@@ -335,33 +335,33 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
     }
 
     @Override
-    public void authplain(String authzid, String u, String p, Protocol protocol) throws ProtocolException {
-        authWithScheme(AuthScheme.PLAIN, authzid, u, p, protocol);
+    public void authplain(String authzid, String u, String p, ProtocolAccess protocolAccess) throws ProtocolException {
+        authWithScheme(AuthScheme.PLAIN, authzid, u, p, protocolAccess);
     }
 
     @Override
-    public void authlogin(String u, String p, Protocol protocol) throws ProtocolException {
-        authWithScheme(AuthScheme.LOGIN, u, p, protocol);
+    public void authlogin(String u, String p, ProtocolAccess protocolAccess) throws ProtocolException {
+        authWithScheme(AuthScheme.LOGIN, u, p, protocolAccess);
     }
 
     @Override
-    public void authntlm(String authzid, String u, String p, Protocol protocol) throws ProtocolException {
-        authWithScheme(AuthScheme.NTLM, authzid, u, p, protocol);
+    public void authntlm(String authzid, String u, String p, ProtocolAccess protocolAccess) throws ProtocolException {
+        authWithScheme(AuthScheme.NTLM, authzid, u, p, protocolAccess);
     }
 
     @Override
-    public void authoauth2(String u, String p, Protocol protocol) throws ProtocolException {
-        authWithScheme(AuthScheme.XOAUTH2, u, p, protocol);
+    public void authoauth2(String u, String p, ProtocolAccess protocolAccess) throws ProtocolException {
+        authWithScheme(AuthScheme.XOAUTH2, u, p, protocolAccess);
     }
 
     @Override
-    public void authoauthbearer(String u, String p, Protocol protocol) throws ProtocolException {
-        authWithScheme(AuthScheme.OAUTHBEARER, u, p, protocol);
+    public void authoauthbearer(String u, String p, ProtocolAccess protocolAccess) throws ProtocolException {
+        authWithScheme(AuthScheme.OAUTHBEARER, u, p, protocolAccess);
     }
 
     @Override
-    public void authsasl(String[] allowed, String realm, String authzid, String u, String p, Protocol protocol) throws ProtocolException {
-        authWithScheme(AuthScheme.SASL, allowed, realm, authzid, u, p, protocol);
+    public void authsasl(String[] allowed, String realm, String authzid, String u, String p, ProtocolAccess protocolAccess) throws ProtocolException {
+        authWithScheme(AuthScheme.SASL, allowed, realm, authzid, u, p, protocolAccess);
     }
 
     /**
@@ -370,11 +370,11 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
      * @param authScheme The authentication scheme
      * @param u The user name
      * @param p The password
-     * @param protocol The protocol instance
+     * @param protocolAccess The protocol access
      * @throws ProtocolException If a protocol error occurs
      */
-    private void authWithScheme(AuthScheme authScheme, String u, String p, Protocol protocol) throws ProtocolException {
-        authWithScheme(authScheme, null, u, p, protocol);
+    private void authWithScheme(AuthScheme authScheme, String u, String p, ProtocolAccess protocolAccess) throws ProtocolException {
+        authWithScheme(authScheme, null, u, p, protocolAccess);
     }
 
 
@@ -385,11 +385,11 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
      * @param authzid The authorization identifier
      * @param u The user name
      * @param p The password
-     * @param protocol The protocol instance
+     * @param protocolAccess The protocol access
      * @throws ProtocolException If a protocol error occurs
      */
-    private void authWithScheme(AuthScheme authScheme, String authzid, String u, String p, Protocol protocol) throws ProtocolException {
-        authWithScheme(authScheme, null, null, authzid, u, p, protocol);
+    private void authWithScheme(AuthScheme authScheme, String authzid, String u, String p, ProtocolAccess protocolAccess) throws ProtocolException {
+        authWithScheme(authScheme, null, null, authzid, u, p, protocolAccess);
     }
 
     /**
@@ -401,13 +401,13 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
      * @param authzid The authorization identifier
      * @param u The user name
      * @param p The password
-     * @param protocol The protocol instance
+     * @param protocolAccess The protocol access
      * @throws ProtocolException If a protocol error occurs
      */
-    private void authWithScheme(AuthScheme authScheme, String[] allowed, String realm, String authzid, String u, String p, Protocol protocol) throws ProtocolException {
-        CircuitBreakerInfo breakerInfo = circuitBreakerFor(protocol);
+    private void authWithScheme(AuthScheme authScheme, String[] allowed, String realm, String authzid, String u, String p, ProtocolAccess protocolAccess) throws ProtocolException {
+        CircuitBreakerInfo breakerInfo = circuitBreakerFor(protocolAccess);
         try {
-            Optional<ProtocolException> optionalProtocolException = Failsafe.with(breakerInfo.getCircuitBreaker()).get(new CircuitBreakerAuthCallable(delegate, authScheme, allowed, realm, authzid, u, p, protocol));
+            Optional<ProtocolException> optionalProtocolException = Failsafe.with(breakerInfo.getCircuitBreaker()).get(new CircuitBreakerAuthCallable(delegate, authScheme, allowed, realm, authzid, u, p, protocolAccess));
             if (optionalProtocolException.isPresent()) {
                 throw optionalProtocolException.get();
             }
@@ -563,7 +563,7 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
         private final String authzid;
         private final String u;
         private final String p;
-        private final Protocol protocol;
+        private final ProtocolAccess protocolAccess;
 
         /**
          * Initializes a new {@link CircuitBreakerAuthCallable}.
@@ -575,9 +575,9 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
          * @param authzid The authorization identifier
          * @param u The user name
          * @param p The password
-         * @param protocol The protocol instance
+         * @param protocol The protocol access
          */
-        CircuitBreakerAuthCallable(MonitoringCommandExecutor delegate, AuthScheme authScheme, String[] allowed, String realm, String authzid, String u, String p, Protocol protocol) {
+        CircuitBreakerAuthCallable(MonitoringCommandExecutor delegate, AuthScheme authScheme, String[] allowed, String realm, String authzid, String u, String p, ProtocolAccess protocolAccess) {
             super();
             this.delegate = delegate;
             this.authScheme = authScheme;
@@ -586,7 +586,7 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
             this.authzid = authzid;
             this.u = u;
             this.p = p;
-            this.protocol = protocol;
+            this.protocolAccess = protocolAccess;
         }
 
         @Override
@@ -594,22 +594,22 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
             try {
                 switch (authScheme) {
                     case LOGIN:
-                        delegate.authlogin(u, p, protocol);
+                        delegate.authlogin(u, p, protocolAccess);
                         break;
                     case NTLM:
-                        delegate.authntlm(authzid, u, p, protocol);
+                        delegate.authntlm(authzid, u, p, protocolAccess);
                         break;
                     case OAUTHBEARER:
-                        delegate.authoauthbearer(u, p, protocol);
+                        delegate.authoauthbearer(u, p, protocolAccess);
                         break;
                     case PLAIN:
-                        delegate.authplain(authzid, u, p, protocol);
+                        delegate.authplain(authzid, u, p, protocolAccess);
                         break;
                     case XOAUTH2:
-                        delegate.authoauth2(u, p, protocol);
+                        delegate.authoauth2(u, p, protocolAccess);
                         break;
                     case SASL:
-                        delegate.authsasl(allowed, realm, authzid, u, p, protocol);
+                        delegate.authsasl(allowed, realm, authzid, u, p, protocolAccess);
                         break;
                     default:
                         throw new IllegalArgumentException("No such authentication scheme: " + authScheme);
@@ -628,24 +628,24 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
 
     private static class CircuitBreakerReadResponseCallable implements Callable<Response> {
 
-        private final Protocol protocol;
+        private final ProtocolAccess protocolAccess;
         private final MonitoringCommandExecutor delegate;
 
         /**
          * Initializes a new {@link CircuitBreakerReadResponseCallable}.
          *
          * @param delegate The delegate
-         * @param protocol The protocol instance
+         * @param protocolAccess The protocol access
          */
-        CircuitBreakerReadResponseCallable(MonitoringCommandExecutor delegate, Protocol protocol) {
+        CircuitBreakerReadResponseCallable(MonitoringCommandExecutor delegate, ProtocolAccess protocolAccess) {
             super();
             this.delegate = delegate;
-            this.protocol = protocol;
+            this.protocolAccess = protocolAccess;
         }
 
         @Override
         public Response call() throws Exception {
-            return delegate.readResponse(protocol);
+            return delegate.readResponse(protocolAccess);
         }
     }
 
@@ -657,7 +657,7 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
         private final String command;
         private final Argument args;
         private final Optional<ResponseInterceptor> optionalInterceptor;
-        private final Protocol protocol;
+        private final ProtocolAccess protocolAccess;
 
         /**
          * Initializes a new {@link CircuitBreakerCommandCallable}.
@@ -666,22 +666,21 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
          * @param command The command
          * @param args The optional arguments
          * @param optionalInterceptor The optional interceptor
-         * @param protocol The protocol instance
+         * @param protocolAccess The protocol access
          */
-        CircuitBreakerCommandCallable(MonitoringCommandExecutor delegate, String command, Argument args, Optional<ResponseInterceptor> optionalInterceptor, Protocol protocol) {
+        CircuitBreakerCommandCallable(MonitoringCommandExecutor delegate, String command, Argument args, Optional<ResponseInterceptor> optionalInterceptor, ProtocolAccess protocolAccess) {
             super();
             this.delegate = delegate;
             this.command = command;
             this.args = args;
             this.optionalInterceptor = optionalInterceptor;
-            this.protocol = protocol;
+            this.protocolAccess = protocolAccess;
         }
 
         @Override
         public Response[] call() throws Exception {
-
             // Obtain responses
-            ExecutedCommand executedCommand = delegate.executeCommandExtended(command, args, optionalInterceptor, protocol);
+            ExecutedCommand executedCommand = delegate.executeCommandExtended(command, args, optionalInterceptor, protocolAccess);
             Response[] responses = executedCommand.responses;
 
             // Check status response

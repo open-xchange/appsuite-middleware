@@ -76,10 +76,10 @@ public interface CommandExecutor {
     /**
      * Checks if this executor is applicable to given protocol instance
      *
-     * @param protocol The protocol instance
+     * @param protocolAccess The protocol access
      * @return <code>true</code> if applicable; otherwise <code>false</code>
      */
-    boolean isApplicable(Protocol protocol);
+    boolean isApplicable(ProtocolAccess protocolAccess);
 
     /**
      * Executes given command with given arguments using specified protocol instance.
@@ -87,22 +87,24 @@ public interface CommandExecutor {
      * @param command The command
      * @param args The arguments
      * @param optionalInterceptor The optional interceptor
-     * @param protocol The protocol instance
+     * @param protocolAccess The protocol access
      * @return The response array
      */
-    default Response[] executeCommand(String command, Argument args, Optional<ResponseInterceptor> optionalInterceptor, Protocol protocol) {
+    default Response[] executeCommand(String command, Argument args, Optional<ResponseInterceptor> optionalInterceptor, ProtocolAccess protocolAccess) {
+        Protocol protocol = protocolAccess.getProtocol();
         return protocol.executeCommand(command, args, optionalInterceptor);
     }
 
     /**
      * Reads a response using specified protocol instance.
      *
-     * @param protocol The protocol instance
+     * @param protocolAccess The protocol access
      * @return The response
      * @throws IOException If an I/O error occurs
      */
-    default Response readResponse(Protocol protocol) throws IOException {
+    default Response readResponse(ProtocolAccess protocolAccess) throws IOException {
         try {
+            Protocol protocol = protocolAccess.getProtocol();
             return protocol.readResponse();
         } catch (ProtocolException e) {
             // Cannot occur
@@ -117,12 +119,13 @@ public interface CommandExecutor {
      *
      * @param command The command
      * @param args The arguments
-     * @param protocol The protocol instance
+     * @param protocolAccess The protocol access
      * @return The tag identifier
      * @throws IOException If an I/O error occurs
      * @throws ProtocolException If a protocol error occurs
      */
-    default String writeCommand(String command, Argument args, Protocol protocol) throws IOException, ProtocolException {
+    default String writeCommand(String command, Argument args, ProtocolAccess protocolAccess) throws IOException, ProtocolException {
+        Protocol protocol = protocolAccess.getProtocol();
         return protocol.writeCommand(command, args);
     }
 
@@ -131,10 +134,11 @@ public interface CommandExecutor {
      *
      * @param u The user name
      * @param p The password
-     * @param protocol The protocol instance
+     * @param protocolAccess The protocol access
      * @throws ProtocolException If a protocol error occurs
      */
-    default void authlogin(String u, String p, Protocol protocol) throws ProtocolException {
+    default void authlogin(String u, String p, ProtocolAccess protocolAccess) throws ProtocolException {
+        Protocol protocol = protocolAccess.getProtocol();
         if (!(protocol instanceof IMAPProtocol)) {
             throw new ProtocolException("Invalid protocol instance: " + protocol.getClass().getName());
         }
@@ -147,10 +151,11 @@ public interface CommandExecutor {
      * @param authzid The authorization identifier
      * @param u The user name
      * @param p The password
-     * @param protocol The protocol instance
+     * @param protocolAccess The protocol access
      * @throws ProtocolException If a protocol error occurs
      */
-    default void authplain(String authzid, String u, String p, Protocol protocol) throws ProtocolException {
+    default void authplain(String authzid, String u, String p, ProtocolAccess protocolAccess) throws ProtocolException {
+        Protocol protocol = protocolAccess.getProtocol();
         if (!(protocol instanceof IMAPProtocol)) {
             throw new ProtocolException("Invalid protocol instance: " + protocol.getClass().getName());
         }
@@ -163,10 +168,11 @@ public interface CommandExecutor {
      * @param authzid The authorization identifier
      * @param u The user name
      * @param p The password
-     * @param protocol The protocol instance
+     * @param protocolAccess The protocol access
      * @throws ProtocolException If a protocol error occurs
      */
-    default void authntlm(String authzid, String u, String p, Protocol protocol) throws ProtocolException {
+    default void authntlm(String authzid, String u, String p, ProtocolAccess protocolAccess) throws ProtocolException {
+        Protocol protocol = protocolAccess.getProtocol();
         if (!(protocol instanceof IMAPProtocol)) {
             throw new ProtocolException("Invalid protocol instance: " + protocol.getClass().getName());
         }
@@ -178,10 +184,11 @@ public interface CommandExecutor {
      *
      * @param u The user name
      * @param p The password
-     * @param protocol The protocol instance
+     * @param protocolAccess The protocol access
      * @throws ProtocolException If a protocol error occurs
      */
-    default void authoauth2(String u, String p, Protocol protocol) throws ProtocolException {
+    default void authoauth2(String u, String p, ProtocolAccess protocolAccess) throws ProtocolException {
+        Protocol protocol = protocolAccess.getProtocol();
         if (!(protocol instanceof IMAPProtocol)) {
             throw new ProtocolException("Invalid protocol instance: " + protocol.getClass().getName());
         }
@@ -193,10 +200,11 @@ public interface CommandExecutor {
      *
      * @param u The user name
      * @param p The password
-     * @param protocol The protocol instance
+     * @param protocolAccess The protocol access
      * @throws ProtocolException If a protocol error occurs
      */
-    default void authoauthbearer(String u, String p, Protocol protocol) throws ProtocolException {
+    default void authoauthbearer(String u, String p, ProtocolAccess protocolAccess) throws ProtocolException {
+        Protocol protocol = protocolAccess.getProtocol();
         if (!(protocol instanceof IMAPProtocol)) {
             throw new ProtocolException("Invalid protocol instance: " + protocol.getClass().getName());
         }
@@ -211,10 +219,11 @@ public interface CommandExecutor {
      * @param authzid The authorization identifier
      * @param u The user name
      * @param p The password
-     * @param protocol The protocol instance
+     * @param protocolAccess The protocol access
      * @throws ProtocolException If a protocol error occurs
      */
-    default void authsasl(String[] allowed, String realm, String authzid, String u, String p, Protocol protocol) throws ProtocolException {
+    default void authsasl(String[] allowed, String realm, String authzid, String u, String p, ProtocolAccess protocolAccess) throws ProtocolException {
+        Protocol protocol = protocolAccess.getProtocol();
         if (!(protocol instanceof IMAPProtocol)) {
             throw new ProtocolException("Invalid protocol instance: " + protocol.getClass().getName());
         }

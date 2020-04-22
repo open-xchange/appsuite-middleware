@@ -54,7 +54,7 @@ import java.util.Set;
 import com.google.common.collect.ImmutableSet;
 import com.openexchange.java.Strings;
 import com.openexchange.net.HostList;
-import com.sun.mail.iap.Protocol;
+import com.sun.mail.imap.ProtocolAccess;
 import net.jodah.failsafe.util.Ratio;
 
 /**
@@ -110,7 +110,7 @@ public class FailsafeCircuitBreakerCommandExecutor extends AbstractFailsafeCircu
     }
 
     @Override
-    protected Key getKey(Protocol protocol) {
+    protected Key getKey(ProtocolAccess protocolAccess) {
         return Key.of(name, getHostList().get().getHostString(), false);
     }
 

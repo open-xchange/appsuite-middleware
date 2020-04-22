@@ -54,7 +54,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.java.Strings;
 import com.openexchange.net.HostList;
-import com.sun.mail.iap.Protocol;
+import com.sun.mail.imap.ProtocolAccess;
 import net.jodah.failsafe.util.Ratio;
 
 /**
@@ -84,8 +84,8 @@ public class GenericFailsafeCircuitBreakerCommandExecutor extends AbstractFailsa
     }
 
     @Override
-    protected Key getKey(Protocol protocol) {
-        return Key.of("generic", protocol.getHost(), false);
+    protected Key getKey(ProtocolAccess protocolAccess) {
+        return Key.of("generic", protocolAccess.getHost(), false);
     }
 
     /**
@@ -115,13 +115,13 @@ public class GenericFailsafeCircuitBreakerCommandExecutor extends AbstractFailsa
     }
 
     @Override
-    public boolean isApplicable(Protocol protocol) {
-        if (excludePrimaryAccount.get() && "true".equals(protocol.getProps().getProperty(PROP_PRIMARY_ACCOUNT))) {
+    public boolean isApplicable(ProtocolAccess protocolAccess) {
+        if (excludePrimaryAccount.get() && "true".equals(protocolAccess.getProps().getProperty(PROP_PRIMARY_ACCOUNT))) {
             return false;
         }
 
         Optional<HostList> optionalHostList = optionalHostsToExclude.get();
-        return !optionalHostList.isPresent() || !optionalHostList.get().contains(protocol.getHost());
+        return !optionalHostList.isPresent() || !optionalHostList.get().contains(protocolAccess.getHost());
     }
 
 }

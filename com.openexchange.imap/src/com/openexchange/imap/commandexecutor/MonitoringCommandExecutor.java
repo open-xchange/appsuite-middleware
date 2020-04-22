@@ -68,6 +68,7 @@ import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.iap.ResponseInterceptor;
 import com.sun.mail.imap.CommandExecutor;
+import com.sun.mail.imap.ProtocolAccess;
 import com.sun.mail.imap.ResponseEvent.StatusResponse;
 import io.micrometer.core.instrument.Metrics;
 import io.micrometer.core.instrument.Timer;
@@ -99,38 +100,38 @@ public class MonitoringCommandExecutor implements CommandExecutor {
     }
 
     @Override
-    public boolean isApplicable(Protocol protocol) {
+    public boolean isApplicable(ProtocolAccess protocolAccess) {
         return true;
     }
 
     @Override
-    public void authlogin(String u, String p, Protocol protocol) throws ProtocolException {
-        authWithScheme(AuthScheme.LOGIN, u, p, protocol);
+    public void authlogin(String u, String p, ProtocolAccess protocolAccess) throws ProtocolException {
+        authWithScheme(AuthScheme.LOGIN, u, p, protocolAccess);
     }
 
     @Override
-    public void authntlm(String authzid, String u, String p, Protocol protocol) throws ProtocolException {
-        authWithScheme(AuthScheme.NTLM, authzid, u, p, protocol);
+    public void authntlm(String authzid, String u, String p, ProtocolAccess protocolAccess) throws ProtocolException {
+        authWithScheme(AuthScheme.NTLM, authzid, u, p, protocolAccess);
     }
 
     @Override
-    public void authoauth2(String u, String p, Protocol protocol) throws ProtocolException {
-        authWithScheme(AuthScheme.XOAUTH2, u, p, protocol);
+    public void authoauth2(String u, String p, ProtocolAccess protocolAccess) throws ProtocolException {
+        authWithScheme(AuthScheme.XOAUTH2, u, p, protocolAccess);
     }
 
     @Override
-    public void authoauthbearer(String u, String p, Protocol protocol) throws ProtocolException {
-        authWithScheme(AuthScheme.OAUTHBEARER, u, p, protocol);
+    public void authoauthbearer(String u, String p, ProtocolAccess protocolAccess) throws ProtocolException {
+        authWithScheme(AuthScheme.OAUTHBEARER, u, p, protocolAccess);
     }
 
     @Override
-    public void authplain(String authzid, String u, String p, Protocol protocol) throws ProtocolException {
-        authWithScheme(AuthScheme.PLAIN, authzid, u, p, protocol);
+    public void authplain(String authzid, String u, String p, ProtocolAccess protocolAccess) throws ProtocolException {
+        authWithScheme(AuthScheme.PLAIN, authzid, u, p, protocolAccess);
     }
 
     @Override
-    public void authsasl(String[] allowed, String realm, String authzid, String u, String p, Protocol protocol) throws ProtocolException {
-        authWithScheme(AuthScheme.SASL, allowed, realm, authzid, u, p, protocol);
+    public void authsasl(String[] allowed, String realm, String authzid, String u, String p, ProtocolAccess protocolAccess) throws ProtocolException {
+        authWithScheme(AuthScheme.SASL, allowed, realm, authzid, u, p, protocolAccess);
     }
 
     /**
@@ -139,11 +140,11 @@ public class MonitoringCommandExecutor implements CommandExecutor {
      * @param authScheme The authentication scheme
      * @param u The user name
      * @param p The password
-     * @param protocol The protocol instance
+     * @param protocolAccess The protocol access
      * @throws ProtocolException If a protocol error occurs
      */
-    private void authWithScheme(AuthScheme authScheme, String u, String p, Protocol protocol) throws ProtocolException {
-        authWithScheme(authScheme, null, u, p, protocol);
+    private void authWithScheme(AuthScheme authScheme, String u, String p, ProtocolAccess protocolAccess) throws ProtocolException {
+        authWithScheme(authScheme, null, u, p, protocolAccess);
     }
 
 
@@ -154,11 +155,11 @@ public class MonitoringCommandExecutor implements CommandExecutor {
      * @param authzid The authorization identifier
      * @param u The user name
      * @param p The password
-     * @param protocol The protocol instance
+     * @param protocolAccess The protocol access
      * @throws ProtocolException If a protocol error occurs
      */
-    private void authWithScheme(AuthScheme authScheme, String authzid, String u, String p, Protocol protocol) throws ProtocolException {
-        authWithScheme(authScheme, null, null, authzid, u, p, protocol);
+    private void authWithScheme(AuthScheme authScheme, String authzid, String u, String p, ProtocolAccess protocolAccess) throws ProtocolException {
+        authWithScheme(authScheme, null, null, authzid, u, p, protocolAccess);
     }
 
     /**
@@ -170,10 +171,10 @@ public class MonitoringCommandExecutor implements CommandExecutor {
      * @param authzid The authorization identifier
      * @param u The user name
      * @param p The password
-     * @param protocol The protocol instance
+     * @param protocolAccess The protocol access
      * @throws ProtocolException If a protocol error occurs
      */
-    private void authWithScheme(AuthScheme authScheme, String[] allowed, String realm, String authzid, String u, String p, Protocol protocol) throws ProtocolException {
+    private void authWithScheme(AuthScheme authScheme, String[] allowed, String realm, String authzid, String u, String p, ProtocolAccess protocolAccess) throws ProtocolException {
         long duration = -1;
         String status = "UNKNOWN";
 
@@ -184,27 +185,27 @@ public class MonitoringCommandExecutor implements CommandExecutor {
             switch (authScheme) {
                 case LOGIN:
                     command = "AUTHENTICATE LOGIN";
-                    CommandExecutor.super.authlogin(u, p, protocol);
+                    CommandExecutor.super.authlogin(u, p, protocolAccess);
                     break;
                 case NTLM:
                     command = "AUTHENTICATE NTLM";
-                    CommandExecutor.super.authntlm(authzid, u, p, protocol);
+                    CommandExecutor.super.authntlm(authzid, u, p, protocolAccess);
                     break;
                 case OAUTHBEARER:
                     command = "AUTHENTICATE OAUTHBEARER";
-                    CommandExecutor.super.authoauthbearer(u, p, protocol);
+                    CommandExecutor.super.authoauthbearer(u, p, protocolAccess);
                     break;
                 case PLAIN:
                     command = "AUTHENTICATE PLAIN";
-                    CommandExecutor.super.authplain(authzid, u, p, protocol);
+                    CommandExecutor.super.authplain(authzid, u, p, protocolAccess);
                     break;
                 case XOAUTH2:
                     command = "AUTHENTICATE XOAUTH2";
-                    CommandExecutor.super.authoauth2(u, p, protocol);
+                    CommandExecutor.super.authoauth2(u, p, protocolAccess);
                     break;
                 case SASL:
                     command = "AUTHENTICATE SASL";
-                    CommandExecutor.super.authsasl(allowed, realm, authzid, u, p, protocol);
+                    CommandExecutor.super.authsasl(allowed, realm, authzid, u, p, protocolAccess);
                     break;
                 default:
                     throw new IllegalArgumentException("No such authentication scheme: " + authScheme);
@@ -221,26 +222,28 @@ public class MonitoringCommandExecutor implements CommandExecutor {
         } finally {
             duration = System.nanoTime() - start;
             if (duration >= 0) {
-                recordStatus(protocol, command, status, Duration.ofNanos(duration));
+                recordStatus(protocolAccess, command, status, Duration.ofNanos(duration));
             }
         }
     }
 
     @Override
-    public Response[] executeCommand(String command, Argument args, Optional<ResponseInterceptor> optionalInterceptor, Protocol protocol) {
-       return executeCommandExtended(command, args, optionalInterceptor, protocol).responses;
+    public Response[] executeCommand(String command, Argument args, Optional<ResponseInterceptor> optionalInterceptor, ProtocolAccess protocolAccess) {
+       return executeCommandExtended(command, args, optionalInterceptor, protocolAccess).responses;
     }
 
     /**
-     * Executes the given command
+     * Executes the given command.
      *
      * @param command The command to execute
      * @param args The arguments of the command
      * @param optionalInterceptor The optional {@link ResponseInterceptor}
-     * @param protocol The protocol to use
+     * @param protocolAccess The protocol access
      * @return The {@link ExecutedCommand}
      */
-    public ExecutedCommand executeCommandExtended(String command, Argument args, Optional<ResponseInterceptor> optionalInterceptor, Protocol protocol) {
+    public ExecutedCommand executeCommandExtended(String command, Argument args, Optional<ResponseInterceptor> optionalInterceptor, ProtocolAccess protocolAccess) {
+        Protocol protocol = protocolAccess.getProtocol();
+
         if (config.isEnabled()) {
             long duration = -1;
             String status = "UNKNOWN";
@@ -266,7 +269,7 @@ public class MonitoringCommandExecutor implements CommandExecutor {
                 return new ExecutedCommand(statusResponse, responses);
             } finally {
                 if (duration >= 0) {
-                    recordStatus(protocol, command, status, Duration.ofNanos(duration));
+                    recordStatus(protocolAccess, command, status, Duration.ofNanos(duration));
                 }
             }
         }
@@ -437,8 +440,8 @@ public class MonitoringCommandExecutor implements CommandExecutor {
         return "OTHER";
     }
 
-    private void recordStatus(Protocol protocol, String command, String status, Duration duration) {
-        boolean isPrimaryAccount = "true".equals(protocol.getProps().getProperty(PROP_PRIMARY_ACCOUNT));
+    private void recordStatus(ProtocolAccess protocolAccess, String command, String status, Duration duration) {
+        boolean isPrimaryAccount = "true".equals(protocolAccess.getProps().getProperty(PROP_PRIMARY_ACCOUNT));
         if (!config.isMeasureExternalAccounts() && !isPrimaryAccount) {
             return;
         }
@@ -452,15 +455,15 @@ public class MonitoringCommandExecutor implements CommandExecutor {
         String targetHost;
         if (isPrimaryAccount) {
             if (config.isGroupByPrimaryHosts()) {
-                targetHost = new StringBuilder(protocol.getHost()).toString();
+                targetHost = new StringBuilder(protocolAccess.getHost()).toString();
             } else if (config.isGroupByPrimaryEndpoints()) {
-                InetAddress inetAddress = protocol.getInetAddress();
-                targetHost = new StringBuilder(inetAddress.getHostAddress()).append(':').append(protocol.getPort()).toString();
+                InetAddress inetAddress = protocolAccess.getInetAddress();
+                targetHost = new StringBuilder(inetAddress.getHostAddress()).append(':').append(protocolAccess.getPort()).toString();
             } else {
                 targetHost = "primary";
             }
         } else if (config.isGroupByExternalHosts()) {
-            targetHost = new StringBuilder(protocol.getHost()).append(protocol.getPort()).toString();
+            targetHost = new StringBuilder(protocolAccess.getHost()).append(protocolAccess.getPort()).toString();
         } else {
             targetHost = "external";
         }

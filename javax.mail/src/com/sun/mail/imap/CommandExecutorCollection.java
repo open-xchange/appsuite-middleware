@@ -51,7 +51,6 @@ package com.sun.mail.imap;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.sun.mail.iap.Protocol;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -132,10 +131,10 @@ public abstract class CommandExecutorCollection implements Iterable<CommandExecu
     /**
      * Gets the matching command executor for given protocol instance.
      *
-     * @param protocol The protocol instance
+     * @param protocolAccess The protocol access
      * @return The matching command executor or <code>null</code>
      */
-    public abstract Optional<CommandExecutor> getMatchingCommandExecutorFor(Protocol protocol);
+    public abstract Optional<CommandExecutor> getMatchingCommandExecutorFor(ProtocolAccess protocolAccess);
 
     // ------------------------------------------------ Implementations ------------------------------------------------
 
@@ -192,8 +191,8 @@ public abstract class CommandExecutorCollection implements Iterable<CommandExecu
         }
 
         @Override
-        public Optional<CommandExecutor> getMatchingCommandExecutorFor(Protocol protocol) {
-            HostAndPortAndUser hostAndPortAndUser = new HostAndPortAndUser(protocol);
+        public Optional<CommandExecutor> getMatchingCommandExecutorFor(ProtocolAccess protocolAccess) {
+            HostAndPortAndUser hostAndPortAndUser = new HostAndPortAndUser(protocolAccess);
             Optional<CommandExecutor> optionalCommandExecutor = matchingCommandExecutors.getIfPresent(hostAndPortAndUser);
             if (optionalCommandExecutor != null) {
                 return optionalCommandExecutor;
@@ -201,7 +200,7 @@ public abstract class CommandExecutorCollection implements Iterable<CommandExecu
 
             CommandExecutor matching = null;
             for (CommandExecutor commandExecutor : commandExecutors) {
-                if ((matching == null || commandExecutor.getRanking() > matching.getRanking()) && commandExecutor.isApplicable(protocol)) {
+                if ((matching == null || commandExecutor.getRanking() > matching.getRanking()) && commandExecutor.isApplicable(protocolAccess)) {
                     matching = commandExecutor;
                 }
             }
@@ -250,10 +249,10 @@ public abstract class CommandExecutorCollection implements Iterable<CommandExecu
         }
 
         @Override
-        public Optional<CommandExecutor> getMatchingCommandExecutorFor(Protocol protocol) {
+        public Optional<CommandExecutor> getMatchingCommandExecutorFor(ProtocolAccess protocolAccess) {
             CommandExecutor matching = null;
             for (CommandExecutor commandExecutor : commandExecutors) {
-                if (commandExecutor.isApplicable(protocol) && (matching == null || commandExecutor.getRanking() > matching.getRanking())) {
+                if (commandExecutor.isApplicable(protocolAccess) && (matching == null || commandExecutor.getRanking() > matching.getRanking())) {
                     matching = commandExecutor;
                 }
             }
@@ -268,8 +267,8 @@ public abstract class CommandExecutorCollection implements Iterable<CommandExecu
         private final String user;
         private final int hash;
 
-        HostAndPortAndUser(Protocol protocol) {
-            this(protocol.getHost(), protocol.getPort(), protocol.getUser());
+        HostAndPortAndUser(ProtocolAccess protocolAccess) {
+            this(protocolAccess.getHost(), protocolAccess.getPort(), protocolAccess.getUser());
         }
 
         HostAndPortAndUser(String host, int port, String user) {

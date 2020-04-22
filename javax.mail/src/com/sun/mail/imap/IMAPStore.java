@@ -70,7 +70,6 @@ import javax.mail.event.StoreEvent;
 import com.sun.mail.iap.BadCommandException;
 import com.sun.mail.iap.CommandFailedException;
 import com.sun.mail.iap.ConnectionException;
-import com.sun.mail.iap.Protocol;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.iap.ResponseCode;
@@ -297,12 +296,12 @@ public class IMAPStore extends Store
     /**
      * Gets the matching command executor for given protocol instance.
      *
-     * @param commandEvent The protocol instance
+     * @param protocolAccess The protocol access
      * @return The optional matching command executor
      */
-    public static Optional<CommandExecutor> getMatchingCommandExecutor(Protocol protocol) {
+    public static Optional<CommandExecutor> getMatchingCommandExecutor(ProtocolAccess protocolAccess) {
         CommandExecutorCollection collection = COMMAND_EXECUTORS_REF.get();
-        return null == collection ? Optional.empty() : collection.getMatchingCommandExecutorFor(protocol);
+        return null == collection ? Optional.empty() : collection.getMatchingCommandExecutorFor(protocolAccess);
     }
 
     /**
@@ -1130,9 +1129,10 @@ public class IMAPStore extends Store
 
 	if (enableSASL) {
 	    try {
-	    Optional<CommandExecutor> optionalCommandExecutor = IMAPStore.getMatchingCommandExecutor(p);
+	    ProtocolAccess protocolAccess = ProtocolAccess.instanceFor(p);
+        Optional<CommandExecutor> optionalCommandExecutor = IMAPStore.getMatchingCommandExecutor(protocolAccess);
 	    if (optionalCommandExecutor.isPresent()) {
-	        optionalCommandExecutor.get().authsasl(saslMechanisms, saslRealm, authzid, u, pw, p);
+	        optionalCommandExecutor.get().authsasl(saslMechanisms, saslRealm, authzid, u, pw, protocolAccess);
 	    } else {
 	        p.sasllogin(saslMechanisms, saslRealm, authzid, u, pw);
 	    }
@@ -1269,19 +1269,20 @@ public class IMAPStore extends Store
 		continue;
 	    }
 
-	    Optional<CommandExecutor> optionalCommandExecutor = IMAPStore.getMatchingCommandExecutor(p);
+	    ProtocolAccess protocolAccess = ProtocolAccess.instanceFor(p);
+        Optional<CommandExecutor> optionalCommandExecutor = IMAPStore.getMatchingCommandExecutor(protocolAccess);
         if (optionalCommandExecutor.isPresent()) {
             CommandExecutor commandExecutor = optionalCommandExecutor.get();
             if (m.equals("PLAIN")) {
-                commandExecutor.authplain(authzid, user, password, p);
+                commandExecutor.authplain(authzid, user, password, protocolAccess);
             } else if (m.equals("LOGIN")) {
-                commandExecutor.authlogin(user, password, p);
+                commandExecutor.authlogin(user, password, protocolAccess);
             } else if (m.equals("NTLM")) {
-                commandExecutor.authntlm(authzid, user, password, p);
+                commandExecutor.authntlm(authzid, user, password, protocolAccess);
             } else if (m.equals("XOAUTH2")) {
-                commandExecutor.authoauth2(user, password, p);
+                commandExecutor.authoauth2(user, password, protocolAccess);
             } else if (m.equals("OAUTHBEARER")) {
-                commandExecutor.authoauthbearer(user, password, p);
+                commandExecutor.authoauthbearer(user, password, protocolAccess);
             } else {
                 logger.log(Level.FINE, "no authenticator for mechanism {0}", m);
                 continue;
