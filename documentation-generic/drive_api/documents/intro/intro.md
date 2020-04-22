@@ -26,6 +26,22 @@ WHILE TRUE
 
 Basically, it's up to the client how often such a synchronization cycle is initiated. For example, he could start a new synchronization cycle after a fixed interval, if he recognizes that the client directories have changed, or if he is informed that something has changed on the server by an event. It's also up to the client to interrupt the synchronization cycle at any time during execution of the actions and continue later on, however, it's recommended to start a new synchronization cycle each time to avoid possibly outdated actions.
 
+Since API version 8, also a minimized synchronization cycle is available which can be used to synchronize changes within a distinct directory, without transferring the other directory versions in the folder tree. The minimized cycle operates on one directory only, and may directly start with synchronizing the contents using the corresponding `syncfiles`-action for the directory. After synchronization of the directory contents is finished, a subsequent request to synchronize the directory itself can then be performed using the special `syncfolder` action to acknowledge this directory checksum. 
+
+This optimized synchronization routine can be used whenever it is known that there are content changes within a specific directory only, either due to a event from the filesystem on client side, or due to a received push event from the server whose payload points to a certain path. In pseudo-code, this would look like:   
+
+```
+WHILE TRUE
+{
+  response = SYNCFILES(<path>)
+  IF 0 == response.actions.length
+    EXECUTE(SYNCFOLDER(<path>))
+    BREAK
+  ELSE
+    EXECUTE(response.actions)
+}
+
+```
 
 ## API
 
