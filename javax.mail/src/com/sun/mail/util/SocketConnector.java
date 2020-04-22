@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,52 +47,35 @@
  *
  */
 
-package com.openexchange.imap.commandexecutor;
+package com.sun.mail.util;
 
-import java.net.InetAddress;
-import java.util.Optional;
-import com.sun.mail.imap.ProtocolAccess;
-import com.sun.mail.util.ProtocolInfo;
-import net.jodah.failsafe.util.Ratio;
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Socket;
 
 /**
- * {@link PrimaryFailsafeCircuitBreakerCommandExecutor} - The special IMAP circuit breaker form primary account.
+ * {@link SocketConnector} - Connects a given socket.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.10.3
+ * @since v7.10.4
  */
-public class PrimaryFailsafeCircuitBreakerCommandExecutor extends AbstractFailsafeCircuitBreakerCommandExecutor {
-
-    private final boolean applyPerEndpoint;
+public interface SocketConnector {
 
     /**
-     * Initializes a new {@link PrimaryFailsafeCircuitBreakerCommandExecutor}.
-     *
-     * @param failureThreshold The ratio of successive failures that must occur in order to open the circuit
-     * @param successThreshold The ratio of successive successful executions that must occur when in a half-open state in order to close the circuit
-     * @param delayMillis The number of milliseconds to wait in open state before transitioning to half-open
-     * @param applyPerEndpoint Whether the circuit breaker shall be applied per end-point (IP/port combination). Otherwise it applies per primary account host name.
-     * @param delegate The delegate executor
-     * @throws IllegalArgumentException If invalid/arguments are passed
+     * Connects given socket using specified arguments.
+     * 
+     * @param socket The socket to connect
+     * @param socketAddress The socket address to connect against
+     * @param connectTimeout The connect timeout or <code>-1</code>
+     * @param protocolInfo The protocol info
+     * @throws IOException If an I/O error occurs
      */
-    public PrimaryFailsafeCircuitBreakerCommandExecutor(Ratio failureThreshold, Ratio successThreshold, long delayMillis, boolean applyPerEndpoint, MonitoringCommandExecutor delegate) {
-        super(Optional.empty(), null, failureThreshold, successThreshold, delayMillis, 100, delegate);
-        this.applyPerEndpoint = applyPerEndpoint;
-    }
-
-    @Override
-    protected Key getKey(ProtocolInfo protocolInfo) {
-        if (applyPerEndpoint) {
-            InetAddress inetAddress = protocolInfo.getInetAddress();
-            return Key.of("primary", inetAddress.getHostAddress() + ':' + protocolInfo.getPort(), true);
+    default void connectSocket(Socket socket, InetSocketAddress socketAddress, int connectTimeout, ProtocolInfo protocolInfo) throws IOException {
+        if (connectTimeout >= 0) {
+            socket.connect(socketAddress, connectTimeout);
+        } else {
+            socket.connect(socketAddress);
         }
-
-        return Key.of("primary", protocolInfo.getHost(), false);
     }
-
-    @Override
-    public boolean isApplicable(ProtocolAccess protocolAccess) {
-        return "true".equals(protocolAccess.getProps().getProperty(PROP_PRIMARY_ACCOUNT));
-    }
-
+    
 }

@@ -51,7 +51,9 @@ package com.sun.mail.imap;
 
 import java.net.InetAddress;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicReference;
 import com.sun.mail.iap.Protocol;
+import com.sun.mail.util.ProtocolInfo;
 
 /**
  * {@link ProtocolAccess} - Provides information about (possibly authenticated user) and access to low-level IMAP protocol.
@@ -59,16 +61,29 @@ import com.sun.mail.iap.Protocol;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.4
  */
-public abstract class ProtocolAccess {
+public abstract class ProtocolAccess implements ProtocolInfo {
 
     /**
-     * Gets the access instance for specified connected protocol.
+     * Gets the connected access instance for specified connected protocol.
      *
      * @param protocol The connected protocol
-     * @return The access
+     * @return The connected access
      */
     public static ProtocolAccess instanceFor(Protocol protocol) {
         return new ConnectedProtocolAccess(protocol);
+    }
+    
+    /**
+     * Gets the unconnected access instance for specified arguments.
+     * 
+     * @param user The user
+     * @param host The host
+     * @param port The port
+     * @param props The properties
+     * @return The unconnected access
+     */
+    public static ProtocolAccess instanceFor(String user, String host, int port, Properties props) {
+        return new UnconnectedProtocolAccess(user, port, host, props);
     }
 
     // -------------------------------------------------------------------------------------------------------------------------------------
@@ -80,41 +95,6 @@ public abstract class ProtocolAccess {
      * @throws IllegalStateException If this instance does not wrap an already connected IMAP protocol
      */
     public abstract Protocol getProtocol();
-
-    /**
-     * Gets the protocol properties.
-     *
-     * @return The properties
-     */
-    public abstract Properties getProps();
-
-    /**
-     * Gets the host
-     *
-     * @return The host
-     */
-    public abstract String getHost();
-
-    /**
-     * Gets the port
-     *
-     * @return The port
-     */
-    public abstract int getPort();
-
-    /**
-     * Gets the user
-     *
-     * @return The user
-     */
-    public abstract String getUser();
-
-    /**
-     * Gets the address of the socket connection.
-     *
-     * @return The address
-     */
-    public abstract InetAddress getInetAddress();
 
     // -------------------------------------------------------------------------------------------------------------------------------------
 
@@ -156,19 +136,24 @@ public abstract class ProtocolAccess {
         public String getUser() {
             return protocol.getUser();
         }
+        
+        @Override
+        public void setInetAddress(InetAddress address) {
+            throw new IllegalStateException("Address cannot be set on a connected instance");
+        }
     }
 
     private static final class UnconnectedProtocolAccess extends ProtocolAccess {
 
-        private final InetAddress address;
+        private final AtomicReference<InetAddress> addressReference;
         private final String user;
         private final int port;
         private final String host;
         private final Properties props;
 
-        UnconnectedProtocolAccess(String user, int port, String host, InetAddress address, Properties props) {
+        UnconnectedProtocolAccess(String user, int port, String host, Properties props) {
             super();
-            this.address = address;
+            this.addressReference = new AtomicReference<>();
             this.user = user;
             this.port = port;
             this.host = host;
@@ -201,7 +186,12 @@ public abstract class ProtocolAccess {
 
         @Override
         public InetAddress getInetAddress() {
-            return address;
+            return addressReference.get();
+        }
+        
+        @Override
+        public void setInetAddress(InetAddress address) {
+            addressReference.set(address);
         }
     }
 }

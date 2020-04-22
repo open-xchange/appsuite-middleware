@@ -57,6 +57,7 @@ import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.iap.ResponseInterceptor;
 import com.sun.mail.imap.protocol.IMAPProtocol;
+import com.sun.mail.util.SocketConnector;
 
 /**
  * {@link CommandExecutor} - Is responsible for executing commands and reading responses.
@@ -64,7 +65,7 @@ import com.sun.mail.imap.protocol.IMAPProtocol;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.0
  */
-public interface CommandExecutor {
+public interface CommandExecutor extends SocketConnector {
 
     /**
      * Protocol property that denotes whether this executor is called for a primary mail account.

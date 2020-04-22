@@ -55,6 +55,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.java.Strings;
 import com.openexchange.net.HostList;
 import com.sun.mail.imap.ProtocolAccess;
+import com.sun.mail.util.ProtocolInfo;
 import net.jodah.failsafe.util.Ratio;
 
 /**
@@ -84,8 +85,8 @@ public class GenericFailsafeCircuitBreakerCommandExecutor extends AbstractFailsa
     }
 
     @Override
-    protected Key getKey(ProtocolAccess protocolAccess) {
-        return Key.of("generic", protocolAccess.getHost(), false);
+    protected Key getKey(ProtocolInfo protocolInfo) {
+        return Key.of("generic", protocolInfo.getHost(), false);
     }
 
     /**

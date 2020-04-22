@@ -128,6 +128,14 @@ public class Protocol {
 	    this.logger = logger;
 	    traceLogger = logger.getSubLogger("protocol", null);
 
+	    if (props != null) {
+	        ProtocolAccess protocolAccess = ProtocolAccess.instanceFor(user, host, port, props);
+	        Optional<CommandExecutor> optionalCommandExecutor = IMAPStore.getMatchingCommandExecutor(protocolAccess);
+	        if (optionalCommandExecutor.isPresent()) {	            
+	            props.put(prefix + ".protocol.info", protocolAccess);
+	            props.put(prefix + ".protocol.connector", optionalCommandExecutor.get());
+	        }
+	    }
 	    socket = SocketFetcher.getSocket(host, port, props, prefix, isSSL);
 	    quote = PropUtil.getBooleanProperty(props,
 					"mail.debug.quote", false);

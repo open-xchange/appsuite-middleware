@@ -52,6 +52,8 @@ package com.openexchange.imap.commandexecutor;
 import static com.openexchange.exception.ExceptionUtils.isEitherOf;
 import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -73,6 +75,7 @@ import com.sun.mail.imap.CommandExecutor;
 import com.sun.mail.imap.ProtocolAccess;
 import com.sun.mail.imap.ResponseEvent.Status;
 import com.sun.mail.imap.ResponseEvent.StatusResponse;
+import com.sun.mail.util.ProtocolInfo;
 import io.micrometer.core.instrument.Metrics;
 import net.jodah.failsafe.CircuitBreaker;
 import net.jodah.failsafe.CircuitBreakerOpenException;
@@ -153,11 +156,11 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
     /**
      * Gets the circuit breaker for specified IMAP protocol instance.
      *
-     * @param protocolAccess The protocol access
+     * @param protocolInfo The protocol info
      * @return The associated circuit breaker
      */
-    protected CircuitBreakerInfo circuitBreakerFor(ProtocolAccess protocolAccess) {
-        Key key = getKey(protocolAccess);
+    protected CircuitBreakerInfo circuitBreakerFor(ProtocolInfo protocolInfo) {
+        Key key = getKey(protocolInfo);
         CircuitBreakerInfo breakerInfo = circuitBreakers.get(key);
         if (breakerInfo == null) {
             CircuitBreakerInfo newBreakerInfo = createCircuitBreaker(key);
@@ -217,10 +220,10 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
     /**
      * Gets a unique key to identify the circuit breaker for specified IMAP protocol instance.
      *
-     * @param protocolAccess The protocol access
+     * @param protocolInfo The protocol info
      * @return The key
      */
-    protected abstract Key getKey(ProtocolAccess protocolAccess);
+    protected abstract Key getKey(ProtocolInfo protocolInfo);
 
     /**
      * Is called when the circuit breaker is opened: The circuit is opened and not allowing executions to occur.
@@ -287,12 +290,34 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
     }
 
     @Override
+    public void connectSocket(Socket socket, InetSocketAddress socketAddress, int connectTimeout, ProtocolInfo protocolInfo) throws IOException {
+        CircuitBreakerInfo breakerInfo = circuitBreakerFor(protocolInfo);
+        try {
+            Failsafe.with(breakerInfo.getCircuitBreaker()).get(new CircuitBreakerConnectCallable(socket, socketAddress, connectTimeout));
+        } catch (CircuitBreakerOpenException e) {
+            // Circuit breaker is open
+            onDenied(e, breakerInfo);
+            throw new IOException("Denied IMAP connection since circuit breaker is open.");
+        } catch (FailsafeException e) {
+            // Runnable failed with a checked exception
+            Throwable failure = e.getCause();
+            if (failure instanceof IOException) {
+                throw (IOException) failure;
+            }
+            if (failure instanceof Error) {
+                throw (Error) failure;
+            }
+            throw new IOException(failure);
+        }
+    }
+
+    @Override
     public Response[] executeCommand(String command, Argument args, Optional<ResponseInterceptor> optionalInterceptor, ProtocolAccess protocolAccess) {
         CircuitBreakerInfo breakerInfo = circuitBreakerFor(protocolAccess);
         try {
             return Failsafe.with(breakerInfo.getCircuitBreaker()).get(new CircuitBreakerCommandCallable(delegate, command, args, optionalInterceptor, protocolAccess));
         } catch (CircuitBreakerOpenException e) {
-            // Circuit is open
+            // Circuit breaker is open
             onDenied(e, breakerInfo);
             IOException ioe = new IOException("Denied IMAP command since circuit breaker is open.");
             return new Response[] { Response.byeResponse(ioe) };
@@ -318,7 +343,7 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
         try {
             return Failsafe.with(breakerInfo.getCircuitBreaker()).get(new CircuitBreakerReadResponseCallable(delegate, protocolAccess));
         } catch (CircuitBreakerOpenException e) {
-            // Circuit is open
+            // Circuit breaker is open
             onDenied(e, breakerInfo);
             throw new IOException("Denied reading from IMAP server since circuit breaker is open.");
         } catch (FailsafeException e) {
@@ -412,7 +437,7 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
                 throw optionalProtocolException.get();
             }
         } catch (CircuitBreakerOpenException e) {
-            // Circuit is open
+            // Circuit breaker is open
             onDenied(e, breakerInfo);
             throw new ProtocolException("Denied authenticating against IMAP server since circuit breaker is open.");
         } catch (FailsafeException e) {
@@ -624,6 +649,30 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
             return Optional.empty();
         }
 
+    }
+
+    private static class CircuitBreakerConnectCallable implements Callable<Void> {
+
+        private final Socket socket;
+        private final InetSocketAddress socketAddress;
+        private final int connectTimeout;
+
+        CircuitBreakerConnectCallable(Socket socket, InetSocketAddress socketAddress,int connectTimeout) {
+            super();
+            this.socket = socket;
+            this.socketAddress = socketAddress;
+            this.connectTimeout = connectTimeout;
+        }
+
+        @Override
+        public Void call() throws Exception {
+            if (connectTimeout >= 0) {
+                socket.connect(socketAddress, connectTimeout);
+            } else {
+                socket.connect(socketAddress);
+            }
+            return null;
+        }
     }
 
     private static class CircuitBreakerReadResponseCallable implements Callable<Response> {
