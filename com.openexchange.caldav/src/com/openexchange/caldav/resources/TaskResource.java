@@ -419,7 +419,7 @@ public class TaskResource extends CommonResource<Task> {
     @Override
     protected void deserialize(InputStream body) throws OXException {
         List<Task> tasks = factory.getIcalParser().parseTasks(body, getTimeZone(), factory.getContext(), new LinkedList<ConversionError>(), new LinkedList<ConversionWarning>()).getImportedObjects();
-        if (null == tasks || 1 != tasks.size()) {
+        if (null == tasks || 1 != tasks.size() || tasks.get(0).containsRecurrenceType()) {
             throw protocolException(getUrl(), HttpServletResponse.SC_BAD_REQUEST);
         }
         taskToSave = tasks.get(0);
