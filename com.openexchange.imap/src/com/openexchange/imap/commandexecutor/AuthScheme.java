@@ -56,5 +56,5 @@ package com.openexchange.imap.commandexecutor;
  * @since v7.10.4
  */
 public enum AuthScheme {
-    PLAIN, LOGIN, NTLM, XOAUTH2, OAUTHBEARER;
+    PLAIN, LOGIN, NTLM, XOAUTH2, OAUTHBEARER, SASL;
 }

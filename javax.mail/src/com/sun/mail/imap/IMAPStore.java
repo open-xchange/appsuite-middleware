@@ -1130,7 +1130,12 @@ public class IMAPStore extends Store
 
 	if (enableSASL) {
 	    try {
-		p.sasllogin(saslMechanisms, saslRealm, authzid, u, pw);
+	    Optional<CommandExecutor> optionalCommandExecutor = IMAPStore.getMatchingCommandExecutor(p);
+	    if (optionalCommandExecutor.isPresent()) {
+	        optionalCommandExecutor.get().authsasl(saslMechanisms, saslRealm, authzid, u, pw, p);
+	    } else {
+	        p.sasllogin(saslMechanisms, saslRealm, authzid, u, pw);
+	    }
 		if (!p.isAuthenticated()) {
             throw new CommandFailedException(
 						"SASL authentication failed");

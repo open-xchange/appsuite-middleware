@@ -204,6 +204,24 @@ public interface CommandExecutor {
     }
 
     /**
+     * Issues the SASL-based login.
+     *
+     * @param allowed The SASL mechanisms we're allowed to use
+     * @param realm The SASL realm
+     * @param authzid The authorization identifier
+     * @param u The user name
+     * @param p The password
+     * @param protocol The protocol instance
+     * @throws ProtocolException If a protocol error occurs
+     */
+    default void authsasl(String[] allowed, String realm, String authzid, String u, String p, Protocol protocol) throws ProtocolException {
+        if (!(protocol instanceof IMAPProtocol)) {
+            throw new ProtocolException("Invalid protocol instance: " + protocol.getClass().getName());
+        }
+        ((IMAPProtocol) protocol).sasllogin(allowed, realm, authzid, u, p);
+    }
+
+    /**
      * Gets the ranking for this command executor.
      * <p>
      * The higher the ranking, the more likely the executor will be invoked in preference over others.

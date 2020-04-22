@@ -105,7 +105,7 @@ public class MonitoringCommandExecutor implements CommandExecutor {
 
     @Override
     public void authlogin(String u, String p, Protocol protocol) throws ProtocolException {
-        authWithScheme(AuthScheme.LOGIN, null, u, p, protocol);
+        authWithScheme(AuthScheme.LOGIN, u, p, protocol);
     }
 
     @Override
@@ -115,12 +115,12 @@ public class MonitoringCommandExecutor implements CommandExecutor {
 
     @Override
     public void authoauth2(String u, String p, Protocol protocol) throws ProtocolException {
-        authWithScheme(AuthScheme.XOAUTH2, null, u, p, protocol);
+        authWithScheme(AuthScheme.XOAUTH2, u, p, protocol);
     }
 
     @Override
     public void authoauthbearer(String u, String p, Protocol protocol) throws ProtocolException {
-        authWithScheme(AuthScheme.OAUTHBEARER, null, u, p, protocol);
+        authWithScheme(AuthScheme.OAUTHBEARER, u, p, protocol);
     }
 
     @Override
@@ -128,9 +128,29 @@ public class MonitoringCommandExecutor implements CommandExecutor {
         authWithScheme(AuthScheme.PLAIN, authzid, u, p, protocol);
     }
 
+    @Override
+    public void authsasl(String[] allowed, String realm, String authzid, String u, String p, Protocol protocol) throws ProtocolException {
+        authWithScheme(AuthScheme.SASL, allowed, realm, authzid, u, p, protocol);
+    }
+
     /**
      * Performs authentication according to given scheme.
      *
+     * @param authScheme The authentication scheme
+     * @param u The user name
+     * @param p The password
+     * @param protocol The protocol instance
+     * @throws ProtocolException If a protocol error occurs
+     */
+    private void authWithScheme(AuthScheme authScheme, String u, String p, Protocol protocol) throws ProtocolException {
+        authWithScheme(authScheme, null, u, p, protocol);
+    }
+
+
+    /**
+     * Performs authentication according to given scheme.
+     *
+     * @param authScheme The authentication scheme
      * @param authzid The authorization identifier
      * @param u The user name
      * @param p The password
@@ -138,6 +158,22 @@ public class MonitoringCommandExecutor implements CommandExecutor {
      * @throws ProtocolException If a protocol error occurs
      */
     private void authWithScheme(AuthScheme authScheme, String authzid, String u, String p, Protocol protocol) throws ProtocolException {
+        authWithScheme(authScheme, null, null, authzid, u, p, protocol);
+    }
+
+    /**
+     * Performs authentication according to given scheme.
+     *
+     * @param authScheme The authentication scheme
+     * @param allowed The SASL mechanisms we're allowed to use
+     * @param realm The SASL realm
+     * @param authzid The authorization identifier
+     * @param u The user name
+     * @param p The password
+     * @param protocol The protocol instance
+     * @throws ProtocolException If a protocol error occurs
+     */
+    private void authWithScheme(AuthScheme authScheme, String[] allowed, String realm, String authzid, String u, String p, Protocol protocol) throws ProtocolException {
         long duration = -1;
         String status = "UNKNOWN";
 
@@ -165,6 +201,10 @@ public class MonitoringCommandExecutor implements CommandExecutor {
                 case XOAUTH2:
                     command = "AUTHENTICATE XOAUTH2";
                     CommandExecutor.super.authoauth2(u, p, protocol);
+                    break;
+                case SASL:
+                    command = "AUTHENTICATE SASL";
+                    CommandExecutor.super.authsasl(allowed, realm, authzid, u, p, protocol);
                     break;
                 default:
                     throw new IllegalArgumentException("No such authentication scheme: " + authScheme);

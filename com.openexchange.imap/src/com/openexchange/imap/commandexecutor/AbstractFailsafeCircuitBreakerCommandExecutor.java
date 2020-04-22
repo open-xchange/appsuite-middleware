@@ -341,7 +341,7 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
 
     @Override
     public void authlogin(String u, String p, Protocol protocol) throws ProtocolException {
-        authWithScheme(AuthScheme.LOGIN, null, u, p, protocol);
+        authWithScheme(AuthScheme.LOGIN, u, p, protocol);
     }
 
     @Override
@@ -351,17 +351,37 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
 
     @Override
     public void authoauth2(String u, String p, Protocol protocol) throws ProtocolException {
-        authWithScheme(AuthScheme.XOAUTH2, null, u, p, protocol);
+        authWithScheme(AuthScheme.XOAUTH2, u, p, protocol);
     }
 
     @Override
     public void authoauthbearer(String u, String p, Protocol protocol) throws ProtocolException {
-        authWithScheme(AuthScheme.OAUTHBEARER, null, u, p, protocol);
+        authWithScheme(AuthScheme.OAUTHBEARER, u, p, protocol);
+    }
+
+    @Override
+    public void authsasl(String[] allowed, String realm, String authzid, String u, String p, Protocol protocol) throws ProtocolException {
+        authWithScheme(AuthScheme.SASL, allowed, realm, authzid, u, p, protocol);
     }
 
     /**
      * Performs authentication according to given scheme.
      *
+     * @param authScheme The authentication scheme
+     * @param u The user name
+     * @param p The password
+     * @param protocol The protocol instance
+     * @throws ProtocolException If a protocol error occurs
+     */
+    private void authWithScheme(AuthScheme authScheme, String u, String p, Protocol protocol) throws ProtocolException {
+        authWithScheme(authScheme, null, u, p, protocol);
+    }
+
+
+    /**
+     * Performs authentication according to given scheme.
+     *
+     * @param authScheme The authentication scheme
      * @param authzid The authorization identifier
      * @param u The user name
      * @param p The password
@@ -369,9 +389,25 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
      * @throws ProtocolException If a protocol error occurs
      */
     private void authWithScheme(AuthScheme authScheme, String authzid, String u, String p, Protocol protocol) throws ProtocolException {
+        authWithScheme(authScheme, null, null, authzid, u, p, protocol);
+    }
+
+    /**
+     * Performs authentication according to given scheme.
+     *
+     * @param authScheme The authentication scheme
+     * @param allowed The SASL mechanisms we're allowed to use
+     * @param realm The SASL realm
+     * @param authzid The authorization identifier
+     * @param u The user name
+     * @param p The password
+     * @param protocol The protocol instance
+     * @throws ProtocolException If a protocol error occurs
+     */
+    private void authWithScheme(AuthScheme authScheme, String[] allowed, String realm, String authzid, String u, String p, Protocol protocol) throws ProtocolException {
         CircuitBreakerInfo breakerInfo = circuitBreakerFor(protocol);
         try {
-            Optional<ProtocolException> optionalProtocolException = Failsafe.with(breakerInfo.getCircuitBreaker()).get(new CircuitBreakerAuthCallable(delegate, authScheme, authzid, u, p, protocol));
+            Optional<ProtocolException> optionalProtocolException = Failsafe.with(breakerInfo.getCircuitBreaker()).get(new CircuitBreakerAuthCallable(delegate, authScheme, allowed, realm, authzid, u, p, protocol));
             if (optionalProtocolException.isPresent()) {
                 throw optionalProtocolException.get();
             }
@@ -521,25 +557,32 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
     private static class CircuitBreakerAuthCallable implements Callable<Optional<ProtocolException>> {
 
         private final MonitoringCommandExecutor delegate;
+        private final AuthScheme authScheme;
+        private final String[] allowed;
+        private final String realm;
         private final String authzid;
         private final String u;
         private final String p;
         private final Protocol protocol;
-        private final AuthScheme authScheme;
 
         /**
          * Initializes a new {@link CircuitBreakerAuthCallable}.
          *
          * @param delegate The delegate
+         * @param authScheme The authentication scheme
+         * @param allowed The SASL mechanisms we're allowed to use
+         * @param realm The SASL realm
          * @param authzid The authorization identifier
          * @param u The user name
          * @param p The password
          * @param protocol The protocol instance
          */
-        CircuitBreakerAuthCallable(MonitoringCommandExecutor delegate, AuthScheme authScheme, String authzid, String u, String p, Protocol protocol) {
+        CircuitBreakerAuthCallable(MonitoringCommandExecutor delegate, AuthScheme authScheme, String[] allowed, String realm, String authzid, String u, String p, Protocol protocol) {
             super();
             this.delegate = delegate;
             this.authScheme = authScheme;
+            this.allowed = allowed;
+            this.realm = realm;
             this.authzid = authzid;
             this.u = u;
             this.p = p;
@@ -564,6 +607,9 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
                         break;
                     case XOAUTH2:
                         delegate.authoauth2(u, p, protocol);
+                        break;
+                    case SASL:
+                        delegate.authsasl(allowed, realm, authzid, u, p, protocol);
                         break;
                     default:
                         throw new IllegalArgumentException("No such authentication scheme: " + authScheme);
