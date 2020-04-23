@@ -10,9 +10,9 @@ Version 7.10.4 of the appsuite middleware introduces some changes for the monito
 
 | Name                                              | Package                   | New Name                | Additional info |
 |:--------------------------------------------------|:--------------------------|:------------------------|:----------------------:|
-| name=RequestTimes.<HTTP_METHOD_NAME\>,type=s3      | open-xchange-filestore-s3 |appsuite_s3_requestTimes_<HTTP_METHOD_NAME\>  |  |
-| name=S3UploadThroughput,type=s3                   | open-xchange-filestore-s3 |appsuite_s3_requestSizeTimer| |
-| name=S3DownloadThroughput,type=s3                 | open-xchange-filestore-s3 |appsuite_s3_requestSize| |
+| name=RequestTimes.<HTTP_METHOD_NAME\>,type=s3      | open-xchange-filestore-s3 |appsuite_s3_requestTimes_<HTTP_METHOD_NAME\>|  |
+| name=S3UploadThroughput,type=s3                   | open-xchange-filestore-s3 |appsuite_s3_requestSizeTimer\{type=<Type\>\} && appsuite_s3_requestSize\{type=<Type\>\}| Have been splitted into two metrics |
+| name=S3DownloadThroughput,type=s3                 | open-xchange-filestore-s3 || See above. |
 | name=Meter.totalIPChanges,type=ipcheck            | open-xchange-core |appsuite_ipcheck_totalIPChanges ||
 | name=Meter.acceptedIPChanges,type=ipcheck         | open-xchange-core |appsuite_ipcheck_acceptedIPChanges||
 | name=Meter.deniedIPChanges,type=ipcheck           | open-xchange-core |appsuite_ipcheck_deniedIPChanges||
@@ -36,7 +36,7 @@ Version 7.10.4 of the appsuite middleware introduces some changes for the monito
 | name=Scanning Time,type=antivirus                 | open-xchange-antivirus |appsuite_antivirus_scanning_time||
 | name=Transfer Rate,type=antivirus                 | open-xchange-antivirus |appsuite_antivirus_transfer_size||
 | name=imap,type=requestRate,server=<HostName@Port\> | open-xchange-core |appsuite_imap_commands\{cmd=<Command\>,status=<Status\>,host=<host\>\}|Merged with errorRate|
-| name=imap,type=errorRate,server=<HostName@Port\> | open-xchange-core ||Merged with requestRate. See above.|
+| name=imap,type=errorRate,server=<HostName@Port\> | open-xchange-imap ||Merged with requestRate. See above.|
 | name=sproxyd,type=EndpointPool.TotalSize,filestore=<FilestoreId\> | open-xchange-filestore-sproxyd | appsuite_sproxyd_EndpointPool_TotalSize\{filestore=<FilestoreId\>\} ||
 | name=sproxyd,type=EndpointPool.Available,filestore=<FilestoreId\> | open-xchange-filestore-sproxyd | appsuite_sproxyd_EndpointPool_Available\{filestore=<FilestoreId\>\} ||
 | name=sproxyd,type=EndpointPool.Unavailable,filestore=<FilestoreId\> | open-xchange-filestore-sproxyd | appsuite_sproxyd_EndpointPool_Unavailable\{filestore=<FilestoreId\>\} ||
@@ -46,7 +46,7 @@ Version 7.10.4 of the appsuite middleware introduces some changes for the monito
 
 Some metrics have been reworked for various reasons or have been newly added. This is the list of feature with those metrics. Please see the respective feature documentation or a dedicated monitoring article for more informations:
 
-* Circuit-breakers
+* Circuit-breakers // TODO add link to docu
 * Http api
 * Rest api
 * DB pool
