@@ -57,7 +57,7 @@ import java.util.ArrayList;
  * @author cutmasta
  *
  */
-public class InvalidDataException extends Exception {
+public class InvalidDataException extends AbstractAdminRmiException {
 
     /**
      * IF we need more granular exceptions for invalid filestore url or invalid

@@ -59,7 +59,7 @@ package com.openexchange.admin.rmi.exceptions;
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  *
  */
-public class NoSuchDatabaseException extends Exception {
+public class NoSuchDatabaseException extends AbstractAdminRmiException {
 
     /**
      * For serialization

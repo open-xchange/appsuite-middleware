@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.rmi.exceptions;
 
+import java.lang.reflect.Field;
 import java.rmi.RemoteException;
 
 /**
@@ -80,9 +81,50 @@ public final class RemoteExceptionUtils {
         if (e instanceof RemoteException) {
             return (RemoteException) e;
         }
+        if (e instanceof AbstractAdminRmiException) {
+            AbstractAdminRmiException adminRmiException = (AbstractAdminRmiException) e;
+            RemoteException cme = new RemoteException(adminRmiException.getBaseMessage(), e);
+            String exceptionId = adminRmiException.getExceptionId();
+            RemoteExceptionUtils.enhanceRemoteException(cme, exceptionId);
+            return cme;
+        }
         RemoteException cme = new RemoteException(e.getMessage());
         cme.setStackTrace(e.getStackTrace());
         return cme;
+    }
+
+    /**
+     * Enhances given remote exception by a unique exception identifier.
+     *
+     * @param e The remote exception to enhance
+     * @param exceptionId The exception identifier
+     * @return The enhanced remote exception
+     */
+    public static RemoteException enhanceRemoteException(RemoteException e, String exceptionId) {
+        Field fieldDetailMessage = FIELD_DETAIL_MESSAGE;
+        if (fieldDetailMessage != null) {
+            try {
+                fieldDetailMessage.set(e, AbstractAdminRmiException.enhanceExceptionMessage(e.getMessage(), exceptionId));
+            } catch (Exception e1) {
+                // Ignore
+            }
+        }
+        return e;
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    private static final Field FIELD_DETAIL_MESSAGE;
+
+    static {
+        Field detailMessageField = null;
+        try {
+            detailMessageField = Throwable.class.getDeclaredField("detailMessage");
+            detailMessageField.setAccessible(true);
+        } catch (Exception e) {
+            // Ignore
+        }
+        FIELD_DETAIL_MESSAGE = detailMessageField;
     }
 
 }

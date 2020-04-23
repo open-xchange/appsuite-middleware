@@ -55,7 +55,7 @@ package com.openexchange.admin.rmi.exceptions;
  * @author choeger
  *
  */
-public class ContextExistsException extends Exception {
+public class ContextExistsException extends AbstractAdminRmiException {
 
 	/**
          * For serialization

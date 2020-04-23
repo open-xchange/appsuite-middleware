@@ -48,7 +48,7 @@
  */
 package com.openexchange.admin.rmi.exceptions;
 
-public class TaskManagerException extends Exception {
+public class TaskManagerException extends AbstractAdminRmiException {
 
     /**
      * For serialization

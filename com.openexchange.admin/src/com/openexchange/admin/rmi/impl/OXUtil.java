@@ -49,7 +49,6 @@
 
 package com.openexchange.admin.rmi.impl;
 
-import static com.openexchange.admin.rmi.exceptions.RemoteExceptionUtils.convertException;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.java.Autoboxing.i;
@@ -70,11 +69,13 @@ import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
 import com.openexchange.admin.rmi.dataobjects.RecalculationScope;
 import com.openexchange.admin.rmi.dataobjects.Server;
+import com.openexchange.admin.rmi.exceptions.AbstractAdminRmiException;
 import com.openexchange.admin.rmi.exceptions.EnforceableDataObjectException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchDatabaseException;
 import com.openexchange.admin.rmi.exceptions.NoSuchObjectException;
+import com.openexchange.admin.rmi.exceptions.RemoteExceptionUtils;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
@@ -112,6 +113,25 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
         super();
         oxutil = OXUtilStorageInterface.getInstance();
         basicauth = BasicAuthenticator.createNonPluginAwareAuthenticator();
+    }
+
+    private void logAndEnhanceException(Throwable t, final Credentials credentials) {
+        logAndEnhanceException(t, credentials, (String) null);
+    }
+
+    private void logAndEnhanceException(Throwable t, final Credentials credentials, final Context ctx) {
+        logAndEnhanceException(t, credentials, null != ctx ? Integer.toString(ctx.getContextId()) : null);
+    }
+
+    private void logAndEnhanceException(Throwable t, final Credentials credentials, final String contextId) {
+        if (t instanceof AbstractAdminRmiException) {
+            logAndReturnException(LOGGER, ((AbstractAdminRmiException) t), credentials, contextId);
+        } else if (t instanceof RemoteException) {
+            RemoteException remoteException = (RemoteException) t;
+            String exceptionId = AbstractAdminRmiException.generateExceptionId();
+            RemoteExceptionUtils.enhanceRemoteException(remoteException, exceptionId);
+            logAndReturnException(LOGGER, remoteException, exceptionId, credentials, contextId);
+        }
     }
 
     @Override
@@ -165,8 +185,9 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             Integer response = I(oxutil.registerFilestore(fstore));
             log(LogLevel.ERROR, LOGGER, credentials, null, "RESPONSE {}", response);
             return new Filestore(response);
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials);
+            throw e;
         }
     }
 
@@ -193,8 +214,9 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             }
 
             oxutil.changeFilestore(fstore);
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials);
+            throw e;
         }
     }
 
@@ -214,8 +236,9 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             basicauth.doAuthentication(myCreds);
             log(LogLevel.DEBUG, LOGGER, credentials, null, searchPattern);
             return oxutil.listFilestores(searchPattern, omitUsage);
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials);
+            throw e;
         }
     }
 
@@ -253,8 +276,9 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
                 throw new InvalidDataException("Store " + store + " in use");
             }
             oxutil.unregisterFilestore(store.getId().intValue());
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials);
+            throw e;
         }
     }
 
@@ -280,19 +304,21 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             }
 
             return new MaintenanceReason(I(oxutil.createMaintenanceReason(reason)));
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials);
+            throw e;
         }
     }
 
-    public MaintenanceReason[] listMaintenanceReasons(Credentials credentials) throws RemoteException {
+    public MaintenanceReason[] listMaintenanceReasons(Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         try {
             Credentials auth = credentials == null ? new Credentials("", "") : credentials;
             basicauth.doAuthentication(auth);
 
             return oxutil.getAllMaintenanceReasons();
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials);
+            throw e;
         }
     }
 
@@ -310,8 +336,9 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             basicauth.doAuthentication(auth);
 
             return oxutil.listMaintenanceReasons(search_pattern);
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, auth));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, auth);
+            throw e;
         }
     }
 
@@ -320,7 +347,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
         return listMaintenanceReason("*", credentials);
     }
 
-    public void createDatabase(final Database db, Credentials credentials) throws RemoteException {
+    public void createDatabase(final Database db, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         try {
             Credentials auth = credentials == null ? new Credentials("", "") : credentials;
             try {
@@ -348,8 +375,9 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             }
 
             oxutil.createDatabase(db, null);
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials);
+            throw e;
         }
     }
 
@@ -412,8 +440,9 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             boolean bCreateSchemas = null != createSchemas && createSchemas.booleanValue();
             int iOptNumberOfSchemas = null != optNumberOfSchemas ? optNumberOfSchemas.intValue() : 0;
             return new Database(oxutil.registerDatabase(db, bCreateSchemas, iOptNumberOfSchemas));
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials);
+            throw e;
         }
     }
 
@@ -444,8 +473,9 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             int iOptNumberOfSchemas = null != optNumberOfSchemas ? optNumberOfSchemas.intValue() : 0;
             List<String> createdSchemas = oxutil.createDatabaseSchemas(db, iOptNumberOfSchemas);
             return createdSchemas.toArray(new String[createdSchemas.size()]);
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials);
+            throw e;
         }
     }
 
@@ -489,8 +519,9 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
                 numDeleted += schemas.size();
             }
             return numDeleted;
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials);
+            throw e;
         }
     }
 
@@ -522,8 +553,9 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             sr.setName(srv.getName());
             sr.setId(I(oxutil.registerServer(srv.getName())));
             return sr;
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials);
+            throw e;
         }
     }
 
@@ -555,8 +587,9 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             }
 
             oxutil.unregisterDatabase(i(database.getId()), isMaster);
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials);
+            throw e;
         }
     }
 
@@ -588,8 +621,9 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             }
 
             oxutil.unregisterServer(server.getId().intValue());
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials);
+            throw e;
         }
     }
 
@@ -620,8 +654,9 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
                 throw new InvalidDataException("No such server " + server);
             }
             oxutil.changeServer(server.getId().intValue(), schemaName);
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials);
+            throw e;
         }
     }
 
@@ -645,8 +680,9 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
 
             boolean bOnlyEmptySchemas = null != onlyEmptySchemas && onlyEmptySchemas.booleanValue();
             return oxutil.countDatabaseSchema(search_pattern, bOnlyEmptySchemas);
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials);
+            throw e;
         }
     }
 
@@ -670,8 +706,9 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
 
             boolean bOnlyEmptySchemas = null != onlyEmptySchemas && onlyEmptySchemas.booleanValue();
             return oxutil.searchForDatabaseSchema(search_pattern, bOnlyEmptySchemas);
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials);
+            throw e;
         }
     }
 
@@ -699,8 +736,9 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             }
 
             return oxutil.searchForDatabase(search_pattern);
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials);
+            throw e;
         }
     }
 
@@ -749,8 +787,9 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             }
 
             return new Database[][] { needingUpdate, currentlyUpdating, outdatedUpdating };
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials);
+            throw e;
         }
     }
 
@@ -780,8 +819,9 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             OXToolStorageInterface oxtools = OXToolStorageInterface.getInstance();
             List<Database> unblockedDatabaseSchema = oxtools.unblockDatabaseSchema(db);
             return unblockedDatabaseSchema.toArray(new Database[unblockedDatabaseSchema.size()]);
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials);
+            throw e;
         }
     }
 
@@ -804,8 +844,9 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             }
 
             return oxutil.searchForServer(search_pattern);
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials);
+            throw e;
         }
     }
 
@@ -845,8 +886,9 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             }
 
             oxutil.changeDatabase(db);
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials);
+            throw e;
         }
     }
 
@@ -876,8 +918,9 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             }
 
             oxutil.deleteMaintenanceReason(del_ids);
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials);
+            throw e;
         }
     }
 
@@ -908,8 +951,9 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             Credentials auth = credentials == null ? new Credentials("", "") : credentials;
             basicauth.doAuthentication(auth);
             return oxutil.createSchema(optDatabaseId);
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials);
+            throw e;
         }
     }
 
@@ -927,8 +971,9 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             basicauth.doAuthentication(auth);
 
             doRecalculateFilestoreUsage(contextId, userId, true);
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials);
+            throw e;
         }
     }
 
@@ -1043,9 +1088,10 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
                 }
             }
         } catch (OXException e) {
-            throw StorageException.wrapForRMI(logAndEnhanceException(LOGGER, e, credentials));
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials));
+            throw logAndReturnException(LOGGER, StorageException.wrapForRMI(e), credentials);
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials);
+            throw e;
         }
     }
 

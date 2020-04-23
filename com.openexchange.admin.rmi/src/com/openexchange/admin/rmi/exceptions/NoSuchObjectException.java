@@ -54,7 +54,7 @@ package com.openexchange.admin.rmi.exceptions;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class NoSuchObjectException extends Exception {
+public class NoSuchObjectException extends AbstractAdminRmiException {
 
     private static final long serialVersionUID = -1177306986891794358L;
 

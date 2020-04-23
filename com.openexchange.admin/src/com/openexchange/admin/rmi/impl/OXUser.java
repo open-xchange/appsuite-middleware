@@ -52,6 +52,7 @@ package com.openexchange.admin.rmi.impl;
 import static com.openexchange.admin.rmi.exceptions.RemoteExceptionUtils.convertException;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.rmi.RemoteException;
@@ -81,6 +82,7 @@ import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.dataobjects.UserProperty;
+import com.openexchange.admin.rmi.exceptions.AbstractAdminRmiException;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.EnforceableDataObjectException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
@@ -89,6 +91,8 @@ import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchFilestoreException;
 import com.openexchange.admin.rmi.exceptions.NoSuchObjectException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
+import com.openexchange.admin.rmi.exceptions.ProgrammErrorException;
+import com.openexchange.admin.rmi.exceptions.RemoteExceptionUtils;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.impl.util.OXUserPropertySorter;
 import com.openexchange.admin.services.AdminServiceRegistry;
@@ -162,6 +166,21 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
     }
 
+    private void logAndEnhanceException(Throwable t, final Credentials credentials, final Context ctx, final User usr) {
+        logAndEnhanceException(t, credentials, null != ctx ? ctx.getIdAsString() : null, null != usr ? String.valueOf(usr.getId()) : null);
+    }
+
+    private void logAndEnhanceException(Throwable t, final Credentials credentials, final String contextId, String userId) {
+        if (t instanceof AbstractAdminRmiException) {
+            logAndReturnException(LOGGER, ((AbstractAdminRmiException) t), credentials, contextId, userId);
+        } else if (t instanceof RemoteException) {
+            RemoteException remoteException = (RemoteException) t;
+            String exceptionId = AbstractAdminRmiException.generateExceptionId();
+            RemoteExceptionUtils.enhanceRemoteException(remoteException, exceptionId);
+            logAndReturnException(LOGGER, remoteException, exceptionId, credentials, contextId, userId);
+        }
+    }
+
     private boolean usernameIsChangeable() {
         return this.cache.getProperties().getUserProp(AdminProperties.User.USERNAME_CHANGEABLE, false);
     }
@@ -192,8 +211,9 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 throw new NoSuchUserException("No such user " + user_id + " in context " + ctx.getId());
             }
             return oxu.getCapabilities(ctx, user);
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx == null ? EMPTY_STRING : ctx.getIdAsString(), user == null ? EMPTY_STRING : String.valueOf(user.getId())));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, ctx, user);
+            throw e;
         }
     }
 
@@ -243,8 +263,9 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     }
                 }
             }
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString(), String.valueOf(user.getId())));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, ctx, user);
+            throw e;
         }
     }
 
@@ -305,8 +326,9 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     }
                 }
             }
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx == null ? EMPTY_STRING : ctx.getIdAsString(), user == null ? EMPTY_STRING : String.valueOf(user.getId())));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, ctx, user);
+            throw e;
         }
     }
 
@@ -395,8 +417,9 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
             // Schedule task
             return TaskManager.getInstance().addJob(fsdm, "moveuserfilestore", "move user " + user_id + " from context " + ctx.getIdAsString() + " to another filestore " + dstFilestore.getId(), ctx.getId().intValue());
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString(), String.valueOf(user.getId())));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, ctx, user);
+            throw e;
         }
     }
 
@@ -405,7 +428,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         return moveFromUserFilestoreToMaster(ctx, user, masterUser, credentials, false);
     }
 
-    private int moveFromUserFilestoreToMaster(final Context ctx, User user, User masterUser, Credentials credentials, boolean inline) throws RemoteException {
+    private int moveFromUserFilestoreToMaster(final Context ctx, User user, User masterUser, Credentials credentials, boolean inline) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         try {
             Credentials auth = credentials == null ? new Credentials(EMPTY_STRING, EMPTY_STRING) : credentials;
             try {
@@ -524,8 +547,17 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             // Execute with current thread
             fsdm.call();
             return -1;
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString(), String.valueOf(user.getId())));
+        } catch (InterruptedException e) {
+            throw logAndReturnException(LOGGER, StorageException.wrapForRMI(e), credentials, ctx.getIdAsString(), String.valueOf(user.getId()));
+        } catch (IOException e) {
+            throw logAndReturnException(LOGGER, StorageException.wrapForRMI(e), credentials, ctx.getIdAsString(), String.valueOf(user.getId()));
+        } catch (ProgrammErrorException e) {
+            RemoteException remoteException = RemoteExceptionUtils.convertException(e);
+            logAndReturnException(LOGGER, remoteException, e.getExceptionId(), credentials, ctx.getIdAsString(), String.valueOf(user.getId()));
+            throw remoteException;
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, ctx, user);
+            throw e;
         }
     }
 
@@ -658,8 +690,9 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             // Schedule task
             oxuser.disableUser(userId, ctx);
             return TaskManager.getInstance().addJob(fsdm, "movefrommastertouserfilestore", "move user " + userId + " from context " + ctx.getIdAsString() + " from master to individual filestore " + destFilestore.getId(), ctx.getId().intValue());
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString(), String.valueOf(user.getId())));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, ctx, user);
+            throw e;
         }
     }
 
@@ -668,7 +701,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         return moveFromContextToUserFilestore(ctx, user, dstFilestore, maxQuota, credentials, false);
     }
 
-    private int moveFromContextToUserFilestore(final Context ctx, User user, Filestore dstFilestore, long maxQuota, Credentials credentials, boolean inline) throws RemoteException {
+    private int moveFromContextToUserFilestore(final Context ctx, User user, Filestore dstFilestore, long maxQuota, Credentials credentials, boolean inline) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         try {
             Credentials auth = credentials == null ? new Credentials(EMPTY_STRING, EMPTY_STRING) : credentials;
             try {
@@ -781,8 +814,19 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             // Execute with current thread
             fsdm.call();
             return -1;
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString(), String.valueOf(user.getId())));
+        } catch (InterruptedException e) {
+            throw logAndReturnException(LOGGER, StorageException.wrapForRMI(e), credentials, ctx.getIdAsString(), String.valueOf(user.getId()));
+        } catch (IOException e) {
+            throw logAndReturnException(LOGGER, StorageException.wrapForRMI(e), credentials, ctx.getIdAsString(), String.valueOf(user.getId()));
+        } catch (OXException e) {
+            throw logAndReturnException(LOGGER, StorageException.wrapForRMI(e), credentials, ctx.getIdAsString(), String.valueOf(user.getId()));
+        } catch (ProgrammErrorException e) {
+            RemoteException remoteException = RemoteExceptionUtils.convertException(e);
+            logAndReturnException(LOGGER, remoteException, e.getExceptionId(), credentials, ctx.getIdAsString(), String.valueOf(user.getId()));
+            throw remoteException;
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, ctx, user);
+            throw e;
         }
     }
 
@@ -791,7 +835,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         return moveFromUserToContextFilestore(ctx, user, credentials, false);
     }
 
-    private int moveFromUserToContextFilestore(final Context ctx, User user, Credentials credentials, boolean inline) throws RemoteException {
+    private int moveFromUserToContextFilestore(final Context ctx, User user, Credentials credentials, boolean inline) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         try {
             Credentials auth = credentials == null ? new Credentials(EMPTY_STRING, EMPTY_STRING) : credentials;
             try {
@@ -911,8 +955,19 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             // Execute with current thread
             fsdm.call();
             return -1;
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString(), String.valueOf(user.getId())));
+        } catch (InterruptedException e) {
+            throw logAndReturnException(LOGGER, StorageException.wrapForRMI(e), credentials, ctx.getIdAsString(), String.valueOf(user.getId()));
+        } catch (IOException e) {
+            throw logAndReturnException(LOGGER, StorageException.wrapForRMI(e), credentials, ctx.getIdAsString(), String.valueOf(user.getId()));
+        } catch (OXException e) {
+            throw logAndReturnException(LOGGER, StorageException.wrapForRMI(e), credentials, ctx.getIdAsString(), String.valueOf(user.getId()));
+        } catch (ProgrammErrorException e) {
+            RemoteException remoteException = RemoteExceptionUtils.convertException(e);
+            logAndReturnException(LOGGER, remoteException, e.getExceptionId(), credentials, ctx.getIdAsString(), String.valueOf(user.getId()));
+            throw remoteException;
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, ctx, user);
+            throw e;
         }
     }
 
@@ -1135,8 +1190,13 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 }
                 cache.setAdminCredentials(ctx, mech, cauth);
             }
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString(), String.valueOf(usrdata.getId())));
+        } catch (NoSuchFilestoreException e) {
+            RemoteException remoteException = RemoteExceptionUtils.convertException(e);
+            logAndReturnException(LOGGER, remoteException, e.getExceptionId(), credentials, ctx.getIdAsString(), String.valueOf(usrdata.getId()));
+            throw remoteException;
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, ctx, usrdata);
+            throw e;
         }
     }
 
@@ -1192,8 +1252,9 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     }
                 }
             }
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString(), String.valueOf(user.getId())));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, ctx, user);
+            throw e;
         }
 
         //      JCS
@@ -1268,8 +1329,9 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     }
                 }
             }
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString(), String.valueOf(user.getId())));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, ctx, user);
+            throw e;
         }
 
         // JCS
@@ -1352,8 +1414,9 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
             // Call main create user method with resolved access rights
             return createUserCommon(ctx, usrdata, access, auth);
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString(), String.valueOf(usrdata.getId())));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, ctx, usrdata);
+            throw e;
         }
     }
 
@@ -1395,8 +1458,9 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             }
 
             return createUserCommon(ctx, usrdata, access, auth);
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString(), String.valueOf(usrdata.getId())));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, ctx, usrdata);
+            throw e;
         }
     }
 
@@ -1407,8 +1471,9 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         try {
             basicauth.doAuthentication(auth, ctx);
             return (oxu.getData(ctx, new User[] { new User(tool.getAdminForContext(ctx)) }))[0];
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString()));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, ctx, null);
+            throw e;
         }
     }
 
@@ -1426,15 +1491,16 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             final int admin_id = tool.getAdminForContext(ctx);
             final UserModuleAccess access = oxu.getModuleAccess(ctx, admin_id);
             return access;
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString()));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, ctx, null);
+            throw e;
         }
     }
 
     /*
      * Main method to create a user. Which all inner create methods MUST use after resolving the access rights!
      */
-    private User createUserCommon(final Context ctx, final User usr, final UserModuleAccess access, final Credentials auth) throws RemoteException {
+    private User createUserCommon(final Context ctx, final User usr, final UserModuleAccess access, final Credentials auth) throws StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, RemoteException {
         try {
             try {
                 doNullCheck(usr, access);
@@ -1563,8 +1629,13 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
             // Return created user
             return usr;
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, auth, ctx.getIdAsString(), String.valueOf(usr.getId())));
+        } catch (NoSuchContextException e) {
+            RemoteException remoteException = RemoteExceptionUtils.convertException(e);
+            logAndReturnException(LOGGER, remoteException, e.getExceptionId(), auth, ctx.getIdAsString(), String.valueOf(usr.getId()));
+            throw remoteException;
+        } catch (Throwable e) {
+            logAndEnhanceException(e, auth, ctx, usr);
+            throw e;
         }
     }
 
@@ -1767,8 +1838,13 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 }
                 throw new StorageException(sb.toString());
             }
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString(), getObjectIds(users)));
+        } catch (NoSuchFilestoreException e) {
+            RemoteException remoteException = RemoteExceptionUtils.convertException(e);
+            logAndReturnException(LOGGER, remoteException, e.getExceptionId(), credentials, ctx.getIdAsString(), getObjectIds(users));
+            throw remoteException;
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, ctx.getIdAsString(), getObjectIds(users));
+            throw e;
         }
     }
 
@@ -1919,8 +1995,9 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
             log(LogLevel.DEBUG, LOGGER, credentials, ctx.getIdAsString(), getObjectIds(retusers), null, Arrays.toString(retusers));
             return retusers;
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString(), getObjectIds(users)));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, ctx.getIdAsString(), getObjectIds(users));
+            throw e;
         }
     }
 
@@ -1962,8 +2039,9 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 throw new NoSuchUserException("No such user " + user_id + " in context " + ctx.getId());
             }
             return oxu.getModuleAccess(ctx, user_id);
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString(), String.valueOf(user.getId())));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, ctx, user);
+            throw e;
         }
     }
 
@@ -1998,8 +2076,9 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             }
 
             return cache.getNameForAccessCombination(oxu.getModuleAccess(ctx, user_id));
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString(), String.valueOf(user.getId())));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, ctx, user);
+            throw e;
         }
     }
 
@@ -2032,8 +2111,9 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             final User[] retval = oxu.list(ctx, search_pattern, includeGuests, excludeUsers);
 
             return retval;
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString()));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, ctx, null);
+            throw e;
         }
     }
 
@@ -2066,8 +2146,9 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             final User[] retval = oxu.listCaseInsensitive(ctx, search_pattern, includeGuests, excludeUsers);
 
             return retval;
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString()));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, ctx, null);
+            throw e;
         }
     }
 
@@ -2093,8 +2174,9 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 return oxu.listUsersWithOwnFilestore(context, null);
             }
             return oxu.listUsersWithOwnFilestore(context, filestore_id);
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials, context.getIdAsString()));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, context, null);
+            throw e;
         }
     }
 
@@ -2377,8 +2459,9 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             }
 
             // TODO: How to notify via EventSystemService ?
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, (String) null, null);
+            throw e;
         }
     }
 
@@ -2430,8 +2513,9 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             } else {
                 throw new InvalidDataException("Neither identifier, name nor display name set in given user object");
             }
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString(), String.valueOf(user.getId())));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, ctx, user);
+            throw e;
         }
     }
 
@@ -2557,8 +2641,11 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             Collections.sort(userProperties, new OXUserPropertySorter());
 
             return userProperties;
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString(), String.valueOf(user.getId())));
+        } catch (OXException e) {
+            throw logAndReturnException(LOGGER, StorageException.wrapForRMI(e), credentials, ctx.getIdAsString(), String.valueOf(user.getId()));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, ctx, user);
+            throw e;
         }
     }
 
@@ -2596,8 +2683,11 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             }
             capabilitiesSource = capabilityService.getCapabilitiesSource(user_id, ctx.getId().intValue());
             return capabilitiesSource;
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString(), String.valueOf(user.getId())));
+        } catch (OXException e) {
+            throw logAndReturnException(LOGGER, StorageException.wrapForRMI(e), credentials, ctx.getIdAsString(), String.valueOf(user.getId()));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, ctx, user);
+            throw e;
         }
     }
 
@@ -2615,8 +2705,9 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             basicauth.doAuthentication(auth, context);
             contextcheck(context);
             return oxu.listUsersByAliasDomain(context, aliasDomain);
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials, context == null ? EMPTY_STRING : context.getIdAsString()));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, context, null);
+            throw e;
         }
     }
 

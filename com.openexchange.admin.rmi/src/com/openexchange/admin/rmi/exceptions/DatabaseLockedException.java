@@ -55,7 +55,7 @@ package com.openexchange.admin.rmi.exceptions;
  * @author dsieben
  *
  */
-public class DatabaseLockedException extends Exception {
+public class DatabaseLockedException extends AbstractAdminRmiException {
 
     /**
      * For serialization

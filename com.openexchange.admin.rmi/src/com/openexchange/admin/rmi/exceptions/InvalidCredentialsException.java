@@ -56,7 +56,7 @@ package com.openexchange.admin.rmi.exceptions;
  * @author cutmasta
  *
  */
-public class InvalidCredentialsException extends Exception {
+public class InvalidCredentialsException extends AbstractAdminRmiException {
 
 	/**
          * For serialization

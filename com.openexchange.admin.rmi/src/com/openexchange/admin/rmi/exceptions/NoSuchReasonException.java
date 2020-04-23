@@ -58,7 +58,7 @@ package com.openexchange.admin.rmi.exceptions;
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  *
  */
-public class NoSuchReasonException extends Exception {
+public class NoSuchReasonException extends AbstractAdminRmiException {
 
     /**
      * For serializations

@@ -56,7 +56,7 @@ package com.openexchange.admin.rmi.exceptions;
  * @author d7
  *
  */
-public class NoSuchGroupException extends Exception {
+public class NoSuchGroupException extends AbstractAdminRmiException {
 
     /**
      *

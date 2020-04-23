@@ -57,7 +57,7 @@ package com.openexchange.admin.rmi.exceptions;
  * <a href="mailto:sebastian.kotyrba@open-xchange.com">Sebastian Kotyrba</a> ,
  * <a href="mailto:carsten.hoeger@open-xchange.com">Carsten Hoeger</a>
  */
-public class OXContextException extends Exception {
+public class OXContextException extends AbstractAdminRmiException {
 
 
     private static final long serialVersionUID = 7673005697667470880L;

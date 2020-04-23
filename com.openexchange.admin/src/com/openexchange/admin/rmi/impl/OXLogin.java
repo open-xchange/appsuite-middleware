@@ -49,18 +49,19 @@
 
 package com.openexchange.admin.rmi.impl;
 
-import static com.openexchange.admin.rmi.exceptions.RemoteExceptionUtils.convertException;
 import java.rmi.RemoteException;
 import com.openexchange.admin.plugins.OXUserPluginInterface;
 import com.openexchange.admin.rmi.OXLoginInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.exceptions.AbstractAdminRmiException;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
+import com.openexchange.admin.rmi.exceptions.RemoteExceptionUtils;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.services.PluginInterfaces;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
@@ -81,13 +82,33 @@ public class OXLogin extends OXCommonImpl implements OXLoginInterface {
         log(LogLevel.INFO, LOGGER, null, null, "Class loaded: {}", this.getClass().getName());
     }
 
+    private void logAndEnhanceException(Throwable t, final Credentials credentials) {
+        logAndEnhanceException(t, credentials, (String) null);
+    }
+
+    private void logAndEnhanceException(Throwable t, final Credentials credentials, final Context ctx) {
+        logAndEnhanceException(t, credentials, null != ctx ? ctx.getIdAsString() : null);
+    }
+
+    private void logAndEnhanceException(Throwable t, final Credentials credentials, final String contextId) {
+        if (t instanceof AbstractAdminRmiException) {
+            logAndReturnException(LOGGER, ((AbstractAdminRmiException) t), credentials, contextId);
+        } else if (t instanceof RemoteException) {
+            RemoteException remoteException = (RemoteException) t;
+            String exceptionId = AbstractAdminRmiException.generateExceptionId();
+            RemoteExceptionUtils.enhanceRemoteException(remoteException, exceptionId);
+            logAndReturnException(LOGGER, remoteException, exceptionId, credentials, contextId);
+        }
+    }
+
     @Override
     public void login(final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
         try {
             BasicAuthenticator.createNonPluginAwareAuthenticator().doUserAuthentication(auth, ctx);
             triggerUpdateProcess(ctx);
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, auth, ctx.getIdAsString()));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, auth, ctx);
+            throw e;
         }
     }
 
@@ -96,8 +117,9 @@ public class OXLogin extends OXCommonImpl implements OXLoginInterface {
         try {
             doNullCheck(auth);
             BasicAuthenticator.createNonPluginAwareAuthenticator().doAuthentication(auth);
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, auth));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, auth);
+            throw e;
         }
     }
 
@@ -132,8 +154,9 @@ public class OXLogin extends OXCommonImpl implements OXLoginInterface {
             }
 
             return retusers[0];
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, auth, ctx.getIdAsString()));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, auth, ctx);
+            throw e;
         }
     }
 

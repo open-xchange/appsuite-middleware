@@ -55,7 +55,7 @@ package com.openexchange.admin.rmi.exceptions;
  * @author d7
  *
  */
-public class ProgrammErrorException extends Exception {
+public class ProgrammErrorException extends AbstractAdminRmiException {
 
     /**
      *

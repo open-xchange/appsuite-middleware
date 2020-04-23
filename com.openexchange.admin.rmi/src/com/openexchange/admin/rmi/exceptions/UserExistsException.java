@@ -52,7 +52,7 @@ package com.openexchange.admin.rmi.exceptions;
 /**
  * @author choeger
  */
-public class UserExistsException extends Exception {
+public class UserExistsException extends AbstractAdminRmiException {
 
     /**
      *

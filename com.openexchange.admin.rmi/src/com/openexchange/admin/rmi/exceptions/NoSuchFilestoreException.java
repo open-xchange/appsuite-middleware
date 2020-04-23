@@ -60,7 +60,7 @@ package com.openexchange.admin.rmi.exceptions;
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  *
  */
-public class NoSuchFilestoreException extends Exception {
+public class NoSuchFilestoreException extends AbstractAdminRmiException {
 
     /**
      * For serialization

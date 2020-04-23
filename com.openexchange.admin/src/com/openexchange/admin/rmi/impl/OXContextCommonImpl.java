@@ -173,7 +173,7 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
             }
             return retval;
         } catch (PluginException e) {
-            throw StorageException.wrapForRMI(logAndEnhanceException(LOGGER, e, auth, ctx.getIdAsString()));
+            throw logAndReturnException(LOGGER, StorageException.wrapForRMI(e), auth, ctx.getIdAsString());
         }
     }
 
@@ -240,7 +240,7 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
                     search_pattern = new_search_pattern;
                 }
             } catch (PluginException e) {
-                throw StorageException.wrapForRMI(logAndEnhanceException(LOGGER, e, auth));
+                throw logAndReturnException(LOGGER, StorageException.wrapForRMI(e), auth);
             }
         }
         return search_pattern;

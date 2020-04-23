@@ -52,7 +52,7 @@ package com.openexchange.admin.rmi.exceptions;
  * @author choeger
  *
  */
-public class DatabaseUpdateException extends Exception {
+public class DatabaseUpdateException extends AbstractAdminRmiException {
 
     /**
      *

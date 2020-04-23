@@ -49,7 +49,6 @@
 
 package com.openexchange.admin.plugin.hosting.rmi.impl;
 
-import static com.openexchange.admin.rmi.exceptions.RemoteExceptionUtils.convertException;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
 import static com.openexchange.java.Autoboxing.i2I;
@@ -86,6 +85,7 @@ import com.openexchange.admin.rmi.dataobjects.Quota;
 import com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
+import com.openexchange.admin.rmi.exceptions.AbstractAdminRmiException;
 import com.openexchange.admin.rmi.exceptions.ContextExistsException;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.DuplicateExtensionException;
@@ -97,6 +97,7 @@ import com.openexchange.admin.rmi.exceptions.NoSuchFilestoreException;
 import com.openexchange.admin.rmi.exceptions.NoSuchObjectException;
 import com.openexchange.admin.rmi.exceptions.NoSuchReasonException;
 import com.openexchange.admin.rmi.exceptions.OXContextException;
+import com.openexchange.admin.rmi.exceptions.RemoteExceptionUtils;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.extensions.OXCommonExtension;
 import com.openexchange.admin.rmi.impl.BasicAuthenticator;
@@ -135,6 +136,25 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         log(LogLevel.DEBUG, LOGGER, null, null, "Class loaded: {}", this.getClass().getName());
     }
 
+    private void logAndEnhanceException(Throwable t, final Credentials credentials) {
+        logAndEnhanceException(t, credentials, (String) null);
+    }
+
+    private void logAndEnhanceException(Throwable t, final Credentials credentials, final Context ctx) {
+        logAndEnhanceException(t, credentials, null != ctx ? ctx.getIdAsString() : null);
+    }
+
+    private void logAndEnhanceException(Throwable t, final Credentials credentials, final String contextId) {
+        if (t instanceof AbstractAdminRmiException) {
+            logAndReturnException(LOGGER, ((AbstractAdminRmiException) t), credentials, contextId);
+        } else if (t instanceof RemoteException) {
+            RemoteException remoteException = (RemoteException) t;
+            String exceptionId = AbstractAdminRmiException.generateExceptionId();
+            RemoteExceptionUtils.enhanceRemoteException(remoteException, exceptionId);
+            logAndReturnException(LOGGER, remoteException, exceptionId, credentials, contextId);
+        }
+    }
+
     @Override
     public Quota[] listQuotas(Context ctx, Credentials credentials) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
         try {
@@ -152,8 +172,9 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             checkExistence(ctx);
             OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
             return oxcox.listQuotas(ctx);
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString()));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, ctx);
+            throw e;
         }
     }
 
@@ -206,8 +227,11 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
             oxcox.changeQuota(ctx, new ArrayList<>(modules), quota, auth);
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString()));
+        } catch (PluginException e) {
+            throw logAndReturnException(LOGGER, StorageException.wrapForRMI(e), credentials, null != ctx ? ctx.getIdAsString() : null);
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, ctx);
+            throw e;
         }
     }
 
@@ -229,8 +253,9 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             checkExistence(ctx);
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
             return oxcox.getCapabilities(ctx);
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString()));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, ctx);
+            throw e;
         }
     }
 
@@ -281,8 +306,11 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
             oxcox.changeCapabilities(ctx, capasToAdd, capasToRemove, capasToDrop, auth);
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials, null != ctx ? ctx.getIdAsString() : null));
+        } catch (PluginException e) {
+            throw logAndReturnException(LOGGER, StorageException.wrapForRMI(e), credentials, null != ctx ? ctx.getIdAsString() : null);
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, ctx);
+            throw e;
         }
     }
 
@@ -324,7 +352,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             if (ctx.getFilestoreId() != null) {
                 if (!tool.existsStore(ctx.getFilestoreId().intValue())) {
                     final InvalidDataException inde = new InvalidDataException("No such filestore with id " + ctx.getFilestoreId());
-                    throw logAndEnhanceException(LOGGER, inde, credentials, ctx.getIdAsString());
+                    throw logAndReturnException(LOGGER, inde, credentials, ctx.getIdAsString());
                 }
             }
 
@@ -358,8 +386,11 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             } catch (OXException e) {
                 log(LogLevel.ERROR, LOGGER, credentials, ctx.getIdAsString(), null, e, "Error invalidating cached infos of context {} in context storage", ctx.getId());
             }
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString()));
+        } catch (PluginException e) {
+            throw logAndReturnException(LOGGER, StorageException.wrapForRMI(e), credentials, ctx.getIdAsString());
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, ctx);
+            throw e;
         }
     }
 
@@ -367,8 +398,9 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
     public Context create(final Context ctx, final User admin_user, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException {
         try {
             return createcommon(ctx, admin_user, null, null, auth, getDefaultSchemaSelectStrategy());
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, auth, ctx.getIdAsString()));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, auth, ctx);
+            throw e;
         }
     }
 
@@ -376,8 +408,9 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
     public Context create(final Context ctx, final User admin_user, final Credentials auth, SchemaSelectStrategy schemaSelectStrategy) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException {
         try {
             return createcommon(ctx, admin_user, null, null, auth, schemaSelectStrategy);
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, auth, ctx.getIdAsString()));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, auth, ctx);
+            throw e;
         }
     }
 
@@ -412,8 +445,9 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             access = access.clone();
 
             return createcommon(ctx, admin_user, null, access, auth, schemaSelectStrategy);
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString()));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, ctx);
+            throw e;
         }
     }
 
@@ -435,8 +469,9 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             }
 
             return createcommon(ctx, admin_user, null, access, auth, schemaSelectStrategy);
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString()));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, ctx);
+            throw e;
         }
     }
 
@@ -513,8 +548,11 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             }
 
             basicAuthenticator.removeFromAuthCache(ctx);
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString()));
+        } catch (PluginException e) {
+            throw logAndReturnException(LOGGER, StorageException.wrapForRMI(e), credentials, ctx.getIdAsString());
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, ctx);
+            throw e;
         }
     }
 
@@ -524,7 +562,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         disable(ctx, reason, auth);
     }
 
-    private void disable(final Context ctx, final MaintenanceReason reason, final Credentials credentials) throws RemoteException, InvalidDataException {
+    private void disable(final Context ctx, final MaintenanceReason reason, final Credentials credentials) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, NoSuchReasonException, OXContextException {
         final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
         try {
             doNullCheck(ctx, reason);
@@ -567,8 +605,11 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             } catch (OXException e) {
                 log(LogLevel.ERROR, LOGGER, credentials, ctx.getIdAsString(), e, "Error invalidating context {} in ox context storage", ctx.getId());
             }
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString()));
+        } catch (PluginException e) {
+            throw logAndReturnException(LOGGER, StorageException.wrapForRMI(e), credentials, ctx.getIdAsString());
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, ctx);
+            throw e;
         }
     }
 
@@ -578,7 +619,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         disableAll(reason, auth);
     }
 
-    private void disableAll(final MaintenanceReason reason, final Credentials credentials) throws RemoteException, InvalidDataException {
+    private void disableAll(final MaintenanceReason reason, final Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchReasonException {
         final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
         try {
             doNullCheck(reason);
@@ -617,8 +658,11 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 }
             }
             // END OF CACHE
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials));
+        } catch (PluginException e) {
+            throw logAndReturnException(LOGGER, StorageException.wrapForRMI(e), credentials);
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials);
+            throw e;
         }
     }
 
@@ -662,8 +706,11 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             } catch (OXException e) {
                 log(LogLevel.ERROR, LOGGER, credentials, ctx.getIdAsString(), e, "Error invalidating context {} in ox context storage", ctx.getId());
             }
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString()));
+        } catch (PluginException e) {
+            throw logAndReturnException(LOGGER, StorageException.wrapForRMI(e), credentials, ctx.getIdAsString());
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, ctx);
+            throw e;
         }
     }
 
@@ -701,8 +748,11 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 }
             }
             // END OF CACHE
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials));
+        } catch (PluginException e) {
+            throw logAndReturnException(LOGGER, StorageException.wrapForRMI(e), credentials);
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials);
+            throw e;
         }
     }
 
@@ -721,8 +771,9 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
             OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
             return oxcox.getData(new Context[] { ctx })[0];
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString()));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, ctx);
+            throw e;
         }
     }
 
@@ -781,8 +832,11 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             Context[] newRetval = retval.toArray(new Context[retval.size()]);
             callAfterDbLookupPluginMethods(newRetval, auth);
             return newRetval;
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials, getObjectIds(ctxs)));
+        } catch (PluginException e) {
+            throw logAndReturnException(LOGGER, StorageException.wrapForRMI(e), credentials, getObjectIds(ctxs));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, getObjectIds(ctxs));
+            throw e;
         }
     }
 
@@ -836,8 +890,11 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             Context[] newRetval = oxcox.listContext(search_pattern, contextFilter, loaderFilter, offset, length);
             callAfterDbLookupPluginMethods(newRetval, auth);
             return newRetval;
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials));
+        } catch (PluginException e) {
+            throw logAndReturnException(LOGGER, StorageException.wrapForRMI(e), credentials);
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials);
+            throw e;
         }
     }
 
@@ -892,8 +949,11 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             Context[] newRetval = retval.toArray(new Context[retval.size()]);
             callAfterDbLookupPluginMethods(newRetval, auth);
             return newRetval;
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials));
+        } catch (PluginException e) {
+            throw logAndReturnException(LOGGER, StorageException.wrapForRMI(e), credentials);
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials);
+            throw e;
         }
     }
 
@@ -937,8 +997,11 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             Context[] newRetval = retval.toArray(new Context[retval.size()]);
             callAfterDbLookupPluginMethods(newRetval, auth);
             return newRetval;
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials));
+        } catch (PluginException e) {
+            throw logAndReturnException(LOGGER, StorageException.wrapForRMI(e), credentials);
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials);
+            throw e;
         }
     }
 
@@ -951,7 +1014,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         return moveContextDatabase(ctx, db, new MaintenanceReason(Integer.valueOf(42)), auth);
     }
 
-    private int moveContextDatabase(final Context ctx, final Database db, final MaintenanceReason reason, final Credentials credentials) throws RemoteException, InvalidDataException {
+    private int moveContextDatabase(final Context ctx, final Database db, final MaintenanceReason reason, final Credentials credentials) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException, OXContextException {
         final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
         try {
             doNullCheck(ctx, db, reason);
@@ -1001,8 +1064,9 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             final DatabaseDataMover ddm = new DatabaseDataMover(ctx, db, reason);
 
             return TaskManager.getInstance().addJob(ddm, "movedatabase", "move context " + ctx.getIdAsString() + " to database " + dbid, ctx.getId().intValue());
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString()));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, ctx);
+            throw e;
         }
     }
 
@@ -1012,7 +1076,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         return moveContextFilestore(ctx, dst_filestore, reason, auth);
     }
 
-    private int moveContextFilestore(final Context ctx, final Filestore dst_filestore, final MaintenanceReason reason, final Credentials credentials) throws RemoteException, InvalidDataException {
+    private int moveContextFilestore(final Context ctx, final Filestore dst_filestore, final MaintenanceReason reason, final Credentials credentials) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, NoSuchFilestoreException, NoSuchReasonException, OXContextException {
         final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
         try {
             doNullCheck(ctx, dst_filestore, reason);
@@ -1109,8 +1173,9 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             } finally {
                 oxcox.enable(ctx);
             }
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString()));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, ctx);
+            throw e;
         }
     }
 
@@ -1241,8 +1306,11 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             } else {
                 oxu.changeModuleAccess(ctx, oxu.getAll(ctx), access);
             }
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString()));
+        } catch (PluginException e) {
+            throw logAndReturnException(LOGGER, StorageException.wrapForRMI(e), credentials, ctx.getIdAsString());
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, ctx);
+            throw e;
         }
     }
 
@@ -1304,8 +1372,11 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             userIds = com.openexchange.tools.arrays.Arrays.remove(userIds, I(adminId));
             oxu.changeModuleAccess(ctx, adminId, accessAdmin);
             oxu.changeModuleAccess(ctx, I2i(userIds), accessUser);
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString()));
+        } catch (PluginException e) {
+            throw logAndReturnException(LOGGER, StorageException.wrapForRMI(e), credentials, ctx.getIdAsString());
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, ctx);
+            throw e;
         }
     }
 
@@ -1346,7 +1417,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                         try {
                             oxContextPlugin.downgrade(ctx, auth);
                         } catch (PluginException e) {
-                            throw StorageException.wrapForRMI(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString()));
+                            throw logAndReturnException(LOGGER, StorageException.wrapForRMI(e), credentials, ctx.getIdAsString());
                         }
                     }
                 }
@@ -1358,8 +1429,9 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             } catch (OXException e) {
                 log(LogLevel.ERROR, LOGGER, credentials, ctx.getIdAsString(), e, "Error invalidating context {} in ox context storage", ctx.getId());
             }
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString()));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, ctx);
+            throw e;
         }
     }
 
@@ -1403,8 +1475,11 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
 
             return cache.getNameForAccessCombination(oxu.getModuleAccess(ctx, tool.getAdminForContext(ctx)));
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString()));
+        } catch (PluginException e) {
+            throw logAndReturnException(LOGGER, StorageException.wrapForRMI(e), credentials, ctx.getIdAsString());
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, ctx);
+            throw e;
         }
     }
 
@@ -1446,8 +1521,11 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             // Get admin id and fetch current access object and return it to the client!
             final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
             return oxu.getModuleAccess(ctx, tool.getAdminForContext(ctx));
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString()));
+        } catch (PluginException e) {
+            throw logAndReturnException(LOGGER, StorageException.wrapForRMI(e), credentials, ctx.getIdAsString());
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, ctx);
+            throw e;
         }
     }
 
@@ -1513,8 +1591,11 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             checkExistence(ctx);
 
             return tool.getAdminForContext(ctx);
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString()));
+        } catch (PluginException e) {
+            throw logAndReturnException(LOGGER, StorageException.wrapForRMI(e), credentials, ctx.getIdAsString());
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, ctx);
+            throw e;
         }
     }
 
@@ -1547,8 +1628,11 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             } else {
                 throw new InvalidDataException("neither id or name is set in supplied context object");
             }
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString()));
+        } catch (PluginException e) {
+            throw logAndReturnException(LOGGER, StorageException.wrapForRMI(e), credentials, ctx.getIdAsString());
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, ctx);
+            throw e;
         }
     }
 
@@ -1581,8 +1665,11 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             } else {
                 throw new InvalidDataException("neither id or name is set in supplied context object");
             }
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString()));
+        } catch (PluginException e) {
+            throw logAndReturnException(LOGGER, StorageException.wrapForRMI(e), credentials, ctx.getIdAsString());
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, ctx);
+            throw e;
         }
     }
 
@@ -1600,8 +1687,9 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             log(LogLevel.DEBUG, LOGGER, credentials, null, "Checking consistency for counters");
 
             OXContextStorageInterface.getInstance().checkCountsConsistency(checkDatabaseCounts, checkFilestoreCounts);
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials);
+            throw e;
         }
     }
 

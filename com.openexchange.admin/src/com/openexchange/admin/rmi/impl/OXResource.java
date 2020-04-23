@@ -49,7 +49,6 @@
 
 package com.openexchange.admin.rmi.impl;
 
-import static com.openexchange.admin.rmi.exceptions.RemoteExceptionUtils.convertException;
 import static com.openexchange.java.Autoboxing.I;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
@@ -62,12 +61,15 @@ import com.openexchange.admin.rmi.OXResourceInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Resource;
+import com.openexchange.admin.rmi.exceptions.AbstractAdminRmiException;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
+import com.openexchange.admin.rmi.exceptions.EnforceableDataObjectException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchObjectException;
 import com.openexchange.admin.rmi.exceptions.NoSuchResourceException;
+import com.openexchange.admin.rmi.exceptions.RemoteExceptionUtils;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.services.PluginInterfaces;
 import com.openexchange.admin.storage.interfaces.OXResourceStorageInterface;
@@ -99,6 +101,21 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface {
         prop = cache.getProperties();
         log(LogLevel.INFO, LOGGER, null, null, "Class loaded: {}", this.getClass().getName());
         basicauth = BasicAuthenticator.createNonPluginAwareAuthenticator();
+    }
+
+    private void logAndEnhanceException(Throwable t, final Credentials credentials, final Context ctx, final Resource res) {
+        logAndEnhanceException(t, credentials, null != ctx ? ctx.getIdAsString() : null, null != res ? String.valueOf(res.getId()) : null);
+    }
+
+    private void logAndEnhanceException(Throwable t, final Credentials credentials, final String contextId, String resourceId) {
+        if (t instanceof AbstractAdminRmiException) {
+            logAndReturnException(LOGGER, ((AbstractAdminRmiException) t), credentials, contextId, resourceId);
+        } else if (t instanceof RemoteException) {
+            RemoteException remoteException = (RemoteException) t;
+            String exceptionId = AbstractAdminRmiException.generateExceptionId();
+            RemoteExceptionUtils.enhanceRemoteException(remoteException, exceptionId);
+            logAndReturnException(LOGGER, remoteException, exceptionId, credentials, contextId, resourceId);
+        }
     }
 
     @Override
@@ -178,8 +195,9 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface {
                     }
                 }
             }
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString(), String.valueOf(res.getId())));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, ctx, res);
+            throw e;
         }
     }
 
@@ -270,8 +288,13 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface {
             }
 
             return res;
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString(), String.valueOf(res.getId())));
+        } catch (EnforceableDataObjectException e) {
+            RemoteException remoteException = RemoteExceptionUtils.convertException(e);
+            logAndReturnException(LOGGER, remoteException, e.getExceptionId(), credentials, ctx.getIdAsString(), String.valueOf(res.getId()));
+            throw remoteException;
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, ctx, res);
+            throw e;
         }
     }
 
@@ -323,8 +346,9 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface {
             }
 
             oxRes.delete(ctx, res);
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString(), String.valueOf(res.getId())));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, ctx, res);
+            throw e;
         }
     }
 
@@ -376,8 +400,9 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface {
             }
 
             return retres;
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString(), String.valueOf(res.getId())));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, ctx, res);
+            throw e;
         }
     }
 
@@ -443,8 +468,9 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface {
                 }
             }
             return retval.toArray(new Resource[retval.size()]);
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString(), getObjectIds(resources)));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, ctx.getIdAsString(), getObjectIds(resources));
+            throw e;
         }
     }
 
@@ -479,8 +505,9 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface {
             checkContextAndSchema(ctx);
 
             return oxRes.list(ctx, pattern);
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString()));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, ctx, null);
+            throw e;
         }
     }
 

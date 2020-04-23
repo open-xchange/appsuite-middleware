@@ -49,7 +49,6 @@
 
 package com.openexchange.admin.rmi.impl;
 
-import static com.openexchange.admin.rmi.exceptions.RemoteExceptionUtils.convertException;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
 import java.rmi.RemoteException;
@@ -65,13 +64,16 @@ import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Group;
 import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.exceptions.AbstractAdminRmiException;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
+import com.openexchange.admin.rmi.exceptions.EnforceableDataObjectException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchGroupException;
 import com.openexchange.admin.rmi.exceptions.NoSuchObjectException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
+import com.openexchange.admin.rmi.exceptions.RemoteExceptionUtils;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.services.PluginInterfaces;
@@ -112,6 +114,21 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         prop = cache.getProperties();
         basicauth = BasicAuthenticator.createNonPluginAwareAuthenticator();
         log(LogLevel.INFO, LOGGER, null, null, "Class loaded: {}", this.getClass().getName());
+    }
+
+    private void logAndEnhanceException(Throwable t, final Credentials credentials, final Context ctx, final Group grp) {
+        logAndEnhanceException(t, credentials, null != ctx ? ctx.getIdAsString() : null, null != grp ? grp.getId().toString() : null);
+    }
+
+    private void logAndEnhanceException(Throwable t, final Credentials credentials, final String contextId, final String groupId) {
+        if (t instanceof AbstractAdminRmiException) {
+            logAndReturnException(LOGGER, ((AbstractAdminRmiException) t), credentials, contextId, groupId);
+        } else if (t instanceof RemoteException) {
+            RemoteException remoteException = (RemoteException) t;
+            String exceptionId = AbstractAdminRmiException.generateExceptionId();
+            RemoteExceptionUtils.enhanceRemoteException(remoteException, exceptionId);
+            logAndReturnException(LOGGER, remoteException, exceptionId, credentials, contextId, groupId);
+        }
     }
 
     @Override
@@ -181,8 +198,9 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
                 }
             }
             // END OF JCS
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString(), String.valueOf(ctx.getIdAsString())));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, ctx, grp);
+            throw e;
         }
     }
 
@@ -280,8 +298,15 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
                     }
                 }
             }
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString()));
+        } catch (PluginException e) {
+            throw logAndReturnException(LOGGER, StorageException.wrapForRMI(e), credentials, ctx.getIdAsString(), String.valueOf(grp.getId()));
+        } catch (EnforceableDataObjectException e) {
+            RemoteException remoteException = RemoteExceptionUtils.convertException(e);
+            logAndReturnException(LOGGER, remoteException, e.getExceptionId(), credentials, ctx.getIdAsString(), String.valueOf(grp.getId()));
+            throw remoteException;
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, ctx, grp);
+            throw e;
         }
     }
 
@@ -389,8 +414,13 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
 
             return grp;
             // MonitoringInfos.incrementNumberOfCreateGroupCalled();
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString(), String.valueOf(grp.getId())));
+        } catch (EnforceableDataObjectException e) {
+            RemoteException remoteException = RemoteExceptionUtils.convertException(e);
+            logAndReturnException(LOGGER, remoteException, e.getExceptionId(), credentials, ctx.getIdAsString(), String.valueOf(grp.getId()));
+            throw remoteException;
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, ctx, grp);
+            throw e;
         }
     }
 
@@ -406,8 +436,9 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
 
         try {
             delete(ctx, new Group[] { grp }, auth);
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString(), String.valueOf(grp.getId())));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, ctx, grp);
+            throw e;
         }
     }
 
@@ -493,8 +524,9 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             }
             // END OF JCS
 
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString(), getObjectIds(grp)));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, ctx.getIdAsString(), getObjectIds(grp));
+            throw e;
         }
     }
 
@@ -545,8 +577,9 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             }
 
             return retgrp;
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString(), String.valueOf(grp.getId())));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, ctx, grp);
+            throw e;
         }
     }
 
@@ -617,8 +650,9 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             }
 
             return retval.toArray(new Group[retval.size()]);
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString(), getObjectIds(groups)));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, ctx.getIdAsString(), getObjectIds(groups));
+            throw e;
         }
     }
 
@@ -634,8 +668,9 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             checkContextAndSchema(ctx);
 
             return new Group(I(tool.getDefaultGroupForContextWithOutConnection(ctx)));
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString()));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, ctx, null);
+            throw e;
         }
     }
 
@@ -673,8 +708,9 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             }
 
             return oxGroup.getMembers(ctx, grp_id);
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString(), String.valueOf(grp.getId())));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, ctx, grp);
+            throw e;
         }
     }
 
@@ -700,8 +736,9 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             checkContextAndSchema(ctx);
 
             return oxGroup.list(ctx, pattern);
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString()));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, ctx, null);
+            throw e;
         }
     }
 
@@ -741,8 +778,9 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             }
 
             return oxGroup.getGroupsForUser(ctx, usr);
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString(), String.valueOf(usr.getId())));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, ctx.getIdAsString(), String.valueOf(usr.getId()));
+            throw e;
         }
     }
 
@@ -801,8 +839,9 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
                 }
             }
             // END OF JCS
-        } catch (Exception e) {
-            throw convertException(logAndEnhanceException(LOGGER, e, credentials, ctx.getIdAsString(), String.valueOf(grp.getId())));
+        } catch (Throwable e) {
+            logAndEnhanceException(e, credentials, ctx.getIdAsString(), String.valueOf(grp.getId()));
+            throw e;
         }
     }
 

@@ -48,7 +48,7 @@
  */
 package com.openexchange.admin.rmi.exceptions;
 
-public class MissingServiceException extends Exception {
+public class MissingServiceException extends AbstractAdminRmiException {
     /**
      * For serialization
      */

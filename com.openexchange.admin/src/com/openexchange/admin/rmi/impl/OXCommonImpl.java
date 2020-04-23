@@ -52,11 +52,7 @@ package com.openexchange.admin.rmi.impl;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
 import java.lang.reflect.Constructor;
-import java.rmi.RemoteException;
-import java.security.SecureRandom;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.lang.reflect.Field;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
@@ -65,6 +61,7 @@ import com.openexchange.admin.rmi.dataobjects.NameAndIdObject;
 import com.openexchange.admin.rmi.dataobjects.Resource;
 import com.openexchange.admin.rmi.dataobjects.Server;
 import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.exceptions.AbstractAdminRmiException;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
@@ -76,6 +73,7 @@ import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.exception.LogLevel;
+import com.openexchange.java.Reflections;
 import com.openexchange.log.LogProperties;
 
 /**
@@ -84,9 +82,6 @@ import com.openexchange.log.LogProperties;
  * @author d7
  */
 public abstract class OXCommonImpl {
-
-    private final static int EXCEPTION_ID = new SecureRandom().nextInt();
-    private final static AtomicInteger COUNTER = new AtomicInteger(0);
 
     private final static org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(OXCommonImpl.class);
 
@@ -200,96 +195,29 @@ public abstract class OXCommonImpl {
         return null == credentials ? null : credentials.getLogin();
     }
 
-    /**
-     * Add exception identifier to exception message, helping to trace errors across client and server
-     *
-     * @param e The exception whose message should be enhanced
-     * @param exceptionId The exception identifier
-     * @return The exception message plus exception identifier
-     */
-    public static String enhanceExceptionMessage(Exception e, String exceptionId) {
-        StringBuilder sb = new StringBuilder(e.getMessage()).append("; exceptionId ").append(exceptionId);
-        return sb.toString();
-    }
-
-    private static final ConcurrentMap<Class<?>, CachedConstructor> CONSTRUCTORS = new ConcurrentHashMap<>();
+    // -------------------------------------------------------------------------------------------------------------------------------------
 
     /**
-     * Adds the exception identifier to exception message
+     * Logs provisioning exception with exception identifier in MDC, enhances exception message by identifier and returns exception with enhanced message
      *
-     * @param <T> The exception type
-     * @param e The exception to enhance
-     * @param exceptionId The exception identifier
+     * @param logger The logger to log the exception
+     * @param e The exception to log and enhance
+     * @param creds The credentials used for this call
+     * @param contextId The identifier of the affected context
+     * @param objectId The identifier of the affected object
      * @return The enhanced exception
      */
-    private static <T extends Exception> Exception enhanceException(T e, String exceptionId) {
-        if (null == e) {
-            return null;
-        }
-
-        // Build message
-        String message = enhanceExceptionMessage(e, exceptionId);
-
-        // Detect appropriate constructor by Exception class
-        Class<? extends Exception> clazz = e.getClass();
-        CachedConstructor constructor = CONSTRUCTORS.get(clazz);
-        if (constructor == null) {
-            try {
-                CachedConstructor newConstructor = determineConstructorFor(clazz);
-                constructor = CONSTRUCTORS.putIfAbsent(clazz, newConstructor);
-                if (constructor == null) {
-                    constructor = newConstructor;
-                }
-            } catch (Exception x) {
-                LOGGER.error("", x);
-                return e;
-            }
-        }
-
-        // No such constructor available
-        if (constructor == NON_EXISTENT) {
-            // Maybe OXResellerException, wrap in RemoteExeption
-            RemoteException cme = new RemoteException(message, e.getCause());
-            cme.setStackTrace(e.getStackTrace());
-            return cme;
-        }
-
-        // Yield new exception instance
+    protected static <E extends AbstractAdminRmiException> E logAndReturnException(org.slf4j.Logger logger, E e, Credentials creds, String contextId, String objectId) {
+        // Enhance by provisioning log properties & log exception
+        LogProperties.putProvisioningLogProperties(getAdminName(creds), e.getExceptionId(), contextId, objectId);
         try {
-            Constructor<T> constr = (Constructor<T>) constructor.constructor;
-            T result = constr.newInstance(message, e.getCause());
-            result.setStackTrace(e.getStackTrace());
-            return result;
-        } catch (Exception x) {
-            LOGGER.error("", x);
-            return e;
-        }
-    }
-
-    private static CachedConstructor determineConstructorFor(Class<? extends Exception> clazz) {
-        try {
-            return new CachedConstructor(clazz.getConstructor(String.class, Throwable.class));
-        } catch (NoSuchMethodException x) {
-            LOGGER.debug("No such constructor Constructor(String, Throwable) available in class '{}'", clazz.getName(), x);
-            return NON_EXISTENT;
-        }
-    }
-
-    /**
-     * Generates a unique exception identifier.
-     *
-     * @return The generated exception identifier
-     */
-    private static String generateExceptionId() {
-        int count = COUNTER.incrementAndGet();
-        while ((count = COUNTER.incrementAndGet()) <= 0) {
-            if (COUNTER.compareAndSet(count, 1)) {
-                count = 1;
-                break;
-            }
+            logger.error("", e);
+        } finally {
+            LogProperties.removeProvisioningLogProperties();
         }
 
-        return new StringBuilder().append(EXCEPTION_ID).append("-").append(count).toString();
+        // Return exception instance as-is
+        return e;
     }
 
     /**
@@ -298,14 +226,39 @@ public abstract class OXCommonImpl {
      * @param logger The logger to log the exception
      * @param e The exception to log and enhance
      * @param creds The credentials used for this call
-     * @param contextId The affected context identifier
-     * @param objectId The affected object identifier in context
+     * @param contextId The identifier of the affected context
      * @return The enhanced exception
      */
-    protected static Exception logAndEnhanceException(org.slf4j.Logger logger, Exception e, Credentials creds, String contextId, String objectId) {
-        // Generate a unique exception identifier
-        String exceptionId = generateExceptionId();
+    protected static <E extends AbstractAdminRmiException> E logAndReturnException(org.slf4j.Logger logger, E e, Credentials creds, String contextId) {
+        return logAndReturnException(logger, e, creds, contextId, null);
+    }
 
+    /**
+     * Logs provisioning exception with exception identifier in MDC, enhances exception message by identifier and returns exception with enhanced message
+     *
+     * @param logger The logger to log the exception
+     * @param e The exception to log and enhance
+     * @param creds The credentials used for this call
+     * @return The enhanced exception
+     */
+    protected static <E extends AbstractAdminRmiException> E logAndReturnException(org.slf4j.Logger logger, E e, Credentials creds) {
+        return logAndReturnException(logger, e, creds, null, null);
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Logs given exception with exception identifier in MDC, enhances exception message by identifier and returns exception with enhanced message
+     *
+     * @param logger The logger to log the exception
+     * @param e The exception to log and enhance
+     * @param exceptionId The exception identifier
+     * @param creds The credentials used for this call
+     * @param contextId The identifier of the affected context
+     * @param objectId The identifier of the affected object
+     * @return The enhanced exception
+     */
+    protected static <E extends Exception> E logAndReturnException(org.slf4j.Logger logger, E e, String exceptionId, Credentials creds, String contextId, String objectId) {
         // Enhance by provisioning log properties & log exception
         LogProperties.putProvisioningLogProperties(getAdminName(creds), exceptionId, contextId, objectId);
         try {
@@ -313,33 +266,39 @@ public abstract class OXCommonImpl {
         } finally {
             LogProperties.removeProvisioningLogProperties();
         }
-        return enhanceException(e, exceptionId);
+
+        // Return exception instance as-is
+        return e;
     }
 
     /**
-     * Logs provisioning exception with exception identifier in MDC, enhances exception message by identifier and returns exception with enhanced message
+     * Logs given exception with exception identifier in MDC, enhances exception message by identifier and returns exception with enhanced message
      *
      * @param logger The logger to log the exception
      * @param e The exception to log and enhance
+     * @param exceptionId The exception identifier
      * @param creds The credentials used for this call
-     * @param contextId The affected context identifier
+     * @param contextId The identifier of the affected context
      * @return The enhanced exception
      */
-    protected static Exception logAndEnhanceException(org.slf4j.Logger logger, Exception e, Credentials creds, String contextId) {
-        return logAndEnhanceException(logger, e, creds, contextId, null);
+    protected static <E extends Exception> E logAndReturnException(org.slf4j.Logger logger, E e, String exceptionId, Credentials creds, String contextId) {
+        return logAndReturnException(logger, e, exceptionId, creds, contextId, null);
     }
 
     /**
-     * Logs provisioning exception with exception identifier in MDC, enhances exception message by identifier and returns exception with enhanced message
+     * Logs given exception with exception identifier in MDC, enhances exception message by identifier and returns exception with enhanced message
      *
      * @param logger The logger to log the exception
      * @param e The exception to log and enhance
+     * @param exceptionId The exception identifier
      * @param creds The credentials used for this call
      * @return The enhanced exception
      */
-    protected static Exception logAndEnhanceException(org.slf4j.Logger logger, Exception e, Credentials creds) {
-        return logAndEnhanceException(logger, e, creds, null, null);
+    protected static <E extends Exception> E logAndReturnException(org.slf4j.Logger logger, E e, String exceptionId, Credentials creds) {
+        return logAndReturnException(logger, e, exceptionId, creds, null, null);
     }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
 
     /**
      * Creates a comma-separated list of object identifiers
@@ -488,6 +447,19 @@ public abstract class OXCommonImpl {
             super();
             this.constructor = constructor;
         }
+    }
+
+    private static final Field FIELD_DETAIL_MESSAGE;
+
+    static {
+        Field detailMessageField = null;
+        try {
+            detailMessageField = Throwable.class.getDeclaredField("detailMessage");
+            Reflections.makeModifiable(detailMessageField);
+        } catch (Exception e) {
+            LOGGER.error("", e);
+        }
+        FIELD_DETAIL_MESSAGE = detailMessageField;
     }
 
 }

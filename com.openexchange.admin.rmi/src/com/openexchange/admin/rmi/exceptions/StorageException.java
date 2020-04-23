@@ -55,7 +55,7 @@ import java.util.Stack;
  * @author d7
  *
  */
-public class StorageException extends Exception {
+public class StorageException extends AbstractAdminRmiException {
 
     private static final long serialVersionUID = -7054584373955744724L;
 
