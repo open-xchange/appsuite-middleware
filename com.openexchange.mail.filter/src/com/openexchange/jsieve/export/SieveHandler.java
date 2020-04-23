@@ -72,6 +72,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.StringTokenizer;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -98,6 +99,10 @@ import com.openexchange.mailfilter.services.Services;
 import com.openexchange.tools.encoding.Base64;
 import io.micrometer.core.instrument.Metrics;
 import io.micrometer.core.instrument.Timer;
+import net.jodah.failsafe.CircuitBreaker;
+import net.jodah.failsafe.CircuitBreakerOpenException;
+import net.jodah.failsafe.Failsafe;
+import net.jodah.failsafe.FailsafeException;
 
 /**
  * This class is used to deal with the communication with sieve. For a description of the communication system to sieve see
@@ -400,7 +405,7 @@ public class SieveHandler {
         {
             int effectiveConnectTimeout = getEffectiveConnectTimeout(configuredTimeout);
             try {
-                s_sieve.connect(new InetSocketAddress(sieve_host, sieve_host_port), effectiveConnectTimeout);
+                connectSocket(effectiveConnectTimeout);
             } catch (java.net.ConnectException e) {
                 // Connection refused remotely
                 throw new OXSieveHandlerException("Sieve server not reachable. Please disable Sieve service if not supported by mail backend.", sieve_host, sieve_host_port, null, e);
@@ -539,6 +544,31 @@ public class SieveHandler {
 
             log.debug("Authentication to sieve successful");
             measureEnd("selectAuth");
+        }
+    }
+
+    private void connectSocket(int connectTimeout) throws IOException {
+        if (optionalCircuitBreaker.isPresent()) {
+            CircuitBreakerInfo circuitBreakerInfo = optionalCircuitBreaker.get();
+            try {
+                Failsafe.with(circuitBreakerInfo.getCircuitBreaker()).get(new CircuitBreakerConnectCallable(s_sieve, new InetSocketAddress(sieve_host, sieve_host_port), connectTimeout));
+            } catch (CircuitBreakerOpenException e) {
+                // Circuit breaker is open
+                circuitBreakerInfo.incrementDenials();
+                throw new IOException("Denied connect attempt to SIEVE server since circuit breaker is open.");
+            } catch (FailsafeException e) {
+                // Runnable failed with a checked exception
+                Throwable failure = e.getCause();
+                if (failure instanceof IOException) {
+                    throw (IOException) failure;
+                }
+                if (failure instanceof Error) {
+                    throw (Error) failure;
+                }
+                throw new IOException(failure);
+            }
+        } else {
+            s_sieve.connect(new InetSocketAddress(sieve_host, sieve_host_port), connectTimeout);
         }
     }
 
@@ -1973,6 +2003,30 @@ public class SieveHandler {
             .description("Mail filter commands per host")
             .tags("host", host, "status", status)
             .register(Metrics.globalRegistry);
+        }
+    }
+
+    private static class CircuitBreakerConnectCallable implements Callable<Void> {
+
+        private final Socket socket;
+        private final InetSocketAddress socketAddress;
+        private final int connectTimeout;
+
+        CircuitBreakerConnectCallable(Socket socket, InetSocketAddress socketAddress,int connectTimeout) {
+            super();
+            this.socket = socket;
+            this.socketAddress = socketAddress;
+            this.connectTimeout = connectTimeout;
+        }
+
+        @Override
+        public Void call() throws Exception {
+            if (connectTimeout >= 0) {
+                socket.connect(socketAddress, connectTimeout);
+            } else {
+                socket.connect(socketAddress);
+            }
+            return null;
         }
     }
 
