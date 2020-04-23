@@ -208,16 +208,7 @@ public abstract class OXCommonImpl {
      * @return The enhanced exception
      */
     protected static <E extends AbstractAdminRmiException> E logAndReturnException(org.slf4j.Logger logger, E e, Credentials creds, String contextId, String objectId) {
-        // Enhance by provisioning log properties & log exception
-        LogProperties.putProvisioningLogProperties(getAdminName(creds), e.getExceptionId(), contextId, objectId);
-        try {
-            logger.error("", e);
-        } finally {
-            LogProperties.removeProvisioningLogProperties();
-        }
-
-        // Return exception instance as-is
-        return e;
+        return logAndReturnException(logger, e, e.getExceptionId(), creds, contextId, objectId);
     }
 
     /**
@@ -230,7 +221,7 @@ public abstract class OXCommonImpl {
      * @return The enhanced exception
      */
     protected static <E extends AbstractAdminRmiException> E logAndReturnException(org.slf4j.Logger logger, E e, Credentials creds, String contextId) {
-        return logAndReturnException(logger, e, creds, contextId, null);
+        return logAndReturnException(logger, e, e.getExceptionId(), creds, contextId, null);
     }
 
     /**
@@ -242,7 +233,7 @@ public abstract class OXCommonImpl {
      * @return The enhanced exception
      */
     protected static <E extends AbstractAdminRmiException> E logAndReturnException(org.slf4j.Logger logger, E e, Credentials creds) {
-        return logAndReturnException(logger, e, creds, null, null);
+        return logAndReturnException(logger, e, e.getExceptionId(), creds, null, null);
     }
 
     // -------------------------------------------------------------------------------------------------------------------------------------
