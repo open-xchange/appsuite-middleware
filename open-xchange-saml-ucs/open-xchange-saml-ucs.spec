@@ -15,7 +15,7 @@ BuildRequires: java-1.8.0-openjdk-devel
 BuildRequires: open-xchange-authentication-ucs-common
 BuildRequires: open-xchange-saml-core
 Version:       @OXVERSION@
-%define        ox_release 0
+%define        ox_release 11
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -54,5 +54,39 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/com.openexchange.saml.ucs.ini
 
 %changelog
-* Tue Apr 14 2020 Marcus Klein <marcus.klein@open-xchange.com>
-initial packaging
+* Thu Apr 23 2020 Felix Marx <felix.marx@open-xchange.com>
+Build for patch 2020-04-30 (5702)
+* Fri Apr 17 2020 Felix Marx <felix.marx@open-xchange.com>
+Build for patch 2020-04-02 (5692)
+* Mon Apr 06 2020 Felix Marx <felix.marx@open-xchange.com>
+Build for patch 2020-04-14 (5677)
+* Thu Mar 19 2020 Felix Marx <felix.marx@open-xchange.com>
+Build for patch 2020-03-23 (5653)
+* Fri Feb 28 2020 Felix Marx <felix.marx@open-xchange.com>
+Build for patch 2020-03-02 (5623)
+* Wed Feb 12 2020 Felix Marx <felix.marx@open-xchange.com>
+Build for patch 2020-02-19 (5588)
+* Wed Feb 12 2020 Felix Marx <felix.marx@open-xchange.com>
+Build for patch 2020-02-10 (5572)
+* Mon Jan 20 2020 Felix Marx <felix.marx@open-xchange.com>
+Build for patch 2020-01-20 (5547)
+* Thu Nov 28 2019 Felix Marx <felix.marx@open-xchange.com>
+Second candidate for 7.10.3 release
+* Thu Nov 21 2019 Felix Marx <felix.marx@open-xchange.com>
+First candidate for 7.10.3 release
+* Thu Oct 17 2019 Felix Marx <felix.marx@open-xchange.com>
+First preview for 7.10.3 release
+* Mon Jun 17 2019 Felix Marx <felix.marx@open-xchange.com>
+prepare for 7.10.3 release
+* Fri May 10 2019 Felix Marx <felix.marx@open-xchange.com>
+Second candidate for 7.10.2 release
+* Fri May 10 2019 Felix Marx <felix.marx@open-xchange.com>
+First candidate for 7.10.2 release
+* Tue Apr 30 2019 Felix Marx <felix.marx@open-xchange.com>
+Second preview for 7.10.2 release
+* Thu Mar 28 2019 Felix Marx <felix.marx@open-xchange.com>
+First preview for 7.10.2 release
+* Thu Oct 18 2018 Felix Marx <felix.marx@open-xchange.com>
+prepare for 7.10.2 release
+* Mon Oct 08 2018 Felix Marx <felix.marx@open-xchange.com>
+prepare for 7.10.1 release
