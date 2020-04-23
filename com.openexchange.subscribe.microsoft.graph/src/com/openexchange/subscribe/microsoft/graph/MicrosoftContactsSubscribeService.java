@@ -79,7 +79,7 @@ import com.openexchange.tools.iterator.SearchIteratorDelegator;
  */
 public class MicrosoftContactsSubscribeService extends AbstractOAuthSubscribeService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(MicrosoftContactsSubscribeService.class);
+    static final Logger LOG = LoggerFactory.getLogger(MicrosoftContactsSubscribeService.class);
     public static final String SOURCE_ID = KnownApi.MICROSOFT_GRAPH.getServiceId() + ".contact";
     private static final int CHUNK_SIZE = 25;
 
@@ -132,26 +132,50 @@ public class MicrosoftContactsSubscribeService extends AbstractOAuthSubscribeSer
      * @param subscription The {@link Subscription}
      */
     private void scheduleInBackground(ThreadPoolService threadPool, FolderUpdaterService<Contact> folderUpdater, OAuthAccount account, Subscription subscription) {
-        threadPool.submit(new AbstractTask<Void>() {
+        threadPool.submit(new BackgroundTask(folderUpdater, account, subscription));
+    }
 
-            @Override
-            public Void call() throws Exception {
-                try {
-                    MicrosoftGraphContactsService contactsService = getServices().getService(MicrosoftGraphContactsService.class);
-                    boolean hasMore = false;
-                    int offset = 0;
-                    do {
-                        List<Contact> contacts = contactsService.getContacts(account.getToken(), CHUNK_SIZE, offset);
-                        folderUpdater.save(new SearchIteratorDelegator<Contact>(contacts), subscription);
-                        offset += contacts.size();
-                        hasMore = !contacts.isEmpty();
-                    } while (hasMore);
-                } catch (Exception e) {
-                    LOG.error("", e);
-                    throw e;
-                }
+    ////////////////////////////// NESTED /////////////////////////////
+
+    /**
+     * {@link BackgroundTask} - Background task for fetching contacts
+     */
+    private final class BackgroundTask extends AbstractTask<Void> {
+
+        private final FolderUpdaterService<Contact> folderUpdater;
+        private final OAuthAccount account;
+        private final Subscription subscription;
+
+        /**
+         * Initialises a new {@link BackgroundTask}.
+         * 
+         * @param folderUpdater The folder updated
+         * @param account The account
+         * @param subscription The subscription
+         */
+        BackgroundTask(FolderUpdaterService<Contact> folderUpdater, OAuthAccount account, Subscription subscription) {
+            this.folderUpdater = folderUpdater;
+            this.account = account;
+            this.subscription = subscription;
+        }
+
+        @Override
+        public Void call() throws Exception {
+            try {
+                MicrosoftGraphContactsService contactsService = getServices().getService(MicrosoftGraphContactsService.class);
+                boolean hasMore = false;
+                int offset = 0;
+                do {
+                    List<Contact> contacts = contactsService.getContacts(account.getToken(), CHUNK_SIZE, offset);
+                    folderUpdater.save(new SearchIteratorDelegator<Contact>(contacts), subscription);
+                    offset += contacts.size();
+                    hasMore = !contacts.isEmpty();
+                } while (hasMore);
                 return null;
+            } catch (Exception e) {
+                LOG.error("", e);
+                throw e;
             }
-        });
+        }
     }
 }

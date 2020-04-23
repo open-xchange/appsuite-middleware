@@ -83,6 +83,14 @@ public class InputStreamEntity implements RESTBodyEntity {
     /**
      * Initialises a new {@link InputStreamEntity}.
      */
+    public InputStreamEntity(InputStream stream, String contentType) {
+        super();
+        entity = new org.apache.http.entity.InputStreamEntity(stream, ContentType.create(contentType));
+    }
+
+    /**
+     * Initialises a new {@link InputStreamEntity}.
+     */
     public InputStreamEntity(InputStream stream, long contentLength, String contentType) {
         super();
         entity = new org.apache.http.entity.InputStreamEntity(stream, contentLength, ContentType.create(contentType));
