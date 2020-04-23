@@ -69,19 +69,21 @@ import net.jodah.failsafe.util.Ratio;
  */
 public class CircuitBreakerMetrics implements MeterBinder {
 
-    private static final String STATE_NAME = "appsuite.circuitbreaker.state";
+    private static final String BASE = "appsuite.circuitbreaker.";
+
+    private static final String STATE_NAME = BASE+"state";
     private static final String STATE_DESCRIPTION = "The current state of the circuit. 1.0 if so, otherwise 0.0.";
 
-    private static final String TIMEOUT_NAME = "appsuite.circuitbreaker.timeout.seconds";
+    private static final String TIMEOUT_NAME = BASE+"timeout.seconds";
     private static final String TIMEOUT_DESCRIPTION = "The timeout for executions or negative if none has been configured.";
 
-    private static final String DELAY_NAME = "appsuite.circuitbreaker.delay.seconds";
+    private static final String DELAY_NAME = BASE+"delay.seconds";
     private static final String DELAY_DESCRIPTION = "The delay before allowing another execution on the circuit.";
 
-    private static final String SUCCESS_THRESHOLD_NAME = "appsuite.circuitbreaker.success.threshold.ratio";
+    private static final String SUCCESS_THRESHOLD_NAME = BASE+"success.threshold.ratio";
     private static final String SUCCESS_THRESHOLD_DESCRIPTION = "The ratio of successive successful executions that must occur when in a half-open state in order to close the circuit.";
 
-    private static final String FAILURE_THRESHOLD_NAME = "appsuite.circuitbreaker.failure.threshold.ratio";
+    private static final String FAILURE_THRESHOLD_NAME = BASE+"failure.threshold.ratio";
     private static final String FAILURE_THRESHOLD_DESCRIPTION = "The ratio of successive failures that must occur when in a closed state in order to open the circuit.";
 
     private final CircuitBreaker circuitBreaker;
