@@ -297,7 +297,7 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
         } catch (CircuitBreakerOpenException e) {
             // Circuit breaker is open
             onDenied(e, breakerInfo);
-            throw new IOException("Denied IMAP connection since circuit breaker is open.");
+            throw new IOException("Denied connect attempt to IMAP server since circuit breaker is open.");
         } catch (FailsafeException e) {
             // Runnable failed with a checked exception
             Throwable failure = e.getCause();
