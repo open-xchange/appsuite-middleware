@@ -55,14 +55,18 @@ import java.net.URI;
 import java.util.Properties;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.idn.IDNA;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.service.MailService;
+import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -122,6 +126,10 @@ public class SpamExpertsSpamHandler extends SpamHandler {
         props.put("mail.imap.socketFactory.port", Integer.toString(imapUrl.getPort()));
         props.put("mail.imap.socketFactory.fallback", "false");
 
+        if (isPrimaryImapAccount(imapUrl.getHost(), imapUrl.getPort(), session.getUserId(), session.getContextId())) {
+            props.put("mail.imap.primary", "true");
+        }
+
         javax.mail.Session imapSession = javax.mail.Session.getInstance(props, null);
 
         IMAPStore imapStore = null;
@@ -156,6 +164,33 @@ public class SpamExpertsSpamHandler extends SpamHandler {
                     // Ignore
                 }
             }
+        }
+    }
+
+    /**
+     * Checks if given host/port denote the primary IMAP account of specified user.
+     *
+     * @param host The host
+     * @param port The port
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return <code>true</code> if given host/port denote the primary IMAP account; otherwise <code>false</code>
+     */
+    private boolean isPrimaryImapAccount(String host, int port, int userId, int contextId) {
+        try {
+            MailAccountStorageService storageService = services.getOptionalService(MailAccountStorageService.class);
+            if (storageService == null) {
+                return false;
+            }
+
+            MailAccount defaultMailAccount = storageService.getDefaultMailAccount(userId, contextId);
+            if (false == Strings.asciiLowerCase(defaultMailAccount.getMailProtocol()).startsWith("imap")) {
+                return false;
+            }
+            return IDNA.toASCII(host).equals(IDNA.toASCII(defaultMailAccount.getMailServer())) && port == defaultMailAccount.getMailPort();
+        } catch (Exception e) {
+            LOG.warn("Failed to check for primary IMAP account of user {} in context {}", I(userId), I(contextId), e);
+           return false;
         }
     }
 
