@@ -151,9 +151,7 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
         }
         analysis.setUid(update.getUid());
 
-        Event master = update;
         List<Event> exceptions = Collections.emptyList();
-
         boolean differ = true;
 
         if (original != null) {
@@ -177,7 +175,7 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
             }
             change.setType(ITipChange.Type.UPDATE);
             change.setCurrentEvent(original);
-            differ = doAppointmentsDiffer(update, original);
+            differ = doAppointmentsDiffer(update, original, session);
             exceptions = new ArrayList<Event>(util.getExceptions(original, session));
         } else {
             if (message.getMethod() == ITipMethod.COUNTER) {
@@ -212,14 +210,16 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
             }
             session.getUtilities().adjustTimeZones(owner, event, original);
             change.setNewEvent(event);
-
             change.setConflicts(util.getConflicts(message.getEvent(), session));
-
             describeDiff(change, wrapper, session, message);
             analysis.addChange(change);
+        }
 
-        } else {
-            master = original;
+        Event master = null;
+        if (null != original && original.containsSeriesId()) {
+            master = new Event();
+            master.setId(original.getSeriesId());
+            master = util.loadEvent(master, session);
         }
 
         for (Event exception : message.exceptions()) {
@@ -229,18 +229,20 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
             change = new ITipChange();
             change.setException(true);
             change.setMaster(master);
-
             exception = handleMicrosoft(message, analysis, matchingException, exception);
-            exception.setSeriesId(update.getSeriesId());
 
             differ = true;
             if (matchingException != null) {
+                exception.setSeriesId(matchingException.getSeriesId());
                 session.getUtilities().adjustTimeZones(owner, exception, matchingException);
                 change.setType(ITipChange.Type.UPDATE);
                 change.setCurrentEvent(matchingException);
                 ensureParticipant(matchingException, exception, session, owner);
-                differ = doAppointmentsDiffer(exception, matchingException);
+                differ = doAppointmentsDiffer(exception, matchingException, session);
             } else {
+                if (null != master) {
+                    exception.setSeriesId(master.getSeriesId());
+                }
                 if (isDeleteException(original, exception)) {
                     analysis.addAnnotation(new ITipAnnotation(Messages.CHANGE_PARTICIPANT_STATE_IN_DELETED_APPOINTMENT, locale));
                     analysis.recommendAction(ITipAction.IGNORE);
@@ -270,7 +272,6 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
         }
 
         // Purge conflicts of irrelevant conflicts
-
         purgeConflicts(analysis);
         if (updateOrNew(analysis)) {
             if (message.getMethod() == ITipMethod.COUNTER) {
