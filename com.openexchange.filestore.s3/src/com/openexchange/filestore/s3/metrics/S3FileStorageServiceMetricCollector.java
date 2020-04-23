@@ -63,7 +63,7 @@ import io.micrometer.core.instrument.Timer;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class S3FileStorageServiceMetricCollector extends ServiceMetricCollector {
-    
+
     private static final String GROUP = "appsuite.s3.";
 
     /**
@@ -75,8 +75,8 @@ public class S3FileStorageServiceMetricCollector extends ServiceMetricCollector 
 
     @Override
     public void collectByteThroughput(final ByteThroughputProvider provider) {
-        Timer timer = Timer.builder(GROUP + "requestSizeTimer").description("The timer of the request size gatherer. Usually runs every 10 seconds.").register(Metrics.globalRegistry);
-        Counter counter = Counter.builder(GROUP + "requestSize").description("The size of s3 requests.").baseUnit("bytes").register(Metrics.globalRegistry);
+        Timer timer = Timer.builder(GROUP + "requestSizeTimer").description("The timer of the request size gatherer. Usually runs every 10 seconds.").tags("type", provider.getThroughputMetricType().name()).register(Metrics.globalRegistry);
+        Counter counter = Counter.builder(GROUP + "requestSize").description("The size of s3 requests.").baseUnit("bytes").tags("type", provider.getThroughputMetricType().name()).register(Metrics.globalRegistry);
         timer.record(Duration.ofSeconds(10));
         counter.increment(Integer.toUnsignedLong(provider.getByteCount()));
     }

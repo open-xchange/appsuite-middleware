@@ -60,6 +60,7 @@ import com.openexchange.pooling.PoolingException;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.Tags;
 import io.micrometer.core.instrument.Timer;
 
 /**
@@ -103,39 +104,40 @@ public abstract class AbstractMetricAwarePool<T extends ConnectionTypeAware> ext
      * Initializes the metrics for this pool
      */
     private void initMetrics() {
+        Tags tags = Tags.of("class", getPoolClass(), "type", type.getTagName(), "pool", String.valueOf(getPoolId()));
         // @formatter:off
         Gauge.builder(GROUP + "active", () -> I(getNumActive()))
              .description("The currently active connections of this db pool")
-             .tags("class", getPoolClass(), "type", type.getTagName(), "pool", String.valueOf(getPoolId()))
+             .tags(tags)
              .register(Metrics.globalRegistry);
         Gauge.builder(GROUP + "max", () -> I(getMaxActive()))
              .description("The maximum number of active connections of this db pool")
-             .tags("class", getPoolClass(), "type", type.getTagName(), "pool", String.valueOf(getPoolId()))
+             .tags(tags)
              .register(Metrics.globalRegistry);
         Gauge.builder(GROUP + "total", () -> I(getNumActive() + getNumIdle()))
              .description("The total number of pooled connections of this db pool")
-             .tags("class", getPoolClass(), "type", type.getTagName(), "pool", String.valueOf(getPoolId()))
+             .tags(tags)
              .register(Metrics.globalRegistry);
         Gauge.builder(GROUP + "idle", () -> I(getNumIdle()))
              .description("The number of idle connections of this db pool")
-             .tags("class", getPoolClass(), "type", type.getTagName(), "pool", String.valueOf(getPoolId()))
+             .tags(tags)
              .register(Metrics.globalRegistry);
         createTimer = Timer.builder(GROUP + "create")
                            .description("The time it takes to initialize a new connection")
-                           .tags("class", getPoolClass(), "type", type.getTagName(), "pool", String.valueOf(getPoolId()))
+                           .tags(tags)
                            .register(Metrics.globalRegistry);
         usage = Timer.builder(GROUP + "usage")
                      .description("The time between acquiration and returning a connection back to pool")
-                     .tags("class", getPoolClass(), "type", type.getTagName(), "pool", String.valueOf(getPoolId()))
+                     .tags(tags)
                      .publishPercentileHistogram()
                      .register(Metrics.globalRegistry);
         acquireTimer = Timer.builder(GROUP + "acquire")
                        .description("The time it takes for a thread to aquire a connection")
-                       .tags("class", getPoolClass(), "type", type.getTagName(), "pool", String.valueOf(getPoolId()))
+                       .tags(tags)
                        .register(Metrics.globalRegistry);
         timeout = Counter.builder(GROUP + "timeout")
                          .description("The number of timeouts")
-                         .tags("class", getPoolClass(), "type", type.getTagName(), "pool", String.valueOf(getPoolId()))
+                         .tags(tags)
                          .register(Metrics.globalRegistry);
         // @formatter:on
     }
