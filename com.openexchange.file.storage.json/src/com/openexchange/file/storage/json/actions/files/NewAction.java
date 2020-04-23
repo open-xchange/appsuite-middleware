@@ -97,7 +97,7 @@ public class NewAction extends AbstractWriteAction {
             // Save file metadata without binary payload
             newId = fileAccess.saveFileMetadata(file, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, request.getSentColumns(), ignoreWarnings, tryAddVersion);
         }
-
+        
         List<OXException> warnings = new ArrayList<>(fileAccess.getAndFlushWarnings());
         if (request.notifyPermissionEntities() && file.getObjectPermissions() != null && file.getObjectPermissions().size() > 0) {
             File modified = fileAccess.getFileMetadata(newId, FileStorageFileAccess.CURRENT_VERSION);

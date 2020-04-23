@@ -77,6 +77,8 @@ import com.openexchange.groupware.upload.StreamedUploadFile;
 import com.openexchange.groupware.upload.StreamedUploadFileIterator;
 import com.openexchange.groupware.upload.StreamedUploadFileListener;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
+import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.session.Session;
@@ -324,9 +326,21 @@ public class MultipartStreamedUpload implements StreamedUpload {
                 FileItemHeaders headers = item.getHeaders();
                 String contentId = headers.getHeader("Content-Id");
                 uploadFile.setContentId(contentId);
+                
+                String cd = headers.getHeader("content-disposition");
+                ContentDisposition contentDispo = new ContentDisposition(cd);
+                String filesize = contentDispo.getParameter("filesize");
+                if (Strings.isNotEmpty(filesize)) {
+                    try {
+                        uploadFile.setSize(Long.parseLong(filesize));
+                    } catch (NumberFormatException e) {
+                        //ignore
+                    }
+                }
 
                 // Deduce MIME type from passed file name
                 String mimeType = MimeType2ExtMap.getContentType(fileName, null);
+                
 
                 // Set associated MIME type
                 {

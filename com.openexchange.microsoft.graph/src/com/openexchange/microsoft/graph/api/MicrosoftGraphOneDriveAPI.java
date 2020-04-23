@@ -49,7 +49,10 @@
 
 package com.openexchange.microsoft.graph.api;
 
+import static com.openexchange.java.Autoboxing.D;
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -66,6 +69,7 @@ import org.json.JSONObject;
 import org.json.JSONValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.microsoft.graph.api.client.MicrosoftGraphRESTClient;
@@ -459,6 +463,25 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
     }
 
     /**
+     * Performs an one-shot upload. This is a blocking operation. If another file is already present
+     * with the same filename in the same folder then its contents will be overridden.
+     * 
+     * @param accessToken The oauth access token
+     * @param folderId The folder identifier of the parent folder (if empty or <code>null</code> the root folder will be used)
+     * @param filename The file's name
+     * @param contentType The content type of the file
+     * @param inputStream A stream with the actual data
+     * @return A {@link JSONObject} with the metadata of the newly uploaded file.
+     * @throws OXException if an error is occurred
+     * @see <a href="https://docs.microsoft.com/en-us/graph/api/driveitem-put-content?view=graph-rest-1.0">Upload small files</a>
+     * 
+     */
+    public JSONObject oneshotUpload(String accessToken, String folderId, String filename, String contentType, InputStream inputStream) throws OXException {
+        String path = BASE_URL + (Strings.isEmpty(folderId) ? "/root" : "/items/" + folderId) + ":/" + filename + ":/content";
+        return putResource(accessToken, path, contentType, inputStream);
+    }
+
+    /**
      * Performs a resumable upload, i.e. a chunk-wise streaming of the data. This is a blocking operation.
      * If another file is already present with the same filename in the same folder then its contents will be
      * overridden.
@@ -466,7 +489,6 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
      * @param accessToken The oauth access token
      * @param folderId The folder identifier of the parent folder (if empty or <code>null</code> the root folder will be used)
      * @param filename The file's name
-     * @param contentType The content type of the file
      * @param contentLength The file's size
      * @param inputStream A stream with the actual data
      * @return A {@link JSONObject} with the metadata of the newly uploaded file.
@@ -474,12 +496,12 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
      * @throws IllegalArgumentException if the content length of the file is less than or equal to zero.
      * @see <a href="https://developer.microsoft.com/en-us/graph/docs/api-reference/v1.0/api/driveitem_createuploadsession">Resumable Upload</a>
      */
-    public JSONObject streamingUpload(String accessToken, String folderId, String filename, String contentType, long contentLength, InputStream inputStream) throws OXException {
+    public JSONObject streamingUpload(String accessToken, String folderId, String filename, long contentLength, InputStream inputStream) throws OXException {
         if (contentLength <= 0) {
             throw new IllegalArgumentException("The content length of the file must be greater than zero!");
         }
         String path = BASE_URL + (Strings.isEmpty(folderId) ? "/root" : "/items/" + folderId) + ":/" + filename + ":/createUploadSession";
-        try {
+        try (BufferedInputStream bis = new BufferedInputStream(inputStream)) {
             JSONObject body = new JSONObject();
             body.put("name", filename);
 
@@ -490,25 +512,26 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
             }
 
             int read = 0;
-            String range;
             int offset = 0;
             int length = CHUNK_SIZE;
             long remainingSize = contentLength;
             long transferredBytes = 0;
-            byte[] b = new byte[CHUNK_SIZE];
+            byte[] b = new byte[length];
             String uploadId = UUID.randomUUID().toString();
-            while ((read = inputStream.read(b, 0, length)) > 0) {
+
+            StringBuilder rangeBuilder = new StringBuilder();
+            while ((read = bis.read(b, 0, CHUNK_SIZE)) > 0) {
                 // Calculate current position
                 remainingSize -= read;
                 transferredBytes += read;
                 length = (int) (remainingSize > CHUNK_SIZE ? CHUNK_SIZE : remainingSize);
                 // The end index has to be calculated before the offset, otherwise it will mess up the range header.
-                range = "bytes " + offset + "-" + (offset + read - 1) + "/" + contentLength;
+                rangeBuilder.append("bytes ").append(offset).append('-').append((offset + read - 1)).append('/').append(contentLength);
                 offset += read;
 
                 // Compile new put request
                 HttpEntityEnclosingRequestBase put = new HttpPut(uploadUrl);
-                put.setHeader(HttpHeaders.CONTENT_RANGE, range);
+                put.setHeader(HttpHeaders.CONTENT_RANGE, rangeBuilder.toString());
                 put.setEntity(new ByteArrayEntity(b, 0, read));
 
                 // Upload
@@ -521,7 +544,8 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
                     LOG.debug("Upload status for upload with id '{}': Successfully completed.", uploadId);
                     return ((JSONValue) response.getResponseBody()).toObject();
                 }
-                LOG.debug("Upload status for upload with id '{}': Completed: {}% ", uploadId, String.format("%1.2f", Double.valueOf((((double) transferredBytes / contentLength * 100)))));
+                LOG.debug("Upload status for upload with id '{}': Completed: {}/{} - {}% ", uploadId, L(transferredBytes), L(contentLength), String.format("%1.2f", D((((double) transferredBytes / contentLength * 100)))));
+                rangeBuilder.setLength(0);
             }
             throw MicrosoftGraphDriveClientExceptionCodes.UPLOAD_FAILED.create(filename, folderId);
         } catch (JSONException e) {

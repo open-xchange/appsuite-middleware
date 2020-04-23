@@ -89,20 +89,6 @@ public interface UploadFile extends BasicUploadFile {
     void setFileName(final String fileName);
 
     /**
-     * Gets the file size in bytes.
-     *
-     * @return The file size in bytes.
-     */
-    long getSize();
-
-    /**
-     * Sets the file size in bytes.
-     *
-     * @param size The file size in bytes.
-     */
-    void setSize(final long size);
-
-    /**
      * Gets the associated unique temporary file on disk.
      *
      * @return The associated unique temporary file on disk.

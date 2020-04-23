@@ -54,7 +54,6 @@ import java.io.InputStream;
 import com.openexchange.groupware.upload.StreamedUploadFile;
 import com.openexchange.groupware.upload.StreamedUploadFileInputStream;
 
-
 /**
  * {@link StreamedUploadFileImpl}
  *
@@ -68,6 +67,7 @@ public class StreamedUploadFileImpl implements StreamedUploadFile {
     private String preparedFileName;
     private String contentType;
     private String contentId;
+    private long size;
     private StreamedUploadFileInputStream stream;
 
     /**
@@ -131,6 +131,16 @@ public class StreamedUploadFileImpl implements StreamedUploadFile {
      */
     public void setFileName(String fileName) {
         this.fileName = fileName;
+    }
+
+    @Override
+    public long getSize() {
+        return size;
+    }
+
+    @Override
+    public void setSize(final long size) {
+        this.size = size;
     }
 
     @Override
