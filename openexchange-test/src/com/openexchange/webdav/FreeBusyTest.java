@@ -1,0 +1,487 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the OX Software GmbH. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.webdav;
+
+import static com.openexchange.java.Autoboxing.B;
+import static com.openexchange.java.Autoboxing.I;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.BlockJUnit4ClassRunner;
+import com.openexchange.ajax.chronos.AbstractChronosTest;
+import com.openexchange.ajax.chronos.util.DateTimeUtil;
+import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.testing.httpclient.invoker.ApiException;
+import com.openexchange.testing.httpclient.models.Attendee;
+import com.openexchange.testing.httpclient.models.Attendee.CuTypeEnum;
+import com.openexchange.testing.httpclient.models.DateTimeData;
+import com.openexchange.testing.httpclient.models.EventData;
+import com.openexchange.testing.httpclient.models.EventData.TranspEnum;
+import com.openexchange.testing.restclient.modules.InternetFreeBusyApi;
+
+/**
+ * {@link FreeBusyTest}
+ *
+ * @author <a href="mailto:anna.ottersbach@open-xchange.com">Anna Ottersbach</a>
+ * @since v7.10.4
+ */
+
+@RunWith(BlockJUnit4ClassRunner.class)
+public class FreeBusyTest extends AbstractChronosTest {
+
+    private static final Map<String, String> CONFIG = new HashMap<String, String>();
+
+    private static final int DEFAULT_WEEKS_FUTURE = 4;
+
+    private static final int DEFAULT_WEEKS_PAST = 1;
+
+    private EventData busyDate;
+
+    private EventData freeDate;
+
+    private String userName;
+
+    private String server;
+
+    private int contextid;
+
+    private InternetFreeBusyApi api;
+
+    private String testResourceName;
+
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        api = new InternetFreeBusyApi();
+        /*
+         * Prepare config
+         */
+        CONFIG.put(FreeBusyProperty.PUBLISH_INTERNET_FREEBUSY.getFQPropertyName(), "true");
+        /*
+         * Create test data
+         */
+        userName = testUser.getUser();
+        server = testUser.getContext();
+        contextid = getClient().getValues().getContextId();
+        testResourceName = "test-resource-1";
+        this.busyDate = createEvent(TranspEnum.OPAQUE, FreeBusyTest.class.getName() + "_Busy", 0, 1);
+        this.freeDate = createEvent(TranspEnum.TRANSPARENT, FreeBusyTest.class.getName() + "_Free", 1, 2);
+    }
+    // -------------------------------Positive tests--------------------------------------------------------------
+
+    /**
+     * 
+     * Tests whether valid iCalendar data is returned,
+     * if only contentId, user name and server name are given.
+     *
+     * @throws Exception if changing the configuration fails
+     * @throws ApiException if an error occurred by getting the free busy data
+     */
+    @Test
+    public void testGetFreeBusy_MinimumValidData_Status200() throws Exception, ApiException {
+        super.setUpConfiguration();
+        String icalResponse = api.getFreeBusy(I(contextid), userName, server, null, null, null);
+        validateICal(icalResponse, userName, server, DEFAULT_WEEKS_PAST, DEFAULT_WEEKS_FUTURE, false);
+    }
+
+    /**
+     * 
+     * Tests whether valid iCalendar data is returned,
+     * if contentId, resource name and server name are given.
+     *
+     * @throws Exception if changing the configuration fails
+     * @throws ApiException if an error occurred by getting the free busy data
+     */
+    @Test
+    public void testGetFreeBusy_Resource_Status200() throws Exception, ApiException {
+        super.setUpConfiguration();
+        String icalResponse = api.getFreeBusy(I(contextid), testResourceName, server, null, null, null);
+        validateICal(icalResponse, testResourceName, server, DEFAULT_WEEKS_PAST, DEFAULT_WEEKS_FUTURE, false);
+    }
+
+    /**
+     * 
+     * Tests whether valid iCalendar data is returned for a resource, if the value simple is set to true.
+     *
+     * @throws Exception if changing the configuration fails
+     * @throws ApiException if an error occurred by getting the free busy data
+     */
+    @Test
+    public void testGetFreeBusy_ResourceSimple_Status200() throws Exception, ApiException {
+        super.setUpConfiguration();
+        String icalResponse = api.getFreeBusy(I(contextid), testResourceName, server, null, null, B(true));
+        validateICal(icalResponse, testResourceName, server, DEFAULT_WEEKS_PAST, DEFAULT_WEEKS_FUTURE, true);
+    }
+
+    /**
+     * 
+     * Tests whether valid iCalendar data is returned, if all parameters are given.
+     *
+     * @throws Exception if changing the configuration fails
+     * @throws ApiException if an error occurred by getting the free busy data
+     */
+    @Test
+    public void testGetFreeBusy_MaximumValidData_Status200() throws Exception {
+        super.setUpConfiguration();
+        int weeksPast = 12;
+        int weeksFuture = 26;
+        String icalResponse = api.getFreeBusy(I(contextid), userName, server, I(weeksPast), I(weeksFuture), B(false));
+        validateICal(icalResponse, userName, server, weeksPast, weeksFuture, false);
+    }
+
+    /**
+     * 
+     * Tests whether valid iCalendar data is returned, if the value simple is set to true.
+     *
+     * @throws Exception if changing the configuration fails
+     * @throws ApiException if an error occurred by getting the free busy data
+     */
+    @Test
+    public void testGetFreeBusy_Simple_Status200() throws Exception {
+        super.setUpConfiguration();
+        String icalResponse = api.getFreeBusy(I(contextid), userName, server, null, null, B(true));
+        validateICal(icalResponse, userName, server, DEFAULT_WEEKS_PAST, DEFAULT_WEEKS_FUTURE, true);
+    }
+
+    // -------------------------------Depend on property tests--------------------------------------------------------------
+
+    /**
+     * 
+     * Tests whether getting free busy data failed with code 404,
+     * if free busy data is not published for the requested user.
+     *
+     * @throws Exception if changing the configuration fails
+     */
+    @Test
+    public void testGetFreeBusy_PublishDisabled_Status404() throws Exception {
+        CONFIG.put(FreeBusyProperty.PUBLISH_INTERNET_FREEBUSY.getFQPropertyName(), "false");
+        super.setUpConfiguration();
+        try {
+            api.getFreeBusy(I(contextid), userName, server, null, null, null);
+            fail();
+        } catch (com.openexchange.testing.restclient.invoker.ApiException e) {
+            assertEquals(404, e.getCode());
+        }
+    }
+
+    /**
+     * 
+     * Tests whether getting free busy data failed with code 400,
+     * if the requested value for time range into past is bigger than the configured maximum.
+     * 
+     * @throws Exception if changing the configuration fails
+     */
+    @Test
+    public void testGetFreeBusy_PropertyWeeksPast_Status400() throws Exception {
+        CONFIG.put(FreeBusyProperty.INTERNET_FREEBUSY_MAXIMUM_TIMERANGE_PAST.getFQPropertyName(), "1");
+        super.setUpConfiguration();
+        int weeksPast = 2;
+        try {
+            api.getFreeBusy(I(contextid), userName, server, I(weeksPast), null, null);
+        } catch (com.openexchange.testing.restclient.invoker.ApiException e) {
+            assertEquals(400, e.getCode());
+        }
+    }
+
+    /**
+     * 
+     * Tests whether getting free busy data failed with code 400,
+     * if the requested value for time range into future is bigger than the configured maximum.
+     * 
+     * @throws Exception if changing the configuration fails
+     */
+    @Test
+    public void testGetFreeBusy_PropertyWeeksFuture_Status400() throws Exception {
+        CONFIG.put(FreeBusyProperty.INTERNET_FREEBUSY_MAXIMUM_TIMERANGE_FUTURE.getFQPropertyName(), "1");
+        super.setUpConfiguration();
+        int weeksFuture = 2;
+        try {
+            api.getFreeBusy(I(contextid), userName, server, null, I(weeksFuture), null);
+        } catch (com.openexchange.testing.restclient.invoker.ApiException e) {
+            assertEquals(400, e.getCode());
+        }
+    }
+
+    // -------------------------------Invalid input tests--------------------------------------------------------------
+
+    /**
+     * 
+     * Tests whether getting free busy data failed with code 400,
+     * if context id is null.
+     * 
+     * @throws Exception if changing the configuration fails
+     */
+    @Test
+    public void testGetFreeBusy_ContextIdNull_Status400() throws Exception {
+        super.setUpConfiguration();
+        try {
+            api.getFreeBusy(null, userName, server, null, null, null);
+            fail();
+        } catch (com.openexchange.testing.restclient.invoker.ApiException e) {
+            assertEquals(400, e.getCode());
+        }
+    }
+
+    /**
+     * 
+     * Tests whether getting free busy data failed with code 404,
+     * if context id is negative.
+     * 
+     * @throws Exception if changing the configuration fails
+     */
+    @Test
+    public void testGetFreeBusy_ContextIdNegative_Status404() throws Exception {
+        super.setUpConfiguration();
+        try {
+            api.getFreeBusy(I(-1), userName, server, null, null, null);
+            fail();
+        } catch (com.openexchange.testing.restclient.invoker.ApiException e) {
+            assertEquals(404, e.getCode());
+        }
+    }
+
+    /**
+     * 
+     * Tests whether getting free busy data failed with code 400,
+     * if user name is null.
+     * 
+     * @throws Exception if changing the configuration fails
+     */
+    @Test
+    public void testGetFreeBusy_UsernameNull_Status400() throws Exception {
+        super.setUpConfiguration();
+        try {
+            api.getFreeBusy(I(contextid), null, server, null, null, null);
+            fail();
+        } catch (com.openexchange.testing.restclient.invoker.ApiException e) {
+            assertEquals(400, e.getCode());
+        }
+    }
+
+    /**
+     * 
+     * Tests whether getting free busy data failed with code 400,
+     * if server name is null.
+     * 
+     * @throws Exception if changing the configuration fails
+     */
+    @Test
+    public void testGetFreeBusy_ServerNull_Status400() throws Exception {
+        super.setUpConfiguration();
+        try {
+            api.getFreeBusy(I(contextid), userName, null, null, null, null);
+            fail();
+        } catch (com.openexchange.testing.restclient.invoker.ApiException e) {
+            assertEquals(400, e.getCode());
+        }
+    }
+
+    /**
+     * 
+     * Tests whether getting free busy data failed with code 404,
+     * if context id does not fit to user and server name.
+     * 
+     * @throws Exception if changing the configuration fails
+     */
+    @Test
+    public void testGetFreeBusy_WrongContextId_Status404() throws Exception {
+        super.setUpConfiguration();
+        try {
+            api.getFreeBusy(I(contextid + 1), userName, server, null, null, null);
+            fail();
+        } catch (com.openexchange.testing.restclient.invoker.ApiException e) {
+            assertEquals(404, e.getCode());
+        }
+    }
+
+    /**
+     * 
+     * Tests whether getting free busy data failed with code 404,
+     * if the user name is not existing in the context.
+     * 
+     * @throws Exception if changing the configuration fails
+     */
+    @Test
+    public void testGetFreeBusy_WrongUserName_Status404() throws Exception {
+        super.setUpConfiguration();
+        try {
+            api.getFreeBusy(I(contextid), userName + "Test", server, null, null, null);
+            fail();
+        } catch (com.openexchange.testing.restclient.invoker.ApiException e) {
+            assertEquals(404, e.getCode());
+        }
+    }
+
+    /**
+     * 
+     * Tests whether getting free busy data failed with code 404,
+     * if the server name does not fit to context id and user name.
+     * 
+     * @throws Exception if changing the configuration fails
+     */
+    @Test
+    public void testGetFreeBusy_WrongServer_Status404() throws Exception {
+        super.setUpConfiguration();
+        try {
+            api.getFreeBusy(I(contextid), userName, server + ".test", null, null, null);
+            fail();
+        } catch (com.openexchange.testing.restclient.invoker.ApiException e) {
+            assertEquals(404, e.getCode());
+        }
+    }
+
+    /**
+     * 
+     * Tests whether getting free busy data failed with code 400,
+     * if the time range into past value is negative.
+     * 
+     * @throws Exception if changing the configuration fails
+     */
+    @Test
+    public void testGetFreeBusy_WeeksStartNegative_Status400() throws Exception {
+        super.setUpConfiguration();
+        try {
+            api.getFreeBusy(I(contextid), userName, server, I(-1), null, null);
+            fail();
+        } catch (com.openexchange.testing.restclient.invoker.ApiException e) {
+            assertEquals(400, e.getCode());
+        }
+    }
+
+    /**
+     * 
+     * Tests whether getting free busy data failed with code 400,
+     * if the time range into future value is negative.
+     * 
+     * @throws Exception if changing the configuration fails
+     */
+    @Test
+    public void testGetFreeBusy_WeeksEndNegative_Status400() throws Exception {
+        super.setUpConfiguration();
+        try {
+            api.getFreeBusy(I(contextid), userName, server, null, I(-1), null);
+            fail();
+        } catch (com.openexchange.testing.restclient.invoker.ApiException e) {
+            assertEquals(400, e.getCode());
+        }
+    }
+
+    // -------------------------------Helper methods--------------------------------------------------------------
+
+    private EventData createEvent(TranspEnum visibility, String name, int start, int end) throws ApiException {
+        EventData event = new EventData();
+        event.setPropertyClass("PUBLIC");
+        Attendee attendeeUser = new Attendee();
+        attendeeUser.entity(getApiClient().getUserId());
+        attendeeUser.cuType(CuTypeEnum.INDIVIDUAL);
+        Attendee attendeeRessouce = new Attendee();
+        attendeeRessouce.setUri(CalendarUtils.getURI(testResourceName + "@" + server));
+        attendeeRessouce.cuType(CuTypeEnum.RESOURCE);
+        List<Attendee> attendees = new ArrayList<>();
+        attendees.add(attendeeUser);
+        attendees.add(attendeeRessouce);
+        event.setAttendees(attendees);
+        event.setTransp(visibility);
+        event.setSummary(name);
+        Date startDate = CalendarUtils.add(new Date(), Calendar.HOUR_OF_DAY, start);
+        event.setStartDate(DateTimeUtil.getDateTime("utc", startDate.getTime()));
+        Date endDate = CalendarUtils.add(new Date(), Calendar.HOUR_OF_DAY, end);
+        event.setEndDate(DateTimeUtil.getDateTime("utc", endDate.getTime()));
+
+        return eventManager.createEvent(event);
+    }
+
+    private void validateICal(String content, String userName, String serverName, int weeksPast, int weeksFuture, boolean simple) throws ParseException {
+        assertTrue("Is no VCalendar", content.startsWith("BEGIN:VCALENDAR") && content.contains("END:VCALENDAR"));
+        assertTrue("Contains no VFreeBusy", content.contains("BEGIN:VFREEBUSY") && content.contains("END:VFREEBUSY"));
+        String startDate = this.busyDate.getStartDate().getValue();
+        String endDate = this.busyDate.getEndDate().getValue();
+        if (simple) {
+            assertTrue("Contains no simple free busy data.", content.contains("FREEBUSY:"));
+
+            assertTrue("Does not contain the busy data", content.contains(startDate) && content.contains(endDate));
+        } else {
+            assertTrue("Contains no extended free busy data.", content.contains("FREEBUSY;FBTYPE=BUSY:"));
+            assertTrue("Does not contain the busy data", content.contains(startDate) && content.contains(endDate));
+            assertTrue("Contains no extended free busy data.", content.contains("FREEBUSY;FBTYPE=FREE:"));
+            startDate = this.freeDate.getStartDate().getValue();
+            endDate = this.freeDate.getEndDate().getValue();
+            assertTrue("Does not contain the free data", content.contains(startDate) && content.contains(endDate));
+        }
+        Date date = DateTimeUtil.parseDateTime(this.busyDate.getStartDate());
+
+        DateTimeData start = DateTimeUtil.getDateTime("utc", CalendarUtils.add(date, Calendar.WEEK_OF_YEAR, -weeksPast).getTime());
+        DateTimeData end = DateTimeUtil.getDateTime("utc", CalendarUtils.add(date, Calendar.WEEK_OF_YEAR, weeksFuture).getTime());
+        assertTrue("Contains wrong start time", content.contains("DTSTART:" + start.getValue().substring(0, 6)));
+        assertTrue("Contains wrong end time", content.contains("DTEND:" + end.getValue().substring(0, 6)));
+        assertTrue("Does not contain the user name", content.contains(userName));
+        assertTrue("Does not contain the server name", content.contains(serverName));
+    }
+
+    @Override
+    protected Map<String, String> getNeededConfigurations() {
+        return CONFIG;
+    }
+
+    @Override
+    protected String getScope() {
+        return "context";
+    }
+
+}

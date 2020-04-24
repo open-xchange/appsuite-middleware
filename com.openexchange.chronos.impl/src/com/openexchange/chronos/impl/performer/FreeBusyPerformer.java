@@ -75,18 +75,15 @@ import com.openexchange.chronos.BusyType;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.EventStatus;
 import com.openexchange.chronos.FbType;
 import com.openexchange.chronos.FreeBusyTime;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
-import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.common.AvailabilityUtils;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.common.FreeBusyUtils;
 import com.openexchange.chronos.common.mapping.EventMapper;
-import com.openexchange.chronos.compat.ShownAsTransparency;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.Comparators;
@@ -112,21 +109,6 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @since v7.10.0
  */
 public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
-
-    //@formatter:off
-    /** The event fields returned in free/busy queries by default */
-    private static final EventField[] FREEBUSY_FIELDS = {
-        EventField.CREATED_BY, EventField.ID, EventField.SERIES_ID, EventField.FOLDER_ID, EventField.COLOR, EventField.CLASSIFICATION,
-        EventField.SUMMARY, EventField.START_DATE, EventField.END_DATE, EventField.CATEGORIES, EventField.TRANSP, EventField.LOCATION,
-        EventField.RECURRENCE_ID, EventField.RECURRENCE_RULE, EventField.STATUS
-    };
-
-    /** The restricted event fields returned in free/busy queries if the user has no access to the event */
-    private static final EventField[] RESTRICTED_FREEBUSY_FIELDS = { EventField.CREATED_BY, EventField.ID, EventField.SERIES_ID,
-        EventField.CLASSIFICATION, EventField.START_DATE, EventField.END_DATE, EventField.TRANSP, EventField.RECURRENCE_ID,
-        EventField.RECURRENCE_RULE, EventField.STATUS
-    };
-    //@formatter:on
 
     private static final boolean AVAILABILITY_ENABLED = false;
 
@@ -166,7 +148,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
                 freeBusyPerAttendee.put(attendee, Collections.emptyList());
                 continue;
             }
-            List<FreeBusyTime> freeBusyTimes = adjustToBoundaries(getFreeBusyTimes(events, getTimeZone(attendee)), from, until);
+            List<FreeBusyTime> freeBusyTimes = FreeBusyPerformerUtil.adjustToBoundaries(FreeBusyPerformerUtil.getFreeBusyTimes(events, getTimeZone(attendee)), from, until);
             if (merge && 1 < freeBusyTimes.size()) {
                 freeBusyTimes = FreeBusyUtils.mergeFreeBusy(freeBusyTimes);
             }
@@ -264,7 +246,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
             eventsPerAttendee.put(attendee, new ArrayList<Event>());
         }
         SearchOptions searchOptions = new SearchOptions(session).setRange(from, until);
-        EventField[] fields = getFields(FREEBUSY_FIELDS, EventField.ORGANIZER, EventField.DELETE_EXCEPTION_DATES, EventField.CHANGE_EXCEPTION_DATES, EventField.RECURRENCE_ID);
+        EventField[] fields = getFields(FreeBusyPerformerUtil.FREEBUSY_FIELDS, EventField.ORGANIZER, EventField.DELETE_EXCEPTION_DATES, EventField.CHANGE_EXCEPTION_DATES, EventField.RECURRENCE_ID);
         List<Event> eventsInPeriod = storage.getEventStorage().searchOverlappingEvents(attendees, true, searchOptions, fields);
         if (0 == eventsInPeriod.size()) {
             return eventsPerAttendee;
@@ -308,7 +290,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
                     }
                     Iterator<RecurrenceId> iterator = getRecurrenceIterator(session, eventInPeriod, iteratorFrom, until);
                     while (iterator.hasNext()) {
-                        put(eventsPerAttendee, attendee, getResultingOccurrence(eventInPeriod, iterator.next(), folderID));
+                        put(eventsPerAttendee, attendee, FreeBusyPerformerUtil.getResultingOccurrence(getResultingEvent(eventInPeriod, folderID), eventInPeriod, iterator.next()));
                         getSelfProtection().checkEventCollection(eventsPerAttendee.get(attendee));
                     }
                 } else {
@@ -336,7 +318,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
         Map<Attendee, List<Event>> eventsPerAttendee = getOverlappingEvents(attendees, from, until);
         Map<Attendee, List<FreeBusyTime>> freeBusyDataPerAttendee = new HashMap<Attendee, List<FreeBusyTime>>(eventsPerAttendee.size());
         for (Map.Entry<Attendee, List<Event>> entry : eventsPerAttendee.entrySet()) {
-            freeBusyDataPerAttendee.put(entry.getKey(), mergeFreeBusy(entry.getValue(), from, until, Utils.getTimeZone(session)));
+            freeBusyDataPerAttendee.put(entry.getKey(), FreeBusyPerformerUtil.mergeFreeBusy(entry.getValue(), from, until, Utils.getTimeZone(session)));
         }
         return freeBusyDataPerAttendee;
     }
@@ -653,27 +635,6 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
     }
 
     /**
-     * Gets a resulting userized event occurrence for the free/busy result based on the supplied data of the master event. Only a subset
-     * of properties is copied over, and a folder identifier is applied optionally, depending on the user's access permissions for the
-     * actual event data.
-     *
-     * @param masterEvent The event data to get the result for
-     * @param recurrenceId The recurrence identifier of the occurrence
-     * @param folderID The folder identifier representing the user's view on the event, or <code>null</code> if not accessible in any folder
-     * @return The resulting event occurrence representing the free/busy slot
-     */
-    private Event getResultingOccurrence(Event masterEvent, RecurrenceId recurrenceId, String folderID) throws OXException {
-        Event resultingOccurrence = getResultingEvent(masterEvent, folderID);
-        resultingOccurrence.setRecurrenceRule(null);
-        resultingOccurrence.removeSeriesId();
-        resultingOccurrence.removeClassification();
-        resultingOccurrence.setRecurrenceId(recurrenceId);
-        resultingOccurrence.setStartDate(CalendarUtils.calculateStart(masterEvent, recurrenceId));
-        resultingOccurrence.setEndDate(CalendarUtils.calculateEnd(masterEvent, recurrenceId));
-        return resultingOccurrence;
-    }
-
-    /**
      * Gets a resulting userized event for the free/busy result based on the supplied event data. Only a subset of properties is copied
      * over, and a folder identifier is applied optionally, depending on the user's access permissions for the actual event data.
      *
@@ -683,119 +644,11 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
      */
     private Event getResultingEvent(Event event, String folderID) throws OXException {
         if (null != folderID) {
-            Event resultingEvent = EventMapper.getInstance().copy(event, new Event(), FREEBUSY_FIELDS);
+            Event resultingEvent = EventMapper.getInstance().copy(event, new Event(), FreeBusyPerformerUtil.FREEBUSY_FIELDS);
             resultingEvent.setFolderId(folderID);
             return anonymizeIfNeeded(session, resultingEvent);
-        } else {
-            return EventMapper.getInstance().copy(event, new Event(), RESTRICTED_FREEBUSY_FIELDS);
         }
+        return EventMapper.getInstance().copy(event, new Event(), FreeBusyPerformerUtil.RESTRICTED_FREEBUSY_FIELDS);
     }
 
-    /**
-     * Normalizes the contained free/busy intervals. This means
-     * <ul>
-     * <li>the intervals are sorted chronologically, i.e. the earliest interval is first</li>
-     * <li>all intervals beyond or above the 'from' and 'until' range are removed, intervals overlapping the boundaries are shortened to
-     * fit</li>
-     * <li>overlapping intervals are merged so that only the most conflicting ones of overlapping time ranges are used</li>
-     * </ul>
-     *
-     * @param events The events to get the free/busy-times from
-     * @param from The start date of the period to consider
-     * @param until The end date of the period to consider
-     * @param timeZone The timezone to consider if the event has <i>floating</i> dates
-     */
-    private static List<FreeBusyTime> mergeFreeBusy(List<Event> events, Date from, Date until, TimeZone timeZone) {
-        if (null == events || 0 == events.size()) {
-            return Collections.emptyList(); // nothing to do
-        }
-        /*
-         * get free/busy times, normalize to requested period & perform the merge
-         */
-        List<FreeBusyTime> freeBusyTimes = adjustToBoundaries(getFreeBusyTimes(events, timeZone), from, until);
-        if (2 > freeBusyTimes.size()) {
-            return freeBusyTimes; // nothing more to do
-        }
-        return FreeBusyUtils.mergeFreeBusy(freeBusyTimes);
-    }
-
-    private static FbType getFbType(Event event) {
-        Transp transp = event.getTransp();
-        if (null == transp) {
-            return FbType.BUSY;
-        }
-        if (ShownAsTransparency.class.isInstance(transp)) {
-            switch ((ShownAsTransparency) transp) {
-                case ABSENT:
-                    return FbType.BUSY_UNAVAILABLE;
-                case FREE:
-                    return FbType.FREE;
-                case TEMPORARY:
-                    return FbType.BUSY_TENTATIVE;
-                default:
-                    return FbType.BUSY;
-            }
-        }
-
-        if (Transp.TRANSPARENT.equals(transp.getValue())) {
-            return FbType.FREE;
-        }
-        if (event.getStatus() == null) {
-            return FbType.BUSY;
-        }
-        if (EventStatus.TENTATIVE.equals(event.getStatus())) {
-            return FbType.BUSY_TENTATIVE;
-        }
-        if (EventStatus.CANCELLED.equals(event.getStatus())) {
-            return FbType.FREE;
-        }
-        return FbType.BUSY;
-    }
-
-    /**
-     * Normalizes a list of free/busy times to the boundaries of a given period, i.e. removes free/busy times outside range and adjusts
-     * the start-/end-times of periods overlapping the start- or enddate of the period.
-     *
-     * @param freeBusyTimes The free/busy times to normalize
-     * @param from The lower inclusive limit of the range
-     * @param until The upper exclusive limit of the range
-     * @return The normalized free/busy times
-     */
-    private static List<FreeBusyTime> adjustToBoundaries(List<FreeBusyTime> freeBusyTimes, Date from, Date until) {
-        for (Iterator<FreeBusyTime> iterator = freeBusyTimes.iterator(); iterator.hasNext();) {
-            FreeBusyTime freeBusyTime = iterator.next();
-            if (freeBusyTime.getEndTime().after(from) && freeBusyTime.getStartTime().before(until)) {
-                if (freeBusyTime.getStartTime().before(from)) {
-                    freeBusyTime.setStartTime(from);
-                }
-                if (freeBusyTime.getEndTime().after(until)) {
-                    freeBusyTime.setEndTime(until);
-                }
-            } else {
-                iterator.remove(); // outside range
-            }
-        }
-        return freeBusyTimes;
-    }
-
-    /**
-     * Gets a list of free/busy times for the supplied events.
-     *
-     * @param events The events to get the free/busy times for
-     * @param timeZone The timezone to consider if the event has <i>floating</i> dates
-     * @return The free/busy times
-     */
-    private static List<FreeBusyTime> getFreeBusyTimes(List<Event> events, TimeZone timeZone) {
-        List<FreeBusyTime> freeBusyTimes = new ArrayList<FreeBusyTime>(events.size());
-        for (Event event : events) {
-            long start = event.getStartDate().getTimestamp();
-            long end = event.getEndDate().getTimestamp();
-            if (CalendarUtils.isFloating(event)) {
-                start = CalendarUtils.getDateInTimeZone(event.getStartDate(), timeZone);
-                end = CalendarUtils.getDateInTimeZone(event.getEndDate(), timeZone);
-            }
-            freeBusyTimes.add(new FreeBusyTime(getFbType(event), new Date(start), new Date(end), event));
-        }
-        return freeBusyTimes;
-    }
 }

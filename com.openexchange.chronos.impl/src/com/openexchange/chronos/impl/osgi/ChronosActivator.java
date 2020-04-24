@@ -68,6 +68,7 @@ import com.openexchange.chronos.rmi.ChronosRMIService;
 import com.openexchange.chronos.scheduling.SchedulingBroker;
 import com.openexchange.chronos.scheduling.changes.DescriptionService;
 import com.openexchange.chronos.scheduling.changes.SchedulingChangeService;
+import com.openexchange.chronos.service.AdministrativeFreeBusyService;
 import com.openexchange.chronos.service.CalendarAvailabilityService;
 import com.openexchange.chronos.service.CalendarEventNotificationService;
 import com.openexchange.chronos.service.CalendarHandler;
@@ -153,6 +154,7 @@ public class ChronosActivator extends HousekeepingActivator {
             }
             registerService(CalendarService.class, new CalendarServiceImpl(this));
             registerService(FreeBusyService.class, new FreeBusyServiceImpl());
+            registerService(AdministrativeFreeBusyService.class, new FreeBusyServiceImpl());
             registerService(CalendarUtilities.class, calendarUtilities);
             // Availability disabled until further notice
             //registerService(CalendarAvailabilityService.class, new CalendarAvailabilityServiceImpl());

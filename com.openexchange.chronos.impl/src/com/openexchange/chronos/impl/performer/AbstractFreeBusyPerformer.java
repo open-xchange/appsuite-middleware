@@ -50,7 +50,6 @@
 package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.CalendarUtils.find;
-import static com.openexchange.chronos.common.CalendarUtils.getObjectIDs;
 import static com.openexchange.chronos.common.CalendarUtils.isAttendee;
 import static com.openexchange.chronos.common.CalendarUtils.isInternal;
 import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
@@ -58,7 +57,6 @@ import static com.openexchange.chronos.common.CalendarUtils.isPublicClassificati
 import static com.openexchange.chronos.common.CalendarUtils.matches;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.TimeZone;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUserType;
@@ -92,14 +90,16 @@ public class AbstractFreeBusyPerformer extends AbstractQueryPerformer {
         super(session, storage);
     }
 
+    /**
+     * Reads the attendee data from storage
+     *
+     * @param events The events to load
+     * @param internal whether to only consider internal attendees or not
+     * @return The {@link Event}s containing the attendee data
+     * @throws OXException
+     */
     protected List<Event> readAttendeeData(List<Event> events, Boolean internal) throws OXException {
-        if (null != events && 0 < events.size()) {
-            Map<String, List<Attendee>> attendeesById = storage.getAttendeeStorage().loadAttendees(getObjectIDs(events), internal);
-            for (Event event : events) {
-                event.setAttendees(attendeesById.get(event.getId()));
-            }
-        }
-        return events;
+        return FreeBusyPerformerUtil.readAttendeeData(events, internal, storage);
     }
 
     /**

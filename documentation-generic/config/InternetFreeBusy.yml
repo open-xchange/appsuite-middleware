@@ -1,0 +1,47 @@
+feature_name: InternetFreeBusy 
+feature_description: |
+    Servlet for Free/Busy Data
+properties:
+  - key: com.openexchange.calendar.enableInternetFreeBusy
+    description: |
+      Enables the internet free busy REST endpoint for public access.
+    defaultValue: false
+    version: 7.10.4
+    reloadable: false
+    configcascadeAware: false
+    related: 
+    file: calendar.properties
+    packageName: open-xchange-core
+    tags: ["InternetFreeBusy"]
+  - key: com.openexchange.calendar.publishInternetFreeBusy
+    description: |
+      Defines whether the free busy data is published for the free busy servlet or not.
+    defaultValue: false
+    version: 7.10.4
+    reloadable: true
+    configcascadeAware: true
+    related: 
+    packageName: open-xchange-core
+    tags: ["InternetFreeBusy"]
+  - key: com.openexchange.calendar.internetFreeBusyMaximumTimerangePast
+    description: |
+      Defines the maximum time range into the past in weeks that can be requested by free busy servlet. Default value is 12 weeks into the past.
+    defaultValue: 12
+    version: 7.10.4
+    reloadable: true
+    configcascadeAware: true
+    related: 
+    file: calendar.properties
+    packageName: open-xchange-core
+    tags: ["InternetFreeBusy"]
+  - key: com.openexchange.calendar.internetFreeBusyMaximumTimerangeFuture
+    description: |
+      Defines the maximum time range into the future in weeks that can be requested by free busy servlet. Default value is 26 weeks into the future.
+    defaultValue: 26
+    version: 7.10.4
+    reloadable: true
+    configcascadeAware: true
+    related: 
+    file: calendar.properties
+    packageName: open-xchange-core
+    tags: ["InternetFreeBusy"]

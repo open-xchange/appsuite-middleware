@@ -22,6 +22,9 @@
   }, {
     "name" : "Health",
     "description" : "The health-check module"
+  }, {
+    "name" : "InternetFreeBusy",
+    "description" : "Servlet for requesting free busy data."
   } ],
   "paths" : {
     "/admin/v1/contexts/{context-id}/users/{user-id}/passwd-changes" : {
@@ -258,12 +261,11 @@
             }
           }
         },
-        "x-ox-examples" : {
-          "Example" : {
-            "description" : "Export user feedback from 2016-01-01 to 2016-12-31",
-            "example" : "GET http://localhost:8009/userfeedback/v1/export/default/star-rating-v1/raw?start=1451606400&end=1483228799"
-          }
-        }
+        "x-ox-examples" : [ {
+          "Example" : null,
+          "description" : "Export user feedback from 2016-01-01 to 2016-12-31",
+          "example" : "GET http://localhost:8009/userfeedback/v1/export/default/star-rating-v1/raw?start=1451606400&end=1483228799"
+        } ]
       }
     },
     "/userfeedback/v1/export/{context-group}/{type}" : {
@@ -373,12 +375,11 @@
             }
           }
         },
-        "x-ox-examples" : {
-          "Example" : {
-            "description" : "Export user feedback from 2016-01-01 to 2016-12-31 as CSV",
-            "example" : "GET http://localhost:8009/userfeedback/v1/export/default/star-rating-v1?start=1451606400&end=1483228799"
-          }
-        }
+        "x-ox-examples" : [ {
+          "Example" : null,
+          "description" : "Export user feedback from 2016-01-01 to 2016-12-31 as CSV",
+          "example" : "GET http://localhost:8009/userfeedback/v1/export/default/star-rating-v1?start=1451606400&end=1483228799"
+        } ]
       }
     },
     "/userfeedback/v1/send/{context-group}/{type}" : {
@@ -468,12 +469,11 @@
             }
           }
         },
-        "x-ox-examples" : {
-          "Example" : {
-            "description" : "Export user feedback from 2016-01-01 to 2016-12-31 and send it via mail to user1@example.org and user2@example.org",
-            "example" : "POST http://localhost:8009/userfeedback/v1/send/default/star-rating-v1?start=1451606400&end=1483228799 {\"subject\":\"User Feedback\",\n \"body\":\"User Feedback\",\n \"compress\":true,\n \"recipients\": [\n   {\"address\":\"user1@example.org\",\n    \"displayName\":\"User 1\",\n    \"pgp_key\":\"-----BEGIN PGP PUBLIC KEY BLOCK-----\\r\\nVersion: BCPG v1.56....\"},\n   {\"address\":\"user2@example.org\",\n    \"displayName\":\"User 2\",\n    \"pgp_key\":\"-----BEGIN PGP PUBLIC KEY BLOCK-----\\r\\nVersion: BCPG v1.56....\"}\n ]\n}\n"
-          }
-        },
+        "x-ox-examples" : [ {
+          "Example" : null,
+          "description" : "Export user feedback from 2016-01-01 to 2016-12-31 and send it via mail to user1@example.org and user2@example.org",
+          "example" : "POST http://localhost:8009/userfeedback/v1/send/default/star-rating-v1?start=1451606400&end=1483228799 {\"subject\":\"User Feedback\",\n \"body\":\"User Feedback\",\n \"compress\":true,\n \"recipients\": [\n   {\"address\":\"user1@example.org\",\n    \"displayName\":\"User 1\",\n    \"pgp_key\":\"-----BEGIN PGP PUBLIC KEY BLOCK-----\\r\\nVersion: BCPG v1.56....\"},\n   {\"address\":\"user2@example.org\",\n    \"displayName\":\"User 2\",\n    \"pgp_key\":\"-----BEGIN PGP PUBLIC KEY BLOCK-----\\r\\nVersion: BCPG v1.56....\"}\n ]\n}\n"
+        } ],
         "requestBody" : {
           "content" : {
             "application/json" : {
@@ -631,12 +631,11 @@
             }
           }
         },
-        "x-ox-examples" : {
-          "Example" : {
-            "description" : "Delete user feedback from 2016-01-01 to 2016-12-31",
-            "example" : "DELETE http://localhost:8009/userfeedback/v1/default/star-rating-v1?start=1451606400&end=1483228799"
-          }
-        }
+        "x-ox-examples" : [ {
+          "Example" : null,
+          "description" : "Delete user feedback from 2016-01-01 to 2016-12-31",
+          "example" : "DELETE http://localhost:8009/userfeedback/v1/default/star-rating-v1?start=1451606400&end=1483228799"
+        } ]
       }
     },
     "/health" : {
@@ -669,12 +668,11 @@
             }
           }
         },
-        "x-ox-examples" : {
-          "Example" : {
-            "description" : "Get health status",
-            "example" : "GET http://localhost:8009/health"
-          }
-        }
+        "x-ox-examples" : [ {
+          "Example" : null,
+          "description" : "Get health status",
+          "example" : "GET http://localhost:8009/health"
+        } ]
       }
     },
     "/admin/v1/close-sessions/by-context" : {
@@ -1073,6 +1071,86 @@
           },
           "401" : {
             "description" : "Not authorized"
+          }
+        }
+      }
+    },
+    "/servlet/webdav.freebusy" : {
+      "get" : {
+        "operationId" : "getFreeBusy",
+        "tags" : [ "InternetFreeBusy" ],
+        "summary" : "Gets the free busy data in iCalendar format.",
+        "parameters" : [ {
+          "name" : "contextId",
+          "in" : "query",
+          "description" : "The context id of the context in which the requested user is located.",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }, {
+          "name" : "userName",
+          "in" : "query",
+          "description" : "The name of the user. Typically the local part of the email address.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "server",
+          "in" : "query",
+          "description" : "The name of the server. Typically the domain part of the email address.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "weeksIntoPast",
+          "in" : "query",
+          "description" : "The requested time range into the past in weeks. Default value is 1 week into the past.",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }, {
+          "name" : "weeksIntoFuture",
+          "in" : "query",
+          "description" : "The requested time range into the future in weeks. Default value is 4 week into the past.",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }, {
+          "name" : "simple",
+          "in" : "query",
+          "description" : "true, if the VFREEBUSY data should not contain free busy type and free information, false otherwise. Default value is false.",
+          "required" : false,
+          "schema" : {
+            "type" : "boolean"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "An iCalendar text containing the requested free busy data.\n",
+            "content" : {
+              "text/calendar" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "In case one parameter has a wrong format or if the time range is bigger than the configured maximum."
+          },
+          "404" : {
+            "description" : "In case the servlet is not enabled, if no existing user with the requested user name, server and context id is found or if this user has not published his free busy data."
+          },
+          "500" : {
+            "description" : "In case an internal server error occurs."
           }
         }
       }

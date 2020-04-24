@@ -95,6 +95,7 @@ import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.charset.CustomCharsetProvider;
 import com.openexchange.chronos.ical.ICalService;
+import com.openexchange.chronos.service.AdministrativeFreeBusyService;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
@@ -287,6 +288,7 @@ import com.openexchange.userconf.UserPermissionService;
 import com.openexchange.userconf.internal.UserConfigurationServiceImpl;
 import com.openexchange.userconf.internal.UserPermissionServiceImpl;
 import com.openexchange.version.VersionService;
+import com.openexchange.webdav.FreeBusyProperty;
 import com.openexchange.xml.jdom.JDOMParser;
 import com.openexchange.xml.spring.SpringParser;
 import net.htmlparser.jericho.Config;
@@ -648,7 +650,11 @@ public final class ServerActivator extends HousekeepingActivator {
          * Track GroupService
          */
         track(GroupService.class, new RegistryCustomizer<>(context, GroupService.class));
-
+        /*
+         * Track AdministrativeFreeBusyService
+         */
+        track(AdministrativeFreeBusyService.class, new RegistryCustomizer<AdministrativeFreeBusyService>(context, AdministrativeFreeBusyService.class));
+        
         /*
          * User Alias Service
          */
@@ -960,6 +966,10 @@ public final class ServerActivator extends HousekeepingActivator {
         // http.registerServlet(prefix+"tasks", new com.openexchange.ajax.Tasks(), null, null);
         // http.registerServlet(prefix+"contacts", new com.openexchange.ajax.Contact(), null, null);
         // http.registerServlet(prefix+"mail", new com.openexchange.ajax.Mail(), null, null);
+        LeanConfigurationService leanConfigService = this.getService(LeanConfigurationService.class);
+        if (leanConfigService.getBooleanProperty(FreeBusyProperty.ENABLE_INTERNET_FREEBUSY)) {
+            http.registerServlet("/servlet/webdav.freebusy", new com.openexchange.webdav.FreeBusy(this), null, null);
+        }
 
         final String prefix = getService(DispatcherPrefixService.class).getPrefix();
         http.registerServlet(prefix + "mail.attachment", new com.openexchange.ajax.MailAttachment(), null, null);

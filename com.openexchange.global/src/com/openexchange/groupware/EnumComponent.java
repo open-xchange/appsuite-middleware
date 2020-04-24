@@ -266,6 +266,10 @@ public enum EnumComponent implements Component {
      * HTTP CLIENT
      */
     HTTP_CLIENT("HC"),
+    /**
+     * Internet free busy relevant errors
+     */
+    FREEBUSY("FREEBUSY")
     ;
 
     /**

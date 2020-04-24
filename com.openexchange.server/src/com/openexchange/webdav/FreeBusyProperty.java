@@ -47,55 +47,60 @@
  *
  */
 
-package com.openexchange.rest.services.annotation;
+package com.openexchange.webdav;
+
+import static com.openexchange.java.Autoboxing.I;
+import com.openexchange.config.lean.Property;
 
 /**
- * {@link Role} - An enumeration for known security roles for REST end-points. A security role specifies how access to a certain REST
- * end-point is granted.
+ * {@link FreeBusyProperty}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.3
+ * @author <a href="mailto:anna.ottersbach@open-xchange.com">Anna Ottersbach</a>
+ * @since v7.10.4
  */
-public enum Role {
+public enum FreeBusyProperty implements Property {
 
     /**
-     * The role identifier for {@link com.openexchange.rest.services.annotation.RoleAllowed} annotation and
-     * {@link javax.annotation.security.RolesAllowed} annotation respectively signaling to perform basic-auth.
-     * <p>
-     * Properties <code>"com.openexchange.rest.services.basic-auth.login"</code> and
-     * <code>"com.openexchange.rest.services.basic-auth.password"</code> are required to be set.
+     * Enables the internet free busy REST endpoint for public access.
+     * Default: false
      */
-    BASIC_AUTHENTICATED("Basic-Authenticated"),
+    ENABLE_INTERNET_FREEBUSY("enableInternetFreeBusy", Boolean.FALSE),
+
     /**
-     * The role identifier for {@link com.openexchange.rest.services.annotation.RoleAllowed} annotation and
-     * {@link javax.annotation.security.RolesAllowed} annotation respectively allowing end-point-specific basic-auth.
-     * <p>
-     * <div style="margin-left: 0.1in; margin-right: 0.5in; margin-bottom: 0.1in; background-color:#FFDDDD;">
-     * The concrete REST end-point is supposed to implement interface <code>com.openexchange.rest.services.EndpointAuthenticator</code>.
-     * </div>
+     * Defines whether the free busy data is published for the free busy servlet or not.
+     * Default: false
      */
-    INDIVIDUAL_BASIC_AUTHENTICATED("Individual-Basic-Authenticated"),
+    PUBLISH_INTERNET_FREEBUSY("publishInternetFreeBusy", Boolean.FALSE),
+
     /**
-     * The role identifier for {@link com.openexchange.rest.services.annotation.RoleAllowed} annotation and
-     * {@link javax.annotation.security.RolesAllowed} annotation respectively signaling to perform basic-auth
-     * against the Open-Xchange Server's master administrator credentials (the ones specified in <code>"mpasswd"</code> file).
+     * Defines the maximum time range into the past in weeks that can be requested by free busy servlet. Default value is 12 weeks into the past.
+     * Default: 12
      */
-    MASTER_ADMIN_AUTHENTICATED("Master-Admin-Basic-Authenticated"),
+    INTERNET_FREEBUSY_MAXIMUM_TIMERANGE_PAST("internetFreeBusyMaximumTimerangePast", I(12)),
 
-    ;
+    /**
+     * Defines the maximum time range into the future in weeks that can be requested by free busy servlet. Default value is 26 weeks into the future.
+     * Default: 26
+     */
+    INTERNET_FREEBUSY_MAXIMUM_TIMERANGE_FUTURE("internetFreeBusyMaximumTimerangeFuture", I(26));
 
-    private final String id;
+    private Object defaultValue;
+    private String suffix;
+    private static final String PREFIX = "com.openexchange.calendar.";
 
-    private Role(String id) {
-        this.id = id;
+    private FreeBusyProperty(String suffix, Object defaultValue) {
+        this.defaultValue = defaultValue;
+        this.suffix = suffix;
     }
 
-    /**
-     * Gets the role identifier.
-     *
-     * @return The role identifier
-     */
-    public String getId() {
-        return id;
+    @Override
+    public String getFQPropertyName() {
+        return PREFIX + this.suffix;
     }
+
+    @Override
+    public Object getDefaultValue() {
+        return defaultValue;
+    }
+
 }

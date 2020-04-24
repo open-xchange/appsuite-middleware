@@ -52,17 +52,22 @@ package com.openexchange.chronos.impl;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.impl.osgi.Services;
+import com.openexchange.chronos.impl.performer.AdministrativeFreeBusyPerformer;
 import com.openexchange.chronos.impl.performer.ConflictCheckPerformer;
 import com.openexchange.chronos.impl.performer.FreeBusyPerformer;
 import com.openexchange.chronos.impl.performer.HasPerformer;
+import com.openexchange.chronos.service.AdministrativeFreeBusyService;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventConflict;
 import com.openexchange.chronos.service.FreeBusyResult;
 import com.openexchange.chronos.service.FreeBusyService;
 import com.openexchange.chronos.storage.CalendarStorage;
+import com.openexchange.chronos.storage.operation.OSGiCalendarStorageOperation;
 import com.openexchange.exception.OXException;
 
 /**
@@ -71,7 +76,7 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class FreeBusyServiceImpl implements FreeBusyService {
+public class FreeBusyServiceImpl implements FreeBusyService, AdministrativeFreeBusyService {
 
     /**
      * Initializes a new {@link FreeBusyServiceImpl}.
@@ -117,6 +122,18 @@ public class FreeBusyServiceImpl implements FreeBusyService {
         } finally {
             session.set(CalendarParameters.PARAMETER_CHECK_CONFLICTS, oldCheckConflicts);
         }
+    }
+
+    @Override
+    public Map<Attendee, FreeBusyResult> getFreeBusy(int ctxId, List<Attendee> attendees, Date from, Date until, boolean merge) throws OXException {
+
+        return new OSGiCalendarStorageOperation<Map<Attendee, FreeBusyResult>>(Services.getServiceLookup(), ctxId, Utils.ACCOUNT_ID) {
+
+            @Override
+            protected Map<Attendee, FreeBusyResult> call(CalendarStorage storage) throws OXException {
+                return new AdministrativeFreeBusyPerformer(storage, optEntityResolver(), Optional.empty()).perform(attendees, from, until, merge);
+            }}.executeQuery();
+
     }
 
 }

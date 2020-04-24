@@ -82,6 +82,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -593,8 +594,23 @@ public class Utils {
         if (false == isClassifiedFor(event, session.getUserId())) {
             return event;
         }
+
+        return anonymize(event, session.getEntityResolver().getLocale(session.getUserId()));
+    }
+
+    /**
+     * <i>Anonymizes</i> an event.
+     * <p/>
+     * After anonymization, the event will only contain those properties defined in {@link #NON_CLASSIFIED_FIELDS}, as well as the
+     * generic summary "Private".
+     *
+     * @param event The event to anonymize
+     * @param locale The locale to translate the generic summary, or <code>null</code> to use the default locale
+     * @return The anonymized event
+     */
+    public static Event anonymize(Event event, Locale locale) throws OXException {
         Event anonymizedEvent = EventMapper.getInstance().copy(event, new Event(), NON_CLASSIFIED_FIELDS);
-        anonymizedEvent.setSummary(StringHelper.valueOf(session.getEntityResolver().getLocale(session.getUserId())).getString(CalendarStrings.SUMMARY_PRIVATE));
+        anonymizedEvent.setSummary(StringHelper.valueOf(locale).getString(CalendarStrings.SUMMARY_PRIVATE));
         return anonymizedEvent;
     }
 

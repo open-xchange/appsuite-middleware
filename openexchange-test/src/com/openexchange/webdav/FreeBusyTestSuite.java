@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,55 +47,19 @@
  *
  */
 
-package com.openexchange.rest.services.annotation;
+package com.openexchange.webdav;
+
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
 /**
- * {@link Role} - An enumeration for known security roles for REST end-points. A security role specifies how access to a certain REST
- * end-point is granted.
+ * 
+ * {@link FreeBusyTestSuite}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.3
+ * @author <a href="mailto:anna.ottersbach@open-xchange.com">Anna Ottersbach</a>
+ * @since v7.10.4
  */
-public enum Role {
-
-    /**
-     * The role identifier for {@link com.openexchange.rest.services.annotation.RoleAllowed} annotation and
-     * {@link javax.annotation.security.RolesAllowed} annotation respectively signaling to perform basic-auth.
-     * <p>
-     * Properties <code>"com.openexchange.rest.services.basic-auth.login"</code> and
-     * <code>"com.openexchange.rest.services.basic-auth.password"</code> are required to be set.
-     */
-    BASIC_AUTHENTICATED("Basic-Authenticated"),
-    /**
-     * The role identifier for {@link com.openexchange.rest.services.annotation.RoleAllowed} annotation and
-     * {@link javax.annotation.security.RolesAllowed} annotation respectively allowing end-point-specific basic-auth.
-     * <p>
-     * <div style="margin-left: 0.1in; margin-right: 0.5in; margin-bottom: 0.1in; background-color:#FFDDDD;">
-     * The concrete REST end-point is supposed to implement interface <code>com.openexchange.rest.services.EndpointAuthenticator</code>.
-     * </div>
-     */
-    INDIVIDUAL_BASIC_AUTHENTICATED("Individual-Basic-Authenticated"),
-    /**
-     * The role identifier for {@link com.openexchange.rest.services.annotation.RoleAllowed} annotation and
-     * {@link javax.annotation.security.RolesAllowed} annotation respectively signaling to perform basic-auth
-     * against the Open-Xchange Server's master administrator credentials (the ones specified in <code>"mpasswd"</code> file).
-     */
-    MASTER_ADMIN_AUTHENTICATED("Master-Admin-Basic-Authenticated"),
-
-    ;
-
-    private final String id;
-
-    private Role(String id) {
-        this.id = id;
-    }
-
-    /**
-     * Gets the role identifier.
-     *
-     * @return The role identifier
-     */
-    public String getId() {
-        return id;
-    }
+@RunWith(Suite.class)
+@Suite.SuiteClasses({ FreeBusyTest.class })
+public class FreeBusyTestSuite {
 }

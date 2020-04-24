@@ -11,7 +11,9 @@ tags:
   - name: Admin
     description: Interface for provisioning and other administrative operations.
   - name: Health
-    description: The health-check module
+    description: The health-check module 
+  - name: InternetFreeBusy
+    description: Servlet for requesting free busy data.
 
 paths: 
    source: ./paths/ 
