@@ -375,7 +375,10 @@ public final class Conversations {
                         iter.remove();
                         removed = true;
                     }
-                    existing.join(conversation);
+                    Conversation joined = existing.join(conversation);
+                    if (!joined.equals(existing)) {
+                        lookupTable.put(messageId, joined);
+                    }
                 }
             }
 
@@ -386,7 +389,10 @@ public final class Conversations {
                         iter.remove();
                         removed = true;
                     }
-                    existing.join(conversation);
+                    Conversation joined = existing.join(conversation);
+                    if (!joined.equals(existing)) {
+                        lookupTable.put(reference, joined);
+                    }
                 }
             }
         }
@@ -407,7 +413,7 @@ public final class Conversations {
             if (null != messageId) {
                 Conversation conversation = lookupTable.get(messageId);
                 if (null != conversation) {
-                    conversation.addMessage(mailMessage);
+                    conversation.getMain().addMessage(mailMessage);
                 }
             }
 
@@ -416,7 +422,7 @@ public final class Conversations {
                 for (String reference : references) {
                     Conversation conversation = lookupTable.get(reference);
                     if (null != conversation) {
-                        conversation.addMessage(mailMessage);
+                        conversation.getMain().addMessage(mailMessage);
                     }
                 }
             }
