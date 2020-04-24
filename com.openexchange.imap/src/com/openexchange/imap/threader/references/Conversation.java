@@ -136,6 +136,11 @@ public final class Conversation {
         return this;
     }
 
+    /**
+     * Adds the given {@link MailMessageWrapper} to this conversation
+     *
+     * @param mmw The {@link MailMessageWrapper}
+     */
     private void addWrapper(final MailMessageWrapper mmw) {
         if (messages.add(mmw)) {
             final MailMessage message = mmw.message;
@@ -170,7 +175,7 @@ public final class Conversation {
      * Joins this conversation with other conversation.
      *
      * @param other The other conversation to join with
-     * @return This conversation
+     * @return The main conversation
      */
     public Conversation join(final Conversation other) {
         if (null != other) {
@@ -191,11 +196,21 @@ public final class Conversation {
         return this;
     }
 
+    /**
+     * Sets the main {@link Conversation}
+     *
+     * @param main The {@link Conversation} to set as main
+     */
     private void setMain(Conversation main) {
         this.main = main;
     }
 
-    private Conversation getMain() {
+    /**
+     * Gets the main {@link Conversation}
+     *
+     * @return The main {@link Conversation}
+     */
+    public Conversation getMain() {
         Conversation main = this.main;
         return main != null ? main : this;
     }
@@ -355,10 +370,20 @@ public final class Conversation {
         return ret;
     }
 
+    /**
+     * Gets the references
+     *
+     * @return The references
+     */
     public Set<String> getReferences() {
         return references;
     }
 
+    /**
+     * Gets the message ids
+     *
+     * @return The message ids
+     */
     public Set<String> getMessageIds() {
         return messageIds;
     }
@@ -373,6 +398,11 @@ public final class Conversation {
         final MailMessage message;
         private final int hash;
 
+        /**
+         * Initializes a new {@link MailMessageWrapper}.
+         *
+         * @param message The {@link MailMessage} to wrap
+         */
         MailMessageWrapper(final MailMessage message) {
             super();
             this.message = message;

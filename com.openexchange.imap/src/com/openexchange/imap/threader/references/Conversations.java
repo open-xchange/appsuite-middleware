@@ -76,7 +76,6 @@ import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MessageHeaders;
-import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.utils.MimeStorageUtility;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
@@ -318,7 +317,7 @@ public final class Conversations {
                     log.debug("\"{}\" for \"{}\" ({}) took {}msec.", command, imapFolder.getFullName(), imapFolder.getStore(), Long.valueOf(dur));
                     mailInterfaceMonitor.addUseTime(dur);
                 }
-                
+
                 // Check for exception during interception
                 if (exceptionRef.hasValue()) {
                     throw exceptionRef.getValue();
@@ -393,7 +392,10 @@ public final class Conversations {
                         iter.remove();
                         removed = true;
                     }
-                    existing.join(conversation);
+                    Conversation joined = existing.join(conversation);
+                    if (!joined.equals(existing)) {
+                        lookupTable.put(messageId, joined);
+                    }
                 }
             }
 
@@ -404,7 +406,10 @@ public final class Conversations {
                         iter.remove();
                         removed = true;
                     }
-                    existing.join(conversation);
+                    Conversation joined = existing.join(conversation);
+                    if (!joined.equals(existing)) {
+                        lookupTable.put(reference, joined);
+                    }
                 }
             }
         }
@@ -425,7 +430,7 @@ public final class Conversations {
             if (null != messageId) {
                 Conversation conversation = lookupTable.get(messageId);
                 if (null != conversation) {
-                    conversation.addMessage(mailMessage);
+                    conversation.getMain().addMessage(mailMessage);
                 }
             }
 
@@ -434,7 +439,7 @@ public final class Conversations {
                 for (String reference : references) {
                     Conversation conversation = lookupTable.get(reference);
                     if (null != conversation) {
-                        conversation.addMessage(mailMessage);
+                        conversation.getMain().addMessage(mailMessage);
                     }
                 }
             }
