@@ -88,6 +88,10 @@ public enum MicrometerFilterProperty implements Property {
      * Comma-separated-list with time values (e.g. 50ms, 100ms, etc.)
      */
     SLA("distribution.", ""),
+    /**
+     * Defines queries for metrics
+     */
+    QUERY(),
     ;
 
     public static final String BASE = "com.openexchange.metrics.micrometer.";

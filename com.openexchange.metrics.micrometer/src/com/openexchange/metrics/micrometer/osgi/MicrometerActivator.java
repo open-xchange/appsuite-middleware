@@ -70,6 +70,7 @@ import com.openexchange.metrics.micrometer.internal.filter.DistributionMinimumMi
 import com.openexchange.metrics.micrometer.internal.filter.DistributionPercentilesMicrometerFilterPerformer;
 import com.openexchange.metrics.micrometer.internal.filter.DistributionSLAMicrometerFilterPerformer;
 import com.openexchange.metrics.micrometer.internal.filter.MicrometerFilterPerformer;
+import com.openexchange.metrics.micrometer.internal.filter.QueryMetricMicrometerFilterPerformer;
 import com.openexchange.metrics.micrometer.internal.property.MicrometerFilterProperty;
 import com.openexchange.metrics.micrometer.internal.property.MicrometerProperty;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -111,6 +112,7 @@ public class MicrometerActivator extends HousekeepingActivator implements Reload
 
     @Override
     protected void startBundle() throws Exception {
+        filterPerformers.add(new QueryMetricMicrometerFilterPerformer());
         filterPerformers.add(new ActivateMetricMicrometerFilterPerformer());
         filterPerformers.add(new DistributionHistogramMicrometerFilterPerformer());
         filterPerformers.add(new DistributionMinimumMicrometerFilterPerformer());

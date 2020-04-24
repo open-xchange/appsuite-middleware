@@ -49,6 +49,9 @@
 
 package com.openexchange.metrics.micrometer.internal.filter;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
@@ -57,7 +60,11 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.metrics.micrometer.internal.property.MicrometerFilterProperty;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Tag;
+import io.micrometer.core.instrument.config.MeterFilter;
 
 /**
  * {@link AbstractMicrometerFilterPerformer}
@@ -139,5 +146,58 @@ abstract class AbstractMicrometerFilterPerformer {
             LOG.error("Invalid value was specified for the {} bound of the {} distribution.", property.name().toLowerCase(), metricId);
             return null;
         }
+    }
+
+    /**
+     * Applies the specified query as filter
+     * 
+     * @param query The query
+     */
+    void applyRegex(String query, MeterRegistry meterRegistry) {
+        LOG.debug("Query: {}", query);
+        int startIndex = query.indexOf("{") + 1;
+        int endIndex = query.indexOf("}");
+        if (startIndex < 0 || endIndex < 0 || endIndex < startIndex) {
+            // Invalid indexes
+            return;
+        }
+        //Valid indexes, apply
+        String metricName = query.substring(0, startIndex - 1);
+        String filter = query.substring(startIndex, endIndex);
+        LOG.debug("Metric name: {}, Filter: {}", metricName, filter);
+        Map<String, String> filterMap = extractFilter(filter);
+
+        meterRegistry.config().meterFilter(MeterFilter.accept(p -> {
+            List<Tag> tags = p.getTags();
+            if (false == p.getName().equals(metricName)) {
+                return false;
+            }
+            LOG.debug("Metric Tags: {}, Filter: {}", tags, filterMap);
+            int matchCount = 0;
+            for (Tag t : tags) {
+                if (filterMap.containsKey(t.getKey()) && filterMap.get(t.getKey()).equals(t.getValue())) {
+                    matchCount++;
+                }
+            }
+            return matchCount == filterMap.size();
+        }));
+    }
+
+    /**
+     * Extracts the filter map from the specified filter string
+     *
+     * @param filter The filter string
+     * @return The filter map
+     */
+    private Map<String, String> extractFilter(String filter) {
+        Map<String, String> map = new HashMap<>();
+        List<String> list = Arrays.asList(Strings.splitByComma(filter));
+        for (String entry : list) {
+            String[] split = Strings.splitBy(entry, '=', true);
+            if (split.length == 2) {
+                map.put(split[0], split[1].replaceAll("\"", ""));
+            }
+        }
+        return map;
     }
 }

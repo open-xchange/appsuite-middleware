@@ -49,47 +49,33 @@
 
 package com.openexchange.metrics.micrometer.internal.filter;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.HashMap;
+import java.util.Map;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.java.Strings;
 import com.openexchange.metrics.micrometer.internal.property.MicrometerFilterProperty;
 import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.config.MeterFilter;
 
 /**
- * {@link ActivateMetricMicrometerFilterPerformer} - Applies metric filters for
- * properties <code>com.openexchange.metrics.micrometer.enable.*</code>
+ * {@link QueryMetricMicrometerFilterPerformer}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.4
  */
-public class ActivateMetricMicrometerFilterPerformer extends AbstractMicrometerFilterPerformer implements MicrometerFilterPerformer {
+public class QueryMetricMicrometerFilterPerformer extends AbstractMicrometerFilterPerformer implements MicrometerFilterPerformer {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ActivateMetricMicrometerFilterPerformer.class);
+    public static final Map<String, String> queryRegistry = new HashMap<>();
 
     /**
-     * Initializes a new {@link ActivateMetricMicrometerFilterPerformer}.
+     * Initializes a new {@link QueryMetricMicrometerFilterPerformer}.
      */
-    public ActivateMetricMicrometerFilterPerformer() {
+    public QueryMetricMicrometerFilterPerformer() {
         super();
     }
 
     @Override
     public void applyFilter(MeterRegistry meterRegistry, ConfigurationService configurationService) {
-        applyFilterFor(MicrometerFilterProperty.ENABLE, configurationService, (entry) -> {
-            String key = entry.getKey();
-            if (key.endsWith("all")) {
-                return;
-            }
-            String metricId = extractMetricId(key, MicrometerFilterProperty.ENABLE);
-            String query = QueryMetricMicrometerFilterPerformer.queryRegistry.get(metricId);
-            if (Strings.isEmpty(query)) {
-                LOG.debug("Applying enable/disable meter filter for '{}'", metricId);
-                meterRegistry.config().meterFilter(Boolean.parseBoolean(entry.getValue()) ? MeterFilter.acceptNameStartsWith(metricId) : MeterFilter.denyNameStartsWith(metricId));
-                return;
-            }
-            applyRegex(query, meterRegistry);
+        applyFilterFor(MicrometerFilterProperty.QUERY, configurationService, (entry) -> {
+            queryRegistry.put(extractMetricId(entry.getKey(), MicrometerFilterProperty.QUERY), entry.getValue());
         });
     }
 }
