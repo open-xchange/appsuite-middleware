@@ -1912,6 +1912,9 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
 
         boolean closed = getStorageService().closeCompositionSpace(session, compositionSpaceId);
         if (closed) {
+            if (LOG.isInfoEnabled()) {
+                LOG.info("Closed composition space: {}", getUnformattedString(compositionSpaceId));
+            }
             attachmentStorage.deleteAttachmentsByCompositionSpace(compositionSpaceId, session);
         }
         return closed;
