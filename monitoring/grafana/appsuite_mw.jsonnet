@@ -10,94 +10,172 @@ local template = grafana.template;
 
 local dbPoolName = 'dbpool';
 local davInterfaceName = 'davinterface';
+local httpClient = 'httpclient';
 
-local overviewTotalSessions = singlestat.new(
-  title='Total Sessions',
-  description='The number of total sessions.',
-  datasource='Prometheus',
-  decimals=0,
-  valueName='avg',
-  valueMaps=[
-    {
-      op: '=',
-      text: '0',
-      value: 'null',
+local templates = [
+  {
+    name: dbPoolName,
+    label: 'DB Pool',
+    hide: 'variable',
+    includeAll: true,
+    query: 'label_values(appsuite_mysql_connections_total,pool)',
+    regex: '([0-9]+)',
+    sort: 3,
+  },
+  {
+    name: davInterfaceName,
+    label: 'DAV Interface',
+    hide: 'variable',
+    includeAll: true,
+    query: 'label_values(appsuite_webdav_requests_seconds_count,interface)',
+    sort: 1,
+  },
+  {
+    name: httpClient,
+    label: 'HTTP Client',
+    query: 'label_values(appsuite_httpclient_requests_seconds_count,client)',
+    sort: 1,
+  },
+];
+
+local sessions = [
+  {
+    title: 'Total',
+    description: 'The number of total sessions.',
+    target: {
+      expr: 'appsuite_sessions_total_count{client="all", instance=~"$instance"}',
+      legendFormat: 'Total',
     },
-  ],
-  sparklineShow=true,
-).addTarget(
+    gridPos: { h: 4, w: 3, x: 0, y: 1 },
+  },
+  {
+    title: 'Active',
+    description: 'The number of active sessions or in other words the number of sessions within the first two short term containers.',
+    target: {
+      expr: 'appsuite_sessions_active_count{client="all", instance=~"$instance"}',
+      legendFormat: 'Active',
+    },
+    gridPos: { h: 4, w: 3, x: 3, y: 1 },
+  },
+  {
+    title: 'Short Term',
+    description: 'The number of sessions in the short term containers.',
+    target: {
+      expr: 'appsuite_sessions_short_term_count{client="all", instance=~"$instance"}',
+      legendFormat: 'Short Term',
+    },
+    gridPos: { h: 4, w: 3, x: 0, y: 5 },
+  },
+  {
+    title: 'Long Term',
+    description: 'The number of sessions in the long term containers.',
+    target: {
+      expr: 'appsuite_sessions_long_term_count{client="all", instance=~"$instance"}',
+      legendFormat: 'Long Term',
+    },
+    gridPos: { h: 4, w: 3, x: 3, y: 5 },
+  },
+];
+
+local cacheRatio = [
+  {
+    title: 'Hit Ratio',
+    expr: 'sum(rate(appsuite_cache_hits_total{instance=~"$instance"}[$interval])) / (sum(rate(appsuite_cache_hits_total{instance=~"$instance"}[$interval])) + sum(rate(appsuite_cache_misses_total{instance=~"$instance"}[$interval])))',
+    gridPos: { h: 4, w: 3, x: 0, y: 17 },
+  },
+  {
+    title: 'Miss Ratio',
+    expr: 'sum(rate(appsuite_cache_misses_total{instance=~"$instance"}[$interval])) / (sum(rate(appsuite_cache_hits_total{instance=~"$instance"}[$interval])) + sum(rate(appsuite_cache_misses_total{instance=~"$instance"}[$interval])))',
+    gridPos: { h: 4, w: 3, x: 0, y: 21 },
+  },
+];
+
+local genPercentileTargets(metric, labels=[], groupBy=[]) = [
   prometheus.target(
-    'appsuite_sessions_total_count{client="all", instance=~"$instance"}',
-    legendFormat='Total Sessions',
+    'histogram_quantile(0.' + p + ', sum(rate(appsuite_' + metric + '_seconds_bucket{' + std.join(',', ['instance=~"$instance"'] + labels) + '}[$interval])) by (' + std.join(',', ['le', 'instance'] + groupBy) + '))',
+    legendFormat='p' + p,
   )
+  for p in [50, 75, 90, 95, 99, 999]
+] + [
+  prometheus.target(
+    'sum(rate(appsuite_%s_seconds_sum{%s}[$interval]))/sum(rate(appsuite_%s_seconds_count{%s}[$interval]))' % [metric, std.join(',', ['instance=~"$instance"'] + labels), metric, std.join(',', ['instance=~"$instance"'] + labels)],
+    legendFormat='avg',
+  ),
+  prometheus.target(
+    'sum(appsuite_%s_seconds_max{%s})' % [metric, std.join(',', ['instance=~"$instance"'] + labels)],
+    legendFormat='max',
+  ),
+];
+
+local httpClientRequestsPerSecond = graphPanel.new(
+  title='Requests (per-second)',
+  datasource=grafana.default.datasource,
+  aliasColors={
+    KO: 'dark-red',
+    OK: 'dark-green',
+    Total: 'dark-yellow',
+  },
+  fill=2,
+  linewidth=2,
+  min='0',
+  format='cps',
+  labelY1='Counts/s',
+).addTargets(
+  [
+    prometheus.target(
+      'sum(rate(appsuite_httpclient_requests_seconds_count{instance=~"$instance",client="$httpclient"}[$interval])) by (client,instance)',
+      legendFormat='Total',
+    ),
+    prometheus.target(
+      'sum(rate(appsuite_httpclient_requests_seconds_count{instance=~"$instance",client="$httpclient",status!~"[45][0-9]{2}"}[$interval])) by (client,instance)',
+      legendFormat='OK',
+    ),
+    prometheus.target(
+      'sum(rate(appsuite_httpclient_requests_seconds_count{instance=~"$instance",client="$httpclient",status=~"[45][0-9]{2}"}[$interval])) by (client,instance)',
+      legendFormat='KO',
+    ),
+  ]
 );
 
-local overviewActiveSessions = singlestat.new(
-  title='Active Sessions',
-  description='The number of active sessions or in other words the number of sessions within the first two short term containers.',
-  datasource='Prometheus',
+local httpClientConnections = graphPanel.new(
+  title='Connections',
+  datasource=grafana.default.datasource,
   decimals=0,
-  valueName='avg',
-  valueMaps=[
-    {
-      op: '=',
-      text: '0',
-      value: 'null',
-    },
-  ],
-  sparklineShow=true,
-).addTarget(
-  prometheus.target(
-    'appsuite_sessions_active_count{client="all", instance=~"$instance"}',
-    legendFormat='Active Sessions',
-  )
-);
-
-local overviewShortTermSessions = singlestat.new(
-  title='Short Term Sessions',
-  description='The number of sessions in the short term containers.',
-  datasource='Prometheus',
-  decimals=0,
-  valueName='avg',
-  valueMaps=[
-    {
-      op: '=',
-      text: '0',
-      value: 'null',
-    },
-  ],
-  sparklineShow=true,
-).addTarget(
-  prometheus.target(
-    'appsuite_sessions_short_term_count{client="all", instance=~"$instance"}',
-    legendFormat='Short Term Sessions',
-  )
-);
-
-local overviewLongTermSessions = singlestat.new(
-  title='Long Term Sessions',
-  description='The number of sessions in the long term containers.',
-  datasource='Prometheus',
-  decimals=0,
-  valueName='avg',
-  valueMaps=[
-    {
-      op: '=',
-      text: '0',
-      value: 'null',
-    },
-  ],
-  sparklineShow=true,
-).addTarget(
-  prometheus.target(
-    'appsuite_sessions_long_term_count{client="all", instance=~"$instance"}',
-    legendFormat='Long Term Sessions',
-  )
+  aliasColors={
+    Max: 'dark-red',
+  },
+  fill=2,
+  linewidth=2,
+  min='0',
+).addTargets(
+  [
+    prometheus.target(
+      'appsuite_httpclient_connections_pending{instance=~"$instance",client=~"$httpclient"}',
+      legendFormat='Pending',
+    ),
+    prometheus.target(
+      'appsuite_httpclient_connections_available{instance=~"$instance",client=~"$httpclient"}',
+      legendFormat='Available',
+    ),
+    prometheus.target(
+      'appsuite_httpclient_connections_leased{instance=~"$instance",client=~"$httpclient"}',
+      legendFormat='Leased',
+    ),
+    prometheus.target(
+      'appsuite_httpclient_connections_max{instance=~"$instance",client=~"$httpclient"}',
+      legendFormat='Max',
+    ),
+  ]
+).addSeriesOverride(
+  {
+    alias: 'Max',
+    fill: 0,
+  },
 );
 
 local threadPoolTasks = graphPanel.new(
   title='ThreadPool Tasks',
-  datasource='Prometheus',
+  datasource=grafana.default.datasource,
   description='',
   fill=2,
   linewidth=2,
@@ -126,7 +204,7 @@ local threadPoolTasks = graphPanel.new(
 
 local threadPool = graphPanel.new(
   title='ThreadPool',
-  datasource='Prometheus',
+  datasource=grafana.default.datasource,
   description='',
   decimals=0,
   fill=2,
@@ -152,7 +230,7 @@ local threadPool = graphPanel.new(
 local httpApiResponsePercentiles = graphPanel.new(
   title='Response Time Percentiles',
   description='HTTP API response time percentiles.',
-  datasource='Prometheus',
+  datasource=grafana.default.datasource,
   aliasColors={
     max: 'dark-red',
   },
@@ -162,40 +240,7 @@ local httpApiResponsePercentiles = graphPanel.new(
   min='0',
   format='s',
 ).addTargets(
-  [
-    prometheus.target(
-      'histogram_quantile(0.5, sum(rate(appsuite_httpapi_requests_seconds_bucket{instance=~"$instance"}[$interval])) by (le, instance))',
-      legendFormat='p50',
-    ),
-    prometheus.target(
-      'histogram_quantile(0.75, sum(rate(appsuite_httpapi_requests_seconds_bucket{instance=~"$instance"}[$interval])) by (le, instance))',
-      legendFormat='p75',
-    ),
-    prometheus.target(
-      'histogram_quantile(0.9, sum(rate(appsuite_httpapi_requests_seconds_bucket{instance=~"$instance"}[$interval])) by (le, instance))',
-      legendFormat='p90',
-    ),
-    prometheus.target(
-      'histogram_quantile(0.95, sum(rate(appsuite_httpapi_requests_seconds_bucket{instance=~"$instance"}[$interval])) by (le, instance))',
-      legendFormat='p95',
-    ),
-    prometheus.target(
-      'histogram_quantile(0.99, sum(rate(appsuite_httpapi_requests_seconds_bucket{instance=~"$instance"}[$interval])) by (le, instance))',
-      legendFormat='p99',
-    ),
-    prometheus.target(
-      'histogram_quantile(0.999, sum(rate(appsuite_httpapi_requests_seconds_bucket{instance=~"$instance"}[$interval])) by (le, instance))',
-      legendFormat='p999',
-    ),
-    prometheus.target(
-      'sum(rate(appsuite_httpapi_requests_seconds_sum{instance=~"$instance"}[$interval]))/sum(rate(appsuite_httpapi_requests_seconds_count{instance=~"$instance"}[$interval]))',
-      legendFormat='avg',
-    ),
-    prometheus.target(
-      'sum(appsuite_httpapi_requests_seconds_max{instance=~"$instance"})',
-      legendFormat='max',
-    ),
-  ]
+  genPercentileTargets('httpapi_requests')
 ).addSeriesOverride(
   {
     alias: 'max',
@@ -204,12 +249,10 @@ local httpApiResponsePercentiles = graphPanel.new(
 );
 
 local httpApiRequestsPercentilesByRequest = graphPanel.new(
-  title='Top Requests (99th percentile)',
-  description='',
-  datasource='Prometheus',
+  title='Top 5 Requests (99th percentile)',
+  datasource=grafana.default.datasource,
   fill=2,
   linewidth=2,
-  nullPointMode='null as zero',
   legend_hideZero=true,
   min='0',
   format='s',
@@ -217,7 +260,7 @@ local httpApiRequestsPercentilesByRequest = graphPanel.new(
   labelY1='Response Time',
 ).addTarget(
   prometheus.target(
-    'topk(10,histogram_quantile(0.99, sum(rate(appsuite_httpapi_requests_seconds_bucket{instance=~"$instance"}[$interval])) by (le, module, action, instance)))',
+    'topk(5,histogram_quantile(0.99, sum(rate(appsuite_httpapi_requests_seconds_bucket{instance=~"$instance"}[${__range_s}s])) by (le, module, action, instance)))',
     legendFormat='{{module}}/{{action}}',
   )
 );
@@ -225,14 +268,12 @@ local httpApiRequestsPercentilesByRequest = graphPanel.new(
 local httpApiRequestsPerSecond = graphPanel.new(
   title='Requests (per-second)',
   description='',
-  datasource='Prometheus',
-  //decimals=0,
+  datasource=grafana.default.datasource,
   aliasColors={
     KO: 'dark-red',
     OK: 'dark-green',
     Total: 'dark-yellow',
   },
-  nullPointMode='null as zero',
   fill=2,
   linewidth=2,
   min='0',
@@ -245,11 +286,11 @@ local httpApiRequestsPerSecond = graphPanel.new(
       legendFormat='Total',
     ),
     prometheus.target(
-      'sum(rate(appsuite_httpapi_requests_seconds_count{status="OK",instance=~"$instance"}[$interval]))',
+      'sum(rate(appsuite_httpapi_requests_seconds_count{status=~"OK",instance=~"$instance"}[$interval]))',
       legendFormat='OK',
     ),
     prometheus.target(
-      'sum(rate(appsuite_httpapi_requests_seconds_count{status!="OK",instance=~"$instance"}[$interval]))',
+      'sum(rate(appsuite_httpapi_requests_seconds_count{status!~"OK",instance=~"$instance"}[$interval]))',
       legendFormat='KO',
     ),
   ]
@@ -258,8 +299,7 @@ local httpApiRequestsPerSecond = graphPanel.new(
 local restApiRequestsPerSecond = graphPanel.new(
   title='Requests (per-second)',
   description='',
-  datasource='Prometheus',
-  //decimals=0,
+  datasource=grafana.default.datasource,
   aliasColors={
     KO: 'dark-red',
     OK: 'dark-green',
@@ -278,11 +318,11 @@ local restApiRequestsPerSecond = graphPanel.new(
       legendFormat='Total',
     ),
     prometheus.target(
-      'sum(rate(appsuite_restapi_requests_seconds_count{status=~"([45][0-9][0-9])",instance=~"$instance"}[$interval]))',
+      'sum(rate(appsuite_restapi_requests_seconds_count{status!~"[45][0-9]{2}",instance=~"$instance"}[$interval]))',
       legendFormat='OK',
     ),
     prometheus.target(
-      'sum(rate(appsuite_restapi_requests_seconds_count{status!~"([45][0-9][0-9])",instance=~"$instance"}[$interval]))',
+      'sum(rate(appsuite_restapi_requests_seconds_count{status=~"[45][0-9]{2}",instance=~"$instance"}[$interval]))',
       legendFormat='KO',
     ),
   ]
@@ -291,7 +331,7 @@ local restApiRequestsPerSecond = graphPanel.new(
 local restApiResponsePercentiles = graphPanel.new(
   title='Response Time Percentiles',
   description='REST API response time percentiles.',
-  datasource='Prometheus',
+  datasource=grafana.default.datasource,
   aliasColors={
     max: 'dark-red',
   },
@@ -301,40 +341,7 @@ local restApiResponsePercentiles = graphPanel.new(
   min='0',
   format='s',
 ).addTargets(
-  [
-    prometheus.target(
-      'histogram_quantile(0.5, sum(rate(appsuite_restapi_requests_seconds_bucket{instance=~"$instance"}[$interval])) by (le, instance))',
-      legendFormat='p50',
-    ),
-    prometheus.target(
-      'histogram_quantile(0.75, sum(rate(appsuite_restapi_requests_seconds_bucket{instance=~"$instance"}[$interval])) by (le, instance))',
-      legendFormat='p75',
-    ),
-    prometheus.target(
-      'histogram_quantile(0.9, sum(rate(appsuite_restapi_requests_seconds_bucket{instance=~"$instance"}[$interval])) by (le, instance))',
-      legendFormat='p90',
-    ),
-    prometheus.target(
-      'histogram_quantile(0.95, sum(rate(appsuite_restapi_requests_seconds_bucket{instance=~"$instance"}[$interval])) by (le, instance))',
-      legendFormat='p95',
-    ),
-    prometheus.target(
-      'histogram_quantile(0.99, sum(rate(appsuite_restapi_requests_seconds_bucket{instance=~"$instance"}[$interval])) by (le, instance))',
-      legendFormat='p99',
-    ),
-    prometheus.target(
-      'histogram_quantile(0.999, sum(rate(appsuite_restapi_requests_seconds_bucket{instance=~"$instance"}[$interval])) by (le, instance))',
-      legendFormat='p999',
-    ),
-    prometheus.target(
-      'sum(rate(appsuite_restapi_requests_seconds_sum{instance=~"$instance"}[$interval]))/sum(rate(appsuite_restapi_requests_seconds_count{instance=~"$instance"}[$interval]))',
-      legendFormat='avg',
-    ),
-    prometheus.target(
-      'sum(appsuite_restapi_requests_seconds_max{instance=~"$instance"})',
-      legendFormat='max',
-    ),
-  ]
+  genPercentileTargets('restapi_requests')
 ).addSeriesOverride(
   {
     alias: 'max',
@@ -344,48 +351,53 @@ local restApiResponsePercentiles = graphPanel.new(
 
 local circuitBreakerDenials = graphPanel.new(
   title='Average Denials Rate (per-second)',
-  description='',
-  datasource='Prometheus',
+  datasource=grafana.default.datasource,
   fill=2,
   linewidth=2,
-  nullPointMode='null as zero',
   min='0',
   labelY1='denials/s',
 ).addTargets(
   [
     prometheus.target(
-      'rate(appsuite_circuit_breaker_denials_total{instance=~"$instance", protocol="imap"}[$interval])',
-      legendFormat='{{protocol}}',
+      'rate(appsuite_circuitbreaker_denials_total{instance=~"$instance", name!="mailfilter"}[$interval])',
+      legendFormat='{{name}}',
     ),
     prometheus.target(
-      'rate(appsuite_circuit_breaker_denials_total{instance=~"$instance", protocol="mailfilter"}[$interval])',
-      legendFormat='{{protocol}}',
+      'rate(appsuite_circuitbreaker_denials_total{instance=~"$instance", name="mailfilter"}[$interval])',
+      legendFormat='{{name}}',
     ),
   ]
 );
 
-local circuitBreakerRequestRate = graphPanel.new(
-  title='Average Error & Request Rate (per-second)',
-  description='',
-  datasource='Prometheus',
+local imapRequestRate = graphPanel.new(
+  title='Requests (per-second)',
+  datasource=grafana.default.datasource,
   fill=2,
   linewidth=2,
-  nullPointMode='null as zero',
+  aliasColors={
+    KO: 'dark-red',
+    OK: 'dark-green',
+    Total: 'dark-yellow',
+  },
   min='0',
-  labelY1='event/s',
+  format='cps',
+  labelY1='Commands/s',
 ).addTargets(
   [
     prometheus.target(
-      'sum(rate(appsuite_imap_requests_seconds_sum{instance=~"$instance"}[$interval]) / rate(appsuite_imap_requests_seconds_count{instance=~"$instance"}[$interval]))',
-      legendFormat='Requests',
+      'sum(rate(appsuite_imap_commands_seconds_count{instance=~"$instance"}[$interval]))',
+      legendFormat='Total',
     ),
     prometheus.target(
-      'sum(rate(appsuite_imap_errors_total{instance=~"$instance"}[$interval]))',
-      legendFormat='Errors',
+      'sum(rate(appsuite_imap_commands_seconds_count{status=~"OK",instance=~"$instance"}[$interval]))',
+      legendFormat='OK',
+    ),
+    prometheus.target(
+      'sum(rate(appsuite_imap_commands_seconds_count{status!~"OK",instance=~"$instance"}[$interval]))',
+      legendFormat='KO',
     ),
   ]
 );
-
 
 local circuitBreakerIMAPStatus = table.new(
   title='IMAP Status',
@@ -403,7 +415,7 @@ local circuitBreakerIMAPStatus = table.new(
   ]
 ).addTarget(
   prometheus.target(
-    'count(appsuite_circuit_breaker_status{protocol="imap"}) by (account, status)',
+    'count(appsuite_circuitbreaker_state{instance=~"$instance",name!="mailfilter"}>0) by (host,state)',
     format='table',
     instant=true,
   )
@@ -411,7 +423,7 @@ local circuitBreakerIMAPStatus = table.new(
 
 local soapApiResponsePercentiles = graphPanel.new(
   title='Response Time Percentiles',
-  datasource='Prometheus',
+  datasource=grafana.default.datasource,
   description='',
   aliasColors={
     max: 'dark-red',
@@ -422,46 +434,13 @@ local soapApiResponsePercentiles = graphPanel.new(
   format='s',
   labelY1='Response Time',
 ).addTargets(
-  [
-    prometheus.target(
-      'histogram_quantile(0.5, sum(rate(appsuite_soapapi_requests_seconds_bucket{instance=~"$instance"}[$interval])) by (le, instance))',
-      legendFormat='p50',
-    ),
-    prometheus.target(
-      'histogram_quantile(0.75, sum(rate(appsuite_soapapi_requests_seconds_bucket{instance=~"$instance"}[$interval])) by (le, instance))',
-      legendFormat='p75',
-    ),
-    prometheus.target(
-      'histogram_quantile(0.9, sum(rate(appsuite_soapapi_requests_seconds_bucket{instance=~"$instance"}[$interval])) by (le, instance))',
-      legendFormat='p90',
-    ),
-    prometheus.target(
-      'histogram_quantile(0.95, sum(rate(appsuite_soapapi_requests_seconds_bucket{instance=~"$instance"}[$interval])) by (le, instance))',
-      legendFormat='p95',
-    ),
-    prometheus.target(
-      'histogram_quantile(0.99, sum(rate(appsuite_soapapi_requests_seconds_bucket{instance=~"$instance"}[$interval])) by (le, instance))',
-      legendFormat='p99',
-    ),
-    prometheus.target(
-      'histogram_quantile(0.999, sum(rate(appsuite_soapapi_requests_seconds_bucket{instance=~"$instance"}[$interval])) by (le, instance))',
-      legendFormat='p999',
-    ),
-    prometheus.target(
-      'sum(rate(appsuite_soapapi_requests_seconds_sum{instance=~"$instance"}[$interval]))/sum(rate(appsuite_webdav_requests_seconds_count{instance=~"$instance"}[$interval]))',
-      legendFormat='avg',
-    ),
-    prometheus.target(
-      'sum(appsuite_soapapi_requests_seconds_max{instance=~"$instance"})',
-      legendFormat='max',
-    ),
-  ]
+  genPercentileTargets('soapapi_requests')
 );
 
 local soapApiRequestsPerSecond = graphPanel.new(
   title='Requests (per-second)',
   description='',
-  datasource='Prometheus',
+  datasource=grafana.default.datasource,
   //decimals=0,
   aliasColors={
     KO: 'dark-red',
@@ -481,11 +460,11 @@ local soapApiRequestsPerSecond = graphPanel.new(
       legendFormat='Total',
     ),
     prometheus.target(
-      'sum(rate(appsuite_soapapi_requests_seconds_count{status=~"([45][0-9][0-9]|OK|0)",instance=~"$instance"}[$interval]))',
+      'sum(rate(appsuite_soapapi_requests_seconds_count{status=~"OK",instance=~"$instance"}[$interval]))',
       legendFormat='OK',
     ),
     prometheus.target(
-      'sum(rate(appsuite_soapapi_requests_seconds_count{status!~"([45][0-9][0-9]|OK|0)",instance=~"$instance"}[$interval]))',
+      'sum(rate(appsuite_soapapi_requests_seconds_count{status!~"OK",instance=~"$instance"}[$interval]))',
       legendFormat='KO',
     ),
   ]
@@ -493,7 +472,7 @@ local soapApiRequestsPerSecond = graphPanel.new(
 
 local webdavApiResponsePercentiles = graphPanel.new(
   title='Response Time Percentiles $davinterface',
-  datasource='Prometheus',
+  datasource=grafana.default.datasource,
   description='',
   aliasColors={
     max: 'dark-red',
@@ -506,53 +485,19 @@ local webdavApiResponsePercentiles = graphPanel.new(
   repeat=davInterfaceName,
   repeatDirection='h',
 ).addTargets(
-  [
-    prometheus.target(
-      'histogram_quantile(0.5, sum(rate(appsuite_webdav_requests_seconds_bucket{instance=~"$instance",interface="$' + davInterfaceName + '"}[$interval])) by (le, interface, instance))',
-      legendFormat='p50',
-    ),
-    prometheus.target(
-      'histogram_quantile(0.75, sum(rate(appsuite_webdav_requests_seconds_bucket{instance=~"$instance",interface="$' + davInterfaceName + '"}[$interval])) by (le, interface, instance))',
-      legendFormat='p75',
-    ),
-    prometheus.target(
-      'histogram_quantile(0.9, sum(rate(appsuite_webdav_requests_seconds_bucket{instance=~"$instance",interface="$' + davInterfaceName + '"}[$interval])) by (le, interface, instance))',
-      legendFormat='p90',
-    ),
-    prometheus.target(
-      'histogram_quantile(0.95, sum(rate(appsuite_webdav_requests_seconds_bucket{instance=~"$instance",interface="$' + davInterfaceName + '"}[$interval])) by (le, interface, instance))',
-      legendFormat='p95',
-    ),
-    prometheus.target(
-      'histogram_quantile(0.99, sum(rate(appsuite_webdav_requests_seconds_bucket{instance=~"$instance",interface="$' + davInterfaceName + '"}[$interval])) by (le, interface, instance))',
-      legendFormat='p99',
-    ),
-    prometheus.target(
-      'histogram_quantile(0.999, sum(rate(appsuite_webdav_requests_seconds_bucket{instance=~"$instance",interface="$' + davInterfaceName + '"}[$interval])) by (le, interface, instance))',
-      legendFormat='p999',
-    ),
-    prometheus.target(
-      'sum(rate(appsuite_webdav_requests_seconds_sum{instance=~"$instance",interface="$' + davInterfaceName + '"}[$interval]))/sum(rate(appsuite_webdav_requests_seconds_count{instance=~"$instance",interface="$' + davInterfaceName + '"}[$interval]))',
-      legendFormat='avg',
-    ),
-    prometheus.target(
-      'sum(appsuite_webdav_requests_seconds_max{instance=~"$instance",interface="$' + davInterfaceName + '"})',
-      legendFormat='max',
-    ),
-  ]
+  genPercentileTargets('webdav_requests', labels=[std.format('interface="$%s"', davInterfaceName)], groupBy=['interface'])
 );
 
 local webdavApiRequestsPerSecond = graphPanel.new(
   title='Requests (per-second)',
   description='',
-  datasource='Prometheus',
+  datasource=grafana.default.datasource,
   //decimals=0,
   aliasColors={
     KO: 'dark-red',
     OK: 'dark-green',
     Total: 'dark-yellow',
   },
-  nullPointMode='null as zero',
   fill=2,
   linewidth=2,
   min='0',
@@ -565,19 +510,39 @@ local webdavApiRequestsPerSecond = graphPanel.new(
       legendFormat='Total',
     ),
     prometheus.target(
-      'sum(rate(appsuite_webdav_requests_seconds_count{status=~"([45][0-9][0-9]|OK|0)",instance=~"$instance"}[$interval]))',
+      'sum(rate(appsuite_webdav_requests_seconds_count{status=~"OK|^0",instance=~"$instance"}[$interval]))',
       legendFormat='OK',
     ),
     prometheus.target(
-      'sum(rate(appsuite_webdav_requests_seconds_count{status!~"([45][0-9][0-9]|OK|0)",instance=~"$instance"}[$interval]))',
+      'sum(rate(appsuite_webdav_requests_seconds_count{status!~"OK|^0",instance=~"$instance"}[$interval]))',
       legendFormat='KO',
     ),
   ]
 );
 
+local dbTimeoutRate = singlestat.new(
+  title='Timeout Rate',
+  datasource=grafana.default.datasource,
+  decimals=0,
+  timeFrom='1h',
+  valueName='avg',
+  valueMaps=[
+    {
+      op: '=',
+      text: '0',
+      value: 'null',
+    },
+  ],
+  sparklineShow=true,
+).addTarget(
+  prometheus.target(
+    expr='sum(rate(appsuite_mysql_connections_timeout_total{instance=~"$instance"}[1h])) by (instance)',
+  )
+);
+
 local configDBConnections = graphPanel.new(
   title='ConfigDB Connections',
-  datasource='Prometheus',
+  datasource=grafana.default.datasource,
   description='The total number of pooled and active connections of this db pool.',
   fill=2,
   linewidth=2,
@@ -600,9 +565,73 @@ local configDBConnections = graphPanel.new(
   ]
 );
 
+local configDBReadConnections = graphPanel.new(
+  title='ConfigDB Read Connections',
+  datasource=grafana.default.datasource,
+  description='The total number of pooled and active connections of this db pool.',
+  aliasColors={
+    Max: 'dark-red',
+  },
+  fill=2,
+  linewidth=2,
+  decimals=0,
+  min='0',
+).addTargets(
+  [
+    prometheus.target(
+      'appsuite_mysql_connections_total{class="configdb",instance=~"$instance",type="read"}',
+      legendFormat='Pooled',
+    ),
+    prometheus.target(
+      'appsuite_mysql_connections_active{class="configdb",instance=~"$instance",type="read"}',
+      legendFormat='Active',
+    ),
+    prometheus.target(
+      'appsuite_mysql_connections_idle{class="configdb",instance=~"$instance",type="read"}',
+      legendFormat='Idle',
+    ),
+    prometheus.target(
+      'sum(appsuite_mysql_connections_max{class="configdb",instance=~"$instance",type="read"})',
+      legendFormat='Max',
+    ),
+  ]
+).addSeriesOverride({ alias: 'Max', fill: 0 },);
+
+local configDBWriteConnections = graphPanel.new(
+  title='ConfigDB Write Connections',
+  datasource=grafana.default.datasource,
+  description='The total number of pooled and active connections of this db pool.',
+  aliasColors={
+    Max: 'dark-red',
+  },
+  fill=2,
+  linewidth=2,
+  decimals=0,
+  min='0',
+).addTargets(
+  [
+    prometheus.target(
+      'appsuite_mysql_connections_total{class="configdb",instance=~"$instance",type="write"}',
+      legendFormat='Pooled',
+    ),
+    prometheus.target(
+      'appsuite_mysql_connections_active{class="configdb",instance=~"$instance",type="write"}',
+      legendFormat='Active',
+    ),
+    prometheus.target(
+      'appsuite_mysql_connections_idle{class="configdb",instance=~"$instance",type="write"}',
+      legendFormat='Idle',
+    ),
+    prometheus.target(
+      'sum(appsuite_mysql_connections_max{class="configdb",instance=~"$instance",type="write"})',
+      legendFormat='Max',
+    ),
+  ]
+).addSeriesOverride({ alias: 'Max', fill: 0 },);
+
 local configDBTimes = graphPanel.new(
   title='ConfigDB Times',
-  datasource='Prometheus',
+  datasource=grafana.default.datasource,
   fill=2,
   linewidth=2,
   description='',
@@ -626,36 +655,73 @@ local configDBTimes = graphPanel.new(
   ]
 );
 
-local userDBConnections = graphPanel.new(
-  title='UserDB Pool $dbpool Connections',
-  datasource='Prometheus',
+local userDBWriteConnections = graphPanel.new(
+  title='UserDB Write Connections',
+  datasource=grafana.default.datasource,
   description='The total number of pooled and active connections of this db pool.',
+  aliasColors={
+    Max: 'dark-red',
+  },
   decimals=0,
   fill=2,
   linewidth=2,
   min='0',
-  repeat=dbPoolName,
-  repeatDirection='h',
 ).addTargets(
   [
     prometheus.target(
-      'appsuite_mysql_connections_total{class!="configdb",instance=~"$instance",pool="$' + dbPoolName + '"}',
-      legendFormat='Pooled {{type}}',
+      'sum(appsuite_mysql_connections_total{class="userdb",instance=~"$instance",type="write"})',
+      legendFormat='Pooled',
     ),
     prometheus.target(
-      'appsuite_mysql_connections_active{class!="configdb",instance=~"$instance",pool="$' + dbPoolName + '"}',
-      legendFormat='Active {{type}}',
+      'sum(appsuite_mysql_connections_active{class="userdb",instance=~"$instance",type="write"})',
+      legendFormat='Active',
     ),
     prometheus.target(
-      'appsuite_mysql_connections_idle{class!="configdb",instance=~"$instance",pool="$' + dbPoolName + '"}',
-      legendFormat='Idle {{type}}',
+      'sum(appsuite_mysql_connections_idle{class="userdb",instance=~"$instance",type="write"})',
+      legendFormat='Idle',
+    ),
+    prometheus.target(
+      'sum(appsuite_mysql_connections_max{class="userdb",instance=~"$instance",type="write"}) by (pool)',
+      legendFormat='Max',
     ),
   ]
-);
+).addSeriesOverride({ alias: 'Max', fill: 0 },);
+
+local userDBReadConnections = graphPanel.new(
+  title='UserDB Read Connections',
+  datasource=grafana.default.datasource,
+  description='The total number of pooled and active connections of this db pool.',
+  aliasColors={
+    Max: 'dark-red',
+  },
+  decimals=0,
+  fill=2,
+  linewidth=2,
+  min='0',
+).addTargets(
+  [
+    prometheus.target(
+      'sum(appsuite_mysql_connections_total{class="userdb",instance=~"$instance",type="read"})',
+      legendFormat='Pooled',
+    ),
+    prometheus.target(
+      'sum(appsuite_mysql_connections_active{class="userdb",instance=~"$instance",type="read"})',
+      legendFormat='Active',
+    ),
+    prometheus.target(
+      'sum(appsuite_mysql_connections_idle{class="userdb",instance=~"$instance",type="read"})',
+      legendFormat='Idle',
+    ),
+    prometheus.target(
+      'sum(appsuite_mysql_connections_max{class="userdb",instance=~"$instance",type="read"}) by (pool)',
+      legendFormat='Max',
+    ),
+  ]
+).addSeriesOverride({ alias: 'Max', fill: 0 },);
 
 local userDBTimes = graphPanel.new(
   title='UserDB Pool $dbpool Times',
-  datasource='Prometheus',
+  datasource=grafana.default.datasource,
   description='',
   decimals=0,
   fill=2,
@@ -682,90 +748,222 @@ local userDBTimes = graphPanel.new(
 );
 
 grafana.newDashboard(
-  title='AppSuite',
-  tags=['Java', 'AppSuite-MW'],
-  metric='jvm_info'
+  title='App Suite', tags=['Java', 'AppSuite-MW'], metric='jvm_info'
 ).addTemplates(
   [
     template.new(
-      name=dbPoolName,
-      label='DB Pool',
-      hide='variable',
-      includeAll=true,
-      datasource='Prometheus',
-      query='label_values(appsuite_mysql_connections_total,pool)',
+      name=obj.name,
+      label=obj.label,
+      query=obj.query,
+      datasource=grafana.default.datasource,
+      hide=if std.objectHas(obj, 'hide') then obj.hide else '',
+      includeAll=if std.objectHas(obj, 'includeAll') then obj.includeAll else false,
+      sort=if std.objectHas(obj, 'sort') then obj.sort else 0,
+      regex=if std.objectHas(obj, 'regex') then obj.regex else '',
       refresh='load',
-      regex='([0-9]+)',
-      sort=3,
-    ),
-    template.new(
-      name=davInterfaceName,
-      label='DAV Interface',
-      hide='variable',
-      includeAll=true,
-      datasource='Prometheus',
-      query='label_values(appsuite_webdav_requests_seconds_count,interface)',
-      refresh='load',
-      sort=1,
-    ),
+    )
+    for obj in templates
   ]
 ).addPanels(
   [
-    row.new(
-      title='Overview'
-    ) + { gridPos: { h: 1, w: 24, x: 0, y: 1 } },
-    overviewTotalSessions { gridPos: { h: 6, w: 4, x: 0, y: 1 } },
-    overviewActiveSessions { gridPos: { h: 6, w: 4, x: 4, y: 1 } },
-    overviewShortTermSessions { gridPos: { h: 6, w: 4, x: 8, y: 1 } },
-    overviewLongTermSessions { gridPos: { h: 6, w: 4, x: 12, y: 1 } },
+    //------------------------------------------------------------------------------
+    row.new(title='Sessions') + { gridPos: { h: 1, w: 24, x: 0, y: 0 } },
   ] + [
+    singlestat.new(
+      title=obj.title,
+      description=obj.description,
+      datasource=grafana.default.datasource,
+      decimals=0,
+      valueName='avg',
+      valueMaps=[
+        {
+          op: '=',
+          text: '0',
+          value: 'null',
+        },
+      ],
+      sparklineShow=true,
+    ).addTarget(
+      prometheus.target(
+        expr=obj.target.expr,
+        legendFormat=obj.target.legendFormat,
+      )
+    ) + { gridPos: obj.gridPos }
+    for obj in sessions
+  ] + [
+    graphPanel.new(
+      title='Overview',
+      datasource=grafana.default.datasource,
+      aliasColors={
+        Max: 'dark-red',
+      },
+      fill=2,
+      linewidth=2,
+      labelY1='Sessions',
+      min='0',
+    ).addTargets(
+      [
+        prometheus.target(
+          expr=obj.target.expr,
+          legendFormat=obj.target.legendFormat,
+        )
+        for obj in sessions
+      ] + [
+        prometheus.target(
+          expr='appsuite_sessions_max_count{client="all", instance=~"$instance"}',
+          legendFormat='Max',
+        ),
+      ]
+    ).addSeriesOverride(
+      {
+        alias: 'Max',
+        fill: 0,
+      },
+    ) { gridPos: { h: 8, w: 12, x: 6, y: 1 } },
+  ] + [
+    //------------------------------------------------------------------------------
     row.new(
       title='ThreadPool'
     ) + { gridPos: { h: 1, w: 24, x: 0, y: 7 } },
     threadPool { gridPos: { h: 8, w: 12, x: 0, y: 8 } },
     threadPoolTasks { gridPos: { h: 8, w: 12, x: 12, y: 8 } },
   ] + [
+    //------------------------------------------------------------------------------
     row.new(
-      title='DB'
+      title='Cache'
     ) + { gridPos: { h: 1, w: 24, x: 0, y: 16 } },
-    configDBConnections { gridPos: { h: 8, w: 12, x: 0, y: 17 } },
-    configDBTimes { gridPos: { h: 8, w: 12, x: 12, y: 17 } },
-    //
-    userDBConnections { gridPos: { h: 8, w: 6, x: 0, y: 25 } },
-    //
-    userDBTimes { gridPos: { h: 8, w: 6, x: 0, y: 33 } },
   ] + [
+    singlestat.new(
+      title=obj.title,
+      datasource=grafana.default.datasource,
+      decimals=1,
+      format='percentunit',
+      valueMaps=[
+        {
+          op: '=',
+          text: '0',
+          value: 'null',
+        },
+      ],
+      sparklineShow=true,
+    ).addTarget(
+      prometheus.target(expr=obj.expr,)
+    ) { gridPos: obj.gridPos }
+    for obj in cacheRatio
+  ] + [
+    graphPanel.new(
+      title='Cache Hit/Miss Ratio',
+      datasource=grafana.default.datasource,
+      format='percentunit',
+      decimals=2,
+      fill=2,
+      linewidth=2,
+      max='1',
+    ).addTargets(
+      [
+        prometheus.target(
+          expr='sum(rate(appsuite_cache_hits_total{instance=~"$instance"}[$interval])) / (sum(rate(appsuite_cache_hits_total{instance=~"$instance"}[$interval])) + sum(rate(appsuite_cache_misses_total{instance=~"$instance"}[$interval])))',
+          legendFormat='Hit Ratio',
+        ),
+        prometheus.target(
+          expr='sum(rate(appsuite_cache_misses_total{instance=~"$instance"}[$interval])) / (sum(rate(appsuite_cache_hits_total{instance=~"$instance"}[$interval])) + sum(rate(appsuite_cache_misses_total{instance=~"$instance"}[$interval])))',
+          legendFormat='Miss Ratio',
+        ),
+      ]
+    ) { gridPos: { h: 8, w: 9, x: 3, y: 17 } },
+    graphPanel.new(
+      title='Cache Operations',
+      datasource=grafana.default.datasource,
+      fill=2,
+      linewidth=2,
+      min='0',
+    ).addTargets(
+      [
+        prometheus.target(
+          expr='sum(rate(appsuite_cache_puts_total{instance=~"$instance"}[$interval]))',
+          legendFormat='Puts',
+        ),
+        prometheus.target(
+          expr='sum(rate(appsuite_cache_removals_total{instance=~"$instance"}[$interval]))',
+          legendFormat='Removals',
+        ),
+      ]
+    ) { gridPos: { h: 8, w: 12, x: 12, y: 17 } },
+    graphPanel.new(
+      title='Top 5 Cache Regions',
+      datasource=grafana.default.datasource,
+      fill=2,
+      linewidth=2,
+      sort='decreasing',
+      min='0',
+      legend_alignAsTable=true,
+      legend_rightSide=true,
+      legend_sort='avg',
+      legend_sortDesc=true,
+      legend_max=true,
+      legend_min=true,
+      legend_avg=true,
+      legend_values=true,
+    ).addTarget(
+      prometheus.target(
+        expr='topk(5,avg_over_time(appsuite_cache_elements_total{instance=~"$instance"}[${__range_s}s]))',
+        legendFormat='{{region}}',
+      )
+    ) { gridPos: { h: 8, w: 24, x: 0, y: 25 } },
+  ] + [
+    //------------------------------------------------------------------------------
+    row.new(
+      title='DB Pool'
+    ) + { gridPos: { h: 1, w: 24, x: 0, y: 33 } },
+    dbTimeoutRate { gridPos: { h: 4, w: 3, x: 0, y: 34 } },
+    configDBReadConnections { gridPos: { h: 8, w: 9, x: 3, y: 34 } },
+    configDBWriteConnections { gridPos: { h: 8, w: 9, x: 12, y: 34 } },
+    userDBReadConnections { gridPos: { h: 8, w: 12, x: 0, y: 50 } },
+    userDBWriteConnections { gridPos: { h: 8, w: 12, x: 12, y: 50 } },
+  ] + [
+    //------------------------------------------------------------------------------
+    row.new(
+      title='HTTP Client "$' + httpClient + '"',
+    ) + { gridPos: { h: 1, w: 24, x: 0, y: 66 } },
+    httpClientRequestsPerSecond { gridPos: { h: 8, w: 12, x: 0, y: 67 } },
+    httpClientConnections { gridPos: { h: 8, w: 12, x: 12, y: 67 } },
+  ] + [
+    //------------------------------------------------------------------------------
     row.new(
       title='HTTP API'
-    ) + { gridPos: { h: 1, w: 24, x: 0, y: 41 } },
-    httpApiRequestsPerSecond { gridPos: { h: 8, w: 12, x: 0, y: 42 } },
-    httpApiResponsePercentiles { gridPos: { h: 8, w: 12, x: 12, y: 42 } },
+    ) + { gridPos: { h: 1, w: 24, x: 0, y: 75 } },
+    httpApiRequestsPerSecond { gridPos: { h: 8, w: 12, x: 0, y: 76 } },
+    httpApiResponsePercentiles { gridPos: { h: 8, w: 12, x: 12, y: 76 } },
     //
-    httpApiRequestsPercentilesByRequest { gridPos: { h: 8, w: 12, x: 0, y: 50 } },
+    httpApiRequestsPercentilesByRequest { gridPos: { h: 8, w: 24, x: 0, y: 84 } },
   ] + [
+    //------------------------------------------------------------------------------
     row.new(
       title='REST API'
-    ) + { gridPos: { h: 1, w: 24, x: 0, y: 64 } },
-    restApiRequestsPerSecond { gridPos: { h: 8, w: 12, x: 0, y: 65 } },
-    restApiResponsePercentiles { gridPos: { h: 8, w: 12, x: 12, y: 65 } },
+    ) + { gridPos: { h: 1, w: 24, x: 0, y: 92 } },
+    restApiRequestsPerSecond { gridPos: { h: 8, w: 12, x: 0, y: 93 } },
+    restApiResponsePercentiles { gridPos: { h: 8, w: 12, x: 12, y: 93 } },
   ] + [
+    //------------------------------------------------------------------------------
     row.new(
       title='WebDAV API'
-    ) + { gridPos: { h: 1, w: 24, x: 0, y: 73 } },
-    webdavApiRequestsPerSecond { gridPos: { h: 8, w: 12, x: 0, y: 74 } },
-    webdavApiResponsePercentiles { gridPos: { h: 8, w: 6, x: 0, y: 82 } },
+    ) + { gridPos: { h: 1, w: 24, x: 0, y: 101 } },
+    webdavApiRequestsPerSecond { gridPos: { h: 8, w: 12, x: 0, y: 102 } },
+    webdavApiResponsePercentiles { gridPos: { h: 8, w: 6, x: 0, y: 110 } },
   ] + [
+    //------------------------------------------------------------------------------
     row.new(
       title='SOAP API'
-    ) + { gridPos: { h: 1, w: 24, x: 0, y: 88 } },
-    soapApiRequestsPerSecond { gridPos: { h: 8, w: 12, x: 0, y: 89 } },
-    soapApiResponsePercentiles { gridPos: { h: 8, w: 12, x: 12, y: 89 } },
+    ) + { gridPos: { h: 1, w: 24, x: 0, y: 118 } },
+    soapApiRequestsPerSecond { gridPos: { h: 8, w: 12, x: 0, y: 119 } },
+    soapApiResponsePercentiles { gridPos: { h: 8, w: 12, x: 12, y: 119 } },
   ] + [
+    //------------------------------------------------------------------------------
     row.new(
       title='Circuit Breaker'
-    ) + { gridPos: { h: 1, w: 24, x: 0, y: 97 } },
-    circuitBreakerDenials { gridPos: { h: 8, w: 12, x: 0, y: 98 } },
-    circuitBreakerRequestRate { gridPos: { h: 8, w: 12, x: 12, y: 98 } },
-    circuitBreakerIMAPStatus { gridPos: { h: 8, w: 24, x: 0, y: 106 } },
+    ) + { gridPos: { h: 1, w: 24, x: 0, y: 127 } },
+    circuitBreakerDenials { gridPos: { h: 8, w: 12, x: 0, y: 128 } },
+    imapRequestRate { gridPos: { h: 8, w: 12, x: 12, y: 128 } },
+    circuitBreakerIMAPStatus { gridPos: { h: 8, w: 24, x: 0, y: 136 } },
   ]
 )
