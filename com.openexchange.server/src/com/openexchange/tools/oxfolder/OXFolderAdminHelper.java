@@ -312,14 +312,14 @@ public final class OXFolderAdminHelper {
                 throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
             }
             /*
-             * Get context's users
+             * Get context's users, excluding guest users
              */
             final TIntList users;
             {
                 PreparedStatement stmt = null;
                 ResultSet rs = null;
                 try {
-                    stmt = writeCon.prepareStatement("SELECT id FROM user WHERE cid = ?");
+                    stmt = writeCon.prepareStatement("SELECT id FROM user WHERE cid = ? AND guestCreatedBy=0");
                     final int pos = 1;
                     stmt.setInt(pos, cid);
                     rs = stmt.executeQuery();
