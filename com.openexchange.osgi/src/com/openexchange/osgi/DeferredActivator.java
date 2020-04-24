@@ -682,7 +682,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
      *
      * @param <S> Type of service's class
      * @param clazz The service's class
-     * @return <code>true</code> if service is removes; otherwise <code>false</code> if not initialized or absent
+     * @return <code>true</code> if service is removed; otherwise <code>false</code> if not initialized or absent
      */
     protected <S> boolean removeService(final Class<? extends S> clazz) {
         ConcurrentMap<Class<?>, ServiceProvider<?>> services = this.services;
