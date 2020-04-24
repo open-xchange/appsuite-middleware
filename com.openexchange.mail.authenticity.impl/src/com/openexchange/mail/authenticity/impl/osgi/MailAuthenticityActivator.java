@@ -73,6 +73,7 @@ import com.openexchange.mail.authenticity.impl.core.jslob.MailAuthenticityFeatur
 import com.openexchange.mail.authenticity.impl.core.jslob.MailAuthenticityLevelJSlobEntry;
 import com.openexchange.mail.authenticity.impl.core.metrics.MailAuthenticityMetricFileLogger;
 import com.openexchange.mail.authenticity.impl.core.metrics.MailAuthenticityMetricLogger;
+import com.openexchange.mail.authenticity.impl.trusted.TrustedMailService;
 import com.openexchange.mail.authenticity.impl.trusted.internal.TrustedMailDataSource;
 import com.openexchange.mail.authenticity.impl.trusted.internal.TrustedMailServiceImpl;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
@@ -107,6 +108,7 @@ public class MailAuthenticityActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
+        Services.setServiceLookup(this);
         final BundleContext context = this.context;
         // It is OK to pass service references since 'stopOnServiceUnavailability' returns 'true'
         LeanConfigurationService leanConfigService = getService(LeanConfigurationService.class);
@@ -120,11 +122,12 @@ public class MailAuthenticityActivator extends HousekeepingActivator {
         track(MailAuthenticityHandler.class, registry);
         openTrackers();
 
-        TrustedMailServiceImpl authenticationHandler = new TrustedMailServiceImpl(this);
-        registerService(ForcedReloadable.class, authenticationHandler);
+        TrustedMailServiceImpl trustedMailService = new TrustedMailServiceImpl(this);
+        registerService(ForcedReloadable.class, trustedMailService);
+        addService(TrustedMailService.class, trustedMailService);
         CustomRuleChecker ruleChecker = new CustomRuleChecker(leanConfigService);
         registerService(Reloadable.class, ruleChecker);
-        MailAuthenticityHandlerImpl handlerImpl = new MailAuthenticityHandlerImpl(authenticationHandler, this, ruleChecker);
+        MailAuthenticityHandlerImpl handlerImpl = new MailAuthenticityHandlerImpl(trustedMailService, this, ruleChecker);
         registerService(MailAuthenticityHandler.class, handlerImpl);
         registerService(Reloadable.class, new ConfigReloader(registry, handlerImpl));
 
@@ -142,8 +145,16 @@ public class MailAuthenticityActivator extends HousekeepingActivator {
             registerService(DataSource.class, trustedMailDataSource, props);
             ImageActionFactory.addMapping(trustedMailDataSource.getRegistrationName(), trustedMailDataSource.getAlias());
         }
-        Services.setServiceLookup(this);
     }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        super.stopBundle();
+        removeService(TrustedMailService.class);
+        Services.setServiceLookup(null);
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
 
     private static class ConfigReloader implements Reloadable {
 

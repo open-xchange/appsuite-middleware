@@ -97,6 +97,8 @@ public final class TrustedMailDataSource implements ImageDataSource {
         return INSTANCE;
     }
 
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
     /**
      * Initializes a new {@link TrustedMailDataSource}.
      */
