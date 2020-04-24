@@ -53,9 +53,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.ConcurrentModificationException;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -86,7 +84,6 @@ public final class Conversation {
     private final Set<String> references;
 
     private boolean messageIdsEmpty;
-    private boolean referencesEmpty;
 
     private Conversation main;
 
@@ -98,9 +95,7 @@ public final class Conversation {
         messages = new HashSet<MailMessageWrapper>(DEFAULT_INITIAL_CAPACITY);
         messageIds = new LinkedHashSet<String>(DEFAULT_INITIAL_CAPACITY << 1, 0.9f);
         references = new LinkedHashSet<String>(DEFAULT_INITIAL_CAPACITY << 1, 0.9f);
-
         messageIdsEmpty = true;
-        referencesEmpty = true;
     }
 
     /**
@@ -155,17 +150,13 @@ public final class Conversation {
             if (null != sReferences) {
                 for (final String sReference : sReferences) {
                     if (null != sReference && Strings.isNotEmpty(sReference)) {
-                        if (references.add(sReference)) {
-                            referencesEmpty = false;
-                        }
+                        references.add(sReference);
                     }
                 }
             } else {
                 String inReplyTo = message.getInReplyTo();
                 if (null != inReplyTo && Strings.isNotEmpty(inReplyTo)) {
-                    if (references.add(inReplyTo)) {
-                        referencesEmpty = false;
-                    }
+                    references.add(inReplyTo);
                 }
             }
         }
@@ -213,123 +204,6 @@ public final class Conversation {
     public Conversation getMain() {
         Conversation main = this.main;
         return main != null ? main : this;
-    }
-
-    /**
-     * Checks if this conversation references OR is referenced by given message
-     *
-     * @param message The message
-     * @return <code>true</code> if references or referenced-by; otherwise <code>false</code>
-     */
-    public boolean referencesOrIsReferencedBy(final MailMessage message) {
-        if (!this.referencesEmpty) {
-            final String messageId = message.getMessageId();
-            if (null != messageId && this.references.contains(messageId)) {
-                return true;
-            }
-        }
-
-        String[] sReferences = this.referencesEmpty ? null : message.getReferences();
-        if (null != sReferences && containsAny(this.references, sReferences)) {
-            return true;
-        }
-
-        if (!this.messageIdsEmpty) {
-            if (null == sReferences) {
-                sReferences = message.getReferences();
-            }
-            if (null != sReferences && containsAny(this.messageIds, sReferences)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Checks if this conversation references OR is referenced by given conversation
-     *
-     * @param other The other conversation
-     * @return <code>true</code> if references or referenced-by; otherwise <code>false</code>
-     */
-    public boolean referencesOrIsReferencedBy(final Conversation other) {
-        if (!this.referencesEmpty) {
-            if (containsAny(this.references, other.messageIds) || (other.referencesEmpty ? false : containsAny(this.references, other.references))) {
-                return true;
-            }
-        }
-
-        if (!other.referencesEmpty) {
-            if (containsAny(this.messageIds, other.references)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Checks if this conversation references to given conversation
-     *
-     * @param other The other conversation possibly referenced
-     * @return <code>true</code> if references; otherwise <code>false</code>
-     */
-    public boolean references(final Conversation other) {
-        return this.referencesEmpty ? false : (containsAny(this.references, other.messageIds) || (other.referencesEmpty ? false : containsAny(this.references, other.references)));
-    }
-
-    /**
-     * Checks if this conversation is referenced by given conversation
-     *
-     * @param other The other conversation
-     * @return <code>true</code> if referenced-by; otherwise <code>false</code>
-     */
-    public boolean isReferencedBy(final Conversation other) {
-        return other.referencesEmpty ? false : containsAny(this.messageIds, other.references);
-    }
-
-    /**
-     * Checks if at least one element is in both collections.
-     *
-     * @param set The first collection, must not be <code>null</code>
-     * @param col The second collection, must not be <code>null</code>
-     * @return <code>true</code> if the intersection of the collections is non-empty
-     */
-    private static boolean containsAny(final Set<String> set, final Collection<String> col) {
-        int retry = 3;
-        while (retry-- > 0) {
-            try {
-                Iterator<String> it = col.iterator();
-                for (int i = col.size(); i-- > 0;) {
-                    if (set.contains(it.next())) {
-                        return true;
-                    }
-                }
-                return false;
-            } catch (ConcurrentModificationException e) {
-                // Start over again
-                if (retry <= 0) {
-                    throw e;
-                }
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Checks if at least one element is in both collections.
-     *
-     * @param set The first collection, must not be <code>null</code>
-     * @param arr The second collection, must not be <code>null</code>
-     * @return <code>true</code> if the intersection of the collections is non-empty
-     */
-    private static boolean containsAny(final Set<String> set, final String[] arr) {
-        for (int i = arr.length; i-- > 0;) {
-            if (set.contains(arr[i])) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**
