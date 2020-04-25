@@ -283,7 +283,9 @@ public class RdbCompositionSpaceStorageService extends AbstractCompositionSpaceS
     }
 
     /**
-     * (Re-)loads all attachments in a Message by the the real data from the AttachmentStorage. Might be necessary if only the attachment id is set.
+     * (Re-)loads all attachments in a message by the the real data from appropriate attachment storage.
+     * <p>
+     * Necessary if only the attachment identifier is set.
      *
      * @param messageDescription The message description
      * @param optionalEncrypt The optional encryption flag on initial opening of a composition space. If present and <code>true</code> the
