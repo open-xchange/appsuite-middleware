@@ -365,39 +365,73 @@ public final class Conversations {
      * @return The folded conversations
      */
     public static List<Conversation> fold(final List<Conversation> toFold) {
-        fold(toFold, new HashMap<String, Conversation>(toFold.size()));
+        fold(toFold, null);
         return toFold;
     }
 
     private static void fold(final List<Conversation> toFold, Map<String, Conversation> lookupTable) {
-        for (Iterator<Conversation> iter = toFold.iterator(); iter.hasNext();) {
-            Conversation conversation = iter.next();
-
-            boolean removed = false;
-            for (String messageId : conversation.getMessageIds()) {
-                Conversation existing = lookupTable.putIfAbsent(messageId, conversation);
-                if (null != existing && !conversation.equals(existing)) {
-                    if (!removed) {
-                        iter.remove();
-                        removed = true;
+        // first collect a temporal lookup table and fold for the first time
+        {
+            Map<String, Conversation> tempLookupTable = new HashMap<String, Conversation>(toFold.size());
+            for (Iterator<Conversation> iter = toFold.iterator(); iter.hasNext();) {
+                Conversation conversation = iter.next();
+                
+                boolean removed = false;
+                for (String messageId : conversation.getMessageIds()) {
+                    Conversation existing = tempLookupTable.putIfAbsent(messageId, conversation);
+                    if (null != existing && !conversation.equals(existing)) {
+                        if (!removed) {
+                            iter.remove();
+                            removed = true;
+                        }
+                        Conversation joined = existing.join(conversation);
+                        if (!joined.equals(existing)) {
+                            tempLookupTable.put(messageId, joined);
+                        }
                     }
-                    Conversation joined = existing.join(conversation);
-                    if (!joined.equals(existing)) {
-                        lookupTable.put(messageId, joined);
+                }
+                
+                for (String reference : conversation.getReferences()) {
+                    Conversation existing = tempLookupTable.putIfAbsent(reference, conversation);
+                    if (null != existing && !conversation.equals(existing)) {
+                        if (!removed) {
+                            iter.remove();
+                            removed = true;
+                        }
+                        Conversation joined = existing.join(conversation);
+                        if (!joined.equals(existing)) {
+                            tempLookupTable.put(reference, joined);
+                        }
                     }
                 }
             }
-
-            for (String reference : conversation.getReferences()) {
-                Conversation existing = lookupTable.putIfAbsent(reference, conversation);
-                if (null != existing && !conversation.equals(existing)) {
-                    if (!removed) {
-                        iter.remove();
-                        removed = true;
+        }
+        // iterate a second time and remove all that are not main Conversations
+        {
+            for (Iterator<Conversation> iter = toFold.iterator(); iter.hasNext();) {
+                Conversation conversation = iter.next();
+                if (!conversation.isMain()) {
+                    iter.remove();
+                }
+            }
+        }
+        // now fill in the results if lookupTable is present
+        if (null == lookupTable) {
+            return;
+        }
+        {
+            for (Iterator<Conversation> iter = toFold.iterator(); iter.hasNext();) {
+                Conversation conversation = iter.next();
+                for (String messageId : conversation.getMessageIds()) {
+                    Conversation existing = lookupTable.putIfAbsent(messageId, conversation);
+                    if (null != existing && !conversation.equals(existing)) {
+                        LOG.debug("folding of Conversations failed for {} and {}", existing, conversation);
                     }
-                    Conversation joined = existing.join(conversation);
-                    if (!joined.equals(existing)) {
-                        lookupTable.put(reference, joined);
+                }
+                for (String reference : conversation.getReferences()) {
+                    Conversation existing = lookupTable.putIfAbsent(reference, conversation);
+                    if (null != existing && !conversation.equals(existing)) {
+                        LOG.debug("folding of Conversations failed for {} and {}", existing, conversation);
                     }
                 }
             }
@@ -412,14 +446,14 @@ public final class Conversations {
      * @return The folded conversations
      */
     public static List<Conversation> foldAndMergeWithList(final List<Conversation> toFold, List<MailMessage> toMergeWith) {
-        HashMap<String, Conversation> lookupTable = new HashMap<String, Conversation>(toFold.size());
+        HashMap<String, Conversation> lookupTable = new HashMap<String, Conversation>(toFold.size() * 2);
         fold(toFold, lookupTable);
         for (MailMessage mailMessage : toMergeWith) {
             String messageId = mailMessage.getMessageId();
             if (null != messageId) {
                 Conversation conversation = lookupTable.get(messageId);
                 if (null != conversation) {
-                    conversation.getMain().addMessage(mailMessage);
+                    conversation.addMessage(mailMessage);
                 }
             }
 
@@ -428,7 +462,7 @@ public final class Conversations {
                 for (String reference : references) {
                     Conversation conversation = lookupTable.get(reference);
                     if (null != conversation) {
-                        conversation.getMain().addMessage(mailMessage);
+                        conversation.addMessage(mailMessage);
                     }
                 }
             }
