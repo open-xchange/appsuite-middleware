@@ -178,6 +178,11 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             String exceptionId = AbstractAdminRmiException.generateExceptionId();
             RemoteExceptionUtils.enhanceRemoteException(remoteException, exceptionId);
             logAndReturnException(LOGGER, remoteException, exceptionId, credentials, contextId, userId);
+        } else if (t instanceof Exception) {
+            RemoteException remoteException = RemoteExceptionUtils.convertException((Exception) t);
+            String exceptionId = AbstractAdminRmiException.generateExceptionId();
+            RemoteExceptionUtils.enhanceRemoteException(remoteException, exceptionId);
+            logAndReturnException(LOGGER, remoteException, exceptionId, credentials, contextId, userId);
         }
     }
 

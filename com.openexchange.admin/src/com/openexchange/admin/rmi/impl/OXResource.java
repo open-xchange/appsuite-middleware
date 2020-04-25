@@ -115,6 +115,11 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface {
             String exceptionId = AbstractAdminRmiException.generateExceptionId();
             RemoteExceptionUtils.enhanceRemoteException(remoteException, exceptionId);
             logAndReturnException(LOGGER, remoteException, exceptionId, credentials, contextId, resourceId);
+        } else if (t instanceof Exception) {
+            RemoteException remoteException = RemoteExceptionUtils.convertException((Exception) t);
+            String exceptionId = AbstractAdminRmiException.generateExceptionId();
+            RemoteExceptionUtils.enhanceRemoteException(remoteException, exceptionId);
+            logAndReturnException(LOGGER, remoteException, exceptionId, credentials, contextId, resourceId);
         }
     }
 

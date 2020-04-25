@@ -98,6 +98,11 @@ public class OXLogin extends OXCommonImpl implements OXLoginInterface {
             String exceptionId = AbstractAdminRmiException.generateExceptionId();
             RemoteExceptionUtils.enhanceRemoteException(remoteException, exceptionId);
             logAndReturnException(LOGGER, remoteException, exceptionId, credentials, contextId);
+        } else if (t instanceof Exception) {
+            RemoteException remoteException = RemoteExceptionUtils.convertException((Exception) t);
+            String exceptionId = AbstractAdminRmiException.generateExceptionId();
+            RemoteExceptionUtils.enhanceRemoteException(remoteException, exceptionId);
+            logAndReturnException(LOGGER, remoteException, exceptionId, credentials, contextId);
         }
     }
 

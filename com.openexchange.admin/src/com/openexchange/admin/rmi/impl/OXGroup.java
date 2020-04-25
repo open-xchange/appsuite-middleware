@@ -128,6 +128,11 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             String exceptionId = AbstractAdminRmiException.generateExceptionId();
             RemoteExceptionUtils.enhanceRemoteException(remoteException, exceptionId);
             logAndReturnException(LOGGER, remoteException, exceptionId, credentials, contextId, groupId);
+        } else if (t instanceof Exception) {
+            RemoteException remoteException = RemoteExceptionUtils.convertException((Exception) t);
+            String exceptionId = AbstractAdminRmiException.generateExceptionId();
+            RemoteExceptionUtils.enhanceRemoteException(remoteException, exceptionId);
+            logAndReturnException(LOGGER, remoteException, exceptionId, credentials, contextId, groupId);
         }
     }
 

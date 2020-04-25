@@ -119,15 +119,16 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
         logAndEnhanceException(t, credentials, (String) null);
     }
 
-    private void logAndEnhanceException(Throwable t, final Credentials credentials, final Context ctx) {
-        logAndEnhanceException(t, credentials, null != ctx ? Integer.toString(ctx.getContextId()) : null);
-    }
-
     private void logAndEnhanceException(Throwable t, final Credentials credentials, final String contextId) {
         if (t instanceof AbstractAdminRmiException) {
             logAndReturnException(LOGGER, ((AbstractAdminRmiException) t), credentials, contextId);
         } else if (t instanceof RemoteException) {
             RemoteException remoteException = (RemoteException) t;
+            String exceptionId = AbstractAdminRmiException.generateExceptionId();
+            RemoteExceptionUtils.enhanceRemoteException(remoteException, exceptionId);
+            logAndReturnException(LOGGER, remoteException, exceptionId, credentials, contextId);
+        } else if (t instanceof Exception) {
+            RemoteException remoteException = RemoteExceptionUtils.convertException((Exception) t);
             String exceptionId = AbstractAdminRmiException.generateExceptionId();
             RemoteExceptionUtils.enhanceRemoteException(remoteException, exceptionId);
             logAndReturnException(LOGGER, remoteException, exceptionId, credentials, contextId);

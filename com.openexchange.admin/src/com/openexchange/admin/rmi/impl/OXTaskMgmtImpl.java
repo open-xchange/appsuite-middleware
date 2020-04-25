@@ -88,6 +88,11 @@ public class OXTaskMgmtImpl extends OXCommonImpl implements OXTaskMgmtInterface 
             String exceptionId = AbstractAdminRmiException.generateExceptionId();
             RemoteExceptionUtils.enhanceRemoteException(remoteException, exceptionId);
             logAndReturnException(log, remoteException, exceptionId, credentials, contextId, id);
+        } else if (t instanceof Exception) {
+            RemoteException remoteException = RemoteExceptionUtils.convertException((Exception) t);
+            String exceptionId = AbstractAdminRmiException.generateExceptionId();
+            RemoteExceptionUtils.enhanceRemoteException(remoteException, exceptionId);
+            logAndReturnException(log, remoteException, exceptionId, credentials, contextId, id);
         }
     }
 
