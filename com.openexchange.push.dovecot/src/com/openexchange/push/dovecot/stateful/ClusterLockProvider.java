@@ -85,6 +85,9 @@ public class ClusterLockProvider {
     public static ClusterLockProvider newInstance(DovecotPushConfiguration config, ServiceLookup services) {
         String mech = config.getClusterLockMech();
         Type type = DovecotPushClusterLock.Type.parse(mech);
+        if (type == null) {
+            throw new IllegalArgumentException("Illegal cluster lock type: " + mech);
+        }
         DovecotPushClusterLock clusterLock;
         switch (type) {
             case HAZELCAST:
