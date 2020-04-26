@@ -65,17 +65,6 @@ import com.openexchange.server.ServiceLookup;
  */
 public class ClusterLockProvider {
 
-    private final DovecotPushClusterLock clusterLock;
-
-    /**
-     * Initializes a new {@link ClusterLockProvider}.
-     * @param clusterLock
-     */
-    private ClusterLockProvider(DovecotPushClusterLock clusterLock) {
-        super();
-        this.clusterLock = clusterLock;
-    }
-
     /**
      * Initializes this configuration instance
      *
@@ -104,6 +93,19 @@ public class ClusterLockProvider {
         }
 
         return new ClusterLockProvider(clusterLock);
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    private final DovecotPushClusterLock clusterLock;
+
+    /**
+     * Initializes a new {@link ClusterLockProvider}.
+     * @param clusterLock
+     */
+    private ClusterLockProvider(DovecotPushClusterLock clusterLock) {
+        super();
+        this.clusterLock = clusterLock;
     }
 
     /**
