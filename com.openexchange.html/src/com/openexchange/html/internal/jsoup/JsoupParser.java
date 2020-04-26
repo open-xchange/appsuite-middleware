@@ -177,6 +177,9 @@ public class JsoupParser {
             // Parse HTML input to a Jsoup document
             Document document = Parser.htmlParser().parseInput(new InterruptibleStringReader(html), "");
 
+            // Disable pretty-print: If disabled, the HTML output methods will not re-format the output, and the output will generally look like the input.
+            document.outputSettings().prettyPrint(false);
+
             // Check <style> tag sizes against threshold
             {
                 int cssThreshold = HtmlServices.cssThreshold();
