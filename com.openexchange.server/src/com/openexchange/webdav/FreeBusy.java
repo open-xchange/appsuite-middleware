@@ -100,8 +100,13 @@ public class FreeBusy extends HttpServlet {
     private static final String PARAMETER_WEEKS_INTO_FUTURE = "weeksIntoFuture";
     private static final String PARAMETER_WEEKS_INTO_PAST = "weeksIntoPast";
 
-    private final ServiceLookup serviceLookup;
+    private final transient ServiceLookup serviceLookup;
 
+    /**
+     * Initializes a new {@link FreeBusy}.
+     *
+     * @param service The service look-up to use
+     */
     public FreeBusy(ServiceLookup service) {
         this.serviceLookup = service;
     }
@@ -111,7 +116,6 @@ public class FreeBusy extends HttpServlet {
      */
     @Override
     protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
-        Map<Attendee, FreeBusyResult> freeBusyResponse = null;
         try {
             int contextId = readContextId(request);
             String userMail = readMailAddress(request);
@@ -126,7 +130,7 @@ public class FreeBusy extends HttpServlet {
             Date end = readEnd(request, contextId);
 
             AdministrativeFreeBusyService service = serviceLookup.getServiceSafe(AdministrativeFreeBusyService.class);
-            freeBusyResponse = service.getFreeBusy(contextId, inputAttendeeList, start, end, false);
+            Map<Attendee, FreeBusyResult> freeBusyResponse = service.getFreeBusy(contextId, inputAttendeeList, start, end, false);
 
             validateResponse(freeBusyResponse);
             Attendee outputAttendee = freeBusyResponse.keySet().stream().findFirst().get();
@@ -145,7 +149,7 @@ public class FreeBusy extends HttpServlet {
                 response.sendError(HttpServletResponse.SC_BAD_REQUEST);
                 return;
             }
-            if (FreeBusyExceptionCode.MISSING_PARAMETER.equals(e) || FreeBusyExceptionCode.USER_NOT_FOUND.equals(e) || 
+            if (FreeBusyExceptionCode.MISSING_PARAMETER.equals(e) || FreeBusyExceptionCode.USER_NOT_FOUND.equals(e) ||
                 CalendarExceptionCodes.INVALID_CALENDAR_USER.equals(e) || com.openexchange.groupware.contexts.impl.ContextExceptionCodes.NOT_FOUND.equals(e)) {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
                 return;
@@ -227,24 +231,28 @@ public class FreeBusy extends HttpServlet {
      */
     private Date readEnd(HttpServletRequest request, int contextId) throws OXException {
         String futureParameter = request.getParameter(PARAMETER_WEEKS_INTO_FUTURE);
-        int weeksFuture;
-        if (null != futureParameter) {
-            try {
-                weeksFuture = Integer.parseInt(futureParameter);
-            } catch (NumberFormatException e) {
-                throw FreeBusyExceptionCode.INVALID_PARAMETER.create(e, PARAMETER_WEEKS_INTO_FUTURE, "Not a valid number");
-            }
-            LeanConfigurationService leanConfigService = serviceLookup.getServiceSafe(LeanConfigurationService.class);
-            int maxTimeRangeFuture = leanConfigService.getIntProperty(-1, contextId, FreeBusyProperty.INTERNET_FREEBUSY_MAXIMUM_TIMERANGE_FUTURE);
-            if (weeksFuture > maxTimeRangeFuture) {
-                throw FreeBusyExceptionCode.INVALID_PARAMETER.create(PARAMETER_WEEKS_INTO_FUTURE, String.format("Maximum value into future is %d weeks", I(maxTimeRangeFuture)));
-            }
-            if (weeksFuture < 0) {
-                throw FreeBusyExceptionCode.INVALID_PARAMETER.create(PARAMETER_WEEKS_INTO_FUTURE, "Value cannot be negative");
-            }
-            return CalendarUtils.add(new Date(), Calendar.WEEK_OF_YEAR, weeksFuture);
+        if (null == futureParameter) {
+            // No such parameter
+            return CalendarUtils.add(new Date(), Calendar.WEEK_OF_YEAR, DEFAULT_WEEKS_FUTURE);
         }
-        return CalendarUtils.add(new Date(), Calendar.WEEK_OF_YEAR, DEFAULT_WEEKS_FUTURE);
+
+        // Parse parameter
+        int weeksFuture;
+        try {
+            weeksFuture = Integer.parseInt(futureParameter);
+        } catch (NumberFormatException e) {
+            throw FreeBusyExceptionCode.INVALID_PARAMETER.create(e, PARAMETER_WEEKS_INTO_FUTURE, "Not a valid number");
+        }
+        if (weeksFuture < 0) {
+            throw FreeBusyExceptionCode.INVALID_PARAMETER.create(PARAMETER_WEEKS_INTO_FUTURE, "Value cannot be negative");
+        }
+
+        LeanConfigurationService leanConfigService = serviceLookup.getServiceSafe(LeanConfigurationService.class);
+        int maxTimeRangeFuture = leanConfigService.getIntProperty(-1, contextId, FreeBusyProperty.INTERNET_FREEBUSY_MAXIMUM_TIMERANGE_FUTURE);
+        if (maxTimeRangeFuture > 0 && weeksFuture > maxTimeRangeFuture) {
+            throw FreeBusyExceptionCode.INVALID_PARAMETER.create(PARAMETER_WEEKS_INTO_FUTURE, String.format("Maximum value into future is %d weeks", I(maxTimeRangeFuture)));
+        }
+        return CalendarUtils.add(new Date(), Calendar.WEEK_OF_YEAR, weeksFuture);
     }
 
     /**
@@ -257,10 +265,10 @@ public class FreeBusy extends HttpServlet {
      */
     private String readMailAddress(HttpServletRequest request) throws OXException {
         final String userName = request.getParameter(PARAMETER_USERNAME);
-        final String serverName = request.getParameter(PARAMETER_SERVER);
         if (Strings.isEmpty(userName)) {
             throw FreeBusyExceptionCode.MISSING_PARAMETER.create(PARAMETER_USERNAME);
         }
+        final String serverName = request.getParameter(PARAMETER_SERVER);
         if (Strings.isEmpty(serverName)) {
             throw FreeBusyExceptionCode.MISSING_PARAMETER.create(PARAMETER_SERVER);
         }
@@ -278,24 +286,26 @@ public class FreeBusy extends HttpServlet {
      */
     private Date readStart(HttpServletRequest request, int contextId) throws OXException {
         String pastParameter = request.getParameter(PARAMETER_WEEKS_INTO_PAST);
-        int weeksPast;
-        if (null != pastParameter) {
-            try {
-                weeksPast = Integer.parseInt(pastParameter);
-            } catch (NumberFormatException e) {
-                throw FreeBusyExceptionCode.INVALID_PARAMETER.create(e, PARAMETER_WEEKS_INTO_PAST, "Not a valid number");
-            }
-            LeanConfigurationService leanConfigService = serviceLookup.getServiceSafe(LeanConfigurationService.class);
-            int maxTimeRangePast = leanConfigService.getIntProperty(-1, contextId, FreeBusyProperty.INTERNET_FREEBUSY_MAXIMUM_TIMERANGE_PAST);
-            if (weeksPast > maxTimeRangePast) {
-                throw FreeBusyExceptionCode.INVALID_PARAMETER.create(PARAMETER_WEEKS_INTO_PAST, String.format("Maximum value back into past is %d weeks", I(maxTimeRangePast)));
-            }
-            if (weeksPast < 0) {
-                throw FreeBusyExceptionCode.INVALID_PARAMETER.create(PARAMETER_WEEKS_INTO_PAST, "Value cannot be negative");
-            }
-            return CalendarUtils.add(new Date(), Calendar.WEEK_OF_YEAR, -weeksPast);
+        if (null == pastParameter) {
+            return CalendarUtils.add(new Date(), Calendar.WEEK_OF_YEAR, -DEFAULT_WEEKS_PAST);
         }
-        return CalendarUtils.add(new Date(), Calendar.WEEK_OF_YEAR, -DEFAULT_WEEKS_PAST);
+
+        int weeksPast;
+        try {
+            weeksPast = Integer.parseInt(pastParameter);
+        } catch (NumberFormatException e) {
+            throw FreeBusyExceptionCode.INVALID_PARAMETER.create(e, PARAMETER_WEEKS_INTO_PAST, "Not a valid number");
+        }
+        if (weeksPast < 0) {
+            throw FreeBusyExceptionCode.INVALID_PARAMETER.create(PARAMETER_WEEKS_INTO_PAST, "Value cannot be negative");
+        }
+
+        LeanConfigurationService leanConfigService = serviceLookup.getServiceSafe(LeanConfigurationService.class);
+        int maxTimeRangePast = leanConfigService.getIntProperty(-1, contextId, FreeBusyProperty.INTERNET_FREEBUSY_MAXIMUM_TIMERANGE_PAST);
+        if (maxTimeRangePast > 0 && weeksPast > maxTimeRangePast) {
+            throw FreeBusyExceptionCode.INVALID_PARAMETER.create(PARAMETER_WEEKS_INTO_PAST, String.format("Maximum value back into past is %d weeks", I(maxTimeRangePast)));
+        }
+        return CalendarUtils.add(new Date(), Calendar.WEEK_OF_YEAR, -weeksPast);
     }
 
     /**
@@ -309,7 +319,7 @@ public class FreeBusy extends HttpServlet {
      */
     private void validateResponse(Map<Attendee, FreeBusyResult> freeBusyResponse) throws OXException {
         if (freeBusyResponse == null || freeBusyResponse.size() != 1) {
-            throw FreeBusyExceptionCode.UNEXPECTED_ERROR.create("The free busy response is invalid");
+            throw FreeBusyExceptionCode.UNEXPECTED_ERROR.create("The free-busy response is invalid");
         }
         for (FreeBusyResult result : freeBusyResponse.values()) {
             if (result.getWarnings() != null) {
