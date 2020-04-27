@@ -52,6 +52,9 @@ package com.openexchange.imap;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.imap.cache.ListLsubCollectionTest;
+import com.openexchange.imap.storecache.KeyTest;
+import com.openexchange.imap.threadsort2.ThreadSortsTest;
 
 
 /**
@@ -61,7 +64,12 @@ import org.junit.runners.Suite.SuiteClasses;
  * @since 7.6.0
  */
 @RunWith(Suite.class)
-@SuiteClasses({ Bug30843Test.class })
+@SuiteClasses({
+    Bug30843Test.class,
+    ListLsubCollectionTest.class,
+    KeyTest.class,
+    ThreadSortsTest.class
+    })
 public class UnitTests {
 
     /**

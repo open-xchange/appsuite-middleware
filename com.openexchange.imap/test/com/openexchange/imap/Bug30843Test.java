@@ -51,6 +51,7 @@ package com.openexchange.imap;
 
 import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertEquals;
+import java.util.HashSet;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -92,6 +93,7 @@ public class Bug30843Test {
         PowerMockito.when(I(configService.getIntProperty(ArgumentMatchers.anyString(), ArgumentMatchers.anyInt()))).thenReturn(I(0));
         PowerMockito.when(configService.getProperty("com.openexchange.imap.imapAuthEnc", "UTF-8")).thenReturn("UTF-8");
         PowerMockito.when(configService.getProperty("com.openexchange.imap.ssl.protocols", "SSLv3 TLSv1")).thenReturn("SSLv3 TLSv1");
+        PowerMockito.when(configService.propertyNames()).thenReturn(new HashSet<String>().iterator());
         PowerMockito.mockStatic(Services.class);
         PowerMockito.when(Services.getService(ConfigurationService.class)).thenReturn(configService);
     }
