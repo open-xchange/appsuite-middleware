@@ -66,20 +66,20 @@ public final class SessionMetricHandler {
 
     private static final String GROUP = "appsuite.sessions.";
 
-    private static final String COUNT_TOTAL = "total.count";
-    private static final String COUNT_TOTAL_DESC = "The number of total sessions";
+    private static final String COUNT_TOTAL = "total";
+    private static final String COUNT_TOTAL_DESC = "The total number of sessions in local short- and long-term containers.";
 
-    private static final String COUNT_LONG = "long.term.count";
-    private static final String COUNT_LONG_DESC = "The number of sessions in the long term containers";
+    private static final String COUNT_LONG = "long.term.total";
+    private static final String COUNT_LONG_DESC = "The total number of sessions in local long-term containers.";
 
-    private static final String COUNT_SHORT = "short.term.count";
-    private static final String COUNT_SHORT_DESC = "The number of sessions in the short term containers";
+    private static final String COUNT_SHORT = "short.term.total";
+    private static final String COUNT_SHORT_DESC = "The total number of sessions in short-term containers";
 
-    private static final String COUNT_ACTIVE = "active.count";
-    private static final String COUNT_ACTIVE_DESC = "The number of active sessions or in other words the number of sessions within the first two short term containers.";
+    private static final String COUNT_ACTIVE = "active.total";
+    private static final String COUNT_ACTIVE_DESC = "The number of active sessions, i.e. the ones within the first two short-term containers.";
 
-    private static final String COUNT_MAX = "max.count";
-    private static final String COUNT_MAX_DESC = "The maximum number of sessions for this node.";
+    private static final String COUNT_MAX = "max";
+    private static final String COUNT_MAX_DESC = "The maximum number of sessions possible on this node.";
 
 
     private static final List<Gauge> METERS = new ArrayList<>(4);
