@@ -129,7 +129,6 @@ public abstract class AbstractMetricAwarePool<T extends ConnectionTypeAware> ext
         usage = Timer.builder(GROUP + "usage")
                      .description("The time between acquiration and returning a connection back to pool")
                      .tags(tags)
-                     .publishPercentileHistogram()
                      .register(Metrics.globalRegistry);
         acquireTimer = Timer.builder(GROUP + "acquire")
                        .description("The time it takes for a thread to aquire a connection")
