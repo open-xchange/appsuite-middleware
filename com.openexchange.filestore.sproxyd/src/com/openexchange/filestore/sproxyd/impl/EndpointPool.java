@@ -60,12 +60,13 @@ import org.apache.http.client.HttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.filestore.sproxyd.osgi.Services;
+import com.openexchange.metrics.micrometer.Micrometer;
 import com.openexchange.osgi.ExceptionUtils;
 import com.openexchange.rest.client.httpclient.HttpClientService;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
-import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.Tags;
 
 /**
  * A {@link EndpointPool} manages a set of endpoints for the sproxyd client. The available
@@ -122,9 +123,31 @@ public class EndpointPool {
      * Initializes the metrics for this {@link EndpointPool}
      */
     private void initMetrics() {
-        Gauge.builder(GROUP_ID+"EndpointPool.TotalSize", () -> I(getNumberOfEndpoints())).description("Number of configured sproxyd endpoints").tag("filestore", filestoreId).register(Metrics.globalRegistry);
-        Gauge.builder(GROUP_ID+"EndpointPool.Available", () -> I(getStats().getAvailableEndpoints())).description("Number of available sproxyd endpoints").tag("filestore", filestoreId).register(Metrics.globalRegistry);
-        Gauge.builder(GROUP_ID+"EndpointPool.Unavailable", () -> I(getStats().getBlacklistedEndpoints())).description("Number of unavailable (blacklisted) sproxyd endpoints").tag("filestore", filestoreId).register(Metrics.globalRegistry);
+        String noUnit = null;
+        Tags tags = Tags.of("filestore", filestoreId);
+        Micrometer.registerOrUpdateGauge(Metrics.globalRegistry,
+            GROUP_ID + "endpoints.total",
+            tags,
+            "Number of configured sproxyd endpoints",
+            noUnit,
+            this,
+            (p) -> (double) p.getNumberOfEndpoints());
+
+        Micrometer.registerOrUpdateGauge(Metrics.globalRegistry,
+            GROUP_ID + "endpoints.available",
+            tags,
+            "Number of available sproxyd endpoints",
+            noUnit,
+            this,
+            (p) -> (double) p.getStats().getAvailableEndpoints());
+
+        Micrometer.registerOrUpdateGauge(Metrics.globalRegistry,
+            GROUP_ID + "endpoints.unavailable",
+            tags,
+            "Number of unavailable (blacklisted) sproxyd endpoints",
+            noUnit,
+            this,
+            (p) -> (double) p.getStats().getBlacklistedEndpoints());
     }
 
     /**
