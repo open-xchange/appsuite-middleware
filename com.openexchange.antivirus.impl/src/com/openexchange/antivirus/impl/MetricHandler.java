@@ -49,10 +49,13 @@
 
 package com.openexchange.antivirus.impl;
 
-import java.util.concurrent.TimeUnit;
+import java.time.Duration;
+import com.google.common.cache.Cache;
+import com.openexchange.antivirus.AntiVirusResult;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
 import io.micrometer.core.instrument.Timer;
+import io.micrometer.core.instrument.binder.cache.GuavaCacheMetrics;
 
 /**
  * {@link MetricHandler} - Simple utility class to handle metric updates
@@ -63,69 +66,49 @@ import io.micrometer.core.instrument.Timer;
  */
 final class MetricHandler {
 
-    private static final String RESULTS = "results";
-
-    private static final String GROUP = "appsuite.antivirus.";
+    private final Counter byteTransferCounter;
 
     /**
-     * Prevents initialization
+     * Initializes a new {@link MetricHandler}.
+     * @param cachedResults
      */
-    private MetricHandler() {
+    public MetricHandler(Cache<String, AntiVirusResult> cachedResults) {
         super();
-    }
-
-    private final static Counter CACHE_HIT = Counter.builder(GROUP + "cache.hit").description("Cached Anti-Virus results hits").baseUnit(RESULTS).register(Metrics.globalRegistry);
-    private final static Counter CACHE_MISS = Counter.builder(GROUP + "cache.miss").description("Cached Anti-Virus results misses").baseUnit(RESULTS).register(Metrics.globalRegistry);
-    private final static Counter CACHE_INVALIDATIONS = Counter.builder(GROUP + "cache.invalidations").description("Cached Anti-Virus results invalidations").baseUnit(RESULTS).register(Metrics.globalRegistry);
-    private final static Counter TRANSFER_SIZE = Counter.builder(GROUP + "transfer.size").description("Measures the amount of bytes transfered to the anti-virus server").baseUnit("bytes").register(Metrics.globalRegistry);
-
-    private final static Timer SCANNING_RATE = Timer.builder(GROUP + "scanning.rate").description("Measures the number of files scanned per second").register(Metrics.globalRegistry);
-    private final static Timer SCANNING_TIME = Timer.builder(GROUP + "scanning.time").description("Measures the time elapsed during scanning a file").register(Metrics.globalRegistry);
-
-    /**
-     * Increments the cache hits metric
-     */
-    static void incrementCacheHits() {
-        CACHE_HIT.increment();
+        GuavaCacheMetrics.monitor(Metrics.globalRegistry, cachedResults, "antivirus");
+        this.byteTransferCounter = Counter.builder("appsuite.antivirus.transfer")
+            .description("Measures the amount of bytes transfered to the anti-virus server")
+            .baseUnit("bytes")
+            .register(Metrics.globalRegistry);
     }
 
     /**
-     * Increments the cache misses metric
-     */
-    static void incrementCacheMisses() {
-        CACHE_MISS.increment();
-    }
-
-    /**
-     * Increments the cache invalidations metric
-     */
-    static void incrementCacheInvalidations() {
-        CACHE_INVALIDATIONS.increment();
-    }
-
-    /**
-     * Records the scan time
-     */
-    static void recordScanTime(long  duration) {
-        SCANNING_RATE.record(duration, TimeUnit.MILLISECONDS);
-    }
-
-    /**
-     * Updates the scanning time by the specified elapsed time
+     * recordScanIOError
      *
-     * @param timeElapsed The elapsed time in milliseconds
+     * @param duration
      */
-    static void updateScanningTime(long timeElapsed) {
-        SCANNING_TIME.record(timeElapsed, TimeUnit.MILLISECONDS);
+    public void recordScanIOError(Duration duration) {
+        Timer timer = Timer.builder("appsuite.antivirus.scans.duration")
+            .description("Measures the number of files scanned per second")
+            .tags("status", "IO_ERROR")
+            .register(Metrics.globalRegistry);
+        timer.record(duration);
     }
 
     /**
-     * Updates the transfer size by the specified content length
+     * recordScanResult
      *
-     * @param contentLength The content length in bytes
+     * @param statusCode
+     * @param duration
+     * @param contentLength
      */
-    static void updateTransferRate(long contentLength) {
-        TRANSFER_SIZE.increment(contentLength);
+    public void recordScanResult(int statusCode, Duration duration, long contentLength) {
+        Timer timer = Timer.builder("appsuite.antivirus.scans.duration")
+            .description("Measures the number of files scanned per second")
+            .tags("status", Integer.toString(statusCode))
+            .register(Metrics.globalRegistry);
+        timer.record(duration);
+
+        byteTransferCounter.increment(contentLength);
     }
 
 }

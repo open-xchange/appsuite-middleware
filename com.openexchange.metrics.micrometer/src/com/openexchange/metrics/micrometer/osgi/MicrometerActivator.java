@@ -62,6 +62,7 @@ import com.openexchange.config.Reloadable;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.metrics.micrometer.MeterNamePrefixFilter;
 import com.openexchange.metrics.micrometer.internal.BasicAuthHttpContext;
 import com.openexchange.metrics.micrometer.internal.filter.ActivateMetricMicrometerFilterPerformer;
 import com.openexchange.metrics.micrometer.internal.filter.DistributionHistogramMicrometerFilterPerformer;
@@ -168,6 +169,8 @@ public class MicrometerActivator extends HousekeepingActivator implements Reload
         } else {
             prometheusRegistry.config().meterFilter(MeterFilter.deny());
         }
+        // rename built-in metrics to contain the "appsuite." prefix
+        prometheusRegistry.config().meterFilter(new MeterNamePrefixFilter());
         Metrics.addRegistry(prometheusRegistry);
     }
 

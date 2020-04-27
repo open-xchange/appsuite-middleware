@@ -62,7 +62,7 @@ import io.micrometer.core.instrument.Metrics;
  */
 public final class CacheEventMetricHandler implements CacheEventMonitor {
 
-    private static final String GROUP = "appsuite.cache.events";
+    private static final String GROUP = "appsuite.jcs.cache.events";
     private static final String OFFERED = GROUP + ".offered";
     private static final String DELIVERED = GROUP + ".delivered";
     private static final String TAG_REGION = "region";

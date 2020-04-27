@@ -47,34 +47,37 @@
  *
  */
 
-package com.openexchange.threadpool.internal;
+package com.openexchange.metrics.micrometer;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
+import io.micrometer.core.instrument.Meter.Id;
+import io.micrometer.core.instrument.config.MeterFilter;
 
 /**
- * {@link PrefixFilter} - Renames a set of metrics by prefixing them with a given value
+ * {@link MeterNamePrefixFilter} - Renames a set of metrics by prefixing them with a given value
  *
- * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.10.4
  */
-public class PrefixFilter extends RenameFilter {
+public class MeterNamePrefixFilter implements MeterFilter {
 
-    private static HashMap<String, String> createNewNames(String prefix, Iterable<String> metricNames) {
-        HashMap<String, String> rename = new HashMap<String, String>();
-        for (String metricName : metricNames) {
-            rename.put(metricName, prefix + metricName);
-        }
-        return rename;
+    private static final String APPSUITE = "appsuite.";
+    private static final List<String> PREFIX_WHITELIST = new ArrayList<String>(3);
+    static {
+        PREFIX_WHITELIST.add(APPSUITE);
+        PREFIX_WHITELIST.add("jvm.");
+        PREFIX_WHITELIST.add("process.");
     }
 
-    /**
-     * Initializes a new {@link PrefixFilter}.
-     *
-     * @param prefix The prefix to apply to the given metrics
-     * @param metrics A list of metric names for which the given prefix should be applied
-     */
-    public PrefixFilter(String prefix, List<String> metrics) {
-        super(createNewNames(prefix, metrics));
+    @Override
+    public Id map(Id id) {
+        final String name = id.getName();
+        boolean acceptAsIs = PREFIX_WHITELIST.stream().anyMatch(prefix -> name.startsWith(prefix));
+        if (acceptAsIs) {
+            return id;
+        }
+
+        return id.withName(APPSUITE + name);
     }
 }
