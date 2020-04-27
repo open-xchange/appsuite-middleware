@@ -62,9 +62,12 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.metrics.micrometer.internal.property.MicrometerFilterProperty;
+import io.micrometer.core.instrument.Meter;
+import io.micrometer.core.instrument.Meter.Id;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
 import io.micrometer.core.instrument.config.MeterFilter;
+import io.micrometer.core.instrument.distribution.DistributionStatisticConfig;
 
 /**
  * {@link AbstractMicrometerFilterPerformer}
@@ -76,39 +79,59 @@ abstract class AbstractMicrometerFilterPerformer {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractMicrometerFilterPerformer.class);
 
+    private final MicrometerFilterProperty property;
+
     /**
      * Initializes a new {@link AbstractMicrometerFilterPerformer}.
      */
-    AbstractMicrometerFilterPerformer() {
+    AbstractMicrometerFilterPerformer(MicrometerFilterProperty property) {
         super();
+        this.property = property;
+    }
+
+    void configure(MeterRegistry meterRegistry, Entry<String, String> entry) {
+        meterRegistry.config().meterFilter(new MeterFilter() {
+
+            @Override
+            public DistributionStatisticConfig configure(Meter.Id id, DistributionStatisticConfig config) {
+                LOG.debug("Applying histogram meter filter for '{}'", id);
+                String key = entry.getKey();
+                String metricId = extractMetricId(key, property);
+                String query = QueryMetricMicrometerFilterPerformer.queryRegistry.get(metricId);
+                if (Strings.isEmpty(query)) {
+                    return applyConfig(entry, metricId, config);
+                }
+                Query q = extractQuery(query);
+                if (q == null) {
+                    return config;
+                }
+                return matchTags(id, q) ? applyConfig(entry, metricId, config) : config;
+            }
+        });
+    }
+
+    /**
+     * Applies the configuration of the specified entry to the specified {@link DistributionStatisticConfig}.
+     * 
+     * @param entry The entry with the configuration
+     * @param metricId the metric identifier
+     * @param config The {@link DistributionStatisticConfig}
+     * @return The merged config
+     */
+    @SuppressWarnings("unused")
+    DistributionStatisticConfig applyConfig(Entry<String, String> entry, String metricId, DistributionStatisticConfig config) {
+        return config;
     }
 
     /**
      * Applies the MeterFilter by the specified meter filter consumer to the specified meter registry.
-     *
-     * @param property The property
+     * 
      * @param configurationService The configuration service to read the property's value
      * @param meterFilterConsumer The consumer which dictates the application of the meter filter
      */
-    void applyFilterFor(MicrometerFilterProperty property, ConfigurationService configurationService, Consumer<Entry<String, String>> meterFilterConsumer) {
+    void applyFilterFor(ConfigurationService configurationService, Consumer<Entry<String, String>> meterFilterConsumer) {
         Map<String, String> properties = getPropertiesStartingWith(configurationService, property);
         properties.entrySet().parallelStream().forEach(entry -> meterFilterConsumer.accept(entry));
-    }
-
-    /**
-     * Returns all properties that start with the specified prefix.
-     *
-     * @param configurationService The configuration service
-     * @param property The prefix of the property
-     * @return The found properties or an empty map
-     */
-    Map<String, String> getPropertiesStartingWith(ConfigurationService configurationService, MicrometerFilterProperty property) {
-        try {
-            return configurationService.getProperties((name, value) -> name.startsWith(property.getFQPropertyName()));
-        } catch (OXException e) {
-            LOG.error("", e);
-            return ImmutableMap.of();
-        }
     }
 
     /**
@@ -128,13 +151,13 @@ abstract class AbstractMicrometerFilterPerformer {
      * Performs a sanity check and returns the specified value as Long for
      * the specified metric.
      * If the sanity check fails, i.e. if the value cannot be parsed or is negative then <code>null</code> will be returned.
-     *
-     * @param property The property
+     * 
      * @param metricId The metric identifier
      * @param value The string value
+     *
      * @return The Long value or <code>null</code> if the sanity check fails.
      */
-    Long distributionValueSanityCheck(MicrometerFilterProperty property, String metricId, String value) {
+    Long distributionValueSanityCheck(String metricId, String value) {
         try {
             long candidate = Long.parseLong(value);
             if (candidate >= 0) {
@@ -153,34 +176,68 @@ abstract class AbstractMicrometerFilterPerformer {
      * 
      * @param query The query
      */
-    void applyRegex(String query, MeterRegistry meterRegistry) {
+    void applyQuery(String query, MeterRegistry meterRegistry) {
+        Query q = extractQuery(query);
+        if (q == null) {
+            return;
+        }
+        meterRegistry.config().meterFilter(MeterFilter.accept(p -> matchTags(p, q)));
+    }
+
+    ///////////////////////////////// HELPERS /////////////////////////////
+
+    private Query extractQuery(String query) {
         LOG.debug("Query: {}", query);
         int startIndex = query.indexOf("{") + 1;
         int endIndex = query.indexOf("}");
         if (startIndex < 0 || endIndex < 0 || endIndex < startIndex) {
             // Invalid indexes
-            return;
+            return null;
         }
         //Valid indexes, apply
         String metricName = query.substring(0, startIndex - 1);
         String filter = query.substring(startIndex, endIndex);
         LOG.debug("Metric name: {}, Filter: {}", metricName, filter);
-        Map<String, String> filterMap = extractFilter(filter);
+        return new Query(metricName, filter);
+    }
 
-        meterRegistry.config().meterFilter(MeterFilter.accept(p -> {
-            List<Tag> tags = p.getTags();
-            if (false == p.getName().equals(metricName)) {
-                return false;
+    /**
+     * Returns all properties that start with the specified prefix.
+     *
+     * @param configurationService The configuration service
+     * @param property The prefix of the property
+     * @return The found properties or an empty map
+     */
+    private Map<String, String> getPropertiesStartingWith(ConfigurationService configurationService, MicrometerFilterProperty property) {
+        try {
+            return configurationService.getProperties((name, value) -> name.startsWith(property.getFQPropertyName()));
+        } catch (OXException e) {
+            LOG.error("", e);
+            return ImmutableMap.of();
+        }
+    }
+
+    /**
+     * Matches all tags from the specified {@link Id} with the tags specified
+     * in the filter.
+     *
+     * @param id The id
+     * @param query The {@link Query}
+     * @return <code>true</code> if all tags match the filter; <code>false</code> otherwise
+     */
+    private boolean matchTags(Meter.Id id, Query query) {
+        Map<String, String> filterMap = extractFilter(query.getFilter());
+        LOG.debug("Metric Tags: {}, Filter: {}", id.getTags(), filterMap);
+        if (false == id.getName().equals(query.getMetricName())) {
+            return false;
+        }
+        int matchCount = 0;
+        for (Tag t : id.getTags()) {
+            if (filterMap.containsKey(t.getKey()) && filterMap.get(t.getKey()).equals(t.getValue())) {
+                matchCount++;
             }
-            LOG.debug("Metric Tags: {}, Filter: {}", tags, filterMap);
-            int matchCount = 0;
-            for (Tag t : tags) {
-                if (filterMap.containsKey(t.getKey()) && filterMap.get(t.getKey()).equals(t.getValue())) {
-                    matchCount++;
-                }
-            }
-            return matchCount == filterMap.size();
-        }));
+        }
+        return matchCount == filterMap.size();
     }
 
     /**

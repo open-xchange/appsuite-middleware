@@ -72,12 +72,12 @@ public class ActivateMetricMicrometerFilterPerformer extends AbstractMicrometerF
      * Initializes a new {@link ActivateMetricMicrometerFilterPerformer}.
      */
     public ActivateMetricMicrometerFilterPerformer() {
-        super();
+        super(MicrometerFilterProperty.ENABLE);
     }
 
     @Override
     public void applyFilter(MeterRegistry meterRegistry, ConfigurationService configurationService) {
-        applyFilterFor(MicrometerFilterProperty.ENABLE, configurationService, (entry) -> {
+        applyFilterFor(configurationService, (entry) -> {
             String key = entry.getKey();
             if (key.endsWith("all")) {
                 return;
@@ -89,7 +89,7 @@ public class ActivateMetricMicrometerFilterPerformer extends AbstractMicrometerF
                 meterRegistry.config().meterFilter(Boolean.parseBoolean(entry.getValue()) ? MeterFilter.acceptNameStartsWith(metricId) : MeterFilter.denyNameStartsWith(metricId));
                 return;
             }
-            applyRegex(query, meterRegistry);
+            applyQuery(query, meterRegistry);
         });
     }
 }

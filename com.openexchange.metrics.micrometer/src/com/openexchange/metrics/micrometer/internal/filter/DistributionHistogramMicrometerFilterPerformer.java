@@ -50,13 +50,10 @@
 package com.openexchange.metrics.micrometer.internal.filter;
 
 import static io.micrometer.core.instrument.distribution.DistributionStatisticConfig.builder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.Map.Entry;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.metrics.micrometer.internal.property.MicrometerFilterProperty;
-import io.micrometer.core.instrument.Meter;
 import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.config.MeterFilter;
 import io.micrometer.core.instrument.distribution.DistributionStatisticConfig;
 
 /**
@@ -68,26 +65,21 @@ import io.micrometer.core.instrument.distribution.DistributionStatisticConfig;
  */
 public class DistributionHistogramMicrometerFilterPerformer extends AbstractMicrometerFilterPerformer implements MicrometerFilterPerformer {
 
-    private static final Logger LOG = LoggerFactory.getLogger(DistributionHistogramMicrometerFilterPerformer.class);
-
     /**
      * Initializes a new {@link DistributionHistogramMicrometerFilterPerformer}.
      */
     public DistributionHistogramMicrometerFilterPerformer() {
-        super();
+        super(MicrometerFilterProperty.HISTOGRAM);
     }
 
     @Override
     public void applyFilter(MeterRegistry meterRegistry, ConfigurationService configurationService) {
-        applyFilterFor(MicrometerFilterProperty.HISTOGRAM, configurationService, (entry) -> {
-            meterRegistry.config().meterFilter(new MeterFilter() {
+        applyFilterFor(configurationService, (entry) -> configure(meterRegistry, entry));
+    }
 
-                @Override
-                public DistributionStatisticConfig configure(Meter.Id id, DistributionStatisticConfig config) {
-                    LOG.debug("Applying histogram meter filter for '{}'", id);
-                    return entry.getKey().contains(id.getName()) ? builder().percentilesHistogram(Boolean.valueOf(entry.getValue())).build().merge(config) : config;
-                }
-            });
-        });
+    @SuppressWarnings("unused")
+    @Override
+    DistributionStatisticConfig applyConfig(Entry<String, String> entry, String metricId, DistributionStatisticConfig config) {
+        return builder().percentilesHistogram(Boolean.valueOf(entry.getValue())).build().merge(config);
     }
 }

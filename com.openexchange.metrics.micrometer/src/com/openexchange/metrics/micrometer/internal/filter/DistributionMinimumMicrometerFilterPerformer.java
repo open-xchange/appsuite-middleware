@@ -49,12 +49,11 @@
 
 package com.openexchange.metrics.micrometer.internal.filter;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.Map.Entry;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.metrics.micrometer.internal.property.MicrometerFilterProperty;
 import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.config.MeterFilter;
+import io.micrometer.core.instrument.distribution.DistributionStatisticConfig;
 
 /**
  * {@link DistributionMinimumMicrometerFilterPerformer} - Applies metric filters for
@@ -65,27 +64,21 @@ import io.micrometer.core.instrument.config.MeterFilter;
  */
 public class DistributionMinimumMicrometerFilterPerformer extends AbstractMicrometerFilterPerformer implements MicrometerFilterPerformer {
 
-    private static final Logger LOG = LoggerFactory.getLogger(DistributionMinimumMicrometerFilterPerformer.class);
-
-    private static final MicrometerFilterProperty PROPERTY = MicrometerFilterProperty.MINIMUM;
-
     /**
      * Initializes a new {@link DistributionMinimumMicrometerFilterPerformer}.
      */
     public DistributionMinimumMicrometerFilterPerformer() {
-        super();
+        super(MicrometerFilterProperty.MINIMUM);
     }
 
     @Override
     public void applyFilter(MeterRegistry meterRegistry, ConfigurationService configurationService) {
-        applyFilterFor(PROPERTY, configurationService, (entry) -> {
-            String metricId = extractMetricId(entry.getKey(), PROPERTY);
-            LOG.debug("Applying {} meter filter for '{}'", PROPERTY.name().toLowerCase(), metricId);
-            Long value = distributionValueSanityCheck(PROPERTY, metricId, entry.getValue());
-            if (value == null) {
-                return;
-            }
-            meterRegistry.config().meterFilter(MeterFilter.minExpected(metricId, value.longValue()));
-        });
+        applyFilterFor(configurationService, (entry) -> configure(meterRegistry, entry));
+    }
+
+    @Override
+    DistributionStatisticConfig applyConfig(Entry<String, String> entry, String metricId, DistributionStatisticConfig config) {
+        Long value = distributionValueSanityCheck(metricId, entry.getValue());
+        return value == null ? config : DistributionStatisticConfig.builder().minimumExpectedValue(value.longValue()).build().merge(config);
     }
 }

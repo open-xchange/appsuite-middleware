@@ -49,14 +49,13 @@
 
 package com.openexchange.metrics.micrometer.internal.filter;
 
+import java.util.Map.Entry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Strings;
 import com.openexchange.metrics.micrometer.internal.property.MicrometerFilterProperty;
-import io.micrometer.core.instrument.Meter;
 import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.config.MeterFilter;
 import io.micrometer.core.instrument.distribution.DistributionStatisticConfig;
 
 /**
@@ -68,45 +67,38 @@ import io.micrometer.core.instrument.distribution.DistributionStatisticConfig;
  */
 public class DistributionPercentilesMicrometerFilterPerformer extends AbstractMicrometerFilterPerformer implements MicrometerFilterPerformer {
 
-    static final Logger LOG = LoggerFactory.getLogger(DistributionPercentilesMicrometerFilterPerformer.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DistributionPercentilesMicrometerFilterPerformer.class);
 
     /**
      * Initializes a new {@link DistributionPercentilesMicrometerFilterPerformer}.
      */
     public DistributionPercentilesMicrometerFilterPerformer() {
-        super();
+        super(MicrometerFilterProperty.PERCENTILES);
     }
 
     @Override
     public void applyFilter(MeterRegistry meterRegistry, ConfigurationService configurationService) {
-        applyFilterFor(MicrometerFilterProperty.PERCENTILES, configurationService, (entry) -> {
-            meterRegistry.config().meterFilter(new MeterFilter() {
+        applyFilterFor(configurationService, (entry) -> configure(meterRegistry, entry));
+    }
 
-                @Override
-                public DistributionStatisticConfig configure(Meter.Id id, DistributionStatisticConfig config) {
-                    LOG.debug("Applying percentiles meter filter for '{}'", id);
-                    if (false == entry.getKey().contains(id.getName())) {
-                        return config;
-                    }
-                    String[] p = Strings.splitByComma(entry.getValue());
-                    double[] percentiles = new double[p.length];
-                    int index = 0;
-                    for (String s : p) {
-                        try {
-                            double value = Double.parseDouble(s);
-                            if (value < 0 || value > 1) {
-                                LOG.error("Invalid percentile '{}' for '{}'. Only values between 0 and 1 are allowed.", value, id);
-                                return config;
-                            }
-                            percentiles[index++] = value;
-                        } catch (NumberFormatException e) {
-                            LOG.error("Percentile '{}' cannot be parsed as double. Ignoring percentiles configuration.", s);
-                            return config;
-                        }
-                    }
-                    return DistributionStatisticConfig.builder().percentiles(percentiles).build().merge(config);
+    @Override
+    DistributionStatisticConfig applyConfig(Entry<String, String> entry, String metricId, DistributionStatisticConfig config) {
+        String[] p = Strings.splitByComma(entry.getValue());
+        double[] percentiles = new double[p.length];
+        int index = 0;
+        for (String s : p) {
+            try {
+                double value = Double.parseDouble(s);
+                if (value < 0 || value > 1) {
+                    LOG.error("Invalid percentile '{}' for '{}'. Only values between 0 and 1 are allowed.", value, metricId);
+                    return config;
                 }
-            });
-        });
+                percentiles[index++] = value;
+            } catch (NumberFormatException e) {
+                LOG.error("Percentile '{}' cannot be parsed as double. Ignoring percentiles configuration.", s);
+                return config;
+            }
+        }
+        return DistributionStatisticConfig.builder().percentiles(percentiles).build().merge(config);
     }
 }

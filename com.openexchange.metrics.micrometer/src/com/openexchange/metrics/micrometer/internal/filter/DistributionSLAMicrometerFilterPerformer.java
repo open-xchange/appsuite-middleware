@@ -49,15 +49,14 @@
 
 package com.openexchange.metrics.micrometer.internal.filter;
 
+import java.util.Map.Entry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Strings;
 import com.openexchange.metrics.micrometer.internal.property.MicrometerFilterProperty;
 import com.openexchange.tools.strings.TimeSpanParser;
-import io.micrometer.core.instrument.Meter;
 import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.config.MeterFilter;
 import io.micrometer.core.instrument.distribution.DistributionStatisticConfig;
 
 /**
@@ -75,34 +74,27 @@ public class DistributionSLAMicrometerFilterPerformer extends AbstractMicrometer
      * Initializes a new {@link DistributionSLAMicrometerFilterPerformer}.
      */
     public DistributionSLAMicrometerFilterPerformer() {
-        super();
+        super(MicrometerFilterProperty.SLA);
     }
 
     @Override
     public void applyFilter(MeterRegistry meterRegistry, ConfigurationService configurationService) {
-        applyFilterFor(MicrometerFilterProperty.SLA, configurationService, (entry) -> {
-            meterRegistry.config().meterFilter(new MeterFilter() {
+        applyFilterFor(configurationService, (entry) -> configure(meterRegistry, entry));
+    }
 
-                @Override
-                public DistributionStatisticConfig configure(Meter.Id id, DistributionStatisticConfig config) {
-                    LOG.debug("Applying SLA meter filter for '{}'", id);
-                    if (false == entry.getKey().contains(id.getName())) {
-                        return config;
-                    }
-                    String[] p = Strings.splitByComma(entry.getValue());
-                    long[] sla = new long[p.length];
-                    int index = 0;
-                    for (String s : p) {
-                        try {
-                            sla[index++] = TimeSpanParser.parseTimespanToPrimitive(s);
-                        } catch (IllegalArgumentException e) {
-                            LOG.error("Cannot parse {} as long. Ignoring SLAs configuration for '{}'.", s, id, e);
-                            return config;
-                        }
-                    }
-                    return DistributionStatisticConfig.builder().sla(sla).build().merge(config);
-                }
-            });
-        });
+    @Override
+    DistributionStatisticConfig applyConfig(Entry<String, String> entry, String metricId, DistributionStatisticConfig config) {
+        String[] p = Strings.splitByComma(entry.getValue());
+        long[] sla = new long[p.length];
+        int index = 0;
+        for (String s : p) {
+            try {
+                sla[index++] = TimeSpanParser.parseTimespanToPrimitive(s);
+            } catch (IllegalArgumentException e) {
+                LOG.error("Cannot parse {} as long. Ignoring SLAs configuration for '{}'.", s, metricId, e);
+                return config;
+            }
+        }
+        return DistributionStatisticConfig.builder().sla(sla).build().merge(config);
     }
 }

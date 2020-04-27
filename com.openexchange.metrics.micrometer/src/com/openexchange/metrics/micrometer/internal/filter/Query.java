@@ -49,34 +49,45 @@
 
 package com.openexchange.metrics.micrometer.internal.filter;
 
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.metrics.micrometer.internal.property.MicrometerFilterProperty;
-import io.micrometer.core.instrument.MeterRegistry;
-
 /**
- * {@link QueryMetricMicrometerFilterPerformer}
+ * {@link Query}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.4
  */
-public class QueryMetricMicrometerFilterPerformer extends AbstractMicrometerFilterPerformer implements MicrometerFilterPerformer {
+class Query {
 
-    public static final Map<String, String> queryRegistry = new HashMap<>();
+    private final String metricName;
+    private final String filter;
 
     /**
-     * Initializes a new {@link QueryMetricMicrometerFilterPerformer}.
+     * Initializes a new {@link Query}.
+     * 
+     * @param metricName The metric name
+     * @param filter The filter
      */
-    public QueryMetricMicrometerFilterPerformer() {
-        super(MicrometerFilterProperty.QUERY);
+    public Query(String metricName, String filter) {
+        super();
+        this.metricName = metricName;
+        this.filter = filter;
     }
 
-    @SuppressWarnings("unused")
-    @Override
-    public void applyFilter(MeterRegistry meterRegistry, ConfigurationService configurationService) {
-        applyFilterFor(configurationService, (entry) -> {
-            queryRegistry.put(extractMetricId(entry.getKey(), MicrometerFilterProperty.QUERY), entry.getValue());
-        });
+    /**
+     * Gets the metricName
+     *
+     * @return The metricName
+     */
+    public String getMetricName() {
+        return metricName;
     }
+
+    /**
+     * Gets the filter
+     *
+     * @return The filter
+     */
+    public String getFilter() {
+        return filter;
+    }
+
 }
