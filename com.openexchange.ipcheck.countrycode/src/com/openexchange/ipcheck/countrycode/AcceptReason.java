@@ -54,7 +54,7 @@ package com.openexchange.ipcheck.countrycode;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-enum AcceptReason {
+public enum AcceptReason {
     /**
      * One of the IP addresses lies with in the private range
      */

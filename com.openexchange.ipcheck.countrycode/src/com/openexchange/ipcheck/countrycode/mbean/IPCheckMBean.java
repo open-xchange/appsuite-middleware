@@ -57,7 +57,7 @@ package com.openexchange.ipcheck.countrycode.mbean;
  */
 public interface IPCheckMBean {
 
-    static String NAME = "com.openexchange.metrics" + ":type=" + IPCheckMetric.COMPONENT_NAME + ",name=percentages";
+    static String NAME = "com.openexchange.metrics" + ":type=" + IPCheckMetricCollector.COMPONENT_NAME + ",name=percentages";
 
     /**
      * Returns the total amount of IP checks per hour

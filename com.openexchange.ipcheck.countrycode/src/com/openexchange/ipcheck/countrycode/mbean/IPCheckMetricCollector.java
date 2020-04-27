@@ -49,6 +49,10 @@
 
 package com.openexchange.ipcheck.countrycode.mbean;
 
+import java.util.EnumMap;
+import java.util.Map;
+import com.openexchange.ipcheck.countrycode.AcceptReason;
+import com.openexchange.ipcheck.countrycode.DenyReason;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
 
@@ -59,39 +63,70 @@ import io.micrometer.core.instrument.Metrics;
  */
 public class IPCheckMetricCollector {
 
+    public static final String COMPONENT_NAME = "ipcheck";
+
+    private final Map<AcceptReason, Counter> acceptCounters;
+    private final  Map<DenyReason, Counter> denyCounters;
+
     /**
-     * Initializes a new {@link IPCheckMetricCollector}.
+     * Initialises a new {@link IPCheckMetricCollector}.
+     *
+     * @param componentName
      */
     public IPCheckMetricCollector() {
         super();
+        acceptCounters = new EnumMap<>(AcceptReason.class);
+        for (AcceptReason reason : AcceptReason.values()) {
+            acceptCounters.put(reason, getCounter("accepted", reason.name()));
+        }
+
+        denyCounters = new EnumMap<>(DenyReason.class);
+        for (DenyReason reason : DenyReason.values()) {
+            denyCounters.put(reason, getCounter("denied", reason.name()));
+        }
     }
 
-    /**
-     * Increments the counter of the given {@link IPCheckMetric}
-     *
-     * @param metric The {@link IPCheckMetric} to increment
-     */
-    public void increment(IPCheckMetric metric) {
-        getCounter(metric.getMetricName()).increment();
+    public void incrementAccepted(AcceptReason reason) {
+        acceptCounters.get(reason).increment();;
     }
 
-    /**
-     * Gets the current count for the given metric name
-     *
-     * @param metricName The metric name
-     * @return The current count
-     */
-    long getCount(String metricName) {
-        return (long) getCounter(metricName).count();
+    public void incrementDenied(DenyReason reason) {
+        denyCounters.get(reason).increment();
     }
 
-    /**
-     * Get the counter for the given name
-     *
-     * @param metricName The metric name
-     * @return The {@link Counter}
-     */
-    Counter getCounter(String metricName) {
-        return Counter.builder(metricName).register(Metrics.globalRegistry);
+    private Counter getCounter(String status, String reason) {
+        return Counter.builder("appsuite.ipchanges")
+            .description("Total number of detected user session IP changes.")
+            .tags("status", status, "reason", reason)
+            .register(Metrics.globalRegistry);
     }
+
+    public double getCount(IPCheckMetric metric) {
+        switch (metric) {
+            case acceptedEligibleIPChanges:
+                return acceptCounters.get(AcceptReason.ELIGIBLE).count();
+            case acceptedPrivateIP:
+                return acceptCounters.get(AcceptReason.PRIVATE_IPV4).count();
+            case acceptedWhiteListed:
+                return acceptCounters.get(AcceptReason.WHITE_LISTED).count();
+            case acceptedIPChanges:
+                return acceptCounters.values().stream()
+                    .map(c -> c.count())
+                    .reduce(0d, Double::sum).doubleValue();
+            case deniedCountryChanged:
+                return denyCounters.get(DenyReason.COUNTRY_CHANGE).count();
+            case deniedException:
+                return denyCounters.get(DenyReason.EXCEPTION).count();
+            case deniedIPChanges:
+                return denyCounters.values().stream()
+                    .map(c -> c.count())
+                    .reduce(0d, Double::sum).doubleValue();
+            case totalIPChanges:
+                return Double.sum(getCount(IPCheckMetric.acceptedIPChanges), getCount(IPCheckMetric.deniedIPChanges));
+            default:
+                return -1d;
+
+        }
+    }
+
 }
