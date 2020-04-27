@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.authentication.application.ajax.RestrictedAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFileAccess;
@@ -75,6 +76,7 @@ import com.openexchange.share.notification.ShareNotifyExceptionCodes;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
+@RestrictedAction(module = AbstractFileAction.MODULE, type = RestrictedAction.Type.WRITE)
 public abstract class AbstractWriteAction extends AbstractFileAction {
 
     @Override
@@ -166,11 +168,11 @@ public abstract class AbstractWriteAction extends AbstractFileAction {
 
         List<FileStorageObjectPermission> oldPermissions = original == null ? null : original.getObjectPermissions();
         if (oldPermissions == null) {
-            oldPermissions = Collections.<FileStorageObjectPermission>emptyList();
+            oldPermissions = Collections.<FileStorageObjectPermission> emptyList();
         }
         List<FileStorageObjectPermission> newPermissions = modified.getObjectPermissions();
         if (newPermissions == null) {
-            newPermissions = Collections.<FileStorageObjectPermission>emptyList();
+            newPermissions = Collections.<FileStorageObjectPermission> emptyList();
         }
         List<FileStorageObjectPermission> addedPermissions = new ArrayList<>(newPermissions.size());
         for (FileStorageObjectPermission permission : newPermissions) {

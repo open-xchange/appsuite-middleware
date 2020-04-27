@@ -54,6 +54,7 @@ import java.util.Optional;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.authentication.application.ajax.RestrictedAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.multifactor.MultifactorDevice;
 import com.openexchange.multifactor.MultifactorProvider;
@@ -70,10 +71,11 @@ import com.openexchange.user.UserService;
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v7.10.2
  */
+@RestrictedAction(module = RestrictedAction.REQUIRES_FULL_AUTH)
 public abstract class AbstractMultifactorAction implements AJAXActionService {
 
     protected final ServiceLookup serviceLookup;
-    protected final UserService   userService;
+    protected final UserService userService;
 
     /**
      * Initializes a new {@link AbstractMultifactorAction}.
@@ -137,7 +139,7 @@ public abstract class AbstractMultifactorAction implements AJAXActionService {
      * @throws OXException
      */
     MultifactorProvider requireProvider(MultifactorDevice device) throws OXException {
-       return requireProvider(device.getProviderName());
+        return requireProvider(device.getProviderName());
     }
 
     @Override

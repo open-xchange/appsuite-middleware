@@ -8,6 +8,8 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.nimbus"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.annotation"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.antivirus"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.authentication.application"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.authentication.application.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.authentication.driver.basic"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.caching"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.caching.events"/>

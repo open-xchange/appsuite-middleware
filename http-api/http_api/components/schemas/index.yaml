@@ -438,6 +438,19 @@ MultifactorStartAuthenticationResponse:
   $ref: ./multifactor-device/MultifactorStartAuthenticationResponse.yaml
 MultifactorFinishAuthenticationData:
   $ref: ./multifactor-device/MultifactorFinishAuthenticationData.yaml
+# Module: ApplicationPassword
+AppPassword:
+  $ref: ./appPassword/AppPassword.yaml
+AppPasswordApplication:
+  $ref: ./appPassword/AppPasswordApplication.yaml
+AppPasswordGetAppsResponse:
+  $ref: ./appPassword/AppPasswordGetAppsResponse.yaml
+AppPasswordListResponse:
+  $ref: ./appPassword/AppPasswordListResponse.yaml
+AppPasswordRegistrationResponse:
+  $ref: ./appPassword/AppPasswordRegistrationResponse.yaml
+AppPasswordRemovalResponse:
+  $ref: ./appPassword/AppPasswordRemovalResponse.yaml
 # Module: multiple
 SingleRequest:
   $ref: ./multiple/SingleRequest.yaml

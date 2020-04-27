@@ -60,8 +60,8 @@ import org.slf4j.Logger;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.SessionUtility;
 import com.openexchange.authentication.Authenticated;
-import com.openexchange.authentication.GuestAuthenticated;
 import com.openexchange.authentication.LoginExceptionCodes;
+import com.openexchange.authentication.ResolvedAuthenticated;
 import com.openexchange.authentication.service.Authentication;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -108,11 +108,11 @@ public class AutoLoginTools {
             Authenticated authenticated = Authentication.login(login, password, properties);
             Context context;
             User user;
-            if (GuestAuthenticated.class.isInstance(authenticated)) {
+            if (ResolvedAuthenticated.class.isInstance(authenticated)) {
                 /*
                  * use already resolved user / context
                  */
-                GuestAuthenticated guestAuthenticated = (GuestAuthenticated) authenticated;
+                ResolvedAuthenticated guestAuthenticated = (ResolvedAuthenticated) authenticated;
                 context = getContext(guestAuthenticated.getContextID());
                 user = getUser(context, guestAuthenticated.getUserID());
             } else {

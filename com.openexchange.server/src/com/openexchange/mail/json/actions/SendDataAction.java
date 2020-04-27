@@ -53,6 +53,7 @@ import javax.mail.MessagingException;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
+import com.openexchange.authentication.application.ajax.RestrictedAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.json.MailOAuthConstants;
@@ -61,7 +62,6 @@ import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 
-
 /**
  * {@link SendDataAction}
  *
@@ -69,7 +69,8 @@ import com.openexchange.server.ServiceLookup;
  * @since v7.8.3
  */
 @OAuthAction(MailOAuthConstants.OAUTH_SEND_DATA)
-@DispatcherNotes( preferStream = true )
+@RestrictedAction(module = AbstractMailAction.MODULE, type = RestrictedAction.Type.WRITE)
+@DispatcherNotes(preferStream = true)
 public class SendDataAction extends AbstractMailAction {
 
     private final NewAction delegate;

@@ -1,0 +1,5 @@
+open-xchange-authentication-application-storage-rdb (7.10.4-0) unstable; urgency=medium
+
+  * prepare for 7.10.4 release
+
+ -- Tobias Friedrich <tobias.friedrich@open-xchange.com>  Fri, 17 Apr 2020 12:41:00 +0200

@@ -55,6 +55,7 @@ import java.util.EnumSet;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.authentication.application.ajax.RestrictedAction;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.vcard.VCardService;
@@ -77,7 +78,10 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
+@RestrictedAction(module = ContactAction.MODULE, type = RestrictedAction.Type.READ)
 public abstract class ContactAction implements AJAXActionService {
+
+    protected static final String MODULE = "contacts";
 
     /** Named logger instance */
     protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactAction.class);
@@ -86,14 +90,12 @@ public abstract class ContactAction implements AJAXActionService {
 
     public static final int[] COLUMNS_ALIAS_ALL = new int[] { 20, 1, 5, 2, 602 };
 
-    public static final int[] COLUMNS_ALIAS_LIST = new int[] {
-        20, 1, 5, 2, 500, 501, 502, 505, 523, 525, 526, 527, 542, 555, 102, 602, 592, 101, 551, 552, 543, 547, 548, 549, 556, 569 };
+    public static final int[] COLUMNS_ALIAS_LIST = new int[] { 20, 1, 5, 2, 500, 501, 502, 505, 523, 525, 526, 527, 542, 555, 102, 602, 592, 101, 551, 552, 543, 547, 548, 549, 556, 569 };
 
     /**
      * Contact fields that are not persistent.
      */
-    public static final EnumSet<ContactField> VIRTUAL_FIELDS =
-        EnumSet.of(ContactField.IMAGE1_URL, ContactField.LAST_MODIFIED_UTC, ContactField.SORT_NAME);
+    public static final EnumSet<ContactField> VIRTUAL_FIELDS = EnumSet.of(ContactField.IMAGE1_URL, ContactField.LAST_MODIFIED_UTC, ContactField.SORT_NAME);
 
     /**
      * Initializes a new {@link ContactAction}.
@@ -107,7 +109,7 @@ public abstract class ContactAction implements AJAXActionService {
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-		return perform(new ContactRequest(requestData, session));
+        return perform(new ContactRequest(requestData, session));
     }
 
     /**
@@ -167,8 +169,8 @@ public abstract class ContactAction implements AJAXActionService {
      * @return
      */
     protected static Date getLatestModified(final Date lastModified, final Contact contact) {
-    	final Date contactLastModified = contact.getLastModified();
-    	return null == contactLastModified || lastModified.after(contactLastModified) ? lastModified : contactLastModified;
+        final Date contactLastModified = contact.getLastModified();
+        return null == contactLastModified || lastModified.after(contactLastModified) ? lastModified : contactLastModified;
     }
 
     /**

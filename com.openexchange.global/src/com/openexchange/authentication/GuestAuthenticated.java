@@ -54,20 +54,6 @@ package com.openexchange.authentication;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public interface GuestAuthenticated extends Authenticated {
-
-    /**
-     * Gets the identifier of the already resolved context the guest resides in.
-     *
-     * @return The context ID
-     */
-    int getContextID();
-
-    /**
-     * Gets the identifier of the already resolved guest user.
-     *
-     * @return the user ID
-     */
-    int getUserID();
+public interface GuestAuthenticated extends ResolvedAuthenticated {
 
 }

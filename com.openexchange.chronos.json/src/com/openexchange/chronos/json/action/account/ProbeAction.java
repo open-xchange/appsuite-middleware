@@ -57,6 +57,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.authentication.application.ajax.RestrictedAction;
 import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.json.action.ChronosAction;
 import com.openexchange.chronos.json.oauth.ChronosOAuthScope;
@@ -78,7 +79,10 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  * @since v7.10.0
  */
 @OAuthAction(ChronosOAuthScope.OAUTH_READ_SCOPE)
+@RestrictedAction(type = RestrictedAction.Type.READ, module = ProbeAction.MODULE)
 public class ProbeAction extends ChronosAction {
+
+    public static final String MODULE = "calendar";
 
     /**
      * Initializes a new {@link ProbeAction}.
@@ -105,7 +109,7 @@ public class ProbeAction extends ChronosAction {
         CalendarSettings parsedSettings = parseSettings(jsonObject);
         CalendarSettings proposedSettings = services.getService(CalendarAccountService.class).probeAccountSettings(calendarAccess.getSession(), providerId, parsedSettings, calendarAccess);
         /*
-         *  return appropriate result
+         * return appropriate result
          */
         JSONObject resultObject = new JSONObject();
         writeSettings(proposedSettings, resultObject);

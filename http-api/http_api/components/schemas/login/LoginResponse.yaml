@@ -16,6 +16,9 @@ properties:
   locale:
     type: string
     description: The users locale (e.g. "en_US").
+  requires_multifactor:
+    type: boolean
+    description: True if multifactor login required
   rampup:
     type: object
     description: >-

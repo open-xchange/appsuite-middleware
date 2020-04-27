@@ -93,6 +93,9 @@ public class DAVServlet extends OXServlet {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DAVServlet.class);
     private static final LoginCustomizer ALLOW_ASTERISK_LOGIN_CUSTOMIZER = new AllowAsteriskAsSeparatorCustomizer();
 
+    /** The required scope to access CalDAV/CardDAV related endpoints for restricted sessions (authenticated with app-specific passwords) */
+    private static final String RESTRICTED_SCOPE_DAV = "dav";
+
     protected final DAVPerformer performer;
     private final Interface interfaze;
 
@@ -272,8 +275,10 @@ public class DAVServlet extends OXServlet {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             return;
         }
-        if (false == checkPermission(request, serverSession)) {
-            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+        if (false == checkPermission(request, method, serverSession)) {
+            addUnauthorizedHeader(response);
+            removeSession(session.getSessionID());
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
         performer.doIt(request, response, method, serverSession);
@@ -285,17 +290,30 @@ public class DAVServlet extends OXServlet {
      * Override if applicable.
      *
      * @param request the HTTP request
+     * @param method The derived WebDAV method for the request
      * @param session The session to check permissions for
      * @return <code>true</code> if permissions are sufficient, <code>false</code>, otherwise
      */
-    protected boolean checkPermission(HttpServletRequest request, @SuppressWarnings("unused") ServerSession session) {
+    protected boolean checkPermission(HttpServletRequest request, WebdavMethod method, @SuppressWarnings("unused") ServerSession session) {
+        /*
+         * check that either "caldav" or "carddav" scope is available when authenticated through OAuth
+         */
         OAuthAccess oAuthAccess = (OAuthAccess) request.getAttribute(OAuthConstants.PARAM_OAUTH_ACCESS);
-        if (null == oAuthAccess) {
-            // basic authentication took place
-            return true;
+        if (null != oAuthAccess) {
+            Scope scope = oAuthAccess.getScope();
+            return scope.has(DAVOAuthScope.CALDAV.getScope()) || scope.has(DAVOAuthScope.CARDDAV.getScope());
         }
-        Scope scope = oAuthAccess.getScope();
-        return scope.has(DAVOAuthScope.CALDAV.getScope()) || scope.has(DAVOAuthScope.CARDDAV.getScope());
+        /*
+         * check that the general "dav" scope is available when session is restricted (authenticated through app-specific password)
+         */
+        String[] restrictedScopes = (String[]) session.getParameter(Session.PARAM_RESTRICTED);
+        if (null != restrictedScopes) {
+            return com.openexchange.tools.arrays.Arrays.contains(restrictedScopes, RESTRICTED_SCOPE_DAV);
+        }
+        /*
+         * assume regularly authenticated *DAV session, otherwise
+         */
+        return true;
     }
 
 }

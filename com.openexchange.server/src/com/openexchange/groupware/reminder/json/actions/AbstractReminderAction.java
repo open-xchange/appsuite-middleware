@@ -61,6 +61,7 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.authentication.application.ajax.RestrictedAction;
 import com.openexchange.ajax.writer.ReminderWriter;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmTrigger;
@@ -90,11 +91,14 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@RestrictedAction(module = AbstractReminderAction.MODULE, type = RestrictedAction.Type.READ)  // Minimum reminders requirement
 public abstract class AbstractReminderAction implements AJAXActionService {
 
     private static final AJAXRequestResult RESULT_JSON_NULL = new AJAXRequestResult(JSONObject.NULL, "json");
 
     private static final String MODULES_PARAMETER = "modules";
+
+    protected static final String MODULE = "reminders";
 
     private final ServiceLookup services;
 
@@ -259,7 +263,7 @@ public abstract class AbstractReminderAction implements AJAXActionService {
         ReminderObject reminder = new ReminderObject();
         reminder.setDate(new Date(trigger.getTime().longValue()));
         EventID eventId = null;
-        if (trigger.containsRecurrenceId()){
+        if (trigger.containsRecurrenceId()) {
             eventId = new EventID(trigger.getFolder(), trigger.getEventId(), trigger.getRecurrenceId());
         } else {
             eventId = new EventID(trigger.getFolder(), trigger.getEventId());

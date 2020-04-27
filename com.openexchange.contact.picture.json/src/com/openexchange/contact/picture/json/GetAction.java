@@ -62,6 +62,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.ajax.requesthandler.ETagAwareAJAXActionService;
 import com.openexchange.ajax.requesthandler.LastModifiedAwareAJAXActionService;
+import com.openexchange.authentication.application.ajax.RestrictedAction;
 import com.openexchange.contact.picture.ContactPicture;
 import com.openexchange.contact.picture.ContactPictureService;
 import com.openexchange.contact.picture.PictureSearchData;
@@ -81,6 +82,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 @DispatcherNotes(defaultFormat = "file", allowPublicSession = true, publicSessionAuth = true)
 @OAuthAction(ContactActionFactory.OAUTH_READ_SCOPE)
+@RestrictedAction(module = "contacts", type = RestrictedAction.Type.READ)
 public class GetAction implements ETagAwareAJAXActionService, LastModifiedAwareAJAXActionService {
 
     final ServiceLookup services;

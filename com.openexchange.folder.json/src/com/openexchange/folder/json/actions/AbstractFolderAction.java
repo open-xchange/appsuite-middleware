@@ -68,6 +68,7 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.oauth.OAuthConstants;
+import com.openexchange.authentication.application.ajax.RestrictedAction;
 import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.chronos.json.oauth.ChronosOAuthScope;
 import com.openexchange.contacts.json.ContactActionFactory;
@@ -111,12 +112,15 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@RestrictedAction(module = AbstractFolderAction.MODULE, type = RestrictedAction.Type.READ)
 public abstract class AbstractFolderAction implements AJAXActionService {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractFolderAction.class);
-    
+
     protected static final String PARAM_AUTORENAME = "autorename";
-    
+
+    protected static final String MODULE = "folder";
+
     /**
      * <code>"ignoreTranslation"</code>.
      */

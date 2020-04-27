@@ -59,12 +59,14 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.java.util.HttpStatusFamily;
 import com.openexchange.login.Interface;
+import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.webdav.OXServlet;
-import com.openexchange.webdav.InfostorePerformer.Action;
+import com.openexchange.webdav.protocol.WebdavMethod;
 import io.micrometer.core.instrument.Metrics;
 import io.micrometer.core.instrument.Timer;
+
 
 /**
  * {@link Infostore} - The WebDAV/XML servlet for infostore module.
@@ -73,7 +75,11 @@ public class Infostore extends OXServlet {
 
     private static final long serialVersionUID = -2064098724675986123L;
 
-    private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Infostore.class);
+    /** The required scope to access read-only WebDAV-related endpoints for restricted sessions (authenticated with app-specific passwords) */
+    private static final String RESTRICTED_SCOPE_WEBDAV_READ = "read_webdav";
+
+    /** The required scope to access read-only WebDAV-related endpoints for restricted sessions (authenticated with app-specific passwords) */
+    private static final String RESTRICTED_SCOPE_WEBDAV_WRITE = "write_webdav";
 
     @Override
     protected Interface getInterface() {
@@ -87,77 +93,86 @@ public class Infostore extends OXServlet {
 
     @Override
     protected void doCopy(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, Action.COPY);
+        doIt(req, resp, WebdavMethod.COPY);
     }
 
     @Override
     protected void doLock(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, Action.LOCK);
+        doIt(req, resp, WebdavMethod.LOCK);
     }
 
     @Override
     protected void doMkCol(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, Action.MKCOL);
+        doIt(req, resp, WebdavMethod.MKCOL);
     }
 
     @Override
     protected void doMove(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, Action.MOVE);
+        doIt(req, resp, WebdavMethod.MOVE);
     }
 
     @Override
     protected void doOptions(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, Action.OPTIONS);
+        doIt(req, resp, WebdavMethod.OPTIONS);
     }
 
     @Override
     protected void doPropFind(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, Action.PROPFIND);
+        doIt(req, resp, WebdavMethod.PROPFIND);
     }
 
     @Override
     protected void doPropPatch(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, Action.PROPPATCH);
+        doIt(req, resp, WebdavMethod.PROPPATCH);
     }
 
     @Override
     protected void doUnLock(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, Action.UNLOCK);
+        doIt(req, resp, WebdavMethod.UNLOCK);
     }
 
     @Override
     protected void doDelete(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, Action.DELETE);
+        doIt(req, resp, WebdavMethod.DELETE);
     }
 
     @Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, Action.GET);
+        doIt(req, resp, WebdavMethod.GET);
     }
 
     @Override
     protected void doHead(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, Action.HEAD);
+        doIt(req, resp, WebdavMethod.HEAD);
     }
 
     @Override
     protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, Action.PUT);
+        doIt(req, resp, WebdavMethod.PUT);
     }
 
     @Override
     protected void doTrace(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, Action.TRACE);
+        doIt(req, resp, WebdavMethod.TRACE);
     }
 
-    @SuppressWarnings("unused")
-    private void doIt(final HttpServletRequest req, final HttpServletResponse resp, final Action action) throws ServletException, IOException {
+    /**
+     * Performs the infostore action
+     *
+     * @param req The request
+     * @param resp The response
+     * @param action The action to perform
+     * @throws ServletException If an error is occurred
+     * @throws IOException if an I/O error is occurred
+     */
+    private void doIt(final HttpServletRequest req, final HttpServletResponse resp, final WebdavMethod method) {
         long start = System.nanoTime();
         try {
             ServerSession session;
             try {
                 session = ServerSessionAdapter.valueOf(getSession(req));
-            } catch (OXException exc) {
+            } catch (OXException e) {
+                org.slf4j.LoggerFactory.getLogger(Infostore.class).warn("Unexpected error getting session associated to request", e);
                 resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 return;
             }
@@ -166,7 +181,13 @@ public class Infostore extends OXServlet {
                 resp.setStatus(HttpServletResponse.SC_PRECONDITION_FAILED);
                 return;
             }
-            InfostorePerformer.getInstance().doIt(req, resp, action, session);
+            if (!checkSessionAuthorized(session, method)) {
+                removeSession(session.getSessionID());
+                addUnauthorizedHeader(resp);
+                resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                return;
+            }
+            InfostorePerformer.getInstance().doIt(req, resp, method, session);
         } finally {
             recordMetric(Duration.ofNanos(System.nanoTime() - start), req.getMethod(), resp.getStatus());
         }
@@ -206,4 +227,24 @@ public class Infostore extends OXServlet {
         // @formatter:on
     }
 
+    /**
+     * Check restricted session. If present, confirm webdav permission
+     *
+     * @param session The session
+     * @return true if allowed, false if should be prevented
+     */
+    private boolean checkSessionAuthorized(ServerSession session, WebdavMethod method) {
+        /*
+         * check that a "webdav" scope appropriate for the method is available when session is restricted (authenticated through app-specific password)
+         */
+        String[] restrictedScopes = (String[]) session.getParameter(Session.PARAM_RESTRICTED);
+        if (null != restrictedScopes) {
+            String requiredScope = null != method && method.isReadOnly() ? RESTRICTED_SCOPE_WEBDAV_READ : RESTRICTED_SCOPE_WEBDAV_WRITE;
+            return com.openexchange.tools.arrays.Arrays.contains(restrictedScopes, requiredScope);
+        }
+        /*
+         * assume regularly authenticated *DAV session, otherwise
+         */
+        return true;
+    }
 }

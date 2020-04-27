@@ -88,7 +88,6 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
  * {@link AllAction}
  *
@@ -403,7 +402,8 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
         if (null != id) {
             return id;
         }
-        final String sha1Sum = JsonCaches.getSHA1Sum("all", req.checkParameter(Mail.PARAMETER_MAILFOLDER), req.checkParameter(AJAXServlet.PARAMETER_COLUMNS), req.getParameter(AJAXServlet.PARAMETER_SORT), req.getParameter(AJAXServlet.PARAMETER_ORDER), req.getParameter("limit"), req.getParameter(AJAXServlet.LEFT_HAND_LIMIT), req.getParameter(AJAXServlet.RIGHT_HAND_LIMIT), req.getParameter("unseen"), req.getParameter("deleted"));
+        final String sha1Sum = JsonCaches.getSHA1Sum("all", req.checkParameter(Mail.PARAMETER_MAILFOLDER), req.checkParameter(AJAXServlet.PARAMETER_COLUMNS), req.getParameter(AJAXServlet.PARAMETER_SORT), req.getParameter(AJAXServlet.PARAMETER_ORDER),
+            req.getParameter("limit"), req.getParameter(AJAXServlet.LEFT_HAND_LIMIT), req.getParameter(AJAXServlet.RIGHT_HAND_LIMIT), req.getParameter("unseen"), req.getParameter("deleted"));
         return sha1Sum;
     }
 

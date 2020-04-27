@@ -55,6 +55,7 @@ import java.util.List;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.authentication.application.ajax.RestrictedAction;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.CommonObject.Marker;
@@ -68,17 +69,18 @@ import com.openexchange.tasks.json.TaskRequest;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
 
-
 /**
  * {@link UpdatesAction}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 @OAuthAction(TaskActionFactory.OAUTH_READ_SCOPE)
+@RestrictedAction(module = TaskAction.MODULE, type = RestrictedAction.Type.WRITE)
 public class UpdatesAction extends TaskAction {
 
     /**
      * Initializes a new {@link UpdatesAction}.
+     * 
      * @param services
      */
     public UpdatesAction(ServiceLookup services) {
@@ -108,7 +110,7 @@ public class UpdatesAction extends TaskAction {
 
         SearchIterator<Task> it = null;
         try {
-            int[] internalColumns = new int[columnsToLoad.length+1];
+            int[] internalColumns = new int[columnsToLoad.length + 1];
             System.arraycopy(columnsToLoad, 0, internalColumns, 0, columnsToLoad.length);
             internalColumns[columnsToLoad.length] = DataObject.LAST_MODIFIED;
 

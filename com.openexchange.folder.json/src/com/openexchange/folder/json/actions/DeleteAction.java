@@ -64,6 +64,7 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.authentication.application.ajax.RestrictedAction;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.services.ServiceRegistry;
@@ -86,6 +87,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 @OAuthAction(OAuthAction.CUSTOM)
+@RestrictedAction(module = AbstractFolderAction.MODULE, type = RestrictedAction.Type.WRITE)
 public final class DeleteAction extends AbstractFolderAction {
 
     public static final String ACTION = AJAXServlet.ACTION_DELETE;
@@ -249,12 +251,12 @@ public final class DeleteAction extends AbstractFolderAction {
         return result;
     }
 
-    private AJAXRequestResult createExtendedResponse(List<TrashResult> results, boolean failOnError) throws JSONException{
+    private AJAXRequestResult createExtendedResponse(List<TrashResult> results, boolean failOnError) throws JSONException {
         JSONArray resultArray = new JSONArray(results.size());
         if (failOnError) {
 
             for (TrashResult trashResult : results) {
-                if (trashResult.isSupported()){
+                if (trashResult.isSupported()) {
                     JSONObject obj = new JSONObject(3);
                     obj.put(SUPPORTED, true);
                     if (trashResult.isTrashed()) {
@@ -274,7 +276,7 @@ public final class DeleteAction extends AbstractFolderAction {
             }
         } else {
             for (TrashResult trashResult : results) {
-                if (trashResult.isSupported()){
+                if (trashResult.isSupported()) {
                     JSONObject obj = new JSONObject(3);
                     obj.put(SUPPORTED, true);
                     if (trashResult.hasFailed()) {
@@ -301,7 +303,6 @@ public final class DeleteAction extends AbstractFolderAction {
         }
         return new AJAXRequestResult(resultArray);
     }
-
 
     /**
      * Tries to get the name of a folder, not throwing an exception in case retrieval fails, but falling back to the folder identifier.
