@@ -137,7 +137,6 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
      * @throws OXException If creation fails
      */
     public String doCreate(final Folder toCreate) throws OXException {
-
         if (InfostoreContentType.getInstance().equals(toCreate.getContentType()) && Strings.isNotEmpty(toCreate.getName())) {
             FilenameValidationUtils.checkCharacters(toCreate.getName());
             FilenameValidationUtils.checkName(toCreate.getName());

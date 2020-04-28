@@ -142,6 +142,9 @@ public class InfostoreExceptionMessages implements LocalizableStrings {
     // The folder you requested does not exist.
     public static final String FOLDER_NOT_EXISTS_MSG = "The folder you requested does not exist.";
 
+    // The file contains too many permissions. Please reduce the number or use groups instead.
+    public static final String TOO_MANY_PERMISSIONS = "The file contains too many permissions. Please reduce the number of permissions or use group permissions instead.";
+
     private InfostoreExceptionMessages() {
         super();
     }

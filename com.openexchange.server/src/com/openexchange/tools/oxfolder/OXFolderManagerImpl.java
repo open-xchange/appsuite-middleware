@@ -51,6 +51,7 @@ package com.openexchange.tools.oxfolder;
 
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_CONNECTION;
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.tools.arrays.Arrays.contains;
 import java.sql.Connection;
 import java.sql.DataTruncation;
@@ -65,6 +66,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -79,6 +81,9 @@ import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.lean.DefaultProperty;
+import com.openexchange.config.lean.LeanConfigurationService;
+import com.openexchange.config.lean.Property;
 import com.openexchange.contact.ContactService;
 import com.openexchange.database.Databases;
 import com.openexchange.database.IncorrectStringSQLException;
@@ -151,6 +156,8 @@ import gnu.trove.set.hash.TIntHashSet;
 final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionConstants {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OXFolderManagerImpl.class);
+
+    private static final Property MAX_FOLDER_PERMISSIONS = DefaultProperty.valueOf("com.openexchange.folder.maxPermissionEntities", I(100));
 
     private static final int[] SYSTEM_PUBLIC_FOLDERS = { FolderObject.SYSTEM_PUBLIC_FOLDER_ID, FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID };
 
@@ -304,6 +311,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         if (folderObj.getPermissions() == null || folderObj.getPermissions().size() == 0) {
             throw OXFolderExceptionCode.MISSING_FOLDER_ATTRIBUTE.create(FolderFields.PERMISSIONS, "", I(ctx.getContextId()));
         }
+        checkFolderPermissions(folderObj, Optional.empty());
         final FolderObject parentFolder = getOXFolderAccess().getFolderObject(folderObj.getParentFolderID());
         if (checkPermissions) {
             /*
@@ -570,6 +578,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
 
         boolean performMove = fo.containsParentFolderID();
         FolderObject originalFolder = getFolderFromMaster(fo.getObjectID());
+        checkFolderPermissions(fo, Optional.ofNullable(originalFolder));
         int oldParentId = originalFolder.getParentFolderID();
         FolderObject storageObject = originalFolder.clone();
 
@@ -2425,6 +2434,37 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             OXFolderSQL.cleanLocksForFolder(folder.getObjectID(), userIds, this.writeCon, ctx);
         } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Checks if the folder contains too many permissions.
+     *
+     * @param folder The folder to check
+     * @param previousFolder The optional previous folder in case of an update
+     * @throws OXException in case the folder contains too many permissions
+     */
+    protected void checkFolderPermissions(FolderObject folder, Optional<FolderObject> previousFolder) throws OXException {
+        if (folder == null) {
+            return;
+        }
+        List<OCLPermission> perms = folder.getPermissions();
+        if (perms != null) {
+            LeanConfigurationService lean = ServerServiceRegistry.getServize(LeanConfigurationService.class, true);
+            int max = i((Integer) MAX_FOLDER_PERMISSIONS.getDefaultValue());
+            if (lean == null) {
+                LOG.warn("Missing {} service. Falling back to default value of {}.", LeanConfigurationService.class.getSimpleName(), MAX_FOLDER_PERMISSIONS.getFQPropertyName());
+            } else {
+
+                max = lean.getIntProperty(user.getId(), ctx.getContextId(), MAX_FOLDER_PERMISSIONS);
+            }
+            if (max > 0 && perms.size() > max) {
+                if (previousFolder.isPresent() && previousFolder.get().getPermissions() != null && previousFolder.get().getPermissions().size() >= perms.size()) {
+                    LOG.debug("Updated folder with id {} in context {} contains too many permissions but accept it anyway, because the overall number didn't increase.", I(previousFolder.get().getObjectID()), I(ctx.getContextId()));
+                    return;
+                }
+                throw OXFolderExceptionCode.TOO_MANY_PERMISSIONS.create();
+            }
         }
     }
 

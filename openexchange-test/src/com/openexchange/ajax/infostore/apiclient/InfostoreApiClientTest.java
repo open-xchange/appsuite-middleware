@@ -51,6 +51,8 @@ package com.openexchange.ajax.infostore.apiclient;
 
 import static com.openexchange.java.Autoboxing.L;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -59,11 +61,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.junit.After;
 import org.junit.Before;
 import com.openexchange.ajax.config.actions.Tree;
-import com.openexchange.ajax.framework.AbstractAPIClientSession;
+import com.openexchange.ajax.framework.AbstractConfigAwareAPIClientSession;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.modules.Module;
@@ -72,8 +75,10 @@ import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.ConfigResponse;
 import com.openexchange.testing.httpclient.models.FolderUpdateResponse;
 import com.openexchange.testing.httpclient.models.FoldersCleanUpResponse;
+import com.openexchange.testing.httpclient.models.InfoItemBody;
 import com.openexchange.testing.httpclient.models.InfoItemData;
 import com.openexchange.testing.httpclient.models.InfoItemListElement;
+import com.openexchange.testing.httpclient.models.InfoItemPermission;
 import com.openexchange.testing.httpclient.models.InfoItemResponse;
 import com.openexchange.testing.httpclient.models.InfoItemUpdateResponse;
 import com.openexchange.testing.httpclient.models.InfoItemsMovedResponse;
@@ -94,7 +99,7 @@ import com.openexchange.tools.io.IOTools;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class InfostoreApiClientTest extends AbstractAPIClientSession {
+public class InfostoreApiClientTest extends AbstractConfigAwareAPIClientSession {
 
     protected static final int[] virtualFolders = { FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID, FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID };
 
@@ -296,4 +301,39 @@ public class InfostoreApiClientTest extends AbstractAPIClientSession {
         List<List<String>> ret = (List<List<String>>)checkResponse(allInfoItems.getError(), allInfoItems.getErrorDesc(), allInfoItems.getData());
         Assert.assertTrue("The item is not present in the given folder", ret.stream().filter( l -> l.contains(itemId)).count() == 1);
     }
+
+    /**
+     * Updates the permissions of the document with the given id
+     *
+     * @param id The id of the document
+     * @param perms The new permissions
+     * @throws ApiException
+     */
+    protected void updatePermissions(String id, List<InfoItemPermission> perms) throws ApiException{
+        updatePermissions(id, perms, Optional.empty());
+    }
+
+    /**
+     *
+     * Updates the permissions of the document with the given id
+     *
+     * @param id The id of the document
+     * @param perms The new permissions
+     * @param errorCode The expected error code
+     * @throws ApiException
+     */
+    protected void updatePermissions(String id, List<InfoItemPermission> perms, Optional<String> errorCode) throws ApiException{
+        InfoItemData file = new InfoItemData();
+        file.setObjectPermissions(perms);
+        InfoItemBody body = new InfoItemBody();
+        body.file(file);
+        InfoItemUpdateResponse resp = infostoreApi.updateInfoItem(getSessionId(), id, timestamp, body, null);
+        if(errorCode.isPresent()) {
+            assertEquals(errorCode.get(), resp.getCode());
+            return;
+        }
+        assertNull(resp.getError());
+        assertNotNull(resp.getData());
+    }
+
 }

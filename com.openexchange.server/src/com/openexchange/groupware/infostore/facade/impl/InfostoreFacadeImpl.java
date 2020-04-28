@@ -159,6 +159,7 @@ import com.openexchange.groupware.infostore.utils.SetSwitch;
 import com.openexchange.groupware.infostore.validation.FilenamesMayNotContainSlashesValidator;
 import com.openexchange.groupware.infostore.validation.InvalidCharactersValidator;
 import com.openexchange.groupware.infostore.validation.ObjectPermissionValidator;
+import com.openexchange.groupware.infostore.validation.PermissionSizeValidator;
 import com.openexchange.groupware.infostore.validation.ValidationChain;
 import com.openexchange.groupware.infostore.webdav.EntityLockManager;
 import com.openexchange.groupware.infostore.webdav.EntityLockManagerImpl;
@@ -4107,7 +4108,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
      * @return The validation chain
      */
     private ValidationChain getValidationChain() {
-        return new ValidationChain(new InvalidCharactersValidator(), new FilenamesMayNotContainSlashesValidator(), new ObjectPermissionValidator(this));
+        return new ValidationChain(new InvalidCharactersValidator(), new FilenamesMayNotContainSlashesValidator(), new ObjectPermissionValidator(this), new PermissionSizeValidator());
     }
 
     private TimedResult<DocumentMetadata> getDocuments(Context context, final User user, ServerSession optSession, UserPermissionBits permissionBits, final long folderId, Metadata[] columns, Metadata sort, int order, int start, int end) throws OXException {

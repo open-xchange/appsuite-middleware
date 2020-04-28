@@ -134,4 +134,7 @@ public class OXFolderExceptionMessage implements LocalizableStrings {
 
     public static final String DUPLICATE_NAME_MSG = "There is already a folder named \"%1$s\". Please choose another name.";
 
+    // The folder contains too many permissions. Please reduce the number or use groups instead.
+    public static final String TOO_MANY_PERMISSIONS = "The folder contains too many permissions. Please reduce the number of permissions or use group permissions instead.";
+
 }
