@@ -43,7 +43,7 @@ local sessions = [
     title: 'Total',
     description: 'The number of total sessions.',
     target: {
-      expr: 'appsuite_sessions_total_count{client="all", instance=~"$instance"}',
+      expr: 'appsuite_sessions_total{client="all", instance=~"$instance"}',
       legendFormat: 'Total',
     },
     gridPos: { h: 4, w: 3, x: 0, y: 1 },
@@ -52,7 +52,7 @@ local sessions = [
     title: 'Active',
     description: 'The number of active sessions or in other words the number of sessions within the first two short term containers.',
     target: {
-      expr: 'appsuite_sessions_active_count{client="all", instance=~"$instance"}',
+      expr: 'appsuite_sessions_active_total{client="all", instance=~"$instance"}',
       legendFormat: 'Active',
     },
     gridPos: { h: 4, w: 3, x: 3, y: 1 },
@@ -61,7 +61,7 @@ local sessions = [
     title: 'Short Term',
     description: 'The number of sessions in the short term containers.',
     target: {
-      expr: 'appsuite_sessions_short_term_count{client="all", instance=~"$instance"}',
+      expr: 'appsuite_sessions_short_term_total{client="all", instance=~"$instance"}',
       legendFormat: 'Short Term',
     },
     gridPos: { h: 4, w: 3, x: 0, y: 5 },
@@ -70,7 +70,7 @@ local sessions = [
     title: 'Long Term',
     description: 'The number of sessions in the long term containers.',
     target: {
-      expr: 'appsuite_sessions_long_term_count{client="all", instance=~"$instance"}',
+      expr: 'appsuite_sessions_long_term_total{client="all", instance=~"$instance"}',
       legendFormat: 'Long Term',
     },
     gridPos: { h: 4, w: 3, x: 3, y: 5 },
@@ -80,12 +80,12 @@ local sessions = [
 local cacheRatio = [
   {
     title: 'Hit Ratio',
-    expr: 'sum(rate(appsuite_cache_hits_total{instance=~"$instance"}[$interval])) / (sum(rate(appsuite_cache_hits_total{instance=~"$instance"}[$interval])) + sum(rate(appsuite_cache_misses_total{instance=~"$instance"}[$interval])))',
+    expr: 'sum(rate(appsuite_jcs_cache_hits_total{instance=~"$instance"}[$interval])) / (sum(rate(appsuite_jcs_cache_hits_total{instance=~"$instance"}[$interval])) + sum(rate(appsuite_jcs_cache_misses_total{instance=~"$instance"}[$interval])))',
     gridPos: { h: 4, w: 3, x: 0, y: 17 },
   },
   {
     title: 'Miss Ratio',
-    expr: 'sum(rate(appsuite_cache_misses_total{instance=~"$instance"}[$interval])) / (sum(rate(appsuite_cache_hits_total{instance=~"$instance"}[$interval])) + sum(rate(appsuite_cache_misses_total{instance=~"$instance"}[$interval])))',
+    expr: 'sum(rate(appsuite_jcs_cache_misses_total{instance=~"$instance"}[$interval])) / (sum(rate(appsuite_jcs_cache_hits_total{instance=~"$instance"}[$interval])) + sum(rate(appsuite_jcs_cache_misses_total{instance=~"$instance"}[$interval])))',
     gridPos: { h: 4, w: 3, x: 0, y: 21 },
   },
 ];
@@ -176,14 +176,10 @@ local httpClientConnections = graphPanel.new(
 local threadPoolTasks = graphPanel.new(
   title='ThreadPool Tasks',
   datasource=grafana.default.datasource,
-  description='',
   fill=2,
   linewidth=2,
   decimals=0,
-  nullPointMode='null as zero',
   labelY1='Tasks/s',
-  legend_alignAsTable=true,
-  legend_rightSide=true,
   min='0',
 ).addTargets(
   [
@@ -205,14 +201,10 @@ local threadPoolTasks = graphPanel.new(
 local threadPool = graphPanel.new(
   title='ThreadPool',
   datasource=grafana.default.datasource,
-  description='',
   decimals=0,
   fill=2,
   linewidth=2,
   labelY1='Threads',
-  nullPointMode='null as zero',
-  legend_alignAsTable=true,
-  legend_rightSide=true,
   min='0',
 ).addTargets(
   [
@@ -267,8 +259,8 @@ local httpApiRequestsPercentilesByRequest = graphPanel.new(
 
 local httpApiRequestsPerSecond = graphPanel.new(
   title='Requests (per-second)',
-  description='',
   datasource=grafana.default.datasource,
+  decimals=0,
   aliasColors={
     KO: 'dark-red',
     OK: 'dark-green',
@@ -298,14 +290,13 @@ local httpApiRequestsPerSecond = graphPanel.new(
 
 local restApiRequestsPerSecond = graphPanel.new(
   title='Requests (per-second)',
-  description='',
   datasource=grafana.default.datasource,
+  decimals=0,
   aliasColors={
     KO: 'dark-red',
     OK: 'dark-green',
     Total: 'dark-yellow',
   },
-  nullPointMode='null as zero',
   fill=2,
   linewidth=2,
   min='0',
@@ -372,6 +363,7 @@ local circuitBreakerDenials = graphPanel.new(
 local imapRequestRate = graphPanel.new(
   title='Requests (per-second)',
   datasource=grafana.default.datasource,
+  decimals=0,
   fill=2,
   linewidth=2,
   aliasColors={
@@ -424,7 +416,6 @@ local circuitBreakerIMAPStatus = table.new(
 local soapApiResponsePercentiles = graphPanel.new(
   title='Response Time Percentiles',
   datasource=grafana.default.datasource,
-  description='',
   aliasColors={
     max: 'dark-red',
   },
@@ -439,15 +430,13 @@ local soapApiResponsePercentiles = graphPanel.new(
 
 local soapApiRequestsPerSecond = graphPanel.new(
   title='Requests (per-second)',
-  description='',
   datasource=grafana.default.datasource,
-  //decimals=0,
+  decimals=0,
   aliasColors={
     KO: 'dark-red',
     OK: 'dark-green',
     Total: 'dark-yellow',
   },
-  nullPointMode='null as zero',
   fill=2,
   linewidth=2,
   min='0',
@@ -473,7 +462,6 @@ local soapApiRequestsPerSecond = graphPanel.new(
 local webdavApiResponsePercentiles = graphPanel.new(
   title='Response Time Percentiles $davinterface',
   datasource=grafana.default.datasource,
-  description='',
   aliasColors={
     max: 'dark-red',
   },
@@ -490,9 +478,8 @@ local webdavApiResponsePercentiles = graphPanel.new(
 
 local webdavApiRequestsPerSecond = graphPanel.new(
   title='Requests (per-second)',
-  description='',
   datasource=grafana.default.datasource,
-  //decimals=0,
+  decimals=0,
   aliasColors={
     KO: 'dark-red',
     OK: 'dark-green',
@@ -521,7 +508,7 @@ local webdavApiRequestsPerSecond = graphPanel.new(
 );
 
 local dbTimeoutRate = singlestat.new(
-  title='Timeout Rate',
+  title='Timeout Error Rate',
   datasource=grafana.default.datasource,
   decimals=0,
   timeFrom='1h',
@@ -634,7 +621,6 @@ local configDBTimes = graphPanel.new(
   datasource=grafana.default.datasource,
   fill=2,
   linewidth=2,
-  description='',
   decimals=0,
   min='0',
   format='s',
@@ -682,10 +668,10 @@ local userDBWriteConnections = graphPanel.new(
     ),
     prometheus.target(
       'sum(appsuite_mysql_connections_max{class="userdb",instance=~"$instance",type="write"}) by (pool)',
-      legendFormat='Max',
+      legendFormat='Max (Pool {{pool}})',
     ),
   ]
-).addSeriesOverride({ alias: 'Max', fill: 0 },);
+).addSeriesOverride({ alias: '/Max.*/', fill: 0 },);
 
 local userDBReadConnections = graphPanel.new(
   title='UserDB Read Connections',
@@ -714,15 +700,14 @@ local userDBReadConnections = graphPanel.new(
     ),
     prometheus.target(
       'sum(appsuite_mysql_connections_max{class="userdb",instance=~"$instance",type="read"}) by (pool)',
-      legendFormat='Max',
+      legendFormat='Max (Pool {{pool}})',
     ),
   ]
-).addSeriesOverride({ alias: 'Max', fill: 0 },);
+).addSeriesOverride({ alias: '/Max.*/', fill: 0 },);
 
 local userDBTimes = graphPanel.new(
   title='UserDB Pool $dbpool Times',
   datasource=grafana.default.datasource,
-  description='',
   decimals=0,
   fill=2,
   linewidth=2,
@@ -810,7 +795,7 @@ grafana.newDashboard(
         for obj in sessions
       ] + [
         prometheus.target(
-          expr='appsuite_sessions_max_count{client="all", instance=~"$instance"}',
+          expr='appsuite_sessions_max{client="all", instance=~"$instance"}',
           legendFormat='Max',
         ),
       ]
@@ -862,11 +847,11 @@ grafana.newDashboard(
     ).addTargets(
       [
         prometheus.target(
-          expr='sum(rate(appsuite_cache_hits_total{instance=~"$instance"}[$interval])) / (sum(rate(appsuite_cache_hits_total{instance=~"$instance"}[$interval])) + sum(rate(appsuite_cache_misses_total{instance=~"$instance"}[$interval])))',
+          expr='sum(rate(appsuite_jcs_cache_hits_total{instance=~"$instance"}[$interval])) / (sum(rate(appsuite_jcs_cache_hits_total{instance=~"$instance"}[$interval])) + sum(rate(appsuite_jcs_cache_misses_total{instance=~"$instance"}[$interval])))',
           legendFormat='Hit Ratio',
         ),
         prometheus.target(
-          expr='sum(rate(appsuite_cache_misses_total{instance=~"$instance"}[$interval])) / (sum(rate(appsuite_cache_hits_total{instance=~"$instance"}[$interval])) + sum(rate(appsuite_cache_misses_total{instance=~"$instance"}[$interval])))',
+          expr='sum(rate(appsuite_jcs_cache_misses_total{instance=~"$instance"}[$interval])) / (sum(rate(appsuite_jcs_cache_hits_total{instance=~"$instance"}[$interval])) + sum(rate(appsuite_jcs_cache_misses_total{instance=~"$instance"}[$interval])))',
           legendFormat='Miss Ratio',
         ),
       ]
@@ -880,11 +865,11 @@ grafana.newDashboard(
     ).addTargets(
       [
         prometheus.target(
-          expr='sum(rate(appsuite_cache_puts_total{instance=~"$instance"}[$interval]))',
+          expr='sum(rate(appsuite_jcs_cache_puts_total{instance=~"$instance"}[$interval]))',
           legendFormat='Puts',
         ),
         prometheus.target(
-          expr='sum(rate(appsuite_cache_removals_total{instance=~"$instance"}[$interval]))',
+          expr='sum(rate(appsuite_jcs_cache_removals_total{instance=~"$instance"}[$interval]))',
           legendFormat='Removals',
         ),
       ]
@@ -906,7 +891,7 @@ grafana.newDashboard(
       legend_values=true,
     ).addTarget(
       prometheus.target(
-        expr='topk(5,avg_over_time(appsuite_cache_elements_total{instance=~"$instance"}[${__range_s}s]))',
+        expr='topk(5,avg_over_time(appsuite_jcs_cache_elements_total{instance=~"$instance"}[${__range_s}s]))',
         legendFormat='{{region}}',
       )
     ) { gridPos: { h: 8, w: 24, x: 0, y: 25 } },
@@ -915,9 +900,9 @@ grafana.newDashboard(
     row.new(
       title='DB Pool'
     ) + { gridPos: { h: 1, w: 24, x: 0, y: 33 } },
-    dbTimeoutRate { gridPos: { h: 4, w: 3, x: 0, y: 34 } },
-    configDBReadConnections { gridPos: { h: 8, w: 9, x: 3, y: 34 } },
-    configDBWriteConnections { gridPos: { h: 8, w: 9, x: 12, y: 34 } },
+    dbTimeoutRate { gridPos: { h: 8, w: 6, x: 0, y: 34 } },
+    configDBReadConnections { gridPos: { h: 8, w: 9, x: 6, y: 34 } },
+    configDBWriteConnections { gridPos: { h: 8, w: 9, x: 15, y: 34 } },
     userDBReadConnections { gridPos: { h: 8, w: 12, x: 0, y: 50 } },
     userDBWriteConnections { gridPos: { h: 8, w: 12, x: 12, y: 50 } },
   ] + [

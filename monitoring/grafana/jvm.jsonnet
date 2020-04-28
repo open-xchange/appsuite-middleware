@@ -147,7 +147,7 @@ local gcDurationCount = graphPanel.new(
 
 grafana.newDashboard(
   title='JVM',
-  tags=['java'],
+  tags=['Java'],
   metric='jvm_info'
 ).addPanels(
   [
