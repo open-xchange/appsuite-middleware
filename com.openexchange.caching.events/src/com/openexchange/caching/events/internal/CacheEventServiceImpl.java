@@ -52,6 +52,7 @@ package com.openexchange.caching.events.internal;
 import static com.openexchange.caching.events.internal.StampedCacheEvent.POISON;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -93,12 +94,12 @@ public final class CacheEventServiceImpl implements CacheEventService, Reloadabl
      * @param event The event
      * @param fromRemote Whether remotely or locally generated
      * @param threadPool The thread pool to use or <code>null</code>
-     * @param metricHandler The metric handler
+     * @param optionalMetricHandler The optional metric handler
      * @throws Exception If notification fails
      */
-    static void notify(List<CacheListener> listeners, Object sender, CacheEvent event, boolean fromRemote, ThreadPoolService threadPool, CacheEventMetricHandler metricHandler) throws Exception {
+    static void notify(List<CacheListener> listeners, Object sender, CacheEvent event, boolean fromRemote, ThreadPoolService threadPool, Optional<CacheEventMetricHandler> optionalMetricHandler) throws Exception {
         // Notify asynchronously via executor service, falling back to sequential delivery
-        Task<Void> notificationTask = new ListenerNotificationTask(fromRemote, event, listeners, sender, metricHandler);
+        Task<Void> notificationTask = new ListenerNotificationTask(fromRemote, event, listeners, sender, optionalMetricHandler);
         if (null == threadPool) {
             ThreadPools.execute(notificationTask);
         } else {
@@ -202,7 +203,7 @@ public final class CacheEventServiceImpl implements CacheEventService, Reloadabl
                 // event and thus re-distributed remotely again
                 try {
                     ThreadPoolService threadPool = threadPoolRef.get();
-                    CacheEventServiceImpl.notify(listenersToNotify, sender, event, fromRemote, threadPool, metricHandler);
+                    CacheEventServiceImpl.notify(listenersToNotify, sender, event, fromRemote, threadPool, Optional.empty());
                 } catch (Exception e) {
                     LOG.warn("Failed to notify cache listeners about {} event: {}", fromRemote ? "remote" : "local", event, e);
                 }
@@ -292,7 +293,7 @@ public final class CacheEventServiceImpl implements CacheEventService, Reloadabl
                     // Deliver events
                     ThreadPoolService threadPool = threadPoolRef.get();
                     for (StampedCacheEvent sce : drained) {
-                        CacheEventServiceImpl.notify(sce.listeners, sce.sender, sce.event, sce.fromRemote, threadPool, metricHandler);
+                        CacheEventServiceImpl.notify(sce.listeners, sce.sender, sce.event, sce.fromRemote, threadPool, Optional.of(metricHandler));
                     }
 
                     // Terminate?
@@ -316,18 +317,18 @@ public final class CacheEventServiceImpl implements CacheEventService, Reloadabl
         private final CacheEvent event;
         private final List<CacheListener> listeners;
         private final Object sender;
-        private final CacheEventMetricHandler metricHandler;
+        private final Optional<CacheEventMetricHandler> optionalMetricHandler;
 
         /**
          * Initializes a new {@link ListenerNotificationTask}.
          */
-        ListenerNotificationTask(boolean fromRemote, CacheEvent event, List<CacheListener> listeners, Object sender, CacheEventMetricHandler metricHandler) {
+        ListenerNotificationTask(boolean fromRemote, CacheEvent event, List<CacheListener> listeners, Object sender, Optional<CacheEventMetricHandler> optionalMetricHandler) {
             super();
             this.fromRemote = fromRemote;
             this.event = event;
             this.listeners = listeners;
             this.sender = sender;
-            this.metricHandler = metricHandler;
+            this.optionalMetricHandler = optionalMetricHandler;
         }
 
         @Override
@@ -343,7 +344,9 @@ public final class CacheEventServiceImpl implements CacheEventService, Reloadabl
                 }
             }
             // Increment delivered events
-            metricHandler.incrementDeliveredEvents(event.getRegion());
+            if (optionalMetricHandler.isPresent()) {
+                optionalMetricHandler.get().incrementDeliveredEvents(event.getRegion());
+            }
             return null;
         }
     }
