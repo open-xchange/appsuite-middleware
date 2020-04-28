@@ -1543,7 +1543,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
             final int retval = oxu.create(ctx, usr, access);
             usr.setId(Integer.valueOf(retval));
-            final ArrayList<OXUserPluginInterface> interfacelist = new ArrayList<OXUserPluginInterface>();
+            final List<OXUserPluginInterface> interfacelist = new ArrayList<OXUserPluginInterface>();
 
             // Trigger plugin extensions
             {

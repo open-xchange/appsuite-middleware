@@ -1787,8 +1787,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
     private String buildQuery(String search_pattern, boolean ignoreCase, boolean includeGuests, boolean excludeUsers) {
         StringBuilder sb = new StringBuilder();
-        if (!includeGuests) {
-            sb.append("SELECT con.userid FROM prg_contacts con JOIN login2user lu ON con.userid = lu.id AND con.cid = lu.cid ").append("JOIN user us ON con.userid = us.id AND us.cid = con.cid ").append("WHERE con.cid = ?");
+        if (includeGuests) {
+            sb.append("SELECT us.id FROM user us LEFT JOIN login2user lu ON us.id = lu.id AND us.cid = lu.cid ");
+            sb.append("LEFT JOIN prg_contacts con ON us.id = con.userid AND us.cid = con.cid WHERE us.cid = ?");
             if (excludeUsers) {
                 sb.append(" AND us.guestCreatedBy > 0");
             }
@@ -1800,15 +1801,17 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 }
             }
         } else {
-            sb.append("SELECT us.id FROM user us LEFT JOIN login2user lu ON us.id = lu.id AND us.cid = lu.cid ").append("LEFT JOIN prg_contacts con ON us.id = con.userid AND us.cid = con.cid WHERE us.cid = ?");
+            sb.append("SELECT con.userid FROM prg_contacts con JOIN login2user lu ON con.userid = lu.id AND con.cid = lu.cid ");
+            sb.append("JOIN user us ON con.userid = us.id AND us.cid = con.cid ");
+            sb.append("WHERE con.cid = ?");
             if (excludeUsers) {
                 sb.append(" AND us.guestCreatedBy > 0");
             }
             if (null != search_pattern && !"%".equals(search_pattern)) {
                 if (ignoreCase) {
-                    sb.append(" AND (lower(lu.uid) LIKE lower(?) ").append("OR lower(con.field01) LIKE lower(?))");
+                    sb.append(" AND (lower(lu.uid) LIKE lower(?) OR lower(con.field01) LIKE lower(?))");
                 } else {
-                    sb.append(" AND (lu.uid LIKE ? ").append("OR con.field01 LIKE ?)");
+                    sb.append(" AND (lu.uid LIKE ? OR con.field01 LIKE ?)");
                 }
             }
         }
@@ -1816,7 +1819,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     }
 
     /**
-     * read all gui related settings from the configtree
+     * read all gui related settings from the config-tree
      *
      * @param ctx
      * @param user
