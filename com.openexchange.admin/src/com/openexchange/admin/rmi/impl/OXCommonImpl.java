@@ -145,10 +145,20 @@ public abstract class OXCommonImpl {
      */
     protected void checkCapabilities(final Optional<Set<String>> capsToAdd, final Optional<Set<String>> capsToRemove) throws InvalidDataException {
         try {
-            if(capsToAdd.isPresent() == false && capsToRemove.isPresent() == false) {
-                return;
+            Set<String> capsToCheck;
+            if (capsToAdd.isPresent()) {
+                if (capsToRemove.isPresent()) {
+                    capsToCheck = Stream.concat(capsToAdd.get().stream(), capsToRemove.get().stream()).collect(Collectors.toSet());
+                } else {
+                    capsToCheck = capsToAdd.get();
+                }
+            } else {
+                if (capsToRemove.isPresent() == false) {
+                    // Nothing to do
+                    return;
+                }
+                capsToCheck = capsToRemove.get();
             }
-            Set<String> capsToCheck = capsToAdd.isPresent() ? capsToRemove.isPresent() ? Stream.concat(capsToAdd.get().stream(), capsToRemove.get().stream()).collect(Collectors.toSet()) : capsToAdd.get() : capsToRemove.get();
             AdminServiceRegistry.getInstance().getService(PermissionConfigurationChecker.class, true).checkCapabilities(capsToCheck);
         } catch (OXException e) {
             throw new InvalidDataException(e);
