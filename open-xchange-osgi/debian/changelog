@@ -1,3 +1,9 @@
+open-xchange-osgi (7.10.3-11) stable; urgency=medium
+
+  * Build for patch 2020-04-30 (5702)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 23 Apr 2020 06:56:09 +0000
+
 open-xchange-osgi (7.10.3-10) stable; urgency=medium
 
   * Build for patch 2020-04-02 (5692)
