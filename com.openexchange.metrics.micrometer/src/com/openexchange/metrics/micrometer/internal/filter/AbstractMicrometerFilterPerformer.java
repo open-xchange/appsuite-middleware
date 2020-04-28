@@ -55,6 +55,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
+import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.common.collect.ImmutableMap;
@@ -186,21 +187,6 @@ abstract class AbstractMicrometerFilterPerformer {
 
     ///////////////////////////////// HELPERS /////////////////////////////
 
-    private Query extractQuery(String query) {
-        LOG.debug("Query: {}", query);
-        int startIndex = query.indexOf("{") + 1;
-        int endIndex = query.indexOf("}");
-        if (startIndex < 0 || endIndex < 0 || endIndex < startIndex) {
-            // Invalid indexes
-            return null;
-        }
-        //Valid indexes, apply
-        String metricName = query.substring(0, startIndex - 1);
-        String filter = query.substring(startIndex, endIndex);
-        LOG.debug("Metric name: {}, Filter: {}", metricName, filter);
-        return new Query(metricName, filter);
-    }
-
     /**
      * Returns all properties that start with the specified prefix.
      *
@@ -226,35 +212,79 @@ abstract class AbstractMicrometerFilterPerformer {
      * @return <code>true</code> if all tags match the filter; <code>false</code> otherwise
      */
     private boolean matchTags(Meter.Id id, Query query) {
-        Map<String, String> filterMap = extractFilter(query.getFilter());
-        LOG.debug("Metric Tags: {}, Filter: {}", id.getTags(), filterMap);
+        LOG.debug("Metric Tags: {}, Filter: {}", id.getTags(), query.getFilterMap());
         if (false == id.getName().equals(query.getMetricName())) {
             return false;
         }
+        if (query.containsRegex()) {
+            return applyRegex(id, query);
+        }
         int matchCount = 0;
         for (Tag t : id.getTags()) {
-            if (filterMap.containsKey(t.getKey()) && filterMap.get(t.getKey()).equals(t.getValue())) {
+            if (query.getFilterMap().containsKey(t.getKey()) && query.getFilterMap().get(t.getKey()).equals(t.getValue())) {
                 matchCount++;
             }
         }
-        return matchCount == filterMap.size();
+        return matchCount == query.getFilterMap().size();
     }
 
     /**
-     * Extracts the filter map from the specified filter string
+     * Applies the regex to the specified metric
      *
-     * @param filter The filter string
-     * @return The filter map
+     * @param id The metric id
+     * @param query The query
+     * @return <code>true</code> if the regex matches at one of the tags; <code>false</code> otherwise
      */
-    private Map<String, String> extractFilter(String filter) {
-        Map<String, String> map = new HashMap<>();
-        List<String> list = Arrays.asList(Strings.splitByComma(filter));
-        for (String entry : list) {
-            String[] split = Strings.splitBy(entry, '=', true);
-            if (split.length == 2) {
-                map.put(split[0], split[1].replaceAll("\"", ""));
+    private boolean applyRegex(Meter.Id id, Query query) {
+        for (Tag t : id.getTags()) {
+            if (query.getFilterMap().containsKey(t.getKey())) {
+                String regex = query.getFilterMap().get(t.getKey());
+                return Pattern.compile(regex).matcher(t.getValue()).matches();
             }
         }
-        return map;
+        return false;
+    }
+
+    /**
+     * Extracts the query from the specified filter query string
+     *
+     * @param query The query string
+     * @return The Query or <code>null</code> if no query can be extracted
+     */
+    private Query extractQuery(String query) {
+        LOG.debug("Query: {}", query);
+        int startIndex = query.indexOf("{") + 1;
+        int endIndex = query.indexOf("}");
+        if (startIndex < 0 || endIndex < 0 || endIndex < startIndex) {
+            // Invalid indexes
+            return null;
+        }
+        //Valid indexes, apply
+        String metricName = query.substring(0, startIndex - 1);
+        String filter = query.substring(startIndex, endIndex);
+        LOG.debug("Metric name: {}, Filter: {}", metricName, filter);
+
+        Map<String, String> map = new HashMap<>(4);
+        List<String> list = Arrays.asList(Strings.splitByComma(filter));
+        int elements = 0;
+        for (String entry : list) {
+            String[] split = Strings.splitBy(entry, '=', true);
+            if (split.length != 2) {
+                continue;
+            }
+            if (false == split[1].startsWith("~")) {
+                map.put(split[0], split[1].replaceAll("\"", ""));
+                elements++;
+                continue;
+            }
+            if (elements == 0) {
+                // If the regex is the first element we encounter
+                // we extract it and ignore everything else
+                map.put(split[0], split[1].substring(1).replaceAll("\"", ""));
+                return new Query(metricName, map, true);
+            }
+            // Otherwise we ignore the regex in the middle
+        }
+        return new Query(metricName, map, false);
     }
 }

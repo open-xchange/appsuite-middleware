@@ -49,6 +49,8 @@
 
 package com.openexchange.metrics.micrometer.internal.filter;
 
+import java.util.Map;
+
 /**
  * {@link Query}
  *
@@ -58,18 +60,20 @@ package com.openexchange.metrics.micrometer.internal.filter;
 class Query {
 
     private final String metricName;
-    private final String filter;
+    private final Map<String, String> filterMap;
+    private final boolean containsRegex;
 
     /**
      * Initializes a new {@link Query}.
      * 
      * @param metricName The metric name
-     * @param filter The filter
+     * @param filterMap
      */
-    public Query(String metricName, String filter) {
+    public Query(String metricName, Map<String, String> filterMap, boolean containsRegex) {
         super();
         this.metricName = metricName;
-        this.filter = filter;
+        this.filterMap = filterMap;
+        this.containsRegex = containsRegex;
     }
 
     /**
@@ -82,12 +86,20 @@ class Query {
     }
 
     /**
-     * Gets the filter
+     * Gets the filterMap
      *
-     * @return The filter
+     * @return The filterMap
      */
-    public String getFilter() {
-        return filter;
+    public Map<String, String> getFilterMap() {
+        return filterMap;
     }
 
+    /**
+     * Gets the containsRegex
+     *
+     * @return The containsRegex
+     */
+    public boolean containsRegex() {
+        return containsRegex;
+    }
 }
