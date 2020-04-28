@@ -56,6 +56,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.common.collect.ImmutableMap;
@@ -95,7 +96,7 @@ abstract class AbstractMicrometerFilterPerformer {
 
             @Override
             public DistributionStatisticConfig configure(Meter.Id id, DistributionStatisticConfig config) {
-                LOG.debug("Applying histogram meter filter for '{}'", id);
+                LOG.debug("Applying filter for '{}'", id);
                 String key = entry.getKey();
                 String metricId = extractMetricId(key, property);
                 String query = QueryMetricMicrometerFilterPerformer.queryRegistry.get(metricId);
@@ -212,18 +213,22 @@ abstract class AbstractMicrometerFilterPerformer {
      * @return <code>true</code> if all tags match the filter; <code>false</code> otherwise
      */
     private boolean matchTags(Meter.Id id, Query query) {
-        LOG.debug("Metric Tags: {}, Filter: {}", id.getTags(), query.getFilterMap());
+        LOG.debug("Metric: {}, Query: {}", id, query);
         if (false == id.getName().equals(query.getMetricName())) {
             return false;
         }
-        if (query.containsRegex()) {
-            return applyRegex(id, query);
-        }
         int matchCount = 0;
         for (Tag t : id.getTags()) {
-            if (query.getFilterMap().containsKey(t.getKey()) && query.getFilterMap().get(t.getKey()).equals(t.getValue())) {
-                matchCount++;
+            if (false == query.getFilterMap().containsKey(t.getKey())) {
+                continue;
             }
+            Filter filter = query.getFilterMap().get(t.getKey());
+            if (false == filter.isRegex() && filter.getValue().equals(t.getValue())) {
+                matchCount++;
+                continue;
+
+            }
+            matchCount += applyRegex(id, t, filter) ? 1 : 0;
         }
         return matchCount == query.getFilterMap().size();
     }
@@ -235,14 +240,15 @@ abstract class AbstractMicrometerFilterPerformer {
      * @param query The query
      * @return <code>true</code> if the regex matches at one of the tags; <code>false</code> otherwise
      */
-    private boolean applyRegex(Meter.Id id, Query query) {
-        for (Tag t : id.getTags()) {
-            if (query.getFilterMap().containsKey(t.getKey())) {
-                String regex = query.getFilterMap().get(t.getKey());
-                return Pattern.compile(regex).matcher(t.getValue()).matches();
-            }
+    private boolean applyRegex(Meter.Id id, Tag tag, Filter filter) {
+        String regex = filter.getValue();
+        try {
+            boolean match = Pattern.compile(regex).matcher(tag.getValue()).matches();
+            return filter.isRegexNegated() ? !match : match;
+        } catch (PatternSyntaxException e) {
+            LOG.error("The specified regex '{}' for metric '{}' is invalid.", regex, id, e);
+            return false;
         }
-        return false;
     }
 
     /**
@@ -252,7 +258,7 @@ abstract class AbstractMicrometerFilterPerformer {
      * @return The Query or <code>null</code> if no query can be extracted
      */
     private Query extractQuery(String query) {
-        LOG.debug("Query: {}", query);
+        LOG.trace("Extracting query: {}", query);
         int startIndex = query.indexOf("{") + 1;
         int endIndex = query.indexOf("}");
         if (startIndex < 0 || endIndex < 0 || endIndex < startIndex) {
@@ -262,29 +268,30 @@ abstract class AbstractMicrometerFilterPerformer {
         //Valid indexes, apply
         String metricName = query.substring(0, startIndex - 1);
         String filter = query.substring(startIndex, endIndex);
-        LOG.debug("Metric name: {}, Filter: {}", metricName, filter);
+        LOG.trace("Extracted --> Metric name: {}, Filter: {}", metricName, filter);
 
-        Map<String, String> map = new HashMap<>(4);
+        Map<String, Filter> map = new HashMap<>(4);
         List<String> list = Arrays.asList(Strings.splitByComma(filter));
-        int elements = 0;
         for (String entry : list) {
+            // Negated regex
+            if (entry.contains("!~")) {
+                String[] s = entry.split("!~");
+                if (s.length == 2) {
+                    map.put(s[0], new Filter(s[1].replaceAll("\"", ""), true, true));
+                    continue;
+                }
+            }
+            // Rest
             String[] split = Strings.splitBy(entry, '=', true);
             if (split.length != 2) {
                 continue;
             }
             if (false == split[1].startsWith("~")) {
-                map.put(split[0], split[1].replaceAll("\"", ""));
-                elements++;
+                map.put(split[0], new Filter(split[1].replaceAll("\"", ""), false, false));
                 continue;
             }
-            if (elements == 0) {
-                // If the regex is the first element we encounter
-                // we extract it and ignore everything else
-                map.put(split[0], split[1].substring(1).replaceAll("\"", ""));
-                return new Query(metricName, map, true);
-            }
-            // Otherwise we ignore the regex in the middle
+            map.put(split[0], new Filter(split[1].substring(1).replaceAll("\"", ""), true, false));
         }
-        return new Query(metricName, map, false);
+        return new Query(metricName, map);
     }
 }

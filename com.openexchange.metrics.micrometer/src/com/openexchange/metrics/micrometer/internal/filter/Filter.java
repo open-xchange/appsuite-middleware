@@ -49,53 +49,63 @@
 
 package com.openexchange.metrics.micrometer.internal.filter;
 
-import java.util.Map;
-
 /**
- * {@link Query}
+ * {@link Filter}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.4
  */
-class Query {
+class Filter {
 
-    private final String metricName;
-    private final Map<String, Filter> filterMap;
+    private final String value;
+    private final boolean isRegex;
+    private final boolean negatedRegex;
 
     /**
-     * Initializes a new {@link Query}.
+     * Initializes a new {@link Filter}.
      * 
-     * @param metricName The metric name
-     * @param filterMap The map with all the filters of the query
+     * @param value The filter value
+     * @param isRegex whether the filter is a regex
+     * @param negatedRegex whether the contained regex should be negated
      */
-    public Query(String metricName, Map<String, Filter> filterMap) {
+    public Filter(String value, boolean isRegex, boolean negatedRegex) {
         super();
-        this.metricName = metricName;
-        this.filterMap = filterMap;
+        this.value = value;
+        this.isRegex = isRegex;
+        this.negatedRegex = negatedRegex;
     }
 
     /**
-     * Gets the metricName
+     * Gets the filter value
      *
-     * @return The metricName
+     * @return The filter value
      */
-    public String getMetricName() {
-        return metricName;
+    public String getValue() {
+        return value;
     }
 
     /**
-     * Gets the filterMap
+     * Returns whether the filter contains a regex
      *
-     * @return The filterMap
+     * @return <code>true</code> if the filter is a regex; <code>false</code> otherwise
      */
-    public Map<String, Filter> getFilterMap() {
-        return filterMap;
+    public boolean isRegex() {
+        return isRegex;
+    }
+
+    /**
+     * Gets the negateRegex
+     *
+     * @return The negateRegex
+     */
+    public boolean isRegexNegated() {
+        return negatedRegex;
     }
 
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("Query [metricName=").append(metricName).append(", filterMap=").append(filterMap).append("]");
+        builder.append("Filter [value=").append(value).append(", isRegex=").append(isRegex).append(", negatedRegex=").append(negatedRegex).append("]");
         return builder.toString();
     }
 }
