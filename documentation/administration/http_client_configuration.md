@@ -47,7 +47,7 @@ To make those problematically defaults visible, they got documented [here](https
 
 Further previous version of the Open Xchange Server have already properties configuring HTTP clients. 
 Just to given an example, the configuration for the iCAL feed feature can be found [here](https://documentation.open-xchange.com/components/middleware/config/latest/#mode=tags&tag=ICal%20Calendar%20Provider). 
-These properties will stay untouched and will overwrite the defaults set with {{com.openenexchange.httpclient.*}}, like described above, too.
+These properties will stay untouched and will overwrite the defaults set with `com.openenexchange.httpclient.*`, like described above, too.
 
 ## Level 3 - Client specific configuration
 
