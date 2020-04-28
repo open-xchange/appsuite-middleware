@@ -281,6 +281,11 @@ public class LocalReportService extends AbstractReportService {
         } catch (SecurityException e) {
             LOG.warn("Java version cannot be read for report: {}", e.getMessage());
         }
+        try {
+            report.setJavaVendor(System.getProperty("java.vendor"));
+        } catch (SecurityException e) {
+            LOG.warn("Java vendor cannot be read for report: {}", e.getMessage());
+        }
 
         report.setDistribution(ReportInformation.getDistributionName());
 
