@@ -98,3 +98,13 @@ properties:
       file: micrometer.properties
       packageName: open-xchange-core
       tags: ["Micrometer", "Metrics"]
+    - key: com.openexchange.metrics.micrometer.query.[PSEUDO_NAME]
+      description: |
+        Defines a query which can further filter all metrics by tags. The 'PSEUDO_NAME' is then used to access all 'enable' and 'distribution.*' properties (it replaces the '<METRIC_NAME>').
+      defaultValue: 
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: false
+      file: micrometer.properties
+      packageName: open-xchange-core
+      tags: ["Micrometer", "Metrics"]
