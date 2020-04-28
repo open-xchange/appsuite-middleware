@@ -631,7 +631,7 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
             LOGGER.error("Unable to reload HTTP client for {}", clientId, e);
             return false;
         } finally {
-            if(close) {
+            if (close) {
                 Streams.close(ccm, newHttpClient);
             }
         }

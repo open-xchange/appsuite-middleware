@@ -155,7 +155,7 @@ public class OwnCloudFileAccess extends AbstractWebDAVFileAccess implements File
     @Override
     protected Set<QName> getPropertiesToQuery(Collection<Field> requestedFields) {
         Set<QName> props = super.getPropertiesToQuery(requestedFields);
-        if(requestedFields == null || requestedFields.contains(Field.COLOR_LABEL)) {
+        if (requestedFields == null || requestedFields.contains(Field.COLOR_LABEL)) {
             props.add(OC_FAVORITE);
         }
         props.add(OC_SHARE_TYPES);
@@ -234,7 +234,7 @@ public class OwnCloudFileAccess extends AbstractWebDAVFileAccess implements File
         WebDAVFile webDAVFile = super.getWebDAVFile(resource);
         if (getRestAccess().isPresent()) {
             Optional<OwnCloudEntityResolver> resolver = getResolver();
-            if(resolver.isPresent()) {
+            if (resolver.isPresent()) {
                 String path = resource.getHref().substring(rootPath.toURI().toString().length());
                 List<FileStorageObjectPermission> perms = OwnCloudPermissionsUtil.getPermissions(path, resource, getRestAccess().get(), resolver.get());
                 webDAVFile.setObjectPermissions(perms);
@@ -408,14 +408,14 @@ public class OwnCloudFileAccess extends AbstractWebDAVFileAccess implements File
     @Override
     public SearchIterator<File> search(String pattern, List<Field> fields, String folderId, boolean includeSubfolders, Field sort, SortDirection order, int start, int end) throws OXException {
         Optional<OwnCloudRestClient> rest = getRestAccess();
-        if(rest.isPresent()) {
+        if (rest.isPresent()) {
             int min = rest.get().getCapabilities().getSearchMinLength();
-            if(min > pattern.length()) {
+            if (min > pattern.length()) {
                 throw FileStorageExceptionCodes.PATTERN_NEEDS_MORE_CHARACTERS.create(I(min));
             }
         }
 
-        if(isRoot(folderId) == false) {
+        if (isRoot(folderId) == false) {
             return super.search(pattern, fields, folderId, includeSubfolders, sort, order, start, end);
         }
         Set<QName> props = getPropertiesToQuery(fields);
@@ -431,13 +431,13 @@ public class OwnCloudFileAccess extends AbstractWebDAVFileAccess implements File
      * @return A list of files
      */
     protected List<File> convertToFiles(List<Response> responses) {
-        if(responses == null || responses.isEmpty()) {
+        if (responses == null || responses.isEmpty()) {
             return Collections.emptyList();
         }
         List<File> result = new ArrayList<>();
         for(Response resp: responses) {
             Optional<Propstat> propstat = resp.getPropstat();
-            if(propstat.isPresent() && propstat.get().getFile().get().isCollection() == false) {
+            if (propstat.isPresent() && propstat.get().getFile().get().isCollection() == false) {
                 result.add(convertToOwnCloudFile(resp.getHref(), propstat.get().getFile().get()));
             }
         }
@@ -461,7 +461,7 @@ public class OwnCloudFileAccess extends AbstractWebDAVFileAccess implements File
         webdavfile.setNumberOfVersions(-1);
         webdavfile.setLastModified(file.getLastModified());
         webdavfile.setEtag(file.getEtag());
-        if(file.getSize() != null) {
+        if (file.getSize() != null) {
             webdavfile.setFileSize(file.getSize().intValue());
         }
         return new OwnCloudFile(webdavfile, file.getFileId(), file.getEtag());
@@ -469,7 +469,7 @@ public class OwnCloudFileAccess extends AbstractWebDAVFileAccess implements File
 
     @Override
     public InputStream getThumbnailStream(String folderId, String id, String version) throws OXException {
-        if(version == CURRENT_VERSION) {
+        if (version == CURRENT_VERSION) {
             WebDAVPath path = getWebDAVPath(folderId, id);
             return client.get(addParameter(path.toString(), false, Optional.empty()), null);
         }
@@ -486,7 +486,7 @@ public class OwnCloudFileAccess extends AbstractWebDAVFileAccess implements File
      */
     private String addParameter(String path, boolean keepAspectRatio, Optional<String> etag) {
         StringBuilder b = new StringBuilder(path);
-        if(etag.isPresent()) {
+        if (etag.isPresent()) {
             b.append("?c=").append(etag);
         } else {
             b.append("?");

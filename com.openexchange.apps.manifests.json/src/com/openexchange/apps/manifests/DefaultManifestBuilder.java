@@ -108,7 +108,7 @@ public class DefaultManifestBuilder implements ManifestBuilder {
         // Any contributors?
         boolean noContributors = false;
         List<ManifestContributor> contributors = Collections.emptyList();
-        if(manifestContributors != null) {
+        if (manifestContributors != null) {
             contributors = manifestContributors.getServiceList();
             noContributors = contributors.isEmpty();
         }

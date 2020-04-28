@@ -998,7 +998,7 @@ public abstract class AbstractCapabilityService implements CapabilityService, Re
                                     deniedCapabilities.add(getCapability(name));
                                 } else {
                                     String name = ('+' == firstChar) ? permissionModifier.substring(1) : permissionModifier;
-                                    if(isLegal(name, userId, contextId) == false) {
+                                    if (isLegal(name, userId, contextId) == false) {
                                         continue;
                                     }
                                     grantedCapabilities.add(getCapability(name));
@@ -1020,7 +1020,7 @@ public abstract class AbstractCapabilityService implements CapabilityService, Re
                         }
                         boolean value = Boolean.parseBoolean(configProperty.get());
                         String name = toLowerCase(propName.substring(28));
-                        if(isLegal(name, userId, contextId) == false) {
+                        if (isLegal(name, userId, contextId) == false) {
                             continue;
                         }
                         if (value) {
@@ -1068,14 +1068,14 @@ public abstract class AbstractCapabilityService implements CapabilityService, Re
                         final char firstChar = sCap.charAt(0);
                         if ('-' == firstChar) {
                             final String name = toLowerCase(sCap.substring(1));
-                            if(isLegal(name, userId, contextId) == false) {
+                            if (isLegal(name, userId, contextId) == false) {
                                 continue;
                             }
                             set.remove(name);
                             removees.add(name);
                         } else {
                             String name = ('+' == firstChar) ? sCap.substring(1) : sCap;
-                            if(isLegal(name, userId, contextId) == false) {
+                            if (isLegal(name, userId, contextId) == false) {
                                 continue;
                             }
                             set.add(name);
@@ -1089,14 +1089,14 @@ public abstract class AbstractCapabilityService implements CapabilityService, Re
                             final char firstChar = sCap.charAt(0);
                             if ('-' == firstChar) {
                                 final String name = toLowerCase(sCap.substring(1));
-                                if(isLegal(name, userId, contextId) == false) {
+                                if (isLegal(name, userId, contextId) == false) {
                                     continue;
                                 }
                                 set.remove(name);
                                 removees.add(name);
                             } else {
                                 String name = ('+' == firstChar) ? sCap.substring(1) : sCap;
-                                if(isLegal(name, userId, contextId) == false) {
+                                if (isLegal(name, userId, contextId) == false) {
                                     continue;
                                 }
                                 set.add(name);

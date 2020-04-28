@@ -96,7 +96,7 @@ public abstract class AbstractMailTransportProvider implements TransportProvider
         saveChangesSafe(serviceLookup.getOptionalService(HostnameService.class), mime, session.getContextId(), session.getUserId());
         MailTransport transport;
         com.openexchange.mail.transport.TransportProvider provider = TransportProviderRegistry.getTransportProvider("smtp");
-        if(preferNoReplyAccount(session)) {
+        if (preferNoReplyAccount(session)) {
             transport = provider.createNewNoReplyTransport(session.getContextId(), false);
         } else {
             transport = provider.createNewMailTransport(session);

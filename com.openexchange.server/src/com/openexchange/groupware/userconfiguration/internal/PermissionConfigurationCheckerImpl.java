@@ -179,7 +179,7 @@ public class PermissionConfigurationCheckerImpl implements Reloadable, Permissio
      */
     private void check(ConfigurationService configService) throws OXException {
         Map<String, String> props = configService.getProperties((n, v) -> ILLEGAL_PROPERTIES.contains(n));
-        if(props.isEmpty() == false) {
+        if (props.isEmpty() == false) {
             props.forEach((name, v) -> LOG.error("Permissions must not be defined as properties. Please remove '{}'", name));
         }
 

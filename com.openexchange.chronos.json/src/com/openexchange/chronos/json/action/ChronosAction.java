@@ -160,7 +160,7 @@ public abstract class ChronosAction extends AbstractChronosAction {
         String timezoneId = requestData.getParameter("timezone");
         if (Strings.isEmpty(timezoneId)) {
             ServerSession session = requestData.getSession();
-            if( session != null) {
+            if ( session != null) {
                 timezoneId = session.getUser().getTimeZone();
             }
         }

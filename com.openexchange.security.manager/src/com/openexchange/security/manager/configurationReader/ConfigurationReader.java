@@ -240,7 +240,7 @@ public class ConfigurationReader {
             properties = new HashMap<String, String>();
             Optional<String> f = providerRef.get().values().stream().map((p) -> p.getFolder(toAdd.getPath())).filter((folder) -> folder.isPresent()).map((folder) -> folder.get()).findFirst();
             Optional<String> opt = Optional.ofNullable(f.orElseGet(() -> configService.getProperty(toAdd.getPath())));
-            if(opt.isPresent()) {
+            if (opt.isPresent()) {
                 properties.put(toAdd.getPath(), opt.get());
             } else {
                 missing.put(toAdd.getPath(), toAdd);
@@ -283,18 +283,18 @@ public class ConfigurationReader {
      * @return An optional list of new {@link FolderPermission}s
      */
     public Optional<List<FolderPermission>> checkProvider(String[] props, SecurityManagerPropertyProvider provider) {
-        if(missing.isEmpty()) {
+        if (missing.isEmpty()) {
             return Optional.empty();
         }
 
         List<FolderPermission> permissions = new ArrayList<>();
         for(String prop : props) {
-            if(missing.containsKey(prop) == false) {
+            if (missing.containsKey(prop) == false) {
                 continue;
             }
             SecurityAddition add = missing.get(prop);
             Optional<String> opt = provider.getFolder(add.getPath());
-            if(opt.isPresent() == false) {
+            if (opt.isPresent() == false) {
                 continue;
             }
             String directory = opt.get();

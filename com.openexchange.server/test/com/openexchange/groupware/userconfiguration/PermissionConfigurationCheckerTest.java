@@ -109,11 +109,11 @@ public class PermissionConfigurationCheckerTest {
         map.put("com.openexchange.capability.contacts", "true");
         try {
             checker.checkAttributes(map);
-            if(!config) {
+            if (!config) {
                 fail();
             }
         } catch (@SuppressWarnings("unused") OXException e) {
-            if(config) {
+            if (config) {
                 fail();
             }
         }
@@ -129,11 +129,11 @@ public class PermissionConfigurationCheckerTest {
 
         try {
             checker.checkCapabilities(Collections.singleton("infostore"));
-            if(!config) {
+            if (!config) {
                 fail();
             }
         } catch (@SuppressWarnings("unused") OXException e) {
-            if(config) {
+            if (config) {
                 fail();
             }
         }

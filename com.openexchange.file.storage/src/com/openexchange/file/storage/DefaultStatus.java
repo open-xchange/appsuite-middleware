@@ -96,12 +96,12 @@ public class DefaultStatus implements Status {
 
     @Override
     public String getMessage(Locale locale) {
-        if(message != null) {
+        if (message != null) {
             return message;
         }
 
-        if(exception != null) {
-            if(exception.getCause() instanceof OXException) {
+        if (exception != null) {
+            if (exception.getCause() instanceof OXException) {
                return ((OXException)exception.getCause()).getDisplayMessage(locale);
             }
             return exception.getDisplayMessage(locale);

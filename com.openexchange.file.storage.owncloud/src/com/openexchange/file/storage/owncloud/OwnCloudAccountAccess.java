@@ -115,7 +115,7 @@ public class OwnCloudAccountAccess extends AbstractWebDAVAccountAccess {
     public Boolean supports(FileStorageCapability capability) {
         switch(capability) {
             case FILE_VERSIONS:
-                if(isConnected() == false) {
+                if (isConnected() == false) {
                     try {
                         connect();
                     } catch (OXException e) {
@@ -164,10 +164,10 @@ public class OwnCloudAccountAccess extends AbstractWebDAVAccountAccess {
         String login = (String) configuration.get("login");
         String password = (String) configuration.get("password");
         String host = (String) configuration.get("url");
-        if(Strings.isEmpty(login) || Strings.isEmpty(password) || Strings.isEmpty(host)) {
+        if (Strings.isEmpty(login) || Strings.isEmpty(password) || Strings.isEmpty(host)) {
             throw FileStorageExceptionCodes.MISSING_CONFIG.create(getService().getId(), getAccountId());
         }
-        if(host.contains(REMOTE_PHP) == false) {
+        if (host.contains(REMOTE_PHP) == false) {
             throw WebdavExceptionCodes.INVALID_CONFIG.create("Host url is invalid");
         }
         String baseUri = host.substring(0, host.indexOf(REMOTE_PHP));

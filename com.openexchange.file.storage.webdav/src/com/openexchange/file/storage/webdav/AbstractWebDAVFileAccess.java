@@ -596,7 +596,7 @@ public abstract class AbstractWebDAVFileAccess extends AbstractWebDAVAccess impl
                 throw FileStorageExceptionCodes.FOLDER_NOT_FOUND.create(
                     folderId, account.getId(), account.getFileStorageService().getId(), I(session.getUserId()), I(session.getContextId()));
             }
-            else if(HttpStatus.SC_FORBIDDEN == e.getStatusCode()) {
+            else if (HttpStatus.SC_FORBIDDEN == e.getStatusCode()) {
                 //Infinity DEPTH not allowed by the server
                 throw FileStorageExceptionCodes.SEARCH_TERM_NOT_SUPPORTED.create(e, "WebDAV infinity depth");
             }

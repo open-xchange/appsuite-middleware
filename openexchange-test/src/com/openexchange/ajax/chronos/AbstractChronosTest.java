@@ -438,7 +438,7 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
                 }
                 long dateTime1 = CalendarUtils.decode(recurrenceId1).getTimestamp();
                 long dateTime2 = CalendarUtils.decode(recurrenceId2).getTimestamp();
-                if(dateTime1 == dateTime2 ) {
+                if (dateTime1 == dateTime2 ) {
                     return 0;
                 }
                 return dateTime1 < dateTime2 ? -1 : 1;

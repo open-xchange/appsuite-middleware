@@ -83,7 +83,7 @@ public class OwnCloudPermissionsUtil {
      * @throws OXException in case of errors
      */
     public static List<FileStorageObjectPermission> getPermissions(String path, WebDAVResource res, OwnCloudRestClient rest, OwnCloudEntityResolver resolver) throws OXException{
-        if(containsShares(res)) {
+        if (containsShares(res)) {
             List<OCShare> shares = rest.getShares(path).getShares();
             List<FileStorageObjectPermission> result = new ArrayList<>(shares.size());
             for(OCShare ocShare: shares) {
