@@ -55,11 +55,10 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.Arrays;
-import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -218,8 +217,13 @@ public class AppsLoadServlet extends SessionServlet {
             return; // no actual files requested
         }
 		// Filter duplicates
-        List<Object> distinct = Arrays.asList(modules).stream().distinct().collect(Collectors.toList());
-        modules = distinct.toArray(new String[distinct.size()]);
+        {
+            Set<String> distinct = new LinkedHashSet<>(length);
+            for (String module : modules) {
+                distinct.add(module);
+            }
+            modules = distinct.toArray(new String[distinct.size()]);
+        }
         // Check length again
 		length = modules.length;
 		if (length < 2) {
@@ -319,9 +323,13 @@ public class AppsLoadServlet extends SessionServlet {
         }
         int[] key = new int[8];
         java.util.Random r = new java.util.Random();
-        for (int j = 0; j < key.length; j++) key[j] = r.nextInt(256);
+        for (int j = 0; j < key.length; j++) {
+            key[j] = r.nextInt(256);
+        }
         char[] obfuscated = moduleName.toCharArray();
-        for (int j = 0; j < obfuscated.length; j++) obfuscated[j] += key[j % key.length];
+        for (int j = 0; j < obfuscated.length; j++) {
+            obfuscated[j] += key[j % key.length];
+        }
         ew.error(("(function(){" +
             "var key = [" + Strings.join(key, ",") + "], name = '" + escapeName(new String(obfuscated)) + "';" +
             "function c(c, i) { return c.charCodeAt(0) - key[i % key.length]; }" +
