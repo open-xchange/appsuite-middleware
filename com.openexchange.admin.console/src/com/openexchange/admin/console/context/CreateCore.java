@@ -82,6 +82,7 @@ public abstract class CreateCore extends ContextAbstraction {
         setMandatoryOptions(parser);
 
         setContextQuotaOption(parser, true);
+        seGABModeOption(parser);
 
         setFurtherOptions(parser);
         setExtendedOptions(parser);
@@ -127,6 +128,7 @@ public abstract class CreateCore extends ContextAbstraction {
                 // Fill ctx obj with additional values from console
                 
                 parseAndSetContextQuota(parser, ctx);
+                parseAndSetGABMode(parser, ctx);
 
                 parseAndSetExtensions(parser, ctx, auth);
 

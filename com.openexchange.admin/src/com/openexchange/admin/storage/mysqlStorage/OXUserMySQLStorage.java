@@ -2764,7 +2764,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             user.setDeniedPortal(access.isDeniedPortal());
             // Apply access.isGlobalAddressBook() to OXFolderAdminHelper.setGlobalAddressBookEnabled()
             final OXFolderAdminHelper adminHelper = new OXFolderAdminHelper();
-            adminHelper.setGlobalAddressBookDisabled(ctx.getId().intValue(), userId, access.isGlobalAddressBookDisabled(), writeCon);
+            adminHelper.setGlobalAddressBookDisabled(ctx.getId().intValue(), userId, access.isGlobalAddressBookDisabled(), ctx.getGABMode(), writeCon);
             adminHelper.setPublicFolderEditable(access.isPublicFolderEditable(), ctx.getId().intValue(), userId, writeCon);
 
             RdbUserPermissionBitsStorage.saveUserPermissionBits(user, insert, writeCon);

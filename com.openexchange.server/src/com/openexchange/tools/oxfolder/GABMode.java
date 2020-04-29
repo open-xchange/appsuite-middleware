@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,34 +49,60 @@
 
 package com.openexchange.tools.oxfolder;
 
-import java.rmi.RemoteException;
-import com.openexchange.exception.OXException;
+import java.io.Serializable;
 
 /**
- * {@link GABRestorerRMIServiceImpl}
+ * {@link GABMode} - Defines a set of different modes for the GABs permission handling
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @since v7.10.4
  */
-public final class GABRestorerRMIServiceImpl implements GABRestorerRMIService {
+public enum GABMode implements Serializable {
 
     /**
-     * Initializes a new {@link GABRestorerRMIServiceImpl}.
+     * The modus <i>global</i>.
+     * <p>
+     * If this modus is chosen for a context, the all user group will be added
+     * to the global address book (GAB) permissions instead of each user.
+     *
+     * @see {@link com.openexchange.group.GroupStorage#GROUP_ZERO_IDENTIFIER}
      */
-    public GABRestorerRMIServiceImpl() {
-        super();
+    GLOBAL,
+
+    /**
+     * The modus <i>individual</i>.
+     * <p>
+     * If this modus is chosen for a context, each user will be added to the
+     * permission set of the global address book (GAB) resulting in a dedicated
+     * row in the <code>oxfolder_permission</code> table
+     */
+    INDIVIDUAL
+
+    ;
+
+    /**
+     * Gets a value describing whether the given string can be seen as equal to the
+     * enum constant or not
+     *
+     * @param mode The mode to check
+     * @return <code>true</code> if the mode can be seen as equal, <code>false</code> otherwise
+     */
+    public boolean equalsMode(String mode) {
+        return null == mode ? false : name().equalsIgnoreCase(mode.trim());
     }
 
-    @Override
-    public void restoreDefaultPermissions(final int cid, GABMode gabMode) throws RemoteException {
-        try {
-            new OXFolderAdminHelper().restoreDefaultGlobalAddressBookPermissions(cid, gabMode, OXFolderProperties.isEnableInternalUsersEdit());
-        } catch (OXException e) {
-            final String message = e.getMessage();
-            org.slf4j.LoggerFactory.getLogger(GABRestorerRMIServiceImpl.class).error(message, e);
-            final Exception wrapMe = new Exception(message);
-            wrapMe.setStackTrace(e.getStackTrace());
-            throw new RemoteException(message, wrapMe);
+    /**
+     * Get the {@link GABMode} fitting to the given string
+     *
+     * @param mode The mode
+     * @return A {@link GABMode} fitting to the string or <code>null</code>
+     */
+    public static GABMode of(String mode) {
+        for (GABMode gabMode : values()) {
+            if (gabMode.equalsMode(mode)) {
+                return gabMode;
+            }
         }
+        return null;
     }
 }
