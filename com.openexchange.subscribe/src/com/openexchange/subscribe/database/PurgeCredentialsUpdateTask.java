@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,34 +47,56 @@
  *
  */
 
-package com.openexchange.subscribe.osgi;
+package com.openexchange.subscribe.database;
 
-import com.openexchange.database.DatabaseService;
-import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
-import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.subscribe.database.PurgeCredentialsUpdateTask;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.Attributes;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.TaskAttributes;
+import com.openexchange.groupware.update.UpdateConcurrency;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskV2;
 
 /**
- * {@link UpdateTaskActivator}
+ * {@link PurgeCredentialsUpdateTask} - Deletes all login/password combinations
+ * from the 'genconf_attributes_strings' table, which prior 7.10.4 were stored
+ * as clear text.
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.4
  */
-public final class UpdateTaskActivator extends HousekeepingActivator {
+public class PurgeCredentialsUpdateTask implements UpdateTaskV2 {
 
-    public UpdateTaskActivator() {
+    private static final String PURGE = "DELETE FROM genconf_attributes_strings where name=?;";
+
+    /**
+     * Initializes a new {@link PurgeCredentialsUpdateTask}.
+     */
+    public PurgeCredentialsUpdateTask() {
         super();
     }
 
     @Override
-    public void startBundle() throws Exception {
-        track(DatabaseService.class, new UpdateTaskRegisterer(context));
-        registerService(UpdateTaskProviderService.class.getName(), new DefaultUpdateTaskProviderService(new PurgeCredentialsUpdateTask()));
-        openTrackers();
+    public void perform(PerformParameters params) throws OXException {
+        Connection con = params.getConnection();
+        try (PreparedStatement stmt = con.prepareStatement(PURGE)) {
+            stmt.setString(1, "password");
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        }
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+    public String[] getDependencies() {
+        return new String[] { "com.openexchange.groupware.update.tasks.GenconfAttributesStringsAddPrimaryKey" };
+    }
+
+    @Override
+    public TaskAttributes getAttributes() {
+        return new Attributes(UpdateConcurrency.BLOCKING);
     }
 }

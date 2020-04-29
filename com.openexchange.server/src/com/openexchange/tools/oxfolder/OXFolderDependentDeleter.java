@@ -71,11 +71,10 @@ import com.openexchange.session.Session;
 import com.openexchange.share.ShareService;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
-import gnu.trove.iterator.TIntIterator;
 import gnu.trove.iterator.TIntObjectIterator;
-import gnu.trove.list.TIntList;
-import gnu.trove.list.linked.TIntLinkedList;
+import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
@@ -97,7 +96,7 @@ public class OXFolderDependentDeleter {
      * @param session The affected session
      * @param folder The deleted folder
      * @param handDown <code>true</code> to also remove the subscriptions of any nested subfolder, <code>false</code>,
-     *                 otherwise
+     *            otherwise
      * @return The number of removed subscriptions
      * @throws OXException
      */
@@ -112,8 +111,8 @@ public class OXFolderDependentDeleter {
      * @param session The affected session
      * @param folders The deleted folders
      * @param handDown <code>true</code> to also remove the subscriptions of any nested subfolder, <code>false</code>,
-     *                 otherwise
-     * @return The number of removed subscriptions 
+     *            otherwise
+     * @return The number of removed subscriptions
      * @throws OXException
      */
     public static void foldersDeleted(Connection con, Session session, Collection<FolderObject> folders, boolean handDown) throws OXException {
@@ -312,10 +311,10 @@ public class OXFolderDependentDeleter {
 
     private static int deleteSubscriptions(Connection connection, int cid, List<Integer> folderIDs) throws SQLException {
         StringBuilder stringBuilder = new StringBuilder(96);
-        stringBuilder.append("SELECT id FROM subscriptions WHERE cid=? AND folder_id");
+        stringBuilder.append("SELECT id,configuration_id FROM subscriptions WHERE cid=? AND folder_id");
         appendPlaceholdersForWhere(stringBuilder, folderIDs.size());
 
-        TIntList ids;
+        TIntIntMap ids;
         {
             PreparedStatement stmt = null;
             ResultSet rs = null;
@@ -331,25 +330,38 @@ public class OXFolderDependentDeleter {
                     return 0;
                 }
 
-                ids = new TIntLinkedList();
-                pos = 1;
+                ids = new TIntIntHashMap();
                 do {
-                    ids.add(rs.getInt(pos));
+                    ids.put(rs.getInt(1), rs.getInt(2));
                 } while (rs.next());
             } finally {
                 Databases.closeSQLStuff(rs, stmt);
             }
         }
+        int updated = deleteFrom("genconf_attributes_strings", connection, cid, ids.values());
+        return updated + deleteFrom("subscriptions", connection, cid, ids.keys());
+    }
 
-        stringBuilder.setLength(0);
-        stringBuilder.append("DELETE FROM subscriptions WHERE cid=? AND id");
-        appendPlaceholdersForWhere(stringBuilder, ids.size());
-        try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
+    /**
+     * Helper for deleting subscriptions. Deletes from the specified table.
+     *
+     * @param table The table's name
+     * @param queryBuilder The query builder
+     * @param connection the connection
+     * @param cid The context identifier
+     * @param ids The ids
+     * @return The amount of deleted rows
+     * @throws SQLException if an SQL error is occurred
+     */
+    private static int deleteFrom(String table, Connection connection, int cid, int[] ids) throws SQLException {
+        StringBuilder queryBuilder = new StringBuilder(256);
+        queryBuilder.append("DELETE FROM ").append(table).append(" WHERE cid=? AND id");
+        appendPlaceholdersForWhere(queryBuilder, ids.length);
+        try (PreparedStatement stmt = connection.prepareStatement(queryBuilder.toString())) {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, cid);
-            TIntIterator iterator = ids.iterator();
-            for (int j = ids.size(); j-- > 0;) {
-                stmt.setInt(parameterIndex++, iterator.next());
+            for (int j = ids.length; j-- > 0;) {
+                stmt.setInt(parameterIndex++, ids[j]);
             }
             return stmt.executeUpdate();
         }

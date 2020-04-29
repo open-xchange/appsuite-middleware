@@ -64,6 +64,10 @@ import com.openexchange.user.User;
  */
 public class SimSubscribeService extends AbstractSubscribeService {
 
+    public SimSubscribeService() {
+        super(); //FIXME: mock ServiceLookup
+    }
+
     private SubscriptionSource source;
 
     private Subscription subscription;
