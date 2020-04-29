@@ -79,6 +79,6 @@ public class DistributionMaximumMicrometerFilterPerformer extends AbstractMicrom
     @Override
     DistributionStatisticConfig applyConfig(Entry<String, String> entry, String metricId, DistributionStatisticConfig config) {
         Long value = distributionValueSanityCheck(metricId, entry.getValue());
-        return value == null ? config : DistributionStatisticConfig.builder().maximumExpectedValue(value.longValue()).build().merge(config);
+        return value == null ? config : DistributionStatisticConfig.builder().maximumExpectedValue(value).build().merge(config);
     }
 }

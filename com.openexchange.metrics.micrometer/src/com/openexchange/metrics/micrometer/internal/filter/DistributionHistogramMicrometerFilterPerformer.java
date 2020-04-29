@@ -77,7 +77,6 @@ public class DistributionHistogramMicrometerFilterPerformer extends AbstractMicr
         applyFilterFor(configurationService, (entry) -> configure(meterRegistry, entry));
     }
 
-    @SuppressWarnings("unused")
     @Override
     DistributionStatisticConfig applyConfig(Entry<String, String> entry, String metricId, DistributionStatisticConfig config) {
         return builder().percentilesHistogram(Boolean.valueOf(entry.getValue())).build().merge(config);

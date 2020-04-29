@@ -179,10 +179,10 @@ com.openexchange.metrics.micrometer.distribution.maximum.appsuite.httpapi.reques
 ```
 
 ## Tag Filtering
-It is also possible to further narrow down the published metrics by using a `query` property (`com.openexchange.metrics.micrometer.query`) with which a filter can be defined (either an exact match or a regular expression). For example:
+It is also possible to further narrow down the published metrics by using a `filter` property (`com.openexchange.metrics.micrometer.filter`) with which a filter can be defined (either an exact match or a regular expression). For example:
 
 ```bash
-com.openexchange.metrics.micrometer.query.some_name=appsuite.httpapi.requests{action="all",module="folders"}
+com.openexchange.metrics.micrometer.filter.some_name=appsuite.httpapi.requests{action="all",module="folders"}
 ```
 
 Note the `some_name` suffix of the property. This will be used as a pseudo name for the metric name and the filter to allow access to the previously defined properties, namely the enable/disable and distribution statistics. The following configuration should enable all `appsuite.httpapi.request` for the `all` action of the `folder` module and publish all SLAs for 50, 100 and 150 ms:
@@ -193,12 +193,12 @@ com.openexchange.metrics.micrometer.distribution.histogram.some_name=false
 com.openexchange.metrics.micrometer.distribution.sla.some_name=50ms,100ms,150ms
 ```
 
-The `query` property also supports an expression language similar to [this](https://prometheus.io/docs/prometheus/latest/querying/examples/).
+The `filter` property also supports an expression language similar to [this](https://prometheus.io/docs/prometheus/latest/querying/examples/).
 
 All expressions starting with a tilde (`~`) after the equals (`=`) sign, are treated as regular expressions. All expressions that instead of an equals sign (`=`) have an exclamation mark (`!`) and are followed by the tilde (`~`), are treated as negated regular expressions. Observe the following example:
 
 ```bash
-com.openexchange.metrics.micrometer.query.filter_read_connections=appsuite.mysql.connections.usage{type="write",class=~".*db",pool!~"-1|-2"}
+com.openexchange.metrics.micrometer.filter.read_connections=appsuite.mysql.connections.usage{type="write",class=~".*db",pool!~"-1|-2"}
 ```
 
 It only publishes all `appsuite.mysql.connections.usage` metrics that are of type `write` their class ends with `db` and their pools are neither `-1` nor `-2`. The output is then similar to this:
@@ -234,4 +234,4 @@ To sum up, the following properties can be used to further configure the Microme
   * `distribution.sla.<METRIC_NAME>`: Defines the SLAs to publish for that specific metric.
   * `distribution.minimum.<METRIC_NAME>`: Defines the lower bound of percentile histogram buckets to publish for that specific metric.
   * `distribution.maximum.<METRIC_NAME>`: Defines the upper bound of percentile histogram buckets to publish for that specific metric.
-  * `query.<PSEUDO_NAME>`: Defines a query which can further filter all metrics by tags. The `<PSEUDO_NAME>` is then used to access all `enable` and `distribution.*` properties (it replaces the `<METRIC_NAME>`).
+  * `filter.<FILTER_NAME>`: Defines a filter which can further narrow down all metrics by tags. The `<FILTER_NAME>` is then used to access all `enable` and `distribution.*` properties (it replaces the `<METRIC_NAME>`).

@@ -98,9 +98,11 @@ properties:
       file: micrometer.properties
       packageName: open-xchange-core
       tags: ["Micrometer", "Metrics"]
-    - key: com.openexchange.metrics.micrometer.query.[PSEUDO_NAME]
+    - key: com.openexchange.metrics.micrometer.filter.[FILTER_NAME]
       description: |
-        Defines a query which can further filter all metrics by tags. The 'PSEUDO_NAME' is then used to access all 'enable' and 'distribution.*' properties (it replaces the '<METRIC_NAME>').
+        Defines a filter which can further narrow down all metrics by tags. The 'FILTER_NAME' is then used to access all 'enable' and 'distribution.*' properties (it replaces the '[METRIC_NAME]').
+        For example the filter <code>com.openexchange.metrics.micrometer.filter.read_connections=appsuite.mysql.connections.usage{type="write",class=~".*db",pool!~"-1|-2"}</code> would only publish all 
+        <code>appsuite.mysql.connections.usage</code> metrics that are of type <code>write</code> their class ends with <code>db</code> and their pools are neither <code>-1</code> nor <code>-2</code>.
       defaultValue: 
       version: 7.10.4
       reloadable: true

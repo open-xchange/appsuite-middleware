@@ -49,53 +49,63 @@
 
 package com.openexchange.metrics.micrometer.internal.filter;
 
-import java.util.Map;
-
 /**
- * {@link Query}
+ * {@link Condition}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.4
  */
-class Query {
+class Condition {
 
-    private final String metricName;
-    private final Map<String, Filter> filterMap;
+    private final String value;
+    private final boolean isRegex;
+    private final boolean negatedRegex;
 
     /**
-     * Initializes a new {@link Query}.
+     * Initializes a new {@link Condition}.
      *
-     * @param metricName The metric name
-     * @param filterMap The map with all the filters of the query
+     * @param value The condition value
+     * @param isRegex whether the condition is a regex
+     * @param negatedRegex whether the contained regex should be negated
      */
-    public Query(String metricName, Map<String, Filter> filterMap) {
+    public Condition(String value, boolean isRegex, boolean negatedRegex) {
         super();
-        this.metricName = metricName;
-        this.filterMap = filterMap;
+        this.value = value;
+        this.isRegex = isRegex;
+        this.negatedRegex = negatedRegex;
     }
 
     /**
-     * Gets the name of the metric this query applies to
+     * Gets the condition value
      *
-     * @return The name of the metric
+     * @return The condition value
      */
-    public String getMetricName() {
-        return metricName;
+    public String getValue() {
+        return value;
     }
 
     /**
-     * Gets a map of all filters of this query
+     * Returns whether the condition contains a regex or not
      *
-     * @return A map of all filters of this query
+     * @return <code>true</code> if the filter is a regex; <code>false</code> otherwise
      */
-    public Map<String, Filter> getFilterMap() {
-        return filterMap;
+    public boolean isRegex() {
+        return isRegex;
+    }
+
+    /**
+     * Whether the regex should be negated or not
+     *
+     * @return <code>true</code> if the regex should be negated, <code>false</code> otherwise
+     */
+    public boolean isRegexNegated() {
+        return negatedRegex;
     }
 
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("Query [metricName=").append(metricName).append(", filterMap=").append(filterMap).append("]");
+        builder.append("Condition [value=").append(value).append(", isRegex=").append(isRegex).append(", negatedRegex=").append(negatedRegex).append("]");
         return builder.toString();
     }
 }

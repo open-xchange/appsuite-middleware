@@ -91,7 +91,7 @@ public enum MicrometerFilterProperty implements Property {
     /**
      * Defines queries for metrics
      */
-    QUERY(),
+    FILTER(),
     ;
 
     public static final String BASE = "com.openexchange.metrics.micrometer.";

@@ -56,26 +56,26 @@ import com.openexchange.metrics.micrometer.internal.property.MicrometerFilterPro
 import io.micrometer.core.instrument.MeterRegistry;
 
 /**
- * {@link QueryMetricMicrometerFilterPerformer}
+ * {@link FilterMetricMicrometerFilterPerformer}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.4
  */
-public class QueryMetricMicrometerFilterPerformer extends AbstractMicrometerFilterPerformer implements MicrometerFilterPerformer {
+public class FilterMetricMicrometerFilterPerformer extends AbstractMicrometerFilterPerformer implements MicrometerFilterPerformer {
 
-    public static final Map<String, String> queryRegistry = new HashMap<>();
+    public static final Map<String, String> filtrerRegistry = new HashMap<>();
 
     /**
-     * Initializes a new {@link QueryMetricMicrometerFilterPerformer}.
+     * Initializes a new {@link FilterMetricMicrometerFilterPerformer}.
      */
-    public QueryMetricMicrometerFilterPerformer() {
-        super(MicrometerFilterProperty.QUERY);
+    public FilterMetricMicrometerFilterPerformer() {
+        super(MicrometerFilterProperty.FILTER);
     }
 
     @Override
     public void applyFilter(MeterRegistry meterRegistry, ConfigurationService configurationService) {
         applyFilterFor(configurationService, (entry) -> {
-            queryRegistry.put(extractMetricId(entry.getKey(), MicrometerFilterProperty.QUERY), entry.getValue());
+            filtrerRegistry.put(extractMetricId(entry.getKey(), MicrometerFilterProperty.FILTER), entry.getValue());
         });
     }
 }

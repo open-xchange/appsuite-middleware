@@ -49,6 +49,8 @@
 
 package com.openexchange.metrics.micrometer.internal.filter;
 
+import java.util.Map;
+
 /**
  * {@link Filter}
  *
@@ -57,55 +59,43 @@ package com.openexchange.metrics.micrometer.internal.filter;
  */
 class Filter {
 
-    private final String value;
-    private final boolean isRegex;
-    private final boolean negatedRegex;
+    private final String metricName;
+    private final Map<String, Condition> filterMap;
 
     /**
      * Initializes a new {@link Filter}.
      *
-     * @param value The filter value
-     * @param isRegex whether the filter is a regex
-     * @param negatedRegex whether the contained regex should be negated
+     * @param metricName The metric name
+     * @param filterMap The map with all the filters of the query
      */
-    public Filter(String value, boolean isRegex, boolean negatedRegex) {
+    public Filter(String metricName, Map<String, Condition> filterMap) {
         super();
-        this.value = value;
-        this.isRegex = isRegex;
-        this.negatedRegex = negatedRegex;
+        this.metricName = metricName;
+        this.filterMap = filterMap;
     }
 
     /**
-     * Gets the filter value
+     * Gets the name of the metric this query applies to
      *
-     * @return The filter value
+     * @return The name of the metric
      */
-    public String getValue() {
-        return value;
+    public String getMetricName() {
+        return metricName;
     }
 
     /**
-     * Returns whether the filter contains a regex or not
+     * Gets a map of all filters of this query
      *
-     * @return <code>true</code> if the filter is a regex; <code>false</code> otherwise
+     * @return A map of all filters of this query
      */
-    public boolean isRegex() {
-        return isRegex;
-    }
-
-    /**
-     * Whether the regex should be negated or not
-     *
-     * @return <code>true</code> if the regex should be negated, <code>false</code> otherwise
-     */
-    public boolean isRegexNegated() {
-        return negatedRegex;
+    public Map<String, Condition> getFilterMap() {
+        return filterMap;
     }
 
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("Filter [value=").append(value).append(", isRegex=").append(isRegex).append(", negatedRegex=").append(negatedRegex).append("]");
+        builder.append("Query [metricName=").append(metricName).append(", filterMap=").append(filterMap).append("]");
         return builder.toString();
     }
 }

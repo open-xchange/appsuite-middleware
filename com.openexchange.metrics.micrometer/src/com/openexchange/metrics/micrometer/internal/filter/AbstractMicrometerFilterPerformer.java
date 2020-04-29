@@ -79,9 +79,9 @@ import io.micrometer.core.instrument.distribution.DistributionStatisticConfig;
  */
 abstract class AbstractMicrometerFilterPerformer {
 
-    static final Logger LOG = LoggerFactory.getLogger(AbstractMicrometerFilterPerformer.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractMicrometerFilterPerformer.class);
 
-    final MicrometerFilterProperty property;
+    private final MicrometerFilterProperty property;
 
     /**
      * Initializes a new {@link AbstractMicrometerFilterPerformer}.
@@ -96,20 +96,32 @@ abstract class AbstractMicrometerFilterPerformer {
 
             @Override
             public DistributionStatisticConfig configure(Meter.Id id, DistributionStatisticConfig config) {
-                LOG.debug("Applying filter for '{}'", id);
-                String key = entry.getKey();
-                String metricId = extractMetricId(key, property);
-                String query = QueryMetricMicrometerFilterPerformer.queryRegistry.get(metricId);
-                if (Strings.isEmpty(query)) {
-                    return applyConfig(entry, metricId, config);
-                }
-                Query q = extractQuery(query);
-                if (q == null) {
-                    return config;
-                }
-                return matchTags(id, q) ? applyConfig(entry, metricId, config) : config;
+                return AbstractMicrometerFilterPerformer.this.configure(id, entry, config);
             }
         });
+    }
+
+    /**
+     * Applies the filter for the specified metric
+     *
+     * @param id The metric identifier
+     * @param entry The configuration entry
+     * @param config The distribution statistics configuration
+     * @return if the filter is applied then it returns the merged config, otherwise the passed config unaltered
+     */
+    DistributionStatisticConfig configure(Meter.Id id, Entry<String, String> entry, DistributionStatisticConfig config) {
+        LOG.debug("Applying filter for '{}'", id);
+        String key = entry.getKey();
+        String metricId = extractMetricId(key, property);
+        String filter = FilterMetricMicrometerFilterPerformer.filtrerRegistry.get(metricId);
+        if (Strings.isEmpty(filter)) {
+            return applyConfig(entry, metricId, config);
+        }
+        Filter q = extractFilter(filter);
+        if (q == null) {
+            return config;
+        }
+        return matchTags(id, q) ? applyConfig(entry, metricId, config) : config;
     }
 
     /**
@@ -120,6 +132,7 @@ abstract class AbstractMicrometerFilterPerformer {
      * @param config The {@link DistributionStatisticConfig}
      * @return The merged config
      */
+    @SuppressWarnings("unused")
     DistributionStatisticConfig applyConfig(Entry<String, String> entry, String metricId, DistributionStatisticConfig config) {
         return config;
     }
@@ -173,12 +186,12 @@ abstract class AbstractMicrometerFilterPerformer {
     }
 
     /**
-     * Applies the specified query as filter
+     * Applies the specified filter as filter
      *
-     * @param query The query
+     * @param filter The filter
      */
-    void applyQuery(String query, MeterRegistry meterRegistry) {
-        Query q = extractQuery(query);
+    void applyQuery(String filter, MeterRegistry meterRegistry) {
+        Filter q = extractFilter(filter);
         if (q == null) {
             return;
         }
@@ -208,42 +221,42 @@ abstract class AbstractMicrometerFilterPerformer {
      * in the filter.
      *
      * @param id The id
-     * @param query The {@link Query}
+     * @param filter The {@link Filter}
      * @return <code>true</code> if all tags match the filter; <code>false</code> otherwise
      */
-    boolean matchTags(Meter.Id id, Query query) {
-        LOG.debug("Metric: {}, Query: {}", id, query);
-        if (false == id.getName().equals(query.getMetricName())) {
+    private boolean matchTags(Meter.Id id, Filter filter) {
+        LOG.debug("Metric: {}, Filter: {}", id, filter);
+        if (false == id.getName().equals(filter.getMetricName())) {
             return false;
         }
         int matchCount = 0;
         for (Tag t : id.getTags()) {
-            if (false == query.getFilterMap().containsKey(t.getKey())) {
+            if (false == filter.getFilterMap().containsKey(t.getKey())) {
                 continue;
             }
-            Filter filter = query.getFilterMap().get(t.getKey());
-            if (false == filter.isRegex() && filter.getValue().equals(t.getValue())) {
+            Condition condition = filter.getFilterMap().get(t.getKey());
+            if (false == condition.isRegex() && condition.getValue().equals(t.getValue())) {
                 matchCount++;
                 continue;
 
             }
-            matchCount += checkRegex(id, t, filter) ? 1 : 0;
+            matchCount += checkRegex(id, t, condition) ? 1 : 0;
         }
-        return matchCount == query.getFilterMap().size();
+        return matchCount == filter.getFilterMap().size();
     }
 
     /**
      * Checks the regex against the specified metric
      *
      * @param id The metric id
-     * @param query The query
+     * @param filter The filter
      * @return <code>true</code> if the regex matches at one of the tags; <code>false</code> otherwise
      */
-    private boolean checkRegex(Meter.Id id, Tag tag, Filter filter) {
-        String regex = filter.getValue();
+    private boolean checkRegex(Meter.Id id, Tag tag, Condition condition) {
+        String regex = condition.getValue();
         try {
             boolean match = Pattern.compile(regex).matcher(tag.getValue()).matches();
-            return filter.isRegexNegated() ? !match : match;
+            return condition.isRegexNegated() ? !match : match;
         } catch (PatternSyntaxException e) {
             LOG.error("The specified regex '{}' for metric '{}' is invalid.", regex, id, e);
             return false;
@@ -251,32 +264,32 @@ abstract class AbstractMicrometerFilterPerformer {
     }
 
     /**
-     * Extracts the query from the specified filter query string
+     * Extracts the filter from the specified filter string
      *
-     * @param query The query string
-     * @return The Query or <code>null</code> if no query can be extracted
+     * @param filter The filter string
+     * @return The Filter or <code>null</code> if no filter can be extracted
      */
-    Query extractQuery(String query) {
-        LOG.trace("Extracting query: {}", query);
-        int startIndex = query.indexOf("{") + 1;
-        int endIndex = query.indexOf("}");
+    private Filter extractFilter(String filter) {
+        LOG.trace("Extracting filter: {}", filter);
+        int startIndex = filter.indexOf("{") + 1;
+        int endIndex = filter.indexOf("}");
         if (startIndex < 0 || endIndex < 0 || endIndex < startIndex) {
-            // Invalid indexes
+            LOG.error("Invalid filter detected: {}", filter);
             return null;
         }
         //Valid indexes, apply
-        String metricName = query.substring(0, startIndex - 1);
-        String filter = query.substring(startIndex, endIndex);
-        LOG.trace("Extracted --> Metric name: {}, Filter: {}", metricName, filter);
+        String metricName = filter.substring(0, startIndex - 1);
+        String condition = filter.substring(startIndex, endIndex);
+        LOG.trace("Extracted --> Metric name: {}, Filter: {}", metricName, condition);
 
-        Map<String, Filter> map = new HashMap<>(4);
-        List<String> filterList = Arrays.asList(Strings.splitByComma(filter));
+        Map<String, Condition> map = new HashMap<>(4);
+        List<String> filterList = Arrays.asList(Strings.splitByComma(condition));
         for (String entry : filterList) {
             // Negated regex
             if (entry.contains("!~")) {
                 String[] s = entry.split("!~");
                 if (s.length == 2) {
-                    map.put(s[0], new Filter(s[1].replaceAll("\"", ""), true, true));
+                    map.put(s[0], new Condition(s[1].replaceAll("\"", ""), true, true));
                     continue;
                 }
             }
@@ -286,11 +299,11 @@ abstract class AbstractMicrometerFilterPerformer {
                 continue;
             }
             if (false == split[1].startsWith("~")) {
-                map.put(split[0], new Filter(split[1].replaceAll("\"", ""), false, false));
+                map.put(split[0], new Condition(split[1].replaceAll("\"", ""), false, false));
                 continue;
             }
-            map.put(split[0], new Filter(split[1].substring(1).replaceAll("\"", ""), true, false));
+            map.put(split[0], new Condition(split[1].substring(1).replaceAll("\"", ""), true, false));
         }
-        return new Query(metricName, map);
+        return new Filter(metricName, map);
     }
 }

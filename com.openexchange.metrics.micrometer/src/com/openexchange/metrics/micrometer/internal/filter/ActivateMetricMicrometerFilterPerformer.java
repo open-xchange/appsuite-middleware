@@ -83,7 +83,7 @@ public class ActivateMetricMicrometerFilterPerformer extends AbstractMicrometerF
                 return;
             }
             String metricId = extractMetricId(key, MicrometerFilterProperty.ENABLE);
-            String query = QueryMetricMicrometerFilterPerformer.queryRegistry.get(metricId);
+            String query = FilterMetricMicrometerFilterPerformer.filtrerRegistry.get(metricId);
             if (Strings.isEmpty(query)) {
                 LOGGER.debug("Applying enable/disable meter filter for '{}'", metricId);
                 meterRegistry.config().meterFilter(Boolean.parseBoolean(entry.getValue()) ? MeterFilter.acceptNameStartsWith(metricId) : MeterFilter.denyNameStartsWith(metricId));
