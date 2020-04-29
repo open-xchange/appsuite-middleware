@@ -66,7 +66,7 @@ public class IPCheckMetricCollector {
     public static final String COMPONENT_NAME = "ipcheck";
 
     private final Map<AcceptReason, Counter> acceptCounters;
-    private final  Map<DenyReason, Counter> denyCounters;
+    private final Map<DenyReason, Counter> denyCounters;
 
     /**
      * Initialises a new {@link IPCheckMetricCollector}.
@@ -87,7 +87,7 @@ public class IPCheckMetricCollector {
     }
 
     public void incrementAccepted(AcceptReason reason) {
-        acceptCounters.get(reason).increment();;
+        acceptCounters.get(reason).increment();
     }
 
     public void incrementDenied(DenyReason reason) {
@@ -95,10 +95,7 @@ public class IPCheckMetricCollector {
     }
 
     private Counter getCounter(String status, String reason) {
-        return Counter.builder("appsuite.ipchanges")
-            .description("Total number of detected user session IP changes.")
-            .tags("status", status, "reason", reason)
-            .register(Metrics.globalRegistry);
+        return Counter.builder("appsuite.ipchanges").description("Total number of detected user session IP changes.").tags("status", status, "reason", reason).register(Metrics.globalRegistry);
     }
 
     public double getCount(IPCheckMetric metric) {
@@ -110,23 +107,17 @@ public class IPCheckMetricCollector {
             case acceptedWhiteListed:
                 return acceptCounters.get(AcceptReason.WHITE_LISTED).count();
             case acceptedIPChanges:
-                return acceptCounters.values().stream()
-                    .map(c -> c.count())
-                    .reduce(0d, Double::sum).doubleValue();
+                return acceptCounters.values().stream().map(c -> Double.valueOf(c.count())).reduce(Double.valueOf(0d), Double::sum).doubleValue();
             case deniedCountryChanged:
                 return denyCounters.get(DenyReason.COUNTRY_CHANGE).count();
             case deniedException:
                 return denyCounters.get(DenyReason.EXCEPTION).count();
             case deniedIPChanges:
-                return denyCounters.values().stream()
-                    .map(c -> c.count())
-                    .reduce(0d, Double::sum).doubleValue();
+                return denyCounters.values().stream().map(c -> Double.valueOf(c.count())).reduce(Double.valueOf(0d), Double::sum).doubleValue();
             case totalIPChanges:
                 return Double.sum(getCount(IPCheckMetric.acceptedIPChanges), getCount(IPCheckMetric.deniedIPChanges));
             default:
                 return -1d;
-
         }
     }
-
 }
