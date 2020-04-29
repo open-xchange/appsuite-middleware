@@ -21,6 +21,7 @@ import com.openexchange.share.notification.impl.DefaultNotificationService;
 import com.openexchange.share.notification.impl.ShareNotificationHandler;
 import com.openexchange.share.notification.impl.mail.MailNotificationHandler;
 import com.openexchange.templating.TemplateService;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.user.UserService;
 
 public class ShareNotificationActivator extends HousekeepingActivator {
@@ -40,7 +41,8 @@ public class ShareNotificationActivator extends HousekeepingActivator {
             HtmlService.class,
             ShareService.class,
             NotificationMailFactory.class,
-            RegionalSettingsService.class
+            RegionalSettingsService.class,
+            ThreadPoolService.class
         };
     }
 
