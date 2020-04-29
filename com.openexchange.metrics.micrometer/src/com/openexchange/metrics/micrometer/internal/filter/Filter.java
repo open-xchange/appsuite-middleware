@@ -63,7 +63,7 @@ class Filter {
 
     /**
      * Initializes a new {@link Filter}.
-     * 
+     *
      * @param value The filter value
      * @param isRegex whether the filter is a regex
      * @param negatedRegex whether the contained regex should be negated
@@ -85,7 +85,7 @@ class Filter {
     }
 
     /**
-     * Returns whether the filter contains a regex
+     * Returns whether the filter contains a regex or not
      *
      * @return <code>true</code> if the filter is a regex; <code>false</code> otherwise
      */
@@ -94,9 +94,9 @@ class Filter {
     }
 
     /**
-     * Gets the negateRegex
+     * Whether the regex should be negated or not
      *
-     * @return The negateRegex
+     * @return <code>true</code> if the regex should be negated, <code>false</code> otherwise
      */
     public boolean isRegexNegated() {
         return negatedRegex;

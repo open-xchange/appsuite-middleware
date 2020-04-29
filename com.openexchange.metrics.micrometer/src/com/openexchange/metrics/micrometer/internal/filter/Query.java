@@ -64,7 +64,7 @@ class Query {
 
     /**
      * Initializes a new {@link Query}.
-     * 
+     *
      * @param metricName The metric name
      * @param filterMap The map with all the filters of the query
      */
@@ -75,18 +75,18 @@ class Query {
     }
 
     /**
-     * Gets the metricName
+     * Gets the name of the metric this query applies to
      *
-     * @return The metricName
+     * @return The name of the metric
      */
     public String getMetricName() {
         return metricName;
     }
 
     /**
-     * Gets the filterMap
+     * Gets a map of all filters of this query
      *
-     * @return The filterMap
+     * @return A map of all filters of this query
      */
     public Map<String, Filter> getFilterMap() {
         return filterMap;

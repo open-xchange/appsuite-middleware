@@ -66,7 +66,7 @@ import io.micrometer.core.instrument.config.MeterFilter;
  */
 public class ActivateMetricMicrometerFilterPerformer extends AbstractMicrometerFilterPerformer implements MicrometerFilterPerformer {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ActivateMetricMicrometerFilterPerformer.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ActivateMetricMicrometerFilterPerformer.class);
 
     /**
      * Initializes a new {@link ActivateMetricMicrometerFilterPerformer}.
@@ -85,7 +85,7 @@ public class ActivateMetricMicrometerFilterPerformer extends AbstractMicrometerF
             String metricId = extractMetricId(key, MicrometerFilterProperty.ENABLE);
             String query = QueryMetricMicrometerFilterPerformer.queryRegistry.get(metricId);
             if (Strings.isEmpty(query)) {
-                LOG.debug("Applying enable/disable meter filter for '{}'", metricId);
+                LOGGER.debug("Applying enable/disable meter filter for '{}'", metricId);
                 meterRegistry.config().meterFilter(Boolean.parseBoolean(entry.getValue()) ? MeterFilter.acceptNameStartsWith(metricId) : MeterFilter.denyNameStartsWith(metricId));
                 return;
             }

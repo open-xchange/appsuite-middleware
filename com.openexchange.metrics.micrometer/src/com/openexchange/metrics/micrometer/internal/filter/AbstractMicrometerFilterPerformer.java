@@ -79,9 +79,9 @@ import io.micrometer.core.instrument.distribution.DistributionStatisticConfig;
  */
 abstract class AbstractMicrometerFilterPerformer {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AbstractMicrometerFilterPerformer.class);
+    static final Logger LOG = LoggerFactory.getLogger(AbstractMicrometerFilterPerformer.class);
 
-    private final MicrometerFilterProperty property;
+    final MicrometerFilterProperty property;
 
     /**
      * Initializes a new {@link AbstractMicrometerFilterPerformer}.
@@ -114,20 +114,19 @@ abstract class AbstractMicrometerFilterPerformer {
 
     /**
      * Applies the configuration of the specified entry to the specified {@link DistributionStatisticConfig}.
-     * 
+     *
      * @param entry The entry with the configuration
      * @param metricId the metric identifier
      * @param config The {@link DistributionStatisticConfig}
      * @return The merged config
      */
-    @SuppressWarnings("unused")
     DistributionStatisticConfig applyConfig(Entry<String, String> entry, String metricId, DistributionStatisticConfig config) {
         return config;
     }
 
     /**
      * Applies the MeterFilter by the specified meter filter consumer to the specified meter registry.
-     * 
+     *
      * @param configurationService The configuration service to read the property's value
      * @param meterFilterConsumer The consumer which dictates the application of the meter filter
      */
@@ -153,7 +152,7 @@ abstract class AbstractMicrometerFilterPerformer {
      * Performs a sanity check and returns the specified value as Long for
      * the specified metric.
      * If the sanity check fails, i.e. if the value cannot be parsed or is negative then <code>null</code> will be returned.
-     * 
+     *
      * @param metricId The metric identifier
      * @param value The string value
      *
@@ -168,14 +167,14 @@ abstract class AbstractMicrometerFilterPerformer {
             LOG.error("Negative values for the {} bound of a distribution is not allowed. Metric: '{}'", property.name().toLowerCase(), metricId);
             return null;
         } catch (NumberFormatException e) {
-            LOG.error("Invalid value was specified for the {} bound of the {} distribution.", property.name().toLowerCase(), metricId);
+            LOG.error("Invalid value was specified for the {} bound of the {} distribution.", property.name().toLowerCase(), metricId, e);
             return null;
         }
     }
 
     /**
      * Applies the specified query as filter
-     * 
+     *
      * @param query The query
      */
     void applyQuery(String query, MeterRegistry meterRegistry) {
@@ -212,7 +211,7 @@ abstract class AbstractMicrometerFilterPerformer {
      * @param query The {@link Query}
      * @return <code>true</code> if all tags match the filter; <code>false</code> otherwise
      */
-    private boolean matchTags(Meter.Id id, Query query) {
+    boolean matchTags(Meter.Id id, Query query) {
         LOG.debug("Metric: {}, Query: {}", id, query);
         if (false == id.getName().equals(query.getMetricName())) {
             return false;
@@ -228,19 +227,19 @@ abstract class AbstractMicrometerFilterPerformer {
                 continue;
 
             }
-            matchCount += applyRegex(id, t, filter) ? 1 : 0;
+            matchCount += checkRegex(id, t, filter) ? 1 : 0;
         }
         return matchCount == query.getFilterMap().size();
     }
 
     /**
-     * Applies the regex to the specified metric
+     * Checks the regex against the specified metric
      *
      * @param id The metric id
      * @param query The query
      * @return <code>true</code> if the regex matches at one of the tags; <code>false</code> otherwise
      */
-    private boolean applyRegex(Meter.Id id, Tag tag, Filter filter) {
+    private boolean checkRegex(Meter.Id id, Tag tag, Filter filter) {
         String regex = filter.getValue();
         try {
             boolean match = Pattern.compile(regex).matcher(tag.getValue()).matches();
@@ -257,7 +256,7 @@ abstract class AbstractMicrometerFilterPerformer {
      * @param query The query string
      * @return The Query or <code>null</code> if no query can be extracted
      */
-    private Query extractQuery(String query) {
+    Query extractQuery(String query) {
         LOG.trace("Extracting query: {}", query);
         int startIndex = query.indexOf("{") + 1;
         int endIndex = query.indexOf("}");
@@ -271,8 +270,8 @@ abstract class AbstractMicrometerFilterPerformer {
         LOG.trace("Extracted --> Metric name: {}, Filter: {}", metricName, filter);
 
         Map<String, Filter> map = new HashMap<>(4);
-        List<String> list = Arrays.asList(Strings.splitByComma(filter));
-        for (String entry : list) {
+        List<String> filterList = Arrays.asList(Strings.splitByComma(filter));
+        for (String entry : filterList) {
             // Negated regex
             if (entry.contains("!~")) {
                 String[] s = entry.split("!~");

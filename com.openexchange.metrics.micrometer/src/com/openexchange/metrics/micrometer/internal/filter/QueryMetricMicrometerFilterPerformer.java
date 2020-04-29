@@ -72,7 +72,6 @@ public class QueryMetricMicrometerFilterPerformer extends AbstractMicrometerFilt
         super(MicrometerFilterProperty.QUERY);
     }
 
-    @SuppressWarnings("unused")
     @Override
     public void applyFilter(MeterRegistry meterRegistry, ConfigurationService configurationService) {
         applyFilterFor(configurationService, (entry) -> {
