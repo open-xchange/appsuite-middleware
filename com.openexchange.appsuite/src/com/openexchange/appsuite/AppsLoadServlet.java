@@ -201,9 +201,9 @@ public class AppsLoadServlet extends SessionServlet {
 	@Override
 	protected void doGet(final HttpServletRequest req, final HttpServletResponse resp)
 			throws ServletException, IOException {
-	    if(req.getRequestURL().length() > UI_URI_LIMIT) {
-	        LOG.error("Url length exceeds maximum allowed characters.");
-	        writeErrorPage(HttpStatus.SC_REQUEST_URI_TOO_LONG, "The request is too long", resp);
+	    if (req.getRequestURL().length() > UI_URI_LIMIT) {
+	        LOG.error("Length of request URL exceeds maximum allowed characters of {}.", Integer.valueOf(UI_URI_LIMIT));
+	        writeErrorPage(HttpStatus.SC_REQUEST_URI_TOO_LONG, "Request-URI Too Long", resp);
 	        return;
 	    }
 		ServerSession session = getSessionObject(req, true);
