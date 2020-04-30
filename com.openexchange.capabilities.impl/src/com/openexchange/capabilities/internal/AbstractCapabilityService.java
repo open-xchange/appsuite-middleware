@@ -104,6 +104,7 @@ import com.openexchange.groupware.userconfiguration.service.PermissionAvailabili
 import com.openexchange.java.BoolReference;
 import com.openexchange.java.ConcurrentEnumMap;
 import com.openexchange.java.Strings;
+import com.openexchange.log.LogProperties;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.server.ServiceLookup;
@@ -993,15 +994,31 @@ public abstract class AbstractCapabilityService implements CapabilityService, Re
      */
     @Override
     public Map<String, Map<String, Set<String>>> getCapabilitiesSource(int userId, int contextId) throws OXException {
-        if ((userId > 0 && contextId > 0) && LOG.isDebugEnabled()) {
-            CapabilitySetImpl capabilitySet = optCachedCapabilitySet(userId, contextId);
-            if (capabilitySet == null) {
-                capabilitySet = getCapabilities(userId, contextId, null, true, getCacheOptionsFor(false, false));
-            } else {
-                alignPermissions(capabilitySet);
-            }
+        if (userId <= 0 || contextId <= 0) {
+            return doGetCapabilitiesSource(userId, contextId);
+        }
 
-            capabilitySet.printHistoryFor(userId, contextId, LOG);
+        // User and context identifier available
+        LogProperties.putUserProperties(userId, contextId);
+        try {
+            return doGetCapabilitiesSource(userId, contextId);
+        } finally {
+            LogProperties.removeUserProperties();
+        }
+    }
+
+    private Map<String, Map<String, Set<String>>> doGetCapabilitiesSource(int userId, int contextId) throws OXException {
+        if (userId > 0 && contextId > 0) {
+            if (LOG.isDebugEnabled()) {
+                CapabilitySetImpl capabilitySet = optCachedCapabilitySet(userId, contextId);
+                if (capabilitySet == null) {
+                    capabilitySet = getCapabilities(userId, contextId, null, true, getCacheOptionsFor(false, false));
+                } else {
+                    alignPermissions(capabilitySet);
+                }
+
+                capabilitySet.printHistoryFor(userId, contextId, LOG);
+            }
         }
 
         Map<String, Map<String, Set<String>>> sets = new LinkedHashMap<String, Map<String, Set<String>>>(6);
