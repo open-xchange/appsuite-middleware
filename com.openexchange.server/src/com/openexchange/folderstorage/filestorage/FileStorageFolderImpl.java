@@ -271,6 +271,11 @@ public final class FileStorageFolderImpl extends AbstractFolder {
         } else {
             cacheable = !fsFolder.isDefaultFolder();
         }
+
+        if (FileStorageDefaultFolderType.TRASH == defaultFolderType) {
+            cacheable = false;
+        }
+
         meta = fsFolder.getMeta();
         this.supportedCapabilities = getSupportedCapabilities(fsFolder, folderAccess);
         lastModified = fsFolder.getLastModifiedDate();

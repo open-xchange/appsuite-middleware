@@ -158,7 +158,12 @@ public class DatabaseFolder extends AbstractFolder {
         id = String.valueOf(objectId);
         name = folderObject.getFolderName();
         parent = String.valueOf(folderObject.getParentFolderID());
-        type = getType(folderObject.getType());
+        Type type = getType(folderObject.getType());
+        this.type = type;
+        if (cacheable && TrashType.getInstance().equals(type)) {
+            this.cacheable = false;
+        }
+
         contentType = getContentType(folderObject.getModule());
         if (contentType.getModule() == InfostoreContentType.getInstance().getModule()) {
             accountId = FileStorageAccounts.getQualifiedID(FileID.INFOSTORE_SERVICE_ID, FileID.INFOSTORE_ACCOUNT_ID);
