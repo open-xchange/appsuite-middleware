@@ -55,7 +55,6 @@ import org.junit.runners.Suite.SuiteClasses;
 import com.openexchange.html.bugtests.Bug16800Test;
 import com.openexchange.html.bugtests.Bug16843Test;
 import com.openexchange.html.bugtests.Bug17195Test;
-import com.openexchange.html.bugtests.Bug19428Test;
 import com.openexchange.html.bugtests.Bug19466Test;
 import com.openexchange.html.bugtests.Bug19522Test;
 import com.openexchange.html.bugtests.Bug20968Test;
@@ -135,7 +134,6 @@ import com.openexchange.html.vulntests.Bug57095VulTest;
     Bug17195Test.class,
     Bug17991VulTest.class,
     Bug18911VulTest.class,
-    Bug19428Test.class,
     Bug19466Test.class,
     Bug19522Test.class,
     Bug20968Test.class,
