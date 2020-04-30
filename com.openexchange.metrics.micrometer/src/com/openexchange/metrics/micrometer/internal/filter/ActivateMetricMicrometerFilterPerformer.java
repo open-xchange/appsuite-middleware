@@ -89,7 +89,7 @@ public class ActivateMetricMicrometerFilterPerformer extends AbstractMicrometerF
                 meterRegistry.config().meterFilter(Boolean.parseBoolean(entry.getValue()) ? MeterFilter.acceptNameStartsWith(metricId) : MeterFilter.denyNameStartsWith(metricId));
                 return;
             }
-            applyQuery(query, meterRegistry);
+            applyFilter(query, meterRegistry);
         });
     }
 }

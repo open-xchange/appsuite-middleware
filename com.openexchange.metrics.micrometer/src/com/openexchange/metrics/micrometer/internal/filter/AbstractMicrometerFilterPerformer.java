@@ -190,7 +190,7 @@ abstract class AbstractMicrometerFilterPerformer {
      *
      * @param filter The filter
      */
-    void applyQuery(String filter, MeterRegistry meterRegistry) {
+    void applyFilter(String filter, MeterRegistry meterRegistry) {
         Filter q = extractFilter(filter);
         if (q == null) {
             return;
@@ -231,10 +231,10 @@ abstract class AbstractMicrometerFilterPerformer {
         }
         int matchCount = 0;
         for (Tag t : id.getTags()) {
-            if (false == filter.getFilterMap().containsKey(t.getKey())) {
+            if (false == filter.getConditions().containsKey(t.getKey())) {
                 continue;
             }
-            Condition condition = filter.getFilterMap().get(t.getKey());
+            Condition condition = filter.getConditions().get(t.getKey());
             if (false == condition.isRegex() && condition.getValue().equals(t.getValue())) {
                 matchCount++;
                 continue;
@@ -242,7 +242,7 @@ abstract class AbstractMicrometerFilterPerformer {
             }
             matchCount += checkRegex(id, t, condition) ? 1 : 0;
         }
-        return matchCount == filter.getFilterMap().size();
+        return matchCount == filter.getConditions().size();
     }
 
     /**

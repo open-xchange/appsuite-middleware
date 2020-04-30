@@ -60,18 +60,18 @@ import java.util.Map;
 class Filter {
 
     private final String metricName;
-    private final Map<String, Condition> filterMap;
+    private final Map<String, Condition> conditionMap;
 
     /**
      * Initializes a new {@link Filter}.
      *
      * @param metricName The metric name
-     * @param filterMap The map with all the filters of the query
+     * @param conditionMap The map with all the conditions for this filter
      */
-    public Filter(String metricName, Map<String, Condition> filterMap) {
+    public Filter(String metricName, Map<String, Condition> conditionMap) {
         super();
         this.metricName = metricName;
-        this.filterMap = filterMap;
+        this.conditionMap = conditionMap;
     }
 
     /**
@@ -84,18 +84,18 @@ class Filter {
     }
 
     /**
-     * Gets a map of all filters of this query
+     * Gets a map of all conditions of this filter
      *
-     * @return A map of all filters of this query
+     * @return A map of all conditions of this filter
      */
-    public Map<String, Condition> getFilterMap() {
-        return filterMap;
+    public Map<String, Condition> getConditions() {
+        return conditionMap;
     }
 
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("Query [metricName=").append(metricName).append(", filterMap=").append(filterMap).append("]");
+        builder.append("Query [metricName=").append(metricName).append(", conditionMap=").append(conditionMap).append("]");
         return builder.toString();
     }
 }
