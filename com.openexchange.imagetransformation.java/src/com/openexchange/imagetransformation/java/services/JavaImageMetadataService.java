@@ -148,21 +148,23 @@ public class JavaImageMetadataService implements ImageMetadataService {
             } catch (ImageProcessingException e) {
                 throw new IOException(e.getMessage(), e);
             }
-            Directory heifDirectory = metadata.getFirstDirectoryOfType(HeifDirectory.class);
-            if (heifDirectory != null) {
 
-                long width = -1;
-                Long longObject = heifDirectory.getLongObject(HeifDirectory.TAG_IMAGE_WIDTH);
-                if (null != longObject) {
-                    width = longObject.longValue();
-                }
-                long height = -1;
-                longObject = heifDirectory.getLongObject(HeifDirectory.TAG_IMAGE_HEIGHT);
-                if (null != longObject) {
-                    height = longObject.longValue();
+            // extract width and height from available HeifDirectories
+            final Dimension dimension = new Dimension(0, 0);
+            Long longObject;
+            for (final Directory curDir : metadata.getDirectoriesOfType(HeifDirectory.class)) {
+                if (null != (longObject = curDir.getLongObject(HeifDirectory.TAG_IMAGE_WIDTH))) {
+                    dimension.width = Math.toIntExact(longObject.longValue());
                 }
 
-                return new Dimension(Math.toIntExact(width), Math.toIntExact(height));
+                if (null != (longObject = curDir.getLongObject(HeifDirectory.TAG_IMAGE_HEIGHT))) {
+                    dimension.height = Math.toIntExact(longObject.longValue());
+                }
+
+                // return if an assignment for width and height was successful
+                if ((0 != dimension.width) && (0 != dimension.height)) {
+                    return dimension;
+                }
             }
             // Doesn't contain a heif directory -> fall back to normal handling
             bufferedInputStream.reset();
