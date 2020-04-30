@@ -54,6 +54,7 @@ import java.time.Duration;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import com.openexchange.ajax.Client;
 import com.openexchange.ajax.requesthandler.oauth.OAuthConstants;
 import com.openexchange.exception.OXException;
@@ -64,6 +65,7 @@ import com.openexchange.login.Interface;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.oauth.provider.resourceserver.OAuthAccess;
 import com.openexchange.oauth.provider.resourceserver.scope.Scope;
+import com.openexchange.servlet.Constants;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.CountingHttpServletRequest;
 import com.openexchange.tools.servlet.http.Authorization.Credentials;
@@ -180,6 +182,12 @@ public class DAVServlet extends OXServlet {
             try {
                 request = new CountingHttpServletRequest(request);
             } catch (RateLimitedException e) {
+                // Mark optional HTTP session as rate-limited
+                HttpSession optionalHttpSession = request.getSession(false);
+                if (optionalHttpSession != null) {
+                    optionalHttpSession.setAttribute(Constants.HTTP_SESSION_ATTR_RATE_LIMITED, Boolean.TRUE);
+                }
+                // Send error response
                 e.send(response);
                 return;
             }

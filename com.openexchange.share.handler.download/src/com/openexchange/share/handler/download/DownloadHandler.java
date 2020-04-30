@@ -55,6 +55,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
@@ -182,7 +183,7 @@ public class DownloadHandler extends HttpAuthShareHandler {
                     fileHolder = new FileHolder(() -> document.getData(), document.getSize(), document.getMimeType(), document.getName());
                 }
             }
-            
+
             /*
              * prepare renderer-compatible request result
              */
@@ -205,6 +206,12 @@ public class DownloadHandler extends HttpAuthShareHandler {
             try {
                 renderer.write(request, result, resolvedShare.getRequest(), resolvedShare.getResponse());
             } catch (RateLimitedException e) {
+                // Mark optional HTTP session as rate-limited
+                HttpSession optionalHttpSession = resolvedShare.getRequest().getSession(false);
+                if (optionalHttpSession != null) {
+                    optionalHttpSession.setAttribute(com.openexchange.servlet.Constants.HTTP_SESSION_ATTR_RATE_LIMITED, Boolean.TRUE);
+                }
+                // Send error response
                 e.send(resolvedShare.getResponse());
             }
         } finally {
@@ -214,7 +221,7 @@ public class DownloadHandler extends HttpAuthShareHandler {
 
     /**
      * Creates an {@link InputStreamClosure} for the file with the specified identifier
-     * 
+     *
      * @param id The file identifier
      * @param version The file version
      * @param fileAccess The {@link IDBasedFileAccess}
@@ -236,7 +243,7 @@ public class DownloadHandler extends HttpAuthShareHandler {
 
     /**
      * Scans the specified IFileHolder and sends a 403 error to the client if the enclosed stream is infected.
-     * 
+     *
      * @param session The session
      * @param response The {@link HttpServletResponse} with which to send a 403 error to the client in case the file is infected
      * @param fileHolder The {@link IFileHolder}
@@ -269,7 +276,7 @@ public class DownloadHandler extends HttpAuthShareHandler {
      * Gets the identifier that uniquely identifies the specified {@link File}, being
      * either the MD5 checksum, or the file identifier (in that order). If none is present
      * then the fall-back identifier is returned
-     * 
+     *
      * @param file The {@link File}
      * @param contextId The context identifier
      * @return The unique identifier, never <code>null</code>

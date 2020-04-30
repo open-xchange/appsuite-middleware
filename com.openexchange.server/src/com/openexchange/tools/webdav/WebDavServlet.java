@@ -55,6 +55,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -230,6 +231,12 @@ public abstract class WebDavServlet extends HttpServlet {
                 super.service(req, resp);
             }
         } catch (RateLimitedException e) {
+            // Mark optional HTTP session as rate-limited
+            HttpSession optionalHttpSession = request.getSession(false);
+            if (optionalHttpSession != null) {
+                optionalHttpSession.setAttribute(com.openexchange.servlet.Constants.HTTP_SESSION_ATTR_RATE_LIMITED, Boolean.TRUE);
+            }
+            // Send error response
             e.send(resp);
         } finally {
             decrementRequests();
