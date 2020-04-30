@@ -60,6 +60,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -86,6 +87,7 @@ import com.openexchange.login.LoginRampUpService;
 import com.openexchange.login.LoginResult;
 import com.openexchange.login.multifactor.MultifactorChecker;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.servlet.Constants;
 import com.openexchange.session.Session;
 import com.openexchange.session.ThreadLocalSessionHolder;
 import com.openexchange.threadpool.AbstractTask;
@@ -241,6 +243,11 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
                         // Double the rate
                         if (doubleRate) {
                             RateLimiter.doubleRateLimitWindow(rateLimitKey, maxLoginRateTimeWindow() * 2);
+                        }
+                        // Mark optional HTTP session as rate-limited
+                        HttpSession optionalHttpSession = req.getSession(false);
+                        if (optionalHttpSession != null) {
+                            optionalHttpSession.setAttribute(Constants.HTTP_SESSION_ATTR_RATE_LIMITED, Boolean.TRUE);
                         }
                         throw rateLimitExceeded;
                     }

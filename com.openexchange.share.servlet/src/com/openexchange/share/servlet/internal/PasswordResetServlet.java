@@ -57,6 +57,7 @@ import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import com.google.common.io.BaseEncoding;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.context.ContextService;
@@ -190,6 +191,12 @@ public class PasswordResetServlet extends AbstractShareServlet {
                 }
             }
         } catch (RateLimitedException e) {
+            // Mark optional HTTP session as rate-limited
+            HttpSession optionalHttpSession = request.getSession(false);
+            if (optionalHttpSession != null) {
+                optionalHttpSession.setAttribute(com.openexchange.servlet.Constants.HTTP_SESSION_ATTR_RATE_LIMITED, Boolean.TRUE);
+            }
+            // Send error response
             e.send(response);
         } catch (OXException | NoSuchAlgorithmException e) {
             LOG.error("Error processing reset-password '{}': {}", request.getPathInfo(), e.getMessage(), e);
@@ -248,6 +255,12 @@ public class PasswordResetServlet extends AbstractShareServlet {
                 sendInvalidRequest(response);
             }
         } catch (RateLimitedException e) {
+            // Mark optional HTTP session as rate-limited
+            HttpSession optionalHttpSession = request.getSession(false);
+            if (optionalHttpSession != null) {
+                optionalHttpSession.setAttribute(com.openexchange.servlet.Constants.HTTP_SESSION_ATTR_RATE_LIMITED, Boolean.TRUE);
+            }
+            // Send error response
             e.send(response);
         } catch (OXException e) {
             LOG.error("Error processing reset-password '{}': {}", request.getPathInfo(), e.getMessage(), e);

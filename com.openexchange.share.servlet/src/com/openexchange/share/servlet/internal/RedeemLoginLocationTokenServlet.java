@@ -55,6 +55,7 @@ import java.util.Map.Entry;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
@@ -125,6 +126,12 @@ public class RedeemLoginLocationTokenServlet extends AbstractShareServlet {
             }
             jLoginLocation.write(response.getWriter());
         } catch (RateLimitedException e) {
+            // Mark optional HTTP session as rate-limited
+            HttpSession optionalHttpSession = request.getSession(false);
+            if (optionalHttpSession != null) {
+                optionalHttpSession.setAttribute(com.openexchange.servlet.Constants.HTTP_SESSION_ATTR_RATE_LIMITED, Boolean.TRUE);
+            }
+            // Send error response
             e.send(response);
         } catch (JSONException e) {
             if (e.getCause() instanceof IOException) {
