@@ -62,6 +62,7 @@
         description: Shard identifier to route the requiest accordingly
         schema:
           type: string
+      - $ref: '#/components/parameters/gblQueryParamLanguage'
     responses:
       '200':
         description: A html error page

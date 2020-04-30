@@ -30,6 +30,7 @@
         required: true
         schema:
           type: string
+      - $ref: '#/components/parameters/gblQueryParamLanguage'
     responses:
       '200':
         description: >

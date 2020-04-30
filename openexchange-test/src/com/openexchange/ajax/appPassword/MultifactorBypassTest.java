@@ -167,12 +167,12 @@ public class MultifactorBypassTest extends AbstractAppPasswordTest {
 
         // Check that the normal login requires multifactor
 
-        LoginResponse login = loginApi.doLogin(testUser.getLogin(), testUser.getPassword(), null, null, null, null, null, null, null, FALSE);
+        LoginResponse login = loginApi.doLogin(testUser.getLogin(), testUser.getPassword(), null, null, null, null, null, null, null, null, FALSE);
         assertThat("Requires multifactor", login.getRequiresMultifactor().booleanValue());
         loginApi.doLogout(login.getSession());
 
         // Now, check that our new app specific password does not
-        login = loginApi.doLogin(loginData.getLogin(), loginData.getPassword(), null, null, null, "mobile-something", null, null, null, FALSE);
+        login = loginApi.doLogin(loginData.getLogin(), loginData.getPassword(), null, null, null, null, "mobile-something", null, null, null, FALSE);
         checkResponse(login.getError(), login.getErrorDesc(), login);
         assertThat("Doesn't require multifactor", login.getRequiresMultifactor() == null);
         loginApi.doLogout(login.getSession());
