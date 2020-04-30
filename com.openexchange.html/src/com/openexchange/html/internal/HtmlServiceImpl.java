@@ -670,7 +670,7 @@ public final class HtmlServiceImpl implements HtmlService {
                     boolean[] modified = options.getModified();
 
                     // Parse the HTML content
-                    JsoupParser.getInstance().parse(html, handler, false);
+                    JsoupParser.getInstance().parse(html, handler, false, false);
 
                     // Check if modified by handler
                     if (options.isDropExternalImages() && null != modified) {
@@ -699,7 +699,7 @@ public final class HtmlServiceImpl implements HtmlService {
                     boolean[] modified = options.getModified();
 
                     // Parse the HTML content
-                    JsoupParser.getInstance().parse(html, handler, false);
+                    JsoupParser.getInstance().parse(html, handler, false, false);
 
                     // Check if modified by handler
                     if (options.isDropExternalImages() && null != modified) {
@@ -1958,7 +1958,7 @@ public final class HtmlServiceImpl implements HtmlService {
                 html = handler.getHTML();
             } else {
                 UrlReplacerJsoupHandler handler = new UrlReplacerJsoupHandler();
-                JsoupParser.getInstance().parse(html, handler, false);
+                JsoupParser.getInstance().parse(html, handler, false, true);
                 html = handler.getDocument().toString();
             }
         }
