@@ -140,6 +140,9 @@ public class IPCheckMBeanImpl extends AnnotatedDynamicStandardMBean implements I
      */
     private void startTask() {
         TimerService timerService = getService(TimerService.class);
+        if (timerService == null) {
+            throw new IllegalStateException("No such service: " + TimerService.class.getName());
+        }
         IPCheckMetricCollector collector = this.metricCollector;
         LinkedBlockingDeque<Measurement> tmp_measurements = this.measurements;
         Runnable task = new Runnable() {
