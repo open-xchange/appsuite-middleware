@@ -120,7 +120,7 @@ enum ReasonHandler {
     };
 
     /** The default failure response */
-    private static final FailureResponse DEFAULT_RESPONSE = new FailureResponse(FailureReason.UNTRUSTED_CERTIFICATE, SSLExceptionCode.UNTRUSTED_CERTIFICATE);
+    static final FailureResponse DEFAULT_RESPONSE = new FailureResponse(FailureReason.UNTRUSTED_CERTIFICATE, SSLExceptionCode.UNTRUSTED_CERTIFICATE);
 
     private Class<?> clazz;
 
@@ -133,7 +133,7 @@ enum ReasonHandler {
 
     /**
      * Handles the specified {@link Reason} of failure
-     * 
+     *
      * @param reason The {@link Reason} to handle
      */
     public static FailureResponse handle(Reason reason) {
@@ -147,7 +147,7 @@ enum ReasonHandler {
 
     /**
      * Checks the {@link Reason} of failure
-     * 
+     *
      * @param reason The {@link Reason} to check
      */
     public abstract FailureResponse checkReason(Reason reason);

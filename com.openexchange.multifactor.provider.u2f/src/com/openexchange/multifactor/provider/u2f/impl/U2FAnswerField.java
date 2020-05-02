@@ -74,7 +74,7 @@ public enum U2FAnswerField implements AnswerField {
     /**
      * The signature
      */
-    SIGNATURE_DATA("signatureData");
+    SIGNATURE_DATA("signatureData"),
     ;
 
     private final String key;

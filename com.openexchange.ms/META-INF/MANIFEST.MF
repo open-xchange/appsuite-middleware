@@ -9,6 +9,7 @@ Bundle-Activator: com.openexchange.ms.osgi.MsActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.hazelcast.core,
+ com.hazelcast.instance,
  com.hazelcast.nio,
  com.hazelcast.nio.serialization,
  com.openexchange.caching,
