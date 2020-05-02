@@ -311,7 +311,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
         }
     }
 
-    public MaintenanceReason[] listMaintenanceReasons(Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+    public MaintenanceReason[] listMaintenanceReasons(Credentials credentials) throws StorageException, InvalidCredentialsException {
         try {
             Credentials auth = credentials == null ? new Credentials("", "") : credentials;
             basicauth.doAuthentication(auth);
@@ -348,7 +348,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
         return listMaintenanceReason("*", credentials);
     }
 
-    public void createDatabase(final Database db, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+    public void createDatabase(final Database db, Credentials credentials) throws StorageException, InvalidCredentialsException, InvalidDataException {
         try {
             Credentials auth = credentials == null ? new Credentials("", "") : credentials;
             try {

@@ -710,11 +710,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
      * @param ctx The {@link Context}
      * @param usrdata The {@link User} data
      * @param connection the {@link Connection}
-     * @param quotaAffectedUserIDs The optional affected user ids after a quota change
-     * @param displayNameUpdate whether the display name was updated
-     * @throws OXException if an error is occurred
+     * @param quotaAffectedUserIDs The optional affected user identifiers after a quota change
+     * @param displayNameUpdate Whether the display name was updated
      */
-    private void updateJCSCaches(final Context ctx, final User usrdata, Connection connection, Set<Integer> quotaAffectedUserIDs, boolean displayNameUpdate) throws OXException {
+    private void updateJCSCaches(final Context ctx, final User usrdata, Connection connection, Set<Integer> quotaAffectedUserIDs, boolean displayNameUpdate) {
         int contextId = ctx.getId().intValue();
         int userId = usrdata.getId().intValue();
         CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
@@ -754,7 +753,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     cache.removeFromGroup(key, Integer.toString(contextId));
                 }
             }
-        } catch (OXException e) {
+        } catch (Exception e) {
             LOG.error("", e);
         }
     }

@@ -319,7 +319,9 @@ public class AntiVirusServiceImpl implements AntiVirusService {
             throw e;
         } finally {
             Duration duration = Duration.between(start, Instant.now());
-            metrics.recordScanResult(response.getStatusCode(), duration, contentLength);
+            if (response != null) {
+                metrics.recordScanResult(response.getStatusCode(), duration, contentLength);
+            }
             long transferRate = contentLength / duration.getSeconds();
             LOG.trace("Completed scanning of {} in {} - average rate {}/sec.", Strings.humanReadableByteCount(contentLength, true), duration, Strings.humanReadableByteCount(transferRate, true));
         }

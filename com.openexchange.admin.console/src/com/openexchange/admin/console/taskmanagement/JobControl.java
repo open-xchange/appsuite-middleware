@@ -87,18 +87,16 @@ public class JobControl extends BasicCommandlineOptions {
 
     private static final char OPT_FLUSH_SHORT = 'f';
 
-    private CLIOption list = null;
-
-    private CLIOption delete = null;
-
-    private CLIOption details = null;
-
-    private CLIOption flush = null;
-
     public static void main(final String[] args) {
         new JobControl(args);
     }
 
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    private CLIOption list;
+    private CLIOption delete;
+    private CLIOption details;
+    private CLIOption flush;
 
     public JobControl(final String[] args2) {
 
@@ -113,7 +111,7 @@ public class JobControl extends BasicCommandlineOptions {
 
             if (parser.getOptionValue(this.contextOption) != null) {
                 ctx = new Context();
-                ctx.setId(Integer.parseInt((String) parser.getOptionValue(this.contextOption)));
+                ctx.setId(Integer.valueOf((String) parser.getOptionValue(this.contextOption)));
             }
 
             final Credentials auth = new Credentials((String) parser.getOptionValue(this.adminUserOption), (String) parser.getOptionValue(this.adminPassOption));

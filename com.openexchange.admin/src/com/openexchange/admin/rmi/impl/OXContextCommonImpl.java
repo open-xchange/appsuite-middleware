@@ -228,12 +228,13 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
         }
     }
 
-    protected String callSearchDbLookupPluginMethods(String search_pattern, Credentials auth) throws StorageException {
+    protected String callSearchDbLookupPluginMethods(String searchPattern, Credentials auth) throws StorageException {
         final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
         if (null == pluginInterfaces) {
-            return search_pattern;
+            return searchPattern;
         }
 
+        String search_pattern = searchPattern;
         for (ContextDbLookupPluginInterface dblu : pluginInterfaces.getDBLookupPlugins().getServiceList()) {
             log(LogLevel.DEBUG, LOGGER, auth, null, "Calling searchTermDBLookup for plugin: {}", dblu.getClass().getName());
             try {
