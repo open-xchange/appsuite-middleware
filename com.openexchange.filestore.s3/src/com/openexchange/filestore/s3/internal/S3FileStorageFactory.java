@@ -49,64 +49,19 @@
 
 package com.openexchange.filestore.s3.internal;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.net.URI;
-import java.security.Key;
-import java.security.KeyPair;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import com.amazonaws.AmazonClientException;
-import com.amazonaws.AmazonServiceException;
-import com.amazonaws.ClientConfiguration;
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.AWSCredentialsProvider;
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.auth.policy.Policy;
-import com.amazonaws.auth.policy.Principal;
-import com.amazonaws.auth.policy.Resource;
-import com.amazonaws.auth.policy.Statement;
-import com.amazonaws.auth.policy.actions.S3Actions;
-import com.amazonaws.auth.policy.conditions.BooleanCondition;
-import com.amazonaws.auth.policy.conditions.StringCondition;
-import com.amazonaws.auth.policy.conditions.StringCondition.StringComparisonType;
-import com.amazonaws.auth.InstanceProfileCredentialsProvider;
-import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration;
-import com.amazonaws.regions.Regions;
-import com.amazonaws.services.s3.AmazonS3Builder;
-import com.amazonaws.services.s3.AmazonS3Client;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-import com.amazonaws.services.s3.AmazonS3EncryptionClientBuilder;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
-import com.amazonaws.services.s3.model.CreateBucketRequest;
-import com.amazonaws.services.s3.model.CryptoConfiguration;
-import com.amazonaws.services.s3.model.EncryptionMaterials;
-import com.amazonaws.services.s3.model.Region;
-import com.amazonaws.services.s3.model.SetBucketPolicyRequest;
-import com.amazonaws.services.s3.model.StaticEncryptionMaterialsProvider;
-import com.openexchange.config.ConfigTools;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadables;
 import com.openexchange.config.lean.LeanConfigurationService;
-import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
-import com.openexchange.filestore.InterestsAware;
 import com.openexchange.filestore.FileStorageProvider;
-import com.openexchange.java.Streams;
+import com.openexchange.filestore.InterestsAware;
+import com.openexchange.filestore.s3.internal.client.S3ClientRegistry;
+import com.openexchange.filestore.s3.internal.client.S3FileStorageClient;
+import com.openexchange.filestore.s3.internal.config.S3ClientConfig;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 
@@ -143,15 +98,19 @@ public class S3FileStorageFactory implements FileStorageProvider, InterestsAware
      */
     private static final int RANKING = 5634;
 
+    private final S3ClientRegistry clientRegistry;
+
     private final ServiceLookup services;
 
     /**
      * Initializes a new {@link S3FileStorageFactory}.
      *
-     * @param configService The configuration service to use
+     * @param clientRegistry The {@link S3ClientRegistry}
+     * @param services The service lookup
      */
-    public S3FileStorageFactory(ServiceLookup services) {
+    public S3FileStorageFactory(S3ClientRegistry clientRegistry, ServiceLookup services) {
         super();
+        this.clientRegistry = clientRegistry;
         this.services = services;
     }
 
@@ -169,18 +128,14 @@ public class S3FileStorageFactory implements FileStorageProvider, InterestsAware
              */
             String filestoreID = extractFilestoreID(uri);
             LOG.debug("Using \"{}\" as filestore ID.", filestoreID);
-            /*
-             * create client
-             */
-            LeanConfigurationService configService = services.getServiceSafe(LeanConfigurationService.class);
-            Map<String, String> optional = getOptional(filestoreID);
-            String encryption = getPropertySafe(S3Properties.ENCRYPTION, configService, optional);
-            S3EncryptionConfig s3EncryptionConfig = new S3EncryptionConfig(encryption);
-            AmazonS3ClientInfo clientInfo = initClient(filestoreID, configService, s3EncryptionConfig);
-            AmazonS3Client client = clientInfo.client;
-            String bucketName = initBucket(client, filestoreID, configService, s3EncryptionConfig);
-            LOG.debug("Using \"{}\" as bucket name.", bucketName);
-            return new S3FileStorage(uri, client, clientInfo.encrypted, s3EncryptionConfig.getServerSideEncryption() != null, bucketName, extractFilestorePrefix(uri), clientInfo.chunkSize);
+
+            S3ClientConfig clientConfig = S3ClientConfig.init(filestoreID, services.getServiceSafe(LeanConfigurationService.class));
+            S3FileStorageClient client = clientRegistry.getOrCreate(clientConfig);
+            LOG.debug("Using \"{}\" as bucket name for filestore \"{}\". Client is \"{}\" with scope \"{}\".",
+                clientConfig.getBucketName(), filestoreID, client.getKey(), clientConfig.getClientScope());
+            S3FileStorage s3FileStorage = new S3FileStorage(uri, extractFilestorePrefix(uri), clientConfig.getBucketName(), client);
+            s3FileStorage.ensureBucket();
+            return s3FileStorage;
         } catch (OXException ex) {
             Throwable cause = ex.getCause();
             if (cause instanceof AmazonS3Exception) {
@@ -203,348 +158,6 @@ public class S3FileStorageFactory implements FileStorageProvider, InterestsAware
     @Override
     public int getRanking() {
         return RANKING;
-    }
-
-    /**
-     * Initializes an {@link AmazonS3Client} as configured by the referenced authority part of the supplied URI.
-     *
-     * @param filestoreID The filestore ID
-     * @param configService The {@link LeanConfigurationService}
-     * @param encryptionConfig The {@link S3EncryptionConfig} of the given filestore
-     * @return The {@link AmazonS3ClientInfo} containing the configured {@link AmazonS3Client}
-     * @throws OXException
-     */
-    private AmazonS3ClientInfo initClient(String filestoreID, LeanConfigurationService configService, S3EncryptionConfig encryptionConfig) throws OXException {
-        /*
-         * prepare credentials provider
-         */
-        Map<String, String> optionals = getOptional(filestoreID);
-        AWSCredentialsProvider credentialsProvider;
-        {
-            String property = configService.getProperty(S3Properties.CREDENTIALS_SOURCE, optionals);
-            if (Strings.isEmpty(property)) {
-                property = S3CredentialsSource.STATIC.getIdentifier();
-            }
-            S3CredentialsSource credentialsSource = S3CredentialsSource.credentialsSourceFor(property);
-            if (credentialsSource == null) {
-                LOG.warn("Invalid value specified for \"{}\" property: {}. Assuming \"{}\" instead. Known values are: {}", S3Properties.CREDENTIALS_SOURCE.getFQPropertyName(optionals), property, S3CredentialsSource.STATIC, Arrays.toString(S3CredentialsSource.values()));
-                credentialsSource = S3CredentialsSource.STATIC;
-            }
-            if (S3CredentialsSource.IAM == credentialsSource) {
-                credentialsProvider = InstanceProfileCredentialsProvider.getInstance();
-            } else {
-                String accessKey = getPropertySafe(S3Properties.ACCESS_KEY, configService, optionals);
-                String secretKey = getPropertySafe(S3Properties.SECRET_KEY, configService, optionals);
-                AWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
-                credentialsProvider = new AWSStaticCredentialsProvider(credentials);
-            }
-        }
-        /*
-         * instantiate client
-         */
-        ClientConfiguration clientConfiguration = getClientConfiguration(filestoreID, configService);
-        AmazonS3Builder<?, ?> clientBuilder;
-        boolean encrypted;
-        {
-            if (encryptionConfig.getClientEncryption() == null || encryptionConfig.getClientEncryption().equals(EncryptionType.NONE)) {
-                AmazonS3ClientBuilder builder = AmazonS3ClientBuilder.standard()
-                    .withCredentials(credentialsProvider)
-                    .withClientConfiguration(clientConfiguration);
-                clientBuilder = builder;
-                encrypted = false;
-            } else {
-                AmazonS3EncryptionClientBuilder builder = AmazonS3EncryptionClientBuilder.standard()
-                    .withCredentials(credentialsProvider)
-                    .withClientConfiguration(clientConfiguration)
-                    .withEncryptionMaterials(new StaticEncryptionMaterialsProvider(getEncryptionMaterials(filestoreID, encryptionConfig.getClientEncryption(), configService)))
-                    .withCryptoConfiguration(new CryptoConfiguration());
-                clientBuilder = builder;
-                encrypted = true;
-            }
-        }
-        /*
-         * configure client
-         */
-        String endpoint = configService.getProperty(S3Properties.ENDPOINT, optionals);
-
-        if (Strings.isNotEmpty(endpoint)) {
-            clientBuilder.setEndpointConfiguration(new EndpointConfiguration(endpoint, null));
-        } else {
-            String region = configService.getProperty(S3Properties.REGION, optionals);
-            try {
-                clientBuilder.withRegion(Regions.fromName(region));
-            } catch (IllegalArgumentException e) {
-                throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, region);
-            }
-        }
-        if (configService.getBooleanProperty(S3Properties.PATH_STYLE_ACCESS, optionals)) {
-            clientBuilder.setPathStyleAccessEnabled(Boolean.TRUE);
-        }
-        clientBuilder.withRequestHandlers(ETagCorrectionHandler.getInstance());
-        long chunkSize;
-        String chunkSizeValue = configService.getProperty(S3Properties.CHUNK_SIZE, optionals);
-        try {
-            chunkSize = ConfigTools.parseBytes(chunkSizeValue);
-        } catch (NumberFormatException e) {
-            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, chunkSizeValue);
-        }
-        return new AmazonS3ClientInfo((AmazonS3Client) clientBuilder.build(), encrypted, chunkSize);
-    }
-
-    /**
-     * Gets the property safe
-     *
-     * @param prop The property to retrieve
-     * @param configurationService The {@link LeanConfigurationService} to use
-     * @param optionals The optionals to use
-     * @return The property
-     * @throws OXException
-     */
-    private static String getPropertySafe(S3Properties prop, LeanConfigurationService configurationService, Map<String, String> optionals) throws OXException {
-        String property = configurationService.getProperty(prop, optionals);
-        if (Strings.isEmpty(property)) {
-            throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(prop.getFQPropertyName(optionals));
-        }
-        return property;
-    }
-
-    /**
-     * Creates and optional map containing only the given filestore id
-     *
-     * @param filestoreId The filestore id
-     * @return The optional map
-     */
-    private static Map<String, String> getOptional(String filestoreId) {
-        return Collections.singletonMap(S3Properties.OPTIONAL_NAME, filestoreId);
-    }
-
-    /**
-     * Gets the client configuration for the given filestore id
-     *
-     * @param filestoreID The filestore id
-     * @param configService The {@link LeanConfigurationService} to use
-     * @return The {@link ClientConfiguration} for the filestore id
-     */
-    private ClientConfiguration getClientConfiguration(String filestoreID, LeanConfigurationService configService) {
-        ClientConfiguration clientConfiguration = new ClientConfiguration();
-
-        Map<String, String> optional = getOptional(filestoreID);
-        {
-            String signerOverride = configService.getProperty(S3Properties.SIGNER_OVERRIDE, optional);
-            if (Strings.isNotEmpty(signerOverride)) {
-                clientConfiguration.setSignerOverride(signerOverride);
-            }
-        }
-
-        {
-            String connectTimeout = configService.getProperty(S3Properties.CONNECT_TIMEOUT, optional);
-            if (Strings.isNotEmpty(connectTimeout)) {
-                try {
-                    clientConfiguration.setConnectionTimeout(Integer.parseInt(connectTimeout.trim()));
-                } catch (NumberFormatException e) {
-                    // Invalid connect timeout.
-                    LOG.warn("Invalid integer value specified for {}", S3Properties.CONNECT_TIMEOUT.getFQPropertyName(), e);
-                }
-            }
-        }
-
-        {
-            String readTimeout = configService.getProperty(S3Properties.READ_TIMEOUT, optional);
-            if (Strings.isNotEmpty(readTimeout)) {
-                try {
-                    clientConfiguration.setSocketTimeout(Integer.parseInt(readTimeout.trim()));
-                } catch (NumberFormatException e) {
-                    // Invalid connect timeout.
-                    LOG.warn("Invalid integer value specified for {}", S3Properties.READ_TIMEOUT.getFQPropertyName(), e);
-                }
-            }
-        }
-
-        {
-            String maxConnectionPoolSize = configService.getProperty(S3Properties.MAX_CONNECTION_POOL_SIZE, optional);
-            if (Strings.isNotEmpty(maxConnectionPoolSize)) {
-                try {
-                    clientConfiguration.setMaxConnections(Integer.parseInt(maxConnectionPoolSize.trim()));
-                } catch (NumberFormatException e) {
-                    // Invalid connect timeout.
-                    LOG.warn("Invalid integer value specified for {}", S3Properties.MAX_CONNECTION_POOL_SIZE.getFQPropertyName(), e);
-                }
-            }
-        }
-
-        String proxyHost = System.getProperty("http.proxyHost");
-        if (proxyHost != null) {
-            clientConfiguration.setProxyHost(proxyHost);
-            String proxyPort = System.getProperty("http.proxyPort");
-            if (proxyPort != null) {
-                clientConfiguration.setProxyPort(Integer.parseInt(proxyPort));
-            }
-
-            String nonProxyHosts = System.getProperty("http.nonProxyHosts");
-            if (Strings.isNotEmpty(nonProxyHosts)) {
-                clientConfiguration.setNonProxyHosts(nonProxyHosts);
-            }
-
-            String login = System.getProperty("http.proxyUser");
-            String password = System.getProperty("http.proxyPassword");
-
-            if (login != null && password != null) {
-                clientConfiguration.setProxyUsername(login);
-                clientConfiguration.setProxyPassword(password);
-            }
-        }
-        return clientConfiguration;
-    }
-
-    /**
-     * Creates a new {@link EncryptionMaterials} for the given filestore id and also checks if the client encryption type is applicable.
-     *
-     * @param filestoreID The filestore id
-     * @param clientEncryptionType The {@link EncryptionType} of the client
-     * @param configurationService The {@link LeanConfigurationService} to use
-     * @return The {@link EncryptionMaterials}
-     * @throws OXException in case of errors or if the client encryption type is not applicable
-     */
-    private EncryptionMaterials getEncryptionMaterials(String filestoreID, EncryptionType clientEncryptionType, LeanConfigurationService configurationService) throws OXException {
-        if (!EncryptionType.RSA.equals(clientEncryptionType)) {
-            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Unsupported encryption type: " + clientEncryptionType.getName());
-        }
-        Map<String, String> optional = getOptional(filestoreID);
-        String keyStore = getPropertySafe(S3Properties.RSA_KEYSTORE, configurationService, optional);
-        String password = getPropertySafe(S3Properties.RSA_PASSWORD, configurationService, optional);
-        KeyPair keyPair = extractKeys(keyStore, password);
-        return new EncryptionMaterials(keyPair);
-    }
-
-    /**
-     * Extracts the private/public key pair from a PKCS #12 keystore file referenced by the supplied path.
-     *
-     * @param pathToKeyStore The path to the keystore file
-     * @param password The password to access the keystore
-     * @return The key pair
-     * @throws OXException
-     */
-    private static KeyPair extractKeys(String pathToKeyStore, String password) throws OXException {
-        PrivateKey privateKey = null;
-        PublicKey publicKey = null;
-        char[] passwordChars = null == password ? null : password.toCharArray();
-        FileInputStream inputStream = null;
-        try {
-            inputStream = new FileInputStream(pathToKeyStore);
-            KeyStore keyStore = KeyStore.getInstance("PKCS12");
-            keyStore.load(inputStream, passwordChars);
-            for (Enumeration<String> aliases = keyStore.aliases(); aliases.hasMoreElements();) {
-                String alias = aliases.nextElement();
-                if (keyStore.isKeyEntry(alias)) {
-                    Key key = keyStore.getKey(alias, passwordChars);
-                    if (null != key && PrivateKey.class.isInstance(key)) {
-                        privateKey = (PrivateKey) keyStore.getKey(alias, passwordChars);
-                        Certificate certificate = keyStore.getCertificate(alias);
-                        publicKey = certificate.getPublicKey();
-                        break;
-                    }
-                }
-            }
-        } catch (FileNotFoundException e) {
-            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, "Error reading " + pathToKeyStore);
-        } catch (KeyStoreException e) {
-            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, "Error reading " + pathToKeyStore);
-        } catch (NoSuchAlgorithmException e) {
-            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, "Error reading " + pathToKeyStore);
-        } catch (CertificateException e) {
-            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, "Error reading " + pathToKeyStore);
-        } catch (IOException e) {
-            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, "Error reading " + pathToKeyStore);
-        } catch (UnrecoverableKeyException e) {
-            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, "Error reading " + pathToKeyStore);
-        } finally {
-            Streams.close(inputStream);
-        }
-        if (null == privateKey) {
-            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("No private key found in " + pathToKeyStore);
-        }
-        if (null == publicKey) {
-            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("No public key found in " + pathToKeyStore);
-        }
-        return new KeyPair(publicKey, privateKey);
-    }
-
-    /**
-     * Initializes the bucket denoted by the supplied URI, creating the bucket dynamically if needed.
-     *
-     * @param s3client The S3 client
-     * @param filestoreID The filestore ID
-     * @param configService The {@link LeanConfigurationService}
-     * @param encryptionConfig The {@link S3EncryptionConfig} for the given filestore
-     * @return The bucket name
-     * @throws OXException If initialization fails
-     */
-    private String initBucket(AmazonS3Client s3client, String filestoreID, LeanConfigurationService configService, S3EncryptionConfig encryptionConfig) throws OXException {
-        Map<String, String> optional = getOptional(filestoreID);
-        String bucketName = getPropertySafe(S3Properties.BUCKET_NAME, configService, optional);
-
-        boolean bucketExists = false;
-        try {
-            bucketExists = s3client.doesBucketExist(bucketName);
-        } catch (IllegalArgumentException e) {
-            throw S3ExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (AmazonClientException e) {
-            throw S3ExceptionCode.wrap(e);
-        } catch (RuntimeException e) {
-            throw S3ExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
-
-        if (false == bucketExists) {
-            String region = configService.getProperty(S3Properties.REGION, optional);
-
-            try {
-                s3client.createBucket(new CreateBucketRequest(bucketName, Region.fromValue(region)));
-
-                if (encryptionConfig.getServerSideEncryption() != null) {
-                    s3client.setBucketPolicy(new SetBucketPolicyRequest(bucketName, getSSEOnlyBucketPolicy(bucketName)));
-                }
-            } catch (IllegalArgumentException e) {
-                throw S3ExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
-            } catch (AmazonS3Exception e) {
-                if ("InvalidLocationConstraint".equals(e.getErrorCode())) {
-                    // Failed to create such a bucket
-                    throw S3ExceptionCode.BUCKET_CREATION_FAILED.create(bucketName, region);
-                }
-                throw S3ExceptionCode.wrap(e);
-            } catch (AmazonServiceException e) {
-                throw S3ExceptionCode.wrap(e);
-            } catch (AmazonClientException e) {
-                throw S3ExceptionCode.wrap(e);
-            } catch (RuntimeException e) {
-                throw S3ExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
-            }
-        }
-
-        return bucketName;
-    }
-
-    /**
-     * Gets the bucket policy for a server side encryption only bucket.
-     *
-     * @param bucket_name The name of the bucket
-     * @return The encryption only policy
-     */
-    private String getSSEOnlyBucketPolicy(String bucket_name) {
-        Policy bucket_policy = new Policy().withStatements(
-            new Statement(Statement.Effect.Deny)
-                .withId("DenyIncorrectEncryptionHeader")
-                .withPrincipals(Principal.AllUsers)
-                .withActions(S3Actions.PutObject)
-                .withResources(new Resource("arn:aws:s3:::" + bucket_name + "/*"))
-                .withConditions(new StringCondition(StringComparisonType.StringNotEquals, "s3:x-amz-server-side-encryption", "AES256")),
-            new Statement(Statement.Effect.Deny)
-                .withId("DenyUnEncryptedObjectUploads")
-                .withPrincipals(Principal.AllUsers)
-                .withActions(S3Actions.PutObject)
-                .withResources(new Resource("arn:aws:s3:::" + bucket_name + "/*"))
-                .withConditions(new BooleanCondition("s3:x-amz-server-side-encryption", true))
-                );
-        return bucket_policy.toJson();
     }
 
     /**
@@ -661,116 +274,6 @@ public class S3FileStorageFactory implements FileStorageProvider, InterestsAware
             throw new IllegalArgumentException("No 'authority' part specified in filestore URI");
         }
         return authority;
-    }
-
-    /**
-     *
-     * {@link AmazonS3ClientInfo}
-     *
-     * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
-     */
-    private static class AmazonS3ClientInfo {
-
-        /** The Amazon S3 client reference */
-        final AmazonS3Client client;
-
-        /** Whether associated Amazon S3 client reference has encryption enabled */
-        final boolean encrypted;
-
-        /** The chunk size to use for multipart uploads */
-        final long chunkSize;
-
-        AmazonS3ClientInfo(AmazonS3Client client, boolean encrypted, long chunkSize) {
-            super();
-            this.client = client;
-            this.encrypted = encrypted;
-            this.chunkSize = chunkSize;
-        }
-    }
-
-    /**
-     *
-     * {@link S3EncryptionConfig} holds encryption types for client- and server-side encryption for a single filestore.
-     *
-     * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
-     * @since v7.10.1
-     */
-    private static class S3EncryptionConfig {
-
-        private final EncryptionType clientEncryption;
-        private final EncryptionType serverSideEncryption;
-
-        /**
-         * Initializes a new {@link S3FileStorageFactory.S3EncryptionConfig}.
-         *
-         * @throws OXException In case the configuration is invalid
-         */
-        S3EncryptionConfig(String config) throws OXException {
-            if (Strings.isEmpty(config)) {
-                throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("An empty encryption type is invalid");
-            }
-            int index = config.indexOf('+');
-            if (index > 0) {
-                // E.g. rsa+sse-s3
-                String[] encryptionTypes = Strings.splitBy(config, '+', true);
-                if (encryptionTypes.length != 2) {
-                    throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("It's only allowed to combine one client side encryption type and one server side encryption type.");
-                }
-
-                EncryptionType typeA = EncryptionType.getTypeByName(encryptionTypes[0]);
-                if (typeA == null) {
-                    throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Unkown encryption type: " + encryptionTypes[0]);
-                }
-
-                EncryptionType typeB = EncryptionType.getTypeByName(encryptionTypes[1]);
-                if (typeB == null) {
-                    throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Unkown encryption type: " + encryptionTypes[1]);
-                }
-
-                if (typeA.isClientSideEncryption() == typeB.isClientSideEncryption()) {
-                    throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("It's only allowed to combine one client side encryption type and one server side encryption type.");
-                }
-
-                if (typeA.isClientSideEncryption()) {
-                    clientEncryption = typeA;
-                    serverSideEncryption = typeB;
-                } else {
-                    clientEncryption = typeB;
-                    serverSideEncryption = typeA;
-                }
-            } else {
-                EncryptionType type = EncryptionType.getTypeByName(config);
-                if (type == null) {
-                    throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Unkown encryption type: " + config);
-                }
-                if (type.isClientSideEncryption()) {
-                    clientEncryption = type;
-                    serverSideEncryption = null;
-                } else {
-                    clientEncryption = null;
-                    serverSideEncryption = type;
-                }
-            }
-        }
-
-        /**
-         * Gets the client encryption
-         *
-         * @return The client encryption
-         */
-        public EncryptionType getClientEncryption() {
-            return clientEncryption;
-        }
-
-        /**
-         * Gets the server-side encryption
-         *
-         * @return The server-side encryption
-         */
-        public EncryptionType getServerSideEncryption() {
-            return serverSideEncryption;
-        }
-
     }
 
 }

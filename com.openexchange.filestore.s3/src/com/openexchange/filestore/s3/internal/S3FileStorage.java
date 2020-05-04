@@ -70,11 +70,20 @@ import java.util.UUID;
 import javax.servlet.http.HttpServletResponse;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
-import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.auth.policy.Policy;
+import com.amazonaws.auth.policy.Principal;
+import com.amazonaws.auth.policy.Resource;
+import com.amazonaws.auth.policy.Statement;
+import com.amazonaws.auth.policy.actions.S3Actions;
+import com.amazonaws.auth.policy.conditions.BooleanCondition;
+import com.amazonaws.auth.policy.conditions.StringCondition;
+import com.amazonaws.auth.policy.conditions.StringCondition.StringComparisonType;
 import com.amazonaws.services.s3.internal.BucketNameUtils;
 import com.amazonaws.services.s3.model.AbortMultipartUploadRequest;
+import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.CompleteMultipartUploadRequest;
 import com.amazonaws.services.s3.model.CopyObjectRequest;
+import com.amazonaws.services.s3.model.CreateBucketRequest;
 import com.amazonaws.services.s3.model.DeleteObjectsRequest;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.InitiateMultipartUploadRequest;
@@ -85,13 +94,16 @@ import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PartETag;
 import com.amazonaws.services.s3.model.PutObjectResult;
+import com.amazonaws.services.s3.model.Region;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
+import com.amazonaws.services.s3.model.SetBucketPolicyRequest;
 import com.amazonaws.services.s3.model.UploadPartRequest;
 import com.amazonaws.services.s3.model.UploadPartResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorageCodes;
+import com.openexchange.filestore.s3.internal.client.S3FileStorageClient;
 import com.openexchange.filestore.utils.TempFileHelper;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
@@ -111,38 +123,29 @@ public class S3FileStorage implements FileStorage {
      */
     private static final String DELIMITER = "/";
 
-    private final AmazonS3Client amazonS3;
-    private final boolean clientSideEncryption;
-    private final boolean serverSideEncryption;
-    private final String bucketName;
-    private final String prefix;
-    private final long chunkSize;
     private final URI uri;
+    private final String prefix;
+    private final String bucketName;
+    private final S3FileStorageClient client;
 
     /**
      * Initializes a new {@link S3FileStorage}.
      *
      * @param uri The URI that fully qualifies this file storage
-     * @param amazonS3 The underlying S3 client
-     * @param clientSideEncryption Whether S3 client has client encryption enabled or not
-     * @param serverSideEncryption Whether to use server side encryption or not
-     * @param bucketName The bucket name to use
      * @param prefix The prefix to use; e.g. <code>"1337ctxstore"</code>
-     * @param chunkSize The chunk size in bytes to use for multipart uploads
+     * @param bucketName The bucket name to use
+     * @param client The file storage client
      */
-    public S3FileStorage(URI uri, AmazonS3Client amazonS3, boolean clientSideEncryption, boolean serverSideEncryption, String bucketName, String prefix, long chunkSize) {
+    public S3FileStorage(URI uri, String prefix, String bucketName, S3FileStorageClient client) {
         super();
         BucketNameUtils.validateBucketName(bucketName);
         if (Strings.isEmpty(prefix) || prefix.contains(DELIMITER)) {
             throw new IllegalArgumentException(prefix);
         }
         this.uri = uri;
-        this.amazonS3 = amazonS3;
-        this.clientSideEncryption = clientSideEncryption;
-        this.serverSideEncryption = serverSideEncryption;
-        this.bucketName = bucketName;
         this.prefix = prefix;
-        this.chunkSize = chunkSize;
+        this.bucketName = bucketName;
+        this.client = client;
         LOG.debug("S3 file storage initialized for \"{}/{}{}\"", bucketName, prefix, DELIMITER);
     }
 
@@ -174,7 +177,7 @@ public class S3FileStorage implements FileStorage {
             /*
              * proceed
              */
-            chunkedUpload = new S3ChunkedUpload(input, clientSideEncryption, chunkSize);
+            chunkedUpload = new S3ChunkedUpload(input, client.getEncryptionConfig().isClientEncryptionEnabled(), client.getChunkSize());
             chunk = chunkedUpload.next();
             if (false == chunkedUpload.hasNext()) {
                 /*
@@ -186,7 +189,7 @@ public class S3FileStorage implements FileStorage {
                  * upload in multipart chunks to provide the correct content length
                  */
                 InitiateMultipartUploadRequest initiateMultipartUploadRequest = new InitiateMultipartUploadRequest(bucketName, key).withObjectMetadata(prepareMetadataForSSE(new ObjectMetadata()));
-                String uploadID = amazonS3.initiateMultipartUpload(initiateMultipartUploadRequest).getUploadId();
+                String uploadID = client.getSdkClient().initiateMultipartUpload(initiateMultipartUploadRequest).getUploadId();
                 boolean completed = false;
                 try {
                     List<PartETag> partETags = new ArrayList<PartETag>();
@@ -202,12 +205,12 @@ public class S3FileStorage implements FileStorage {
                      * upload last part & complete upload
                      */
                     partETags.add(uploadPart(key, uploadID, partNumber++, chunk, true).getPartETag());
-                    amazonS3.completeMultipartUpload(new CompleteMultipartUploadRequest(bucketName, key, uploadID, partETags));
+                    client.getSdkClient().completeMultipartUpload(new CompleteMultipartUploadRequest(bucketName, key, uploadID, partETags));
                     completed = true;
                 } finally {
                     if (false == completed) {
                         try {
-                            amazonS3.abortMultipartUpload(new AbortMultipartUploadRequest(bucketName, key, uploadID));
+                            client.getSdkClient().abortMultipartUpload(new AbortMultipartUploadRequest(bucketName, key, uploadID));
                         } catch (AmazonClientException e) {
                             LOG.warn("Error aborting multipart upload", e);
                         }
@@ -242,7 +245,7 @@ public class S3FileStorage implements FileStorage {
             request.setRange(offset, fileSize - 1);
         }
         try {
-            return new AbortIfNotFullyConsumedS3ObjectInputStreamWrapper(amazonS3.getObject(request).getObjectContent());
+            return new AbortIfNotFullyConsumedS3ObjectInputStreamWrapper(client.getSdkClient().getObject(request).getObjectContent());
         } catch (AmazonClientException e) {
             if (AmazonServiceException.class.isInstance(e) && HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE == ((AmazonServiceException) e).getStatusCode()) {
                 throw FileStorageCodes.INVALID_RANGE.create(e, L(offset), L(length), name, L(fileSize));
@@ -260,7 +263,7 @@ public class S3FileStorage implements FileStorage {
         ListObjectsRequest listObjectsRequest = new ListObjectsRequest().withBucketName(bucketName).withDelimiter(DELIMITER).withPrefix(prefix + DELIMITER);
         ObjectListing objectListing;
         do {
-            objectListing = amazonS3.listObjects(listObjectsRequest);
+            objectListing = client.getSdkClient().listObjects(listObjectsRequest);
             for (S3ObjectSummary objectSummary : objectListing.getObjectSummaries()) {
                 files.add(removePrefix(objectSummary.getKey()));
             }
@@ -284,7 +287,7 @@ public class S3FileStorage implements FileStorage {
     public boolean deleteFile(String name) throws OXException {
         String key = addPrefix(name);
         try {
-            amazonS3.deleteObject(bucketName, key);
+            client.getSdkClient().deleteObject(bucketName, key);
             return true;
         } catch (AmazonClientException e) {
             throw wrap(e, key);
@@ -296,7 +299,7 @@ public class S3FileStorage implements FileStorage {
         if (null != names && 0 < names.length) {
             DeleteObjectsRequest deleteRequest = new DeleteObjectsRequest(bucketName).withKeys(addPrefix(names));
             try {
-                amazonS3.deleteObjects(deleteRequest);
+                client.getSdkClient().deleteObjects(deleteRequest);
             } catch (MultiObjectDeleteException e) {
                 List<DeleteError> errors = e.getErrors();
                 if (null != errors && 0 < errors.size()) {
@@ -326,7 +329,7 @@ public class S3FileStorage implements FileStorage {
                     if (null == fileList || 0 == fileList.size()) {
                         break; // no more files found
                     }
-                    amazonS3.deleteObjects(new DeleteObjectsRequest(bucketName).withKeys(addPrefix(fileList)));
+                    client.getSdkClient().deleteObjects(new DeleteObjectsRequest(bucketName).withKeys(addPrefix(fileList)));
                 } catch (MultiObjectDeleteException e) {
                     if (i < RETRY_COUNT - 1) {
                         LOG.warn("Not all files in bucket deleted yet, trying again.", e);
@@ -400,8 +403,8 @@ public class S3FileStorage implements FileStorage {
                 ObjectMetadata metadata = new ObjectMetadata();
                 metadata = prepareMetadataForSSE(metadata);
                 copyObjectRequest.setNewObjectMetadata(metadata);
-                amazonS3.copyObject(copyObjectRequest);
-                amazonS3.deleteObject(bucketName, tempKey);
+                client.getSdkClient().copyObject(copyObjectRequest);
+                client.getSdkClient().deleteObject(bucketName, tempKey);
                 return getMetadata(key).getContentLength();
             } catch (AmazonClientException e) {
                 throw wrap(e, key);
@@ -430,7 +433,7 @@ public class S3FileStorage implements FileStorage {
             ObjectMetadata metadata = new ObjectMetadata();
             metadata = prepareMetadataForSSE(metadata);
             copyObjectRequest.setNewObjectMetadata(metadata);
-            amazonS3.copyObject(copyObjectRequest);
+            client.getSdkClient().copyObject(copyObjectRequest);
             /*
              * upload $length bytes from previous file to new current file
              */
@@ -440,7 +443,7 @@ public class S3FileStorage implements FileStorage {
             InputStream inputStream = null;
             try {
                 inputStream = getFile(tempKey, 0, length);
-                amazonS3.putObject(bucketName, key, inputStream, metadata);
+                client.getSdkClient().putObject(bucketName, key, inputStream, metadata);
             } finally {
                 Streams.close(inputStream);
             }
@@ -448,11 +451,77 @@ public class S3FileStorage implements FileStorage {
             throw wrap(e, key);
         } finally {
             try {
-                amazonS3.deleteObject(bucketName, tempKey);
+                client.getSdkClient().deleteObject(bucketName, tempKey);
             } catch (AmazonClientException e) {
                 LOG.warn("Error cleaning up temporary file", e);
             }
         }
+    }
+
+    /**
+     * Ensures the configured bucket exists, creating it dynamically if needed.
+     *
+     * @throws OXException If initialization fails
+     */
+    public void ensureBucket() throws OXException {
+        boolean bucketExists = false;
+        try {
+            bucketExists = client.getSdkClient().doesBucketExist(bucketName);
+        } catch (IllegalArgumentException e) {
+            throw S3ExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (AmazonClientException e) {
+            throw S3ExceptionCode.wrap(e);
+        } catch (RuntimeException e) {
+            throw S3ExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+
+        if (false == bucketExists) {
+            String region = client.getSdkClient().getRegionName();
+            try {
+                client.getSdkClient().createBucket(new CreateBucketRequest(bucketName, Region.fromValue(region)));
+                if (client.getEncryptionConfig().isServerSideEncryptionEnabled()) {
+                    client.getSdkClient().setBucketPolicy(new SetBucketPolicyRequest(bucketName, getSSEOnlyBucketPolicy(bucketName)));
+                }
+            } catch (IllegalArgumentException e) {
+                throw S3ExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+            } catch (AmazonS3Exception e) {
+                if ("InvalidLocationConstraint".equals(e.getErrorCode())) {
+                    // Failed to create such a bucket
+                    throw S3ExceptionCode.BUCKET_CREATION_FAILED.create(bucketName, region);
+                }
+                throw S3ExceptionCode.wrap(e);
+            } catch (AmazonServiceException e) {
+                throw S3ExceptionCode.wrap(e);
+            } catch (AmazonClientException e) {
+                throw S3ExceptionCode.wrap(e);
+            } catch (RuntimeException e) {
+                throw S3ExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Gets the bucket policy for a server side encryption only bucket.
+     *
+     * @param bucket_name The name of the bucket
+     * @return The encryption only policy
+     */
+    private String getSSEOnlyBucketPolicy(String bucket_name) {
+        Policy bucket_policy = new Policy().withStatements(
+            new Statement(Statement.Effect.Deny)
+                .withId("DenyIncorrectEncryptionHeader")
+                .withPrincipals(Principal.AllUsers)
+                .withActions(S3Actions.PutObject)
+                .withResources(new Resource("arn:aws:s3:::" + bucket_name + "/*"))
+                .withConditions(new StringCondition(StringComparisonType.StringNotEquals, "s3:x-amz-server-side-encryption", "AES256")),
+            new Statement(Statement.Effect.Deny)
+                .withId("DenyUnEncryptedObjectUploads")
+                .withPrincipals(Principal.AllUsers)
+                .withActions(S3Actions.PutObject)
+                .withResources(new Resource("arn:aws:s3:::" + bucket_name + "/*"))
+                .withConditions(new BooleanCondition("s3:x-amz-server-side-encryption", true))
+                );
+        return bucket_policy.toJson();
     }
 
     /**
@@ -464,7 +533,7 @@ public class S3FileStorage implements FileStorage {
      */
     private ObjectMetadata getMetadata(String key) throws OXException {
         try {
-            return amazonS3.getObjectMetadata(bucketName, key);
+            return client.getSdkClient().getObjectMetadata(bucketName, key);
         } catch (AmazonClientException e) {
             throw wrap(e, key);
         }
@@ -479,7 +548,7 @@ public class S3FileStorage implements FileStorage {
      */
     private S3Object getObject(String key) throws OXException {
         try {
-            return amazonS3.getObject(bucketName, key);
+            return client.getSdkClient().getObject(bucketName, key);
         } catch (AmazonClientException e) {
             throw wrap(e, key);
         }
@@ -564,14 +633,14 @@ public class S3FileStorage implements FileStorage {
             metadata.setContentLength(chunk.getSize());
             metadata.setContentMD5(chunk.getMD5Digest());
             prepareMetadataForSSE(metadata);
-            return amazonS3.putObject(bucketName, key, chunk.getData(), metadata);
+            return client.getSdkClient().putObject(bucketName, key, chunk.getData(), metadata);
         } finally {
             Streams.close(chunk);
         }
     }
 
     private ObjectMetadata prepareMetadataForSSE(ObjectMetadata metadata) {
-        if (serverSideEncryption) {
+        if (client.getEncryptionConfig().isServerSideEncryptionEnabled()) {
             metadata.setSSEAlgorithm(ObjectMetadata.AES_256_SERVER_SIDE_ENCRYPTION);
         }
         return metadata;
@@ -601,7 +670,7 @@ public class S3FileStorage implements FileStorage {
             if (null != md5Digest) {
                 request.withMD5Digest(md5Digest);
             }
-            return amazonS3.uploadPart(request);
+            return client.getSdkClient().uploadPart(request);
         } finally {
             Streams.close(chunk);
         }

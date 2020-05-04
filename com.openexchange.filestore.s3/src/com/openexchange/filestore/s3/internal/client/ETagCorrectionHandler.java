@@ -47,41 +47,66 @@
  *
  */
 
-package com.openexchange.filestore.s3.metrics;
+package com.openexchange.filestore.s3.internal.client;
 
-import com.amazonaws.metrics.ByteThroughputProvider;
-import com.amazonaws.metrics.ServiceLatencyProvider;
-import com.amazonaws.metrics.ServiceMetricCollector;
-import io.micrometer.core.instrument.Counter;
-import io.micrometer.core.instrument.Metrics;
+import java.util.Map;
+import com.amazonaws.Request;
+import com.amazonaws.Response;
+import com.amazonaws.handlers.RequestHandler2;
+import com.amazonaws.services.s3.Headers;
+import com.amazonaws.services.s3.model.ObjectMetadata;
 
 /**
- * {@link S3FileStorageServiceMetricCollector}
+ * {@link ETagCorrectionHandler}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * Request handler to correct misspelled ETags in responses.
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.8.3
  */
-public class S3FileStorageServiceMetricCollector extends ServiceMetricCollector {
+public class ETagCorrectionHandler extends RequestHandler2 {
+
+    private static final ETagCorrectionHandler INSTANCE = new ETagCorrectionHandler();
 
     /**
-     * Initializes a new {@link S3FileStorageServiceMetricCollector}.
+     * Gets the handler instance to correct misspelled ETag headers in responses.
+     *
+     * @return The handler
      */
-    public S3FileStorageServiceMetricCollector() {
+    static ETagCorrectionHandler getInstance() {
+        return INSTANCE;
+    }
+
+    /**
+     * Initializes a new {@link ETagCorrectionHandler}.
+     */
+    private ETagCorrectionHandler() {
         super();
     }
 
     @Override
-    public void collectByteThroughput(final ByteThroughputProvider provider) {
-        Counter counter = Counter.builder("appsuite.filestore.s3.transferred")
-            .description("The size of s3 requests.")
-            .baseUnit("bytes")
-            .tags("type", provider.getThroughputMetricType().name())
-            .register(Metrics.globalRegistry);
-        counter.increment(Integer.toUnsignedLong(provider.getByteCount()));
+    public void beforeRequest(Request<?> request) {
+        // nothing to do
     }
 
     @Override
-    public void collectLatency(final ServiceLatencyProvider provider) {
-        // no-op
+    public void afterResponse(Request<?> request, Response<?> response) {
+        Object awsResponse = response.getAwsResponse();
+        if (ObjectMetadata.class.isInstance(awsResponse)) {
+            ObjectMetadata metadata = (ObjectMetadata) awsResponse;
+            Map<String, Object> headers = metadata.getRawMetadata();
+            if (null != headers) {
+                String etag = (String) headers.get("Etag");
+                if (null != etag) {
+                    metadata.setHeader(Headers.ETAG, etag.replace("\"", ""));
+                }
+            }
+        }
+    }
+
+    @Override
+    public void afterError(Request<?> request, Response<?> response, Exception e) {
+        // nothing to do
     }
 
 }

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,66 +47,27 @@
  *
  */
 
-package com.openexchange.filestore.s3.internal;
+package com.openexchange.filestore.s3;
 
-import java.util.Map;
-import com.amazonaws.Request;
-import com.amazonaws.Response;
-import com.amazonaws.handlers.RequestHandler2;
-import com.amazonaws.services.s3.Headers;
-import com.amazonaws.services.s3.model.ObjectMetadata;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.filestore.s3.internal.config.S3ClientConfigTest;
 
 /**
- * {@link ETagCorrectionHandler}
+ * {@link UnitTests}
  *
- * Request handler to correct misspelled ETags in responses.
- *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.8.3
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.10.4
  */
-public class ETagCorrectionHandler extends RequestHandler2 {
+@RunWith(Suite.class)
+@SuiteClasses({
+    S3ClientConfigTest.class
+})
+public class UnitTests {
 
-    private static final ETagCorrectionHandler INSTANCE = new ETagCorrectionHandler();
-
-    /**
-     * Gets the handler instance to correct misspelled ETag headers in responses.
-     *
-     * @return The handler
-     */
-    static ETagCorrectionHandler getInstance() {
-        return INSTANCE;
-    }
-
-    /**
-     * Initializes a new {@link ETagCorrectionHandler}.
-     */
-    private ETagCorrectionHandler() {
+    public UnitTests() {
         super();
-    }
-
-    @Override
-    public void beforeRequest(Request<?> request) {
-        // nothing to do
-    }
-
-    @Override
-    public void afterResponse(Request<?> request, Response<?> response) {
-        Object awsResponse = response.getAwsResponse();
-        if (ObjectMetadata.class.isInstance(awsResponse)) {
-            ObjectMetadata metadata = (ObjectMetadata) awsResponse;
-            Map<String, Object> headers = metadata.getRawMetadata();
-            if (null != headers) {
-                String etag = (String) headers.get("Etag");
-                if (null != etag) {
-                    metadata.setHeader(Headers.ETAG, etag.replace("\"", ""));
-                }
-            }
-        }
-    }
-
-    @Override
-    public void afterError(Request<?> request, Response<?> response, Exception e) {
-        // nothing to do
     }
 
 }

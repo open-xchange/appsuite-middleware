@@ -47,67 +47,66 @@
  *
  */
 
-package com.openexchange.filestore.s3.internal;
+package com.openexchange.filestore.s3.internal.config;
+
+import com.openexchange.java.Strings;
 
 /**
- * All available and supported {@link EncryptionType}s.
+ * {@link S3CredentialsSource} - The S3 credentials source indicating from what source to take credentials from to authenticate against S3
+ * end-point.
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.10.1
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.3
  */
-public enum EncryptionType {
-    /**
-     * No encryption at all
-     */
-    NONE("none", true),
-    /**
-     * Client side encryption via rsa
-     */
-    RSA("rsa", true),
-    /**
-     * Server side encryption
-     */
-    SSE_S3("sse-s3", false);
-
-    private String name;
-    private boolean clientSideEncryption;
+public enum S3CredentialsSource {
 
     /**
-     * Initializes a new {@link EncryptionType}.
+     * Credentials are taken from <code>"com.openexchange.filestore.s3.[filestoreID].accessKey"</code> property and
+     * <code>"com.openexchange.filestore.s3.[filestoreID].secretKey"</code> property respectively.
      */
-    private EncryptionType(String name, boolean clientSide) {
-        this.name = name;
-        this.clientSideEncryption = clientSide;
+    STATIC("static"),
+    /**
+     * Credentials are taken from integrated AWS Identity and Access Management (IAM). See also
+     * <a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/introduction.html">https://docs.aws.amazon.com/IAM/latest/UserGuide/introduction.html</a>
+     */
+    IAM("iam"),
+    ;
+
+    private final String identifier;
+
+    private S3CredentialsSource(String identifier) {
+        this.identifier = identifier;
     }
 
     /**
-     * Gets the name
+     * Gets the identifier.
      *
-     * @return The name
+     * @return The identifier
      */
-    public String getName() {
-        return name;
+    public String getIdentifier() {
+        return identifier;
+    }
+
+    @Override
+    public String toString() {
+        return identifier;
     }
 
     /**
-     * Gets the clientSideEncryption
+     * Gets the credentials source for given identifier.
      *
-     * @return The clientSideEncryption
+     * @param id The identifier to look-up by
+     * @return The associated credentials source or <code>null</code>
      */
-    public boolean isClientSideEncryption() {
-        return clientSideEncryption;
-    }
+    public static S3CredentialsSource credentialsSourceFor(String id) {
+        if (Strings.isEmpty(id)) {
+            return null;
+        }
 
-    /**
-     * Returns the {@link EncryptionType} or null if no {@link EncryptionType} with this name exists.
-     *
-     * @param name The name of the {@link EncryptionType}
-     * @return The {@link EncryptionType} or null
-     */
-    public static EncryptionType getTypeByName(String name) {
-        for (EncryptionType type : values()) {
-            if (type.getName().equals(name)) {
-                return type;
+        String toLookUp = Strings.asciiLowerCase(id).trim();
+        for (S3CredentialsSource credentialsSource : values()) {
+            if (toLookUp.equals(credentialsSource.identifier)) {
+                return credentialsSource;
             }
         }
         return null;

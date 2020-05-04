@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,109 +47,98 @@
  *
  */
 
-package com.openexchange.filestore.s3.internal;
+package com.openexchange.filestore.s3.internal.config;
 
+import com.openexchange.config.Interests;
+import com.openexchange.config.Reloadable;
 import com.openexchange.config.lean.Property;
 
 /**
- * {@link S3Properties}
+ * {@link S3ClientProperty}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.10.1
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.10.4
  */
-public enum S3Properties implements Property {
-
+public enum S3ClientProperty implements Property {
     /**
-     * "com.openexchange.filestore.s3.[filestoreID].endpoint"
+     * "com.openexchange.filestore.s3client.[clientID].endpoint"
      */
     ENDPOINT("endpoint", "s3.amazonaws.com"),
     /**
-     * "com.openexchange.filestore.s3.[filestoreID].bucketName"
-     */
-    BUCKET_NAME("bucketName"),
-    /**
-     * "com.openexchange.filestore.s3.[filestoreID].region"
+     * "com.openexchange.filestore.s3client.[clientID].region"
      */
     REGION("region", "us-west-2"),
     /**
-     * "com.openexchange.filestore.s3.[filestoreID].pathStyleAccess"
+     * "com.openexchange.filestore.s3client.[clientID].pathStyleAccess"
      */
     PATH_STYLE_ACCESS("pathStyleAccess", Boolean.TRUE),
     /**
-     * "com.openexchange.filestore.s3.[filestoreID].accessKey"
+     * "com.openexchange.filestore.s3client.[clientID].accessKey"
      */
-    ACCESS_KEY("accessKey"),
+    ACCESS_KEY("accessKey", null),
     /**
-     * "com.openexchange.filestore.s3.[filestoreID].secretKey"
+     * "com.openexchange.filestore.s3client.[clientID].secretKey"
      */
-    SECRET_KEY("secretKey"),
+    SECRET_KEY("secretKey", null),
     /**
-     * "com.openexchange.filestore.s3.[filestoreID].encryption"
+     * "com.openexchange.filestore.s3client.[clientID].encryption"
      */
     ENCRYPTION("encryption", EncryptionType.NONE.getName()),
     /**
-     * "com.openexchange.filestore.s3.[filestoreID].signerOverride"
+     * "com.openexchange.filestore.s3client.[clientID].signerOverride"
      */
     SIGNER_OVERRIDE("signerOverride", "S3SignerType"),
     /**
-     * "com.openexchange.filestore.s3.[filestoreID].chunkSize"
+     * "com.openexchange.filestore.s3client.[clientID].chunkSize"
      */
     CHUNK_SIZE("chunkSize", "5 MB"),
     /**
-     * "com.openexchange.filestore.s3.[filestoreID].encryption.rsa.keyStore"
+     * "com.openexchange.filestore.s3client.[clientID].encryption.rsa.keyStore"
      */
-    RSA_KEYSTORE("encryption.rsa.keyStore"),
+    RSA_KEYSTORE("encryption.rsa.keyStore", null),
     /**
-     * "com.openexchange.filestore.s3.[filestoreID].encryption.rsa.password"
+     * "com.openexchange.filestore.s3client.[clientID].encryption.rsa.password"
      */
-    RSA_PASSWORD("encryption.rsa.password"),
+    RSA_PASSWORD("encryption.rsa.password", null),
     /**
-     * "com.openexchange.filestore.s3.[filestoreID].connectTimeout"
+     * "com.openexchange.filestore.s3client.[clientID].connectTimeout"
      */
     CONNECT_TIMEOUT("connectTimeout", "10000"),
     /**
-     * "com.openexchange.filestore.s3.[filestoreID].readTimeout"
+     * "com.openexchange.filestore.s3client.[clientID].readTimeout"
      */
     READ_TIMEOUT("readTimeout", "50000"),
     /**
-     * "com.openexchange.filestore.s3.[filestoreID].maxConnectionPoolSize"
+     * "com.openexchange.filestore.s3client.[clientID].maxConnectionPoolSize"
      */
     MAX_CONNECTION_POOL_SIZE("maxConnectionPoolSize", "50"),
     /**
-     * "com.openexchange.filestore.s3.metricCollection"
+     * "com.openexchange.filestore.s3client.[clientID].credentialsSource"
      */
-    METRIC_COLLECTION("com.openexchange.filestore.s3.", "metricCollection", Boolean.FALSE),
+    CREDENTIALS_SOURCE("credentialsSource", S3CredentialsSource.STATIC.getIdentifier()),
     /**
-     * "com.openexchange.filestore.s3.[filestoreID].credentialsSource"
+     * "com.openexchange.filestore.s3client.[clientID].buckets"
      */
-    CREDENTIALS_SOURCE("credentialsSource", S3CredentialsSource.STATIC.getIdentifier())
+    BUCKETS("buckets", ""),
     ;
 
-    public static final String OPTIONAL_NAME = "filestoreID";
-    private static final String PREFIX = "com.openexchange.filestore.s3.[" + OPTIONAL_NAME + "].";
+    public static final String PREFIX = "com.openexchange.filestore.s3client.";
+    public static final String QUALIFIER_CLIENT_ID = "clientID";
+    private static final String FQN_PREFIX = PREFIX + '[' + QUALIFIER_CLIENT_ID + "].";
 
-    private final Object defaultValue;
+    private final String name;
     private final String fqn;
+    private final Object defaultValue;
 
     /**
-     * Initializes a new {@link S3Properties}.
+     * Initializes a new {@link S3ClientProperty}.
+     *
+     * @param name The name of the property
+     * @param defaultValue The default value
      */
-    private S3Properties(String propName) {
-        this(propName, null);
-    }
-
-    /**
-     * Initializes a new {@link S3Properties}.
-     */
-    private S3Properties(String propName, Object defaultValue) {
-        this(PREFIX, propName, defaultValue);
-    }
-
-    /**
-     * Initializes a new {@link S3Properties}.
-     */
-    private S3Properties(String prefix, String propName, Object defaultValue) {
-        this.fqn = prefix + propName;
+    private S3ClientProperty(String name, Object defaultValue) {
+        this.name = name;
+        this.fqn = FQN_PREFIX + name;
         this.defaultValue = defaultValue;
     }
 
@@ -161,6 +150,23 @@ public enum S3Properties implements Property {
     @Override
     public Object getDefaultValue() {
         return defaultValue;
+    }
+
+    /**
+     * Gets the short name of the {@link S3ClientProperty}
+     *
+     * @return The short name
+     */
+    public String getShortName() {
+        return name;
+    }
+
+    /**
+     * Gets a wildcard string that can be used to signal {@link Interests} by {@link Reloadable}s
+     * to get callbacks whenever a configuration property was changed and reloaded.
+     */
+    public static String getInterestsWildcard() {
+        return PREFIX + "*";
     }
 
 }

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,41 +47,35 @@
  *
  */
 
-package com.openexchange.filestore.s3.metrics;
+package com.openexchange.filestore.s3.internal.config;
 
-import com.amazonaws.metrics.ByteThroughputProvider;
-import com.amazonaws.metrics.ServiceLatencyProvider;
-import com.amazonaws.metrics.ServiceMetricCollector;
-import io.micrometer.core.instrument.Counter;
-import io.micrometer.core.instrument.Metrics;
 
 /**
- * {@link S3FileStorageServiceMetricCollector}
+ * Denotes the scope of an S3 API client. I.e. if it is shared across multiple filestore
+ * instances or not.
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.10.4
  */
-public class S3FileStorageServiceMetricCollector extends ServiceMetricCollector {
+public enum S3ClientScope {
 
     /**
-     * Initializes a new {@link S3FileStorageServiceMetricCollector}.
+     * The S3 client instance is used only for a single filestore instance.
      */
-    public S3FileStorageServiceMetricCollector() {
-        super();
-    }
+    DEDICATED,
+    /**
+     * The S3 client instance is shared between multiple filestore instances that
+     * rely on the very same configuration and have only different buckets set.
+     */
+    SHARED,
+    ;
 
-    @Override
-    public void collectByteThroughput(final ByteThroughputProvider provider) {
-        Counter counter = Counter.builder("appsuite.filestore.s3.transferred")
-            .description("The size of s3 requests.")
-            .baseUnit("bytes")
-            .tags("type", provider.getThroughputMetricType().name())
-            .register(Metrics.globalRegistry);
-        counter.increment(Integer.toUnsignedLong(provider.getByteCount()));
+    /**
+     * Checks whether this {@link S3ClientScope} is of type {@link S3ClientScope#SHARED} or not
+     *
+     * @return <code>true</code> if it of type {@link S3ClientScope#SHARED}, <code>false</code> otherwise
+     */
+    public boolean isShared() {
+        return this.equals(SHARED);
     }
-
-    @Override
-    public void collectLatency(final ServiceLatencyProvider provider) {
-        // no-op
-    }
-
 }
