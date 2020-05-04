@@ -67,7 +67,6 @@ import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.categories.MailCategoriesConfigService;
 import com.openexchange.mail.categories.MailCategoriesConstants;
 import com.openexchange.mail.categories.MailCategoriesExceptionCodes;
@@ -82,10 +81,13 @@ import com.openexchange.mail.categories.ruleengine.MailCategoriesRuleEngine;
 import com.openexchange.mail.categories.ruleengine.MailCategoriesRuleEngineExceptionCodes;
 import com.openexchange.mail.categories.ruleengine.MailCategoryRule;
 import com.openexchange.mail.categories.ruleengine.RuleType;
+import com.openexchange.mail.config.MailProperties;
+import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.search.ANDTerm;
 import com.openexchange.mail.search.HeaderTerm;
 import com.openexchange.mail.search.ORTerm;
 import com.openexchange.mail.search.SearchTerm;
+import com.openexchange.mailaccount.Account;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.AbstractTask;
@@ -104,6 +106,7 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
     private final static String FLAG_PREFIX = "$ox_";
     private static final String FROM_HEADER = "from";
 
+    static final String FULLNAME = MailFolder.MAIL_PREFIX + Account.DEFAULT_ID_STR + MailProperties.getInstance().getDefaultSeparator() + "INBOX";
     private static final String RULE_DEFINITION_PROPERTY_PREFIX = "com.openexchange.mail.categories.rules.";
     private static final String STATUS_NOT_YET_STARTED = "notyetstarted";
     private static final String STATUS_ERROR = "error";
@@ -547,11 +550,12 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
                 }
             }
 
-            // remove all previous category flags
-            String[] flagsToRemove = getAllFlags(session, false, false);
-            newRule.addFlagsToRemove(flagsToRemove);
-
-            setRule(session, category, newRule);
+            if (newRule != null) {
+                // remove all previous category flags
+                String[] flagsToRemove = getAllFlags(session, false, false);
+                newRule.addFlagsToRemove(flagsToRemove);
+                setRule(session, category, newRule);
+            }
 
         } else {
             // create rule for reorganize only
@@ -565,9 +569,11 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
                 }
             }
 
-            // remove all previous category flags
-            String[] flagsToRemove = getAllFlags(session, false, false);
-            newRule.addFlagsToRemove(flagsToRemove);
+            if (newRule != null) {
+                // remove all previous category flags
+                String[] flagsToRemove = getAllFlags(session, false, false);
+                newRule.addFlagsToRemove(flagsToRemove);
+            }
         }
 
         // Reorganize if necessary
@@ -577,12 +583,11 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
                 boolean supported = ruleEngine.applyRule(session, newRule);
                 if (supported == false) {
                     SearchTerm<?> searchTerm = getSearchTerm(newRule);
-                    FullnameArgument fa = new FullnameArgument("INBOX");
-                    if (searchTerm != null) {
-                        MailCategoriesOrganizer.organizeExistingMails(session, fa.getFullName(), searchTerm, flag, newRule.getFlagsToRemove());
+                    if (searchTerm != null && newRule != null) {
+                        MailCategoriesOrganizer.organizeExistingMails(session, FULLNAME, searchTerm, flag, newRule.getFlagsToRemove());
                     }
                 }
-            } catch (OXException e) {
+            } catch (@SuppressWarnings("unused") OXException e) {
                 if (warnings.isEmpty()) {
                     warnings.add(MailCategoriesOrganizeExceptionCodes.UNABLE_TO_ORGANIZE.create());
                 }
@@ -640,10 +645,9 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
 
     @Override
     public void addMails(Session session, List<MailObjectParameter> mails, String category) throws OXException {
-        FullnameArgument fa = new FullnameArgument("INBOX");
         String flag = getFlagByCategory(session, category);
         String[] allFlags = getAllFlags(session, false, false);
-        MailCategoriesOrganizer.organizeMails(session, fa.getFullName(), mails, flag, allFlags);
+        MailCategoriesOrganizer.organizeMails(session, FULLNAME, mails, flag, allFlags);
     }
 
     @Override
@@ -733,12 +737,11 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
                     rules.add(rule);
                 }
                 mailCategoriesService.getRuleEngine().initRuleEngineForUser(session, rules);
-                FullnameArgument fa = new FullnameArgument("INBOX");
                 for (MailCategoryRule rule : rules) {
                     boolean supported = mailCategoriesService.getRuleEngine().applyRule(session, rule);
                     if (supported == false) {
                         SearchTerm<?> searchTerm = mailCategoriesService.getSearchTerm(rule);
-                        MailCategoriesOrganizer.organizeExistingMails(session, fa.getFullname(), searchTerm, rule.getFlag(), null);
+                        MailCategoriesOrganizer.organizeExistingMails(session, FULLNAME, searchTerm, rule.getFlag(), null);
                     }
                 }
 
