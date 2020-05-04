@@ -66,9 +66,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.Scanner;
 import javax.management.openmbean.CompositeData;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLException;
@@ -170,7 +170,9 @@ public class TransportHandler {
         httpURLConnection.setReadTimeout(2500);
         httpURLConnection.setUseCaches(false);
         httpURLConnection.setDoOutput(true);
-        httpURLConnection.setFixedLengthStreamingMode(report.length()); // This enforces 'sun.net.www.protocol.http.HttpURLConnection' to use a "streaming" output stream; otherwise outgoing data is stored into a ByteArrayOutputStream (likely causing an OOME; see Bug 57260)
+        if (metadata.getBoolean("needsComposition") == false) {
+            httpURLConnection.setFixedLengthStreamingMode(report.length()); // This enforces 'sun.net.www.protocol.http.HttpURLConnection' to use a "streaming" output stream; otherwise outgoing data is stored into a ByteArrayOutputStream (likely causing an OOME; see Bug 57260)
+        }
         httpURLConnection.setDoInput(true);
         httpURLConnection.setRequestMethod("POST");
         httpURLConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
