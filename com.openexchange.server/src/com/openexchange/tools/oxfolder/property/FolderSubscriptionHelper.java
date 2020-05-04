@@ -70,7 +70,7 @@ import com.openexchange.folderstorage.database.contentType.TaskContentType;
 public class FolderSubscriptionHelper {
 
     private static final String SUBSCRIBED_KEY = "subscribed";
-    private static final String SYNC_KEY = "used_for_sync";
+    private static final String SYNC_KEY = "usedForSync";
 
     /**
      * A map of supported modules mapped to their property prefix names
