@@ -81,8 +81,6 @@ import com.openexchange.mail.categories.ruleengine.MailCategoriesRuleEngine;
 import com.openexchange.mail.categories.ruleengine.MailCategoriesRuleEngineExceptionCodes;
 import com.openexchange.mail.categories.ruleengine.MailCategoryRule;
 import com.openexchange.mail.categories.ruleengine.RuleType;
-import com.openexchange.mail.config.MailProperties;
-import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.search.ANDTerm;
 import com.openexchange.mail.search.HeaderTerm;
 import com.openexchange.mail.search.ORTerm;
@@ -106,7 +104,7 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
     private final static String FLAG_PREFIX = "$ox_";
     private static final String FROM_HEADER = "from";
 
-    static final String FULLNAME = MailFolder.MAIL_PREFIX + Account.DEFAULT_ID_STR + MailProperties.getInstance().getDefaultSeparator() + "INBOX";
+    static final String FULLNAME = com.openexchange.mail.utils.MailFolderUtility.prepareFullname(Account.DEFAULT_ID, "INBOX");
     private static final String RULE_DEFINITION_PROPERTY_PREFIX = "com.openexchange.mail.categories.rules.";
     private static final String STATUS_NOT_YET_STARTED = "notyetstarted";
     private static final String STATUS_ERROR = "error";
