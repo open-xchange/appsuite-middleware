@@ -10,6 +10,7 @@ build documentation:
   script:
     - echo $CI_COMMIT_REF_NAME
     - echo $CI_REPOSITORY_URL
+    - rm -R -f middleware
     - git clone --depth 1 --no-checkout --branch $CI_COMMIT_REF_NAME $CI_REPOSITORY_URL middleware
     - cd middleware
     - git config core.sparsecheckout true
