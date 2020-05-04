@@ -1,3 +1,9 @@
+open-xchange-spamhandler-parallels (7.10.2-26) stable; urgency=medium
+
+  * Build for patch 2020-05-11 (5719)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 04 May 2020 14:04:26 +0000
+
 open-xchange-spamhandler-parallels (7.10.2-25) stable; urgency=medium
 
   * Build for patch 2020-04-14 (5676)
