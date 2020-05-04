@@ -2170,6 +2170,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         try {
             // delete all users
             int contextId = ctx.getId().intValue();
+            Integer adminId = null;
             for (User user : users) {
                 int userId = user.getId().intValue();
 
@@ -2300,6 +2301,25 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt = write_ox_con.prepareStatement("DELETE FROM calendar_alarm_trigger WHERE cid = ? AND eventId = ?");
                 stmt.setInt(1, contextId);
                 stmt.setString(2, eventId);
+                stmt.executeUpdate();
+                stmt.close();
+
+                // Reassign guestCreatedBy values
+                if(destUser == null && adminId==null) {
+                    // Identifiy context admin
+                    stmt = write_ox_con.prepareStatement("SELECT user FROM user_setting_admin WHERE cid = ?");
+                    stmt.setInt(1, contextId);
+                    ResultSet rs = stmt.executeQuery();
+                    if(rs.next()) {
+                        adminId = I(rs.getInt("user"));
+                    }
+                    rs.close();
+                    stmt.close();
+                }
+                stmt = write_ox_con.prepareStatement("UPDATE user SET guestCreatedBy = ? WHERE cid = ? AND guestCreatedBy = ?");
+                stmt.setInt(1, destUser==null ? i(adminId) : i(destUser));
+                stmt.setInt(2, contextId);
+                stmt.setInt(3, userId);
                 stmt.executeUpdate();
                 stmt.close();
 
