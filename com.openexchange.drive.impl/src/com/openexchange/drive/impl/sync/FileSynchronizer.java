@@ -384,9 +384,6 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
 
     @Override
     protected int processConflictingChange(IntermediateSyncResult<FileVersion> result, ThreeWayComparison<FileVersion> comparison) throws OXException {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Conflicting change detected [root={}, path={}]:\n{}", session.getRootFolderID(), path, dumpComparisonDetails(comparison));
-        }
         if (Change.DELETED == comparison.getServerChange() && Change.DELETED == comparison.getClientChange()) {
             /*
              * both deleted, just let client remove it's metadata
