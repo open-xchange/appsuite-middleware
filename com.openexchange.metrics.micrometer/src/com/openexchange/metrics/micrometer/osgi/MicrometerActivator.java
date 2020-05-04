@@ -70,8 +70,8 @@ import com.openexchange.metrics.micrometer.internal.filter.DistributionMaximumMi
 import com.openexchange.metrics.micrometer.internal.filter.DistributionMinimumMicrometerFilterPerformer;
 import com.openexchange.metrics.micrometer.internal.filter.DistributionPercentilesMicrometerFilterPerformer;
 import com.openexchange.metrics.micrometer.internal.filter.DistributionSLAMicrometerFilterPerformer;
-import com.openexchange.metrics.micrometer.internal.filter.MicrometerFilterPerformer;
 import com.openexchange.metrics.micrometer.internal.filter.FilterMetricMicrometerFilterPerformer;
+import com.openexchange.metrics.micrometer.internal.filter.MicrometerFilterPerformer;
 import com.openexchange.metrics.micrometer.internal.property.MicrometerFilterProperty;
 import com.openexchange.metrics.micrometer.internal.property.MicrometerProperty;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -95,7 +95,6 @@ public class MicrometerActivator extends HousekeepingActivator implements Reload
     private static final String SERVLET_BIND_POINT = "/metrics";
 
     private volatile PrometheusMeterRegistry prometheusRegistry;
-
     private final List<MicrometerFilterPerformer> filterPerformers;
 
     /**
@@ -160,7 +159,10 @@ public class MicrometerActivator extends HousekeepingActivator implements Reload
      * @param configService The configuration service
      */
     private void applyMeterFilters(ConfigurationService configService) {
-        Metrics.removeRegistry(prometheusRegistry);
+        if (prometheusRegistry != null) {
+            Metrics.removeRegistry(prometheusRegistry);
+            prometheusRegistry.close();
+        }
         prometheusRegistry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
         filterPerformers.stream().forEach(p -> p.applyFilter(prometheusRegistry, configService));
         String value = configService.getProperty(MicrometerFilterProperty.ENABLE.getFQPropertyName() + ".all", Boolean.TRUE.toString());
@@ -186,11 +188,12 @@ public class MicrometerActivator extends HousekeepingActivator implements Reload
 
     /**
      * Unregisters the {@link #SERVLET_BIND_POINT} servlet
-     *
-     * @throws OXException if the servlet cannot be unregistered
      */
-    private void unregisterServlet() throws OXException {
-        HttpService httpService = getServiceSafe(HttpService.class);
+    private void unregisterServlet() {
+        HttpService httpService = getService(HttpService.class);
+        if (httpService == null) {
+            return;
+        }
         httpService.unregister(SERVLET_BIND_POINT);
     }
 
