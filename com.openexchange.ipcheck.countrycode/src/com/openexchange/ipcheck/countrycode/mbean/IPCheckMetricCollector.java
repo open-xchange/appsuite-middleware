@@ -49,6 +49,7 @@
 
 package com.openexchange.ipcheck.countrycode.mbean;
 
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Map;
 import com.openexchange.ipcheck.countrycode.AcceptReason;
@@ -75,15 +76,17 @@ public class IPCheckMetricCollector {
      */
     public IPCheckMetricCollector() {
         super();
-        acceptCounters = new EnumMap<>(AcceptReason.class);
+        Map<AcceptReason, Counter> acceptCounters = new EnumMap<>(AcceptReason.class);
         for (AcceptReason reason : AcceptReason.values()) {
             acceptCounters.put(reason, getCounter("accepted", reason.name()));
         }
+        this.acceptCounters = Collections.unmodifiableMap(acceptCounters);
 
-        denyCounters = new EnumMap<>(DenyReason.class);
+        Map<DenyReason, Counter> denyCounters = new EnumMap<>(DenyReason.class);
         for (DenyReason reason : DenyReason.values()) {
             denyCounters.put(reason, getCounter("denied", reason.name()));
         }
+        this.denyCounters = Collections.unmodifiableMap(denyCounters);
     }
 
     public void incrementAccepted(AcceptReason reason) {
@@ -107,13 +110,13 @@ public class IPCheckMetricCollector {
             case acceptedWhiteListed:
                 return acceptCounters.get(AcceptReason.WHITE_LISTED).count();
             case acceptedIPChanges:
-                return acceptCounters.values().stream().map(c -> Double.valueOf(c.count())).reduce(Double.valueOf(0d), Double::sum).doubleValue();
+                return acceptCounters.values().stream().mapToDouble(c -> c.count()).sum();
             case deniedCountryChanged:
                 return denyCounters.get(DenyReason.COUNTRY_CHANGE).count();
             case deniedException:
                 return denyCounters.get(DenyReason.EXCEPTION).count();
             case deniedIPChanges:
-                return denyCounters.values().stream().map(c -> Double.valueOf(c.count())).reduce(Double.valueOf(0d), Double::sum).doubleValue();
+                return denyCounters.values().stream().mapToDouble(c -> c.count()).sum();
             case totalIPChanges:
                 return Double.sum(getCount(IPCheckMetric.acceptedIPChanges), getCount(IPCheckMetric.deniedIPChanges));
             default:

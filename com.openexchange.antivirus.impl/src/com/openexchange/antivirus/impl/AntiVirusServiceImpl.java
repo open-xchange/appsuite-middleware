@@ -306,6 +306,15 @@ public class AntiVirusServiceImpl implements AntiVirusService {
         return builder;
     }
 
+    /**
+     * Wraps ICAP request execution by logging and monitoring
+     *
+     * @param client
+     * @param request
+     * @param contentLength
+     * @return
+     * @throws IOException
+     */
     private ICAPResponse logAndMonitorExecution(ICAPClient client, ICAPRequest request, long contentLength) throws IOException {
         Instant start = Instant.now();
         ICAPResponse response = null;

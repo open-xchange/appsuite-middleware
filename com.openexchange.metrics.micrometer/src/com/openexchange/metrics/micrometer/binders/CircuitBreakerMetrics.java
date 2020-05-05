@@ -65,7 +65,7 @@ import net.jodah.failsafe.util.Ratio;
  * {@link CircuitBreakerMetrics}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.10.3
+ * @since v7.10.4
  */
 public class CircuitBreakerMetrics implements MeterBinder {
 

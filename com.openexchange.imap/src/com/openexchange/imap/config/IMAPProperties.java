@@ -852,9 +852,10 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
     }
 
     /**
-     * initMonitoringCommandExecutor
+     * Initializes and configures the command executor that wraps all performed IMAP commands with proper monitoring.
      *
-     * @return
+     * @param configuration Current {@link ConfigurationService} instance
+     * @return The command executor
      */
     private static MonitoringCommandExecutor initMonitoringCommandExecutor(ConfigurationService configuration) {
         MonitoringCommandExecutor.Config monitoringConfig = new MonitoringCommandExecutor.Config();
@@ -871,6 +872,15 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         return monitoringCommandExecutor;
     }
 
+    /**
+     * Initializes IMAP circuit breakers and returns their respective command executors.
+     *
+     * @param configuration Current {@link ConfigurationService} instance
+     * @param logBuilder Log output {@link StringBuilder}
+     * @param args Log output format arguments
+     * @param monitoringCommandExecutor The monitoring command executor as delegate for the actual IMAP commands
+     * @return List of command executors in expected evaluation order
+     */
     private static List<CommandExecutor> initCircuitBreakers(ConfigurationService configuration, StringBuilder logBuilder,
             List<Object> args, MonitoringCommandExecutor monitoringCommandExecutor) {
         // Load generic breaker

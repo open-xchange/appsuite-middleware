@@ -281,6 +281,9 @@ public class MonitoringCommandExecutor implements CommandExecutor {
 
     // -------------------------------------------------------------------------------------------------------------------------------------
 
+    /**
+     * Monitoring configuration.
+     */
     public static final class Config {
 
         public static final String DEFAULT_COMMAND_WHITELIST_STRING = "SELECT, EXAMINE, CREATE, DELETE, RENAME, SUBSCRIBE, UNSUBSCRIBE, LIST, LSUB,"
@@ -417,6 +420,14 @@ public class MonitoringCommandExecutor implements CommandExecutor {
         }
     }
 
+    /**
+     * Extracts the basic IMAP command by removing potential {@code UID} prefixes and anything after the first subsequent whitespace.
+     * Finally the extracted command is matched against the configured whitelist and - if contained - returned as is or rewritten
+     * to {@code OTHER}.
+     *
+     * @param command The IMAP command as written out to the IMAP connection
+     * @return The sanitized value for per-command monitoring
+     */
     private String sanitizeCommand(final String command) {
         int startIndex;
         int endIndex;
@@ -440,6 +451,14 @@ public class MonitoringCommandExecutor implements CommandExecutor {
         return "OTHER";
     }
 
+    /**
+     * Records command execution time with proper tags based on given input and monitoring configuration.
+     *
+     * @param protocolAccess The protocol access
+     * @param command The performed command as it was written out to the IMAP connection
+     * @param status The response status, i.e. {@code OK}, {@code NO}, {@code BAD}, {@code BYE}
+     * @param duration The duration
+     */
     private void recordStatus(ProtocolAccess protocolAccess, String command, String status, Duration duration) {
         boolean isPrimaryAccount = "true".equals(protocolAccess.getProps().getProperty(PROP_PRIMARY_ACCOUNT));
         if (!config.isMeasureExternalAccounts() && !isPrimaryAccount) {

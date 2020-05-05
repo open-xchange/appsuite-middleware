@@ -82,9 +82,9 @@ final class MetricHandler {
     }
 
     /**
-     * recordScanIOError
+     * Monitor timing of an ICAP request that failed due to an IO error
      *
-     * @param duration
+     * @param duration Duration from request start to occurred error
      */
     public void recordScanIOError(Duration duration) {
         Timer timer = Timer.builder("appsuite.antivirus.scans.duration")
@@ -95,11 +95,11 @@ final class MetricHandler {
     }
 
     /**
-     * recordScanResult
+     * Monitor timing of an ICAP request that was answered by a proper HTTP response
      *
-     * @param statusCode
-     * @param duration
-     * @param contentLength
+     * @param statusCode The HTTP status response from the ICAP server
+     * @param duration Duration from request start to received response
+     * @param contentLength Length of request body in bytes to update the transfer rate meter
      */
     public void recordScanResult(int statusCode, Duration duration, long contentLength) {
         Timer timer = Timer.builder("appsuite.antivirus.scans.duration")
