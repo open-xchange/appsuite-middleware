@@ -80,7 +80,88 @@ public class Capabilities {
         return EMPTY_SET;
     }
 
+   /**
+    * Gets an immutable capability set containing only the specified capability. This set is serializable.
+    *
+    * @param capability The sole capability to be stored in the returned capability set.
+    * @return An immutable capability set containing only the specified capability
+    * @throws IllegalArgumentException If given capability is <code>null</code>
+    */
+   public static final CapabilitySet singletonCapabilitySet(Capability capability) {
+       if (capability == null) {
+        throw new IllegalArgumentException("Capability must not be null");
+    }
+       return new SingletonCapabilitySet(capability);
+   }
+
     // -------------------------------------------------------------------------------------------------------------------------------------
+
+    private static class SingletonCapabilitySet implements CapabilitySet, Serializable {
+
+        private static final long serialVersionUID = -8834649119751603760L;
+
+        private final Capability capability;
+
+        SingletonCapabilitySet(Capability capability) {
+            super();
+            this.capability = capability;
+        }
+
+        @Override
+        public int size() {
+            return 1;
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return false;
+        }
+
+        @Override
+        public boolean contains(Capability capability) {
+            return this.capability.equals(capability);
+        }
+
+        @Override
+        public boolean contains(String id) {
+            return this.capability.getId().equals(id);
+        }
+
+        @Override
+        public Capability get(String id) {
+            return this.capability.getId().equals(id) ? this.capability : null;
+        }
+
+        @Override
+        public Iterator<Capability> iterator() {
+            return Collections.<Capability> singletonList(capability).iterator();
+        }
+
+        @Override
+        public boolean add(Capability capability) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public boolean remove(Capability capability) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public boolean remove(String id) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void clear() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public Set<Capability> asSet() {
+            return Collections.singleton(capability);
+        }
+    }
 
     private static class EmptyCapabilitySet implements CapabilitySet, Serializable {
 
