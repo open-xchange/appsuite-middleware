@@ -11,7 +11,7 @@
         description: The comment the attendee wants to transmit
         required: false
         schema:
-          type: String
+          type: string
       - in: query
         name: dataSource
         description: >-
