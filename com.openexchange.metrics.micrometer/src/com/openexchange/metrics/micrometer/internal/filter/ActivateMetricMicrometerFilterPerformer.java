@@ -83,7 +83,7 @@ public class ActivateMetricMicrometerFilterPerformer extends AbstractMicrometerF
                 return;
             }
             String metricId = extractMetricId(key, MicrometerFilterProperty.ENABLE);
-            String query = FilterMetricMicrometerFilterPerformer.filtrerRegistry.get(metricId);
+            String query = FilterMetricMicrometerFilterPerformer.filterRegistry.get(metricId);
             if (Strings.isEmpty(query)) {
                 LOGGER.debug("Applying enable/disable meter filter for '{}'", metricId);
                 meterRegistry.config().meterFilter(Boolean.parseBoolean(entry.getValue()) ? MeterFilter.acceptNameStartsWith(metricId) : MeterFilter.denyNameStartsWith(metricId));
@@ -91,5 +91,18 @@ public class ActivateMetricMicrometerFilterPerformer extends AbstractMicrometerF
             }
             applyFilter(query, meterRegistry);
         });
+    }
+
+    /**
+     * Applies the specified filter as filter
+     *
+     * @param filter The filter
+     */
+    private void applyFilter(String filter, MeterRegistry meterRegistry) {
+        Filter q = extractFilter(filter);
+        if (q == null) {
+            return;
+        }
+        meterRegistry.config().meterFilter(MeterFilter.accept(p -> matchTags(p, q)));
     }
 }

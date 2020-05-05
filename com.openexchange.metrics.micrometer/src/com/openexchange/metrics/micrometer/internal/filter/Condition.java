@@ -59,20 +59,20 @@ class Condition {
 
     private final String value;
     private final boolean isRegex;
-    private final boolean negatedRegex;
+    private final boolean negated;
 
     /**
      * Initializes a new {@link Condition}.
      *
      * @param value The condition value
      * @param isRegex whether the condition is a regex
-     * @param negatedRegex whether the contained regex should be negated
+     * @param negated whether the condition should be negated
      */
-    public Condition(String value, boolean isRegex, boolean negatedRegex) {
+    public Condition(String value, boolean isRegex, boolean negated) {
         super();
         this.value = value;
         this.isRegex = isRegex;
-        this.negatedRegex = negatedRegex;
+        this.negated = negated;
     }
 
     /**
@@ -94,18 +94,18 @@ class Condition {
     }
 
     /**
-     * Whether the regex should be negated or not
+     * Whether the condition should be negated or not
      *
-     * @return <code>true</code> if the regex should be negated, <code>false</code> otherwise
+     * @return <code>true</code> if the condition should be negated, <code>false</code> otherwise
      */
-    public boolean isRegexNegated() {
-        return negatedRegex;
+    public boolean isNegated() {
+        return negated;
     }
 
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("Condition [value=").append(value).append(", isRegex=").append(isRegex).append(", negatedRegex=").append(negatedRegex).append("]");
+        builder.append("Condition [value=").append(value).append(", isRegex=").append(isRegex).append(", negated=").append(negated).append("]");
         return builder.toString();
     }
 }

@@ -49,8 +49,6 @@
 
 package com.openexchange.metrics.micrometer.internal.filter;
 
-import java.util.HashMap;
-import java.util.Map;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.metrics.micrometer.internal.property.MicrometerFilterProperty;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -63,8 +61,6 @@ import io.micrometer.core.instrument.MeterRegistry;
  */
 public class FilterMetricMicrometerFilterPerformer extends AbstractMicrometerFilterPerformer implements MicrometerFilterPerformer {
 
-    public static final Map<String, String> filtrerRegistry = new HashMap<>();
-
     /**
      * Initializes a new {@link FilterMetricMicrometerFilterPerformer}.
      */
@@ -74,8 +70,9 @@ public class FilterMetricMicrometerFilterPerformer extends AbstractMicrometerFil
 
     @Override
     public void applyFilter(MeterRegistry meterRegistry, ConfigurationService configurationService) {
+        filterRegistry.clear();
         applyFilterFor(configurationService, (entry) -> {
-            filtrerRegistry.put(extractMetricId(entry.getKey(), MicrometerFilterProperty.FILTER), entry.getValue());
+            filterRegistry.put(extractMetricId(entry.getKey(), MicrometerFilterProperty.FILTER), entry.getValue());
         });
     }
 }

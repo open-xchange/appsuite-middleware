@@ -80,7 +80,7 @@ import io.micrometer.core.instrument.distribution.DistributionStatisticConfig;
 abstract class AbstractMicrometerFilterPerformer {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractMicrometerFilterPerformer.class);
-
+    static final Map<String, String> filterRegistry = new HashMap<>();
     private final MicrometerFilterProperty property;
 
     /**
@@ -113,7 +113,7 @@ abstract class AbstractMicrometerFilterPerformer {
         LOG.debug("Applying filter for '{}'", id);
         String key = entry.getKey();
         String metricId = extractMetricId(key, property);
-        String filter = FilterMetricMicrometerFilterPerformer.filtrerRegistry.get(metricId);
+        String filter = filterRegistry.get(metricId);
         if (Strings.isEmpty(filter)) {
             return applyConfig(entry, metricId, config);
         }
@@ -186,90 +186,12 @@ abstract class AbstractMicrometerFilterPerformer {
     }
 
     /**
-     * Applies the specified filter as filter
-     *
-     * @param filter The filter
-     */
-    void applyFilter(String filter, MeterRegistry meterRegistry) {
-        Filter q = extractFilter(filter);
-        if (q == null) {
-            return;
-        }
-        meterRegistry.config().meterFilter(MeterFilter.accept(p -> matchTags(p, q)));
-    }
-
-    ///////////////////////////////// HELPERS /////////////////////////////
-
-    /**
-     * Returns all properties that start with the specified prefix.
-     *
-     * @param configurationService The configuration service
-     * @param property The prefix of the property
-     * @return The found properties or an empty map
-     */
-    private Map<String, String> getPropertiesStartingWith(ConfigurationService configurationService, MicrometerFilterProperty property) {
-        try {
-            return configurationService.getProperties((name, value) -> name.startsWith(property.getFQPropertyName()));
-        } catch (OXException e) {
-            LOG.error("", e);
-            return ImmutableMap.of();
-        }
-    }
-
-    /**
-     * Matches all tags from the specified {@link Id} with the tags specified
-     * in the filter.
-     *
-     * @param id The id
-     * @param filter The {@link Filter}
-     * @return <code>true</code> if all tags match the filter; <code>false</code> otherwise
-     */
-    private boolean matchTags(Meter.Id id, Filter filter) {
-        LOG.debug("Metric: {}, Filter: {}", id, filter);
-        if (false == id.getName().equals(filter.getMetricName())) {
-            return false;
-        }
-        int matchCount = 0;
-        for (Tag t : id.getTags()) {
-            if (false == filter.getConditions().containsKey(t.getKey())) {
-                continue;
-            }
-            Condition condition = filter.getConditions().get(t.getKey());
-            if (false == condition.isRegex() && condition.getValue().equals(t.getValue())) {
-                matchCount++;
-                continue;
-
-            }
-            matchCount += checkRegex(id, t, condition) ? 1 : 0;
-        }
-        return matchCount == filter.getConditions().size();
-    }
-
-    /**
-     * Checks the regex against the specified metric
-     *
-     * @param id The metric id
-     * @param filter The filter
-     * @return <code>true</code> if the regex matches at one of the tags; <code>false</code> otherwise
-     */
-    private boolean checkRegex(Meter.Id id, Tag tag, Condition condition) {
-        String regex = condition.getValue();
-        try {
-            boolean match = Pattern.compile(regex).matcher(tag.getValue()).matches();
-            return condition.isRegexNegated() ? !match : match;
-        } catch (PatternSyntaxException e) {
-            LOG.error("The specified regex '{}' for metric '{}' is invalid.", regex, id, e);
-            return false;
-        }
-    }
-
-    /**
      * Extracts the filter from the specified filter string
      *
      * @param filter The filter string
      * @return The Filter or <code>null</code> if no filter can be extracted
      */
-    private Filter extractFilter(String filter) {
+    Filter extractFilter(String filter) {
         LOG.trace("Extracting filter: {}", filter);
         int startIndex = filter.indexOf("{") + 1;
         int endIndex = filter.indexOf("}");
@@ -293,17 +215,91 @@ abstract class AbstractMicrometerFilterPerformer {
                     continue;
                 }
             }
-            // Rest
+            // Negated exact match
+            if (entry.contains("!=")) {
+                String[] s = entry.split("!=");
+                if (s.length == 2) {
+                    map.put(s[0], new Condition(s[1].replaceAll("\"", ""), false, true));
+                    continue;
+                }
+            }
             String[] split = Strings.splitBy(entry, '=', true);
             if (split.length != 2) {
                 continue;
             }
+            // Regex
             if (false == split[1].startsWith("~")) {
                 map.put(split[0], new Condition(split[1].replaceAll("\"", ""), false, false));
                 continue;
             }
+            // Exact match
             map.put(split[0], new Condition(split[1].substring(1).replaceAll("\"", ""), true, false));
         }
         return new Filter(metricName, map);
+    }
+
+    /**
+     * Matches all tags from the specified {@link Id} with the tags specified
+     * in the filter.
+     *
+     * @param id The id
+     * @param filter The {@link Filter}
+     * @return <code>true</code> if all tags match the filter; <code>false</code> otherwise
+     */
+    boolean matchTags(Meter.Id id, Filter filter) {
+        LOG.debug("Metric: {}, Filter: {}", id, filter);
+        if (false == id.getName().equals(filter.getMetricName())) {
+            return false;
+        }
+        int matchCount = 0;
+        for (Tag t : id.getTags()) {
+            if (false == filter.getConditions().containsKey(t.getKey())) {
+                continue;
+            }
+            Condition condition = filter.getConditions().get(t.getKey());
+            if (false == condition.isRegex() && condition.getValue().equals(t.getValue()) && !condition.isNegated()) {
+                matchCount++;
+                continue;
+
+            }
+            matchCount += checkRegex(id, t, condition) ? 1 : 0;
+        }
+        return matchCount == filter.getConditions().size();
+    }
+
+    ///////////////////////////////// HELPERS /////////////////////////////
+
+    /**
+     * Returns all properties that start with the specified prefix.
+     *
+     * @param configurationService The configuration service
+     * @param property The prefix of the property
+     * @return The found properties or an empty map
+     */
+    private Map<String, String> getPropertiesStartingWith(ConfigurationService configurationService, MicrometerFilterProperty property) {
+        try {
+            return configurationService.getProperties((name, value) -> name.startsWith(property.getFQPropertyName()));
+        } catch (OXException e) {
+            LOG.error("", e);
+            return ImmutableMap.of();
+        }
+    }
+
+    /**
+     * Checks the regex against the specified metric
+     *
+     * @param id The metric id
+     * @param filter The filter
+     * @return <code>true</code> if the regex matches at one of the tags; <code>false</code> otherwise
+     */
+    private boolean checkRegex(Meter.Id id, Tag tag, Condition condition) {
+        String regex = condition.getValue();
+        try {
+            boolean match = Pattern.compile(regex).matcher(tag.getValue()).matches();
+            return condition.isNegated() ? !match : match;
+        } catch (PatternSyntaxException e) {
+            LOG.error("The specified regex '{}' for metric '{}' is invalid.", regex, id, e);
+            return false;
+        }
     }
 }

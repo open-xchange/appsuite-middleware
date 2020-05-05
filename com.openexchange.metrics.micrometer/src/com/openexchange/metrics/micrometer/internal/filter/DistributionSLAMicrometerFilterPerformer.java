@@ -50,6 +50,7 @@
 package com.openexchange.metrics.micrometer.internal.filter;
 
 import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.config.ConfigurationService;
@@ -89,7 +90,7 @@ public class DistributionSLAMicrometerFilterPerformer extends AbstractMicrometer
         int index = 0;
         for (String s : p) {
             try {
-                sla[index++] = TimeSpanParser.parseTimespanToPrimitive(s);
+                sla[index++] = TimeUnit.MILLISECONDS.toNanos(TimeSpanParser.parseTimespanToPrimitive(s));
             } catch (IllegalArgumentException e) {
                 LOG.error("Cannot parse {} as long. Ignoring SLAs configuration for '{}'.", s, metricId, e);
                 return config;
