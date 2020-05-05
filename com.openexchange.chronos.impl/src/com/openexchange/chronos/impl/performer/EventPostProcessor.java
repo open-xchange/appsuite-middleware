@@ -143,7 +143,7 @@ public class EventPostProcessor {
 
     /**
      * Sets a map holding additional hints to assign the {@link EventFlag#ATTACHMENTS} when processing the events.
-     * 
+     *
      * @param eventIdsWithAttachment A set holding the identifiers of those events where at least one attachment stored
      * @return A self reference
      */
@@ -154,7 +154,7 @@ public class EventPostProcessor {
 
     /**
      * Sets a map holding additional hints to assign the {@link EventFlag#ALARMS} when processing the events.
-     * 
+     *
      * @param alarmTriggersPerEventId A set holding the identifiers of those events where at least one alarm trigger is stored for the user
      * @return A self reference
      */
@@ -165,7 +165,7 @@ public class EventPostProcessor {
 
     /**
      * Sets a map holding additional hints to assign the {@link EventFlag#SCHEDULED} when processing the events.
-     * 
+     *
      * @param attendeeCountsPerEventId The number of attendees, mapped to the identifiers of the corresponding events
      * @return A self reference
      */
@@ -176,7 +176,7 @@ public class EventPostProcessor {
 
     /**
      * Sets a map holding essential information about the calendar user attendee when processing the events.
-     * 
+     *
      * @param userAttendeePerEventId The calendar user attendees, mapped to the identifiers of the corresponding events
      * @return A self reference
      */
@@ -328,7 +328,7 @@ public class EventPostProcessor {
 
     /**
      * Gets the first event of the previously processed events.
-     * 
+     *
      * @return The first event, or <code>null</code> if there is none
      */
     public Event getFirstEvent() throws OXException {
@@ -374,6 +374,12 @@ public class EventPostProcessor {
         if (isSeriesMaster(event)) {
             knownRecurrenceData.put(event.getSeriesId(), new DefaultRecurrenceData(event));
         }
+        if (null == requestedFields || Arrays.contains(requestedFields, EventField.ATTENDEES)) {
+            /*
+             * inject known data from other attendee copies of the same event
+             */
+            new ResolvePerformer(session, storage).injectKnownAttendeeData(event, folder);
+        }
         event.setFolderId(folder.getId());
         if (null == requestedFields || Arrays.contains(requestedFields, EventField.FLAGS)) {
             event.setFlags(getFlags(event, folder));
@@ -410,7 +416,7 @@ public class EventPostProcessor {
              * apply 'userized' exception dates to series master as requested
              */
             maximumTimestamp = Math.max(maximumTimestamp, event.getTimestamp());
-            if (null == requestedFields || Arrays.contains(requestedFields, EventField.CHANGE_EXCEPTION_DATES) || 
+            if (null == requestedFields || Arrays.contains(requestedFields, EventField.CHANGE_EXCEPTION_DATES) ||
                 Arrays.contains(requestedFields, EventField.DELETE_EXCEPTION_DATES)) {
                 try {
                     return events.add(applyExceptionDates(storage, event, folder.getCalendarUserId()));
@@ -540,7 +546,7 @@ public class EventPostProcessor {
 
     /**
      * Injects essential information about the calendar user attendee prior processing the event, in case it is available.
-     * 
+     *
      * @param event The event to enrich with essential information about the calendar user attendee
      * @return The event, enriched with data about the calendar user attendee if available
      */

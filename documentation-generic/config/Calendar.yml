@@ -517,3 +517,15 @@ properties:
       file: calendar.properties
       packageName: open-xchange-core
       tags: ["Calendar"]
+    - key: com.openexchange.calendar.lookupPeerAttendeesForSameMailDomainOnly
+      description: |
+        Attendee data from copies of a group-scheduled event organized by an external calendar user is dynamically looked up in calendar
+        folders of other internal users. This flag indicates whether the lookup is only attempted for attendees that share the same mail domain
+        as the current calendar user, or if the lookup is always performed.
+      defaultValue: true
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: true
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar"]

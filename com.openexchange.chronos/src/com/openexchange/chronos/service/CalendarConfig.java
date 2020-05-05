@@ -109,7 +109,7 @@ public interface CalendarConfig {
      * <p/>
      * This setting is either used for internal user attendees when the operation is performed by the organizer, or for the organizer or
      * calendar owner in case the operation is performed by another user on his behalf.
-     * 
+     *
      * @param userId The identifier of the user to get the notification preference for
      * @return <code>true</code> of notifications are enabled, <code>false</code>, otherwise
      * @see com.openexchange.mail.usersetting.UserSettingMail#isNotifyAppointments()
@@ -123,7 +123,7 @@ public interface CalendarConfig {
      * calendar owner in case the operation is performed by another user on his behalf.
      * <p/>
      * This setting is <b>not</b> used for changes towards a user's participation status (reply operations).
-     * 
+     *
      * @param userId The identifier of the user to get the notification preference for
      * @return <code>true</code> of notifications are enabled, <code>false</code>, otherwise
      * @see com.openexchange.mail.usersetting.UserSettingMail#isNotifyAppointments()
@@ -135,7 +135,7 @@ public interface CalendarConfig {
      * <p/>
      * This setting is either used for internal user attendees when the operation is performed by the organizer, or for the organizer or
      * calendar owner in case the operation is performed by another user on his behalf.
-     * 
+     *
      * @param userId The identifier of the user to get the notification preference for
      * @return <code>true</code> of notifications are enabled, <code>false</code>, otherwise
      * @see com.openexchange.mail.usersetting.UserSettingMail#isNotifyAppointments()
@@ -146,7 +146,7 @@ public interface CalendarConfig {
      * Gets a value indicating whether notifications for replies of attendees are enabled or not.
      * <p/>
      * This setting used if the user is the event organizer and the operation is performed by an invited attendee.
-     * 
+     *
      * @param userId The identifier of the user to get the notification preference for
      * @return <code>true</code> of notifications are enabled, <code>false</code>, otherwise
      * @see com.openexchange.mail.usersetting.UserSettingMail#isNotifyAppointmentsConfirmOwner()
@@ -157,7 +157,7 @@ public interface CalendarConfig {
      * Gets a value indicating whether notifications for replies of attendees are enabled or not.
      * <p/>
      * This setting used if the user is an attendee and the operation is performed by another invited attendee.
-     * 
+     *
      * @param userId The identifier of the user to get the notification preference for
      * @return <code>true</code> of notifications are enabled, <code>false</code>, otherwise
      * @see com.openexchange.mail.usersetting.UserSettingMail#isNotifyAppointmentsConfirmParticipant()
@@ -174,7 +174,7 @@ public interface CalendarConfig {
      * @see com.openexchange.mail.usersetting.UserSettingMail#getMsgFormat()
      */
     int getMsgFormat(int userId);
-    
+
     /**
      * Gets a value indicating whether newly added group attendees should be resolved to their individual members, without preserving the
      * group reference, or not.
@@ -226,10 +226,10 @@ public interface CalendarConfig {
      * @return <code>true</code> if allowed attendee changes should be restricted, <code>false</code>, otherwise
      */
     boolean isRestrictAllowedAttendeeChanges();
-    
+
     /**
      * Gets a value indicating whether it is allowed to change the organizer of an event or not.
-     * 
+     *
      * @return <code>true</code> if organizer changes are allowed, <code>false</code> otherwise
      */
     boolean isOrganizerChangeAllowed();
@@ -242,5 +242,14 @@ public interface CalendarConfig {
      * @return <code>true</code> if changing <code>PARTSTAT</code>s of other attendees is allowed, <code>false</code>, otherwise
      */
     boolean isAllowOrganizerPartStatChanges();
+
+    /**
+     * Attendee data from copies of a group-scheduled event organized by an external calendar user is dynamically looked up in calendar
+     * folders of other internal users. This flag indicates whether the lookup is only attempted for attendees that share the same mail domain
+     * as the current calendar user, or if the lookup is always performed.
+     *
+     * @return <code>true</code> if lookup should only be done if the mail domain matches, <code>false</code>, otherwise
+     */
+    boolean isLookupPeerAttendeesForSameMailDomainOnly();
 
 }

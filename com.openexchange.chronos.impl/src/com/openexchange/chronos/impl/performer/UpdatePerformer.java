@@ -51,6 +51,7 @@ package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.CalendarUtils.collectAttendees;
 import static com.openexchange.chronos.common.CalendarUtils.contains;
+import static com.openexchange.chronos.common.CalendarUtils.extractEMailAddress;
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.getExceptionDateUpdates;
 import static com.openexchange.chronos.common.CalendarUtils.getSimpleAttendeeUpdates;
@@ -59,17 +60,21 @@ import static com.openexchange.chronos.common.CalendarUtils.getUserIDs;
 import static com.openexchange.chronos.common.CalendarUtils.hasExternalOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.initRecurrenceRule;
 import static com.openexchange.chronos.common.CalendarUtils.isAllDay;
+import static com.openexchange.chronos.common.CalendarUtils.isExternalUser;
+import static com.openexchange.chronos.common.CalendarUtils.isInternal;
 import static com.openexchange.chronos.common.CalendarUtils.isOpaqueTransparency;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.impl.Check.requireUpToDateTimestamp;
 import static com.openexchange.chronos.impl.Utils.extractReplies;
+import static com.openexchange.chronos.impl.Utils.isSameMailDomain;
 import static com.openexchange.tools.arrays.Collections.isNullOrEmpty;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -108,6 +113,7 @@ import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.chronos.service.SimpleCollectionUpdate;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.groupware.tools.mappings.Mapping;
 import com.openexchange.tools.arrays.Arrays;
 
@@ -163,9 +169,10 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
     public InternalCalendarResult perform(String objectId, RecurrenceId recurrenceId, Event updatedEventData, long clientTimestamp) throws OXException {
         getSelfProtection().checkEvent(updatedEventData);
         /*
-         * load original event data
+         * load original event data & pre-process event update
          */
         Event originalEvent = requireUpToDateTimestamp(loadEventData(objectId), clientTimestamp);
+        updatedEventData = restoreInjectedAttendeeDate(originalEvent, updatedEventData);
         /*
          * update event or event occurrence
          */
@@ -192,7 +199,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
 
     /**
      * Handles any necessary scheduling after an update has been performed, i.e. tracks suitable scheduling messages and notifications.
-     * 
+     *
      * @param result The update result
      */
     private void handleScheduling(InternalUpdateResult result) throws OXException {
@@ -204,7 +211,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             if (isSeriesMaster(eventUpdate.getOriginal())) {
                 /*
                  * update of series, determine scheduling operations based on superset of attendees in all instances of the series
-                 */                
+                 */
                 AbstractSimpleCollectionUpdate<Attendee> collectedAttendeeUpdates = getSimpleAttendeeUpdates(
                     collectAttendees(result.getOriginalResource(), null, (CalendarUserType[]) null),
                     collectAttendees(result.getUpdatedResource(), null, (CalendarUserType[]) null));
@@ -354,7 +361,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         /*
          * handle new delete exceptions from the calendar user's point of view beforehand
          */
-        if (isSeriesMaster(originalEvent) && eventData.containsDeleteExceptionDates() && 
+        if (isSeriesMaster(originalEvent) && eventData.containsDeleteExceptionDates() &&
             false == hasExternalOrganizer(originalEvent) && false == deleteRemovesEvent(originalEvent)) {
             if (updateDeleteExceptions(originalEvent, eventData)) {
                 originalEvent = loadEventData(originalEvent.getId());
@@ -402,7 +409,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                 for(Event eve: originalChangeExceptions) {
                     copies.add(EventMapper.getInstance().copy(eve, null, EventMapper.getInstance().getAssignedFields(eve)));
                 }
-                
+
                 List<Event> exceptionsWithAlarms = storage.getUtilities().loadAdditionalEventData(calendarUserId, copies, null);
                 Map<Event, List<Alarm>> alarmsToUpdate = AlarmUpdateProcessor.getUpdatedExceptions(originalAlarms, eventData.getAlarms(), exceptionsWithAlarms);
                 for (Entry<Event, List<Alarm>> toUpdate : alarmsToUpdate.entrySet()) {
@@ -666,6 +673,59 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
     }
 
     /**
+     * Restores data of foreign attendees that may have been injected previously from copies of the same group-scheduled event located
+     * in calendar folders of other internal users, effectively undoing the applied changes so that they do not appear as being actively
+     * updated by the client.
+     *
+     * @param originalEvent The original event
+     * @param updatedEventData The updated event data
+     * @return The possibly patched event, or the passed updated event data if not applicable
+     * @see ResolvePerformer#injectKnownAttendeeData(Event, CalendarFolder)
+     */
+    private Event restoreInjectedAttendeeDate(Event originalEvent, Event updatedEventData) {
+        if (null == updatedEventData.getAttendees() || null == originalEvent.getAttendees() || null == originalEvent.getOrganizer() ||
+            PublicType.getInstance().equals(folder.getType()) || isInternal(originalEvent.getOrganizer(), CalendarUserType.INDIVIDUAL)) {
+            return updatedEventData;
+        }
+        Attendee calendarUserAttendee = find(originalEvent.getAttendees(), folder.getCalendarUserId());
+        if (null == calendarUserAttendee) {
+            return updatedEventData;
+        }
+        List<Attendee> restoredAttendees = new ArrayList<Attendee>(updatedEventData.getAttendees());
+        boolean modified = false;
+        for (ListIterator<Attendee> iterator = restoredAttendees.listIterator(); iterator.hasNext();) {
+            Attendee attendee = iterator.next();
+            /*
+             * check if (virtually) internal attendee needs to be restored with original attendee data
+             */
+            if (matches(attendee, calendarUserAttendee) || matches(originalEvent.getOrganizer(), attendee) ||
+                session.getConfig().isLookupPeerAttendeesForSameMailDomainOnly() && false == isSameMailDomain(extractEMailAddress(attendee.getUri()), extractEMailAddress(calendarUserAttendee.getUri()))) {
+                continue; // not applicable
+            }
+            Attendee matchingOriginalAttendee = find(originalEvent.getAttendees(), attendee);
+            if (null != matchingOriginalAttendee && isExternalUser(matchingOriginalAttendee)) {
+                LOG.debug("Restoring previously injected attendee data {} from calendar {} back to {} in {}",
+                    attendee, attendee.getFolderId(), matchingOriginalAttendee, updatedEventData);
+                iterator.set(matchingOriginalAttendee);
+                modified = true;
+            }
+        }
+        if (modified) {
+            /*
+             * continue with restored attendee data
+             */
+            return new UnmodifiableEvent(updatedEventData) {
+
+                @Override
+                public List<Attendee> getAttendees() {
+                    return restoredAttendees;
+                }
+            };
+        }
+        return updatedEventData;
+    }
+
+    /**
      * Adjusts the intermediate updated data of the series master event after a series split has been performed, effectively rolling back
      * an already applied value for the <i>related-to</i> field, so that the split can be recognized properly afterwards.
      *
@@ -702,7 +762,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         /*
          * ensure the sequence number is incremented
          */
-        if (originalSeriesMaster.getSequence() >= updatedSeriesMaster.getSequence() && 
+        if (originalSeriesMaster.getSequence() >= updatedSeriesMaster.getSequence() &&
             (false == clientUpdate.containsSequence() || originalSeriesMaster.getSequence() >= clientUpdate.getSequence())) {
             adjustedClientUpdate.setSequence(updatedSeriesMaster.getSequence() + 1);
         }
@@ -712,7 +772,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         adjustedClientUpdate.setRelatedTo(updatedSeriesMaster.getRelatedTo());
         /*
          * adjust recurrence rule as needed
-         */        
+         */
         Mapping<? extends Object, Event> rruleMapping = EventMapper.getInstance().get(EventField.RECURRENCE_RULE);
         if (false == rruleMapping.isSet(clientUpdate) || rruleMapping.equals(updatedSeriesMaster, clientUpdate)) {
             /*
