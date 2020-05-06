@@ -37,6 +37,8 @@ Authors:
 %install
 export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
+mkdir -p %{buildroot}/var/opt/open-xchange/frontend/history/apps
+mkdir -p %{buildroot}/var/opt/open-xchange/frontend/history/manifests
 
 %post
 . /opt/open-xchange/lib/oxfunctions.sh
@@ -49,6 +51,9 @@ if [ ${1:-0} -eq 2 ]; then
     # SoftwareChange_Request-2880
     ox_add_property io.ox/core//pdf/enableRangeRequests true /opt/open-xchange/etc/settings/appsuite.properties
 fi
+
+ox_update_permissions /var/opt/open-xchange/frontend/history/apps open-xchange:root 750
+ox_update_permissions /var/opt/open-xchange/frontend/history/manifests open-xchange:root 750
 
 %clean
 %{__rm} -rf %{buildroot}
@@ -70,6 +75,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/meta/appsuite.yaml
 %config(noreplace) /opt/open-xchange/etc/settings/appsuite.properties
 %config(noreplace) /opt/open-xchange/etc/settings/upsell-appsuite.properties
+%dir %attr(750, open-xchange, root) /var/opt/open-xchange/frontend/history/apps
+%dir %attr(750, open-xchange, root) /var/opt/open-xchange/frontend/history/manifests
 
 %changelog
 * Thu Jan 16 2020 Marcus Klein <marcus.klein@open-xchange.com>

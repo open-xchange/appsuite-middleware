@@ -29,6 +29,10 @@ postFix() {
     ox_add_property io.ox/core//pdf/enableRangeRequests true /opt/open-xchange/etc/settings/appsuite.properties
 }
 
+setPermissions() {
+    ox_update_permissions /var/opt/open-xchange/frontend/history/apps open-xchange:root 750
+    ox_update_permissions /var/opt/open-xchange/frontend/history/manifests open-xchange:root 750
+}
 
 case "$1" in
     configure)
@@ -36,6 +40,7 @@ case "$1" in
             # we are in update mode, run postFix to apply fixes
             postFix "$2"
         }
+        setPermissions
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
