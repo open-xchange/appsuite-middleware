@@ -39,6 +39,7 @@ local annotation = grafana.annotation;
         datasource=self.default.datasource,
         query='label_values(up{job=~"$job"}, instance)',
         refresh='time',
+        sort=1,
       ),
     ]
   ).addAnnotations(
