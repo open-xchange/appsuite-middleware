@@ -191,7 +191,6 @@ com.openexchange.index.solr/jars
 com.openexchange.authentication.imap/jars
 com.openexchange.contact.storage.rdb/jars
 com.openexchange.groupware.tools/jars
-com.openexchange.authentication.ucs/jars/
 com.openexchange.blackwhitelist/jars/
 com.openexchange.control/tmp/
 com.openexchange.indexedSearch.json/jars/
