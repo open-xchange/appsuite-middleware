@@ -1,3 +1,9 @@
+---
+title: Data managed in file storage
+icon: fa-container-storage
+tags: Configuration , Storage, Drive, Files
+---
+
 # Data managed in file storage
 
 ## Introduction
