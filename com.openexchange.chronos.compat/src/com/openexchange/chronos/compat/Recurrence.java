@@ -287,9 +287,11 @@ public class Recurrence {
         }
         if (SeriesPattern.MONTHLY_2.equals(type)) {
             recur.setByDayPart(getByDayPart(pattern.getDaysOfWeek()));
-            int weekNo = pattern.getDayOfMonth().intValue();
+            int weekNo = dayOfMonth;
             if (5 == weekNo) {
                 weekNo = -1;
+            } else if (0 == weekNo) {
+                weekNo = 1;
             }
             recur.setByPart(Part.BYSETPOS, I(weekNo));
         } else if (SeriesPattern.MONTHLY_1.equals(type)) {
@@ -312,9 +314,11 @@ public class Recurrence {
         if (SeriesPattern.YEARLY_2.equals(type)) {
             recur.setByDayPart(getByDayPart(pattern.getDaysOfWeek()));
             recur.setByPart(Part.BYMONTH, pattern.getMonth());
-            int weekNo = pattern.getDayOfMonth().intValue();
+            int weekNo = dayOfMonth;
             if (5 == weekNo) {
                 weekNo = -1;
+            } else if (0 == weekNo) {
+                weekNo = 1;
             }
             recur.setByPart(Part.BYSETPOS, I(weekNo));
         } else if (SeriesPattern.YEARLY_1.equals(type)) {
