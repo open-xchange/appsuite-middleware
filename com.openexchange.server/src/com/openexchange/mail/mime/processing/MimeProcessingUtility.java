@@ -819,6 +819,10 @@ public final class MimeProcessingUtility {
             if (isHtml) {
                 contentType.setCharsetParameter("UTF-8");
                 replyText = MimeForward.replaceMetaEquiv(replyText, contentType);
+                HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
+                if (htmlService != null) {
+                    replyText = htmlService.checkBaseTag(replyText, true);
+                }
             } else {
                 String cs = contentType.getCharsetParameter();
                 if (cs == null || "US-ASCII".equalsIgnoreCase(cs) || !CharsetDetector.isValid(cs) || MessageUtility.isSpecialCharset(cs)) {
@@ -898,6 +902,10 @@ public final class MimeProcessingUtility {
                 }
                 contentType.setCharsetParameter("UTF-8");
                 firstSeenText = MimeForward.replaceMetaEquiv(firstSeenText, contentType);
+                HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
+                if (htmlService != null) {
+                    firstSeenText = htmlService.checkBaseTag(firstSeenText, true);
+                }
             }
             /*
              * Add appropriate text part prefixed with forward text
