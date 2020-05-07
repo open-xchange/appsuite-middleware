@@ -50,8 +50,12 @@
 package com.openexchange.metrics.micrometer.internal.filter;
 
 import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.java.Strings;
 import com.openexchange.metrics.micrometer.internal.property.MicrometerFilterProperty;
+import com.openexchange.tools.strings.TimeSpanParser;
+import io.micrometer.core.instrument.Meter.Id;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.distribution.DistributionStatisticConfig;
 
@@ -77,8 +81,17 @@ public class DistributionMaximumMicrometerFilterPerformer extends AbstractMicrom
     }
 
     @Override
-    DistributionStatisticConfig applyConfig(Entry<String, String> entry, String metricId, DistributionStatisticConfig config) {
-        Long value = distributionValueSanityCheck(metricId, entry.getValue());
-        return value == null ? config : DistributionStatisticConfig.builder().maximumExpectedValue(value).build().merge(config);
+    DistributionStatisticConfig applyConfig(Id id, Entry<String, String> entry, String metricId, DistributionStatisticConfig config) {
+        if (!id.getName().startsWith(metricId)) {
+            return config;
+        }
+
+        String value = entry.getValue();
+        if (Strings.isEmpty(value)) {
+            return config;
+        }
+
+        long nanos = TimeUnit.MILLISECONDS.toNanos(TimeSpanParser.parseTimespanToPrimitive(value));
+        return DistributionStatisticConfig.builder().maximumExpectedValue(Long.valueOf(nanos)).build().merge(config);
     }
 }

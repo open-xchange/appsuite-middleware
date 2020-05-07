@@ -55,6 +55,7 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Strings;
 import com.openexchange.metrics.micrometer.internal.property.MicrometerFilterProperty;
+import io.micrometer.core.instrument.Meter.Id;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.distribution.DistributionStatisticConfig;
 
@@ -82,7 +83,15 @@ public class DistributionPercentilesMicrometerFilterPerformer extends AbstractMi
     }
 
     @Override
-    DistributionStatisticConfig applyConfig(Entry<String, String> entry, String metricId, DistributionStatisticConfig config) {
+    DistributionStatisticConfig applyConfig(Id id, Entry<String, String> entry, String metricId, DistributionStatisticConfig config) {
+        if (!id.getName().startsWith(metricId)) {
+            return config;
+        }
+
+        if (Strings.isEmpty(entry.getValue())) {
+            return DistributionStatisticConfig.builder().percentiles(new double[0]).build().merge(config);
+        }
+
         String[] p = Strings.splitByComma(entry.getValue());
         double[] percentiles = new double[p.length];
         int index = 0;

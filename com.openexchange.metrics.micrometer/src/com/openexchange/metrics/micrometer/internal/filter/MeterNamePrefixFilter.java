@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.metrics.micrometer;
+package com.openexchange.metrics.micrometer.internal.filter;
 
 import java.util.ArrayList;
 import java.util.List;

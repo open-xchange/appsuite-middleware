@@ -60,7 +60,7 @@ properties:
       tags: ["Micrometer", "Metrics"]
     - key: com.openexchange.metrics.micrometer.distribution.percentiles.[METRIC_NAME]
       description: |
-        Publishes specific percentile histograms of the specified metric.
+        Publishes concrete percentiles for the distribution. Comma-separated list of values between 0.0 and 1.0. Example: 0.5, 0.75, 0.95, 0.99, 0.999
       defaultValue: true
       version: 7.10.4
       reloadable: true
@@ -71,6 +71,15 @@ properties:
     - key: com.openexchange.metrics.micrometer.distribution.sla.[METRIC_NAME]
       description: |
         Publishes specific SLAs of the specified metric.
+        
+        Units are
+        
+           * `ms` for miliseconds
+           * `s` for seconds
+           * `m` for minutes
+           * `h` for hours
+           * `D` for days
+           * `W` for weeks
       defaultValue: 50ms,100ms,150ms,200ms,250ms,300ms,400ms,500ms,750ms,1s,2s,5s,10s,30s,1m
       version: 7.10.4
       reloadable: true
@@ -80,7 +89,16 @@ properties:
       tags: ["Micrometer", "Metrics"]
     - key: com.openexchange.metrics.micrometer.distribution.minimum.[METRIC_NAME]
       description: |
-        Defines the lower bound of percentile histogram buckets to publish for that specific metric.
+        Defines the lower bound of percentile histogram buckets to publish for that specific metric. Example: 100ms
+        
+        Units are
+        
+           * `ms` for miliseconds
+           * `s` for seconds
+           * `m` for minutes
+           * `h` for hours
+           * `D` for days
+           * `W` for weeks
       defaultValue: 
       version: 7.10.4
       reloadable: true
@@ -90,7 +108,16 @@ properties:
       tags: ["Micrometer", "Metrics"]
     - key: com.openexchange.metrics.micrometer.distribution.maximum.[METRIC_NAME]
       description: |
-        Defines the upper bound of percentile histogram buckets to publish for that specific metric.
+        Defines the upper bound of percentile histogram buckets to publish for that specific metric. Example: 60s
+        
+        Units are
+        
+           * `ms` for miliseconds
+           * `s` for seconds
+           * `m` for minutes
+           * `h` for hours
+           * `D` for days
+           * `W` for weeks
       defaultValue: 
       version: 7.10.4
       reloadable: true
