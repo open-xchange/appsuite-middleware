@@ -56,6 +56,7 @@ import org.junit.Test;
 import com.openexchange.chronos.compat.SeriesPattern;
 import com.openexchange.chronos.recurrence.service.RecurrenceUtils;
 import com.openexchange.chronos.service.RecurrenceData;
+import com.openexchange.exception.OXException;
 import com.openexchange.java.util.TimeZones;
 
 /**
@@ -69,7 +70,10 @@ import com.openexchange.java.util.TimeZones;
 public class MWB273Test {
 
     @Test
-    public void testSeriesPatterns() {
+    public void testSeriesPatterns() throws OXException {
+        testSeriesPattern("t|4|i|1|b|8|c|11|s|1544227200000|", null, true);
+        testSeriesPattern("t|5|i|3|a|2|s|1547476200000|", "UTC", false);
+        testSeriesPattern("t|2|i|1|a|4|o|11|s|1570525200000|e|1576540800000|", "CST6CDT", false);
         testSeriesPattern("t|6|i|1|a|2|b|5|c|4|s|1590364800000", null, true);
         testSeriesPattern("t|4|i|1|b|18|c|7|s|1534550400000", null, true);
         testSeriesPattern("t|4|i|1|b|27|c|7|s|1535328000000", null, true);
