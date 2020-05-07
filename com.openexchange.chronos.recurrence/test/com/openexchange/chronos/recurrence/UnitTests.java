@@ -52,6 +52,7 @@ package com.openexchange.chronos.recurrence;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.chronos.recurrence.compat.MWB273Test;
 
 /**
  * {@link UnitTests}
@@ -75,6 +76,7 @@ import org.junit.runners.Suite.SuiteClasses;
     com.openexchange.chronos.recurrence.compat.RecurrencePositionTest.class,
     com.openexchange.chronos.recurrence.compat.Bug66412Test.class,
     Bug68612Test.class,
+    MWB273Test.class,
 })
 public class UnitTests {
 
