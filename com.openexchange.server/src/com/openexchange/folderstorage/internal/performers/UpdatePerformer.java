@@ -511,14 +511,14 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                 if (null == realStorage) {
                     throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, folder.getID());
                 }
-    
+
                 if (storage.equals(realStorage)) {
                     storage.updateFolder(folder, storageParameters);
                 } else {
                     checkOpenedStorage(realStorage, openedStorages);
                     realStorage.updateFolder(folder, storageParameters);
                     storage.updateFolder(folder, storageParameters);
-    
+
                     if (comparedPermissions.hasRemovedUsers() || comparedPermissions.hasModifiedUsers()) {
                         if (realStorage instanceof LockCleaningFolderStorage) {
                             List<Permission> removedPermissions = comparedPermissions.getRemovedUserPermissions();
@@ -527,7 +527,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                             for(Permission perm: removedPermissions){
                                 userIdRemoved[x++] = perm.getEntity();
                             }
-    
+
                             List<Permission> modifiedPermissions = comparedPermissions.getModifiedUserPermissions();
                             int[] userIdModified = new int[modifiedPermissions.size()];
                             x = 0;
@@ -536,7 +536,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                                     userIdModified[x++] = perm.getEntity();
                                 }
                             }
-    
+
                             int[] merged = com.openexchange.tools.arrays.Arrays.concatenate(userIdRemoved, userIdModified);
                             ((LockCleaningFolderStorage) realStorage).cleanLocksFor(folder, merged, storageParameters);
                         }
