@@ -922,28 +922,36 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             fo.setCreatedBy(storageObj.getCreatedBy());
         }
         fo.setDefaultFolder(storageObj.isDefaultFolder());
-        OXFolderUtility.checkPermissionsAgainstSessionUserConfig(session, fo, storageObj.getNonSystemPermissionsAsArray());
-        OXFolderUtility.checkFolderPermissions(fo, user.getId(), ctx, warnings);
-        OXFolderUtility.checkPermissionsAgainstUserConfigs(readCon, fo, ctx);
-        OXFolderUtility.checkSystemFolderPermissions(fo.getObjectID(), fo.getNonSystemPermissionsAsArray(), user, ctx);
-        if (FolderObject.PUBLIC == fo.getType() || FolderObject.INFOSTORE == storageObj.getModule()) {
-            {
-                final OCLPermission[] removedPerms = OXFolderUtility.getPermissionsWithoutFolderAccess(fo.getNonSystemPermissionsAsArray(), storageObj.getNonSystemPermissionsAsArray());
-                if (removedPerms.length > 0) {
-                    new CheckPermissionOnRemove(session, writeCon, ctx).checkPermissionsOnUpdate(fo.getObjectID(), removedPerms, lastModified);
+        {
+            OCLPermission[] originalPermissions = storageObj.getNonSystemPermissionsAsArray();
+            OCLPermission[] updatedPermissions = fo.getNonSystemPermissionsAsArray();
+            OXFolderUtility.checkPermissionsAgainstSessionUserConfig(session, fo, updatedPermissions, originalPermissions);
+            OXFolderUtility.checkFolderPermissions(fo, user.getId(), ctx, warnings);
+            OXFolderUtility.checkPermissionsAgainstUserConfigs(readCon, fo, ctx);
+            OXFolderUtility.checkSystemFolderPermissions(fo.getObjectID(), updatedPermissions, user, ctx);
+            if (FolderObject.PUBLIC == fo.getType() || FolderObject.INFOSTORE == storageObj.getModule()) {
+                {
+                    final OCLPermission[] removedPerms = OXFolderUtility.getPermissionsWithoutFolderAccess(updatedPermissions, originalPermissions);
+                    if (removedPerms.length > 0) {
+                        new CheckPermissionOnRemove(session, writeCon, ctx).checkPermissionsOnUpdate(fo.getObjectID(), removedPerms, lastModified);
+                    }
                 }
-            }
 
-            // add a TIntSet for each permission entity
-            boolean allChecked = true;
-            for (OCLPermission perm : fo.getNonSystemPermissionsAsArray()) {
-                if (null == alreadyCheckedParents.putIfAbsent(perm.getEntity(), new TIntHashSet())) {
-                    allChecked = false;
+                // add a TIntSet for each permission entity
+                boolean allChecked = true;
+                for (OCLPermission perm : updatedPermissions) {
+                    if (null == alreadyCheckedParents.putIfAbsent(perm.getEntity(), new TIntHashSet())) {
+                        allChecked = false;
+                    }
+                }
+                if (!allChecked) {
+                    new CheckPermissionOnUpdate(session, writeCon, ctx).checkParentPermissions(storageObj.getParentFolderID(), updatedPermissions, originalPermissions, lastModified, alreadyCheckedParents);
                 }
             }
-            if (!allChecked) {
-                new CheckPermissionOnUpdate(session, writeCon, ctx).checkParentPermissions(storageObj.getParentFolderID(), fo.getNonSystemPermissionsAsArray(), storageObj.getNonSystemPermissionsAsArray(), lastModified, alreadyCheckedParents);
-            }
+            /*
+             * Check duplicate permissions
+             */
+            OXFolderUtility.checkForDuplicatePermissions(updatedPermissions);
         }
 
         boolean rename = false;
@@ -989,10 +997,6 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                 OXFolderUtility.checkSimilarNamedSharedFolder(diff, allSharedFolders, rename ? fo.getFolderName() : storageObj.getFolderName(), ctx);
             }
         }
-        /*
-         * Check duplicate permissions
-         */
-        OXFolderUtility.checkForDuplicateNonSystemPermissions(fo, ctx);
         /*
          * Call SQL update
          */

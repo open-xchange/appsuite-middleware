@@ -503,41 +503,43 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
         /*
          * Change permissions either in real or in virtual storage
          */
-        if (FolderStorage.REAL_TREE_ID.equals(folder.getTreeID())) {
-            storage.updateFolder(folder, storageParameters);
-        } else {
-            final FolderStorage realStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, folder.getID());
-            if (null == realStorage) {
-                throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, folder.getID());
-            }
-
-            if (storage.equals(realStorage)) {
+        if (comparedPermissions.hasChanges()) {
+            if (FolderStorage.REAL_TREE_ID.equals(folder.getTreeID())) {
                 storage.updateFolder(folder, storageParameters);
             } else {
-                checkOpenedStorage(realStorage, openedStorages);
-                realStorage.updateFolder(folder, storageParameters);
-                storage.updateFolder(folder, storageParameters);
-
-                if (comparedPermissions.hasRemovedUsers() || comparedPermissions.hasModifiedUsers()) {
-                    if (realStorage instanceof LockCleaningFolderStorage) {
-                        List<Permission> removedPermissions = comparedPermissions.getRemovedUserPermissions();
-                        int[] userIdRemoved = new int[removedPermissions.size()];
-                        int x = 0;
-                        for(Permission perm: removedPermissions){
-                            userIdRemoved[x++] = perm.getEntity();
-                        }
-
-                        List<Permission> modifiedPermissions = comparedPermissions.getModifiedUserPermissions();
-                        int[] userIdModified = new int[modifiedPermissions.size()];
-                        x = 0;
-                        for (Permission perm : modifiedPermissions) {
-                            if (perm.getWritePermission() == Permission.NO_PERMISSIONS || perm.getWritePermission() == Permission.WRITE_OWN_OBJECTS) {
-                                userIdModified[x++] = perm.getEntity();
+                final FolderStorage realStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, folder.getID());
+                if (null == realStorage) {
+                    throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, folder.getID());
+                }
+    
+                if (storage.equals(realStorage)) {
+                    storage.updateFolder(folder, storageParameters);
+                } else {
+                    checkOpenedStorage(realStorage, openedStorages);
+                    realStorage.updateFolder(folder, storageParameters);
+                    storage.updateFolder(folder, storageParameters);
+    
+                    if (comparedPermissions.hasRemovedUsers() || comparedPermissions.hasModifiedUsers()) {
+                        if (realStorage instanceof LockCleaningFolderStorage) {
+                            List<Permission> removedPermissions = comparedPermissions.getRemovedUserPermissions();
+                            int[] userIdRemoved = new int[removedPermissions.size()];
+                            int x = 0;
+                            for(Permission perm: removedPermissions){
+                                userIdRemoved[x++] = perm.getEntity();
                             }
+    
+                            List<Permission> modifiedPermissions = comparedPermissions.getModifiedUserPermissions();
+                            int[] userIdModified = new int[modifiedPermissions.size()];
+                            x = 0;
+                            for (Permission perm : modifiedPermissions) {
+                                if (perm.getWritePermission() == Permission.NO_PERMISSIONS || perm.getWritePermission() == Permission.WRITE_OWN_OBJECTS) {
+                                    userIdModified[x++] = perm.getEntity();
+                                }
+                            }
+    
+                            int[] merged = com.openexchange.tools.arrays.Arrays.concatenate(userIdRemoved, userIdModified);
+                            ((LockCleaningFolderStorage) realStorage).cleanLocksFor(folder, merged, storageParameters);
                         }
-
-                        int[] merged = com.openexchange.tools.arrays.Arrays.concatenate(userIdRemoved, userIdModified);
-                        ((LockCleaningFolderStorage) realStorage).cleanLocksFor(folder, merged, storageParameters);
                     }
                 }
             }
