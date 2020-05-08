@@ -59,7 +59,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.capabilities.CapabilityService;
-import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.groupware.notify.hostname.HostnameService;
@@ -98,7 +98,7 @@ public class SAMLFeature extends DependentServiceStarter {
 
     private final static Class<?>[] NEEDED_SERVICES = new Class[] {
         HttpService.class,
-        ConfigurationService.class,
+        LeanConfigurationService.class,
         DispatcherPrefixService.class,
         SessionReservationService.class,
         HazelcastInstance.class,
@@ -128,11 +128,11 @@ public class SAMLFeature extends DependentServiceStarter {
 
     @Override
     protected synchronized void start(ServiceLookup services) throws Exception {
-        ConfigurationService configService = services.getService(ConfigurationService.class);
-        boolean enabled = configService.getBoolProperty(SAMLProperties.ENABLED, false);
+        LeanConfigurationService configService = services.getServiceSafe(LeanConfigurationService.class);
+        boolean enabled = configService.getBooleanProperty(SAMLProperties.ENABLED);
         if (enabled) {
             LOG.info("Starting SAML 2.0 support...");
-            SessiondService sessiondService = services.getService(SessiondService.class);
+            SessiondService sessiondService = services.getServiceSafe(SessiondService.class);
             serviceRegistrations.push(context.registerService(SessionInspectorService.class, new SAMLSessionInspector(sessiondService), null));
             serviceRegistrations.push(context.registerService(CustomPortableFactory.class, new PortableAuthnRequestInfoFactory(), null));
             serviceRegistrations.push(context.registerService(CustomPortableFactory.class, new PortableLogoutRequestInfoFactory(), null));
@@ -141,8 +141,8 @@ public class SAMLFeature extends DependentServiceStarter {
 
             getSamlBackend(services);
 
-            if (configService.getBoolProperty("com.openexchange.saml.startVeryDangerousDebugBackend", false)) {
-                serviceRegistrations.push(context.registerService(SAMLBackend.class, new VeryDangerousSAMLBackend(services.getService(UserService.class), services.getService(ContextService.class)), null));
+            if (configService.getBooleanProperty(SAMLProperties.DEBUG_BACKEND)) {
+                serviceRegistrations.push(context.registerService(SAMLBackend.class, new VeryDangerousSAMLBackend(services.getServiceSafe(UserService.class), services.getServiceSafe(ContextService.class), configService), null));
             }
         } else {
             LOG.info("SAML 2.0 support is disabled by configuration. Skipping initialization...");
@@ -180,7 +180,6 @@ public class SAMLFeature extends DependentServiceStarter {
             samlBackends.stop();
             samlBackends = null;
         }
-        DefaultConfig.release();
     }
 
 }
