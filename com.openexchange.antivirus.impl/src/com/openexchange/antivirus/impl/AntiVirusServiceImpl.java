@@ -309,10 +309,10 @@ public class AntiVirusServiceImpl implements AntiVirusService {
     /**
      * Wraps ICAP request execution by logging and monitoring
      *
-     * @param client
-     * @param request
-     * @param contentLength
-     * @return
+     * @param client The {@link ICAPClient} to use
+     * @param request The {@link ICAPRequest} to execute
+     * @param contentLength The content length
+     * @return The {@link ICAPResponse}
      * @throws IOException
      */
     private ICAPResponse logAndMonitorExecution(ICAPClient client, ICAPRequest request, long contentLength) throws IOException {
