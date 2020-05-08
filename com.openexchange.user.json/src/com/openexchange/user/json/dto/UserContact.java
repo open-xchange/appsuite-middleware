@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.user.json;
+package com.openexchange.user.json.dto;
 
 import java.util.Comparator;
 import java.util.List;

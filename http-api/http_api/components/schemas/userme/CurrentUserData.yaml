@@ -8,10 +8,21 @@ properties:
     description: The unique identifier of the user himself.
   context_admin:
     type: integer
-    description: The ID of the context's administrator user.
+    description: The ID of the context administrator user.
   login_name:
     type: string
     description: The login name of the user.
   display_name:
     type: string
     description: The display name of the user.
+  mail_login:
+    type: string
+    description: The username used to authenticate at the primary mail server. Can be absent in temporary error situations.
+  email_address:
+    type: string
+    description: The users' primary email address
+  email_aliases:
+    type: array
+    description: All email aliases of the user
+    items:
+      type: string

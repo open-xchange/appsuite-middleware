@@ -72,7 +72,7 @@ import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.User;
 import com.openexchange.user.UserService;
-import com.openexchange.user.json.UserContact;
+import com.openexchange.user.json.dto.UserContact;
 import com.openexchange.user.json.field.UserField;
 import com.openexchange.user.json.filter.UserCensorship;
 import com.openexchange.user.json.mapping.UserMapper;

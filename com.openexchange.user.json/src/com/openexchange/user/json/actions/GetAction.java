@@ -62,7 +62,7 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.User;
 import com.openexchange.user.UserService;
-import com.openexchange.user.json.UserContact;
+import com.openexchange.user.json.dto.UserContact;
 
 /**
  * {@link GetAction} - Maps the action to a <tt>get</tt> action.

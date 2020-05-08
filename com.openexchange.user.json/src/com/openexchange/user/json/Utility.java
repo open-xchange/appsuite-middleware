@@ -68,6 +68,7 @@ import java.util.regex.Pattern;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.user.json.dto.UserContact;
 
 /**
  * {@link Utility} - Utility class for user JSON interface bundle.

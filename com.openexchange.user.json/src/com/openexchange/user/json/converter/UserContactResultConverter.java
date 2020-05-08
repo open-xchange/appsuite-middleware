@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.user.json;
+package com.openexchange.user.json.converter;
 
 import java.util.List;
 import java.util.Map;
@@ -67,7 +67,9 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.User;
+import com.openexchange.user.json.Utility;
 import com.openexchange.user.json.actions.GetAction;
+import com.openexchange.user.json.dto.UserContact;
 
 /**
  * {@link UserContactResultConverter} - JSON result converter for user contacts.
