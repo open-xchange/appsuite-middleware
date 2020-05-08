@@ -54,6 +54,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.database.Databases;
@@ -83,35 +86,24 @@ public class ReassignGuestsWithDeletedUserToAdminUpdateTask implements UpdateTas
         Connection con = params.getConnection();
         int rollback = 0;
         try {
-            con.setAutoCommit(false);
-            rollback = 1;
-
             if (!Databases.tablesExist(con, "user")) {
+                // No "user" table. Leave.
                 return;
             }
 
-            ResultSet resultSet = null;
-            //@formatter:off
-            PreparedStatement selectStatement = con.prepareStatement("SELECT DISTINCT cid, guestCreatedBy FROM user as a WHERE guestCreatedBy > 0 "
-                                                        + "AND NOT EXISTS (SELECT id FROM user WHERE cid = a.cid AND id = a.guestCreatedBy)");
-            //@formatter:on
-            PreparedStatement updateStatement = null;
-            try {
-                resultSet = selectStatement.executeQuery();
-                updateStatement = con.prepareStatement("UPDATE user AS u JOIN user_setting_admin AS a ON u.cid=a.cid SET u.guestCreatedBy = a.user WHERE u.cid = ? AND guestCreatedBy = ?");
-                while (resultSet.next()) {
-                    int contextId = resultSet.getInt("cid");
-                    int guestCreatedBy = resultSet.getInt("guestCreatedBy");
-                    updateStatement.setInt(1, contextId);
-                    updateStatement.setInt(2, guestCreatedBy);
-                    updateStatement.addBatch();
-                }
-                int updates = updateStatement.executeUpdate();
-                LOG.info("Reassigned {} orphaned guest user to the respective context admin.", I(updates));
-            } finally {
-                Databases.closeSQLStuff(resultSet, selectStatement);
-                Databases.closeSQLStuff(updateStatement);
+            // Check for orphaned guest users
+            List<ContextAndGuestCreatedBy> reslts = determineOrphanedGuestUsers(con);
+            if (reslts.isEmpty()) {
+                // No orphaned guest users present. Leave.
+                return;
             }
+
+            // There are orphaned guest users that need to be reassigned. Start transaction...
+            con.setAutoCommit(false);
+            rollback = 1;
+
+            updateOrphanedGuestUsers(reslts, con);
+
             con.commit();
             rollback = 2;
         } catch (SQLException e) {
@@ -126,6 +118,47 @@ public class ReassignGuestsWithDeletedUserToAdminUpdateTask implements UpdateTas
         }
     }
 
+    private List<ContextAndGuestCreatedBy> determineOrphanedGuestUsers(Connection con) throws SQLException {
+        PreparedStatement selectStatement = null;
+        ResultSet resultSet = null;
+        try {
+            //@formatter:off
+            selectStatement = con.prepareStatement("SELECT DISTINCT cid, guestCreatedBy FROM user as a WHERE guestCreatedBy > 0 "
+                                                        + "AND NOT EXISTS (SELECT id FROM user WHERE cid = a.cid AND id = a.guestCreatedBy)");
+            //@formatter:on
+            resultSet = selectStatement.executeQuery();
+            if (resultSet.next() == false) {
+                // No result available
+                return Collections.emptyList();
+            }
+
+            // Collect results
+            List<ContextAndGuestCreatedBy> results = new ArrayList<>();
+            do {
+                results.add(new ContextAndGuestCreatedBy(resultSet.getInt(1), resultSet.getInt(2)));
+            } while (resultSet.next());
+            return results;
+        } finally {
+            Databases.closeSQLStuff(resultSet, selectStatement);
+        }
+    }
+
+    private void updateOrphanedGuestUsers(List<ContextAndGuestCreatedBy> results, Connection con) throws SQLException {
+        PreparedStatement updateStatement = null;
+        try {
+            updateStatement = con.prepareStatement("UPDATE user AS u JOIN user_setting_admin AS a ON u.cid=a.cid SET u.guestCreatedBy = a.user WHERE u.cid = ? AND guestCreatedBy = ?");
+            for (ContextAndGuestCreatedBy contextAndGuestCreatedBy : results) {
+                updateStatement.setInt(1, contextAndGuestCreatedBy.contextId);
+                updateStatement.setInt(2, contextAndGuestCreatedBy.guestCreatedBy);
+                updateStatement.addBatch();
+            }
+            updateStatement.executeBatch();
+            LOG.info("Reassigned {} orphaned guest users to the respective context administrator.", I(results.size()));
+        } finally {
+            Databases.closeSQLStuff(updateStatement);
+        }
+    }
+
     @Override
     public String[] getDependencies() {
         return new String[] { UserAddGuestCreatedByTask.class.getName(), AddGuestCreatedByIndexForUserTable.class.getName() };
@@ -134,6 +167,21 @@ public class ReassignGuestsWithDeletedUserToAdminUpdateTask implements UpdateTas
     @Override
     public TaskAttributes getAttributes() {
         return new Attributes(UpdateConcurrency.BLOCKING, WorkingLevel.SCHEMA);
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    // Helper class
+    private static class ContextAndGuestCreatedBy {
+
+        final int contextId;
+        final int guestCreatedBy;
+
+        ContextAndGuestCreatedBy(int contextId, int guestCreatedBy) {
+            super();
+            this.contextId = contextId;
+            this.guestCreatedBy = guestCreatedBy;
+        }
     }
 
 }
