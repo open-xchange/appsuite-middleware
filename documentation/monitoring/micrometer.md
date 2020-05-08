@@ -15,6 +15,9 @@ Developers can still use the `MetricService`, but it is going to be removed in a
 The migration is very simple. Instead of using an OSGi service, one can define and register metrics via static methods, similar to SLF4J. A simple counter can be registered as follows:
 
 ```java
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.Metrics;
+
 Counter myCounter = Counter.builder("metric.group." + "metric.name")
                             .description("Some description")
                             .baseUnit("unit")
