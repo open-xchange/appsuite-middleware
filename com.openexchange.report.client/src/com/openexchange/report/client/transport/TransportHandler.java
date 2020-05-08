@@ -170,7 +170,9 @@ public class TransportHandler {
         httpURLConnection.setReadTimeout(2500);
         httpURLConnection.setUseCaches(false);
         httpURLConnection.setDoOutput(true);
-        if (metadata.getBoolean("needsComposition") == false) {
+        if (metadata.getBoolean("needsComposition")) {
+            httpURLConnection.setChunkedStreamingMode(-1); //This enforces 'sun.net.www.protocol.http.HttpURLConnection' to use a "streaming" output stream in chunked streaming mode with default chunk size.
+        } else {
             httpURLConnection.setFixedLengthStreamingMode(report.length()); // This enforces 'sun.net.www.protocol.http.HttpURLConnection' to use a "streaming" output stream; otherwise outgoing data is stored into a ByteArrayOutputStream (likely causing an OOME; see Bug 57260)
         }
         httpURLConnection.setDoInput(true);
