@@ -275,10 +275,19 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
         // Yield server session
         ServerSession session = ServerSessionAdapter.valueOf(ses);
 
+        // Check From address
+        InternetAddress fromAddresss;
+        {
+            Address from = m.getFrom();
+            if (null == from) {
+                throw MailExceptionCode.MISSING_FIELD.create(MailJSONField.FROM.getKey());
+            }
+            fromAddresss = toMimeAddress(from);
+        }
+
         // Determine the account identifier by From address
         int accountId;
         try {
-            InternetAddress fromAddresss = toMimeAddress(m.getFrom());
             accountId = MimeMessageFiller.resolveFrom2Account(session, fromAddresss, true, true);
         } catch (OXException e) {
             if (MailExceptionCode.NO_TRANSPORT_SUPPORT.equals(e) || MailExceptionCode.INVALID_SENDER.equals(e)) {
@@ -329,13 +338,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
         sourceMessage.setAccountId(accountId);
 
         // From
-        {
-            Address from = m.getFrom();
-            if (null == from) {
-                throw MailExceptionCode.MISSING_FIELD.create(MailJSONField.FROM.getKey());
-            }
-            sourceMessage.addFrom(toMimeAddress(from));
-        }
+        sourceMessage.addFrom(fromAddresss);
 
         // Recipients
         {
@@ -730,8 +733,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
 
                     // Determine the account identifier by From address
                     try {
-                        InternetAddress fromAddresss = toMimeAddress(m.getFrom());
-                        accountId = MimeMessageFiller.resolveFrom2Account(ServerSessionAdapter.valueOf(session), fromAddresss, true, true);
+                        accountId = MimeMessageFiller.resolveFrom2Account(ServerSessionAdapter.valueOf(session), fromAddress, true, true);
                     } catch (OXException e) {
                         if (MailExceptionCode.NO_TRANSPORT_SUPPORT.equals(e) || MailExceptionCode.INVALID_SENDER.equals(e)) {
                             // Re-throw
@@ -2270,14 +2272,26 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
         if (null == addrs) {
             return null;
         }
-        List<InternetAddress> mimeAddresses = new ArrayList<>(addrs.size());
-        for (Address address : addrs) {
-            InternetAddress mimeAddress = toMimeAddress(address);
-            if (null != mimeAddress) {
-                mimeAddresses.add(mimeAddress);
+
+        int numberOfAddresses = addrs.size();
+        switch (numberOfAddresses) {
+            case 0:
+                return new InternetAddress[0];
+            case 1: {
+                Address address = addrs.get(0);
+                return address == null ? new InternetAddress[0] : new InternetAddress[] { toMimeAddress(address) };
+            }
+            default: {
+                List<InternetAddress> mimeAddresses = new ArrayList<>(numberOfAddresses);
+                for (Address address : addrs) {
+                    InternetAddress mimeAddress = toMimeAddress(address);
+                    if (null != mimeAddress) {
+                        mimeAddresses.add(mimeAddress);
+                    }
+                }
+                return mimeAddresses.toArray(new InternetAddress[mimeAddresses.size()]);
             }
         }
-        return mimeAddresses.toArray(new InternetAddress[mimeAddresses.size()]);
     }
 
     private static InternetAddress toMimeAddress(Address a) throws OXException {
@@ -2285,10 +2299,12 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
             return null;
         }
         try {
-            return new QuotedInternetAddress(a.getAddress(), a.getPersonal(), "UTF-8");
+            QuotedInternetAddress mimeAddress = new QuotedInternetAddress(a.getAddress(), true);
+            mimeAddress.setPersonal(a.getPersonal(), "UTF-8");
+            return mimeAddress;
         } catch (UnsupportedEncodingException e) {
             // Nah...
-            throw OXException.general("UTF-8 not available", e);
+            throw OXException.general("UTF-8 charset not available", e);
         } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         }
