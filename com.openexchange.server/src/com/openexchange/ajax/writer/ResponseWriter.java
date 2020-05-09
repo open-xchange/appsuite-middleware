@@ -475,10 +475,10 @@ public final class ResponseWriter {
      * Writes specified exception to given JSON object using passed locale (if no other locale specified through {@link OXExceptionConstants#PROPERTY_LOCALE}.
      *
      * @param json The JSON object
-     * @param errorKey The key value for the error value inside the JSON object
      * @param exception The exception to write
      * @param locale The locale
      * @param includeStackTraceOnError <code>true</code> to append stack trace elements to JSON object; otherwise <code>false</code>
+     * @param errorKey The key value for the error value inside the JSON object; e.g. <code>"error"</code>
      * @throws JSONException If writing JSON fails
      * @see OXExceptionConstants#PROPERTY_LOCALE
      */
