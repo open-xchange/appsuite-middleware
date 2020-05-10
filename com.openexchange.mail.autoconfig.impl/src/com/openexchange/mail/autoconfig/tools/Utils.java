@@ -52,13 +52,13 @@ package com.openexchange.mail.autoconfig.tools;
 import static com.openexchange.java.Autoboxing.I;
 import java.net.URI;
 import java.net.URISyntaxException;
-import javax.mail.internet.idn.IDNA;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.MailAccounts;
 
 /**
  * {@link Utils}
@@ -159,10 +159,7 @@ public class Utils {
             }
 
             MailAccount defaultMailAccount = storageService.getDefaultMailAccount(userId, contextId);
-            if (false == Strings.asciiLowerCase(defaultMailAccount.getMailProtocol()).startsWith("imap")) {
-                return false;
-            }
-            return IDNA.toASCII(host).equals(IDNA.toASCII(defaultMailAccount.getMailServer())) && port == defaultMailAccount.getMailPort();
+            return MailAccounts.isEqualImapAccount(defaultMailAccount, host, port);
         } catch (Exception e) {
            LoggerHolder.LOGGER.warn("Failed to check for primary IMAP account of user {} in context {}", I(userId), I(contextId), e);
            return false;
