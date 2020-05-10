@@ -75,6 +75,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -601,7 +602,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 // Content part
                 {
                     final MimeBodyPart textPart = new MimeBodyPart();
-                    final String content = snippet.getContent();
+                    String content = snippet.getContent();
                     MessageUtility.setText(sanitizeContent(content), "UTF-8", null == misc ? "plain" : contentSubType, textPart);
                     // textPart.setText(sanitizeContent(snippet.getContent()), "UTF-8", "plain");
                     multipart.addBodyPart(textPart);
@@ -1328,7 +1329,18 @@ public final class MimeSnippetManagement implements SnippetManagement {
             return "plain";
         }
         final String ct = SnippetUtils.parseContentTypeFromMisc(misc);
-        return new ContentType(ct).getSubType();
+        return Strings.asciiLowerCase(new ContentType(ct).getSubType());
+    }
+
+    private static Optional<String> optionalContentSubtype(final Object misc) throws OXException {
+        if (misc == null) {
+            return Optional.empty();
+        }
+        Optional<String> optionalContentType = SnippetUtils.parseOptionalContentTypeFromMisc(misc);
+        if (!optionalContentType.isPresent()) {
+            return Optional.empty();
+        }
+        return Optional.of(Strings.asciiLowerCase(new ContentType(optionalContentType.get()).getSubType()));
     }
 
 }
