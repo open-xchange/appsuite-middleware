@@ -49,10 +49,10 @@
 
 package com.openexchange.chronos.json.action.account;
 
-import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.folderstorage.CalendarFolderConverter.CALENDAR_CONFIG_FIELD;
 import static com.openexchange.folderstorage.CalendarFolderConverter.CALENDAR_PROVIDER_FIELD;
 import static com.openexchange.folderstorage.CalendarFolderConverter.EXTENDED_PROPERTIES_FIELD;
+import static com.openexchange.java.Autoboxing.B;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -148,7 +148,7 @@ public class ProbeAction extends ChronosAction {
             }
             if (settings.containsConfig()) {
                 FolderProperty property = new FolderProperty(CALENDAR_CONFIG_FIELD.getName(), settings.getConfig());
-                jsonObject.put(CALENDAR_CONFIG_FIELD.getName(), CALENDAR_CONFIG_FIELD.write(property));
+                jsonObject.put(CALENDAR_CONFIG_FIELD.getName(), CALENDAR_CONFIG_FIELD.write(property, null));
             }
             if (settings.containsExtendedProperties()) {
                 ExtendedProperties clone = (ExtendedProperties) settings.getExtendedProperties().clone();
@@ -156,7 +156,7 @@ public class ProbeAction extends ChronosAction {
                     clone.add(CalendarFolderProperty.USED_FOR_SYNC(B(ufs.isUsedForSync()), ufs.isProtected()));
                 });
                 FolderProperty property = new FolderProperty(EXTENDED_PROPERTIES_FIELD.getName(), clone);
-                jsonObject.put(EXTENDED_PROPERTIES_FIELD.getName(), EXTENDED_PROPERTIES_FIELD.write(property));
+                jsonObject.put(EXTENDED_PROPERTIES_FIELD.getName(), EXTENDED_PROPERTIES_FIELD.write(property, null));
             }
 
         } catch (JSONException e) {

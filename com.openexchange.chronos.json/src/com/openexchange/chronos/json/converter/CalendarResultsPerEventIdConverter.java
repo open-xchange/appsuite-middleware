@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.json.converter;
 
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -136,7 +137,7 @@ public class CalendarResultsPerEventIdConverter extends CalendarResultConverter 
             jsonObject.put("timestamp", calendarResult.getTimestamp());
             if (ErrorAwareCalendarResult.class.isInstance(calendarResult) && null != ((ErrorAwareCalendarResult) calendarResult).getError()) {
                 JSONObject error = new JSONObject();
-                ResponseWriter.addException(error, ((ErrorAwareCalendarResult) calendarResult).getError());
+                ResponseWriter.addException(error, ((ErrorAwareCalendarResult) calendarResult).getError(), session.getUser().getLocale());
                 jsonObject.put(ChronosCalendarResultJsonFields.ErrorAwareResult.ERROR, error);
             } else {
                 jsonObject.put(ChronosCalendarResultJsonFields.ErrorAwareResult.CREATED, convertCreateResults(calendarResult.getCreations(), timeZoneID, session, requestedFields, extendedEntities));
