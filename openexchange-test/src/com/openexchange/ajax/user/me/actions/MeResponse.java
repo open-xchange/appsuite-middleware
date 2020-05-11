@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,23 +47,26 @@
  *
  */
 
-package com.openexchange.ajax.user;
+package com.openexchange.ajax.user.me.actions;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.ajax.user.me.MeTest;
-import com.openexchange.test.concurrent.ParallelSuite;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
+
 
 /**
- * Test suite for all user interface tests.
+ * {@link MeResponse}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.10.4
  */
-@RunWith(ParallelSuite.class)
-@SuiteClasses({ GetTest.class, AllTest.class, ListTest.class, Bug13911Test.class, Bug17539Test.class, Bug26354Test.class, Bug26431Test.class, MeTest.class })
-public final class UserAJAXSuite {
+public class MeResponse extends AbstractAJAXResponse {
 
-    private UserAJAXSuite() {
-        super();
+    /**
+     * Initializes a new {@link MeResponse}.
+     * @param response
+     */
+    protected MeResponse(Response response) {
+        super(response);
     }
+
 }
