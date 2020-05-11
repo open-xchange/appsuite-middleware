@@ -59,6 +59,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -188,11 +189,9 @@ public class DefaultDispatcher implements Dispatcher {
             RequestContextHolder.set(requestContext);
 
             // Determine action factory and yield an action executing the request
-            AJAXActionServiceFactory factory = lookupFactory(modifiedRequestData.getModule());
-            if (factory == null) {
-                throw AjaxExceptionCodes.UNKNOWN_MODULE.create(modifiedRequestData.getModule());
-            }
-            moduleToRecord = factory instanceof ModuleAwareAJAXActionServiceFactory ? ((ModuleAwareAJAXActionServiceFactory) factory).getModule() : modifiedRequestData.getModule();
+            FactoryAndModule factoryAndModule = optFactoryAndModule(modifiedRequestData.getModule()).orElseThrow(() -> AjaxExceptionCodes.UNKNOWN_MODULE.create(modifiedRequestData.getModule()));
+            AJAXActionServiceFactory factory = factoryAndModule.factory;
+            moduleToRecord = factoryAndModule.module;
 
             AJAXActionService action = factory.createActionService(modifiedRequestData.getAction());
             if (action == null) {
@@ -804,28 +803,30 @@ public class DefaultDispatcher implements Dispatcher {
     }
 
     /**
-     * Looks-up denoted factory
+     * Searches for an AJAXActionServiceFactory with the given module.
+     * If none is found it tries to find one by removing the last path segment of the given module until one is found or until the last path segment is reached.
      *
-     * @param module The module to look-up for
-     * @return The factory or <code>null</code>
+     * E.g. mail/theAttachmentName -> mail
+     *
+     * @param module The module path (e.g. <code>mail/theAttachmentName</code> or <code>folders</code>)
+     * @return An optional {@link FactoryAndModule} if found
      */
-    @Override
-    public AJAXActionServiceFactory lookupFactory(final String module) {
-        AJAXActionServiceFactory serviceFactory = actionFactories.get(module);
+    private Optional<FactoryAndModule> optFactoryAndModule(String module) {
+        String candidate = module;
+        AJAXActionServiceFactory serviceFactory = actionFactories.get(candidate);
         if (null == serviceFactory) {
-            String candidate = module;
-            int index = candidate.lastIndexOf('/');
-            while (index > 0) {
+            for (int index; serviceFactory == null && (index = candidate.lastIndexOf('/')) > 0;) {
                 candidate = candidate.substring(0, index);
                 serviceFactory = actionFactories.get(candidate);
-                if (null != serviceFactory) {
-                    break;
-                }
-                index = candidate.lastIndexOf('/');
             }
-            return new ModuleAwareAJAXActionServiceFactory(serviceFactory, candidate);
         }
-        return serviceFactory;
+        return serviceFactory == null ? Optional.empty() : Optional.of(new FactoryAndModule(candidate, serviceFactory));
+    }
+
+    @Override
+    public AJAXActionServiceFactory lookupFactory(final String module) {
+        Optional<FactoryAndModule> optionalResult = optFactoryAndModule(module);
+        return optionalResult.isPresent() ? optionalResult.get().factory : null;
     }
 
     private DispatcherNotes getActionMetadata(final AJAXActionService action) {
@@ -1048,44 +1049,29 @@ public class DefaultDispatcher implements Dispatcher {
             return true;
         }
 
-    }// End of class Strings
+    } // End of class StrPair
 
     /**
-     * {@link ModuleAwareAJAXActionServiceFactory} is a wrapper for a AJAXActionServiceFactory which knows it's module
+     * {@link FactoryAndModule} The result of a factory lookup. See {@link DefaultDispatcher#lookupFactory(String)}
      *
      * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
      * @since v7.10.4
      */
-    private static final class ModuleAwareAJAXActionServiceFactory implements AJAXActionServiceFactory {
+    private static final class FactoryAndModule {
 
-        private final AJAXActionServiceFactory delegate;
-        private final String module;
+        final String module;
+        final AJAXActionServiceFactory factory;
 
         /**
-         * Initializes a new {@link ModuleAwareAJAXActionServiceFactory}.
+         * Initializes a new {@link FactoryAndModule}.
          *
-         * @param delegate The AJAXActionServiceFactory to delegate to
-         * @param module The module of this {@link AJAXActionServiceFactory}
+         * @param module The module of the factory
+         * @param factory The factory
          */
-        public ModuleAwareAJAXActionServiceFactory(AJAXActionServiceFactory delegate, String module) {
+        FactoryAndModule(String module, AJAXActionServiceFactory factory) {
             super();
-            this.delegate = delegate;
             this.module = module;
+            this.factory = factory;
         }
-
-        @Override
-        public AJAXActionService createActionService(String action) throws OXException {
-            return delegate.createActionService(action);
-        }
-
-        /**
-         * Gets the module
-         *
-         * @return The module
-         */
-        public String getModule() {
-            return module;
-        }
-
     }
 }
