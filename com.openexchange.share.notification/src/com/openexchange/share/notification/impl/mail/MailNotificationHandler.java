@@ -52,6 +52,7 @@ package com.openexchange.share.notification.impl.mail;
 import java.io.UnsupportedEncodingException;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
+import com.openexchange.authentication.application.AppPasswordUtils;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -127,7 +128,7 @@ public class MailNotificationHandler implements ShareNotificationHandler<Interne
         TransportProvider transportProvider = getTransportProvider();
         ShareCreatedNotification<InternetAddress> casted = (ShareCreatedNotification<InternetAddress>) notification;
         ComposedMailMessage mail = ShareCreatedMail.init(casted, transportProvider, services).compose();
-        if (ServerSessionAdapter.valueOf(casted.getSession()).getUserConfiguration().hasWebMail()) {
+        if (preferNoReplyAccount(casted.getSession())) {
             sendMail(transportProvider.createNewMailTransport(casted.getSession()), mail);
         } else {
             boolean usePersonalEmailAddress = getBoolValue("com.openexchange.share.notification.usePersonalEmailAddress", false, casted.getSession());
@@ -143,7 +144,7 @@ public class MailNotificationHandler implements ShareNotificationHandler<Interne
         TransportProvider transportProvider = getTransportProvider();
         LinkCreatedNotification<InternetAddress> casted = (LinkCreatedNotification<InternetAddress>) notification;
         ComposedMailMessage mail = LinkCreatedMail.init(casted, transportProvider, services).compose();
-        if (ServerSessionAdapter.valueOf(casted.getSession()).getUserConfiguration().hasWebMail()) {
+        if (preferNoReplyAccount(casted.getSession())) {
             sendMail(transportProvider.createNewMailTransport(casted.getSession()), mail);
         } else {
             boolean usePersonalEmailAddress = getBoolValue("com.openexchange.share.notification.usePersonalEmailAddress", false, casted.getSession());
@@ -153,6 +154,26 @@ public class MailNotificationHandler implements ShareNotificationHandler<Interne
                 sendMail(transportProvider.createNewNoReplyTransport(casted.getContextID(), true), mail);
             }
         }
+    }
+
+    /**
+     * Gets a value indicating whether to prefer the <i>no-reply</i> transport account when sending notification mails, or to stick to
+     * the user's primary mail transport account instead.
+     *
+     * @param session The session to decide the preference for
+     * @return <code>true</code> if the no-reply account should be used, <code>false</code>, otherwise
+     */
+    private boolean preferNoReplyAccount(Session session) throws OXException {
+        /*
+         * use no-reply if user has no mail module permission
+         */
+        if (null == session || false == ServerSessionAdapter.valueOf(session).getUserConfiguration().hasWebMail()) {
+            return true;
+        }
+        /*
+         * otherwise use no-reply if session is restricted and has no required scope
+         */
+        return AppPasswordUtils.isNotRestrictedOrHasScopes(session, "write_mail");
     }
 
     private void sendPasswordResetConfirm(ShareNotification<InternetAddress> notification) throws UnsupportedEncodingException, OXException, MessagingException {
