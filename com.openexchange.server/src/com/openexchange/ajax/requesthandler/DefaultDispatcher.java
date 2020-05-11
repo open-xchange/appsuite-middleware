@@ -192,7 +192,7 @@ public class DefaultDispatcher implements Dispatcher {
             if (factory == null) {
                 throw AjaxExceptionCodes.UNKNOWN_MODULE.create(modifiedRequestData.getModule());
             }
-            moduleToRecord = modifiedRequestData.getModule();
+            moduleToRecord = factory instanceof ModuleAwareAJAXActionServiceFactory ? ((ModuleAwareAJAXActionServiceFactory) factory).getModule() : modifiedRequestData.getModule();
 
             AJAXActionService action = factory.createActionService(modifiedRequestData.getAction());
             if (action == null) {
@@ -823,6 +823,7 @@ public class DefaultDispatcher implements Dispatcher {
                 }
                 index = candidate.lastIndexOf('/');
             }
+            return new ModuleAwareAJAXActionServiceFactory(serviceFactory, candidate);
         }
         return serviceFactory;
     }
@@ -1049,4 +1050,42 @@ public class DefaultDispatcher implements Dispatcher {
 
     }// End of class Strings
 
+    /**
+     * {@link ModuleAwareAJAXActionServiceFactory} is a wrapper for a AJAXActionServiceFactory which knows it's module
+     *
+     * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+     * @since v7.10.4
+     */
+    private static final class ModuleAwareAJAXActionServiceFactory implements AJAXActionServiceFactory {
+
+        private final AJAXActionServiceFactory delegate;
+        private final String module;
+
+        /**
+         * Initializes a new {@link ModuleAwareAJAXActionServiceFactory}.
+         *
+         * @param delegate The AJAXActionServiceFactory to delegate to
+         * @param module The module of this {@link AJAXActionServiceFactory}
+         */
+        public ModuleAwareAJAXActionServiceFactory(AJAXActionServiceFactory delegate, String module) {
+            super();
+            this.delegate = delegate;
+            this.module = module;
+        }
+
+        @Override
+        public AJAXActionService createActionService(String action) throws OXException {
+            return delegate.createActionService(action);
+        }
+
+        /**
+         * Gets the module
+         *
+         * @return The module
+         */
+        public String getModule() {
+            return module;
+        }
+
+    }
 }
