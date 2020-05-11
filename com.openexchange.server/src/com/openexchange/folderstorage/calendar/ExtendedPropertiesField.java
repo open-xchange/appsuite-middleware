@@ -59,6 +59,7 @@ import com.openexchange.folderstorage.FolderField;
 import com.openexchange.folderstorage.FolderProperty;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ExtendedPropertiesField}
@@ -110,14 +111,14 @@ public class ExtendedPropertiesField extends FolderField {
     }
 
     @Override
-    public Object write(FolderProperty property) {
+    public Object write(FolderProperty property, ServerSession session) {
         if (null != property) {
             try {
                 DataHandler dataHandler = ServerServiceRegistry.getServize(ConversionService.class).getDataHandler(DataHandlers.XPROPERTIES2JSON);
                 if (null == dataHandler) {
                     throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create("No such data handler: " + DataHandlers.XPROPERTIES2JSON);
                 }
-                ConversionResult result = dataHandler.processData(new SimpleData<Object>(property.getValue()), new DataArguments(), null);
+                ConversionResult result = dataHandler.processData(new SimpleData<Object>(property.getValue()), new DataArguments(), session);
                 return result.getData();
             } catch (Exception e) {
                 LOG.warn("Error writing extended calendar properties \"{}\": {}", property.getValue(), e.getMessage(), e);

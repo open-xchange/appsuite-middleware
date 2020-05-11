@@ -143,11 +143,11 @@ public class ProbeAction extends ChronosAction {
             }
             if (settings.containsConfig()) {
                 FolderProperty property = new FolderProperty(CALENDAR_CONFIG_FIELD.getName(), settings.getConfig());
-                jsonObject.put(CALENDAR_CONFIG_FIELD.getName(), CALENDAR_CONFIG_FIELD.write(property));
+                jsonObject.put(CALENDAR_CONFIG_FIELD.getName(), CALENDAR_CONFIG_FIELD.write(property, null));
             }
             if (settings.containsExtendedProperties()) {
                 FolderProperty property = new FolderProperty(EXTENDED_PROPERTIES_FIELD.getName(), settings.getExtendedProperties());
-                jsonObject.put(EXTENDED_PROPERTIES_FIELD.getName(), EXTENDED_PROPERTIES_FIELD.write(property));
+                jsonObject.put(EXTENDED_PROPERTIES_FIELD.getName(), EXTENDED_PROPERTIES_FIELD.write(property, null));
             }
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
