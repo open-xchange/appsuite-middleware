@@ -94,6 +94,11 @@ public class StatelessDovecotPushListener extends AbstractDovecotPushListener {
             }
 
             if (registrationResult.isFailed()) {
+                if (!isUserValid()) {
+                    scheduleRetry = false;
+                    logInfo = registrationResult.getLogInfo();
+                    throw registrationResult.getException();
+                }
                 scheduleRetry = registrationResult.scheduleRetry();
                 logInfo = registrationResult.getLogInfo();
                 throw registrationResult.getException();
