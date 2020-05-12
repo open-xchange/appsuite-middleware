@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+	<classpathentry kind="lib" path="lib/jersey-client-2.26.jar" sourcepath="lib/source/jersey-client-2.26-sources.jar"/>
+	<classpathentry kind="lib" path="lib/jersey-server-2.26.jar" sourcepath="lib/source/jersey-server-2.26-sources.jar"/>
+	<classpathentry kind="lib" path="lib/jersey-common-2.26.jar" sourcepath="lib/source/jersey-common-2.26-sources.jar"/>
+	<classpathentry kind="lib" path="lib/jersey-hk2-2.26.jar" sourcepath="lib/source/jersey-hk2-2.26-sources.jar"/>
+	<classpathentry kind="lib" path="lib/jersey-entity-filtering-2.26.jar" sourcepath="lib/source/jersey-entity-filtering-2.26-sources.jar"/>
+	<classpathentry kind="lib" path="lib/jersey-media-json-jackson-2.26.jar" sourcepath="lib/source/jersey-media-json-jackson-2.26-sources.jar"/>
+	<classpathentry kind="lib" path="lib/jersey-media-multipart-2.26.jar" sourcepath="lib/source/jersey-media-multipart-2.26-sources.jar"/>
 	<classpathentry kind="src" path="common"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="unittests"/>
@@ -197,13 +204,6 @@
 	<classpathentry kind="lib" path="lib/jackson-datatype-joda-2.7.5.jar" sourcepath="lib/source/jackson-datatype-joda-2.7.5-sources.jar"/>
 	<classpathentry kind="lib" path="lib/jackson-datatype-jsr310-2.7.5.jar" sourcepath="lib/source/jackson-datatype-jsr310-2.7.5-sources.jar"/>
 	<classpathentry kind="lib" path="lib/jackson-module-jaxb-annotations-2.8.4.jar" sourcepath="lib/source/jackson-module-jaxb-annotations-2.8.4-sources.jar"/>
-	<classpathentry kind="lib" path="lib/jersey-client-2.26.jar" sourcepath="lib/source/jersey-client-2.26-sources.jar"/>
-	<classpathentry kind="lib" path="lib/jersey-server-2.26.jar" sourcepath="lib/source/jersey-server-2.26-sources.jar"/>
-	<classpathentry kind="lib" path="lib/jersey-common-2.26.jar" sourcepath="lib/source/jersey-common-2.26-sources.jar"/>
-	<classpathentry kind="lib" path="lib/jersey-hk2-2.26.jar" sourcepath="lib/source/jersey-hk2-2.26-sources.jar"/>
-	<classpathentry kind="lib" path="lib/jersey-entity-filtering-2.26.jar" sourcepath="lib/source/jersey-entity-filtering-2.26-sources.jar"/>
-	<classpathentry kind="lib" path="lib/jersey-media-json-jackson-2.26.jar" sourcepath="lib/source/jersey-media-json-jackson-2.26-sources.jar"/>
-	<classpathentry kind="lib" path="lib/jersey-media-multipart-2.26.jar" sourcepath="lib/source/jersey-media-multipart-2.26-sources.jar"/>
 	<classpathentry kind="lib" path="lib/hk2-utils-2.5.0-b42.jar" sourcepath="lib/source/hk2-utils-2.5.0-b42-sources.jar"/>
 	<classpathentry kind="lib" path="lib/hk2-api-2.5.0-b42.jar" sourcepath="lib/source/hk2-api-2.5.0-b42-sources.jar"/>
 	<classpathentry kind="lib" path="lib/hk2-locator-2.5.0-b42.jar" sourcepath="lib/source/hk2-locator-2.5.0-b42-sources.jar"/>
