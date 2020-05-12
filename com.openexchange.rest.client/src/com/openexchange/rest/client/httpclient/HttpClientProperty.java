@@ -16,7 +16,7 @@ import com.openexchange.config.lean.Property;
 public enum HttpClientProperty implements Property {
 
     SOCKET_READ_TIMEOUT_MILLIS("readTimeout", I(30000), (config, in) -> config.setSocketReadTimeout(i(in))),
-    CONNTECTION_TIMEOUT_MILLIS("connectTimeout", I(30000), (config, in) -> config.setConnectionTimeout(i(in))),
+    CONNTECTION_TIMEOUT_MILLIS("connectTimeout", I(30000), (config, in) -> config.setConnectTimeout(i(in))),
     CONNECTION_REQUEST_TIMEOUT_MILLIS("connectionRequestTimeout", I(30000), (config, in) -> config.setConnectionRequestTimeout(i(in))),
     KEEP_ALIVE_DURATION_SECS("keepAlive.duration", I(20), (config, in) -> config.setKeepAliveDuration(i(in))),
     KEEP_ALIVE_MONITOR_INTERVAL_SECS("keepAlive.monitorInterval", I(5), (config, in) -> config.setKeepAliveMonitorInterval(i(in))),

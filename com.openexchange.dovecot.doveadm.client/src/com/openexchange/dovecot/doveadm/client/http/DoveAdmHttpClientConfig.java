@@ -126,7 +126,7 @@ public class DoveAdmHttpClientConfig extends DefaultHttpClientConfigProvider {
         } catch (OXException e) {
             LoggerFactory.getLogger(DoveAdmHttpClientConfig.class).warn("Unable to set HTTP client configuration for DoveAdm call {}", call, e);
         }
-        return config.setMaxTotalConnections(TOTAL_CONNECTIONS).setMaxConnectionsPerRoute(TOTAL_CONNECTIONS_PER_ROUTE).setConnectionTimeout(CONNECTION_TIMEOUT).setSocketReadTimeout(READ_TIMEOUT);
+        return config.setMaxTotalConnections(TOTAL_CONNECTIONS).setMaxConnectionsPerRoute(TOTAL_CONNECTIONS_PER_ROUTE).setConnectTimeout(CONNECTION_TIMEOUT).setSocketReadTimeout(READ_TIMEOUT);
     }
 
     /**

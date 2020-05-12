@@ -74,9 +74,9 @@ public interface HttpBasicConfig {
     /**
      * Gets the timeout in milliseconds until a connection is established.
      *
-     * @return The connection timeout
+     * @return The connect timeout
      */
-    int getConnectionTimeout();
+    int getConnectTimeout();
 
     /**
      * Gets the timeout in milliseconds used when requesting a connection from the connection manager.
@@ -131,14 +131,14 @@ public interface HttpBasicConfig {
     HttpBasicConfig setSocketReadTimeout(int socketReadTimeout);
 
     /**
-     * Sets the connection timeout in milliseconds. A timeout value of zero
+     * Sets the connect timeout in milliseconds. A timeout value of zero
      * is interpreted as an infinite timeout.
      * Default: {@link HttpClientProperty#CONNTECTION_TIMEOUT_MILLIS}
      *
-     * @param connectionTimeout The timeout
+     * @param connectTimeout The timeout
      * @return This instance for chaining
      */
-    HttpBasicConfig setConnectionTimeout(int connectionTimeout);
+    HttpBasicConfig setConnectTimeout(int connectTimeout);
 
     /**
      * Sets the connection request timeout in milliseconds defining the maximum time to wait for a connection from the pool. A timeout

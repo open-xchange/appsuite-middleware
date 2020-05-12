@@ -71,7 +71,7 @@ public class AutoConfigHttpConfiguration extends DefaultHttpClientConfigProvider
 
     @Override
     public HttpBasicConfig configureHttpBasicConfig(HttpBasicConfig config) {
-        return config.setConnectionTimeout(3000).setSocketReadTimeout(10000);
+        return config.setConnectTimeout(3000).setSocketReadTimeout(10000);
     }
 
     @Override

@@ -78,6 +78,6 @@ public class DropboxHttpClientConfiguration extends DefaultHttpClientConfigProvi
 
     @Override
     public HttpBasicConfig configureHttpBasicConfig(HttpBasicConfig config) {
-        return config.setConnectionTimeout(20000).setSocketReadTimeout(120000);
+        return config.setConnectTimeout(20000).setSocketReadTimeout(120000);
     }
 }

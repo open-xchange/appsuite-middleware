@@ -99,7 +99,7 @@ public class OAuthAuthenticationHttpClientConfig extends DefaultHttpClientConfig
         config.setSocketReadTimeout(DEFAULT_READ_TIMEOUT);
         config.setMaxConnectionsPerRoute(DEFAULT_MAX_CONNECTIONS);
         config.setMaxConnectionsPerRoute(DEFAULT_MAX_CONNECTIONS_PER_HOST);
-        config.setConnectionTimeout(DEFAULT_CONNECT_TIMEOUT);
+        config.setConnectTimeout(DEFAULT_CONNECT_TIMEOUT);
         config.setConnectionRequestTimeout(DEFAULT_POOL_TIMEOUT);
         return config;
     }

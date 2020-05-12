@@ -72,7 +72,7 @@ public class ProxyHttpClientConfiguration extends DefaultHttpClientConfigProvide
 
     @Override
     public HttpBasicConfig configureHttpBasicConfig(HttpBasicConfig config) {
-        return config.setConnectionTimeout(3000).setSocketReadTimeout(3000);
+        return config.setConnectTimeout(3000).setSocketReadTimeout(3000);
     }
 
     @Override

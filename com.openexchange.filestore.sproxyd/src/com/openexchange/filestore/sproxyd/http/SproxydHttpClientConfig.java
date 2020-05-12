@@ -100,7 +100,7 @@ public class SproxydHttpClientConfig extends AbstractHttpClientModifer implement
             LoggerFactory.getLogger(SproxydHttpClientConfig.class).error("Unable to load correct properties for sproxyd HTTP client. Falling back to defaults", e);
         }
         // Fallback to default values
-        return config.setMaxTotalConnections(DEF_MAX_CONNECTIONS).setMaxConnectionsPerRoute(DEF_MAX_CONNECTIONS_PER_HOST).setConnectionTimeout(DEF_CON_TIMEOUT).setSocketReadTimeout(DEF_READ_TIMEOUT);
+        return config.setMaxTotalConnections(DEF_MAX_CONNECTIONS).setMaxConnectionsPerRoute(DEF_MAX_CONNECTIONS_PER_HOST).setConnectTimeout(DEF_CON_TIMEOUT).setSocketReadTimeout(DEF_READ_TIMEOUT);
     }
 
     @Override
@@ -122,7 +122,7 @@ public class SproxydHttpClientConfig extends AbstractHttpClientModifer implement
 
         config.setMaxTotalConnections(optIntProperty(clientId, "maxConnections", DEF_MAX_CONNECTIONS, nameBuilder, configService));
         config.setMaxConnectionsPerRoute(optIntProperty(clientId, "maxConnectionsPerHost", DEF_MAX_CONNECTIONS_PER_HOST, nameBuilder, configService));
-        config.setConnectionTimeout(optIntProperty(clientId, "connectionTimeout", DEF_CON_TIMEOUT, nameBuilder, configService));
+        config.setConnectTimeout(optIntProperty(clientId, "connectionTimeout", DEF_CON_TIMEOUT, nameBuilder, configService));
         config.setSocketReadTimeout(optIntProperty(clientId, "socketReadTimeout", DEF_READ_TIMEOUT, nameBuilder, configService));
         return config;
     }

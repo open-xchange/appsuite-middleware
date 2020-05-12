@@ -104,8 +104,8 @@ public class HttpBasicConfigImpl implements HttpBasicConfig {
     }
 
     @Override
-    public HttpBasicConfig setConnectionTimeout(int connectionTimeout) {
-        this.connectionTimeout = connectionTimeout;
+    public HttpBasicConfig setConnectTimeout(int connectTimeout) {
+        this.connectionTimeout = connectTimeout;
         return this;
     }
 
@@ -151,7 +151,7 @@ public class HttpBasicConfigImpl implements HttpBasicConfig {
     }
 
     @Override
-    public int getConnectionTimeout() {
+    public int getConnectTimeout() {
         return connectionTimeout;
     }
 

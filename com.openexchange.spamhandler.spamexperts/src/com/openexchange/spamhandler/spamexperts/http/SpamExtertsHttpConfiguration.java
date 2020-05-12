@@ -73,7 +73,7 @@ public class SpamExtertsHttpConfiguration extends DefaultHttpClientConfigProvide
 
     @Override
     public HttpBasicConfig configureHttpBasicConfig(HttpBasicConfig config) {
-        return config.setMaxTotalConnections(32).setMaxConnectionsPerRoute(32).setConnectionTimeout(5000);
+        return config.setMaxTotalConnections(32).setMaxConnectionsPerRoute(32).setConnectTimeout(5000);
     }
 
 }

@@ -89,7 +89,7 @@ public class SchedJoulesHttpConfiguration extends DefaultHttpClientConfigProvide
         int timeout = null == configurationService
             ? i(SchedJoulesProperty.connectionTimeout.getDefaultValue(Integer.class))
             : configurationService.getIntProperty(SchedJoulesProperty.connectionTimeout);
-        return config.setConnectionTimeout(timeout).setSocketReadTimeout(timeout);
+        return config.setConnectTimeout(timeout).setSocketReadTimeout(timeout);
     }
 
 }

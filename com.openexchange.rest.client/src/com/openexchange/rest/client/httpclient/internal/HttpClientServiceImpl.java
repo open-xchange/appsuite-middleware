@@ -355,7 +355,7 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
         HttpClientBuilder builder = new ExtendedBuilder(clientId)
             .setConnectionManager(ccm)
             .setDefaultRequestConfig(RequestConfig.custom()
-                .setConnectTimeout(config.getConnectionTimeout())
+                .setConnectTimeout(config.getConnectTimeout())
                 .setSocketTimeout(config.getSocketReadTimeout())
                 .setConnectionRequestTimeout(config.getConnectionRequestTimeout())
                 .setCookieSpec("lenient")
