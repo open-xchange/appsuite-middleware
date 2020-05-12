@@ -95,7 +95,6 @@ public class RestClientActivator extends HousekeepingActivator {
     @Override
     protected synchronized void startBundle() throws Exception {
         RestClientServices.setServices(this);
-        registerService(EndpointManagerFactory.class, new EndpointManagerFactoryImpl(this));
 
         HttpClientServiceImpl httpClientService = new HttpClientServiceImpl(context, this);
         this.httpClientService = httpClientService;
@@ -103,6 +102,7 @@ public class RestClientActivator extends HousekeepingActivator {
         trackService(LeanConfigurationService.class);
         openTrackers();
 
+        registerService(EndpointManagerFactory.class, new EndpointManagerFactoryImpl(httpClientService, this));
         registerService(HttpClientService.class, httpClientService);
         registerService(ForcedReloadable.class, httpClientService);
         // Avoid annoying WARN logging

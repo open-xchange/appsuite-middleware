@@ -47,49 +47,49 @@
  *
  */
 
-package com.openexchange.rest.client.endpointpool;
+package com.openexchange.dovecot.doveadm.client.internal;
 
-import java.net.URI;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-import com.openexchange.exception.OXException;
-import com.openexchange.osgi.annotation.SingletonService;
+import com.openexchange.rest.client.endpointpool.Endpoint;
 
 /**
- * {@link EndpointManagerFactory} - A factory service for new end-point managers.
+ * {@link EndpointAndClientId} - A pair of end-point and HTTP client identifier.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.1
+ * @since v7.10.4
  */
-@SingletonService
-public interface EndpointManagerFactory {
+public class EndpointAndClientId {
+
+    private final Endpoint endpoint;
+    private final String httpClientId;
 
     /**
-     * Creates a new end-point manager for the specified end-point URIs.
+     * Initializes a new {@link EndpointAndClientId}.
      *
-     * @param endpointUris The end-point URIs
-     * @param httpClientId The associated HTTP client
-     * @param availableStrategy The strategy to decide whether an end-point is available or not
-     * @param heartbeatInterval The heart-beat interval to check if a black-listed end-point URI is available again
-     * @param timeUnit The time unit for the heart-beat interval
-     * @return A new end-point manager
-     * @throws OXException If a new end-point manager cannot be returned
-     * @throws IllegalArgumentException If passed URIs are empty or invalid
+     * @param endpoint The end-point
+     * @param httpClientId The client identifier
      */
-    EndpointManager createEndpointManagerByUris(List<URI> endpointUris, String httpClientId, EndpointAvailableStrategy availableStrategy, long heartbeatInterval, TimeUnit timeUnit) throws OXException;
+    public EndpointAndClientId(Endpoint endpoint, String httpClientId) {
+        super();
+        this.endpoint = endpoint;
+        this.httpClientId = httpClientId;
+    }
 
     /**
-     * Creates a new end-point manager for the specified end-point URIs.
+     * Gets the end-point.
      *
-     * @param endpoints The end-points
-     * @param httpClientId The associated HTTP client
-     * @param availableStrategy The strategy to decide whether an end-point is available or not
-     * @param heartbeatInterval The heart-beat interval to check if a black-listed end-point URI is available again
-     * @param timeUnit The time unit for the heart-beat interval
-     * @return A new end-point manager
-     * @throws OXException If a new end-point manager cannot be returned
-     * @throws IllegalArgumentException If passed URIs are empty or invalid
+     * @return The end-point
      */
-    EndpointManager createEndpointManager(List<String> endpoints, String httpClientId, EndpointAvailableStrategy availableStrategy, long heartbeatInterval, TimeUnit timeUnit) throws OXException;
+    public Endpoint getEndpoint() {
+        return endpoint;
+    }
+
+    /**
+     * Gets the HTTP client identifier.
+     *
+     * @return The client identifier
+     */
+    public String getHttpClientId() {
+        return httpClientId;
+    }
 
 }
