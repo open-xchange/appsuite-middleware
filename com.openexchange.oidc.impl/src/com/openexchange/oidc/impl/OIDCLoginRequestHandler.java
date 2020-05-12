@@ -86,6 +86,7 @@ import com.openexchange.oidc.OIDCBackendConfig.AutologinMode;
 import com.openexchange.oidc.OIDCBackendProperty;
 import com.openexchange.oidc.osgi.Services;
 import com.openexchange.oidc.tools.OIDCTools;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.session.SessionDescription;
 import com.openexchange.session.reservation.EnhancedAuthenticated;
@@ -143,7 +144,7 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
             }
         } catch (OXException e) {
             LOG.error(e.getLocalizedMessage(), e);
-            if (respondWithJson) {
+            if (respondWithJson && response.getWriter() != null) {
                 try {
                     requestContext.getMetricProvider().recordException(e);
                     ResponseWriter.writeException(e, new JSONWriter(
@@ -328,6 +329,9 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
             }
 
             SessionReservationService sessionReservationService = Services.getServiceSafe(SessionReservationService.class);
+            if (sessionReservationService == null) {
+                throw ServiceExceptionCode.absentService(SessionReservationService.class);
+            }
             Reservation reservation = sessionReservationService.removeReservation(sessionToken);
             if (null == reservation) {
                 handleException(response, respondWithJson, LoginExceptionCodes.INVALID_CREDENTIALS.create(), HttpServletResponse.SC_FORBIDDEN, requestContext);
