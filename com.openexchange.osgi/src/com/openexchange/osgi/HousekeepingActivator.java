@@ -110,7 +110,7 @@ public abstract class HousekeepingActivator extends DeferredActivator {
             }
 
             // Such a service already available
-            LOG.error("Duplicate service instance for singleton service \"{}\" detected. Please review active/started bundles.", clazz.getName());
+            LOG.error("Duplicate service instance for singleton service \"{}\" detected in bundle \"{}\". Please review active/started bundles.", clazz.getName(), context.getBundle().getSymbolicName());
             context.ungetService(reference);
             return null;
         }
