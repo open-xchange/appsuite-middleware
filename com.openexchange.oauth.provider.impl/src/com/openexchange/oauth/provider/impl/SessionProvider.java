@@ -101,7 +101,7 @@ import com.openexchange.user.UserService;
  */
 public class SessionProvider {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SessionProvider.class);
+    static final Logger LOG = LoggerFactory.getLogger(SessionProvider.class);
 
     private static final String OAUTH_SESSION_KEY = "oauthSession";
 
@@ -143,9 +143,15 @@ public class SessionProvider {
         try {
             do {
                 String sessionId = sessionCache.get(accessToken, new Callable<String>() {
+
                     @Override
                     public String call() throws Exception {
-                        return login(contextId, userId, clientName, httpRequest).getSessionID();
+                        try {
+                            return login(contextId, userId, clientName, httpRequest).getSessionID();
+                        } catch (Exception e) {
+                            LOG.error("Exception occurred while trying to get session.", e);
+                            throw e;
+                        }
                     }
                 });
 
@@ -190,6 +196,7 @@ public class SessionProvider {
         final Context context = contextService.getContext(contextId);
         final User user = userService.getUser(userId, context);
         LoginResult loginResult = LoginPerformer.getInstance().doLogin(getLoginRequest(httpRequest, user, clientName), new HashMap<String, Object>(1), new LoginMethodClosure() {
+
             @Override
             public Authenticated doAuthentication(LoginResultImpl retval) {
                 return new OAuthProviderAuthenticated(user.getLoginInfo(), context.getLoginInfo()[0]);

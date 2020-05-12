@@ -267,7 +267,7 @@ public class LoginRequestImpl implements LoginRequest {
         this.serverName = serverName;
         this.serverPort = serverPort;
         this.httpSession = httpSession;
-        this.httpSessionID = httpSession.getId();
+        this.httpSessionID = httpSession != null ? httpSession.getId() : null;
         this.language = language;
         this.storeLanguage = storeLanguage;
         this.locale = locale;
