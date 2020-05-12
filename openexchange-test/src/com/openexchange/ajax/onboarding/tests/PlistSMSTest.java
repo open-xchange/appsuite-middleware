@@ -59,7 +59,7 @@ import org.junit.Test;
 import com.google.common.io.BaseEncoding;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.client.onboarding.OnboardingExceptionCodes;
-import com.openexchange.sms.SMSExceptionCode;
+import com.openexchange.sms.sipgate.SipgateSMSExceptionCode;
 import com.openexchange.testing.httpclient.models.CommonResponse;
 
 /**
@@ -86,7 +86,7 @@ public class PlistSMSTest extends AbstractPlistSMSTest {
                 // scenario disabled
                 continue;
             }
-            checkException(response.getCode(), SMSExceptionCode.NOT_SENT);
+            checkException(response.getCode(), SipgateSMSExceptionCode.NOT_CONFIGURED);
         }
     }
 

@@ -56,7 +56,7 @@ import java.util.Map;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
-import com.openexchange.sms.SMSExceptionCode;
+import com.openexchange.sms.sipgate.SipgateSMSExceptionCode;
 import com.openexchange.sms.tools.SMSBucketExceptionCodes;
 import com.openexchange.testing.httpclient.models.CommonResponse;
 
@@ -72,7 +72,7 @@ public class PlistSMSUserLimitTest extends AbstractPlistSMSTest {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        //Wait until sms tokens are refreshed
+        // Wait until sms tokens are refreshed
         Thread.sleep(61000);
     }
 
@@ -88,7 +88,7 @@ public class PlistSMSUserLimitTest extends AbstractPlistSMSTest {
 
             if (x < 2) {
                 // Expecting an sipgate authorization exception
-                checkException(response.getCode(), SMSExceptionCode.NOT_SENT);
+                checkException(response.getCode(), SipgateSMSExceptionCode.NOT_CONFIGURED);
             } else {
                 // SMS should run into user limit
                 checkException(response.getCode(), SMSBucketExceptionCodes.SMS_LIMIT_REACHED);
@@ -116,14 +116,14 @@ public class PlistSMSUserLimitTest extends AbstractPlistSMSTest {
             }
         }
 
-        //Wait until sms tokens are refreshed
+        // Wait until sms tokens are refreshed
         Thread.sleep(122000);
 
-        //Execute another sms request which shouldn't run into the user sms limit
+        // Execute another sms request which shouldn't run into the user sms limit
         CommonResponse response = onboardingApi.executeClientOnboarding(getSessionId(), "apple.iphone/mailsync", "sms", jsonString);
         assertNotNull("Unexpected response from the server! Response does not contain an exception.", response.getError());
         // Expecting an sipgate authorization exception
-        checkException(response.getCode(), SMSExceptionCode.NOT_SENT);
+        checkException(response.getCode(), SipgateSMSExceptionCode.NOT_CONFIGURED);
     }
 
     @Override

@@ -212,5 +212,6 @@
 	<classpathentry kind="lib" path="lib/commons-httpclient-3.1.jar" sourcepath="lib/source/commons-httpclient-3.1-sources.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/commons-codec-1.14.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/httpclient-osgi-4.5.12.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.sms.sipgate"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

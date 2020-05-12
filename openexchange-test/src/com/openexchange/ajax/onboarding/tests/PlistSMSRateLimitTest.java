@@ -53,7 +53,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.junit.Test;
 import com.openexchange.client.onboarding.OnboardingExceptionCodes;
-import com.openexchange.sms.SMSExceptionCode;
+import com.openexchange.sms.sipgate.SipgateSMSExceptionCode;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.CommonResponse;
 
@@ -71,7 +71,7 @@ public class PlistSMSRateLimitTest extends AbstractPlistSMSTest {
 
         CommonResponse response = onboardingApi.executeClientOnboarding(getSessionId(), "apple.iphone/mailsync", "sms", jsonString);
         // Expecting an sipgate authorization exception
-        checkException(response.getCode(), SMSExceptionCode.NOT_SENT);
+        checkException(response.getCode(), SipgateSMSExceptionCode.NOT_CONFIGURED);
 
         response = onboardingApi.executeClientOnboarding(getSessionId(), "apple.iphone/mailsync", "sms", jsonString);
         // Expecting an SENT_QUOTA_EXCEEDED exeption
@@ -82,7 +82,7 @@ public class PlistSMSRateLimitTest extends AbstractPlistSMSTest {
 
         response = onboardingApi.executeClientOnboarding(getSessionId(), "apple.iphone/mailsync", "sms", jsonString);
         // Expecting an sipgate authorization exception
-        checkException(response.getCode(), SMSExceptionCode.NOT_SENT);
+        checkException(response.getCode(), SipgateSMSExceptionCode.NOT_CONFIGURED);
     }
 
     @Override
