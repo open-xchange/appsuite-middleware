@@ -774,10 +774,10 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
     }
 
     private static final String SQL_LOAD_P =
-        "SELECT permission_id, fp, orp, owp, odp, admin_flag, group_flag, system, type, sharedParentFolder FROM oxfolder_permissions WHERE cid = ? AND fuid = ?";
+        "SELECT permission_id, fp, orp, owp, odp, admin_flag, group_flag, `system`, type, sharedParentFolder FROM oxfolder_permissions WHERE cid = ? AND fuid = ?";
 
     private static final String SQL_LOAD_P_BACKUP =
-        "SELECT permission_id, fp, orp, owp, odp, admin_flag, group_flag, system, type, sharedParentFolder FROM del_oxfolder_permissions WHERE cid = ? AND fuid = ?";
+        "SELECT permission_id, fp, orp, owp, odp, admin_flag, group_flag, `system`, type, sharedParentFolder FROM del_oxfolder_permissions WHERE cid = ? AND fuid = ?";
 
     private static final OCLPermission[] loadFolderPermissions(final int folderId, final int cid, final Connection con) throws OXException {
         PreparedStatement stmt = null;
