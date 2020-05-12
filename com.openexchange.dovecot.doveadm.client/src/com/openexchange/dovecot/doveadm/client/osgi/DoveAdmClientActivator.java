@@ -49,12 +49,11 @@
 
 package com.openexchange.dovecot.doveadm.client.osgi;
 
+import java.util.List;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dovecot.doveadm.client.DoveAdmClient;
-import com.openexchange.dovecot.doveadm.client.http.DoveAdmHttpClientConfig;
-import com.openexchange.dovecot.doveadm.client.internal.HttpDoveAdmCall;
 import com.openexchange.dovecot.doveadm.client.internal.HttpDoveAdmClient;
 import com.openexchange.dovecot.doveadm.client.internal.HttpDoveAdmEndpointAvailableStrategy;
 import com.openexchange.dovecot.doveadm.client.internal.HttpDoveAdmEndpointManager;
@@ -74,6 +73,7 @@ import com.openexchange.version.VersionService;
 public class DoveAdmClientActivator extends HousekeepingActivator {
 
     private HttpDoveAdmClient client;
+    private List<SpecificHttpClientConfigProvider> configProviders;
 
     /**
      * Initializes a new {@link DoveAdmClientActivator}.
@@ -116,16 +116,17 @@ public class DoveAdmClientActivator extends HousekeepingActivator {
         EndpointManagerFactory factory = getService(EndpointManagerFactory.class);
         HttpDoveAdmEndpointManager endpointManager = new HttpDoveAdmEndpointManager();
         HttpDoveAdmEndpointAvailableStrategy availableStrategy = new HttpDoveAdmEndpointAvailableStrategy(apiSecret);
-        boolean anyAvailable = endpointManager.init(factory, availableStrategy, configurationService);
-        if (false == anyAvailable) {
+        List<SpecificHttpClientConfigProvider> configProviders = endpointManager.init(factory, availableStrategy, this);
+        if (configProviders.isEmpty()) {
             logger.error("Missing end-points for Dovecot DoveAdm REST interface. DoveAdm client will not be initialized.");
             return;
         }
 
         // Initialize HTTP client config for the different doveadm calls
-        for (HttpDoveAdmCall call : HttpDoveAdmCall.values()) {
-            registerService(SpecificHttpClientConfigProvider.class, new DoveAdmHttpClientConfig(this, call));
+        for (SpecificHttpClientConfigProvider configProvider : configProviders) {
+            registerService(SpecificHttpClientConfigProvider.class, configProvider);
         }
+        this.configProviders = configProviders;
 
         // Initialize client to Dovecot REST interface
         HttpDoveAdmClient client = new HttpDoveAdmClient(apiSecret, endpointManager, this);
@@ -147,6 +148,17 @@ public class DoveAdmClientActivator extends HousekeepingActivator {
         if (null != client) {
             this.client = null;
             client.shutDown();
+        }
+
+        List<SpecificHttpClientConfigProvider> configProviders = this.configProviders;
+        if (configProviders != null) {
+            this.configProviders = null;
+            HttpClientService httpClientService = getService(HttpClientService.class);
+            if (httpClientService != null) {
+                for (SpecificHttpClientConfigProvider configProvider : configProviders) {
+                    httpClientService.destroyHttpClient(configProvider.getClientId());
+                }
+            }
         }
 
         logger.info("Bundle successfully stopped: {}", context.getBundle().getSymbolicName());
