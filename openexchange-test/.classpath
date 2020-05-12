@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+	<classpathentry kind="lib" path="lib/hamcrest-2.2.jar" sourcepath="lib/source/hamcrest-2.2-sources.jar"/>
+	<classpathentry kind="lib" path="lib/hamcrest-date-2.0.7.jar" sourcepath="lib/source/hamcrest-date-2.0.7-sources.jar"/>
 	<classpathentry kind="lib" path="lib/jersey-client-2.26.jar" sourcepath="lib/source/jersey-client-2.26-sources.jar"/>
 	<classpathentry kind="lib" path="lib/jersey-server-2.26.jar" sourcepath="lib/source/jersey-server-2.26-sources.jar"/>
 	<classpathentry kind="lib" path="lib/jersey-common-2.26.jar" sourcepath="lib/source/jersey-common-2.26-sources.jar"/>
@@ -87,8 +89,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.capabilities.impl"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.capabilities"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
-	<classpathentry kind="lib" path="lib/hamcrest-2.2.jar" sourcepath="lib/source/hamcrest-2.2-sources.jar"/>
-	<classpathentry kind="lib" path="lib/hamcrest-date-2.0.7.jar" sourcepath="lib/source/hamcrest-date-2.0.7-sources.jar"/>
 	<classpathentry kind="src" path="/com.openexchange.admin.rmi"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.file.storage"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.contactcollector.impl"/>

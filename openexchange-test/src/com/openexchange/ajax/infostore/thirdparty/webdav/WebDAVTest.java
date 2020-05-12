@@ -54,8 +54,8 @@ import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
@@ -203,9 +203,11 @@ public class WebDAVTest extends AbstractConfigAwareAPIClientSession {
     public void tearDown() throws Exception {
         try {
             //Delete the created WebDAV FileAccount again
-            FileAccountUpdateResponse response = filestorageApi.deleteFileAccount(getSessionId(), testFileAccount.getFilestorageService(), testFileAccount.getId());
-            Integer responseData = checkResponse(response.getError(), response.getErrorDesc(), response.getData());
-            Assert.assertThat(responseData, is(I(1)));
+            if (testFileAccount.getId() != null) {
+                FileAccountUpdateResponse response = filestorageApi.deleteFileAccount(getSessionId(), testFileAccount.getFilestorageService(), testFileAccount.getId());
+                Integer responseData = checkResponse(response.getError(), response.getErrorDesc(), response.getData());
+                Assert.assertThat(responseData, is(I(1)));
+            }
         } finally {
             super.tearDown();
         }
@@ -284,7 +286,7 @@ public class WebDAVTest extends AbstractConfigAwareAPIClientSession {
         //for example: webdav://18/VXNlcnN0b3JlL2FudG9uJTIwYW50b24v
         testFileAccount.getId();
         testFileAccount.getFilestorageService();
-        String rootFolder = String.format("Userstore/%s%s%s/", testUser.getUser(), ",%20", testUser.getUser());
+        String rootFolder = String.format("Userstore/%s%s%s/", testUser.getUser(), "%20", testUser.getUser());
         if (Strings.isNotEmpty(path)) {
             rootFolder += path;
         }
@@ -395,7 +397,7 @@ public class WebDAVTest extends AbstractConfigAwareAPIClientSession {
     protected List<String> deleteFolder(String folderId, boolean hardDelete) throws ApiException {
         final boolean failOnError = true;
         final boolean extendedResponse = false;
-        FoldersCleanUpResponse response = foldersApi.deleteFolders(getSessionId(), Collections.singletonList(folderId), null, null, null, hardDelete, failOnError, extendedResponse, null);
+        FoldersCleanUpResponse response = foldersApi.deleteFolders(getSessionId(), Collections.singletonList(folderId), null, null, null, B(hardDelete), B(failOnError), B(extendedResponse), null);
         return checkResponse(response.getError(), response.getErrorDesc(), response.getData());
     }
 
@@ -423,14 +425,14 @@ public class WebDAVTest extends AbstractConfigAwareAPIClientSession {
     @Test
     public void testGetAllFileAccounts() throws Exception {
         final boolean connectionCheck = true;
-        FileAccountsResponse response = filestorageApi.getAllFileAccounts(getSessionId(), null, connectionCheck);
+        FileAccountsResponse response = filestorageApi.getAllFileAccounts(getSessionId(), null, B(connectionCheck));
         List<FileAccountData> allAccounts = checkResponse(response.getError(), response.getErrorDesc(), response.getData());
         assertThat(allAccounts, is(not(empty())));
         List<FileAccountData> accountData = allAccounts.stream().filter(a -> a.getId().equals(testFileAccount.getId())).collect(Collectors.toList());
         assertThat(accountData, is(not(nullValue())));
         FileAccountData fileAccount = accountData.get(0);
         assertThat(fileAccount.getHasError(), is(nullValue()));
-        assertThat(fileAccount.getError(), isEmptyOrNullString());
+        assertThat(fileAccount.getError(), is(emptyOrNullString()));
     }
 
     @Test
@@ -443,7 +445,7 @@ public class WebDAVTest extends AbstractConfigAwareAPIClientSession {
         incorrectFileAccount.setDisplayName(incorrectDisplayName);
         incorrectFileAccount.setConfiguration(new WebDAVFileAccountConfiguration(incorrectURL, testUser.getUser(), testUser.getPassword()));
         FileAccountCreationResponse response = filestorageApi.createFileAccount(getSessionId(), incorrectFileAccount);
-        assertThat(response.getError(), not(isEmptyOrNullString()));
+        assertThat(response.getError(), not(emptyOrNullString()));
 
         final boolean connectionCheck = true;
         FileAccountsResponse allResponse = filestorageApi.getAllFileAccounts(getSessionId(), null, B(connectionCheck));
@@ -560,8 +562,8 @@ public class WebDAVTest extends AbstractConfigAwareAPIClientSession {
 
         //check that the original file is not present anymore
         InfoItemResponse checkResponse = infostoreApi.getInfoItem(getSessionId(), newItem.getId(), newItem.getFolder());
-        assertThat(checkResponse.getError(), not(isEmptyOrNullString()));
-        assertThat(checkResponse.getErrorDesc(), not(isEmptyOrNullString()));
+        assertThat(checkResponse.getError(), not(emptyOrNullString()));
+        assertThat(checkResponse.getErrorDesc(), not(emptyOrNullString()));
         assertThat(checkResponse.getCode(), is("FILE_STORAGE-0026"));
 
         //Get the moved file and check it's content
@@ -606,8 +608,8 @@ public class WebDAVTest extends AbstractConfigAwareAPIClientSession {
 
         //Folder gone?
         FolderResponse response = foldersApi.getFolder(getSessionId(), newFolderId, null, null, null);
-        assertThat(response.getError(), not(isEmptyOrNullString()));
-        assertThat(response.getErrorDesc(), not(isEmptyOrNullString()));
+        assertThat(response.getError(), not(emptyOrNullString()));
+        assertThat(response.getErrorDesc(), not(emptyOrNullString()));
         assertThat(response.getCode(), is("FILE_STORAGE-0007"));  /* FOLDER_NOT_FOUND */
     }
 
@@ -645,8 +647,8 @@ public class WebDAVTest extends AbstractConfigAwareAPIClientSession {
 
         //Check that the moved folder is gone
         FolderResponse checkMoved = foldersApi.getFolder(getSessionId(), newFolderId2, null, null, null);
-        assertThat(checkMoved.getError(), not(isEmptyOrNullString()));
-        assertThat(checkMoved.getErrorDesc(), not(isEmptyOrNullString()));
+        assertThat(checkMoved.getError(), not(emptyOrNullString()));
+        assertThat(checkMoved.getErrorDesc(), not(emptyOrNullString()));
         assertThat(checkMoved.getCode(), is("FILE_STORAGE-0007"));  /* FOLDER_NOT_FOUND */
 
         final boolean hardDelete = true;
