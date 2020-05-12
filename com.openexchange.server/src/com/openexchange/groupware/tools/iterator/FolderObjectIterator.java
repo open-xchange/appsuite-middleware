@@ -203,7 +203,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         return fields.toString();
     }
 
-    private static final String[] selectFieldsPerm = { "permission_id", "fp", "orp", "owp", "odp", "admin_flag", "group_flag", "system", "type", "sharedParentFolder" };
+    private static final String[] selectFieldsPerm = { "permission_id", "fp", "orp", "owp", "odp", "admin_flag", "group_flag", "`system`", "type", "sharedParentFolder" };
 
     /**
      * Gets all necessary fields in right order to be used in an SQL <i>SELECT</i> statement needed to create instances of
