@@ -119,7 +119,7 @@ public abstract class AbstractFolderAction implements AJAXActionService {
 
     protected static final String PARAM_AUTORENAME = "autorename";
 
-    protected static final String MODULE = "folder";
+    protected static final String MODULE = "folders";
 
     /**
      * <code>"ignoreTranslation"</code>.
