@@ -50,7 +50,6 @@
 package com.openexchange.realtime.hazelcast.osgi;
 
 import static com.openexchange.realtime.hazelcast.channel.HazelcastAccess.discoverMapName;
-import java.util.concurrent.atomic.AtomicBoolean;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
 import com.hazelcast.config.Config;
@@ -90,7 +89,6 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HazelcastRealtimeActivator.class);
 
-    private final AtomicBoolean isStopped = new AtomicBoolean(true);
     private HazelcastResourceDirectory directory;
     private String cleanerRegistrationId;
 
@@ -176,12 +174,12 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
             LOG.error("Failed to expose ManagementObjects", oxe);
         }
         openTrackers();
-        isStopped.set(false);
+        Services.getStoppedFlag().set(false);
     }
 
     @Override
     protected synchronized void stopBundle() throws Exception {
-        if (isStopped.compareAndSet(false, true)) {
+        if (Services.getStoppedFlag().compareAndSet(false, true)) {
             LOG.info("Stopping bundle: {}", getClass().getCanonicalName());
 
             HazelcastResourceDirectory directory = this.directory;
