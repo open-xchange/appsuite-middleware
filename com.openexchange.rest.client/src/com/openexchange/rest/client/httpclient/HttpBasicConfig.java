@@ -133,7 +133,7 @@ public interface HttpBasicConfig {
     /**
      * Sets the connect timeout in milliseconds. A timeout value of zero
      * is interpreted as an infinite timeout.
-     * Default: {@link HttpClientProperty#CONNTECTION_TIMEOUT_MILLIS}
+     * Default: {@link HttpClientProperty#CONNECT_TIMEOUT_MILLIS}
      *
      * @param connectTimeout The timeout
      * @return This instance for chaining

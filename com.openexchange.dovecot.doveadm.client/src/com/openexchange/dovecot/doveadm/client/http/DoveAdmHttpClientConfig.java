@@ -50,7 +50,7 @@
 package com.openexchange.dovecot.doveadm.client.http;
 
 import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.rest.client.httpclient.HttpClientProperty.CONNTECTION_TIMEOUT_MILLIS;
+import static com.openexchange.rest.client.httpclient.HttpClientProperty.CONNECT_TIMEOUT_MILLIS;
 import static com.openexchange.rest.client.httpclient.HttpClientProperty.MAX_CONNECTIONS_PER_ROUTE;
 import static com.openexchange.rest.client.httpclient.HttpClientProperty.MAX_TOTAL_CONNECTIONS;
 import static com.openexchange.rest.client.httpclient.HttpClientProperty.SOCKET_READ_TIMEOUT_MILLIS;
@@ -168,7 +168,7 @@ public class DoveAdmHttpClientConfig extends DefaultHttpClientConfigProvider {
         propPrefix.setLength(resetLen);
         name = propPrefix.append("connectTimeout").toString();
         value = configService.getProperty(name);
-        setValue(name, value, CONNECTION_TIMEOUT, config, CONNTECTION_TIMEOUT_MILLIS);
+        setValue(name, value, CONNECTION_TIMEOUT, config, CONNECT_TIMEOUT_MILLIS);
         return config;
     }
 
