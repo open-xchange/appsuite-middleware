@@ -2016,6 +2016,10 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
      * @throws OXException
      */
     private Metadata[] reduceOrigin(Metadata[] metadata, int folderId, ServerSession session) throws OXException {
+        if (session.getUser().isGuest()) {
+            // Guest doesn't have a trash
+            return metadata;
+        }
         final OXFolderAccess folderAccess = new OXFolderAccess(session.getContext());
         final int trashFolderId = getTrashFolderID(session, folderAccess);
         if (Metadata.contains(metadata, Metadata.ORIGIN_LITERAL) && false == isBelowTrashFolder(folderId, trashFolderId, folderAccess)) {
