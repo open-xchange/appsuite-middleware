@@ -61,8 +61,8 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.authentication.application.ajax.RestrictedAction;
 import com.openexchange.ajax.writer.ReminderWriter;
+import com.openexchange.authentication.application.ajax.RestrictedAction;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Event;
@@ -98,7 +98,7 @@ public abstract class AbstractReminderAction implements AJAXActionService {
 
     private static final String MODULES_PARAMETER = "modules";
 
-    protected static final String MODULE = "reminders";
+    protected static final String MODULE = "reminder";
 
     private final ServiceLookup services;
 
