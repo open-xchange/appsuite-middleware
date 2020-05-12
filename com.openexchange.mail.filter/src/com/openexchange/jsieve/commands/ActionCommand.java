@@ -175,6 +175,11 @@ public class ActionCommand extends ControlOrActionCommand {
          * <p><a href="https://tools.ietf.org/html/rfc5293#section-4">RFC-5293: Action addheader</a></p>
          */
         ADDHEADER("addheader", 2, addHeaderTags(), "addheader", Collections.singletonList("editheader")),
+
+        /**
+         * Filter command. Handled by the FilterActionRegistry
+         */
+        FILTER("filter", 0, new Hashtable<String, Integer>(), "filter", Collections.singletonList("vnd.dovecot.filter")),
         /**
          * <p>By default, the deleteheader action deletes all occurrences of the
          * named header field. The deleteheader action does not affect Sieve's
