@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.login;
 
+import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
@@ -62,6 +63,10 @@ import com.openexchange.java.Strings;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.LoginResult;
 import com.openexchange.login.listener.LoginListener;
+import io.github.bucket4j.Bandwidth;
+import io.github.bucket4j.Bucket;
+import io.github.bucket4j.Bucket4j;
+import io.github.bucket4j.Refill;
 
 /**
  * {@link RateLimiterByLogin}
@@ -76,7 +81,7 @@ public class RateLimiterByLogin implements LoginListener {
         static final Logger LOG = org.slf4j.LoggerFactory.getLogger(RateLimiterByLogin.class);
     }
 
-    private final LoadingCache<String, SimpleInMemoryRateLimiter> limiters;
+    private final LoadingCache<String, Bucket> limiters;
 
     /**
      * Initializes a new {@link RateLimiterByLogin}.
@@ -86,11 +91,14 @@ public class RateLimiterByLogin implements LoginListener {
      */
     public RateLimiterByLogin(final int permits, final long timeFrameInSeconds) {
         super();
-        CacheLoader<String, SimpleInMemoryRateLimiter> loader = new CacheLoader<String, SimpleInMemoryRateLimiter>() {
+        CacheLoader<String, Bucket> loader = new CacheLoader<String, Bucket>() {
 
             @Override
-            public SimpleInMemoryRateLimiter load(String key) {
-                return new SimpleInMemoryRateLimiter(permits, timeFrameInSeconds, TimeUnit.SECONDS);
+            public Bucket load(String key) {
+                long capacity = permits;
+                Refill refill = Refill.intervally(permits, Duration.ofSeconds(timeFrameInSeconds));
+                Bandwidth limit = Bandwidth.classic(capacity, refill);
+                return Bucket4j.builder().addLimit(limit).build();
             }
         };
         limiters = CacheBuilder.newBuilder().expireAfterAccess(30, TimeUnit.MINUTES).build(loader);
@@ -100,9 +108,10 @@ public class RateLimiterByLogin implements LoginListener {
     public void onBeforeAuthentication(LoginRequest request, Map<String, Object> properties) throws OXException {
         String login = request.getLogin();
         if (Strings.isNotEmpty(login)) {
-            SimpleInMemoryRateLimiter rateLimiter = limiters.getIfPresent(login);
-            if (null != rateLimiter && !rateLimiter.canAcquire()) {
+            Bucket rateLimiter = limiters.getIfPresent(login);
+            if (null != rateLimiter && !rateLimiter.estimateAbilityToConsume(1).canBeConsumed()) {
                 // Rate limit is already exhausted
+                LoggerHolder.LOG.debug("Too many preceding failed login attempts due to invalid credentials for login {}", login);
                 throw LoginExceptionCodes.TOO_MANY_LOGIN_ATTEMPTS.create(login);
             }
         }
@@ -125,7 +134,7 @@ public class RateLimiterByLogin implements LoginListener {
             if (Strings.isNotEmpty(login)) {
                 // Consume...
                 LoggerHolder.LOG.debug("Detected failed login attempt due to invalid credentials for login {}", login);
-                limiters.getUnchecked(login).tryAcquire();
+                limiters.getUnchecked(login).tryConsume(1);
             }
         }
     }

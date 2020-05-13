@@ -59,6 +59,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import com.openexchange.groupware.dataRetrieval.Constants;
 import com.openexchange.groupware.dataRetrieval.DataProvider;
 import com.openexchange.groupware.dataRetrieval.FileMetadata;
@@ -88,7 +89,7 @@ public class FileDeliveryServlet extends HttpServlet {
 
     /**
      * Initializes a new {@link FileDeliveryServlet}.
-     * 
+     *
      * @param paramMap {@link RandomTokenContainer}
      * @param dataProviders {@link DataProviderRegistry}
      * @param configuration The {@link Configuration}
@@ -107,6 +108,12 @@ public class FileDeliveryServlet extends HttpServlet {
             req.getSession(true);
             super.service(new CountingHttpServletRequest(req), resp);
         } catch (RateLimitedException e) {
+            // Mark optional HTTP session as rate-limited
+            HttpSession optionalHttpSession = req.getSession(false);
+            if (optionalHttpSession != null) {
+                optionalHttpSession.setAttribute(com.openexchange.servlet.Constants.HTTP_SESSION_ATTR_RATE_LIMITED, Boolean.TRUE);
+            }
+            // Send error response
             e.send(resp);
         }
     }

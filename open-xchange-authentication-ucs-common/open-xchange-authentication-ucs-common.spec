@@ -14,7 +14,7 @@ BuildRequires: java-1.8.0-openjdk-devel
 %endif
 BuildRequires: open-xchange-core
 Version:       @OXVERSION@
-%define        ox_release 11
+%define        ox_release 12
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -99,6 +99,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/authplugin.properties
 
 %changelog
+* Mon May 04 2020 Felix Marx <felix.marx@open-xchange.com>
+Build for patch 2020-05-11 (5720)
 * Thu Apr 23 2020 Felix Marx <felix.marx@open-xchange.com>
 Build for patch 2020-04-30 (5702)
 * Fri Apr 17 2020 Felix Marx <felix.marx@open-xchange.com>

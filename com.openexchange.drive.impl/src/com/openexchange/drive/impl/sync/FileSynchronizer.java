@@ -76,6 +76,7 @@ import com.openexchange.drive.impl.internal.UploadHelper;
 import com.openexchange.drive.impl.management.DriveConfig;
 import com.openexchange.drive.impl.metadata.DriveMetadata;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.composition.FilenameValidationUtils;
 import com.openexchange.file.storage.composition.FolderID;
@@ -419,6 +420,10 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                     comparison.getClientVersion(), comparison.getServerVersion(), comparison, path));
                 return 1;
             } else {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Non-trivial conflicting change detected [root={}, path={}]:\n{}", 
+                        session.getRootFolderID(), path, dumpComparisonDetails(comparison));
+                }
                 /*
                  * keep both client- and server versions, let client first rename it's file...
                  */
@@ -566,6 +571,61 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
             normalizedDirectoryNames = DriveUtils.getNormalizedFolderNames(session.getStorage().getSubfolders(path).values());
         }
         return normalizedDirectoryNames;
+    }
+    
+    private String dumpComparisonDetails(ThreeWayComparison<FileVersion> comparison) {
+        FileVersion originalVersion = comparison.getOriginalVersion();
+        FileVersion clientVersion = comparison.getClientVersion();
+        ServerFileVersion serverVersion = null;
+        String fileId = null;
+        if (null != comparison.getServerVersion()) {
+            try {
+                serverVersion = ServerFileVersion.valueOf(comparison.getServerVersion(), path, session);
+                fileId = null != serverVersion.getFile() ? serverVersion.getFile().getId() : null;
+            } catch (OXException e) {
+                LOG.warn("Unexpected error getting server file version", e);
+            }
+        }
+        return new StringBuilder() // @formatter:off
+            .append("  Original version: ").append(originalVersion).append('\n')
+            .append("  Matching metadata: ").append(dumpFileDetails(optMatchingFileVersion(fileId, originalVersion))).append('\n')
+            .append("  Client version: ").append(clientVersion).append(" (").append(comparison.getClientChange()).append(")\n")
+            .append("  Matching metadata: ").append(dumpFileDetails(optMatchingFileVersion(fileId, clientVersion))).append('\n')
+            .append("  Server version: ").append(serverVersion).append(" (").append(comparison.getServerChange()).append(")\n")
+            .append("  Matching metadata: ").append(dumpFileDetails(optMatchingFileVersion(fileId, serverVersion))).append('\n')
+        .toString(); // @formatter:on
+    }
+
+    private File optMatchingFileVersion(String id, FileVersion fileVersion) {
+        if (null == id || null == fileVersion || null == fileVersion.getChecksum()) {
+            return null;
+        }
+        try {
+            for (File file : session.getStorage().getFileVersions(id)) {
+                if (ChecksumProvider.matches(session, file, fileVersion.getChecksum())) {
+                    return file;
+                }
+            }
+        } catch (OXException e) {
+            LOG.warn("Unexpected error getting matching file version", e);
+        }
+        return null;
+    }
+
+    private static String dumpFileDetails(File file) {
+        if (null == file) {
+            return null;
+        }
+        return new StringBuilder() // @formatter:off
+            .append("File [fileName=").append(file.getFileName()).append(", folderId=").append(file.getFolderId()).append(", id=").append(file.getId())
+            .append(", version=").append(file.getVersion()).append(", versionComment=").append(file.getVersionComment())
+            .append(", fileSize=").append(file.getFileSize()).append(", md5sum=").append(file.getFileMD5Sum()).append(", sequenceNumber=").append(file.getSequenceNumber())
+            .append(", created=").append(null == file.getCreated() ? null : DriveConstants.LOG_DATE_FORMAT.get().format(file.getCreated()))
+            .append(", createdBy=").append(file.getCreatedBy())
+            .append(", lastModified=").append(null == file.getLastModified() ? null : DriveConstants.LOG_DATE_FORMAT.get().format(file.getLastModified()))
+            .append(", modifiedBy=").append(file.getModifiedBy())
+            .append(']')
+        .toString(); // @formatter:on
     }
 
 }

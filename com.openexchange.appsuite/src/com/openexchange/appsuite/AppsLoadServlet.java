@@ -55,11 +55,13 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.http.HttpStatus;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.SessionServlet;
@@ -75,6 +77,11 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @author <a href="mailto:viktor.pracht@open-xchange.com">Viktor Pracht</a>
  */
 public class AppsLoadServlet extends SessionServlet {
+
+	/**
+     * The hardcoded appsuite ui uri limit in characters
+     */
+    private static final int UI_URI_LIMIT = 8190;
 
     private static final long serialVersionUID = -8909104490806162791L;
 
@@ -190,31 +197,44 @@ public class AppsLoadServlet extends SessionServlet {
         }
     }
 
-    @Override
-    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        ServerSession session = getSessionObject(req, true);
+	@Override
+	protected void doGet(final HttpServletRequest req, final HttpServletResponse resp)
+			throws ServletException, IOException {
+	    if(req.getRequestURL().length() > UI_URI_LIMIT) {
+	        LOG.error("Url length exceeds maximum allowed characters.");
+	        writeErrorPage(HttpStatus.SC_REQUEST_URI_TOO_LONG, "The request is too long", resp);
+	        return;
+	    }
+		ServerSession session = getSessionObject(req, true);
+		String[] modules = Strings.splitByComma(req.getPathInfo());
+		if (null == modules) {
+			return; // no actual files requested
+		}
 
-        final String[] modules = Strings.splitByComma(req.getPathInfo());
-        if (null == modules) {
-            return; // no actual files requested
-        }
-        final int length = modules.length;
+		int length = modules.length;
         if (length < 2) {
             return; // no actual files requested
         }
-        resp.setContentType("text/javascript;charset=UTF-8");
-        ErrorWriter ew = new ErrorWriter(resp, length);
-        for (int i = 1; i < length; i++) {
-            final String module = modules[i].replace(' ', '+');
-            // Module names may only contain letters, digits, '_', '-', '/' and
-            // '.', but not "..".
-            final Matcher m = moduleRE.matcher(module);
-            if (!m.matches()) {
-                final String escapedName = escapeName(module);
-                LOG.debug("Invalid module name: '{}'", escapedName);
-                ew.error(("console.error('Invalid module name detected');\n").getBytes("UTF-8"));
-                continue;
-            }
+		// Filter duplicates
+        modules = Arrays.asList(modules).stream().distinct().toArray(String[]::new);
+        // Check length again
+		length = modules.length;
+		if (length < 2) {
+			return; // no actual files requested
+		}
+		resp.setContentType("text/javascript;charset=UTF-8");
+		ErrorWriter ew = new ErrorWriter(resp, length);
+		for (int i = 1; i < length; i++) {
+			final String module = modules[i].replace(' ', '+');
+			// Module names may only contain letters, digits, '_', '-', '/' and
+			// '.', but not "..".
+			final Matcher m = moduleRE.matcher(module);
+			if (!m.matches()) {
+				final String escapedName = escapeName(module);
+				LOG.debug("Invalid module name: '{}'", escapedName);
+				ew.error(("console.error('Invalid module name detected');\n").getBytes("UTF-8"));
+				continue;
+			}
 
             // Map module name to file name
             final String format = m.group(1);

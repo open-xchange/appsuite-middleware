@@ -1,3 +1,9 @@
+open-xchange-authentication-oauth (7.10.3-12) stable; urgency=medium
+
+  * Build for patch 2020-05-11 (5720)
+
+ -- Steffen Templin <steffen.templin@open-xchange.com>  Mon, 04 May 2020 14:53:50 +0000
+
 open-xchange-authentication-oauth (7.10.3-11) stable; urgency=medium
 
   * Build for patch 2020-04-30 (5702)

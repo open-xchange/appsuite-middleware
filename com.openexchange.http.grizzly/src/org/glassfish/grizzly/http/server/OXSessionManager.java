@@ -49,6 +49,7 @@
 
 package org.glassfish.grizzly.http.server;
 
+import static com.openexchange.servlet.Constants.HTTP_SESSION_ATTR_RATE_LIMITED;
 import java.util.Iterator;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
@@ -82,7 +83,6 @@ public class OXSessionManager implements SessionManager {
     // -----------------------------------------------------------------------------------------------
 
     private final GrizzlyConfig grizzlyConfig;
-    private final TimerService timerService;
     private final ConcurrentMap<String, Session> sessions;
     private final Random rnd;
     private final ScheduledTimerTask sessionExpirer;
@@ -99,7 +99,6 @@ public class OXSessionManager implements SessionManager {
     public OXSessionManager(GrizzlyConfig grizzlyConfig, TimerService timerService) {
         super();
         this.grizzlyConfig = grizzlyConfig;
-        this.timerService = timerService;
         int max = grizzlyConfig.getMaxNumberOfHttpSessions();
         this.max = max;
         this.considerSessionCount = max > 0;
@@ -122,29 +121,73 @@ public class OXSessionManager implements SessionManager {
         this.sessionExpirer = timerService.scheduleAtFixedRate(newTaskForPeriodicChecks(lock), periodSeconds, periodSeconds, TimeUnit.SECONDS);
     }
 
-    private void scheduleCleanUpNow(long currentTime) {
-        timerService.schedule(newTaskForOneTimeCheck(currentTime, lock), 0, TimeUnit.MILLISECONDS);
-    }
-
     /**
      * Cleans-up the session collection. Drops invalid/expired sessions.
      * <p>
      * <b>Must only be called when holding lock.</b>
      *
      * @param currentTime The current time stamp
+     * @return <code>true</code> if any session has been removed; otherwise <code>false</code>
      */
-    void cleanUp(long currentTime) {
+    boolean cleanUp(long currentTime) {
+        boolean anyRemoved = false;
         Session session;
         for (Iterator<Session> it = sessions.values().iterator(); it.hasNext();) {
             session = it.next();
-            if (!session.isValid() || ((session.getSessionTimeout() > 0) && ((currentTime - session.getTimestamp()) > session.getSessionTimeout()))) {
+            if (isInvalid(session) || isRateLimited(session) || isTimedOut(currentTime, session) || isUnusedSession(session)) {
                 session.setValid(false);
                 it.remove();
                 sessionsCount--;
+                anyRemoved = true;
             }
         }
 
         lastCleanUp = System.currentTimeMillis();
+        return anyRemoved;
+    }
+
+    /**
+     * Checks if given session has been marked as invalid.
+     *
+     * @param session The session to check
+     * @return <code>true</code> if invalid; otherwise <code>false</code>
+     */
+    private static boolean isInvalid(Session session) {
+        return !session.isValid();
+    }
+
+    /**
+     * Checks if given session has no "authenticated" marker set.
+     *
+     * @param session The session to check
+     * @return <code>true</code> if "authenticated" marker is absent; otherwise <code>false</code>
+     */
+    private boolean isRateLimited(Session session) {
+        return Boolean.TRUE.equals(session.getAttribute(HTTP_SESSION_ATTR_RATE_LIMITED));
+    }
+
+    /**
+     * Checks whether the session ran into possible set session timeout or not.
+     *
+     * @param currentTime The current time to compare to
+     * @param session The session to check
+     * @return <code>true</code> if the session ran into the timeout, otherwise <code>false</code>
+     */
+    private static boolean isTimedOut(long currentTime, Session session) {
+        long timeout = session.getSessionTimeout();
+        return (timeout > 0) && ((currentTime - session.getTimestamp()) > timeout);
+    }
+
+    /**
+     * Gets a value indicating whether the session can be seen as unused until now or not
+     * <p>
+     * Using {@link GrizzlyConfig#getSessionUnjoinedThreshold()} to measure elapsed time
+     *
+     * @param session The session to check
+     * @return <code>true</code> if the session can be seen as unused, <code>false</code> if not.
+     */
+    private boolean isUnusedSession(Session session) {
+        return session.isNew();
     }
 
     /**
@@ -181,6 +224,7 @@ public class OXSessionManager implements SessionManager {
 
         Session session = sessions.get(requestedSessionId);
         if (session == null) {
+            removeInvalidSessionCookie(request, requestedSessionId);
             return null;
         }
 
@@ -200,13 +244,19 @@ public class OXSessionManager implements SessionManager {
     public Session createSession(Request request) {
         lock.lock();
         try {
-            if (considerSessionCount && sessionsCount >= max) {
-                long currentTime = System.currentTimeMillis();
-                if ((currentTime - lastCleanUp) >= (MIN_PERIOD_SECONDS * 1000)) {
-                    scheduleCleanUpNow(currentTime);
-                }
+            if (considerSessionCount) {
+                while (sessionsCount >= max) {
+                    boolean anyRemoved = false;
 
-                throw onMaxSessionCountExceeded();
+                    long currentTime = System.currentTimeMillis();
+                    if ((currentTime - lastCleanUp) >= (MIN_PERIOD_SECONDS * 1000)) {
+                        anyRemoved = cleanUp(currentTime);
+                    }
+
+                    if (!anyRemoved) {
+                        throw onMaxSessionCountExceeded();
+                    }
+                }
             }
 
             Session session = new Session();
@@ -232,9 +282,8 @@ public class OXSessionManager implements SessionManager {
      * @return The appropriate instance of <code>IllegalStateException</code> reflecting the exceeded count
      */
     protected IllegalStateException onMaxSessionCountExceeded() {
-        String message = "Max. number of HTTP sessions (" + max + ") exceeded.";
-        LOG.warn(message);
-        return new IllegalStateException(message);
+        LOG.warn("Max. number of HTTP sessions ({}) exceeded.", Integer.valueOf(max));
+        return new IllegalStateException("Max. number of HTTP sessions (" + max + ") exceeded.");
     }
 
     @Override
@@ -397,29 +446,23 @@ public class OXSessionManager implements SessionManager {
     // ---------------------------------------------------------------------------------------------------------------------
 
     private ExpirerTask newTaskForPeriodicChecks(Lock lock) {
-        return new ExpirerTask(-1L, lock);
-    }
-
-    private ExpirerTask newTaskForOneTimeCheck(long currentTime, Lock lock) {
-        return new ExpirerTask(currentTime, lock);
+        return new ExpirerTask(lock);
     }
 
     private final class ExpirerTask implements Runnable {
 
         private final Lock tlock;
-        private final long currentTime;
 
-        ExpirerTask(long currentTime, Lock lock) {
+        ExpirerTask(Lock lock) {
             super();
             this.tlock = lock;
-            this.currentTime = currentTime;
         }
 
         @Override
         public void run() {
             tlock.lock();
             try {
-                cleanUp(currentTime < 0 ? System.currentTimeMillis() : currentTime);
+                cleanUp(System.currentTimeMillis());
             } finally {
                 tlock.unlock();
             }

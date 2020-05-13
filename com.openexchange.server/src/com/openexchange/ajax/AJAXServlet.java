@@ -67,6 +67,7 @@ import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.json.JSONArray;
@@ -91,6 +92,7 @@ import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.monitoring.MonitoringInfo;
+import com.openexchange.servlet.Constants;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.CountingHttpServletRequest;
@@ -575,6 +577,12 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
                 super.service(requestToPass, resp);
             }
         } catch (RateLimitedException e) {
+            // Mark optional HTTP session as rate-limited
+            HttpSession optionalHttpSession = req.getSession(false);
+            if (optionalHttpSession != null) {
+                optionalHttpSession.setAttribute(Constants.HTTP_SESSION_ATTR_RATE_LIMITED, Boolean.TRUE);
+            }
+            // Send error response
             e.send(resp);
         } catch (RuntimeException e) {
             OXException oxe = new OXException(e);
