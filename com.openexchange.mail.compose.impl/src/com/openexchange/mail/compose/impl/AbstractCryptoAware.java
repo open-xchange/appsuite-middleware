@@ -53,9 +53,8 @@ import java.security.Key;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
-import com.openexchange.capabilities.CapabilityService;
-import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.config.cascade.ConfigViews;
@@ -64,7 +63,6 @@ import com.openexchange.mail.compose.CompositionSpace;
 import com.openexchange.mail.compose.Message;
 import com.openexchange.mail.compose.security.CompositionSpaceKeyStorage;
 import com.openexchange.mail.compose.security.CompositionSpaceKeyStorageService;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
@@ -125,33 +123,13 @@ public abstract class AbstractCryptoAware {
         return ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.mail.compose.security.autoDeleteIfKeyIsMissing", defaultValue, view);
     }
 
-    private CapabilitySet getCapabilitySet(Session session) throws OXException {
-        CapabilityService capabilityService = services.getOptionalService(CapabilityService.class);
-        if (null == capabilityService) {
-            throw ServiceExceptionCode.absentService(CapabilityService.class);
-        }
-        return capabilityService.getCapabilities(session);
-    }
-
-    private boolean isEncryptionEnabled(Session session) throws OXException {
-        boolean defaultValue = true;
-
-        ConfigViewFactory viewFactory = services.getOptionalService(ConfigViewFactory.class);
-        if (null == viewFactory) {
-            return defaultValue;
-        }
-
-        ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
-        return ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.mail.compose.security.encryptionEnabled", defaultValue, view);
-    }
-
     /**
      * Checks whether encryption is needed for specified session.
      * <p>
      * Currently encryption is needed for session-associated user when
      * <ul>
      * <li>Property "com.openexchange.mail.compose.security.encryptionEnabled" is set to "true" (default)</li>
-     * <li>Capability "guard" is available</li>
+     * <li>Capability "guard" is available (also set via configuration; see <a href="https://www.oxpedia.org/wiki/index.php?title=AppSuite:OX_Guard#Open-Xchange_Middleware_Configuration">here</a>)</li>
      * </ul>
      *
      * @param session The session
@@ -159,7 +137,7 @@ public abstract class AbstractCryptoAware {
      * @throws OXException If need for encryption cannot be checked
      */
     protected boolean needsEncryption(Session session) throws OXException {
-        return isEncryptionEnabled(session) && getCapabilitySet(session).contains("guard");
+        return CryptoUtility.needsEncryption(session, services);
     }
 
     /**
@@ -168,12 +146,12 @@ public abstract class AbstractCryptoAware {
      * @param compositionSpaceId The composition space identifier
      * @param createIfAbsent <code>true</code> to create a key if there is none; otherwise <code>false</code>
      * @param session The session
-     * @return The key
+     * @return The key or <code>null</code>; never <code>null</code> if <code>createIfAbsent</code> is <code>true</code>
      * @throws OXException If key cannot be returned
      */
-    protected Key getKeyFor(UUID compositionSpaceId, boolean createIfAbsent, Session session) throws OXException {
+    protected Optional<Key> getKeyFor(UUID compositionSpaceId, boolean createIfAbsent, Session session) throws OXException {
         CompositionSpaceKeyStorage keyStorage = keyStorageService.getKeyStorageFor(session);
-        return keyStorage.getKeyFor(compositionSpaceId, createIfAbsent, session);
+        return Optional.ofNullable(keyStorage.getKeyFor(compositionSpaceId, createIfAbsent, session));
     }
 
     /**

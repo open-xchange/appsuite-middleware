@@ -52,6 +52,7 @@ package com.openexchange.caching.events.internal;
 import static com.openexchange.caching.events.internal.StampedCacheEvent.POISON;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -92,11 +93,11 @@ public final class CacheEventServiceImpl implements CacheEventService, CacheEven
      * @param sender The sender
      * @param event The event
      * @param fromRemote Whether remotely or locally generated
-     * @param numDeliveredEvents The counter for delivered events
+     * @param numDeliveredEvents The optional counter for delivered events
      * @param threadPool The thread pool to use or <code>null</code>
      * @throws Exception If notification fails
      */
-    static void notify(List<CacheListener> listeners, Object sender, CacheEvent event, boolean fromRemote, AtomicLong numDeliveredEvents, ThreadPoolService threadPool) throws Exception {
+    static void notify(List<CacheListener> listeners, Object sender, CacheEvent event, boolean fromRemote, Optional<AtomicLong> numDeliveredEvents, ThreadPoolService threadPool) throws Exception {
         // Notify asynchronously via executor service, falling back to sequential delivery
         Task<Void> notificationTask = new ListenerNotificationTask(fromRemote, event, listeners, sender, numDeliveredEvents);
         if (null == threadPool) {
@@ -218,7 +219,7 @@ public final class CacheEventServiceImpl implements CacheEventService, CacheEven
                 // event and thus re-distributed remotely again
                 try {
                     ThreadPoolService threadPool = threadPoolRef.get();
-                    CacheEventServiceImpl.notify(listenersToNotify, sender, event, fromRemote, numDeliveredEvents, threadPool);
+                    CacheEventServiceImpl.notify(listenersToNotify, sender, event, fromRemote, Optional.empty(), threadPool);
                 } catch (Exception e) {
                     LOG.warn("Failed to notify cache listeners about {} event: {}", fromRemote ? "remote" : "local", event, e);
                 }
@@ -310,7 +311,7 @@ public final class CacheEventServiceImpl implements CacheEventService, CacheEven
                     // Deliver events
                     ThreadPoolService threadPool = threadPoolRef.get();
                     for (StampedCacheEvent sce : drained) {
-                        CacheEventServiceImpl.notify(sce.listeners, sce.sender, sce.event, sce.fromRemote, numDeliveredEvents, threadPool);
+                        CacheEventServiceImpl.notify(sce.listeners, sce.sender, sce.event, sce.fromRemote, Optional.of(numDeliveredEvents), threadPool);
                     }
 
                     // Terminate?
@@ -334,18 +335,18 @@ public final class CacheEventServiceImpl implements CacheEventService, CacheEven
         private final CacheEvent event;
         private final List<CacheListener> listeners;
         private final Object sender;
-        private final AtomicLong numDeliveredEvents;
+        private final Optional<AtomicLong> optionalNumDeliveredEvents;
 
         /**
          * Initializes a new {@link ListenerNotificationTask}.
          */
-        ListenerNotificationTask(boolean fromRemote, CacheEvent event, List<CacheListener> listeners, Object sender, AtomicLong numDeliveredEvents) {
+        ListenerNotificationTask(boolean fromRemote, CacheEvent event, List<CacheListener> listeners, Object sender, Optional<AtomicLong> optionalNumDeliveredEvents) {
             super();
             this.fromRemote = fromRemote;
             this.event = event;
             this.listeners = listeners;
             this.sender = sender;
-            this.numDeliveredEvents = numDeliveredEvents;
+            this.optionalNumDeliveredEvents = optionalNumDeliveredEvents;
         }
 
         @Override
@@ -369,8 +370,11 @@ public final class CacheEventServiceImpl implements CacheEventService, CacheEven
             /*
              * track delivery
              */
-            if (numDeliveredEvents.incrementAndGet() < 0L) {
-                numDeliveredEvents.set(0L);
+            if (optionalNumDeliveredEvents.isPresent()) {
+                AtomicLong numDeliveredEvents = optionalNumDeliveredEvents.get();
+                if (numDeliveredEvents.incrementAndGet() < 0L) {
+                    numDeliveredEvents.set(0L);
+                }
             }
             return null;
         }

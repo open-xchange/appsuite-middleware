@@ -49,10 +49,12 @@
 
 package com.openexchange.mail.compose.impl.open;
 
+import static com.openexchange.java.Autoboxing.B;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.exception.OXException;
@@ -176,6 +178,7 @@ public class Resend extends AbstractOpener {
         // Check if original mail may contain attachments
         if (multipart) {
             // Add mail's non-inline parts
+            Optional<Boolean> optionalEncrypt = Optional.of(B(state.encrypt));
             {
                 NonInlineForwardPartHandler handler = new NonInlineForwardPartHandler();
                 if (null != contentIds && !contentIds.isEmpty()) {
@@ -190,7 +193,7 @@ public class Resend extends AbstractOpener {
                     for (MailPart mailPart : nonInlineParts) {
                         // Compile & store attachment
                         AttachmentDescription attachment = AttachmentStorages.createAttachmentDescriptionFor(mailPart, i + 1, state.compositionSpaceId, session);
-                        Attachment partAttachment = AttachmentStorages.saveAttachment(mailPart.getInputStream(), attachment, session, state.attachmentStorage);
+                        Attachment partAttachment = AttachmentStorages.saveAttachment(mailPart.getInputStream(), attachment, optionalEncrypt, session, state.attachmentStorage);
                         state.attachments.add(partAttachment);
                         i++;
                     }
@@ -216,7 +219,7 @@ public class Resend extends AbstractOpener {
                         MailPart mailPart = inlineEntry.getValue();
                         // Compile & store attachment
                         AttachmentDescription attachment = AttachmentStorages.createInlineAttachmentDescriptionFor(mailPart, inlineEntry.getKey(), i + 1, state.compositionSpaceId);
-                        Attachment partAttachment = AttachmentStorages.saveAttachment(mailPart.getInputStream(), attachment, session, state.attachmentStorage);
+                        Attachment partAttachment = AttachmentStorages.saveAttachment(mailPart.getInputStream(), attachment, optionalEncrypt, session, state.attachmentStorage);
                         state.attachments.add(partAttachment);
 
                         inlineAttachments.put(inlineEntry.getKey(), partAttachment);

@@ -69,7 +69,7 @@ import com.openexchange.mail.compose.CompositionSpaceErrorCode;
 import com.openexchange.mail.compose.CompositionSpaces;
 import com.openexchange.mail.compose.DataProvider;
 import com.openexchange.mail.compose.KnownAttachmentStorageType;
-import com.openexchange.mail.compose.impl.attachment.AbstractAttachmentStorage;
+import com.openexchange.mail.compose.impl.attachment.AbstractNonCryptoAttachmentStorage;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
@@ -79,7 +79,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.2
  */
-public class RdbAttachmentStorage extends AbstractAttachmentStorage {
+public class RdbAttachmentStorage extends AbstractNonCryptoAttachmentStorage {
 
     /**
      * Initializes a new {@link RdbAttachmentStorage}.

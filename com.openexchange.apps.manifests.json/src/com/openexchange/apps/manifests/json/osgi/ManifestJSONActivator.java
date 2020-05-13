@@ -160,7 +160,7 @@ public class ManifestJSONActivator extends AJAXModuleActivator implements Forced
         for (String path : paths) {
             File file = new File(path);
             if (file.exists() && file.isDirectory()) {
-                File[] filesInDir = file.listFiles();
+                File[] filesInDir = file.listFiles((f, name) -> name.contentEquals("version.txt") == false);
                 if (null != filesInDir) {
                     for (File f : filesInDir) {
                         read(f, manifests);

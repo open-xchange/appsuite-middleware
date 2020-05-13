@@ -62,7 +62,7 @@ import com.openexchange.mail.compose.AttachmentStorageIdentifier;
 import com.openexchange.mail.compose.DataProvider;
 import com.openexchange.mail.compose.SeekingDataProvider;
 import com.openexchange.mail.compose.AttachmentStorageIdentifier.KnownArgument;
-import com.openexchange.mail.compose.impl.attachment.AbstractAttachmentStorage;
+import com.openexchange.mail.compose.impl.attachment.AbstractNonCryptoAttachmentStorage;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
@@ -73,7 +73,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.2
  */
-public abstract class FileStorageAttachmentStorage extends AbstractAttachmentStorage {
+public abstract class FileStorageAttachmentStorage extends AbstractNonCryptoAttachmentStorage {
 
     /**
      * Initializes a new {@link FileStorageAttachmentStorage}.

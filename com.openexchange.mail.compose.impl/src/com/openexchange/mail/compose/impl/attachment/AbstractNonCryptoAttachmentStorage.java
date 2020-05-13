@@ -88,25 +88,25 @@ import com.openexchange.tools.stream.CountingOnlyInputStream;
 
 
 /**
- * {@link AbstractAttachmentStorage}
+ * {@link AbstractNonCryptoAttachmentStorage} - The abstract non-en/decrypting attachment storage.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.2
  */
-public abstract class AbstractAttachmentStorage implements AttachmentStorage {
+public abstract class AbstractNonCryptoAttachmentStorage implements AttachmentStorage {
 
     /** Simple class to delay initialization until needed */
     private static class LoggerHolder {
-        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractAttachmentStorage.class);
+        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractNonCryptoAttachmentStorage.class);
     }
 
     /** The service look-up for tracked OSGi services */
     protected final ServiceLookup services;
 
     /**
-     * Initializes a new {@link AbstractAttachmentStorage}.
+     * Initializes a new {@link AbstractNonCryptoAttachmentStorage}.
      */
-    protected AbstractAttachmentStorage(ServiceLookup services) {
+    protected AbstractNonCryptoAttachmentStorage(ServiceLookup services) {
         super();
         this.services = services;
     }
@@ -436,7 +436,7 @@ public abstract class AbstractAttachmentStorage implements AttachmentStorage {
     }
 
     @Override
-    public Attachment saveAttachment(InputStream input, AttachmentDescription attachment, SizeProvider sizeProvider, Session session) throws OXException {
+    public Attachment saveAttachment(InputStream input, AttachmentDescription attachment, SizeProvider sizeProvider, Optional<Boolean> optionalEncrypt, Session session) throws OXException {
         DatabaseService databaseService = requireDatabaseService();
 
         StorageIdentifierAndSize identifierAndSize = saveData(input, attachment.getSize(), sizeProvider, session);
@@ -452,7 +452,7 @@ public abstract class AbstractAttachmentStorage implements AttachmentStorage {
 
             Attachment savedAttachment;
             try {
-                savedAttachment = saveAttachment(identifierAndSize, attachment, session, con);
+                savedAttachment = saveAttachmentMetaData(identifierAndSize, attachment, session, con);
             } catch (OXException e) {
                 // Assume storage resource already deleted. Null'ify and re-throw...
                 storageIdentifierToDelete = null;
@@ -493,11 +493,11 @@ public abstract class AbstractAttachmentStorage implements AttachmentStorage {
      */
     public Attachment saveAttachment(InputStream input, AttachmentDescription attachment, SizeProvider sizeProvider, Session session, Connection con) throws OXException {
         if (null == con) {
-            return saveAttachment(input, attachment, sizeProvider, session);
+            return saveAttachment(input, attachment, sizeProvider, Optional.empty(), session);
         }
 
         StorageIdentifierAndSize identifierAndSize = saveData(input, attachment.getSize(), sizeProvider, session);
-        return saveAttachment(identifierAndSize, attachment, session, con);
+        return saveAttachmentMetaData(identifierAndSize, attachment, session, con);
     }
 
     /**
@@ -513,7 +513,7 @@ public abstract class AbstractAttachmentStorage implements AttachmentStorage {
         stmt.setInt(pos, 0);
     }
 
-    private Attachment saveAttachment(StorageIdentifierAndSize identifierAndSize, AttachmentDescription attachment, Session session, Connection con) throws OXException {
+    private Attachment saveAttachmentMetaData(StorageIdentifierAndSize identifierAndSize, AttachmentDescription attachment, Session session, Connection con) throws OXException {
         AttachmentStorageIdentifier storageIdentifierToDelete = identifierAndSize.storageIdentifier;
         PreparedStatement stmt = null;
         try {

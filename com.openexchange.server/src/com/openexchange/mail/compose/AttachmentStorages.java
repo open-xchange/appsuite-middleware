@@ -51,6 +51,7 @@ package com.openexchange.mail.compose;
 
 import static com.openexchange.mail.MailExceptionCode.getSize;
 import java.io.InputStream;
+import java.util.Optional;
 import java.util.UUID;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.upload.StreamedUploadFile;
@@ -206,13 +207,33 @@ public class AttachmentStorages {
      * @param attachmentStorage The storage instance to use
      * @return The resulting attachment
      * @throws OXException If saving attachment fails
+     * @see #saveAttachment(InputStream, AttachmentDescription, Optional, Session, AttachmentStorage)
      */
     public static Attachment saveAttachment(InputStream input, AttachmentDescription attachmentDesc, Session session, AttachmentStorage attachmentStorage) throws OXException {
+        return saveAttachment(input, attachmentDesc, Optional.empty(), session, attachmentStorage);
+    }
+
+    /**
+     * Saves the specified attachment binary data and meta data using given storage instance.
+     *
+     * @param input The input stream providing binary data
+     * @param attachment The attachment providing meta data
+     * @param optionalEncrypt The optional encryption flag on initial opening of a composition space. If present and <code>true</code> the
+     *                        attachment to save is supposed to be encrypted according to caller. If present and <code>false</code>  the
+     *                        attachment to save is <b>not</b> supposed to be encrypted according to caller. If absent, encryption is
+     *                        automatically determined.<br>
+     *                        <b>Note</b>: The flag MUST be aligned to associated composition space
+     * @param session The session providing user information
+     * @param attachmentStorage The storage instance to use
+     * @return The resulting attachment
+     * @throws OXException If saving attachment fails
+     */
+    public static Attachment saveAttachment(InputStream input, AttachmentDescription attachmentDesc, Optional<Boolean> optionalEncrypt, Session session, AttachmentStorage attachmentStorage) throws OXException {
         Attachment savedAttachment = null;
         InputStream in = input;
         try {
             // Optimistic save
-            savedAttachment = attachmentStorage.saveAttachment(in, attachmentDesc, null, session);
+            savedAttachment = attachmentStorage.saveAttachment(in, attachmentDesc, null, optionalEncrypt, session);
             Streams.close(in);
             in = null;
 

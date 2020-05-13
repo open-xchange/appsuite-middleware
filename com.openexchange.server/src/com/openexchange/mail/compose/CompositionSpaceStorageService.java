@@ -50,6 +50,7 @@
 package com.openexchange.mail.compose;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.annotation.SingletonService;
@@ -100,9 +101,12 @@ public interface CompositionSpaceStorageService {
      *
      * @param session The session providing user information
      * @param compositionSpaceDesc The composition space, which shall be opened
+     * @param optionalEncrypt The optional encryption flag. If present and <code>true</code> the attachment to save is supposed to be
+     *                        encrypted according to caller. If present and<code>false</code>  the attachment to save is <b>not</b> supposed
+     *                        to be encrypted according to caller. If absent, encryption is automatically determined.
      * @return The identifier for the newly created composition space
      */
-    CompositionSpace openCompositionSpace(Session session, CompositionSpaceDescription compositionSpaceDesc) throws OXException;
+    CompositionSpace openCompositionSpace(Session session, CompositionSpaceDescription compositionSpaceDesc, Optional<Boolean> optionalEncrypt) throws OXException;
 
     /**
      * Updates a composition space.
@@ -115,9 +119,10 @@ public interface CompositionSpaceStorageService {
      *
      * @param session The session providing user information
      * @param compositionSpaceDesc The description providing the changes to apply
+     * @param optionalOriginalSpace The optional original compositon space that is supposed to be updated
      * @return The composition space after changes are applied
      */
-    CompositionSpace updateCompositionSpace(Session session, CompositionSpaceDescription compositionSpaceDesc) throws OXException;
+    CompositionSpace updateCompositionSpace(Session session, CompositionSpaceDescription compositionSpaceDesc, Optional<CompositionSpace> optionalOriginalSpace) throws OXException;
 
     /**
      * Closes a composition space, which effectively removes it from the storage.

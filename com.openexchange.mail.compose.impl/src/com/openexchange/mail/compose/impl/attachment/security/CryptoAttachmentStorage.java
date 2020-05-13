@@ -54,6 +54,7 @@ import java.io.InputStream;
 import java.security.Key;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.crypto.CryptoService;
@@ -100,6 +101,17 @@ public class CryptoAttachmentStorage extends AbstractCryptoAware implements Atta
         return null == compositionSpaceStorage ? false : compositionSpaceStorage.isContentEncrypted(session, compositionSpaceId);
     }
 
+    private boolean hasEncryptedContentElseNeedsEncryption(UUID compositionSpaceId, Session session) throws OXException {
+        try {
+            return hasEncryptedContent(compositionSpaceId, session);
+        } catch (OXException e) {
+            if (!CompositionSpaceErrorCode.NO_SUCH_COMPOSITION_SPACE.equals(e)) {
+                throw e;
+            }
+            return needsEncryption(session);
+        }
+    }
+
     @Override
     public AttachmentStorageType getStorageType() {
         return attachmentStorage.getStorageType();
@@ -114,15 +126,59 @@ public class CryptoAttachmentStorage extends AbstractCryptoAware implements Atta
     public Attachment getAttachment(UUID id, Session session) throws OXException {
         Attachment attachment = attachmentStorage.getAttachment(id, session);
         if (null != attachment) {
-            if (needsEncryption(session) || hasEncryptedContent(attachment.getCompositionSpaceId(), session)) {
-                Key key = getKeyFor(attachment.getCompositionSpaceId(), false, session);
-                if (null == key) {
+            if (hasEncryptedContent(attachment.getCompositionSpaceId(), session)) {
+                Optional<Key> optionalKey = getKeyFor(attachment.getCompositionSpaceId(), false, session);
+                if (!optionalKey.isPresent()) {
                     throw CompositionSpaceErrorCode.MISSING_KEY.create(UUIDs.getUnformattedString(attachment.getCompositionSpaceId()));
                 }
-                attachment = new DecryptingAttachment(attachment, key, services.getService(CryptoService.class));
+                attachment = new DecryptingAttachment(attachment, optionalKey.get(), services.getService(CryptoService.class));
             }
         }
         return attachment;
+    }
+
+    @Override
+    public Attachment[] getAttachments(List<UUID> ids, Session session) throws OXException {
+        if (ids == null || ids.isEmpty()) {
+            return new Attachment[0];
+        }
+
+        Attachment[] retval = new Attachment[ids.size()];
+
+        FlagAndKey flagAndKey = null;
+        int index = 0;
+        for (UUID id : ids) {
+            Attachment attachment = attachmentStorage.getAttachment(id, session);
+            if (attachment == null) {
+                // No such attachment
+                retval[index++] = null;
+            } else {
+                flagAndKey = getFlagAndKey(flagAndKey, attachment, session);
+                if (flagAndKey.encrypted) {
+                    attachment = new DecryptingAttachment(attachment, flagAndKey.key, services.getService(CryptoService.class));
+                }
+                retval[index++] = attachment;
+            }
+        }
+
+        return retval;
+    }
+
+    private FlagAndKey getFlagAndKey(FlagAndKey existent, Attachment attachment, Session session) throws OXException {
+        if (existent != null) {
+            return existent;
+        }
+
+        boolean encrypted = hasEncryptedContent(attachment.getCompositionSpaceId(), session);
+        if (encrypted == false) {
+            return new FlagAndKey(false, null);
+        }
+
+        Optional<Key> optionalKey = getKeyFor(attachment.getCompositionSpaceId(), false, session);
+        if (!optionalKey.isPresent()) {
+            throw CompositionSpaceErrorCode.MISSING_KEY.create(UUIDs.getUnformattedString(attachment.getCompositionSpaceId()));
+        }
+        return new FlagAndKey(true, optionalKey.get());
     }
 
     @Override
@@ -132,15 +188,16 @@ public class CryptoAttachmentStorage extends AbstractCryptoAware implements Atta
             return attachments;
         }
 
-        if (!needsEncryption(session) && !hasEncryptedContent(compositionSpaceId, session)) {
+        if (!hasEncryptedContent(compositionSpaceId, session)) {
             return attachments;
         }
 
-        Key key = getKeyFor(compositionSpaceId, false, session);
-        if (null == key) {
+        Optional<Key> optionalKey = getKeyFor(compositionSpaceId, false, session);
+        if (!optionalKey.isPresent()) {
             throw CompositionSpaceErrorCode.MISSING_KEY.create(UUIDs.getUnformattedString(compositionSpaceId));
         }
 
+        Key key = optionalKey.get();
         CryptoService cryptoService = services.getService(CryptoService.class);
         List<Attachment> decryptedAttachments = new ArrayList<Attachment>(attachments.size());
         for (Attachment attachment : attachments) {
@@ -156,15 +213,16 @@ public class CryptoAttachmentStorage extends AbstractCryptoAware implements Atta
             return sizeReturner;
         }
 
-        if (!needsEncryption(session) && !hasEncryptedContent(compositionSpaceId, session) ) {
+        if (!hasEncryptedContent(compositionSpaceId, session)) {
             return sizeReturner;
         }
 
-        Key key = getKeyFor(compositionSpaceId, false, session);
-        if (null == key) {
+        Optional<Key> optionalKey = getKeyFor(compositionSpaceId, false, session);
+        if (!optionalKey.isPresent()) {
             throw CompositionSpaceErrorCode.MISSING_KEY.create(UUIDs.getUnformattedString(compositionSpaceId));
         }
 
+        Key key = optionalKey.get();
         CryptoService cryptoService = services.getService(CryptoService.class);
         SizeReturner.Builder decryptingSizeReturner = SizeReturner.builder();
         decryptingSizeReturner.withSize(sizeReturner.getSize());
@@ -175,13 +233,18 @@ public class CryptoAttachmentStorage extends AbstractCryptoAware implements Atta
     }
 
     @Override
-    public Attachment saveAttachment(InputStream input, AttachmentDescription attachment, SizeProvider sizeProvider, Session session) throws OXException {
-        if (false == needsEncryption(session)) {
-            return attachmentStorage.saveAttachment(input, attachment, sizeProvider, session);
+    public Attachment saveAttachment(InputStream input, AttachmentDescription attachment, SizeProvider sizeProvider, Optional<Boolean> optionalEncrypt, Session session) throws OXException {
+        boolean encrypt = optionalEncrypt.isPresent() ? optionalEncrypt.get().booleanValue() : hasEncryptedContentElseNeedsEncryption(attachment.getCompositionSpaceId(), session);
+        return saveAttachmentEncryptedOrNot(encrypt, input, attachment, sizeProvider, session);
+    }
+
+    private Attachment saveAttachmentEncryptedOrNot(boolean entcrypt, InputStream input, AttachmentDescription attachment, SizeProvider sizeProvider, Session session) throws OXException {
+        if (!entcrypt) {
+            return attachmentStorage.saveAttachment(input, attachment, sizeProvider, Optional.empty(), session);
         }
 
         // Grab space-associated key
-        Key key = getKeyFor(attachment.getCompositionSpaceId(), true, session);
+        Key key = getKeyFor(attachment.getCompositionSpaceId(), true, session).get(); // always present since createIfAbsent is true
 
         // Adjust input stream and size provider
         CryptoService cryptoService = services.getService(CryptoService.class);
@@ -201,7 +264,7 @@ public class CryptoAttachmentStorage extends AbstractCryptoAware implements Atta
         }
 
         // Save attachment & return decrypted view on it
-        Attachment savedAttachment = attachmentStorage.saveAttachment(inputToUse, attachment, sizeProviderToUse, session);
+        Attachment savedAttachment = attachmentStorage.saveAttachment(inputToUse, attachment, sizeProviderToUse, Optional.empty(), session);
         return new DecryptingAttachment(savedAttachment, key, cryptoService);
     }
 
@@ -241,6 +304,18 @@ public class CryptoAttachmentStorage extends AbstractCryptoAware implements Atta
         @Override
         public long getSize() {
             return countingStream.getCount();
+        }
+    }
+
+    private static class FlagAndKey {
+
+        final boolean encrypted;
+        final Key key;
+
+        FlagAndKey(boolean encrypted, Key key) {
+            super();
+            this.encrypted = encrypted;
+            this.key = key;
         }
     }
 

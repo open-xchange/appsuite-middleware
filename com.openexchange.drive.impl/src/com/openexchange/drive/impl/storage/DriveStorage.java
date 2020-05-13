@@ -592,6 +592,17 @@ public class DriveStorage {
     }
 
     /**
+     * Gets file metadata for all versions of the supplied file ID.
+     *
+     * @param id The (unique) identifier of the file
+     * @return The file metadata for all versions of the file
+     * @throws OXException
+     */
+    public List<File> getFileVersions(String id) throws OXException {
+        return SearchIterators.asList(getFileAccess().getVersions(id).results());
+    }
+
+    /**
      * Gets all synchronized files present in the folder identified by the supplied ID.
      *
      * @param folderID The folder ID

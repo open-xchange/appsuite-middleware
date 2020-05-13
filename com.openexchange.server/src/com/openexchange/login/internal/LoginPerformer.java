@@ -141,7 +141,7 @@ public final class LoginPerformer {
      * Performs the login for specified login request.
      *
      * @param request The login request
-     * @return The login providing login information
+     * @return The result providing login information
      * @throws LoginException If login fails
      */
     public LoginResult doLogin(final LoginRequest request) throws OXException {
@@ -153,7 +153,7 @@ public final class LoginPerformer {
      *
      * @param request The login request
      * @param properties The arbitrary properties; e.g. <code>"headers"</code> or <code>{@link com.openexchange.authentication.Cookie "cookies"}</code>
-     * @return The login providing login information
+     * @return The result providing login information
      * @throws LoginException If login fails
      */
     public LoginResult doLogin(final LoginRequest request, final Map<String, Object> properties) throws OXException {
@@ -165,7 +165,7 @@ public final class LoginPerformer {
      *
      * @param request The login request
      * @param properties The properties
-     * @return The login providing login information
+     * @return The result providing login information
      * @throws OXException If login fails
      */
     public LoginResult doAutoLogin(LoginRequest request, Map<String, Object> properties) throws OXException {
@@ -176,7 +176,7 @@ public final class LoginPerformer {
      * Performs the login for specified login request.
      *
      * @param request The login request
-     * @return The login providing login information
+     * @return The result providing login information
      * @throws OXException If login fails
      */
     public LoginResult doAutoLogin(final LoginRequest request) throws OXException {
@@ -190,7 +190,7 @@ public final class LoginPerformer {
      * @param request The login request
      * @param properties The properties to decorate; e.g. <code>"headers"</code> or <code>{@link com.openexchange.authentication.Cookie "cookies"}</code>
      * @param loginMethod The actual login method that performs authentication
-     * @return The login providing login information
+     * @return The result providing login information
      * @throws OXException If login fails
      */
     public LoginResult doLogin(LoginRequest request, Map<String, Object> properties, LoginMethodClosure loginMethod) throws OXException {

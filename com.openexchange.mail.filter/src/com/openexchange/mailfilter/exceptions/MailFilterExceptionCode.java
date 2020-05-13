@@ -186,6 +186,10 @@ public enum MailFilterExceptionCode implements DisplayableOXExceptionCode {
      */
     INVALID_SIEVE_RULE2("Invalid SIEVE rule specified. Server response: %1$s", INVALID_SIEVE_RULE2_MSG, CATEGORY_USER_INPUT, 25), // Yup, the same error code
     /**
+     * Invalid SIEVE rule specified. Server response: %1$s
+     */
+    INVALID_SIEVE_RULE3("Invalid SIEVE rule specified. The provided 'from' address contains an invalid mail address. Only the users email addresses and its aliases are allowed.", INVALID_SIEVE_RULE_MSG, CATEGORY_USER_INPUT, 25), // Yup, the same error code
+    /**
      * Invalid credentials
      */
     INVALID_FILTER_TYPE_FLAG("Invalid filter type flag: %1$s", CATEGORY_ERROR, 26),

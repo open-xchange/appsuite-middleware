@@ -260,4 +260,7 @@ public final class MailExceptionStrings implements LocalizableStrings {
     // Thrown when an oauth-associated mail transport has been disabled. That is it exceeded the limit for failed authentication count.
     public static final String MAIL_TRANSPORT_DISABLED_OAUTH_MSG = "Your mail transport for %2$s was disabled because of authorization issues. Please reauthorize the account %5$s to enable it again.";
 
+    // User tried to send an email, which has been composed as a reply or forward referencing a message, which no longer exists
+    public static final String ORIGINAL_MAIL_NOT_FOUND_MSG = "As the original email no longer exists, your email has been sent as a new one.";
+
 }
