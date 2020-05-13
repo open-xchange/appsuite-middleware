@@ -77,7 +77,7 @@ import com.openexchange.testing.httpclient.models.MailData;
 /**
  * {@link MWB263Test}
  * 
- * 1. Create a series event as user A in context 1.
+ * 1. Create a series event as user A in context 1.
  * 2. Create a change exception as organizer by moving a specific event
  * 3. Receive mails as attendee B in context 2.
  * 4. Accept series
