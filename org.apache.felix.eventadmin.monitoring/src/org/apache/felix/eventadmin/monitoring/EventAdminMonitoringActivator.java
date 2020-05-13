@@ -65,18 +65,26 @@ import com.openexchange.management.ManagementService;
 
 
 /**
- * {@link Activator}
+ * {@link EventAdminMonitoringActivator}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class Activator implements BundleActivator {
+public class EventAdminMonitoringActivator implements BundleActivator {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
+    /** The logger constant */
+    static final Logger LOG = LoggerFactory.getLogger(EventAdminMonitoringActivator.class);
 
     private ServiceTracker<Object, Object> tracker;
 
+    /**
+     * Initializes a new {@link EventAdminMonitoringActivator}.
+     */
+    public EventAdminMonitoringActivator() {
+        super();
+    }
+
     @Override
-    public void start(final BundleContext context) throws Exception {
+    public synchronized void start(final BundleContext context) throws Exception {
         tracker = new ServiceTracker<Object, Object>(
             context,
             FrameworkUtil.createFilter(
@@ -110,7 +118,9 @@ public class Activator implements BundleActivator {
                 }
 
                 @Override
-                public synchronized void modifiedService(ServiceReference<Object> reference, Object service) {}
+                public synchronized void modifiedService(ServiceReference<Object> reference, Object service) {
+                    // Nothing
+                }
 
                 @Override
                 public synchronized void removedService(ServiceReference<Object> reference, Object service) {
@@ -136,21 +146,22 @@ public class Activator implements BundleActivator {
                         LOG.error("Could not unregister EventAdminMBean", e);
                     }
                 }
+
+                private ObjectName createObjectName() throws MalformedObjectNameException {
+                    return new ObjectName("org.apache.felix.eventadmin.monitoring", "type", "EventAdminMBean");
+                }
             }
         );
         tracker.open();
     }
 
     @Override
-    public void stop(final BundleContext context) throws Exception {
+    public synchronized void stop(final BundleContext context) throws Exception {
+        ServiceTracker<Object, Object> tracker = this.tracker;
         if (tracker != null) {
+            this.tracker = null;
             tracker.close();
-            tracker = null;
         }
-    }
-
-    private ObjectName createObjectName() throws MalformedObjectNameException {
-        return new ObjectName("org.apache.felix.eventadmin.monitoring", "type", "EventAdminMBean");
     }
 
 }
