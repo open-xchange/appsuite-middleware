@@ -55,6 +55,9 @@ import java.util.concurrent.ExecutionException;
 import org.slf4j.Logger;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.Member;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.cascade.ConfigViews;
 import com.openexchange.dovecot.doveadm.client.DoveAdmClient;
 import com.openexchange.exception.OXException;
 import com.openexchange.hazelcast.Hazelcasts;
@@ -122,6 +125,24 @@ public abstract class AbstractDovecotPushManagerService implements PushManagerEx
     @Override
     public boolean listenersRequireResources() {
         return false;
+    }
+
+    /**
+     * Checks if Dovecot Push is enabled for given user.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return <code>true</code> if enabled; otherwise <code>false</code>
+     * @throws OXException If check fails
+     */
+    protected boolean isDovecotPushEnabledFor(int userId, int contextId) throws OXException {
+        ConfigViewFactory factory = services.getOptionalService(ConfigViewFactory.class);
+        if (factory == null) {
+            throw ServiceExceptionCode.absentService(ConfigViewFactory.class);
+        }
+
+        ConfigView view = factory.getView(userId, contextId);
+        return ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.push.dovecot.enabled", true, view);
     }
 
     /**

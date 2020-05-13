@@ -104,6 +104,16 @@ public class StatelessDovecotPushManagerService extends AbstractDovecotPushManag
 
         int contextId = session.getContextId();
         int userId = session.getUserId();
+
+        if (false == isDovecotPushEnabledFor(userId, contextId)) {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.info("Denied starting Dovecot listener for user {} in context {} with session {} ({}) since disabled via configuration", I(userId), I(contextId), session.getSessionID(), session.getClient(), new Throwable("Dovecot start listener trace"));
+            } else {
+                LOGGER.info("Denied starting Dovecot listener for user {} in context {} with session {} ({}) since disabled via configuration", I(userId), I(contextId), session.getSessionID(), session.getClient());
+            }
+            return null;
+        }
+
         RegistrationContext registrationContext = getRegistrationContext(session);
         StatelessDovecotPushListener listener = new StatelessDovecotPushListener(registrationContext, false, services);
         String reason = listener.initateRegistration();
@@ -160,6 +170,16 @@ public class StatelessDovecotPushManagerService extends AbstractDovecotPushManag
 
         int contextId = pushUser.getContextId();
         int userId = pushUser.getUserId();
+
+        if (false == isDovecotPushEnabledFor(userId, contextId)) {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.info("Denied starting permanent Dovecot listener for user {} in context {} since disabled via configuration", I(userId), I(contextId), new Throwable("Dovecot start permanent listener trace"));
+            } else {
+                LOGGER.info("Denied starting permanent Dovecot listener for user {} in context {} since disabled via configuration", I(userId), I(contextId));
+            }
+            return null;
+        }
+
         RegistrationContext registrationContext = getRegistrationContext(pushUser);
         StatelessDovecotPushListener listener = new StatelessDovecotPushListener(registrationContext, false, services);
         String reason = listener.initateRegistration();
