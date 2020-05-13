@@ -1970,7 +1970,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
      * @throws OXException
      */
     private int getTrashFolderID(ServerSession session, OXFolderAccess folderAccess) throws OXException {
-        return folderAccess.getDefaultFolderID(session.getUserId(), FolderObject.INFOSTORE, FolderObject.TRASH);
+        return session.getUser().isGuest() ? -1 : folderAccess.getDefaultFolderID(session.getUserId(), FolderObject.INFOSTORE, FolderObject.TRASH);
     }
 
     /**
