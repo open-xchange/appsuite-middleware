@@ -1,6 +1,6 @@
 ---
 title: Application-specific Passwords
-icon: fab fa-mobile
+icon: fa-sign-in
 tags: Authentication, Session, Security
 ---
 
@@ -36,52 +36,34 @@ The property can be defined using the config-cascade. Users must have at least o
 The details and restrictions of the applications are then defined in a ``yml`` file. There is a sample yml shipped with the installation, `app-password-apps-template.yml` This file should contain the specifics of the various applications. These include the translatable display title, the permission scopes, and the order in which they are offered to the User. Example:
 
 ```
-mail:
-    displayName_t10e: Mail App
-    restrictedScopes: [read_mail, write_mail, read_folder, write_folder, read_contacts, write_contacts]
-    sortOrder: 10
-
-caldav:
-    displayName_t10e: Calendar Client (CalDAV)
-    restrictedScopes: [dav,read_caldav,write_caldav]
+drive:
+    displayName_t10e: Drive Sync App
+    restrictedScopes: [read_drive,write_drive,read_folders,write_folders,read_files,write_files]
     sortOrder: 20
-
-carddav:
-    displayName_t10e: Addressbook Client (CardDAV)
-    restrictedScopes: [dav,read_carddav,write_carddav]
-    sortOrder: 30
-
-webdav:
-    displayName_t10e: WebDAV Client
-    restrictedScopes: [webdav, read_webdav, write_webdav]
-    sortOrder: 40
-
-eas:
-    displayName_t10e: Exchange ActiveSync
-    restrictedScopes: [read_mail, write_mail, read_folder, write_folder, read_contacts, write_contacts, read_calendar, write_calendar]
-    sortOrder: 50
 ```
 
-The scopes are predefined in the core, and include the following:
+Within the middleware core, the following restricted scopes are predefined for the HTTP API modules:
 
-- Calendar: read_calendar, write_calendar
-  
-- Folders: read_folder, write_folder
-  
-- Mail: read_mail, write_mail
-  
-- Contacts: read_contacts, write_contacts
-  
-- Drive: read_drive, write_drive
-  
-- FileStorage: read_files, write_files
-  
-- Tasks: read_tasks, write_tasks
-  
-- Caldav: read_caldav, write_caldav, dav
-  
-- Carddav: read_carddav, write_carddav, dav
-  
+- ``folders``: read_folders, write_folders
+- ``mail`` / ``mailcompose``: read_mail, write_mail
+- ``calendar`` / ``chronos``: read_calendar, write_calendar
+- ``contacts``: read_contacts, write_contacts
+- ``infostore`` / ``files`` / ``fileaccount`` / ``fileservice``: read_files, write_files
+- ``drive``: read_drive, write_drive
+- ``tasks``: read_tasks, write_tasks
+- ``reminder``: read_reminder, write_reminder
+
+The modules ``appPasswords`` and ``multifactor`` of the HTTP API are not available for applications with app-specific passwords; any other modules are not decorated with scopes and can be accessed independently of the restricted scopes associated with the application type.
+
+For WebDAV interfaces, the following scopes are available:
+
+- WebDAV access to InfoStore/Files: read_webdav, write_webdav
+- General CalDAV/CardDAV: dav
+- CalDAV: read_caldav, write_caldav
+- CardDAV: read_carddav, write_carddav
+
+Here, *read_webdav* / *write_webdav* are used to grant access to the user's Drive or Files module via WebDAV (at ``/servlet/webdav.infostore/`` or its aliases). Any CalDAV- and CardDAV-related endpoints (usually behind ``/servlet/dav/``) require the general scope *dav* for basic functionality, as well as the more concrete scopes *read_caldav*, *write_caldav* for CalDAV-, and *read_carddav*, *write_carddav*-specific actions.
+
 
 ## Blacklists
 

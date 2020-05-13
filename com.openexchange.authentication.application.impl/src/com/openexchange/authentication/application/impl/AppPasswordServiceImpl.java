@@ -50,8 +50,6 @@
 package com.openexchange.authentication.application.impl;
 
 import static com.openexchange.java.Autoboxing.I;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -81,8 +79,6 @@ import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.geolocation.GeoInformation;
-import com.openexchange.geolocation.GeoLocationService;
 import com.openexchange.html.HtmlSanitizeOptions;
 import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.tools.StringHelper;
@@ -91,6 +87,7 @@ import com.openexchange.osgi.ServiceSet;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
@@ -111,7 +108,7 @@ public class AppPasswordServiceImpl implements AppPasswordService, AppAuthentica
 
     /**
      * Initializes a new {@link AppPasswordServiceImpl}.
-     * 
+     *
      * @param services A service lookup reference
      * @param notifierRegistry The notifier registry to use
      * @param storages The available storage services
@@ -206,11 +203,15 @@ public class AppPasswordServiceImpl implements AppPasswordService, AppAuthentica
 
     @Override
     public List<AppPasswordApplication> getApplications(Session session) throws OXException {
+        ServerSession serverSession = ServerSessionAdapter.valueOf(session);
+        if (serverSession.getUser().isGuest()) {
+            return Collections.emptyList();
+        }
         Collection<AppPasswordApplication> applications = getApplicationsById(session.getContextId(), session.getUserId()).values();
-        Locale locale = ServerSessionAdapter.valueOf(session).getUser().getLocale();
+        Locale locale = serverSession.getUser().getLocale();
         return getLocalizedApplications(locale, applications);
     }
-    
+
     @Override
     public void removePassword(Session session, String passwordId) throws OXException {
         for (AppPasswordStorage storage : getStorages()) {
@@ -259,7 +260,7 @@ public class AppPasswordServiceImpl implements AppPasswordService, AppAuthentica
 
     /**
      * Gets the app-password applications configured and enabled for a specific user.
-     * 
+     *
      * @param contextId The context identifier
      * @param userId The user identifier
      * @return The available applications mapped by their application type id, or an empty map if there are none
@@ -342,42 +343,6 @@ public class AppPasswordServiceImpl implements AppPasswordService, AppAuthentica
         for (AppPasswordStorage storage : getStorages()) {
             if (handles(storage, loginRequest)) {
                 return storage;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Check if geoLocation service installed and if has record for the IP address.
-     * Returns "City, Country" if found
-     * getGeolocation
-     *
-     * @param contextId The contextId of the user
-     * @param ipAddress String representation of the IP address
-     * @return String of city,country for the location of the IP address
-     */
-    private String getGeolocation(int contextId, String ipAddress) {
-        if (ipAddress != null) {
-            GeoLocationService geoService = services.getService(GeoLocationService.class);
-            if (geoService != null) {
-                try {
-                    InetAddress addr = InetAddress.getByName(ipAddress);
-                    if (addr.isSiteLocalAddress() || addr.isLinkLocalAddress() || addr.isLoopbackAddress()) {
-                        return null;
-                    }
-                    GeoInformation location = geoService.getGeoInformation(contextId, addr);
-                    if (location.hasCountry()) {  // Minimum required data for is country
-                        StringBuilder sb = new StringBuilder();
-                        if (location.hasCity()) {
-                            sb.append(location.getCity());
-                            sb.append(", ");
-                        }
-                        sb.append(location.getCountry());
-                        return sb.toString();
-                    }
-                } catch (UnknownHostException | OXException ex) {
-                    LOG.error("Error utilizing geolocation service for application password history", ex);
-                }
             }
         }
         return null;
