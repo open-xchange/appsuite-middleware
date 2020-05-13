@@ -54,6 +54,7 @@ import static com.openexchange.ajax.chronos.itip.ITipAssertion.assertSingleChang
 import static com.openexchange.ajax.chronos.itip.ITipAssertion.assertSingleEvent;
 import static com.openexchange.ajax.chronos.itip.ITipUtil.constructBody;
 import static com.openexchange.ajax.chronos.itip.ITipUtil.receiveIMip;
+import static com.openexchange.ajax.chronos.itip.ITipUtil.receiveNotification;
 import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -178,7 +179,7 @@ public class ITipOnBehalfTest extends AbstractITipAnalyzeTest {
          * Check notification mail within organizers inbox
          * 
          */
-        rememberMail(receiveIMip(apiClient, testUser.getLogin(), summary, 0, null));
+        rememberMail(receiveNotification(apiClient, testUser.getLogin(), summary));
 
         /*
          * Receive iMIP as attendee

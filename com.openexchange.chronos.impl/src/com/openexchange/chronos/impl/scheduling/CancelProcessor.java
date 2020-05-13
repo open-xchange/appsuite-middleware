@@ -47,9 +47,8 @@
  *
  */
 
-package com.openexchange.chronos.impl.performer;
+package com.openexchange.chronos.impl.scheduling;
 
-import static com.openexchange.chronos.impl.Check.requireUpToDateTimestamp;
 import static java.util.Collections.singletonList;
 import java.util.Collections;
 import java.util.List;
@@ -62,6 +61,7 @@ import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.InternalCalendarResult;
 import com.openexchange.chronos.impl.Utils;
+import com.openexchange.chronos.impl.performer.AbstractUpdatePerformer;
 import com.openexchange.chronos.scheduling.IncomingSchedulingMessage;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventID;
@@ -69,25 +69,24 @@ import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link CancelPerformer} - Handles incoming <code>CANCEL</code> message by external organizer and tries to apply
+ * {@link CancelProcessor} - Handles incoming <code>CANCEL</code> message by external organizer and tries to apply
  * the delete the events transmitted from the message.
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.4
  * @see <a href="https://tools.ietf.org/html/rfc5546#section-3.2.5">RFC5546 Section 3.2.5</a>
  */
-public class CancelPerformer extends AbstractUpdatePerformer {
+public class CancelProcessor extends AbstractUpdatePerformer {
 
     /**
-     * Initializes a new {@link CancelPerformer}.
+     * Initializes a new {@link CancelProcessor}.
      *
      * @param storage The underlying calendar storage
      * @param session The calendar session
      * @param folder The calendar folder representing the current view on the events
-     * @param source The source from which the scheduling has been triggered
-     * @throws OXException
+     * @throws OXException If initialization fails
      */
-    public CancelPerformer(CalendarStorage storage, CalendarSession session, CalendarFolder folder) throws OXException {
+    public CancelProcessor(CalendarStorage storage, CalendarSession session, CalendarFolder folder) throws OXException {
         super(storage, session, folder);
     }
 
@@ -103,7 +102,7 @@ public class CancelPerformer extends AbstractUpdatePerformer {
      * @throws OXException In case data is invalid, outdated or permissions are missing, especially
      *             if the organizer of the transmitted event doesn't match the remembered one
      */
-    public InternalCalendarResult perform(IncomingSchedulingMessage message) throws OXException {
+    public InternalCalendarResult process(IncomingSchedulingMessage message) throws OXException {
         CalendarUser originator = message.getSchedulingObject().getOriginator();
         /*
          * Delete transmitted occurrences one by one
@@ -151,7 +150,6 @@ public class CancelPerformer extends AbstractUpdatePerformer {
          */
         Check.requireInSequence(originalEvent, deletee);
         Check.eventIsInFolder(originalEvent, folder);
-        requireUpToDateTimestamp(originalEvent, timestamp.getTime());
         requireDeletePermissions(originalEvent);
 
         if (CalendarUtils.isSeriesEvent(originalEvent)) {

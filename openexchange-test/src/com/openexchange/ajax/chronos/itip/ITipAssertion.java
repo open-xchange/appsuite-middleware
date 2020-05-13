@@ -75,7 +75,7 @@ import com.openexchange.testing.httpclient.models.EventData;
  */
 public class ITipAssertion {
 
-    private ITipAssertion() {};
+    private ITipAssertion() {}
 
     /**
      * Asserts that only one analyze with exact one change was provided in the response

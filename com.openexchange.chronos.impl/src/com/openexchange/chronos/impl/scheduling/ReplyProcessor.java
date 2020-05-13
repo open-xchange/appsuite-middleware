@@ -47,14 +47,13 @@
  *
  */
 
-package com.openexchange.chronos.impl.performer;
+package com.openexchange.chronos.impl.scheduling;
 
 import static com.openexchange.chronos.common.CalendarUtils.collectAttendees;
 import static com.openexchange.chronos.common.CalendarUtils.getSimpleAttendeeUpdates;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -80,6 +79,7 @@ import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.InternalCalendarResult;
 import com.openexchange.chronos.impl.InternalEventUpdate;
 import com.openexchange.chronos.impl.Utils;
+import com.openexchange.chronos.impl.performer.AbstractUpdatePerformer;
 import com.openexchange.chronos.scheduling.IncomingSchedulingMessage;
 import com.openexchange.chronos.scheduling.SchedulingSource;
 import com.openexchange.chronos.service.CalendarSession;
@@ -91,14 +91,14 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 
 /**
- * {@link ReplyPerformer} - Handles incoming <code>REPLY</code> message by external calendar users and tries to apply
+ * {@link ReplyProcessor} - Handles incoming <code>REPLY</code> message by external calendar users and tries to apply
  * the changes transmitted in the message.
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.4
  * @see <a href="https://tools.ietf.org/html/rfc5546#section-3.2.3">RFC5546 Section 3.2.3</a>
  */
-public class ReplyPerformer extends AbstractUpdatePerformer {
+public class ReplyProcessor extends AbstractUpdatePerformer {
 
     private static final AttendeeField[] UPDATE_FIELDS = { AttendeeField.COMMENT, AttendeeField.EXTENDED_PARAMETERS, AttendeeField.PARTSTAT, AttendeeField.SENT_BY, AttendeeField.TIMESTAMP };
 
@@ -113,9 +113,9 @@ public class ReplyPerformer extends AbstractUpdatePerformer {
      * @param session The calendar session
      * @param folder The calendar folder representing the current view on the events
      * @param source The source from which the scheduling has been triggered
-     * @throws OXException
+     * @throws OXException If initialization fails
      */
-    public ReplyPerformer(CalendarStorage storage, CalendarSession session, CalendarFolder folder, SchedulingSource source) throws OXException {
+    public ReplyProcessor(CalendarStorage storage, CalendarSession session, CalendarFolder folder, SchedulingSource source) throws OXException {
         super(storage, session, folder);
         this.source = source;
 
@@ -131,14 +131,13 @@ public class ReplyPerformer extends AbstractUpdatePerformer {
      * @return An {@link InternalCalendarResult} containing the changes that has been performed
      * @throws OXException In case data is invalid, outdated or permissions are missing
      */
-    public InternalCalendarResult perform(IncomingSchedulingMessage message) throws OXException {
+    public InternalCalendarResult process(IncomingSchedulingMessage message) throws OXException {
         Event firstEvent = message.getResource().getFirstEvent();
         CalendarUser originator = message.getSchedulingObject().getOriginator();
         Attendee replyingAttendee = getReplyingAttendee(firstEvent, originator);
         EventID eventID = Utils.resolveEventId(session, storage, firstEvent.getUid(), null, message.getTargetUser());
         Event originalEvent = loadEventData(eventID.getObjectID());
 
-        Check.requireUpToDateTimestamp(originalEvent, timestamp.getTime());
         Check.eventIsVisible(folder, originalEvent);
         Check.eventIsInFolder(originalEvent, folder);
 
@@ -171,46 +170,37 @@ public class ReplyPerformer extends AbstractUpdatePerformer {
                 /*
                  * Update series master, afterwards exceptions, too
                  */
-                Event updatedMasterEvent = null;
                 Optional<DefaultItemUpdate<Attendee, AttendeeField>> attendeeUpdate = prepareAttendee(originalEvent, replyingAttendee);
                 if (attendeeUpdate.isPresent()) {
-                    updatedMasterEvent = updateAttendee(originalEvent, attendeeUpdate.get());
+                    Event updatedMasterEvent = updateAttendee(originalEvent, attendeeUpdate.get());
                     resultTracker.trackUpdate(originalEvent, updatedMasterEvent);
                 }
-                LinkedList<Event> updatedExceptions = new LinkedList<>();
                 List<Event> originalChangeExceptions = loadExceptionData(originalEvent);
-                for (Event changeException : originalChangeExceptions) {
+                for (Event originalChangeException : originalChangeExceptions) {
                     /*
                      * Lookup update for specific exception
                      */
-                    Event matchingEvent = message.getResource().getChangeException(changeException.getRecurrenceId());
-                    if (null == matchingEvent) {
-                        /*
-                         * Apply same data as from the master
-                         */
-                        attendeeUpdate = prepareAttendee(changeException, replyingAttendee);
-                    } else {
+                    Event updatedEventData = message.getResource().getChangeException(originalChangeException.getRecurrenceId());
+                    if (null != updatedEventData) {
                         /*
                          * Apply data transmitted for this exception
                          */
-                        attendeeUpdate = prepareAttendee(originalEvent, getReplyingAttendee(matchingEvent, originator));
-                    }
-                    if (attendeeUpdate.isPresent()) {
-                        Event updatedEventException = updateAttendee(changeException, attendeeUpdate.get());
-                        resultTracker.trackUpdate(changeException, updatedEventException);
-                        updatedExceptions.add(updatedEventException);
+                        attendeeUpdate = prepareAttendee(originalChangeException, getReplyingAttendee(updatedEventData, originator));
+                        if (attendeeUpdate.isPresent()) {
+                            Event updatedEventException = updateAttendee(originalChangeException, attendeeUpdate.get());
+                            resultTracker.trackUpdate(originalChangeException, updatedEventException);
+                        }
                     }
                 }
                 /*
                  * Create new change exceptions for unknown exception data
                  */
-                Event originalSeriesMaster = loadEventData(originalEvent.getSeriesId());
                 RecurrenceService recurrenceService = session.getRecurrenceService();
-                List<RecurrenceId> recurrenceIds = updatedExceptions.stream().map(e -> e.getRecurrenceId()).collect(Collectors.toList());
+                List<RecurrenceId> recurrenceIds = originalChangeExceptions.stream().filter(e -> null != e.getRecurrenceId()).map(e -> e.getRecurrenceId()).collect(Collectors.toList());
                 for (Event event : message.getResource().getChangeExceptions()) {
                     if (null == CalendarUtils.find(recurrenceIds, event.getRecurrenceId())) {
-                        Check.recurrenceIdExists(recurrenceService, originalSeriesMaster, event.getRecurrenceId());
-                        createNewChangeException(originalSeriesMaster, event.getRecurrenceId(), replyingAttendee);
+                        Check.recurrenceIdExists(recurrenceService, originalEvent, event.getRecurrenceId());
+                        createNewChangeException(originalEvent, event.getRecurrenceId(), replyingAttendee);
                     }
                 }
             } else {
@@ -219,17 +209,23 @@ public class ReplyPerformer extends AbstractUpdatePerformer {
                  */
                 Event originalSeriesMaster = loadEventData(originalEvent.getSeriesId());
                 RecurrenceService recurrenceService = session.getRecurrenceService();
-                List<RecurrenceId> exceptionData = loadExceptionData(originalSeriesMaster).stream().map(e -> e.getRecurrenceId()).collect(Collectors.toList());
-                for (Event event : message.getResource().getEvents()) {
-                    if (null == CalendarUtils.find(exceptionData, event.getRecurrenceId())) {
-                        Check.recurrenceIdExists(recurrenceService, originalSeriesMaster, event.getRecurrenceId());
-                        createNewChangeException(originalSeriesMaster, event.getRecurrenceId(), replyingAttendee);
+                List<RecurrenceId> exceptionData = loadExceptionData(originalSeriesMaster).stream().filter(e -> null != e.getRecurrenceId()).map(e -> e.getRecurrenceId()).collect(Collectors.toList());
+                for (Event updatedEventData : message.getResource().getEvents()) {
+                    if (null == CalendarUtils.find(exceptionData, updatedEventData.getRecurrenceId())) {
+                        /*
+                         * Create new change exceptions for unknown exception data
+                         */
+                        Check.recurrenceIdExists(recurrenceService, originalSeriesMaster, updatedEventData.getRecurrenceId());
+                        createNewChangeException(originalSeriesMaster, updatedEventData.getRecurrenceId(), replyingAttendee);
                     } else {
-                        Event originalSeriesException = loadExceptionData(originalSeriesMaster, event.getRecurrenceId());
-                        Optional<DefaultItemUpdate<Attendee, AttendeeField>> attendeeUpdate = prepareAttendee(originalSeriesException, getReplyingAttendee(event, originator));
+                        /*
+                         * Update known occurrence
+                         */
+                        Event originalChangeException = loadExceptionData(originalSeriesMaster, updatedEventData.getRecurrenceId());
+                        Optional<DefaultItemUpdate<Attendee, AttendeeField>> attendeeUpdate = prepareAttendee(originalChangeException, getReplyingAttendee(updatedEventData, originator));
                         if (attendeeUpdate.isPresent()) {
-                            Event updatedEvent = updateAttendee(originalSeriesException, attendeeUpdate.get());
-                            resultTracker.trackUpdate(event, updatedEvent);
+                            Event updatedEvent = updateAttendee(originalChangeException, attendeeUpdate.get());
+                            resultTracker.trackUpdate(updatedEventData, updatedEvent);
                         }
                     }
                 }
@@ -247,6 +243,14 @@ public class ReplyPerformer extends AbstractUpdatePerformer {
         }
     }
 
+    /**
+     * Prepares an attendee update by applying new data for an existing attendee by updating fields {@link #UPDATE_FIELDS}
+     *
+     * @param originalEvent The original event to get the attendee data from
+     * @param replyingAttendee The attendee replying to copy the new data from
+     * @return An {@link Optional} containing the attendee update with new data, or {@link Optional#empty()} if there is nothing to update
+     * @throws OXException
+     */
     private Optional<DefaultItemUpdate<Attendee, AttendeeField>> prepareAttendee(Event originalEvent, Attendee replyingAttendee) throws OXException {
         Attendee originalAttendee = CalendarUtils.find(originalEvent.getAttendees(), replyingAttendee);
         if (null == originalAttendee) {
@@ -288,9 +292,10 @@ public class ReplyPerformer extends AbstractUpdatePerformer {
      * @param originalSeriesMaster The series master
      * @param recurrenceId The {@link RecurrenceId} to create the exception on
      * @param attendee The attendee to add
+     * @return The created change exception
      * @throws OXException
      */
-    private void createNewChangeException(Event originalSeriesMaster, RecurrenceId recurrenceId, Attendee attendee) throws OXException {
+    private Event createNewChangeException(Event originalSeriesMaster, RecurrenceId recurrenceId, Attendee attendee) throws OXException {
         /*
          * Add new change exceptions
          */
@@ -328,6 +333,7 @@ public class ReplyPerformer extends AbstractUpdatePerformer {
         storage.getAlarmTriggerStorage().insertTriggers(updatedMasterEvent, seriesMasterAlarms);
         storage.getAlarmTriggerStorage().deleteTriggers(updatedExceptionEvent.getId());
         storage.getAlarmTriggerStorage().insertTriggers(updatedExceptionEvent, storage.getAlarmStorage().loadAlarms(updatedExceptionEvent));
+        return updatedExceptionEvent;
     }
 
     /**
@@ -451,28 +457,28 @@ public class ReplyPerformer extends AbstractUpdatePerformer {
     /**
      * Get the attendee that replied
      *
-     * @param event The event
+     * @param updatedEventData The event containing updated data
      * @param originator The originator of the message
      * @return The attendee that replied
      * @throws OXException If the attendee can not be found
      * @see <a href="https://tools.ietf.org/html/rfc5546#section-3.2.3">RFC5546 Section 3.2.3</a>
      * @see <a href="https://tools.ietf.org/html/rfc6047#section-3">RFC6047 Section 3</a>
      */
-    private Attendee getReplyingAttendee(Event event, CalendarUser originator) throws OXException {
-        Attendee replyingAttendee = CalendarUtils.find(event.getAttendees(), originator);
+    private Attendee getReplyingAttendee(Event updatedEventData, CalendarUser originator) throws OXException {
+        Attendee replyingAttendee = CalendarUtils.find(updatedEventData.getAttendees(), originator);
         if (null == replyingAttendee) {
             /*
              * iTIP only allows one attendee in a reply, look up if originator is set in SENT-BY
              */
             LOG.debug("Didn't find attendee. Searching in SENT-BY field.");
-            if (1 != event.getAttendees().size() || false == event.getAttendees().get(0).containsSentBy()) {
-                throw CalendarExceptionCodes.ATTENDEE_NOT_FOUND.create(I(originator.getEntity()), event.getId());
+            if (1 != updatedEventData.getAttendees().size() || false == updatedEventData.getAttendees().get(0).containsSentBy()) {
+                throw CalendarExceptionCodes.ATTENDEE_NOT_FOUND.create(I(originator.getEntity()), updatedEventData.getId());
             }
-            CalendarUser sentBy = event.getAttendees().get(0).getSentBy();
+            CalendarUser sentBy = updatedEventData.getAttendees().get(0).getSentBy();
             if (false == CalendarUtils.matches(originator, sentBy)) {
-                throw CalendarExceptionCodes.ATTENDEE_NOT_FOUND.create(I(originator.getEntity()), event.getId());
+                throw CalendarExceptionCodes.ATTENDEE_NOT_FOUND.create(I(originator.getEntity()), updatedEventData.getId());
             }
-            replyingAttendee = event.getAttendees().get(0);
+            replyingAttendee = updatedEventData.getAttendees().get(0);
         }
         replyingAttendee = AttendeeMapper.getInstance().copy(replyingAttendee, null, (AttendeeField[]) null);
         replyingAttendee.setCuType(CalendarUserType.INDIVIDUAL);
@@ -480,12 +486,12 @@ public class ReplyPerformer extends AbstractUpdatePerformer {
         /*
          * Add comment to attendee, remove from event
          */
-        if (null != event.getExtendedProperties()) {
-            ExtendedProperty comment = event.getExtendedProperties().get("COMMENT");
+        if (null != updatedEventData.getExtendedProperties()) {
+            ExtendedProperty comment = updatedEventData.getExtendedProperties().get("COMMENT");
             if (null != comment && Strings.isNotEmpty(comment.getValue().toString())) {
                 replyingAttendee.setComment(comment.getValue().toString());
             }
-            event.getExtendedProperties().removeAll("COMMENT");
+            updatedEventData.getExtendedProperties().removeAll("COMMENT");
         }
         return replyingAttendee;
     }

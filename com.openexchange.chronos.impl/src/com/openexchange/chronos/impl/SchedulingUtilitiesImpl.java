@@ -52,8 +52,8 @@ package com.openexchange.chronos.impl;
 import static com.openexchange.chronos.impl.Utils.getCalendarFolder;
 import static com.openexchange.chronos.impl.Utils.postProcess;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.impl.performer.CancelPerformer;
-import com.openexchange.chronos.impl.performer.ReplyPerformer;
+import com.openexchange.chronos.impl.scheduling.CancelProcessor;
+import com.openexchange.chronos.impl.scheduling.ReplyProcessor;
 import com.openexchange.chronos.scheduling.IncomingSchedulingMessage;
 import com.openexchange.chronos.scheduling.SchedulingSource;
 import com.openexchange.chronos.service.CalendarResult;
@@ -94,7 +94,7 @@ public class SchedulingUtilitiesImpl implements SchedulingUtilities {
             @Override
             protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
                 Event event = message.getResource().getFirstEvent();
-                return new CancelPerformer(storage, session, getCalendarFolder(session, storage, event.getUid(), event.getRecurrenceId(), message.getTargetUser())).perform(message);
+                return new CancelProcessor(storage, session, getCalendarFolder(session, storage, event.getUid(), event.getRecurrenceId(), message.getTargetUser())).process(message);
             }
         }.executeUpdate()).getUserizedResult();
     }
@@ -106,7 +106,7 @@ public class SchedulingUtilitiesImpl implements SchedulingUtilities {
             @Override
             protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
                 Event event = message.getResource().getFirstEvent();
-                return new ReplyPerformer(storage, session, getCalendarFolder(session, storage, event.getUid(), event.getRecurrenceId(), message.getTargetUser()), source).perform(message);
+                return new ReplyProcessor(storage, session, getCalendarFolder(session, storage, event.getUid(), event.getRecurrenceId(), message.getTargetUser()), source).process(message);
             }
         }.executeUpdate()).getUserizedResult();
     }

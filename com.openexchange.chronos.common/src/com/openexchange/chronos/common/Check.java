@@ -133,7 +133,7 @@ public class Check {
      *
      * @param recurrenceService A reference to the recurrence service
      * @param seriesMaster The series master event providing the recurrence information
-     * @param recurrenceID The recurrence identifier
+     * @param recurrenceIDs The recurrence identifier
      * @return The passed list of recurrence identifiers, after their existence was checked
      * @throws OXException {@link CalendarExceptionCodes#INVALID_RECURRENCE_ID}
      */

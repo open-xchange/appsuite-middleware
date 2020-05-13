@@ -198,6 +198,18 @@ public class ITipUtil {
     }
 
     /**
+     * Receive a calendar notification from the inbox
+     *
+     * @param apiClient The {@link ApiClient} to use
+     * @param fromToMatch The mail of the originator of the message
+     * @param subjectToMatch The summary of the event
+     * @return The mail as {@link MailData}
+     * @throws Exception If the mail can't be found or something mismatches
+     */
+    public static MailData receiveNotification(ApiClient apiClient, String fromToMatch, String subjectToMatch) throws Exception {
+        return receiveIMip(apiClient, fromToMatch, subjectToMatch, -1, null);
+    }
+    /**
      * Receive the iMIP message from the inbox
      *
      * @param apiClient The {@link ApiClient} to use
