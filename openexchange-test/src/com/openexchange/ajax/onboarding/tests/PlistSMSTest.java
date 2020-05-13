@@ -51,6 +51,7 @@ package com.openexchange.ajax.onboarding.tests;
 
 import static org.junit.Assert.assertNotNull;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
@@ -59,6 +60,7 @@ import org.junit.Test;
 import com.google.common.io.BaseEncoding;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.client.onboarding.OnboardingExceptionCodes;
+import com.openexchange.java.Strings;
 import com.openexchange.sms.sipgate.SipgateSMSExceptionCode;
 import com.openexchange.testing.httpclient.models.CommonResponse;
 
@@ -148,35 +150,15 @@ public class PlistSMSTest extends AbstractPlistSMSTest {
     }
 
     private static String toHash(int userId, int contextId, String scenario, String device) throws NoSuchAlgorithmException, UnsupportedEncodingException {
-
         String secret = UID;
-        String challenge = userId + contextId + device + scenario + secret;
-        MessageDigest md;
+        String challenge = new StringBuilder(128).append(userId).append(contextId).append(device).append(scenario).append(secret).toString();
 
-        md = MessageDigest.getInstance("SHA-1");
+        MessageDigest md = MessageDigest.getInstance("SHA-1");
+        byte[] challengeBytes = challenge.getBytes(StandardCharsets.UTF_8);
+        md.update(challengeBytes, 0, challengeBytes.length);
 
-        byte[] sha1hash = new byte[40];
-        md.update(challenge.getBytes("UTF-8"), 0, challenge.length());
-        sha1hash = md.digest();
-        return convertToHex(sha1hash);
-    }
-
-    private static String convertToHex(byte[] data) {
-        StringBuffer buf = new StringBuffer();
-
-        for (int i = 0; i < data.length; i++) {
-            int halfbyte = (data[i] >>> 4) & 0x0F;
-            int two_halfs = 0;
-            do {
-                if ((0 <= halfbyte) && (halfbyte <= 9)) {
-                    buf.append((char) ('0' + halfbyte));
-                } else {
-                    buf.append((char) ('a' + (halfbyte - 10)));
-                }
-                halfbyte = data[i] & 0x0F;
-            } while (two_halfs++ < 1);
-        }
-        return buf.toString();
+        byte[] sha1hash = md.digest();
+        return Strings.asHex(sha1hash);
     }
 
     @Override
