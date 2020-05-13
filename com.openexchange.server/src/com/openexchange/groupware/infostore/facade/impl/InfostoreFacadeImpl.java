@@ -2007,25 +2007,28 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
 
 
     /**
-     * Reduces the {@link Metadata.ORIGIN_LITERAL} element from the given metadata array if present and if the corresponding folderID is located under the trash folder.
+     * Removes the {@link Metadata.ORIGIN_LITERAL} element from the given metadata array if present and if the denoted folder is located below trash folder.
      *
-     * @param metadata The metadata to reduce
-     * @param folderId The folderId
+     * @param metadata The metadata to examine
+     * @param folderId The folder identifier
      * @param session The session
      * @return The meta data potentially reduced by the {@link Metadata.ORIGIN_LITERAL}
-     * @throws OXException
+     * @throws OXException If check fails
      */
-    private Metadata[] reduceOrigin(Metadata[] metadata, int folderId, ServerSession session) throws OXException {
-        if (session.getUser().isGuest()) {
-            // Guest doesn't have a trash
-            return metadata;
-        }
-        final OXFolderAccess folderAccess = new OXFolderAccess(session.getContext());
-        final int trashFolderId = getTrashFolderID(session, folderAccess);
-        if (Metadata.contains(metadata, Metadata.ORIGIN_LITERAL) && false == isBelowTrashFolder(folderId, trashFolderId, folderAccess)) {
-            List<Metadata> list = new ArrayList<Metadata>(Arrays.asList(metadata));
-            list.removeIf( m -> m == Metadata.ORIGIN_LITERAL);
-            return list.toArray(new Metadata[list.size()]);
+    private Metadata[] removeOriginFromMetadata(Metadata[] metadata, int folderId, ServerSession session) throws OXException {
+        if (Metadata.contains(metadata, Metadata.ORIGIN_LITERAL) && false == session.getUser().isGuest()) {
+            OXFolderAccess folderAccess = new OXFolderAccess(session.getContext());
+            int trashFolderId = getTrashFolderID(session, folderAccess);
+            if (false == isBelowTrashFolder(folderId, trashFolderId, folderAccess)) {
+                Metadata[] retval = new Metadata[metadata.length - 1];
+                int index = 0;
+                for (Metadata m : metadata) {
+                    if (m != Metadata.ORIGIN_LITERAL) {
+                        retval[index++] = m;
+                    }
+                }
+                return retval;
+            }
         }
         return metadata;
     }
@@ -3095,12 +3098,12 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
 
     @Override
     public TimedResult<DocumentMetadata> getDocuments(final long folderId, final Metadata[] columns, final ServerSession session) throws OXException {
-        return getDocuments(folderId, reduceOrigin(columns, (int)folderId, session), null, 0, session);
+        return getDocuments(folderId, removeOriginFromMetadata(columns, (int)folderId, session), null, 0, session);
     }
 
     @Override
     public TimedResult<DocumentMetadata> getDocuments(long folderId, Metadata[] columns, Metadata sort, int order, ServerSession session) throws OXException {
-        return getDocuments(folderId, reduceOrigin(columns, (int)folderId, session), sort, order, -1, -1, session);
+        return getDocuments(folderId, removeOriginFromMetadata(columns, (int)folderId, session), sort, order, -1, -1, session);
     }
 
     @Override
@@ -3177,7 +3180,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         Metadata[] cols = addSequenceNumberIfNeeded(columns);
         cols = addDateFieldsIfNeeded(cols, sort);
         if(folderId != -1) {
-            cols = reduceOrigin(cols, (int)folderId, session);
+            cols = removeOriginFromMetadata(cols, (int)folderId, session);
         }
         if (shouldTriggerMediaDataExtraction) {
             cols = addFieldsForTriggeringMediaMetaDataExtractionIfNeeded(cols);
@@ -3347,7 +3350,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         boolean shouldTriggerMediaDataExtraction = shouldTriggerMediaDataExtraction();
         Metadata[] cols = addSequenceNumberIfNeeded(columns);
         cols = addDateFieldsIfNeeded(cols, sort);
-        cols = reduceOrigin(cols, (int)folderId, session);
+        cols = removeOriginFromMetadata(cols, (int)folderId, session);
         if (shouldTriggerMediaDataExtraction) {
             cols = addFieldsForTriggeringMediaMetaDataExtractionIfNeeded(cols);
         }
@@ -3591,7 +3594,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
          * perform search & enhance results with additional metadata as needed
          */
         boolean shouldTriggerMediaDataExtraction = shouldTriggerMediaDataExtraction();
-        Metadata[] fields = Tools.getFieldsToQuery(reduceOrigin(cols, folderId, session), Metadata.ID_LITERAL, Metadata.FOLDER_ID_LITERAL);
+        Metadata[] fields = Tools.getFieldsToQuery(removeOriginFromMetadata(cols, folderId, session), Metadata.ID_LITERAL, Metadata.FOLDER_ID_LITERAL);
         fields = addDateFieldsIfNeeded(fields, sortedBy);
         if (shouldTriggerMediaDataExtraction) {
             fields = addFieldsForTriggeringMediaMetaDataExtractionIfNeeded(fields);
@@ -3645,7 +3648,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
          * perform search & enhance results with additional metadata as needed
          */
         boolean shouldTriggerMediaDataExtraction = shouldTriggerMediaDataExtraction();
-        Metadata[] fields = Tools.getFieldsToQuery(reduceOrigin(cols, folderId, session), Metadata.ID_LITERAL, Metadata.FOLDER_ID_LITERAL);
+        Metadata[] fields = Tools.getFieldsToQuery(removeOriginFromMetadata(cols, folderId, session), Metadata.ID_LITERAL, Metadata.FOLDER_ID_LITERAL);
         fields = addDateFieldsIfNeeded(fields, sortedBy);
         if (shouldTriggerMediaDataExtraction) {
             fields = addFieldsForTriggeringMediaMetaDataExtractionIfNeeded(fields);
