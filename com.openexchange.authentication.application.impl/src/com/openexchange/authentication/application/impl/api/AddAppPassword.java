@@ -49,6 +49,7 @@
 
 package com.openexchange.authentication.application.impl.api;
 
+import java.util.Objects;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -85,8 +86,9 @@ public class AddAppPassword extends AbstractAppPasswordAction {
         String appType = requestData.requireParameter(PARAMETER_APPLICATION_TYPE);
         String appName = requestData.requireParameter(PARAMETER_APPLICATION_NAME);
         ApplicationPassword lpass = getService().addPassword(session, appName, appType);
+        boolean sameLoginName = Objects.equals(session.getLogin(), lpass.getLogin());
         try {
-            return new AJAXRequestResult(new JSONObject().put("password", lpass.getAppPassword()).put("login", lpass.getLogin()).put("newLogin", lpass.isNewLogin()));
+            return new AJAXRequestResult(new JSONObject().put("password", lpass.getAppPassword()).put("login", lpass.getLogin()).put("newLogin", false == sameLoginName));
         } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
         }

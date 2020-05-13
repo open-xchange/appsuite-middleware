@@ -49,68 +49,25 @@
 
 package com.openexchange.authentication.application.storage.rdb;
 
-import com.openexchange.authentication.NamePart;
-import com.openexchange.config.lean.Property;
-
 /**
- * {@link AppPasswordStorageProperty}
+ * {@link LoginNameSource}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.4
  */
-public enum AppPasswordStorageProperty implements Property {
+public enum LoginNameSource {
 
-    /**
-     * Configures whether the database-backed application password storage is generally enabled or not.
-     */
-    ENABLED("enabled", Boolean.TRUE),
+    /** Use the login information from the actual regular session as-is */
+    SESSION,
 
-    /**
-     * Defines the name part of the context lookup source value used for determining the context of a user.
-     */
-    CONTEXT_LOOKUP_NAME_PART("contextLookupNamePart", NamePart.DOMAIN.getConfigName()),
+    /** Take over the user's primary mail address */
+    MAIL,
 
-    /**
-     * Configures where the login name used for application credentials is taken from. Possible options are <code>session</code> to use
-     * the login information from the actual regular session as-is, <code>mail</code> to take over the user's primary mail address,
-     * <code>username</code> to use the user's name, or <code>synthetic</code> to construct the name from the stored login mappings
-     * associated with the user and context, separated by the <code>@</code>-character.
-     * <p/>
-     * Defaults to <code>session</code>.
-     */
-    LOGIN_NAME_SOURCE("loginNameSource", LoginNameSource.SESSION.name()),
+    /** Use the user's name */
+    USERNAME,
 
-    /**
-     * When enabled, encrypts and stores the user's regular session password in the application password authentication. Required if
-     * applications accessing external systems like the mail server need their individual credentials rather than master- or OAuth-based
-     * authentication.
-     */
-    STORE_USER_PASSWORD("storeUserPassword", Boolean.FALSE)
+    /** Construct the name from the stored login mappings associated with the user and context, separated by the <code>@</code>-character */
+    SYNTHETIC
 
     ;
-
-    private final Object defaultValue;
-    private final String fqn;
-
-    /**
-     * Initializes a new {@link AppPasswordStorageProperty}.
-     *
-     * @param suffix The property name suffix
-     * @param defaultValue The property's default value
-     */
-    private AppPasswordStorageProperty(String suffix, Object defaultValue) {
-        this.defaultValue = defaultValue;
-        this.fqn = "com.openexchange.authentication.application.storage.rdb." + suffix;
-    }
-
-    @Override
-    public String getFQPropertyName() {
-        return fqn;
-    }
-
-    @Override
-    public Object getDefaultValue() {
-        return defaultValue;
-    }
-
 }

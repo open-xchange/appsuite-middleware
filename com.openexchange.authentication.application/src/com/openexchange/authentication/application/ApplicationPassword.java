@@ -191,7 +191,6 @@ public class ApplicationPassword {
     private final String userInfo;              // The userId for authenticating the user
     private String login;          // The login for the user
     private final String guid;          // Unique guid
-    private boolean newLogin;        // True if the username is new for the user
 
     ApplicationPassword(String guid, String userInfo, String login, String appPassword, String fullPassword, String name, String appType) {
         super();
@@ -202,7 +201,6 @@ public class ApplicationPassword {
         this.userInfo = userInfo;
         this.login = login;
         this.guid = guid;
-        this.newLogin = false;
     }
 
     /**
@@ -285,33 +283,4 @@ public class ApplicationPassword {
         return this.name;
     }
 
-    /**
-     * Sets the login
-     * setLogin
-     *
-     * @param login
-     */
-    public void setLogin(String login) {
-        this.login = login;
-    }
-
-    /**
-     * Sets flag that this is a new/different login
-     * setNewLogin
-     *
-     */
-    public void setNewLogin() {
-        this.newLogin = true;
-    }
-
-    /**
-     * Returns true if the login is possibly not
-     * the same as used for appsuite login
-     * isNewLogin
-     *
-     * @return
-     */
-    public boolean isNewLogin() {
-        return this.newLogin;
-    }
 }

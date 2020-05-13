@@ -60,13 +60,15 @@ import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Enums;
+import com.openexchange.java.Strings;
 import com.openexchange.password.mechanism.PasswordDetails;
 import com.openexchange.password.mechanism.PasswordMech;
 import com.openexchange.password.mechanism.PasswordMechRegistry;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
-import com.openexchange.user.User;
-import com.openexchange.user.UserService;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * Abstract password storage. Provides basic functionality for getting new password, login
@@ -82,7 +84,7 @@ public abstract class AbstractAppPasswordStorage {
 
     /**
      * Initializes a new {@link AbstractAppPasswordStorage}.
-     * 
+     *
      * @param lookup The service lookup
      */
     public AbstractAppPasswordStorage(ServiceLookup lookup) {
@@ -122,16 +124,6 @@ public abstract class AbstractAppPasswordStorage {
     }
 
     /**
-     * Retrieve UserService
-     *
-     * @return the UserService
-     * @throws OXException if the service is absent
-     */
-    private UserService getUserService() throws OXException {
-        return lookup.getServiceSafe(UserService.class);
-    }
-
-    /**
      * Get the registered DatabaseService
      *
      * @return the DatabaseService
@@ -143,7 +135,7 @@ public abstract class AbstractAppPasswordStorage {
 
     /**
      * Create new password hash from new password
-     * 
+     *
      * @param password The password
      * @return PasswordDetails The password details with the encoded password
      * @throws OXException if an error is occurred
@@ -206,34 +198,13 @@ public abstract class AbstractAppPasswordStorage {
     }
 
     /**
-     * Get the login for the user and adds to the application password
-     *
-     * @param appPass The application password
-     * @param session The seission
-     * @throws OXException if an error is occurred
-     */
-    protected void addLoginName(ApplicationPassword appPass, Session session) throws OXException {
-        try {
-            String login = session.getLogin();
-            if (login == null) {
-                User user = getUserService().getUser(session.getUserId(), session.getContextId());
-                login = user.getMail();
-                appPass.setNewLogin();   // Not necessarily the same as the login
-            }
-            appPass.setLogin(login);
-        } catch (OXException e) {
-            throw AppPasswordExceptionCodes.APPLICATION_PASSWORD_GENERIC_ERROR.create("Problem creating login name", e);
-        }
-    }
-
-    /**
      * Checks if configured to store the user password. Returns if true. Null if not
      *
      * @param session The session
      * @return The session's password or <code>null</code> if the password is not stored (by configuration setting)
      * @throws OXException if an error is occurred
      */
-    protected String getPasswordIfConfigured(Session session) throws OXException {
+    private String getPasswordIfConfigured(Session session) throws OXException {
         if (getConfigService().getBooleanProperty(session.getUserId(), session.getContextId(), AppPasswordStorageProperty.STORE_USER_PASSWORD)) {
             return session.getPassword();
         }
@@ -250,16 +221,14 @@ public abstract class AbstractAppPasswordStorage {
      * @throws OXException if an error is occurred
      */
     protected ApplicationPassword createAppPass(Session session, String appName, String appType) throws OXException {
-        String newPassword = passwordGenerator.generateRandomPassword();
-        ApplicationPassword lpass = ApplicationPassword.builder()
-            .setAppPassword(newPassword)
+        return ApplicationPassword.builder()
+            .setLogin(getLoginName(session))
+            .setAppPassword(passwordGenerator.generateRandomPassword())
             .setFullPassword(getPasswordIfConfigured(session))
             .setAppType(appType == null ? "" : appType)
             .setName(appName == null ? "" : appName)
             .setUUID(UUID.randomUUID().toString())
         .build();
-        addLoginName(lpass, session);
-        return lpass;
     }
 
     /**
@@ -285,6 +254,27 @@ public abstract class AbstractAppPasswordStorage {
             throw INVALID_CREDENTIALS_MISSING_CONTEXT_MAPPING.create(loginContextInfo);
         }
         return contextId;
+    }
+
+    private String getLoginName(Session session) throws OXException {
+        ServerSession serverSession = ServerSessionAdapter.valueOf(session);
+        String loginNameSource = getConfigService().getProperty(session.getUserId(), session.getContextId(), AppPasswordStorageProperty.LOGIN_NAME_SOURCE);
+        switch (Enums.parse(LoginNameSource.class, loginNameSource, LoginNameSource.SESSION)) {
+            case MAIL:
+                return serverSession.getUser().getMail();
+            case USERNAME:
+                return serverSession.getUser().getLoginInfo();
+            case SYNTHETIC:
+                return serverSession.getUser().getLoginInfo() + '@' + serverSession.getContext().getLoginInfo()[0];
+            case SESSION:
+                String login = session.getLogin();
+                if (Strings.isEmpty(login)) {
+                    throw AppPasswordExceptionCodes.MISSING_CONFIGURATION.create(AppPasswordStorageProperty.LOGIN_NAME_SOURCE.getFQPropertyName());
+                }
+                return session.getLogin();
+            default:
+                throw AppPasswordExceptionCodes.MISSING_CONFIGURATION.create(AppPasswordStorageProperty.LOGIN_NAME_SOURCE.getFQPropertyName());
+        }
     }
 
 }
