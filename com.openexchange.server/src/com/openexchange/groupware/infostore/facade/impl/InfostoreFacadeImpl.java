@@ -2007,22 +2007,29 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
 
 
     /**
-     * Removes the {@link Metadata.ORIGIN_LITERAL} element from the given metadata array if present and if the denoted folder is located below trash folder.
+     * Removes the {@link Metadata.ORIGIN_LITERAL} element from the given fields if present and if the denoted folder is located below trash folder.
      *
-     * @param metadata The metadata to examine
+     * @param fields The requested fields to examine
      * @param folderId The folder identifier
      * @param session The session
      * @return The meta data potentially reduced by the {@link Metadata.ORIGIN_LITERAL}
      * @throws OXException If check fails
      */
-    private Metadata[] removeOriginFromMetadata(Metadata[] metadata, int folderId, ServerSession session) throws OXException {
-        if (Metadata.contains(metadata, Metadata.ORIGIN_LITERAL) && false == session.getUser().isGuest()) {
+    private Metadata[] removeOriginFromMetadata(Metadata[] fields, int folderId, ServerSession session) throws OXException {
+        if (Metadata.contains(fields, Metadata.ORIGIN_LITERAL) && false == session.getUser().isGuest()) {
             OXFolderAccess folderAccess = new OXFolderAccess(session.getContext());
             int trashFolderId = getTrashFolderID(session, folderAccess);
             if (false == isBelowTrashFolder(folderId, trashFolderId, folderAccess)) {
-                Metadata[] retval = new Metadata[metadata.length - 1];
+                int length = fields.length;
+                if (length == 1) {
+                    // Return empty fields
+                    return new Metadata[0];
+                }
+
+                // Strip ORIGIN field
+                Metadata[] retval = new Metadata[length - 1];
                 int index = 0;
-                for (Metadata m : metadata) {
+                for (Metadata m : fields) {
                     if (m != Metadata.ORIGIN_LITERAL) {
                         retval[index++] = m;
                     }
@@ -2030,7 +2037,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                 return retval;
             }
         }
-        return metadata;
+        return fields;
     }
 
     /**
