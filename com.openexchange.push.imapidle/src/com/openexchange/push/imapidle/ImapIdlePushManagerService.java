@@ -64,6 +64,9 @@ import org.slf4j.Logger;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.Member;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.cascade.ConfigViews;
 import com.openexchange.exception.OXException;
 import com.openexchange.hazelcast.Hazelcasts;
 import com.openexchange.java.Streams;
@@ -204,6 +207,24 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
         globalLock = new ReentrantLockAccessControl();
     }
 
+    /**
+     * Checks if IMAP-IDLE Push is enabled for given user.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return <code>true</code> if enabled; otherwise <code>false</code>
+     * @throws OXException If check fails
+     */
+    private boolean isImapIdlePushEnabledFor(int userId, int contextId) throws OXException {
+        ConfigViewFactory factory = services.getOptionalService(ConfigViewFactory.class);
+        if (factory == null) {
+            throw ServiceExceptionCode.absentService(ConfigViewFactory.class);
+        }
+
+        ConfigView view = factory.getView(userId, contextId);
+        return ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.push.imapidle.enabled", true, view);
+    }
+
     private AccessControl getlockFor(int userId, int contextId) {
         LockService lockService = services.getOptionalService(LockService.class);
         if (null == lockService) {
@@ -287,6 +308,15 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
         Session session = generateSessionFor(pushUser);
         int contextId = session.getContextId();
         int userId = session.getUserId();
+
+        if (false == isImapIdlePushEnabledFor(userId, contextId)) {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.info("Denied starting permanent IMAP-IDLE listener for user {} in context {} since disabled via configuration", I(userId), I(contextId), new Throwable("IMAP-IDLE start permanent listener trace"));
+            } else {
+                LOGGER.info("Denied starting permanent IMAP-IDLE listener for user {} in context {} since disabled via configuration", I(userId), I(contextId));
+            }
+            return null;
+        }
 
         SessionInfo sessionInfo = new SessionInfo(session, true, false);
         AcquisitionResult acquisitionResult = clusterLock.acquireLock(sessionInfo);
@@ -379,6 +409,15 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
         }
         int contextId = session.getContextId();
         int userId = session.getUserId();
+
+        if (false == isImapIdlePushEnabledFor(userId, contextId)) {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.info("Denied starting IMAP-IDLE listener for user {} in context {} with session {} since disabled via configuration", I(userId), I(contextId), session.getSessionID(), new Throwable("IMAP-IDLE start listener trace"));
+            } else {
+                LOGGER.info("Denied starting IMAP-IDLE listener for user {} in context {} with session {} since disabled via configuration", I(userId), I(contextId), session.getSessionID());
+            }
+            return null;
+        }
 
         SessionInfo sessionInfo = new SessionInfo(session, false, isTransient(session, services));
         AcquisitionResult acquisitionResult = clusterLock.acquireLock(sessionInfo);
