@@ -131,7 +131,7 @@ public final class CacheEventServiceImpl implements CacheEventService, CacheEven
 
                         // Deliver events
                         for (StampedCacheEvent sce : drained) {
-                            CacheEventServiceImpl.this.notify(sce.listeners, sce.sender, sce.event, sce.fromRemote);
+                            CacheEventServiceImpl.this.notify(sce.listeners, sce.sender, sce.event, sce.fromRemote, true);
                         }
 
                         // Terminate?
@@ -219,7 +219,7 @@ public final class CacheEventServiceImpl implements CacheEventService, CacheEven
                 // Deliver remotely received event immediately to local cache listeners to prevent event being aggregated into another local
                 // event and thus re-distributed remotely again
                 try {
-                    notify(listenersToNotify, sender, event, fromRemote);
+                    notify(listenersToNotify, sender, event, fromRemote, false);
                 } catch (Exception e) {
                     LOG.warn("Failed to notify cache listeners about {} event: {}", fromRemote ? "remote" : "local", event, e);
                 }
@@ -260,8 +260,9 @@ public final class CacheEventServiceImpl implements CacheEventService, CacheEven
      * @param sender The sender
      * @param event The event
      * @param fromRemote Whether remotely or locally generated
+     * @param incrementDeliveredEvents Whether number of delivered events should be incremented
      */
-    protected void notify(final List<CacheListener> listeners, final Object sender, final CacheEvent event, final boolean fromRemote) {
+    protected void notify(final List<CacheListener> listeners, final Object sender, final CacheEvent event, final boolean fromRemote, final boolean incrementDeliveredEvents) {
         Runnable notificationRunnable = new Runnable() {
 
             @Override
@@ -281,7 +282,7 @@ public final class CacheEventServiceImpl implements CacheEventService, CacheEven
                 /*
                  * track delivery
                  */
-                if (deliveredEvents.incrementAndGet() < 0L) {
+                if (incrementDeliveredEvents && deliveredEvents.incrementAndGet() < 0L) {
                     deliveredEvents.set(0L);
                 }
             }

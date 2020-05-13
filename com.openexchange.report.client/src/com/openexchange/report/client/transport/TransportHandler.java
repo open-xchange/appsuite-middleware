@@ -89,7 +89,7 @@ public class TransportHandler {
 
     private static final String REPORT_SERVER_URL = "activation.open-xchange.com";
 
-    private static final String REPORT_SERVER_CLIENT_AUTHENTICATION_STRING = "rhadsIsAgTicOpyodNainPacloykAuWyribZydkarbEncherc4";
+    private static final String REPORT_SERVER_CLIENT_AUTHENTICATION_STRING = "BKvKJhhjBuz6fUGvKGjGhgCkjvchgvjgaypHFGc7tvjVc76Vja";
 
     private static final String POST_CLIENT_AUTHENTICATION_STRING_KEY = "clientauthenticationstring";
 
