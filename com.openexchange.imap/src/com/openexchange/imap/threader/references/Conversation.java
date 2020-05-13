@@ -86,7 +86,7 @@ public final class Conversation {
     private final Set<String> references;
 
     private boolean messageIdsEmpty;
-    private boolean referencesEmpty;
+    private final boolean referencesEmpty;
 
     private Conversation main;
 
@@ -136,13 +136,19 @@ public final class Conversation {
         return this;
     }
 
+    /**
+     * Adds the given {@link MailMessageWrapper} to this conversation
+     *
+     * @param mmw The {@link MailMessageWrapper}
+     */
     private void addWrapper(final MailMessageWrapper mmw) {
-        if (messages.add(mmw)) {
+        Conversation main = getMain();
+        if (main.messages.add(mmw)) {
             final MailMessage message = mmw.message;
             final String messageId = message.getMessageId();
             if (null != messageId) {
-                if (messageIds.add(messageId)) {
-                    messageIdsEmpty = false;
+                if (main.messageIds.add(messageId)) {
+                    main.messageIdsEmpty = false;
                 }
             }
 
@@ -150,17 +156,13 @@ public final class Conversation {
             if (null != sReferences) {
                 for (final String sReference : sReferences) {
                     if (null != sReference && Strings.isNotEmpty(sReference)) {
-                        if (references.add(sReference)) {
-                            referencesEmpty = false;
-                        }
+                        main.references.add(sReference);
                     }
                 }
             } else {
                 String inReplyTo = message.getInReplyTo();
                 if (null != inReplyTo && Strings.isNotEmpty(inReplyTo)) {
-                    if (references.add(inReplyTo)) {
-                        referencesEmpty = false;
-                    }
+                    main.references.add(inReplyTo);
                 }
             }
         }
@@ -170,7 +172,7 @@ public final class Conversation {
      * Joins this conversation with other conversation.
      *
      * @param other The other conversation to join with
-     * @return This conversation
+     * @return The main conversation
      */
     public Conversation join(final Conversation other) {
         if (null != other) {
@@ -182,28 +184,50 @@ public final class Conversation {
                 main.join(other);
                 return main.getMain();
             }
-            final Set<MailMessageWrapper> messages = other.messages;
+
+            // now get the other main
+            Conversation otherMain = other.getMain();
+            // special case, we found ourself, no need to fetch mails
+            if (this.equals(otherMain)) {
+                return this;
+            }
+
+            final Set<MailMessageWrapper> messages = otherMain.messages;
             for (final MailMessageWrapper mmw : messages) {
                 addWrapper(mmw);
             }
-            other.setMain(this);
+            otherMain.setMain(this);
         }
         return this;
     }
 
+    /**
+     * Sets the main {@link Conversation}
+     *
+     * @param main The {@link Conversation} to set as main
+     */
     private void setMain(Conversation main) {
+        if (this.equals(main)) {
+            return;
+        }
+        Conversation otherMain = getMain();
+        if (!this.equals(otherMain)) {
+            otherMain.setMain(main);
+        }
         this.main = main;
     }
 
+    /**
+     * Gets the main {@link Conversation}
+     *
+     * @return The main {@link Conversation}
+     */
     private Conversation getMain() {
         Conversation main = this.main;
-        if (main != null) {
-            return main;
-        } else {
-            return this;
-        }
+        return main != null ? main.getMain() : this;
     }
-    
+
+
     /**
      * Checks if this conversation references OR is referenced by given message
      *
@@ -322,13 +346,22 @@ public final class Conversation {
     }
 
     /**
+     * Returns true if this is the main {@link Conversation}
+     * @return <code>true</code> if this is the main  {@link Conversation}, <code>false</code> otherwise
+     */
+    public boolean isMain() {
+        return this.equals(getMain());
+    }
+
+    /**
      *Adds the message identifiers from this conversation to given set.
      *
      * @param set The set to add the message identifiers to
      */
     public void addMessageIdsTo(Set<String> set) {
-        if (!messageIdsEmpty) {
-            set.addAll(messageIds);
+        Conversation main = getMain();
+        if (!main.messageIdsEmpty) {
+            set.addAll(main.messageIds);
         }
     }
 
@@ -348,23 +381,34 @@ public final class Conversation {
      * @return The messages with given sorting
      */
     public List<MailMessage> getMessages(final Comparator<MailMessage> comparator) {
-        if (messages.isEmpty()) {
+        Conversation main = getMain();
+        if (main.messages.isEmpty()) {
             return Collections.emptyList();
         }
-        final List<MailMessage> ret = new ArrayList<MailMessage>(messages.size());
-        for (final MailMessageWrapper mmw : messages) {
+        final List<MailMessage> ret = new ArrayList<MailMessage>(main.messages.size());
+        for (final MailMessageWrapper mmw : main.messages) {
             ret.add(mmw.message);
         }
         Collections.sort(ret, null == comparator ? COMPARATOR_DESC : comparator);
         return ret;
     }
 
+    /**
+     * Gets the references
+     *
+     * @return The references
+     */
     public Set<String> getReferences() {
-        return references;
+        return getMain().references;
     }
 
+    /**
+     * Gets the message ids
+     *
+     * @return The message ids
+     */
     public Set<String> getMessageIds() {
-        return messageIds;
+        return getMain().messageIds;
     }
 
     /**
@@ -377,6 +421,11 @@ public final class Conversation {
         final MailMessage message;
         private final int hash;
 
+        /**
+         * Initializes a new {@link MailMessageWrapper}.
+         *
+         * @param message The {@link MailMessage} to wrap
+         */
         MailMessageWrapper(final MailMessage message) {
             super();
             this.message = message;
@@ -420,5 +469,16 @@ public final class Conversation {
             return true;
         }
     } // End of class MailMessageWrapper
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("Conversation [messageIds=");
+        builder.append(messageIds);
+        builder.append(", references=");
+        builder.append(references);
+        builder.append("]");
+        return builder.toString();
+    }
 
 }
