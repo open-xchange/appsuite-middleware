@@ -53,8 +53,8 @@ import static com.openexchange.java.Autoboxing.B;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import java.util.List;
@@ -181,7 +181,7 @@ public abstract class AbstractMultifactorProviderTest extends AbstractMultifacto
         //Start the registration process of a new multifactor device
         MultifactorStartRegistrationResponseData startRegistrationResult = doStartRegistration();
         assertThat(startRegistrationResult.getChallenge(), is(not(nullValue())));
-        assertThat(startRegistrationResult.getDeviceId(), not(isEmptyOrNullString()));
+        assertThat(startRegistrationResult.getDeviceId(), not(emptyOrNullString()));
 
         //Validate the response of the registration
         validateStartRegistrationResponse(startRegistrationResult);
@@ -192,7 +192,7 @@ public abstract class AbstractMultifactorProviderTest extends AbstractMultifacto
         //As a result the new device should have been returned
         assertThat(device, is(not(nullValue())));
         //..with an ID assigned
-        assertThat(device.getId(), not(isEmptyOrNullString()));
+        assertThat(device.getId(), not(emptyOrNullString()));
         //..it must match the device ID returned from start registration
         assertThat(device.getId(), is(equalTo((startRegistrationResult.getDeviceId()))));
         //.. and the provider must match
@@ -207,7 +207,9 @@ public abstract class AbstractMultifactorProviderTest extends AbstractMultifacto
     }
 
     protected void clearAllMultifactorDevices() throws Exception {
-        getAdminApi().multifactorDeleteDevices(contextId, userId);
+        if (contextId != null && userId != null) {
+            getAdminApi().multifactorDeleteDevices(contextId, userId);
+        }
     }
 
     protected void clearAllMultifactorDevicesByUser() throws Exception {
@@ -298,7 +300,7 @@ public abstract class AbstractMultifactorProviderTest extends AbstractMultifacto
 
         //Try to delete the 2nd factor. THIS MUST FAIL.
         MultifactorDeleteResponse deleteResponse = multifactorApi.multifactorDeviceActionDelete(client2.getSession(), getProviderName(), registrationResponseData.getDeviceId());
-        assertThat(deleteResponse.getError(), not(isEmptyOrNullString()));
+        assertThat(deleteResponse.getError(), not(emptyOrNullString()));
         assertThat(deleteResponse.getCode(), is("MFA-0001"));
 
         //As a result the device must still be present
@@ -318,7 +320,7 @@ public abstract class AbstractMultifactorProviderTest extends AbstractMultifacto
         //This MUST FAIL, because the 2nd factor was not provided
         CurrentUserResponse currentUser = new UserMeApi(client2).getCurrentUser(client2.getSession());
         assertThat(currentUser.getData(), is(nullValue()));
-        assertThat(currentUser.getError(), not(isEmptyOrNullString()));
+        assertThat(currentUser.getError(), not(emptyOrNullString()));
         assertThat(currentUser.getCode(), is("MFA-0001"));
     }
 
@@ -350,7 +352,7 @@ public abstract class AbstractMultifactorProviderTest extends AbstractMultifacto
         //For example deleting multifactor devices
         MultifactorDeleteResponse deleteResponse = MultifactorApi().multifactorDeviceActionDelete(getSessionId(), getProviderName(), deviceData.getDeviceId());
         assertThat(deleteResponse.getData(), is(empty()));
-        assertThat(deleteResponse.getError(), not(isEmptyOrNullString()));
+        assertThat(deleteResponse.getError(), not(emptyOrNullString()));
         assertThat(deleteResponse.getCode(), is("MFA-0015"));
     }
 
