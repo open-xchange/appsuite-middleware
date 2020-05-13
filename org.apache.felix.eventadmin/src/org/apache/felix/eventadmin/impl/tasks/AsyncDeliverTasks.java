@@ -36,6 +36,9 @@ import org.osgi.service.event.EventAdmin;
  */
 public class AsyncDeliverTasks
 {
+    /** The logger constant */
+    static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(AsyncDeliverTasks.class);
+
     /** The thread pool to use to spin-off new threads. */
     private final DefaultThreadPool m_pool;
 
@@ -135,6 +138,10 @@ public class AsyncDeliverTasks
                 postedEvents.set(0L);
             }
             executer.addAndReactivate(new TaskInfo(tasks, event), m_pool);
+
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Posted OSGi event \"{}\"", event.getTopic(), new Throwable("Posted OSGi event trace"));
+            }
         //}
     }
 
@@ -244,6 +251,7 @@ public class AsyncDeliverTasks
             if (m_delivered_events.incrementAndGet() < 0L) {
                 m_delivered_events.set(0L);
             }
+            LOGGER.debug("Delivered event \"{}\"", info.event.getTopic());
         }
     }
 
