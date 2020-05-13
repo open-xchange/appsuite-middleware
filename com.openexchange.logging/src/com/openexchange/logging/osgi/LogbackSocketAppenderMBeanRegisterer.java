@@ -49,43 +49,123 @@
 
 package com.openexchange.logging.osgi;
 
-import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import org.osgi.framework.BundleContext;
-import com.openexchange.logback.extensions.appenders.AbstractRemoteAppender;
-import com.openexchange.logback.extensions.appenders.kafka.KafkaAppender;
-import com.openexchange.logback.extensions.appenders.logstash.LogstashSocketAppenderMBean;
+import org.osgi.framework.BundleEvent;
+import org.osgi.framework.BundleListener;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.logback.extensions.logstash.LogstashSocketAppender;
+import com.openexchange.logback.extensions.logstash.LogstashSocketAppenderMBean;
+import com.openexchange.management.ManagementService;
+import ch.qos.logback.classic.LoggerContext;
 
 /**
  * {@link LogbackSocketAppenderMBeanRegisterer}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class LogbackSocketAppenderMBeanRegisterer extends AbstractRemoteAppenderMBeanRegisterer {
+public class LogbackSocketAppenderMBeanRegisterer implements ServiceTrackerCustomizer<ManagementService, ManagementService> {
 
-    private static final String PROPERTY = "com.openexchange.logback.extensions.appenders.logstash.enabled";
-    private static final String APPENDER_NAME = "Logstash";
+    protected static Logger LOGGER = LoggerFactory.getLogger(LogbackSocketAppenderMBeanRegisterer.class);
+
+    private final BundleContext context;
+    private ObjectName logstashConfName; // guarded by synchronized
 
     /**
      * Initialises a new {@link LogbackSocketAppenderMBeanRegisterer}.
      */
     public LogbackSocketAppenderMBeanRegisterer(BundleContext context) {
-        super(context, APPENDER_NAME);
+        super();
+        this.context = context;
     }
 
     @Override
-    String getEnabledPropertyName() {
-        return PROPERTY;
+    public synchronized ManagementService addingService(ServiceReference<ManagementService> reference) {
+        ManagementService managementService = context.getService(reference);
+        LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+
+        // Register optional LogstashSocketAppenderMBean
+        boolean logstashEnabled = Boolean.parseBoolean(loggerContext.getProperty("com.openexchange.logback.extensions.logstash.enabled"));
+        if (!logstashEnabled) {
+            return managementService;
+        }
+
+        LogstashSocketAppender logstashSocketAppender = LogstashSocketAppender.getInstance();
+        if (null == logstashSocketAppender) {
+            // "com.openexchange.java-commons.logback-extensions" bundle not yet started... Add a listener for it to register its MBean later on
+            context.addBundleListener(new LogbackExtensionsBundleListener(this, managementService));
+        } else {
+            try {
+                ObjectName logstashConfName = new ObjectName(LogstashSocketAppenderMBean.DOMAIN, LogstashSocketAppenderMBean.KEY, LogstashSocketAppenderMBean.VALUE);
+                managementService.registerMBean(logstashConfName, logstashSocketAppender);
+                this.logstashConfName = logstashConfName;
+            } catch (Exception e) {
+                LOGGER.error("Could not register LogstashSocketAppenderMBean", e);
+            }
+        }
+        return managementService;
     }
 
     @Override
-    AbstractRemoteAppender<?> getRemoteAppender() {
-        return KafkaAppender.getInstance();
+    public synchronized void modifiedService(ServiceReference<ManagementService> reference, ManagementService managementService) {
+        // Nothing
     }
 
     @Override
-    ObjectName getObjectName() throws MalformedObjectNameException {
-        return new ObjectName(LogstashSocketAppenderMBean.DOMAIN, LogstashSocketAppenderMBean.KEY, LogstashSocketAppenderMBean.VALUE);
+    public synchronized void removedService(ServiceReference<ManagementService> reference, ManagementService managementService) {
+        if (null == managementService) {
+            return;
+        }
+
+        ObjectName logstashConfName = this.logstashConfName;
+        if (logstashConfName != null) {
+            try {
+                managementService.unregisterMBean(logstashConfName);
+                LOGGER.info("LogstashSocketAppenderMBean successfully unregistered.");
+            } catch (Exception e) {
+                LOGGER.warn("Could not unregister LogstashSocketAppenderMBean", e);
+            }
+        }
     }
+
+    // -------------------------------------------------------------------------------------------------------------------
+
+    private static final class LogbackExtensionsBundleListener implements BundleListener {
+
+        private final LogbackSocketAppenderMBeanRegisterer registerer;
+        private final ManagementService managementService;
+
+        /**
+         * Initializes a new {@link BundleListenerImplementation}.
+         */
+        LogbackExtensionsBundleListener(LogbackSocketAppenderMBeanRegisterer registerer, ManagementService managementService) {
+            super();
+            this.registerer = registerer;
+            this.managementService = managementService;
+        }
+
+        @Override
+        public void bundleChanged(BundleEvent event) {
+            if (BundleEvent.STARTED == event.getType() && "com.openexchange.java-commons.logback-extensions".equals(event.getBundle().getSymbolicName())) {
+                synchronized (registerer) {
+                    LogstashSocketAppender logstashSocketAppender = LogstashSocketAppender.getInstance();
+                    if (null == logstashSocketAppender) {
+                        LOGGER.warn("Logstash socket appender has been enabled, but not initialized. Please ensure bundle \"com.openexchange.java-commons.logback-extensions\" ('logback-extensions') is orderly started");
+                    } else {
+                        try {
+                            ObjectName logstashConfName = new ObjectName(LogstashSocketAppenderMBean.DOMAIN, LogstashSocketAppenderMBean.KEY, LogstashSocketAppenderMBean.VALUE);
+                            managementService.registerMBean(logstashConfName, logstashSocketAppender);
+                            registerer.logstashConfName = logstashConfName;
+                        } catch (Exception e) {
+                            LOGGER.warn("Failed to register MBean for logstash socket appender.", e);
+                        }
+                    }
+                }
+            }
+        }
+    } // End of LogbackExtensionsBundleListener class
 
 }

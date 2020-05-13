@@ -63,7 +63,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.log.audit.Attribute;
 import com.openexchange.log.audit.AuditLogFilter;
 import com.openexchange.log.audit.AuditLogService;
-import com.openexchange.logback.extensions.encoders.ExtendedPatternLayoutEncoder;
+import com.openexchange.logback.extensions.ExtendedPatternLayoutEncoder;
 import com.openexchange.osgi.ServiceListing;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.ILoggingEvent;

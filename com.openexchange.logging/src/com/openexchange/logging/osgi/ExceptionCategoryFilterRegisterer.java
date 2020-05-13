@@ -65,7 +65,6 @@ import com.openexchange.logging.filter.RankingAwareTurboFilterList;
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-@SuppressWarnings("unused")
 public class ExceptionCategoryFilterRegisterer implements ServiceTrackerCustomizer<ConfigurationService, ConfigurationService>, Reloadable {
 
     private static final String PROP_SUPPRESSED_CATEGORIES = "com.openexchange.log.suppressedCategories";

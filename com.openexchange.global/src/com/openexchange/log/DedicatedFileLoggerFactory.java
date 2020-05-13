@@ -54,7 +54,7 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.java.Strings;
-import com.openexchange.logback.extensions.encoders.ExtendedPatternLayoutEncoder;
+import com.openexchange.logback.extensions.ExtendedPatternLayoutEncoder;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.ILoggingEvent;

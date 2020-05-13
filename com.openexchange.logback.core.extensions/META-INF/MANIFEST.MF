@@ -9,12 +9,7 @@ Fragment-Host: ch.qos.logback.core;bundle-version="[1.0.13,2.0.0)"
 Bundle-ClassPath: .
 Import-Package: com.fasterxml.jackson.core,
  com.openexchange.logback.extensions,
- com.openexchange.logback.extensions.encoders,
- com.openexchange.logback.extensions.policies,
- com.openexchange.logback.extensions.converters,
- com.openexchange.logback.extensions.appenders,
- com.openexchange.logback.extensions.appenders.kafka,
- com.openexchange.logback.extensions.appenders.logstash,
+ com.openexchange.logback.extensions.logstash,
  org.apache.commons.io,
  org.apache.commons.lang.time,
  org.slf4j

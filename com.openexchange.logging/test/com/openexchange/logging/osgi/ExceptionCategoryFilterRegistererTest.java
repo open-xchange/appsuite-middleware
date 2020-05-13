@@ -59,6 +59,7 @@ import com.openexchange.logging.filter.ExceptionCategoryFilter;
 import com.openexchange.logging.filter.RankingAwareTurboFilterList;
 import com.openexchange.logging.internal.IncludeStackTraceServiceImpl;
 
+
 /**
  * {@link ExceptionCategoryFilterRegistererTest}
  *
@@ -66,9 +67,8 @@ import com.openexchange.logging.internal.IncludeStackTraceServiceImpl;
  */
 public class ExceptionCategoryFilterRegistererTest {
 
-    @SuppressWarnings("unchecked")
-    @Test
-    public void testCorrectFilterHandlingOnConfigServiceAppearance() throws Exception {
+     @Test
+     public void testCorrectFilterHandlingOnConfigServiceAppearance() throws Exception {
         /*
          * When ConfigurationService appears, ExceptionCategoryFilter shall be registered.
          * When ConfigurationService appears again, the old filter shall be removed and registered again.

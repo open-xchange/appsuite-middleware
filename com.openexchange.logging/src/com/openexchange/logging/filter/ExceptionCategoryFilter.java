@@ -138,7 +138,6 @@ public class ExceptionCategoryFilter extends ExtendedTurboFilter {
         return DEFAULT_RANKING;
     }
 
-    @SuppressWarnings("unused")
     @Override
     public FilterReply decide(Marker marker, Logger logger, Level level, String format, Object[] params, Throwable t) {
         if (OXException.class.isInstance(t)) {

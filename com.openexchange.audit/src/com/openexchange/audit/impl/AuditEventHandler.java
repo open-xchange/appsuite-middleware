@@ -83,7 +83,7 @@ import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
-import com.openexchange.logback.extensions.encoders.ExtendedPatternLayoutEncoder;
+import com.openexchange.logback.extensions.ExtendedPatternLayoutEncoder;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.user.UserService;
