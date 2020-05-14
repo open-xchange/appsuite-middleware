@@ -59,6 +59,7 @@ import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.caldav.query.Filter;
 import com.openexchange.caldav.query.FilterParser;
 import com.openexchange.dav.DAVProtocol;
+import com.openexchange.dav.PreconditionException;
 import com.openexchange.dav.actions.PROPFINDAction;
 import com.openexchange.webdav.action.WebdavRequest;
 import com.openexchange.webdav.action.WebdavResponse;
@@ -109,10 +110,10 @@ public class CalendarQueryReport extends PROPFINDAction {
         }
 
         final Filter filter = new FilterParser().parse(filterDef);
-        try {
-            return ((FilteringResource) req.getResource()).filter(filter);
-        } catch (@SuppressWarnings("unused") final ClassCastException x) {
-            throw WebdavProtocolException.generalError(req.getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        if (false == FilteringResource.class.isInstance(req.getResource())) {
+            throw new PreconditionException(DAVProtocol.CAL_NS.getURI(), "supported-filter", req.getUrl(), HttpServletResponse.SC_FORBIDDEN);
         }
+        return ((FilteringResource) req.getResource()).filter(filter);
     }
+
 }

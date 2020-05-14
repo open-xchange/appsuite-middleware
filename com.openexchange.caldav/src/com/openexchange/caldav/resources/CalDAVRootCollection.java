@@ -113,7 +113,7 @@ public class CalDAVRootCollection extends DAVRootCollection {
             new SupportedCalendarComponentSets(SupportedCalendarComponentSets.VEVENT, SupportedCalendarComponentSets.VTODO),
             new ScheduleDefaultCalendarURL(factory),
             new ScheduleDefaultTasksURL(factory),
-            new SupportedReportSet(),
+            new SupportedReportSet(SupportedReportSet.CALENDAR_MULTIGET, SupportedReportSet.ACL_PRINCIPAL_PROP_SET, SupportedReportSet.PRINCIPAL_MATCH, SupportedReportSet.PRINCIPAL_PROPERTY_SEARCH, SupportedReportSet.EXPAND_PROPERTY, SupportedReportSet.CALENDARSERVER_PRINCIPAL_SEARCH, SupportedReportSet.SYNC_COLLECTION),
             new CurrentUserPrivilegeSet(Privilege.READ, Privilege.READ_ACL, Privilege.READ_CURRENT_USER_PRIVILEGE_SET, Privilege.BIND, Privilege.UNBIND)
         );
     }
