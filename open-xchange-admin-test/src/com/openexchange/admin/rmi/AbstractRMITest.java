@@ -196,9 +196,8 @@ public abstract class AbstractRMITest {
      * @return the context admin's {@link Credentials}
      */
     private static Credentials getContextAdminCredentials() {
-        String oxadmin = AJAXConfig.getProperty(Property.OXADMIN, "oxadmin");
-        String contextPassword = AJAXConfig.getProperty(Property.PASSWORD, "secret");
-        return new Credentials(oxadmin, contextPassword);
+        User oxadmin = UserFactory.createContextAdmin();
+        return new Credentials(oxadmin.getName(), oxadmin.getPassword());
     }
 
     /**
