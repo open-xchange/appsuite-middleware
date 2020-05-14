@@ -5,8 +5,8 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.sql"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.json"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.google.json"/>
-	<classpathentry exported="true" kind="lib" path="testlib/hamcrest-core-1.3.jar" sourcepath="testlib/source/hamcrest-core-1.3-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="testlib/hamcrest-library-1.3.jar"/>
+	<classpathentry exported="true" kind="lib" path="testlib/hamcrest-2.2.jar" sourcepath="testlib/source/hamcrest-2.2-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="testlib/hamcrest-date-2.0.7.jar" sourcepath="testlib/source/hamcrest-date-2.0.7-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="testlib/awaitility-1.6.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="testlib/junit-addons-1.4.jar" sourcepath="testlib/source/junit-addons-1.4-src.jar"/>
 	<classpathentry exported="true" kind="lib" path="testlib/dumbster1.6.jar" sourcepath="testlib/source/dumbster1.6-src.zip"/>

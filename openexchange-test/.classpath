@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="lib" path="lib/hamcrest-2.2.jar" sourcepath="lib/source/hamcrest-2.2-sources.jar"/>
-	<classpathentry kind="lib" path="lib/hamcrest-date-2.0.7.jar" sourcepath="lib/source/hamcrest-date-2.0.7-sources.jar"/>
 	<classpathentry kind="lib" path="lib/jersey-client-2.26.jar" sourcepath="lib/source/jersey-client-2.26-sources.jar"/>
 	<classpathentry kind="lib" path="lib/jersey-server-2.26.jar" sourcepath="lib/source/jersey-server-2.26-sources.jar"/>
 	<classpathentry kind="lib" path="lib/jersey-common-2.26.jar" sourcepath="lib/source/jersey-common-2.26-sources.jar"/>
