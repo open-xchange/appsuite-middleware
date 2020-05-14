@@ -10,13 +10,13 @@
 	<classpathentry kind="src" path="common"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="lib" path="lib/httpunit-1.7.jar" sourcepath="lib/source/httpunit-1.7-sources.zip"/>
-	<classpathentry kind="lib" path="lib/jchronic-0.2.6.jar"/>
+	<classpathentry kind="lib" path="lib/jchronic-0.2.6.jar" sourcepath="lib/source/jchronic-0.2.6-sources.jar"/>
 	<classpathentry kind="lib" path="lib/junit-4.12.jar" sourcepath="lib/source/junit-4.12-sources.jar"/>
 	<classpathentry kind="lib" path="lib/junit-addons-1.4.jar" sourcepath="lib/source/junit-addons-1.4-src.jar"/>
 	<classpathentry kind="lib" path="lib/junitperf-1.9.1.jar"/>
-	<classpathentry kind="lib" path="lib/jvyaml.jar"/>
+	<classpathentry kind="lib" path="lib/jvyaml-0.2.jar" sourcepath="lib/source/jvyaml-src-0.2.tar.gz"/>
 	<classpathentry kind="lib" path="lib/nekohtml.jar"/>
-	<classpathentry kind="lib" path="lib/xercesImpl.jar" sourcepath="lib/source/xerces-2.9.0-source.zip"/>
+	<classpathentry kind="lib" path="lib/xerces-2.9.0.jar" sourcepath="lib/source/xerces-2.9.0-source.zip"/>
 	<classpathentry kind="lib" path="lib/jackrabbit-webdav-2.3.3.jar" sourcepath="lib/source/jackrabbit-webdav-2.3.3-sources.jar"/>
 	<classpathentry kind="lib" path="lib/cardme-0.4.0.jar" sourcepath="lib/source/cardme-src-0.4.0.jar"/>
 	<classpathentry kind="lib" path="lib/js.jar"/>
