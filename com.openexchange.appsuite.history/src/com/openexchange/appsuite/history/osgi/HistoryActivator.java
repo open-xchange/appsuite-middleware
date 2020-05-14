@@ -49,7 +49,6 @@
 
 package com.openexchange.appsuite.history.osgi;
 
-import static com.openexchange.java.Autoboxing.C;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -109,7 +108,7 @@ public class HistoryActivator extends HousekeepingActivator implements ForcedRel
     protected void startBundle() throws Exception {
         LeanConfigurationService configService = getServiceSafe(LeanConfigurationService.class);
         Dictionary<String, Object> dictionary = new Hashtable<String, Object>(1);
-        dictionary.put(SecurityManagerPropertyProvider.PROPS_SERVICE_KEY, Strings.concat(C(','), APPSUITE_PROP.getFQPropertyName(), MANIFEST_PROP.getFQPropertyName()));
+        dictionary.put(SecurityManagerPropertyProvider.PROPS_SERVICE_KEY, Strings.concat(",", new String[] { APPSUITE_PROP.getFQPropertyName(), MANIFEST_PROP.getFQPropertyName() }));
         registerService(SecurityManagerPropertyProvider.class, (property) -> {
             if (APPSUITE_PROP.getFQPropertyName().contentEquals(property)) {
                 return Optional.of(configService.getProperty(APPSUITE_PROP));
