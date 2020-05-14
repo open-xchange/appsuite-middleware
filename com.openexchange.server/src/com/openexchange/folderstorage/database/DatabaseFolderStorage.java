@@ -1950,8 +1950,9 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
             return; // not applicable
         }
         if (false == SetterAwareFolder.class.isInstance(folderUpdate) || ((SetterAwareFolder) folderUpdate).containsSubscribed()) {
-            Optional<Boolean> originalSubscribed = ServerServiceRegistry.getServize(FolderSubscriptionHelper.class, true).isSubscribed(optCon, session.getContextId(), session.getUserId(), originalFolder.getObjectID(), originalFolder.getModule());
-            if (false == originalSubscribed.isPresent() || b(originalSubscribed.get()) != folderUpdate.isSubscribed()) {
+            Boolean originalSubscribed = ServerServiceRegistry.getServize(FolderSubscriptionHelper.class, true)
+                .isSubscribed(optCon, session.getContextId(), session.getUserId(), originalFolder.getObjectID(), originalFolder.getModule()).orElse(Boolean.TRUE);
+            if (b(originalSubscribed) != folderUpdate.isSubscribed()) {
                 if (originalFolder.isDefaultFolder() && FolderObject.PRIVATE == originalFolder.getType(session.getUserId()) ) {
                     throw FolderExceptionErrorMessage.SUBSCRIBE_NOT_ALLOWED.create(); // deny update for user's default private folder
                 }
@@ -1959,8 +1960,9 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
             }
         }
         if (false == SetterAwareFolder.class.isInstance(folderUpdate) || ((SetterAwareFolder) folderUpdate).containsUsedForSync()) {
-            Optional<Boolean> originalUsedForSync = ServerServiceRegistry.getServize(FolderSubscriptionHelper.class, true).isUsedForSync(optCon, session.getContextId(), session.getUserId(), originalFolder.getObjectID(), originalFolder.getModule());
-            if (false == originalUsedForSync.isPresent() || b(originalUsedForSync.get()) != folderUpdate.getUsedForSync().isUsedForSync()) {
+            Boolean originalUsedForSync = ServerServiceRegistry.getServize(FolderSubscriptionHelper.class, true)
+                .isUsedForSync(optCon, session.getContextId(), session.getUserId(), originalFolder.getObjectID(), originalFolder.getModule()).orElse(Boolean.TRUE);
+            if (b(originalUsedForSync) != folderUpdate.getUsedForSync().isUsedForSync()) {
                 if (originalFolder.isDefaultFolder() && FolderObject.PRIVATE == originalFolder.getType(session.getUserId()) ) {
                     throw FolderExceptionErrorMessage.SUBSCRIBE_NOT_ALLOWED.create(); // deny update for user's default private folder
                 }
