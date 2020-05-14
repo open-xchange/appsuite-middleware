@@ -50,24 +50,24 @@
 package com.openexchange.ajax.chronos.itip.bugs;
 
 import static com.openexchange.ajax.chronos.itip.ITipAssertion.assertAttendeePartStat;
-import static com.openexchange.ajax.chronos.itip.ITipAssertion.assertChanges;
 import static com.openexchange.ajax.chronos.itip.ITipAssertion.assertSingleChange;
 import static com.openexchange.ajax.chronos.itip.ITipAssertion.assertSingleEvent;
 import static com.openexchange.ajax.chronos.itip.ITipUtil.constructBody;
 import static com.openexchange.ajax.chronos.itip.ITipUtil.receiveIMip;
+import static com.openexchange.ajax.chronos.util.DateTimeUtil.incrementDateTimeData;
+import static com.openexchange.ajax.chronos.util.DateTimeUtil.parseDateTime;
 import static com.openexchange.java.Autoboxing.I;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
-import java.util.Calendar;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import org.junit.Test;
 import com.openexchange.ajax.chronos.factory.EventFactory;
 import com.openexchange.ajax.chronos.itip.AbstractITipAnalyzeTest;
-import com.openexchange.ajax.chronos.util.DateTimeUtil;
 import com.openexchange.chronos.scheduling.SchedulingMethod;
 import com.openexchange.testing.httpclient.models.AnalysisChangeNewEvent;
 import com.openexchange.testing.httpclient.models.Attendee;
@@ -100,7 +100,7 @@ public class MWB263Test extends AbstractITipAnalyzeTest {
 
     @Test
     public void testBug() throws Exception {
-        EventData eventToCreate = EventFactory.createSeriesEvent(getUserId(), summary, 10, folderId);
+        EventData eventToCreate = EventFactory.createSeriesEvent(getUserId(), summary, 10, defaultFolderId);
         Attendee replyingAttendee = prepareCommonAttendees(eventToCreate);
 
         createdEvent = eventManager.createEvent(eventToCreate, true);
@@ -108,12 +108,10 @@ public class MWB263Test extends AbstractITipAnalyzeTest {
         /*
          * Immediately create exception by updating end date
          */
-        List<EventData> events = getAllEventsOfEvent(eventManager, createdEvent);
-        EventData secondOccurrence = events.get(2);
+        List<EventData> events = getAllEventsOfCreatedEvent();
+        EventData secondOccurrence = events.get(1);
         EventData deltaEvent = prepareDeltaEvent(secondOccurrence);
-        Calendar date = Calendar.getInstance();
-        date.setTimeInMillis(DateTimeUtil.parseZuluDateTime(secondOccurrence.getEndDate()).getTime() + TimeUnit.HOURS.toMillis(4));
-        deltaEvent.setEndDate(DateTimeUtil.getDateTime(date));
+        deltaEvent.setEndDate(incrementDateTimeData(secondOccurrence.getEndDate(), TimeUnit.HOURS.toMillis(1)));
         eventManager.updateEvent(deltaEvent);
 
         /*
@@ -131,29 +129,30 @@ public class MWB263Test extends AbstractITipAnalyzeTest {
          */
         EventData attendeeEvent = assertSingleEvent(accept(apiClientC2, constructBody(iMip), null), createdEvent.getUid());
         assertAttendeePartStat(attendeeEvent.getAttendees(), replyingAttendee.getEmail(), PartStat.ACCEPTED.getStatus());
-        rememberForCleanup(apiClientC2, attendeeEvent);
+        eventManagerC2.rememberEvent(attendeeEvent);
 
         /*
          * Receive exception mail as attendee, status for series still NEEDS_ACTION
          */
         MailData iMipException = receiveIMip(apiClientC2, userResponseC1.getData().getEmail1(), summary, 1, SchedulingMethod.REQUEST);
         rememberMail(apiClientC2, iMipException);
-        AnalysisChangeNewEvent newException = assertChanges(analyze(apiClientC2, iMipException), 2, 1).getNewEvent();
+        AnalysisChangeNewEvent newException = assertSingleChange(analyze(apiClientC2, iMipException)).getNewEvent();
         assertNotNull(newException);
-        assertEquals(createdEvent.getUid(), newException.getUid());
+        assertEquals(secondOccurrence.getRecurrenceId(), newException.getRecurrenceId());
         assertAttendeePartStat(newException.getAttendees(), replyingAttendee.getEmail(), PartStat.NEEDS_ACTION.getStatus());
 
         /*
          * Reply with "decline", look up if the exception is created for the series
          */
-        EventData attendeeException = assertSingleEvent(accept(apiClientC2, constructBody(iMipException), null), createdEvent.getUid());
+        EventData attendeeException = assertSingleEvent(decline(apiClientC2, constructBody(iMipException), null), createdEvent.getUid());
         assertAttendeePartStat(attendeeException.getAttendees(), replyingAttendee.getEmail(), PartStat.DECLINED.getStatus());
         assertThat(attendeeException.getSeriesId(), is(attendeeEvent.getId()));
 
         /*
          * Ensure that there are no duplicates
          */
-        List<EventData> allEvents = eventManagerC2.getAllEvents(DateTimeUtil.parseZuluDateTime(eventToCreate.getStartDate()), DateTimeUtil.parseZuluDateTime(deltaEvent.getEndDate()));
+        List<EventData> allEvents = eventManagerC2.getAllEvents(parseDateTime(eventToCreate.getStartDate()), parseDateTime(deltaEvent.getEndDate()));
+        allEvents = allEvents.stream().filter(e -> summary.equals(e.getSummary())).collect(Collectors.toList());
         assertThat(I(allEvents.size()), is(I(2)));
     }
 
