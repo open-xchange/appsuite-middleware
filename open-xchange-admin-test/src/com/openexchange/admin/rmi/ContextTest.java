@@ -53,7 +53,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import java.rmi.ServerException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.UUID;
@@ -62,6 +61,7 @@ import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
+import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.factory.ContextFactory;
 
 /**
@@ -146,7 +146,7 @@ public class ContextTest extends AbstractRMITest {
     /**
      * Test context creation with absent of quota information
      */
-    @Test(expected = ServerException.class)
+    @Test(expected = InvalidDataException.class)
     public void testCreateContextNoQuota() throws Exception {
         Context c = new Context();
         c.setName("Name-" + UUID.randomUUID().toString());
@@ -320,8 +320,7 @@ public class ContextTest extends AbstractRMITest {
             getContextManager().create(ctx2, contextAdminCredentials);
             fail("Could add Context");
         } catch (Exception x) {
-            String expected = "Cannot map 'foo' to the newly created context. This mapping is already in use.";
-            assertTrue("Excpected: " + expected, x.getCause().getMessage().startsWith(expected));
+            assertTrue(x.getMessage().startsWith("Cannot map 'foo' to the newly created context. This mapping is already in use."));
         }
     }
 

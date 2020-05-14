@@ -53,8 +53,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import java.rmi.RemoteException;
-import java.rmi.ServerException;
 import java.util.Arrays;
 import java.util.List;
 import org.junit.Assert;
@@ -65,6 +63,11 @@ import com.openexchange.admin.rmi.dataobjects.Group;
 import com.openexchange.admin.rmi.dataobjects.Resource;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
+import com.openexchange.admin.rmi.exceptions.ContextExistsException;
+import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
+import com.openexchange.admin.rmi.exceptions.NoSuchGroupException;
+import com.openexchange.admin.rmi.exceptions.NoSuchResourceException;
+import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.factory.ContextFactory;
 import com.openexchange.admin.rmi.factory.GroupFactory;
 import com.openexchange.admin.rmi.factory.ResourceFactory;
@@ -201,7 +204,7 @@ public class AdditionalRMITests extends AbstractRMITest {
         } finally {
             try {
                 getResourceManager().delete(testResource, context, contextAdminCredentials);
-            } catch (RemoteException e) {
+            } catch (NoSuchResourceException e) {
                 // don't do anything, has been removed already, right?
                 System.out.println("Resource was removed already");
             }
@@ -341,7 +344,7 @@ public class AdditionalRMITests extends AbstractRMITest {
     }
 
     @Test
-    public void testDeleteOxUsers() {
+    public void testDeleteOxUsers() throws Exception {
         boolean resourceDeleted = false;
         Resource res = ResourceFactory.createResource("resourceName", "resourceDisplayname", "resource@email.invalid");
         try {
@@ -435,7 +438,7 @@ public class AdditionalRMITests extends AbstractRMITest {
             try {
                 getContextManager().create(newContext, newAdmin);
                 fail("Should throw ContextExistsException");
-            } catch (ServerException e) {
+            } catch (ContextExistsException e) {
                 assertTrue("Caught exception", true);
             }
         } finally {
@@ -451,8 +454,8 @@ public class AdditionalRMITests extends AbstractRMITest {
         try {
             getContextManager().delete(missingContext);
             fail("Expected NoSuchContextException");
-        } catch (RemoteException e) {
-            checkException(e);
+        } catch (NoSuchContextException e) {
+            assertTrue("Caught exception", true);
         }
     }
 
@@ -463,8 +466,8 @@ public class AdditionalRMITests extends AbstractRMITest {
         try {
             getGroupManager().delete(missingGroup, context, contextAdminCredentials);
             fail("Expected NoSuchGroupException");
-        } catch (RemoteException e) {
-            checkException(e);
+        } catch (NoSuchGroupException e) {
+            assertTrue("Caught exception", true);
         }
     }
 
@@ -475,8 +478,8 @@ public class AdditionalRMITests extends AbstractRMITest {
         try {
             getResourceManager().delete(missingResource, context, contextAdminCredentials);
             fail("Expected NoSuchResourceException");
-        } catch (RemoteException e) {
-            checkException(e);
+        } catch (NoSuchResourceException e) {
+            assertTrue("Caught exception", true);
         }
     }
 
@@ -487,8 +490,8 @@ public class AdditionalRMITests extends AbstractRMITest {
         try {
             getUserManager().delete(context, missingUser, contextAdminCredentials);
             fail("Expected NoSuchUserException");
-        } catch (RemoteException e) {
-            checkException(e);
+        } catch (NoSuchUserException e) {
+            assertTrue("Caught exception", true);
         }
     }
 
