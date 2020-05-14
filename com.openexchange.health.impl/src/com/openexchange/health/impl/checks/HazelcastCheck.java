@@ -49,12 +49,13 @@
 
 package com.openexchange.health.impl.checks;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import com.hazelcast.cluster.ClusterState;
 import com.hazelcast.core.Cluster;
 import com.hazelcast.core.HazelcastInstance;
-import com.openexchange.health.MWHealthCheck;
+import com.openexchange.health.CachingMWHealthCheck;
 import com.openexchange.health.MWHealthCheckResponse;
 import com.openexchange.health.impl.MWHealthCheckResponseImpl;
 import com.openexchange.server.ServiceLookup;
@@ -66,7 +67,7 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.1
  */
-public class HazelcastCheck implements MWHealthCheck {
+public class HazelcastCheck extends CachingMWHealthCheck {
 
     private final static String NAME = "hazelcast";
     private final static long TIMEOUT = 15000L;
@@ -74,7 +75,7 @@ public class HazelcastCheck implements MWHealthCheck {
     private final ServiceLookup services;
 
     public HazelcastCheck(ServiceLookup services) {
-        super();
+        super(5000);
         this.services = services;
     }
 
@@ -89,26 +90,28 @@ public class HazelcastCheck implements MWHealthCheck {
     }
 
     @Override
-    public MWHealthCheckResponse call() {
+    protected MWHealthCheckResponse doCall() {
         HazelcastInstance hzInstance = services.getOptionalService(HazelcastInstance.class);
         if (null == hzInstance) {
             return new MWHealthCheckResponseImpl(NAME, null, true);
         }
+
         boolean status = true;
-        Map<String, Object> data = new HashMap<>(5);
         Cluster cluster = hzInstance.getCluster();
-        if (null != cluster) {
-            data.put("memberCount", String.valueOf(cluster.getMembers().size()));
-            ClusterState clusterState = cluster.getClusterState();
-            if (!ClusterState.ACTIVE.equals(clusterState)) {
-                status = false;
-            }
-            data.put("clusterState", clusterState.name());
-            data.put("clusterVersion", cluster.getClusterVersion().toString());
-            data.put("memberVersion", cluster.getLocalMember().getVersion().toString());
-            data.put("isLiteMember", String.valueOf(cluster.getLocalMember().isLiteMember()));
+        if (null == cluster) {
+            return new MWHealthCheckResponseImpl(NAME, Collections.emptyMap(), status);
         }
 
+        Map<String, Object> data = new HashMap<>(5);
+        data.put("memberCount", String.valueOf(cluster.getMembers().size()));
+        ClusterState clusterState = cluster.getClusterState();
+        if (!ClusterState.ACTIVE.equals(clusterState)) {
+            status = false;
+        }
+        data.put("clusterState", clusterState.name());
+        data.put("clusterVersion", cluster.getClusterVersion().toString());
+        data.put("memberVersion", cluster.getLocalMember().getVersion().toString());
+        data.put("isLiteMember", String.valueOf(cluster.getLocalMember().isLiteMember()));
         return new MWHealthCheckResponseImpl(NAME, data, status);
     }
 
