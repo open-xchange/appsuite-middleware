@@ -50,6 +50,7 @@
 package com.openexchange.ajax.login;
 
 import static com.openexchange.ajax.ConfigMenu.convert2JS;
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.util.Locale;
 import java.util.Map;
@@ -77,6 +78,9 @@ import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.authentication.ResultCode;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.cascade.ConfigViews;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.impl.ConfigTree;
@@ -314,7 +318,7 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
 
             // Await client-specific ramp-up and add to JSON object
             if (null != optRampUp) {
-                int timeoutSecs = 30;
+                int timeoutSecs = getLoginRampUpTimeout(session);
                 try {
                     JSONObject jsonObject = optRampUp.get(timeoutSecs, TimeUnit.SECONDS);
                     for (Map.Entry<String, Object> entry : jsonObject.entrySet()) {
@@ -430,6 +434,19 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
 
         requestContext.getMetricProvider().recordSuccess();
         return false;
+    }
+
+    private static int getLoginRampUpTimeout(Session session) {
+        String propertyName = "com.openexchange.ajax.login.rampup.timeoutSeconds";
+        int defaultValue = 10;
+        try {
+            ConfigViewFactory factory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
+            ConfigView view = factory.getView(session.getUserId(), session.getContextId());
+            return ConfigViews.getDefinedIntPropertyFrom(propertyName, defaultValue, view);
+        } catch (Exception e) {
+            LOG.warn("Failed to obtain value for property \"{}\". Returning default value of {} instead.", propertyName, I(defaultValue), e);
+            return defaultValue;
+        }
     }
 
     /**
