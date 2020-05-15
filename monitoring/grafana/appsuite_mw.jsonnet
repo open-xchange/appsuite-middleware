@@ -11,8 +11,21 @@ local template = grafana.template;
 local dbPoolName = 'dbpool';
 local davInterfaceName = 'davinterface';
 local httpClient = 'httpclient';
+local serviceName = 'service';
 
 local templates = [
+  {
+    name: serviceName,
+    label: 'Service',
+    query: 'label_values(' + serviceName + ')',
+    sort: 1,
+  },
+  {
+    name: 'instance',
+    label: 'Instance',
+    query: 'label_values(up{job=~"$job",service=~"$' + serviceName + '"}, instance)',
+    sort: 1,
+  },
   {
     name: dbPoolName,
     label: 'DB Pool',
@@ -733,7 +746,7 @@ local userDBTimes = graphPanel.new(
 );
 
 grafana.newDashboard(
-  title='App Suite', tags=['Java', 'AppSuite-MW'], metric='jvm_info'
+  title='App Suite', tags=['Java', 'AppSuite'], metric='jvm_info',
 ).addTemplates(
   [
     template.new(

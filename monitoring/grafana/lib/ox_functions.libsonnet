@@ -33,14 +33,6 @@ local annotation = grafana.annotation;
         query='label_values(' + metric + ',job)',
         refresh='load'
       ),
-      template.new(
-        name='instance',
-        label='Instance',
-        datasource=self.default.datasource,
-        query='label_values(up{job=~"$job"}, instance)',
-        refresh='time',
-        sort=1,
-      ),
     ]
   ).addAnnotations(
     [
