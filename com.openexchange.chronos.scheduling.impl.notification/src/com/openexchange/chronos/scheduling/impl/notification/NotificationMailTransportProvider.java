@@ -183,6 +183,7 @@ public class NotificationMailTransportProvider extends AbstractMailTransportProv
 
     @Override
     public boolean preferNoReplyAccount(Session session) throws OXException {
-        return serviceLookup.getServiceSafe(LeanConfigurationService.class).getBooleanProperty(session.getUserId(), session.getContextId(), PREFER_NO_REPLY_PROPERTY);
+        return super.preferNoReplyAccount(session) ||
+            serviceLookup.getServiceSafe(LeanConfigurationService.class).getBooleanProperty(session.getUserId(), session.getContextId(), PREFER_NO_REPLY_PROPERTY);
     }
 }

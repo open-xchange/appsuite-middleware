@@ -50,6 +50,7 @@
 package com.openexchange.ms.internal;
 
 import java.net.InetSocketAddress;
+import com.hazelcast.instance.EndpointQualifier;
 import com.openexchange.ms.Member;
 
 /**
@@ -78,7 +79,7 @@ public final class HzMember implements Member {
 
     @Override
     public InetSocketAddress getInetSocketAddress() {
-        return hzMember.getInetSocketAddress();
+        return hzMember.getSocketAddress(EndpointQualifier.MEMBER);
     }
 
 }

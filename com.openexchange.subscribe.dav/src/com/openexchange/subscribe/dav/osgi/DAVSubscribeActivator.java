@@ -89,7 +89,7 @@ public class DAVSubscribeActivator extends HousekeepingActivator {
 
             @Override
             public HttpBasicConfig configureHttpBasicConfig(HttpBasicConfig config) {
-                return config.setMaxTotalConnections(10).setMaxConnectionsPerRoute(5).setConnectionTimeout(5000).setSocketReadTimeout(10000);
+                return config.setMaxTotalConnections(10).setMaxConnectionsPerRoute(5).setConnectTimeout(5000).setSocketReadTimeout(10000);
             }
         });
 

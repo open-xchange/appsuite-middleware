@@ -62,15 +62,15 @@ import com.openexchange.html.AbstractSanitizing;
 public class Bug29695Test extends AbstractSanitizing {
      @Test
      public void testDontReplaceCopyRegEntities() throws Exception {
-        String content = getHtmlService().getConformHTML("<b>&copy; by &reg;</b>", "UTF-8");
+        String content = trimLines(getHtmlService().getConformHTML("<b>&copy; by &reg;</b>", "UTF-8"));
         String expected = "<!doctype html>\n" +
             "<html>\n" +
-            " <head> \n" +
-            "  <meta charset=\"UTF-8\"> \n" +
-            " </head>\n" +
-            " <body>\n" +
-            "  <b>\u00a9 by \u00ae</b> \n" +
-            " </body>\n" +
+            "<head>\n" +
+            "<meta charset=\"UTF-8\">\n" +
+            "</head>\n" +
+            "<body>\n" +
+            "<b>\u00a9 by \u00ae</b>\n" +
+            "</body>\n" +
             "</html>";
         assertEquals(expected, content);
     }

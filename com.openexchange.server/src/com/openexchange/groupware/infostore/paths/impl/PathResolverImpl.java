@@ -209,7 +209,7 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
                     if (con == null) {
                         con = getReadConnection(session.getContext());
                     }
-                    stmt = con.prepareStatement("SELECT folder.fuid, folder.fname FROM oxfolder_tree AS folder JOIN oxfolder_tree AS parent ON (folder.parent = parent.fuid AND folder.cid = parent.cid) WHERE folder.cid = ? and parent.fuid = ? and folder.fname = ?");
+                    stmt = con.prepareStatement("SELECT folder.fuid, folder.fname, folder.type, folder.default_flag, folder.created_from FROM oxfolder_tree AS folder JOIN oxfolder_tree AS parent ON (folder.parent = parent.fuid AND folder.cid = parent.cid) WHERE folder.cid = ? and parent.fuid = ? and folder.fname = ?");
                     stmt.setInt(1, session.getContextId());
 
                     stmt.setInt(2, parentId);
@@ -220,6 +220,15 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
                     int folderid = 0;
                     while (rs.next()) {
                         final String fname = rs.getString(2);
+                        final int folderType = rs.getInt(3);
+                        final boolean defaultFlag = rs.getInt(4) == 1;
+                        final int createdFrom = rs.getInt(5);
+
+                        if (folderType == FolderObject.TRASH && defaultFlag && createdFrom != session.getUserId()) {
+                            //Do not consider special trash folder of other users in order to prevent ambiguous matching (DUPLICATE_SUBFOLDER).
+                            continue;
+                        }
+
                         if (fname.equals(component)) {
                             if ( found ) {
                                 final OXException e = InfostoreExceptionCodes.DUPLICATE_SUBFOLDER.create(I(parentId), component, I(session.getContextId()));

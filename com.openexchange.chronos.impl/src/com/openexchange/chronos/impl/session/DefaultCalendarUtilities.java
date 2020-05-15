@@ -51,6 +51,8 @@ package com.openexchange.chronos.impl.session;
 
 import java.util.Comparator;
 import java.util.TimeZone;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.mapping.DefaultEventUpdate;
@@ -73,6 +75,8 @@ import com.openexchange.server.ServiceLookup;
  * @since v7.10.0
  */
 public class DefaultCalendarUtilities implements CalendarUtilities {
+
+    private static final Logger LOG = LoggerFactory.getLogger(DefaultCalendarUtilities.class);
 
     private final CalendarSession session;
     private final ServiceLookup services;

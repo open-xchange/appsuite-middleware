@@ -50,10 +50,10 @@
 package com.openexchange.oauth.provider.resourceserver.annotations;
 
 import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
 
 /**
  * <p>
@@ -78,12 +78,17 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
+@Inherited
 public @interface OAuthAction {
 
     /**
      * Grants access to any valid OAuth request.
      */
     public static final String GRANT_ALL = "*";
+
+    public static final String READ_MAIL = "read_mail";
+
+    public static final String WRITE_MAIL = "write_mail";
 
     /**
      * Indicates that a custom scope check is necessary.
@@ -93,8 +98,9 @@ public @interface OAuthAction {
 
     /**
      * Indicates the required OAuth 2.0 scope to call this action.
+     * 
      * @return The scope. If all requests are authorized to call this action
-     * {@link OAuthAction#GRANT_ALL} must be returned.
+     *         {@link OAuthAction#GRANT_ALL} must be returned.
      */
     String value();
 

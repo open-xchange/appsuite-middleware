@@ -107,6 +107,7 @@ import com.openexchange.webdav.action.behaviour.RequestSpecificBehaviourRegistry
 import com.openexchange.webdav.action.behaviour.UserAgentBehaviour;
 import com.openexchange.webdav.action.ifheader.IgnoreLocksIfHeaderApply;
 import com.openexchange.webdav.protocol.Protocol;
+import com.openexchange.webdav.protocol.WebdavMethod;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.xml.spring.SpringParser;
 
@@ -130,7 +131,7 @@ public final class InfostorePerformer implements SessionHolder {
         return INSTANCE;
     }
 
-    public static enum Action {
+    public static enum Acti1on {
         UNLOCK, PROPPATCH, PROPFIND, OPTIONS, MOVE, MKCOL, LOCK, COPY, DELETE, GET, HEAD, PUT, TRACE
     }
 
@@ -138,7 +139,7 @@ public final class InfostorePerformer implements SessionHolder {
 
     private final Protocol protocol = new Protocol();
 
-    private final Map<Action, WebdavAction> actions = new EnumMap<Action, WebdavAction>(Action.class);
+    private final Map<WebdavMethod, WebdavAction> actions = new EnumMap<WebdavMethod, WebdavAction>(WebdavMethod.class);
 
     private final ThreadLocal<ServerSession> session = new ThreadLocal<ServerSession>();
 
@@ -168,7 +169,6 @@ public final class InfostorePerformer implements SessionHolder {
             FolderObject.getFolderString(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID, locale),
             FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID,
             FolderObject.SYSTEM_INFOSTORE_FOLDER_ID);
-
 
 
         final InfostoreWebdavFactory infoFactory = new InfostoreWebdavFactory();
@@ -211,34 +211,28 @@ public final class InfostorePerformer implements SessionHolder {
         put = prepare(oxWebdavPut, false, true, new WebdavIfAction(0, true, false), oxWebdavMaxUploadSize);
         trace = prepare(new WebdavTraceAction(), true, true, new WebdavIfAction(0, false, false));
 
-        actions.put(Action.UNLOCK, unlock);
-        actions.put(Action.PROPPATCH, propPatch);
-        actions.put(Action.PROPFIND, propFind);
-        actions.put(Action.OPTIONS, options);
-        actions.put(Action.MOVE, move);
-        actions.put(Action.MKCOL, mkcol);
-        actions.put(Action.LOCK, lock);
-        actions.put(Action.COPY, copy);
-        actions.put(Action.DELETE, delete);
-        actions.put(Action.GET, get);
-        actions.put(Action.HEAD, head);
-        actions.put(Action.PUT, put);
-        actions.put(Action.TRACE, trace);
+        actions.put(WebdavMethod.UNLOCK, unlock);
+        actions.put(WebdavMethod.PROPPATCH, propPatch);
+        actions.put(WebdavMethod.PROPFIND, propFind);
+        actions.put(WebdavMethod.OPTIONS, options);
+        actions.put(WebdavMethod.MOVE, move);
+        actions.put(WebdavMethod.MKCOL, mkcol);
+        actions.put(WebdavMethod.LOCK, lock);
+        actions.put(WebdavMethod.COPY, copy);
+        actions.put(WebdavMethod.DELETE, delete);
+        actions.put(WebdavMethod.GET, get);
+        actions.put(WebdavMethod.HEAD, head);
+        actions.put(WebdavMethod.PUT, put);
+        actions.put(WebdavMethod.TRACE, trace);
 
         makeLockNullTolerant();
 
         loadRequestSpecificBehaviourRegistry();
     }
 
-    private static volatile Action[] NULL_TOLERANT_ACTIONS;
-
     private void makeLockNullTolerant() {
-        // Single-check-idiom to initialize constant
-        Action[] tmp = NULL_TOLERANT_ACTIONS;
-        if (null == tmp) {
-            NULL_TOLERANT_ACTIONS = tmp = new Action[] { Action.OPTIONS, Action.LOCK, Action.MKCOL, Action.PUT };
-        }
-        for (final Action action : tmp) {
+        WebdavMethod[] nullTolerantActions = new WebdavMethod[] { WebdavMethod.OPTIONS, WebdavMethod.LOCK, WebdavMethod.MKCOL, WebdavMethod.PUT };
+        for (final WebdavMethod action : nullTolerantActions) {
             WebdavAction webdavAction = actions.get(action);
             while (webdavAction != null) {
                 if (webdavAction instanceof WebdavExistsAction) {
@@ -321,7 +315,7 @@ public final class InfostorePerformer implements SessionHolder {
         return session.get().getUser();
     }
 
-    public void doIt(final HttpServletRequest req, final HttpServletResponse resp, final Action action, final ServerSession sess) {
+    public void doIt(final HttpServletRequest req, final HttpServletResponse resp, final WebdavMethod action, final ServerSession sess) {
         try {
             final WebdavRequest webdavRequest = new ServletWebdavRequest(factory, req);
             final WebdavResponse webdavResponse = new ServletWebdavResponse(resp);

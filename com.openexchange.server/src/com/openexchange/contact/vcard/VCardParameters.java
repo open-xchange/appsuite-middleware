@@ -91,42 +91,42 @@ public interface VCardParameters {
      */
     VCardParameters setPhotoScaleDimension(Dimension dimension);
 
-     /**
-      * Gets a value indicating whether import and export is done in <i>strict</i> mode or not.
-      *
-      * @return <code>true</code> if strict mode is enabled, <code>false</code>, otherwise
-      */
-     boolean isStrict();
+    /**
+     * Gets a value indicating whether import and export is done in <i>strict</i> mode or not.
+     *
+     * @return <code>true</code> if strict mode is enabled, <code>false</code>, otherwise
+     */
+    boolean isStrict();
 
-     /**
-      * Sets a value indicating whether import and export is done in <i>strict</i> mode or not.
-      *
-      * @param strict <code>true</code> if strict mode is enabled, <code>false</code>, otherwise
-      * @return A self reference
-      */
-     VCardParameters setStrict(boolean strict);
+    /**
+     * Sets a value indicating whether import and export is done in <i>strict</i> mode or not.
+     *
+     * @param strict <code>true</code> if strict mode is enabled, <code>false</code>, otherwise
+     * @return A self reference
+     */
+    VCardParameters setStrict(boolean strict);
 
-     /**
-      * Gets the underlying groupware session.
-      *
-      * @return The session, or <code>null</code> if not set
-      */
-     Session getSession();
+    /**
+     * Gets the underlying groupware session.
+     *
+     * @return The session, or <code>null</code> if not set
+     */
+    Session getSession();
 
-     /**
-      * Sets the underlying groupware session.
-      *
-      * @param session The session, or <code>null</code> if not set
-      * @return A self reference
-      */
-     VCardParameters setSession(Session session);
+    /**
+     * Sets the underlying groupware session.
+     *
+     * @param session The session, or <code>null</code> if not set
+     * @return A self reference
+     */
+    VCardParameters setSession(Session session);
 
-     /**
-      * Gets the maximum allowed size in bytes for contact images.
-      *
-      * @return The maximum allowed size
-      */
-     long getMaxContactImageSize();
+    /**
+     * Gets the maximum allowed size in bytes for contact images.
+     *
+     * @return The maximum allowed size
+     */
+    long getMaxContactImageSize();
 
     /**
      * Sets the maximum allowed size in bytes for contact images.
@@ -223,25 +223,10 @@ public interface VCardParameters {
      * This setting is only effective if <code>keepOriginalVCard</code> is <code>true</code>.
      *
      * @param removeImageFromKeptVCard <code>true</code> if binary value of the imported <code>PHOTO</code> property should be removed,
-     *                                 <code>false</code>, otherwise
+     *            <code>false</code>, otherwise
      * @return A self reference
      */
     VCardParameters setRemoveImageFromKeptVCard(boolean removeImageFromKeptVCard);
-
-    /**
-     * Gets a value whether to enforce the vCard should be use the UTF-8 charset for reading and writing the vCard.
-     *
-     * @return <code>true</code> if UTF-8 should be enforced, <code>false</code> to fall back to the JVM's default charset
-     */
-    boolean isEnforceUtf8();
-
-    /**
-     * Gets a value whether to enforce the vCard should be use the UTF-8 charset for reading and writing the vCard.
-     *
-     * @param enforceUtf8 <code>true</code> if UTF-8 should be enforced, <code>false</code> to fall back to the JVM's default charset
-     * @return A self reference
-     */
-    VCardParameters setEnforceUtf8(boolean enforceUtf8);
 
     /**
      * Gets a value indicating whether attachments found in (non-standard) <code>ATTACH</code> properties should be processed and imported
@@ -278,6 +263,21 @@ public interface VCardParameters {
     VCardParameters setRemoveAttachmentsFromKeptVCard(boolean removeAttachmentsFromKeptVCard);
 
     /**
+     * Gets the configured mode used for the export of distribution lists.
+     * 
+     * @return The distribution list mode, or <code>null</code> if not defined
+     */
+    DistributionListMode getDistributionListMode();
+
+    /**
+     * Configures the mode used for the export of distribution lists.
+     * 
+     * @param mode The distribution list mode to use
+     * @return A self reference
+     */
+    VCardParameters setDistributionListMode(DistributionListMode mode);
+
+    /**
      * Gets the vCard property names to consider during import/export.
      *
      * @return The property names, or <code>null</code> if not set
@@ -309,5 +309,4 @@ public interface VCardParameters {
      * @return A self reference
      */
     <T> VCardParameters set(String name, T value);
-
 }

@@ -70,6 +70,7 @@ import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderProperty;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
+import com.openexchange.folderstorage.UsedForSync;
 import com.openexchange.java.Enums;
 import com.openexchange.share.core.tools.ShareTool;
 import com.openexchange.share.recipient.RecipientType;
@@ -141,9 +142,11 @@ public final class FolderParser {
                      */
                     folder.setSubscribed(folderJsonObject.getBoolean(FolderField.SUBSCRIBED.getName()));
                 }
-            } else {
-                // If not present consider as subscribed
-                folder.setSubscribed(true);
+            }
+            
+            if (folderJsonObject.hasAndNotNull(FolderField.USED_FOR_SYNC.getName())) {
+                JSONObject usedForSyncJSON = folderJsonObject.getJSONObject((FolderField.USED_FOR_SYNC.getName()));
+                folder.setUsedForSync(UsedForSync.of(usedForSyncJSON.getBoolean("value")));
             }
 
             if (folderJsonObject.hasAndNotNull(FolderField.SUBFOLDERS.getName())) {

@@ -56,6 +56,7 @@ import com.openexchange.folderstorage.FolderField;
 import com.openexchange.folderstorage.FolderProperty;
 import com.openexchange.folderstorage.ParameterizedFolder;
 import com.openexchange.folderstorage.SetterAwareFolder;
+import com.openexchange.folderstorage.UsedForSync;
 
 /**
  * {@link FolderUpdate}
@@ -70,6 +71,7 @@ public class FolderUpdate extends AbstractFolder implements ParameterizedFolder,
     private final Map<FolderField, FolderProperty> properties;
 
     private boolean containsSubscribed;
+    private boolean containsUsedForSync;
 
     /**
      * Initializes a new {@link FolderUpdate}.
@@ -77,6 +79,7 @@ public class FolderUpdate extends AbstractFolder implements ParameterizedFolder,
     public FolderUpdate() {
         super();
         subscribed = true;
+        usedForSync = UsedForSync.DEFAULT;
         this.properties = new HashMap<FolderField, FolderProperty>();
     }
 
@@ -108,6 +111,17 @@ public class FolderUpdate extends AbstractFolder implements ParameterizedFolder,
     @Override
     public boolean containsSubscribed() {
         return containsSubscribed;
+    }
+    
+    @Override
+    public void setUsedForSync(UsedForSync usedForSync) {
+        super.setUsedForSync(usedForSync);
+        containsUsedForSync=true;
+    }
+
+    @Override
+    public boolean containsUsedForSync() {
+        return containsUsedForSync;
     }
 
 }

@@ -1,6 +1,6 @@
 feature_name: Multifactor
 feature_description: |
-  See [[https://documentation.open-xchange.com/{{version}}/middleware/components/multifactor.html]] for more informations.
+  See [[https://documentation.open-xchange.com/{{version}}/middleware/security_and_encryption/multifactor_authentication.html]] for more informations.
 properties:
     - key: com.openexchange.multifactor.totp.enabled
       description: |

@@ -174,11 +174,11 @@ public class SecurityManagerActivator extends HousekeepingActivator {
             public void added(ServiceReference<SecurityManagerPropertyProvider> ref, SecurityManagerPropertyProvider service) {
                 providers.put(I(service.hashCode()), service);
                 ConfigurationReader opt = getOptionalService(ConfigurationReader.class);
-                if(opt != null) {
+                if (opt != null) {
                     Optional<Object> props = Optional.ofNullable(ref.getProperty(SecurityManagerPropertyProvider.PROPS_SERVICE_KEY));
-                    if(props.isPresent()) {
+                    if (props.isPresent()) {
                         Optional<List<FolderPermission>> newPerms = opt.checkProvider(Strings.splitByComma(props.get().toString()), service);
-                        if(newPerms.isPresent()) {
+                        if (newPerms.isPresent()) {
                             try {
                                 securityManager.insertFolderPolicy(newPerms.get());
                             } catch (OXException e) {

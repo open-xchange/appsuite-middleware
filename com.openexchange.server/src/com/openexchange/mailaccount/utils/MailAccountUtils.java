@@ -139,7 +139,7 @@ public class MailAccountUtils {
      * @throws OXException in case the host is blacklisted
      */
     public static boolean isDenied(String hostName, int port) throws OXException {
-        if(isBlacklisted(hostName)) {
+        if (isBlacklisted(hostName)) {
             throw MailAccountExceptionCodes.BLACKLISTED_SERVER.create(hostName);
         }
         return false == isAllowed(port);

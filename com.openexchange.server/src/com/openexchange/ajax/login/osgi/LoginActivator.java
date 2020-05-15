@@ -50,7 +50,6 @@
 package com.openexchange.ajax.login.osgi;
 
 import static com.openexchange.osgi.Tools.withRanking;
-import java.util.Dictionary;
 import java.util.regex.Pattern;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
@@ -64,6 +63,7 @@ import com.openexchange.ajax.login.AllowedRedirectUris;
 import com.openexchange.ajax.login.LoginRequestHandler;
 import com.openexchange.ajax.login.RateLimiterByLogin;
 import com.openexchange.ajax.login.RedeemReservationLogin;
+import com.openexchange.authentication.application.AppAuthenticatorService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.java.Strings;
@@ -92,6 +92,7 @@ public class LoginActivator extends HousekeepingActivator {
 
     /** Simple class to delay initialization until needed */
     private static class LoggerHolder {
+
         static final Logger LOG = org.slf4j.LoggerFactory.getLogger(LoginActivator.class);
     }
 
@@ -137,6 +138,7 @@ public class LoginActivator extends HousekeepingActivator {
         track(ShareService.class, new ServerServiceRegistryTracker<ShareService>(ShareService.class));
         track(PasswordMechRegistry.class, new ServerServiceRegistryTracker<PasswordMechRegistry>(PasswordMechRegistry.class));
         track(ModuleSupport.class, new ServerServiceRegistryTracker<ModuleSupport>(ModuleSupport.class));
+        track(AppAuthenticatorService.class, new ServerServiceRegistryTracker<AppAuthenticatorService>(AppAuthenticatorService.class));
 
         ServiceSet<LoginRampUpService> rampUp = new ServiceSet<LoginRampUpService>();
         track(LoginRampUpService.class, rampUp);
@@ -155,6 +157,7 @@ public class LoginActivator extends HousekeepingActivator {
         track(TokenLoginService.class, new TokenLoginCustomizer(context));
         track(SessionReservationService.class, new SessionReservationCustomizer(context));
         track(Enhancer.class, new SimpleRegistryListener<Enhancer>() {
+
             @Override
             public void added(ServiceReference<Enhancer> ref, Enhancer service) {
                 redeemReservationLogin.addEnhancer(service);

@@ -109,7 +109,7 @@ public class OwnCloudSearchBody extends WebDAVXmlBody {
 
             addFields(doc, root);
 
-            if(start >= 0 && end > 0 && start<end) {
+            if (start >= 0 && end > 0 && start<end) {
                 Element limit = doc.createElementNS(OWNCLOUD_NS, "oc:limit");
                 limit.setTextContent(String.valueOf(end-start));
                 search.appendChild(limit);

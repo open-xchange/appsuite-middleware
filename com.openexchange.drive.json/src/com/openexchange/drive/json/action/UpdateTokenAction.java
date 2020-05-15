@@ -63,7 +63,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class UpdateTokenAction extends AbstractDriveAction {
+public class UpdateTokenAction extends AbstractDriveWriteAction {
 
     @Override
     protected boolean requiresRootFolderID() {

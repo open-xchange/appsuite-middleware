@@ -49,7 +49,8 @@
 
 package com.openexchange.imap.commandexecutor;
 
-import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.imap.commandexecutor.AbstractFailsafeCircuitBreakerCommandExecutor.Key;
+import com.openexchange.metrics.micrometer.binders.CircuitBreakerMetrics;
 import net.jodah.failsafe.CircuitBreaker;
 
 /**
@@ -60,10 +61,9 @@ import net.jodah.failsafe.CircuitBreaker;
  */
 public class CircuitBreakerInfo {
 
-    private final String key;
+    private final Key key;
     private final CircuitBreaker circuitBreaker;
-    private final AtomicReference<Runnable> onOpenMetricTask;
-    private final AtomicReference<Runnable> onDeniedMetricTask;
+    private CircuitBreakerMetrics metrics;
 
     /**
      * Initializes a new {@link CircuitBreakerInfo}.
@@ -71,12 +71,10 @@ public class CircuitBreakerInfo {
      * @param key The key identifying the circuit breaker to create
      * @param circuitBreaker The circuit breaker
      */
-    public CircuitBreakerInfo(String key, CircuitBreaker circuitBreaker) {
+    public CircuitBreakerInfo(Key key, CircuitBreaker circuitBreaker) {
         super();
         this.key = key;
         this.circuitBreaker = circuitBreaker;
-        onOpenMetricTask = new AtomicReference<>(null);
-        onDeniedMetricTask = new AtomicReference<>(null);
     }
 
     /**
@@ -84,7 +82,7 @@ public class CircuitBreakerInfo {
      *
      * @return The key
      */
-    public String getKey() {
+    public Key getKey() {
         return key;
     }
 
@@ -98,21 +96,21 @@ public class CircuitBreakerInfo {
     }
 
     /**
-     * Gets the "on open" metric task reference
+     * Sets the metrics
      *
-     * @return The "on open" metric task reference
+     * @param metrics The metrics to set
      */
-    public AtomicReference<Runnable> getOnOpenMetricTaskReference() {
-        return onOpenMetricTask;
+    public void setMetrics(CircuitBreakerMetrics metrics) {
+        this.metrics = metrics;
     }
 
     /**
-     * Gets the "on denied" metric task reference
+     * Gets the metrics
      *
-     * @return The "on denied" metric task reference
+     * @return The metrics
      */
-    public AtomicReference<Runnable> getOnDeniedMetricTaskReference() {
-        return onDeniedMetricTask;
+    public CircuitBreakerMetrics getMetrics() {
+        return metrics;
     }
 
 }

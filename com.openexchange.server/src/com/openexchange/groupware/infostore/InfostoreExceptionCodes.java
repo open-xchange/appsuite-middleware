@@ -230,6 +230,14 @@ public enum InfostoreExceptionCodes implements DisplayableOXExceptionCode {
      * An unexpected error occurred: %1$s
      */
     UNEXPECTED_ERROR("An unexpected error occurred: %1$s", CATEGORY_ERROR, 2109),
+    /**
+     * Invalid folder identifier: %1$s
+     */
+    INVALID_FOLDER_IDENTIFIER("Invalid folder identifier: %1$s", Category.CATEGORY_ERROR, 31, InfostoreExceptionMessages.FOLDER_NOT_EXISTS_MSG),
+    /**
+     * The document contains too many permissions
+     */
+    TOO_MANY_PERMISSIONS("The document contains too many permissions", Category.CATEGORY_USER_INPUT, 2110, InfostoreExceptionMessages.TOO_MANY_PERMISSIONS),
     ;
 
     private final String message;

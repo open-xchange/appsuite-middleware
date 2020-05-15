@@ -52,7 +52,6 @@ package com.openexchange.rest.client.endpointpool;
 import java.net.URI;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import org.apache.http.client.HttpClient;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.annotation.SingletonService;
 
@@ -69,7 +68,7 @@ public interface EndpointManagerFactory {
      * Creates a new end-point manager for the specified end-point URIs.
      *
      * @param endpointUris The end-point URIs
-     * @param httpClient The associated HTTP client
+     * @param httpClientId The associated HTTP client
      * @param availableStrategy The strategy to decide whether an end-point is available or not
      * @param heartbeatInterval The heart-beat interval to check if a black-listed end-point URI is available again
      * @param timeUnit The time unit for the heart-beat interval
@@ -77,13 +76,13 @@ public interface EndpointManagerFactory {
      * @throws OXException If a new end-point manager cannot be returned
      * @throws IllegalArgumentException If passed URIs are empty or invalid
      */
-    EndpointManager createEndpointManagerByUris(List<URI> endpointUris, HttpClient httpClient, EndpointAvailableStrategy availableStrategy, long heartbeatInterval, TimeUnit timeUnit) throws OXException;
+    EndpointManager createEndpointManagerByUris(List<URI> endpointUris, String httpClientId, EndpointAvailableStrategy availableStrategy, long heartbeatInterval, TimeUnit timeUnit) throws OXException;
 
     /**
      * Creates a new end-point manager for the specified end-point URIs.
      *
      * @param endpoints The end-points
-     * @param httpClient The associated HTTP client
+     * @param httpClientId The associated HTTP client
      * @param availableStrategy The strategy to decide whether an end-point is available or not
      * @param heartbeatInterval The heart-beat interval to check if a black-listed end-point URI is available again
      * @param timeUnit The time unit for the heart-beat interval
@@ -91,6 +90,6 @@ public interface EndpointManagerFactory {
      * @throws OXException If a new end-point manager cannot be returned
      * @throws IllegalArgumentException If passed URIs are empty or invalid
      */
-    EndpointManager createEndpointManager(List<String> endpoints, HttpClient httpClient, EndpointAvailableStrategy availableStrategy, long heartbeatInterval, TimeUnit timeUnit) throws OXException;
+    EndpointManager createEndpointManager(List<String> endpoints, String httpClientId, EndpointAvailableStrategy availableStrategy, long heartbeatInterval, TimeUnit timeUnit) throws OXException;
 
 }

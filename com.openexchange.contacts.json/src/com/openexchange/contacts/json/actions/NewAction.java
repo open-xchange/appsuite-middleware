@@ -53,6 +53,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.authentication.application.ajax.RestrictedAction;
 import com.openexchange.contacts.json.ContactActionFactory;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.contacts.json.RequestTools;
@@ -65,7 +66,6 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
-
 /**
  * {@link NewAction}
  *
@@ -73,10 +73,12 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 @OAuthAction(ContactActionFactory.OAUTH_WRITE_SCOPE)
+@RestrictedAction(module = ContactAction.MODULE, type = RestrictedAction.Type.WRITE)
 public class NewAction extends ContactAction {
 
     /**
      * Initializes a new {@link NewAction}.
+     * 
      * @param serviceLookup
      */
     public NewAction(ServiceLookup serviceLookup) {
@@ -103,15 +105,15 @@ public class NewAction extends ContactAction {
 
         String folderID = json.optString("folder_id", null);
         if (null == folderID) {
-			throw OXJSONExceptionCodes.MISSING_FIELD.create("folder_id");
+            throw OXJSONExceptionCodes.MISSING_FIELD.create("folder_id");
         }
 
         Contact contact;
-		try {
-			contact = ContactMapper.getInstance().deserialize(json, ContactMapper.getInstance().getAllFields(ContactAction.VIRTUAL_FIELDS));
-		} catch (JSONException e) {
-			throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, json);
-		}
+        try {
+            contact = ContactMapper.getInstance().deserialize(json, ContactMapper.getInstance().getAllFields(ContactAction.VIRTUAL_FIELDS));
+        } catch (JSONException e) {
+            throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, json);
+        }
 
         if (containsImage) {
             if (!json.has("image1") || Strings.isNotEmpty(json.opt("image1").toString())) {

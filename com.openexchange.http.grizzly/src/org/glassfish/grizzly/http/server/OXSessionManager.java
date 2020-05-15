@@ -50,6 +50,7 @@
 package org.glassfish.grizzly.http.server;
 
 import static com.openexchange.servlet.Constants.HTTP_SESSION_ATTR_AUTHENTICATED;
+import static com.openexchange.servlet.Constants.HTTP_SESSION_ATTR_RATE_LIMITED;
 import java.util.Iterator;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
@@ -134,7 +135,7 @@ public class OXSessionManager implements SessionManager {
         Session session;
         for (Iterator<Session> it = sessions.values().iterator(); it.hasNext();) {
             session = it.next();
-            if (isInvalid(session) || isNotAuthenticated(session) || isTimedOut(currentTime, session) || isUnusedSession(currentTime, session)) {
+            if (isInvalid(session) || isNotAuthenticated(session) || isRateLimited(session) || isTimedOut(currentTime, session) || isUnusedSession(currentTime, session)) {
                 session.setValid(false);
                 it.remove();
                 sessionsCount--;
@@ -167,6 +168,16 @@ public class OXSessionManager implements SessionManager {
             return false;
         }
         return !Boolean.TRUE.equals(session.getAttribute(HTTP_SESSION_ATTR_AUTHENTICATED));
+    }
+
+    /**
+     * Checks if given session has no "authenticated" marker set.
+     *
+     * @param session The session to check
+     * @return <code>true</code> if "authenticated" marker is absent; otherwise <code>false</code>
+     */
+    private boolean isRateLimited(Session session) {
+        return Boolean.TRUE.equals(session.getAttribute(HTTP_SESSION_ATTR_RATE_LIMITED));
     }
 
     /**

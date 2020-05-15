@@ -1,0 +1,20 @@
+/metrics:
+  get:
+    operationId: getMetrics
+    tags:
+      - Metrics
+    summary: Gets appsuite metrics in the prometheus format
+    responses:
+      '200':
+        description: |
+          The metrics in the prometheus format.
+        content:
+          text/plain:
+            schema:
+              type: string
+      '401':
+        description: Not authorized
+      '403':
+        description: >-
+          In case basic authentication is enabled and an external client tries to access this resouce without using ssl.
+

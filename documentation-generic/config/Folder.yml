@@ -131,3 +131,14 @@ properties:
       file: foldercache.properties
       packageName: open-xchange-core
       tags: ["Folder", "Database"]
+    - key: com.openexchange.folder.maxPermissionEntities
+      description: |
+        Specifies the maximal allowed number of folder permissions. A value below 0 deactivates this limit. 
+      defaultValue: 100
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: folder.properties
+      packageName: open-xchange-core
+      tags: ["Folder", "Limit", "Permission"]

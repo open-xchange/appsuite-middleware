@@ -93,6 +93,8 @@ public final class Pools implements Runnable {
     }
 
     /**
+     * 
+     * @param poolId The db pool id
      * @return the {@link ConnectionPool} and never <code>null</code>.
      * @throws OXException if creating the pool fails.
      */

@@ -103,7 +103,7 @@ public class SamlOAuthHttpConfiguration extends DefaultHttpClientConfigProvider 
         } catch (OXException e) {
             LoggerFactory.getLogger(SamlOAuthHttpConfiguration.class).warn("Can't apply HTTP client configuration for SAML OAuth.", e);
         }
-        return config.setMaxTotalConnections(DEFAULT_TOTAL_CONNECTIONS).setMaxConnectionsPerRoute(DEFAULT_CONNECTIONS_PER_ROUTE).setConnectionTimeout(DEFAULT_TIMEOUT).setSocketReadTimeout(DEFAULT_READ_TIMEOUT);
+        return config.setMaxTotalConnections(DEFAULT_TOTAL_CONNECTIONS).setMaxConnectionsPerRoute(DEFAULT_CONNECTIONS_PER_ROUTE).setConnectTimeout(DEFAULT_TIMEOUT).setSocketReadTimeout(DEFAULT_READ_TIMEOUT);
     }
 
     private HttpBasicConfig getFromConfiguration(HttpBasicConfig config) throws OXException {
@@ -115,7 +115,7 @@ public class SamlOAuthHttpConfiguration extends DefaultHttpClientConfigProvider 
         config.setMaxConnectionsPerRoute(i(value));
 
         value = view.opt(CONNECTION_TIMEOUT, Integer.class, I(DEFAULT_TIMEOUT));
-        config.setConnectionTimeout(i(value));
+        config.setConnectTimeout(i(value));
 
         value = view.opt(SOCKET_READ_TIMEOUT, Integer.class, I(DEFAULT_READ_TIMEOUT));
         config.setSocketReadTimeout(i(value));

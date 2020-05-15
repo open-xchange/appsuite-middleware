@@ -52,10 +52,14 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import com.openexchange.java.Charsets;
 
 public class ShellExecutor {
+
+    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ShellExecutor.class);
 
     public static class ArrayOutput {
 
@@ -77,6 +81,46 @@ public class ShellExecutor {
         public final ArrayList<String> stdOutput = new ArrayList<String>();
 
         public int exitstatus;
+    }
+
+    /**
+     * Tests for availability of specified program.
+     *
+     * @param desiredProgram The program to test
+     * @return <code>true</code> if available; otherwise <code>false</code>
+     */
+    public static boolean testForProgramInPath(String desiredProgram) {
+        ProcessBuilder pb = new ProcessBuilder(isWindows() ? "where" : "which", desiredProgram);
+        try {
+            Process proc = pb.start();
+            int errCode = proc.waitFor();
+            if (errCode != 0) {
+                return false;
+            }
+
+            Path foundProgram = null;
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(proc.getInputStream()))) {
+                foundProgram = Paths.get(reader.readLine());
+            }
+            LOGGER.debug("{} has been found at : {}", desiredProgram, foundProgram);
+            return true;
+        } catch (IOException | InterruptedException e) {
+            LOGGER.warn("Something went wrong while searching for {}", desiredProgram, e);
+            return false;
+        }
+    }
+
+    private static boolean isWindows() {
+        return System.getProperty("os.name").toLowerCase().contains("windows");
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Initializes a new {@link ShellExecutor}.
+     */
+    public ShellExecutor() {
+        super();
     }
 
     public final ArrayOutput executeprocargs(final String[] args, final String[] env) throws IOException, InterruptedException {

@@ -355,7 +355,7 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
         HttpClientBuilder builder = new ExtendedBuilder(clientId)
             .setConnectionManager(ccm)
             .setDefaultRequestConfig(RequestConfig.custom()
-                .setConnectTimeout(config.getConnectionTimeout())
+                .setConnectTimeout(config.getConnectTimeout())
                 .setSocketTimeout(config.getSocketReadTimeout())
                 .setConnectionRequestTimeout(config.getConnectionRequestTimeout())
                 .setCookieSpec("lenient")
@@ -548,9 +548,11 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
          */
         for (Entry<String, SpecificHttpClientConfigProvider> entry : specificProviders.entrySet()) {
             String clientId = entry.getKey();
-            SpecificHttpClientConfigProvider provider = entry.getValue();
-            HttpBasicConfig newClientConfig = provider.configureHttpBasicConfig(createNewDefaultConfig(configService));
-            reloadClient(clientId, newClientConfig, provider, true);
+            if (null != httpClients.getIfPresent(clientId)) {
+                SpecificHttpClientConfigProvider provider = entry.getValue();
+                HttpBasicConfig newClientConfig = provider.configureHttpBasicConfig(createNewDefaultConfig(configService));
+                reloadClient(clientId, newClientConfig, provider, true);
+            }
         }
 
         for (Entry<String, PatternEnhancedWildcardHttpClientConfigProvider> entry : wildcardProviders.entrySet()) {
@@ -631,7 +633,7 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
             LOGGER.error("Unable to reload HTTP client for {}", clientId, e);
             return false;
         } finally {
-            if(close) {
+            if (close) {
                 Streams.close(ccm, newHttpClient);
             }
         }

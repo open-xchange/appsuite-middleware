@@ -68,9 +68,9 @@ public final class GABRestorerRMIServiceImpl implements GABRestorerRMIService {
     }
 
     @Override
-    public void restoreDefaultPermissions(final int cid) throws RemoteException {
+    public void restoreDefaultPermissions(final int cid, GABMode gabMode) throws RemoteException {
         try {
-            new OXFolderAdminHelper().restoreDefaultGlobalAddressBookPermissions(cid, OXFolderProperties.isEnableInternalUsersEdit());
+            new OXFolderAdminHelper().restoreDefaultGlobalAddressBookPermissions(cid, gabMode, OXFolderProperties.isEnableInternalUsersEdit());
         } catch (OXException e) {
             final String message = e.getMessage();
             org.slf4j.LoggerFactory.getLogger(GABRestorerRMIServiceImpl.class).error(message, e);

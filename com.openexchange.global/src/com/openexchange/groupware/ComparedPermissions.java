@@ -143,7 +143,7 @@ public abstract class ComparedPermissions<P, GP extends P> {
         /*
          * Calculate added permissions
          */
-        final Map<Integer, P> newUsers = new HashMap<>();
+        final Map<Integer, P> newUsers = new HashMap<>(newPermissions.size());
         final Map<Integer, P> newGroups = new HashMap<>();
         for (P permission : newPermissions) {
             if (isSystemPermission(permission)) {
@@ -165,9 +165,14 @@ public abstract class ComparedPermissions<P, GP extends P> {
         /*
          * Calculate removed permissions
          */
-        final Map<Integer, P> oldUsers = new HashMap<>();
-        final Map<Integer, P> oldGroups = new HashMap<>();
-        if (null != originalPermissions) {
+        final Map<Integer, P> oldUsers;
+        final Map<Integer, P> oldGroups;
+        if (null == originalPermissions) {
+            oldUsers = Collections.emptyMap();
+            oldGroups = Collections.emptyMap();
+        } else {
+            oldUsers = new HashMap<>(originalPermissions.size());
+            oldGroups = new HashMap<>();
             for (P permission : originalPermissions) {
                 if (isSystemPermission(permission)) {
                     continue;

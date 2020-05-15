@@ -50,7 +50,6 @@
 package com.openexchange.mail.filter.json.v2.json.mapper.parser.action;
 
 import com.openexchange.jsieve.commands.ActionCommand;
-import com.openexchange.jsieve.commands.ActionCommand.Commands;
 import com.openexchange.jsieve.commands.test.IActionCommand;
 import com.openexchange.jsieve.registry.ActionCommandRegistry;
 import com.openexchange.jsieve.registry.CommandRegistry;
@@ -70,7 +69,7 @@ public abstract class AbstractActionCommandParser extends AbstractCommandParser<
     /**
      * Initializes a new {@link AbstractActionCommandParser}.
      */
-    protected AbstractActionCommandParser(ServiceLookup services, Commands actionCommand) {
+    protected AbstractActionCommandParser(ServiceLookup services, IActionCommand actionCommand) {
         super(services, actionCommand);
     }
 

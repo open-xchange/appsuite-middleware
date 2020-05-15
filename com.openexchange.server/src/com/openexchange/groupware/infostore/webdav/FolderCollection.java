@@ -144,11 +144,13 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 		if (!exists) {
 			return;
 		}
+		FolderObject deletedFolder = null;
 		Connection con = null;
 		try {
 			con = provider.getWriteConnection(getSession().getContext());
 			final OXFolderManager oxma = OXFolderManager.getInstance(getSession(), con, con);
-			oxma.deleteFolder(new FolderObject(id), true, System.currentTimeMillis());
+			final boolean hardDelete = !factory.isTrashEnabled(getSession());
+			deletedFolder = oxma.deleteFolder(new FolderObject(id), true, System.currentTimeMillis(), hardDelete);
 			exists = false;
 			factory.removed(this);
 		} catch (OXException x) {
@@ -160,7 +162,11 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 		    throw WebdavProtocolException.generalError(e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		} finally {
 			if (con != null) {
-				provider.releaseWriteConnection(getSession().getContext(), con);
+			    if (deletedFolder == null) {
+			        provider.releaseWriteConnectionAfterReading(getSession().getContext(), con);
+                } else {
+                    provider.releaseWriteConnection(getSession().getContext(), con);
+                }
 			}
 		}
 		final Set<OXWebdavResource> set = new HashSet<OXWebdavResource>(children);
@@ -638,11 +644,10 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
             iter = OXFolderIteratorSQL.getVisibleSubfoldersIterator(id, user.getId(), user.getGroups(), ctx, userPermissionBits, new Timestamp(0));
             while (iter.hasNext()) {
                 final FolderObject folder = iter.next();
-                if (FolderObject.TRASH == folder.getType()) {
-                    continue; // skip trash folder
+                if (FolderObject.TRASH != folder.getType() || factory.isTrashEnabled(session)) {
+                    final WebdavPath newUrl = getUrl().dup().append(getFolderName(folder));
+                    children.add(new FolderCollection(newUrl, factory, folder));
                 }
-                final WebdavPath newUrl = getUrl().dup().append(getFolderName(folder));
-                children.add(new FolderCollection(newUrl, factory, folder));
             }
             children.addAll(factory.getResourcesInFolder(this, folder.getObjectID()));
         } catch (WebdavProtocolException e) {

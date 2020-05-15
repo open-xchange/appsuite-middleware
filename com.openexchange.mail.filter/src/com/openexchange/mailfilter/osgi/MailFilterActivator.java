@@ -73,7 +73,6 @@ import com.openexchange.mailfilter.internal.MailFilterInterceptorRegistryImpl;
 import com.openexchange.mailfilter.internal.MailFilterPreferencesItem;
 import com.openexchange.mailfilter.internal.MailFilterServiceImpl;
 import com.openexchange.mailfilter.services.Services;
-import com.openexchange.metrics.MetricService;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.sessiond.SessiondEventConstants;
@@ -105,8 +104,6 @@ public class MailFilterActivator extends HousekeepingActivator {
 
             registerService(MailFilterInterceptorRegistry.class, new MailFilterInterceptorRegistryImpl());
             trackService(MailFilterInterceptorRegistry.class);
-
-            track(MetricService.class, new MetricServiceTracker(mailFilterService, context));
 
             trackService(SSLSocketFactoryProvider.class);
             openTrackers();

@@ -52,13 +52,16 @@ package com.openexchange.chronos.json.action.account;
 import static com.openexchange.folderstorage.CalendarFolderConverter.CALENDAR_CONFIG_FIELD;
 import static com.openexchange.folderstorage.CalendarFolderConverter.CALENDAR_PROVIDER_FIELD;
 import static com.openexchange.folderstorage.CalendarFolderConverter.EXTENDED_PROPERTIES_FIELD;
+import static com.openexchange.java.Autoboxing.B;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.authentication.application.ajax.RestrictedAction;
 import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.json.action.ChronosAction;
 import com.openexchange.chronos.json.oauth.ChronosOAuthScope;
+import com.openexchange.chronos.provider.CalendarFolderProperty;
 import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
@@ -76,7 +79,10 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  * @since v7.10.0
  */
 @OAuthAction(ChronosOAuthScope.OAUTH_READ_SCOPE)
+@RestrictedAction(type = RestrictedAction.Type.READ, module = ProbeAction.MODULE)
 public class ProbeAction extends ChronosAction {
+
+    public static final String MODULE = "calendar";
 
     /**
      * Initializes a new {@link ProbeAction}.
@@ -101,10 +107,9 @@ public class ProbeAction extends ChronosAction {
          * parse & probe client-supplied calendar settings
          */
         CalendarSettings parsedSettings = parseSettings(jsonObject);
-        CalendarSettings proposedSettings = services.getService(CalendarAccountService.class).probeAccountSettings(
-            calendarAccess.getSession(), providerId, parsedSettings, calendarAccess);
+        CalendarSettings proposedSettings = services.getService(CalendarAccountService.class).probeAccountSettings(calendarAccess.getSession(), providerId, parsedSettings, calendarAccess);
         /*
-         *  return appropriate result
+         * return appropriate result
          */
         JSONObject resultObject = new JSONObject();
         writeSettings(proposedSettings, resultObject);
@@ -143,12 +148,17 @@ public class ProbeAction extends ChronosAction {
             }
             if (settings.containsConfig()) {
                 FolderProperty property = new FolderProperty(CALENDAR_CONFIG_FIELD.getName(), settings.getConfig());
-                jsonObject.put(CALENDAR_CONFIG_FIELD.getName(), CALENDAR_CONFIG_FIELD.write(property));
+                jsonObject.put(CALENDAR_CONFIG_FIELD.getName(), CALENDAR_CONFIG_FIELD.write(property, null));
             }
             if (settings.containsExtendedProperties()) {
-                FolderProperty property = new FolderProperty(EXTENDED_PROPERTIES_FIELD.getName(), settings.getExtendedProperties());
-                jsonObject.put(EXTENDED_PROPERTIES_FIELD.getName(), EXTENDED_PROPERTIES_FIELD.write(property));
+                ExtendedProperties clone = (ExtendedProperties) settings.getExtendedProperties().clone();
+                settings.getUsedForSync().ifPresent((ufs) -> {
+                    clone.add(CalendarFolderProperty.USED_FOR_SYNC(B(ufs.isUsedForSync()), ufs.isProtected()));
+                });
+                FolderProperty property = new FolderProperty(EXTENDED_PROPERTIES_FIELD.getName(), clone);
+                jsonObject.put(EXTENDED_PROPERTIES_FIELD.getName(), EXTENDED_PROPERTIES_FIELD.write(property, null));
             }
+
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }

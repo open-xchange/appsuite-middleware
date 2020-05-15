@@ -289,7 +289,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             throw new StorageException(e);
         } finally {
             Databases.closeSQLStuff(rs, stmt);
-            releaseWriteContextConnection(con, ctx, cache);
+            releaseWriteContextConnectionAfterReading(con, ctx.getId().intValue(), cache);
         }
     }
 
@@ -710,11 +710,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
      * @param ctx The {@link Context}
      * @param usrdata The {@link User} data
      * @param connection the {@link Connection}
-     * @param quotaAffectedUserIDs The optional affected user ids after a quota change
-     * @param displayNameUpdate whether the display name was updated
-     * @throws OXException if an error is occurred
+     * @param quotaAffectedUserIDs The optional affected user identifiers after a quota change
+     * @param displayNameUpdate Whether the display name was updated
      */
-    private void updateJCSCaches(final Context ctx, final User usrdata, Connection connection, Set<Integer> quotaAffectedUserIDs, boolean displayNameUpdate) throws OXException {
+    private void updateJCSCaches(final Context ctx, final User usrdata, Connection connection, Set<Integer> quotaAffectedUserIDs, boolean displayNameUpdate) {
         int contextId = ctx.getId().intValue();
         int userId = usrdata.getId().intValue();
         CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
@@ -754,7 +753,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     cache.removeFromGroup(key, Integer.toString(contextId));
                 }
             }
-        } catch (OXException e) {
+        } catch (Exception e) {
             LOG.error("", e);
         }
     }
@@ -1787,8 +1786,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
     private String buildQuery(String search_pattern, boolean ignoreCase, boolean includeGuests, boolean excludeUsers) {
         StringBuilder sb = new StringBuilder();
-        if (!includeGuests) {
-            sb.append("SELECT con.userid FROM prg_contacts con JOIN login2user lu ON con.userid = lu.id AND con.cid = lu.cid ").append("JOIN user us ON con.userid = us.id AND us.cid = con.cid ").append("WHERE con.cid = ?");
+        if (includeGuests) {
+            sb.append("SELECT us.id FROM user us LEFT JOIN login2user lu ON us.id = lu.id AND us.cid = lu.cid ");
+            sb.append("LEFT JOIN prg_contacts con ON us.id = con.userid AND us.cid = con.cid WHERE us.cid = ?");
             if (excludeUsers) {
                 sb.append(" AND us.guestCreatedBy > 0");
             }
@@ -1800,15 +1800,17 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 }
             }
         } else {
-            sb.append("SELECT us.id FROM user us LEFT JOIN login2user lu ON us.id = lu.id AND us.cid = lu.cid ").append("LEFT JOIN prg_contacts con ON us.id = con.userid AND us.cid = con.cid WHERE us.cid = ?");
+            sb.append("SELECT con.userid FROM prg_contacts con JOIN login2user lu ON con.userid = lu.id AND con.cid = lu.cid ");
+            sb.append("JOIN user us ON con.userid = us.id AND us.cid = con.cid ");
+            sb.append("WHERE con.cid = ?");
             if (excludeUsers) {
                 sb.append(" AND us.guestCreatedBy > 0");
             }
             if (null != search_pattern && !"%".equals(search_pattern)) {
                 if (ignoreCase) {
-                    sb.append(" AND (lower(lu.uid) LIKE lower(?) ").append("OR lower(con.field01) LIKE lower(?))");
+                    sb.append(" AND (lower(lu.uid) LIKE lower(?) OR lower(con.field01) LIKE lower(?))");
                 } else {
-                    sb.append(" AND (lu.uid LIKE ? ").append("OR con.field01 LIKE ?)");
+                    sb.append(" AND (lu.uid LIKE ? OR con.field01 LIKE ?)");
                 }
             }
         }
@@ -1816,7 +1818,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     }
 
     /**
-     * read all gui related settings from the configtree
+     * read all gui related settings from the config-tree
      *
      * @param ctx
      * @param user
@@ -2168,6 +2170,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         try {
             // delete all users
             int contextId = ctx.getId().intValue();
+            Integer adminId = null;
             for (User user : users) {
                 int userId = user.getId().intValue();
 
@@ -2298,6 +2301,25 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt = write_ox_con.prepareStatement("DELETE FROM calendar_alarm_trigger WHERE cid = ? AND eventId = ?");
                 stmt.setInt(1, contextId);
                 stmt.setString(2, eventId);
+                stmt.executeUpdate();
+                stmt.close();
+
+                // Reassign guestCreatedBy values
+                if(destUser == null && adminId==null) {
+                    // Identifiy context admin
+                    stmt = write_ox_con.prepareStatement("SELECT user FROM user_setting_admin WHERE cid = ?");
+                    stmt.setInt(1, contextId);
+                    ResultSet rs = stmt.executeQuery();
+                    if(rs.next()) {
+                        adminId = I(rs.getInt("user"));
+                    }
+                    rs.close();
+                    stmt.close();
+                }
+                stmt = write_ox_con.prepareStatement("UPDATE user SET guestCreatedBy = ? WHERE cid = ? AND guestCreatedBy = ?");
+                stmt.setInt(1, destUser==null ? i(adminId) : i(destUser));
+                stmt.setInt(2, contextId);
+                stmt.setInt(3, userId);
                 stmt.executeUpdate();
                 stmt.close();
 
@@ -2742,7 +2764,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             user.setDeniedPortal(access.isDeniedPortal());
             // Apply access.isGlobalAddressBook() to OXFolderAdminHelper.setGlobalAddressBookEnabled()
             final OXFolderAdminHelper adminHelper = new OXFolderAdminHelper();
-            adminHelper.setGlobalAddressBookDisabled(ctx.getId().intValue(), userId, access.isGlobalAddressBookDisabled(), writeCon);
+            adminHelper.setGlobalAddressBookDisabled(ctx.getId().intValue(), userId, access.isGlobalAddressBookDisabled(), ctx.getGABMode(), writeCon);
             adminHelper.setPublicFolderEditable(access.isPublicFolderEditable(), ctx.getId().intValue(), userId, writeCon);
 
             RdbUserPermissionBitsStorage.saveUserPermissionBits(user, insert, writeCon);

@@ -58,7 +58,6 @@ import com.openexchange.antivirus.impl.AntiVirusServiceImpl;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.icap.ICAPClientFactoryService;
-import com.openexchange.metrics.MetricService;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -78,7 +77,7 @@ public class AntiVirusServiceActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { LeanConfigurationService.class, ICAPClientFactoryService.class, MetricService.class, CapabilityService.class };
+        return new Class<?>[] { LeanConfigurationService.class, ICAPClientFactoryService.class, CapabilityService.class };
     }
 
     @Override

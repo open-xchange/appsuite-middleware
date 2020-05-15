@@ -57,11 +57,8 @@ import com.amazonaws.metrics.RequestMetricCollector;
 import com.amazonaws.util.AWSRequestMetrics;
 import com.amazonaws.util.AWSRequestMetrics.Field;
 import com.amazonaws.util.TimingInfo;
-import com.openexchange.metrics.MetricDescriptor;
-import com.openexchange.metrics.MetricDescriptorCache;
-import com.openexchange.metrics.MetricService;
-import com.openexchange.metrics.MetricType;
-import com.openexchange.metrics.types.Timer;
+import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.Timer;
 
 /**
  * {@link S3FileStorageRequestMetricCollector}
@@ -70,16 +67,11 @@ import com.openexchange.metrics.types.Timer;
  */
 public class S3FileStorageRequestMetricCollector extends RequestMetricCollector {
 
-    private final MetricService metricService;
-    private MetricDescriptorCache metricDescriptorCache;
-
     /**
-     * Initialises a new {@link S3FileStorageRequestMetricCollector}.
+     * Initializes a new {@link S3FileStorageRequestMetricCollector}.
      */
-    public S3FileStorageRequestMetricCollector(MetricService metricService) {
+    public S3FileStorageRequestMetricCollector() {
         super();
-        this.metricService = metricService;
-        metricDescriptorCache = new MetricDescriptorCache(metricService, "s3");
     }
 
     @Override
@@ -109,9 +101,8 @@ public class S3FileStorageRequestMetricCollector extends RequestMetricCollector 
             Field predefined = (Field) type;
             switch (predefined) {
                 case ClientExecuteTime:
-                    MetricDescriptor metricDescriptor = metricDescriptorCache.getMetricDescriptor(MetricType.TIMER, "RequestTimes." + request.getHttpMethod().name(), "The execution time of %s requests measured in events/sec", "events");
-                    Timer timer = metricService.getTimer(metricDescriptor);
-                    timer.update(longValue, TimeUnit.MILLISECONDS);
+                    Timer timer = Timer.builder("appsuite.s3.requestTimes."+request.getHttpMethod().name()).description(String.format("The execution time of %s requests measured in events/sec", request.getHttpMethod().name())).register(Metrics.globalRegistry);
+                    timer.record(longValue, TimeUnit.MILLISECONDS);
                     break;
                 default:
                     break;
@@ -119,10 +110,4 @@ public class S3FileStorageRequestMetricCollector extends RequestMetricCollector 
         }
     }
 
-    /**
-     * Stops the metric collector and unregisters all metrics
-     */
-    void stop() {
-        metricDescriptorCache.clear();
-    }
 }

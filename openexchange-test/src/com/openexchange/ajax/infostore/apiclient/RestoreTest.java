@@ -52,11 +52,15 @@ package com.openexchange.ajax.infostore.apiclient;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.util.Collections;
 import java.util.List;
 import org.junit.Test;
+import com.openexchange.groupware.infostore.utils.Metadata;
+import com.openexchange.testing.httpclient.models.InfoItemData;
 import com.openexchange.testing.httpclient.models.InfoItemListElement;
+import com.openexchange.testing.httpclient.models.InfoItemsResponse;
 import com.openexchange.testing.httpclient.models.InfoItemsRestoreResponseData;
 
 
@@ -125,6 +129,93 @@ public class RestoreTest extends InfostoreApiClientTest {
         assertEquals(folderTitle, restoredItem.getPath().get(0).getTitle());
 
         rememberFolder(restoredItem.getPath().get(0).getId());
+    }
+
+    @Test
+    public void testRestoreFileCopiedToTrash() throws Exception {
+        // Create and upload a file
+        final File file = File.createTempFile("infostore-restore-test", ".txt");
+        String id = uploadInfoItem(file, MIME_TEXT_PLAIN);
+
+        final String trashFolderId = String.valueOf(getClient().getValues().getInfostoreTrashFolder());
+
+        // Copy to trash
+        InfoItemData itemToCopy = new InfoItemData();
+        itemToCopy.setFolderId(trashFolderId);
+        itemToCopy.setId(id);
+        String idCopied = copyInfoItem(id, itemToCopy);
+        super.assertFileExistsInFolder(trashFolderId, idCopied);
+
+        // restore it
+        InfoItemListElement itemToRestore = new InfoItemListElement();
+        itemToRestore.setFolder(trashFolderId);
+        itemToRestore.setId(idCopied);
+        List<InfoItemsRestoreResponseData> restoreInfoItems = restoreInfoItems(Collections.singletonList(itemToRestore));
+        assertEquals(1, restoreInfoItems.size());
+
+        // Check item is the same and restored path is not null
+        InfoItemsRestoreResponseData restoredItem = restoreInfoItems.get(0);
+        assertEquals(itemToRestore.getId(), restoredItem.getId());
+        assertNotNull(restoredItem.getPath());
+        assertFalse(restoredItem.getPath().isEmpty());
+        assertEquals(folderTitle, restoredItem.getPath().get(0).getTitle());
+
+        String folderId = restoredItem.getPath().get(0).getId();
+
+        //Get all items in the restored folder
+        InfoItemsResponse getRestoredResponse = infostoreApi.getAllInfoItems(apiClient.getSession(),
+            folderId,
+            Integer.toString(Metadata.FILENAME),
+            null, null, null, null, null, null);
+        List<List<String>> ret = (List<List<String>>)checkResponse(getRestoredResponse.getError(), getRestoredResponse.getErrorDesc(), getRestoredResponse.getData());
+
+        //There should two items in the folder now: the original and the restored copy
+        String copiedFileName = file.getName().substring(0, file.getName().lastIndexOf(".")) + " (1)" +
+                                file.getName().substring(file.getName().lastIndexOf("."));
+        assertTrue("The item is not present in the given folder", ret.stream().filter( l -> l.contains(file.getName())).count() == 1);
+        assertTrue("The item is not present in the given folder", ret.stream().filter( l -> l.contains(copiedFileName)).count() == 1);
+    }
+
+    @Test
+    public void testRestoreFileMovedToTrash() throws Exception {
+        // Create and upload a file
+        final File file = File.createTempFile("infostore-restore-test", ".txt");
+        String id = uploadInfoItem(file, MIME_TEXT_PLAIN);
+
+        final String trashFolderId = String.valueOf(getClient().getValues().getInfostoreTrashFolder());
+
+        // Move to trash
+        InfoItemListElement toMove = new InfoItemListElement();
+        toMove.setFolder(folderId);
+        toMove.setId(id);
+        List<String> idsMoved = moveInfoItems(trashFolderId, Collections.singletonList(toMove));
+        assertTrue(idsMoved.size() == 0);
+
+        // restore it
+        InfoItemListElement itemToRestore = new InfoItemListElement();
+        itemToRestore.setFolder(trashFolderId);
+        itemToRestore.setId(toTrash(id));
+        List<InfoItemsRestoreResponseData> restoreInfoItems = restoreInfoItems(Collections.singletonList(itemToRestore));
+        assertEquals(1, restoreInfoItems.size());
+
+        // Check item is the same and restored path is not null
+        InfoItemsRestoreResponseData restoredItem = restoreInfoItems.get(0);
+        assertEquals(itemToRestore.getId(), restoredItem.getId());
+        assertNotNull(restoredItem.getPath());
+        assertFalse(restoredItem.getPath().isEmpty());
+        assertEquals(folderTitle, restoredItem.getPath().get(0).getTitle());
+
+        String folderId = restoredItem.getPath().get(0).getId();
+
+        //Get all items in the restored folder
+        InfoItemsResponse getRestoredResponse = infostoreApi.getAllInfoItems(apiClient.getSession(),
+            folderId,
+            Integer.toString(Metadata.FILENAME),
+            null, null, null, null, null, null);
+        List<List<String>> ret = (List<List<String>>)checkResponse(getRestoredResponse.getError(), getRestoredResponse.getErrorDesc(), getRestoredResponse.getData());
+
+        //The item should be back in the original folder
+        assertTrue("The item is not present in the given folder", ret.stream().filter( l -> l.contains(file.getName())).count() == 1);
     }
 
     private String toTrash(String id) throws Exception {

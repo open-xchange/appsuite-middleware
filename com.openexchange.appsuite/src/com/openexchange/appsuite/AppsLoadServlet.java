@@ -205,7 +205,7 @@ public class AppsLoadServlet extends SessionServlet {
 	@Override
 	protected void doGet(final HttpServletRequest req, final HttpServletResponse resp)
 			throws ServletException, IOException {
-	    if(req.getRequestURL().length() > UI_URI_LIMIT) {
+	    if (req.getRequestURL().length() > UI_URI_LIMIT) {
 	        LOG.error("Url length exceeds maximum allowed characters.");
 	        writeErrorPage(HttpStatus.SC_REQUEST_URI_TOO_LONG, "The request is too long", resp);
 	        return;
@@ -320,9 +320,9 @@ public class AppsLoadServlet extends SessionServlet {
      * @return An {@link Optional} {@link FileCache}
      */
     private Optional<FileCache> getExternalCache(Session session, String version, String path) {
-    	if(fileCacheProviderTracker != null) {
+    	if (fileCacheProviderTracker != null) {
 	    	for(FileCacheProvider provider: fileCacheProviderTracker.getServiceList()) {
-	    		if(provider.isApplicable(session, version, path)) {
+	    		if (provider.isApplicable(session, version, path)) {
 	    			return Optional.of(provider.getData());
 	    		}
 	    	}

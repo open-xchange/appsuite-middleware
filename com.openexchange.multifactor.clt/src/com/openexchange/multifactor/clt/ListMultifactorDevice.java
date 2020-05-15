@@ -102,7 +102,9 @@ public class ListMultifactorDevice extends AbstractMultifactorClt {
     }
 
     @Override
-    protected void checkArguments(CommandLine cmd) {}
+    protected void checkArguments(CommandLine cmd) {
+        // Nothing in here
+    }
 
     @Override
     protected void addOptions(Options options) {

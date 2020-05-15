@@ -272,8 +272,19 @@ public class DovecotPushManagerService extends AbstractDovecotPushManagerService
         if (null == session) {
             return null;
         }
+
         int contextId = session.getContextId();
         int userId = session.getUserId();
+
+        if (false == isDovecotPushEnabledFor(userId, contextId)) {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.info("Denied starting Dovecot listener for user {} in context {} with session {} ({}) since disabled via configuration", I(userId), I(contextId), session.getSessionID(), session.getClient(), new Throwable("Dovecot start listener trace"));
+            } else {
+                LOGGER.info("Denied starting Dovecot listener for user {} in context {} with session {} ({}) since disabled via configuration", I(userId), I(contextId), session.getSessionID(), session.getClient());
+            }
+            return null;
+        }
+
         RegistrationContext registrationContext = getRegistrationContext(session);
         SessionInfo sessionInfo = new SessionInfo(registrationContext, false);
         if (clusterLock.acquireLock(sessionInfo)) {
@@ -387,6 +398,16 @@ public class DovecotPushManagerService extends AbstractDovecotPushManagerService
 
         int contextId = pushUser.getContextId();
         int userId = pushUser.getUserId();
+
+        if (false == isDovecotPushEnabledFor(userId, contextId)) {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.info("Denied starting permanent Dovecot listener for user {} in context {} since disabled via configuration", I(userId), I(contextId), new Throwable("Dovecot start permanent listener trace"));
+            } else {
+                LOGGER.info("Denied starting permanent Dovecot listener for user {} in context {} since disabled via configuration", I(userId), I(contextId));
+            }
+            return null;
+        }
+
         RegistrationContext registrationContext = getRegistrationContext(pushUser);
         SessionInfo sessionInfo = new SessionInfo(registrationContext, true);
         if (clusterLock.acquireLock(sessionInfo)) {

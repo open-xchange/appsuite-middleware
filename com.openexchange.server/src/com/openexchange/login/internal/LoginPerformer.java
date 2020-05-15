@@ -62,11 +62,12 @@ import javax.security.auth.login.LoginException;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.Cookie;
-import com.openexchange.authentication.GuestAuthenticated;
 import com.openexchange.authentication.LoginExceptionCodes;
+import com.openexchange.authentication.ResolvedAuthenticated;
 import com.openexchange.authentication.ResponseEnhancement;
 import com.openexchange.authentication.ResultCode;
 import com.openexchange.authentication.SessionEnhancement;
+import com.openexchange.authentication.application.RestrictedAuthentication;
 import com.openexchange.authorization.Authorization;
 import com.openexchange.authorization.AuthorizationService;
 import com.openexchange.configuration.ServerProperty;
@@ -140,7 +141,7 @@ public final class LoginPerformer {
      * Performs the login for specified login request.
      *
      * @param request The login request
-     * @return The login providing login information
+     * @return The result providing login information
      * @throws LoginException If login fails
      */
     public LoginResult doLogin(final LoginRequest request) throws OXException {
@@ -152,7 +153,7 @@ public final class LoginPerformer {
      *
      * @param request The login request
      * @param properties The arbitrary properties; e.g. <code>"headers"</code> or <code>{@link com.openexchange.authentication.Cookie "cookies"}</code>
-     * @return The login providing login information
+     * @return The result providing login information
      * @throws LoginException If login fails
      */
     public LoginResult doLogin(final LoginRequest request, final Map<String, Object> properties) throws OXException {
@@ -164,7 +165,7 @@ public final class LoginPerformer {
      *
      * @param request The login request
      * @param properties The properties
-     * @return The login providing login information
+     * @return The result providing login information
      * @throws OXException If login fails
      */
     public LoginResult doAutoLogin(LoginRequest request, Map<String, Object> properties) throws OXException {
@@ -175,7 +176,7 @@ public final class LoginPerformer {
      * Performs the login for specified login request.
      *
      * @param request The login request
-     * @return The login providing login information
+     * @return The result providing login information
      * @throws OXException If login fails
      */
     public LoginResult doAutoLogin(final LoginRequest request) throws OXException {
@@ -189,7 +190,7 @@ public final class LoginPerformer {
      * @param request The login request
      * @param properties The properties to decorate; e.g. <code>"headers"</code> or <code>{@link com.openexchange.authentication.Cookie "cookies"}</code>
      * @param loginMethod The actual login method that performs authentication
-     * @return The login providing login information
+     * @return The result providing login information
      * @throws OXException If login fails
      */
     public LoginResult doLogin(LoginRequest request, Map<String, Object> properties, LoginMethodClosure loginMethod) throws OXException {
@@ -258,27 +259,27 @@ public final class LoginPerformer {
             // Get user & context
             Context ctx;
             User user;
-            if (GuestAuthenticated.class.isInstance(authed)) {
+            if (ResolvedAuthenticated.class.isInstance(authed)) {
                 // use already resolved user / context
-                GuestAuthenticated guestAuthenticated = (GuestAuthenticated) authed;
+                ResolvedAuthenticated guestAuthenticated = (ResolvedAuthenticated) authed;
                 ctx = getContext(guestAuthenticated.getContextID());
                 user = getUser(ctx, guestAuthenticated.getUserID());
             } else {
                 // Perform user / context lookup
                 ctx = findContext(authed.getContextInfo());
                 user = findUser(ctx, authed.getUserInfo());
-
-                // Checks if something is deactivated.
-                AuthorizationService authService = Authorization.getService();
-                if (null == authService) {
-                    final OXException e = ServiceExceptionCode.SERVICE_UNAVAILABLE.create(AuthorizationService.class.getName());
-                    LOG.error("unable to find AuthorizationService", e);
-                    throw e;
-                }
-
-                // Authorize
-                authService.authorizeUser(ctx, user);
             }
+
+            // Checks if something is deactivated.
+            AuthorizationService authService = Authorization.getService();
+            if (null == authService) {
+                final OXException e = ServiceExceptionCode.SERVICE_UNAVAILABLE.create(AuthorizationService.class.getName());
+                LOG.error("unable to find AuthorizationService", e);
+                throw e;
+            }
+
+            // Authorize
+            authService.authorizeUser(ctx, user);
 
             // Store locale if requested by client during login request
             user = LoginPerformer.storeLanguageIfNeeded(request, user, ctx);
@@ -288,23 +289,35 @@ public final class LoginPerformer {
             // Check if indicated client is allowed to perform a login
             checkClient(request, user, ctx);
 
-            // Compile parameters for adding a session
-            AddSessionParameterImpl addSessionParam = new AddSessionParameterImpl(authed.getUserInfo(), request, user, ctx);
-
-            // Add SessionEnhancement instance (if any)
-            if (SessionEnhancement.class.isInstance(authed)) {
-                addSessionParam.addEnhancement((SessionEnhancement) authed);
-            }
-
             // Perform multi-factor authentication if enabled for the user and mark session
+            SessionEnhancement multifactorSessionEnhancement = null;
             {
                 MultifactorChecker multifactorCheck = ServerServiceRegistry.getInstance().getService(MultifactorChecker.class);
                 if (multifactorCheck != null) {
                     Optional<SessionEnhancement> optionalEnhancement = multifactorCheck.checkMultiFactorAuthentication(request, ctx, user);
                     if (optionalEnhancement.isPresent()) {
-                        addSessionParam.addEnhancement(optionalEnhancement.get());
+                        multifactorSessionEnhancement = optionalEnhancement.get();
                     }
                 }
+            }
+
+            // Compile parameters for adding a session
+            AddSessionParameterImpl addSessionParam;
+
+            if (authed instanceof RestrictedAuthentication) {
+                addSessionParam = new AddSessionParameterImpl(authed.getUserInfo(), request, user, ctx, ((RestrictedAuthentication) authed).getPassword());
+                addSessionParam.addEnhancement(((RestrictedAuthentication) authed).getSessionEnhancement());
+                multifactorSessionEnhancement = null;  // Bypass Multifactor
+            } else {
+                addSessionParam = new AddSessionParameterImpl(authed.getUserInfo(), request, user, ctx);
+            }
+
+            if (SessionEnhancement.class.isInstance(authed)) {
+                addSessionParam.addEnhancement((SessionEnhancement) authed);
+            }
+
+            if (multifactorSessionEnhancement != null) {
+                addSessionParam.addEnhancement(multifactorSessionEnhancement);
             }
 
             // Finally, add the session
@@ -743,7 +756,8 @@ public final class LoginPerformer {
             if (null != login) {
                 String client = request.getClient();
                 String sessionId = null == session ? null : session.getSessionID();
-                auditLogService.log("ox.login", DefaultAttribute.valueFor(Name.LOGIN, login, 256), DefaultAttribute.valueFor(Name.IP_ADDRESS, request.getClientIP()), DefaultAttribute.timestampFor(new Date()), DefaultAttribute.valueFor(Name.CLIENT, null == client ? "<none>" : client), DefaultAttribute.valueFor(Name.SESSION_ID, null == sessionId ? "<none>" : sessionId));
+                auditLogService.log("ox.login", DefaultAttribute.valueFor(Name.LOGIN, login, 256), DefaultAttribute.valueFor(Name.IP_ADDRESS, request.getClientIP()), DefaultAttribute.timestampFor(new Date()),
+                    DefaultAttribute.valueFor(Name.CLIENT, null == client ? "<none>" : client), DefaultAttribute.valueFor(Name.SESSION_ID, null == sessionId ? "<none>" : sessionId));
             }
         }
     }

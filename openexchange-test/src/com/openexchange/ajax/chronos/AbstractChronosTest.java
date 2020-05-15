@@ -350,7 +350,7 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
      */
     @SuppressWarnings({ "unchecked" })
     protected ArrayList<ArrayList<?>> getPrivateFolderList(FoldersApi foldersApi, String session, String module, String columns, String tree) throws Exception {
-        FoldersVisibilityResponse visibleFolders = foldersApi.getVisibleFolders(session, module, columns, tree, null);
+        FoldersVisibilityResponse visibleFolders = foldersApi.getVisibleFolders(session, module, columns, tree, null, Boolean.TRUE);
         if (visibleFolders.getError() != null) {
             throw new OXException(new Exception(visibleFolders.getErrorDesc()));
         }
@@ -438,7 +438,7 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
                 }
                 long dateTime1 = CalendarUtils.decode(recurrenceId1).getTimestamp();
                 long dateTime2 = CalendarUtils.decode(recurrenceId2).getTimestamp();
-                if(dateTime1 == dateTime2 ) {
+                if (dateTime1 == dateTime2 ) {
                     return 0;
                 }
                 return dateTime1 < dateTime2 ? -1 : 1;

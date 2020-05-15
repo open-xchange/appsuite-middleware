@@ -62,6 +62,6 @@ public class MonitorImpl implements MonitorService {
 
     @Override
     public void dummyMethod() {
-
+        // Nothing in here
     }
 }

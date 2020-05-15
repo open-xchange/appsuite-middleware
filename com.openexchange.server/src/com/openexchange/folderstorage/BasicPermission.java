@@ -311,9 +311,6 @@ public class BasicPermission implements Permission, Cloneable {
         if (system != other.getSystem()) {
             return false;
         }
-        if (type != other.getType()) {
-            return false;
-        }
         if ((null != type ? type : FolderPermissionType.NORMAL) != (null != other.getType() ? other.getType() : FolderPermissionType.NORMAL)) {
             return false;
         }

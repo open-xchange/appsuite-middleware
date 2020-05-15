@@ -264,7 +264,7 @@ public abstract class AbstractWebDAVFileStorageService implements AccountAware, 
                     FileStorageAccountManagerLookupService lookupService = services.getService(FileStorageAccountManagerLookupService.class);
                     m = newInstanceFor(lookupService.getAccountManagerFor(getId()));
                     Optional<String> optCap = getCapability();
-                    if(optCap.isPresent()) {
+                    if (optCap.isPresent()) {
                         m = new CapabilityAwareAccountManager(optCap.get(), getId(), services.getServiceSafe(CapabilityService.class), m);
                     }
                     accountManager = m;

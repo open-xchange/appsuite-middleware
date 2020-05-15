@@ -50,63 +50,29 @@
 package com.openexchange.capabilities;
 
 import java.io.Serializable;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * {@link CapabilitySet} - A capability set.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CapabilitySet implements Iterable<Capability>, Serializable, Cloneable {
-
-    private static final long serialVersionUID = -7226304751781497934L;
-
-    /** The capability map */
-    private final transient Map<String, Capability> capabilities;
-
-    /**
-     * Initializes a new {@link CapabilitySet}.
-     *
-     * @param capacity The initial capacity
-     */
-    public CapabilitySet(final int capacity) {
-        super();
-        capabilities = new ConcurrentHashMap<String, Capability>(capacity);
-    }
-
-    private CapabilitySet(CapabilitySet source) {
-        super();
-        Map<String, Capability> m = source.capabilities;
-        capabilities = null == m ? null : new ConcurrentHashMap<String, Capability>(m);
-    }
-
-    @Override
-    public CapabilitySet clone() {
-        return new CapabilitySet(this);
-    }
+public interface CapabilitySet extends Iterable<Capability>, Serializable, Cloneable {
 
     /**
      * Gets the size
      *
      * @return The size
      */
-    public int size() {
-        return capabilities.size();
-    }
+    int size();
 
     /**
      * Checks if set is empty
      *
      * @return <code>true</code> if empty; else <code>false</code>
      */
-    public boolean isEmpty() {
-        return capabilities.isEmpty();
-    }
+    boolean isEmpty();
 
     /**
      * Checks for presence of given capability.
@@ -114,9 +80,7 @@ public final class CapabilitySet implements Iterable<Capability>, Serializable, 
      * @param capability The capability to look for
      * @return <code>true</code> if contained; else <code>false</code>
      */
-    public boolean contains(final Capability capability) {
-        return null == capability ? false : capabilities.containsKey(capability.getId());
-    }
+    boolean contains(Capability capability);
 
     /**
      * Checks for presence of denoted capability.
@@ -124,9 +88,7 @@ public final class CapabilitySet implements Iterable<Capability>, Serializable, 
      * @param id The capability identifier to look for
      * @return <code>true</code> if contained; else <code>false</code>
      */
-    public boolean contains(final String id) {
-        return null == id ? false : capabilities.containsKey(id);
-    }
+    boolean contains(String id);
 
     /**
      * Gets the capability identifies by the supplied ID.
@@ -134,9 +96,7 @@ public final class CapabilitySet implements Iterable<Capability>, Serializable, 
      * @param id The capability identifier to look for
      * @return The capability, or <code>null</code> if not found
      */
-    public Capability get(final String id) {
-        return null == id ? null : capabilities.get(id);
-    }
+    Capability get(String id);
 
     /**
      * Gets an iterator for capabilities.
@@ -144,9 +104,7 @@ public final class CapabilitySet implements Iterable<Capability>, Serializable, 
      * @return An iterator for capabilities
      */
     @Override
-    public Iterator<Capability> iterator() {
-        return capabilities.values().iterator();
-    }
+    Iterator<Capability> iterator();
 
     /**
      * Adds given capability.
@@ -154,12 +112,7 @@ public final class CapabilitySet implements Iterable<Capability>, Serializable, 
      * @param capability The capability to add
      * @return <code>true</code> if set changed; otherwise <code>false</code> if already contained
      */
-    public boolean add(final Capability capability) {
-        if (null == capability) {
-            return false;
-        }
-        return null == capabilities.put(capability.getId(), capability);
-    }
+    boolean add(Capability capability);
 
     /**
      * Removes the given capability.
@@ -167,12 +120,7 @@ public final class CapabilitySet implements Iterable<Capability>, Serializable, 
      * @param capability The capability
      * @return <code>true</code> if removed; otherwise <code>false</code> if no such capability was contained
      */
-    public boolean remove(final Capability capability) {
-        if (null == capability) {
-            return false;
-        }
-        return null != capabilities.remove(capability.getId());
-    }
+    boolean remove(Capability capability);
 
     /**
      * Removes the denoted capability.
@@ -180,19 +128,12 @@ public final class CapabilitySet implements Iterable<Capability>, Serializable, 
      * @param id The capability identifier
      * @return <code>true</code> if removed; otherwise <code>false</code> if no such capability was contained
      */
-    public boolean remove(final String id) {
-        if (null == id) {
-            return false;
-        }
-        return null != capabilities.remove(id);
-    }
+    boolean remove(String id);
 
     /**
      * Clears this set.
      */
-    public void clear() {
-        capabilities.clear();
-    }
+    void clear();
 
     /**
      * Creates the {@link Set set} view for this capability set.
@@ -201,13 +142,6 @@ public final class CapabilitySet implements Iterable<Capability>, Serializable, 
      *
      * @return The {@link Set set} view for this capability set
      */
-    public Set<Capability> asSet() {
-        return new HashSet<Capability>(capabilities.values());
-    }
-
-    @Override
-    public String toString() {
-        return new TreeSet<Capability>(capabilities.values()).toString();
-    }
+    Set<Capability> asSet();
 
 }

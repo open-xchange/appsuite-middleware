@@ -53,6 +53,8 @@ import static com.openexchange.folderstorage.database.DatabaseFolderStorageUtili
 import static com.openexchange.folderstorage.database.DatabaseFolderStorageUtility.getUserPermissionBits;
 import static com.openexchange.folderstorage.database.DatabaseFolderStorageUtility.localizeFolderNames;
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.b;
+import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.java.util.Tools.getUnsignedInteger;
 import static com.openexchange.server.impl.OCLPermission.ADMIN_PERMISSION;
 import static com.openexchange.server.impl.OCLPermission.DELETE_ALL_OBJECTS;
@@ -76,6 +78,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -109,6 +112,7 @@ import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.LockCleaningFolderStorage;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.RestoringFolderStorage;
+import com.openexchange.folderstorage.SetterAwareFolder;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.StorageParametersUtility;
@@ -174,6 +178,7 @@ import com.openexchange.tools.oxfolder.OXFolderLoader.IdAndName;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderSQL;
 import com.openexchange.tools.oxfolder.UpdatedFolderHandler;
+import com.openexchange.tools.oxfolder.property.FolderSubscriptionHelper;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.user.User;
@@ -608,12 +613,16 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
             }
             // Create
             final OXFolderManager folderManager = OXFolderManager.getInstance(session, con, con);
-            folderManager.createFolder(createMe, true, millis);
+            FolderObject createdFolder = folderManager.createFolder(createMe, true, millis);
             final int fuid = createMe.getObjectID();
             if (fuid <= 0) {
                 throw OXFolderExceptionCode.CREATE_FAILED.create(new Object[0]);
             }
             folder.setID(String.valueOf(fuid));
+            
+            // store user properties as needed
+            storeUserProperties(Optional.of(con), session, createdFolder, folder);
+
             // Handle warnings
             final List<OXException> warnings = folderManager.getWarnings();
             if (null != warnings) {
@@ -1815,6 +1824,8 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
             }
 
             final int folderId = Integer.parseInt(id);
+            FolderObject originalFolder = getFolderObject(folderId, context, con, storageParameters);
+            boolean changedFolder = false;
 
             /*
              * Check for concurrent modification
@@ -1835,6 +1846,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
                 final String name = folder.getName();
                 if (null != name) {
                     updateMe.setFolderName(name);
+                    changedFolder = changedFolder || false == updateMe.getFolderName().equals(originalFolder.getFolderName());
                 }
             }
             updateMe.setLastModified(millis);
@@ -1844,30 +1856,34 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
                 final ContentType ct = folder.getContentType();
                 if (null != ct) {
                     updateMe.setModule(getModuleByContentType(ct));
+                    changedFolder = changedFolder || updateMe.getModule() != originalFolder.getModule();
                 }
             }
             {
                 final String parentId = folder.getParentID();
                 if (null == parentId) {
-                    updateMe.setParentFolderID(getFolderObject(folderId, context, con, storageParameters).getParentFolderID());
+                    updateMe.setParentFolderID(originalFolder.getParentFolderID());
                 } else {
                     if (DatabaseFolderStorageUtility.hasSharedPrefix(parentId)) {
-                        updateMe.setParentFolderID(getFolderObject(folderId, context, con, storageParameters).getParentFolderID());
+                        updateMe.setParentFolderID(originalFolder.getParentFolderID());
                     } else {
                         updateMe.setParentFolderID(Integer.parseInt(parentId));
                     }
+                    changedFolder = changedFolder || updateMe.getParentFolderID() != originalFolder.getParentFolderID();
                 }
             }
             {
                 FolderPath originPath = folder.getOriginPath();
                 if (null != originPath) {
                     updateMe.setOriginPath(originPath.isEmpty() ? FolderPathObject.EMPTY_PATH : FolderPathObject.copyOf(originPath));
+                    changedFolder = changedFolder || false == updateMe.getOriginPath().equals(originalFolder.getOriginPath());
                 }
             }
             {
                 final Type t = folder.getType();
                 if (null != t) {
                     updateMe.setType(getTypeByFolderType(t));
+                    changedFolder = changedFolder || updateMe.getType() != originalFolder.getType();
                 }
             }
             // Meta
@@ -1875,6 +1891,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
                 final Map<String, Object> meta = folder.getMeta();
                 if (null != meta) {
                     updateMe.setMeta(meta);
+                    changedFolder = changedFolder || false == updateMe.getMeta().equals(originalFolder.getMeta());
                 }
             }
             // Permissions
@@ -1889,15 +1906,24 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
                     oclPermissions[i] = oclPerm;
                 }
                 updateMe.setPermissionsAsArray(oclPermissions);
+                changedFolder = changedFolder || false == updateMe.getPermissions().equals(originalFolder.getPermissions());
             } else {
                 ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
                 boolean applyParentPermissions = configurationService.getBoolProperty("com.openexchange.folderstorage.inheritParentPermissions", false);
                 if (applyParentPermissions && isInPublicTree(folder.getParentID(), context, con, storageParameters)) {
                     FolderObject parent = getFolderObject(updateMe.getParentFolderID(), context, con, storageParameters);
                     inheritPublicFolderPermissions(updateMe, parent, context, con, storageParameters, folderManager, millis);
+                    changedFolder = true;
                 }
             }
-            folderManager.updateFolder(updateMe, true, StorageParametersUtility.isHandDownPermissions(storageParameters), millis.getTime());
+
+            // Perform update of folder in storage if actually changed
+            if (changedFolder) {
+                folderManager.updateFolder(updateMe, true, StorageParametersUtility.isHandDownPermissions(storageParameters), millis.getTime());
+            }
+
+            // Store updated user properties for folder as needed
+            storeUserProperties(Optional.ofNullable(con), session, originalFolder, folder);
 
             // Handle warnings
             final List<OXException> warnings = folderManager.getWarnings();
@@ -1908,6 +1934,40 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
             }
         } finally {
             provider.close();
+        }
+    }
+
+    /**
+     * Stores any updates of user-specific properties for a specific database folder.
+     *
+     * @param optCon An optional database connection to use
+     * @param session The user's session
+     * @param originalFolder The orinal folder object
+     * @param folderUpdate The folder update as passed from the client
+     */
+    private static void storeUserProperties(Optional<Connection> optCon, Session session, FolderObject originalFolder, Folder folderUpdate) throws OXException {
+        if (false == FolderSubscriptionHelper.isSubscribableModule(originalFolder.getModule())) {
+            return; // not applicable
+        }
+        if (false == SetterAwareFolder.class.isInstance(folderUpdate) || ((SetterAwareFolder) folderUpdate).containsSubscribed()) {
+            Boolean originalSubscribed = ServerServiceRegistry.getServize(FolderSubscriptionHelper.class, true)
+                .isSubscribed(optCon, session.getContextId(), session.getUserId(), originalFolder.getObjectID(), originalFolder.getModule()).orElse(Boolean.TRUE);
+            if (b(originalSubscribed) != folderUpdate.isSubscribed()) {
+                if (originalFolder.isDefaultFolder() && FolderObject.PRIVATE == originalFolder.getType(session.getUserId()) ) {
+                    throw FolderExceptionErrorMessage.SUBSCRIBE_NOT_ALLOWED.create(); // deny update for user's default private folder
+                }
+                ServerServiceRegistry.getServize(FolderSubscriptionHelper.class, true).setSubscribed(optCon, session.getContextId(), session.getUserId(), originalFolder.getObjectID(), originalFolder.getModule(), folderUpdate.isSubscribed());
+            }
+        }
+        if (false == SetterAwareFolder.class.isInstance(folderUpdate) || ((SetterAwareFolder) folderUpdate).containsUsedForSync()) {
+            Boolean originalUsedForSync = ServerServiceRegistry.getServize(FolderSubscriptionHelper.class, true)
+                .isUsedForSync(optCon, session.getContextId(), session.getUserId(), originalFolder.getObjectID(), originalFolder.getModule()).orElse(Boolean.TRUE);
+            if (b(originalUsedForSync) != folderUpdate.getUsedForSync().isUsedForSync()) {
+                if (originalFolder.isDefaultFolder() && FolderObject.PRIVATE == originalFolder.getType(session.getUserId()) ) {
+                    throw FolderExceptionErrorMessage.SUBSCRIBE_NOT_ALLOWED.create(); // deny update for user's default private folder
+                }
+                ServerServiceRegistry.getServize(FolderSubscriptionHelper.class, true).setUsedForSync(optCon, session.getContextId(), session.getUserId(), originalFolder.getObjectID(), originalFolder.getModule(), folderUpdate.getUsedForSync());
+            }
         }
     }
 
@@ -2138,7 +2198,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
         return getDeletedFolderIDs(treeId, timeStamp, null, storageParameters);
     }
 
-    public String[] getDeletedFolderIDs(final String treeId, final Date timeStamp, ContentType[] includeContentTypes, final StorageParameters storageParameters) throws OXException {
+    public String[] getDeletedFolderIDs(@SuppressWarnings("unused") final String treeId, final Date timeStamp, ContentType[] includeContentTypes, final StorageParameters storageParameters) throws OXException {
         Date since = null != timeStamp ? timeStamp : new Date(0L);
         ConnectionProvider provider = getConnection(Mode.READ, storageParameters);
         SearchIterator<FolderObject> searchIterator = null;
@@ -2610,7 +2670,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
             final Connection con = provider.getConnection();
             final OXFolderManager folderManager = OXFolderManager.getInstance(storageParameters.getSession(), con, con);
 
-            FolderObject fo = new FolderObject(Integer.valueOf(folder.getID()));
+            FolderObject fo = new FolderObject(i(Integer.valueOf(folder.getID())));
             folderManager.cleanLocksForFolder(fo, userIds);
         } finally {
             provider.close();

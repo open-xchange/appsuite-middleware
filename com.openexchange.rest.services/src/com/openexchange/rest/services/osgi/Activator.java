@@ -73,6 +73,7 @@ import com.openexchange.rest.services.jersey.JSONReaderWriter;
 import com.openexchange.rest.services.jersey.JerseyConfiguration;
 import com.openexchange.rest.services.jersey.OXExceptionMapper;
 import com.openexchange.rest.services.jersey.ProblemJSONWriter;
+import com.openexchange.rest.services.metrics.MetricsListener;
 import com.openexchange.rest.services.security.AuthenticationFilter;
 
 /**
@@ -165,6 +166,7 @@ public class Activator implements BundleActivator {
             registrations.add(context.registerService(ProblemJSONWriter.class, new ProblemJSONWriter(), null));
             registrations.add(context.registerService(OXExceptionMapper.class, new OXExceptionMapper(), null));
             registrations.add(context.registerService(ApplicationConfiguration.class, new JerseyConfiguration(), null));
+            registrations.add(context.registerService(MetricsListener.class, new MetricsListener(), null));
 
             /*-
              * From now on all instances of registerable classes are handled/added in:

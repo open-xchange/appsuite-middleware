@@ -52,7 +52,7 @@ package com.openexchange.rest.client.osgi;
 import static com.openexchange.osgi.Tools.generateServiceFilter;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ForcedReloadable;
-import com.openexchange.metrics.MetricService;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -84,7 +84,7 @@ public class RestClientActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { TimerService.class, SSLSocketFactoryProvider.class, SSLConfigurationService.class, MetricService.class, ConfigurationService.class };
+        return new Class<?>[] { TimerService.class, SSLSocketFactoryProvider.class, SSLConfigurationService.class, ConfigurationService.class };
     }
 
     @Override
@@ -95,13 +95,14 @@ public class RestClientActivator extends HousekeepingActivator {
     @Override
     protected synchronized void startBundle() throws Exception {
         RestClientServices.setServices(this);
-        registerService(EndpointManagerFactory.class, new EndpointManagerFactoryImpl(this));
 
         HttpClientServiceImpl httpClientService = new HttpClientServiceImpl(context, this);
         this.httpClientService = httpClientService;
         track(generateServiceFilter(context, SpecificHttpClientConfigProvider.class, WildcardHttpClientConfigProvider.class), httpClientService);
+        trackService(LeanConfigurationService.class);
         openTrackers();
 
+        registerService(EndpointManagerFactory.class, new EndpointManagerFactoryImpl(httpClientService, this));
         registerService(HttpClientService.class, httpClientService);
         registerService(ForcedReloadable.class, httpClientService);
         // Avoid annoying WARN logging

@@ -1388,6 +1388,39 @@ public class Strings {
 
         return c == null ? s : new String(c);
     }
+    
+    /**
+     * Accepts a string of separated values, splits it around matches of the given {@link java.util.regex.Pattern regular expression}, trims
+     * the split values and returns them as an array.
+     * <p>
+     * <div style="background-color:#FFDDDD; padding:6px; margin:0px;">
+     * <b>Note</b>: The separator is interpreted a regular expression. Please consider {@link java.util.regex.Pattern#quote(String) quoting}
+     * in case separator should be interpreted as a literal pattern or use the {@link #splitBy(String, char, boolean) splitBy() method}
+     * </div>
+     *
+     * @param input The string of separated values
+     * @param separator The separator as a regular expression used to split the input around this separator
+     * @return The split and trimmed input as an array
+     * @throws IllegalArgumentException If input or the separator are missing or if the separator isn't a valid pattern
+     * @see #splitBy(String, char, boolean)
+     */
+    public static String[] trimAndSplit(String input, String separator) {
+        if (input == null) {
+            throw new IllegalArgumentException("Missing input");
+        }
+        if (Strings.isEmpty(input)) {
+            return new String[0];
+        }
+        if (Strings.isEmpty(separator)) {
+            throw new IllegalArgumentException("Missing separator");
+        }
+
+        try {
+            return input.split(separator);
+        } catch (PatternSyntaxException pse) {
+            throw new IllegalArgumentException("Illegal pattern syntax", pse);
+        }
+    }
 
     /**
      * Accepts a string of separated values, splits it around matches of the given {@link java.util.regex.Pattern regular expression}, trims
@@ -1405,18 +1438,11 @@ public class Strings {
      * @see #splitBy(String, char, boolean)
      */
     public static List<String> splitAndTrim(String input, String separator) {
-        if (input == null) {
-            throw new IllegalArgumentException("Missing input");
-        }
-        if (Strings.isEmpty(input)) {
-            return Collections.emptyList();
-        }
-        if (Strings.isEmpty(separator)) {
-            throw new IllegalArgumentException("Missing separator");
-        }
-
         try {
-            String[] tokens = input.split(separator);
+            String[] tokens = trimAndSplit(input, separator);
+            if (tokens.length == 0) {
+                return Collections.emptyList();
+            }
             List<String> trimmedSplits = new ArrayList<String>(tokens.length);
             for (String token : tokens) {
                 trimmedSplits.add(token.trim());

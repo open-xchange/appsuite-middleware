@@ -61,7 +61,8 @@ import com.openexchange.test.concurrent.ParallelSuite;
 @RunWith(ParallelSuite.class)
 @Suite.SuiteClasses({
     com.openexchange.rest.userfeedback.UserFeedbackSuite.class,
-    com.openexchange.rest.advertisement.AdvertisementTestSuite.class
+    com.openexchange.rest.advertisement.AdvertisementTestSuite.class, 
+    com.openexchange.webdav.FreeBusyTestSuite.class
 })
 public final class RESTTests {
 

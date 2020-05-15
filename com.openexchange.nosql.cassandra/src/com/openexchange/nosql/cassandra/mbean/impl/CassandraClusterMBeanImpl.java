@@ -63,6 +63,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.management.AnnotatedDynamicStandardMBean;
 import com.openexchange.nosql.cassandra.CassandraService;
 import com.openexchange.nosql.cassandra.mbean.CassandraClusterMBean;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -95,6 +96,9 @@ public class CassandraClusterMBeanImpl extends AnnotatedDynamicStandardMBean imp
     protected void refresh() {
         try {
             CassandraService cassandraService = getService(CassandraService.class);
+            if (cassandraService == null) {
+                throw ServiceExceptionCode.absentService(CassandraService.class);
+            }
             cluster = cassandraService.getCluster();
             metrics = cluster.getMetrics();
             errors = metrics.getErrorMetrics();

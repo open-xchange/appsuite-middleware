@@ -64,8 +64,10 @@ import com.openexchange.osgi.annotation.SingletonService;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @deprecated Use meters from io.micrometer.core.instrument instead
  */
 @SingletonService
+@Deprecated
 public interface MetricService {
 
     /**
@@ -115,7 +117,7 @@ public interface MetricService {
 
     /**
      * Removes the {@link Metric} defined with the specified {@link MetricDescriptor}
-     * 
+     *
      * @param descriptor The {@link MetricDescriptor}
      */
     void removeMetric(MetricDescriptor descriptor);

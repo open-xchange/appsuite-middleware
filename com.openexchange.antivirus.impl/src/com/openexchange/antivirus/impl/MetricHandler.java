@@ -49,95 +49,66 @@
 
 package com.openexchange.antivirus.impl;
 
-import java.util.function.Consumer;
-import com.openexchange.metrics.MetricDescriptor;
-import com.openexchange.metrics.MetricDescriptorCache;
-import com.openexchange.metrics.MetricService;
-import com.openexchange.metrics.MetricType;
-import com.openexchange.server.ServiceLookup;
+import java.time.Duration;
+import com.google.common.cache.Cache;
+import com.openexchange.antivirus.AntiVirusResult;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.Timer;
+import io.micrometer.core.instrument.binder.cache.GuavaCacheMetrics;
 
 /**
  * {@link MetricHandler} - Simple utility class to handle metric updates
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.2
  */
 final class MetricHandler {
 
-    private final MetricDescriptorCache metricDescriptorCache;
-    private final ServiceLookup services;
+    private final Counter byteTransferCounter;
 
     /**
-     * Initialises a new {@link MetricHandler}.
+     * Initializes a new {@link MetricHandler}.
+     * @param cachedResults
      */
-    public MetricHandler(ServiceLookup services) {
+    public MetricHandler(Cache<String, AntiVirusResult> cachedResults) {
         super();
-        this.services = services;
-        this.metricDescriptorCache = new MetricDescriptorCache(services.getService(MetricService.class), "antivirus");
+        GuavaCacheMetrics.monitor(Metrics.globalRegistry, cachedResults, "antivirus");
+        this.byteTransferCounter = Counter.builder("appsuite.antivirus.transfer")
+            .description("Measures the amount of bytes transfered to the anti-virus server")
+            .baseUnit("bytes")
+            .register(Metrics.globalRegistry);
     }
 
     /**
-     * Increments the cache hits metric
+     * Monitor timing of an ICAP request that failed due to an IO error
+     *
+     * @param duration Duration from request start to occurred error
      */
-    void incrementCacheHits() {
-        MetricDescriptor descriptor = metricDescriptorCache.getMetricDescriptor(MetricType.COUNTER, "Cache Hit", "Cached Anti-Virus results hits", "results");
-        updateMetric(t -> t.getCounter(descriptor).incement());
+    public void recordScanIOError(Duration duration) {
+        Timer timer = Timer.builder("appsuite.antivirus.scans.duration")
+            .description("Measures the number of files scanned per second")
+            .tags("status", "IO_ERROR")
+            .register(Metrics.globalRegistry);
+        timer.record(duration);
     }
 
     /**
-     * Increments the cache misses metric
+     * Monitor timing of an ICAP request that was answered by a proper HTTP response
+     *
+     * @param statusCode The HTTP status response from the ICAP server
+     * @param duration Duration from request start to received response
+     * @param contentLength Length of request body in bytes to update the transfer rate meter
      */
-    void incrementCacheMisses() {
-        MetricDescriptor descriptor = metricDescriptorCache.getMetricDescriptor(MetricType.COUNTER, "Cache Miss", "Cached Anti-Virus results misses", "results");
-        updateMetric(t -> t.getCounter(descriptor).incement());
+    public void recordScanResult(int statusCode, Duration duration, long contentLength) {
+        Timer timer = Timer.builder("appsuite.antivirus.scans.duration")
+            .description("Measures the number of files scanned per second")
+            .tags("status", Integer.toString(statusCode))
+            .register(Metrics.globalRegistry);
+        timer.record(duration);
+
+        byteTransferCounter.increment(contentLength);
     }
 
-    /**
-     * Increments the cache invalidations metric
-     */
-    void incrementCacheInvalidations() {
-        MetricDescriptor descriptor = metricDescriptorCache.getMetricDescriptor(MetricType.COUNTER, "Cache Invalidations", "Cached Anti-Virus results invalidations", "results");
-        updateMetric(t -> t.getCounter(descriptor).incement());
-    }
-
-    /**
-     * Increments the scans per second metric
-     */
-    void updateScansPerSecond() {
-        MetricDescriptor descriptor = metricDescriptorCache.getMetricDescriptor(MetricType.METER, "Scanning Rate", "Measures the number of files scanned per second", "scans");
-        updateMetric(t -> t.getMeter(descriptor).mark());
-    }
-
-    /**
-     * Updates the scanning time by the specified elapsed time
-     * 
-     * @param timeElapsed The elapsed time
-     */
-    void updateScanningTime(long timeElapsed) {
-        MetricDescriptor descriptor = metricDescriptorCache.getMetricDescriptor(MetricType.HISTOGRAM, "Scanning Time", "Measures the time elapsed during scanning a file", "");
-        updateMetric(t -> t.getHistogram(descriptor).update(timeElapsed));
-    }
-
-    /**
-     * Updates the transfer rate by the specified content length
-     * 
-     * @param contentLength The content length
-     */
-    void updateTransferRate(long contentLength) {
-        MetricDescriptor descriptor = metricDescriptorCache.getMetricDescriptor(MetricType.METER, "Transfer Rate", "Measures the transfer rate when uploading a file to the anti-virus server", "bytes");
-        updateMetric(t -> t.getMeter(descriptor).mark(contentLength));
-    }
-
-    /**
-     * Updates the metric specified in the provided {@link Consumer}
-     * 
-     * @param consumer The consumer
-     */
-    private void updateMetric(Consumer<MetricService> consumer) {
-        MetricService metricService = services.getService(MetricService.class);
-        if (metricService == null) {
-            return;
-        }
-        consumer.accept(metricService);
-    }
 }

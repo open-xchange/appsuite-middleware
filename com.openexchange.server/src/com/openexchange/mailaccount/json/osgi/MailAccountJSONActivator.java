@@ -73,7 +73,6 @@ import com.openexchange.oauth.OAuthAccountReauthorizedListener;
 import com.openexchange.oauth.provider.resourceserver.scope.AbstractScopeProvider;
 import com.openexchange.oauth.provider.resourceserver.scope.OAuthScopeProvider;
 
-
 /**
  * {@link MailAccountJSONActivator}
  *

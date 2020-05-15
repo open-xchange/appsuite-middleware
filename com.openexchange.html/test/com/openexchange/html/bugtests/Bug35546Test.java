@@ -62,17 +62,17 @@ import com.openexchange.html.AbstractSanitizing;
 public class Bug35546Test extends AbstractSanitizing {
      @Test
      public void testKeepEmptyBreaksAfterConversion() throws Exception {
-        String content = getHtmlService().getConformHTML("<p>Text before one empty line</p><p><br></p><p>Text after empty line.</p>", "UTF-8");
+        String content = trimLines(getHtmlService().getConformHTML("<p>Text before one empty line</p><p><br></p><p>Text after empty line.</p>", "UTF-8"));
         String expected = "<!doctype html>\n" +
             "<html>\n" +
-            " <head> \n" +
-            "  <meta charset=\"UTF-8\"> \n" +
-            " </head>\n" +
-            " <body>\n" +
-            "  <p>Text before one empty line</p>\n" +
-            "  <p><br></p>\n" +
-            "  <p>Text after empty line.</p> \n" +
-            " </body>\n" +
+            "<head>\n" +
+            "<meta charset=\"UTF-8\">\n" +
+            "</head>\n" +
+            "<body>\n" +
+            "<p>Text before one empty line</p>\n" +
+            "<p><br></p>\n" +
+            "<p>Text after empty line.</p>\n" +
+            "</body>\n" +
             "</html>";
         assertEquals(expected, content);
     }

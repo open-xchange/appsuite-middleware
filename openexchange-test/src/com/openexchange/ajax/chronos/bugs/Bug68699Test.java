@@ -112,6 +112,6 @@ public class Bug68699Test extends AbstractChronosTest {
         /*
          * Expect that there is no mail and util throws AssertionError
          */
-        ITipUtil.receiveIMip(apiClient2, testUser.getLogin(), "Appointment changed: " + summary, 1, null);
+        ITipUtil.receiveNotification(apiClient2, testUser.getLogin(), "Appointment changed: " + summary);
     }
 }

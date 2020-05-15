@@ -68,7 +68,6 @@ import com.openexchange.filestore.sproxyd.rmi.impl.SproxydRemoteImpl;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.metrics.MetricService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.rest.client.httpclient.HttpClientService;
 import com.openexchange.rest.client.httpclient.WildcardHttpClientConfigProvider;
@@ -92,7 +91,7 @@ public class SproxydActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, DatabaseService.class, TimerService.class, MetricService.class, HttpClientService.class };
+        return new Class<?>[] { ConfigurationService.class, DatabaseService.class, TimerService.class, HttpClientService.class };
     }
 
     @Override
@@ -117,7 +116,7 @@ public class SproxydActivator extends HousekeepingActivator {
             props.put("RMIName", SproxydRemoteManagement.RMI_NAME);
             registerService(Remote.class, new SproxydRemoteImpl(this), props);
         }
-        
+
         // Register HTTP client config
         registerService(WildcardHttpClientConfigProvider.class, new SproxydHttpClientConfig(this));
     }

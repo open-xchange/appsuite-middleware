@@ -49,15 +49,13 @@
 
 package com.openexchange.filestore.s3.metrics;
 
+import java.time.Duration;
 import com.amazonaws.metrics.ByteThroughputProvider;
 import com.amazonaws.metrics.ServiceLatencyProvider;
 import com.amazonaws.metrics.ServiceMetricCollector;
-import com.amazonaws.metrics.ThroughputMetricType;
-import com.openexchange.metrics.MetricDescriptor;
-import com.openexchange.metrics.MetricDescriptorCache;
-import com.openexchange.metrics.MetricService;
-import com.openexchange.metrics.MetricType;
-import com.openexchange.metrics.types.Meter;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.Timer;
 
 /**
  * {@link S3FileStorageServiceMetricCollector}
@@ -66,25 +64,21 @@ import com.openexchange.metrics.types.Meter;
  */
 public class S3FileStorageServiceMetricCollector extends ServiceMetricCollector {
 
-    private MetricService metricService;
-    private final MetricDescriptorCache metricDescriptorCache;
+    private static final String GROUP = "appsuite.s3.";
 
     /**
-     * Initialises a new {@link S3FileStorageServiceMetricCollector}.
+     * Initializes a new {@link S3FileStorageServiceMetricCollector}.
      */
-    public S3FileStorageServiceMetricCollector(MetricService metricService) {
+    public S3FileStorageServiceMetricCollector() {
         super();
-        metricDescriptorCache = new MetricDescriptorCache(metricService, "s3");
-        this.metricService = metricService;
     }
 
     @Override
     public void collectByteThroughput(final ByteThroughputProvider provider) {
-        ThroughputMetricType throughputMetricType = provider.getThroughputMetricType();
-        MetricDescriptor metricDescriptor = metricDescriptorCache.getMetricDescriptor(MetricType.METER, throughputMetricType.name(), "The %s in bytes/sec", "bytes");
-        Meter meter = metricService.getMeter(metricDescriptor);
-        int bytes = provider.getByteCount();
-        meter.mark(Integer.toUnsignedLong(bytes));
+        Timer timer = Timer.builder(GROUP + "requestSizeTimer").description("The timer of the request size gatherer. Usually runs every 10 seconds.").tags("type", provider.getThroughputMetricType().name()).register(Metrics.globalRegistry);
+        Counter counter = Counter.builder(GROUP + "requestSize").description("The size of s3 requests.").baseUnit("bytes").tags("type", provider.getThroughputMetricType().name()).register(Metrics.globalRegistry);
+        timer.record(Duration.ofSeconds(10));
+        counter.increment(Integer.toUnsignedLong(provider.getByteCount()));
     }
 
     @Override
@@ -92,10 +86,4 @@ public class S3FileStorageServiceMetricCollector extends ServiceMetricCollector 
         // no-op
     }
 
-    /**
-     * Stops the metric collector and unregisters all metrics
-     */
-    void stop() {
-        metricDescriptorCache.clear();
-    }
 }

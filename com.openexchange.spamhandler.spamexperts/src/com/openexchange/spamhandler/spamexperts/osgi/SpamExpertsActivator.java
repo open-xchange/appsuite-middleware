@@ -58,6 +58,7 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.mail.service.MailService;
+import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.rest.client.httpclient.SpecificHttpClientConfigProvider;
@@ -89,6 +90,9 @@ public class SpamExpertsActivator extends HousekeepingActivator {
 	protected synchronized void startBundle() throws Exception {
 	    org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(SpamExpertsActivator.class);
         logger.info("starting bundle: \"com.openexchange.spamhandler.spamexperts\"");
+        
+        trackService(MailAccountStorageService.class);
+        openTrackers();
 
 	    final SpamExpertsConfig config = new SpamExpertsConfig(this);
 

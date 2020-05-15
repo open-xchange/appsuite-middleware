@@ -78,6 +78,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
+import com.openexchange.groupware.userconfiguration.PermissionConfigurationChecker;
 import com.openexchange.groupware.userconfiguration.service.PermissionAvailabilityService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
@@ -196,6 +197,7 @@ public class CapabilitiesActivator extends HousekeepingActivator {
         });
 
         trackService(ServerConfigService.class);
+        trackService(PermissionConfigurationChecker.class);
 
         /*
          * Register update task, create table job and delete listener

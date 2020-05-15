@@ -50,13 +50,18 @@
 package com.openexchange.share.notification.impl;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.i;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.stream.Collectors;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import org.slf4j.Logger;
@@ -66,7 +71,6 @@ import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupService;
-import com.openexchange.groupware.container.ObjectPermission;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.groupware.notify.hostname.HostData;
@@ -88,11 +92,12 @@ import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.share.notification.ShareNotifyExceptionCodes;
 import com.openexchange.share.notification.impl.mail.MailNotifications;
 import com.openexchange.share.notification.impl.mail.MailNotifications.ShareCreatedBuilder;
+import com.openexchange.threadpool.Task;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadRenamer;
+import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 import com.openexchange.user.User;
 import com.openexchange.user.UserService;
-import gnu.trove.iterator.TIntObjectIterator;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
 
 /**
  * {@link DefaultNotificationService} - The default share notification service.
@@ -104,7 +109,7 @@ import gnu.trove.map.hash.TIntObjectHashMap;
  */
 public class DefaultNotificationService implements ShareNotificationService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(DefaultNotificationService.class);
+    protected static final Logger LOG = LoggerFactory.getLogger(DefaultNotificationService.class);
 
     private final ServiceLookup serviceLookup;
 
@@ -223,7 +228,7 @@ public class DefaultNotificationService implements ShareNotificationService {
         }
     }
 
-    private <T> void send(ShareNotification<T> notification) throws OXException {
+    protected <T> void send(ShareNotification<T> notification) throws OXException {
         @SuppressWarnings("unchecked") ShareNotificationHandler<T> handler = (ShareNotificationHandler<T>) handlers.get(notification.getTransport());
         if (handler == null) {
             throw new OXException(new IllegalArgumentException("No provider exists to handle notifications for transport " + notification.getTransport().toString()));
@@ -238,7 +243,7 @@ public class DefaultNotificationService implements ShareNotificationService {
      * @return the built ShareNotification
      * @throws OXException
      */
-    private ShareNotification<InternetAddress> buildShareCreatedMailNotification(UserDetail userDetail, ShareTarget target, String message, String shareUrl, Session session, HostData hostData) throws OXException {
+    protected ShareNotification<InternetAddress> buildShareCreatedMailNotification(UserDetail userDetail, ShareTarget target, String message, String shareUrl, Session session, HostData hostData) throws OXException {
         User user = userDetail.getUser();
         if (Strings.isEmpty(user.getMail())) {
             String guestName = user.getDisplayName();
@@ -296,51 +301,6 @@ public class DefaultNotificationService implements ShareNotificationService {
             return warnings;
         }
 
-       TIntObjectMap<UserDetail> usersById = new TIntObjectHashMap<>();
-        for (int userId : entities.getUsers()) {
-            User user = null;
-            try {
-                user = userService.getUser(userId, context);
-                usersById.put(userId, new UserDetail(user));
-            } catch (OXException e) {
-                String mailAddress = null;
-                if (user != null) {
-                    mailAddress = user.getMail();
-                }
-                collectWarning(warnings, e, mailAddress);
-            }
-        }
-
-        for (int groupId : entities.getGroups()) {
-            Group group;
-            try {
-                group = groupService.getGroup(context, groupId);
-            } catch (OXException e) {
-                collectWarning(warnings, e);
-                continue;
-            }
-            for (int userId : group.getMember()) {
-                if (!usersById.containsKey(userId)) {
-                    User user = null;
-                    try {
-                        user = userService.getUser(userId, context);
-                        UserDetail userDetail = new UserDetail(user);
-                        userDetail.setGroup(group);
-                        usersById.put(userId, userDetail);
-                    } catch (OXException e) {
-                        String mailAddress = null;
-                        if (user != null) {
-                            mailAddress = user.getMail();
-                        }
-                        collectWarning(warnings, e, mailAddress);
-                    }
-                }
-            }
-        }
-
-        // remove sharing user if he somehow made it into the list of recipients
-        usersById.remove(session.getUserId());
-
         // get underlying share & check session user's permissions
         ModuleSupport moduleSupport = serviceLookup.getService(ModuleSupport.class);
         ShareTarget srcTarget = new ShareTarget(targetPath.getModule(), targetPath.getFolder(), targetPath.getItem());
@@ -353,50 +313,140 @@ public class DefaultNotificationService implements ShareNotificationService {
             return warnings;
         }
 
-        Set<InternetAddress> collectedAddresses = new HashSet<InternetAddress>();
-        TIntObjectIterator<UserDetail> it = usersById.iterator();
-        for (int i = usersById.size(); i-- > 0; ) {
-            it.advance();
-            User user = null;
+        // Gather users and groups to notify
+        Map<Integer, UserDetail> usersById = new HashMap<>(entities.size());
+        for (int userId : entities.getUsers()) {
             try {
-                int userId = it.key();
-                UserDetail userDetail = it.value();
-                user = userDetail.getUser();
-                ShareTarget dstTarget = moduleSupport.adjustTarget(srcTarget, session, userId);
-                String shareUrl;
-                if (user.isGuest()) {
-                    if (dstTarget.getModule() == Module.MAIL.getFolderConstant()) {
-                        String m = Module.getForFolderConstant(dstTarget.getModule()).getName();
-                        throw ShareExceptionCodes.SHARING_NOT_SUPPORTED.create(m == null ? Integer.toString(dstTarget.getModule()) : m);
-                    }
-
-                    shareUrl = ShareLinks.generateExternal(hostData, new ShareToken(context.getContextId(), user).getToken(), targetPath);
-                    String mail = user.getMail();
-                    if (Strings.isNotEmpty(mail)) {
-                        collectedAddresses.add(new QuotedInternetAddress(mail));
-                    }
-                } else {
-                    shareUrl = ShareLinks.generateInternal(hostData, dstTarget);
-                }
-                ShareNotification<InternetAddress> shareNotification = buildShareCreatedMailNotification(userDetail, dstTarget, message, shareUrl, session, hostData);
-                send(shareNotification);
-            } catch (Exception e) {
-                String mailAddress = null;
-                if (user != null) {
-                    mailAddress = user.getMail();
-                }
-                collectWarning(warnings, e, mailAddress);
+                User user = userService.getUser(userId, context);
+                usersById.put(I(userId), new UserDetail(user));
+            } catch (OXException e) {
+                collectWarning(warnings, e, null);
             }
         }
 
+        for (int groupId : entities.getGroups()) {
+            Group group;
+            try {
+                group = groupService.getGroup(context, groupId);
+            } catch (OXException e) {
+                collectWarning(warnings, e);
+                continue;
+            }
+            for (int userId : group.getMember()) {
+                if (!usersById.containsKey(I(userId))) {
+                    try {
+                        User user = userService.getUser(userId, context);
+                        UserDetail userDetail = new UserDetail(user);
+                        userDetail.setGroup(group);
+                        usersById.put(I(userId), userDetail);
+                    } catch (OXException e) {
+                        collectWarning(warnings, e, null);
+                    }
+                }
+            }
+        }
+
+        // remove sharing user if he somehow made it into the list of recipients
+        usersById.remove(I(session.getUserId()));
+
+        /*
+         * Send notifications to guest synchronously
+         */
+        Set<InternetAddress> collectedAddresses = sendToGuests(usersById, moduleSupport, srcTarget, warnings, message, targetPath, session, hostData);
         if (!collectedAddresses.isEmpty()) {
             ContactCollectorService ccs = serviceLookup.getOptionalService(ContactCollectorService.class);
             if (null != ccs) {
                 ccs.memorizeAddresses(collectedAddresses, true, session);
             }
         }
-
+        /*
+         * Send notifications to internal users asynchronously
+         */
+        try {
+            sendToInternals(usersById, moduleSupport, srcTarget, message, session, hostData);
+        } catch (OXException e) {
+            collectWarning(warnings, e);
+        }
         return warnings;
+    }
+
+    /**
+     * Sends the notification to guest users
+     *
+     * @param usersById All users to be notified
+     * @param moduleSupport The {@link ModuleSupport}
+     * @param srcTarget The source target folder
+     * @param warnings A list of warnings to add additional errors to
+     * @param message The (optional) additional message for the notification. Can be <code>null</code>.
+     * @param targetPath The path to the share target
+     * @param session The session of the notifying user
+     * @param hostData The host data to generate share links
+     * @return
+     */
+    private Set<InternetAddress> sendToGuests(Map<Integer, UserDetail> usersById, ModuleSupport moduleSupport, ShareTarget srcTarget, List<OXException> warnings, String message, ShareTargetPath targetPath, Session session, HostData hostData) {
+        Set<InternetAddress> collectedAddresses = new HashSet<InternetAddress>();
+        /*
+         * Filter for guest users
+         */
+        Map<Integer, UserDetail> guestsById = new HashMap<>(usersById).entrySet().stream() //@formatter:off
+            .filter(g -> g.getValue().getUser().isGuest())
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)); //@formatter:on
+        /*
+         * Create notification for each guest
+         */
+        for (Entry<Integer, UserDetail> entry : guestsById.entrySet()) {
+            UserDetail userDetail = entry.getValue();
+            int userId = i(entry.getKey());
+            User user = userDetail.getUser();
+            try {
+                ShareTarget dstTarget = moduleSupport.adjustTarget(srcTarget, session, userId);
+                String shareUrl;
+                if (dstTarget.getModule() == Module.MAIL.getFolderConstant()) {
+                    String m = Module.getForFolderConstant(dstTarget.getModule()).getName();
+                    throw ShareExceptionCodes.SHARING_NOT_SUPPORTED.create(m == null ? Integer.toString(dstTarget.getModule()) : m);
+                }
+
+                shareUrl = ShareLinks.generateExternal(hostData, new ShareToken(session.getContextId(), user).getToken(), targetPath);
+                String mail = user.getMail();
+                if (Strings.isNotEmpty(mail)) {
+                    collectedAddresses.add(new QuotedInternetAddress(mail));
+                }
+                ShareNotification<InternetAddress> shareNotification = buildShareCreatedMailNotification(userDetail, dstTarget, message, shareUrl, session, hostData);
+                send(shareNotification);
+            } catch (Exception e) {
+                collectWarning(warnings, e, user.getMail());
+            }
+        }
+        return collectedAddresses;
+    }
+
+    /**
+     * Send notifications to internal users in the background. Errors will be logged
+     *
+     * @param usersById All users to be notified
+     * @param moduleSupport The {@link ModuleSupport}
+     * @param srcTarget The source target folder
+     * @param message The (optional) additional message for the notification. Can be <code>null</code>.
+     * @param session The session of the notifying user
+     * @param hostData The host data to generate share links
+     * @throws OXException If {@link ThreadPoolService} is missing
+     */
+    private void sendToInternals(Map<Integer, UserDetail> usersById, ModuleSupport moduleSupport, ShareTarget srcTarget, String message, Session session, HostData hostData) throws OXException {
+        /*
+         * Filter for internal users
+         */
+        Map<Integer, UserDetail> internalUsersById = new HashMap<>(usersById).entrySet().stream() //@formatter:off
+            .filter(g -> false == g.getValue().getUser().isGuest())
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)); //@formatter:on
+        /*
+         * Send notifications asynchronous
+         */
+        ThreadPoolService threadPoolService = serviceLookup.getServiceSafe(ThreadPoolService.class);
+        List<Task<Void>> tasks = new ArrayList<>(internalUsersById.size());
+        for (Entry<Integer, UserDetail> entry : internalUsersById.entrySet()) {
+            tasks.add(new NotificationTask(entry.getKey(), entry.getValue(), moduleSupport, srcTarget, message, session, hostData));
+        }
+        threadPoolService.invoke(tasks, CallerRunsBehavior.getInstance());
     }
 
     private static final class UserDetail {
@@ -422,6 +472,68 @@ public class DefaultNotificationService implements ShareNotificationService {
 
         void setGroup(Group group) {
             this.group = group;
+        }
+    }
+
+    /**
+     * {@link NotificationTask} - Task to handle the generation of notification mails to internal user
+     *
+     * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+     * @since v7.10.4
+     */
+    private class NotificationTask implements Task<Void> {
+
+        private final Integer userId;
+        private final UserDetail userDetail;
+        private final ModuleSupport moduleSupport;
+        private final ShareTarget srcTarget;
+        private final String message;
+        private final Session session;
+        private final HostData hostData;
+
+        /**
+         * Initializes a new {@link NotificationTask}.
+         * 
+         * @param userId The user identifier
+         * @param userDetail The details for the user to notify
+         * @param moduleSupport The {@link ModuleSupport}
+         * @param srcTarget The source target folder
+         * @param message The (optional) additional message for the notification. Can be <code>null</code>.
+         * @param session The session of the notifying user
+         * @param hostData The host data to generate share links
+         */
+        public NotificationTask(Integer userId, UserDetail userDetail, ModuleSupport moduleSupport, ShareTarget srcTarget, String message, Session session, HostData hostData) {
+            super();
+            this.userId = userId;
+            this.userDetail = userDetail;
+            this.moduleSupport = moduleSupport;
+            this.srcTarget = srcTarget;
+            this.message = message;
+            this.session = session;
+            this.hostData = hostData;
+        }
+
+        @Override
+        public void setThreadName(ThreadRenamer threadRenamer) {}
+
+        @Override
+        public void beforeExecute(Thread t) {}
+
+        @Override
+        public void afterExecute(Throwable t) {}
+
+        @Override
+        public Void call() throws Exception {
+            try {
+                LOG.trace("Sending notification mail to user {} in context {} from user {}", userId, I(session.getContextId()), I(session.getUserId()));
+                ShareTarget dstTarget = moduleSupport.adjustTarget(srcTarget, session, i(userId));
+                String shareUrl = ShareLinks.generateInternal(hostData, dstTarget);
+                ShareNotification<InternetAddress> shareNotification = buildShareCreatedMailNotification(userDetail, dstTarget, message, shareUrl, session, hostData);
+                send(shareNotification);
+            } catch (Exception e) {
+                LOG.warn("Unable to send notification mail to internal user {}", userId, e);
+            }
+            return null;
         }
     }
 
@@ -459,21 +571,4 @@ public class DefaultNotificationService implements ShareNotificationService {
         }
     }
 
-    /**
-     * Converts the passed permissions to a folder permission bit mask if necessary
-     *
-     * @param type
-     * @param permissions
-     * @return
-     */
-    private static int adjustPermissions(Entities.Permission permission) {
-        switch (permission.getType()) {
-            case FOLDER:
-                return permission.getPermissions();
-            case OBJECT:
-                return ObjectPermission.convertFolderPermissionBits(permission.getPermissions());
-            default:
-                throw new IllegalArgumentException("Unknown permission type: " + permission.getType());
-        }
-    }
 }

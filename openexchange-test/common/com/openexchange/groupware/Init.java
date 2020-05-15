@@ -981,8 +981,7 @@ public final class Init {
             };
 
             ThreadPoolService threadPool = (ThreadPoolService) services.get(ThreadPoolService.class);
-            MetricService metricService = (MetricService) services.get(MetricService.class);
-            CacheEventMetricHandler metricHandler = new CacheEventMetricHandler(metricService);
+            CacheEventMetricHandler metricHandler = new CacheEventMetricHandler();
             CacheEventService cacheEventService = new CacheEventServiceImpl(config, threadPool, metricHandler);
             services.put(CacheEventService.class, cacheEventService);
             TestServiceRegistry.getInstance().addService(CacheEventService.class, cacheEventService);

@@ -64,6 +64,7 @@ import com.openexchange.management.AnnotatedDynamicStandardMBean;
 import com.openexchange.nosql.cassandra.CassandraService;
 import com.openexchange.nosql.cassandra.impl.CassandraServiceImpl;
 import com.openexchange.nosql.cassandra.mbean.CassandraNodeMBean;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -75,7 +76,7 @@ public class CassandraNodeMBeanImpl extends AnnotatedDynamicStandardMBean implem
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CassandraNodeMBeanImpl.class);
 
-    private Host host;
+    private final Host host;
     private int connections;
     private int inFlightQueries;
     private int maxLoad;
@@ -85,7 +86,7 @@ public class CassandraNodeMBeanImpl extends AnnotatedDynamicStandardMBean implem
 
     /**
      * Initialises a new {@link CassandraNodeMBeanImpl}.
-     * 
+     *
      * @throws NotCompliantMBeanException
      */
     public CassandraNodeMBeanImpl(ServiceLookup services, Host host) throws NotCompliantMBeanException {
@@ -97,6 +98,9 @@ public class CassandraNodeMBeanImpl extends AnnotatedDynamicStandardMBean implem
     protected void refresh() {
         try {
             CassandraService cassandraService = getService(CassandraService.class);
+            if (cassandraService == null) {
+                throw ServiceExceptionCode.absentService(CassandraService.class);
+            }
             Cluster cluster = cassandraService.getCluster();
             LoadBalancingPolicy loadBalancingPolicy = cluster.getConfiguration().getPolicies().getLoadBalancingPolicy();
             PoolingOptions poolingOptions = cluster.getConfiguration().getPoolingOptions();

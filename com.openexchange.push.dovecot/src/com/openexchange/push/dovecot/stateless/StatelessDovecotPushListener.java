@@ -83,6 +83,12 @@ public class StatelessDovecotPushListener extends AbstractDovecotPushListener {
 
     @Override
     public synchronized String initateRegistration() throws OXException {
+        if (false == registrationContext.hasWebMailAndIsActive()) {
+            StringBuilder sb = new StringBuilder("Denied start of a ").append(permanent ? "permanent" : "session-bound").append(" push listener for user ").append(registrationContext.getUserId());
+            sb.append(" in context ").append(registrationContext.getContextId()).append(": Missing \"webmail\" permission or user is disabled.");
+            return sb.toString();
+        }
+
         boolean scheduleRetry = false;
         String logInfo = null;
         try {
@@ -94,6 +100,11 @@ public class StatelessDovecotPushListener extends AbstractDovecotPushListener {
             }
 
             if (registrationResult.isFailed()) {
+                if (!isUserValid()) {
+                    scheduleRetry = false;
+                    logInfo = registrationResult.getLogInfo();
+                    throw registrationResult.getException();
+                }
                 scheduleRetry = registrationResult.scheduleRetry();
                 logInfo = registrationResult.getLogInfo();
                 throw registrationResult.getException();

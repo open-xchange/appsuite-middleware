@@ -95,15 +95,19 @@ public final class Tokens implements LoginRequestHandler {
     }
 
     @Override
-    public void handleRequest(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    public void handleRequest(HttpServletRequest req, HttpServletResponse resp, LoginRequestContext requestContext) throws IOException {
         try {
-            doTokens(req, resp);
+            doTokens(req, resp, requestContext);
+            if(requestContext.getMetricProvider().isStateUnknown()) {
+               requestContext.getMetricProvider().recordSuccess();
+            }
         } catch (OXException e) {
             LoginServlet.logAndSendException(resp, e);
+            requestContext.getMetricProvider().recordException(e);
         }
     }
 
-    private void doTokens(HttpServletRequest req, HttpServletResponse resp) throws OXException, IOException {
+    private void doTokens(HttpServletRequest req, HttpServletResponse resp, LoginRequestContext requestContext) throws OXException, IOException {
         String clientToken = LoginTools.parseParameter(req, CLIENT_TOKEN);
         String serverToken = LoginTools.parseParameter(req, SERVER_TOKEN);
         String client = LoginTools.parseParameter(req, CLIENT_PARAM);
@@ -160,6 +164,7 @@ public final class Tokens implements LoginRequestHandler {
             final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
             LOG.error("", oje);
             response.setException(oje);
+            requestContext.getMetricProvider().recordErrorCode(OXJSONExceptionCodes.JSON_WRITE_ERROR);
         }
 
         Tools.disableCaching(resp);
@@ -171,6 +176,7 @@ public final class Tokens implements LoginRequestHandler {
         } catch (JSONException e) {
             LOG.error("", e);
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            requestContext.getMetricProvider().recordErrorCode(OXJSONExceptionCodes.JSON_WRITE_ERROR);
         }
     }
 }

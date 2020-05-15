@@ -1,6 +1,6 @@
 ---
 title: CalDAV Clients
-icon: fa-address-card
+icon: fa-calendar-check
 tags: DAV, CalDAV, Clients
 ---
 

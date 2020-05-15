@@ -1,6 +1,6 @@
 ---
 title: CardDAV Clients
-icon: fa-address-card
+icon: fa-address-book
 tags: DAV, CardDAV, Clients
 ---
 
@@ -61,4 +61,8 @@ Please consider the following known limitations for the CardDAV interface:
 
 ### Client Restrictions
 
-* The Mac Contacts App does not Support CalDAV Collections. Open-Xchange by default recognizes this and exposes an aggregated collection of the CalDAV Collections. As a consequence new contacts entered in subfolders on OX side will not appear in subfolders (or Contact Groups) on the Mac Contacts App but inside of the aggregated Collection itself. Additionally Contact Groups from the Contacts App are not synced to OX - however the Contacts itself will be synced to the OX Address Book. Creating a new Contacts Group from within the Contacts App using the OX CardDAV Account is not possible - the name will revert to “untitled group” and will not be synced to OX App Suite.
+* The Mac Contacts App does not support CalDAV Collections. Open-Xchange by default recognizes this and exposes an aggregated collection of the CalDAV Collections. As a consequence new contacts entered in subfolders on OX side will not appear in subfolders (or Contact Groups) on the Mac Contacts App but inside of the aggregated Collection itself.
+* Contact Groups from the Mac Contacts App are not synced to OX - however the Contacts itself will be synced to the OX Address Book. Creating a new Contacts Group from within the Contacts App using the OX CardDAV Account is not possible - the name will revert to “untitled group” and will not be synced to OX App Suite.
+* Contact Groups (aka distribution lists) synchronization is in general restricted to a limited group of clients. Since version 7.10.4 contact groups can be synced by using the [eM Client](https://emclient.com/) or the [Outlook CalDAV Synchronizer](https://caldavsynchronizer.org/) with some known limitations: 
+** The Open-Xchange server does only support contact group synchronization based on the vCard 3.0 format specification.
+** both clients are not able to resolve distribution list members that are located in a different folder than the distribution list. The Open-Xchange server fixes this issue by doing a mapping based on the email address if the client provides a distribution list member without a UID.

@@ -51,8 +51,11 @@ package com.openexchange.admin.rmi.impl;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
@@ -71,10 +74,12 @@ import com.openexchange.admin.rmi.exceptions.NoSuchObjectException;
 import com.openexchange.admin.rmi.exceptions.NoSuchResourceException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.exception.LogLevel;
-import com.openexchange.java.Reflections;
 import com.openexchange.log.LogProperties;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.userconfiguration.PermissionConfigurationChecker;
 
 /**
  * General abstraction class used by all impl classes
@@ -83,10 +88,17 @@ import com.openexchange.log.LogProperties;
  */
 public abstract class OXCommonImpl {
 
+    private static final String CONFIG_NAMESPACE = "config";
+
     private final static org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(OXCommonImpl.class);
 
     protected final OXToolStorageInterface tool;
 
+    /**
+     * Initializes a new {@link OXCommonImpl}.
+
+     * @throws StorageException In case the PermissionConfigurationChecker service is unavailable
+     */
     public OXCommonImpl() {
         tool = OXToolStorageInterface.getInstance();
     }
@@ -109,6 +121,66 @@ public abstract class OXCommonImpl {
             final InvalidCredentialsException e = new InvalidCredentialsException("Client sent invalid context data object");
             LOGGER.error("", e);
             throw e;
+        }
+    }
+
+    /**
+     * Checks if the given user has attributes which contain illegal properties
+     *
+     * @param user The user to check
+     * @throws InvalidDataException in case the given user has Attributes which contain invalid properties
+     */
+    protected void checkUserAttributes(final User user) throws InvalidDataException {
+        if (user != null && user.getUserAttributes() != null) {
+            checkUserAttributes(user.getUserAttributes());
+        }
+    }
+
+    /**
+     * Checks if the capabilities contain illegal capabilities
+     *
+     * @param capsToAdd The capabilities to check
+     * @param capsToRemove The capabilities to check
+     * @throws InvalidDataException in case an illegal capability has been found
+     */
+    protected void checkCapabilities(final Optional<Set<String>> capsToAdd, final Optional<Set<String>> capsToRemove) throws InvalidDataException {
+        try {
+            Set<String> capsToCheck;
+            if (capsToAdd.isPresent()) {
+                if (capsToRemove.isPresent()) {
+                    capsToCheck = Stream.concat(capsToAdd.get().stream(), capsToRemove.get().stream()).collect(Collectors.toSet());
+                } else {
+                    capsToCheck = capsToAdd.get();
+                }
+            } else {
+                if (capsToRemove.isPresent() == false) {
+                    // Nothing to do
+                    return;
+                }
+                capsToCheck = capsToRemove.get();
+            }
+            AdminServiceRegistry.getInstance().getService(PermissionConfigurationChecker.class, true).checkCapabilities(capsToCheck);
+        } catch (OXException e) {
+            throw new InvalidDataException(e);
+        }
+    }
+
+    /**
+     * Checks if the given user attributes contain any illegal properties
+     *
+     * @param attributes The user attributes to check
+     * @throws InvalidDataException in case the given user Attributes contain invalid properties
+     */
+    protected void checkUserAttributes(final Map<String, Map<String, String>> attributes) throws InvalidDataException {
+        if (attributes != null) {
+            Map<String, String> map = attributes.get(CONFIG_NAMESPACE);
+            if (map != null && map.isEmpty() == false) {
+                try {
+                    AdminServiceRegistry.getInstance().getService(PermissionConfigurationChecker.class, true).checkAttributes(map);
+                } catch (OXException e) {
+                    throw new InvalidDataException(e);
+                }
+            }
         }
     }
 
@@ -419,38 +491,6 @@ public abstract class OXCommonImpl {
      */
     public static void log(LogLevel level, org.slf4j.Logger logger, Credentials creds, Exception e, String message) {
         log(level, logger, creds, null, null, e, message, new Object[] {});
-    }
-
-    // -------------------------------------------------------------------------------------------------------------------------------------
-
-    private static final CachedConstructor NON_EXISTENT = new CachedConstructor(null);
-
-    private static class CachedConstructor {
-
-        final Constructor<?> constructor;
-
-        /**
-         * Initializes a new {@link CachedConstructor}.
-         *
-         * @param constructor The cached constructor
-         */
-        CachedConstructor(Constructor<?> constructor) {
-            super();
-            this.constructor = constructor;
-        }
-    }
-
-    private static final Field FIELD_DETAIL_MESSAGE;
-
-    static {
-        Field detailMessageField = null;
-        try {
-            detailMessageField = Throwable.class.getDeclaredField("detailMessage");
-            Reflections.makeModifiable(detailMessageField);
-        } catch (Exception e) {
-            LOGGER.error("", e);
-        }
-        FIELD_DETAIL_MESSAGE = detailMessageField;
     }
 
 }

@@ -70,7 +70,7 @@ import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
 import com.openexchange.oauth.association.spi.OAuthAccountAssociationProvider;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.tools.oxfolder.property.FolderUserPropertyStorage;
+import com.openexchange.tools.oxfolder.property.FolderSubscriptionHelper;
 import com.openexchange.user.UserService;
 
 public class Activator extends HousekeepingActivator {
@@ -81,7 +81,7 @@ public class Activator extends HousekeepingActivator {
         return new Class[] {
             OAuthService.class, OAuthServiceMetaDataRegistry.class, OAuthAccountStorage.class, CalendarAccountService.class, AdministrativeCalendarAccountService.class, LeanConfigurationService.class, RecurrenceService.class,
             // The services below are only required by migration
-            GenericConfigurationStorageService.class, CalendarStorageFactory.class, ContextService.class, FolderUserPropertyStorage.class, GroupService.class, UserService.class, FolderService.class
+            GenericConfigurationStorageService.class, CalendarStorageFactory.class, ContextService.class, FolderSubscriptionHelper.class, GroupService.class, UserService.class, FolderService.class
         };
         //@formatter:on
     }

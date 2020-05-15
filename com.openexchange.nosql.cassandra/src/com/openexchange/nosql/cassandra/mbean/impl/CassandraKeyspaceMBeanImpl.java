@@ -65,6 +65,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.management.AnnotatedDynamicStandardMBean;
 import com.openexchange.nosql.cassandra.CassandraService;
 import com.openexchange.nosql.cassandra.mbean.CassandraKeyspaceMBean;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -81,7 +82,7 @@ public class CassandraKeyspaceMBeanImpl extends AnnotatedDynamicStandardMBean im
 
     /**
      * Initialises a new {@link CassandraKeyspaceMBeanImpl}.
-     * 
+     *
      * @param services
      * @param description
      * @param mbeanInterface
@@ -96,6 +97,9 @@ public class CassandraKeyspaceMBeanImpl extends AnnotatedDynamicStandardMBean im
     protected void refresh() {
         try {
             CassandraService cassandraService = getService(CassandraService.class);
+            if (cassandraService == null) {
+                throw ServiceExceptionCode.absentService(CassandraService.class);
+            }
             Cluster cluster = cassandraService.getCluster();
             keyspaceMetadata = cluster.getMetadata().getKeyspace(keyspaceName);
         } catch (OXException e) {

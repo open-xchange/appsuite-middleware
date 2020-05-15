@@ -85,6 +85,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TimeZone;
@@ -382,7 +383,7 @@ public class Utils {
     public static boolean isCheckConflicts(CalendarParameters parameters) {
         return parameters.get(CalendarParameters.PARAMETER_CHECK_CONFLICTS, Boolean.class, Boolean.FALSE).booleanValue();
     }
-    
+
     /**
      * Gets a value indicating whether the checks of (external) attendee URIs are disabled or not, considering both the calendar
      * parameters and general configuration.
@@ -429,6 +430,25 @@ public class Utils {
      */
     public static Date getUntil(CalendarParameters parameters) {
         return parameters.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
+    }
+
+    /**
+     * Gets a value indicating whether two email addresses share the same domain part.
+     *
+     * @param email1 The first email address to check
+     * @param email2 The second email address to check
+     * @return <code>true</code> if both addresses end with the same domain, <code>false</code>, otherwise
+     */
+    public static boolean isSameMailDomain(String email1, String email2) {
+        int idx1 = null != email1 ? email1.lastIndexOf('@') : -1;
+        if (0 > idx1) {
+            return false;
+        }
+        int idx2 = null != email2 ? email2.lastIndexOf('@') : -1;
+        if (0 > idx2) {
+            return false;
+        }
+        return Objects.equals(email1.substring(idx1), email2.substring(idx2));
     }
 
     /**
@@ -665,11 +685,11 @@ public class Utils {
         }
         return folder.getSession().getUserId();
     }
-    
+
     /**
      * Resolves the event ID for the given UID and the given calendar user. In case the recurrence ID is unknown,
      * the master event will be returned.
-     * 
+     *
      * @param session The session to use
      * @param storage The storage to lookup the event from
      * @param uid The event UID to load
@@ -874,7 +894,7 @@ public class Utils {
 
     /**
      * Initializes a {@link DelegatingEvent} that overrides the participation status of the attendee matching a specific calendar user.
-     * 
+     *
      * @param event The event to override the participation status in
      * @param calendarUser The calendar user to override the participation status for
      * @param partStat The participation status to indicate for the matching attendee
@@ -908,7 +928,7 @@ public class Utils {
     /**
      * Initializes a calendar object resource based on {@link DelegatingEvent}s that override the participation status of the attendee
      * matching a specific calendar user.
-     * 
+     *
      * @param resource The resource to override the participation status in
      * @param calendarUser The calendar user to override the participation status for
      * @param partStat The participation status to indicate for the matching attendee
@@ -925,7 +945,7 @@ public class Utils {
     /**
      * Gets a valued indicating whether changed properties in an updated attendee represents a modification that needs to be reported as
      * <i>reply</i> to the of a group scheduled event organizer or not.
-     * 
+     *
      * @param originalAttendee The original attendee
      * @param updatedAttendee The updated attendee
      * @return <code>true</code> if the changed properties represent a reply, <code>false</code>, otherwise
@@ -945,7 +965,7 @@ public class Utils {
     /**
      * Gets a value indicating whether the applied changes represent an attendee reply of a specific calendar user for the associated
      * calendar object resource or not, depending on the modified attendee fields.
-     * 
+     *
      * @return <code>true</code> if the underlying calendar resource is replied to along with the update, <code>false</code>, otherwise
      */
     public static boolean isReply(CollectionUpdate<Attendee, AttendeeField> attendeeUpdates, CalendarUser calendarUser) {
@@ -979,7 +999,7 @@ public class Utils {
         }
         return false;
     }
-    
+
     /**
      * Gets a value indicating whether an event update represents a <i>re-scheduling</i> of the calendar object resource or not, depending
      * on the modified event fields.
@@ -1036,7 +1056,7 @@ public class Utils {
 
     /**
      * Extracts those event updates that represent a <i>reply</i> scheduling operation from a specific calendar user's point of view.
-     * 
+     *
      * @param eventUpdates The event updates to extract the replies from
      * @param calendarUser The calendar user to extract the replies for
      * @return The event updates representing <i>reply</i> scheduling operations, or an empty list if there are none
@@ -1156,7 +1176,7 @@ public class Utils {
     /**
      * Replaces a change exception's recurrence identifier to piggyback the recurrence data of the corresponding event series. This aids the
      * <i>legacy</i> storage to calculate the correct recurrence positions properly.
-     * 
+     *
      * @param changeException The change exception event to edit the recurrence identifier in
      * @param recurrenceData The recurrence data to inject
      * @return The passed change exception event, with an replaced data-aware recurrence identifier
@@ -1173,7 +1193,7 @@ public class Utils {
     /**
      * Replaces the recurrence identifier in a list of change exceptions to piggyback the recurrence data of the corresponding event
      * series. This aids the <i>legacy</i> storage to calculate the correct recurrence positions properly.
-     * 
+     *
      * @param changeExceptions The change exception events to edit the recurrence identifier in
      * @param recurrenceData The recurrence data to inject
      * @return The passed change exception events, with an replaced data-aware recurrence identifier
@@ -1250,7 +1270,7 @@ public class Utils {
                 LOG.warn("Error getting effective user permission for folder {}; skipping.", I(folder.getObjectID()), e);
                 continue;
             }
-            if (ownPermission.getFolderPermission() >= requiredFolderPermission && 
+            if (ownPermission.getFolderPermission() >= requiredFolderPermission &&
                 ownPermission.getReadPermission() >= requiredReadPermission &&
                 ownPermission.getWritePermission() >= requiredWritePermission &&
                 ownPermission.getDeletePermission() >= requiredDeletePermission) {
@@ -1522,11 +1542,11 @@ public class Utils {
     }
 
     /**
-     * 
+     *
      * Processes an {@link InternalCalendarResult}. Informs {@link CalendarHandler} and triggers the {@link SchedulingBroker} to send messages.
      * <p>
      * Does <b>NOT</b> track attendee usage as per {@link #trackAttendeeUsage(CalendarSession, CalendarEvent)}
-     * 
+     *
      * @param <T> The type of the {@link InternalCalendarResult}
      * @param services The {@link ServiceLookup} to obtain the {@link CalendarEventNotificationService} and the {@link SchedulingBroker} from
      * @param result The actual result
@@ -1582,7 +1602,7 @@ public class Utils {
      * entity resolver.
      * <p/>
      * For externally organized events, only the calendar user itself should be resolved, otherwise, there are no restrictions.
-     * 
+     *
      * @param session The calendar session
      * @param folder The parent folder of the event being processed
      * @param event The event being processed
@@ -1660,7 +1680,7 @@ public class Utils {
 
     /**
      * Extracts (and optionally removes) specific calendar parameters from the supplied parameter container.
-     * 
+     *
      * @param parameters The parameters to extract
      * @param remove <code>true</code> to remove the extracted parameters from the original parameter container, <code>false</code> to
      *            keep them
@@ -1685,7 +1705,7 @@ public class Utils {
 
     /**
      * Copies all calendar parameters from one parameter container into another one.
-     * 
+     *
      * @param from The calendar parameters to copy
      * @param to The target calendar parameters to copy into
      * @return The possibly modified target calendar parameters

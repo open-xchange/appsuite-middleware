@@ -95,6 +95,8 @@ public class DistributionListEntryObject implements Serializable {
 
     private String sortName;
 
+    private String contactUid;
+
     private boolean b_entry_id;
 
     private boolean b_emailaddress;
@@ -110,6 +112,7 @@ public class DistributionListEntryObject implements Serializable {
     private boolean b_folderid;
 
     private boolean b_sortName;
+    private boolean b_contactUid;
 
     /**
      * Initializes a new {@link DistributionListEntryObject}
@@ -171,6 +174,15 @@ public class DistributionListEntryObject implements Serializable {
         return sortName;
     }
 
+    /**
+     * Gets the contactUid
+     *
+     * @return The contactUid
+     */
+    public String getContactUid() {
+        return this.contactUid;
+    }
+
     // SET METHODS
     public void setEntryID(final int entry_id) {
         this.entry_id = entry_id;
@@ -208,13 +220,23 @@ public class DistributionListEntryObject implements Serializable {
     }
 
     /**
+     * Sets the contactUid
+     *
+     * @param contactUid The contactUid to set
+     */
+    public void setContactUid(String contactUid) {
+        this.contactUid = contactUid;
+        this.b_contactUid = true;
+    }
+
+    /**
      * Sets the distribution list entry's email address
      *
      * @param emailaddress The email address to set
      * @throws OXException If specified email address is invalid
      */
     public void setEmailaddress(final String emailaddress) throws OXException {
-    	this.setEmailaddress(emailaddress, null != emailaddress && 0 < emailaddress.length());
+        this.setEmailaddress(emailaddress, null != emailaddress && 0 < emailaddress.length());
     }
 
     /**
@@ -225,16 +247,16 @@ public class DistributionListEntryObject implements Serializable {
      * @throws OXException If specified email address is invalid and verification is enabled
      */
     public void setEmailaddress(String emailaddress, boolean verifyAddress) throws OXException {
-    	if (verifyAddress) {
-	        /*
-	         * Verify email address with JavaMail's InternetAddress class
-	         */
-	        try {
-	            new QuotedInternetAddress(emailaddress);
-	        } catch (AddressException e) {
-	            throw ContactExceptionCodes.INVALID_EMAIL.create(e, emailaddress);
-	        }
-    	}
+        if (verifyAddress) {
+            /*
+             * Verify email address with JavaMail's InternetAddress class
+             */
+            try {
+                new QuotedInternetAddress(emailaddress);
+            } catch (AddressException e) {
+                throw ContactExceptionCodes.INVALID_EMAIL.create(e, emailaddress);
+            }
+        }
         this.emailaddress = emailaddress;
         b_emailaddress = true;
     }
@@ -288,6 +310,14 @@ public class DistributionListEntryObject implements Serializable {
         b_sortName = false;
     }
 
+    /**
+     * Removes the contactUid
+     */
+    public void removeContactUid() {
+        contactUid = null;
+        b_contactUid = false;
+    }
+
     // CONTAINS METHODS
     public boolean containsEntryID() {
         return b_entry_id;
@@ -324,6 +354,10 @@ public class DistributionListEntryObject implements Serializable {
      */
     public boolean containsSortName() {
         return b_sortName;
+    }
+
+    public boolean containsContactUid() {
+        return b_contactUid;
     }
 
     @Override
@@ -399,6 +433,13 @@ public class DistributionListEntryObject implements Serializable {
         } else if ((getSortName() == null && dleo.getSortName() != null) || (getSortName() != null && dleo.getSortName() == null)) {
             eq = false;
         }
+        if (getContactUid() != null && dleo.getContactUid() != null) {
+            if (!getContactUid().equals(dleo.getContactUid())) {
+                eq = false;
+            }
+        } else if ((getContactUid() == null && dleo.getContactUid() != null) || (getContactUid() != null && dleo.getContactUid() == null)) {
+            eq = false;
+        }
 
         return eq;
     }
@@ -412,6 +453,7 @@ public class DistributionListEntryObject implements Serializable {
         emailfield = 0;
         folderid = 0;
         sortName = null;
+        contactUid = null;
 
         b_entry_id = false;
         b_displayname = false;
@@ -421,11 +463,11 @@ public class DistributionListEntryObject implements Serializable {
         b_emailfield = false;
         b_folderid = false;
         b_sortName = false;
+        b_contactUid = false;
     }
 
     @Override
     public String toString() {
         return "DistributionListEntryObject [emailaddress=" + emailaddress + ", displayname=" + displayname + "]";
     }
-
 }

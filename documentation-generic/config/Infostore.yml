@@ -102,3 +102,27 @@ properties:
       file: infostore.properties
       packageName: open-xchange-core
       tags: ["Infostore"]
+
+    - key: com.openexchange.infostore.trash.useForWebdav
+      description: |
+        Specifies if the trash folder should be enabled for WebDAV access. If enabled, resources will be moved into
+        the trash folder on deletion. Also the trash folder will be exposed via WebDAV.
+      defaultValue: true
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: true
+      file: infostore.properties
+      packageName: open-xchange-core
+      tags: ["Infostore"]
+
+    - key: com.openexchange.infostore.maxPermissionEntities
+      description: |
+        Specifies the maximum allowed number of object permissions. A value below 0 deactivates the limit.
+      defaultValue: 100
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: infostore.properties
+      packageName: open-xchange-core
+      tags: ["Infostore", "Limit", "Permission"]

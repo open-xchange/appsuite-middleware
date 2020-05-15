@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.json.converter;
 
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import org.json.JSONArray;
@@ -139,7 +140,7 @@ public class EventsPerFolderResultConverter extends EventResultConverter {
             jsonObject.put("folder", folderId);
             if (null != eventsResult.getError()) {
                 JSONObject error = new JSONObject();
-                ResponseWriter.addException(error, eventsResult.getError());
+                ResponseWriter.addException(error, eventsResult.getError(), session.getUser().getLocale());
                 jsonObject.put("error", error);
             } else {
                 jsonObject.putOpt("events", convertEvents(eventsResult.getEvents(), timeZoneID, session, requestedFields, extendedEntities));

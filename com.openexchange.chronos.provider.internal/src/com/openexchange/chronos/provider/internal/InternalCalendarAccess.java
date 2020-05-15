@@ -53,8 +53,6 @@ import static com.openexchange.chronos.compat.Event2Appointment.asInt;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR_LITERAL;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.SCHEDULE_TRANSP;
-import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_SYNC;
-import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_SYNC_LITERAL;
 import static com.openexchange.chronos.provider.internal.Constants.ACCOUNT_ID;
 import static com.openexchange.chronos.provider.internal.Constants.CONTENT_TYPE;
 import static com.openexchange.chronos.provider.internal.Constants.PRIVATE_FOLDER_ID;
@@ -94,6 +92,7 @@ import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarCapability;
 import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.CalendarFolderProperty;
+import com.openexchange.chronos.provider.UsedForSync;
 import com.openexchange.chronos.provider.extensions.FolderSearchAware;
 import com.openexchange.chronos.provider.extensions.FolderSyncAware;
 import com.openexchange.chronos.provider.extensions.PersonalAlarmAware;
@@ -201,23 +200,13 @@ public class InternalCalendarAccess implements FolderCalendarAccess, SubscribeAw
     @Override
     public String updateFolder(String folderId, CalendarFolder folder, long clientTimestamp) throws OXException {
         /*
-         * update extended properties & subscribed flag as needed; 'hide' the change in folder update afterwards
+         * update extended properties as needed; 'hide' the change in folder update afterwards
          */
         GroupwareCalendarFolder originalFolder = getFolder(folderId);
         if (null != folder.getExtendedProperties()) {
             updateProperties(originalFolder, folder.getExtendedProperties());
             DefaultGroupwareCalendarFolder folderUpdate = new DefaultGroupwareCalendarFolder(folder);
             folderUpdate.setExtendedProperties(null);
-            folder = folderUpdate;
-        }
-        if (originalFolder.isSubscribed() != folder.isSubscribed()) {
-            if (originalFolder.isDefaultFolder() && GroupwareFolderType.PRIVATE.equals(originalFolder.getType())) {
-                throw OXException.noPermissionForFolder();
-            }
-            Map<String, String> properties = Collections.singletonMap(USER_PROPERTY_PREFIX + "subscribed", String.valueOf(folder.isSubscribed()));
-            storeUserProperties(session.getContextId(), folderId, session.getUserId(), properties);
-            DefaultGroupwareCalendarFolder folderUpdate = new DefaultGroupwareCalendarFolder(folder);
-            folderUpdate.setSubscribed(true);
             folder = folderUpdate;
         }
         /*
@@ -231,26 +220,21 @@ public class InternalCalendarAccess implements FolderCalendarAccess, SubscribeAw
     @Override
     public String createFolder(CalendarFolder folder) throws OXException {
         /*
-         * perform common folder create (excluding extended properties & subscribe flag)
+         * perform common folder create (excluding extended properties)
          */
         String folderId;
         {
             DefaultGroupwareCalendarFolder plainFolder = new DefaultGroupwareCalendarFolder(folder);
             plainFolder.setExtendedProperties(null);
-            plainFolder.setSubscribed(true);
             ParameterizedFolder folderToCreate = getStorageFolder(TREE_ID, CONTENT_TYPE, plainFolder, null, ACCOUNT_ID, null);
             FolderResponse<String> response = getFolderService().createFolder(folderToCreate, session.getSession(), initDecorator());
             folderId = response.getResponse();
         }
         /*
-         * insert extended properties & subscribed flag if needed
+         * insert extended properties if needed
          */
         if (null != folder.getExtendedProperties()) {
             updateProperties(getFolder(folderId), folder.getExtendedProperties());
-        }
-        if (false == folder.isSubscribed()) {
-            Map<String, String> properties = Collections.singletonMap(USER_PROPERTY_PREFIX + "subscribed", String.valueOf(folder.isSubscribed()));
-            storeUserProperties(session.getContextId(), folderId, session.getUserId(), properties);
         }
         return folderId;
     }
@@ -452,8 +436,11 @@ public class InternalCalendarAccess implements FolderCalendarAccess, SubscribeAw
         Map<String, String> userProperties = loadUserProperties(session.getContextId(), userizedFolder.getID(), session.getUserId());
         calendarFolder.setExtendedProperties(getExtendedProperties(userProperties, userizedFolder));
         calendarFolder.setSupportedCapabilites(CalendarCapability.getCapabilities(getClass()));
-        String subscribed = userProperties.get(USER_PROPERTY_PREFIX + "subscribed");
-        calendarFolder.setSubscribed(null == subscribed || Boolean.parseBoolean(subscribed));
+
+        if (userizedFolder.isDefault() && PrivateType.getInstance().equals(userizedFolder.getType())) {
+            calendarFolder.setUsedForSync(UsedForSync.FORCED_ACTIVE);
+        }
+
         return calendarFolder;
     }
 
@@ -506,16 +493,6 @@ public class InternalCalendarAccess implements FolderCalendarAccess, SubscribeAw
      */
     private static ExtendedProperties getExtendedProperties(Map<String, String> userProperties, UserizedFolder folder) {
         ExtendedProperties properties = new ExtendedProperties();
-        /*
-         * used for sync
-         */
-        if (folder.isDefault() && PrivateType.getInstance().equals(folder.getType())) {
-            properties.add(USED_FOR_SYNC(Boolean.TRUE, true));
-        } else if (userProperties.containsKey(USER_PROPERTY_PREFIX + USED_FOR_SYNC_LITERAL)) {
-            properties.add(USED_FOR_SYNC(userProperties.get(USER_PROPERTY_PREFIX + USED_FOR_SYNC_LITERAL), false));
-        } else {
-            properties.add(USED_FOR_SYNC(Boolean.TRUE, false));
-        }
         /*
          * schedule transparency
          */
@@ -627,7 +604,7 @@ public class InternalCalendarAccess implements FolderCalendarAccess, SubscribeAw
      * @return The collected subfolders, or an empty list if there are none
      */
     private List<UserizedFolder> getSubfoldersRecursively(FolderService folderService, FolderServiceDecorator decorator, String parentId) throws OXException {
-        UserizedFolder[] subfolders = folderService.getSubfolders(TREE_ID, parentId, false, session.getSession(), decorator).getResponse();
+        UserizedFolder[] subfolders = folderService.getSubfolders(TREE_ID, parentId, true, session.getSession(), decorator).getResponse();
         if (null == subfolders || 0 == subfolders.length) {
             return Collections.emptyList();
         }

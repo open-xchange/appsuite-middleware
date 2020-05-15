@@ -59,6 +59,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
+import com.openexchange.config.lean.DefaultProperty;
+import com.openexchange.config.lean.LeanConfigurationService;
+import com.openexchange.config.lean.Property;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBProviderUser;
 import com.openexchange.exception.OXException;
@@ -74,6 +77,8 @@ import com.openexchange.groupware.infostore.WebdavFolderAliases;
 import com.openexchange.groupware.infostore.database.impl.InfostoreSecurity;
 import com.openexchange.groupware.infostore.webdav.URLCache.Type;
 import com.openexchange.server.impl.EffectivePermission;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.Session;
 import com.openexchange.session.SessionHolder;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
@@ -95,6 +100,12 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 public class InfostoreWebdavFactory extends AbstractWebdavFactory implements BulkLoader {
 
     private static final Protocol PROTOCOL = new Protocol();
+
+    /**
+     * Defines if WebDAV resources should be moved to trash or deleted directly
+     */
+    private static final Property TRASH_USE_FOR_WEBDAV = DefaultProperty.valueOf("com.openexchange.infostore.trash.useForWebdav", Boolean.TRUE);
+
     private WebdavFolderAliases aliases;
 
 
@@ -286,8 +297,6 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
             throw WebdavProtocolException.generalError(e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }
-
-
 
     private Set<TransactionAware> services(){
         return this.services;
@@ -602,4 +611,15 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
         }
     }
 
+    /**
+    * Returns if the trash folder should be considered when using WebDAV
+    *
+    * @param session The session
+    * @return True, if the trash folder for WeDAV should be used, false otherwise
+    * @throws OXException
+    */
+    public boolean isTrashEnabled(Session session) throws OXException {
+        LeanConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(LeanConfigurationService.class, true);
+        return configurationService.getBooleanProperty(session.getUserId(), session.getContextId(), TRASH_USE_FOR_WEBDAV);
+    }
 }

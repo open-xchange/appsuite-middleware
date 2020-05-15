@@ -49,9 +49,13 @@
 
 package com.openexchange.chronos.provider.basic;
 
+import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_SYNC_LITERAL;
 import java.util.Date;
+import java.util.Optional;
 import org.json.JSONObject;
 import com.openexchange.chronos.ExtendedProperties;
+import com.openexchange.chronos.provider.CalendarFolderProperty;
+import com.openexchange.chronos.provider.UsedForSync;
 import com.openexchange.exception.OXException;
 
 /**
@@ -74,6 +78,7 @@ public class CalendarSettings {
     private boolean containsSubscribed;
     private OXException error;
     private boolean containsError;
+    private UsedForSync usedForSync;
 
     /**
      * Initializes a new {@link CalendarSettings}.
@@ -171,6 +176,24 @@ public class CalendarSettings {
     public void setExtendedProperties(ExtendedProperties value) {
         extendedProperties = value;
         containsExtendedProperties = true;
+        checkUsedForSync(value);
+    }
+
+    /**
+     * Checks if the given {@link ExtendedProperties} contain any used for sync value and remove it and set the according field instead
+     *
+     * @param props The {@link ExtendedProperties} to check
+     */
+    private void checkUsedForSync(ExtendedProperties props) {
+        if(props == null || props.contains(USED_FOR_SYNC_LITERAL) == false) {
+            return;
+        }
+        boolean protekted = CalendarFolderProperty.isProtected(getExtendedProperties().get(USED_FOR_SYNC_LITERAL));
+        Boolean usedForSync = CalendarFolderProperty.optPropertyValue(getExtendedProperties(), USED_FOR_SYNC_LITERAL, Boolean.class);
+        if(getUsedForSync().isPresent() == false) {
+            setUsedForSync(new UsedForSync(usedForSync.booleanValue(), protekted));
+        }
+        props.removeAll(USED_FOR_SYNC_LITERAL);
     }
 
     /**
@@ -288,6 +311,24 @@ public class CalendarSettings {
      */
     public boolean containsError() {
         return containsError;
+    }
+
+    /**
+     * Gets the usedForSync
+     *
+     * @return The usedForSync
+     */
+    public Optional<UsedForSync> getUsedForSync() {
+        return Optional.ofNullable(usedForSync);
+    }
+
+    /**
+     * Sets the usedForSync
+     *
+     * @param usedForSync The usedForSync to set
+     */
+    public void setUsedForSync(UsedForSync usedForSync) {
+        this.usedForSync = usedForSync;
     }
 
     /**

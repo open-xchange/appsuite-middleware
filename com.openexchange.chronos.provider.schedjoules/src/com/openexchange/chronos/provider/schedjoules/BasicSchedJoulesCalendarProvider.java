@@ -51,15 +51,15 @@ package com.openexchange.chronos.provider.schedjoules;
 
 import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR_LITERAL;
-import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_SYNC_LITERAL;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.optPropertyValue;
+import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_SYNC_LITERAL;
 import static com.openexchange.chronos.provider.basic.CommonCalendarConfigurationFields.NAME;
 import static com.openexchange.chronos.provider.schedjoules.SchedJoulesFields.ITEM_ID;
 import static com.openexchange.chronos.provider.schedjoules.SchedJoulesFields.LOCALE;
 import static com.openexchange.chronos.provider.schedjoules.SchedJoulesFields.REFRESH_INTERVAL;
-import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
+import static com.openexchange.java.Autoboxing.B;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;

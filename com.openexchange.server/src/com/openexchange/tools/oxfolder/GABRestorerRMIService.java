@@ -66,7 +66,8 @@ public interface GABRestorerRMIService extends Remote {
      * Restores default permissions on global address book folder.
      *
      * @param cid The context ID
+     * @param gabMode The mode the global address book shall operate on
      * @throws RemoteException If an error is occurred
      */
-    void restoreDefaultPermissions(int cid) throws RemoteException;
+    void restoreDefaultPermissions(int cid, GABMode gabMode) throws RemoteException;
 }

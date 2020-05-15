@@ -57,6 +57,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.tools.oxfolder.GABMode;
 
 /**
  * Class representing a context.
@@ -125,6 +126,8 @@ public class Context extends ExtendableDataObject implements NameAndIdObject {
     private boolean listrun;
 
     private List<Object[]> quotas;
+    
+    private GABMode gabMode;
 
     public Context() {
         super();
@@ -557,6 +560,24 @@ public class Context extends ExtendableDataObject implements NameAndIdObject {
         return userAttribtuesset;
     }
 
+    /**
+     * Sets the {@link GABMode}
+     *
+     * @param mode THe mode to use for the context
+     */
+    public void setGABMode(GABMode mode) {
+        this.gabMode = mode;
+    }
+
+    /**
+     * Gets the {@link GABMode} for the context
+     *
+     * @return The {@link GABMode} or <code>null</code> if not set
+     */
+    public GABMode getGABMode() {
+        return gabMode;
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -714,6 +735,13 @@ public class Context extends ExtendableDataObject implements NameAndIdObject {
             return false;
         }
         if (writeDatabaseset != other.writeDatabaseset) {
+            return false;
+        }
+        if (gabMode == null) {
+            if (other.gabMode != null) {
+                return false;
+            }
+        } else if (!gabMode.equals(other.gabMode)) {
             return false;
         }
         return true;

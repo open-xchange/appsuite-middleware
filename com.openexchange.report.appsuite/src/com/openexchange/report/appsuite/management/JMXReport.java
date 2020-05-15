@@ -115,7 +115,7 @@ public class JMXReport {
             jsonData.put("storageFolderPath", storageFolderPath);
             jsonData.put(Report.OPERATINGSYSTEM, new JSONObject().put(Report.OPERATINGSYSTEM_NAME, report.getOperatingSystemName()).put(Report.OPERATINGSYSTEM_VERSION, report.getOperatingSystemVersion()).put(Report.OPERATINGSYSTEM_DISTRIBUTION, report.getDistribution()));
             jsonData.put(Report.DATABASE_VERSION, report.getDatabaseVersion());
-            jsonData.put(Report.JAVA_VERSION, report.getJavaVersion());
+            jsonData.put(Report.JAVA, new JSONObject().put(Report.JAVA_VERSION, report.getJavaVersion()).put(Report.JAVA_VENDOR, report.getJavaVendor()));
             jsonData.put(Report.INSTALLED_OX_PACKAGES, new JSONArray(report.getInstalledOXPackages()));
             jsonData.put(Report.CONFIGURED_3RD_PARTY_APIS, new JSONObject().put(Report.APIS_OAUTH, new JSONArray(report.getConfiguredThirdPartyAPIsOAuth())).put(Report.APIS_OTHERS, new JSONArray(report.getConfiguredThirdPartyAPIsOthers())));
 

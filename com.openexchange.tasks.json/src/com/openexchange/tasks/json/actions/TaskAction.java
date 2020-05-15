@@ -59,6 +59,7 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.authentication.application.ajax.RestrictedAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.DataObject;
@@ -85,7 +86,10 @@ import gnu.trove.list.array.TIntArrayList;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 
+@RestrictedAction(module = TaskAction.MODULE, type = RestrictedAction.Type.READ)
 public abstract class TaskAction implements AJAXActionService {
+
+    protected static final String MODULE = "tasks";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TaskAction.class);
 

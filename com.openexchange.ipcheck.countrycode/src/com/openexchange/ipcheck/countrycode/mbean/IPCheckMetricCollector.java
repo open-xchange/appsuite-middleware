@@ -49,10 +49,13 @@
 
 package com.openexchange.ipcheck.countrycode.mbean;
 
-import com.openexchange.metrics.MetricDescriptor;
-import com.openexchange.metrics.MetricService;
-import com.openexchange.metrics.MetricType;
-import com.openexchange.metrics.types.Meter;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.Map;
+import com.openexchange.ipcheck.countrycode.AcceptReason;
+import com.openexchange.ipcheck.countrycode.DenyReason;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.Metrics;
 
 /**
  * {@link IPCheckMetricCollector}
@@ -62,51 +65,62 @@ import com.openexchange.metrics.types.Meter;
 public class IPCheckMetricCollector {
 
     public static final String COMPONENT_NAME = "ipcheck";
-    private MetricService metrics;
+
+    private final Map<AcceptReason, Counter> acceptCounters;
+    private final Map<DenyReason, Counter> denyCounters;
 
     /**
      * Initialises a new {@link IPCheckMetricCollector}.
      *
      * @param componentName
      */
-    public IPCheckMetricCollector(MetricService metrics) {
+    public IPCheckMetricCollector() {
         super();
-        this.metrics = metrics;
+        Map<AcceptReason, Counter> acceptCounters = new EnumMap<>(AcceptReason.class);
+        for (AcceptReason reason : AcceptReason.values()) {
+            acceptCounters.put(reason, getCounter("accepted", reason.name()));
+        }
+        this.acceptCounters = Collections.unmodifiableMap(acceptCounters);
+
+        Map<DenyReason, Counter> denyCounters = new EnumMap<>(DenyReason.class);
+        for (DenyReason reason : DenyReason.values()) {
+            denyCounters.put(reason, getCounter("denied", reason.name()));
+        }
+        this.denyCounters = Collections.unmodifiableMap(denyCounters);
     }
 
-    public void incrementTotalIPChanges() {
-        getMeter(IPCheckMetric.totalIPChanges.getMetricName()).mark();
+    public void incrementAccepted(AcceptReason reason) {
+        acceptCounters.get(reason).increment();
     }
 
-    public void incrementAcceptedIPChanges() {
-        getMeter(IPCheckMetric.acceptedIPChanges.getMetricName()).mark();
+    public void incrementDenied(DenyReason reason) {
+        denyCounters.get(reason).increment();
     }
 
-    public void incrementDeniedIPChanges() {
-        getMeter(IPCheckMetric.deniedIPChanges.getMetricName()).mark();
+    private Counter getCounter(String status, String reason) {
+        return Counter.builder("appsuite.ipchanges").description("Total number of detected user session IP changes.").tags("status", status, "reason", reason).register(Metrics.globalRegistry);
     }
 
-    public void incrementAcceptedPrivateIP() {
-        getMeter(IPCheckMetric.acceptedPrivateIP.getMetricName()).mark();
-    }
-
-    public void incrementAcceptedWhiteListed() {
-        getMeter(IPCheckMetric.acceptedWhiteListed.getMetricName()).mark();
-    }
-
-    public void incrementAcceptedEligibleIPChange() {
-        getMeter(IPCheckMetric.acceptedEligibleIPChanges.getMetricName()).mark();
-    }
-
-    public void incrementDeniedException() {
-        getMeter(IPCheckMetric.deniedException.getMetricName()).mark();
-    }
-
-    public void incrementDeniedCountryChange() {
-        getMeter(IPCheckMetric.deniedCountryChanged.getMetricName()).mark();
-    }
-
-    Meter getMeter(String metricName) {
-        return metrics.getMeter(MetricDescriptor.newBuilder(COMPONENT_NAME, metricName, MetricType.METER).build());
+    public double getCount(IPCheckMetric metric) {
+        switch (metric) {
+            case acceptedEligibleIPChanges:
+                return acceptCounters.get(AcceptReason.ELIGIBLE).count();
+            case acceptedPrivateIP:
+                return acceptCounters.get(AcceptReason.PRIVATE_IPV4).count();
+            case acceptedWhiteListed:
+                return acceptCounters.get(AcceptReason.WHITE_LISTED).count();
+            case acceptedIPChanges:
+                return acceptCounters.values().stream().mapToDouble(c -> c.count()).sum();
+            case deniedCountryChanged:
+                return denyCounters.get(DenyReason.COUNTRY_CHANGE).count();
+            case deniedException:
+                return denyCounters.get(DenyReason.EXCEPTION).count();
+            case deniedIPChanges:
+                return denyCounters.values().stream().mapToDouble(c -> c.count()).sum();
+            case totalIPChanges:
+                return Double.sum(getCount(IPCheckMetric.acceptedIPChanges), getCount(IPCheckMetric.deniedIPChanges));
+            default:
+                return -1d;
+        }
     }
 }

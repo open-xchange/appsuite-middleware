@@ -37,3 +37,13 @@ properties:
       file: dovecot-push.properties
       packageName: open-xchange-push-dovecot
       tags: ["Mail","Push"]
+    - key: com.openexchange.push.dovecot.enabled
+      description: |
+        Enables or disables Dovecot Push
+      defaultValue: true
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: true
+      file: dovecot-push.properties
+      packageName: open-xchange-push-dovecot
+      tags: ["Mail","Push"]

@@ -70,6 +70,7 @@ public final class AddSessionParameterImpl implements AddSessionParameter {
     private final User user;
     private final Context ctx;
     private final List<SessionEnhancement> enhancements;
+    private final String passwordOverride;
 
     /**
      * Initializes a new {@link AddSessionParameterImpl}.
@@ -80,12 +81,26 @@ public final class AddSessionParameterImpl implements AddSessionParameter {
      * @param ctx The resolved context
      */
     public AddSessionParameterImpl(final String userName, final LoginRequest request, final User user, final Context ctx) {
+        this(userName, request, user, ctx, null);
+    }
+
+    /**
+     * Initializes a new {@link AddSessionParameterImpl}.
+     *
+     * @param userName The user name
+     * @param request The associated login request
+     * @param user The resolved user
+     * @param ctx The resolved context
+     * @param passwordOverride Override the login password with new value, or <code>null</code> if not applicable
+     */
+    public AddSessionParameterImpl(final String userName, final LoginRequest request, final User user, final Context ctx, String passwordOverride) {
         super();
         this.userName = userName;
         this.request = request;
         this.user = user;
         this.ctx = ctx;
         this.enhancements = Collections.synchronizedList(new ArrayList<SessionEnhancement>());
+        this.passwordOverride = passwordOverride;
     }
 
     @Override
@@ -115,7 +130,7 @@ public final class AddSessionParameterImpl implements AddSessionParameter {
 
     @Override
     public String getPassword() {
-        return request.getPassword();
+        return null != passwordOverride ? passwordOverride : request.getPassword();
     }
 
     @Override

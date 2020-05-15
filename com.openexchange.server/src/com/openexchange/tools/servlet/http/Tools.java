@@ -414,7 +414,7 @@ public final class Tools {
      * @See {@link #isRemoveCachingHeader(HttpServletRequest)}, {@link #removeCachingHeader(HttpServletResponse)}, {@link #disableCaching(AJAXRequestResult)}
      */
     public static void updateCachingHeaders(final HttpServletRequest req, final HttpServletResponse resp) {
-        if(isRemoveCachingHeader(req)) {
+        if (isRemoveCachingHeader(req)) {
             removeCachingHeader(resp);
         } else {
             disableCaching(resp);

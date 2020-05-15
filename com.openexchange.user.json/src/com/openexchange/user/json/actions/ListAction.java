@@ -72,7 +72,7 @@ import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.User;
 import com.openexchange.user.UserExceptionCode;
 import com.openexchange.user.UserService;
-import com.openexchange.user.json.UserContact;
+import com.openexchange.user.json.dto.UserContact;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 

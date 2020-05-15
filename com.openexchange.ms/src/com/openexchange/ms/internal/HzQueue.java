@@ -76,7 +76,10 @@ public final class HzQueue<E> extends AbstractHzResource implements Queue<E> {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HzQueue.class);
 
-    private static final String MESSAGE_DATA_OBJECT = HzDataUtility.MESSAGE_DATA_OBJECT;
+    /**
+     * The property name for transmitted message data object.
+     */
+    static final String MESSAGE_DATA_OBJECT = HzDataUtility.MESSAGE_DATA_OBJECT;
 
     private final IQueue<Map<String, Object>> hzQueue;
     private final String senderId;

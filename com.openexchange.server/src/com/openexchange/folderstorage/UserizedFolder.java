@@ -195,5 +195,5 @@ public interface UserizedFolder extends ParameterizedFolder, AltNameAwareFolder 
      * @return The parameters reference
      */
     ConcurrentMap<String, Object> getParameters();
-
+    
 }

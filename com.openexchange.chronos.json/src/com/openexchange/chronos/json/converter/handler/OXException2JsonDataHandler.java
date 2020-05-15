@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.json.converter.handler;
 
+import java.util.Locale;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.writer.ResponseWriter;
@@ -60,6 +61,7 @@ import com.openexchange.conversion.DataHandler;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link OXException2JsonDataHandler}
@@ -94,8 +96,9 @@ public class OXException2JsonDataHandler implements DataHandler {
             if (null == sourceData) {
                 result.setData(null);
             } else if (OXException.class.isInstance(sourceData)) {
+                Locale locale = null != session ? ServerSessionAdapter.valueOf(session).getUser().getLocale() : null;
                 JSONObject jsonObject = new JSONObject();
-                ResponseWriter.addException(jsonObject, (OXException) sourceData);
+                ResponseWriter.addException(jsonObject, (OXException) sourceData, locale);
                 result.setData(jsonObject);
             } else {
                 throw DataExceptionCodes.TYPE_NOT_SUPPORTED.create(sourceData.getClass().toString());

@@ -42,6 +42,7 @@ import org.slf4j.MDC;
 import com.sun.mail.imap.CommandExecutor;
 import com.sun.mail.imap.GreetingListener;
 import com.sun.mail.imap.IMAPStore;
+import com.sun.mail.imap.ProtocolAccess;
 import com.sun.mail.imap.ProtocolListener;
 import com.sun.mail.imap.ProtocolListenerCollection;
 import com.sun.mail.imap.ResponseEvent;
@@ -127,6 +128,14 @@ public class Protocol {
 	    this.logger = logger;
 	    traceLogger = logger.getSubLogger("protocol", null);
 
+	    if (props != null) {
+	        ProtocolAccess protocolAccess = ProtocolAccess.instanceFor(user, host, port, props);
+	        Optional<CommandExecutor> optionalCommandExecutor = IMAPStore.getMatchingCommandExecutor(protocolAccess);
+	        if (optionalCommandExecutor.isPresent()) {	            
+	            props.put(prefix + ".protocol.info", protocolAccess);
+	            props.put(prefix + ".protocol.connector", optionalCommandExecutor.get());
+	        }
+	    }
 	    socket = SocketFetcher.getSocket(host, port, props, prefix, isSSL);
 	    quote = PropUtil.getBooleanProperty(props,
 					"mail.debug.quote", false);
@@ -135,9 +144,10 @@ public class Protocol {
 
 	    // Read server greeting
 	    {
-	        Optional<CommandExecutor> optionalCommandExecutor = IMAPStore.getMatchingCommandExecutor(this);
+	        ProtocolAccess protocolAccess = ProtocolAccess.instanceFor(this);
+            Optional<CommandExecutor> optionalCommandExecutor = IMAPStore.getMatchingCommandExecutor(protocolAccess);
 	        if (optionalCommandExecutor.isPresent()) {
-	            processGreeting(optionalCommandExecutor.get().readResponse(this));
+	            processGreeting(optionalCommandExecutor.get().readResponse(protocolAccess));
 	        } else {
 	            processGreeting(readResponse());
 	        }
@@ -416,10 +426,11 @@ public class Protocol {
      */
     public synchronized Response[] command(String command, Argument args, Optional<ResponseInterceptor> optionalInterceptor) {
         // Determine suitable executor
-        Optional<CommandExecutor> optionalCommandExecutor = IMAPStore.getMatchingCommandExecutor(this);
+        ProtocolAccess protocolAccess = ProtocolAccess.instanceFor(this);
+        Optional<CommandExecutor> optionalCommandExecutor = IMAPStore.getMatchingCommandExecutor(protocolAccess);
         if (optionalCommandExecutor.isPresent()) {            
             // Issue command using matching executor
-            return optionalCommandExecutor.get().executeCommand(command, args, optionalInterceptor, this);
+            return optionalCommandExecutor.get().executeCommand(command, args, optionalInterceptor, protocolAccess);
         }
 
         // No matching executor available

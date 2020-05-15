@@ -66,6 +66,7 @@ import com.openexchange.folderstorage.FolderProperty;
 import com.openexchange.folderstorage.ParameterizedFolder;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Type;
+import com.openexchange.folderstorage.UsedForSync;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.i18n.tools.StringHelper;
 
@@ -532,6 +533,11 @@ public final class OutlookFolder implements FolderExtension, AltNameAwareFolder,
             return ((AltNameAwareFolder) realFolder).getLocalizedName(locale, altName);
         }
         return getLocalizedName(locale);
+    }
+    
+    @Override
+    public UsedForSync getUsedForSync() {
+        return realFolder.getUsedForSync();
     }
 
 }

@@ -55,6 +55,7 @@ import java.util.Set;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.authentication.application.ajax.RestrictedAction;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.json.converter.CalendarResultConverter;
 import com.openexchange.chronos.json.oauth.ChronosOAuthScope;
@@ -73,6 +74,7 @@ import com.openexchange.server.ServiceLookup;
  * @since v7.10.0
  */
 @OAuthAction(ChronosOAuthScope.OAUTH_WRITE_SCOPE)
+@RestrictedAction(module = ChronosAction.MODULE, type = RestrictedAction.Type.WRITE)
 public class NewAction extends ChronosAction {
 
     private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(PARAM_SCHEDULING, PARAM_CHECK_CONFLICTS, PARAM_RANGE_START, PARAM_RANGE_END, PARAM_EXPAND, PARAM_FIELDS, PARAM_PUSH_TOKEN);

@@ -388,6 +388,28 @@ public abstract class AbstractCLI<R, C> {
     }
 
     /**
+     * Gets the mandatory integer value for the specified option
+     * 
+     * <p>Exits gracefully if <code>int</code> value is invalid or missing
+     * (i.e. equals with the default value which should be dictated by the invoker).</p>
+     * 
+     * @param opt The option name
+     * @param defaultValue The default value
+     * @param cmd The command line
+     * @param options The options
+     * @return The <code>int</code> value
+     */
+    protected int getMandatoryInt(char opt, int defaultValue, CommandLine cmd, Options options) {
+        int candidate = parseInt(opt, defaultValue, cmd, options);
+        if (candidate == defaultValue) {
+            System.err.println("The '-" + opt + "' is mandatory but not set.");
+            printHelp();
+            System.exit(1);
+        }
+        return candidate;
+    }
+
+    /**
      * Creates a switch {@link Option} with no arguments
      *
      * @param shortName The short name of the {@link Option}

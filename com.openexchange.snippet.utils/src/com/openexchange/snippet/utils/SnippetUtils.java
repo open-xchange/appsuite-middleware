@@ -49,11 +49,12 @@
 
 package com.openexchange.snippet.utils;
 
+import static com.openexchange.java.Strings.isEmpty;
+import java.util.Optional;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
-import com.openexchange.java.HTMLDetector;
 import com.openexchange.snippet.utils.internal.Services;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
@@ -78,7 +79,17 @@ public final class SnippetUtils {
      * @return The sanitized content
      */
     public static String sanitizeContent(String content) {
-        if (com.openexchange.java.Strings.isEmpty(content) || !HTMLDetector.containsHTMLTags(content, "<div")) {
+        if (isEmpty(content)) {
+            return content;
+        }
+
+        int s1 = content.indexOf('<');
+        if (s1 < 0) {
+            return content;
+        }
+
+        int s2 = content.indexOf('>');
+        if (s2 < 0 || s2 < s1) {
             return content;
         }
 
@@ -166,12 +177,60 @@ public final class SnippetUtils {
      *
      * @param misc The miscellaneous JSON object
      * @return The extracted content type information or <code>"text/plain"</code> as fall-back
-     * @throws OXException If content type cannot be extracted
      */
     public static String parseContentTypeFromMisc(final JSONObject misc) {
         String cts = misc.optString("content-type", null);
         return null == cts ? "text/plain" : cts;
     }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Parses optional content type from miscellaneous JSON data.
+     *
+     * @param misc The miscellaneous JSON object
+     * @return The optional content type information
+     * @throws OXException If content type cannot be extracted
+     */
+    public static Optional<String> parseOptionalContentTypeFromMisc(final Object misc) throws OXException {
+        if (misc instanceof JSONObject) {
+            return parseOptionalContentTypeFromMisc((JSONObject) misc);
+        }
+
+        try {
+            return parseOptionalContentTypeFromMisc(new JSONObject(misc.toString()));
+        } catch (JSONException e) {
+            throw OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e);
+        }
+    }
+
+    /**
+     * Parses optional content type from miscellaneous JSON data.
+     *
+     * @param misc The miscellaneous JSON object
+     * @return The optional content type information
+     * @throws OXException If content type cannot be extracted
+     */
+    public static Optional<String> parseOptionalContentTypeFromMisc(final String misc) throws OXException {
+        try {
+            return parseOptionalContentTypeFromMisc(new JSONObject(misc));
+        } catch (JSONException e) {
+            throw OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e);
+        }
+    }
+
+    /**
+     * Parses optional content type from miscellaneous JSON data.
+     *
+     * @param misc The miscellaneous JSON object
+     * @return The optional content type information
+     */
+    public static Optional<String> parseOptionalContentTypeFromMisc(final JSONObject misc) {
+        String cts = misc.optString("content-type", null);
+        return Optional.ofNullable(cts);
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
 
     /**
      * Get the image identifier stored in the misc JSONObject of the snippet.

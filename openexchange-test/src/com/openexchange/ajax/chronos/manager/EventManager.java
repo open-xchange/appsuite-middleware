@@ -961,6 +961,24 @@ public class EventManager extends AbstractManager {
     /**
      * Keeps track of the specified {@link EventId} for the specified user
      *
+     * @param eventData The {@link EventData} to generate the {@link EventId} from
+     * @see #rememberEventId(EventId)
+     */
+    public void rememberEvent(EventData eventData) {
+        if (null == eventData) {
+            return;
+        }
+
+        EventId eventId = new EventId();
+        eventId.setId(eventData.getId());
+        eventId.setFolder(null == eventData.getFolder() ? defaultFolder : eventData.getFolder());
+        eventId.setRecurrenceId(eventData.getRecurrenceId());
+        rememberEventId(eventId);
+    }
+
+    /**
+     * Keeps track of the specified {@link EventId} for the specified user
+     *
      * @param eventId The {@link EventId}
      */
     public void rememberEventId(EventId eventId) {

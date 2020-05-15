@@ -111,18 +111,22 @@ public final class HTTPAuthLogin implements LoginRequestHandler {
     }
 
     @Override
-    public void handleRequest(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    public void handleRequest(HttpServletRequest req, HttpServletResponse resp, LoginRequestContext requestContext) throws IOException {
         try {
-            doAuthHeaderLogin(req, resp);
+            doAuthHeaderLogin(req, resp, requestContext);
+            if(requestContext.getMetricProvider().isStateUnknown()) {
+                requestContext.getMetricProvider().recordSuccess();
+            }
         } catch (OXException e) {
             LOG.error(e.getMessage(), e);
             resp.addHeader("WWW-Authenticate", "NEGOTIATE");
             resp.addHeader("WWW-Authenticate", "Basic realm=\"Open-Xchange\"");
             resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
+            requestContext.getMetricProvider().recordException(e);
         }
     }
 
-    private void doAuthHeaderLogin(HttpServletRequest req, HttpServletResponse resp) throws OXException, IOException {
+    private void doAuthHeaderLogin(HttpServletRequest req, HttpServletResponse resp, LoginRequestContext requestContext) throws OXException, IOException {
         /*
          * Try to lookup session by auto-login
          */
@@ -137,6 +141,7 @@ public final class HTTPAuthLogin implements LoginRequestHandler {
                 resp.addHeader("WWW-Authenticate", "NEGOTIATE");
                 resp.addHeader("WWW-Authenticate", "Basic realm=\"Open-Xchange\"");
                 resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authorization Required!");
+                requestContext.getMetricProvider().recordHTTPStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 return;
             }
             final String version;

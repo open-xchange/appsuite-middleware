@@ -166,7 +166,7 @@ public abstract class AbstractITipTest extends AbstractChronosTest {
 
     protected EnhancedApiClient enhancedApiClientC2;
 
-    private List<TearDownOperation> operations = new LinkedList<>();
+    private final List<TearDownOperation> operations = new LinkedList<>();
 
     @Override
     public void setUp() throws Exception {
@@ -206,16 +206,19 @@ public abstract class AbstractITipTest extends AbstractChronosTest {
 
     @Override
     public void tearDown() throws Exception {
-        /*
-         * Call operations from last added item to first added item (FIFO)
-         * to avoid premature closing of e.g. API clients before all relevant
-         * operations for this client has been called
-         */
-        for (int i = operations.size() - 1; i >= 0; i--) {
-            operations.get(i).safeTearDown();
+        try {
+            /*
+             * Call operations from last added item to first added item (FIFO)
+             * to avoid premature closing of e.g. API clients before all relevant
+             * operations for this client has been called
+             */
+            for (int i = operations.size() - 1; i >= 0; i--) {
+                operations.get(i).safeTearDown();
+            }
+            eventManagerC2.cleanUp();
+        } finally {
+            super.tearDown();
         }
-        eventManagerC2.cleanUp();
-        super.tearDown();
     }
 
     /*
@@ -263,6 +266,15 @@ public abstract class AbstractITipTest extends AbstractChronosTest {
      */
     protected ActionResponse decline(ConversionDataSource body, String comment) throws ApiException {
         ActionResponse response = chronosApi.decline(apiClient.getSession(), DataSources.MAIL.getDataSource(), DescriptionFormat.HTML.getFormat(), body, comment);
+        validateActionResponse(response);
+        return response;
+    }
+
+    /**
+     * @See {@link ChronosApi#decline(String, String, String, ConversionDataSource)}
+     */
+    protected ActionResponse decline(ApiClient apiClient, ConversionDataSource body, String comment) throws ApiException {
+        ActionResponse response = new ChronosApi(apiClient).decline(apiClient.getSession(), DataSources.MAIL.getDataSource(), DescriptionFormat.HTML.getFormat(), body, comment);
         validateActionResponse(response);
         return response;
     }

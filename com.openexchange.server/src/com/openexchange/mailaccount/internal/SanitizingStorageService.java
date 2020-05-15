@@ -51,6 +51,7 @@ package com.openexchange.mailaccount.internal;
 
 import java.sql.Connection;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.exception.OXException;
@@ -223,6 +224,19 @@ final class SanitizingStorageService implements MailAccountStorageService {
     }
 
     @Override
+    public List<MailAccount> getUserMailAccounts(int contextId) throws OXException {
+        try {
+            return storageService.getUserMailAccounts(contextId);
+        } catch (OXException e) {
+            if (!isURIError(e)) {
+                throw e;
+            }
+            Sanitizer.sanitize(contextId, storageService);
+            return storageService.getUserMailAccounts(contextId);
+        }
+    }
+
+    @Override
     public MailAccount getDefaultMailAccount(final int user, final int cid) throws OXException {
         return storageService.getDefaultMailAccount(user, cid);
     }
@@ -305,6 +319,11 @@ final class SanitizingStorageService implements MailAccountStorageService {
     @Override
     public void deleteMailAccount(final int id, final Map<String, Object> properties, final int user, final int cid, final boolean deletePrimary, final Connection con) throws OXException {
         storageService.deleteMailAccount(id, properties, user, cid, deletePrimary, con);
+    }
+
+    @Override
+    public void deleteAllMailAccounts(int userId, int contextId, Connection connection) throws OXException {
+        storageService.deleteAllMailAccounts(userId, contextId, connection);
     }
 
     @Override

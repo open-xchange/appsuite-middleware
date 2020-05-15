@@ -431,11 +431,23 @@ public class SocketFetcher {
 	try {
 	    logger.finest("connecting...");
 	    if (proxyHost != null) {
-            proxyConnect(socket, proxyHost, proxyPort, host, port, cto);
+            proxyConnect(socket, proxyHost, proxyPort, host, address, port, cto, prefix, props);
         } else if (cto >= 0) {
-            socket.connect(new InetSocketAddress(address, port), cto);
+            SocketConnector socketConnector = (SocketConnector) props.get(prefix + ".protocol.connector");
+            ProtocolInfo protocolInfo = (ProtocolInfo) props.get(prefix + ".protocol.info");
+            if (socketConnector != null && protocolInfo != null) {
+                protocolInfo.setInetAddress(address);
+                socketConnector.connectSocket(socket, new InetSocketAddress(address, port), cto, protocolInfo);
+	        } else
+                socket.connect(new InetSocketAddress(address, port), cto);
         } else {
-            socket.connect(new InetSocketAddress(address, port));
+            SocketConnector socketConnector = (SocketConnector) props.get(prefix + ".protocol.connector");
+            ProtocolInfo protocolInfo = (ProtocolInfo) props.get(prefix + ".protocol.info");
+            if (socketConnector != null && protocolInfo != null) {
+                protocolInfo.setInetAddress(address);
+                socketConnector.connectSocket(socket, new InetSocketAddress(address, port), -1, protocolInfo);
+            } else
+                socket.connect(new InetSocketAddress(address, port));
         }
 	    logger.finest("success!");
 	} catch (IOException ex) {
@@ -942,7 +954,7 @@ public class SocketFetcher {
      */
     private static void proxyConnect(Socket socket,
 				String proxyHost, int proxyPort,
-				String host, int port, int cto)
+				String host, InetAddress address, int port, int cto, String prefix, Properties props)
 				throws IOException {
 	if (logger.isLoggable(Level.FINE)) {
         logger.fine("connecting through proxy " +
@@ -950,9 +962,21 @@ public class SocketFetcher {
 			host + ":" + port);
     }
 	if (cto >= 0) {
-        socket.connect(new InetSocketAddress(proxyHost, proxyPort), cto);
+	    SocketConnector socketConnector = (SocketConnector) props.get(prefix + ".protocol.connector");
+        ProtocolInfo protocolInfo = (ProtocolInfo) props.get(prefix + ".protocol.info");
+        if (socketConnector != null && protocolInfo != null) {
+            protocolInfo.setInetAddress(address);
+            socketConnector.connectSocket(socket, new InetSocketAddress(proxyHost, proxyPort), cto, protocolInfo);
+        } else
+            socket.connect(new InetSocketAddress(proxyHost, proxyPort), cto);
     } else {
-        socket.connect(new InetSocketAddress(proxyHost, proxyPort));
+        SocketConnector socketConnector = (SocketConnector) props.get(prefix + ".protocol.connector");
+        ProtocolInfo protocolInfo = (ProtocolInfo) props.get(prefix + ".protocol.info");
+        if (socketConnector != null && protocolInfo != null) {
+            protocolInfo.setInetAddress(address);
+            socketConnector.connectSocket(socket, new InetSocketAddress(proxyHost, proxyPort), -1, protocolInfo);
+        } else
+            socket.connect(new InetSocketAddress(proxyHost, proxyPort));
     }
 	PrintStream os = new PrintStream(socket.getOutputStream(), false,
         StandardCharsets.UTF_8.name());

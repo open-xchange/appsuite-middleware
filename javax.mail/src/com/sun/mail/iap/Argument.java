@@ -51,6 +51,7 @@ import java.util.List;
 import java.util.Optional;
 import com.sun.mail.imap.CommandExecutor;
 import com.sun.mail.imap.IMAPStore;
+import com.sun.mail.imap.ProtocolAccess;
 import com.sun.mail.util.ASCIIUtility;
 
 /**
@@ -473,10 +474,11 @@ public class Argument {
 	// If we are using synchronized literals, wait for the server's
 	// continuation signal
 	if (!nonSync) {
-	    Optional<CommandExecutor> optionalCommandExecutor = IMAPStore.getMatchingCommandExecutor(protocol);
+	    ProtocolAccess protocolAccess = ProtocolAccess.instanceFor(protocol);
+        Optional<CommandExecutor> optionalCommandExecutor = IMAPStore.getMatchingCommandExecutor(protocolAccess);
 	    if (optionalCommandExecutor.isPresent()) {
 	        for (; ;) {
-                Response r = optionalCommandExecutor.get().readResponse(protocol);
+                Response r = optionalCommandExecutor.get().readResponse(protocolAccess);
                 if (r.isContinuation())
                     break;
                 if (r.isTagged())

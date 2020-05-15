@@ -33,6 +33,7 @@ import com.openexchange.admin.soap.reseller.service.reseller.soap.dataobjects.Re
  *         &lt;element name="usedQuota" type="{http://www.w3.org/2001/XMLSchema}long" minOccurs="0"/>
  *         &lt;element name="userAttributes" type="{http://dataobjects.soap.admin.openexchange.com/xsd}SOAPStringMapMap" minOccurs="0"/>
  *         &lt;element name="writeDatabase" type="{http://dataobjects.soap.admin.openexchange.com/xsd}Database" minOccurs="0"/>
+ *         &lt;element name="gabMode" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -54,7 +55,8 @@ import com.openexchange.admin.soap.reseller.service.reseller.soap.dataobjects.Re
     "readDatabase",
     "usedQuota",
     "userAttributes",
-    "writeDatabase"
+    "writeDatabase",
+    "gabMode"
 })
 @XmlSeeAlso({
     ResellerContext.class
@@ -85,6 +87,8 @@ public class Context {
     protected SOAPStringMapMap userAttributes;
     @XmlElement(nillable = true)
     protected Database writeDatabase;
+    @XmlElement(nillable = true)
+    protected String gabMode;
 
     /**
      * Ruft den Wert der averageSize-Eigenschaft ab.
@@ -386,6 +390,30 @@ public class Context {
      */
     public void setWriteDatabase(Database value) {
         this.writeDatabase = value;
+    }
+
+    /**
+     * Ruft den Wert der gabMode-Eigenschaft ab.
+     *
+     * @return
+     *     possible object is
+     *     {@link String }
+     *
+     */
+    public String getGABMode() {
+        return gabMode;
+    }
+
+    /**
+     * Legt den Wert der gabMode-Eigenschaft fest.
+     *
+     * @param gabMode
+     *     allowed object is
+     *     {@link String }
+     *
+     */
+    public void setGABMode(String gabMode) {
+        this.gabMode = gabMode;
     }
 
 }

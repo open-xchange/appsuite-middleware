@@ -454,23 +454,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         if (null != t) {
             // Log spawning of a new thread
             if (null != firstTask) {
-                final Object stringer = new Object() {
-
-                    @Override
-                    public String toString() {
-                        final Object task;
-                        if (firstTask instanceof CustomFutureTask) {
-                            final Task<?> tsk = ((CustomFutureTask<?>) firstTask).getTask();
-                            task = tsk instanceof TaskWrapper ? ((TaskWrapper) tsk).getWrapped() : tsk;
-                        } else if (firstTask instanceof ScheduledFutureTask) {
-                            task = ((ScheduledFutureTask<?>) firstTask).getWrapped();
-                        } else {
-                            task = firstTask;
-                        }
-                        return task.getClass().getName();
-                    }
-                };
-                LOG.debug("Spawned new thread for {}", stringer, new Throwable("Thread-Creation-Watcher"));
+                LOG.debug("Spawned new thread for {}", taskName(firstTask), new Throwable("Thread-Creation-Watcher"));
             }
             // Continue initialization worker
             w.thread = t;
@@ -1792,6 +1776,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         } else if (r instanceof ScheduledFutureTask<?>) {
             ((ThreadRenamer) thread).renamePrefix("OXTimer");
         }
+        LOG.debug("About to execute task {} on thread {}", taskName(r), thread);
         super.beforeExecute(thread, r);
     }
 
@@ -2636,6 +2621,25 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                 path.delete();
             }
         }
+    }
+
+    private static Object taskName(Runnable runnable) {
+        return new Object() {
+
+            @Override
+            public String toString() {
+                Object task;
+                if (runnable instanceof CustomFutureTask) {
+                    final Task<?> tsk = ((CustomFutureTask<?>) runnable).getTask();
+                    task = tsk instanceof TaskWrapper ? ((TaskWrapper) tsk).getWrapped() : tsk;
+                } else if (runnable instanceof ScheduledFutureTask) {
+                    task = ((ScheduledFutureTask<?>) runnable).getWrapped();
+                } else {
+                    task = runnable;
+                }
+                return task.getClass().getName();
+            }
+        };
     }
 
 }

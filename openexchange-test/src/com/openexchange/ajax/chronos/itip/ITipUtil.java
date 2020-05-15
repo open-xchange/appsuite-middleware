@@ -50,17 +50,22 @@
 package com.openexchange.ajax.chronos.itip;
 
 import static com.openexchange.java.Autoboxing.I;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 import java.io.File;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 import javax.jms.IllegalStateException;
 import org.apache.commons.io.output.FileWriterWithEncoding;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import com.google.api.services.calendar.model.Event.Organizer;
 import com.openexchange.ajax.chronos.factory.AttendeeFactory;
@@ -75,17 +80,22 @@ import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.test.pool.TestUser;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
+import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.Attendee;
 import com.openexchange.testing.httpclient.models.Attendee.CuTypeEnum;
 import com.openexchange.testing.httpclient.models.AttendeeAndAlarm;
+import com.openexchange.testing.httpclient.models.CommonResponse;
 import com.openexchange.testing.httpclient.models.ConversionDataSource;
 import com.openexchange.testing.httpclient.models.EventData;
+import com.openexchange.testing.httpclient.models.JSlobData;
+import com.openexchange.testing.httpclient.models.JSlobsResponse;
 import com.openexchange.testing.httpclient.models.MailAttachment;
 import com.openexchange.testing.httpclient.models.MailData;
 import com.openexchange.testing.httpclient.models.MailDestinationData;
 import com.openexchange.testing.httpclient.models.MailImportResponse;
 import com.openexchange.testing.httpclient.models.MailResponse;
 import com.openexchange.testing.httpclient.models.MailsResponse;
+import com.openexchange.testing.httpclient.modules.JSlobApi;
 import com.openexchange.testing.httpclient.modules.MailApi;
 import net.fortuna.ical4j.util.CompatibilityHints;
 
@@ -98,13 +108,18 @@ import net.fortuna.ical4j.util.CompatibilityHints;
  */
 public class ITipUtil {
 
+    private static final String NOTIFY_ACCEPTED_DECLINED_AS_CREATOR = "notifyAcceptedDeclinedAsCreator";
+    private static final String NOTIFY_ACCEPTED_DECLINED_AS_PARTICIPANT = "notifyAcceptedDeclinedAsParticipant";
+    private static final String NOTIFY_NEW_MODIFIED_DELETED = "notifyNewModifiedDeleted";
+    private static final String DELETE_INVITATION_MAIL_AFTER_ACTION = "deleteInvitationMailAfterAction";
+
+    public static final String FOLDER_MACHINE_READABLE = "default0%2FINBOX";
+    public static final String FOLDER_HUMAN_READABLE = "default0/INBOX";
+
     /**
      * Initializes a new {@link ITipUtil}.
      */
     private ITipUtil() {}
-
-    public static final String FOLDER_MACHINE_READABLE = "default0%2FINBOX";
-    public static final String FOLDER_HUMAN_READABLE = "default0/INBOX";
 
     /**
      * Uploads a mail to the INBOX
@@ -195,6 +210,19 @@ public class ITipUtil {
         body.setComOpenexchangeMailConversionMailid(mailId);
         body.setComOpenexchangeMailConversionSequenceid(sequenceId);
         return body;
+    }
+
+    /**
+     * Receive a calendar notification from the inbox
+     *
+     * @param apiClient The {@link ApiClient} to use
+     * @param fromToMatch The mail of the originator of the message
+     * @param subjectToMatch The summary of the event
+     * @return The mail as {@link MailData}
+     * @throws Exception If the mail can't be found or something mismatches
+     */
+    public static MailData receiveNotification(ApiClient apiClient, String fromToMatch, String subjectToMatch) throws Exception {
+        return receiveIMip(apiClient, fromToMatch, subjectToMatch, -1, null);
     }
 
     /**
@@ -406,6 +434,64 @@ public class ITipUtil {
         attendee.setPartStat(originalAttendee.getPartStat());
         attendee.setMember(originalAttendee.getMember());
         return attendee;
+    }
+
+    /**
+     * Changes the calendar settings
+     *
+     * @param jslobApi The API client to use
+     * @param notifyAcceptedDeclinedAsCreator <code>true</code> to receive notifications for participant changes as <b>ORGANIZER</b>
+     * @param notifyAcceptedDeclinedAsParticipant <code>true</code> to receive notifications for participant changes as <b>ATTENDEE</b>
+     * @param notifyNewModifiedDeleted <code>true</code> to receive notifications for new or deleted events
+     * @param deleteInvitationMailAfterAction <code>true</code> to delete iMIP or notification mails after processing
+     * @throws JSONException In case of error
+     * @throws ApiException In case settings can't be set
+     */
+    public static void changeCalendarSettings(JSlobApi jslobApi, boolean notifyAcceptedDeclinedAsCreator, boolean notifyAcceptedDeclinedAsParticipant, boolean notifyNewModifiedDeleted, boolean deleteInvitationMailAfterAction) throws JSONException, ApiException {
+        JSONObject jsonObject = new JSONObject(2);
+        jsonObject.put(NOTIFY_ACCEPTED_DECLINED_AS_CREATOR, Boolean.toString(notifyAcceptedDeclinedAsCreator));
+        jsonObject.put(NOTIFY_ACCEPTED_DECLINED_AS_PARTICIPANT, Boolean.toString(notifyAcceptedDeclinedAsParticipant));
+        jsonObject.put(NOTIFY_NEW_MODIFIED_DELETED, Boolean.toString(notifyNewModifiedDeleted));
+        jsonObject.put(DELETE_INVITATION_MAIL_AFTER_ACTION, Boolean.toString(deleteInvitationMailAfterAction));
+        CommonResponse response = jslobApi.setJSlob(jslobApi.getApiClient().getSession(), jsonObject, "io.ox/calendar", null);
+        assertNotNull("Response missing!", response);
+        assertNull(response.getError());
+    }
+
+    /**
+     * Changes the calendar settings
+     *
+     * @param jslobApi The API client to use
+     * @param values The original values
+     * @throws JSONException In case of error
+     * @throws ApiException In case settings can't be set
+     */
+    public static void restoreCalendarSettings(JSlobApi jslobApi, Map<Object, Object> values) throws JSONException, ApiException {
+        JSONObject jsonObject = new JSONObject(2);
+        jsonObject.put(NOTIFY_ACCEPTED_DECLINED_AS_CREATOR, values.get(NOTIFY_ACCEPTED_DECLINED_AS_CREATOR).toString());
+        jsonObject.put(NOTIFY_ACCEPTED_DECLINED_AS_PARTICIPANT, values.get(NOTIFY_ACCEPTED_DECLINED_AS_PARTICIPANT).toString());
+        jsonObject.put(NOTIFY_NEW_MODIFIED_DELETED, values.get(NOTIFY_NEW_MODIFIED_DELETED).toString());
+        jsonObject.put(DELETE_INVITATION_MAIL_AFTER_ACTION, values.get(DELETE_INVITATION_MAIL_AFTER_ACTION));
+        CommonResponse response = jslobApi.setJSlob(jslobApi.getApiClient().getSession(), jsonObject, "io.ox/calendar", null);
+        assertNotNull("Response missing!", response);
+        assertNull(response.getError());
+    }
+
+    /**
+     * Get the JSLob for <code>io.ox/calendar</code>
+     *
+     * @param jSlobApi The API client to use
+     * @return The JSLob as {@link Map}
+     * @throws ApiException In case of error
+     */
+    @SuppressWarnings("unchecked")
+    public static Map<Object, Object> getJSLoabForCalendar(JSlobApi jSlobApi) throws ApiException {
+        JSlobsResponse jSlobsResponse = jSlobApi.getJSlobList(jSlobApi.getApiClient().getSession(), Collections.singletonList("io.ox/calendar"), null);
+        assertNotNull(jSlobsResponse);
+        assertThat("No error expected!", jSlobsResponse.getError(), nullValue());
+        JSlobData data = jSlobsResponse.getData().get(0);
+        assertNotNull(data);
+        return ((Map<Object, Object>) data.getTree());
     }
 
 }

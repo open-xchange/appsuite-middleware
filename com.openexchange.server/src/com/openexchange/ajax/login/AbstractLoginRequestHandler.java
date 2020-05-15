@@ -50,6 +50,7 @@
 package com.openexchange.ajax.login;
 
 import static com.openexchange.ajax.ConfigMenu.convert2JS;
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.util.Locale;
 import java.util.Map;
@@ -60,6 +61,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import org.apache.http.HttpStatus;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -75,6 +78,9 @@ import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.authentication.ResultCode;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.cascade.ConfigViews;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.impl.ConfigTree;
@@ -86,6 +92,7 @@ import com.openexchange.login.LoginRampUpService;
 import com.openexchange.login.LoginResult;
 import com.openexchange.login.multifactor.MultifactorChecker;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.servlet.Constants;
 import com.openexchange.session.Session;
 import com.openexchange.session.ThreadLocalSessionHolder;
 import com.openexchange.threadpool.AbstractTask;
@@ -176,12 +183,13 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
      * @param resp The associated HTTP response
      * @param login The login closure to invoke
      * @param conf The login configuration
+     * @param requestContext The request's context
      * @return <code>true</code> if an auto-login should proceed afterwards; otherwise <code>false</code>
      * @throws IOException If an I/O error occurs
      * @throws OXException If an Open-Xchange error occurs
      */
-    protected boolean loginOperation(HttpServletRequest req, HttpServletResponse resp, LoginClosure login, LoginConfiguration conf) throws IOException, OXException {
-        return loginOperation(req, resp, login, null, conf);
+    protected boolean loginOperation(HttpServletRequest req, HttpServletResponse resp, LoginClosure login, LoginConfiguration conf, LoginRequestContext requestContext) throws IOException, OXException {
+        return loginOperation(req, resp, login, null, conf, requestContext);
     }
 
     /**
@@ -193,11 +201,12 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
      * @param resp The associated HTTP response
      * @param login The login closure to invoke
      * @param conf The login configuration
+     * @param requestContext The request's context
      * @return <code>true</code> if an auto-login should proceed afterwards; otherwise <code>false</code>
      * @throws IOException If an I/O error occurs
      * @throws OXException If an Open-Xchange error occurs
      */
-    protected boolean loginOperation(HttpServletRequest req, HttpServletResponse resp, LoginClosure login, LoginCookiesSetter cookiesSetter, LoginConfiguration conf) throws IOException, OXException {
+    protected boolean loginOperation(HttpServletRequest req, HttpServletResponse resp, LoginClosure login, LoginCookiesSetter cookiesSetter, LoginConfiguration conf, LoginRequestContext requestContext) throws IOException, OXException {
         Tools.disableCaching(resp);
         resp.setContentType(LoginServlet.CONTENTTYPE_JAVASCRIPT);
 
@@ -241,6 +250,11 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
                         // Double the rate
                         if (doubleRate) {
                             RateLimiter.doubleRateLimitWindow(rateLimitKey, maxLoginRateTimeWindow() * 2);
+                        }
+                        // Mark optional HTTP session as rate-limited
+                        HttpSession optionalHttpSession = req.getSession(false);
+                        if (optionalHttpSession != null) {
+                            optionalHttpSession.setAttribute(Constants.HTTP_SESSION_ATTR_RATE_LIMITED, Boolean.TRUE);
                         }
                         throw rateLimitExceeded;
                     }
@@ -304,7 +318,7 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
 
             // Await client-specific ramp-up and add to JSON object
             if (null != optRampUp) {
-                int timeoutSecs = 30;
+                int timeoutSecs = getLoginRampUpTimeout(session);
                 try {
                     JSONObject jsonObject = optRampUp.get(timeoutSecs, TimeUnit.SECONDS);
                     for (Map.Entry<String, Object> entry : jsonObject.entrySet()) {
@@ -365,6 +379,7 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
                 LOG.error("", e);
             }
             response.setException(e);
+            requestContext.getMetricProvider().recordException(e);
         } catch (JSONException e) {
             final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
             LOG.error("", oje);
@@ -374,6 +389,7 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
         try {
             if (response.hasError() || null == result) {
                 ResponseWriter.write(response, resp.getWriter(), extractLocale(req, result));
+                requestContext.getMetricProvider().recordException(response.getException());
                 return false;
             }
 
@@ -410,11 +426,27 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
             }
             LOG.error(LoginServlet.RESPONSE_ERROR, e);
             LoginServlet.sendError(resp);
+            requestContext.getMetricProvider().recordHTTPStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR);
             return false;
         } finally {
             ThreadLocalSessionHolder.getInstance().clear();
         }
+
+        requestContext.getMetricProvider().recordSuccess();
         return false;
+    }
+
+    private static int getLoginRampUpTimeout(Session session) {
+        String propertyName = "com.openexchange.ajax.login.rampup.timeoutSeconds";
+        int defaultValue = 10;
+        try {
+            ConfigViewFactory factory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
+            ConfigView view = factory.getView(session.getUserId(), session.getContextId());
+            return ConfigViews.getDefinedIntPropertyFrom(propertyName, defaultValue, view);
+        } catch (Exception e) {
+            LOG.warn("Failed to obtain value for property \"{}\". Returning default value of {} instead.", propertyName, I(defaultValue), e);
+            return defaultValue;
+        }
     }
 
     /**

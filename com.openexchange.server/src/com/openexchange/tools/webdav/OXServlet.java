@@ -637,7 +637,7 @@ public abstract class OXServlet extends WebDavServlet {
     /**
      * @param sessionID
      */
-    private static void removeSession(final String sessionID) {
+    protected static void removeSession(final String sessionID) {
         try {
             ServerServiceRegistry.getInstance().getService(SessiondService.class, true).removeSession(sessionID);
         } catch (OXException e) {
@@ -650,7 +650,7 @@ public abstract class OXServlet extends WebDavServlet {
      *
      * @param resp the response to that the header should be added.
      */
-    private void addUnauthorizedHeader(final HttpServletResponse resp) {
+    protected void addUnauthorizedHeader(final HttpServletResponse resp) {
         if (useHttpAuth()) {
             resp.addHeader("WWW-Authenticate", "Basic realm=\"" + basicRealm + "\", encoding=\"UTF-8\"");
             if (allowOAuthAccess()) {

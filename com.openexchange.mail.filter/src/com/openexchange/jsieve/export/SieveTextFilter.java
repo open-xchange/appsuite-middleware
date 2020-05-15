@@ -81,6 +81,9 @@ import com.openexchange.mailfilter.Credentials;
 import com.openexchange.mailfilter.MailFilterInterceptorRegistry;
 import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
 import com.openexchange.mailfilter.services.Services;
+import static com.openexchange.jsieve.commands.ActionCommand.Commands.ENOTIFY;
+import static com.openexchange.jsieve.commands.ActionCommand.Commands.PGP_ENCRYPT;
+import static com.openexchange.jsieve.commands.ActionCommand.Commands.VACATION;
 
 /**
  * This class will be used to filter out special things which are not part of
@@ -618,28 +621,26 @@ public final class SieveTextFilter {
         }
     }
 
+    private static final List<String> SIZE_AWARE_COMMANDS = Arrays.asList(ENOTIFY.getCommandName(), PGP_ENCRYPT.getCommandName(), VACATION.getCommandName());
+
     private int getActionCommandSize(final List<ActionCommand> actionCommands) {
         if (null == actionCommands) {
             return 0;
         }
         int size = 0;
         for (final ActionCommand actionCommand : actionCommands) {
-            switch (actionCommand.getCommand()) {
-                case ENOTIFY:
-                case PGP_ENCRYPT:
-                case VACATION:
-                    // The text arguments for vacation end method for enotify are the last in the list
-                    ArrayList<Object> arguments = actionCommand.getArguments();
-                    int argumentsSize = arguments.size();
-                    if (argumentsSize > 0) {
-                        ArrayList<String> object = (ArrayList<String>) arguments.get(argumentsSize - 1);
-                        for (String o : object) {
-                            size += countLines(o) + 1;
-                        }
+            if (SIZE_AWARE_COMMANDS.contains(actionCommand.getCommand().getCommandName())) {
+                // The text arguments for vacation end method for enotify are the last in the list
+                ArrayList<Object> arguments = actionCommand.getArguments();
+                int argumentsSize = arguments.size();
+                if (argumentsSize > 0) {
+                    ArrayList<String> object = (ArrayList<String>) arguments.get(argumentsSize - 1);
+                    for (String o : object) {
+                        size += countLines(o) + 1;
                     }
-                    break;
-                default:
-                    size++;
+                }
+            } else {
+                size++;
             }
         }
         return size;

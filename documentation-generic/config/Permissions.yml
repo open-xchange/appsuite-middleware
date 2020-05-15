@@ -87,3 +87,30 @@ properties:
       file: permissions.properties
       packageName: open-xchange-core
       tags: ["Permission", "Mail", "Capability"]
+
+    - key: com.openexchange.capabilities.allowIllegalPermissionProvisioning
+      description: |
+        Whether or not capabilities which are in conflict with permissions can be provisioned.
+        If this property is set to 'false' then an error is thrown during the provisioning operation.
+        In both cases an error is logged.
+      defaultValue: false
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: false
+      related: com.openexchange.capabilities.applyIllegalPermissions
+      file: permissions.properties
+      packageName: open-xchange-core
+      tags: ["Permission", "Capability"]
+    - key: com.openexchange.capabilities.applyIllegalPermissions
+      description: |
+        Whether or not capabilities which are in conflict with permissions should be applied when calculating the capability set of an user or context.
+        If this property is set to 'false' then any conflicting capabilities are ignored.
+        In both cases a warning is logged.
+      defaultValue: false
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: false
+      related: com.openexchange.capabilities.allowIllegalPermissionProvisioning
+      file: permissions.properties
+      packageName: open-xchange-core
+      tags: ["Permission", "Capability"]

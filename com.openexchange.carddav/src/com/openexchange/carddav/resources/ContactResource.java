@@ -54,10 +54,12 @@ import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
 import org.jdom2.Element;
@@ -66,7 +68,9 @@ import com.openexchange.carddav.GroupwareCarddavFactory;
 import com.openexchange.carddav.Tools;
 import com.openexchange.carddav.photos.PhotoUtils;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.contact.ContactService;
+import com.openexchange.contact.vcard.DistributionListMode;
 import com.openexchange.contact.vcard.VCardExport;
 import com.openexchange.contact.vcard.VCardImport;
 import com.openexchange.contact.vcard.VCardParameters;
@@ -80,12 +84,22 @@ import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.tools.mappings.MappedIncorrectString;
 import com.openexchange.groupware.tools.mappings.MappedTruncation;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
+import com.openexchange.search.CompositeSearchTerm;
+import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
+import com.openexchange.search.SearchTerm;
+import com.openexchange.search.SingleSearchTerm;
+import com.openexchange.search.SingleSearchTerm.SingleOperation;
+import com.openexchange.search.internal.operands.ConstantOperand;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
+import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.webdav.WebDAVRequestContext;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProperty;
@@ -109,6 +123,9 @@ public class ContactResource extends CommonResource<Contact> {
     public static final String CONTENT_TYPE = "text/vcard; charset=utf-8";
 
     private static final int MAX_RETRIES = 3;
+
+    /** The contact fields that are considered when resolving distribution list references */
+    private static final ContactField CONTACT_FIELDS_TO_LOAD[] = { ContactField.OBJECT_ID, ContactField.FOLDER_ID, ContactField.UID, ContactField.DISPLAY_NAME, ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3, ContactField.MARK_AS_DISTRIBUTIONLIST, ContactField.DISTRIBUTIONLIST };
 
     private final GroupwareCarddavFactory factory;
     private final CardDAVCollection parent;
@@ -188,7 +205,7 @@ public class ContactResource extends CommonResource<Contact> {
         boolean saved = false;
         Session session = factory.getSession();
         try {
-            if (false == exists()) {
+            if (!exists()) {
                 throw protocolException(getUrl(), HttpServletResponse.SC_CONFLICT);
             } else if (null == vCardImport || null == vCardImport.getContact()) {
                 throw protocolException(getUrl(), HttpServletResponse.SC_NOT_FOUND);
@@ -205,6 +222,7 @@ public class ContactResource extends CommonResource<Contact> {
              * update contact, trying again in case of recoverable errors
              */
             ContactService contactService = factory.requireService(ContactService.class);
+            restoreDistributionListReferences(session, contactService, contact, Integer.toString(contact.getParentFolderID()));
             for (int i = 0; i < MAX_RETRIES && false == saved; i++) {
                 try {
                     contactService.updateContact(session, Integer.toString(contact.getParentFolderID()), Integer.toString(contact.getObjectID()), contact, contact.getLastModified());
@@ -249,8 +267,8 @@ public class ContactResource extends CommonResource<Contact> {
             if (null != object) {
                 for (int i = 0; i < MAX_RETRIES && false == deleted; i++) {
                     try {
-                        factory.requireService(ContactService.class).deleteContact(session,
-                            Integer.toString(object.getParentFolderID()), Integer.toString(object.getObjectID()), object.getLastModified());
+                        ContactService contactService = factory.requireService(ContactService.class);
+                        contactService.deleteContact(session, Integer.toString(object.getParentFolderID()), Integer.toString(object.getObjectID()), object.getLastModified());
                         LOG.debug("{}: deleted.", getUrl());
                         deleted = true;
                         this.object = null;
@@ -317,6 +335,8 @@ public class ContactResource extends CommonResource<Contact> {
                 }
                 return;
             }
+
+            restoreDistributionListReferences(session, contactService, contact, parentFolderID);
             /*
              * store original vCard if possible
              */
@@ -353,12 +373,129 @@ public class ContactResource extends CommonResource<Contact> {
         }
     }
 
+    private void restoreDistributionListReferences(Session session, ContactService contactService, Contact contact, String parentFolderID) throws OXException {
+        if (contact == null || !contact.getMarkAsDistribtuionlist()) {
+            return;
+        }
+        // try to search for known contacts
+        SearchTerm<?> searchTerm = createSearchTerm(parentFolderID, Arrays.asList(contact.getDistributionList()), contact.getUid());
+        SearchIterator<Contact> contacts = null;
+        try {
+            contacts = contactService.searchContacts(session, searchTerm, CONTACT_FIELDS_TO_LOAD);
+            List<Contact> dbContacts = SearchIterators.asList(contacts);
+            Optional<Contact> originalContact = dbContacts.stream().filter(x -> x.getUid().equals(contact.getUid())).findFirst();
+            List<DistributionListEntryObject> prepared = restoreDistributionListReferences0(originalContact, Arrays.asList(contact.getDistributionList()), dbContacts);
+            contact.setDistributionList(prepared.stream().toArray(DistributionListEntryObject[]::new));
+        } finally {
+            SearchIterators.close(contacts);
+        }
+    }
+
+    private SearchTerm<?> createSearchTerm(String parentFolderID, List<DistributionListEntryObject> newDistList, String originalContactUID) {
+        SingleSearchTerm folderTerm = new SingleSearchTerm(SingleOperation.EQUALS);
+        folderTerm.addOperand(new ContactFieldOperand(ContactField.FOLDER_ID));
+        folderTerm.addOperand(new ConstantOperand<String>(parentFolderID));
+
+        CompositeSearchTerm uidOrTerm = null;
+        for (DistributionListEntryObject entry : newDistList) {
+            String uid = entry.getContactUid();
+            if (Strings.isNotEmpty(uid)) {
+                if (uidOrTerm == null) {
+                    uidOrTerm = new CompositeSearchTerm(CompositeOperation.OR);
+                }
+                SingleSearchTerm uidTerm = new SingleSearchTerm(SingleOperation.EQUALS);
+                uidTerm.addOperand(new ContactFieldOperand(ContactField.UID));
+                uidTerm.addOperand(new ConstantOperand<String>(uid));
+                uidOrTerm.addSearchTerm(uidTerm);
+            }
+        }
+        SearchTerm<?> searchTerm = null;
+        if (uidOrTerm != null) {
+            if (Strings.isNotEmpty(originalContactUID)) {
+                SingleSearchTerm uidTerm = new SingleSearchTerm(SingleOperation.EQUALS);
+                uidTerm.addOperand(new ContactFieldOperand(ContactField.UID));
+                uidTerm.addOperand(new ConstantOperand<String>(originalContactUID));
+                uidOrTerm.addSearchTerm(uidTerm);
+            }
+            CompositeSearchTerm compSearchTerm = new CompositeSearchTerm(CompositeOperation.AND);
+            compSearchTerm.addSearchTerm(folderTerm);
+            compSearchTerm.addSearchTerm(uidOrTerm);
+            searchTerm = compSearchTerm;
+        } else {
+            searchTerm = folderTerm;
+        }
+        return searchTerm;
+    }
+
+    private List<DistributionListEntryObject> restoreDistributionListReferences0(Optional<Contact> originalContact, List<DistributionListEntryObject> provided, List<Contact> dbContacts) {
+        for (DistributionListEntryObject entry : provided) {
+            if (entry.containsEntryID() && entry.containsFolderld() && entry.containsEmailfield()) { //skip the appropriate set ones
+                continue;
+            }
+            Optional<Contact> findFirst = dbContacts.stream().filter(x -> x.getUid().equals(entry.getContactUid())).findFirst();
+            if (findFirst.isPresent()) {
+                Contact dbContact = findFirst.get();
+                if (!entry.containsDisplayname()) {
+                    entry.setDisplayname(dbContact.getDisplayName());
+                }
+                if (entry.containsEmailaddress() && Strings.isNotEmpty(entry.getEmailaddress())) {
+                    String providedMailAddress = entry.getEmailaddress();
+                    if (providedMailAddress.equals(dbContact.getEmail1())) {
+                        entry.setEmailfield(DistributionListEntryObject.EMAILFIELD1);
+                    } else if (providedMailAddress.equals(dbContact.getEmail2())) {
+                        entry.setEmailfield(DistributionListEntryObject.EMAILFIELD2);
+                    } else if (providedMailAddress.equals(dbContact.getEmail3())) {
+                        entry.setEmailfield(DistributionListEntryObject.EMAILFIELD3);
+                    }
+                }
+                if (!entry.containsEntryID() || entry.getEntryID() < 1) {
+                    entry.setEntryID(dbContact.getObjectID());
+                }
+                if (!entry.containsFolderld() || entry.getFolderID() < 1) {
+                    entry.setFolderID(dbContact.getParentFolderID());
+                }
+            } else if (originalContact.isPresent()) {
+                // try to match dleo from original list 
+                DistributionListEntryObject[] origDistList = originalContact.get().getDistributionList();
+                if (origDistList == null) {
+                    continue;
+                }
+                // try matching uid...
+                Optional<DistributionListEntryObject> findOriginalDistListEntry = Arrays.asList(origDistList).stream().filter(x -> x.getContactUid() != null && x.getContactUid().equals(entry.getContactUid())).findFirst();
+                if (false == findOriginalDistListEntry.isPresent()) {
+                    // try match by mail als last resort
+                    findOriginalDistListEntry = Arrays.asList(origDistList).stream().filter(x -> x.getEmailaddress() != null && x.getEmailaddress().equals(entry.getEmailaddress())).findFirst();
+                }
+                if (findOriginalDistListEntry.isPresent()) { // internal user or one-off => set appropriate to not overwrite NULL values
+                    DistributionListEntryObject relatedDbEntry = findOriginalDistListEntry.get();
+                    if (relatedDbEntry.containsFolderld()) {
+                        entry.setFolderID(relatedDbEntry.getFolderID());
+                    }
+                    if (relatedDbEntry.containsEntryID()) {
+                        entry.setEntryID(relatedDbEntry.getEntryID());
+                    }
+                    if (relatedDbEntry.containsSortName()) {
+                        entry.setSortName(relatedDbEntry.getSortName());
+                    }
+                    if (relatedDbEntry.containsEmailfield()) {
+                        entry.setEmailfield(relatedDbEntry.getEmailfield());
+                    }
+                    if (relatedDbEntry.containsContactUid()) {
+                        entry.setContactUid(relatedDbEntry.getContactUid());
+                    }
+                    continue;
+                }
+                continue;
+            }
+        }
+        return provided;
+    }
+
     @Override
     protected void deserialize(InputStream inputStream) throws OXException, IOException {
         VCardService vCardService = factory.requireService(VCardService.class);
-        VCardParameters parameters = vCardService.createParameters(factory.getSession()).setKeepOriginalVCard(parent.isStoreOriginalVCard())
-            .setImportAttachments(true).setRemoveAttachmentsFromKeptVCard(true);
-        if (false == exists()) {
+        VCardParameters parameters = vCardService.createParameters(factory.getSession()).setKeepOriginalVCard(parent.isStoreOriginalVCard()).setImportAttachments(true).setRemoveAttachmentsFromKeptVCard(true).setDistributionListMode(getDistributionListMode());
+        if (!exists()) {
             /*
              * import vCard as new contact
              */
@@ -446,7 +583,7 @@ public class ContactResource extends CommonResource<Contact> {
             /*
              * image problem, handle by create without image
              */
-            if (object!=null){
+            if (object != null) {
                 LOG.warn("{}: {} - removing image and trying again.", getUrl(), e.getMessage());
                 object.removeImage1();
             }
@@ -523,7 +660,7 @@ public class ContactResource extends CommonResource<Contact> {
          * determine required contact fields for the export
          */
         VCardService vCardService = factory.requireService(VCardService.class);
-        VCardParameters parameters = vCardService.createParameters(factory.getSession());
+        VCardParameters parameters = vCardService.createParameters(factory.getSession()).setDistributionListMode(getDistributionListMode());
         ContactField[] contactFields;
         if (null != propertyNames && 0 < propertyNames.size()) {
             parameters.setPropertyNames(propertyNames);
@@ -534,8 +671,7 @@ public class ContactResource extends CommonResource<Contact> {
         /*
          * load required contact data from storage
          */
-        Contact contact = factory.getContactService().getContact(
-            factory.getSession(), String.valueOf(object.getParentFolderID()), String.valueOf(object.getObjectID()), contactFields);
+        Contact contact = factory.getContactService().getContact(factory.getSession(), String.valueOf(object.getParentFolderID()), String.valueOf(object.getObjectID()), contactFields);
         applyAttachments(contact);
         if (isExportPhotoAsURI() && 0 < contact.getNumberOfImages()) {
             contact.setProperty("com.openexchange.contact.vcard.photo.uri", PhotoUtils.buildURI(factory.getServiceSafe(ConfigViewFactory.class), getHostData(), contact));
@@ -644,6 +780,15 @@ public class ContactResource extends CommonResource<Contact> {
             return propertyNames;
         }
         return null;
+    }
+
+    /**
+     * Gets the distribution list mode to use for serialization to vCards, based on the client's user agent.
+     * 
+     * @return The distribution list mode
+     */
+    private DistributionListMode getDistributionListMode() {
+        return DistributionListMode.ADDRESSBOOKSERVER; // only mode as of now
     }
 
     /**

@@ -60,6 +60,7 @@ import org.apache.cxf.endpoint.ServerImpl;
 import org.apache.cxf.frontend.WSDLGetUtils;
 import org.apache.cxf.interceptor.Interceptor;
 import org.apache.cxf.message.Message;
+import org.apache.cxf.phase.Phase;
 import org.apache.cxf.service.model.EndpointInfo;
 import org.apache.cxf.wsdl.interceptors.DocLiteralInInterceptor;
 import org.osgi.framework.BundleContext;
@@ -69,6 +70,7 @@ import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 import com.openexchange.soap.cxf.ExceptionUtils;
 import com.openexchange.soap.cxf.WebserviceName;
+import com.openexchange.soap.cxf.interceptor.MetricsInterceptor;
 
 /**
  * {@link WebserviceCollector}
@@ -282,6 +284,10 @@ public class WebserviceCollector implements ServiceListener {
                 // Add logging interceptors
                 serverEndpoint.getInInterceptors().add(new com.openexchange.soap.cxf.interceptor.LoggingInInterceptor());
                 serverEndpoint.getOutInterceptors().add(new com.openexchange.soap.cxf.interceptor.LoggingOutInterceptor());
+                // Add metric interceptors
+                serverEndpoint.getInInterceptors().add(new MetricsInterceptor(Phase.RECEIVE));
+                serverEndpoint.getOutInterceptors().add(new MetricsInterceptor(Phase.SEND));
+                serverEndpoint.getOutFaultInterceptors().add(new MetricsInterceptor(Phase.SEND));
             }
             oldEndpoint = endpoints.replace(name, endpoint);
             LOG.info("Publishing endpoint succeeded. Published \"{}\" under address \"{}\".", name, address);

@@ -51,6 +51,8 @@ package com.openexchange.mailaccount;
 
 import static com.openexchange.mailaccount.Constants.MAIL_PROTOCOL_GUARD_GUEST;
 import java.util.Map;
+import javax.mail.internet.idn.IDNA;
+import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 
 
@@ -128,4 +130,39 @@ public final class MailAccounts {
         return null == account ? false : Constants.NAME_GUARD_GUEST.equals(account.getName());
     }
 
+    /**
+     * Checks if specified mail account is an IMAP account having given host and port (optional).
+     *
+     * @param account The mail account to check against
+     * @param host The host name
+     * @param port The port or <code>-1</code> to ignore
+     * @return <code>true</code> if given mail account matches; otherwise <code>false</code>
+     */
+    public static boolean isEqualImapAccount(MailAccount account, String host, int port) {
+        if (account == null) {
+            return false;
+        }
+
+        // Check if mail protocol advertises IMAP
+        String mailProtocol = account.getMailProtocol();
+        if (mailProtocol == null || !Strings.asciiLowerCase(mailProtocol).startsWith("imap")) {
+            return false;
+        }
+
+        // Check if port is equal to given one (if any)
+        if (port > 0) {
+            int mailPort = account.getMailPort();
+            if (mailPort <= 0 || port != mailPort) {
+                return false;
+            }
+        }
+
+        // Check if host is (ASCII-wise) equal to given one
+        if (IDNA.toASCII(host).equals(IDNA.toASCII(account.getMailServer()))) {
+            return false;
+        }
+
+        // Appears to be matching IMAP account
+        return true;
+    }
 }

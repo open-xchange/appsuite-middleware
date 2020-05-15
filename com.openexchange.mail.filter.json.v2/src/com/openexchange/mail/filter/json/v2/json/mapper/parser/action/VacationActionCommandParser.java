@@ -148,7 +148,7 @@ public class VacationActionCommandParser extends AbstractActionCommandParser {
             }
 
             if (Strings.isNotEmpty(from)) {
-                if(UserAliasUtility.isAlias(from, session.getUser().getAliases()) == false) {
+                if (UserAliasUtility.isAlias(from, session.getUser().getAliases()) == false) {
                     throw MailFilterExceptionCode.INVALID_SIEVE_RULE3.create();
                 }
                 arrayList.add(ArgumentUtil.createTagArgument(VacationActionField.from));

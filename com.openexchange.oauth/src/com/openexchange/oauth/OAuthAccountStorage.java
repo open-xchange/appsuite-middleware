@@ -60,7 +60,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public interface OAuthAccountStorage {
-    
+
     /**
      * Stores the specified {@link OAuthAccount} in the storage
      * 
@@ -82,7 +82,20 @@ public interface OAuthAccountStorage {
     OAuthAccount getAccount(Session session, int accountId) throws OXException;
 
     /**
+     * Returns the account with the specified identifier for the specified
+     * user in the specified context
+     *
+     * @param contextId The context identifier
+     * @param userId The user identifier
+     * @param accountId The account identifier
+     * @return The account
+     * @throws OXException If account does not exist, or if any other error is occurred
+     */
+    OAuthAccount getAccount(int contextId, int userId, int accountId) throws OXException;
+
+    /**
      * Deletes the specified account.
+     * 
      * @param session The session
      * @param accountId The account identifier
      *
@@ -109,6 +122,7 @@ public interface OAuthAccountStorage {
      * <li>enabled scopes; {@link OAuthConstants#ARGUMENT_SCOPES}</li>
      * <li>user password is <b>mandatory</b> if request token shall be updated; {@link OAuthConstants#ARGUMENT_PASSWORD}</li>
      * </ul>
+     * 
      * @param session The session
      * @param accountId The account identifier
      * @param arguments The arguments to update
@@ -116,7 +130,7 @@ public interface OAuthAccountStorage {
      * @throws OXException If update fails
      */
     void updateAccount(Session session, int accountId, Map<String, Object> arguments) throws OXException;
-    
+
     /**
      * Searches for an {@link OAuthAccount} with the specified user identity for the specified provider
      * 

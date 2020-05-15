@@ -72,7 +72,6 @@ import com.openexchange.tools.iterator.SearchIterators;
 import ezvcard.Ezvcard;
 import ezvcard.VCard;
 import ezvcard.io.chain.ChainingTextWriter;
-import ezvcard.util.IOUtils;
 
 /**
  * {@link DefaultVCardService}
@@ -116,11 +115,7 @@ public class DefaultVCardService implements VCardService {
         VCard template = null;
         if (null != originalVCard) {
             try {
-                if (vCardParameters.isEnforceUtf8()) {
-                    template = Ezvcard.parse(IOUtils.utf8Reader(originalVCard)).first();
-                } else {
-                    template = Ezvcard.parse(originalVCard).first();
-                }
+                template = Ezvcard.parse(originalVCard).first();
             } catch (IOException e) {
                 org.slf4j.LoggerFactory.getLogger(DefaultVCardService.class).error(
                     "Error parsing original vCard during export of contact {}: {}", contact, e.getMessage(), e);
@@ -180,13 +175,9 @@ public class DefaultVCardService implements VCardService {
         ChainingTextWriter writerChain = Ezvcard.write(vCards);
         applyOptions(getParametersOrDefault(parameters), writerChain);
         try {
-            if (parameters.isEnforceUtf8()) {
-                writerChain.go(IOUtils.utf8Writer(fileHolder.asOutputStream()));
-            } else {
-                writerChain.go(fileHolder.asOutputStream());
-            }
+            writerChain.go(fileHolder.asOutputStream());
             return fileHolder;
-        } catch (IOException e) {
+        } catch (Exception e) {
             Streams.close(fileHolder);
             throw VCardExceptionCodes.IO_ERROR.create(e, e.getMessage());
         }

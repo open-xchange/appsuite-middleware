@@ -58,7 +58,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.osgi.annotation.SingletonService;
 
 /**
- * {@link ConfigurationService}
+ * {@link ConfigurationService} - The service providing access to application's configuration.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

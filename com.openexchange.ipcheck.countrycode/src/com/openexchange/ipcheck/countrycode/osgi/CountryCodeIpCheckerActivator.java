@@ -56,7 +56,6 @@ import com.openexchange.configuration.ServerConfig;
 import com.openexchange.geolocation.GeoLocationService;
 import com.openexchange.java.Strings;
 import com.openexchange.management.ManagementService;
-import com.openexchange.metrics.MetricService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.MultipleServiceTracker;
 import com.openexchange.sessiond.SessiondService;
@@ -91,7 +90,7 @@ public class CountryCodeIpCheckerActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getOptionalServices() {
-        return new Class<?>[] { GeoLocationService.class, ManagementService.class, MetricService.class };
+        return new Class<?>[] { GeoLocationService.class, ManagementService.class };
     }
 
     @Override

@@ -6,6 +6,8 @@ tags: Security, Configuration
 
 Appsuite provides methods for users to require secondary, additional methods of authentication before creating a valid Appsuite session. These methods may include SMS messages, Time based authenticator methods, U2F compatible devices/keyfobs, and other custom methods.
 
+**Please Note:** When a user enables multifactor authentication for their account, their logins will be limited to the Appsuite UI only, as client applications (Mail app, Drive app, Exchange Active Sync) do not currently have the interface to perform the additional multifactor requirements.  As of 7.10.4, users can add Application Passwords to use in order to bypass multifactor authentication for their client applications.  See [Application Passwords]({{site.baseurl}}/middleware/login_and_sessions/application_passwords.html) for details.
+
 # Enabling Multifactor
 
 The `open-xchange-multifactor` package is required for the core of multifactor authentication. For some methods (such as SMS), additional packages will be required.

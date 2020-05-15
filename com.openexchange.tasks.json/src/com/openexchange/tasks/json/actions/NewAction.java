@@ -55,6 +55,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.parser.TaskParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.authentication.application.ajax.RestrictedAction;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tasks.Task;
@@ -71,6 +72,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 @OAuthAction(TaskActionFactory.OAUTH_WRITE_SCOPE)
+@RestrictedAction(module = TaskAction.MODULE, type = RestrictedAction.Type.WRITE)
 public class NewAction extends TaskAction {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(NewAction.class);

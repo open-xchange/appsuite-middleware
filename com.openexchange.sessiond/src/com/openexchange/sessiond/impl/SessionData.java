@@ -575,6 +575,15 @@ final class SessionData {
         }
     }
 
+    /**
+     * Gets the max. number of total sessions
+     *
+     * @return the max. number of total sessions
+     */
+    int getMaxSessions() {
+        return this.maxSessions;
+    }
+
     int countSessions() {
         // A read-only access to session list
         int count = 0;

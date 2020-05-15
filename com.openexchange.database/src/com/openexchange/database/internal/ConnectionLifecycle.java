@@ -120,7 +120,7 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
         }
     }
 
-    private static volatile Integer usageThreshold;
+    static volatile Integer usageThreshold;
 
     private static int usageThreshold() {
         Integer tmp = usageThreshold;

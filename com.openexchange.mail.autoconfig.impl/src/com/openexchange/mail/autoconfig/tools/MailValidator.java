@@ -50,6 +50,9 @@
 package com.openexchange.mail.autoconfig.tools;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.mail.autoconfig.sources.Guess.PROP_GENERAL_CONTEXT_ID;
+import static com.openexchange.mail.autoconfig.sources.Guess.PROP_GENERAL_USER_ID;
+import static com.openexchange.mail.autoconfig.sources.Guess.PROP_SMTP_AUTH_SUPPORTED;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
@@ -75,7 +78,7 @@ import com.sun.mail.smtp.SMTPTransport;
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class MailValidator {
-    
+
     private static final Logger LOGGER = LoggerFactory.getLogger(MailValidator.class);
 
     private static final int DEFAULT_CONNECT_TIMEOUT = 1000;
@@ -89,9 +92,10 @@ public class MailValidator {
      * @param connectMode The connect mode to use
      * @param user The login
      * @param pwd The password
+     * @param optProperties The properties or <code>null</code>
      * @return <code>true</code> for successful authentication, otherwise <code>false</code> for failed authentication
      */
-    public static boolean validateImap(String host, int port, ConnectMode connectMode, String user, String pwd) {
+    public static boolean validateImap(String host, int port, ConnectMode connectMode, String user, String pwd, Map<String, Object> optProperties) {
         Store store = null;
         try {
             SSLSocketFactoryProvider factoryProvider = Services.getService(SSLSocketFactoryProvider.class);
@@ -124,6 +128,17 @@ public class MailValidator {
             props.put("mail.imap.connectiontimeout", I(DEFAULT_CONNECT_TIMEOUT));
             props.put("mail.imap.timeout", I(DEFAULT_TIMEOUT));
             props.put("mail.imap.socketFactory.port", I(port));
+
+            if (optProperties != null) {
+                Integer contextId = (Integer) optProperties.get(PROP_GENERAL_CONTEXT_ID);
+                Integer userId = (Integer) optProperties.get(PROP_GENERAL_USER_ID);
+                if (contextId != null && userId != null) {
+                    if (Utils.isPrimaryImapAccount(host, port, userId.intValue(), contextId.intValue())) {
+                        props.put("mail.imap.primary", "true");
+                    }
+                }
+            }
+
             Session session = Session.getInstance(props, null);
             store = session.getStore("imap");
             store.connect(host, port, user, pwd);
@@ -147,9 +162,10 @@ public class MailValidator {
      * @param connectMode The connect mode to use
      * @param user The login
      * @param pwd The password
+     * @param optProperties The properties or <code>null</code>
      * @return <code>true</code> for successful authentication, otherwise <code>false</code> for failed authentication
      */
-    public static boolean validatePop3(String host, int port, ConnectMode connectMode, String user, String pwd) {
+    public static boolean validatePop3(String host, int port, ConnectMode connectMode, String user, String pwd, Map<String, Object> optProperties) {
         Store store = null;
         try {
             Properties props = new Properties();
@@ -265,7 +281,7 @@ public class MailValidator {
                 final SMTPTransport smtpTransport = (SMTPTransport) transport;
                 if (!smtpTransport.supportsExtension("AUTH") && !smtpTransport.supportsExtension("AUTH=LOGIN")) {
                     // No authentication mechanism supported
-                    optProperties.put("smtp.auth-supported", Boolean.FALSE);
+                    optProperties.put(PROP_SMTP_AUTH_SUPPORTED, Boolean.FALSE);
                 }
             }
 
@@ -318,7 +334,7 @@ public class MailValidator {
     public static boolean tryPop3Connect(String host, int port, boolean secure) {
         return tryConnect(host, port, secure, "QUIT\r\n");
     }
-    
+
     private static boolean tryConnect(String host, int port, boolean secure, String closePhrase) {
         try (Socket s = secure ? Services.getService(SSLSocketFactoryProvider.class).getDefault().createSocket() : new Socket()) {
             /*

@@ -59,6 +59,7 @@ import com.openexchange.admin.rmi.Bug27065Test;
 import com.openexchange.admin.rmi.Bug62360Test;
 import com.openexchange.admin.rmi.ContextTest;
 import com.openexchange.admin.rmi.GroupTest;
+import com.openexchange.admin.rmi.PermissionCapabilityTest;
 import com.openexchange.admin.rmi.ResourceTest;
 import com.openexchange.admin.rmi.UserTest;
 import com.openexchange.admin.rmi.UtilDatabaseTest;
@@ -86,6 +87,7 @@ import com.openexchange.admin.user.copy.rmi.UserCopyTest;
     UtilTest.class,
     UserCopyTest.class,
     UserTest.class,
+    PermissionCapabilityTest.class
     //@formatter:on
 })
 public class AdminRMITestSuite {

@@ -51,7 +51,6 @@ package com.openexchange.chronos.provider.composition.impl;
 
 import static com.openexchange.chronos.provider.CalendarAccount.DEFAULT_ACCOUNT;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.SCHEDULE_TRANSP;
-import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_SYNC;
 import static com.openexchange.chronos.provider.composition.IDMangling.getRelativeFolderId;
 import static com.openexchange.chronos.provider.composition.IDMangling.getRelativeId;
 import static com.openexchange.chronos.provider.composition.IDMangling.getUniqueFolderId;
@@ -61,8 +60,10 @@ import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMa
 import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.withUniqueEventIDs;
 import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.withUniqueID;
 import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.withUniqueIDs;
+import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
+import static com.openexchange.java.Autoboxing.b;
 import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.osgi.Tools.requireService;
 import java.util.ArrayList;
@@ -108,6 +109,7 @@ import com.openexchange.chronos.provider.CalendarProviders;
 import com.openexchange.chronos.provider.DefaultCalendarFolder;
 import com.openexchange.chronos.provider.DefaultCalendarPermission;
 import com.openexchange.chronos.provider.FreeBusyProvider;
+import com.openexchange.chronos.provider.UsedForSync;
 import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.chronos.provider.basic.BasicCalendarAccess;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
@@ -1049,8 +1051,8 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
     private static Event find(List<Event> events, String folderId, String eventId, RecurrenceId recurrenceId) {
         if (null != events) {
             for (Event event : events) {
-                if (null != event && eventId.equals(event.getId()) && 
-                    (folderId.equals(event.getFolderId()) || folderId.equals(BasicCalendarAccess.FOLDER_ID) && null == event.getFolderId())) { 
+                if (null != event && eventId.equals(event.getId()) &&
+                    (folderId.equals(event.getFolderId()) || folderId.equals(BasicCalendarAccess.FOLDER_ID) && null == event.getFolderId())) {
                     if (null == recurrenceId || recurrenceId.matches(event.getRecurrenceId())) {
                         return event;
                     }
@@ -1072,9 +1074,10 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
         folder.setExtendedProperties(settings.getExtendedProperties());
         folder.setName(settings.getName());
         folder.setLastModified(settings.getLastModified());
-        folder.setSubscribed(settings.isSubscribed());
-        folder.setPermissions(Collections.singletonList(new DefaultCalendarPermission(session.getUserId(), 
-            CalendarPermission.READ_FOLDER, CalendarPermission.READ_ALL_OBJECTS, CalendarPermission.NO_PERMISSIONS, 
+        folder.setSubscribed(B(settings.isSubscribed()));
+        folder.setUsedForSync(settings.getUsedForSync().orElse(UsedForSync.DEFAULT));
+        folder.setPermissions(Collections.singletonList(new DefaultCalendarPermission(session.getUserId(),
+            CalendarPermission.READ_FOLDER, CalendarPermission.READ_ALL_OBJECTS, CalendarPermission.NO_PERMISSIONS,
             CalendarPermission.NO_PERMISSIONS, false == autoProvisioned, false, 0)));
         folder.setSupportedCapabilites(CalendarCapability.getCapabilities(calendarAccess.getClass()));
         if (null != accountError) {
@@ -1087,13 +1090,13 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
         DefaultCalendarFolder folder = new DefaultCalendarFolder();
         folder.setId(BasicCalendarAccess.FOLDER_ID);
         folder.setLastModified(account.getLastModified());
-        folder.setPermissions(Collections.singletonList(new DefaultCalendarPermission(session.getUserId(), 
-            CalendarPermission.READ_FOLDER, CalendarPermission.READ_ALL_OBJECTS, CalendarPermission.NO_PERMISSIONS, 
+        folder.setPermissions(Collections.singletonList(new DefaultCalendarPermission(session.getUserId(),
+            CalendarPermission.READ_FOLDER, CalendarPermission.READ_ALL_OBJECTS, CalendarPermission.NO_PERMISSIONS,
             CalendarPermission.NO_PERMISSIONS, true, false, 0)));
         folder.setAccountError(accountError);
         folder.setName(getAccountName(account));
+        folder.setUsedForSync(UsedForSync.DEACTIVATED);
         ExtendedProperties extendedProperties = new ExtendedProperties();
-        extendedProperties.add(USED_FOR_SYNC(Boolean.FALSE, true));
         extendedProperties.add(SCHEDULE_TRANSP(TimeTransparency.TRANSPARENT, true));
         folder.setExtendedProperties(extendedProperties);
         return folder;
@@ -1116,7 +1119,12 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
         if (null != userConfig) {
             settings.setConfig(userConfig);
         }
-        settings.setSubscribed(calendarFolder.isSubscribed());
+        if (null != calendarFolder.isSubscribed()) {
+            settings.setSubscribed(b(calendarFolder.isSubscribed()));
+        }
+        if (null != calendarFolder.getUsedForSync()) {
+            settings.setUsedForSync(calendarFolder.getUsedForSync());
+        }
         return settings;
     }
 

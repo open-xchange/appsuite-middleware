@@ -66,6 +66,15 @@ public interface ICommand {
     String getCommandName();
 
     /**
+     * The json name of the command
+     *
+     * @return The command name
+     */
+    default String getJsonName() {
+        return getCommandName();
+    }
+
+    /**
      * The required sieve server capabilities
      *
      * @return The required capabilities

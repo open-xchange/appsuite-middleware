@@ -54,11 +54,11 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import org.apache.http.client.HttpClient;
 import com.openexchange.exception.OXException;
 import com.openexchange.rest.client.endpointpool.EndpointAvailableStrategy;
 import com.openexchange.rest.client.endpointpool.EndpointManager;
 import com.openexchange.rest.client.endpointpool.EndpointManagerFactory;
+import com.openexchange.rest.client.httpclient.HttpClientService;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.timer.TimerService;
@@ -72,28 +72,33 @@ import com.openexchange.timer.TimerService;
  */
 public class EndpointManagerFactoryImpl implements EndpointManagerFactory {
 
+    private final HttpClientService httpClientService;
     private final ServiceLookup services;
 
     /**
      * Initializes a new {@link EndpointManagerFactoryImpl}.
+     *
+     * @param httpClientService The HTTP client service to use
+     * @param services The service look-up to obtain needed OSGi services
      */
-    public EndpointManagerFactoryImpl(ServiceLookup services) {
+    public EndpointManagerFactoryImpl(HttpClientService httpClientService, ServiceLookup services) {
         super();
+        this.httpClientService = httpClientService;
         this.services = services;
     }
 
     @Override
-    public EndpointManager createEndpointManagerByUris(List<URI> endpointUris, HttpClient httpClient, EndpointAvailableStrategy availableStrategy, long heartbeatInterval, TimeUnit timeUnit) throws OXException {
+    public EndpointManager createEndpointManagerByUris(List<URI> endpointUris, String httpClientId, EndpointAvailableStrategy availableStrategy, long heartbeatInterval, TimeUnit timeUnit) throws OXException {
         TimerService timerService = services.getOptionalService(TimerService.class);
         if (null == timerService) {
             throw ServiceExceptionCode.absentService(TimerService.class);
         }
 
-        return new EndpointManagerImpl(endpointUris, httpClient, availableStrategy, timeUnit.toMillis(heartbeatInterval), timerService);
+        return new EndpointManagerImpl(endpointUris, httpClientId, availableStrategy, timeUnit.toMillis(heartbeatInterval), timerService, httpClientService);
     }
 
     @Override
-    public EndpointManager createEndpointManager(List<String> endpoints, HttpClient httpClient, EndpointAvailableStrategy availableStrategy, long heartbeatInterval, TimeUnit timeUnit) throws OXException {
+    public EndpointManager createEndpointManager(List<String> endpoints, String httpClientId, EndpointAvailableStrategy availableStrategy, long heartbeatInterval, TimeUnit timeUnit) throws OXException {
         TimerService timerService = services.getOptionalService(TimerService.class);
         if (null == timerService) {
             throw ServiceExceptionCode.absentService(TimerService.class);
@@ -114,7 +119,7 @@ public class EndpointManagerFactoryImpl implements EndpointManagerFactory {
                 endpointUris.add(new URI(sEndpoint.endsWith("/") ? sEndpoint.substring(0, sEndpoint.length() - 1) : sEndpoint));
             }
 
-            return new EndpointManagerImpl(endpointUris, httpClient, availableStrategy, timeUnit.toMillis(heartbeatInterval), timerService);
+            return new EndpointManagerImpl(endpointUris, httpClientId, availableStrategy, timeUnit.toMillis(heartbeatInterval), timerService, httpClientService);
         } catch (URISyntaxException e) {
             throw new IllegalArgumentException("Invalid URIs", e);
         }

@@ -1811,7 +1811,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                         adminUser.setDisplay_name(display);
                     }
                     final OXFolderAdminHelper oxa = new OXFolderAdminHelper();
-                    oxa.addContextSystemFolders(contextId, display, adminUser.getLanguage(), oxCon);
+                    oxa.addContextSystemFolders(contextId, ctx.getGABMode(), display, adminUser.getLanguage(), oxCon);
 
                     oxCon.commit();
                     rollback = 2;

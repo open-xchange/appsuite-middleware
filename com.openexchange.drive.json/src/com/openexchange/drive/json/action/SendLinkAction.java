@@ -72,7 +72,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.0
  */
-public class SendLinkAction extends AbstractDriveAction {
+public class SendLinkAction extends AbstractDriveWriteAction {
 
     @Override
     protected AJAXRequestResult doPerform(AJAXRequestData requestData, DefaultDriveSession session) throws OXException {

@@ -50,13 +50,11 @@
 package com.openexchange.folderstorage.database.getfolder;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.database.DatabaseFolder;
 import com.openexchange.folderstorage.database.LocalizedDatabaseFolder;
 import com.openexchange.groupware.container.FolderObject;
@@ -115,47 +113,43 @@ public final class SystemPublicFolder {
      * @throws OXException If the database folder cannot be returned
      */
     public static int[] getSystemPublicFolderSubfoldersAsInt(final User user, final UserPermissionBits userPerm, final Context ctx, final Connection con) throws OXException {
-        try {
-            /*
-             * The system public folder
-             */
-            final Queue<FolderObject> q =
-                ((FolderObjectIterator) OXFolderIteratorSQL.getVisibleSubfoldersIterator(
-                    FolderObject.SYSTEM_PUBLIC_FOLDER_ID,
-                    user.getId(),
-                    user.getGroups(),
-                    ctx,
-                    userPerm,
-                    null,
-                    con)).asQueue();
-            final TIntList subfolderIds = new TIntArrayList(q.size());
-            /*
-             * Add global address book and subfolders
-             */
-            final CapabilityService capsService = ServerServiceRegistry.getInstance().getService(CapabilityService.class);
-            if (null == capsService || capsService.getCapabilities(user.getId(), ctx.getContextId()).contains("gab")) {
-                subfolderIds.add(FolderObject.SYSTEM_LDAP_FOLDER_ID);
-            }
-            for (final FolderObject folderObject : q) {
-                subfolderIds.add(folderObject.getObjectID());
-            }
-            /*
-             * Check for presence of virtual folders
-             */
-            TIntSet containedModules = OXFolderIteratorSQL.hasVisibleFoldersNotSeenInTreeView(new int[] { FolderObject.CALENDAR, FolderObject.CONTACT, FolderObject.TASK }, user.getId(), user.getGroups(), userPerm, ctx, con);
-            if (containedModules.contains(FolderObject.CALENDAR)) {
-                subfolderIds.add(FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID);
-            }
-            if (containedModules.contains(FolderObject.CONTACT)) {
-                subfolderIds.add(FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID);
-            }
-            if (containedModules.contains(FolderObject.TASK)) {
-                subfolderIds.add(FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID);
-            }
-            return subfolderIds.toArray();
-        } catch (SQLException e) {
-            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+        /*
+         * The system public folder
+         */
+        final Queue<FolderObject> q =
+            ((FolderObjectIterator) OXFolderIteratorSQL.getVisibleSubfoldersIterator(
+                FolderObject.SYSTEM_PUBLIC_FOLDER_ID,
+                user.getId(),
+                user.getGroups(),
+                ctx,
+                userPerm,
+                null,
+                con)).asQueue();
+        final TIntList subfolderIds = new TIntArrayList(q.size());
+        /*
+         * Add global address book and subfolders
+         */
+        final CapabilityService capsService = ServerServiceRegistry.getInstance().getService(CapabilityService.class);
+        if (null == capsService || capsService.getCapabilities(user.getId(), ctx.getContextId()).contains("gab")) {
+            subfolderIds.add(FolderObject.SYSTEM_LDAP_FOLDER_ID);
         }
+        for (final FolderObject folderObject : q) {
+            subfolderIds.add(folderObject.getObjectID());
+        }
+        /*
+         * Check for presence of virtual folders
+         */
+        TIntSet containedModules = OXFolderIteratorSQL.hasVisibleFoldersNotSeenInTreeView(new int[] { FolderObject.CALENDAR, FolderObject.CONTACT, FolderObject.TASK }, user.getId(), user.getGroups(), userPerm, ctx, con);
+        if (containedModules.contains(FolderObject.CALENDAR)) {
+            subfolderIds.add(FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID);
+        }
+        if (containedModules.contains(FolderObject.CONTACT)) {
+            subfolderIds.add(FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID);
+        }
+        if (containedModules.contains(FolderObject.TASK)) {
+            subfolderIds.add(FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID);
+        }
+        return subfolderIds.toArray();
     }
 
     /**
@@ -169,48 +163,44 @@ public final class SystemPublicFolder {
      * @throws OXException If the database folder cannot be returned
      */
     public static List<String[]> getSystemPublicFolderSubfolders(final User user, final UserPermissionBits userPerm, final Context ctx, final Connection con) throws OXException {
-        try {
-            /*
-             * The system public folder
-             */
-            final Queue<FolderObject> q =
-                ((FolderObjectIterator) OXFolderIteratorSQL.getVisibleSubfoldersIterator(
-                    FolderObject.SYSTEM_PUBLIC_FOLDER_ID,
-                    user.getId(),
-                    user.getGroups(),
-                    ctx,
-                    userPerm,
-                    null,
-                    con)).asQueue();
-            final List<String[]> subfolderIds = new ArrayList<String[]>(q.size());
-            final StringHelper sh = StringHelper.valueOf(user.getLocale());
-            /*
-             * Add global address book and subfolders
-             */
-            final CapabilityService capsService = ServerServiceRegistry.getInstance().getService(CapabilityService.class);
-            if (null == capsService || capsService.getCapabilities(user.getId(), ctx.getContextId()).contains("gab")) {
-                subfolderIds.add(toArray(String.valueOf(FolderObject.SYSTEM_LDAP_FOLDER_ID), sh.getString(FolderStrings.SYSTEM_LDAP_FOLDER_NAME)));
-            }
-            for (final FolderObject folderObject : q) {
-                subfolderIds.add(toArray(String.valueOf(folderObject.getObjectID()), folderObject.getFolderName()));
-            }
-            /*
-             * Check for presence of virtual folders
-             */
-            TIntSet containedModules = OXFolderIteratorSQL.hasVisibleFoldersNotSeenInTreeView(new int[] { FolderObject.CALENDAR, FolderObject.CONTACT, FolderObject.TASK }, user.getId(), user.getGroups(), userPerm, ctx, con);
-            if (containedModules.contains(FolderObject.CALENDAR)) {
-                subfolderIds.add(toArray(String.valueOf(FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID), sh.getString(FolderStrings.VIRTUAL_LIST_CALENDAR_FOLDER_NAME)));
-            }
-            if (containedModules.contains(FolderObject.CONTACT)) {
-                subfolderIds.add(toArray(String.valueOf(FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID), sh.getString(FolderStrings.VIRTUAL_LIST_CONTACT_FOLDER_NAME)));
-            }
-            if (containedModules.contains(FolderObject.TASK)) {
-                subfolderIds.add(toArray(String.valueOf(FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID), sh.getString(FolderStrings.VIRTUAL_LIST_TASK_FOLDER_NAME)));
-            }
-            return subfolderIds;
-        } catch (SQLException e) {
-            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+        /*
+         * The system public folder
+         */
+        final Queue<FolderObject> q =
+            ((FolderObjectIterator) OXFolderIteratorSQL.getVisibleSubfoldersIterator(
+                FolderObject.SYSTEM_PUBLIC_FOLDER_ID,
+                user.getId(),
+                user.getGroups(),
+                ctx,
+                userPerm,
+                null,
+                con)).asQueue();
+        final List<String[]> subfolderIds = new ArrayList<String[]>(q.size());
+        final StringHelper sh = StringHelper.valueOf(user.getLocale());
+        /*
+         * Add global address book and subfolders
+         */
+        final CapabilityService capsService = ServerServiceRegistry.getInstance().getService(CapabilityService.class);
+        if (null == capsService || capsService.getCapabilities(user.getId(), ctx.getContextId()).contains("gab")) {
+            subfolderIds.add(toArray(String.valueOf(FolderObject.SYSTEM_LDAP_FOLDER_ID), sh.getString(FolderStrings.SYSTEM_LDAP_FOLDER_NAME)));
         }
+        for (final FolderObject folderObject : q) {
+            subfolderIds.add(toArray(String.valueOf(folderObject.getObjectID()), folderObject.getFolderName()));
+        }
+        /*
+         * Check for presence of virtual folders
+         */
+        TIntSet containedModules = OXFolderIteratorSQL.hasVisibleFoldersNotSeenInTreeView(new int[] { FolderObject.CALENDAR, FolderObject.CONTACT, FolderObject.TASK }, user.getId(), user.getGroups(), userPerm, ctx, con);
+        if (containedModules.contains(FolderObject.CALENDAR)) {
+            subfolderIds.add(toArray(String.valueOf(FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID), sh.getString(FolderStrings.VIRTUAL_LIST_CALENDAR_FOLDER_NAME)));
+        }
+        if (containedModules.contains(FolderObject.CONTACT)) {
+            subfolderIds.add(toArray(String.valueOf(FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID), sh.getString(FolderStrings.VIRTUAL_LIST_CONTACT_FOLDER_NAME)));
+        }
+        if (containedModules.contains(FolderObject.TASK)) {
+            subfolderIds.add(toArray(String.valueOf(FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID), sh.getString(FolderStrings.VIRTUAL_LIST_TASK_FOLDER_NAME)));
+        }
+        return subfolderIds;
     }
 
     private static String[] toArray(final String... values) {

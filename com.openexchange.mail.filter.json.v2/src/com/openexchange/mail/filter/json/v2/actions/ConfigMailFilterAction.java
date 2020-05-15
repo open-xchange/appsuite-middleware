@@ -73,6 +73,7 @@ import com.openexchange.mail.filter.json.v2.config.OptionsProperty;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.ActionCommandParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.ActionCommandParserRegistry;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.ExtendedFieldTestCommandParser;
+import com.openexchange.mail.filter.json.v2.json.mapper.parser.IdAwareParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.TestCommandParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.TestCommandParserRegistry;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.action.simplified.SimplifiedAction;
@@ -154,6 +155,23 @@ public class ConfigMailFilterAction extends AbstractMailFilterAction {
         return result;
     }
 
+    /**
+     * isCommandSupported checks if the command is supported, calling the appropriate check depending
+     * on the parser class type
+     *
+     * @param parser Parser to use
+     * @param capabilities List of capabilities
+     * @param id ID of the command
+     * @return <code>true</code> if supported, <code>false</code> otherwise
+     * @throws OXException
+     */
+    private static boolean isCommandSupported(TestCommandParser<TestCommand> parser, Set<String> capabilities, String id) throws OXException {
+        if (parser instanceof IdAwareParser) {
+            return ((IdAwareParser) parser).isCommandSupported(capabilities, id);
+        }
+        return parser.isCommandSupported(capabilities);
+    }
+
     private JSONArray getTestArray(final Set<String> capabilities, Blacklist blacklists) throws OXException, JSONException {
         TestCommandParserRegistry service = services.getService(TestCommandParserRegistry.class);
         final JSONArray testarray = new JSONArray();
@@ -161,7 +179,7 @@ public class ConfigMailFilterAction extends AbstractMailFilterAction {
         for (Map.Entry<String, TestCommandParser<TestCommand>> entry : map.entrySet()) {
             String id = entry.getKey();
             TestCommandParser<TestCommand> parser = entry.getValue();
-            if (!blacklists.isBlacklisted(BasicGroup.tests, id) && parser.isCommandSupported(capabilities)) {
+            if (!blacklists.isBlacklisted(BasicGroup.tests, id) && isCommandSupported(parser, capabilities, id)) {
                 ITestCommand command = parser.getCommand();
                 final JSONObject object = new JSONObject();
                 final JSONArray comparison = new JSONArray();
@@ -209,6 +227,23 @@ public class ConfigMailFilterAction extends AbstractMailFilterAction {
         return testarray;
     }
 
+    /**
+     * isCommandSupported checks if the command is supported, calling the appropriate check depending
+     * on the parser class type
+     *
+     * @param parser The parser to use
+     * @param capabilities List of capabilities
+     * @param id ID of the action
+     * @return True if supported
+     * @throws OXException
+     */
+    private static boolean isCommandSupported(ActionCommandParser<ActionCommand> parser, Set<String> capabilities, String id) throws OXException {
+        if (parser instanceof IdAwareParser) {
+            return ((IdAwareParser) parser).isCommandSupported(capabilities, id);
+        }
+        return parser.isCommandSupported(capabilities);
+    }
+
     private JSONArray getActionArray(final Set<String> capabilities, Blacklist blacklists) throws OXException, JSONException {
         ActionCommandParserRegistry service = services.getService(ActionCommandParserRegistry.class);
         final JSONArray testarray = new JSONArray();
@@ -228,7 +263,7 @@ public class ConfigMailFilterAction extends AbstractMailFilterAction {
                 //ignore, obviously the specified entry is not a simplified command
             }
 
-            if (!blacklists.isBlacklisted(BasicGroup.actions, entry.getKey()) && parser.isCommandSupported(capabilities)) {
+            if (!blacklists.isBlacklisted(BasicGroup.actions, entry.getKey()) && isCommandSupported(parser, capabilities, entry.getKey())) {
                 final JSONObject object = new JSONObject();
                 object.put("id", entry.getKey());
                 testarray.put(object);

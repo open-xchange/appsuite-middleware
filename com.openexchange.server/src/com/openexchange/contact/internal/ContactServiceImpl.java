@@ -680,8 +680,7 @@ public class ContactServiceImpl extends DefaultContactService {
         /*
          * determine queried storages according to queried folders
          */
-        Map<ContactStorage, List<String>> queriedStorages = Tools.getStorages(session,
-            null == folderIDs ? Tools.getVisibleFolders(contextID, userID) : folderIDs);
+        Map<ContactStorage, List<String>> queriedStorages = Tools.getStorages(session, null == folderIDs ? Tools.getVisibleFolders(contextID, userID) : folderIDs);
         Check.hasStorages(queriedStorages);
         /*
          * prepare fields and sort options
@@ -731,8 +730,7 @@ public class ContactServiceImpl extends DefaultContactService {
         /*
          * determine queried storages according to searched folders
          */
-        Map<ContactStorage, List<String>> queriedStorages = Tools.getStorages(session,
-                termAnanlyzer.hasFolderIDs() ? termAnanlyzer.getFolderIDs() : Tools.getSearchFolders(contextID, userID, false));
+        Map<ContactStorage, List<String>> queriedStorages = Tools.getStorages(session, termAnanlyzer.hasFolderIDs() ? termAnanlyzer.getFolderIDs() : Tools.getSearchFolders(contextID, userID, false));
         Check.hasStorages(queriedStorages);
         /*
          * prepare fields and sort options
@@ -949,8 +947,7 @@ public class ContactServiceImpl extends DefaultContactService {
         /*
          * determine queried storages according to searched folders
          */
-        Map<ContactStorage, List<String>> queriedStorages = Tools.getStorages(session,
-            null == folderIDs ? Tools.getVisibleFolders(contextID, userID) : folderIDs);
+        Map<ContactStorage, List<String>> queriedStorages = Tools.getStorages(session, null == folderIDs ? Tools.getVisibleFolders(contextID, userID) : folderIDs);
         Check.hasStorages(queriedStorages);
         /*
          * prepare fields and sort options
@@ -986,8 +983,7 @@ public class ContactServiceImpl extends DefaultContactService {
         /*
          * determine queried storages according to searched folders
          */
-        Map<ContactStorage, List<String>> queriedStorages = Tools.getStorages(session,
-            null == folderIDs ? Tools.getVisibleFolders(contextID, userID) : folderIDs);
+        Map<ContactStorage, List<String>> queriedStorages = Tools.getStorages(session, null == folderIDs ? Tools.getVisibleFolders(contextID, userID) : folderIDs);
         Check.hasStorages(queriedStorages);
         /*
          * prepare fields and sort options

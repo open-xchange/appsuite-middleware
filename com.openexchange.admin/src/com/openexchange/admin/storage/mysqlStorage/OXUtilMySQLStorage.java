@@ -1115,7 +1115,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                                     LOG.debug("Schema \"{}\" of database {} successfully marked for deletion", emptySchema.getScheme(), emptySchema.getId());
                                     numOfSchemasToDelete--;
                                 } else {
-                                    if (schemaSpecified) {
+                                    if (schemaSpecified && db != null) { // Variable "db" is always not null if "schemaSpecified" equals true. Just to keep IDE happy.
                                         throw new StorageException("Schema \"" + db.getScheme() + "\" of database " + db.getId() + " is in use");
                                     }
 

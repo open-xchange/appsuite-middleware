@@ -79,7 +79,7 @@ public class RampUp extends AbstractLoginRequestHandler implements LoginRequestH
     }
 
     @Override
-    public void handleRequest(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    public void handleRequest(HttpServletRequest req, HttpServletResponse resp, LoginRequestContext requestContext) throws IOException {
 
         resp.setContentType(LoginServlet.CONTENTTYPE_JAVASCRIPT);
         final Response response = new Response();
@@ -88,18 +88,21 @@ public class RampUp extends AbstractLoginRequestHandler implements LoginRequestH
             final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
             if (null == sessiondService) {
                 resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                requestContext.getMetricProvider().recordHTTPStatus(HttpServletResponse.SC_FORBIDDEN);
                 return;
             }
 
             String sessionId = req.getParameter("session");
             if (null == sessionId) {
                 resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing \"session\" parameter.");
+                requestContext.getMetricProvider().recordHTTPStatus(HttpServletResponse.SC_BAD_REQUEST);
                 return;
             }
 
             session = sessiondService.getSession(sessionId);
             if (null == session) {
                 resp.sendError(HttpServletResponse.SC_FORBIDDEN, "No such session.");
+                requestContext.getMetricProvider().recordHTTPStatus(HttpServletResponse.SC_FORBIDDEN);
                 return;
             }
 
@@ -119,12 +122,15 @@ public class RampUp extends AbstractLoginRequestHandler implements LoginRequestH
         resp.setContentType(LoginServlet.CONTENTTYPE_JAVASCRIPT);
         try {
             if (response.hasError()) {
+                requestContext.getMetricProvider().recordException(response.getException());
                 ResponseWriter.write(response, resp.getWriter(), LoginServlet.localeFrom(session));
             } else {
                 ((JSONObject) response.getData()).write(resp.getWriter());
+                requestContext.getMetricProvider().recordSuccess();
             }
         } catch (JSONException e) {
             LoginServlet.sendError(resp);
+            requestContext.getMetricProvider().recordHTTPStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }
 

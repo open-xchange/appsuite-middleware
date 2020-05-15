@@ -65,11 +65,6 @@ public class CommonCalendarConfigurationFields {
     public static final String DESCRIPTION = CalendarFolderProperty.DESCRIPTION_LITERAL;
 
     /**
-     * Flag indicating whether the folder is used for sync
-     */
-    public static final String USED_FOR_SYNC = CalendarFolderProperty.USED_FOR_SYNC_LITERAL;
-
-    /**
      * The folder's color
      */
     public static final String COLOR = CalendarFolderProperty.COLOR_LITERAL;
@@ -88,5 +83,10 @@ public class CommonCalendarConfigurationFields {
      * The interval at which the data for an external subscription is refreshed (in minutes).
      */
     public static final String REFRESH_INTERVAL = "refreshInterval";
+
+    /**
+     * Flag indicating whether the folder is used for sync
+     */
+    public static final String USED_FOR_SYNC = CalendarFolderProperty.USED_FOR_SYNC_LITERAL;
 
 }

@@ -54,6 +54,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.authentication.application.ajax.RestrictedAction;
 import com.openexchange.contacts.json.ContactActionFactory;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.contacts.json.RequestTools;
@@ -65,7 +66,6 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
-
 /**
  * {@link UpdateAction}
  *
@@ -73,10 +73,12 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 @OAuthAction(ContactActionFactory.OAUTH_WRITE_SCOPE)
+@RestrictedAction(module = ContactAction.MODULE, type = RestrictedAction.Type.WRITE)
 public class UpdateAction extends ContactAction {
 
     /**
      * Initializes a new {@link UpdateAction}.
+     * 
      * @param serviceLookup
      */
     public UpdateAction(ServiceLookup serviceLookup) {
@@ -102,11 +104,11 @@ public class UpdateAction extends ContactAction {
         }
 
         Contact contact;
-		try {
-			contact = ContactMapper.getInstance().deserialize(json, ContactMapper.getInstance().getAllFields(ContactAction.VIRTUAL_FIELDS));
-		} catch (JSONException e) {
-			throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, json);
-		}
+        try {
+            contact = ContactMapper.getInstance().deserialize(json, ContactMapper.getInstance().getAllFields(ContactAction.VIRTUAL_FIELDS));
+        } catch (JSONException e) {
+            throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, json);
+        }
 
         if (containsImage) {
             if (!json.has("image1") || !com.openexchange.java.Strings.isEmpty(json.opt("image1").toString())) {
@@ -124,8 +126,7 @@ public class UpdateAction extends ContactAction {
             }
         }
 
-        getContactService().updateContact(request.getSession(), request.getFolderID(), request.getObjectID(), contact,
-        		new Date(request.getTimestamp()));
+        getContactService().updateContact(request.getSession(), request.getFolderID(), request.getObjectID(), contact, new Date(request.getTimestamp()));
         return new AJAXRequestResult(new JSONObject(0), contact.getLastModified(), "json");
     }
 }

@@ -170,6 +170,17 @@ properties:
       file: circuit-breaker.properties
       packageName: open-xchange-imap
       tags: ["IMAP", "Circuit Breaker"]
+    - key: com.openexchange.imap.breaker.primary.applyPerEndpoint
+      description: |
+        If `true`, the primary account circuit breaker is applied per IP/port combination, i.e. one unique instance with its own state is used per combination.
+        Otherwise one instance is created and used per primary account host name.
+      defaultValue: true
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: false
+      file: circuit-breaker.properties
+      packageName: open-xchange-imap
+      tags: ["IMAP", "Circuit Breaker"]
     - key: com.openexchange.mail.filter.breaker.enabled
       description: |
         The flag to enable/disable the generic mail filter circuit breaker.

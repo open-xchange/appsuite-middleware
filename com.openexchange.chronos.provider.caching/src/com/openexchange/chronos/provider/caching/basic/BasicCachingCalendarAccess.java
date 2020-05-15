@@ -107,12 +107,14 @@ import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
+import com.openexchange.chronos.provider.UsedForSync;
 import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
 import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.chronos.provider.basic.BasicCalendarAccess;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
 import com.openexchange.chronos.provider.basic.CommonCalendarConfigurationFields;
 import com.openexchange.chronos.provider.caching.AlarmHelper;
+import com.openexchange.chronos.provider.caching.CachingCalendarUtils;
 import com.openexchange.chronos.provider.caching.DiffAwareExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.basic.exception.BasicCachingCalendarExceptionCodes;
@@ -356,13 +358,13 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         Number lastUpdate = caching.optNumber(CachingCalendarAccessConstants.LAST_UPDATE);
         long now = System.currentTimeMillis();
         long refreshInterval = TimeUnit.MINUTES.toMillis(getCascadedRefreshInterval());
-        if (lastUpdate == null || lastUpdate.longValue() <= 0 || 
+        if (lastUpdate == null || lastUpdate.longValue() <= 0 ||
             (refreshInterval < now - lastUpdate.longValue() + TimeUnit.MINUTES.toMillis(1)) ||
             b(parameters.get(CalendarParameters.PARAMETER_UPDATE_CACHE, Boolean.class, Boolean.FALSE))) {
             if (lastUpdate != null && lastUpdate.longValue() > 0 && lastUpdate.longValue() + TimeUnit.MINUTES.toMillis(1) > now) {
                 throw BasicCachingCalendarExceptionCodes.ALREADY_UP_TO_DATE.create(I(account.getAccountId()), I(session.getUserId()), I(session.getContextId()));
             }
-            LOG.debug("Try to update cache for account {} with refresh interval {} (used server time: {}, last update: {}) and current cache configuration '{}'", 
+            LOG.debug("Try to update cache for account {} with refresh interval {} (used server time: {}, last update: {}) and current cache configuration '{}'",
                 I(account.getAccountId()), L(refreshInterval), L(now), lastUpdate != null ? lastUpdate : "never", caching);
             update();
         }
@@ -900,8 +902,8 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         if (addedItems.isEmpty()) {
             return Collections.emptyList();
         }
-        
-        
+
+
         List<CreateResult> createResults = new ArrayList<CreateResult>(addedItems.size());
         Map<String, List<Event>> originalEventsByUID = CalendarUtils.getEventsByUID(existingEvents, false);
         Date now = new Date();
@@ -909,7 +911,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         for (Entry<String, List<Event>> entry : extEventsByUID.entrySet()) {
             List<Event> originalEventGroup = sortSeriesMasterFirst(originalEventsByUID.get(entry.getKey()));
             List<Event> toCreate = sortSeriesMasterFirst(entry.getValue());
-            
+
             /*
              * Check events before processing
              */
@@ -1139,6 +1141,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
      * @return A {@link CalendarResult}
      * @throws OXException
      */
+    @SuppressWarnings("unused")
     protected CalendarResult updateAlarmsInternal(EventID eventID, List<Alarm> alarms, long clientTimestamp, CalendarUtilities calendarUtilities) throws OXException {
         Event originalEvent = getEvent(eventID.getObjectID(), eventID.getRecurrenceID());
         originalEvent.setFolderId(eventID.getFolderID());
@@ -1196,7 +1199,8 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
      * read from the {@link CalendarAccount#getInternalConfiguration()}:
      * <ul>
      * <li>{@link CommonCalendarConfigurationFields#NAME}</li>
-     * <li>{@link CommonCalendarConfigurationFields#SUBSCRIBED} (default: <code>false</code></li>
+     * <li>{@link CommonCalendarConfigurationFields#SUBSCRIBED} (default: <code>true</code></li>
+     * <li>{@link CommonCalendarConfigurationFields#USED_FOR_SYNC} (default: <code>true</code></li>
      * </ul>
      *
      * It also sets the user configuration, the last modified timestamp, the specified {@link ExtendedProperties}
@@ -1214,6 +1218,11 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         settings.setName(internalConfig.optString(CommonCalendarConfigurationFields.NAME, DEFAULT_CALENDAR_NAME));
         settings.setExtendedProperties(extendedProperties);
         settings.setSubscribed(internalConfig.optBoolean("subscribed", true));
+        if (CachingCalendarUtils.canBeUsedForSync(account.getProviderId(), session)) {
+            settings.setUsedForSync(UsedForSync.of(internalConfig.optBoolean(CommonCalendarConfigurationFields.USED_FOR_SYNC, true)));
+        } else {
+            settings.setUsedForSync(UsedForSync.DEACTIVATED);
+        }
         settings.setError(optAccountError());
 
         return settings;
@@ -1238,9 +1247,9 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         ExtendedProperties extendedProperties = new ExtendedProperties();
         extendedProperties.add(SCHEDULE_TRANSP(TimeTransparency.TRANSPARENT, true));
         extendedProperties.add(DESCRIPTION(internalConfig.optString(CommonCalendarConfigurationFields.DESCRIPTION, null)));
-        extendedProperties.add(USED_FOR_SYNC(B(internalConfig.optBoolean(CommonCalendarConfigurationFields.USED_FOR_SYNC, false)), false));
         extendedProperties.add(COLOR(internalConfig.optString(CommonCalendarConfigurationFields.COLOR, null), false));
         extendedProperties.add(LAST_UPDATE(optLastUpdate()));
+        extendedProperties.add(USED_FOR_SYNC(B(internalConfig.optBoolean(CommonCalendarConfigurationFields.USED_FOR_SYNC, false)), false));
 
         return extendedProperties;
     }

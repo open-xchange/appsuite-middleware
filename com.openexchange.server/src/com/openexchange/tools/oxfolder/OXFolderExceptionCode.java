@@ -585,6 +585,10 @@ public enum OXFolderExceptionCode implements DisplayableOXExceptionCode  {
      * There is already a folder named "%1$s" located below the parent folder with identifier %2$s. Please choose another name.
      */
     DUPLICATE_NAME("There is already a folder named \"%1$s\" located below the parent folder with identifier %2$s. Please choose another name.", OXFolderExceptionMessage.DUPLICATE_NAME_MSG, Category.CATEGORY_PERMISSION_DENIED, 95),
+    /**
+     * The folder contains too many permissions
+     */
+    TOO_MANY_PERMISSIONS("The folder contains too many permissions", OXFolderExceptionMessage.TOO_MANY_PERMISSIONS, Category.CATEGORY_USER_INPUT, 96),
 
     ;
 

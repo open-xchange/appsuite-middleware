@@ -49,23 +49,13 @@
 
 package com.openexchange.dovecot.doveadm.client.http;
 
-import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.rest.client.httpclient.HttpClientProperty.CONNTECTION_TIMEOUT_MILLIS;
-import static com.openexchange.rest.client.httpclient.HttpClientProperty.MAX_CONNECTIONS_PER_ROUTE;
-import static com.openexchange.rest.client.httpclient.HttpClientProperty.MAX_TOTAL_CONNECTIONS;
-import static com.openexchange.rest.client.httpclient.HttpClientProperty.SOCKET_READ_TIMEOUT_MILLIS;
 import java.util.Optional;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.DefaultInterests;
 import com.openexchange.config.Interests;
+import com.openexchange.dovecot.doveadm.client.internal.ClientConfig;
 import com.openexchange.dovecot.doveadm.client.internal.HttpDoveAdmCall;
 import com.openexchange.dovecot.doveadm.client.internal.HttpDoveAdmEndpointManager;
-import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
 import com.openexchange.rest.client.httpclient.DefaultHttpClientConfigProvider;
-import com.openexchange.rest.client.httpclient.HttpClientProperty;
 import com.openexchange.rest.client.httpclient.HttpBasicConfig;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.version.VersionService;
@@ -78,40 +68,34 @@ import com.openexchange.version.VersionService;
  */
 public class DoveAdmHttpClientConfig extends DefaultHttpClientConfigProvider {
 
-    private static final int READ_TIMEOUT = 3000;
-    private static final int CONNECTION_TIMEOUT = 10000;
-    private static final int TOTAL_CONNECTIONS = 100;
-    private static final int TOTAL_CONNECTIONS_PER_ROUTE = 100;
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(DoveAdmHttpClientConfig.class);
-
-    private final ServiceLookup serviceLookup;
-    private final HttpDoveAdmCall call;
-
     /**
-     * Initializes a new {@link DoveAdmHttpClientConfig}.
+     * Generates the client identifier for the DoveAdm call.
      *
-     * @param serviceLookup The {@link ServiceLookup}
-     * @param call The {@link HttpDoveAdmCall}^
+     * @param call The call to get the identifier for
+     * @return The client identifier for the HTTP client
      */
-    public DoveAdmHttpClientConfig(ServiceLookup serviceLookup, HttpDoveAdmCall call) {
-        super(getClientId(call), "OX Dovecot Http Client v", Optional.ofNullable(serviceLookup.getService(VersionService.class)));
-        this.serviceLookup = serviceLookup;
-        this.call = call;
-    }
-
-    /**
-     * Get the client ID for the {@link HttpDoveAdmCall}
-     *
-     * @param call The call to get the ID for
-     * @return The client ID for the HTTP client
-     */
-    public static String getClientId(HttpDoveAdmCall call) {
+    public static String generateClientId(HttpDoveAdmCall call) {
         String name = "doveadm";
         if (call != HttpDoveAdmCall.DEFAULT) {
             name = "doveadm-" + call.getName();
         }
         return name;
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    private final ClientConfig clientConfig;
+
+    /**
+     * Initializes a new {@link DoveAdmHttpClientConfig}.
+     *
+     * @param httpClientId The identifier for the HTTP client
+     * @param clientConfig The client configuration
+     * @param services The service look-up
+     */
+    public DoveAdmHttpClientConfig(String httpClientId, ClientConfig clientConfig, ServiceLookup services) {
+        super(httpClientId, "OX Dovecot Http Client v", Optional.ofNullable(services.getService(VersionService.class)));
+        this.clientConfig = clientConfig;
     }
 
     @Override
@@ -121,74 +105,11 @@ public class DoveAdmHttpClientConfig extends DefaultHttpClientConfigProvider {
 
     @Override
     public HttpBasicConfig configureHttpBasicConfig(HttpBasicConfig config) {
-        try {
-            return getFromConfiguration(config);
-        } catch (OXException e) {
-            LoggerFactory.getLogger(DoveAdmHttpClientConfig.class).warn("Unable to set HTTP client configuration for DoveAdm call {}", call, e);
-        }
-        return config.setMaxTotalConnections(TOTAL_CONNECTIONS).setMaxConnectionsPerRoute(TOTAL_CONNECTIONS_PER_ROUTE).setConnectionTimeout(CONNECTION_TIMEOUT).setSocketReadTimeout(READ_TIMEOUT);
-    }
-
-    /**
-     * Configures the {@link HttpBasicConfig} with values fromt he configuration.
-     *
-     * @param config The {@link HttpBasicConfig} to configure
-     * @return The configured {@link HttpBasicConfig}
-     * @throws OXException in case the {@link ConfigurationService} is missing
-     */
-    private HttpBasicConfig getFromConfiguration(HttpBasicConfig config) throws OXException {
-        ConfigurationService configService = serviceLookup.getServiceSafe(ConfigurationService.class);
-
-        // Read properties for HTTP connections/pooling
-        StringBuilder propPrefix;
-        String fallBackName = HttpDoveAdmEndpointManager.DOVEADM_ENDPOINTS;
-        String propName = HttpDoveAdmEndpointManager.DOVEADM_ENDPOINTS + "." + call.getName();
-        String endPoints = configService.getProperty(propName);
-        if (Strings.isEmpty(endPoints)) {
-            propPrefix = new StringBuilder(fallBackName.length() + 1).append(fallBackName).append('.');
-        } else {
-            propPrefix = new StringBuilder(propName.length() + 1).append(propName).append('.');
-        }
-
-        int resetLen = propPrefix.length();
-        String name = propPrefix.append("totalConnections").toString();
-        String value = configService.getProperty(name);
-        setValue(name, value, TOTAL_CONNECTIONS, config, MAX_TOTAL_CONNECTIONS);
-
-        propPrefix.setLength(resetLen);
-        name = propPrefix.append("maxConnectionsPerRoute").toString();
-        value = configService.getProperty(name);
-        setValue(name, value, TOTAL_CONNECTIONS_PER_ROUTE, config, MAX_CONNECTIONS_PER_ROUTE);
-
-        propPrefix.setLength(resetLen);
-        name = propPrefix.append("readTimeout").toString();
-        value = configService.getProperty(name);
-        setValue(name, value, READ_TIMEOUT, config, SOCKET_READ_TIMEOUT_MILLIS);
-
-        propPrefix.setLength(resetLen);
-        name = propPrefix.append("connectTimeout").toString();
-        value = configService.getProperty(name);
-        setValue(name, value, CONNECTION_TIMEOUT, config, CONNTECTION_TIMEOUT_MILLIS);
+        config.setConnectTimeout(clientConfig.getConnectTimeout());
+        config.setMaxConnectionsPerRoute(clientConfig.getMaxConnectionsPerRoute());
+        config.setMaxTotalConnections(clientConfig.getTotalConnections());
+        config.setSocketReadTimeout(clientConfig.getReadTimeout());
         return config;
     }
 
-    /**
-     * Sets the {@link HttpClientProperty} value. If the given value is empty it falls back to the given default value
-     *
-     * @param propName The name of the property
-     * @param value The value
-     * @param defaultValue The default value
-     * @param config The {@link HttpBasicConfig}
-     * @param prop The {@link HttpClientProperty}
-     */
-    private void setValue(String propName, String value, int defaultValue, HttpBasicConfig config, HttpClientProperty prop) {
-        if (Strings.isNotEmpty(value)) {
-            try {
-                prop.setInConfig(config, Integer.valueOf(value));
-            } catch (NumberFormatException ignoree) {
-                LOGGER.warn("Unale to parse value for property {}", propName, ignoree);
-            }
-        }
-        prop.setInConfig(config, I(defaultValue));
-    }
 }

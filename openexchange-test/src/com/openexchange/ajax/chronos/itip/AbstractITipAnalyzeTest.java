@@ -57,7 +57,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
@@ -102,7 +101,9 @@ public abstract class AbstractITipAnalyzeTest extends AbstractITipTest {
         Attendee replyingAttendee = convertToAttendee(testUserC2, Integer.valueOf(0));
         replyingAttendee.setPartStat(PartStat.NEEDS_ACTION.getStatus());
         // organizer gets added automatically
-        event.setAttendees(Collections.singletonList(replyingAttendee));
+        ArrayList<Attendee> attendees = new ArrayList<>(5);
+        attendees.add(replyingAttendee);
+        event.setAttendees(attendees);
         CalendarUser c = new CalendarUser();
         c.cn(userResponseC1.getData().getDisplayName());
         c.email(userResponseC1.getData().getEmail1());
@@ -184,8 +185,7 @@ public abstract class AbstractITipAnalyzeTest extends AbstractITipTest {
         Date from = instance.getTime();
         instance.add(Calendar.DAY_OF_MONTH, 7);
         Date until = instance.getTime();
-        instance.add(Calendar.DAY_OF_MONTH, -7);
-        List<EventData> allEvents = eventManager.getAllEvents(defaultFolderId, from, until, true);
+        List<EventData> allEvents = eventManager.getAllEvents(null, from, until, true);
         allEvents = getEventsByUid(allEvents, event.getUid()); // Filter by series uid
         return allEvents;
     }

@@ -49,7 +49,11 @@
 
 package com.openexchange.push.mail.notify;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.List;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.cascade.ConfigViews;
 import com.openexchange.exception.OXException;
 import com.openexchange.push.PushListener;
 import com.openexchange.push.PushListenerService;
@@ -58,12 +62,15 @@ import com.openexchange.push.PushManagerService;
 import com.openexchange.push.PushUser;
 import com.openexchange.push.PushUserInfo;
 import com.openexchange.push.mail.notify.osgi.Services;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 
 /**
  * {@link MailNotifyPushManagerService} - The {@link PushManagerService} for primary mail account.
  */
 public final class MailNotifyPushManagerService implements PushManagerExtendedService {
+
+    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(MailNotifyPushManagerService.class);
 
     private final String name;
     private final MailNotifyPushListenerRegistry registry;
@@ -77,6 +84,24 @@ public final class MailNotifyPushManagerService implements PushManagerExtendedSe
         this.registry = registry;
     }
 
+    /**
+     * Checks if Mail Notify Push is enabled for given user.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return <code>true</code> if enabled; otherwise <code>false</code>
+     * @throws OXException If check fails
+     */
+    private boolean isMailNotifyPushEnabledFor(int userId, int contextId) throws OXException {
+        ConfigViewFactory factory = Services.optService(ConfigViewFactory.class);
+        if (factory == null) {
+            throw ServiceExceptionCode.absentService(ConfigViewFactory.class);
+        }
+
+        ConfigView view = factory.getView(userId, contextId);
+        return ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.push.mail.notify.enabled", true, view);
+    }
+
     private Session generateSessionFor(PushUser pushUser) throws OXException {
         PushListenerService pushListenerService = Services.getService(PushListenerService.class, true);
         return pushListenerService.generateSessionFor(pushUser);
@@ -87,6 +112,17 @@ public final class MailNotifyPushManagerService implements PushManagerExtendedSe
     @Override
     public PushListener startListener(Session session) throws OXException {
         if (null == session) {
+            return null;
+        }
+
+        int contextId = session.getContextId();
+        int userId = session.getUserId();
+        if (false == isMailNotifyPushEnabledFor(userId, contextId)) {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.info("Denied starting Mail Notify listener for user {} in context {} with session {} since disabled via configuration", I(userId), I(contextId), session.getSessionID(), new Throwable("Mail Notify start listener trace"));
+            } else {
+                LOGGER.info("Denied starting Mail Notify listener for user {} in context {} with session {} since disabled via configuration", I(userId), I(contextId), session.getSessionID());
+            }
             return null;
         }
 
@@ -121,6 +157,17 @@ public final class MailNotifyPushManagerService implements PushManagerExtendedSe
     @Override
     public PushListener startPermanentListener(PushUser pushUser) throws OXException {
         if (null == pushUser) {
+            return null;
+        }
+
+        int contextId = pushUser.getContextId();
+        int userId = pushUser.getUserId();
+        if (false == isMailNotifyPushEnabledFor(userId, contextId)) {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.info("Denied starting permanent Mail Notify listener for user {} in context {} since disabled via configuration", I(userId), I(contextId), new Throwable("Mail Notify start permanent listener trace"));
+            } else {
+                LOGGER.info("Denied starting permanent Mail Notify listener for user {} in context {} since disabled via configuration", I(userId), I(contextId));
+            }
             return null;
         }
 

@@ -209,8 +209,7 @@ public abstract class AbstractContactFacetingModuleSearchDriver extends Abstract
         int excludedAdminID = !includeAdmin ? session.getContext().getMailadmin() : -1;
         List<Contact> contacts;
         try {
-            searchIterator = Services.getContactService().autocompleteContacts(
-                session, folderIDs, prefix, parameters, CONTACT_FIELDS, sortOptions);
+            searchIterator = Services.getContactService().autocompleteContacts(session, folderIDs, prefix, parameters, CONTACT_FIELDS, sortOptions);
             if (0 < excludedAdminID) {
                 contacts = new ArrayList<Contact>();
                 while (searchIterator.hasNext()) {

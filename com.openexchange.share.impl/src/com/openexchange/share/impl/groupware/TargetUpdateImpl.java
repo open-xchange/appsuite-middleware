@@ -68,6 +68,7 @@ import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SetterAwareFolder;
+import com.openexchange.folderstorage.UsedForSync;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -318,6 +319,7 @@ public class TargetUpdateImpl extends AbstractTargetUpdate {
         private static final long serialVersionUID = -8615729293509593034L;
 
         private boolean containsSubscribed;
+        private boolean containsUsedForSync;
 
         /**
          * Initializes a new {@link FolderUpdate}.
@@ -325,6 +327,7 @@ public class TargetUpdateImpl extends AbstractTargetUpdate {
         public FolderUpdate() {
             super();
             subscribed = true;
+            usedForSync = UsedForSync.DEFAULT;
         }
 
         @Override
@@ -341,6 +344,17 @@ public class TargetUpdateImpl extends AbstractTargetUpdate {
         @Override
         public boolean containsSubscribed() {
             return containsSubscribed;
+        }
+        
+        @Override
+        public void setUsedForSync(UsedForSync usedForSync) {
+            super.setUsedForSync(usedForSync);
+            containsUsedForSync = true;
+        }
+        
+        @Override
+        public boolean containsUsedForSync() {
+            return containsUsedForSync;
         }
 
     }

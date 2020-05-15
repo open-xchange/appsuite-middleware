@@ -1,0 +1,19 @@
+/appPasswords?action=getApps:
+  get:
+    operationId: getApplications
+    tags:
+      - AppPassword
+    summary: Lists the existing application available
+    parameters:
+      - $ref: '#/components/parameters/gblQueryParamSession'
+    responses:
+      '200':
+        description: >
+          A JSON object containing the list of available applications.
+
+          In case of errors the responsible fields in the response are filled
+          (see [Error handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AppPasswordGetAppsResponse'

@@ -64,6 +64,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
@@ -306,6 +307,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             }
 
             // Change capabilities
+            checkCapabilities(Optional.ofNullable(capsToAdd), Optional.ofNullable(capsToRemove));
             oxu.changeCapabilities(ctx, user, capsToAdd, capsToRemove, capsToDrop, auth);
 
             // Check for context administrator
@@ -359,7 +361,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             }
 
             if (!tool.existsContext(ctx)) {
-                throw new NoSuchContextException(i(ctx.getId()));
+                throw new NoSuchContextException(ctx.getIdAsString());
             } else if (!tool.existsUser(ctx, user_id)) {
                 throw new NoSuchUserException("No such user " + user_id + " in context " + ctx.getId());
             } else if (!tool.existsStore(dstFilestore.getId().intValue())) {
@@ -1053,8 +1055,9 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     throw new InvalidDataException("The displayname is already used");
                 }
             }
-            final User[] dbuser = oxu.getData(ctx, new User[] { usrdata });
 
+            checkUserAttributes(usrdata);
+            final User[] dbuser = oxu.getData(ctx, new User[] { usrdata });
             checkChangeUserData(ctx, usrdata, dbuser[0], this.prop);
 
             // Check if he wants to change the filestore id
@@ -1518,6 +1521,8 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             try {
                 basicauth.doAuthentication(auth, ctx);
 
+                checkUserAttributes(usr);
+
                 checkContextAndSchema(ctx);
 
                 tool.checkCreateUserData(ctx, usr);
@@ -1538,7 +1543,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
             final int retval = oxu.create(ctx, usr, access);
             usr.setId(Integer.valueOf(retval));
-            final ArrayList<OXUserPluginInterface> interfacelist = new ArrayList<OXUserPluginInterface>();
+            final List<OXUserPluginInterface> interfacelist = new ArrayList<OXUserPluginInterface>();
 
             // Trigger plugin extensions
             {

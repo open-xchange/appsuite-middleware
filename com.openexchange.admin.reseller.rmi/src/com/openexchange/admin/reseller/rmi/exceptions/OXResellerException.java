@@ -49,12 +49,13 @@
 
 package com.openexchange.admin.reseller.rmi.exceptions;
 
+import com.openexchange.admin.rmi.exceptions.AbstractAdminRmiException;
 
 /**
  * @author choeger
  *
  */
-public class OXResellerException extends Exception {
+public class OXResellerException extends AbstractAdminRmiException {
 
     public enum Code {
         /**

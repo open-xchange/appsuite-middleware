@@ -68,13 +68,16 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import org.apache.commons.collections4.IterableUtils;
 import org.slf4j.MDC;
 import com.openexchange.threadpool.CompletionFuture;
 import com.openexchange.threadpool.CorePoolSize;
+import com.openexchange.threadpool.CorePoolSize.Behavior;
 import com.openexchange.threadpool.RefusedExecutionBehavior;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPoolService;
-import com.openexchange.threadpool.CorePoolSize.Behavior;
+import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.binder.jvm.ExecutorServiceMetrics;
 
 /**
  * {@link ThreadPoolServiceImpl} - A thread pool backed by a {@link ThreadPoolExecutor} instance which is accessible via
@@ -213,6 +216,7 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
             threadPoolExecutor.setRejectedExecutionHandler(reh);
             threadPoolExecutor.setBlocking(blocking);
         }
+        new ExecutorServiceMetrics(threadPoolExecutor, "main", IterableUtils.emptyIterable()).bindTo(Metrics.globalRegistry);
     }
 
     private static int getCorePoolSize(CorePoolSize corePoolSize) {

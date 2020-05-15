@@ -50,6 +50,7 @@
 package com.openexchange.config.lean;
 
 import java.util.Map;
+import com.openexchange.config.PropertyFilter;
 import com.openexchange.osgi.annotation.SingletonService;
 
 /**
@@ -175,8 +176,8 @@ public interface LeanConfigurationService {
      *
      * @param property The {@link Property} to fetch
      * @param optionals A {@link Map} containing optional path parameters. The parameters will be used to replace
-     *                  optional parameters in the full qualified name of the property with the value stored for
-     *                  each path parameter.
+     *            optional parameters in the full qualified name of the property with the value stored for
+     *            each path parameter.
      * @return The string value of the property
      */
     String getProperty(Property property, Map<String, String> optionals);
@@ -187,8 +188,8 @@ public interface LeanConfigurationService {
      *
      * @param property The {@link Property} to fetch
      * @param optionals A {@link Map} containing optional path parameters. The parameters will be used to replace
-     *                  optional parameters in the full qualified name of the property with the value stored for
-     *                  each path parameter.
+     *            optional parameters in the full qualified name of the property with the value stored for
+     *            each path parameter.
      *
      * @return The integer value of the property
      * @throws IllegalArgumentException If value cannot be converted to <code>Integer</code>
@@ -201,8 +202,8 @@ public interface LeanConfigurationService {
      *
      * @param property The {@link Property} to fetch
      * @param optionals A {@link Map} containing optional path parameters. The parameters will be used to replace
-     *                  optional parameters in the full qualified name of the property with the value stored for
-     *                  each path parameter.
+     *            optional parameters in the full qualified name of the property with the value stored for
+     *            each path parameter.
      * @return The boolean value of the property
      * @throws IllegalArgumentException If value cannot be converted to <code>Boolean</code>
      */
@@ -214,8 +215,8 @@ public interface LeanConfigurationService {
      *
      * @param property The {@link Property} to fetch
      * @param optionals A {@link Map} containing optional path parameters. The parameters will be used to replace
-     *                  optional parameters in the full qualified name of the property with the value stored for
-     *                  each path parameter.
+     *            optional parameters in the full qualified name of the property with the value stored for
+     *            each path parameter.
      * @return The float value of the property
      * @throws IllegalArgumentException If value cannot be converted to <code>Float</code>
      */
@@ -227,8 +228,8 @@ public interface LeanConfigurationService {
      *
      * @param property The {@link Property} to fetch
      * @param optionals A {@link Map} containing optional path parameters. The parameters will be used to replace
-     *                  optional parameters in the full qualified name of the property with the value stored for
-     *                  each path parameter.
+     *            optional parameters in the full qualified name of the property with the value stored for
+     *            each path parameter.
      * @return The long value of the property
      * @throws IllegalArgumentException If value cannot be converted to <code>Long</code>
      */
@@ -242,8 +243,8 @@ public interface LeanConfigurationService {
      * @param contextId The context identifier
      * @param property The {@link Property} name to fetch
      * @param optionals A {@link Map} containing optional path parameters. The parameters will be used to replace
-     *                  optional parameters in the full qualified name of the property with the value stored for
-     *                  each path parameter.
+     *            optional parameters in the full qualified name of the property with the value stored for
+     *            each path parameter.
      * @return The {@link String} value of the property
      */
     String getProperty(int userId, int contextId, Property property, Map<String, String> optionals);
@@ -256,8 +257,8 @@ public interface LeanConfigurationService {
      * @param contextId The context identifier
      * @param property The {@link Property} name to fetch
      * @param optionals A {@link Map} containing optional path parameters. The parameters will be used to replace
-     *                  optional parameters in the full qualified name of the property with the value stored for
-     *                  each path parameter.
+     *            optional parameters in the full qualified name of the property with the value stored for
+     *            each path parameter.
      * @return The {@link Integer} value of the property
      * @throws IllegalArgumentException If value cannot be converted to <code>Integer</code>
      */
@@ -271,8 +272,8 @@ public interface LeanConfigurationService {
      * @param contextId The context identifier
      * @param property The {@link Property} name to fetch
      * @param optionals A {@link Map} containing optional path parameters. The parameters will be used to replace
-     *                  optional parameters in the full qualified name of the property with the value stored for
-     *                  each path parameter.
+     *            optional parameters in the full qualified name of the property with the value stored for
+     *            each path parameter.
      * @return The {@link Boolean} value of the property
      * @throws IllegalArgumentException If value cannot be converted to <code>Boolean</code>
      */
@@ -286,8 +287,8 @@ public interface LeanConfigurationService {
      * @param contextId The context identifier
      * @param property The {@link Property} name to fetch
      * @param optionals A {@link Map} containing optional path parameters. The parameters will be used to replace
-     *                  optional parameters in the full qualified name of the property with the value stored for
-     *                  each path parameter.
+     *            optional parameters in the full qualified name of the property with the value stored for
+     *            each path parameter.
      * @return The {@link Float} value of the property
      * @throws IllegalArgumentException If value cannot be converted to <code>Float</code>
      */
@@ -301,11 +302,18 @@ public interface LeanConfigurationService {
      * @param contextId The context identifier
      * @param property The {@link Property} name to fetch
      * @param optionals A {@link Map} containing optional path parameters. The parameters will be used to replace
-     *                  optional parameters in the full qualified name of the property with the value stored for
-     *                  each path parameter.
+     *            optional parameters in the full qualified name of the property with the value stored for
+     *            each path parameter.
      * @return The {@link Long} value of the property
      * @throws IllegalArgumentException If value cannot be converted to <code>Long</code>
      */
     long getLongProperty(int userId, int contextId, Property property, Map<String, String> optionals);
 
+    /**
+     * Returns all properties that fulfill the given filter's acceptance criteria.
+     *
+     * @param filter The property filter
+     * @return The appropriate properties or an empty {@link Map} if no properties were matched
+     */
+    Map<String, String> getProperties(PropertyFilter propertyFilter);
 }

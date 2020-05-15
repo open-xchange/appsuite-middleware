@@ -210,15 +210,15 @@ public abstract class AbstractWebDAVFolderAccess extends AbstractWebDAVAccess im
         Map<String, String> headers = Collections.singletonMap("If-None-Match", "*");
         NameBuilder nameBuilder = null;
         boolean created = false;
-        while(!created) {
+        while (!created) {
             try {
                 client.mkCol(path.toString(), headers);
                 created = true;
             }
             catch(WebDAVClientException e) {
-                if(autoRename && e.getStatusCode() == HttpStatus.SC_PRECONDITION_FAILED) {
+                if (autoRename && e.getStatusCode() == HttpStatus.SC_PRECONDITION_FAILED) {
                     //Collection does already exist. Choose another name
-                    if(nameBuilder == null) {
+                    if (nameBuilder == null) {
                          nameBuilder = NameBuilder.nameBuilderFor(path.getName());
                     }
                     nameBuilder.advance();
@@ -259,16 +259,16 @@ public abstract class AbstractWebDAVFolderAccess extends AbstractWebDAVAccess im
         Map<String, String> headers = Collections.singletonMap("Overwrite", "F");
         NameBuilder nameBuilder = null;
         boolean moved = false;
-        while(!moved) {
+        while (!moved) {
             try {
                 client.move(path.toString(), targetPath.toString(), headers);
                 moved = true;
             }
             catch(WebDAVClientException e) {
-                if(e.getStatusCode() == HttpStatus.SC_PRECONDITION_FAILED) {
-                    if(autoRename) {
+                if (e.getStatusCode() == HttpStatus.SC_PRECONDITION_FAILED) {
+                    if (autoRename) {
                         //Collection does already exist. Choose another name
-                        if(nameBuilder == null) {
+                        if (nameBuilder == null) {
                              nameBuilder = NameBuilder.nameBuilderFor(name);
                         }
                         nameBuilder.advance();
@@ -297,7 +297,7 @@ public abstract class AbstractWebDAVFolderAccess extends AbstractWebDAVAccess im
             Map<String, String> headers = Collections.singletonMap("Overwrite", "F");
             client.move(path.toString(), targetPath.toString(), headers);
         } catch (WebDAVClientException e) {
-            if(e.getStatusCode() == HttpStatus.SC_PRECONDITION_FAILED) {
+            if (e.getStatusCode() == HttpStatus.SC_PRECONDITION_FAILED) {
                 throw FileStorageExceptionCodes.DUPLICATE_FOLDER.create(e, newName, folderId);
             }
             throw e;

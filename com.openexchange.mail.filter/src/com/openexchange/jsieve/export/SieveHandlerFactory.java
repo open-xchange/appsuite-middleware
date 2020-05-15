@@ -65,7 +65,6 @@ import com.openexchange.mailfilter.properties.LoginType;
 import com.openexchange.mailfilter.properties.MailFilterProperty;
 import com.openexchange.mailfilter.properties.PasswordSource;
 import com.openexchange.mailfilter.services.Services;
-import com.openexchange.metrics.MetricService;
 import com.openexchange.tools.net.URIDefaults;
 import com.openexchange.tools.net.URIParser;
 import com.openexchange.user.User;
@@ -83,12 +82,11 @@ public final class SieveHandlerFactory {
      *
      * @param creds The credentials
      * @param optionalCircuitBreaker The optional breaker for mail filter access
-     * @param optionalMetricService The optional metric service to measure request/error rate
      * @return A sieve handler
      * @throws OXException
      */
-    public static SieveHandler getSieveHandler(Credentials creds, Optional<CircuitBreakerInfo> optionalCircuitBreaker, Optional<MetricService> optionalMetricService) throws OXException {
-        return getSieveHandler(creds, optionalCircuitBreaker, optionalMetricService, false);
+    public static SieveHandler getSieveHandler(Credentials creds, Optional<CircuitBreakerInfo> optionalCircuitBreaker) throws OXException {
+        return getSieveHandler(creds, optionalCircuitBreaker, false);
     }
 
     /**
@@ -96,12 +94,11 @@ public final class SieveHandlerFactory {
      *
      * @param creds The credentials
      * @param optionalCircuitBreaker The optional breaker for mail filter access
-     * @param optionalMetricService The optional metric service to measure request/error rate
      * @param onlyWelcome <code>true</code> if only server's welcome message is of interest; otherwise <code>false</code> for full login round-trip
      * @return A sieve handler
      * @throws OXException
      */
-    public static SieveHandler getSieveHandler(Credentials creds, Optional<CircuitBreakerInfo> optionalCircuitBreaker, Optional<MetricService> optionalMetricService, boolean onlyWelcome) throws OXException {
+    public static SieveHandler getSieveHandler(Credentials creds, Optional<CircuitBreakerInfo> optionalCircuitBreaker, boolean onlyWelcome) throws OXException {
         LeanConfigurationService mailFilterConfig = Services.getService(LeanConfigurationService.class);
 
         int userId = creds.getUserid();
@@ -162,16 +159,16 @@ public final class SieveHandlerFactory {
         switch (credentialSource) {
             case IMAP_LOGIN: {
                 String authname = getMailAccount(userId, contextId, mailAccount).getLogin();
-                return newSieveHandlerUsing(sieveServer, sievePort, creds.getUsername(), authname, getRightPassword(mailFilterConfig, creds), authEnc, creds.getOauthToken(), optionalCircuitBreaker, optionalMetricService, userId, contextId);
+                return newSieveHandlerUsing(sieveServer, sievePort, creds.getUsername(), authname, getRightPassword(mailFilterConfig, creds), authEnc, creds.getOauthToken(), optionalCircuitBreaker, userId, contextId);
             }
             case MAIL: {
                 String authname = getUser(creds, user).getMail();
-                return newSieveHandlerUsing(sieveServer, sievePort, creds.getUsername(), authname, getRightPassword(mailFilterConfig, creds), authEnc, creds.getOauthToken(), optionalCircuitBreaker, optionalMetricService, userId, contextId);
+                return newSieveHandlerUsing(sieveServer, sievePort, creds.getUsername(), authname, getRightPassword(mailFilterConfig, creds), authEnc, creds.getOauthToken(), optionalCircuitBreaker, userId, contextId);
             }
             case SESSION:
                 // fall-through
             case SESSION_FULL_LOGIN:
-                return newSieveHandlerUsing(sieveServer, sievePort, creds.getUsername(), creds.getAuthname(), getRightPassword(mailFilterConfig, creds), authEnc, creds.getOauthToken(), optionalCircuitBreaker, optionalMetricService, userId, contextId);
+                return newSieveHandlerUsing(sieveServer, sievePort, creds.getUsername(), creds.getAuthname(), getRightPassword(mailFilterConfig, creds), authEnc, creds.getOauthToken(), optionalCircuitBreaker, userId, contextId);
             default:
                 throw MailFilterExceptionCode.NO_VALID_CREDSRC.create();
         }
@@ -188,13 +185,12 @@ public final class SieveHandlerFactory {
      * @param authEncoding The authentication encoding
      * @param oauthToken The OAuth token
      * @param optionalCircuitBreaker The optional breaker for mail filter access
-     * @param optionalMetricService The optional metric service to measure request/error rate
      * @param userId The user identifier
      * @param contextId The context identifier
      * @return The {@link SieveHandler}
      */
-    private static SieveHandler newSieveHandlerUsing(String host, int port, String userName, String authName, String password, String authEncoding, String oauthToken, Optional<CircuitBreakerInfo> optionalCircuitBreaker, Optional<MetricService> optionalMetricService, int userId, int contextId) {
-        return new SieveHandler(null == userName ? authName : userName, authName, password, host, port, authEncoding, oauthToken, optionalCircuitBreaker, optionalMetricService, userId, contextId);
+    private static SieveHandler newSieveHandlerUsing(String host, int port, String userName, String authName, String password, String authEncoding, String oauthToken, Optional<CircuitBreakerInfo> optionalCircuitBreaker, int userId, int contextId) {
+        return new SieveHandler(null == userName ? authName : userName, authName, password, host, port, authEncoding, oauthToken, optionalCircuitBreaker, userId, contextId);
     }
 
     /**

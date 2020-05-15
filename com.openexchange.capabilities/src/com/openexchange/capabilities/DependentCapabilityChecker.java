@@ -79,7 +79,7 @@ public abstract class DependentCapabilityChecker implements CapabilityChecker {
 
     @Override
     public boolean isEnabled(String capability, Session session) throws OXException {
-        return isEnabled(capability, session, new CapabilitySet(2));
+        return isEnabled(capability, session, Capabilities.emptyCapabilitySet());
     }
 
 }

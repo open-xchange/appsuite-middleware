@@ -60,13 +60,13 @@ import org.apache.http.client.HttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.filestore.sproxyd.osgi.Services;
-import com.openexchange.metrics.MetricDescriptor;
-import com.openexchange.metrics.MetricService;
-import com.openexchange.metrics.MetricType;
+import com.openexchange.metrics.micrometer.Micrometer;
 import com.openexchange.osgi.ExceptionUtils;
 import com.openexchange.rest.client.httpclient.HttpClientService;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
+import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.Tags;
 
 /**
  * A {@link EndpointPool} manages a set of endpoints for the sproxyd client. The available
@@ -84,7 +84,7 @@ public class EndpointPool {
 
     static final Logger LOG = LoggerFactory.getLogger(EndpointPool.class);
 
-    private static final String GROUP_ID = "sproxyd";
+    private static final String GROUP_ID = "appsuite.sproxyd.";
 
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
     private final List<String> available;
@@ -101,9 +101,8 @@ public class EndpointPool {
      * @param endpointUrls A list of endpoint URLs to manage; must not be empty; URLs must always end with a trailing slash
      * @param heartbeatInterval
      * @param timerService
-     * @param metrics
      */
-    public EndpointPool(String filestoreId, List<String> endpointUrls, int heartbeatInterval, TimerService timerService, MetricService metrics) {
+    public EndpointPool(String filestoreId, List<String> endpointUrls, int heartbeatInterval, TimerService timerService) {
         super();
         this.filestoreId = filestoreId;
         int size = endpointUrls.size();
@@ -117,33 +116,38 @@ public class EndpointPool {
 
         LOG.debug("Sproxyd endpoint pool [{}]: Scheduling heartbeat timer task", filestoreId);
         heartbeat = timerService.scheduleWithFixedDelay(new Heartbeat(filestoreId, this), heartbeatInterval, heartbeatInterval);
-        initMetrics(metrics);
+        initMetrics();
     }
 
-    private void initMetrics(MetricService metrics) {
-        metrics.getGauge(MetricDescriptor.newBuilder(GROUP_ID, "EndpointPool.TotalSize", MetricType.GAUGE)
-            .withDescription("Number of configured sproxyd endpoints")
-            .withMetricSupplier(() -> I(getNumberOfEndpoints()))
-            .addDimension("filestore", filestoreId)
-            .build());
+    /**
+     * Initializes the metrics for this {@link EndpointPool}
+     */
+    private void initMetrics() {
+        String noUnit = null;
+        Tags tags = Tags.of("filestore", filestoreId);
+        Micrometer.registerOrUpdateGauge(Metrics.globalRegistry,
+            GROUP_ID + "endpoints.total",
+            tags,
+            "Number of configured sproxyd endpoints",
+            noUnit,
+            this,
+            (p) -> (double) p.getNumberOfEndpoints());
 
-        metrics.getGauge(MetricDescriptor.newBuilder(GROUP_ID, "EndpointPool.Available", MetricType.GAUGE)
-            .withDescription("Number of available sproxyd endpoints")
-            .withMetricSupplier(() -> I(getStats().getAvailableEndpoints()))
-            .addDimension("filestore", filestoreId)
-            .build());
+        Micrometer.registerOrUpdateGauge(Metrics.globalRegistry,
+            GROUP_ID + "endpoints.available",
+            tags,
+            "Number of available sproxyd endpoints",
+            noUnit,
+            this,
+            (p) -> (double) p.getStats().getAvailableEndpoints());
 
-        metrics.getGauge(MetricDescriptor.newBuilder(GROUP_ID, "EndpointPool.Unavailable", MetricType.GAUGE)
-            .withDescription("Number of unavailable (blacklisted) sproxyd endpoints")
-            .withMetricSupplier(() -> I(getStats().getBlacklistedEndpoints()))
-            .addDimension("filestore", filestoreId)
-            .build());
-
-        metrics.getGauge(MetricDescriptor.newBuilder(GROUP_ID, "EndpointPool.Blacklist", MetricType.GAUGE)
-            .withDescription("List of unavailable (blacklisted) sproxyd endpoints")
-            .withMetricSupplier(() -> getStats().getBlacklist())
-            .addDimension("filestore", filestoreId)
-            .build());
+        Micrometer.registerOrUpdateGauge(Metrics.globalRegistry,
+            GROUP_ID + "endpoints.unavailable",
+            tags,
+            "Number of unavailable (blacklisted) sproxyd endpoints",
+            noUnit,
+            this,
+            (p) -> (double) p.getStats().getBlacklistedEndpoints());
     }
 
     /**

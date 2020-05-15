@@ -22,7 +22,7 @@ local overviewRowUptime = singlestat.new(
   thresholds='300,3600',
 ).addTarget(
   prometheus.target(
-    expr='sum(time() - node_boot_time_seconds{instance=~"$instance"})',
+    expr='sum(time() - node_boot_time_seconds{instance=~"$instance"}) or sum(time() - node_boot_time{instance=~"$instance"})',
     instant=true,
   )
 );
@@ -34,7 +34,7 @@ local overviewRowTotalRAM = singlestat.new(
   format='bytes',
 ).addTarget(
   prometheus.target(
-    expr='sum(node_memory_MemTotal_bytes{instance=~"$instance"})',
+    expr='sum(node_memory_MemTotal_bytes{instance=~"$instance"}) or sum(node_memory_MemTotal{instance=~"$instance"})',
     legendFormat='{{instance}}',
     instant=true,
   )
@@ -45,7 +45,7 @@ local overviewRowCPUCores = singlestat.new(
   valueName='current',
 ).addTarget(
   prometheus.target(
-    expr='sum(count(node_cpu_seconds_total{instance=~"$instance", mode="system"}) by (cpu))',
+    expr='sum(count(node_cpu_seconds_total{instance=~"$instance", mode="system"}) or count(node_cpu{instance=~"$instance", mode="system"}) by (cpu))',
     instant=true,
   )
 );
@@ -60,7 +60,7 @@ local overviewRowIOWait = singlestat.new(
   thresholds='30,40,50',
 ).addTarget(
   prometheus.target(
-    expr='avg(irate(node_cpu_seconds_total{instance=~"$instance",mode="iowait"}[30m])) * 100',
+    expr='(avg(irate(node_cpu_seconds_total{instance=~"$instance",mode="iowait"}[30m])) or avg(irate(node_cpu{instance=~"$instance",mode="iowait"}[30m]))) * 100',
   )
 );
 
@@ -73,7 +73,7 @@ local overviewRowCPUUsage = singlestat.new(
   gaugeShow=true,
 ).addTarget(
   prometheus.target(
-    expr='100 - (avg(irate(node_cpu_seconds_total{instance=~"$instance",mode="idle"}[30m])) * 100)',
+    expr='100 - (avg(irate(node_cpu_seconds_total{instance=~"$instance",mode="idle"}[30m])) * 100) OR\n100 - (avg(irate(node_cpu{instance=~"$instance",mode="idle"}[30m])) * 100)',
     instant=true,
   )
 );
@@ -87,7 +87,7 @@ local overviewRowRAMUsage = singlestat.new(
   gaugeShow=true,
 ).addTarget(
   prometheus.target(
-    expr='(1 - (node_memory_MemAvailable_bytes{instance=~"$instance"} / (node_memory_MemTotal_bytes{instance=~"$instance"})))* 100',
+    expr='(1 - (node_memory_MemAvailable_bytes{instance=~"$instance"} / (node_memory_MemTotal_bytes{instance=~"$instance"})))* 100 OR\n(1 - (node_memory_MemAvailable{instance=~"$instance"} / (node_memory_MemTotal{instance=~"$instance"})))* 100',
     instant=true,
   )
 );
@@ -101,7 +101,7 @@ local overviewRowSwapUsage = singlestat.new(
   gaugeShow=true,
 ).addTarget(
   prometheus.target(
-    expr='(1 - (node_memory_SwapFree_bytes{instance=~"$instance"} / node_memory_SwapTotal_bytes{instance=~"$instance"})) * 100',
+    expr='(1 - (node_memory_SwapFree_bytes{instance=~"$instance"} / node_memory_SwapTotal_bytes{instance=~"$instance"})) * 100 OR\n(1 - (node_memory_SwapFree{instance=~"$instance"} / node_memory_SwapTotal{instance=~"$instance"})) * 100',
     instant=true,
   )
 );
@@ -115,7 +115,7 @@ local overviewRowFSUsage = singlestat.new(
   gaugeShow=true,
 ).addTarget(
   prometheus.target(
-    expr='topk(1, 100 - ((node_filesystem_avail_bytes{instance=~"$instance",fstype=~"ext[2-4]|[x|z]fs"} * 100) / node_filesystem_size_bytes {instance=~"$instance",fstype=~"ext[2-4]|[x|z]fs"}))',
+    expr='topk(1, 100 - ((node_filesystem_avail_bytes{instance=~"$instance",fstype=~"ext[2-4]|[x|z]fs"} * 100) / node_filesystem_size_bytes {instance=~"$instance",fstype=~"ext[2-4]|[x|z]fs"})) OR topk(1, 100 - ((node_filesystem_avail{instance=~"$instance",fstype=~"ext[2-4]|[x|z]fs"} * 100) / node_filesystem_size {instance=~"$instance",fstype=~"ext[2-4]|[x|z]fs"}))',
     instant=true,
   )
 );
@@ -175,22 +175,22 @@ local cpuRowCPU = graphPanel.new(
 ).addTargets(
   [
     prometheus.target(
-      expr='avg(irate(node_cpu_seconds_total{instance=~"$instance",mode="system"}[30m]))',
+      expr='avg(irate(node_cpu_seconds_total{instance=~"$instance",mode="system"}[30m])) OR avg(irate(node_cpu{instance=~"$instance",mode="system"}[30m]))',
       legendFormat='System',
       intervalFactor=1,
     ),
     prometheus.target(
-      expr='avg(irate(node_cpu_seconds_total{instance=~"$instance",mode="user"}[30m]))',
+      expr='avg(irate(node_cpu_seconds_total{instance=~"$instance",mode="user"}[30m])) OR avg(irate(node_cpu{instance=~"$instance",mode="user"}[30m]))',
       legendFormat='User',
       intervalFactor=1,
     ),
     prometheus.target(
-      expr='avg(irate(node_cpu_seconds_total{instance=~"$instance",mode="iowait"}[30m]))',
+      expr='avg(irate(node_cpu_seconds_total{instance=~"$instance",mode="iowait"}[30m])) OR avg(irate(node_cpu{instance=~"$instance",mode="iowait"}[30m]))',
       legendFormat='Iowait',
       intervalFactor=1,
     ),
     prometheus.target(
-      expr='1-avg(irate(node_cpu_seconds_total{instance=~"$instance",mode="idle"}[30m]))',
+      expr='1-avg(irate(node_cpu_seconds_total{instance=~"$instance",mode="idle"}[30m])) OR 1-avg(irate(node_cpu{instance=~"$instance",mode="idle"}[30m]))',
       legendFormat='Idle',
       intervalFactor=1,
     ),
@@ -250,17 +250,17 @@ local memoryRowMemory = graphPanel.new(
 ).addTargets(
   [
     prometheus.target(
-      expr='node_memory_MemTotal_bytes{instance=~"$instance"}',
+      expr='node_memory_MemTotal_bytes{instance=~"$instance"} OR node_memory_MemTotal{instance=~"$instance"}',
       legendFormat='Total',
       intervalFactor=1,
     ),
     prometheus.target(
-      expr='node_memory_MemTotal_bytes{instance=~"$instance"} - node_memory_MemAvailable_bytes{instance=~"$instance"}',
+      expr='node_memory_MemTotal_bytes{instance=~"$instance"} - node_memory_MemAvailable_bytes{instance=~"$instance"} OR node_memory_MemTotal{instance=~"$instance"} - node_memory_MemAvailable{instance=~"$instance"}',
       legendFormat='Used',
       intervalFactor=1,
     ),
     prometheus.target(
-      expr='node_memory_MemAvailable_bytes{instance=~"$instance"}',
+      expr='node_memory_MemAvailable_bytes{instance=~"$instance"} OR node_memory_MemAvailable{instance=~"$instance"}',
       legendFormat='Available',
       intervalFactor=1,
     ),
@@ -290,7 +290,7 @@ local kernelRowForks = graphPanel.new(
   formatY1='ops',
 ).addTarget(
   prometheus.target(
-    expr='irate(node_forks_total{instance=~"$instance"}[$interval])',
+    expr='irate(node_forks_total{instance=~"$instance"}[$interval]) OR irate(node_forks{instance=~"$instance"}[$interval])',
     legendFormat='Forks',
     intervalFactor=1,
   )
@@ -313,7 +313,7 @@ local kernelRowSwitches = graphPanel.new(
   formatY1='ops',
 ).addTarget(
   prometheus.target(
-    expr='irate(node_context_switches_total{instance=~"$instance"}[$interval])',
+    expr='irate(node_context_switches_total{instance=~"$instance"}[$interval]) OR irate(node_context_switches{instance=~"$instance"}[$interval])',
     legendFormat='Context Switches',
     intervalFactor=1,
   )
@@ -374,12 +374,12 @@ local networkRowTraffic = graphPanel.new(
 ).addTargets(
   [
     prometheus.target(
-      expr='irate(node_network_receive_bytes_total{instance=~"$instance",device!~"tap.*|veth.*|br.*|docker.*|virbr*|lo*"}[30m])*8',
+      expr='irate(node_network_receive_bytes_total{instance=~"$instance",device!~"tap.*|veth.*|br.*|docker.*|virbr*|lo*"}[30m])*8 OR irate(node_network_receive_bytes{instance=~"$instance",device!~"tap.*|veth.*|br.*|docker.*|virbr*|lo*"}[30m])*8',
       legendFormat='{{device}}_Receive',
       intervalFactor=1,
     ),
     prometheus.target(
-      expr='irate(node_network_transmit_bytes_total{instance=~"$instance",device!~"tap.*|veth.*|br.*|docker.*|virbr*|lo*"}[30m])*8',
+      expr='irate(node_network_transmit_bytes_total{instance=~"$instance",device!~"tap.*|veth.*|br.*|docker.*|virbr*|lo*"}[30m])*8 OR irate(node_network_transmit_bytes{instance=~"$instance",device!~"tap.*|veth.*|br.*|docker.*|virbr*|lo*"}[30m])*8',
       legendFormat='{{device}}_Transmit',
       intervalFactor=1,
     ),
@@ -411,12 +411,12 @@ local diskRowIops = graphPanel.new(
 ).addTargets(
   [
     prometheus.target(
-      expr='irate(node_disk_reads_completed_total{instance=~"$instance"}[30m])',
+      expr='irate(node_disk_reads_completed_total{instance=~"$instance"}[30m]) OR irate(node_disk_reads_completed{instance=~"$instance"}[30m])',
       legendFormat='{{device}}_Reads',
       intervalFactor=1,
     ),
     prometheus.target(
-      expr='irate(node_disk_writes_completed_total{instance=~"$instance"}[30m])',
+      expr='irate(node_disk_writes_completed_total{instance=~"$instance"}[30m]) OR irate(node_disk_writes_completed{instance=~"$instance"}[30m])',
       legendFormat='{{device}}_Writes',
       intervalFactor=1,
     ),
@@ -448,12 +448,12 @@ local diskRowIoBytes = graphPanel.new(
 ).addTargets(
   [
     prometheus.target(
-      expr='irate(node_disk_read_bytes_total{instance=~"$instance"}[30m])',
+      expr='irate(node_disk_read_bytes_total{instance=~"$instance"}[30m]) OR irate(node_disk_bytes_read{instance=~"$instance"}[30m])',
       legendFormat='{{device}}_Read',
       intervalFactor=1,
     ),
     prometheus.target(
-      expr='irate(node_disk_written_bytes_total{instance=~"$instance"}[30m])',
+      expr='irate(node_disk_written_bytes_total{instance=~"$instance"}[30m]) OR irate(node_disk_bytes_written{instance=~"$instance"}[30m])',
       legendFormat='{{device}}_Written',
       intervalFactor=1,
     ),
@@ -486,12 +486,12 @@ local diskRowIoTime = graphPanel.new(
 ).addTargets(
   [
     prometheus.target(
-      expr='irate(node_disk_read_time_seconds_total{instance=~"$instance"}[30m]) / irate(node_disk_reads_completed_total{instance=~"$instance"}[30m])',
+      expr='irate(node_disk_read_time_seconds_total{instance=~"$instance"}[30m]) / irate(node_disk_reads_completed_total{instance=~"$instance"}[30m]) OR\n      irate(node_disk_read_time_ms{instance=~"$instance"}[30m]) / irate(node_disk_reads_completed{instance=~"$instance"}[30m])',
       legendFormat='{{device}}_Read',
       intervalFactor=1,
     ),
     prometheus.target(
-      expr='irate(node_disk_write_time_seconds_total{instance=~"$instance"}[30m]) / irate(node_disk_writes_completed_total{instance=~"$instance"}[30m])',
+      expr='irate(node_disk_write_time_seconds_total{instance=~"$instance"}[30m]) / irate(node_disk_writes_completed_total{instance=~"$instance"}[30m]) OR\n      irate(node_disk_write_time_ms{instance=~"$instance"}[30m]) / irate(node_disk_writes_completed{instance=~"$instance"}[30m])',
       legendFormat='{{device}}_Write',
       intervalFactor=1,
     ),

@@ -50,6 +50,7 @@
 package com.openexchange.dav.resources;
 
 import static com.openexchange.dav.DAVProtocol.protocolException;
+import static com.openexchange.java.Autoboxing.b;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -57,8 +58,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
+import java.util.Objects;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.config.ConfigTools;
+import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dav.DAVFactory;
 import com.openexchange.dav.DAVProtocol;
@@ -121,7 +124,7 @@ public abstract class FolderCollection<T> extends DAVCollection {
         this.folder = folder;
         if (null != folder) {
             ConfigViewFactory configViewFactory = factory.getService(ConfigViewFactory.class);
-            includeProperties(new CTag(this), new com.openexchange.dav.mixins.SyncToken(this), 
+            includeProperties(new CTag(this), new com.openexchange.dav.mixins.SyncToken(this),
                 new ACL(folder.getPermissions(), configViewFactory), new ACLRestrictions(), new SupportedPrivilegeSet(), new Principal(getOwner(), configViewFactory));
             if (supportsPermissions(folder)) {
                 includeProperties(new ShareAccess(this), new Invite(this), new ShareResourceURI(this, factory.getServiceSafe(ConfigViewFactory.class)));
@@ -260,7 +263,17 @@ public abstract class FolderCollection<T> extends DAVCollection {
         }
         Date since = new Date(syncToken.getTimestamp());
         if (0L < since.getTime() && false == syncToken.isInitial() && false == syncToken.isTruncated()) {
-            checkDataAvailability(since, token);
+            Date minimumSince = getMinimumSinceForSync();
+            if (null != minimumSince && minimumSince.after(since)) {
+                /*
+                 * token out of range to cover known tombstone data; require slow-sync unless token matches the current one (no changes)
+                 */
+                if (false == Objects.equals(token, getSyncToken())) {
+                    OXException cause = OXException.general("Token \"" + token + "\" out of range.");
+                    LOG.debug("", cause);
+                    throw new PreconditionException(cause, DAVProtocol.DAV_NS.getURI(), "valid-sync-token", getUrl(), HttpServletResponse.SC_FORBIDDEN);
+                }
+            }
         }
         /*
          * get & return sync-status
@@ -272,29 +285,29 @@ public abstract class FolderCollection<T> extends DAVCollection {
         }
     }
 
-    private void checkDataAvailability(Date since, String token) throws PreconditionException {
+    /**
+     * Gets the minimum date representing the point in time how long data about deleted items is available in the storage, i.e. the date
+     * since when incremental synchronization is supported.
+     *
+     * @return The minimum date until which differential synchronization is possible, or <code>null</code> if not restricted
+     */
+    private Date getMinimumSinceForSync() {
         try {
-            ConfigViewFactory configViewFactory = factory.getService(ConfigViewFactory.class);
-            Boolean enabled = configViewFactory.getView().opt("com.openexchange.database.tombstone.cleanup.enabled", Boolean.class, Boolean.TRUE);
-            if (enabled == null || enabled.booleanValue() == false) {
-                return;
+            ConfigView configView = factory.requireService(ConfigViewFactory.class).getView();
+            if (false == b(configView.opt("com.openexchange.database.tombstone.cleanup.enabled", Boolean.class, Boolean.TRUE))) {
+                return null; // no restrictions
             }
-            String timespanStr = configViewFactory.getView().opt("com.openexchange.database.tombstone.cleanup.timespan", String.class, "12w");
+            String timespanStr = configView.opt("com.openexchange.database.tombstone.cleanup.timespan", String.class, "12w");
             long timespan = ConfigTools.parseTimespan(timespanStr);
             if (timespan < 1) {
                 LOG.warn("Cleanup enabled but no meaningful value defined. Will use the default of 3 months.");
                 timespan = ConfigTools.parseTimespan("12w");
             }
-            if (since != null && since.after(new Date(System.currentTimeMillis() - timespan))) {
-                return;
-            }
-        } catch (OXException e) {
-            LOG.warn("Unable to retrieve configuration view.", e);
-            return;
+            return new Date(System.currentTimeMillis() - timespan);
+        } catch (IllegalArgumentException | OXException e) {
+            LOG.warn("Error determing tombstone cleanup timespan, falling back to default of 3 months.", e);
+            return new Date(System.currentTimeMillis() - ConfigTools.parseTimespan("12w"));
         }
-        // Set since to null in case already clean-up data is requested to perform a slow sync
-        OXException cause = OXException.general("Token \"" + token + "\" out of range.");
-        throw new PreconditionException(cause, DAVProtocol.DAV_NS.getURI(), "valid-sync-token", getUrl(), HttpServletResponse.SC_FORBIDDEN);
     }
 
     @Override

@@ -206,10 +206,10 @@ public class OPTIONSAction extends DefaultWebdavOptionsAction {
     public Optional<EnumSet<WebdavOption>> getCardDAVOptions(ServerSession session) throws OXException {
         if (session.getUserPermissionBits().hasContact() && factory.getServiceSafe(CapabilityService.class).getCapabilities(session).contains(Permission.CARDDAV.getCapabilityName())) {
             EnumSet<WebdavOption> result = EnumSet.copyOf(BASIC_CARD_DAV_OPTIONS);
-            if(session.getUserPermissionBits().hasFullSharedFolderAccess()) {
+            if (session.getUserPermissionBits().hasFullSharedFolderAccess()) {
                 result.addAll(SHARING_OPTIONS);
             }
-            if(session.getUserPermissionBits().hasInfostore()) {
+            if (session.getUserPermissionBits().hasInfostore()) {
                 result.add(MANAGED_ATTACHMENT_OPTION);
             }
             return Optional.of(result);

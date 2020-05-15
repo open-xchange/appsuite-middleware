@@ -656,6 +656,10 @@ public final class MimeReply extends AbstractMimeProcessing {
             if (retvalContentType.startsWith("text/htm")) {
                 retvalContentType.setCharsetParameter("UTF-8");
                 replyText = replaceMetaEquiv(replyText, retvalContentType);
+                HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
+                if (htmlService != null) {
+                    replyText = htmlService.checkBaseTag(replyText, true);
+                }
             }
             MessageUtility.setText(replyText, retvalContentType.getCharsetParameter(), retvalContentType.getSubType(), replyMsg);
             // replyMsg.setText(replyText, retvalContentType.getCharsetParameter(), retvalContentType.getSubType());

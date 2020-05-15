@@ -61,7 +61,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentAndMetadata;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
-import com.openexchange.groupware.infostore.InfostoreFolderPath;
 import com.openexchange.groupware.infostore.InfostoreSearchEngine;
 import com.openexchange.groupware.infostore.search.SearchTerm;
 import com.openexchange.groupware.infostore.utils.Metadata;
@@ -82,8 +81,8 @@ import com.openexchange.user.User;
  */
 public class FilteringInfostoreFacadeImpl implements InfostoreFacade, InfostoreSearchEngine {
 
-    private InfostoreFacadeImpl delegate;
-    private ServiceLookup services;
+    private final InfostoreFacadeImpl delegate;
+    private final ServiceLookup services;
 
     public FilteringInfostoreFacadeImpl(InfostoreFacadeImpl delegate, ServiceLookup services) {
         super();
@@ -232,13 +231,13 @@ public class FilteringInfostoreFacadeImpl implements InfostoreFacade, InfostoreS
     }
 
     @Override
-    public void removeDocument(long folderId, long date, ServerSession session) throws OXException {
-        delegate.removeDocument(folderId, date, session);
+    public void removeDocument(long folderId, long date, ServerSession session, boolean hardDelete) throws OXException {
+        delegate.removeDocument(folderId, date, session, hardDelete);
     }
 
     @Override
-    public List<IDTuple> removeDocument(List<IDTuple> ids, long date, ServerSession session) throws OXException {
-        return delegate.removeDocument(ids, date, session);
+    public List<IDTuple> removeDocument(List<IDTuple> ids, long date, ServerSession session, boolean hardDelete) throws OXException {
+        return delegate.removeDocument(ids, date, session, hardDelete);
     }
 
     @Override
@@ -247,13 +246,13 @@ public class FilteringInfostoreFacadeImpl implements InfostoreFacade, InfostoreS
     }
 
     @Override
-    public List<IDTuple> moveDocuments(ServerSession session, List<IDTuple> ids, long sequenceNumber, String targetFolderID, boolean adjustFilenamesAsNeeded) throws OXException {
-        return delegate.moveDocuments(session, ids, sequenceNumber, targetFolderID, adjustFilenamesAsNeeded);
+    public IDTuple copyDocument(ServerSession session, IDTuple id, int version, DocumentMetadata metaData, Metadata[] modifiedFields, InputStream newFile, long sequenceNumber, String targetFolderID) throws OXException {
+        return delegate.copyDocument(session, id, version, metaData, modifiedFields, newFile, sequenceNumber, targetFolderID);
     }
 
     @Override
-    public List<IDTuple> moveDocuments(ServerSession session, List<IDTuple> ids, long sequenceNumber, String targetFolderID, boolean adjustFilenamesAsNeeded, Map<String, InfostoreFolderPath> optOriginPath) throws OXException {
-        return delegate.moveDocuments(session, ids, sequenceNumber, targetFolderID, adjustFilenamesAsNeeded, optOriginPath);
+    public List<IDTuple> moveDocuments(ServerSession session, List<IDTuple> ids, long sequenceNumber, String targetFolderID, boolean adjustFilenamesAsNeeded) throws OXException {
+        return delegate.moveDocuments(session, ids, sequenceNumber, targetFolderID, adjustFilenamesAsNeeded);
     }
 
     @Override
@@ -297,13 +296,13 @@ public class FilteringInfostoreFacadeImpl implements InfostoreFacade, InfostoreS
     }
 
     @Override
-    public TimedResult<DocumentMetadata> getVersions(int id, Metadata[] columns, ServerSession session) throws OXException {
-        return removeAdminFromObjectPermissions(session.getContextId(), delegate.getVersions(id, columns, session));
+    public TimedResult<DocumentMetadata> getVersions(long folderId, int id, Metadata[] columns, ServerSession session) throws OXException {
+        return removeAdminFromObjectPermissions(session.getContextId(), delegate.getVersions(folderId, id, columns, session));
     }
 
     @Override
-    public TimedResult<DocumentMetadata> getVersions(int id, Metadata[] columns, Metadata sort, int order, ServerSession session) throws OXException {
-        return removeAdminFromObjectPermissions(session.getContextId(), delegate.getVersions(id, columns, sort, order, session));
+    public TimedResult<DocumentMetadata> getVersions(long folderId, int id, Metadata[] columns, Metadata sort, int order, ServerSession session) throws OXException {
+        return removeAdminFromObjectPermissions(session.getContextId(), delegate.getVersions(folderId, id, columns, sort, order, session));
     }
 
     @Override
@@ -413,8 +412,8 @@ public class FilteringInfostoreFacadeImpl implements InfostoreFacade, InfostoreS
     }
 
     @Override
-    public List<IDTuple> restore(Map<String, List<IDTuple>> toRestore, ServerSession session) throws OXException {
-        return delegate.restore(toRestore, session);
+    public Map<IDTuple, String> restore(List<IDTuple> toRestore, long destFolderId, ServerSession session) throws OXException {
+        return delegate.restore(toRestore, destFolderId, session);
     }
 
     @Override

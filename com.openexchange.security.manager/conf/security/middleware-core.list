@@ -35,3 +35,7 @@ UPLOAD_DIRECTORY:RW
 # Templates
 com.openexchange.templating.path
 com.openexchange.templating.assets.path
+
+# Metrics
+/proc/self/status
+

@@ -57,6 +57,7 @@ import com.openexchange.mail.autoconfig.http.AutoConfigHttpConfiguration;
 import com.openexchange.mail.autoconfig.http.ISPDBHttpConfiguration;
 import com.openexchange.mail.autoconfig.internal.AutoconfigServiceImpl;
 import com.openexchange.mail.autoconfig.tools.Services;
+import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.rest.client.httpclient.SpecificHttpClientConfigProvider;
@@ -77,6 +78,8 @@ public class Activator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         Services.setServiceLookup(this);
+        trackService(MailAccountStorageService.class);
+        openTrackers();
         registerService(AutoconfigService.class, new AutoconfigServiceImpl(this));
         registerService(SpecificHttpClientConfigProvider.class, new AutoConfigHttpConfiguration());
         registerService(SpecificHttpClientConfigProvider.class, new ISPDBHttpConfiguration());
@@ -84,8 +87,8 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        Services.setServiceLookup(null);
         super.stopBundle();
+        Services.setServiceLookup(null);
     }
 
 }

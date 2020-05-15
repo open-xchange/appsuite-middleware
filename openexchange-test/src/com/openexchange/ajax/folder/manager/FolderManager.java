@@ -95,8 +95,8 @@ public class FolderManager {
         return createFolder.getData();
     }
 
-    public FoldersVisibilityData getAllFolders(String contentType, String columns) throws ApiException {
-        FoldersVisibilityResponse visibleFolders = folderApi.getFoldersApi().getVisibleFolders(getSession(), contentType, columns, tree, null);
+    public FoldersVisibilityData getAllFolders(String contentType, String columns, Boolean all) throws ApiException {
+        FoldersVisibilityResponse visibleFolders = folderApi.getFoldersApi().getVisibleFolders(getSession(), contentType, columns, tree, null, all);
         checkResponse(visibleFolders.getError(), visibleFolders.getErrorDesc(), visibleFolders.getData());
         return visibleFolders.getData();
     }

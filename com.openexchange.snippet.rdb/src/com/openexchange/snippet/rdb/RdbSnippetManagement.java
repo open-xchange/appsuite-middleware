@@ -53,6 +53,7 @@ import static com.openexchange.database.Databases.closeSQLStuff;
 import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.snippet.rdb.Services.getService;
 import static com.openexchange.snippet.utils.SnippetUtils.sanitizeContent;
+import static com.openexchange.snippet.utils.SnippetUtils.sanitizeHtmlContent;
 import java.io.Closeable;
 import java.io.FilterInputStream;
 import java.io.IOException;
@@ -69,6 +70,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.config.cascade.ComposedConfigProperty;
@@ -503,6 +505,8 @@ public final class RdbSnippetManagement implements SnippetManagement {
             }
         }
 
+        String contentSubType = determineContentSubtype(snippet.getMisc());
+
         DatabaseService databaseService = getDatabaseService();
         int contextId = this.contextId;
         Connection con = databaseService.getWritable(contextId);
@@ -526,7 +530,10 @@ public final class RdbSnippetManagement implements SnippetManagement {
             }
             // Store content
             {
-                final String content = sanitizeContent(snippet.getContent());
+                String content = snippet.getContent();
+                if (contentSubType.indexOf("htm") >= 0) {
+                    content = sanitizeHtmlContent(content);
+                }
                 if (null != content) {
                     stmt = con.prepareStatement("INSERT INTO snippetContent (cid, user, id, content) VALUES (?, ?, ?, ?)");
                     stmt.setInt(1, contextId);
@@ -610,6 +617,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
         if (null == identifier) {
             return identifier;
         }
+
         int id = Integer.parseInt(identifier);
         DatabaseService databaseService = getDatabaseService();
         int contextId = this.contextId;
@@ -1160,6 +1168,25 @@ public final class RdbSnippetManagement implements SnippetManagement {
                 databaseService.backReadOnly(contextId, con);
             }
         }
+    }
+
+    private static String determineContentSubtype(final Object misc) throws OXException {
+        if (misc == null) {
+            return "plain";
+        }
+        final String ct = SnippetUtils.parseContentTypeFromMisc(misc);
+        return Strings.asciiLowerCase(new ContentType(ct).getSubType());
+    }
+
+    private static Optional<String> optionalContentSubtype(final Object misc) throws OXException {
+        if (misc == null) {
+            return Optional.empty();
+        }
+        Optional<String> optionalContentType = SnippetUtils.parseOptionalContentTypeFromMisc(misc);
+        if (!optionalContentType.isPresent()) {
+            return Optional.empty();
+        }
+        return Optional.of(Strings.asciiLowerCase(new ContentType(optionalContentType.get()).getSubType()));
     }
 
 }

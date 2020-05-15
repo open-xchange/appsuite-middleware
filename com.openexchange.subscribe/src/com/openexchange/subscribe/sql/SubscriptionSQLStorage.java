@@ -62,6 +62,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -108,11 +109,49 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
     public SubscriptionSQLStorage(final DBProvider dbProvider, final GenericConfigurationStorageService storageService, final SubscriptionSourceDiscoveryService discoveryService) {
         this(dbProvider, DBTransactionPolicy.NORMAL_TRANSACTIONS, storageService, discoveryService);
     }
+
     public SubscriptionSQLStorage(final DBProvider dbProvider, final DBTransactionPolicy txPolicy, final GenericConfigurationStorageService storageService, final SubscriptionSourceDiscoveryService discoveryService) {
         this.dbProvider = dbProvider;
         this.txPolicy = txPolicy;
         this.storageService = storageService;
         this.discoveryService = discoveryService;
+    }
+
+    @Override
+    public List<Subscription> getSubscriptionsForContext(Context ctx) throws OXException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        Connection con = dbProvider.getReadConnection(ctx);
+        try {
+            stmt = con.prepareStatement("SELECT id, folder_id, last_update, created, user_id, enabled, configuration_id, source_id FROM subscriptions WHERE cid=?");
+            stmt.setInt(1, ctx.getContextId());
+            rs = stmt.executeQuery();
+            return parseResultSet(rs, ctx, con);
+        } catch (SQLException e) {
+            throw SQLException.create(e);
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+            dbProvider.releaseReadConnection(ctx, con);
+        }
+    }
+
+    @Override
+    public List<Subscription> getSubscriptionsForContextAndProvider(Context ctx, String sourceId) throws OXException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        Connection con = dbProvider.getReadConnection(ctx);
+        try {
+            stmt = con.prepareStatement("SELECT id, folder_id, last_update, created, user_id, enabled, configuration_id, source_id FROM subscriptions WHERE cid=? AND source_id=?");
+            stmt.setInt(1, ctx.getContextId());
+            stmt.setString(2, sourceId);
+            rs = stmt.executeQuery();
+            return parseResultSet(rs, ctx, con);
+        } catch (SQLException e) {
+            throw SQLException.create(e);
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+            dbProvider.releaseReadConnection(ctx, con);
+        }
     }
 
     @Override
@@ -149,17 +188,11 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
 
     @Override
     public Subscription getSubscription(final Context ctx, final int id) throws OXException {
-        Subscription retval = null;
-
-        Connection readConnection = null;
         ResultSet resultSet = null;
         StatementBuilder builder = null;
+        Connection readConnection = dbProvider.getReadConnection(ctx);
         try {
-            readConnection = dbProvider.getReadConnection(ctx);
-            final SELECT select = new SELECT("id", "user_id", "configuration_id", "source_id", "folder_id", "last_update", "created", "enabled")
-            .FROM(subscriptions)
-            .WHERE(
-                new EQUALS("id", PLACEHOLDER).AND(new EQUALS("cid", PLACEHOLDER)));
+            final SELECT select = new SELECT("id", "user_id", "configuration_id", "source_id", "folder_id", "last_update", "created", "enabled").FROM(subscriptions).WHERE(new EQUALS("id", PLACEHOLDER).AND(new EQUALS("cid", PLACEHOLDER)));
 
             final List<Object> values = new ArrayList<Object>();
             values.add(I(id));
@@ -168,9 +201,12 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
             builder = new StatementBuilder();
             resultSet = builder.executeQuery(readConnection, select, values);
             final List<Subscription> subscriptions = parseResultSet(resultSet, ctx, readConnection);
-            if (subscriptions.size() != 0) {
+
+            Subscription retval = null;
+            if (!subscriptions.isEmpty()) {
                 retval = subscriptions.get(0);
             }
+            return retval;
         } catch (SQLException e) {
             throw SQLException.create(e);
         } finally {
@@ -184,24 +220,17 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
                 dbProvider.releaseReadConnection(ctx, readConnection);
             }
         }
-
-        return retval;
     }
 
     @Override
     public List<Subscription> getSubscriptions(final Context ctx, final String folderId) throws OXException {
         List<Subscription> retval = null;
 
-        Connection readConnection = null;
         ResultSet resultSet = null;
         StatementBuilder builder = null;
+        Connection readConnection = dbProvider.getReadConnection(ctx);
         try {
-            readConnection = dbProvider.getReadConnection(ctx);
-            final SELECT select = new
-                SELECT("id", "user_id", "configuration_id", "source_id", "folder_id", "last_update", "created", "enabled")
-                .FROM(subscriptions)
-                .WHERE(
-                    new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("folder_id", PLACEHOLDER)));
+            final SELECT select = new SELECT("id", "user_id", "configuration_id", "source_id", "folder_id", "last_update", "created", "enabled").FROM(subscriptions).WHERE(new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("folder_id", PLACEHOLDER)));
 
             final List<Object> values = new ArrayList<Object>();
             values.add(I(ctx.getContextId()));
@@ -258,15 +287,12 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
     }
 
     @Override
-    public List<Subscription> getSubscriptionsOfUser(Context ctx, int userId)  throws OXException {
-        Connection readConnection = null;
+    public List<Subscription> getSubscriptionsOfUser(Context ctx, int userId) throws OXException {
         ResultSet resultSet = null;
         StatementBuilder builder = null;
+        Connection readConnection = dbProvider.getReadConnection(ctx);
         try {
-            readConnection = dbProvider.getReadConnection(ctx);
-            final SELECT select = new SELECT("*")
-            .FROM(subscriptions)
-            .WHERE(new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("user_id", PLACEHOLDER)));
+            final SELECT select = new SELECT("*").FROM(subscriptions).WHERE(new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("user_id", PLACEHOLDER)));
 
             final List<Object> values = new LinkedList<Object>();
             values.add(I(ctx.getContextId()));
@@ -355,6 +381,27 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
         }
     }
 
+    @Override
+    public void deleteSubscription(Context ctx, int userId, int id) throws OXException {
+        Connection writeConnection = dbProvider.getWriteConnection(ctx);
+        try {
+            delete(getSubscription(ctx, id), writeConnection);
+        } catch (SQLException e) {
+            throw SQLException.create(e);
+        } finally {
+            dbProvider.releaseWriteConnection(ctx, writeConnection);
+        }
+    }
+
+    @Override
+    public void deleteSubscription(Context ctx, int userId, int id, Connection connection) throws OXException {
+        try {
+            delete(getSubscription(ctx, id), connection);
+        } catch (SQLException e) {
+            throw SQLException.create(e);
+        }
+    }
+
     private void delete(final Subscription subscription, final Connection writeConnection) throws SQLException, OXException {
         final DELETE delete = new DELETE().FROM(subscriptions).WHERE(new EQUALS("id", PLACEHOLDER).AND(new EQUALS("cid", PLACEHOLDER)));
 
@@ -372,9 +419,7 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
 
         final int id = IDGenerator.getId(subscription.getContext().getContextId(), Types.SUBSCRIPTION, writeConnection);
 
-        final INSERT insert = new INSERT().INTO(subscriptions).SET("id", PLACEHOLDER).SET("cid", PLACEHOLDER).SET("user_id", PLACEHOLDER).SET(
-            "configuration_id",
-            PLACEHOLDER).SET("source_id", PLACEHOLDER).SET("folder_id", PLACEHOLDER).SET("last_update", PLACEHOLDER).SET("created", PLACEHOLDER).SET("enabled", PLACEHOLDER);
+        final INSERT insert = new INSERT().INTO(subscriptions).SET("id", PLACEHOLDER).SET("cid", PLACEHOLDER).SET("user_id", PLACEHOLDER).SET("configuration_id", PLACEHOLDER).SET("source_id", PLACEHOLDER).SET("folder_id", PLACEHOLDER).SET("last_update", PLACEHOLDER).SET("created", PLACEHOLDER).SET("enabled", PLACEHOLDER);
 
         final List<Object> values = new ArrayList<Object>();
         values.add(I(id));
@@ -439,12 +484,7 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
             txPolicy.setAutoCommit(writeConnection, false);
             rollback = 1;
 
-            new StatementBuilder().executeStatement(writeConnection,
-                new UPDATE(subscriptions)
-                    .SET("last_update", PLACEHOLDER)
-                    .WHERE(new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("id",  PLACEHOLDER))), Arrays.<Object>asList(L(currentTimeMillis), I(ctx.getContextId()), I(subscriptionId)));
-
-
+            new StatementBuilder().executeStatement(writeConnection, new UPDATE(subscriptions).SET("last_update", PLACEHOLDER).WHERE(new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("id", PLACEHOLDER))), Arrays.<Object> asList(L(currentTimeMillis), I(ctx.getContextId()), I(subscriptionId)));
 
             txPolicy.commit(writeConnection);
             rollback = 2;
@@ -471,11 +511,7 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
         try {
             readConection = dbProvider.getReadConnection(subscription.getContext());
 
-            final SELECT select = new
-                SELECT("configuration_id")
-                .FROM(subscriptions)
-                .WHERE(
-                    new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("id", PLACEHOLDER)));
+            final SELECT select = new SELECT("configuration_id").FROM(subscriptions).WHERE(new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("id", PLACEHOLDER)));
 
             final List<Object> values = new ArrayList<Object>();
             values.add(I(subscription.getContext().getContextId()));
@@ -504,8 +540,12 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
     }
 
     private List<Subscription> parseResultSet(final ResultSet resultSet, final Context ctx, final Connection readConnection) throws OXException, SQLException {
-        final List<Subscription> retval = new LinkedList<Subscription>();
-        while (resultSet.next()) {
+        if (!resultSet.next()) {
+            return Collections.emptyList();
+        }
+
+        List<Subscription> retval = new LinkedList<Subscription>();
+        do {
             final Subscription subscription = new Subscription();
             subscription.setContext(ctx);
             subscription.setFolderId(resultSet.getString("folder_id"));
@@ -518,11 +558,14 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
             final Map<String, Object> content = new HashMap<String, Object>();
             storageService.fill(readConnection, ctx, resultSet.getInt("configuration_id"), content);
 
+            String sourceId = resultSet.getString("source_id");
+            content.put("source_id", sourceId);
+
             subscription.setConfiguration(content);
-            subscription.setSource(discoveryService.getSource(resultSet.getString("source_id")));
+            subscription.setSource(discoveryService.getSource(sourceId));
 
             retval.add(subscription);
-        }
+        } while (resultSet.next());
         return retval;
     }
 
@@ -534,11 +577,7 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
         StatementBuilder builder = null;
         try {
             readConnection = dbProvider.getReadConnection(ctx);
-            final SELECT select = new
-                SELECT("id")
-                .FROM(subscriptions)
-                .WHERE(
-                    new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("id", PLACEHOLDER)));
+            final SELECT select = new SELECT("id").FROM(subscriptions).WHERE(new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("id", PLACEHOLDER)));
 
             final List<Object> values = new ArrayList<Object>();
             values.add(I(ctx.getContextId()));
@@ -570,11 +609,7 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
         try {
             writeConnection = dbProvider.getWriteConnection(ctx);
             txPolicy.setAutoCommit(writeConnection, false);
-
-            final List<Subscription> subs = getSubscriptionsOfUser(ctx, userId);
-            for(final Subscription sub: subs){
-                delete(sub, writeConnection);
-            }
+            deleteAllSubscriptionsForUser(userId, ctx, writeConnection);
             txPolicy.commit(writeConnection);
         } catch (SQLException e) {
             throw SQLException.create(e);
@@ -592,15 +627,24 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
     }
 
     @Override
+    public void deleteAllSubscriptionsForUser(int userId, Context ctx, Connection connection) throws OXException {
+        try {
+            final List<Subscription> subs = getSubscriptionsOfUser(ctx, userId);
+            for (final Subscription sub : subs) {
+                delete(sub, connection);
+            }
+        } catch (SQLException e) {
+            throw SQLException.create(e);
+        }
+    }
+
+    @Override
     public void deleteAllSubscriptionsInContext(final int contextId, final Context ctx) throws OXException {
         Connection writeConnection = null;
         try {
             writeConnection = dbProvider.getWriteConnection(ctx);
             txPolicy.setAutoCommit(writeConnection, false);
-            final DELETE delete = new
-                DELETE()
-                .FROM(subscriptions)
-                .WHERE(new EQUALS("cid", PLACEHOLDER));
+            final DELETE delete = new DELETE().FROM(subscriptions).WHERE(new EQUALS("cid", PLACEHOLDER));
 
             final List<Object> values = new ArrayList<Object>();
             values.add(I(ctx.getContextId()));
@@ -669,7 +713,7 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
     public Map<String, Boolean> hasSubscriptions(final Context ctx, final List<String> folderIds) throws OXException {
 
         final Map<String, Boolean> retval = new HashMap<String, Boolean>();
-        for(final String folderId : folderIds) {
+        for (final String folderId : folderIds) {
             retval.put(folderId, Boolean.FALSE);
         }
 
@@ -679,7 +723,7 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
         try {
             readConnection = dbProvider.getReadConnection(ctx);
             final ArrayList<Expression> placeholders = new ArrayList<Expression>(folderIds.size());
-            for(int i = 0; i < folderIds.size(); i++) {
+            for (int i = 0; i < folderIds.size(); i++) {
                 placeholders.add(PLACEHOLDER);
             }
 
@@ -748,7 +792,7 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
     @Override
     public void update(final String recrypted, final EncryptedField customizationNote) throws OXException {
         final int configId = getConfigurationId(customizationNote.subscription);
-        final Map<String,Object> update = new HashMap<String, Object>();
+        final Map<String, Object> update = new HashMap<String, Object>();
         update.put(customizationNote.field, recrypted);
 
         storageService.update(customizationNote.subscription.getContext(), configId, update);

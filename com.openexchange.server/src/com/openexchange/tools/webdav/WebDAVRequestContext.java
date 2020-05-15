@@ -50,7 +50,10 @@
 package com.openexchange.tools.webdav;
 
 import java.util.Enumeration;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.framework.request.DefaultRequestContext;
 import com.openexchange.session.Session;
@@ -65,6 +68,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public class WebDAVRequestContext extends DefaultRequestContext {
 
+    private static final Logger LOG = LoggerFactory.getLogger(WebDAVRequestContext.class);
     private final HttpServletRequest request;
     private final Session session;
 
@@ -73,6 +77,7 @@ public class WebDAVRequestContext extends DefaultRequestContext {
      *
      * @param request The underlying HTTP servlet request
      * @param session The session
+     * @throws ServletException
      */
     public WebDAVRequestContext(HttpServletRequest request, Session session) {
         super();
@@ -89,6 +94,7 @@ public class WebDAVRequestContext extends DefaultRequestContext {
             setSession(ServerSessionAdapter.valueOf(session));
         } catch (OXException e) {
             // Failed to set session
+            LOG.debug("", e);
         }
     }
 
@@ -143,5 +149,4 @@ public class WebDAVRequestContext extends DefaultRequestContext {
     public String toString() {
         return "DAVRequestContext [session=" + session + ", hostData()=" + getHostData() + "]";
     }
-
 }

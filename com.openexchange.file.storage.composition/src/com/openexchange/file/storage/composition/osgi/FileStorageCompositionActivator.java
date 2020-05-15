@@ -90,7 +90,7 @@ public class FileStorageCompositionActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[]{ FileStorageServiceRegistry.class, EventAdmin.class, ThreadPoolService.class, ConfigurationService.class, FileStorageAccountManagerLookupService.class };
+        return new Class<?>[] { FileStorageServiceRegistry.class, EventAdmin.class, ThreadPoolService.class, ConfigurationService.class, FileStorageAccountManagerLookupService.class };
     }
 
     @Override

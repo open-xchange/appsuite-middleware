@@ -88,7 +88,7 @@ public class CapabilityAwareAccountManager implements FileStorageAccountManager 
     }
     
     private void checkCapability(Session session) throws OXException {
-        if(false == capService.getCapabilities(session).contains(cap)) {
+        if (false == capService.getCapabilities(session).contains(cap)) {
             throw WebdavExceptionCodes.MISSING_CAPABILITY.create(id);
         }
     }

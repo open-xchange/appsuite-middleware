@@ -277,6 +277,17 @@ properties:
     file: login.properties
     packageName: open-xchange-core
     tags: ["Login"]
+  - key: com.openexchange.ajax.login.rampup.timeoutSeconds
+    description: |
+      Specifies the timeout in seconds when awaiting completion of asynchronously performed ramp-up actions during login execution
+    defaultValue: 10
+    version: 7.10.4
+    reloadable: true
+    configcascadeAware: true
+    related: 
+    file: login.properties
+    packageName: open-xchange-core
+    tags: ["Login"]
   - key: com.openexchange.ajax.login.rateLimitByLogin.enabled
     description: |
       If set to "true" a rate limiter based on user names for login is enabled. The rate limiter uses the token bucket algorithm and tracks

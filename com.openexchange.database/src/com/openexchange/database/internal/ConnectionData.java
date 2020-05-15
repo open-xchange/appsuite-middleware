@@ -50,12 +50,13 @@
 package com.openexchange.database.internal;
 
 import java.util.Properties;
+import com.openexchange.database.ConnectionType;
 
 /**
  * Data to create connections to some specific database.
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class ConnectionData {
+public class ConnectionData implements ConnectionTypeAware {
 
     /**
      * Creates a new builder for an instance of <code>ConnectionData</code>
@@ -75,6 +76,7 @@ public class ConnectionData {
         private boolean block;
         private int max;
         private int min;
+        private ConnectionType type = ConnectionType.WRITABLE;
 
         /**
          * Initializes a new {@link ConnectionData.Builder}.
@@ -112,6 +114,11 @@ public class ConnectionData {
             this.min = min;
             return this;
         }
+        
+        public Builder withType(ConnectionType type) {
+            this.type = type;
+            return this;
+        }
 
         /**
          * Creates the <code>ConnectionData</code> instance from this builder's arguments.
@@ -119,7 +126,7 @@ public class ConnectionData {
          * @return The <code>ConnectionData</code> instance
          */
         public ConnectionData build() {
-            return new ConnectionData(url, driverClass, props, block, max, min);
+            return new ConnectionData(url, driverClass, props, block, max, min, type);
         }
     }
 
@@ -154,11 +161,25 @@ public class ConnectionData {
      * The min. limit
      */
     final int min;
+    
+    /**
+     * The connection type
+     */
+    final ConnectionType type;
 
     /**
      * Initializes a new {@link ConnectionData}.
+     * 
+     * @param url
+     * @param driverClass
+     * @param props
+     * @param block
+     * @param max
+     * @param min
+     * @param type The {@link ConnectionType}
+     * 
      */
-    ConnectionData(String url, String driverClass, Properties props, boolean block, int max, int min) {
+    ConnectionData(String url, String driverClass, Properties props, boolean block, int max, int min, ConnectionType type) {
         super();
         this.url = url;
         this.driverClass = driverClass;
@@ -166,6 +187,12 @@ public class ConnectionData {
         this.block = block;
         this.max = max;
         this.min = min;
+        this.type = type;
+    }
+    
+    @Override
+    public ConnectionType getConnectionType() {
+        return type;
     }
 
 }

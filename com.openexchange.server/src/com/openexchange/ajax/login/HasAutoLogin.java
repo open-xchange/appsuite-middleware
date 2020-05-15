@@ -53,6 +53,7 @@ import static com.openexchange.ajax.AJAXServlet.ACTION_AUTOLOGIN;
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.http.HttpStatus;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -90,7 +91,7 @@ public final class HasAutoLogin implements LoginRequestHandler {
     }
 
     @Override
-    public void handleRequest(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    public void handleRequest(HttpServletRequest req, HttpServletResponse resp, LoginRequestContext requestContext) throws IOException {
         Tools.disableCaching(resp);
         resp.setStatus(HttpServletResponse.SC_OK);
         resp.setContentType(LoginServlet.CONTENTTYPE_JAVASCRIPT);
@@ -98,9 +99,11 @@ public final class HasAutoLogin implements LoginRequestHandler {
             final JSONObject json = new JSONObject(2);
             json.put(ACTION_AUTOLOGIN, true); // Keeping this for compatibility...
             json.write(resp.getWriter());
+            requestContext.getMetricProvider().recordSuccess();
         } catch (JSONException e) {
             LoggerHolder.LOG.error(LoginServlet.RESPONSE_ERROR, e);
             LoginServlet.sendError(resp);
+            requestContext.getMetricProvider().recordHTTPStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR);
         }
     }
 

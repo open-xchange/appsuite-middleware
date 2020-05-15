@@ -114,7 +114,7 @@ public class AutoLogin extends AbstractLoginRequestHandler {
     }
 
     @Override
-    public void handleRequest(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
+    public void handleRequest(final HttpServletRequest req, final HttpServletResponse resp, LoginRequestContext requestContext) throws IOException {
         Tools.disableCaching(resp);
         resp.setContentType(LoginServlet.CONTENTTYPE_JAVASCRIPT);
         Response response = new Response();
@@ -128,12 +128,14 @@ public class AutoLogin extends AbstractLoginRequestHandler {
                 if (skipAutoLoginForSsoSession(req, resp)) {
                     // Auto-login disabled per configuration.
                     // Try to perform a login using HTTP request/response to see if invocation signals that an auto-login should proceed afterwards
-                    if (doAutoLogin(req, resp)) {
+                    if (doAutoLogin(req, resp, requestContext)) {
                         if (Reply.STOP == SessionInspector.getInstance().getChain().onAutoLoginFailed(Reason.AUTO_LOGIN_DISABLED, req, resp)) {
+                            requestContext.getMetricProvider().recordErrorCode(AjaxExceptionCodes.DISABLED_ACTION);
                             return;
                         }
                         throw AjaxExceptionCodes.DISABLED_ACTION.create("autologin");
                     }
+                    requestContext.getMetricProvider().recordSuccess();
                     return;
                 }
 
@@ -147,13 +149,15 @@ public class AutoLogin extends AbstractLoginRequestHandler {
                      * auto-login failed
                      */
                     SessionUtility.removeOXCookies(hash, req, resp);
-                    if (doAutoLogin(req, resp)) {
+                    if (doAutoLogin(req, resp, requestContext)) {
                         SessionUtility.removeJSESSIONID(req, resp);
                         if (Reply.STOP == SessionInspector.getInstance().getChain().onAutoLoginFailed(Reason.AUTO_LOGIN_FAILED, req, resp)) {
+                            requestContext.getMetricProvider().recordErrorCode(OXJSONExceptionCodes.INVALID_COOKIE);
                             return;
                         }
                         throw OXJSONExceptionCodes.INVALID_COOKIE.create();
                     }
+                    requestContext.getMetricProvider().recordSuccess();
                     return;
                 }
             }
@@ -219,6 +223,7 @@ public class AutoLogin extends AbstractLoginRequestHandler {
 
             // Set data
             response.setData(json);
+            requestContext.getMetricProvider().recordSuccess();
 
             /*-
              * Ensure appropriate public-session-cookie is set
@@ -273,10 +278,12 @@ public class AutoLogin extends AbstractLoginRequestHandler {
         try {
             if (response.hasError()) {
                 ResponseWriter.write(response, resp.getWriter(), LoginServlet.localeFrom(session));
+                requestContext.getMetricProvider().recordException(response.getException());
             } else {
                 ((JSONObject) response.getData()).write(resp.getWriter());
             }
         } catch (JSONException e) {
+            requestContext.getMetricProvider().recordHTTPStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             LOG.error(LoginServlet.RESPONSE_ERROR, e);
             LoginServlet.sendError(resp);
         }
@@ -287,9 +294,10 @@ public class AutoLogin extends AbstractLoginRequestHandler {
      *
      * @param req The associated HTTP request
      * @param resp The associated HTTP response
+     * @param requestContext The request's context
      * @return <code>true</code> if an auto login should proceed afterwards; otherwise <code>false</code>
      */
-    private boolean doAutoLogin(final HttpServletRequest req, final HttpServletResponse resp) throws IOException, OXException {
+    private boolean doAutoLogin(final HttpServletRequest req, final HttpServletResponse resp, LoginRequestContext requestContext) throws IOException, OXException {
         return loginOperation(req, resp, new LoginClosure() {
 
             @Override
@@ -297,7 +305,7 @@ public class AutoLogin extends AbstractLoginRequestHandler {
                 final LoginRequest request = parseAutoLoginRequest(req2);
                 return LoginPerformer.getInstance().doAutoLogin(request);
             }
-        }, conf);
+        }, conf, requestContext);
     }
 
     /**

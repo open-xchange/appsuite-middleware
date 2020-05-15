@@ -365,6 +365,7 @@ public enum FileStorageExceptionCodes implements DisplayableOXExceptionCode {
      * Restore from trash is not supported
      */
     NO_RESTORE_SUPPORT("Restore from trash is not supported", Category.CATEGORY_ERROR, 72, FileStorageExceptionMessages.NO_RESTORE_SUPPORT_MSG),
+
     ;
 
     /**

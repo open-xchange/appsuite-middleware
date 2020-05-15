@@ -61,11 +61,12 @@ import com.openexchange.mail.service.MailService;
 import com.openexchange.share.ShareService;
 import com.openexchange.user.UserService;
 import com.openexchange.user.json.Constants;
-import com.openexchange.user.json.UserContactResultConverter;
 import com.openexchange.user.json.actions.UserActionFactory;
 import com.openexchange.user.json.actions.UserMeActionFactory;
 import com.openexchange.user.json.anonymizer.ContactAnonymizerService;
 import com.openexchange.user.json.anonymizer.UserAnonymizerService;
+import com.openexchange.user.json.converter.MeResultConverter;
+import com.openexchange.user.json.converter.UserContactResultConverter;
 
 /**
  * {@link UserJSONActivator} - Activator for JSON user interface.
@@ -98,6 +99,7 @@ public class UserJSONActivator extends AJAXModuleActivator {
              * Register result converter
              */
             registerService(ResultConverter.class, new UserContactResultConverter());
+            registerService(ResultConverter.class, new MeResultConverter());
             registerService(AnonymizerService.class.getName(), new UserAnonymizerService());
             registerService(AnonymizerService.class.getName(), new ContactAnonymizerService());
 

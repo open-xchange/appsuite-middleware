@@ -162,7 +162,11 @@ public class Report implements Serializable {
 
     public static final String OPERATINGSYSTEM_DISTRIBUTION = "distribution";
 
-    public static final String JAVA_VERSION = "java-version";
+    public static final String JAVA = "java";
+
+    public static final String JAVA_VERSION = "version";
+
+    public static final String JAVA_VENDOR = "vendor";
 
     public static final String DATABASE_VERSION = "database-version";
 
@@ -211,6 +215,8 @@ public class Report implements Serializable {
     private String distribution;
 
     private String javaVersion;
+
+    private String javaVendor;
 
     private String databaseVersion;
 
@@ -531,8 +537,19 @@ public class Report implements Serializable {
         return this.javaVersion;
     }
 
+    public String getJavaVendor() {
+        if (this.javaVendor == null) {
+            return "unavailable";
+        }
+        return this.javaVendor;
+    }
+
     public void setJavaVersion(String version) {
         this.javaVersion = version;
+    }
+
+    public void setJavaVendor(String vendor) {
+        this.javaVendor = vendor;
     }
 
     public String getDatabaseVersion() {

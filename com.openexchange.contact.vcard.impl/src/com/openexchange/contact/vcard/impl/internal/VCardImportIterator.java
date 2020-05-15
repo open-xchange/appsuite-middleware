@@ -66,7 +66,6 @@ import ezvcard.VCard;
 import ezvcard.ValidationWarnings;
 import ezvcard.io.chain.ChainingTextWriter;
 import ezvcard.io.text.VCardReader;
-import ezvcard.util.IOUtils;
 
 /**
  * {@link VCardImportIterator}
@@ -90,17 +89,13 @@ public class VCardImportIterator implements SearchIterator<VCardImport> {
      * @param mapper The vCard mapper to use
      * @param parameters The vCard parameters
      */
-    public VCardImportIterator(InputStream inputStream, VCardMapper mapper, VCardParameters parameters) throws OXException {
+    public VCardImportIterator(InputStream inputStream, VCardMapper mapper, VCardParameters parameters) {
         super();
         this.mapper = mapper;
         this.parameters = parameters;
         warnings = new ArrayList<OXException>();
         vCardStream = new VCardInputStream(inputStream, parameters.getMaxVCardSize());
-        if (parameters.isEnforceUtf8()) {
-            reader = new VCardReader(IOUtils.utf8Reader(vCardStream));
-        } else {
-            reader = new VCardReader(vCardStream);
-        }
+        reader = new VCardReader(vCardStream);
     }
 
     /**
@@ -205,11 +200,7 @@ public class VCardImportIterator implements SearchIterator<VCardImport> {
             originalVCard = new ThresholdFileHolder();
             ChainingTextWriter writerChain = Ezvcard.write(vCard).prodId(false);
             try {
-                if (parameters.isEnforceUtf8()) {
-                    writerChain.go(IOUtils.utf8Writer(originalVCard.asOutputStream()));
-                } else {
-                    writerChain.go(originalVCard.asOutputStream());
-                }
+                writerChain.go(originalVCard.asOutputStream());
             } catch (IllegalArgumentException e) {
                 Streams.close(originalVCard);
                 originalVCard = null;

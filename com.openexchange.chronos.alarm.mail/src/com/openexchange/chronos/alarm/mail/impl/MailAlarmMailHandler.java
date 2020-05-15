@@ -91,7 +91,7 @@ public class MailAlarmMailHandler {
         } finally {
             try {
                 transport.close();
-            } catch (OXException e) {
+            } catch (@SuppressWarnings("unused") OXException e) {
                 // ignore
             }
         }

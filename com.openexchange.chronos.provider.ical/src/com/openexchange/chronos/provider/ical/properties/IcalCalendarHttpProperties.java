@@ -99,7 +99,7 @@ public class IcalCalendarHttpProperties extends DefaultHttpClientConfigProvider 
         }
         config.setMaxTotalConnections(i(maxConnections.getDefaultValue(Integer.class)));
         config.setMaxConnectionsPerRoute(i(maxConnectionsPerRoute.getDefaultValue(Integer.class)));
-        config.setConnectionTimeout(i(connectionTimeout.getDefaultValue(Integer.class)));
+        config.setConnectTimeout(i(connectionTimeout.getDefaultValue(Integer.class)));
         config.setSocketReadTimeout(i(socketReadTimeout.getDefaultValue(Integer.class)));
         return config;
     }
@@ -116,7 +116,7 @@ public class IcalCalendarHttpProperties extends DefaultHttpClientConfigProvider 
 
         config.setMaxTotalConnections(configurationService.getIntProperty(maxConnections));
         config.setMaxConnectionsPerRoute(configurationService.getIntProperty(maxConnectionsPerRoute));
-        config.setConnectionTimeout(configurationService.getIntProperty(connectionTimeout));
+        config.setConnectTimeout(configurationService.getIntProperty(connectionTimeout));
         config.setSocketReadTimeout(configurationService.getIntProperty(socketReadTimeout));
         return config;
     }

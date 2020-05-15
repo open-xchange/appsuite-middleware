@@ -54,6 +54,7 @@ import java.util.Set;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.authentication.application.ajax.RestrictedAction;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.chronos.service.CalendarParameters;
@@ -70,16 +71,12 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 @OAuthAction(AppointmentActionFactory.OAUTH_READ_SCOPE)
+@RestrictedAction(module = AppointmentAction.MODULE, type = RestrictedAction.Type.WRITE)
 public final class UpdatesAction extends AppointmentAction {
 
-    private static final Set<String> REQUIRED_PARAMETERS = com.openexchange.tools.arrays.Collections.unmodifiableSet(
-        AJAXServlet.PARAMETER_COLUMNS
-    );
+    private static final Set<String> REQUIRED_PARAMETERS = com.openexchange.tools.arrays.Collections.unmodifiableSet(AJAXServlet.PARAMETER_COLUMNS);
 
-    private static final Set<String> OPTIONAL_PARAMETERS = com.openexchange.tools.arrays.Collections.unmodifiableSet(
-        AJAXServlet.PARAMETER_IGNORE, AJAXServlet.PARAMETER_START, AJAXServlet.PARAMETER_END,
-        AJAXServlet.PARAMETER_RECURRENCE_MASTER, AJAXServlet.PARAMETER_TIMEZONE, AJAXServlet.PARAMETER_SORT, AJAXServlet.PARAMETER_ORDER
-    );
+    private static final Set<String> OPTIONAL_PARAMETERS = com.openexchange.tools.arrays.Collections.unmodifiableSet(AJAXServlet.PARAMETER_IGNORE, AJAXServlet.PARAMETER_START, AJAXServlet.PARAMETER_END, AJAXServlet.PARAMETER_RECURRENCE_MASTER, AJAXServlet.PARAMETER_TIMEZONE, AJAXServlet.PARAMETER_SORT, AJAXServlet.PARAMETER_ORDER);
 
     /**
      * Initializes a new {@link UpdatesAction}.

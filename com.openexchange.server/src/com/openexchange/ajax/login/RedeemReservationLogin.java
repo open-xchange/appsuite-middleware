@@ -101,11 +101,15 @@ public class RedeemReservationLogin implements LoginRequestHandler {
     }
 
     @Override
-    public void handleRequest(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    public void handleRequest(HttpServletRequest req, HttpServletResponse resp, LoginRequestContext requestContext) throws IOException {
         try {
-            doSsoLogin(req, resp);
+            doSsoLogin(req, resp, requestContext);
+            if(requestContext.getMetricProvider().isStateUnknown()) {
+                requestContext.getMetricProvider().recordSuccess();
+            }
         } catch (OXException e) {
             LoginTools.useErrorPageTemplateOrSendException(e, getConf().getErrorPageTemplate(), req, resp);
+            requestContext.getMetricProvider().recordException(e);
         }
     }
 
@@ -135,11 +139,12 @@ public class RedeemReservationLogin implements LoginRequestHandler {
         return enhancers.remove(enhancer);
     }
 
-    private void doSsoLogin(HttpServletRequest req, HttpServletResponse resp) throws OXException, IOException {
+    private void doSsoLogin(HttpServletRequest req, HttpServletResponse resp, LoginRequestContext requestContext) throws OXException, IOException {
         LoginConfiguration conf = getConf();
         String token = LoginTools.parseToken(req);
         if (null == token) {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            requestContext.getMetricProvider().recordHTTPStatus(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
 
@@ -147,18 +152,21 @@ public class RedeemReservationLogin implements LoginRequestHandler {
         Reservation reservation = null == service ? null : service.removeReservation(token);
         if (null == reservation) {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            requestContext.getMetricProvider().recordHTTPStatus(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
 
         Context context = ContextStorage.getInstance().getContext(reservation.getContextId());
         if (!context.isEnabled()) {
             resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+            requestContext.getMetricProvider().recordHTTPStatus(HttpServletResponse.SC_FORBIDDEN);
             return;
         }
 
         User user = UserStorage.getInstance().getUser(reservation.getUserId(), context);
         if (!user.isMailEnabled()) {
             resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+            requestContext.getMetricProvider().recordHTTPStatus(HttpServletResponse.SC_FORBIDDEN);
             return;
         }
 

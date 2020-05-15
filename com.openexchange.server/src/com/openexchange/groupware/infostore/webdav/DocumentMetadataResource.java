@@ -146,7 +146,6 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
         this.loadedMetadata = true;
         this.setId(metadata.getId());
         this.setExists(true);
-
     }
 
     @Override
@@ -828,16 +827,17 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 
     private void deleteMetadata() throws OXException {
         final ServerSession session = getSession();
+        final boolean hardDelete = !factory.isTrashEnabled(session);
         database.startTransaction();
         try {
             DocumentMetadata document = database.getDocumentMetadata(-1, id, InfostoreFacade.CURRENT_VERSION, session);
-			List<IDTuple> nd = database.removeDocument(
-			    Collections.<IDTuple>singletonList(
-			        new IDTuple(
-			            Long.toString(document.getFolderId()),
-			            Integer.toString(document.getId())
-			        )
-			    ), Long.MAX_VALUE, session);
+            List<IDTuple> nd = database.removeDocument(
+                Collections.<IDTuple>singletonList(
+                    new IDTuple(
+                        Long.toString(document.getFolderId()),
+                        Integer.toString(document.getId())
+                    )
+                ), Long.MAX_VALUE, session, hardDelete);
             if (nd.size() > 0) {
                 database.rollback();
                 throw InfostoreExceptionCodes.DELETE_FAILED.create(Integer.valueOf(nd.get(0).getId()));

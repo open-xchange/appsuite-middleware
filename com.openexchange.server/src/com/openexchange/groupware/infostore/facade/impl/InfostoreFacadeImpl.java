@@ -50,8 +50,11 @@
 package com.openexchange.groupware.infostore.facade.impl;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.tools.arrays.Arrays.contains;
+import static com.openexchange.java.util.Tools.getUnsignedLong;
+import static com.openexchange.java.util.Tools.getUnsignedInteger;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
@@ -74,7 +77,9 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
+import com.google.common.collect.Lists;
 import com.openexchange.ajax.fileholder.IFileHolder.InputStreamClosure;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.capabilities.CapabilityService;
@@ -154,6 +159,7 @@ import com.openexchange.groupware.infostore.utils.SetSwitch;
 import com.openexchange.groupware.infostore.validation.FilenamesMayNotContainSlashesValidator;
 import com.openexchange.groupware.infostore.validation.InvalidCharactersValidator;
 import com.openexchange.groupware.infostore.validation.ObjectPermissionValidator;
+import com.openexchange.groupware.infostore.validation.PermissionSizeValidator;
 import com.openexchange.groupware.infostore.validation.ValidationChain;
 import com.openexchange.groupware.infostore.webdav.EntityLockManager;
 import com.openexchange.groupware.infostore.webdav.EntityLockManagerImpl;
@@ -194,6 +200,8 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorDelegator;
 import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
+import com.openexchange.tools.oxfolder.OXFolderManager;
+import com.openexchange.tools.oxfolder.OXFolderSQL;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tx.UndoableAction;
@@ -1027,6 +1035,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
     }
 
     private IDTuple saveDocument(final DocumentMetadata document, final InputStream data, final long sequenceNumber, final boolean tryAddVersion, final ServerSession session) throws OXException {
+
         if (document.getId() != InfostoreFacade.NEW) {
             return saveDocument(document, data, sequenceNumber, nonNull(document), session);
         }
@@ -1511,6 +1520,10 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             return saveDocument(document, data, sequenceNumber, session);
         }
 
+        //Adding original path information if necessary
+        final OXFolderAccess folderAccess = new OXFolderAccess(session.getContext());
+        modifiedColumns = addOriginPathIfNecessary(document, modifiedColumns, session, folderAccess);
+
         // Check permissions
         Context context = session.getContext();
         int sharedFilesFolderID = getSharedFilesFolderID();
@@ -1936,7 +1949,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
     }
 
     @Override
-    public void removeDocument(final long folderId, final long date, final ServerSession session) throws OXException {
+    public void removeDocument(final long folderId, final long date, final ServerSession session, boolean hardDelete) throws OXException {
         if (folderId == getSharedFilesFolderID()) {
             throw InfostoreExceptionCodes.NO_DELETE_PERMISSION.create();
         }
@@ -1944,13 +1957,215 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         String whereClause = "infostore.folder_id = " + folderId;
         List<DocumentMetadata> allDocuments = SearchIterators.asList(InfostoreIterator.allDocumentsWhere(whereClause, Metadata.VALUES_ARRAY, this, context));
         if (!allDocuments.isEmpty()) {
-            List<DocumentMetadata> allVersions = SearchIterators.asList(InfostoreIterator.allVersionsWhere(whereClause, Metadata.VALUES_ARRAY, this, context));
             objectPermissionLoader.add(allDocuments, context, objectPermissionLoader.load(folderId, context));
-            removeDocuments(allDocuments, allVersions, date, session, null);
+            removeDocuments(allDocuments, date, session, null, hardDelete);
         }
     }
 
-    protected void removeDocuments(final List<DocumentMetadata> allDocuments, final List<DocumentMetadata> allVersions, final long date, final ServerSession session, final List<DocumentMetadata> rejected) throws OXException {
+    /**
+     * Gets the trash folder ID for the given session
+     *
+     * @param session The session to get the trash folder ID for
+     * @param folderAccess The folderAccess for the given session
+     * @return The trash folder ID for the given session, or -1 if the trash folder is not present for the given session
+     * @throws OXException
+     */
+    private int getTrashFolderID(ServerSession session, OXFolderAccess folderAccess) throws OXException {
+        return session.getUser().isGuest() ? -1 : folderAccess.getDefaultFolderID(session.getUserId(), FolderObject.INFOSTORE, FolderObject.TRASH);
+    }
+
+    /**
+     * Adds the original folder path to the supplied meta data if necessary
+     * <p>
+     * The original folder path will be added if document is not new, the document's folder is supposed to be changed to the trash folder
+     *
+     * @param metadata The document
+     * @param modifiedFields The modified fields
+     * @param session The session
+     * @param folderAccess the folder access
+     * @return The new modified fields, enhanced by {@link Metadata#ORIGIN_LITERAL} if the original path was added to the document.
+     * @throws OXException
+     */
+    private Metadata[] addOriginPathIfNecessary(DocumentMetadata metadata, Metadata[] modifiedFields, ServerSession session, OXFolderAccess folderAccess) throws OXException {
+        final int trashFolderId = getTrashFolderID(session, folderAccess);
+        List<Metadata> fieldsToReturn = new ArrayList<Metadata>(Arrays.asList(modifiedFields));
+        if (fieldsToReturn.contains(Metadata.FOLDER_ID_LITERAL) && false == fieldsToReturn.contains(Metadata.ORIGIN_LITERAL)) {
+            // File's folder is supposed to be changed and no origin path is set
+            if (NEW != metadata.getId() && 0 != metadata.getFolderId() && isBelowTrashFolder((int)metadata.getFolderId(), trashFolderId, folderAccess)) {
+                // File is supposed to be moved to a Trash folder
+                DocumentMetadata loaded = getDocumentMetadata(-1, metadata.getId(), metadata.getVersion(), session);
+                if (loaded.getFolderId() != metadata.getFolderId()) {
+                    InfostoreFolderPath originPath = generateOriginPathIfTrashed((int)loaded.getFolderId(), trashFolderId, session, folderAccess);
+                    if (null != originPath) {
+                        metadata.setOriginFolderPath(originPath);
+                        fieldsToReturn.add(Metadata.ORIGIN_LITERAL);
+                    }
+                }
+            }
+        }
+        return fieldsToReturn.toArray(new Metadata[fieldsToReturn.size()]);
+    }
+
+    private static final boolean DROP_ORIGIN_FROM_COLUMNS = false;
+
+    /**
+     * Removes the {@link Metadata.ORIGIN_LITERAL} element from the given columns if present and if the denoted folder is <b>not</b> located below trash folder.
+     *
+     * @param columns The requested columns to examine
+     * @param folderId The folder identifier
+     * @param session The session
+     * @return The meta data potentially reduced by the {@link Metadata.ORIGIN_LITERAL}
+     * @throws OXException If check fails
+     */
+    private Metadata[] removeOriginFromColumns(Metadata[] columns, int folderId, ServerSession session) throws OXException {
+        if (false == DROP_ORIGIN_FROM_COLUMNS) {
+            return columns;
+        }
+
+        if (Metadata.contains(columns, Metadata.ORIGIN_LITERAL) && false == session.getUser().isGuest()) {
+            OXFolderAccess folderAccess = new OXFolderAccess(session.getContext());
+            int trashFolderId = getTrashFolderID(session, folderAccess);
+            if (false == isBelowTrashFolder(folderId, trashFolderId, folderAccess)) {
+                int length = columns.length;
+                if (length == 1) {
+                    // Return empty fields
+                    return new Metadata[0];
+                }
+
+                // Strip ORIGIN field
+                Metadata[] retval = new Metadata[length - 1];
+                int index = 0;
+                for (Metadata m : columns) {
+                    if (m != Metadata.ORIGIN_LITERAL) {
+                        retval[index++] = m;
+                    }
+                }
+                return retval;
+            }
+        }
+        return columns;
+    }
+
+    /**
+     * Gets the personal folder for the given session
+     *
+     * @param session The session
+     * @param folderAccess the folder access for the given session
+     * @return The personal folder for the given session, or null
+     * @throws OXException
+     */
+    private int getPersonalFolderID(ServerSession session, OXFolderAccess folderAccess) throws OXException {
+        return folderAccess.getDefaultFolderID(session.getUserId(), FolderObject.INFOSTORE, FolderObject.PUBLIC);
+    }
+
+    /**
+     * Checks if the folder with the given name exists in the parent folder and re-creates it if not.
+     *
+     * @param name The name of the folder to check
+     * @param parentFolderId The ID of the parent folder
+     * @param pathRecreated
+     * @param folderAccess The folder access
+     * @param session The session
+     * @return The ID of the folder, either the existing
+     * @throws OXException
+     */
+    private int ensureFolderExistsForName(String name, int parentFolderId, boolean[] pathRecreated, OXFolderAccess folderAccess, ServerSession session) throws OXException {
+
+        try {
+            //Check if the folder already exists
+            TIntList folderIds = OXFolderSQL.lookUpFolders(parentFolderId, name, FolderObject.INFOSTORE, null, session.getContext());
+            for (int folderId : folderIds.toArray()) {
+                if (name.equals(folderAccess.getFolderName(folderId))) {
+                    return folderId;
+                }
+            }
+        } catch (SQLException e) {
+            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        }
+
+        //Re-Create the folder
+        FolderObject parentFolder = folderAccess.getFolderObject(parentFolderId);
+        List<OCLPermission> permissions = parentFolder.getPermissions();
+        OXFolderManager folderManager = OXFolderManager.getInstance(session, folderAccess);
+        FolderObject toCreate = new FolderObject();
+        toCreate.setModule(FolderObject.INFOSTORE);
+        toCreate.setParentFolderID(parentFolderId);
+        toCreate.setFolderName(name);
+        toCreate.setPermissions(permissions);
+        toCreate.setType(parentFolder.getType());
+        folderManager.createFolder(toCreate, true, System.currentTimeMillis());
+
+        pathRecreated[0] = true;
+        return toCreate.getObjectID();
+    }
+
+    /**
+     * Checks if the given folder is below the trash
+     *
+     * @param folderId The ID of the folder to check
+     * @param trashFolderId The ID of the trash folder to check
+     * @param folderAccess The folderAccess for the given session
+     * @return True, if the given folder is below the trash folder, false otherwise
+     * @throws OXException
+     */
+    private boolean isBelowTrashFolder(int folderId, int trashFolderId, OXFolderAccess folderAccess) throws OXException {
+        while (-1 != folderId) {
+            if (folderId == trashFolderId) {
+                return true;
+            }
+            if (folderId == FolderObject.SYSTEM_INFOSTORE_FOLDER_ID) {
+                return false;
+            }
+            folderId = folderAccess.getParentFolderID(folderId);
+        }
+        return false;
+    }
+
+    /**
+     * Generates the original path for a given folder which is about to be deleted
+     *
+     * @param oldFolderId The folder
+     * @param trashFolderId the ID of the trash folder
+     * @param session The session
+     * @param folderAccess The folder access for the given session
+     * @return The original path
+     * @throws OXException
+     */
+    private InfostoreFolderPath generateOriginPathIfTrashed(int oldFolderId, final int trashFolderId, ServerSession session, OXFolderAccess folderAccess) throws OXException {
+        final int personalFolder = getPersonalFolderID(session, folderAccess);
+
+        List<String> result = null;
+        while (-1 != oldFolderId && FolderObject.SYSTEM_INFOSTORE_FOLDER_ID != oldFolderId) {
+            if (trashFolderId == oldFolderId) {
+                // Obviously already located in/below Trash folder. No original path required.
+                return null;
+            }
+
+            if (null == result) {
+                result = new ArrayList<>(6);
+            }
+            if (oldFolderId == FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID || oldFolderId == FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID || oldFolderId == personalFolder) {
+                result.add(Integer.toString(oldFolderId));
+                oldFolderId = -1; // force termination of while loop
+            } else {
+                FolderObject folder = folderAccess.getFolderObject(oldFolderId);
+                result.add(folder.getFolderName());
+                oldFolderId = folder.getParentFolderID();
+            }
+        }
+        return null == result ? null : InfostoreFolderPath.copyOf(Lists.reverse(result));
+    }
+
+    /**
+     * Removes the documents (hard delete) and all of the corresponding document versions.
+     *
+     * @param allDocuments The documents to remove
+     * @param date The date
+     * @param session The session
+     * @param rejected A list which will contain all documents which could not be deleted
+     * @throws OXException
+     */
+    private void removeDocuments(final List<DocumentMetadata> allDocuments, final long date, final ServerSession session, final List<DocumentMetadata> rejected) throws OXException {
         final List<DocumentMetadata> delDocs = new ArrayList<>();
         final List<DocumentMetadata> delVers = new ArrayList<>();
         final TIntSet rejectedIds = new TIntHashSet(allDocuments.size());
@@ -1974,6 +2189,24 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
          * Move records into del_* tables
          */
         perform(new ReplaceDocumentIntoDelTableAction(this, QUERIES, context, delDocs, session), true);
+
+        /*
+         * Load versions
+         */
+        Set<Integer> objectIDs = allDocuments.stream().map(d -> I(d.getId())).collect(Collectors.toSet());
+        List<DocumentMetadata> allVersions = new ArrayList<DocumentMetadata>();
+        String whereClause;
+        if (!objectIDs.isEmpty()) {
+            if (1 == objectIDs.size()) {
+                whereClause = "infostore.id=" + objectIDs.iterator().next();
+            } else {
+                StringBuilder stringBuilder = new StringBuilder("infostore.id IN (");
+                Strings.join(objectIDs, ",", stringBuilder);
+                whereClause = stringBuilder.append(')').toString();
+            }
+            allVersions = SearchIterators.asList(InfostoreIterator.allVersionsWhere(whereClause, Metadata.VALUES_ARRAY, this, context));
+        }
+
         /*
          * Remove referenced files from underlying storage
          */
@@ -1996,6 +2229,72 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         perform(new DeleteDocumentAction(this, QUERIES, context, delDocs, session), true);
         perform(new DeleteObjectPermissionAction(this, context, delDocs), true);
         rememberForGuestCleanup(context.getContextId(), delDocs);
+    }
+
+    /**
+     * Removes a list of documents
+     *
+     * @param allDocuments The documents to remove
+     * @param date The client's timestamp
+     * @param session The session
+     * @param rejected A list which will contain all documents which could not be deleted after the method returns
+     * @param hardDelete True in order to hard delete the documents, false to move them to the trash
+     * @throws OXException
+     */
+    protected void removeDocuments(final List<DocumentMetadata> allDocuments, final long date, final ServerSession session, final List<DocumentMetadata> rejected, boolean hardDelete) throws OXException {
+        if (hardDelete) {
+            //Perform hard deletion
+            removeDocuments(allDocuments, date, session, rejected);
+        } else {
+            //Move to trash
+            moveDocumentsToTrash(allDocuments, date, session, rejected);
+        }
+    }
+
+    /**
+     * Moves documents to the trash.
+     * <p>
+     * Documents which are already inside the trash will be deleted permanently.
+     * Also if the trash folder is not available the documents will be deleted permanently as well.
+     *</p>
+     *
+     * @param allDocuments The documents to delete
+     * @param date The client's time stamp
+     * @param session The session
+     * @param rejected A list which will contain all documents which could not be deleted after the method returns
+     * @throws OXException
+     */
+    private void moveDocumentsToTrash(final List<DocumentMetadata> allDocuments, final long date, final ServerSession session, final List<DocumentMetadata> rejected) throws OXException {
+        final OXFolderAccess folderAccess = new OXFolderAccess(session.getContext());
+
+        //Check present of trash folder
+        final int trashFolderID = getTrashFolderID(session, folderAccess);
+        if (trashFolderID == -1) {
+            //Perform hard deletion instead
+            removeDocuments(allDocuments, date, session, rejected);
+        } else {
+            //Distinguish between documents already in or below trash folder
+            List<DocumentMetadata> documentsToDelete = new ArrayList<>();
+            List<DocumentMetadata> documentsToMove = new ArrayList<>();
+            for (DocumentMetadata document : allDocuments) {
+                if (isBelowTrashFolder((int) document.getFolderId(), trashFolderID, folderAccess)) {
+                    documentsToDelete.add(document);
+                } else {
+                    documentsToMove.add(document);
+                }
+            }
+
+            //hard-delete already deleted documents
+            if (!documentsToDelete.isEmpty()) {
+                removeDocuments(documentsToDelete, date, session, rejected);
+            }
+
+            //move other documents to trash
+            if (!documentsToMove.isEmpty()) {
+                final List<DocumentMetadata> notMoved = moveDocuments(session, documentsToMove, trashFolderID, date, true);
+                rejected.addAll(notMoved);
+            }
+        }
     }
 
     /**
@@ -2114,7 +2413,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
      * @return A list of documents that could not be moved due to concurrent modifications
      * @throws OXException
      */
-    protected List<DocumentMetadata> moveDocuments(ServerSession session, List<DocumentMetadata> documents, long destinationFolderID, long sequenceNumber, boolean adjustFilenamesAsNeeded, Map<String, InfostoreFolderPath> optOriginPaths) throws OXException {
+    protected List<DocumentMetadata> moveDocuments(ServerSession session, List<DocumentMetadata> documents, long destinationFolderID, long sequenceNumber, boolean adjustFilenamesAsNeeded) throws OXException {
         Context context = session.getContext();
         User user = session.getUser();
         UserPermissionBits permissionBits = session.getUserPermissionBits();
@@ -2155,7 +2454,10 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             Connection readConnection = null;
             FilenameReserver filenameReserver = new FilenameReserverImpl(session.getContext(), this);
             try {
+                final OXFolderAccess folderAccess = new OXFolderAccess(session.getContext());
+                final int trashFolderID = getTrashFolderID(session, folderAccess);
                 readConnection = getReadConnection(context);
+                boolean moveToTrash = false;
                 List<DocumentMetadata> tombstoneDocuments = new ArrayList<>(numberOfDocuments);
                 List<DocumentMetadata> documentsToUpdate = new ArrayList<>(numberOfDocuments);
                 List<DocumentMetadata> versionsToUpdate = new ArrayList<>();
@@ -2177,18 +2479,21 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                     /*
                      * check origin path
                      */
-                    if (null != optOriginPaths) {
-                        InfostoreFolderPath originFolderPath = optOriginPaths.get(String.valueOf(document.getId()));
-                        if (null != originFolderPath && !originFolderPath.isEmpty()) {
-                            documentToUpdate.setOriginFolderPath(originFolderPath);
-                        } else {
-                            documentToUpdate.setOriginFolderPath(null);
-                        }
-                        if (null != originFolderPath && !originFolderPath.isEmpty()) {
-                            tombstoneDocument.setOriginFolderPath(originFolderPath);
-                        } else {
-                            tombstoneDocument.setOriginFolderPath(null);
-                        }
+                    //@formatter:off
+                    InfostoreFolderPath originFolderPath = !isBelowTrashFolder((int) document.getFolderId(), trashFolderID, folderAccess) ?
+                        generateOriginPathIfTrashed((int) document.getFolderId(), trashFolderID, session, folderAccess) :
+                        null;
+                    //@formatter:on
+                    if (null != originFolderPath && !originFolderPath.isEmpty()) {
+                        documentToUpdate.setOriginFolderPath(originFolderPath);
+                        moveToTrash = true;
+                    } else {
+                        documentToUpdate.setOriginFolderPath(null);
+                    }
+                    if (null != originFolderPath && !originFolderPath.isEmpty()) {
+                        tombstoneDocument.setOriginFolderPath(originFolderPath);
+                    } else {
+                        tombstoneDocument.setOriginFolderPath(null);
                     }
                     /*
                      * prepare object permission update / removal
@@ -2229,7 +2534,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                  * perform document move
                  */
                 Metadata[] modified = null;
-                if (null == optOriginPaths) {
+                if (!moveToTrash) {
                     modified = new Metadata[] { Metadata.LAST_MODIFIED_LITERAL, Metadata.MODIFIED_BY_LITERAL, Metadata.FOLDER_ID_LITERAL };
                 } else {
                     modified = new Metadata[] { Metadata.LAST_MODIFIED_LITERAL, Metadata.MODIFIED_BY_LITERAL, Metadata.FOLDER_ID_LITERAL, Metadata.ORIGIN_LITERAL };
@@ -2262,7 +2567,88 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
     }
 
     @Override
-    public List<IDTuple> moveDocuments(ServerSession session, List<IDTuple> ids, long sequenceNumber, String targetFolderID, boolean adjustFilenamesAsNeeded, Map<String, InfostoreFolderPath> originPath) throws OXException {
+    public IDTuple copyDocument(ServerSession session, IDTuple id, int version, DocumentMetadata update, Metadata[] modifiedFields, InputStream newFile, long sequenceNumber, String targetFolderID) throws OXException {
+
+        int fileId;
+        try {
+            fileId = i(Integer.valueOf(id.getId()));
+        } catch (NumberFormatException e) {
+            throw InfostoreExceptionCodes.DOCUMENT_NOT_EXIST.create();
+        }
+
+        long folderId;
+        try {
+            folderId = Long.parseLong(id.getFolder());
+        } catch (NumberFormatException e) {
+            throw InfostoreExceptionCodes.NOT_INFOSTORE_FOLDER.create(e, targetFolderID);
+        }
+
+        long destinationFolderID;
+        try {
+            destinationFolderID = Long.parseLong(targetFolderID);
+        } catch (NumberFormatException e) {
+            throw InfostoreExceptionCodes.NOT_INFOSTORE_FOLDER.create(e, targetFolderID);
+        }
+
+        InputStream in = newFile;
+        try {
+            DocumentMetadata orig;
+            if (null == id.getFolder()) {
+                orig = getDocumentMetadata(-1, fileId, version, session);
+            } else {
+                orig = getDocumentMetadata(folderId, fileId, version, session);
+                if (0 < orig.getFolderId() && folderId != orig.getFolderId()) {
+                    throw InfostoreExceptionCodes.DOCUMENT_NOT_EXIST.create();
+                }
+            }
+            final long orignalFolderId = orig.getFolderId();
+
+            if(in == null && orig.getFileName() != null) {
+               in = getDocument(fileId, version, session);
+            }
+
+            //apply meta data update if provided
+            if(update != null) {
+                GetSwitch get = new GetSwitch(update);
+                SetSwitch set = new SetSwitch(orig);
+                for(Metadata modifiedField : modifiedFields) {
+                    set.setValue(modifiedField.doSwitch(get));
+                    modifiedField.doSwitch(set);
+                }
+                /*
+                 * remove creation date of original file so that the current time will be assigned during creation
+                 */
+                if (false == Arrays.asList(modifiedFields).contains(Metadata.CREATION_DATE_LITERAL)) {
+                    orig.setCreationDate(null);
+                }
+            }
+            orig.setId(NEW);
+            orig.setFolderId(destinationFolderID);
+            orig.setObjectPermissions(null);
+            FileStorageUtility.checkUrl(orig.getURL());
+
+            //Trash handling
+            OXFolderAccess folderAccess = new OXFolderAccess(session.getContext());
+            int trashFolderID = getTrashFolderID(session, folderAccess);
+            if(isBelowTrashFolder((int)destinationFolderID, trashFolderID, folderAccess)) {
+                orig.setOriginFolderPath(generateOriginPathIfTrashed((int)orignalFolderId, trashFolderID, session, folderAccess));
+            }
+
+            if (in == null) {
+                saveDocumentMetadata(orig, sequenceNumber, session);
+            } else {
+                saveDocument(orig, in, sequenceNumber, session);
+            }
+
+            return new IDTuple(targetFolderID, Integer.toString(orig.getId()));
+        }
+        finally {
+            Streams.close(in);
+        }
+    }
+
+    @Override
+    public List<IDTuple> moveDocuments(ServerSession session, List<IDTuple> ids, long sequenceNumber, String targetFolderID, boolean adjustFilenamesAsNeeded) throws OXException {
         if (null == ids || 0 == ids.size()) {
             return Collections.emptyList();
         }
@@ -2292,7 +2678,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         /*
          * perform move
          */
-        List<DocumentMetadata> rejectedDocuments = moveDocuments(session, allDocuments, destinationFolderID, sequenceNumber, adjustFilenamesAsNeeded, originPath);
+        List<DocumentMetadata> rejectedDocuments = moveDocuments(session, allDocuments, destinationFolderID, sequenceNumber, adjustFilenamesAsNeeded);
         if (null == rejectedDocuments || 0 == rejectedDocuments.size()) {
             return Collections.emptyList();
         }
@@ -2303,13 +2689,15 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         return rejectedIDs;
     }
 
-    @Override
-    public List<IDTuple> moveDocuments(ServerSession session, List<IDTuple> ids, long sequenceNumber, String targetFolderID, boolean adjustFilenamesAsNeeded) throws OXException {
-        return moveDocuments(session, ids, sequenceNumber, targetFolderID, adjustFilenamesAsNeeded, null);
-    }
-
-    @Override
-    public List<IDTuple> restore(Map<String, List<IDTuple>> toRestore, ServerSession session) throws OXException {
+    /**
+     * Restores files from trash folder to origin location. If the path was deleted too, it will be recreated.
+     *
+     * @param toRestore A mapping of target folder identifiers to files to restore
+     * @param session The session
+     * @return The identifiers of those documents that could <b>not</b> be restored successfully
+     * @throws OXException If restore fails
+     */
+    private List<IDTuple> restore(Map<String, List<IDTuple>> toRestore, ServerSession session) throws OXException {
         if (null == toRestore || toRestore.size() == 0) {
             return Collections.emptyList();
         }
@@ -2319,13 +2707,126 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         for (Map.Entry<String, List<IDTuple>> entry : toRestore.entrySet()) {
             String targetFolderId = entry.getKey();
             List<IDTuple> filesToRestore = entry.getValue();
-            result.addAll(moveDocuments(session, filesToRestore, now, targetFolderId, true, Collections.emptyMap()));
+            result.addAll(moveDocuments(session, filesToRestore, now, targetFolderId, true));
         }
         return result;
     }
 
     @Override
-    public List<IDTuple> removeDocument(final List<IDTuple> ids, final long date, final ServerSession session) throws OXException {
+    public Map<IDTuple, String> restore(List<IDTuple> tuples, long destFolderId, ServerSession session) throws OXException {
+        if (null == tuples || tuples.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        // The result list
+        int size = tuples.size();
+        Map<IDTuple, String> result = new LinkedHashMap<IDTuple, String>(size);
+
+        // Check trash folder existence
+        OXFolderAccess folderAccess = new OXFolderAccess(session.getContext());
+        int trashFolderID = getTrashFolderID(session, folderAccess);
+        if (-1 == trashFolderID) {
+            return Collections.emptyMap();
+        }
+
+        // Checks tuples to restore
+        for (IDTuple tuple : tuples) {
+            if (false == isBelowTrashFolder(Integer.parseInt(tuple.getFolder()), trashFolderID, folderAccess)) {
+                throw InfostoreExceptionCodes.INVALID_FOLDER_IDENTIFIER.create("File does not reside in trash folder");
+            }
+        }
+
+        // Load origin paths
+        TIntObjectMap<InfostoreFolderPath> originPaths;
+        if (size > 1) {
+            SearchIterator<DocumentMetadata> iterator = null;
+            try {
+                TimedResult<DocumentMetadata> documents = getDocuments(tuples, new Metadata[] { Metadata.ID_LITERAL, Metadata.ORIGIN_LITERAL, Metadata.FOLDER_ID_LITERAL }, session);
+                iterator = documents.results();
+                originPaths = new TIntObjectHashMap<>(size);
+                while (iterator.hasNext()) {
+                    DocumentMetadata metadata = iterator.next();
+                    InfostoreFolderPath originPath = metadata.getOriginFolderPath();
+                    if (null != originPath) {
+                        originPaths.put(metadata.getId(), originPath);
+                    }
+                }
+            } finally {
+                SearchIterators.close(iterator);
+            }
+        } else {
+            IDTuple tuple = tuples.get(0);
+            DocumentMetadata metadata = getDocumentMetadata(getUnsignedLong(tuple.getFolder()), getUnsignedInteger(tuple.getId()), InfostoreFacade.CURRENT_VERSION, session);
+            InfostoreFolderPath originPath = metadata.getOriginFolderPath();
+            originPaths = new TIntObjectHashMap<>(1);
+            if (originPath != null) {
+                originPaths.put(metadata.getId(), originPath);
+            }
+        }
+
+        // Iterate tuples to restore
+        Map<String, List<IDTuple>> toRestore = new LinkedHashMap<>(size);
+        boolean[] pathRecreated = new boolean[] { false };
+        int personalFolderId = -1;
+        for (IDTuple tuple : tuples) {
+            InfostoreFolderPath originPath = originPaths.get(getUnsignedInteger(tuple.getId()));
+            if (null == originPath) {
+                originPath = InfostoreFolderPath.EMPTY_PATH;
+            }
+
+            long folderId;
+            try {
+                switch (originPath.getType()) {
+                    case PRIVATE:
+                        if (-1 == personalFolderId) {
+                            personalFolderId = getPersonalFolderID(session, folderAccess);
+                        }
+                        folderId = personalFolderId;
+                        break;
+                    case PUBLIC:
+                        folderId = FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID;
+                        break;
+                    case SHARED:
+                        folderId = FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID;
+                        break;
+                    case UNDEFINED: /* fall-through */
+                    default:
+                        folderId = destFolderId;
+                        originPath = InfostoreFolderPath.EMPTY_PATH;
+                        break;
+                }
+                if (!originPath.isEmpty()) {
+                    pathRecreated[0] = false;
+                    for (String name : originPath.getPathForRestore()) {
+                        folderId = ensureFolderExistsForName(name, (int) folderId, pathRecreated, folderAccess, session);
+                    }
+                }
+            } catch (OXException e) {
+                if (!"FLD".equals(e.getPrefix()) || 6 != e.getCode()) {
+                    throw e;
+                }
+
+                folderId = destFolderId;
+            }
+
+            List<IDTuple> tuplesToRestore = toRestore.get(Long.toString(folderId));
+            if (null == tuplesToRestore) {
+                tuplesToRestore = new ArrayList<>();
+                toRestore.put(Long.toString(folderId), tuplesToRestore);
+            }
+            tuplesToRestore.add(tuple);
+            result.put(IDTuple.copy(tuple), String.valueOf(folderId));
+        }
+
+        List<IDTuple> restoreResult = restore(toRestore, session);
+        for (IDTuple id : restoreResult) {
+            result.remove(id);
+        }
+        return result;
+    }
+
+    @Override
+    public List<IDTuple> removeDocument(final List<IDTuple> ids, final long date, final ServerSession session, boolean hardDelete) throws OXException {
         if (null == ids || 0 == ids.size()) {
             return Collections.emptyList();
         }
@@ -2345,7 +2846,6 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             whereClause = stringBuilder.append(')').toString();
         }
         List<DocumentMetadata> allDocuments = SearchIterators.asList(InfostoreIterator.allDocumentsWhere(whereClause, Metadata.VALUES_ARRAY, this, context));
-        List<DocumentMetadata> allVersions = SearchIterators.asList(InfostoreIterator.allVersionsWhere(whereClause, Metadata.VALUES_ARRAY, this, context));
         objectPermissionLoader.add(allDocuments, context, idsToFolders.keySet());
 
         // Ensure folder ids are consistent between request and existing documents
@@ -2371,7 +2871,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         }
 
         final List<DocumentMetadata> rejectedDocuments = new ArrayList<>();
-        removeDocuments(allDocuments, allVersions, date, session, rejectedDocuments);
+        removeDocuments(allDocuments, date, session, rejectedDocuments, hardDelete);
 
         List<IDTuple> rejectedIDs = new ArrayList<>(rejectedDocuments.size() + unknownDocuments.size());
         for (final DocumentMetadata rejected : rejectedDocuments) {
@@ -2466,7 +2966,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
     public int[] removeVersion(int id, int[] versionIds, boolean allowRemoveCurrentVersion, boolean updateLastModified, ServerSession session) throws OXException {
         return removeVersion(id, versionIds, allowRemoveCurrentVersion, updateLastModified, session, true);
     }
-    
+
     /**
      * Removes denoted versions.
      *
@@ -2611,12 +3111,12 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
 
     @Override
     public TimedResult<DocumentMetadata> getDocuments(final long folderId, final Metadata[] columns, final ServerSession session) throws OXException {
-        return getDocuments(folderId, columns, null, 0, session);
+        return getDocuments(folderId, removeOriginFromColumns(columns, (int)folderId, session), null, 0, session);
     }
 
     @Override
     public TimedResult<DocumentMetadata> getDocuments(long folderId, Metadata[] columns, Metadata sort, int order, ServerSession session) throws OXException {
-        return getDocuments(folderId, columns, sort, order, -1, -1, session);
+        return getDocuments(folderId, removeOriginFromColumns(columns, (int)folderId, session), sort, order, -1, -1, session);
     }
 
     @Override
@@ -2674,16 +3174,16 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
 
     @Override
     public TimedResult<DocumentMetadata> getVersions(final int id, final ServerSession session) throws OXException {
-        return getVersions(id, Metadata.HTTPAPI_VALUES_ARRAY, null, 0, session);
+        return getVersions(-1, id, Metadata.HTTPAPI_VALUES_ARRAY, null, 0, session);
     }
 
     @Override
-    public TimedResult<DocumentMetadata> getVersions(final int id, final Metadata[] columns, final ServerSession session) throws OXException {
-        return getVersions(id, columns, null, 0, session);
+    public TimedResult<DocumentMetadata> getVersions(final long folderId, final int id, final Metadata[] columns, final ServerSession session) throws OXException {
+        return getVersions(folderId, id, columns, null, 0, session);
     }
 
     @Override
-    public TimedResult<DocumentMetadata> getVersions(final int id, Metadata[] columns, final Metadata sort, final int order, final ServerSession session) throws OXException {
+    public TimedResult<DocumentMetadata> getVersions(final long folderId, final int id, Metadata[] columns, final Metadata sort, final int order, final ServerSession session) throws OXException {
         Context context = session.getContext();
         final EffectiveInfostorePermission infoPerm = security.getInfostorePermission(session, id);
         if (false == infoPerm.canReadObject()) {
@@ -2692,6 +3192,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         boolean shouldTriggerMediaDataExtraction = shouldTriggerMediaDataExtraction();
         Metadata[] cols = addSequenceNumberIfNeeded(columns);
         cols = addDateFieldsIfNeeded(cols, sort);
+        if(folderId != -1) {
+            cols = removeOriginFromColumns(cols, (int)folderId, session);
+        }
         if (shouldTriggerMediaDataExtraction) {
             cols = addFieldsForTriggeringMediaMetaDataExtractionIfNeeded(cols);
         }
@@ -2860,6 +3363,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         boolean shouldTriggerMediaDataExtraction = shouldTriggerMediaDataExtraction();
         Metadata[] cols = addSequenceNumberIfNeeded(columns);
         cols = addDateFieldsIfNeeded(cols, sort);
+        cols = removeOriginFromColumns(cols, (int)folderId, session);
         if (shouldTriggerMediaDataExtraction) {
             cols = addFieldsForTriggeringMediaMetaDataExtractionIfNeeded(cols);
         }
@@ -3103,7 +3607,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
          * perform search & enhance results with additional metadata as needed
          */
         boolean shouldTriggerMediaDataExtraction = shouldTriggerMediaDataExtraction();
-        Metadata[] fields = Tools.getFieldsToQuery(cols, Metadata.ID_LITERAL, Metadata.FOLDER_ID_LITERAL);
+        Metadata[] fields = Tools.getFieldsToQuery(removeOriginFromColumns(cols, folderId, session), Metadata.ID_LITERAL, Metadata.FOLDER_ID_LITERAL);
         fields = addDateFieldsIfNeeded(fields, sortedBy);
         if (shouldTriggerMediaDataExtraction) {
             fields = addFieldsForTriggeringMediaMetaDataExtractionIfNeeded(fields);
@@ -3157,7 +3661,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
          * perform search & enhance results with additional metadata as needed
          */
         boolean shouldTriggerMediaDataExtraction = shouldTriggerMediaDataExtraction();
-        Metadata[] fields = Tools.getFieldsToQuery(cols, Metadata.ID_LITERAL, Metadata.FOLDER_ID_LITERAL);
+        Metadata[] fields = Tools.getFieldsToQuery(removeOriginFromColumns(cols, folderId, session), Metadata.ID_LITERAL, Metadata.FOLDER_ID_LITERAL);
         fields = addDateFieldsIfNeeded(fields, sortedBy);
         if (shouldTriggerMediaDataExtraction) {
             fields = addFieldsForTriggeringMediaMetaDataExtractionIfNeeded(fields);
@@ -3604,7 +4108,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
      * @return The validation chain
      */
     private ValidationChain getValidationChain() {
-        return new ValidationChain(new InvalidCharactersValidator(), new FilenamesMayNotContainSlashesValidator(), new ObjectPermissionValidator(this));
+        return new ValidationChain(new InvalidCharactersValidator(), new FilenamesMayNotContainSlashesValidator(), new ObjectPermissionValidator(this), new PermissionSizeValidator());
     }
 
     private TimedResult<DocumentMetadata> getDocuments(Context context, final User user, ServerSession optSession, UserPermissionBits permissionBits, final long folderId, Metadata[] columns, Metadata sort, int order, int start, int end) throws OXException {

@@ -81,7 +81,7 @@ public class ProviderAwareManifestBuilder implements ManifestBuilder {
     @Override
     public JSONArray buildManifests(ServerSession session, String version) throws OXException {
         for(ManifestProvider provider: providerTracker.getServiceList()) {
-            if(provider.isApplicable(session, version)) {
+            if (provider.isApplicable(session, version)) {
                 return provider.getManifestBuilder().buildManifests(session, version);
             }
         }

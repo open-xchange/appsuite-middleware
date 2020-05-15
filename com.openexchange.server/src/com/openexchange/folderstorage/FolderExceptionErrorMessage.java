@@ -226,7 +226,7 @@ public enum FolderExceptionErrorMessage implements DisplayableOXExceptionCode {
     /**
      * The set permissions (%1$d) are invalid for entity (%2$d) on object %3$s.
      */
-    INVALID_PERMISSIONS("The set permissions (%1$d) are invalid for entity (%2$d) on object %3$s.", Category.CATEGORY_PERMISSION_DENIED, 1039),
+    INVALID_PERMISSIONS("The set permissions (%1$d) are invalid for entity (%2$d) on object %3$s.", Category.CATEGORY_PERMISSION_DENIED, 1039, FolderExceptionMessages.INVALID_PERMISSIONS_MSG),
     /**
      * Folder name contains illegal characters: \"%1$s\"
      */
@@ -243,6 +243,10 @@ public enum FolderExceptionErrorMessage implements DisplayableOXExceptionCode {
      * Process was interrupted. Please try again.
      */
     INTERRUPT_ERROR("Process was interrupted. Please try again.", CATEGORY_TRY_AGAIN, 1043, OXExceptionStrings.MESSAGE_RETRY),
+    /**
+     * Changing the subscription or the used_for_sync state is not allowed for default folders.
+     */
+    SUBSCRIBE_NOT_ALLOWED("Changing the subscription or the used_for_sync state is not allowed for default folders.", CATEGORY_USER_INPUT, 1044, OXExceptionStrings.MESSAGE_DENIED),
 
     ;
 

@@ -58,6 +58,7 @@ import javax.servlet.http.HttpServletRequest;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.authentication.application.ajax.RestrictedAction;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
@@ -88,12 +89,15 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
+@RestrictedAction(module = AbstractDriveAction.MODULE, type = RestrictedAction.Type.READ)
 public abstract class AbstractDriveAction implements AJAXActionService {
+
+    protected static final String MODULE = "drive";
 
     private final DriveShareJSONParser parser;
 
     /**
-     * Initializes a new {@link AbstractDriveShareAction}.
+     * Initializes a new {@link AbstractDriveAction}.
      */
     protected AbstractDriveAction() {
         super();

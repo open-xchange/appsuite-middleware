@@ -60,6 +60,7 @@ import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import com.openexchange.database.ConfigDatabaseService;
+import com.openexchange.database.ConnectionType;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.JdbcProperties;
 import com.openexchange.exception.OXException;
@@ -73,7 +74,9 @@ import com.openexchange.pooling.PoolConfig;
  */
 public class ContextDatabaseLifeCycle implements PoolLifeCycle {
 
-    private static final String SELECT = "SELECT url,driver,login,password,hardlimit,max,initial FROM db_pool WHERE db_pool_id=?";
+    private static final String SELECT = "SELECT p.url,p.driver,p.login,p.password,p.hardlimit,p.max,p.initial,c.write_db_pool_id "
+                                       + "FROM db_pool AS p join db_cluster as c on p.db_pool_id = c.read_db_pool_id or p.db_pool_id = c.write_db_pool_id "
+                                       + "WHERE p.db_pool_id=?";
 
     private final Management management;
 
@@ -174,14 +177,15 @@ public class ContextDatabaseLifeCycle implements PoolLifeCycle {
             Properties defaults = new Properties();
 
             // Apply arguments read from database
-            String url = result.getString(1);
-            conDataBuilder.withDriverClass(result.getString(2));
-            defaults.put("user", result.getString(3));
-            defaults.put("password", result.getString(4));
-            conDataBuilder.withBlock(result.getBoolean(5));
-            conDataBuilder.withMax(result.getInt(6));
-            conDataBuilder.withMin(result.getInt(7));
-
+            int index = 1;
+            String url = result.getString(index++);
+            conDataBuilder.withDriverClass(result.getString(index++));
+            defaults.put("user", result.getString(index++));
+            defaults.put("password", result.getString(index++));
+            conDataBuilder.withBlock(result.getBoolean(index++));
+            conDataBuilder.withMax(result.getInt(index++));
+            conDataBuilder.withMin(result.getInt(index++));
+            conDataBuilder.withType(ConnectionType.get(poolId == result.getInt(index++)));
             // Apply JDBC properties (and drop any parameters from JDBC URL)
             url = JdbcProperties.removeParametersFromJdbcUrl(url);
             conDataBuilder.withUrl(url);
@@ -197,7 +201,7 @@ public class ContextDatabaseLifeCycle implements PoolLifeCycle {
         }
     }
 
-    private class ContextPoolAdapter extends AbstractConfigurationListener<ConnectionData> {
+    private class ContextPoolAdapter extends AbstractMetricAwarePool<ConnectionData> {
 
         ContextPoolAdapter(int poolId, ConnectionData data, Function<ConnectionData, String> toURL, Function<ConnectionData, Properties> toConnectionArguments, Function<ConnectionData, PoolConfig> toConfig) {
             super(poolId, data, toURL, toConnectionArguments, toConfig);
@@ -216,6 +220,11 @@ public class ContextDatabaseLifeCycle implements PoolLifeCycle {
                 OXException exception = DBPoolingExceptionCodes.NO_DRIVER.create(e, data.driverClass);
                 LOG.error("Unable to reload configuration", exception);
             }
+        }
+        
+        @Override
+        protected String getPoolClass() {
+            return "userdb";
         }
     }
 }
