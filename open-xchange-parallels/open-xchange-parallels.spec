@@ -14,7 +14,7 @@ BuildRequires: java-1.8.0-openjdk-devel
 %endif
 BuildRequires:  open-xchange-admin
 Version:        @OXVERSION@
-%define         ox_release 26
+%define         ox_release 27
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -75,6 +75,8 @@ fi
 %doc com.openexchange.parallels/ChangeLog
 
 %changelog
+* Fri May 15 2020 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2020-05-26 (5741)
 * Mon May 04 2020 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2020-05-11 (5719)
 * Mon Apr 06 2020 Marcus Klein <marcus.klein@open-xchange.com>
