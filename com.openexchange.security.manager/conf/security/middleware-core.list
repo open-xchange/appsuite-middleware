@@ -39,3 +39,6 @@ com.openexchange.templating.assets.path
 # Metrics
 /proc/self/status
 
+# History
+com.openexchange.apps.backupPath:RW
+com.openexchange.apps.manifestBackupPath:RW
