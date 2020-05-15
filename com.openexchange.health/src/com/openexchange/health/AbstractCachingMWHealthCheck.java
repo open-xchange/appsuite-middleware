@@ -55,25 +55,28 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * {@link CachingMWHealthCheck} - Abstract class for health checks, that cache their result for specified time-to-live prior to actually
- * re-checking.
+ * {@link AbstractCachingMWHealthCheck} - Abstract class for health checks, that cache their response for specified time-to-live prior to
+ * actually re-checking.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.4
  */
-public abstract class CachingMWHealthCheck implements MWHealthCheck {
+public abstract class AbstractCachingMWHealthCheck implements MWHealthCheck {
 
-    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(CachingMWHealthCheck.class);
+    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(AbstractCachingMWHealthCheck.class);
 
+    /** The reference to cached result wrapped by a Future */
     protected final AtomicReference<StampedFutureTask> stammpedResponseReference;
+
+    /** The time-to-live duration in milliseconds */
     protected final long timeToLiveMillis;
 
     /**
-     * Initializes a new {@link CachingMWHealthCheck}.
+     * Initializes a new {@link AbstractCachingMWHealthCheck}.
      *
-     * @param timeToLiveMillis The time-to-live in milliseconds for cached result
+     * @param timeToLiveMillis The time-to-live in milliseconds for a cached response, if elapsed the response is considered as expired/invalid
      */
-    protected CachingMWHealthCheck(long timeToLiveMillis) {
+    protected AbstractCachingMWHealthCheck(long timeToLiveMillis) {
         super();
         this.timeToLiveMillis = timeToLiveMillis;
         stammpedResponseReference = new AtomicReference<>();
@@ -83,7 +86,7 @@ public abstract class CachingMWHealthCheck implements MWHealthCheck {
     public final MWHealthCheckResponse call() {
         StampedFutureTask stampedResponse = stammpedResponseReference.get();
         boolean executed = false;
-        if (stampedResponse == null || stampedResponse.isElapsed(timeToLiveMillis)) {
+        if (stampedResponse == null || stampedResponse.isExpired(timeToLiveMillis)) {
             StampedFutureTask ft = new StampedFutureTask(new HealthCheckCallable(this));
             if (stammpedResponseReference.compareAndSet(stampedResponse, ft)) {
                 LOGGER.debug("Going to execute health check \"{}\"", getName());
@@ -117,7 +120,7 @@ public abstract class CachingMWHealthCheck implements MWHealthCheck {
     }
 
     /**
-     * Executes the health check
+     * Executes the health check.
      *
      * @return The health check response
      */
@@ -139,16 +142,16 @@ public abstract class CachingMWHealthCheck implements MWHealthCheck {
             checkTimeStamp = System.currentTimeMillis();
         }
 
-        boolean isElapsed(long timeToLiveMillis) {
+        boolean isExpired(long timeToLiveMillis) {
             return (System.currentTimeMillis() - checkTimeStamp) > timeToLiveMillis;
         }
     }
 
     private static class HealthCheckCallable implements Callable<MWHealthCheckResponse> {
 
-        private final CachingMWHealthCheck instance;
+        private final AbstractCachingMWHealthCheck instance;
 
-        HealthCheckCallable(CachingMWHealthCheck instance) {
+        HealthCheckCallable(AbstractCachingMWHealthCheck instance) {
             super();
             this.instance = instance;
         }

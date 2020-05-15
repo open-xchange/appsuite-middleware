@@ -55,7 +55,7 @@ import java.util.Map;
 import com.hazelcast.cluster.ClusterState;
 import com.hazelcast.core.Cluster;
 import com.hazelcast.core.HazelcastInstance;
-import com.openexchange.health.CachingMWHealthCheck;
+import com.openexchange.health.AbstractCachingMWHealthCheck;
 import com.openexchange.health.MWHealthCheckResponse;
 import com.openexchange.health.impl.MWHealthCheckResponseImpl;
 import com.openexchange.server.ServiceLookup;
@@ -67,7 +67,7 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.1
  */
-public class HazelcastCheck extends CachingMWHealthCheck {
+public class HazelcastCheck extends AbstractCachingMWHealthCheck {
 
     private final static String NAME = "hazelcast";
     private final static long TIMEOUT = 15000L;
