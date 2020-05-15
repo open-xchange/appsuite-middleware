@@ -548,9 +548,11 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
          */
         for (Entry<String, SpecificHttpClientConfigProvider> entry : specificProviders.entrySet()) {
             String clientId = entry.getKey();
-            SpecificHttpClientConfigProvider provider = entry.getValue();
-            HttpBasicConfig newClientConfig = provider.configureHttpBasicConfig(createNewDefaultConfig(configService));
-            reloadClient(clientId, newClientConfig, provider, true);
+            if (null != httpClients.getIfPresent(clientId)) {
+                SpecificHttpClientConfigProvider provider = entry.getValue();
+                HttpBasicConfig newClientConfig = provider.configureHttpBasicConfig(createNewDefaultConfig(configService));
+                reloadClient(clientId, newClientConfig, provider, true);
+            }
         }
 
         for (Entry<String, PatternEnhancedWildcardHttpClientConfigProvider> entry : wildcardProviders.entrySet()) {
