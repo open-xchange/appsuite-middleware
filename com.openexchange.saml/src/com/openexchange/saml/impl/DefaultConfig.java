@@ -50,13 +50,14 @@
 package com.openexchange.saml.impl;
 
 import static com.openexchange.saml.SAMLProperties.*;
-import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
 import com.google.common.collect.ImmutableSet;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.lean.LeanConfigurationService;
+import com.openexchange.config.lean.Property;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.saml.SAMLConfig;
 
 /**
@@ -70,39 +71,21 @@ public class DefaultConfig implements SAMLConfig {
 
     private static final ImmutableSet<String> ALL_HOSTS_SET = ImmutableSet.of("all");
 
-    private static final AtomicReference<DefaultConfig> DEFAULT_CONFIG_REFERENCE = new AtomicReference<>();
-
-    /**
-     * Gets the default configuration instance if yet initialized; otherwise empty.
-     *
-     * @return The optional default configuration instance
-     * @see #init(ConfigurationService)
-     */
-    public static Optional<DefaultConfig> getDefaultConfig() {
-        return Optional.ofNullable(DEFAULT_CONFIG_REFERENCE.get());
-    }
-
-    /**
-     * Releases the default configuration instance.
-     */
-    public static void release() {
-        DEFAULT_CONFIG_REFERENCE.set(null);
-    }
 
     /**
      * Initializes the default configuration using given service.
      *
-     * @param configService The configuration service to use
+     * @param configService The lean configuration service to use
      * @return The initialized default configuration
      * @throws OXException If initialization fails
      */
-    public static DefaultConfig init(ConfigurationService configService) throws OXException {
+    public static DefaultConfig init(LeanConfigurationService configService) throws OXException {
         String providerName = checkProperty(configService, PROVIDER_NAME);
         String entityID = checkProperty(configService, ENTITY_ID);
         String acsURL = checkProperty(configService, ACS_URL);
         String idpEntityID = checkProperty(configService, IDP_ENTITY_ID);
         String idpAuthnURL = checkProperty(configService, IDP_LOGIN_URL);
-        boolean supportSingleLogout = configService.getBoolProperty(ENABLE_SINGLE_LOGOUT, false);
+        boolean supportSingleLogout = configService.getBooleanProperty(ENABLE_SINGLE_LOGOUT);
         String slsURL = null;
         String idpLogoutURL = null;
         Binding logoutResponseBinding = null;
@@ -115,19 +98,18 @@ public class DefaultConfig implements SAMLConfig {
                 logoutResponseTemplate = checkProperty(configService, LOGOUT_RESPONSE_POST_TEMPLATE);
             }
         }
-        boolean enableMetadataService = configService.getBoolProperty(ENABLE_METADATA_SERVICE, false);
-        boolean autoLoginEnabled = configService.getBoolProperty(ENABLE_AUTO_LOGIN, false);
-        boolean allowUnsolicitedResponses = configService.getBoolProperty(ALLOW_UNSOLICITED_RESPONSES, true);
-        boolean sessionIndexAutoLoginEnabled = configService.getBoolProperty(ENABLE_SESSION_INDEX_AUTO_LOGIN, false);
+        boolean enableMetadataService = configService.getBooleanProperty(ENABLE_METADATA_SERVICE);
+        boolean autoLoginEnabled = configService.getBooleanProperty(ENABLE_AUTO_LOGIN);
+        boolean allowUnsolicitedResponses = configService.getBooleanProperty(ALLOW_UNSOLICITED_RESPONSES);
+        boolean sessionIndexAutoLoginEnabled = configService.getBooleanProperty(ENABLE_SESSION_INDEX_AUTO_LOGIN);
 
         DefaultConfig config = new DefaultConfig(providerName, entityID, acsURL, logoutResponseBinding, idpAuthnURL, idpEntityID,
             idpLogoutURL, slsURL, supportSingleLogout, enableMetadataService, logoutResponseTemplate, autoLoginEnabled,
             allowUnsolicitedResponses, sessionIndexAutoLoginEnabled);
-        DEFAULT_CONFIG_REFERENCE.set(config);
         return config;
     }
 
-    private static Binding checkBinding(ConfigurationService configService, String property) throws OXException {
+    private static Binding checkBinding(LeanConfigurationService configService, Property property) throws OXException {
         String bindingName = checkProperty(configService, property);
         if ("http-redirect".equals(bindingName)) {
             return Binding.HTTP_REDIRECT;
@@ -138,10 +120,10 @@ public class DefaultConfig implements SAMLConfig {
         throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(property + " = " + bindingName);
     }
 
-    private static String checkProperty(ConfigurationService configService, String name) throws OXException {
-        String property = configService.getProperty(name);
-        if (property == null) {
-            throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(name);
+    private static String checkProperty(LeanConfigurationService configService, Property prop) throws OXException {
+        String property = configService.getProperty(prop);
+        if (Strings.isEmpty(property)) {
+            throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(prop);
         }
 
         return property;
@@ -166,6 +148,21 @@ public class DefaultConfig implements SAMLConfig {
 
     /**
      * Initializes a new {@link DefaultConfig}.
+     *
+     * @param providerName
+     * @param entityID
+     * @param acsURL
+     * @param logoutResponseBinding
+     * @param idpAuthnURL
+     * @param idpEntityID
+     * @param idpLogoutURL
+     * @param slsURL
+     * @param supportSingleLogout
+     * @param enableMetadataService
+     * @param logoutResponseTemplate
+     * @param autoLoginEnabled
+     * @param allowUnsolicitedResponses
+     * @param sessionIndexAutoLoginEnabled
      */
     private DefaultConfig(String providerName, String entityID, String acsURL, Binding logoutResponseBinding, String idpAuthnURL,
             String idpEntityID, String idpLogoutURL, String slsURL, boolean supportSingleLogout, boolean enableMetadataService,

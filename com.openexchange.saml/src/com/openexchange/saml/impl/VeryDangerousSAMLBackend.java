@@ -60,6 +60,7 @@ import org.opensaml.saml.saml2.core.LogoutRequest;
 import org.opensaml.saml.saml2.core.LogoutResponse;
 import org.opensaml.saml.saml2.core.Response;
 import org.opensaml.security.credential.Credential;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.saml.SAMLConfig;
@@ -90,15 +91,21 @@ public class VeryDangerousSAMLBackend extends AbstractSAMLBackend {
 
     private final ContextService contextService;
 
+    private DefaultConfig defaultConfig;
+
     /**
      * Initializes a new {@link VeryDangerousSAMLBackend}.
+     *
      * @param userService
      * @param contextService
+     * @param config The {@link LeanConfigurationService} to use
+     * @throws OXException
      */
-    public VeryDangerousSAMLBackend(UserService userService, ContextService contextService) {
+    public VeryDangerousSAMLBackend(UserService userService, ContextService contextService, LeanConfigurationService config) throws OXException {
         super();
         this.userService = userService;
         this.contextService = contextService;
+        this.defaultConfig = DefaultConfig.init(config);
     }
 
     @Override
@@ -198,6 +205,11 @@ public class VeryDangerousSAMLBackend extends AbstractSAMLBackend {
     @Override
     protected void doFinishLogout(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws IOException {
         httpResponse.sendRedirect("https://www.google.com");
+    }
+
+    @Override
+    public SAMLConfig getConfig() {
+        return defaultConfig;
     }
 
 }

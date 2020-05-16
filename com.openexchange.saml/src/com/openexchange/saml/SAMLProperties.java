@@ -49,6 +49,7 @@
 
 package com.openexchange.saml;
 
+import com.openexchange.config.lean.Property;
 
 /**
  * Contains the keys of <code>saml.properties</code>.
@@ -56,81 +57,105 @@ package com.openexchange.saml;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
-public class SAMLProperties {
-
+public enum SAMLProperties implements Property {
     /**
      * Toggle to enable/disable the feature as a whole
      */
-    public static final String ENABLED = "com.openexchange.saml.enabled";
-
+    ENABLED("enabled", Boolean.FALSE),
     /**
      * The binding via which logout responses are sent.
      */
-    public static final String LOGOUT_RESPONSE_BINDING = "com.openexchange.saml.logoutResponseBinding";
-
+    LOGOUT_RESPONSE_BINDING("logoutResponseBinding", "http-redirect"),
     /**
      * The URL of the assertion consumer service.
      */
-    public static final String ACS_URL = "com.openexchange.saml.acsURL";
-
+    ACS_URL("acsURL"),
     /**
      * Whether single logout is supported.
      */
-    public static final String ENABLE_SINGLE_LOGOUT = "com.openexchange.saml.enableSingleLogout";
-
+    ENABLE_SINGLE_LOGOUT("enableSingleLogout", Boolean.FALSE),
     /**
      * The URL of the single logout service.
      */
-    public static final String SLS_URL = "com.openexchange.saml.slsURL";
-
+    SLS_URL("slsURL"),
     /**
      * The unique entity ID of the service provider.
      */
-    public static final String ENTITY_ID = "com.openexchange.saml.entityID";
-
+    ENTITY_ID("entityID"),
     /**
      * The human-readable name of the service provider.
      */
-    public static final String PROVIDER_NAME = "com.openexchange.saml.providerName";
-
+    PROVIDER_NAME("providerName"),
     /**
      * The unique entity ID of the identity provider.
      */
-    public static final String IDP_ENTITY_ID = "com.openexchange.saml.idpEntityID";
-
+    IDP_ENTITY_ID("idpEntityID"),
     /**
      * The URL of the identity provider where authentication requests are redirected to.
      */
-    public static final String IDP_LOGIN_URL = "com.openexchange.saml.idpAuthnURL";
-
+    IDP_LOGIN_URL("idpAuthnURL"),
     /**
      * The URL of the identity provider where logout responses are redirected/posted to.
      */
-    public static final String IDP_LOGOUT_URL = "com.openexchange.saml.idpLogoutURL";
-
+    IDP_LOGOUT_URL("idpLogoutURL"),
     /**
      * Whether the metadata service shall be enabled.
      */
-    public static final String ENABLE_METADATA_SERVICE = "com.openexchange.saml.enableMetadataService";
-
+    ENABLE_METADATA_SERVICE("enableMetadataService", Boolean.FALSE),
     /**
      * The HTML template to use when logout responses are sent to the IdP via HTTP POST.
      */
-    public static final String LOGOUT_RESPONSE_POST_TEMPLATE = "com.openexchange.saml.logoutResponseTemplate";
-
+    LOGOUT_RESPONSE_POST_TEMPLATE("logoutResponseTemplate", "saml.logout.response.html.tmpl"),
     /**
      * Whether SAML-specific auto-login is enabled.
      */
-    public static final String ENABLE_AUTO_LOGIN = "com.openexchange.saml.enableAutoLogin";
-
+    ENABLE_AUTO_LOGIN("enableAutoLogin", Boolean.FALSE),
     /**
      * Whether SAML unsolicited responses are enabled.
      */
-    public static final String ALLOW_UNSOLICITED_RESPONSES = "com.openexchange.saml.allowUnsolicitedResponses";
-
+    ALLOW_UNSOLICITED_RESPONSES("allowUnsolicitedResponses", Boolean.TRUE),
     /**
      * Whether SAML-specific auto-login is enabled, that uses the SessionIndex of the AuthnResponse.
      */
-    public static final String ENABLE_SESSION_INDEX_AUTO_LOGIN = "com.openexchange.saml.enableSessionIndexAutoLogin";
+    ENABLE_SESSION_INDEX_AUTO_LOGIN("enableSessionIndexAutoLogin", Boolean.FALSE),
+    /**
+     * Starts a very dangerous debug backend
+     */
+    DEBUG_BACKEND("startVeryDangerousDebugBackend", Boolean.FALSE);
+
+    private static final String PREFIX = "com.openexchange.saml.";
+
+    private Object defValue;
+    private String fqn;
+
+    /**
+     * Initializes a new {@link SAMLProperties} with an empty default value.
+     *
+     * @param name The name
+     */
+    private SAMLProperties(String name){
+        this(name, null);
+    }
+
+    /**
+     * Initializes a new {@link SAMLProperties}.
+     *
+     * @param name The name
+     * @param defValue The default value
+     */
+    private SAMLProperties(String name, Object defValue){
+        this.fqn = PREFIX + name;
+        this.defValue = defValue;
+    }
+
+    @Override
+    public String getFQPropertyName() {
+        return fqn;
+    }
+
+    @Override
+    public Object getDefaultValue() {
+        return defValue;
+    }
 
 }

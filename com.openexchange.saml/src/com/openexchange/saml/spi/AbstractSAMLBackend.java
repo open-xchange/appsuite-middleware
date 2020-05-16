@@ -52,7 +52,6 @@ package com.openexchange.saml.spi;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
-import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.bouncycastle.util.encoders.Base64;
@@ -70,7 +69,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.saml.SAMLConfig;
 import com.openexchange.saml.SAMLExceptionCode;
-import com.openexchange.saml.impl.DefaultConfig;
 import com.openexchange.saml.state.AuthnRequestInfo;
 import com.openexchange.saml.state.DefaultAuthnRequestInfo;
 import com.openexchange.saml.state.StateManagement;
@@ -254,12 +252,6 @@ public abstract class AbstractSAMLBackend implements SAMLBackend {
             // Whatever unexpected uncaught exception
             throw SAMLExceptionCode.INVALID_REQUEST.create(e, "Parsing the 'RelayState' parameter failed");
         }
-    }
-
-    @Override
-    public SAMLConfig getConfig() {
-        Optional<DefaultConfig> optionalDefaultConfig = DefaultConfig.getDefaultConfig();
-        return optionalDefaultConfig.orElseThrow(() -> new IllegalStateException("Default configuration not yet initialized"));
     }
 
     @Override

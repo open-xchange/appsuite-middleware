@@ -4,6 +4,24 @@ local singlestat = grafana.singlestat;
 local graphPanel = grafana.graphPanel;
 local row = grafana.row;
 local prometheus = grafana.prometheus;
+local template = grafana.template;
+
+local serviceName = 'service';
+
+local templates = [
+  {
+    name: serviceName,
+    label: 'Service',
+    query: 'label_values(' + serviceName + ')',
+    sort: 1,
+  },
+  {
+    name: 'instance',
+    label: 'Instance',
+    query: 'label_values(up{job=~"$job",service=~"$' + serviceName + '"}, instance)',
+    sort: 1,
+  },
+];
 
 local memoryHeapUsage = graphPanel.new(
   title='Heap',
@@ -13,22 +31,22 @@ local memoryHeapUsage = graphPanel.new(
   legend_max=true,
   legend_current=true,
   format='decbytes',
-  min='0'
-).addTarget(
-  prometheus.target(
-    'jvm_memory_bytes_used{instance=~"$instance", area="heap"}',
-    legendFormat='Used',
-  )
-).addTarget(
-  prometheus.target(
-    'jvm_memory_bytes_committed{instance=~"$instance", area="heap"}',
-    legendFormat='Committed',
-  )
-).addTarget(
-  prometheus.target(
-    'jvm_memory_bytes_max{instance=~"$instance", area="heap"}',
-    legendFormat='Max',
-  )
+  min='0',
+).addTargets(
+  [
+    prometheus.target(
+      'jvm_memory_bytes_used{instance=~"$instance", area="heap"}',
+      legendFormat='Used',
+    ),
+    prometheus.target(
+      'jvm_memory_bytes_committed{instance=~"$instance", area="heap"}',
+      legendFormat='Committed',
+    ),
+    prometheus.target(
+      'jvm_memory_bytes_max{instance=~"$instance", area="heap"}',
+      legendFormat='Max',
+    ),
+  ]
 );
 
 local memoryNonHeapUsage = graphPanel.new(
@@ -39,22 +57,22 @@ local memoryNonHeapUsage = graphPanel.new(
   legend_max=true,
   legend_current=true,
   format='decbytes',
-  min='0'
-).addTarget(
-  prometheus.target(
-    'jvm_memory_bytes_used{instance=~"$instance", area="nonheap"}',
-    legendFormat='Used',
-  )
-).addTarget(
-  prometheus.target(
-    'jvm_memory_bytes_committed{instance=~"$instance", area="nonheap"}',
-    legendFormat='Committed',
-  )
-).addTarget(
-  prometheus.target(
-    'jvm_memory_bytes_max{instance=~"$instance", area="nonheap"}',
-    legendFormat='Max',
-  )
+  min='0',
+).addTargets(
+  [
+    prometheus.target(
+      'jvm_memory_bytes_used{instance=~"$instance", area="nonheap"}',
+      legendFormat='Used',
+    ),
+    prometheus.target(
+      'jvm_memory_bytes_committed{instance=~"$instance", area="nonheap"}',
+      legendFormat='Committed',
+    ),
+    prometheus.target(
+      'jvm_memory_bytes_max{instance=~"$instance", area="nonheap"}',
+      legendFormat='Max',
+    ),
+  ]
 );
 
 local memoryPoolOldNewGen = graphPanel.new(
@@ -65,17 +83,18 @@ local memoryPoolOldNewGen = graphPanel.new(
   legend_max=true,
   legend_current=true,
   format='decbytes',
-  min='0'
-).addTarget(
-  prometheus.target(
-    'jvm_memory_pool_bytes_used{instance=~"$instance", pool="CMS Old Gen"}',
-    legendFormat='Old-Gen',
-  )
-).addTarget(
-  prometheus.target(
-    'jvm_memory_pool_bytes_used{instance=~"$instance", pool="Par Eden Space"}',
-    legendFormat='New-Gen',
-  )
+  min='0',
+).addTargets(
+  [
+    prometheus.target(
+      'jvm_memory_pool_bytes_used{instance=~"$instance", pool="CMS Old Gen"}',
+      legendFormat='Old-Gen',
+    ),
+    prometheus.target(
+      'jvm_memory_pool_bytes_used{instance=~"$instance", pool="Par Eden Space"}',
+      legendFormat='New-Gen',
+    ),
+  ]
 );
 
 local memoryPools = graphPanel.new(
@@ -86,7 +105,7 @@ local memoryPools = graphPanel.new(
   legend_max=true,
   legend_current=true,
   format='decbytes',
-  min='0'
+  min='0',
 ).addTarget(
   prometheus.target(
     'jvm_memory_pool_bytes_used{instance=~"$instance"}',
@@ -99,7 +118,7 @@ local overviewThreads = singlestat.new(
   description='Current thread count of a JVM.',
   datasource=grafana.default.datasource,
   valueName='current',
-  sparklineShow=true
+  sparklineShow=true,
 ).addTarget(
   prometheus.target(
     'jvm_threads_current{instance=~"$instance"}'
@@ -111,7 +130,7 @@ local overviewClassesLoaded = singlestat.new(
   description='The number of classes that are currently loaded in the JVM.',
   datasource=grafana.default.datasource,
   valueName='current',
-  sparklineShow=true
+  sparklineShow=true,
 ).addTarget(
   prometheus.target(
     'jvm_classes_loaded{instance=~"$instance"}'
@@ -123,7 +142,7 @@ local gcDuration = graphPanel.new(
   description='Used bytes of a given JVM memory area.',
   datasource=grafana.default.datasource,
   nullPointMode='null as zero',
-  format='s'
+  format='s',
 ).addTarget(
   prometheus.target(
     'rate(jvm_gc_collection_seconds_sum{instance=~"$instance"}[$interval])/rate(jvm_gc_collection_seconds_count{instance=~"$instance"}[$interval])',
@@ -137,7 +156,7 @@ local gcDurationCount = graphPanel.new(
   datasource=grafana.default.datasource,
   nullPointMode='null as zero',
   decimals=2,
-  format='ops'
+  format='ops',
 ).addTarget(
   prometheus.target(
     'rate(jvm_gc_collection_seconds_count{instance=~"$instance"}[$interval])',
@@ -149,6 +168,21 @@ grafana.newDashboard(
   title='JVM',
   tags=['Java'],
   metric='jvm_info'
+).addTemplates(
+  [
+    template.new(
+      name=obj.name,
+      label=obj.label,
+      query=obj.query,
+      datasource=grafana.default.datasource,
+      hide=if std.objectHas(obj, 'hide') then obj.hide else '',
+      includeAll=if std.objectHas(obj, 'includeAll') then obj.includeAll else false,
+      sort=if std.objectHas(obj, 'sort') then obj.sort else 0,
+      regex=if std.objectHas(obj, 'regex') then obj.regex else '',
+      refresh='load',
+    )
+    for obj in templates
+  ]
 ).addPanels(
   [
     row.new(

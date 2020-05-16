@@ -68,6 +68,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.saml.SAMLConfig;
+import com.openexchange.saml.impl.DefaultConfig;
 import com.openexchange.saml.spi.AbstractSAMLBackend;
 import com.openexchange.saml.spi.AuthenticationInfo;
 import com.openexchange.saml.spi.CredentialProvider;
@@ -103,6 +104,7 @@ public class UCSSamlBackend extends AbstractSAMLBackend {
     private final UCSSamlConfiguration uCSSamlConfiguration;
     private final UserService userService;
     private final ContextService contextService;
+    private final DefaultConfig defaultConfig;
 
     /**
      * Default constructor.
@@ -111,14 +113,16 @@ public class UCSSamlBackend extends AbstractSAMLBackend {
      * @param uCSSamlConfiguration
      *
      * @param configService The service to use
+     * @throws OXException
      */
-    public UCSSamlBackend(UCSLookup ucsLookup, LeanConfigurationService leanConfig, UserService userService, ContextService contextService, UCSSamlConfiguration uCSSamlConfiguration) {
+    public UCSSamlBackend(UCSLookup ucsLookup, LeanConfigurationService leanConfig, UserService userService, ContextService contextService, UCSSamlConfiguration uCSSamlConfiguration) throws OXException {
         super();
         this.ucsLookup = ucsLookup;
         this.leanConfig = leanConfig;
         this.userService = userService;
         this.contextService = contextService;
         this.uCSSamlConfiguration = uCSSamlConfiguration;
+        this.defaultConfig = DefaultConfig.init(leanConfig);
     }
 
     private UCSSamlExceptionHandler getInternalExceptionHandler() {
@@ -201,6 +205,11 @@ public class UCSSamlBackend extends AbstractSAMLBackend {
     @Override
     protected void doFinishLogout(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws IOException {
         httpResponse.sendRedirect(leanConfig.getProperty(UCSSamlProperty.logoutRedirectUrl));
+    }
+
+    @Override
+    public SAMLConfig getConfig() {
+        return defaultConfig;
     }
 
 }

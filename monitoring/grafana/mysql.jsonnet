@@ -3,6 +3,7 @@ local grafana = (import 'grafonnet/grafana.libsonnet')
 local graphPanel = grafana.graphPanel;
 local prometheus = grafana.prometheus;
 local singlestat = grafana.singlestat;
+local template = grafana.template;
 local row = grafana.row;
 
 local connectionRowConnections = graphPanel.new(
@@ -707,6 +708,15 @@ grafana.newDashboard(
   title='MySQL',
   tags=['MySQL', 'MariaDB'],
   metric='mysql_up'
+).addTemplate(
+  template.new(
+    name='instance',
+    label='Instance',
+    datasource=grafana.default.datasource,
+    query='label_values(up{job=~"$job"}, instance)',
+    refresh='time',
+    sort=1,
+  ),
 ).addPanels(
   [
     row.new(
