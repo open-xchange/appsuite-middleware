@@ -49,57 +49,24 @@
 
 package com.openexchange.imap.storecache;
 
-import javax.mail.MessagingException;
-import com.openexchange.imap.IMAPAccess;
-import com.openexchange.session.Session;
-import com.sun.mail.imap.IMAPStore;
 
 /**
- * {@link NonCachingIMAPStoreContainer} - The non-caching {@link IMAPStoreContainer}.
+ * {@link IMAPStoreContainerInvalidException} - Special exception thrown when
+ * {@link IMAPStoreContainer#getStore(javax.mail.Session, String, String, com.openexchange.session.Session) getStore()} method is invoked,
+ * but {@code IMAPStoreContainer} instance has been invalidated.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.4
  */
-public class NonCachingIMAPStoreContainer extends AbstractIMAPStoreContainer {
+public class IMAPStoreContainerInvalidException extends Exception {
 
-    protected final String server;
-    protected final int port;
+    private static final long serialVersionUID = -8486026072974077164L;
 
     /**
-     * Initializes a new {@link NonCachingIMAPStoreContainer}.
+     * Initializes a new {@link IMAPStoreContainerInvalidException}.
      */
-    public NonCachingIMAPStoreContainer(int accountId, Session session, String server, int port, boolean propagateClientIp) {
-        super(accountId, session, propagateClientIp);
-        this.port = port;
-        this.server = server;
-    }
-
-    @Override
-    public IMAPStore getStore(javax.mail.Session imapSession, String login, String pw, Session session) throws MessagingException, InterruptedException {
-        return newStore(server, port, login, pw, imapSession, session);
-    }
-
-    @Override
-    public void backStore(final IMAPStore imapStore) {
-        backStoreNoValidityCheck(imapStore);
-    }
-
-    protected void backStoreNoValidityCheck(final IMAPStore imapStore) {
-        IMAPAccess.closeSafely(imapStore);
-    }
-
-    @Override
-    public void closeElapsed(final long stamp) {
-        // Nothing to do
-    }
-
-    @Override
-    public void clear() {
-        // Nothing to do
-    }
-
-    @Override
-    public boolean hasElapsed(long millis) {
-        return false;
+    public IMAPStoreContainerInvalidException() {
+        super("IMAP store container is invalid");
     }
 
 }
