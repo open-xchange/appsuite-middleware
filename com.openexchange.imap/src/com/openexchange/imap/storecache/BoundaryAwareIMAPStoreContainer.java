@@ -62,13 +62,15 @@ import com.sun.mail.util.PropUtil;
  */
 public final class BoundaryAwareIMAPStoreContainer extends UnboundedIMAPStoreContainer {
 
+    private final int maxRetryCount;
     private volatile Limiter limiter;
 
     /**
      * Initializes a new {@link BoundaryAwareIMAPStoreContainer}.
      */
-    public BoundaryAwareIMAPStoreContainer(int accountId, Session session, String server, int port, boolean propagateClientIp, boolean checkConnectivityIfPolled) {
-        super(accountId, session, server, port, propagateClientIp, checkConnectivityIfPolled);
+    public BoundaryAwareIMAPStoreContainer(int accountId, Session session, String server, int port, boolean propagateClientIp, boolean checkConnectivityIfPolled, IMAPStoreCache.Key key) {
+        super(accountId, session, server, port, propagateClientIp, checkConnectivityIfPolled, key);
+        maxRetryCount = 10;
     }
 
     /**
@@ -91,7 +93,7 @@ public final class BoundaryAwareIMAPStoreContainer extends UnboundedIMAPStoreCon
     }
 
     @Override
-    public IMAPStore getStore(javax.mail.Session imapSession, String login, String pw, Session session) throws MessagingException, InterruptedException {
+    public IMAPStore getStore(javax.mail.Session imapSession, String login, String pw, Session session) throws IMAPStoreContainerInvalidException, MessagingException, InterruptedException {
         final int maxNumAuthenticated = PropUtil.getIntProperty(imapSession.getProperties(), "mail.imap.maxNumAuthenticated", 0);
         if (maxNumAuthenticated <= 0) {
             return super.getStore(imapSession, login, pw, session);
@@ -105,19 +107,20 @@ public final class BoundaryAwareIMAPStoreContainer extends UnboundedIMAPStoreCon
         }
 
         // Await until permit is available
+        int count = maxRetryCount;
         synchronized (limiter) {
-            int count = maxRetryCount;
             while (count-- > 0 && !limiter.acquire()) {
                 LOG.debug("BoundaryAwareIMAPStoreContainer.getStore(): W A I T I N G -- {}", limiter);
                 limiter.wait(2000);
             }
-            if (count <= 0) {
-                // Timed out -- So what...?
-                LOG.debug("BoundaryAwareIMAPStoreContainer.getStore(): T I M E D   O U T -- {}", limiter);
-                // /final String message = "Max. number of connections exceeded. Try again later.";
-                // /throw new MessagingException(message, new com.sun.mail.iap.ConnectQuotaExceededException(message));
-            }
         }
+        if (count <= 0) {
+            // Timed out -- So what...?
+            LOG.debug("BoundaryAwareIMAPStoreContainer.getStore(): T I M E D   O U T -- {}", limiter);
+            // /final String message = "Max. number of connections exceeded. Try again later.";
+            // /throw new MessagingException(message, new com.sun.mail.iap.ConnectQuotaExceededException(message));
+        }
+
         LOG.debug("BoundaryAwareIMAPStoreContainer.getStore(): Acquired -- {}", limiter);
         return super.getStore(imapSession, login, pw, session);
     }
