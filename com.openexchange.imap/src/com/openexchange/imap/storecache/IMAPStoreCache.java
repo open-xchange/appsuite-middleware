@@ -56,6 +56,7 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.mail.MessagingException;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.config.ConfigurationService;
@@ -64,11 +65,9 @@ import com.openexchange.config.Reloadable;
 import com.openexchange.config.Reloadables;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPAccess;
-import com.openexchange.imap.IMAPProvider;
 import com.openexchange.imap.config.IMAPReloadable;
 import com.openexchange.imap.services.Services;
 import com.openexchange.mail.MailExceptionCode;
-import com.openexchange.mail.Protocol;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.session.Session;
 import com.openexchange.session.UserAndContext;
@@ -116,13 +115,12 @@ public final class IMAPStoreCache {
             return;
         }
         final ConfigurationService service = Services.getService(ConfigurationService.class);
-        final boolean checkConnected = null == service ? false : service.getBoolProperty("com.openexchange.imap.checkConnected", false);
         Container container = null == service ? Container.getDefault() : Container.containerFor(service.getProperty("com.openexchange.imap.storeContainerType", Container.getDefault().getId()));
         if (Container.UNBOUNDED.equals(container) && (null != service && service.getIntProperty("com.openexchange.imap.maxNumConnections", 0) > 0)) {
             LOG.warn("Property \"com.openexchange.imap.storeContainerType\" is set to \"unbounded\", but \"com.openexchange.imap.maxNumConnections\" is greater than zero. Using default container \"{}\" instead.", Container.getDefault().getId());
             container = Container.getDefault();
         }
-        tmp = new IMAPStoreCache(checkConnected, container);
+        tmp = new IMAPStoreCache(container);
         tmp.reinit(true);
         instance = tmp;
     }
@@ -160,7 +158,7 @@ public final class IMAPStoreCache {
     }
 
     /*-
-     * -------------------------------------- Runnable stuff --------------------------------------
+     * -------------------------------------------------------------- Runnable stuff -------------------------------------------------------
      */
 
     private static final class ContainerCloseElapsedRunnable implements Runnable {
@@ -211,15 +209,13 @@ public final class IMAPStoreCache {
     }
 
     /*-
-     * -------------------------------------- Member stuff --------------------------------------
+     * ---------------------------------------------------------- Member stuff -------------------------------------------------------------
      */
 
     private final Container containerType;
-    private final Protocol protocol;
     private final ConcurrentMap<Key, IMAPStoreContainer> map;
     private final ConcurrentMap<UserAndContext, Queue<Key>> keys;
-    private final boolean checkConnected;
-    private volatile ScheduledTimerTask timerTask;
+    private final AtomicReference<ScheduledTimerTask> timerTaskReference;
     private final RefusedExecutionBehavior<Object> behavior;
 
     /**
@@ -227,14 +223,13 @@ public final class IMAPStoreCache {
      *
      * @param container
      */
-    private IMAPStoreCache(boolean checkConnected, Container container) {
+    private IMAPStoreCache(Container container) {
         super();
         containerType = null == container ? Container.getDefault() : container;
         behavior = CallerRunsBehavior.getInstance();
-        this.checkConnected = checkConnected;
-        protocol = IMAPProvider.PROTOCOL_IMAP;
         map = new NonBlockingHashMap<Key, IMAPStoreContainer>();
         keys = new NonBlockingHashMap<UserAndContext, Queue<Key>>();
+        timerTaskReference = new AtomicReference<>();
     }
 
     /**
@@ -249,25 +244,22 @@ public final class IMAPStoreCache {
     void reinit(boolean withInitialDelay) {
         TimerService timer = Services.getService(TimerService.class);
 
-        ScheduledTimerTask timerTask = this.timerTask;
+        ScheduledTimerTask timerTask = timerTaskReference.getAndSet(null);
         if (null != timerTask) {
-            this.timerTask = null;
             timerTask.cancel();
             timer.purge();
         }
 
-        Runnable task = new CloseElapsedRunnable(this);
         int delayMillis = SHRINKER_MILLIS.get();
-        this.timerTask = timer.scheduleWithFixedDelay(task, withInitialDelay ? delayMillis : 0L, delayMillis);
+        timerTaskReference.set(timer.scheduleWithFixedDelay(new CloseElapsedRunnable(this), withInitialDelay ? delayMillis : 0L, delayMillis));
     }
 
     private void shutDown() {
         List<IMAPStoreContainer> containers = new ArrayList<IMAPStoreContainer>(this.map.values());
         this.map.clear();
 
-        ScheduledTimerTask timerTask = this.timerTask;
+        ScheduledTimerTask timerTask = timerTaskReference.getAndSet(null);
         if (null != timerTask) {
-            this.timerTask = null;
             timerTask.cancel();
         }
 
@@ -317,7 +309,7 @@ public final class IMAPStoreCache {
     void closeElapsed() {
         final Iterator<IMAPStoreContainer> containers = map.values().iterator();
         if (!containers.hasNext()) {
-            // Nothing cached
+            // Cache is empty
             return;
         }
 
@@ -368,7 +360,7 @@ public final class IMAPStoreCache {
                 return container.getStore(imapSession, login, pw, session);
             } catch (IMAPStoreContainerInvalidException e) {
                 // Try again by re-fetching appropriate container
-                LOG.debug("Encountered invalid IMAP store container. Trying again.", e);
+                LOG.debug("Encountered invalidated IMAP store container. Trying again.", e);
             } catch (InterruptedException e) {
                 // Should not occur
                 Thread.currentThread().interrupt();
@@ -388,26 +380,23 @@ public final class IMAPStoreCache {
         Key key = newKey(accountId, server, port, login, session.getUserId(), session.getContextId());
 
         // Fetch existing or create a new one
-        IMAPStoreContainer container = null;
-        while (null == container) {
-            container = map.get(key);
+        IMAPStoreContainer container = map.get(key);
+        if (null == container) {
+            IMAPStoreContainer newContainer = newContainer(server, port, accountId, session, propagateClientIp, checkConnectivityIfPolled, key);
+            container = map.putIfAbsent(key, newContainer);
             if (null == container) {
-                final IMAPStoreContainer newContainer = newContainer(server, port, accountId, session, propagateClientIp, checkConnectivityIfPolled, key);
-                container = map.putIfAbsent(key, newContainer);
-                if (null == container) {
-                    container = newContainer;
-                    // Remember key
-                    UserAndContext uk = UserAndContext.newInstance(session);
-                    Queue<Key> keyQueue = keys.get(uk);
+                container = newContainer;
+                // Remember key
+                UserAndContext uk = UserAndContext.newInstance(session);
+                Queue<Key> keyQueue = keys.get(uk);
+                if (null == keyQueue) {
+                    Queue<Key> nq = new LinkedBlockingQueue<Key>();
+                    keyQueue = keys.putIfAbsent(uk, nq);
                     if (null == keyQueue) {
-                        Queue<Key> nq = new LinkedBlockingQueue<Key>();
-                        keyQueue = keys.putIfAbsent(uk, nq);
-                        if (null == keyQueue) {
-                            keyQueue = nq;
-                        }
+                        keyQueue = nq;
                     }
-                    keyQueue.offer(key);
                 }
+                keyQueue.offer(key);
             }
         }
         return container;
