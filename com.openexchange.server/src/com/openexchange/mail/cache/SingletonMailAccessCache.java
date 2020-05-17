@@ -272,9 +272,9 @@ public final class SingletonMailAccessCache implements IMailAccessCache {
 
             int prime = 31;
             int result = 1;
-            result = prime * result + accountId;
             result = prime * result + cid;
             result = prime * result + user;
+            result = prime * result + accountId;
             hash = result;
         }
 
@@ -295,13 +295,13 @@ public final class SingletonMailAccessCache implements IMailAccessCache {
                 return false;
             }
             final Key other = (Key) obj;
-            if (accountId != other.accountId) {
-                return false;
-            }
             if (cid != other.cid) {
                 return false;
             }
             if (user != other.user) {
+                return false;
+            }
+            if (accountId != other.accountId) {
                 return false;
             }
             return true;

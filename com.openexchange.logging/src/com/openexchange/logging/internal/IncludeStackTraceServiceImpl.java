@@ -53,6 +53,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.ajax.response.IncludeStackTraceService;
 import com.openexchange.exception.OXException;
+import com.openexchange.session.UserAndContext;
 
 
 /**
@@ -63,7 +64,7 @@ import com.openexchange.exception.OXException;
 public final class IncludeStackTraceServiceImpl implements IncludeStackTraceService {
 
     /** The map for tuples */
-    private final ConcurrentMap<Key, Boolean> map;
+    private final ConcurrentMap<UserAndContext, Boolean> map;
 
     /** The non-empty flag */
     private volatile boolean nonEmpty;
@@ -73,13 +74,13 @@ public final class IncludeStackTraceServiceImpl implements IncludeStackTraceServ
      */
     public IncludeStackTraceServiceImpl() {
         super();
-        map = new ConcurrentHashMap<IncludeStackTraceServiceImpl.Key, Boolean>(32, 0.9f, 1);
+        map = new ConcurrentHashMap<UserAndContext, Boolean>(32, 0.9f, 1);
         nonEmpty = false;
     }
 
     @Override
     public boolean includeStackTraceOnError(int userId, int contextId) throws OXException {
-        return nonEmpty && map.containsKey(new Key(userId, contextId));
+        return nonEmpty && map.containsKey(UserAndContext.newInstance(userId, contextId));
     }
 
     @Override
@@ -97,54 +98,11 @@ public final class IncludeStackTraceServiceImpl implements IncludeStackTraceServ
     public void addTuple(int userId, int contextId, boolean enable) {
         if (enable) {
             nonEmpty = true;
-            map.put(new Key(userId, contextId), Boolean.TRUE);
+            map.put(UserAndContext.newInstance(userId, contextId), Boolean.TRUE);
         } else {
-            map.remove(new Key(userId, contextId));
+            map.remove(UserAndContext.newInstance(userId, contextId));
             nonEmpty = !map.isEmpty();
         }
     }
-
-    // -------------------------------------------------------------------------------- //
-
-    private static final class Key {
-
-        private final int contextId;
-        private final int userId;
-        private final int hash;
-
-        Key(int userId, int contextId) {
-            super();
-            this.userId = userId;
-            this.contextId = contextId;
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + contextId;
-            result = prime * result + userId;
-            hash = result;
-        }
-
-        @Override
-        public int hashCode() {
-            return hash;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (!(obj instanceof Key)) {
-                return false;
-            }
-            Key other = (Key) obj;
-            if (contextId != other.contextId) {
-                return false;
-            }
-            if (userId != other.userId) {
-                return false;
-            }
-            return true;
-        }
-    } // End of class Key
 
 }

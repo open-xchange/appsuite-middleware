@@ -90,6 +90,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.objectusecount.ObjectUseCountService;
 import com.openexchange.osgi.Tools;
 import com.openexchange.principalusecount.PrincipalUseCountService;
+import com.openexchange.session.UserAndContext;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.notification.ShareNotificationService;
@@ -104,57 +105,9 @@ import com.openexchange.userconf.UserPermissionService;
  */
 public final class FolderStorageActivator implements BundleActivator {
 
-    private static final class Key {
-
-        public static Key valueOf(final int userId, final int cid) {
-            return new Key(userId, cid);
-        }
-
-        private final int userId;
-
-        private final int cid;
-
-        private final int hash;
-
-        public Key(final int userId, final int cid) {
-            super();
-            this.userId = userId;
-            this.cid = cid;
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + cid;
-            result = prime * result + userId;
-            hash = result;
-        }
-
-        @Override
-        public int hashCode() {
-            return hash;
-        }
-
-        @Override
-        public boolean equals(final Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (!(obj instanceof Key)) {
-                return false;
-            }
-            final Key other = (Key) obj;
-            if (cid != other.cid) {
-                return false;
-            }
-            if (userId != other.userId) {
-                return false;
-            }
-            return true;
-        }
-
-    }
-
     private static final class DisplayNameFolderField implements AdditionalFolderField {
 
-        private final Cache<Key, String> cache;
+        private final Cache<UserAndContext, String> cache;
 
         protected DisplayNameFolderField() {
             super();
@@ -174,7 +127,7 @@ public final class FolderStorageActivator implements BundleActivator {
             }
 
             Context context = session.getContext();
-            Key key = Key.valueOf(createdBy, context.getContextId());
+            UserAndContext key = UserAndContext.newInstance(createdBy, context.getContextId());
             String displayName = cache.getIfPresent(key);
             try {
                 if (null != displayName) {

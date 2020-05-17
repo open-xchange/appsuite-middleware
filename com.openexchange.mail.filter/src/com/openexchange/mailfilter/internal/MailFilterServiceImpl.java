@@ -115,6 +115,7 @@ import com.openexchange.mailfilter.properties.PasswordSource;
 import com.openexchange.metrics.micrometer.binders.CircuitBreakerMetrics;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.UserAndContext;
 import io.micrometer.core.instrument.Metrics;
 import net.jodah.failsafe.CircuitBreaker;
 import net.jodah.failsafe.function.CheckedRunnable;
@@ -144,7 +145,7 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
 
     }
 
-    private static final ConcurrentMap<Key, Object> LOCKS = new ConcurrentHashMap<Key, Object>(256, 0.9f, 1);
+    private static final ConcurrentMap<UserAndContext, Object> LOCKS = new ConcurrentHashMap<UserAndContext, Object>(256, 0.9f, 1);
 
     /**
      * Gets the lock instance for specified session.
@@ -157,7 +158,7 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
             // Any...
             return new Object();
         }
-        Key key = new Key(creds.getUserid(), creds.getContextid());
+        UserAndContext key = UserAndContext.newInstance(creds.getUserid(), creds.getContextid());
         Object lock = LOCKS.get(key);
         if (null == lock) {
             Object newLock = new Object();
@@ -176,7 +177,7 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
      * @param contextId The context identifier
      */
     public static void removeFor(int userId, int contextId) {
-        LOCKS.remove(new Key(userId, contextId));
+        LOCKS.remove(UserAndContext.newInstance(userId, contextId));
     }
 
     // ---------------------------------------------------------------------------------------------------------------- //
@@ -1277,48 +1278,6 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
     }
 
     // ----------------------------------------------------- Helper classes -------------------------------------------------------
-
-    private static final class Key {
-
-        private final int cid;
-        private final int user;
-        private final int hash;
-
-        Key(int user, int cid) {
-            super();
-            this.user = user;
-            this.cid = cid;
-            int prime = 31;
-            int result = 1;
-            result = prime * result + cid;
-            result = prime * result + user;
-            hash = result;
-        }
-
-        @Override
-        public int hashCode() {
-            return hash;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (!(obj instanceof Key)) {
-                return false;
-            }
-            Key other = (Key) obj;
-            if (cid != other.cid) {
-                return false;
-            }
-            if (user != other.user) {
-                return false;
-            }
-            return true;
-        }
-
-    } // End of class Key
 
     private static final class HostAndPort {
 

@@ -426,11 +426,8 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
     private static final class Key {
 
         private final int user;
-
         private final int context;
-
         private final int accountId;
-
         private final int hash;
 
         protected Key(final int accountId, final int user, final int context) {
@@ -444,9 +441,9 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
         private int hashCode0() {
             final int prime = 31;
             int result = 1;
-            result = prime * result + accountId;
             result = prime * result + context;
             result = prime * result + user;
+            result = prime * result + accountId;
             return result;
         }
 
@@ -467,13 +464,13 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
                 return false;
             }
             final Key other = (Key) obj;
-            if (accountId != other.accountId) {
-                return false;
-            }
             if (context != other.context) {
                 return false;
             }
             if (user != other.user) {
+                return false;
+            }
+            if (accountId != other.accountId) {
                 return false;
             }
             return true;

@@ -98,6 +98,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.PutIfAbsent;
 import com.openexchange.session.Session;
 import com.openexchange.session.Sessions;
+import com.openexchange.session.UserAndContext;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.version.VersionService;
 
@@ -122,9 +123,9 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
 
     // --------------------------------------------------------------------------------------------------------------------------------- //
 
-    private static final ConcurrentMap<Key, AcquiredLatch> SYNCHRONIZER = new ConcurrentHashMap<>(256);
+    private static final ConcurrentMap<UserAndContext, AcquiredLatch> SYNCHRONIZER = new ConcurrentHashMap<>(256);
 
-    private static AcquiredLatch acquireFor(Key key) {
+    private static AcquiredLatch acquireFor(UserAndContext key) {
         AcquiredLatch latch = SYNCHRONIZER.get(key);
         if (null == latch) {
             AcquiredLatch newLatch = new AcquiredLatch(Thread.currentThread(), new CountDownLatch(1));
@@ -136,7 +137,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
         return latch;
     }
 
-    private static void releaseFor(Key key) {
+    private static void releaseFor(UserAndContext key) {
         SYNCHRONIZER.remove(key);
     }
 
@@ -908,7 +909,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
             return;
         }
 
-        Key key = new Key(session.getUserId(), session.getContextId());
+        UserAndContext key = UserAndContext.newInstance(session);
         AcquiredLatch acquiredLatch = acquireFor(key);
         CountDownLatch latch = acquiredLatch.latch;
         if (Thread.currentThread() == acquiredLatch.owner) {
@@ -1463,47 +1464,6 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     protected abstract void shutdown() throws OXException;
 
     // -----------------------------------------------------------------------------------------------------------------
-
-    private static final class Key {
-
-        private final int contextId;
-        private final int userId;
-        private final int hash;
-
-        Key(int userId, int contextId) {
-            super();
-            this.userId = userId;
-            this.contextId = contextId;
-
-            int prime = 31;
-            int result = prime * 1 + contextId;
-            result = prime * result + userId;
-            hash = result;
-        }
-
-        @Override
-        public int hashCode() {
-            return hash;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (!(obj instanceof Key)) {
-                return false;
-            }
-            Key other = (Key) obj;
-            if (contextId != other.contextId) {
-                return false;
-            }
-            if (userId != other.userId) {
-                return false;
-            }
-            return true;
-        }
-    }
 
     private static final class AcquiredLatch {
 
