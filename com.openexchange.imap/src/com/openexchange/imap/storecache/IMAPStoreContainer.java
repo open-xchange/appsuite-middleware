@@ -73,12 +73,13 @@ public interface IMAPStoreContainer {
      * @param imapSession The IMAP session
      * @param login The login
      * @param pw The password
-     * @param session The Groupware session
-     * @return The connected IMAP store or <code>null</code> if currently impossible to do so
+     * @param session The Open-Xchange session
+     * @return The connected IMAP store or empty if currently impossible to do so
+     * @throws IMAPStoreContainerInvalidException If this container has already been invalidated
      * @throws MessagingException If returning a connected IMAP store fails
      * @throws InterruptedException If thread is interrupted when possibly waiting for free resources
      */
-    IMAPStore getStore(javax.mail.Session imapSession, String login, String pw, Session session) throws MessagingException, InterruptedException;
+    IMAPStore getStore(javax.mail.Session imapSession, String login, String pw, Session session) throws IMAPStoreContainerInvalidException, MessagingException, InterruptedException;
 
     /**
      * Returns specified IMAP store to container.
@@ -91,9 +92,8 @@ public interface IMAPStoreContainer {
      * Close elapsed {@link IMAPStore} instances.
      *
      * @param stamp The stamp to check against
-     * @param debugBuilder The optional debug builder
      */
-    void closeElapsed(long stamp, StringBuilder debugBuilder);
+    void closeElapsed(long stamp);
 
     /**
      * Orderly clears this container.
@@ -101,17 +101,11 @@ public interface IMAPStoreContainer {
     void clear();
 
     /**
-     * Gets the number of stores currently in-use.
-     *
-     * @return The number of stores currently in-use
-     */
-    int getInUseCount();
-
-    /**
-     * Determines whether the IMAPStoreContainer has elapsed
+     * Determines whether the IMAPStoreContainer has elapsed IMAP store instances.
      *
      * @param millis
-     * @return true if elapsed; false otherwise
+     * @return true if it contains elapsed ones; false otherwise
      */
     boolean hasElapsed(long millis);
+
 }
