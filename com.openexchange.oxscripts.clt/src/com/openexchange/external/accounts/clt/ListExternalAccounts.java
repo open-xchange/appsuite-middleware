@@ -145,7 +145,7 @@ public class ListExternalAccounts extends AbstractExternalAccountCLT {
 
     /**
      * Extracts the optional sorting comparator from the specified option value
-     * 
+     *
      * @param optionValue The option value
      * @return The comparator
      */
@@ -278,7 +278,7 @@ public class ListExternalAccounts extends AbstractExternalAccountCLT {
     /**
      * {@link ExecutorContext}
      */
-    private final class ExecutorContext {
+    private final static class ExecutorContext {
 
         private final int cid;
         private final int uid;
@@ -392,7 +392,7 @@ public class ListExternalAccounts extends AbstractExternalAccountCLT {
          * Compares the two integers and returns <code>-1</code>,
          * <code>0</code> or <code>1</code>, if a is less than, equals
          * to or greater than b respectively.
-         * 
+         *
          *
          * @param a Value a
          * @param b Value b
