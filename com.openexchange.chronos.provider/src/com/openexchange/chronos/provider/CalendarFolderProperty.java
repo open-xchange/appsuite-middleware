@@ -285,17 +285,32 @@ public enum CalendarFolderProperty {
      * @return The property value, or <code>null</code> if not defined or incompatible for the target type
      */
     public static <T> T optPropertyValue(ExtendedProperties extendedProperties, String name, Class<T> clazz) {
-        if (null != extendedProperties) {
-            ExtendedProperty property = extendedProperties.get(name);
-            if (null != property) {
-                try {
-                    return clazz.cast(property.getValue());
-                } catch (ClassCastException e) {
-                    // special handling for boolean strings, ignore, otherwise
-                    if (Boolean.class.equals(clazz) && String.class.isInstance(property.getValue())) {
-                        return clazz.cast(Boolean.valueOf((String) property.getValue()));
-                    }
-                }
+        return null == extendedProperties ? null : optPropertyValue(extendedProperties.get(name), clazz);
+    }
+
+    /**
+     * Optionally gets the value of a specific extended property from the supplied extended properties container.
+     *
+     * @param extendedProperties The extended properties to get the value from
+     * @param name The name of the extended property to get the value from
+     * @param clazz The value's target type
+     * @return The property value, or <code>null</code> if not defined or incompatible for the target type
+     * @throws IllegalArgumentException If given target type is <code>null</code>
+     */
+    public static <T> T optPropertyValue(ExtendedProperty property, Class<T> clazz) {
+        if (null == property) {
+            return null;
+        }
+        if (clazz == null) {
+            throw new IllegalArgumentException("Target type must not be null");
+        }
+
+        try {
+            return clazz.cast(property.getValue());
+        } catch (ClassCastException e) {
+            // Special handling for boolean strings, ignore, otherwise
+            if (Boolean.class.equals(clazz) && String.class.isInstance(property.getValue())) {
+                return clazz.cast(Boolean.valueOf((String) property.getValue()));
             }
         }
         return null;
