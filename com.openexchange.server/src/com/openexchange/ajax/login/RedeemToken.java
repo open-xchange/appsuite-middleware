@@ -50,6 +50,8 @@
 package com.openexchange.ajax.login;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.json.JSONException;
@@ -67,6 +69,7 @@ import com.openexchange.servlet.Constants;
 import com.openexchange.session.Session;
 import com.openexchange.tokenlogin.TokenLoginSecret;
 import com.openexchange.tokenlogin.TokenLoginService;
+import com.openexchange.tools.net.URITools;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.user.User;
 
@@ -172,8 +175,18 @@ public class RedeemToken implements LoginRequestHandler {
                 requestContext.getMetricProvider().recordHTTPStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             }
         } else {
-            StringBuilder sb = new StringBuilder(redirectUrl).append("&session=").append(session.getSessionID());
-            resp.sendRedirect(sb.toString());
+            try {
+                URI uri = new URI(redirectUrl);
+                if (!URITools.DEFAULT_VALIDATOR.apply(uri).booleanValue()) {
+                    throw new IOException("Invalid redirect URL");
+                }
+                StringBuilder sb = new StringBuilder(redirectUrl).append("&session=").append(session.getSessionID());
+                resp.sendRedirect(sb.toString());
+            } catch (URISyntaxException | IOException e) {
+                LOG.info("Illegal redirect URL", e);
+                resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                requestContext.getMetricProvider().recordHTTPStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            }
         }
     }
 

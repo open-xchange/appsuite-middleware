@@ -52,15 +52,19 @@ package com.openexchange.tools.net;
 import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.InetAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.UnknownHostException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import com.google.common.collect.ImmutableSet;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.InetAddresses;
+import com.openexchange.java.Strings;
 
 /**
  * {@link URITools}
@@ -91,6 +95,56 @@ public final class URITools {
         }
         return retval;
     }
+
+    private static final String LOCAL_HOST_NAME;
+    private static final String LOCAL_HOST_ADDRESS;
+
+    static {
+        // Host name initialization
+        String localHostName;
+        String localHostAddress;
+        try {
+            InetAddress localHost = InetAddress.getLocalHost();
+            localHostName = localHost.getCanonicalHostName();
+            localHostAddress = localHost.getHostAddress();
+        } catch (UnknownHostException e) {
+            localHostName = "localhost";
+            localHostAddress = "127.0.0.1";
+        }
+        LOCAL_HOST_NAME = localHostName;
+        LOCAL_HOST_ADDRESS = localHostAddress;
+    }
+
+    private static final Set<String> ALLOWED_PROTOCOLS = ImmutableSet.of("http", "https", "ftp", "ftps");
+    private static final Set<String> DENIED_HOSTS = ImmutableSet.of("localhost", "127.0.0.1", LOCAL_HOST_ADDRESS, LOCAL_HOST_NAME);
+
+    /**
+     * The default URI validator that validates the given URI/URL according to white-listed protocols and blacklisted hosts.
+     *
+     * @param url The URL to validate
+     * @return An optional OXException
+     */
+    public static Function<URI, Boolean> DEFAULT_VALIDATOR = (uri) -> {
+        String protocol = uri.getScheme();
+        if (protocol == null || !ALLOWED_PROTOCOLS.contains(Strings.asciiLowerCase(protocol))) {
+            return Boolean.FALSE;
+        }
+
+        String host = Strings.asciiLowerCase(uri.getHost());
+        if (host == null || DENIED_HOSTS.contains(host)) {
+            return Boolean.FALSE;
+        }
+
+        try {
+            InetAddress inetAddress = InetAddress.getByName(uri.getHost());
+            if (InetAddresses.isInternalAddress(inetAddress)) {
+                return Boolean.FALSE;
+            }
+        } catch (UnknownHostException e) {
+            return Boolean.FALSE;
+        }
+        return Boolean.TRUE;
+    };
 
     private static final Set<Integer> REDIRECT_RESPONSE_CODES = ImmutableSet.of(I(HttpURLConnection.HTTP_MOVED_PERM), I(HttpURLConnection.HTTP_MOVED_TEMP), I(HttpURLConnection.HTTP_SEE_OTHER), I(HttpURLConnection.HTTP_USE_PROXY));
 
