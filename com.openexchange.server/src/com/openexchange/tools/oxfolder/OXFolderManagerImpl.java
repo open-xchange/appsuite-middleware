@@ -2450,12 +2450,11 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         }
         List<OCLPermission> perms = folder.getPermissions();
         if (perms != null) {
-            LeanConfigurationService lean = ServerServiceRegistry.getServize(LeanConfigurationService.class, true);
             int max = i((Integer) MAX_FOLDER_PERMISSIONS.getDefaultValue());
+            LeanConfigurationService lean = ServerServiceRegistry.getServize(LeanConfigurationService.class, true);
             if (lean == null) {
-                LOG.warn("Missing {} service. Falling back to default value of {}.", LeanConfigurationService.class.getSimpleName(), MAX_FOLDER_PERMISSIONS.getFQPropertyName());
+                LOG.warn("Missing {} service. Falling back to default value of {}:{}", LeanConfigurationService.class.getSimpleName(), MAX_FOLDER_PERMISSIONS.getFQPropertyName(), I(max));
             } else {
-
                 max = lean.getIntProperty(user.getId(), ctx.getContextId(), MAX_FOLDER_PERMISSIONS);
             }
             if (max > 0 && perms.size() > max) {
