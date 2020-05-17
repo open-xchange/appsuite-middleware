@@ -519,8 +519,8 @@ public class ResolvePerformer extends AbstractQueryPerformer {
          */
         String objectId = eventId.getObjectID();
         Event attendeeCopy = storage.getEventStorage().loadEvent(objectId, new EventField[] { EventField.UID, EventField.RECURRENCE_ID, EventField.SEQUENCE, EventField.ORGANIZER });
-        if (null != attendeeCopy && false == event.getUid().equals(attendeeCopy.getUid()) || false == matches(event.getRecurrenceId(), attendeeCopy.getRecurrenceId()) ||
-            event.getSequence() != attendeeCopy.getSequence() || false == matches(event.getOrganizer(), attendeeCopy.getOrganizer())) {
+        if (null != attendeeCopy && (false == event.getUid().equals(attendeeCopy.getUid()) || false == matches(event.getRecurrenceId(), attendeeCopy.getRecurrenceId()) ||
+            event.getSequence() != attendeeCopy.getSequence() || false == matches(event.getOrganizer(), attendeeCopy.getOrganizer()))) {
             return null; // different revision of event
         }
         /*
