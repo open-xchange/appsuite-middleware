@@ -134,6 +134,11 @@ public class RedeemToken implements LoginRequestHandler {
         }
         req.getSession().setAttribute(Constants.HTTP_SESSION_ATTR_AUTHENTICATED, Boolean.TRUE);
         TokenLoginSecret tokenLoginSecret = service.getTokenLoginSecret(appSecret);
+        if (tokenLoginSecret == null) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            requestContext.getMetricProvider().recordHTTPStatus(HttpServletResponse.SC_BAD_REQUEST);
+            return;
+        }
         Boolean writePassword = (Boolean) tokenLoginSecret.getParameters().get("accessPassword");
         try {
             Context context = ContextStorage.getInstance().getContext(session.getContextId());
