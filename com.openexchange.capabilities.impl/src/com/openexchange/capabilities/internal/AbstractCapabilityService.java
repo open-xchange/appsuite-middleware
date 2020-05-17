@@ -1328,8 +1328,13 @@ public abstract class AbstractCapabilityService implements CapabilityService, Re
 
     @Override
     public void reloadConfiguration(ConfigurationService configService) {
+        Cache optCache = optCache();
+        if (optCache == null) {
+            return;
+        }
+
         try {
-            optCache().clear();
+            optCache.clear();
         } catch (OXException e) {
             LOG.error("Unable to clear capability cache: {}",e.getMessage(), e);
         }
