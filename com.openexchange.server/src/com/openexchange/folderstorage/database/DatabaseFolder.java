@@ -90,6 +90,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.FolderPathObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.java.Strings;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -387,16 +388,22 @@ public class DatabaseFolder extends AbstractFolder {
 
     @Override
     public UsedForSync getUsedForSync() {
-        if (false == FolderSubscriptionHelper.isSubscribableModule(folderObject.getModule())) {
-            return UsedForSync.DEACTIVATED;
-        }
         try {
+            FolderSubscriptionHelper subscriptionHelper = ServerServiceRegistry.getInstance().getService(FolderSubscriptionHelper.class);
+            if (subscriptionHelper == null) {
+                throw ServiceExceptionCode.absentService(FolderSubscriptionHelper.class);
+            }
+
+            if (false == subscriptionHelper.isSubscribableModule(folderObject.getModule())) {
+                return UsedForSync.DEACTIVATED;
+            }
+
             ServerSession session = getSession();
             if (null != session) {
                 if (folderObject.isDefaultFolder() && FolderObject.PRIVATE == folderObject.getType(session.getUserId()) ) {
                     return UsedForSync.FORCED_ACTIVE;
                 }
-                Boolean usedForSync = ServerServiceRegistry.getServize(FolderSubscriptionHelper.class, true).isUsedForSync(
+                Boolean usedForSync = subscriptionHelper.isUsedForSync(
                     Optional.empty(), session.getContextId(), session.getUserId(), folderObject.getObjectID(), folderObject.getModule()).orElse(Boolean.TRUE);
                 return UsedForSync.of(usedForSync.booleanValue());
             }
@@ -414,16 +421,22 @@ public class DatabaseFolder extends AbstractFolder {
 
     @Override
     public boolean isSubscribed() {
-        if (false == FolderSubscriptionHelper.isSubscribableModule(folderObject.getModule())) {
-            return true;
-        }
         try {
+            FolderSubscriptionHelper subscriptionHelper = ServerServiceRegistry.getInstance().getService(FolderSubscriptionHelper.class);
+            if (subscriptionHelper == null) {
+                throw ServiceExceptionCode.absentService(FolderSubscriptionHelper.class);
+            }
+
+            if (false == subscriptionHelper.isSubscribableModule(folderObject.getModule())) {
+                return true;
+            }
+
             ServerSession session = getSession();
             if (null != session) {
                 if (folderObject.isDefaultFolder() && FolderObject.PRIVATE == folderObject.getType(session.getUserId()) ) {
                     return true;
                 }
-                return b(ServerServiceRegistry.getServize(FolderSubscriptionHelper.class, true).isSubscribed(
+                return b(subscriptionHelper.isSubscribed(
                     Optional.empty(), session.getContextId(), session.getUserId(), folderObject.getObjectID(), folderObject.getModule()).orElse(Boolean.TRUE));
             }
         } catch (OXException e) {

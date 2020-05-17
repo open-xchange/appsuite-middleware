@@ -62,6 +62,7 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.tools.oxfolder.property.FolderSubscriptionHelper;
 import com.openexchange.tools.oxfolder.property.FolderUserPropertyStorage;
 import com.openexchange.tools.oxfolder.property.impl.CachingFolderUserPropertyStorage;
+import com.openexchange.tools.oxfolder.property.impl.FolderSubscriptionHelperImpl;
 import com.openexchange.tools.oxfolder.property.impl.FolderUserPropertyDeleteListener;
 import com.openexchange.tools.oxfolder.property.impl.RdbFolderUserPropertyStorage;
 import com.openexchange.tools.oxfolder.property.sql.CreateFolderUserPropertyTable;
@@ -123,10 +124,11 @@ public class FolderUserPropertyActivator extends HousekeepingActivator {
         RdbFolderUserPropertyStorage rdbStorage = new RdbFolderUserPropertyStorage(this);
         FolderUserPropertyStorage storage = new CachingFolderUserPropertyStorage(rdbStorage);
 
-        registerService(FolderSubscriptionHelper.class, new FolderSubscriptionHelper(storage));
+        registerService(FolderSubscriptionHelper.class, new FolderSubscriptionHelperImpl(storage));
         registerService(FolderUserPropertyStorage.class, storage);
         FolderUserPropertyDeleteListener delListener = new FolderUserPropertyDeleteListener(rdbStorage);
         registerService(FolderDeleteListenerService.class, delListener);
         registerService(DeleteListener.class, delListener);
     }
+
 }
