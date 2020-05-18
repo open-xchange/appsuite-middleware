@@ -1322,24 +1322,31 @@ public final class OXFolderAdminHelper {
     }
 
     private static void insertPermissionsForSystemFolder(final int systemFolderId, final Collection<OCLPermission> systemPermissions, final int contextId, final Connection writeCon) throws SQLException {
+        if (systemPermissions.isEmpty()) {
+            return;
+        }
+
         PreparedStatement stmt = null;
-        for (OCLPermission systemPermission : systemPermissions) {
+        try {
             stmt = writeCon.prepareStatement(SQL_INSERT_SYSTEM_PERMISSION);
-            stmt.setInt(1, contextId);
-            stmt.setInt(2, systemFolderId); // fuid
-            stmt.setInt(3, systemPermission.getEntity()); // entity
-            stmt.setInt(4, systemPermission.getFolderPermission()); // folder
-            // permission
-            stmt.setInt(5, systemPermission.getReadPermission()); // read
-            // permission
-            stmt.setInt(6, systemPermission.getWritePermission()); // write
-            // permission
-            stmt.setInt(7, systemPermission.getDeletePermission()); // delete
-            // permission
-            stmt.setInt(8, systemPermission.isFolderAdmin() ? 1 : 0); // admin_flag
-            stmt.setInt(9, systemPermission.isGroupPermission() ? 1 : 0); // group_flag
-            stmt.executeUpdate();
-            stmt.close();
+            for (OCLPermission systemPermission : systemPermissions) {
+                stmt.setInt(1, contextId); // cid
+                stmt.setInt(2, systemFolderId); // fuid
+                stmt.setInt(3, systemPermission.getEntity()); // entity
+                stmt.setInt(4, systemPermission.getFolderPermission()); // folder permission
+                stmt.setInt(5, systemPermission.getReadPermission()); // read permission
+                stmt.setInt(6, systemPermission.getWritePermission()); // write permission
+                stmt.setInt(7, systemPermission.getDeletePermission()); // delete permission
+                stmt.setInt(8, systemPermission.isFolderAdmin() ? 1 : 0); // admin_flag
+                stmt.setInt(9, systemPermission.isGroupPermission() ? 1 : 0); // group_flag
+                stmt.addBatch();
+            }
+            stmt.executeBatch();
+        } finally {
+            if (stmt != null) {
+                stmt.close();
+                stmt = null;
+            }
         }
     }
 

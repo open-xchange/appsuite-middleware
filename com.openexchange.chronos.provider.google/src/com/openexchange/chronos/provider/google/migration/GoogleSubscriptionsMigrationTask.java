@@ -194,7 +194,7 @@ public class GoogleSubscriptionsMigrationTask extends UpdateTaskAdapter {
             GroupService groupService = Services.getService(GroupService.class);
             UserService userService = Services.getService(UserService.class);
             FolderService folderService = Services.getService(FolderService.class);
-            FolderSubscriptionHelper helper = Services.getService(FolderSubscriptionHelper.class);
+            FolderSubscriptionHelper subscriptionHelper = Services.getService(FolderSubscriptionHelper.class);
             for (Subscription sub : subscriptions) {
                 subscriptionStorage.forgetSubscription(sub);
 
@@ -202,9 +202,9 @@ public class GoogleSubscriptionsMigrationTask extends UpdateTaskAdapter {
                 try {
                     UserizedFolder folder = folderService.getFolder("0", sub.getFolderId(), userService.getUser(sub.getUserId(), ctx), ctx, new FolderServiceDecorator());
                     Set<Integer> userFromPermissions = getUserFromPermissions(folder.getPermissions(), groupService, ctx);
-                    int folderId = Integer.valueOf(sub.getFolderId()).intValue();
+                    int folderId = Integer.parseInt(sub.getFolderId(), 10);
                     for (Integer user : userFromPermissions) {
-                        helper.setSubscribed(Optional.of(writeCon), ctxId, user.intValue(), folderId, folder.getContentType().getModule(), false);
+                        subscriptionHelper.setSubscribed(Optional.of(writeCon), ctxId, user.intValue(), folderId, folder.getContentType().getModule(), false);
                     }
                 } catch (OXException e) {
                     if (FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.equals(e)) {

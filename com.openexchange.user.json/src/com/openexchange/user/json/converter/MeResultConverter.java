@@ -111,15 +111,18 @@ public class MeResultConverter implements ResultConverter {
                 }
 
                 jReturn.put("email_address", user.getMail());
-                JSONArray jAliases = new JSONArray();
-                String[] aliases = user.getAliases();
-                if (aliases != null && aliases.length > 0) {
-                    jAliases = new JSONArray(aliases.length);
-                    for (String alias : aliases) {
-                        jAliases.put(alias);
+
+                JSONArray jAliases;
+                {
+                    String[] aliases = user.getAliases();
+                    if (aliases != null && aliases.length > 0) {
+                        jAliases = new JSONArray(aliases.length);
+                        for (String alias : aliases) {
+                            jAliases.put(alias);
+                        }
+                    } else {
+                        jAliases = JSONArray.EMPTY_ARRAY;
                     }
-                } else {
-                    jAliases = new JSONArray(0);
                 }
                 jReturn.put("email_aliases", jAliases);
 

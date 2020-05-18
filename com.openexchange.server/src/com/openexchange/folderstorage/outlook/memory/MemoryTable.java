@@ -67,6 +67,7 @@ import com.openexchange.folderstorage.outlook.memory.impl.MemoryFolderImpl;
 import com.openexchange.folderstorage.outlook.memory.impl.MemoryTreeImpl;
 import com.openexchange.folderstorage.outlook.sql.Utility;
 import com.openexchange.session.Session;
+import com.openexchange.session.UserAndContext;
 import gnu.trove.ConcurrentTIntObjectHashMap;
 
 /**
@@ -116,10 +117,10 @@ public final class MemoryTable {
         return getMemoryTable0(session, createIfAbsent);
     }
 
-    private static final ConcurrentMap<Key, MemoryTable> MAP = new ConcurrentHashMap<Key, MemoryTable>(1024, 0.9f, 1);
+    private static final ConcurrentMap<UserAndContext, MemoryTable> MAP = new ConcurrentHashMap<UserAndContext, MemoryTable>(1024, 0.9f, 1);
 
     private static MemoryTable getMemoryTable0(final Session session, final boolean createIfAbsent) throws OXException {
-        final Key key = keyFor(session);
+        final UserAndContext key = keyFor(session);
         MemoryTable memoryTable = MAP.get(key);
         if (null != memoryTable) {
             return memoryTable;
@@ -570,56 +571,12 @@ public final class MemoryTable {
         }
     }
 
-    private static Key keyFor(final Session session) {
-        return new Key(session.getUserId(), session.getContextId());
+    private static UserAndContext keyFor(final Session session) {
+        return UserAndContext.newInstance(session);
     }
 
-    private static Key keyFor(final int userId, final int contextId) {
-        return new Key(userId, contextId);
-    }
-
-    private static final class Key {
-
-        private final int cid;
-
-        private final int user;
-
-        private final int hash;
-
-        protected Key(final int user, final int cid) {
-            super();
-            this.user = user;
-            this.cid = cid;
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + cid;
-            result = prime * result + user;
-            hash = result;
-        }
-
-        @Override
-        public int hashCode() {
-            return hash;
-        }
-
-        @Override
-        public boolean equals(final Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (!(obj instanceof Key)) {
-                return false;
-            }
-            final Key other = (Key) obj;
-            if (cid != other.cid) {
-                return false;
-            }
-            if (user != other.user) {
-                return false;
-            }
-            return true;
-        }
-
+    private static UserAndContext keyFor(final int userId, final int contextId) {
+        return UserAndContext.newInstance(userId, contextId);
     }
 
 }

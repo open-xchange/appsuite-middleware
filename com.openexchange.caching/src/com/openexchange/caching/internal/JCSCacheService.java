@@ -244,43 +244,43 @@ public final class JCSCacheService extends DefaultCacheKeyService implements Cac
                 return;
             }
 
-            meters.add(Gauge.builder("appsuite.jcs.cache.elements.max", memCache, (c) -> new Integer(c.getCacheAttributes().getMaxObjects()).doubleValue())
+            meters.add(Gauge.builder("appsuite.jcs.cache.elements.max", memCache, (c) -> ((double) c.getCacheAttributes().getMaxObjects()))
                 .description("Max. number of cached elements")
                 .tag("region", region)
                 .register(Metrics.globalRegistry));
 
-            meters.add(Gauge.builder("appsuite.jcs.cache.elements.total", memCache, (c) -> new Integer(c.getSize()).doubleValue())
+            meters.add(Gauge.builder("appsuite.jcs.cache.elements.total", memCache, (c) -> ((double) c.getSize()))
                 .description("Current number of cached elements")
                 .tag("region", region)
                 .register(Metrics.globalRegistry));
 
-            meters.add(FunctionCounter.builder("appsuite.jcs.cache.puts.total", memCache, (c) -> new Integer(c.getCompositeCache().getUpdateCount()).doubleValue())
+            meters.add(FunctionCounter.builder("appsuite.jcs.cache.puts.total", memCache, (c) -> ((double) c.getCompositeCache().getUpdateCount()))
                 .description("Number of cache put operations")
                 .tag("region", region)
                 .register(Metrics.globalRegistry));
 
-            meters.add(FunctionCounter.builder("appsuite.jcs.cache.removals.total", memCache, (c) -> new Integer(c.getCompositeCache().getRemoveCount()).doubleValue())
+            meters.add(FunctionCounter.builder("appsuite.jcs.cache.removals.total", memCache, (c) -> ((double) c.getCompositeCache().getRemoveCount()))
                 .description("Number of remove from cache operations")
                 .tag("region", region)
                 .register(Metrics.globalRegistry));
 
-            meters.add(FunctionCounter.builder("appsuite.jcs.cache.hits.total", memCache, (c) -> new Integer(c.getCompositeCache().getHitCountRam()).doubleValue())
+            meters.add(FunctionCounter.builder("appsuite.jcs.cache.hits.total", memCache, (c) -> ((double) c.getCompositeCache().getHitCountRam()))
                 .description("Number of cache hits")
                 .tag("region", region)
                 .register(Metrics.globalRegistry));
 
-            meters.add(FunctionCounter.builder("appsuite.jcs.cache.misses.notfound.total", memCache, (c) -> new Integer(c.getCompositeCache().getMissCountNotFound()).doubleValue())
+            meters.add(FunctionCounter.builder("appsuite.jcs.cache.misses.notfound.total", memCache, (c) -> ((double) c.getCompositeCache().getMissCountNotFound()))
                 .description("Number of cache misses (element not in cache)")
                 .tag("region", region)
                 .register(Metrics.globalRegistry));
 
-            meters.add(FunctionCounter.builder("appsuite.jcs.cache.misses.expired.total", memCache, (c) -> new Integer(c.getCompositeCache().getMissCountExpired()).doubleValue())
+            meters.add(FunctionCounter.builder("appsuite.jcs.cache.misses.expired.total", memCache, (c) -> ((double) c.getCompositeCache().getMissCountExpired()))
                 .description("Number of cache misses (element in cache but expired)")
                 .tag("region", region)
                 .register(Metrics.globalRegistry));
 
             meters.add(FunctionCounter.builder("appsuite.jcs.cache.misses.total", memCache, (c) ->
-                    new Integer(c.getCompositeCache().getMissCountNotFound() + c.getCompositeCache().getMissCountExpired()).doubleValue())
+                    ((double) (c.getCompositeCache().getMissCountNotFound() + c.getCompositeCache().getMissCountExpired())))
                 .description("Number of cache misses (not in cache + in cache but expired)")
                 .tag("region", region)
                 .register(Metrics.globalRegistry));

@@ -659,7 +659,7 @@ public final class ServerActivator extends HousekeepingActivator {
          * Track AdministrativeFreeBusyService
          */
         track(AdministrativeFreeBusyService.class, new RegistryCustomizer<AdministrativeFreeBusyService>(context, AdministrativeFreeBusyService.class));
-        
+
         /*
          * User Alias Service
          */

@@ -99,12 +99,14 @@ public class GeoLocationServiceTracker extends MultipleServiceTracker {
         bundleContext.registerService(IPChecker.class, service, null);
 
         ManagementService managementService = getTrackedService(ManagementService.class);
-        try {
-            metricsMBean = new IPCheckMBeanImpl(services, service);
-            managementService.registerMBean(new ObjectName(IPCheckMBean.NAME), metricsMBean);
-        } catch (NotCompliantMBeanException | MalformedObjectNameException | OXException e) {
-            LOG.error("Could not start bundle '{}': {}", bundleContext.getBundle().getSymbolicName(), e.getMessage(), e);
-            return;
+        if (managementService != null) {
+            try {
+                metricsMBean = new IPCheckMBeanImpl(services, service);
+                managementService.registerMBean(new ObjectName(IPCheckMBean.NAME), metricsMBean);
+            } catch (NotCompliantMBeanException | MalformedObjectNameException | OXException e) {
+                LOG.error("Could not start bundle '{}': {}", bundleContext.getBundle().getSymbolicName(), e.getMessage(), e);
+                return;
+            }
         }
         LOG.info("Bundle successfully started: {}", bundleContext.getBundle().getSymbolicName());
 

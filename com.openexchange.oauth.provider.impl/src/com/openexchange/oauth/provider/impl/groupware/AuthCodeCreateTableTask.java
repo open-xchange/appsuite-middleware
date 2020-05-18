@@ -112,6 +112,8 @@ public class AuthCodeCreateTableTask extends UpdateTaskAdapter {
                 }
                 stmt = con.prepareStatement(createStmts[i]);
                 stmt.executeUpdate();
+                stmt.close();
+                stmt = null;
             }
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());

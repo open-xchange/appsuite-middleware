@@ -73,7 +73,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
 
     private int maxIdle;
     private long maxIdleTime;
-    private int maxActive;
+    private volatile int maxActive;
     private long maxWait;
     private long maxLifeTime;
     private ExhaustedActions exhaustedAction;
@@ -242,51 +242,54 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                     }
                 }
                 retval = data.popIdle();
-                if (null == retval && maxActive > 0 && data.numActive() >= maxActive) {
-                    // now we are getting in trouble. no more idle objects, a maximum number of active is defined and we reached this
-                    // border.
-                    switch (exhaustedAction) {
-                    case GROW:
-                        break;
-                    case FAIL:
-                        throw new PoolingException("Pool exhausted.");
-                    case BLOCK:
-                        final String threadName = Thread.currentThread().getName();
-                        final boolean writeWarning = System.currentTimeMillis() > (lastWarning + 60000L);
-                        if (writeWarning) {
-                            logThreads(data.getActive());
-                            lastWarning = System.currentTimeMillis();
-                            final PoolingException warn = new PoolingException("Thread " + threadName
-                                + " is sent to sleep until an object in the pool is available. " + data.numActive()
-                                + " objects are already in use.");
-                            LOG.warn(warn.getMessage(), warn);
-                        }
-                        final long sleepStartTime = System.currentTimeMillis();
-                        boolean timedOut = false;
-                        try {
-                            if (maxWait > 0) {
-                                timedOut = !idleAvailable.await(maxWait - getWaitTime(startTime), TimeUnit.MILLISECONDS);
-                            } else {
-                                idleAvailable.await();
+                if (null == retval) {
+                    int maxActive = this.maxActive;
+                    if (maxActive > 0 && data.numActive() >= maxActive) {
+                        // now we are getting in trouble. no more idle objects, a maximum number of active is defined and we reached this
+                        // border.
+                        switch (exhaustedAction) {
+                        case GROW:
+                            break;
+                        case FAIL:
+                            throw new PoolingException("Pool exhausted.");
+                        case BLOCK:
+                            final String threadName = Thread.currentThread().getName();
+                            final boolean writeWarning = System.currentTimeMillis() > (lastWarning + 60000L);
+                            if (writeWarning) {
+                                logThreads(data.getActive());
+                                lastWarning = System.currentTimeMillis();
+                                final PoolingException warn = new PoolingException("Thread " + threadName
+                                    + " is sent to sleep until an object in the pool is available. " + data.numActive()
+                                    + " objects are already in use.");
+                                LOG.warn(warn.getMessage(), warn);
                             }
-                        } catch (InterruptedException e) {
-                            // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
-                            Thread.currentThread().interrupt();
-                            LOG.error("Thread {} was interrupted.", threadName, e);
+                            final long sleepStartTime = System.currentTimeMillis();
+                            boolean timedOut = false;
+                            try {
+                                if (maxWait > 0) {
+                                    timedOut = !idleAvailable.await(maxWait - getWaitTime(startTime), TimeUnit.MILLISECONDS);
+                                } else {
+                                    idleAvailable.await();
+                                }
+                            } catch (InterruptedException e) {
+                                // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
+                                Thread.currentThread().interrupt();
+                                LOG.error("Thread {} was interrupted.", threadName, e);
+                            }
+                            if (writeWarning) {
+                                final PoolingException warn = new PoolingException("Thread " + threadName + " slept for "
+                                    + getWaitTime(sleepStartTime) + "ms.");
+                                LOG.warn(warn.getMessage(), warn);
+                            }
+                            if (timedOut) {
+                                idleAvailable.signal();
+                                throw new PoolingException("Wait time exceeded. Active: " + data.numActive() + ", Idle: " + data.numIdle()
+                                    + ", Waiting: " + lock.getWaitQueueLength(idleAvailable) + ", Time: " + getWaitTime(startTime));
+                            }
+                            continue;
+                        default:
+                            throw new IllegalStateException("Unknown exhausted action: " + exhaustedAction);
                         }
-                        if (writeWarning) {
-                            final PoolingException warn = new PoolingException("Thread " + threadName + " slept for "
-                                + getWaitTime(sleepStartTime) + "ms.");
-                            LOG.warn(warn.getMessage(), warn);
-                        }
-                        if (timedOut) {
-                            idleAvailable.signal();
-                            throw new PoolingException("Wait time exceeded. Active: " + data.numActive() + ", Idle: " + data.numIdle()
-                                + ", Waiting: " + lock.getWaitQueueLength(idleAvailable) + ", Time: " + getWaitTime(startTime));
-                        }
-                        continue;
-                    default:
-                        throw new IllegalStateException("Unknown exhausted action: " + exhaustedAction);
                     }
                 }
                 if (null == retval) {
@@ -359,7 +362,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
         }
         throw new PoolingException("Pool has been stopped.");
     }
-    
+
     /**
      * Creates a new object of this pool
      *
@@ -607,7 +610,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
         }
         LOG.trace("Clean run ending. Time: {}", L(getWaitTime(startTime)));
     }
-    
+
     /**
      * Gets the maxActive
      *

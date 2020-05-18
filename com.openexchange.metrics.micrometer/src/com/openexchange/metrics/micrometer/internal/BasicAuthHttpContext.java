@@ -51,6 +51,7 @@ package com.openexchange.metrics.micrometer.internal;
 
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -110,7 +111,7 @@ public class BasicAuthHttpContext implements HttpContext {
     protected boolean isAuthenticated(HttpServletRequest request) {
         try {
             String authzHeader = request.getHeader(AUTH_HEADER);
-            String loginAndPassword = new String(Base64.getDecoder().decode(authzHeader.substring(6)));
+            String loginAndPassword = new String(Base64.getDecoder().decode(authzHeader.substring(6)), StandardCharsets.ISO_8859_1);
             String[] creds = loginAndPassword.split(":", 2);
             if (creds.length != 2 || Strings.isEmpty(creds[0]) || Strings.isEmpty(creds[1])) {
                 return false;

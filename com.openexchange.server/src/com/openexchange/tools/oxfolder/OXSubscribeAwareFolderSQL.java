@@ -51,53 +51,81 @@ package com.openexchange.tools.oxfolder;
 
 import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.property.FolderSubscriptionHelper;
 
 /**
- * {@link OXSubscribeAwareFolderSQL}
+ * {@link OXSubscribeAwareFolderSQL} - Utility class.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.4
  */
 public class OXSubscribeAwareFolderSQL {
 
+    /**
+     * Initializes a new {@link OXSubscribeAwareFolderSQL}.
+     */
+    private OXSubscribeAwareFolderSQL() {
+        super();
+    }
 
     /**
      * Gets all visible folders for the given module. Unsubscribed folders are ignored.
      *
-     * @param userId The user id
+     * @param userId The user identifier
      * @param memberInGroups The memberInGroups
      * @param accessibleModules The accessible modules
      * @param module The module to retrieve
      * @param ctx The context
      * @return A list of available folders in the given module
-     * @throws OXException
+     * @throws OXException If query fails
      */
     public static List<FolderObject> getAllVisibleFoldersOfModule(final int userId, final int[] memberInGroups, final int[] accessibleModules, final int module, final Context ctx) throws OXException {
         Connection con = DBPool.pickup(ctx);
+        try {
+            return getAllVisibleFoldersOfModule(userId, memberInGroups, accessibleModules, module, ctx, con);
+        } finally {
+            Database.back(ctx.getContextId(), false, con);
+        }
+    }
+
+    private static List<FolderObject> getAllVisibleFoldersOfModule(int userId, int[] memberInGroups, int[] accessibleModules, int module, Context ctx, Connection con) throws OXException {
         SearchIterator<FolderObject> iter = OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(userId, memberInGroups, accessibleModules, module, ctx, con);
         try {
-            List<FolderObject> result = new ArrayList<>();
-            while (iter.hasNext()) {
-                FolderObject folder = iter.next();
-                if (ServerServiceRegistry.getServize(FolderSubscriptionHelper.class, true).isSubscribed(Optional.ofNullable(con), ctx.getContextId(), userId, folder.getObjectID(), folder.getModule()).orElse(Boolean.TRUE) == Boolean.FALSE) {
-                    continue;
-                }
-                result.add(folder);
+            if (!iter.hasNext()) {
+                return Collections.emptyList();
             }
-            return result;
+
+            FolderSubscriptionHelper subscriptionHelper = ServerServiceRegistry.getInstance().getService(FolderSubscriptionHelper.class);
+            if (subscriptionHelper == null) {
+                throw ServiceExceptionCode.absentService(FolderSubscriptionHelper.class);
+            }
+
+            Optional<Connection> optCon = Optional.of(con);
+            List<FolderObject> result = null;
+            do {
+                FolderObject folder = iter.next();
+                if (folder != null && subscriptionHelper.isSubscribed(optCon, ctx.getContextId(), userId, folder.getObjectID(), folder.getModule()).orElse(Boolean.TRUE).booleanValue()) {
+                    if (result == null) {
+                        result = new ArrayList<>();
+                    }
+                    result.add(folder);
+                }
+            } while (iter.hasNext());
+            return result == null ? Collections.emptyList() : result;
         } finally {
-            iter.close();
-            Database.back(ctx.getContextId(), false, con);
+            SearchIterators.close(iter);
         }
     }
 

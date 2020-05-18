@@ -160,6 +160,7 @@ import com.openexchange.java.CallerRunsCompletionService;
 import com.openexchange.java.Collators;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.Tools;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -175,10 +176,10 @@ import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 import com.openexchange.tools.oxfolder.OXFolderLoader;
 import com.openexchange.tools.oxfolder.OXFolderLoader.IdAndName;
+import com.openexchange.tools.oxfolder.property.FolderSubscriptionHelper;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderSQL;
 import com.openexchange.tools.oxfolder.UpdatedFolderHandler;
-import com.openexchange.tools.oxfolder.property.FolderSubscriptionHelper;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.user.User;
@@ -619,7 +620,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
                 throw OXFolderExceptionCode.CREATE_FAILED.create(new Object[0]);
             }
             folder.setID(String.valueOf(fuid));
-            
+
             // store user properties as needed
             storeUserProperties(Optional.of(con), session, createdFolder, folder);
 
@@ -1946,27 +1947,30 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
      * @param folderUpdate The folder update as passed from the client
      */
     private static void storeUserProperties(Optional<Connection> optCon, Session session, FolderObject originalFolder, Folder folderUpdate) throws OXException {
-        if (false == FolderSubscriptionHelper.isSubscribableModule(originalFolder.getModule())) {
+        FolderSubscriptionHelper subscriptionHelper = ServerServiceRegistry.getInstance().getService(FolderSubscriptionHelper.class);
+        if (subscriptionHelper == null) {
+            throw ServiceExceptionCode.absentService(FolderSubscriptionHelper.class);
+        }
+
+        if (false == subscriptionHelper.isSubscribableModule(originalFolder.getModule())) {
             return; // not applicable
         }
         if (false == SetterAwareFolder.class.isInstance(folderUpdate) || ((SetterAwareFolder) folderUpdate).containsSubscribed()) {
-            Boolean originalSubscribed = ServerServiceRegistry.getServize(FolderSubscriptionHelper.class, true)
-                .isSubscribed(optCon, session.getContextId(), session.getUserId(), originalFolder.getObjectID(), originalFolder.getModule()).orElse(Boolean.TRUE);
+            Boolean originalSubscribed = subscriptionHelper.isSubscribed(optCon, session.getContextId(), session.getUserId(), originalFolder.getObjectID(), originalFolder.getModule()).orElse(Boolean.TRUE);
             if (b(originalSubscribed) != folderUpdate.isSubscribed()) {
-                if (originalFolder.isDefaultFolder() && FolderObject.PRIVATE == originalFolder.getType(session.getUserId()) ) {
+                if (originalFolder.isDefaultFolder() && FolderObject.PRIVATE == originalFolder.getType(session.getUserId())) {
                     throw FolderExceptionErrorMessage.SUBSCRIBE_NOT_ALLOWED.create(); // deny update for user's default private folder
                 }
-                ServerServiceRegistry.getServize(FolderSubscriptionHelper.class, true).setSubscribed(optCon, session.getContextId(), session.getUserId(), originalFolder.getObjectID(), originalFolder.getModule(), folderUpdate.isSubscribed());
+                subscriptionHelper.setSubscribed(optCon, session.getContextId(), session.getUserId(), originalFolder.getObjectID(), originalFolder.getModule(), folderUpdate.isSubscribed());
             }
         }
         if (false == SetterAwareFolder.class.isInstance(folderUpdate) || ((SetterAwareFolder) folderUpdate).containsUsedForSync()) {
-            Boolean originalUsedForSync = ServerServiceRegistry.getServize(FolderSubscriptionHelper.class, true)
-                .isUsedForSync(optCon, session.getContextId(), session.getUserId(), originalFolder.getObjectID(), originalFolder.getModule()).orElse(Boolean.TRUE);
+            Boolean originalUsedForSync = subscriptionHelper.isUsedForSync(optCon, session.getContextId(), session.getUserId(), originalFolder.getObjectID(), originalFolder.getModule()).orElse(Boolean.TRUE);
             if (b(originalUsedForSync) != folderUpdate.getUsedForSync().isUsedForSync()) {
-                if (originalFolder.isDefaultFolder() && FolderObject.PRIVATE == originalFolder.getType(session.getUserId()) ) {
+                if (originalFolder.isDefaultFolder() && FolderObject.PRIVATE == originalFolder.getType(session.getUserId())) {
                     throw FolderExceptionErrorMessage.SUBSCRIBE_NOT_ALLOWED.create(); // deny update for user's default private folder
                 }
-                ServerServiceRegistry.getServize(FolderSubscriptionHelper.class, true).setUsedForSync(optCon, session.getContextId(), session.getUserId(), originalFolder.getObjectID(), originalFolder.getModule(), folderUpdate.getUsedForSync());
+                subscriptionHelper.setUsedForSync(optCon, session.getContextId(), session.getUserId(), originalFolder.getObjectID(), originalFolder.getModule(), folderUpdate.getUsedForSync());
             }
         }
     }

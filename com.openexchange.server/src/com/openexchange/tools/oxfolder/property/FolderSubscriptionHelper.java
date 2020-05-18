@@ -49,17 +49,11 @@
 
 package com.openexchange.tools.oxfolder.property;
 
-import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
-import java.util.Collections;
-import java.util.Map;
 import java.util.Optional;
-import com.google.common.collect.ImmutableMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UsedForSync;
-import com.openexchange.folderstorage.database.contentType.CalendarContentType;
-import com.openexchange.folderstorage.database.contentType.ContactContentType;
-import com.openexchange.folderstorage.database.contentType.TaskContentType;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
  * The {@link FolderSubscriptionHelper} is able to check and set subscription and usedForSync status of pim folders.
@@ -67,150 +61,68 @@ import com.openexchange.folderstorage.database.contentType.TaskContentType;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.4
  */
-public class FolderSubscriptionHelper {
-
-    private static final String SUBSCRIBED_KEY = "subscribed";
-    private static final String SYNC_KEY = "usedForSync";
+@SingletonService
+public interface FolderSubscriptionHelper {
 
     /**
-     * A map of supported modules mapped to their property prefix names
-     */
-    private static final Map<Integer, String> SUBSCRIPTION_AWARE_MODULES = ImmutableMap.<Integer, String> builder()
-        .put(I(TaskContentType.getInstance().getModule()), "tsk/")
-        .put(I(CalendarContentType.getInstance().getModule()), "cal/")
-        .put(I(ContactContentType.getInstance().getModule()), "con/")
-    .build();
-        
-    private final FolderUserPropertyStorage storage;
-
-    /**
-     * Initializes a new {@link FolderSubscriptionHelper}.
-     *
-     * @param storage The underlying {@link FolderUserPropertyStorage}
-     */
-    public FolderSubscriptionHelper(FolderUserPropertyStorage storage) {
-        super();
-        this.storage = storage;
-    }
-
-    /**
-     * Checks if the folder has any subscriptions
+     * Checks if the folder has any subscriptions.
      *
      * @param optCon The optional {@link Connection} to use
-     * @param ctxId The context id
-     * @param userId The user id
-     * @param folderId The folder id
-     * @param module The module id
+     * @param ctxId The context identifier
+     * @param userId The user identifier
+     * @param folderId The folder identifier
+     * @param module The module identifier
      * @return The optional subscription value
      * @throws OXException In case the subscription couldn't be loaded
      */
-    public Optional<Boolean> isSubscribed(Optional<Connection> optCon, int ctxId, int userId, int folderId, int module) throws OXException {
-        String result;
-        if(optCon.isPresent()) {
-            result = storage.getFolderProperty(ctxId, folderId, userId, getSubscribeKey(module), optCon.get());
-        } else {
-            result = storage.getFolderProperty(ctxId, folderId, userId, getSubscribeKey(module));
-        }
-        return Optional.ofNullable(result == null ? null : Boolean.valueOf(result));
-    }
+    Optional<Boolean> isSubscribed(Optional<Connection> optCon, int ctxId, int userId, int folderId, int module) throws OXException;
 
     /**
-     * Gets the subscribed key for the given content type
-     *
-     * @param module the module number
-     * @return The key
-     */
-    private String getSubscribeKey(int module) {
-        String prefix = SUBSCRIPTION_AWARE_MODULES.get(I(module));
-        if(prefix != null) {
-            return prefix + SUBSCRIBED_KEY;
-        }
-        return SUBSCRIBED_KEY;
-    }
-
-    /**
-     * Gets the subscribed key for the given content type
-     *
-     * @param int The module number
-     * @return The key
-     */
-    private String getUsedForSyncKey(int module) {
-        String prefix = SUBSCRIPTION_AWARE_MODULES.get(I(module));
-        if(prefix != null) {
-            return prefix + SYNC_KEY;
-        }
-        return SYNC_KEY;
-    }
-
-    /**
-     * Checks if the folder has any subscriptions
+     * Checks if the folder has any subscriptions.
      *
      * @param optCon The optional {@link Connection} to use
-     * @param ctxId The context id
-     * @param userId The user id
-     * @param folderId The folder id
+     * @param ctxId The context identifier
+     * @param userId The user identifier
+     * @param folderId The folder identifier
      * @param folderModule The folder module
      * @return The optional usedForSync value
      * @throws OXException In case the subscription couldn't be loaded
      */
-    public Optional<Boolean> isUsedForSync(Optional<Connection> optCon, int ctxId, int userId, int folderId, int folderModule) throws OXException {
-        String result;
-        if(optCon.isPresent()) {
-            result = storage.getFolderProperty(ctxId, folderId, userId, getUsedForSyncKey(folderModule), optCon.get());
-        } else {
-            result = storage.getFolderProperty(ctxId, folderId, userId, getUsedForSyncKey(folderModule));
-        }
-        return Optional.ofNullable(result == null ? null : Boolean.valueOf(result));
-    }
+    Optional<Boolean> isUsedForSync(Optional<Connection> optCon, int ctxId, int userId, int folderId, int folderModule) throws OXException;
 
     /**
-     * Inserts, updates or removes the usedForSync property for the given user and folder
+     * Inserts, updates or removes the usedForSync property for the given user and folder.
      *
      * @param optCon The optional {@link Connection} to use
-     * @param contextId The context id
-     * @param userId The user id
-     * @param folderId The folder id
-     * @param module The module id
+     * @param contextId The context identifier
+     * @param userId The user identifier
+     * @param folderId The folder identifier
+     * @param module The module identifier
      * @param usedForSync Whether the folder is used for sync or not
      * @throws OXException In case the subscription couldn't be set
      */
-    public void setUsedForSync(Optional<Connection> optCon, int contextId, int userId, int folderId, int module, UsedForSync usedForSync) throws OXException {
-        Map<String, String> data = Collections.singletonMap(getUsedForSyncKey(module), Boolean.valueOf(usedForSync.isUsedForSync()).toString());
-        if (optCon.isPresent()) {
-            storage.setFolderProperties(contextId, folderId, userId, data, optCon.get());
-        } else {
-            storage.setFolderProperties(contextId, folderId, userId, data);
-        }
-    }
+    void setUsedForSync(Optional<Connection> optCon, int contextId, int userId, int folderId, int module, UsedForSync usedForSync) throws OXException;
 
     /**
-     * Inserts, updates or removes the subscription property for the given user and folder
+     * Inserts, updates or removes the subscription property for the given user and folder.
      *
      * @param optCon The optional {@link Connection} to use
-     * @param contextId The context id
-     * @param userId The user id
-     * @param folderId The folder id
-     * @param module The module id
+     * @param contextId The context identifier
+     * @param userId The user identifier
+     * @param folderId The folder identifier
+     * @param module The module identifier
      * @param subscribed Whether the folder is subscribed or not
      * @throws OXException In case the subscription couldn't be set
      */
-    public void setSubscribed(Optional<Connection> optCon, int contextId, int userId, int folderId, int module, boolean subscribed) throws OXException {
-        Map<String, String> data = Collections.singletonMap(getSubscribeKey(module), Boolean.valueOf(subscribed).toString());
-        if (optCon.isPresent()) {
-            storage.setFolderProperties(contextId, folderId, userId, data, optCon.get());
-        } else {
-            storage.setFolderProperties(contextId, folderId, userId, data);
-        }
-    }
+    void setSubscribed(Optional<Connection> optCon, int contextId, int userId, int folderId, int module, boolean subscribed) throws OXException;
 
     /**
-     * Checks if the given module is subscription aware
+     * Checks if the given module is subscription aware.
      *
      * @param module The module id
      * @return <code>true</code> if the module is subscription aware, <code>false</code> otherwise
+     * @throws OXException If check fails
      */
-    public static boolean isSubscribableModule(final int module) {
-        return SUBSCRIPTION_AWARE_MODULES.containsKey(I(module));
-    }
+    boolean isSubscribableModule(final int module) throws OXException;
 
 }

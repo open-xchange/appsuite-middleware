@@ -49,7 +49,7 @@
 
 package com.openexchange.metrics.micrometer.osgi;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
@@ -94,7 +94,7 @@ public class MicrometerActivator extends HousekeepingActivator implements Reload
 
     private static final String SERVLET_BIND_POINT = "/metrics";
 
-    private volatile PrometheusMeterRegistry prometheusRegistry;
+    private PrometheusMeterRegistry prometheusRegistry;
     private final List<MicrometerFilterPerformer> filterPerformers;
 
     /**
@@ -102,7 +102,7 @@ public class MicrometerActivator extends HousekeepingActivator implements Reload
      */
     public MicrometerActivator() {
         super();
-        filterPerformers = new LinkedList<>();
+        filterPerformers = new ArrayList<>();
     }
 
     @Override
@@ -111,7 +111,7 @@ public class MicrometerActivator extends HousekeepingActivator implements Reload
     }
 
     @Override
-    protected void startBundle() throws Exception {
+    protected synchronized void startBundle() throws Exception {
         filterPerformers.add(new FilterMetricMicrometerFilterPerformer());
         filterPerformers.add(new ActivateMetricMicrometerFilterPerformer());
         filterPerformers.add(new DistributionHistogramMicrometerFilterPerformer());
@@ -127,7 +127,8 @@ public class MicrometerActivator extends HousekeepingActivator implements Reload
     }
 
     @Override
-    protected void stopBundle() throws Exception {
+    protected synchronized void stopBundle() throws Exception {
+        super.stopBundle();
         unregisterServlet();
         filterPerformers.clear();
         LOG.info("Bundle {} successfully stopped", this.context.getBundle().getSymbolicName());
@@ -158,7 +159,7 @@ public class MicrometerActivator extends HousekeepingActivator implements Reload
      *
      * @param configService The configuration service
      */
-    private void applyMeterFilters(ConfigurationService configService) {
+    private synchronized void applyMeterFilters(ConfigurationService configService) {
         if (prometheusRegistry != null) {
             Metrics.removeRegistry(prometheusRegistry);
             prometheusRegistry.close();

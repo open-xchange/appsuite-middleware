@@ -156,7 +156,7 @@ public class Operation implements Serializable, Comparable<Operation> {
 
     private final String capabilityId;
     private final Type type;
-    private final Optional<String> optionalReason;
+    private final String optionalReason;
 
     /**
      * Initializes a new {@link Operation}.
@@ -169,7 +169,7 @@ public class Operation implements Serializable, Comparable<Operation> {
         super();
         this.capabilityId = capabilityId;
         this.type = type;
-        this.optionalReason = optionalReason;
+        this.optionalReason = optionalReason.orElse(null);
 
     }
 
@@ -179,7 +179,7 @@ public class Operation implements Serializable, Comparable<Operation> {
      * @return The optional reason text
      */
     public Optional<String> getOptionalReason() {
-        return optionalReason;
+        return Optional.ofNullable(optionalReason);
     }
 
     /**
@@ -202,12 +202,12 @@ public class Operation implements Serializable, Comparable<Operation> {
 
     @Override
     public String toString() {
-        if (!optionalReason.isPresent()) {
+        if (optionalReason == null) {
             return capabilityId;
         }
 
         StringBuilder builder = new StringBuilder(capabilityId);
-        builder.append(" (").append(optionalReason.get()).append(')');
+        builder.append(" (").append(optionalReason).append(')');
         return builder.toString();
     }
 

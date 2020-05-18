@@ -33,7 +33,7 @@ public enum HttpClientProperty implements Property {
     private final String fqn;
     private final String defaultName;
     private final Integer value;
-    private final BiConsumer<HttpBasicConfig, Integer> setter;
+    private final transient BiConsumer<HttpBasicConfig, Integer> setter;
 
     /**
      * Initializes a new {@link HttpClientProperty}.

@@ -54,6 +54,7 @@ import java.util.Date;
 import java.util.Optional;
 import org.json.JSONObject;
 import com.openexchange.chronos.ExtendedProperties;
+import com.openexchange.chronos.ExtendedProperty;
 import com.openexchange.chronos.provider.CalendarFolderProperty;
 import com.openexchange.chronos.provider.UsedForSync;
 import com.openexchange.exception.OXException;
@@ -185,12 +186,18 @@ public class CalendarSettings {
      * @param props The {@link ExtendedProperties} to check
      */
     private void checkUsedForSync(ExtendedProperties props) {
-        if(props == null || props.contains(USED_FOR_SYNC_LITERAL) == false) {
+        if (props == null) {
             return;
         }
-        boolean protekted = CalendarFolderProperty.isProtected(getExtendedProperties().get(USED_FOR_SYNC_LITERAL));
-        Boolean usedForSync = CalendarFolderProperty.optPropertyValue(getExtendedProperties(), USED_FOR_SYNC_LITERAL, Boolean.class);
-        if(getUsedForSync().isPresent() == false) {
+
+        ExtendedProperty usedForSyncProperty = props.get(USED_FOR_SYNC_LITERAL);
+        if (usedForSyncProperty == null) {
+            return;
+        }
+
+        boolean protekted = CalendarFolderProperty.isProtected(usedForSyncProperty);
+        Boolean usedForSync = CalendarFolderProperty.optPropertyValue(usedForSyncProperty, Boolean.class);
+        if (getUsedForSync().isPresent() == false) {
             setUsedForSync(new UsedForSync(usedForSync.booleanValue(), protekted));
         }
         props.removeAll(USED_FOR_SYNC_LITERAL);
