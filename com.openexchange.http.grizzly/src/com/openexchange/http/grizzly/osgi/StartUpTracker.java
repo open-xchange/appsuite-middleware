@@ -52,6 +52,7 @@ package com.openexchange.http.grizzly.osgi;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -179,7 +180,7 @@ public final class StartUpTracker implements ServiceTrackerCustomizer<SignalStar
                 if (awaitShutDownSeconds > 0) {
                     // Perform an orderly shut-down
                     AtomicBoolean doQuit = new AtomicBoolean(false);
-                    FutureTask<Void> shutDownTask = initiateShutDown(doQuit);
+                    Future<Void> shutDownTask = initiateShutDown(doQuit);
 
                     // Await shut-down
                     try {
@@ -228,7 +229,7 @@ public final class StartUpTracker implements ServiceTrackerCustomizer<SignalStar
         }
     }
 
-    private FutureTask<Void> initiateShutDown(final AtomicBoolean doQuit) {
+    private Future<Void> initiateShutDown(final AtomicBoolean doQuit) {
         Runnable r = new Runnable() {
 
             @Override
