@@ -119,7 +119,21 @@ public final class URITools {
     private static final Set<String> DENIED_HOSTS = ImmutableSet.of("localhost", "127.0.0.1", LOCAL_HOST_ADDRESS, LOCAL_HOST_NAME);
 
     /**
-     * The default URI validator that validates the given URI/URL according to white-listed protocols and blacklisted hosts.
+     * The default URI validator that validates the given URI/URL according to white-listed protocols and blacklisted hosts:<br>
+     * <b>White-listed protocols</b>
+     * <ul>
+     * <li><code>"http"</code></li>
+     * <li><code>"https"</code></li>
+     * <li><code>"ftp"</code></li>
+     * <li><code>"ftps"</code></li>
+     * </ul>
+     * <b>Black-listed host names</b>
+     * <ul>
+     * <li><code>"localhost"</code></li>
+     * <li><code>"127.0.0.1"</code></li>
+     * <li>Host name of {@link InetAddress#getLocalHost() local host}</li>
+     * <li>IP address of {@link InetAddress#getLocalHost() local host}</li>
+     * </ul>
      *
      * @param url The URL to validate
      * @return An optional OXException
