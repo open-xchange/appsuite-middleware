@@ -220,7 +220,7 @@ public final class StartUpTracker implements ServiceTrackerCustomizer<SignalStar
             }
 
             // Stop Grizzly
-            grizzly.stop();
+            grizzly.shutdownNow();
             LOGGER.info("Grizzly stopped.");
 
             // Unget service
