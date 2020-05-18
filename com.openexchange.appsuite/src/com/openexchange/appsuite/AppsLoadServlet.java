@@ -54,11 +54,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
-import java.util.Arrays;
-import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -80,7 +79,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 public class AppsLoadServlet extends SessionServlet {
 
     public static FileContributor contributors = null;
-    
+
 	/**
      * The hardcoded appsuite ui uri limit in characters
      */
@@ -234,7 +233,7 @@ public class AppsLoadServlet extends SessionServlet {
 	@Override
 	protected void doGet(final HttpServletRequest req, final HttpServletResponse resp)
 			throws ServletException, IOException {
-	    if(req.getRequestURL().length() > UI_URI_LIMIT) {
+	    if (req.getRequestURL().length() > UI_URI_LIMIT) {
 	        LOG.error("Url length exceeds maximum allowed characters.");
 	        writeErrorPage(HttpStatus.SC_REQUEST_URI_TOO_LONG, "The request is too long", resp);
 	        return;
@@ -250,8 +249,18 @@ public class AppsLoadServlet extends SessionServlet {
             return; // no actual files requested
         }
 		// Filter duplicates
-        List<Object> collect = Arrays.asList(modules).stream().distinct().collect(Collectors.toList());
-        modules = collect.toArray(new String[collect.size()]);
+        {
+            boolean duplicateFound = false;
+            Set<String> tmp = new LinkedHashSet<String>(length);
+            for (String module : modules) {
+                if (!tmp.add(module)) {
+                    duplicateFound = true;
+                }
+            }
+            if (duplicateFound) {
+                modules = tmp.toArray(new String[tmp.size()]);
+            }
+        }
         // Check length again
 		length = modules.length;
 		if (length < 2) {
@@ -350,9 +359,13 @@ public class AppsLoadServlet extends SessionServlet {
         }
         int[] key = new int[8];
         java.util.Random r = new java.util.Random();
-        for (int j = 0; j < key.length; j++) key[j] = r.nextInt(256);
+        for (int j = 0; j < key.length; j++) {
+            key[j] = r.nextInt(256);
+        }
         char[] obfuscated = moduleName.toCharArray();
-        for (int j = 0; j < obfuscated.length; j++) obfuscated[j] += key[j % key.length];
+        for (int j = 0; j < obfuscated.length; j++) {
+            obfuscated[j] += key[j % key.length];
+        }
         ew.error(("(function(){" +
             "var key = [" + Strings.join(key, ",") + "], name = '" + escapeName(new String(obfuscated)) + "';" +
             "function c(c, i) { return c.charCodeAt(0) - key[i % key.length]; }" +
