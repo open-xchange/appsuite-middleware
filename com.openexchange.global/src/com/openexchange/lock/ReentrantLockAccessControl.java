@@ -84,7 +84,7 @@ public class ReentrantLockAccessControl implements AccessControl {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         release();
     }
 

@@ -49,6 +49,7 @@
 
 package com.openexchange.lock;
 
+import java.io.Closeable;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -69,7 +70,7 @@ import java.util.concurrent.TimeUnit;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.4
  */
-public interface AccessControl extends AutoCloseable {
+public interface AccessControl extends Closeable {
 
     /**
      * Acquires a grant from this access control; waiting for an available grant if needed.
