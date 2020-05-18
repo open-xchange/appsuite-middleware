@@ -58,4 +58,4 @@ Lists all database schemata that their names match the specified search pattern
 
 # SEE ALSO
 
-[createschema(1)](createschema), [createschemas(1)](createschemas), [countdatabaseschema(1)(countdatabaseschema)]
+[createschema(1)](createschema), [createschemas(1)](createschemas), [countdatabaseschema(1)](countdatabaseschema)
