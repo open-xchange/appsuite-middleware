@@ -7,7 +7,7 @@ BuildRequires:  ant-nodeps
 BuildRequires:  open-xchange-core
 BuildRequires:  java-devel >= 1.6.0
 Version:	@OXVERSION@
-%define        ox_release 51
+%define        ox_release 52
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -62,6 +62,8 @@ fi
 %doc com.openexchange.spamhandler.cloudmark/ChangeLog
 
 %changelog
+* Mon May 18 2020 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>
+Build for patch 2020-05-22 (5739)
 * Thu Apr 02 2020 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>
 Build for patch 2020-04-07 (5685)
 * Tue Mar 03 2020 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>
