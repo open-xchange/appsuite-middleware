@@ -53,9 +53,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import java.rmi.RemoteException;
 import java.util.Stack;
-import org.junit.After;
 import org.junit.Test;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
@@ -65,6 +63,8 @@ import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.DuplicateExtensionException;
+import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.factory.ResellerAdminFactory;
 import com.openexchange.admin.rmi.factory.UserFactory;
 
@@ -79,17 +79,16 @@ public class OXResellerInterfaceTest extends AbstractOXResellerTest {
         super();
     }
 
-    @After
+    @Override
     public final void tearDown() throws Exception {
-        final ResellerAdmin[] adms = getResellerManager().search("test*");
-        for (final ResellerAdmin adm : adms) {
-            getResellerManager().delete(adm);
+        try {
+            final ResellerAdmin[] adms = getResellerManager().search("test*");
+            for (final ResellerAdmin adm : adms) {
+                getResellerManager().delete(adm);
+            }
+        } finally {
+            super.tearDown();
         }
-    }
-
-    @Test
-    public void testUpdateModuleAccessRestrictions() throws Exception {
-        getResellerManager().updateDatabaseModuleAccessRestrictions();
     }
 
     @Test
@@ -103,29 +102,25 @@ public class OXResellerInterfaceTest extends AbstractOXResellerTest {
         assertTrue("creation of ResellerAdmin failed", admch.getId() > 0);
     }
 
-    @Test
+    @Test(expected = InvalidDataException.class)
     public void testCreateMissingMandatoryFields() throws Exception {
-        try {
-            ResellerAdmin adm = new ResellerAdmin();
-            // no displayname
-            adm.setName("incomplete");
-            adm.setPassword("secret");
-            getResellerManager().create(adm);
+        ResellerAdmin adm = new ResellerAdmin();
+        // no displayname
+        adm.setName("incomplete");
+        adm.setPassword("secret");
+        getResellerManager().create(adm);
 
-            // no password
-            adm.setPassword(null);
-            adm.setDisplayname("Test incomplete");
-            adm.setName("incomplete");
-            getResellerManager().create(adm);
+        // no password
+        adm.setPassword(null);
+        adm.setDisplayname("Test incomplete");
+        adm.setName("incomplete");
+        getResellerManager().create(adm);
 
-            // no name
-            adm.setPassword("secret");
-            adm.setDisplayname("Test incomplete");
-            adm.setName(null);
-            getResellerManager().create(adm);
-        } catch (RemoteException e) {
-            checkException(e);
-        }
+        // no name
+        adm.setPassword("secret");
+        adm.setDisplayname("Test incomplete");
+        adm.setName(null);
+        getResellerManager().create(adm);
     }
 
     @Test
@@ -189,15 +184,11 @@ public class OXResellerInterfaceTest extends AbstractOXResellerTest {
         assertEquals("getData must return changed name", adm.getName(), chadm.getName());
     }
 
-    @Test
+    @Test(expected = StorageException.class)
     public void testChangeNameWithoutID() throws Exception {
-        try {
-            ResellerAdmin adm = new ResellerAdmin();
-            adm.setName(CHANGEDNAME + "new");
-            getResellerManager().change(adm);
-        } catch (RemoteException e) {
-            checkException(e);
-        }
+        ResellerAdmin adm = new ResellerAdmin();
+        adm.setName(CHANGEDNAME + "new");
+        getResellerManager().change(adm);
     }
 
     @Test
@@ -284,7 +275,7 @@ public class OXResellerInterfaceTest extends AbstractOXResellerTest {
         boolean deleteFailed = false;
         try {
             getResellerManager().delete(ResellerAdminFactory.createResellerAdmin("owned"));
-        } catch (OXResellerException | RemoteException e) {
+        } catch (OXResellerException e) {
             deleteFailed = true;
         }
         assertTrue("deletion of ResellerAdmin must fail", deleteFailed);
