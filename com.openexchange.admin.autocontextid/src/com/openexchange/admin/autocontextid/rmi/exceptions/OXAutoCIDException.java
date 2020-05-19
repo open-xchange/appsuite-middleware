@@ -82,9 +82,9 @@ public class OXAutoCIDException extends Exception {
          */
         MAXIMUM_NUMBER_CONTEXT_REACHED("Maximum number of contexts reached: %1$s"),
         /**
-         * Maximum overall number of users reached: %1$s
+         * Maximum overall number of contexts reached: %1$s
          */
-        MAXIMUM_OVERALL_NUMBER_OF_CONTEXT_REACHED("Maximum overall number of users reached: %1$s"),
+        MAXIMUM_OVERALL_NUMBER_OF_CONTEXT_REACHED("Maximum overall number of contexts reached: %1$s"),
         /**
          * Maximum overall number of users reached: %1$s
          */
