@@ -66,6 +66,8 @@ import com.openexchange.halo.HaloContactQuery;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.Tools;
 import com.openexchange.mail.IndexRange;
+import com.openexchange.mail.MailFetchListener;
+import com.openexchange.mail.MailFetchListenerRegistry;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
@@ -212,14 +214,17 @@ public class EmailContactHalo extends AbstractContactHalo implements HaloContact
         SearchTerm<?> senderTerm = generateSenderSearch(addresses);
         SearchTerm<?> recipientTerm = generateRecipientSearch(addresses);
         List<MailMessage> messages = new LinkedList<MailMessage>();
+        List<MailFetchListener> fetchListeners = MailFetchListenerRegistry.getFetchListeners();
         for (MailAccount mailAccount : userMailAccounts) {
+            List<MailMessage> aux = new LinkedList<MailMessage>();
             MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
             try {
                 mailAccess = mailService.getMailAccess(session, mailAccount.getId());
                 mailAccess.connect();
                 RetrievalResult retrievees = retrieveMessages(limit, senderTerm, recipientTerm, requestedFields, headers, mailAccess);
-                messages.addAll(retrievees.inboxMessages);
-                messages.addAll(retrievees.sentMessage);
+                aux.addAll(retrievees.inboxMessages);
+                aux.addAll(retrievees.sentMessage);
+                checkForMailFetchListeners(messages, fetchListeners, aux, mailAccess, requestedFields);
             } finally {
                 if (mailAccess != null) {
                     mailAccess.close(true);
@@ -242,6 +247,30 @@ public class EmailContactHalo extends AbstractContactHalo implements HaloContact
 
         messages = messages.subList(0, Math.min(limit, messages.size()));
         return new AJAXRequestResult(messages, "mail");
+    }
+
+    /**
+     * Check for mail fetch listeners
+     *
+     * @param messages The messages
+     * @param fetchListeners The fetch listeners
+     * @param aux The auxiliary list with messages
+     * @param mailAccess The mail access
+     * @param requestedFields The requested fields
+     * @throws OXException if an error is occurred
+     */
+    private void checkForMailFetchListeners(List<MailMessage> messages, List<MailFetchListener> fetchListeners, List<MailMessage> aux, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, MailField[] requestedFields) throws OXException {
+        if (null == fetchListeners) {
+            return;
+        }
+        if (Arrays.binarySearch(requestedFields, MailField.AUTHENTICATION_MECHANISM_RESULTS) < 0 && (Arrays.binarySearch(requestedFields, MailField.AUTHENTICATION_OVERALL_RESULT) < 0)) {
+            return;
+        }
+        for (MailMessage m : aux) {
+            for (MailFetchListener listener : fetchListeners) {
+                messages.add(listener.onSingleMailFetch(m, mailAccess));
+            }
+        }
     }
 
     protected SearchTerm<?> generateSenderSearch(final List<String> addresses) {
