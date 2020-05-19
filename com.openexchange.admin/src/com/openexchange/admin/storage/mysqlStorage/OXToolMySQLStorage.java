@@ -59,7 +59,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -1987,7 +1986,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
 
             // Determine outdated threshold
             long outdatedThreshold = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(1); // 24h ago
-            List<Database> outdatedUpdating = new LinkedList<Database>();
+            List<Database> outdatedUpdating = null;
 
             // Unblock outdated schemas
             Updater updater = Updater.getInstance();
@@ -2000,6 +1999,9 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                         int contextId = getAnyContextFromSchema(poolId, database.getScheme());
                         try {
                             updater.unblock(database.getScheme(), poolId, contextId);
+                            if (outdatedUpdating == null) {
+                                outdatedUpdating = new LinkedList<Database>();
+                            }
                             outdatedUpdating.add(database);
                         } catch (OXException e) {
                             if (!e.equalsCode(5, "UPD")) {
@@ -2010,7 +2012,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                     }
                 }
             }
-            return outdatedUpdating;
+            return outdatedUpdating == null ? Collections.emptyList() : outdatedUpdating;
         } catch (OXException e) {
             if (e.getCode() == 102) {
                 // NOTE: this situation should not happen!
@@ -2072,9 +2074,9 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             }
         }
 
-        List<Database> needingUpdate = new LinkedList<Database>();
-        List<Database> currentlyUpdating = new LinkedList<Database>();
-        List<Database> outdatedUpdating = new LinkedList<Database>();
+        List<Database> needingUpdate = null;
+        List<Database> currentlyUpdating = null;
+        List<Database> outdatedUpdating = null;
 
         long outdatedThreshold = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(1); // 24h ago
 
@@ -2086,12 +2088,21 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                     // Currently updating
                     Date runningSince = status.blockingUpdatesRunningSince();
                     if (null != runningSince && runningSince.getTime() < outdatedThreshold) {
+                        if (outdatedUpdating == null) {
+                            outdatedUpdating = new LinkedList<Database>();
+                        }
                         outdatedUpdating.add(database);
                     } else {
+                        if (currentlyUpdating == null) {
+                            currentlyUpdating = new LinkedList<Database>();
+                        }
                         currentlyUpdating.add(database);
                     }
                 } else if (status.needsBlockingUpdates()) {
                     // Needs update
+                    if (needingUpdate == null) {
+                        needingUpdate = new LinkedList<Database>();
+                    }
                     needingUpdate.add(database);
                 }
             }
@@ -2105,7 +2116,11 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             throw StorageException.wrapForRMI(e);
         }
 
-        return Arrays.asList(needingUpdate, currentlyUpdating, outdatedUpdating);
+        List<List<Database>> retval = new ArrayList<>(3);
+        retval.add(needingUpdate == null ? Collections.emptyList() : needingUpdate);
+        retval.add(currentlyUpdating == null ? Collections.emptyList() : currentlyUpdating);
+        retval.add(outdatedUpdating == null ? Collections.emptyList() : outdatedUpdating);
+        return retval;
     }
 
     /**
