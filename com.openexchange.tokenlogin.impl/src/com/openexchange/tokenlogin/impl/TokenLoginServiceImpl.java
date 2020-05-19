@@ -82,6 +82,7 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.DefaultAddSessionParameter;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.sessiond.SessiondServiceExtended;
 import com.openexchange.tokenlogin.DefaultTokenLoginSecret;
 import com.openexchange.tokenlogin.TokenLoginExceptionCodes;
 import com.openexchange.tokenlogin.TokenLoginSecret;
@@ -381,7 +382,12 @@ public class TokenLoginServiceImpl implements TokenLoginService {
             lock.unlock();
         }
         // Create duplicate session
-        final Session session = sessiondService.getSession(sessionId);
+        Session session;
+        if (sessiondService instanceof SessiondServiceExtended) {
+            session = ((SessiondServiceExtended) sessiondService).peekSession(sessionId);
+        } else {
+            session = sessiondService.getSession(sessionId);
+        }
         if (null == session) {
             throw TokenLoginExceptionCodes.NO_SUCH_SESSION_FOR_TOKEN.create(token);
         }
@@ -390,7 +396,7 @@ public class TokenLoginServiceImpl implements TokenLoginService {
         parameter.setClientIP(Strings.isEmpty(optClientIp) ? session.getLocalIp() : optClientIp);
         parameter.setFullLogin(session.getLogin()).setPassword(session.getPassword());
         parameter.setContext(contextService.getContext(session.getContextId()));
-        parameter.setUserLoginInfo(session.getLoginName()).setTransient(session.isTransient());
+        parameter.setUserLoginInfo(session.getLoginName());
         // Client identifier
         parameter.setClient(Strings.isEmpty(optClientIdentifier) ? session.getClient() : optClientIdentifier);
         // Authentication identifier
@@ -398,6 +404,8 @@ public class TokenLoginServiceImpl implements TokenLoginService {
         // Hash value
         parameter.setHash(Strings.isEmpty(optHash) ? session.getHash() : optHash);
         parameter.setUserAgent(Strings.isEmpty(optUserAgent) ? (String) session.getParameter(Session.PARAM_USER_AGENT) : optUserAgent);
+        // short-living session without fail-over
+        parameter.setTransient(true).setStaySignedIn(false);
         // Add & return session
         return sessiondService.addSession(parameter);
     }
