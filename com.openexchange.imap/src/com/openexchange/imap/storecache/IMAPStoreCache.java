@@ -116,10 +116,6 @@ public final class IMAPStoreCache {
         }
         final ConfigurationService service = Services.getService(ConfigurationService.class);
         Container container = null == service ? Container.getDefault() : Container.containerFor(service.getProperty("com.openexchange.imap.storeContainerType", Container.getDefault().getId()));
-        if (Container.UNBOUNDED.equals(container) && (null != service && service.getIntProperty("com.openexchange.imap.maxNumConnections", 0) > 0)) {
-            LOG.warn("Property \"com.openexchange.imap.storeContainerType\" is set to \"unbounded\", but \"com.openexchange.imap.maxNumConnections\" is greater than zero. Using default container \"{}\" instead.", Container.getDefault().getId());
-            container = Container.getDefault();
-        }
         tmp = new IMAPStoreCache(container);
         tmp.reinit(true);
         instance = tmp;
