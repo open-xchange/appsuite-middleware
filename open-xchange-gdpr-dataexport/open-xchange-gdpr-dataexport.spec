@@ -6,7 +6,7 @@ BuildRequires: ant
 BuildRequires: open-xchange-core
 BuildRequires: java-1.8.0-openjdk-devel
 Version:       @OXVERSION@
-%define        ox_release 0
+%define        ox_release 1
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -56,6 +56,8 @@ GLOBIGNORE='*'
 /opt/open-xchange/sbin/*
 
 %changelog
+* Wed May 20 2020 Thorben Betten <thorben.betten@open-xchange.com>
+First preview of 7.10.4 release
 * Thu Jan 16 2020 Thorben Betten <thorben.betten@open-xchange.com>
 prepare for 7.10.4 release
 * Thu Nov 28 2019 Thorben Betten <thorben.betten@open-xchange.com>

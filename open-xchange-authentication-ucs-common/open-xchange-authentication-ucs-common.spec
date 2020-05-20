@@ -6,7 +6,7 @@ BuildRequires: ant
 BuildRequires: java-1.8.0-openjdk-devel
 BuildRequires: open-xchange-core
 Version:       @OXVERSION@
-%define        ox_release 0
+%define        ox_release 1
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -91,5 +91,27 @@ fi
 %config(noreplace) /opt/open-xchange/etc/authplugin.properties
 
 %changelog
-* Tue Apr 14 2020 Marcus Klein <marcus.klein@open-xchange.com>
-initial packaging
+* Wed May 20 2020 Felix Marx <felix.marx@open-xchange.com>
+First preview of 7.10.4 release
+* Thu Jan 16 2020 Felix Marx <felix.marx@open-xchange.com>
+prepare for 7.10.4 release
+* Thu Nov 28 2019 Felix Marx <felix.marx@open-xchange.com>
+Second candidate for 7.10.3 release
+* Thu Nov 21 2019 Felix Marx <felix.marx@open-xchange.com>
+First candidate for 7.10.3 release
+* Thu Oct 17 2019 Felix Marx <felix.marx@open-xchange.com>
+First preview for 7.10.3 release
+* Mon Jun 17 2019 Felix Marx <felix.marx@open-xchange.com>
+prepare for 7.10.3 release
+* Fri May 10 2019 Felix Marx <felix.marx@open-xchange.com>
+Second candidate for 7.10.2 release
+* Fri May 10 2019 Felix Marx <felix.marx@open-xchange.com>
+First candidate for 7.10.2 release
+* Tue Apr 30 2019 Felix Marx <felix.marx@open-xchange.com>
+Second preview for 7.10.2 release
+* Thu Mar 28 2019 Felix Marx <felix.marx@open-xchange.com>
+First preview for 7.10.2 release
+* Thu Oct 18 2018 Felix Marx <felix.marx@open-xchange.com>
+prepare for 7.10.2 release
+* Mon Oct 08 2018 Felix Marx <felix.marx@open-xchange.com>
+prepare for 7.10.1 release
