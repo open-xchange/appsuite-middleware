@@ -67,15 +67,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import org.dmfs.rfc5545.DateTime;
 import com.openexchange.annotation.Nullable;
+import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.common.DefaultRecurrenceData;
+import com.openexchange.chronos.service.RecurrenceData;
+import com.openexchange.chronos.service.RecurrenceIterator;
+import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.database.Databases;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.GroupService;
 import com.openexchange.groupware.calendar.CalendarCollectionUtils;
 import com.openexchange.groupware.calendar.Constants;
-import com.openexchange.groupware.calendar.RecurringResultInterface;
-import com.openexchange.groupware.calendar.RecurringResultsInterface;
+import com.openexchange.groupware.calendar.old.RRuleHelper;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.GroupParticipant;
@@ -84,7 +89,9 @@ import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.data.Check;
 import com.openexchange.groupware.tasks.TaskParticipant.Type;
+import com.openexchange.groupware.tasks.osgi.Services;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.java.Strings;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -464,22 +471,20 @@ public final class TaskLogic {
         if (!task.containsStartDate() || !task.containsEndDate() || null == task.getStartDate() || null == task.getEndDate() || !task.containsRecurrenceType() || CalendarObject.NO_RECURRENCE == task.getRecurrenceType()) {
             return;
         }
+        String recurrenceRule = RRuleHelper.getRecurrenceRule(task);
+        if (Strings.isEmpty(recurrenceRule)) {
+            return;
+        }
+        RecurrenceData data = new DefaultRecurrenceData(recurrenceRule, new DateTime(task.getStartDate().getTime()));
+        RecurrenceService recurrenceService = Services.getService(RecurrenceService.class);
+        RecurrenceIterator<RecurrenceId> iterateRecurrenceIds = recurrenceService.iterateRecurrenceIds(data);
+        if (null != iterateRecurrenceIds && iterateRecurrenceIds.hasNext()) {
+            RecurrenceId recurrenceId = iterateRecurrenceIds.next();
+            task.setEndDate(toEndDate(recurrenceId, task));
+            task.setStartDate(toDate(recurrenceId));
+            return;
+        }
 
-        task.setRecurrenceCalculator((int) ((task.getEndDate().getTime() - task.getStartDate().getTime()) / (Constants.MILLI_DAY)));
-        final RecurringResultsInterface results = CalendarCollectionUtils.calculateRecurring(task, 0, 0, 1, CalendarCollectionUtils.MAX_OCCURRENCESE, false);
-        if (null == results || 0 == results.size()) {
-            return;
-        }
-        final RecurringResultInterface result = results.getRecurringResult(0);
-        if (null == result) {
-            return;
-        }
-        if (!new Date(result.getStart()).equals(task.getStartDate())) {
-            task.setStartDate(new Date(result.getStart()));
-        }
-        if (!new Date(result.getEnd()).equals(task.getEndDate())) {
-            task.setEndDate(new Date(result.getEnd()));
-        }
     }
 
     /**
@@ -687,15 +692,35 @@ public final class TaskLogic {
         // Recurring calculation sets until date itself and may add some time
         // in some conditions cause an overflow if MAX_VALUE is set and no
         // new recurrence is calculated.
-        final RecurringResultsInterface rr = CalendarCollectionUtils.calculateRecurring(task, 0, 0, 2, CalendarCollectionUtils.MAX_OCCURRENCESE, false);
-        final RecurringResultInterface result = rr.getRecurringResult(0);
-        final Date[] retval;
-        if (null == result) {
-            retval = new Date[0];
-        } else {
-            retval = new Date[] { new Date(result.getStart()), new Date(result.getEnd()) };
+        RecurrenceService recurrenceService = Services.getService(RecurrenceService.class);
+        RecurrenceData data = new DefaultRecurrenceData(RRuleHelper.getRecurrenceRule(task), new DateTime(task.getStartDate().getTime()));
+        RecurrenceIterator<RecurrenceId> recurrenceIterator = recurrenceService.iterateRecurrenceIds(data, I(2), I(CalendarCollectionUtils.MAX_OCCURRENCESE));
+        if (null != recurrenceIterator && recurrenceIterator.hasNext()) {
+            RecurrenceId recurrenceId = recurrenceIterator.next();
+            return new Date[] { toDate(recurrenceId), toEndDate(recurrenceId, task) };
         }
-        return retval;
+        return new Date[0];
+    }
+
+    /**
+     * Converts a {@link RecurrenceId} to date
+     *
+     * @param recurrenceId The ID
+     * @return A {@link Date}
+     */
+    private static Date toDate(RecurrenceId recurrenceId) {
+        return new Date(recurrenceId.getValue().getTimestamp());
+    }
+
+    /**
+     * Converts a {@link RecurrenceId} to an end date, taking
+     * the time between start and end date of the task into account
+     *
+     * @param recurrenceId The ID
+     * @return A {@link Date}
+     */
+    private static Date toEndDate(RecurrenceId recurrenceId, Task task) {
+        return new Date(recurrenceId.getValue().getTimestamp() + (task.getEndDate().getTime() - task.getStartDate().getTime()));
     }
 
     /**
