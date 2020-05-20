@@ -67,6 +67,7 @@ import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.session.Session;
 import com.sun.mail.imap.GreetingListener;
 import com.sun.mail.imap.IMAPStore;
+import com.sun.mail.util.PropUtil;
 
 /**
  * {@link UnboundedIMAPStoreContainer} - The unbounded {@link IMAPStoreContainer}.
@@ -100,8 +101,16 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
         this.checkConnectivityIfPolled = checkConnectivityIfPolled;
     }
 
+    private void checkMaxNumConnections(javax.mail.Session imapSession, Session session) {
+        int maxNumAuthenticated = PropUtil.getIntProperty(imapSession.getProperties(), "mail.imap.maxNumAuthenticated", 0);
+        if (maxNumAuthenticated > 0) {
+            LOG.warn("Property \"com.openexchange.imap.storeContainerType\" is set to \"unbounded\", but \"com.openexchange.imap.maxNumConnections\" is greater than 0 (zero) for user {} in context {}. Please review settings.", I(session.getUserId()), I(session.getContextId()));
+        }
+    }
+
     @Override
     public IMAPStore getStore(javax.mail.Session imapSession, String login, String pw, Session session) throws IMAPStoreContainerInvalidException, MessagingException, InterruptedException {
+        checkMaxNumConnections(imapSession, session);
         // Poll or create IMAP store
         IMAPStoreWrapper imapStoreWrapper;
         lock.lock();

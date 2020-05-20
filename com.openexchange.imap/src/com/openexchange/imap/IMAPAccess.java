@@ -75,9 +75,6 @@ import javax.mail.internet.idn.IDNA;
 import javax.security.auth.Subject;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Interests;
-import com.openexchange.config.Reloadable;
-import com.openexchange.config.Reloadables;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.acl.ACLExtension;
 import com.openexchange.imap.acl.ACLExtensionInit;
@@ -88,7 +85,6 @@ import com.openexchange.imap.cache.RootSubfoldersEnabledCache;
 import com.openexchange.imap.config.IIMAPProperties;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.config.IMAPProperties;
-import com.openexchange.imap.config.IMAPReloadable;
 import com.openexchange.imap.config.IMAPSessionProperties;
 import com.openexchange.imap.config.MailAccountIMAPProperties;
 import com.openexchange.imap.converters.IMAPFolderConverter;
@@ -106,7 +102,6 @@ import com.openexchange.log.audit.AuditLogService;
 import com.openexchange.log.audit.DefaultAttribute;
 import com.openexchange.log.audit.DefaultAttribute.Name;
 import com.openexchange.mail.MailExceptionCode;
-import com.openexchange.mail.Protocol;
 import com.openexchange.mail.api.AuthType;
 import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mail.api.IMailStoreAware;
@@ -256,16 +251,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     private transient Subject kerberosSubject;
 
     /**
-     * The IMAP protocol.
-     */
-    private final Protocol protocol;
-
-    /**
-     * The max. connection count.
-     */
-    private int maxCount;
-
-    /**
      * The connected flag.
      */
     private boolean connected;
@@ -301,30 +286,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     private transient volatile IMAPConfig imapConfig;
 
     /**
-     * A simple cache for max. count values per server.
-     */
-    private static volatile ConcurrentMap<String, Integer> maxCountCache;
-
-    static {
-        IMAPReloadable.getInstance().addReloadable(new Reloadable() {
-
-            @SuppressWarnings("synthetic-access")
-            @Override
-            public void reloadConfiguration(final ConfigurationService configService) {
-                final ConcurrentMap<String, Integer> m = maxCountCache;
-                if (null != m) {
-                    m.clear();
-                }
-            }
-
-            @Override
-            public Interests getInterests() {
-                return Reloadables.interestsForProperties("com.openexchange.imap.maxNumConnections");
-            }
-        });
-    }
-
-    /**
      * Initializes a new {@link IMAPAccess IMAP access} for default IMAP account.
      *
      * @param session The session providing needed user data
@@ -332,8 +293,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     protected IMAPAccess(final Session session) {
         super(session);
         setMailProperties((Properties) System.getProperties().clone());
-        maxCount = -1;
-        protocol = IMAPProvider.PROTOCOL_IMAP;
     }
 
     /**
@@ -345,30 +304,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     protected IMAPAccess(final Session session, final int accountId) {
         super(session, accountId);
         setMailProperties((Properties) System.getProperties().clone());
-        maxCount = -1;
-        protocol = IMAPProvider.PROTOCOL_IMAP;
-    }
-
-    /**
-     * Gets the max. count for this IMAP access.
-     *
-     * @return The max. count
-     * @throws OXException If an exception occurs
-     */
-    protected int getMaxCount() throws OXException {
-        final ConcurrentMap<String, Integer> cache = maxCountCache;
-        if (null == cache) {
-            return protocol.getMaxCount(server, MailAccount.DEFAULT_ID == accountId);
-        }
-        Integer maxCount = cache.get(server);
-        if (null == maxCount) {
-            final Integer i = Integer.valueOf(protocol.getMaxCount(server, MailAccount.DEFAULT_ID == accountId));
-            maxCount = cache.putIfAbsent(server, i);
-            if (null == maxCount) {
-                maxCount = i;
-            }
-        }
-        return maxCount.intValue();
     }
 
     @Override
@@ -817,7 +752,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              */
             checkAuthFailed(this.login, this.password, imapConfProps);
             this.clientIp = clientIp;
-            maxCount = getMaxCount();
+            int maxCount = getIMAPConfig().getIMAPProperties().getMaxNumConnection();
             try {
                 imapStore = connectIMAPStore(maxCount);
             } catch (AuthenticationFailedException e) {
@@ -1241,7 +1176,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         RootSubfoldersEnabledCache.init();
         ACLExtensionInit.getInstance().start();
         Entity2ACLInit.getInstance().start();
-        maxCountCache = new NonBlockingHashMap<>(16);
 
         final ConfigurationService confService = Services.getService(ConfigurationService.class);
         final boolean useIMAPStoreCache = null == confService ? true : confService.getBoolProperty("com.openexchange.imap.useIMAPStoreCache", true);
@@ -1295,7 +1229,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     @Override
     protected void shutdown() throws OXException {
         USE_IMAP_STORE_CACHE.set(true);
-        maxCountCache = null;
         Entity2ACLInit.getInstance().stop();
         ACLExtensionInit.getInstance().stop();
         IMAPCapabilityAndGreetingCache.tearDown();
