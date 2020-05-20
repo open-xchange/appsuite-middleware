@@ -58,6 +58,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.StringCollection;
 
@@ -72,55 +73,35 @@ public class PushMsObject extends AbstractPushMsObject implements Serializable {
 
     private static final long serialVersionUID = -8490584616201401142L;
 
+    /**
+     * Generates the appropriate <code>PushMsObject</code> instance from given object's map representation
+     *
+     * @param pojo The object's map representation formerly created via {@link PushMsObject#writePojo()}
+     * @return The <code>PushMsObject</code> instance or <code>null</code>
+     */
     public static PushMsObject valueFor(final Map<String, Object> pojo) {
         if (null == pojo || pojo.containsKey("__pure")) {
             return null;
         }
         try {
-            final int contextId;
-            {
-                final Integer i = (Integer) pojo.get("__contextId");
-                contextId = null == i ? 0 : i.intValue();
-            }
-            final boolean remote;
-            {
-                final Boolean b = (Boolean) pojo.get("__remote");
-                remote = null == b ? false : b.booleanValue();
-            }
-            final int folderId;
-            {
-                final Integer i = (Integer) pojo.get("__folderId");
-                folderId = null == i ? 0 : i.intValue();
-            }
-            final int module;
-            {
-                final Integer i = (Integer) pojo.get("__module");
-                module = null == i ? 0 : i.intValue();
-            }
-            final int hash;
-            {
-                final Integer i = (Integer) pojo.get("__hash");
-                hash = null == i ? 0 : i.intValue();
-            }
-            final int[] users = (int[]) pojo.get("__users");
-            final long creationDate;
-            {
-                final Long l = (Long) pojo.get("__creationDate");
-                creationDate = null == l ? 0 : l.longValue();
-            }
-            final long timestamp;
-            {
-                final Long l = (Long) pojo.get("__timestamp");
-                timestamp = null == l ? 0 : l.longValue();
-            }
-            final String hostname = (String) pojo.get("__hostname");
-            final String topicName = (String) pojo.get("__topicName");
+            int contextId = parseFrom("__contextId", pojo, Integer.class).intValue();
+            boolean remote = parseFrom("__remote", pojo, Boolean.class).booleanValue();
+            int folderId = parseFrom("__folderId", pojo, Integer.class).intValue();
+            int module = parseFrom("__module", pojo, Integer.class).intValue();
+            int hash = parseFrom("__hash", pojo, Integer.class).intValue();
+            int[] users = (int[]) pojo.get("__users");
+            long creationDate = parseFrom("__creationDate", pojo, Long.class).longValue();
+            long timestamp = parseFrom("__timestamp", pojo, Long.class).longValue();
+            String hostname = (String) pojo.get("__hostname");
+            String topicName = (String) pojo.get("__topicName");
             return new PushMsObject(folderId, module, contextId, users, remote, timestamp, topicName, hostname, hash, new Date(creationDate));
         } catch (NullPointerException npe) {
             LOG.warn("Missing required attribute.", npe);
             return null;
         }
     }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
 
     private final int folderId;
     private final int module;
@@ -139,7 +120,7 @@ public class PushMsObject extends AbstractPushMsObject implements Serializable {
      * @param contextId The context ID
      * @param users The user IDs as an array
      * @param isRemote <code>true</code> to mark this push object as remotely received; otherwise <code>false</code>
-     * @param timestamp last modified time of the groupware data object
+     * @param timestamp last modified time of the Groupware data object
      * @param topicName the topic on which the data object was received
      */
     public PushMsObject(final int folderId, final int module, final int contextId, final int[] users, final boolean isRemote, final long timestamp, final String topicName) {
@@ -164,14 +145,14 @@ public class PushMsObject extends AbstractPushMsObject implements Serializable {
     /**
      * Initializes a new {@link PushMsObject}.
      *
-     * @param folderId The folder ID
-     * @param module The module
-     * @param contextId The context ID
-     * @param users The user IDs as an array
+     * @param folderId The folder identifier
+     * @param module The module identifier
+     * @param contextId The context identifier
+     * @param users The user identifiers as an array
      * @param isRemote <code>true</code> to mark this push object as remotely received; otherwise <code>false</code>
-     * @param timestamp last modified time of the groupware data object
-     * @param topicName the topic on which the data object was received
-     * @param hostname the hostname to use for this PushMsObject
+     * @param timestamp The last-modified time stamp of the Groupware data object
+     * @param topicName The topic on which the data object was received
+     * @param hostname The host name to use
      */
     public PushMsObject(final int folderId, final int module, final int contextId, final int[] users, final boolean isRemote, final long timestamp, final String topicName, String hostname) {
         super(contextId, isRemote);
@@ -207,7 +188,7 @@ public class PushMsObject extends AbstractPushMsObject implements Serializable {
     }
 
     /**
-     * Generates the POJO view for this instance.
+     * Generates the POJO (aka map representation) view for this instance.
      *
      * @return The POJO view
      */
@@ -243,27 +224,27 @@ public class PushMsObject extends AbstractPushMsObject implements Serializable {
     }
 
     /**
-     * Gets the folder ID.
+     * Gets the folder identifier.
      *
-     * @return The folder ID
+     * @return The folder identifier
      */
     public int getFolderId() {
         return folderId;
     }
 
     /**
-     * Gets the module.
+     * Gets the module identifier.
      *
-     * @return The module
+     * @return The module identifier
      */
     public int getModule() {
         return module;
     }
 
     /**
-     * Gets the user IDs as an array.
+     * Gets the user identifiers as an array.
      *
-     * @return The user IDs as an array
+     * @return The user identifiers as an array
      */
     public int[] getUsers() {
         return users;
@@ -340,6 +321,8 @@ public class PushMsObject extends AbstractPushMsObject implements Serializable {
             ",TIMESTAMP=").append(timestamp).append(",TOPIC=").append(topicName).append(",HOSTNAME=").append(hostname).toString();
     }
 
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
     public static PushMsObject parseString(String toParse) throws OXException {
         final Pattern regex = Pattern.compile(
             "FOLDER_ID=(.*?),MODULE=(.*?),CONTEXT_ID=(.*?),USERS=(.*?),IS_REMOTE=(.*?),TIMESTAMP=(.*?),TOPIC=(.*?),HOSTNAME=(.*?)",
@@ -369,4 +352,37 @@ public class PushMsObject extends AbstractPushMsObject implements Serializable {
         String hostname = matcher.group(8);
         return new PushMsObject(folderId, module, contextId, users, isRemote, timestamp, topicName, hostname);
     }
+
+    @FunctionalInterface
+    private static interface Extractor<T> {
+
+        T extract(String key, Map<String, Object> pojo);
+    }
+
+    private static final Map<Class<?>, Extractor<?>> EXTRACTORS;
+    static {
+        ImmutableMap.Builder<Class<?>, Extractor<?>> extractors = ImmutableMap.builderWithExpectedSize(3);
+        extractors.put(Integer.class, (key, pojo) -> {
+            Integer i = (Integer) pojo.get(key);
+            return null == i ? Integer.valueOf(0) : i;
+        });
+        extractors.put(Long.class, (key, pojo) -> {
+            Long l = (Long) pojo.get(key);
+            return null == l ? Long.valueOf(0) : l;
+        });
+        extractors.put(Boolean.class, (key, pojo) -> {
+            Boolean b = (Boolean) pojo.get(key);
+            return null == b ? Boolean.FALSE : b;
+        });
+        EXTRACTORS = extractors.build();
+    }
+
+    private static <T> T parseFrom(String key, Map<String, Object> pojo, Class<T> type) {
+        Extractor<?> extractor = EXTRACTORS.get(type);
+        if (extractor == null) {
+            throw new IllegalArgumentException("Unsupported type: " + (type == null ? "null" : type.getName()));
+        }
+        return (T) extractor.extract(key, pojo);
+    }
+
 }
