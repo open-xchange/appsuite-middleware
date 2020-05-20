@@ -64,7 +64,7 @@ import io.micrometer.core.instrument.config.MeterFilter;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.4
  */
-public class ActivateMetricMicrometerFilterPerformer extends AbstractMicrometerFilterPerformer implements MicrometerFilterPerformer {
+public class ActivateMetricMicrometerFilterPerformer extends AbstractMicrometerFilterPerformer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ActivateMetricMicrometerFilterPerformer.class);
 
@@ -83,7 +83,7 @@ public class ActivateMetricMicrometerFilterPerformer extends AbstractMicrometerF
                 return;
             }
             String metricId = extractMetricId(key, MicrometerFilterProperty.ENABLE);
-            String query = FilterMetricMicrometerFilterPerformer.filterRegistry.get(metricId);
+            String query = FilterMetricMicrometerFilterPerformer.filterRegistryReference.get().get(metricId);
             if (Strings.isEmpty(query)) {
                 LOGGER.debug("Applying enable/disable meter filter for '{}'", metricId);
                 meterRegistry.config().meterFilter(Boolean.parseBoolean(entry.getValue()) ? MeterFilter.acceptNameStartsWith(metricId) : MeterFilter.denyNameStartsWith(metricId));

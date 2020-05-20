@@ -65,7 +65,7 @@ import io.micrometer.core.instrument.distribution.DistributionStatisticConfig;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.4
  */
-public class DistributionPercentilesMicrometerFilterPerformer extends AbstractMicrometerFilterPerformer implements MicrometerFilterPerformer {
+public class DistributionPercentilesMicrometerFilterPerformer extends AbstractMicrometerFilterPerformer {
 
     private static final Logger LOG = LoggerFactory.getLogger(DistributionPercentilesMicrometerFilterPerformer.class);
 

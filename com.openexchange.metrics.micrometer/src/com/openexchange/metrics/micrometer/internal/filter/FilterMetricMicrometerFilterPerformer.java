@@ -49,6 +49,7 @@
 
 package com.openexchange.metrics.micrometer.internal.filter;
 
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.metrics.micrometer.internal.property.MicrometerFilterProperty;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -59,7 +60,7 @@ import io.micrometer.core.instrument.MeterRegistry;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.4
  */
-public class FilterMetricMicrometerFilterPerformer extends AbstractMicrometerFilterPerformer implements MicrometerFilterPerformer {
+public class FilterMetricMicrometerFilterPerformer extends AbstractMicrometerFilterPerformer {
 
     /**
      * Initializes a new {@link FilterMetricMicrometerFilterPerformer}.
@@ -70,9 +71,10 @@ public class FilterMetricMicrometerFilterPerformer extends AbstractMicrometerFil
 
     @Override
     public void applyFilter(MeterRegistry meterRegistry, ConfigurationService configurationService) {
-        filterRegistry.clear();
+        final ImmutableMap.Builder<String, String> filterRegistry = ImmutableMap.builder();
         applyFilterFor(configurationService, (entry) -> {
             filterRegistry.put(extractMetricId(entry.getKey(), MicrometerFilterProperty.FILTER), entry.getValue());
         });
+        filterRegistryReference.set(filterRegistry.build());
     }
 }

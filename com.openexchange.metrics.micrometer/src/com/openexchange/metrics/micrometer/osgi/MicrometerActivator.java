@@ -49,12 +49,12 @@
 
 package com.openexchange.metrics.micrometer.osgi;
 
-import java.util.ArrayList;
 import java.util.List;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.google.common.collect.ImmutableList;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.DefaultInterests;
 import com.openexchange.config.Interests;
@@ -102,7 +102,15 @@ public class MicrometerActivator extends HousekeepingActivator implements Reload
      */
     public MicrometerActivator() {
         super();
-        filterPerformers = new ArrayList<>();
+        ImmutableList.Builder<MicrometerFilterPerformer> filterPerformers = ImmutableList.builderWithExpectedSize(8);
+        filterPerformers.add(new FilterMetricMicrometerFilterPerformer());
+        filterPerformers.add(new ActivateMetricMicrometerFilterPerformer());
+        filterPerformers.add(new DistributionHistogramMicrometerFilterPerformer());
+        filterPerformers.add(new DistributionMinimumMicrometerFilterPerformer());
+        filterPerformers.add(new DistributionMaximumMicrometerFilterPerformer());
+        filterPerformers.add(new DistributionPercentilesMicrometerFilterPerformer());
+        filterPerformers.add(new DistributionSLAMicrometerFilterPerformer());
+        this.filterPerformers = filterPerformers.build();
     }
 
     @Override
@@ -112,14 +120,6 @@ public class MicrometerActivator extends HousekeepingActivator implements Reload
 
     @Override
     protected synchronized void startBundle() throws Exception {
-        filterPerformers.add(new FilterMetricMicrometerFilterPerformer());
-        filterPerformers.add(new ActivateMetricMicrometerFilterPerformer());
-        filterPerformers.add(new DistributionHistogramMicrometerFilterPerformer());
-        filterPerformers.add(new DistributionMinimumMicrometerFilterPerformer());
-        filterPerformers.add(new DistributionMaximumMicrometerFilterPerformer());
-        filterPerformers.add(new DistributionPercentilesMicrometerFilterPerformer());
-        filterPerformers.add(new DistributionSLAMicrometerFilterPerformer());
-
         applyMeterFilters(getServiceSafe(ConfigurationService.class));
         registerServlet();
 
@@ -131,7 +131,6 @@ public class MicrometerActivator extends HousekeepingActivator implements Reload
     protected synchronized void stopBundle() throws Exception {
         super.stopBundle();
         unregisterServlet();
-        filterPerformers.clear();
         LOG.info("Bundle {} successfully stopped", this.context.getBundle().getSymbolicName());
     }
 

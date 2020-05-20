@@ -62,7 +62,7 @@ import io.micrometer.core.instrument.distribution.DistributionStatisticConfig;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.4
  */
-public class DistributionMinimumMicrometerFilterPerformer extends AbstractMicrometerFilterPerformer implements MicrometerFilterPerformer {
+public class DistributionMinimumMicrometerFilterPerformer extends AbstractMicrometerFilterPerformer {
 
     /**
      * Initializes a new {@link DistributionMinimumMicrometerFilterPerformer}.

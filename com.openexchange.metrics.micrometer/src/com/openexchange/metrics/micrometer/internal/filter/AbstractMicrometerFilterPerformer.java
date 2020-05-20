@@ -50,10 +50,12 @@
 package com.openexchange.metrics.micrometer.internal.filter;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -77,10 +79,12 @@ import io.micrometer.core.instrument.distribution.DistributionStatisticConfig;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.4
  */
-abstract class AbstractMicrometerFilterPerformer {
+abstract class AbstractMicrometerFilterPerformer implements MicrometerFilterPerformer {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractMicrometerFilterPerformer.class);
-    static final Map<String, String> filterRegistry = new HashMap<>();
+
+    static final AtomicReference<Map<String, String>> filterRegistryReference = new AtomicReference<Map<String,String>>(Collections.emptyMap());
+
     private final MicrometerFilterProperty property;
 
     /**
@@ -113,7 +117,7 @@ abstract class AbstractMicrometerFilterPerformer {
         LOG.debug("Applying filter for '{}'", id);
         String key = entry.getKey();
         String metricId = extractMetricId(key, property);
-        String filter = filterRegistry.get(metricId);
+        String filter = filterRegistryReference.get().get(metricId);
         if (Strings.isEmpty(filter)) {
             return applyConfig(entry, metricId, config);
         }
