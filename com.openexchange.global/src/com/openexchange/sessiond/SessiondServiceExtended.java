@@ -87,7 +87,7 @@ public interface SessiondServiceExtended extends SessiondService {
     /**
      * Get the session object related to the given session identifier.
      *
-     * @param sessionId The Session identifier
+     * @param sessionId The session identifier
      * @param considerSessionStorage <code>true</code> to consider session storage for possible distributed session; otherwise
      *            <code>false</code>
      * @return Returns the session or <code>null</code> if no session exists for the given identifier or if the session is expired
@@ -99,7 +99,7 @@ public interface SessiondServiceExtended extends SessiondService {
      * <p>
      * If session has been fetched from session storage, that session will not be added to local SessionD.
      *
-     * @param sessionId The Session identifier
+     * @param sessionId The session identifier
      * @return Returns the session or <code>null</code> if no session exists for the given identifier or if the session is expired
      * @see SessiondServiceExtended#getSession(String, boolean)
      */

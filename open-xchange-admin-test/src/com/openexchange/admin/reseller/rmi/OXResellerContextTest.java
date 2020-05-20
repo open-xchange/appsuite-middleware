@@ -51,8 +51,6 @@ package com.openexchange.admin.reseller.rmi;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import java.rmi.RemoteException;
-import java.rmi.ServerException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -60,6 +58,9 @@ import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
+import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.factory.ResellerAdminFactory;
 
 public class OXResellerContextTest extends AbstractOXResellerTest {
@@ -75,7 +76,6 @@ public class OXResellerContextTest extends AbstractOXResellerTest {
         super();
     }
 
-    @Override
     @Before
     public final void setUp() throws Exception {
         super.setUp();
@@ -83,7 +83,6 @@ public class OXResellerContextTest extends AbstractOXResellerTest {
         getResellerManager().create(randomAdmin);
     }
 
-    @Override
     @After
     public final void tearDown() throws Exception {
         final ResellerAdmin[] adms = getResellerManager().search(randomAdmin.getName());
@@ -92,25 +91,17 @@ public class OXResellerContextTest extends AbstractOXResellerTest {
         }
     }
 
-    @Test
+    @Test(expected = InvalidCredentialsException.class)
     public void testListAllContextInvalidAuthNoUser() throws Exception {
         ResellerAdmin second = ResellerAdminFactory.createRandomResellerAdmin();
-        try {
-            getContextManager().listAll(ResellerRandomCredentials(second.getName()));
-        } catch (RemoteException e) {
-            checkException(e);
-        }
+        getContextManager().listAll(ResellerRandomCredentials(second.getName()));
     }
 
-    @Test
+    @Test(expected = InvalidCredentialsException.class)
     public void testListAllContextInvalidAuthWrongpasswd() throws Exception {
-        try {
-            Credentials creds = ResellerRandomCredentials(randomAdmin.getName());
-            creds.setPassword("wrongpass");
-            getContextManager().listAll(creds);
-        } catch (RemoteException e) {
-            checkException(e);
-        }
+        Credentials creds = ResellerRandomCredentials(randomAdmin.getName());
+        creds.setPassword("wrongpass");
+        getContextManager().listAll(creds);
     }
 
     @Test
@@ -133,7 +124,7 @@ public class OXResellerContextTest extends AbstractOXResellerTest {
         boolean failed_ctx3 = false;
         try {
             ctx3 = createContext(creds);
-        } catch (ServerException e) {
+        } catch (StorageException e) {
             failed_ctx3 = true;
         }
 
@@ -161,7 +152,7 @@ public class OXResellerContextTest extends AbstractOXResellerTest {
         boolean failed_ctx1 = false;
         try {
             ctx1 = createContextNoQuota(contextAdmin);
-        } catch (ServerException e) {
+        } catch (InvalidDataException e) {
             failed_ctx1 = true;
         }
 
@@ -187,7 +178,7 @@ public class OXResellerContextTest extends AbstractOXResellerTest {
         boolean failed_ctx3 = false;
         try {
             ctx3 = createContext(resellerRandomCredentials);
-        } catch (ServerException e) {
+        } catch (StorageException e) {
             failed_ctx3 = true;
         }
         deleteContext(ctx1, resellerRandomCredentials);

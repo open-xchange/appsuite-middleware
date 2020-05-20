@@ -68,6 +68,7 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.database.Databases;
 import com.openexchange.database.SchemaInfo;
 import com.openexchange.databaseold.Database;
@@ -302,11 +303,12 @@ public final class UpdateTaskToolkit {
      * @return an unmodifiable {@link Set} with all registered update tasks
      */
     public static Set<String> getRegisteredUpdateTasks() {
-        Set<String> registered = new HashSet<>();
-        for (UpdateTaskV2 updateTask : DynamicSet.getInstance().getTaskSet()) {
+        Set<UpdateTaskV2> tasks = DynamicSet.getInstance().getTaskSet();
+        ImmutableSet.Builder<String> registered = ImmutableSet.builderWithExpectedSize(tasks.size());
+        for (UpdateTaskV2 updateTask : tasks) {
             registered.add(updateTask.getClass().getName());
         }
-        return Collections.unmodifiableSet(registered);
+        return registered.build();
     }
 
     /**
