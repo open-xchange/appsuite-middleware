@@ -52,8 +52,7 @@ package com.openexchange.push.ms;
 import static com.openexchange.java.Autoboxing.I;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Dictionary;
-import java.util.Hashtable;
+import java.util.Collections;
 import java.util.Map;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
@@ -85,47 +84,50 @@ public class PushMsListener implements MessageListener<Map<String, Object>> {
     @Override
     public void onMessage(final Message<Map<String, Object>> message) {
         final PushMsObject pushObj = PushMsObject.valueFor(message.getMessageObject());
-        if (null != pushObj) {
-            if (!getHostname().equals(pushObj.getHostname())) {
-                LOG.debug("{} received PushMsObject: {}", getHostname(), pushObj);
-                final ServiceLookup registry = Services.getServiceLookup();
-                final EventAdmin eventAdmin = registry.getService(EventAdmin.class);
-                final EventFactoryService eventFactoryService = registry.getService(EventFactoryService.class);
-                if (eventAdmin != null && eventFactoryService != null) {
-                    final int action;
-                    final String topicName;
-                    if (pushObj.getModule() == Types.FOLDER) {
-                        action = RemoteEvent.FOLDER_CHANGED;
-                        topicName = "com/openexchange/remote/folderchanged";
-                    } else {
-                        action = RemoteEvent.FOLDER_CONTENT_CHANGED;
-                        topicName = "com/openexchange/remote/foldercontentchanged";
-                    }
-                    for (final int user : pushObj.getUsers()) {
-                        /*-
-                         * Post event to current user
-                         *
-                         *       See com.openexchange.usm.ox_event.impl.OXEventManagerImpl.handleEvent(Event)
-                         *       See com.openexchange.usm.session.impl.SessionManagerImpl.folderContentChanged(int, int, String, long)
-                         */
-                        final RemoteEvent remEvent = eventFactoryService.newRemoteEvent(
-                            pushObj.getFolderId(),
-                            user,
-                            pushObj.getContextId(),
-                            action,
-                            pushObj.getModule(),
-                            pushObj.getTimestamp());
-                        final Dictionary<String, RemoteEvent> ht = new Hashtable<String, RemoteEvent>(1);
-                        ht.put(RemoteEvent.EVENT_KEY, remEvent);
-                        eventAdmin.postEvent(new Event(topicName, ht));
-                        LOG.debug("Posted remote event to user {} in context {}: {}", I(user), I(pushObj.getContextId()), remEvent);
-                    }
-                }
-            } else {
-                LOG.debug("Recieved PushMsObject's host name is equal to this listener's host name: {}. Ignore...", getHostname());
-            }
-        } else {
+        if (null == pushObj) {
             LOG.debug("Received null from topic. Ignore...");
+            return;
+        }
+
+        if (getHostname().equals(pushObj.getHostname())) {
+            LOG.debug("Recieved PushMsObject's host name is equal to this listener's host name: {}. Ignore...", getHostname());
+            return;
+        }
+
+        LOG.debug("{} received PushMsObject: {}", getHostname(), pushObj);
+        final ServiceLookup registry = Services.getServiceLookup();
+        final EventAdmin eventAdmin = registry.getService(EventAdmin.class);
+        if (eventAdmin != null) {
+            final EventFactoryService eventFactoryService = registry.getService(EventFactoryService.class);
+            if (eventFactoryService != null) {
+                final int action;
+                final String topicName;
+                if (pushObj.getModule() == Types.FOLDER) {
+                    action = RemoteEvent.FOLDER_CHANGED;
+                    topicName = "com/openexchange/remote/folderchanged";
+                } else {
+                    action = RemoteEvent.FOLDER_CONTENT_CHANGED;
+                    topicName = "com/openexchange/remote/foldercontentchanged";
+                }
+                for (final int user : pushObj.getUsers()) {
+                    /*-
+                     * Post event to current user
+                     *
+                     *       See com.openexchange.usm.ox_event.impl.OXEventManagerImpl.handleEvent(Event)
+                     *       See com.openexchange.usm.session.impl.SessionManagerImpl.folderContentChanged(int, int, String, long)
+                     */
+                    final RemoteEvent remEvent = eventFactoryService.newRemoteEvent(
+                        pushObj.getFolderId(),
+                        user,
+                        pushObj.getContextId(),
+                        action,
+                        pushObj.getModule(),
+                        pushObj.getTimestamp());
+                    final Map<String, RemoteEvent> ht = Collections.singletonMap(RemoteEvent.EVENT_KEY, remEvent);
+                    eventAdmin.postEvent(new Event(topicName, ht));
+                    LOG.debug("Posted remote event to user {} in context {}: {}", I(user), I(pushObj.getContextId()), remEvent);
+                }
+            }
         }
     }
 
