@@ -121,8 +121,9 @@ public class MicrometerActivator extends HousekeepingActivator implements Reload
         filterPerformers.add(new DistributionSLAMicrometerFilterPerformer());
 
         applyMeterFilters(getServiceSafe(ConfigurationService.class));
-        registerService(Reloadable.class, this);
         registerServlet();
+
+        registerService(Reloadable.class, this);
         LOG.info("Bundle {} successfully started", this.context.getBundle().getSymbolicName());
     }
 
@@ -142,7 +143,7 @@ public class MicrometerActivator extends HousekeepingActivator implements Reload
     }
 
     @Override
-    public void reloadConfiguration(ConfigurationService configService) {
+    public synchronized void reloadConfiguration(ConfigurationService configService) {
         try {
             applyMeterFilters(configService);
             unregisterServlet();
