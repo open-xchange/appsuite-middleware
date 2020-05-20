@@ -2,9 +2,9 @@
 
 Name:           open-xchange-file-storage-webdav
 BuildArch:      noarch
-BuildRequires: ant
+BuildRequires:  ant
 BuildRequires:  open-xchange-core
-BuildRequires: java-1.8.0-openjdk-devel
+BuildRequires:  java-1.8.0-openjdk-devel
 Version:        @OXVERSION@
 %define         ox_release 1
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
@@ -14,7 +14,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 URL:            http://www.open-xchange.com/
 Source:         %{name}_%{version}.orig.tar.bz2
 Summary:        The Open Xchange backend webdav file storage extension
-Autoreqprov:   no
+Autoreqprov:    no
 Requires:       open-xchange-core >= @OXVERSION@
 Provides:       open-xchange-file-storage-webdav = %{version}
 
