@@ -237,9 +237,15 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
             }
 
             Map<String, Map<String, Object>> aux = new HashMap<>();
-            // First get the successfully executed tasks
+            // First get all executed tasks
             Set<String> executedTasks = new HashSet<>();
-            Arrays.stream(tasks).filter(t -> t.isSuccessful()).forEach(t -> executedTasks.add(t.getTaskName()));
+            for (ExecutedTask task : tasks) {
+                String taskName = task.getTaskName();
+                if (task.isSuccessful() == false) {
+                    aux.put(taskName, new TaskMetadataBuilder().withTaskName(taskName).withTaskState(TaskState.failed).withReason("See server logs").build());
+                }
+                executedTasks.add(taskName);
+            }
 
             // Then collect all tasks from the different sets
             if (pending) {
