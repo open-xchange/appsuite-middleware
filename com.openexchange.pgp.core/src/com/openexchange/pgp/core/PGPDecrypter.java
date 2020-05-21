@@ -49,8 +49,8 @@
 
 package com.openexchange.pgp.core;
 
-import static com.openexchange.java.Autoboxing.l;
 import static com.openexchange.java.Autoboxing.L;
+import static com.openexchange.java.Autoboxing.l;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -59,6 +59,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import org.bouncycastle.openpgp.PGPCompressedData;
+import org.bouncycastle.openpgp.PGPEncryptedData;
 import org.bouncycastle.openpgp.PGPEncryptedDataList;
 import org.bouncycastle.openpgp.PGPException;
 import org.bouncycastle.openpgp.PGPLiteralData;
@@ -169,9 +170,9 @@ public class PGPDecrypter {
         //Processing decrypted data
         PGPPrivateKey privateKey = null;
         PGPPublicKeyEncryptedData encryptedData = null;
-        Iterator<PGPPublicKeyEncryptedData> encryptedDataListIterator = encryptedDataList.getEncryptedDataObjects();
+        Iterator<PGPEncryptedData> encryptedDataListIterator = encryptedDataList.getEncryptedDataObjects();
         while (encryptedDataListIterator.hasNext()) {
-            encryptedData = encryptedDataListIterator.next();
+            encryptedData = (PGPPublicKeyEncryptedData) encryptedDataListIterator.next();
             privateKey = getPrivateKey(encryptedData, userID, password);
             if (privateKey != null) {
                 break;
@@ -214,11 +215,11 @@ public class PGPDecrypter {
      */
     private String getMissingKeyIds(PGPEncryptedDataList encryptedDataList) {
         StringBuilder sb = new StringBuilder();
-        Iterator<PGPPublicKeyEncryptedData> dataListIterator = encryptedDataList.getEncryptedDataObjects();
+        Iterator<PGPEncryptedData> dataListIterator = encryptedDataList.getEncryptedDataObjects();
         PGPPublicKeyEncryptedData encryptedData = null;
         sb.append(" ( ");
         while (dataListIterator.hasNext()) {
-            encryptedData = dataListIterator.next();
+            encryptedData = (PGPPublicKeyEncryptedData) dataListIterator.next();
             String keyId = Long.toHexString(encryptedData.getKeyID()).substring(8).toUpperCase();
             if (!sb.toString().contains(keyId)) { // avoid repeats
                 if (sb.length() > 8) {
