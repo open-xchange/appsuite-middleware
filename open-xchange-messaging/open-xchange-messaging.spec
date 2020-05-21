@@ -9,7 +9,7 @@ BuildRequires:  open-xchange-oauth
 BuildRequires:  open-xchange-xerces
 BuildRequires: java-1.8.0-openjdk-devel
 Version:        @OXVERSION@
-%define         ox_release 0
+%define         ox_release 1
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -67,6 +67,8 @@ perl -pi -e 's;(^.*?)\s+(.*/(twitter)\.properties)$;$1 %%%attr(640,root,open-xch
 %dir /opt/open-xchange/etc/
 
 %changelog
+* Wed May 20 2020 Marcus Klein <marcus.klein@open-xchange.com>
+First preview of 7.10.4 release
 * Thu Jan 16 2020 Marcus Klein <marcus.klein@open-xchange.com>
 prepare for 7.10.4 release
 * Thu Nov 28 2019 Marcus Klein <marcus.klein@open-xchange.com>

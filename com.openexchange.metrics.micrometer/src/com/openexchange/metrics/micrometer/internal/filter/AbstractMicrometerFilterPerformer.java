@@ -50,10 +50,12 @@
 package com.openexchange.metrics.micrometer.internal.filter;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -77,10 +79,12 @@ import io.micrometer.core.instrument.distribution.DistributionStatisticConfig;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.4
  */
-abstract class AbstractMicrometerFilterPerformer {
+abstract class AbstractMicrometerFilterPerformer implements MicrometerFilterPerformer {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractMicrometerFilterPerformer.class);
-    static final Map<String, String> filterRegistry = new HashMap<>();
+
+    static final AtomicReference<Map<String, String>> filterRegistryReference = new AtomicReference<Map<String, String>>(Collections.emptyMap());
+
     private final MicrometerFilterProperty property;
 
     /**
@@ -113,27 +117,25 @@ abstract class AbstractMicrometerFilterPerformer {
         LOG.debug("Applying filter for '{}'", id);
         String key = entry.getKey();
         String metricId = extractMetricId(key, property);
-        String filter = filterRegistry.get(metricId);
-        if (Strings.isEmpty(filter)) {
-            return applyConfig(entry, metricId, config);
+        Filter filter = extractFilter(filterRegistryReference.get().get(metricId));
+        if (filter == null) {
+            return applyConfig(id, entry, metricId, config);
         }
-        Filter q = extractFilter(filter);
-        if (q == null) {
-            return config;
-        }
-        return matchTags(id, q) ? applyConfig(entry, metricId, config) : config;
+        return matchTags(id, filter) ? applyConfig(id, entry, filter.getMetricName(), config) : config;
     }
 
     /**
      * Applies the configuration of the specified entry to the specified {@link DistributionStatisticConfig}.
-     *
+     * 
+     * @param id The metric identifier
      * @param entry The entry with the configuration
      * @param metricId the metric identifier
      * @param config The {@link DistributionStatisticConfig}
+     *
      * @return The merged config
      */
     @SuppressWarnings("unused")
-    DistributionStatisticConfig applyConfig(Entry<String, String> entry, String metricId, DistributionStatisticConfig config) {
+    DistributionStatisticConfig applyConfig(Id id, Entry<String, String> entry, String metricId, DistributionStatisticConfig config) {
         return config;
     }
 
@@ -145,7 +147,7 @@ abstract class AbstractMicrometerFilterPerformer {
      */
     void applyFilterFor(ConfigurationService configurationService, Consumer<Entry<String, String>> meterFilterConsumer) {
         Map<String, String> properties = getPropertiesStartingWith(configurationService, property);
-        properties.entrySet().parallelStream().forEach(entry -> meterFilterConsumer.accept(entry));
+        properties.entrySet().stream().forEach(entry -> meterFilterConsumer.accept(entry));
     }
 
     /**
@@ -192,6 +194,9 @@ abstract class AbstractMicrometerFilterPerformer {
      * @return The Filter or <code>null</code> if no filter can be extracted
      */
     Filter extractFilter(String filter) {
+        if (Strings.isEmpty(filter)) {
+            return null;
+        }
         LOG.trace("Extracting filter: {}", filter);
         int startIndex = filter.indexOf("{") + 1;
         int endIndex = filter.indexOf("}");
@@ -248,7 +253,7 @@ abstract class AbstractMicrometerFilterPerformer {
      */
     boolean matchTags(Meter.Id id, Filter filter) {
         LOG.debug("Metric: {}, Filter: {}", id, filter);
-        if (false == id.getName().equals(filter.getMetricName())) {
+        if (false == id.getName().startsWith(filter.getMetricName())) {
             return false;
         }
         int matchCount = 0;
@@ -276,7 +281,7 @@ abstract class AbstractMicrometerFilterPerformer {
      * @param property The prefix of the property
      * @return The found properties or an empty map
      */
-    private Map<String, String> getPropertiesStartingWith(ConfigurationService configurationService, MicrometerFilterProperty property) {
+    Map<String, String> getPropertiesStartingWith(ConfigurationService configurationService, MicrometerFilterProperty property) {
         try {
             return configurationService.getProperties((name, value) -> name.startsWith(property.getFQPropertyName()));
         } catch (OXException e) {

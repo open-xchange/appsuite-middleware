@@ -53,6 +53,7 @@ import static io.micrometer.core.instrument.distribution.DistributionStatisticCo
 import java.util.Map.Entry;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.metrics.micrometer.internal.property.MicrometerFilterProperty;
+import io.micrometer.core.instrument.Meter.Id;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.distribution.DistributionStatisticConfig;
 
@@ -63,7 +64,7 @@ import io.micrometer.core.instrument.distribution.DistributionStatisticConfig;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.4
  */
-public class DistributionHistogramMicrometerFilterPerformer extends AbstractMicrometerFilterPerformer implements MicrometerFilterPerformer {
+public class DistributionHistogramMicrometerFilterPerformer extends AbstractMicrometerFilterPerformer {
 
     /**
      * Initializes a new {@link DistributionHistogramMicrometerFilterPerformer}.
@@ -78,7 +79,7 @@ public class DistributionHistogramMicrometerFilterPerformer extends AbstractMicr
     }
 
     @Override
-    DistributionStatisticConfig applyConfig(Entry<String, String> entry, String metricId, DistributionStatisticConfig config) {
-        return builder().percentilesHistogram(Boolean.valueOf(entry.getValue())).build().merge(config);
+    DistributionStatisticConfig applyConfig(Id id, Entry<String, String> entry, String metricId, DistributionStatisticConfig config) {
+        return id.getName().startsWith(metricId) ? builder().percentilesHistogram(Boolean.valueOf(entry.getValue())).build().merge(config) : config;
     }
 }

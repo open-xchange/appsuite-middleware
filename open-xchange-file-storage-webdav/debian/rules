@@ -1,69 +1,23 @@
 #!/usr/bin/make -f
 
+include /usr/share/dpkg/default.mk
+
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-installroot=$(CURDIR)/debian/open-xchange-file-storage-webdav
+DEB_DESTDIR=$(CURDIR)/debian/$(DEB_SOURCE)/
 
-configure: configure-stamp
-configure-stamp:
-	dh_testdir
-	touch configure-stamp
+%:
+	dh $@
 
-build: build-stamp
-
-build-stamp: configure-stamp
-	dh_testdir
-	touch build-stamp
-
-clean:
-	dh_testdir
-	dh_testroot
-	rm -f build-stamp configure-stamp
-	ant -lib build/lib -Dbasedir=build -f build/build.xml clean
+override_dh_clean:
+	ant -f build/build.xml clean
 	dh_clean
 
-install: build
-	dh_testdir
-	dh_testroot
-	dh_prep
-	dh_installdirs
-	ant -lib build/lib -Dbasedir=build -DdestDir=$(installroot) -DpackageName=open-xchange-file-storage-webdav -f build/build.xml build
+override_dh_install:
+	ant -DdestDir=$(DEB_DESTDIR) -DpackageName=$(DEB_SOURCE) -f build/build.xml build
+	dh_install
 
-# Build architecture-independent files here.
-binary-indep: build install
-# We have nothing to do by default.
+override_dh_strip_nondeterminism:
+	dh_strip_nondeterminism --exclude=.jar
 
-# Build architecture-dependent files here.
-binary-arch: build install
-	dh_testdir
-	dh_testroot
-	dh_installchangelogs
-	dh_installdocs
-	dh_installexamples
-#	dh_install
-#	dh_installmenu
-#	dh_installdebconf
-#	dh_installlogrotate
-#	dh_installemacsen
-#	dh_installpam
-#	dh_installmime
-#	dh_installinit
-#	dh_installcron
-#	dh_installinfo
-	dh_installman
-	dh_link
-	dh_strip
-	dh_compress
-	dh_fixperms
-#	dh_perl
-#	dh_python
-#	dh_makeshlibs
-	dh_installdeb
-	dh_shlibdeps
-	dh_gencontrol
-	dh_md5sums
-	dh_builddeb
-
-binary: binary-indep binary-arch
-.PHONY: build clean binary-indep binary-arch binary install configure

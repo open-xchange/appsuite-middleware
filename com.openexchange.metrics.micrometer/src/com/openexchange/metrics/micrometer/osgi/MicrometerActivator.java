@@ -49,8 +49,6 @@
 
 package com.openexchange.metrics.micrometer.osgi;
 
-import java.util.ArrayList;
-import java.util.List;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 import org.slf4j.Logger;
@@ -62,25 +60,14 @@ import com.openexchange.config.Reloadable;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.metrics.micrometer.MeterNamePrefixFilter;
 import com.openexchange.metrics.micrometer.internal.BasicAuthHttpContext;
-import com.openexchange.metrics.micrometer.internal.filter.ActivateMetricMicrometerFilterPerformer;
-import com.openexchange.metrics.micrometer.internal.filter.DistributionHistogramMicrometerFilterPerformer;
-import com.openexchange.metrics.micrometer.internal.filter.DistributionMaximumMicrometerFilterPerformer;
-import com.openexchange.metrics.micrometer.internal.filter.DistributionMinimumMicrometerFilterPerformer;
-import com.openexchange.metrics.micrometer.internal.filter.DistributionPercentilesMicrometerFilterPerformer;
-import com.openexchange.metrics.micrometer.internal.filter.DistributionSLAMicrometerFilterPerformer;
-import com.openexchange.metrics.micrometer.internal.filter.FilterMetricMicrometerFilterPerformer;
-import com.openexchange.metrics.micrometer.internal.filter.MicrometerFilterPerformer;
+import com.openexchange.metrics.micrometer.internal.RegistryInitializer;
 import com.openexchange.metrics.micrometer.internal.property.MicrometerFilterProperty;
 import com.openexchange.metrics.micrometer.internal.property.MicrometerProperty;
 import com.openexchange.osgi.HousekeepingActivator;
 import io.micrometer.core.instrument.Metrics;
-import io.micrometer.core.instrument.config.MeterFilter;
-import io.micrometer.prometheus.PrometheusConfig;
 import io.micrometer.prometheus.PrometheusMeterRegistry;
 import io.prometheus.client.exporter.MetricsServlet;
-import io.prometheus.client.hotspot.DefaultExports;
 
 /**
  * {@link MicrometerActivator}
@@ -94,15 +81,14 @@ public class MicrometerActivator extends HousekeepingActivator implements Reload
 
     private static final String SERVLET_BIND_POINT = "/metrics";
 
-    private PrometheusMeterRegistry prometheusRegistry;
-    private final List<MicrometerFilterPerformer> filterPerformers;
+    private final RegistryInitializer registryInitializer;
 
     /**
      * Initializes a new {@link MicrometerActivator}.
      */
     public MicrometerActivator() {
         super();
-        filterPerformers = new ArrayList<>();
+        registryInitializer = new RegistryInitializer(Metrics.globalRegistry);
     }
 
     @Override
@@ -111,18 +97,10 @@ public class MicrometerActivator extends HousekeepingActivator implements Reload
     }
 
     @Override
-    protected synchronized void startBundle() throws Exception {
-        filterPerformers.add(new FilterMetricMicrometerFilterPerformer());
-        filterPerformers.add(new ActivateMetricMicrometerFilterPerformer());
-        filterPerformers.add(new DistributionHistogramMicrometerFilterPerformer());
-        filterPerformers.add(new DistributionMinimumMicrometerFilterPerformer());
-        filterPerformers.add(new DistributionMaximumMicrometerFilterPerformer());
-        filterPerformers.add(new DistributionPercentilesMicrometerFilterPerformer());
-        filterPerformers.add(new DistributionSLAMicrometerFilterPerformer());
-
-        applyMeterFilters(getServiceSafe(ConfigurationService.class));
+    protected void startBundle() throws Exception {
         registerService(Reloadable.class, this);
-        registerServlet();
+        PrometheusMeterRegistry prometheusRegistry = registryInitializer.initialize(getServiceSafe(ConfigurationService.class));
+        registerServlet(prometheusRegistry);
         LOG.info("Bundle {} successfully started", this.context.getBundle().getSymbolicName());
     }
 
@@ -130,7 +108,7 @@ public class MicrometerActivator extends HousekeepingActivator implements Reload
     protected synchronized void stopBundle() throws Exception {
         super.stopBundle();
         unregisterServlet();
-        filterPerformers.clear();
+        registryInitializer.reset();
         LOG.info("Bundle {} successfully stopped", this.context.getBundle().getSymbolicName());
     }
 
@@ -142,11 +120,11 @@ public class MicrometerActivator extends HousekeepingActivator implements Reload
     }
 
     @Override
-    public void reloadConfiguration(ConfigurationService configService) {
+    public synchronized void reloadConfiguration(ConfigurationService configService) {
         try {
-            applyMeterFilters(configService);
+            PrometheusMeterRegistry prometheusRegistry = registryInitializer.initialize(configService);
             unregisterServlet();
-            registerServlet();
+            registerServlet(prometheusRegistry);
         } catch (Exception e) {
             LOG.error("Cannot apply meter filters", e);
         }
@@ -155,34 +133,12 @@ public class MicrometerActivator extends HousekeepingActivator implements Reload
     ///////////////////////////////////// HELPERS //////////////////////////////////////////
 
     /**
-     * Applies the meter filters
-     *
-     * @param configService The configuration service
-     */
-    private synchronized void applyMeterFilters(ConfigurationService configService) {
-        if (prometheusRegistry != null) {
-            Metrics.removeRegistry(prometheusRegistry);
-            prometheusRegistry.close();
-        }
-        prometheusRegistry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
-        filterPerformers.stream().forEach(p -> p.applyFilter(prometheusRegistry, configService));
-        String value = configService.getProperty(MicrometerFilterProperty.ENABLE.getFQPropertyName() + ".all", Boolean.TRUE.toString());
-        if (Boolean.parseBoolean(value)) {
-            DefaultExports.register(prometheusRegistry.getPrometheusRegistry());
-        } else {
-            prometheusRegistry.config().meterFilter(MeterFilter.deny());
-        }
-        // rename built-in metrics to contain the "appsuite." prefix
-        prometheusRegistry.config().meterFilter(new MeterNamePrefixFilter());
-        Metrics.addRegistry(prometheusRegistry);
-    }
-
-    /**
      * Registers the {@link #SERVLET_BIND_POINT} servlet
      *
+     * @param prometheusRegistry
      * @throws Exception if the servlet cannot be registered
      */
-    private void registerServlet() throws Exception {
+    private void registerServlet(PrometheusMeterRegistry prometheusRegistry) throws Exception {
         HttpService httpService = getServiceSafe(HttpService.class);
         httpService.registerServlet(SERVLET_BIND_POINT, new MetricsServlet(prometheusRegistry.getPrometheusRegistry()), null, withHttpContext());
     }
