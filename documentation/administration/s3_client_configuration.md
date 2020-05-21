@@ -14,7 +14,7 @@ It is also possible to use both at the same time, but again we highly recommend 
 
 ## How to configure s3 clients
 
-The new clients are configured via the new namespace `com.openexchange.filestore.s3client.[clientID]`. A complete configuration could look like thise:
+The new clients are configured via the new namespace `com.openexchange.filestore.s3client.[clientID]`. A complete configuration could look like this:
 
 ```
 
@@ -24,12 +24,12 @@ com.openexchange.filestore.s3client.ox-filestore-1.secretKey=myAccessSecret
 com.openexchange.filestore.s3client.ox-filestore-1.encryption=none
 com.openexchange.filestore.s3client.ox-filestore-1.pathStyleAccess=true
 com.openexchange.filestore.s3client.ox-filestore-1.chunkSize=8MB
-com.openexchange.filestore.s3client.ox-filestore-1.buckets=ox-filestore-1-1-* ox-filestore2-1-1-5 
+com.openexchange.filestore.s3client.ox-filestore-1.buckets=ox-filestore-1-1-*, ox-filestore2-1-1-5 
 ```
 
 As you can see the most properties are exactly the same as before. But there is one new property called 
 `com.openexchange.filestore.s3client.[clientID].buckets` which contains all buckets the client serves.
-It is possible to use multiple entries separated by whitespaces and you can even use wildcards or a combination of both.
+It is possible to use multiple entries separated by comma and you can even use wildcards or a combination of both.
 
 Once you configured all your clients you only have to configure the filestore mapping. For this purpose you use the existing 
 `com.openexchange.filestore.s3.[filestoreID].bucketName` property. For example for two filestores:
