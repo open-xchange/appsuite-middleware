@@ -57,7 +57,7 @@ import java.util.List;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import org.jcodec.common.Assert;
+import org.junit.Assert;
 import org.junit.Test;
 import com.openexchange.ajax.chronos.factory.AttendeeFactory;
 import com.openexchange.ajax.chronos.factory.EventFactory;
@@ -144,15 +144,14 @@ public class NeedsActionActionTest extends AbstractExtendedChronosTest {
 
     @Test
     public void testCreateSeriesWithoutExceptions_returnOneNeedsAction() throws Exception {
+        Calendar start = getStart();
         ApiClient client3 = generateApiClient(testUser3);
         rememberClient(client3);
         EnhancedApiClient enhancedClient3 = generateEnhancedClient(testUser3);
         rememberClient(enhancedClient3);
         UserApi userApi3 = new UserApi(client3, enhancedClient3, testUser3, false);
 
-        Calendar start = Calendar.getInstance();
-        Calendar end = Calendar.getInstance();
-        end.setTimeInMillis(end.getTimeInMillis() + TimeUnit.HOURS.toMillis(2));
+        Calendar end = getEnd();
 
         EventsResponse eventsNeedingAction = userApi3.getChronosApi().getEventsNeedingAction(client3.getSession(), DateTimeUtil.getDateTime(start).getValue(), DateTimeUtil.getDateTime(end).getValue(), null, null, null, null);
 
@@ -161,15 +160,15 @@ public class NeedsActionActionTest extends AbstractExtendedChronosTest {
 
     @Test
     public void testCreateSeriesWithoutExceptionsAndOneSingleEventsFromDifferentUser_returnTwoNeedsAction() throws Exception {
+        Calendar start = getStart();
         createSingleEvent();
-        
+
         ApiClient client3 = generateApiClient(testUser3);
         rememberClient(client3);
         EnhancedApiClient enhancedClient3 = generateEnhancedClient(testUser3);
         rememberClient(enhancedClient3);
         UserApi userApi3 = new UserApi(client3, enhancedClient3, testUser3, false);
 
-        Calendar start = Calendar.getInstance();
         Calendar end = Calendar.getInstance();
         end.setTimeInMillis(end.getTimeInMillis() + TimeUnit.HOURS.toMillis(2));
 
@@ -180,6 +179,7 @@ public class NeedsActionActionTest extends AbstractExtendedChronosTest {
 
     @Test
     public void testCreateSeriesWithChangedSummary_returnTwoNeedsAction() throws Exception {
+        Calendar start = getStart();
         EventData secondOccurrence = getSecondOccurrence(eventManager, event);
         secondOccurrence.setSummary("The summary changed and that should result in a dedicated action");
         eventManager.updateOccurenceEvent(secondOccurrence, secondOccurrence.getRecurrenceId(), true);
@@ -190,7 +190,6 @@ public class NeedsActionActionTest extends AbstractExtendedChronosTest {
         rememberClient(enhancedClient3);
         UserApi userApi3 = new UserApi(client3, enhancedClient3, testUser3, false);
 
-        Calendar start = Calendar.getInstance();
         Calendar end = Calendar.getInstance();
         end.setTimeInMillis(end.getTimeInMillis() + TimeUnit.DAYS.toMillis(14));
 
@@ -201,6 +200,7 @@ public class NeedsActionActionTest extends AbstractExtendedChronosTest {
 
     @Test
     public void testCreateSeriesWithOneDeclineOccurrences_returnOneNeedsActionForSeriesOnly() throws Exception {
+        Calendar start = getStart();
         AttendeeAndAlarm data = new AttendeeAndAlarm();
         organizerAttendee.setPartStat(ParticipationStatus.DECLINED.toString());
         organizerAttendee.setMember(null);
@@ -215,7 +215,6 @@ public class NeedsActionActionTest extends AbstractExtendedChronosTest {
         rememberClient(enhancedClient3);
         UserApi userApi3 = new UserApi(client3, enhancedClient3, testUser3, false);
 
-        Calendar start = Calendar.getInstance();
         Calendar end = Calendar.getInstance();
         end.setTimeInMillis(end.getTimeInMillis() + TimeUnit.DAYS.toMillis(14));
 
@@ -226,6 +225,7 @@ public class NeedsActionActionTest extends AbstractExtendedChronosTest {
 
     @Test
     public void testCreateSeriesWithChangedSummaryAndOneSingleEvent_returnThreeNeedsAction() throws Exception {
+        Calendar start = getStart();
         EventData secondOccurrence = getSecondOccurrence(eventManager, event);
         secondOccurrence.setSummary("The summary changed and that should result in a dedicated action");
         eventManager.updateOccurenceEvent(secondOccurrence, secondOccurrence.getRecurrenceId(), true);
@@ -238,7 +238,6 @@ public class NeedsActionActionTest extends AbstractExtendedChronosTest {
         rememberClient(enhancedClient3);
         UserApi userApi3 = new UserApi(client3, enhancedClient3, testUser3, false);
 
-        Calendar start = Calendar.getInstance();
         Calendar end = Calendar.getInstance();
         end.setTimeInMillis(end.getTimeInMillis() + TimeUnit.DAYS.toMillis(14));
 
@@ -271,4 +270,17 @@ public class NeedsActionActionTest extends AbstractExtendedChronosTest {
 
         return occurrences.get(2);
     }
+
+    private Calendar getEnd() {
+        Calendar end = Calendar.getInstance();
+        end.setTimeInMillis(end.getTimeInMillis() + TimeUnit.HOURS.toMillis(2));
+        return end;
+    }
+
+    private Calendar getStart() {
+        Calendar start = Calendar.getInstance();
+        start.setTimeInMillis(start.getTimeInMillis() - TimeUnit.HOURS.toMillis(1));
+        return start;
+    }
+
 }
