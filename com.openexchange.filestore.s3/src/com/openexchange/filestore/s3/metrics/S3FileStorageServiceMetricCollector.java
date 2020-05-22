@@ -49,13 +49,11 @@
 
 package com.openexchange.filestore.s3.metrics;
 
-import java.time.Duration;
 import com.amazonaws.metrics.ByteThroughputProvider;
 import com.amazonaws.metrics.ServiceLatencyProvider;
 import com.amazonaws.metrics.ServiceMetricCollector;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
-import io.micrometer.core.instrument.Timer;
 
 /**
  * {@link S3FileStorageServiceMetricCollector}
@@ -63,8 +61,6 @@ import io.micrometer.core.instrument.Timer;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class S3FileStorageServiceMetricCollector extends ServiceMetricCollector {
-
-    private static final String GROUP = "appsuite.s3.";
 
     /**
      * Initializes a new {@link S3FileStorageServiceMetricCollector}.
@@ -75,9 +71,11 @@ public class S3FileStorageServiceMetricCollector extends ServiceMetricCollector 
 
     @Override
     public void collectByteThroughput(final ByteThroughputProvider provider) {
-        Timer timer = Timer.builder(GROUP + "requestSizeTimer").description("The timer of the request size gatherer. Usually runs every 10 seconds.").tags("type", provider.getThroughputMetricType().name()).register(Metrics.globalRegistry);
-        Counter counter = Counter.builder(GROUP + "requestSize").description("The size of s3 requests.").baseUnit("bytes").tags("type", provider.getThroughputMetricType().name()).register(Metrics.globalRegistry);
-        timer.record(Duration.ofSeconds(10));
+        Counter counter = Counter.builder("appsuite.filestore.s3.transferred")
+            .description("The size of s3 requests.")
+            .baseUnit("bytes")
+            .tags("type", provider.getThroughputMetricType().name())
+            .register(Metrics.globalRegistry);
         counter.increment(Integer.toUnsignedLong(provider.getByteCount()));
     }
 
