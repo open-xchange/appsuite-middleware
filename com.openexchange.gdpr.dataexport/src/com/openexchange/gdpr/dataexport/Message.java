@@ -60,6 +60,14 @@ import java.util.UUID;
  */
 public class Message {
 
+    public static enum Type {
+        /** The neutral type */
+        NEUTRAL,
+        /** The type to signal "permission denied" error */
+        PERMISSION_DENIED,
+        ;
+    }
+
     /**
      * Creates a new builder for an instance of <code>Message</code>.
      *
@@ -69,6 +77,15 @@ public class Message {
         return new Builder();
     }
 
+    /**
+     * Creates a new builder for an instance of <code>Message</code> having message type preset to "permission denied".
+     *
+     * @return The builder
+     */
+    public static Builder builderWithPermissionDeniedType() {
+        return new Builder().withType(Type.PERMISSION_DENIED);
+    }
+
     /** The builder for an instance of <code>Message</code> */
     public static class Builder {
 
@@ -76,6 +93,7 @@ public class Message {
         private String moduleId;
         private final StringBuilder messageBuilder;
         private UUID id;
+        private Type type;
 
         /**
          * Initializes a new {@link Builder}.
@@ -84,6 +102,7 @@ public class Message {
             super();
             timeStamp = new Date();
             messageBuilder = new StringBuilder();
+            type = Type.NEUTRAL;
         }
 
         /**
@@ -96,6 +115,17 @@ public class Message {
          */
         public Builder withId(UUID id) {
             this.id = id;
+            return this;
+        }
+
+        /**
+         * Sets the message type
+         *
+         * @param type The type
+         * @return This builder
+         */
+        public Builder withType(Type type) {
+            this.type = type;
             return this;
         }
 
@@ -170,7 +200,7 @@ public class Message {
             if (id == null) {
                 id = UUID.randomUUID();
             }
-            return new Message(id, messageBuilder.toString(), timeStamp, moduleId);
+            return new Message(id, messageBuilder.toString(), timeStamp, moduleId, type);
         }
     }
 
@@ -180,6 +210,7 @@ public class Message {
     private final String message;
     private final Date timeStamp;
     private final String moduleId;
+    private final Type type;
     private final int hash;
 
     /**
@@ -189,13 +220,15 @@ public class Message {
      * @param message The message
      * @param timeStamp The time stamp
      * @param moduleId The module identifier
+     * @param type The message type
      */
-    Message(UUID id, String message, Date timeStamp, String moduleId) {
+    Message(UUID id, String message, Date timeStamp, String moduleId, Type type) {
         super();
         this.id = id;
         this.message = message;
         this.timeStamp = timeStamp;
         this.moduleId = moduleId;
+        this.type = type;
         int prime = 31;
         int result = 1;
         result = prime * result + ((id == null) ? 0 : id.hashCode());
@@ -209,6 +242,15 @@ public class Message {
      */
     public UUID getId() {
         return id;
+    }
+
+    /**
+     * Gets the message type.
+     *
+     * @return The type
+     */
+    public Type getType() {
+        return type;
     }
 
     /**

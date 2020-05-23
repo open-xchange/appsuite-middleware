@@ -405,7 +405,7 @@ public class MailDataExport extends AbstractDataExportProviderTask {
             } else {
                 if (isPermissionDenied(e)) {
                     LOG.debug("Forbidden to export messages from folder \"{}\" from primary mail account of user {} in context {}", fullName, I(task.getUserId()), I(task.getContextId()), e);
-                    sink.addToReport(Message.builder().appendToMessage("Insufficient permissions to export messages from folder \"").appendToMessage(fullName).appendToMessage("\": ").appendToMessage(e.getMessage()).withModuleId(ID_MAIL).withTimeStamp(new Date()).build());
+                    sink.addToReport(Message.builderWithPermissionDeniedType().appendToMessage("Insufficient permissions to export messages from folder \"").appendToMessage(fullName).appendToMessage("\": ").appendToMessage(e.getMessage()).withModuleId(ID_MAIL).withTimeStamp(new Date()).build());
                 } else {
                     LOG.warn("Failed to export messages from folder \"{}\" from primary mail account of user {} in context {}", fullName, I(task.getUserId()), I(task.getContextId()), e);
                     sink.addToReport(Message.builder().appendToMessage("Failed to export messages from folder \"").appendToMessage(fullName).appendToMessage("\": ").appendToMessage(e.getMessage()).withModuleId(ID_MAIL).withTimeStamp(new Date()).build());

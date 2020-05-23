@@ -153,6 +153,18 @@ properties:
       file: dataexport.properties
       packageName: open-xchange-gdpr-dataexport
       tags: ["Data Export"]
+    - key: com.openexchange.gdpr.dataexport.considerPermissionDeniedErrors
+      description: |
+        Whether to add "permission denied" errors to diagnostics report.
+        Requires that "com.openexchange.gdpr.dataexport.addDiagnosticsReport" is set to "true"; otherwise it will be ignored
+      defaultValue: false
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: true
+      related: ["com.openexchange.gdpr.dataexport.addDiagnosticsReport"]
+      file: dataexport.properties
+      packageName: open-xchange-gdpr-dataexport
+      tags: ["Data Export"]
     - key: com.openexchange.gdpr.dataexport.provider.calendar.enabled
       description: |
         Whether calendar module is supposed to be offered for data export.

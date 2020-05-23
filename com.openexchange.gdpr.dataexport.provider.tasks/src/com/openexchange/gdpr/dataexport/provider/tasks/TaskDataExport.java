@@ -430,7 +430,7 @@ public class TaskDataExport extends AbstractDataExportProviderTask {
             }
             if (isPermissionDenied(e)) {
                 LOG.debug("Forbidden to export tasks from folder \"{}\" for user {} in context {}", folder.getName(), I(task.getUserId()), I(task.getContextId()), e);
-                sink.addToReport(Message.builder().appendToMessage("Insufficient permissions to export tasks from folder \"").appendToMessage(folder.getName()).appendToMessage("\": ").appendToMessage(e.getMessage()).withModuleId(ID_TASKS).withTimeStamp(new Date()).build());
+                sink.addToReport(Message.builderWithPermissionDeniedType().appendToMessage("Insufficient permissions to export tasks from folder \"").appendToMessage(folder.getName()).appendToMessage("\": ").appendToMessage(e.getMessage()).withModuleId(ID_TASKS).withTimeStamp(new Date()).build());
             } else {
                 LOG.warn("Failed to export tasks from folder \"{}\" for user {} in context {}", folder.getName(), I(task.getUserId()), I(task.getContextId()), e);
                 sink.addToReport(Message.builder().appendToMessage("Failed to export tasks from folder \"").appendToMessage(folder.getName()).appendToMessage("\": ").appendToMessage(e.getMessage()).withModuleId(ID_TASKS).withTimeStamp(new Date()).build());

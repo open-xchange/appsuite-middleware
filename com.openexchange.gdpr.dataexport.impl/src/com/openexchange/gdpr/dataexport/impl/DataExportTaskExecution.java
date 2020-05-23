@@ -84,6 +84,7 @@ import com.openexchange.gdpr.dataexport.DataExportStatus;
 import com.openexchange.gdpr.dataexport.DataExportStorageService;
 import com.openexchange.gdpr.dataexport.DataExportTask;
 import com.openexchange.gdpr.dataexport.DataExportWorkItem;
+import com.openexchange.gdpr.dataexport.DiagnosticsReportOptions;
 import com.openexchange.gdpr.dataexport.ExportResult;
 import com.openexchange.gdpr.dataexport.Message;
 import com.openexchange.gdpr.dataexport.PauseResult;
@@ -131,7 +132,7 @@ public class DataExportTaskExecution extends AbstractTask<Void> {
     private final AtomicReference<Runnable> cleanUpTask;
     private final CountDownLatch latch;
     private final AtomicLong startTime;
-    private final boolean addDiagnosticsReport;
+    private final DiagnosticsReportOptions diagnosticsReportOptions;
 
     /**
      * Initializes a new {@link DataExportTaskExecution}.
@@ -143,9 +144,9 @@ public class DataExportTaskExecution extends AbstractTask<Void> {
      * @param providerRegistry The listing of available data export providers
      * @param services The services
      */
-    public DataExportTaskExecution(DataExportJob initialJob, boolean addDiagnosticsReport, DataExportConfig config, DataExportStorageService storageService, DataExportProviderRegistry providerRegistry, ServiceLookup services) {
+    public DataExportTaskExecution(DataExportJob initialJob, DiagnosticsReportOptions diagnosticsReportOptions, DataExportConfig config, DataExportStorageService storageService, DataExportProviderRegistry providerRegistry, ServiceLookup services) {
         super();
-        this.addDiagnosticsReport = addDiagnosticsReport;
+        this.diagnosticsReportOptions = diagnosticsReportOptions;
         this.expirationTimeMillis = config.getExpirationTimeMillis();
         this.maxProcessingTimeMillis = config.getMaxProcessingTimeMillis();
         this.maxTimeToLiveMillis = config.getMaxTimeToLiveMillis();
@@ -306,7 +307,7 @@ public class DataExportTaskExecution extends AbstractTask<Void> {
         int userId = task.getUserId();
         int contextId = task.getContextId();
         UUID taskId = task.getId();
-        Optional<DataExportDiagnosticsReport> optionalReport = addDiagnosticsReport ? Optional.of(new DataExportDiagnosticsReport()) : Optional.empty();
+        Optional<DataExportDiagnosticsReport> optionalReport = diagnosticsReportOptions.isAddDiagnosticsReport() ? Optional.of(new DataExportDiagnosticsReport(diagnosticsReportOptions)) : Optional.empty();
 
         boolean error = true;
         currentJob.set(new JobAndReport(job, optionalReport));

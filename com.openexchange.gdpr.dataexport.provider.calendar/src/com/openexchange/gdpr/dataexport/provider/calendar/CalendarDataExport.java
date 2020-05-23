@@ -400,7 +400,7 @@ public class CalendarDataExport extends AbstractDataExportProviderTask {
             }
             if (isPermissionDenied(e)) {
                 LOG.debug("Forbidden to export events from folder \"{}\" for user {} in context {}", folder.getName(), I(task.getUserId()), I(task.getContextId()), e);
-                sink.addToReport(Message.builder().appendToMessage("Insufficient permissions to export appointments from folder \"").appendToMessage(folder.getName()).appendToMessage("\": ").appendToMessage(e.getMessage()).withModuleId(ID_CALENDAR).withTimeStamp(new Date()).build());
+                sink.addToReport(Message.builderWithPermissionDeniedType().appendToMessage("Insufficient permissions to export appointments from folder \"").appendToMessage(folder.getName()).appendToMessage("\": ").appendToMessage(e.getMessage()).withModuleId(ID_CALENDAR).withTimeStamp(new Date()).build());
             } else {
                 LOG.warn("Failed to export events from folder \"{}\" for user {} in context {}", folder.getName(), I(task.getUserId()), I(task.getContextId()), e);
                 sink.addToReport(Message.builder().appendToMessage("Failed to export appointments from folder \"").appendToMessage(folder.getName()).appendToMessage("\": ").appendToMessage(e.getMessage()).withModuleId(ID_CALENDAR).withTimeStamp(new Date()).build());
