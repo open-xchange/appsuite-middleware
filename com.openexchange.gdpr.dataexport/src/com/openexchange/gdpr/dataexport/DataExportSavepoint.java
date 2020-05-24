@@ -96,7 +96,7 @@ public class DataExportSavepoint {
             }
 
             if (report == null) {
-                report = new DataExportDiagnosticsReport();
+                report = new DataExportDiagnosticsReport(DiagnosticsReportOptions.builder().build());
             }
             report.add(message);
             return this;
@@ -163,7 +163,7 @@ public class DataExportSavepoint {
         super();
         this.fileStorageLocation = fileStorageLocation;
         this.savepoint = savepoint == null ? null : ImmutableJSONObject.immutableFor(savepoint);
-        this.report = report == null ? new DataExportDiagnosticsReport() : report;
+        this.report = report == null ? new DataExportDiagnosticsReport(DiagnosticsReportOptions.builder().build()) : report;
     }
 
     /**

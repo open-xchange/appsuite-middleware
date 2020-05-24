@@ -472,7 +472,10 @@ public class DataExportSinkImpl implements DataExportSink {
     @Override
     public synchronized void addToReport(Message message) throws OXException {
         if (optionalReport.isPresent()) {
-            optionalReport.get().add(message);
+            DataExportDiagnosticsReport diagnosticsReport = optionalReport.get();
+            if (diagnosticsReport.isConsiderPermissionDeniedErrors() || Message.Type.PERMISSION_DENIED != message.getType()) {
+                diagnosticsReport.add(message);
+            }
         }
     }
 
