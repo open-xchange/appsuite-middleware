@@ -1811,7 +1811,7 @@ public class MimeMessageFiller {
             final ConversionService conversionService = ServerServiceRegistry.getInstance().getService(ConversionService.class);
             do {
                 final String imageTag = m.group();
-                if (MimeMessageUtility.isValidImageUri(imageTag)) {
+                if (MimeMessageUtility.isValidImageTag(imageTag)) {
                     final String id = m.getManagedFileId();
                     ImageProvider imageProvider;
                     if (null != id) {
@@ -1860,21 +1860,26 @@ public class MimeMessageFiller {
                         {
                             final Matcher srcMatcher = PATTERN_SRC.matcher(imageTag);
                             if (srcMatcher.find()) {
-                                ImageLocation il;
-                                try {
-                                    il = ImageUtility.parseImageLocationFrom(Strings.replaceSequenceWith(srcMatcher.group(1), "&amp;", '&'));
-                                    SecuritySettings securitySettings = mail.getSecuritySettings();
-                                    if (null != securitySettings) {
-                                        il.setAuth(securitySettings.getAuthentication());
+                                String imageUri = Strings.replaceSequenceWith(srcMatcher.group(1), "&amp;", '&');
+                                if (MimeMessageUtility.isValidImageSource(imageUri)) {
+                                    ImageLocation il;
+                                    try {
+                                        il = ImageUtility.parseImageLocationFrom(imageUri);
+                                        SecuritySettings securitySettings = mail.getSecuritySettings();
+                                        if (null != securitySettings) {
+                                            il.setAuth(securitySettings.getAuthentication());
+                                        }
+                                    } catch (IllegalArgumentException e) {
+                                        final StringBuffer bblankImageTag = new StringBuffer(imageTag.length());
+                                        srcMatcher.appendReplacement(bblankImageTag, "");
+                                        srcMatcher.appendTail(bblankImageTag);
+                                        blankImageTag = bblankImageTag.toString();
+                                        il = null;
                                     }
-                                } catch (IllegalArgumentException e) {
-                                    final StringBuffer bblankImageTag = new StringBuffer(imageTag.length());
-                                    srcMatcher.appendReplacement(bblankImageTag, "");
-                                    srcMatcher.appendTail(bblankImageTag);
-                                    blankImageTag = bblankImageTag.toString();
-                                    il = null;
+                                    imageLocation = il;
+                                } else {
+                                    imageLocation = null;
                                 }
-                                imageLocation = il;
                             } else {
                                 ImageLocation il;
                                 try {
