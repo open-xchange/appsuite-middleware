@@ -56,7 +56,6 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.java.Strings;
 import com.openexchange.metrics.micrometer.internal.property.MicrometerFilterProperty;
 import io.micrometer.core.instrument.Meter.Id;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -94,14 +93,14 @@ public class ActivateMetricMicrometerFilterPerformer extends AbstractMicrometerF
                 return;
             }
             String metricId = extractMetricId(key, MicrometerFilterProperty.ENABLE);
-            String query = filterRegistryReference.get().get(metricId);
+            Filter filter = filterRegistryReference.get().get(metricId);
             boolean enabled = Boolean.parseBoolean(entry.getValue());
-            if (Strings.isEmpty(query)) {
+            if (filter == null) {
                 LOGGER.debug("Applying enable/disable meter filter for '{}'", metricId);
                 meterRegistry.config().meterFilter(enabled ? MeterFilter.acceptNameStartsWith(metricId) : MeterFilter.denyNameStartsWith(metricId));
                 return;
             }
-            applyFilter(query, enabled, meterRegistry);
+            applyFilter(filter, enabled, meterRegistry);
         });
     }
 
@@ -119,7 +118,7 @@ public class ActivateMetricMicrometerFilterPerformer extends AbstractMicrometerF
         Set<String> namesWithQuery = new HashSet<>();
         for (Entry<String, String> entry : enabledProperties.entrySet()) {
             String metricId = extractMetricId(entry.getKey(), MicrometerFilterProperty.ENABLE);
-            if (Strings.isEmpty(filterRegistryReference.get().get(metricId))) {
+            if (null == filterRegistryReference.get().get(metricId)) {
                 staticNames.add(metricId);
             } else {
                 namesWithQuery.add(metricId);
@@ -151,7 +150,7 @@ public class ActivateMetricMicrometerFilterPerformer extends AbstractMicrometerF
         }
         for (String name : namesQuery) {
             String value = props.get(MicrometerFilterProperty.ENABLE.getFQPropertyName() + "." + name);
-            Filter filter = extractFilter(filterRegistryReference.get().get(name));
+            Filter filter = filterRegistryReference.get().get(name);
             if (filter == null) {
                 continue;
             }
@@ -167,11 +166,10 @@ public class ActivateMetricMicrometerFilterPerformer extends AbstractMicrometerF
      *
      * @param filter The filter
      */
-    private void applyFilter(String filter, boolean enabled, MeterRegistry meterRegistry) {
-        Filter q = extractFilter(filter);
-        if (q == null) {
+    private void applyFilter(Filter filter, boolean enabled, MeterRegistry meterRegistry) {
+        if (filter == null) {
             return;
         }
-        meterRegistry.config().meterFilter(enabled ? MeterFilter.accept(p -> matchTags(p, q)) : MeterFilter.deny(p -> matchTags(p, q)));
+        meterRegistry.config().meterFilter(enabled ? MeterFilter.accept(p -> matchTags(p, filter)) : MeterFilter.deny(p -> matchTags(p, filter)));
     }
 }

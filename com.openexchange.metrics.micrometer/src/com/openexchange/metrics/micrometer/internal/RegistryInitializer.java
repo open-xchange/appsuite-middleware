@@ -117,7 +117,7 @@ public class RegistryInitializer {
         PrometheusMeterRegistry prometheusRegistry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
         DefaultExports.register(prometheusRegistry.getPrometheusRegistry());
         filterPerformers.stream().forEach(p -> p.applyFilter(prometheusRegistry, configService));
-        enableAll(configService);
+        enableAll(configService, prometheusRegistry);
         // rename built-in metrics to contain the "appsuite." prefix
         prometheusRegistry.config().meterFilter(new MeterNamePrefixFilter());
         parentRegistry.add(prometheusRegistry);
@@ -163,7 +163,7 @@ public class RegistryInitializer {
     /*
      * Visible for testing
      */
-    synchronized void enableAll(ConfigurationService configService) {
+    synchronized void enableAll(ConfigurationService configService, PrometheusMeterRegistry prometheusRegistry) {
         boolean enableAll = Boolean.parseBoolean(configService.getProperty(MicrometerFilterProperty.ENABLE.getFQPropertyName() + ".all", Boolean.TRUE.toString()));
         if (enableAll) {
             return;

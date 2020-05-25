@@ -49,10 +49,7 @@
 
 package com.openexchange.metrics.micrometer.internal.filter;
 
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicReference;
@@ -64,7 +61,6 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
 import com.openexchange.metrics.micrometer.internal.property.MicrometerFilterProperty;
 import io.micrometer.core.instrument.Meter;
 import io.micrometer.core.instrument.Meter.Id;
@@ -83,7 +79,7 @@ abstract class AbstractMicrometerFilterPerformer implements MicrometerFilterPerf
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractMicrometerFilterPerformer.class);
 
-    static final AtomicReference<Map<String, String>> filterRegistryReference = new AtomicReference<Map<String, String>>(Collections.emptyMap());
+    static final AtomicReference<Map<String, Filter>> filterRegistryReference = new AtomicReference<Map<String, Filter>>(Collections.emptyMap());
 
     private final MicrometerFilterProperty property;
 
@@ -95,6 +91,13 @@ abstract class AbstractMicrometerFilterPerformer implements MicrometerFilterPerf
         this.property = property;
     }
 
+    /**
+     * This is only called when filtering new timers and distribution summaries
+     * (i.e. those meter types that use DistributionStatisticConfig).
+     *
+     * @param meterRegistry The meter registry
+     * @param entry The configuration entry
+     */
     void configure(MeterRegistry meterRegistry, Entry<String, String> entry) {
         meterRegistry.config().meterFilter(new MeterFilter() {
 
@@ -117,7 +120,7 @@ abstract class AbstractMicrometerFilterPerformer implements MicrometerFilterPerf
         LOG.debug("Applying filter for '{}'", id);
         String key = entry.getKey();
         String metricId = extractMetricId(key, property);
-        Filter filter = extractFilter(filterRegistryReference.get().get(metricId));
+        Filter filter = filterRegistryReference.get().get(metricId);
         if (filter == null) {
             return applyConfig(id, entry, metricId, config);
         }
@@ -161,86 +164,6 @@ abstract class AbstractMicrometerFilterPerformer implements MicrometerFilterPerf
     String extractMetricId(String propertyName, MicrometerFilterProperty property) {
         String prop = property.name().toLowerCase();
         return propertyName.substring(propertyName.indexOf(prop) + prop.length() + 1);
-    }
-
-    /**
-     * Performs a sanity check and returns the specified value as Long for
-     * the specified metric.
-     * If the sanity check fails, i.e. if the value cannot be parsed or is negative then <code>null</code> will be returned.
-     *
-     * @param metricId The metric identifier
-     * @param value The string value
-     *
-     * @return The Long value or <code>null</code> if the sanity check fails.
-     */
-    Long distributionValueSanityCheck(String metricId, String value) {
-        try {
-            long candidate = Long.parseLong(value);
-            if (candidate >= 0) {
-                return Long.valueOf(candidate);
-            }
-            LOG.error("Negative values for the {} bound of a distribution is not allowed. Metric: '{}'", property.name().toLowerCase(), metricId);
-            return null;
-        } catch (NumberFormatException e) {
-            LOG.error("Invalid value was specified for the {} bound of the {} distribution.", property.name().toLowerCase(), metricId, e);
-            return null;
-        }
-    }
-
-    /**
-     * Extracts the filter from the specified filter string
-     *
-     * @param filter The filter string
-     * @return The Filter or <code>null</code> if no filter can be extracted
-     */
-    Filter extractFilter(String filter) {
-        if (Strings.isEmpty(filter)) {
-            return null;
-        }
-        LOG.trace("Extracting filter: {}", filter);
-        int startIndex = filter.indexOf("{") + 1;
-        int endIndex = filter.indexOf("}");
-        if (startIndex < 0 || endIndex < 0 || endIndex < startIndex) {
-            LOG.error("Invalid filter detected: {}", filter);
-            return null;
-        }
-        //Valid indexes, apply
-        String metricName = filter.substring(0, startIndex - 1);
-        String condition = filter.substring(startIndex, endIndex);
-        LOG.trace("Extracted --> Metric name: {}, Filter: {}", metricName, condition);
-
-        Map<String, Condition> map = new HashMap<>(4);
-        List<String> filterList = Arrays.asList(Strings.splitByComma(condition));
-        for (String entry : filterList) {
-            // Negated regex
-            if (entry.contains("!~")) {
-                String[] s = entry.split("!~");
-                if (s.length == 2) {
-                    map.put(s[0], new Condition(s[1].replaceAll("\"", ""), true, true));
-                    continue;
-                }
-            }
-            // Negated exact match
-            if (entry.contains("!=")) {
-                String[] s = entry.split("!=");
-                if (s.length == 2) {
-                    map.put(s[0], new Condition(s[1].replaceAll("\"", ""), false, true));
-                    continue;
-                }
-            }
-            String[] split = Strings.splitBy(entry, '=', true);
-            if (split.length != 2) {
-                continue;
-            }
-            // Regex
-            if (false == split[1].startsWith("~")) {
-                map.put(split[0], new Condition(split[1].replaceAll("\"", ""), false, false));
-                continue;
-            }
-            // Exact match
-            map.put(split[0], new Condition(split[1].substring(1).replaceAll("\"", ""), true, false));
-        }
-        return new Filter(metricName, map);
     }
 
     /**
