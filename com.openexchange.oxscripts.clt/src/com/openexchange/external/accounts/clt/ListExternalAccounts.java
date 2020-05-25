@@ -102,7 +102,7 @@ public class ListExternalAccounts extends AbstractExternalAccountCLT {
     protected void addOptions(Options options) {
         super.addOptions(options);
         options.addOption(createArgumentOption("r", "provider", "providerId", "The provider identifier", false));
-        options.addOption(createArgumentOption("o", "sort-by", "sortById", "The sort identifier. It can be one of the following: [" + SortBy.getCommandLineIds() + "]. Defaults to 'u'.", false));
+        options.addOption(createArgumentOption("o", "sort-by", "sortById", "The sort identifier. It can be one of the following: [" + SortBy.getCommandLineIds() + "] where " + SortBy.getDisplayNames() + ". Defaults to 'u'.", false));
     }
 
     @Override
@@ -154,7 +154,7 @@ public class ListExternalAccounts extends AbstractExternalAccountCLT {
             return SortBy.USER_ID.getComparator();
         }
         if (optionValue.length() > 1) {
-            System.err.println("Invalid sorting identifier. Please use one of the following: [" + SortBy.getCommandLineIds() + "]");
+            System.err.println("Invalid sorting identifier. Please use one of the following: [" + SortBy.getCommandLineIds() + "] where " + SortBy.getDisplayNames());
             System.exit(1);
         }
         char c = optionValue.toCharArray()[0];
@@ -338,19 +338,21 @@ public class ListExternalAccounts extends AbstractExternalAccountCLT {
      */
     private enum SortBy {
 
-        USER_ID('u', (o1, o2) -> compare(o1.getUserId(), o2.getUserId())),
-        ACCOUNT_ID('a', (o1, o2) -> compare(o1.getId(), o2.getId())),
-        MODULE_ID('m', (o1, o2) -> o1.getModule().toString().compareTo(o2.getModule().toString())),
-        PROVIDER_ID('p', (o1, o2) -> o1.getProviderId().compareTo(o2.getProviderId()));
+        USER_ID('u', "userId", (o1, o2) -> compare(o1.getUserId(), o2.getUserId())),
+        ACCOUNT_ID('a', "accountId", (o1, o2) -> compare(o1.getId(), o2.getId())),
+        MODULE_ID('m', "moduleId", (o1, o2) -> o1.getModule().toString().compareTo(o2.getModule().toString())),
+        PROVIDER_ID('p', "providerId", (o1, o2) -> o1.getProviderId().compareTo(o2.getProviderId()));
 
         private final Comparator<ExternalAccount> comparator;
         private final char commandLineId;
+        private final String displayName;
 
         /**
          * Initializes a new {@link ListExternalAccounts.SortBy}.
          */
-        private SortBy(char commandLineId, Comparator<ExternalAccount> comparator) {
+        private SortBy(char commandLineId, String displayName, Comparator<ExternalAccount> comparator) {
             this.commandLineId = commandLineId;
+            this.displayName = displayName;
             this.comparator = comparator;
         }
 
@@ -385,6 +387,24 @@ public class ListExternalAccounts extends AbstractExternalAccountCLT {
                 sb.append(sortBy.getCommandLineId()).append(",");
             }
             sb.setLength(sb.length() - 1);
+            return sb.toString();
+        }
+
+        /**
+         * Returns a comma-separated list with
+         * the display names of all available command line
+         * identifiers.
+         *
+         * @return a comma-separated list with
+         *         all available command line identifiers and
+         *         their display names.
+         */
+        public static String getDisplayNames() {
+            StringBuilder sb = new StringBuilder(16);
+            for (SortBy sortBy : values()) {
+                sb.append(sortBy.getCommandLineId()).append(": ").append(sortBy.displayName).append(", ");
+            }
+            sb.setLength(sb.length() - 2);
             return sb.toString();
         }
 
