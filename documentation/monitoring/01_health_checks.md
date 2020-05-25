@@ -7,12 +7,13 @@ tags: Configuration, Installation, Administration, Monitoring
 # Introduction
 With v7.10.1 the Open-Xchange middleware offers health-checks to verify the middleware is running fine or get information which component is in trouble. This information can be retrieved via a REST interface.
 
+
 # Installation
-The health-check feature is included in ``open-xchange-core`` package. Thus, no additional packages need to be installed. The REST interface will be available via 
+The health-check feature is included in ``open-xchange-core`` package. Thus, no additional packages need to be installed. The REST interface will be available via
+
 ```
 GET hostname:8009/health
 ```
-.
 
 
 # Configuration
@@ -20,19 +21,25 @@ GET hostname:8009/health
 ## Enable authentication to access REST interface
 By default, there is no authentication for accessing the REST interface. To enable authentication, the properties ``com.openexchange.health.username`` and ``com.openexchange.health.password`` must be set.
 
+
 ## Skip health-checks
 To disable too expensive or invasive health-checks based on their names, the comma-separated list ``com.openexchange.health.skip`` can be set. Health-checks listed here will not be executed at all.
+
 
 ## Ignore health-check results
 To ignore health-check results based on their names when evaluating the overall status, the comma-separated list ``com.openexchange.health.ignore`` can be set. Health-checks listed here will be executed and their results will be included in the response, but their status will not affect the overall status.
 
 
 # Response
+
 ## Available health-checks
+
 With ``open-xchange-core`` the following health-checks are available
+
 
 ### allPluginsLoaded
 Checks if all bundles are ``ACTIVE``.
+
 ```json
 {
     "name": "allPluginsLoaded",
@@ -40,8 +47,10 @@ Checks if all bundles are ``ACTIVE``.
 }
 ```
 
+
 ### jvmHeap
 JVM heap metrics based on ``MemoryMXBean``-data. The field ``lastOOM`` is only available in ``DOWN`` case.
+
 ```json
 {
     "name": "jvmHeap",
@@ -56,8 +65,10 @@ JVM heap metrics based on ``MemoryMXBean``-data. The field ``lastOOM`` is only a
 }
 ```
 
+
 ### configDB
 Check the round-trip-time for read/write connections to the configDB.
+
 ```json
 {
     "name": "configDB",
@@ -69,8 +80,10 @@ Check the round-trip-time for read/write connections to the configDB.
 }
 ```
 
+
 ### hazelcast
 If available, check for hazelcast cluster state.
+
 ```json
 {
     "name": "hazelcast",
@@ -85,8 +98,10 @@ If available, check for hazelcast cluster state.
 }
 ```
 
+
 ## Service data
 Some information about the installed middleware.
+
 ```json
 "service":
     {
@@ -99,6 +114,7 @@ Some information about the installed middleware.
         "charset": "UTF-8"
     }
 ```
+
 
 ## Response codes
 If all health-checks are running fine (or ignored), the HTTP status will be ``200 OK`` and the health-check data will be included in the response body.

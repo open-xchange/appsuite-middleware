@@ -24,7 +24,7 @@ When the circuit breaker is open, it checks after a certain delay if the underly
 
 # Installation
 
-The circuit breaker for connections to IMAP and mail filter endpoints ships with package `open-xchange-imap` and `open-xchange-mailfilter` respectvely. No further packages need to be installed.
+The circuit breaker for connections to IMAP and mail filter endpoints ships with package `open-xchange-imap` and `open-xchange-mailfilter` respectively. No further packages need to be installed.
 
 # Configuration
 
@@ -111,100 +111,6 @@ com.openexchange.imap.breaker.gmail.delayMillis=60000
 
 # Monitoring
 
-There are several ways to collect metrics from `JMX`, in this example we will keep focus on a plugin-in driven server agent called [Telegraf](https://github.com/influxdata/telegraf). This agent offers the [jolokia2](https://github.com/influxdata/telegraf/tree/master/plugins/inputs/jolokia2) input plugin to read JMX metrics from one or more Jolokia agent REST endpoints.
+Monitoring is essential to be able to configure circuit breakers properly and to create awareness about their current state.
 
-## Response times & failure rates
 
-With the following `MBeans` it's possible to track response times and failure rates:
-
-- `com.openexchange.metrics.imap`
-  - `errorRate`: Failed `IMAP` request meter per target server.
-  - `requestRate`: Overall `IMAP` request timer per target server.
-- `com.openexchange.metrics.mailfilter`
-  - `errorRate`: Failed `mail filter` request meter per target server.
-  - `requestRate`: Overall `mail filter` request timer per target server.
-
-This could be the `Jolokia Metric Configuration` to read the response times and failure rates from the `MBeans`:
-
-```plaintext
-  [[inputs.jolokia2_agent.metric]]
-    mbean = "com.openexchange.metrics:name=*Rate,type=*,server=*"
-    name = "ox_circuit_breaker"
-    tag_keys = ["type", "server", "name"]
-```
-
-and the graphical visualization in `Grafana`:
-
-- Error & Request Rate
-
-![rate](circuit_breaker/error_request_rate.png "error request rate")
-
-- Response Times
-
-![responsetimes](circuit_breaker/response_times.png "response times")
-
-## Status, configuration settings, trip count & denials per circuit breaker
-
-With the following `MBean` it's possible to track some circuit breaker specific metrics or settings:
-
-- `com.openexchange.metrics.circuit-breakers`
-  - `delayMillis`: The number of milliseconds to wait in open state before transitioning to half-open.
-  - `denialsMeter`: The occurrences when an access attempt has been denied because circuit breaker is currently open and thus not allowing executions to occur.
-  - `failureThreshold`: The number of successive failures that must occur in order to open the circuit.
-  - `status`: The current status of the circuit breaker.
-  - `successThreshold`: The number of successive successful executions that must occur when in a half-open state in order to close the circuit.
-  - `tripCount`: The number representing how often the circuit breaker tripped.
-
-The `Jolokia Metric Configuration` to read for example the status or the denials from the `MBean` could be:
-
-```plaintext
-  [[inputs.jolokia2_agent.metric]]
-    mbean = "com.openexchange.metrics:name=denialsMeter,type=circuit-breakers,account=*,protocol=*"
-    name = "ox_circuit_breaker"
-    paths = ["Count"]
-    tag_keys = ["name", "type", "protocol", "account"]
-
-  [[inputs.jolokia2_agent.metric]]
-    mbean = "com.openexchange.metrics:name=status,type=circuit-breakers,account=*,protocol=*"
-    name = "ox_circuit_breaker"
-    tag_keys = ["name", "type", "protocol", "account"]
-```
-
-and how it could be visualized:
-
-- Denials
-
-![denials](circuit_breaker/denials.png "denials")
-
-## Example Configuration
-
-Full example configuration of the [jolokia2](https://github.com/influxdata/telegraf/tree/master/plugins/inputs/jolokia2) plugin to collect all `Circuit-Breaker` related metrics:
-
-### Jolokia Agent
-
-```plaintext
-[[inputs.jolokia2_agent]]
-  urls = ["http://${MIDDLEWARE_NODE}:8009/monitoring/jolokia"]
-  username = "${JOLOKIA_USER}"
-  password = "${JOLOKIA_PASSWORD}"
-```
-
-### Jolokia Metrics
-
-```plaintext
-  [[inputs.jolokia2_agent.metric]]
-    mbean = "com.openexchange.metrics:name=*Rate,type=*,server=*"
-    name = "ox_circuit_breaker"
-    tag_keys = ["type", "server", "name"]
-
-  [[inputs.jolokia2_agent.metric]]
-    mbean = "com.openexchange.metrics:name=denialsMeter,type=circuit-breakers,account=*,protocol=*"
-    name = "ox_circuit_breaker"
-    paths = ["Count"]
-    tag_keys = ["name", "type", "protocol", "account"]
-
-  [[inputs.jolokia2_agent.metric]]
-    mbean = "com.openexchange.metrics:name=status,type=circuit-breakers,account=*,protocol=*"
-    name = "ox_circuit_breaker"
-    tag_keys = ["name", "type", "protocol", "account"]
-```
