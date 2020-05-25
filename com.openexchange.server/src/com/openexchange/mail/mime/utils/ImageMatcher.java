@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.mime.utils;
 
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.openexchange.dispatcher.DispatcherPrefixService;
@@ -90,7 +91,7 @@ public final class ImageMatcher {
      * }
      * </pre>
      */
-    private static volatile Pattern PATTERN_REF_IMG = null;
+    private static final AtomicReference<Pattern> PATTERN_REF_IMG = new AtomicReference<>(null);
 
     /**
      * Sets the prefix service.
@@ -102,7 +103,7 @@ public final class ImageMatcher {
      */
     public static void setPrefixService(final DispatcherPrefixService prefixService) {
         if (null == prefixService) {
-            PATTERN_REF_IMG = null;
+            PATTERN_REF_IMG.set(null);
         } else {
             String prefix = "[a-zA-Z_0-9&-.]+/";
             final String regexImageUrl =
@@ -110,10 +111,11 @@ public final class ImageMatcher {
             final String regexFileUrl =
                 "(<img[^>]*?)(src=\")(?:[^>]*?)" + prefix + "file([^a-zA-Z][^\"]+?)(?:\\?|&amp;|&)(id=)([^\"&]+)(?:(&[^\"]+\")|(\"))([^>]*/?>)";
 
-            PATTERN_REF_IMG =
-                Pattern.compile("(?:" + regexFileUrl + ")|(?:" + regexImageUrl + ')', Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+            PATTERN_REF_IMG.set(Pattern.compile("(?:" + regexFileUrl + ")|(?:" + regexImageUrl + ')', Pattern.CASE_INSENSITIVE | Pattern.DOTALL));
         }
     }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
 
     private final Matcher matcher;
 
@@ -122,7 +124,7 @@ public final class ImageMatcher {
      */
     private ImageMatcher(final CharSequence content) {
         super();
-        final Pattern pattern = PATTERN_REF_IMG;
+        final Pattern pattern = PATTERN_REF_IMG.get();
         if (null == pattern) {
             throw new IllegalStateException(ImageMatcher.class.getSimpleName() + " not initialized, yet.");
         }
