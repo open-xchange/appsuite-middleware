@@ -50,7 +50,7 @@
 package com.openexchange.saml;
 
 import java.util.Set;
-import com.openexchange.saml.impl.DefaultConfig;
+import com.openexchange.saml.spi.DefaultConfig;
 
 /**
  * Contains configuration settings of the SAML feature.

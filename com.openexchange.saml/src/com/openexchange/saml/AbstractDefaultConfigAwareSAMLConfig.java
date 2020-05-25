@@ -51,7 +51,7 @@ package com.openexchange.saml;
 
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.saml.impl.DefaultConfig;
+import com.openexchange.saml.spi.DefaultConfig;
 
 /**
  * {@link AbstractDefaultConfigAwareSAMLConfig} is a {@link SAMLConfig} which is also aware of the {@link DefaultConfig}.
@@ -79,7 +79,7 @@ public abstract class AbstractDefaultConfigAwareSAMLConfig implements SAMLConfig
      *
      * @return The default {@link SAMLConfig}
      */
-    protected SAMLConfig getConfig() {
+    protected SAMLConfig getDefaultConfig() {
         return config;
     }
 

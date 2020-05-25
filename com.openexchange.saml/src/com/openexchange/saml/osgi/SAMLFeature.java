@@ -66,7 +66,6 @@ import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 import com.openexchange.osgi.DependentServiceStarter;
 import com.openexchange.saml.SAMLProperties;
-import com.openexchange.saml.impl.DefaultConfig;
 import com.openexchange.saml.impl.DefaultLoginConfigurationLookup;
 import com.openexchange.saml.impl.VeryDangerousSAMLBackend;
 import com.openexchange.saml.impl.SAMLSessionInspector;
