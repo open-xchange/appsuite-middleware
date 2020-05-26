@@ -68,14 +68,14 @@ public interface JdbcProperties {
      * <b>Note</b>: Modifying the returned <code>java.util.Properties</code> instance is reflected in JDBC properties
      * </div>
      *
-     * @return The JDBC properties or <code>null</code> if not yet initialized
+     * @return The JDBC properties
      */
     Properties getJdbcPropertiesRaw();
 
     /**
      * Gets a copy of the currently active JDBC properties.
      *
-     * @return The JDBC properties copy or <code>null</code> if not yet initialized
+     * @return The JDBC properties copy
      */
     Properties getJdbcPropertiesCopy();
 
