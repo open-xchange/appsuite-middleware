@@ -50,11 +50,10 @@
 package com.openexchange.database;
 
 import java.util.Properties;
-import com.openexchange.database.internal.JdbcPropertiesImpl;
 import com.openexchange.osgi.annotation.SingletonService;
 
 /**
- * {@link JdbcPropertiesImpl} - Provides the currently active JDBC properties as specified in <code>"dbconnector.yaml"</code> file.
+ * {@link JdbcProperties} - Provides the currently active JDBC properties as specified in <code>"dbconnector.yaml"</code> file.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.4
