@@ -382,10 +382,10 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
     }
 
     @Override
-    public void deleteSubscription(Context ctx, int userId, int id) throws OXException {
+    public boolean deleteSubscription(Context ctx, int userId, int id) throws OXException {
         Connection writeConnection = dbProvider.getWriteConnection(ctx);
         try {
-            delete(getSubscription(ctx, id), writeConnection);
+            return delete(getSubscription(ctx, id), writeConnection);
         } catch (SQLException e) {
             throw SQLException.create(e);
         } finally {
@@ -394,24 +394,25 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
     }
 
     @Override
-    public void deleteSubscription(Context ctx, int userId, int id, Connection connection) throws OXException {
+    public boolean deleteSubscription(Context ctx, int userId, int id, Connection connection) throws OXException {
         try {
-            delete(getSubscription(ctx, id), connection);
+            return delete(getSubscription(ctx, id), connection);
         } catch (SQLException e) {
             throw SQLException.create(e);
         }
     }
 
-    private void delete(final Subscription subscription, final Connection writeConnection) throws SQLException, OXException {
+    private boolean delete(final Subscription subscription, final Connection writeConnection) throws SQLException, OXException {
         final DELETE delete = new DELETE().FROM(subscriptions).WHERE(new EQUALS("id", PLACEHOLDER).AND(new EQUALS("cid", PLACEHOLDER)));
 
         final List<Object> values = new ArrayList<Object>();
         values.add(I(subscription.getId()));
         values.add(I(subscription.getContext().getContextId()));
 
-        new StatementBuilder().executeStatement(writeConnection, delete, values);
+        boolean deleted = new StatementBuilder().executeStatement(writeConnection, delete, values) > 0;
 
         storageService.delete(writeConnection, subscription.getContext(), getConfigurationId(subscription));
+        return deleted;
     }
 
     private int save(final Subscription subscription, final Connection writeConnection) throws OXException, SQLException {

@@ -161,7 +161,8 @@ public interface ExternalAccountService {
      * @param contextId The context identifier
      * @param userId The user identifier
      * @param module The module
+     * @return <code>true</code> if the account was successfully deleted; <code>false</code> otherwise
      * @throws OXException In case provider is missing or error while executing
      */
-    void delete(int id, int contextId, int userId, ExternalAccountModule module) throws OXException;
+    boolean delete(int id, int contextId, int userId, ExternalAccountModule module) throws OXException;
 }

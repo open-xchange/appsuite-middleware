@@ -222,12 +222,12 @@ public class AdministrativeOAuthAccountStorageSQLImpl extends OAuthAccountStorag
     }
 
     @Override
-    public void deleteAccount(int contextId, int userId, int accountId) throws OXException {
-        deleteAccount(ServerSessionAdapter.valueOf(userId, contextId), accountId);
+    public boolean deleteAccount(int contextId, int userId, int accountId) throws OXException {
+        return deleteAccount(ServerSessionAdapter.valueOf(userId, contextId), accountId);
     }
 
     @Override
-    public void deleteAccount(int contextId, int userId, int accountId, Connection connection) throws OXException {
+    public boolean deleteAccount(int contextId, int userId, int accountId, Connection connection) throws OXException {
         try {
             DeleteListenerRegistry deleteListenerRegistry = DeleteListenerRegistry.getInstance();
             Map<String, Object> properties = new HashMap<>(2);
@@ -236,8 +236,9 @@ public class AdministrativeOAuthAccountStorageSQLImpl extends OAuthAccountStorag
             properties.put(OAuthConstants.SESSION_PARAM_UPDATE_SCOPES, Boolean.FALSE);
 
             deleteListenerRegistry.triggerOnBeforeDeletion(accountId, properties, userId, contextId, connection);
-            deleteAccount(ServerSessionAdapter.valueOf(userId, contextId), accountId, connection);
+            boolean deleted = deleteAccount(ServerSessionAdapter.valueOf(userId, contextId), accountId, connection);
             deleteListenerRegistry.triggerOnAfterDeletion(accountId, properties, userId, contextId, connection);
+            return deleted;
         } catch (SQLException e) {
             throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         }

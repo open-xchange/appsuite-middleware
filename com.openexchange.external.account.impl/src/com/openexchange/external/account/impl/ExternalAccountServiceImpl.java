@@ -168,15 +168,16 @@ public class ExternalAccountServiceImpl implements ExternalAccountService {
     }
 
     @Override
-    public void delete(int id, int contextId, int userId, ExternalAccountModule module) throws OXException {
+    public boolean delete(int id, int contextId, int userId, ExternalAccountModule module) throws OXException {
         DatabaseService databaseService = getDatabaseService();
         Connection connection = databaseService.getWritable(contextId);
         int rollback = 0;
+        boolean deleted = false;
         try {
             connection.setAutoCommit(false);
             rollback = 1;
 
-            getProviderFor(module).delete(id, contextId, userId, connection);
+            deleted = getProviderFor(module).delete(id, contextId, userId, connection);
 
             connection.commit();
             rollback = 2;
@@ -191,6 +192,7 @@ public class ExternalAccountServiceImpl implements ExternalAccountService {
             }
             databaseService.backWritable(contextId, connection);
         }
+        return deleted;
     }
 
     //////////////////////////// HELPERS ////////////////////////////

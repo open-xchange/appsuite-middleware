@@ -185,7 +185,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
     }
 
     @Override
-    public void deleteAccount(Session session, int accountId) throws OXException {
+    public boolean deleteAccount(Session session, int accountId) throws OXException {
         int userId = session.getUserId();
         int contextId = session.getContextId();
 
@@ -194,8 +194,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
             try {
                 if (Databases.isInTransaction(connection)) {
                     // Given connection is already in transaction. Invoke & return immediately.
-                    deleteAccount(session, accountId, connection);
-                    return;
+                    return deleteAccount(session, accountId, connection);
                 }
             } catch (SQLException e) {
                 throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -216,12 +215,13 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
             properties.put(OAuthConstants.SESSION_PARAM_UPDATE_SCOPES, Boolean.FALSE);
 
             deleteListenerRegistry.triggerOnBeforeDeletion(accountId, properties, userId, contextId, connection);
-            deleteAccount(session, accountId, connection);
+            boolean deleted = deleteAccount(session, accountId, connection);
             deleteListenerRegistry.triggerOnAfterDeletion(accountId, properties, userId, contextId, connection);
 
             connection.commit(); // COMMIT
             rollback = 2;
             LOG.info("Deleted OAuth account with id '{}' for user '{}' in context '{}'", I(accountId), I(userId), I(contextId));
+            return deleted;
         } catch (SQLException e) {
             throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (OXException e) {

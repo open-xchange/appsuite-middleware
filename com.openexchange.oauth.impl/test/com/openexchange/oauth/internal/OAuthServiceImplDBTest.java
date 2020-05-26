@@ -200,8 +200,9 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
             }
 
             @Override
-            public void deleteAccount(Session session, int accountId) throws OXException {
+            public boolean deleteAccount(Session session, int accountId) throws OXException {
                 // TODO Auto-generated method stub
+                return true;
 
             }
         };

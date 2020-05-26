@@ -108,13 +108,13 @@ public class OAuthExternalAccountProvider implements ExternalAccountProvider {
     }
 
     @Override
-    public void delete(int id, int contextId, int userId) throws OXException {
-        getStorage().deleteAccount(contextId, userId, id);
+    public boolean delete(int id, int contextId, int userId) throws OXException {
+        return getStorage().deleteAccount(contextId, userId, id);
     }
 
     @Override
-    public void delete(int id, int contextId, int userId, Connection connection) throws OXException {
-        getStorage().deleteAccount(contextId, userId, id, connection);
+    public boolean delete(int id, int contextId, int userId, Connection connection) throws OXException {
+        return getStorage().deleteAccount(contextId, userId, id, connection);
     }
 
     /**

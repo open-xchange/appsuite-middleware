@@ -196,7 +196,7 @@ public class AdministrativeRdbCalendarAccountStorage implements AdministrativeCa
     }
 
     @Override
-    public void deleteAccount(int contextId, int userId, int accountId) throws OXException {
+    public boolean deleteAccount(int contextId, int userId, int accountId) throws OXException {
         DatabaseService databaseService = getDatabaseService();
         Connection connection = databaseService.getWritable(contextId);
         int rollback = 0;
@@ -204,9 +204,10 @@ public class AdministrativeRdbCalendarAccountStorage implements AdministrativeCa
             connection.setAutoCommit(false);
             rollback = 1;
             connection = databaseService.getWritable(contextId);
-            deleteAccount(contextId, userId, accountId, connection);
+            boolean deleted = deleteAccount(contextId, userId, accountId, connection);
             connection.commit();
             rollback = 2;
+            return deleted;
         } catch (SQLException e) {
             throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
@@ -221,21 +222,22 @@ public class AdministrativeRdbCalendarAccountStorage implements AdministrativeCa
     }
 
     @Override
-    public void deleteAccount(int contextId, int userId, int accountId, Connection connection) throws OXException {
+    public boolean deleteAccount(int contextId, int userId, int accountId, Connection connection) throws OXException {
         PreparedStatement stmt = null;
         try {
             CalendarAccount account = getAccount(contextId, userId, accountId, connection);
             if (account == null) {
-                return;
+                return false;
             }
 
             stmt = connection.prepareStatement(DELETE_ACCOUNT);
             stmt.setInt(1, contextId);
             stmt.setInt(2, accountId);
             stmt.setInt(3, userId);
-            stmt.executeUpdate();
+            boolean deleted = stmt.executeUpdate() > 0;
 
             invalidate(contextId, userId, account);
+            return deleted;
         } catch (SQLException e) {
             throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {

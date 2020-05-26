@@ -123,9 +123,10 @@ public interface ExternalAccountProvider {
      * @param id The account's identifier
      * @param contextId The context identifier
      * @param userId The user identifier
+     * @return <code>true</code> if the account was successfully deleted; <code>false</code> otherwise
      * @throws OXException if an error is occurred
      */
-    void delete(int id, int contextId, int userId) throws OXException;
+    boolean delete(int id, int contextId, int userId) throws OXException;
 
     /**
      * Deletes the external account with the specified identifier
@@ -135,7 +136,8 @@ public interface ExternalAccountProvider {
      * @param contextId The context identifier
      * @param userId The user identifier
      * @param connection The writable connection to use for deletion
+     * @return <code>true</code> if the account was successfully deleted; <code>false</code> otherwise
      * @throws OXException if an error is occurred
      */
-    void delete(int id, int contextId, int userId, Connection connection) throws OXException;
+    boolean delete(int id, int contextId, int userId, Connection connection) throws OXException;
 }

@@ -307,18 +307,18 @@ final class SanitizingStorageService implements MailAccountStorageService {
     }
 
     @Override
-    public void deleteMailAccount(final int id, final Map<String, Object> properties, final int user, final int cid) throws OXException {
-        storageService.deleteMailAccount(id, properties, user, cid);
+    public boolean deleteMailAccount(final int id, final Map<String, Object> properties, final int user, final int cid) throws OXException {
+        return storageService.deleteMailAccount(id, properties, user, cid);
     }
 
     @Override
-    public void deleteMailAccount(final int id, final Map<String, Object> properties, final int user, final int cid, final boolean deletePrimary) throws OXException {
-        storageService.deleteMailAccount(id, properties, user, cid, deletePrimary);
+    public boolean deleteMailAccount(final int id, final Map<String, Object> properties, final int user, final int cid, final boolean deletePrimary) throws OXException {
+        return storageService.deleteMailAccount(id, properties, user, cid, deletePrimary);
     }
 
     @Override
-    public void deleteMailAccount(final int id, final Map<String, Object> properties, final int user, final int cid, final boolean deletePrimary, final Connection con) throws OXException {
-        storageService.deleteMailAccount(id, properties, user, cid, deletePrimary, con);
+    public boolean deleteMailAccount(final int id, final Map<String, Object> properties, final int user, final int cid, final boolean deletePrimary, final Connection con) throws OXException {
+        return storageService.deleteMailAccount(id, properties, user, cid, deletePrimary, con);
     }
 
     @Override

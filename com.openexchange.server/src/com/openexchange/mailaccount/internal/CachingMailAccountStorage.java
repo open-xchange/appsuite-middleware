@@ -282,11 +282,12 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     }
 
     @Override
-    public void deleteMailAccount(int id, Map<String, Object> properties, int userId, int contextId, boolean deletePrimary, Connection con) throws OXException {
+    public boolean deleteMailAccount(int id, Map<String, Object> properties, int userId, int contextId, boolean deletePrimary, Connection con) throws OXException {
         dropSessionParameter(userId, contextId);
 
-        delegate.deleteMailAccount(id, properties, userId, contextId, deletePrimary, con);
+        boolean deleted = delegate.deleteMailAccount(id, properties, userId, contextId, deletePrimary, con);
         invalidateMailAccount(id, userId, contextId);
+        return deleted;
     }
 
     @Override
@@ -298,19 +299,21 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     }
 
     @Override
-    public void deleteMailAccount(int id, Map<String, Object> properties, int userId, int contextId, boolean deletePrimary) throws OXException {
+    public boolean deleteMailAccount(int id, Map<String, Object> properties, int userId, int contextId, boolean deletePrimary) throws OXException {
         dropSessionParameter(userId, contextId);
 
-        delegate.deleteMailAccount(id, properties, userId, contextId, deletePrimary);
+        boolean deleted = delegate.deleteMailAccount(id, properties, userId, contextId, deletePrimary);
         invalidateMailAccount(id, userId, contextId);
+        return deleted;
     }
 
     @Override
-    public void deleteMailAccount(int id, Map<String, Object> properties, int userId, int contextId) throws OXException {
+    public boolean deleteMailAccount(int id, Map<String, Object> properties, int userId, int contextId) throws OXException {
         dropSessionParameter(userId, contextId);
 
-        delegate.deleteMailAccount(id, properties, userId, contextId);
+        boolean deleted = delegate.deleteMailAccount(id, properties, userId, contextId);
         invalidateMailAccount(id, userId, contextId);
+        return deleted;
     }
 
     private void dropSessionParameter(final int userId, final int contextId) {
