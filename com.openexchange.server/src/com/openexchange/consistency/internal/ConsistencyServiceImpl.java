@@ -212,7 +212,7 @@ public class ConsistencyServiceImpl implements ConsistencyService {
                 databaseService.back(poolid.intValue(), poolCon);
                 poolCon = null;
             }
-            if (ret.size() == 0 && repair) {
+            if (repair && ret.isEmpty()) {
                 ret.add("there was nothing to repair");
             }
             Databases.closeSQLStuff(rs, stmt);
