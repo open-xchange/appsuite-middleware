@@ -62,53 +62,40 @@ import com.openexchange.user.User;
 public class EntityImpl implements Entity {
 
     private static final long serialVersionUID = -4838502301287665200L;
-    private EntityType type;
+
+    private final EntityType type;
     private final MultiKey identifier;
-    private Context context;
-    private User user;
+    private final Context context;
+    private final User user;
 
     /**
-     * Initialises a new {@link EntityImpl} as {@link Context}.
+     * Initializes a new {@link EntityImpl} of type {@link EntityType#Context context}.
      *
      * @param context The context
      */
     public EntityImpl(Context context) {
-        this(new MultiKey(new Object[] { I(context.getContextId()) }));
-        this.context = context;
-
+        this(new MultiKey(new Object[] { I(context.getContextId()) }), context, null, EntityType.Context);
     }
 
     /**
-     * Initialises a new {@link EntityImpl} as {link User}
+     * Initializes a new {@link EntityImpl} of type {@link EntityType#User user}.
      *
      * @param context The context
      * @param user The user
      */
     public EntityImpl(Context context, User user) {
-        this(new MultiKey(I(context.getContextId()), I(user.getId())));
-        this.context = context;
-        this.user = user;
+        this(new MultiKey(I(context.getContextId()), I(user.getId())), context, user, EntityType.User);
     }
 
     /**
      * Initialises a new {@link EntityImpl}.
      */
-    private EntityImpl(MultiKey identifier) {
+    private EntityImpl(MultiKey identifier, Context context, User user, EntityType type) {
         super();
-        if (identifier == null) {
-            throw new IllegalArgumentException("The identifiers can not be 'null'.");
-        }
         this.identifier = identifier;
-        switch (identifier.getKeys().length) {
-            case 1:
-                type = EntityType.Context;
-                break;
-            case 2:
-                type = EntityType.User;
-                break;
-            default:
-                throw new IllegalArgumentException("Invalid amount of identifiers specified: " + identifier.getKeys().length);
-        }
+        this.type = type;
+        this.context = context;
+        this.user = user;
     }
 
     @Override
