@@ -1116,7 +1116,7 @@ public class ConsistencyServiceImpl implements ConsistencyService {
      * @throws OXException if an error is occurred
      */
     private Map<Entity, List<String>> listMissing(List<Entity> entities) throws OXException {
-        Map<Entity, List<String>> retval = new HashMap<Entity, List<String>>();
+        Map<Entity, List<String>> retval = new HashMap<Entity, List<String>>(entities.size());
         DoNothingSolver doNothing = new DoNothingSolver();
         for (Entity entity : entities) {
             RecordSolver recorder = new RecordSolver();
@@ -1134,7 +1134,7 @@ public class ConsistencyServiceImpl implements ConsistencyService {
      * @throws OXException if an error is occurred
      */
     private Map<Entity, List<String>> listUnassigned(List<Entity> entities) throws OXException {
-        Map<Entity, List<String>> retval = new HashMap<Entity, List<String>>();
+        Map<Entity, List<String>> retval = new HashMap<Entity, List<String>>(entities.size());
         DoNothingSolver doNothing = new DoNothingSolver();
         for (Entity entity : entities) {
             RecordSolver recorder = new RecordSolver();
