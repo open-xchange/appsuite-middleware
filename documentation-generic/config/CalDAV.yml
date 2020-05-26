@@ -54,6 +54,23 @@ properties:
       file: caldav.properties
       packageName: open-xchange-dav
       tags: ["CalDAV", "Limit", "Appointment"]
+    - key: com.openexchange.caldav.interval.strict
+      description: |
+        Controls whether resources sent by the client that fall out of the configured 
+        timerange are rejected by the server or not. If enabled, such PUT requests are 
+        answered with HTTP 403 and the "CALDAV:max-date-time" / "min-date-time" 
+        preconditions as per RFC 4791. 
+        However, since some clients are not really able to cope with these reponses, the 
+        check is deactivated by default so that such data sent by the client is still 
+        accepted by the server.
+      defaultValue: false
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: true
+      related: com.openexchange.caldav.interval.start com.openexchange.caldav.interval.end
+      file: caldav.properties
+      packageName: open-xchange-dav
+      tags: ["CalDAV", "Limit", "Appointment"]
     - key: com.openexchange.caldav.url
       description: |
         Tells users where to find a caldav folder. This can be displayed in frontends.
