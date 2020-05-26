@@ -65,6 +65,7 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.microsoft.graph.api.MicrosoftGraphOneDriveAPI;
 import com.openexchange.microsoft.graph.api.MicrosoftGraphQueryParameters;
@@ -370,9 +371,15 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
         long contentLength = file.getFileSize();
         InputStream is = inputStream;
         if (contentLength <= 0) {
-            try (ThresholdFileHolder sink = new ThresholdFileHolder(-1, -1, true)) {
-                is = sink.write(inputStream).getStream();
+            ThresholdFileHolder sink = null;
+            try {
+                sink = new ThresholdFileHolder();
+                sink.write(inputStream);
                 contentLength = sink.getLength();
+                is = sink.getClosingStream();
+                sink = null; // Avoid premature closing
+            } finally {
+                Streams.close(sink);
             }
         }
 

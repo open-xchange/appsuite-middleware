@@ -326,13 +326,13 @@ public class MultipartStreamedUpload implements StreamedUpload {
                 FileItemHeaders headers = item.getHeaders();
                 String contentId = headers.getHeader("Content-Id");
                 uploadFile.setContentId(contentId);
-                
+
                 String cd = headers.getHeader("content-disposition");
                 ContentDisposition contentDispo = new ContentDisposition(cd);
                 String filesize = contentDispo.getParameter("filesize");
                 if (Strings.isNotEmpty(filesize)) {
                     try {
-                        uploadFile.setSize(Long.parseLong(filesize));
+                        uploadFile.setSize(Long.parseLong(filesize.trim()));
                     } catch (NumberFormatException e) {
                         //ignore
                     }
@@ -340,7 +340,7 @@ public class MultipartStreamedUpload implements StreamedUpload {
 
                 // Deduce MIME type from passed file name
                 String mimeType = MimeType2ExtMap.getContentType(fileName, null);
-                
+
 
                 // Set associated MIME type
                 {

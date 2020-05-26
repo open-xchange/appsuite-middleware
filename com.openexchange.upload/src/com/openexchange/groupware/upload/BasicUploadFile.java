@@ -96,19 +96,12 @@ public interface BasicUploadFile {
      * @return The prepared file name
      */
     String getPreparedFileName();
-    
+
     /**
      * Gets the file size in bytes.
      *
-     * @return The file size in bytes.
+     * @return The file size in bytes or <code>-1</code> if unknown
      */
     long getSize();
-
-    /**
-     * Sets the file size in bytes.
-     *
-     * @param size The file size in bytes.
-     */
-    void setSize(final long size);
 
 }

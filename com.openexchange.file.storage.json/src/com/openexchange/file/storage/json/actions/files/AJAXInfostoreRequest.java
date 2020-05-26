@@ -951,9 +951,12 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
                     fields.add(File.Field.FILE_MIMETYPE);
                 }
 
-                
-                file.setFileSize(streamedUploadFile.getSize());
-                fields.add(File.Field.FILE_SIZE);
+
+                long size = streamedUploadFile.getSize();
+                if (size >= 0) {
+                    file.setFileSize(size);
+                    fields.add(File.Field.FILE_SIZE);
+                }
                 // TODO: Guess Content-Type
             } else if (uploadFile != null) {
                 if (!fields.contains(File.Field.FILENAME) || file.getFileName() == null || file.getFileName().trim().length() == 0) {

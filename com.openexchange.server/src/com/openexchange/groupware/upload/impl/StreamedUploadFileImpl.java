@@ -75,6 +75,7 @@ public class StreamedUploadFileImpl implements StreamedUploadFile {
      */
     public StreamedUploadFileImpl() {
         super();
+        size = -1;
     }
 
     @Override
@@ -138,7 +139,11 @@ public class StreamedUploadFileImpl implements StreamedUploadFile {
         return size;
     }
 
-    @Override
+    /**
+     * Sets the size in bytes.x
+     *
+     * @param size The size
+     */
     public void setSize(final long size) {
         this.size = size;
     }
