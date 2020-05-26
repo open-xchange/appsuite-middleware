@@ -78,6 +78,7 @@ import com.openexchange.mail.filter.json.v2.json.mapper.parser.action.PGPEncrypt
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.action.RedirectActionCommandParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.action.RejectActionCommandParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.action.RemoveFlagActionCommandParser;
+import com.openexchange.mail.filter.json.v2.json.mapper.parser.action.SetActionCommandParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.action.SetFlagActionCommandParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.action.StopActionCommandParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.action.VacationActionCommandParser;
@@ -218,6 +219,8 @@ public class MailFilterJSONActivator extends AJAXModuleActivator {
         registry.register(ActionCommand.Commands.REMOVEFLAG.getJsonName(), new RemoveFlagActionCommandParser(this));
         registry.register(ActionCommand.Commands.PGP_ENCRYPT.getJsonName(), new PGPEncryptActionCommandParser(this));
         registry.register(SimplifiedAction.COPY.getCommandName(), new FileIntoActionCommandParser(this));
+        registry.register(ActionCommand.Commands.SET.getJsonName(), new SetActionCommandParser(this));
+
         // Commands that use the sieve filter command
         final FilterActionRegistry filterRegistry = new FilterActionRegistry();
         registerService(FilterActionRegistry.class, filterRegistry);
