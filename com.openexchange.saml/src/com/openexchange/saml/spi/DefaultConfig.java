@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.saml.impl;
+package com.openexchange.saml.spi;
 
 import static com.openexchange.saml.SAMLProperties.*;
 import java.util.Set;
@@ -71,7 +71,6 @@ public class DefaultConfig implements SAMLConfig {
 
     private static final ImmutableSet<String> ALL_HOSTS_SET = ImmutableSet.of("all");
 
-
     /**
      * Initializes the default configuration using given service.
      *
@@ -80,22 +79,34 @@ public class DefaultConfig implements SAMLConfig {
      * @throws OXException If initialization fails
      */
     public static DefaultConfig init(LeanConfigurationService configService) throws OXException {
-        String providerName = checkProperty(configService, PROVIDER_NAME);
-        String entityID = checkProperty(configService, ENTITY_ID);
-        String acsURL = checkProperty(configService, ACS_URL);
-        String idpEntityID = checkProperty(configService, IDP_ENTITY_ID);
-        String idpAuthnURL = checkProperty(configService, IDP_LOGIN_URL);
+        return init(configService, false);
+    }
+
+    /**
+     * Initializes the default configuration using given service.
+     *
+     * @param configService The lean configuration service to use
+     * @param optional Whether the values are to be considered optional or not
+     * @return The initialized default configuration
+     * @throws OXException If initialization fails
+     */
+    public static DefaultConfig init(LeanConfigurationService configService, boolean optional) throws OXException {
+        String providerName = checkProperty(configService, PROVIDER_NAME, optional);
+        String entityID = checkProperty(configService, ENTITY_ID, optional);
+        String acsURL = checkProperty(configService, ACS_URL, optional);
+        String idpEntityID = checkProperty(configService, IDP_ENTITY_ID, optional);
+        String idpAuthnURL = checkProperty(configService, IDP_LOGIN_URL, optional);
         boolean supportSingleLogout = configService.getBooleanProperty(ENABLE_SINGLE_LOGOUT);
         String slsURL = null;
         String idpLogoutURL = null;
         Binding logoutResponseBinding = null;
         String logoutResponseTemplate = null;
         if (supportSingleLogout) {
-            slsURL = checkProperty(configService, SLS_URL);
-            idpLogoutURL = checkProperty(configService, IDP_LOGOUT_URL);
-            logoutResponseBinding = checkBinding(configService, LOGOUT_RESPONSE_BINDING);
+            slsURL = checkProperty(configService, SLS_URL, optional);
+            idpLogoutURL = checkProperty(configService, IDP_LOGOUT_URL, optional);
+            logoutResponseBinding = checkBinding(configService, LOGOUT_RESPONSE_BINDING, optional);
             if (logoutResponseBinding == Binding.HTTP_POST) {
-                logoutResponseTemplate = checkProperty(configService, LOGOUT_RESPONSE_POST_TEMPLATE);
+                logoutResponseTemplate = checkProperty(configService, LOGOUT_RESPONSE_POST_TEMPLATE, optional);
             }
         }
         boolean enableMetadataService = configService.getBooleanProperty(ENABLE_METADATA_SERVICE);
@@ -109,9 +120,13 @@ public class DefaultConfig implements SAMLConfig {
         return config;
     }
 
-    private static Binding checkBinding(LeanConfigurationService configService, Property property) throws OXException {
-        String bindingName = checkProperty(configService, property);
-        if ("http-redirect".equals(bindingName)) {
+    private static Binding checkBinding(LeanConfigurationService configService, Property property, boolean optional) throws OXException {
+        String bindingName = checkProperty(configService, property, optional);
+        if (bindingName == null) {
+            if (optional) {
+                return null;
+            }
+        } else if ("http-redirect".equals(bindingName)) {
             return Binding.HTTP_REDIRECT;
         } else if ("http-post".equals(bindingName)) {
             return Binding.HTTP_POST;
@@ -120,9 +135,12 @@ public class DefaultConfig implements SAMLConfig {
         throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(property + " = " + bindingName);
     }
 
-    private static String checkProperty(LeanConfigurationService configService, Property prop) throws OXException {
+    private static String checkProperty(LeanConfigurationService configService, Property prop, boolean optional) throws OXException {
         String property = configService.getProperty(prop);
         if (Strings.isEmpty(property)) {
+            if (optional) {
+                return null;
+            }
             throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(prop);
         }
 

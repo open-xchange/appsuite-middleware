@@ -143,7 +143,11 @@ import com.openexchange.test.concurrent.ParallelSuite;
     MailFolderCountTest.class,
     PermissionLimitTest.class,
     CheckLimitsTest.class,
-    SubscribeTest.class
+    SubscribeTest.class,
+
+    // Merge/inherit parent folder permissions on move tests
+    InheritPermissionOnMoveTest.class,
+    MergePermissionOnMoveTest.class,
 
 })
 public final class FolderTestSuite {

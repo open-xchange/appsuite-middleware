@@ -68,6 +68,7 @@ import com.openexchange.saml.SAMLConfig.Binding;
 import com.openexchange.saml.spi.AbstractSAMLBackend;
 import com.openexchange.saml.spi.AuthenticationInfo;
 import com.openexchange.saml.spi.CredentialProvider;
+import com.openexchange.saml.spi.DefaultConfig;
 import com.openexchange.saml.spi.LogoutInfo;
 import com.openexchange.saml.state.AuthnRequestInfo;
 import com.openexchange.saml.state.LogoutRequestInfo;

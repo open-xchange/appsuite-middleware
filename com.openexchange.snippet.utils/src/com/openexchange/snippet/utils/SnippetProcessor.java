@@ -464,7 +464,7 @@ public class SnippetProcessor {
             int count = 0;
             do {
                 String imageTag = m.group();
-                if (MimeMessageUtility.isValidImageUri(imageTag)) {
+                if (MimeMessageUtility.isValidImageTag(imageTag)) {
                     String id = m.getManagedFileId();
                     if (null == id || !mfm.contains(id)) {
                         // Leave it
