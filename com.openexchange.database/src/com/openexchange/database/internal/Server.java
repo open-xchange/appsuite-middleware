@@ -150,17 +150,24 @@ public final class Server {
      * @return The server identifier or <code>-1</code> if no such server is registered with specified name
      * @throws OXException If resolving the server name fails
      */
-    private static int loadServerId(final String name) throws OXException {
+    private static int loadServerId(String name) throws OXException {
         ConfigDatabaseService myService = CONFIG_DB_SERVICE_REF.get();
         if (null == myService) {
             throw DBPoolingExceptionCodes.NOT_INITIALIZED.create(Server.class.getName());
         }
 
-        Connection con = null;
+        Connection con = myService.getReadOnly();
+        try {
+            return loadServerId(name, con);
+        } finally {
+            myService.backReadOnly(con);
+        }
+    }
+
+    private static int loadServerId(String name, Connection con) throws OXException {
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            con = myService.getReadOnly();
             stmt = con.prepareStatement(SELECT);
             stmt.setString(1, name);
             result = stmt.executeQuery();
@@ -169,9 +176,6 @@ public final class Server {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
-            if (null != con) {
-                myService.backReadOnly(con);
-            }
         }
     }
 

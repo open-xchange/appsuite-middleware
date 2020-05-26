@@ -62,7 +62,6 @@ import java.util.function.Function;
 import com.openexchange.database.ConfigDatabaseService;
 import com.openexchange.database.ConnectionType;
 import com.openexchange.database.DBPoolingExceptionCodes;
-import com.openexchange.database.JdbcProperties;
 import com.openexchange.exception.OXException;
 import com.openexchange.pooling.ExhaustedActions;
 import com.openexchange.pooling.PoolConfig;
@@ -187,7 +186,7 @@ public class ContextDatabaseLifeCycle implements PoolLifeCycle {
             conDataBuilder.withMin(result.getInt(index++));
             conDataBuilder.withType(ConnectionType.get(poolId == result.getInt(index++)));
             // Apply JDBC properties (and drop any parameters from JDBC URL)
-            url = JdbcProperties.removeParametersFromJdbcUrl(url);
+            url = JdbcPropertiesImpl.doRemoveParametersFromJdbcUrl(url);
             conDataBuilder.withUrl(url);
 
             defaults.putAll(jdbcProperties);
@@ -221,7 +220,7 @@ public class ContextDatabaseLifeCycle implements PoolLifeCycle {
                 LOG.error("Unable to reload configuration", exception);
             }
         }
-        
+
         @Override
         protected String getPoolClass() {
             return "userdb";

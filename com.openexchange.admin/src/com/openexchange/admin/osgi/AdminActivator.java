@@ -92,6 +92,7 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.JdbcProperties;
 import com.openexchange.filestore.FileStorageUnregisterListenerRegistry;
 import com.openexchange.groupware.filestore.FileLocationHandler;
 import com.openexchange.groupware.userconfiguration.PermissionConfigurationChecker;
@@ -125,13 +126,14 @@ public class AdminActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, ThreadPoolService.class, PasswordMechRegistry.class, VersionService.class };
+        return new Class<?>[] { ConfigurationService.class, ThreadPoolService.class, PasswordMechRegistry.class, VersionService.class, JdbcProperties.class };
     }
 
     @Override
     public synchronized void startBundle() throws Exception {
         final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AdminActivator.class);
         AdminServiceRegistry.getInstance().addService(ThreadPoolService.class, getService(ThreadPoolService.class));
+        AdminServiceRegistry.getInstance().addService(JdbcProperties.class, getService(JdbcProperties.class));
 
         track(PasswordMechRegistry.class, new RegistryServiceTrackerCustomizer<PasswordMechRegistry>(context, AdminServiceRegistry.getInstance(), PasswordMechRegistry.class));
         track(PipesAndFiltersService.class, new RegistryServiceTrackerCustomizer<PipesAndFiltersService>(context, AdminServiceRegistry.getInstance(), PipesAndFiltersService.class));
@@ -308,6 +310,7 @@ public class AdminActivator extends HousekeepingActivator {
             this.daemon = null;
         }
 
+        AdminServiceRegistry.getInstance().removeService(JdbcProperties.class);
         AdminServiceRegistry.getInstance().removeService(ThreadPoolService.class);
 
         super.stopBundle();

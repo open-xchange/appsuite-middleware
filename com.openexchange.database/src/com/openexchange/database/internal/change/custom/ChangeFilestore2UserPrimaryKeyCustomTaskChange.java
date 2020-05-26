@@ -77,8 +77,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.LockSupport;
 import com.openexchange.database.Databases;
-import com.openexchange.database.JdbcProperties;
 import com.openexchange.database.SchemaInfo;
+import com.openexchange.database.internal.JdbcPropertiesImpl;
 import com.openexchange.java.Sets;
 import com.openexchange.java.Strings;
 import gnu.trove.iterator.TIntIntIterator;
@@ -654,12 +654,12 @@ public class ChangeFilestore2UserPrimaryKeyCustomTaskChange implements CustomTas
             DriverManager.setLoginTimeout(120);
 
             String urlToUse = url;
-            Properties defaults = JdbcProperties.getInstance().getJdbcPropertiesCopy();
+            Properties defaults = JdbcPropertiesImpl.getInstance().getJdbcPropertiesCopy();
             if (null == defaults) {
                 defaults = new Properties();
                 defaults.setProperty("useSSL", "false");
             } else {
-                urlToUse = JdbcProperties.removeParametersFromJdbcUrl(urlToUse);
+                urlToUse = JdbcPropertiesImpl.doRemoveParametersFromJdbcUrl(urlToUse);
             }
             defaults.put("user", login);
             defaults.put("password", passwd);
