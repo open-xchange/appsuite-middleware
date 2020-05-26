@@ -730,7 +730,7 @@ public class DatabaseImpl extends DBService {
         ResultSet result = null;
         try {
             // Determine users with a specific file storage set
-            stmt = con.prepareStatement("SELECT DISTINCT user.id FROM user WHERE user.cid=? AND user.filestore_id>0");
+            stmt = con.prepareStatement("SELECT user.id FROM user WHERE user.cid=? AND user.filestore_id>0");
             stmt.setInt(1, contextId);
             result = stmt.executeQuery();
             boolean hasUserFileStores = result.next();
