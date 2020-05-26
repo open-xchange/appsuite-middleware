@@ -13,6 +13,18 @@ properties:
       packageName: open-xchange-core
       tags: ["Share","Mail"]
 
+    - key: com.openexchange.share.notification.numOfNotificationThreads
+      description: |
+        Specifies the number of threads that are used to concurrently send out notification mails to internal users when a folder gets shared
+      defaultValue: 10
+      version: 7.10.4
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: share.properties
+      packageName: open-xchange-core
+      tags: ["Share","Mail"]
+
     - key: com.openexchange.share.userAgentBlacklist.enabled
       description: |
         Enables or disables black-listing of User-Agents that are about to access a share link.
