@@ -553,13 +553,19 @@ public class DefaultNotificationService implements ShareNotificationService {
         }
 
         @Override
-        public void setThreadName(ThreadRenamer threadRenamer) {}
+        public void setThreadName(ThreadRenamer threadRenamer) {
+            // Nothing to do
+        }
 
         @Override
-        public void beforeExecute(Thread t) {}
+        public void beforeExecute(Thread t) {
+            // Nothing to do
+        }
 
         @Override
-        public void afterExecute(Throwable t) {}
+        public void afterExecute(Throwable t) {
+            // Nothing to do
+        }
 
         @Override
         public Void call() throws Exception {
@@ -570,7 +576,7 @@ public class DefaultNotificationService implements ShareNotificationService {
                 ShareNotification<InternetAddress> shareNotification = buildShareCreatedMailNotification(userDetail, dstTarget, message, shareUrl, session, hostData);
                 send(shareNotification);
             } catch (Exception e) {
-                LOG.warn("Unable to send notification mail to internal user {}", userId, e);
+                LOG.warn("Unable to send notification mail to internal user {} in context {}", userId, I(session.getContextId()), e);
             }
             return null;
         }
