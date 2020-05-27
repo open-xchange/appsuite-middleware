@@ -84,7 +84,7 @@ import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
  * {@link PermissionLimitTest}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.10.0
+ * @since v7.10.4
  */
 public class PermissionLimitTest extends AbstractConfigAwareAPIClientSession {
 
