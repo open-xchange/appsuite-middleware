@@ -198,7 +198,7 @@ public class PermissionLimitTest extends AbstractConfigAwareAPIClientSession {
         body.folder(folder);
         FolderUpdateResponse resp = folderApi.updateFolder(getSessionId(), id, body, Boolean.FALSE, timestamp, null, null, B(cascade), null, null);
         if(errorCode.isPresent()) {
-            assertEquals(errorCode.get(), resp.getCode());
+            assertEquals("Unexpected error: " + resp.getErrorDesc(), errorCode.get(), resp.getCode());
             return null;
         }
         assertNull(resp.getError());
