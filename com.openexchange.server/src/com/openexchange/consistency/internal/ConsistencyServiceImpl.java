@@ -65,6 +65,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.requesthandler.cache.ResourceCacheMetadataStore;
@@ -78,7 +79,6 @@ import com.openexchange.consistency.RepairAction;
 import com.openexchange.consistency.RepairPolicy;
 import com.openexchange.consistency.internal.solver.DoNothingSolver;
 import com.openexchange.consistency.internal.solver.PolicyResolver;
-import com.openexchange.consistency.internal.solver.ProblemSolver;
 import com.openexchange.consistency.internal.solver.RecordSolver;
 import com.openexchange.consistency.osgi.ConsistencyServiceLookup;
 import com.openexchange.contact.vcard.storage.VCardStorageMetadataStore;
@@ -120,7 +120,7 @@ public class ConsistencyServiceImpl implements ConsistencyService {
 
     private static final Logger LOG = LoggerFactory.getLogger(ConsistencyServiceImpl.class);
 
-    private DatabaseImpl database;
+    private final AtomicReference<DatabaseImpl> databaseReference;
     private final ServiceLookup services;
 
     /**
@@ -129,6 +129,7 @@ public class ConsistencyServiceImpl implements ConsistencyService {
     public ConsistencyServiceImpl(ServiceLookup services) {
         super();
         this.services = services;
+        databaseReference = new AtomicReference<>(null);
     }
 
     @Override
@@ -239,7 +240,18 @@ public class ConsistencyServiceImpl implements ConsistencyService {
         DoNothingSolver doNothing = new DoNothingSolver();
         RecordSolver recorder = new RecordSolver();
         Context ctx = getContext(contextId);
-        checkOneEntity(new EntityImpl(ctx), recorder, recorder, recorder, recorder, doNothing, recorder, recorder, getDatabase(), getAttachments(), getFileStorage(ctx));
+
+        ProblemSolversToUse solvers = ProblemSolversToUse.builder()
+                .withDatabaseSolver(recorder)
+                .withAttachmentSolver(recorder)
+                .withSnippetSolver(recorder)
+                .withPreviewSolver(recorder)
+                .withFileSolver(doNothing)
+                .withVCardSolver(recorder)
+                .withCompositionSpaceReferencesSolver(recorder)
+                .build();
+        checkOneEntity(new EntityImpl(ctx), solvers, getFileStorage(ctx));
+
         return recorder.getProblems();
     }
 
@@ -267,7 +279,18 @@ public class ConsistencyServiceImpl implements ConsistencyService {
         DoNothingSolver doNothing = new DoNothingSolver();
         RecordSolver recorder = new RecordSolver();
         Context ctx = getContext(contextId);
-        checkOneEntity(new EntityImpl(ctx), doNothing, doNothing, doNothing, doNothing, recorder, doNothing, doNothing, getDatabase(), getAttachments(), getFileStorage(ctx));
+
+        ProblemSolversToUse solvers = ProblemSolversToUse.builder()
+            .withDatabaseSolver(doNothing)
+            .withAttachmentSolver(doNothing)
+            .withSnippetSolver(doNothing)
+            .withPreviewSolver(doNothing)
+            .withFileSolver(recorder)
+            .withVCardSolver(doNothing)
+            .withCompositionSpaceReferencesSolver(doNothing)
+            .build();
+        checkOneEntity(new EntityImpl(ctx), solvers, getFileStorage(ctx));
+
         return recorder.getProblems();
     }
 
@@ -335,8 +358,15 @@ public class ConsistencyServiceImpl implements ConsistencyService {
      * @return the DatabaseImpl
      */
     private DatabaseImpl getDatabase() {
+        DatabaseImpl database = databaseReference.get();
         if (database == null) {
-            database = new DatabaseImpl(new DBPoolProvider());
+            synchronized (this) {
+                database = databaseReference.get();
+                if (database == null) {
+                    database = new DatabaseImpl(new DBPoolProvider());
+                    databaseReference.set(database);
+                }
+            }
         }
         return database;
     }
@@ -921,11 +951,13 @@ public class ConsistencyServiceImpl implements ConsistencyService {
      * @param fileStorage The file storage for that entity
      * @throws OXException if an error is occurred
      */
-    private void checkOneEntity(Entity entity, ProblemSolver dbSolver, ProblemSolver attachmentSolver, ProblemSolver snippetSolver, ProblemSolver previewSolver, ProblemSolver fileSolver, ProblemSolver vCardSolver, ProblemSolver compositionSpaceReferencesSolver, DatabaseImpl database, AttachmentBase attach, FileStorage fileStorage) throws OXException {
+    private void checkOneEntity(Entity entity, ProblemSolversToUse args, FileStorage fileStorage) throws OXException {
+        DatabaseImpl database = getDatabase();
+        AttachmentBase attach = getAttachments();
+        LOG.info("Checking entity {}. Using solvers db: {} attachments: {} snippets: {} files: {} vcards: {} previews: {}", entity, args.getDatabaseSolver().description(), args.getAttachmentSolver().description(), args.getSnippetSolver().description(), args.getFileSolver().description(), args.getvCardSolver().description(), args.getPreviewSolver().description());
+
         // We believe in the worst case, so lets check the storage first, so
         // that the state file is recreated
-        LOG.info("Checking entity {}. Using solvers db: {} attachments: {} snippets: {} files: {} vcards: {} previews: {}", entity, dbSolver.description(), attachmentSolver.description(), snippetSolver.description(), fileSolver.description(), vCardSolver.description(), previewSolver.description());
-
         try {
             fileStorage.recreateStateFile();
         } catch (OXException e) {
@@ -997,7 +1029,7 @@ public class ConsistencyServiceImpl implements ConsistencyService {
             // dbfileset contains all the members that aren't in the filestoreset
             if (ConsistencyUtil.diffSet(dbfileset, filestoreset, "database list", "filestore list")) {
                 // implement the solver for dbfiles here
-                dbSolver.solve(entity, dbfileset);
+                args.getDatabaseSolver().solve(entity, dbfileset);
             }
 
             // Build the difference set of the attachment database set, so that the
@@ -1005,7 +1037,7 @@ public class ConsistencyServiceImpl implements ConsistencyService {
             // filestoreset
             if (ConsistencyUtil.diffSet(attachmentset, filestoreset, "database list of attachment files", "filestore list")) {
                 // implement the solver for deleted dbfiles here
-                attachmentSolver.solve(entity, attachmentset);
+                args.getAttachmentSolver().solve(entity, attachmentset);
             }
 
             // Build the difference set of the attachment database set, so that the
@@ -1013,19 +1045,19 @@ public class ConsistencyServiceImpl implements ConsistencyService {
             // filestoreset
             if (ConsistencyUtil.diffSet(snippetset, filestoreset, "database list of snippet files", "filestore list")) {
                 // implement the solver for deleted dbfiles here
-                snippetSolver.solve(entity, snippetset);
+                args.getSnippetSolver().solve(entity, snippetset);
             }
 
             if (ConsistencyUtil.diffSet(previewset, filestoreset, "database list of cached previews", "filestore list")) {
-                previewSolver.solve(entity, previewset);
+                args.getPreviewSolver().solve(entity, previewset);
             }
 
             if (ConsistencyUtil.diffSet(vcardset, filestoreset, "database list of VCard files", "filestore list")) {
-                vCardSolver.solve(entity, vcardset);
+                args.getvCardSolver().solve(entity, vcardset);
             }
 
             if (ConsistencyUtil.diffSet(compositionspacereferencesset, filestoreset, "database list of composition space referenced files", "filestore list")) {
-                compositionSpaceReferencesSolver.solve(entity, compositionspacereferencesset);
+                args.getCompositionSpaceReferencesSolver().solve(entity, compositionspacereferencesset);
             }
 
             // Build the difference set of the filestore set, so that the final
@@ -1033,7 +1065,7 @@ public class ConsistencyServiceImpl implements ConsistencyService {
             // the dbdelfileset
             if (ConsistencyUtil.diffSet(filestoreset, joineddbfileset, "filestore list", "one of the databases")) {
                 // implement the solver for the filestore here
-                fileSolver.solve(entity, filestoreset);
+                args.getFileSolver().solve(entity, filestoreset);
             }
         } catch (OXException e) {
             LOG.error("", e);
@@ -1054,7 +1086,16 @@ public class ConsistencyServiceImpl implements ConsistencyService {
             FileStorage storage = getFileStorage(entity);
 
             PolicyResolver resolvers = PolicyResolver.build(repairPolicy, repairAction, database, attachments, storage, getAdmin(entity.getContext()));
-            checkOneEntity(entity, resolvers.getDbSolver(), resolvers.getAttachmentSolver(), resolvers.getSnippetSolver(), resolvers.getPreviewSolver(), resolvers.getFileSolver(), resolvers.getvCardSolver(), resolvers.getCompositionSpaceReferencesSolver(), database, attachments, storage);
+            ProblemSolversToUse solvers = ProblemSolversToUse.builder()
+                .withDatabaseSolver(resolvers.getDbSolver())
+                .withAttachmentSolver(resolvers.getAttachmentSolver())
+                .withSnippetSolver(resolvers.getSnippetSolver())
+                .withPreviewSolver(resolvers.getPreviewSolver())
+                .withFileSolver(resolvers.getFileSolver())
+                .withVCardSolver(resolvers.getvCardSolver())
+                .withCompositionSpaceReferencesSolver(resolvers.getCompositionSpaceReferencesSolver())
+                .build();
+            checkOneEntity(entity, solvers, storage);
 
             /*
              * The ResourceCache might store resources in the filestorage. Depending on its configuration (preview.properties)
@@ -1120,7 +1161,18 @@ public class ConsistencyServiceImpl implements ConsistencyService {
         DoNothingSolver doNothing = new DoNothingSolver();
         for (Entity entity : entities) {
             RecordSolver recorder = new RecordSolver();
-            checkOneEntity(entity, recorder, recorder, recorder, recorder, doNothing, recorder, recorder, getDatabase(), getAttachments(), getFileStorage(entity));
+
+            ProblemSolversToUse solvers = ProblemSolversToUse.builder()
+                .withDatabaseSolver(recorder)
+                .withAttachmentSolver(recorder)
+                .withSnippetSolver(recorder)
+                .withPreviewSolver(recorder)
+                .withFileSolver(doNothing)
+                .withVCardSolver(recorder)
+                .withCompositionSpaceReferencesSolver(recorder)
+                .build();
+            checkOneEntity(entity, solvers, getFileStorage(entity));
+
             retval.put(entity, recorder.getProblems());
         }
         return retval;
@@ -1138,7 +1190,18 @@ public class ConsistencyServiceImpl implements ConsistencyService {
         DoNothingSolver doNothing = new DoNothingSolver();
         for (Entity entity : entities) {
             RecordSolver recorder = new RecordSolver();
-            checkOneEntity(entity, doNothing, doNothing, doNothing, doNothing, recorder, doNothing, doNothing, getDatabase(), getAttachments(), getFileStorage(entity));
+
+            ProblemSolversToUse solvers = ProblemSolversToUse.builder()
+                .withDatabaseSolver(doNothing)
+                .withAttachmentSolver(doNothing)
+                .withSnippetSolver(doNothing)
+                .withPreviewSolver(doNothing)
+                .withFileSolver(recorder)
+                .withVCardSolver(doNothing)
+                .withCompositionSpaceReferencesSolver(doNothing)
+                .build();
+            checkOneEntity(entity, solvers, getFileStorage(entity));
+
             retval.put(entity, recorder.getProblems());
         }
         return retval;
@@ -1173,4 +1236,5 @@ public class ConsistencyServiceImpl implements ConsistencyService {
         }
         return obfuscatorService.unobfuscate(s);
     }
+
 }
