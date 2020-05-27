@@ -129,13 +129,13 @@ public class MailExternalAccountProvider implements ExternalAccountProvider {
     }
 
     @Override
-    public void delete(int id, int contextId, int userId) throws OXException {
-        getMailAccountStorageService().deleteMailAccount(id, ImmutableMap.of(), userId, contextId);
+    public boolean delete(int id, int contextId, int userId) throws OXException {
+        return getMailAccountStorageService().deleteMailAccount(id, ImmutableMap.of(), userId, contextId);
     }
 
     @Override
-    public void delete(int id, int contextId, int userId, Connection connection) throws OXException {
-        getMailAccountStorageService().deleteMailAccount(id, ImmutableMap.of(), userId, contextId, false, connection);
+    public boolean delete(int id, int contextId, int userId, Connection connection) throws OXException {
+        return getMailAccountStorageService().deleteMailAccount(id, ImmutableMap.of(), userId, contextId, false, connection);
     }
 
     ////////////////////////////////////////////// HELPERS ////////////////////////////////////////

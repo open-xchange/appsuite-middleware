@@ -86,7 +86,7 @@ public class PhotoConsumer implements BiConsumer<JSONObject, Contact> {
             u.setImage1(api.getContactPhoto(id, accessToken));
             u.setImageContentType(api.getContactPhotoMetadata(id, accessToken).optString("@odata.mediaContentType"));
         } catch (OXException e) {
-            LOG.debug("Cannot get photo for contact with id '{}'", id);
+            LOG.debug("Cannot get photo for contact with id '{}'", id, e);
         }
     }
 }

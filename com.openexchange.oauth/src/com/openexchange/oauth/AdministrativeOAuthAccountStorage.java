@@ -107,9 +107,10 @@ public interface AdministrativeOAuthAccountStorage extends OAuthAccountStorage {
      * @param contextId The context identifier
      * @param userId The user identifier
      * @param accountId The account identifier
+     * @return <code>true</code> if the account was successfully deleted; <code>false</code> otherwise
      * @throws OXException if an error is occurred
      */
-    void deleteAccount(int contextId, int userId, int accountId) throws OXException;
+    boolean deleteAccount(int contextId, int userId, int accountId) throws OXException;
 
     /**
      * Deletes the specified account
@@ -118,7 +119,8 @@ public interface AdministrativeOAuthAccountStorage extends OAuthAccountStorage {
      * @param userId The user identifier
      * @param accountId The account identifier
      * @param connection The writeable connection
+     * @return <code>true</code> if the account was successfully deleted; <code>false</code> otherwise
      * @throws OXException if an error is occurred
      */
-    void deleteAccount(int contextId, int userId, int accountId, Connection connection) throws OXException;
+    boolean deleteAccount(int contextId, int userId, int accountId, Connection connection) throws OXException;
 }

@@ -96,6 +96,7 @@ public class BirthdayConsumer implements BiConsumer<JSONObject, Contact> {
         super();
     }
 
+    @SuppressWarnings("unused")
     @Override
     public void accept(JSONObject t, Contact u) {
         if (!t.hasAndNotNull("birthday")) {

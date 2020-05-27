@@ -88,6 +88,7 @@ import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.sqlStorage.OXAdminPoolDBPool;
 import com.openexchange.admin.storage.sqlStorage.OXAdminPoolInterface;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.database.Databases;
 import com.openexchange.database.JdbcProperties;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
@@ -531,13 +532,15 @@ public class AdminCache {
         // give database some time to react (in seconds)
         DriverManager.setLoginTimeout(120);
 
+        JdbcProperties jdbcProperties = AdminServiceRegistry.getInstance().getService(JdbcProperties.class);
+
         String urlToUse = url;
-        java.util.Properties defaults = JdbcProperties.getInstance().getJdbcPropertiesCopy();
+        java.util.Properties defaults = jdbcProperties.getJdbcPropertiesCopy();
         if (null == defaults) {
             defaults = new java.util.Properties();
             defaults.setProperty("useSSL", "false");
         } else {
-            urlToUse = JdbcProperties.removeParametersFromJdbcUrl(urlToUse);
+            urlToUse = Databases.removeParametersFromJdbcUrl(urlToUse);
         }
 
         if (user != null) {
@@ -556,8 +559,10 @@ public class AdminCache {
         Class.forName(driver);
         DriverManager.setLoginTimeout(120);
 
+        JdbcProperties jdbcProperties = AdminServiceRegistry.getInstance().getService(JdbcProperties.class);
+
         String urlToUse = url;
-        Properties defaults = JdbcProperties.getInstance().getJdbcPropertiesCopy();
+        Properties defaults = jdbcProperties.getJdbcPropertiesCopy();
         if (null == defaults) {
             defaults = new Properties();
             defaults.setProperty("useSSL", "false");
@@ -580,7 +585,7 @@ public class AdminCache {
                 }
             }
         } else {
-            urlToUse = JdbcProperties.removeParametersFromJdbcUrl(urlToUse);
+            urlToUse = Databases.removeParametersFromJdbcUrl(urlToUse);
 
             for (Iterator<Entry<Object, Object>> it = defaults.entrySet().iterator(); it.hasNext();) {
                 Map.Entry<Object, Object> property = it.next();

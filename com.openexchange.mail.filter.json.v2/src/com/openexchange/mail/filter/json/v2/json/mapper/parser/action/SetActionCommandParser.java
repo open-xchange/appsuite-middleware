@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2018-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,57 +47,53 @@
  *
  */
 
-package com.openexchange.rest.client.v2.entity;
+package com.openexchange.mail.filter.json.v2.json.mapper.parser.action;
 
-import java.io.InputStream;
-import org.apache.http.HttpEntity;
-import org.apache.http.entity.ContentType;
-import com.openexchange.rest.client.v2.RESTBodyEntity;
+import java.util.ArrayList;
+import java.util.List;
+import org.apache.jsieve.SieveException;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.exception.OXException;
+import com.openexchange.jsieve.commands.ActionCommand;
+import com.openexchange.jsieve.commands.ActionCommand.Commands;
+import com.openexchange.mail.filter.json.v2.json.fields.GeneralField;
+import com.openexchange.mail.filter.json.v2.json.fields.SetActionField;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link InputStreamEntity}
+ * {@link SetActionCommandParser}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since v7.10.1
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.4
  */
-public class InputStreamEntity implements RESTBodyEntity {
-
-    private final HttpEntity entity;
+public class SetActionCommandParser extends AbstractActionCommandParser {
 
     /**
-     * Initialises a new {@link InputStreamEntity}.
+     * Initializes a new {@link SetActionCommandParser}.
      */
-    public InputStreamEntity(InputStream stream) {
-        super();
-        entity = new org.apache.http.entity.InputStreamEntity(stream);
-    }
-
-    /**
-     * Initialises a new {@link InputStreamEntity}.
-     */
-    public InputStreamEntity(InputStream stream, long contentLength) {
-        super();
-        entity = new org.apache.http.entity.InputStreamEntity(stream, contentLength);
-    }
-
-    /**
-     * Initialises a new {@link InputStreamEntity}.
-     */
-    public InputStreamEntity(InputStream stream, String contentType) {
-        super();
-        entity = new org.apache.http.entity.InputStreamEntity(stream, ContentType.create(contentType));
-    }
-
-    /**
-     * Initialises a new {@link InputStreamEntity}.
-     */
-    public InputStreamEntity(InputStream stream, long contentLength, String contentType) {
-        super();
-        entity = new org.apache.http.entity.InputStreamEntity(stream, contentLength, ContentType.create(contentType));
+    public SetActionCommandParser(ServiceLookup services) {
+        super(services, Commands.SET);
     }
 
     @Override
-    public HttpEntity getBodyEntity() {
-        return entity;
+    public ActionCommand parse(JSONObject jsonObject, ServerSession session) throws JSONException, SieveException, OXException {
+        final ArrayList<Object> arrayList = new ArrayList<Object>();
+        arrayList.add(jsonObject.getString(SetActionField.name.name()));
+        arrayList.add(jsonObject.getString(SetActionField.value.name()));
+        return new ActionCommand(ActionCommand.Commands.SET, arrayList);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public void parse(JSONObject jsonObject, ActionCommand actionCommand) throws JSONException {
+        ArrayList<Object> arguments = actionCommand.getArguments();
+        if (arguments.size() != 2) {
+            throw new JSONException("Invalid sieve rule");
+        }
+        jsonObject.put(GeneralField.id.name(), ActionCommand.Commands.SET.getJsonName());
+        jsonObject.put(SetActionField.name.name(), ((List<String>) arguments.get(0)).get(0));
+        jsonObject.put(SetActionField.value.name(), ((List<String>) arguments.get(1)).get(0));
     }
 }

@@ -184,9 +184,9 @@ public class ExternalAccountRMIServiceImpl implements ExternalAccountRMIService 
     }
 
     @Override
-    public void delete(int id, int contextId, int userId, ExternalAccountModule module) throws RemoteException {
+    public boolean delete(int id, int contextId, int userId, ExternalAccountModule module) throws RemoteException {
         try {
-            service.delete(id, contextId, userId, module);
+            return service.delete(id, contextId, userId, module);
         } catch (OXException e) {
             LOG.error("", e);
             throw new RemoteException(e.getPlainLogMessage(), e);

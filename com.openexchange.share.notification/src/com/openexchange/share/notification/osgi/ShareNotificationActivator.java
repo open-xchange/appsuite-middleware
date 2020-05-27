@@ -1,5 +1,6 @@
 package com.openexchange.share.notification.osgi;
 
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
@@ -56,6 +57,7 @@ public class ShareNotificationActivator extends HousekeepingActivator {
         defaultNotificationService.add(new MailNotificationHandler(this));
 
         // track additional share notification handlers
+        final BundleContext context = this.context;
         track(ShareNotificationHandler.class, new ServiceTrackerCustomizer<ShareNotificationHandler, ShareNotificationHandler>() {
             @Override
             public ShareNotificationHandler addingService(ServiceReference<ShareNotificationHandler> reference) {
@@ -78,9 +80,9 @@ public class ShareNotificationActivator extends HousekeepingActivator {
 
         trackService(ContactCollectorService.class);
         trackService(ObjectUseCountService.class);
+        openTrackers();
 
         registerService(ShareNotificationService.class, defaultNotificationService);
-        openTrackers();
     }
 
     @Override

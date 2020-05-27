@@ -999,8 +999,8 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
     }
 
     @Override
-    public void deleteMailAccount(final int id, final Map<String, Object> properties, final int userId, final int contextId) throws OXException {
-        deleteMailAccount(id, properties, userId, contextId, false);
+    public boolean deleteMailAccount(final int id, final Map<String, Object> properties, final int userId, final int contextId) throws OXException {
+        return deleteMailAccount(id, properties, userId, contextId, false);
     }
 
     @Override
@@ -1014,7 +1014,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
     }
 
     @Override
-    public void deleteMailAccount(final int id, final Map<String, Object> properties, final int userId, final int contextId, final boolean deletePrimary) throws OXException {
+    public boolean deleteMailAccount(final int id, final Map<String, Object> properties, final int userId, final int contextId, final boolean deletePrimary) throws OXException {
         if (!deletePrimary && MailAccount.DEFAULT_ID == id) {
             throw MailAccountExceptionCodes.NO_DEFAULT_DELETE.create(I(userId), I(contextId));
         }
@@ -1022,8 +1022,9 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         final Connection con = Database.get(contextId, true);
         try {
             con.setAutoCommit(false);
-            deleteMailAccount(id, properties, userId, contextId, deletePrimary, con);
+            boolean deleted = deleteMailAccount(id, properties, userId, contextId, deletePrimary, con);
             con.commit();
+            return deleted;
         } catch (SQLException e) {
             rollback(con);
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -1100,13 +1101,14 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
     }
 
     @Override
-    public void deleteMailAccount(final int id, final Map<String, Object> properties, final int userId, final int contextId, final boolean deletePrimary, final Connection con) throws OXException {
+    public boolean deleteMailAccount(final int id, final Map<String, Object> properties, final int userId, final int contextId, final boolean deletePrimary, final Connection con) throws OXException {
         if (!deletePrimary && MailAccount.DEFAULT_ID == id) {
             throw MailAccountExceptionCodes.NO_DEFAULT_DELETE.create(I(userId), I(contextId));
         }
         dropPOP3StorageFolders(userId, contextId);
         final boolean restoreConstraints = disableForeignKeyChecks(con);
         PreparedStatement stmt = null;
+        int deletedRows = 0;
         try {
             final DeleteListenerRegistry registry = DeleteListenerRegistry.getInstance();
             registry.triggerOnBeforeDeletion(id, properties, userId, contextId, con);
@@ -1118,14 +1120,15 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             stmt.setLong(1, contextId);
             stmt.setLong(2, id);
             stmt.setLong(3, userId);
-            stmt.executeUpdate();
+            deletedRows += stmt.executeUpdate();
             closeSQLStuff(stmt);
             stmt = con.prepareStatement("DELETE FROM user_transport_account WHERE cid = ? AND id = ? AND user = ?");
             stmt.setLong(1, contextId);
             stmt.setLong(2, id);
             stmt.setLong(3, userId);
-            stmt.executeUpdate();
+            deletedRows += stmt.executeUpdate();
             registry.triggerOnAfterDeletion(id, properties, userId, contextId, con);
+            return deletedRows > 0;
         } catch (SQLException e) {
             final String className = e.getClass().getName();
             if ((null != className) && className.endsWith("MySQLIntegrityConstraintViolationException")) {
@@ -1134,8 +1137,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                         /*
                          * Retry & return
                          */
-                        deleteMailAccount(id, properties, userId, contextId, deletePrimary, con);
-                        return;
+                        return deleteMailAccount(id, properties, userId, contextId, deletePrimary, con);
                     }
                 } catch (RuntimeException re) {
                     LOG.debug("", re);

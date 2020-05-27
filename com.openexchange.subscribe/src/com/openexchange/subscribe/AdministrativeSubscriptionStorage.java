@@ -99,9 +99,10 @@ public interface AdministrativeSubscriptionStorage extends SubscriptionStorage {
      * @param ctx The {@link Context}
      * @param userId the user identifier
      * @param id The subscription identifier
+     * @return <code>true</code> if the subscription was successfully deleted; <code>false</code> otherwise
      * @throws OXException if an error is occurred
      */
-    void deleteSubscription(Context ctx, int userId, int id) throws OXException;
+    boolean deleteSubscription(Context ctx, int userId, int id) throws OXException;
 
     /**
      * Removes the specified subscription
@@ -110,9 +111,10 @@ public interface AdministrativeSubscriptionStorage extends SubscriptionStorage {
      * @param userId the user identifier
      * @param id The subscription identifier
      * @param connection The writable connection
+     * @return <code>true</code> if the subscription was successfully deleted; <code>false</code> otherwise
      * @throws OXException if an error is occurred
      */
-    void deleteSubscription(Context ctx, int userId, int id, Connection connection) throws OXException;
+    boolean deleteSubscription(Context ctx, int userId, int id, Connection connection) throws OXException;
 
     /**
      * Deletes all {@link Subscription}s for the given user

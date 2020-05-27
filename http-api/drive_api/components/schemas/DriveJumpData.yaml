@@ -3,3 +3,6 @@ properties:
   redirectUrl:
     type: string
     description: The direct link to the file/folder.
+  appendClientToken:
+    type: boolean
+    description: '`true` if the client token needs to be appended, `false`, otherwise.'

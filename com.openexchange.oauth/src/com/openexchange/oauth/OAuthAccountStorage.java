@@ -98,10 +98,10 @@ public interface OAuthAccountStorage {
      * 
      * @param session The session
      * @param accountId The account identifier
-     *
+     * @return <code>true</code> if the account was successfully deleted; <code>false</code> otherwise
      * @throws OXException If deletion fails
      */
-    void deleteAccount(Session session, int accountId) throws OXException;
+    boolean deleteAccount(Session session, int accountId) throws OXException;
 
     /**
      * Updates the specified account

@@ -166,7 +166,8 @@ public interface ExternalAccountRMIService extends Remote {
      * @param contextId The context identifier
      * @param userId The user identifier
      * @param module The module
+     * @return <code>true</code> if the account was successfully deleted; <code>false</code> otherwise
      * @throws RemoteException
      */
-    void delete(int id, int contextId, int userId, ExternalAccountModule module) throws RemoteException;
+    boolean delete(int id, int contextId, int userId, ExternalAccountModule module) throws RemoteException;
 }

@@ -59,7 +59,6 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ForcedReloadable;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadables;
-import com.openexchange.database.JdbcProperties;
 import com.openexchange.database.internal.Configuration.ConfigurationDifference;
 import com.openexchange.database.internal.ConfigurationListener.ConfigDBListener;
 import com.openexchange.database.internal.reloadable.ConnectionReloader;
@@ -160,7 +159,7 @@ public class ConnectionReloaderImpl implements ForcedReloadable, ConnectionReloa
             ConfigurationDifference configDifference = this.configuration.getDifferenceTo(configuration);
             if (keyStoreUpdate || configDifference.anythingDifferent()) {
                 configuration.logCurrentPoolConfig();
-                JdbcProperties.getInstance().setJdbcProperties(configuration.getJdbcProps());
+                JdbcPropertiesImpl.getInstance().setJdbcProperties(configuration.getJdbcProps());
                 notify(keyStoreUpdate, configuration, configDifference);
                 this.configuration = configuration;
             }

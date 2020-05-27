@@ -69,6 +69,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.openexchange.database.internal.JdbcPropertiesImpl;
 import com.openexchange.exception.ExceptionUtils;
 import com.openexchange.java.ConcurrentList;
 import com.openexchange.java.Strings;
@@ -773,7 +774,7 @@ public final class Databases {
      * @return The parameter-less JDBC URL
      */
     public static String removeParametersFromJdbcUrl(String url) {
-        return JdbcProperties.removeParametersFromJdbcUrl(url);
+        return JdbcPropertiesImpl.doRemoveParametersFromJdbcUrl(url);
     }
 
     /**

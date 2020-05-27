@@ -68,6 +68,7 @@ import com.openexchange.drive.json.internal.Services;
 import com.openexchange.drive.json.internal.UploadActionBodyParser;
 import com.openexchange.drive.json.listener.BlockingListenerFactory;
 import com.openexchange.groupware.notify.hostname.HostnameService;
+import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.notification.ShareNotificationService;
@@ -92,7 +93,7 @@ public class DriveJsonActivator extends AJAXModuleActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { DriveService.class, DriveEventService.class, LeanConfigurationService.class,
             ConfigurationService.class, DriveSubscriptionStore.class, CapabilityService.class, ModuleSupport.class,
-            ShareNotificationService.class, DatabaseService.class, ShareService.class
+            ShareNotificationService.class, DatabaseService.class, ShareService.class, ServerConfigService.class
         };
     }
 

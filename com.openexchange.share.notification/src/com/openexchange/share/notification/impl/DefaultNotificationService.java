@@ -59,6 +59,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.CompletionService;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
@@ -66,6 +67,9 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.config.cascade.ComposedConfigProperty;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
@@ -92,10 +96,10 @@ import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.share.notification.ShareNotifyExceptionCodes;
 import com.openexchange.share.notification.impl.mail.MailNotifications;
 import com.openexchange.share.notification.impl.mail.MailNotifications.ShareCreatedBuilder;
+import com.openexchange.threadpool.BoundedCompletionService;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadRenamer;
-import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
@@ -388,7 +392,7 @@ public class DefaultNotificationService implements ShareNotificationService {
         /*
          * Filter for guest users
          */
-        Map<Integer, UserDetail> guestsById = new HashMap<>(usersById).entrySet().stream() //@formatter:off
+        Map<Integer, UserDetail> guestsById = usersById.entrySet().stream() //@formatter:off
             .filter(g -> g.getValue().getUser().isGuest())
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)); //@formatter:on
         /*
@@ -435,18 +439,53 @@ public class DefaultNotificationService implements ShareNotificationService {
         /*
          * Filter for internal users
          */
-        Map<Integer, UserDetail> internalUsersById = new HashMap<>(usersById).entrySet().stream() //@formatter:off
+        Map<Integer, UserDetail> internalUsersById = usersById.entrySet().stream() //@formatter:off
             .filter(g -> false == g.getValue().getUser().isGuest())
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)); //@formatter:on
         /*
          * Send notifications asynchronous
          */
         ThreadPoolService threadPoolService = serviceLookup.getServiceSafe(ThreadPoolService.class);
-        List<Task<Void>> tasks = new ArrayList<>(internalUsersById.size());
+        int numOfNotificationThreads = getIntValue("com.openexchange.share.notification.numOfNotificationThreads", 10, session);
+        CompletionService<Void> completionService = new BoundedCompletionService<Void>(threadPoolService, numOfNotificationThreads).setTrackable(true);
+        int numTasks = 0;
         for (Entry<Integer, UserDetail> entry : internalUsersById.entrySet()) {
-            tasks.add(new NotificationTask(entry.getKey(), entry.getValue(), moduleSupport, srcTarget, message, session, hostData));
+            completionService.submit(new NotificationTask(entry.getKey(), entry.getValue(), moduleSupport, srcTarget, message, session, hostData));
+            numTasks++;
         }
-        threadPoolService.invoke(tasks, CallerRunsBehavior.getInstance());
+        try {
+            for (int i = numTasks; i-- > 0;) {
+                completionService.take();
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            LOG.error("Interrupte while sending notifications to internl users", e);
+        }
+    }
+
+    /**
+     * Gets the value for specified <code>integer</code> property.
+     *
+     * @param propertyName The name of the <code>integer</code> property
+     * @param defaultValue The default <code>integer</code> value
+     * @param session The session from requesting user
+     * @return The <code>integer</code> value or <code>defaultValue</code> (if absent)
+     * @throws OXException If <code>integer</code> value cannot be returned
+     * @throws IllegalArgumentException If session is <code>null</code>
+     */
+    private int getIntValue(String propertyName, int defaultValue, Session session) throws OXException {
+        if (null == session) {
+            throw new IllegalArgumentException("Session must not be null");
+        }
+        ConfigViewFactory viewFactory = serviceLookup.getService(ConfigViewFactory.class);
+        ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
+
+        ComposedConfigProperty<Integer> property = view.property(propertyName, int.class);
+        if (null == property || !property.isDefined()) {
+            return defaultValue;
+        }
+
+        return property.get().intValue();
     }
 
     private static final class UserDetail {
@@ -493,7 +532,7 @@ public class DefaultNotificationService implements ShareNotificationService {
 
         /**
          * Initializes a new {@link NotificationTask}.
-         * 
+         *
          * @param userId The user identifier
          * @param userDetail The details for the user to notify
          * @param moduleSupport The {@link ModuleSupport}
@@ -514,13 +553,19 @@ public class DefaultNotificationService implements ShareNotificationService {
         }
 
         @Override
-        public void setThreadName(ThreadRenamer threadRenamer) {}
+        public void setThreadName(ThreadRenamer threadRenamer) {
+            // Nothing to do
+        }
 
         @Override
-        public void beforeExecute(Thread t) {}
+        public void beforeExecute(Thread t) {
+            // Nothing to do
+        }
 
         @Override
-        public void afterExecute(Throwable t) {}
+        public void afterExecute(Throwable t) {
+            // Nothing to do
+        }
 
         @Override
         public Void call() throws Exception {
@@ -531,7 +576,7 @@ public class DefaultNotificationService implements ShareNotificationService {
                 ShareNotification<InternetAddress> shareNotification = buildShareCreatedMailNotification(userDetail, dstTarget, message, shareUrl, session, hostData);
                 send(shareNotification);
             } catch (Exception e) {
-                LOG.warn("Unable to send notification mail to internal user {}", userId, e);
+                LOG.warn("Unable to send notification mail to internal user {} in context {}", userId, I(session.getContextId()), e);
             }
             return null;
         }

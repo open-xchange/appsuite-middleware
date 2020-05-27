@@ -49,6 +49,7 @@
 
 package com.openexchange.external.accounts.clt;
 
+import static com.openexchange.java.Autoboxing.I;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
@@ -96,7 +97,9 @@ public class DeleteExternalAccounts extends AbstractExternalAccountCLT {
     @Override
     protected Void invoke(Options options, CommandLine cmd, String optRmiHostName) throws Exception {
         ExternalAccountRMIService service = getRmiStub(ExternalAccountRMIService.RMI_NAME);
-        service.delete(id, contextId, userId, module);
+        if (service.delete(id, contextId, userId, module)) {
+            System.out.println(String.format("Account from module '%1$s' with id '%2$s' for user '%3$s' in context '%4$s' was deleted.", module, I(id), I(userId), I(contextId)));
+        }
         return null;
     }
 

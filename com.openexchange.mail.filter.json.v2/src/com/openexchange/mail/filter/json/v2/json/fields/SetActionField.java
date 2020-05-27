@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,74 +47,16 @@
  *
  */
 
-package com.openexchange.groupware.upload;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+package com.openexchange.mail.filter.json.v2.json.fields;
 
 /**
- * {@link UploadFile}
+ * {@link SetActionField}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.4
  */
-public interface UploadFile extends BasicUploadFile {
-
-    /**
-     * Sets the file's field name in multipart upload.
-     *
-     * @param fieldName The file's field name in multipart upload.
-     */
-    void setFieldName(final String fieldName);
-
-    /**
-     * Sets the file's content type.
-     *
-     * @param contentType The file's content type.
-     */
-    void setContentType(final String contentType);
-
-    /**
-     * Sets the value of the <code>"Content-Id"</code> header.
-     *
-     * @param contentId The value of the <code>"Content-Id"</code> header or <code>null</code>
-     */
-    void setContentId(final String contentId);
-
-    /**
-     * Sets the file name as provided through upload form.
-     *
-     * @param fileName The file name
-     */
-    void setFileName(final String fileName);
-
-    /**
-     * Sets the file size in bytes.
-     *
-     * @param size The file size in bytes.
-     */
-    void setSize(final long size);
-
-    /**
-     * Gets the associated unique temporary file on disk.
-     *
-     * @return The associated unique temporary file on disk.
-     */
-    File getTmpFile();
-
-    /**
-     * Sets the associated unique temporary file on disk.
-     *
-     * @param tmpFile The associated unique temporary file on disk.
-     */
-    void setTmpFile(final File tmpFile);
-
-    /**
-     * Gets the {@link InputStream} to the file held on disk.
-     *
-     * @return The <tt>InputStream</tt> instance
-     * @throws IOException If opening stream fails
-     */
-    InputStream openStream() throws IOException;
-
+public enum SetActionField {
+    modifiers,
+    name,
+    value;
 }

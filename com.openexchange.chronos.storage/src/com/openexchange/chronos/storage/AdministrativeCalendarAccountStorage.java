@@ -110,9 +110,10 @@ public interface AdministrativeCalendarAccountStorage {
      * @param contextId the context identifier
      * @param userId The user identifier
      * @param accountId The account identifier
+     * @return <code>true</code> if the account was successfully deleted; <code>false</code> otherwise
      * @throws OXException if an error is occurred
      */
-    void deleteAccount(int contextId, int userId, int accountId) throws OXException;
+    boolean deleteAccount(int contextId, int userId, int accountId) throws OXException;
 
     /**
      * Deletes the calendar account with the specified identifier
@@ -121,7 +122,8 @@ public interface AdministrativeCalendarAccountStorage {
      * @param userId The user identifier
      * @param accountId The account identifier
      * @param connection The writeable connection
+     * @return <code>true</code> if the account was successfully deleted; <code>false</code> otherwise
      * @throws OXException if an error is occurred
      */
-    void deleteAccount(int contextId, int userId, int accountId, Connection connection) throws OXException;
+    boolean deleteAccount(int contextId, int userId, int accountId, Connection connection) throws OXException;
 }

@@ -59,11 +59,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.microsoft.graph.api.MicrosoftGraphOneDriveAPI;
 import com.openexchange.microsoft.graph.api.MicrosoftGraphQueryParameters;
@@ -86,6 +88,11 @@ import com.openexchange.microsoft.graph.onedrive.parser.OneDriveFolderParser;
 public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveService {
 
     private static final Logger LOG = LoggerFactory.getLogger(MicrosoftGraphDriveServiceImpl.class);
+
+    /**
+     * The file size limit for the one-shot upload operation
+     */
+    private static final int ONESHOT_LIMIT = 1024 * 1024 * 4;
     /**
      * Infostore's root folder id
      */
@@ -360,7 +367,27 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
 
     @Override
     public String upload(String accessToken, File file, InputStream inputStream) throws OXException {
-        JSONObject responseBody = api.streamingUpload(accessToken, file.getFolderId(), file.getFileName(), file.getFileMIMEType(), file.getFileSize(), inputStream);
+        JSONObject responseBody;
+        long contentLength = file.getFileSize();
+        InputStream is = inputStream;
+        if (contentLength <= 0) {
+            ThresholdFileHolder sink = null;
+            try {
+                sink = new ThresholdFileHolder();
+                sink.write(inputStream);
+                contentLength = sink.getLength();
+                is = sink.getClosingStream();
+                sink = null; // Avoid premature closing
+            } finally {
+                Streams.close(sink);
+            }
+        }
+
+        if (contentLength > ONESHOT_LIMIT) {
+            responseBody = api.streamingUpload(accessToken, file.getFolderId(), file.getFileName(), contentLength, is);
+        } else {
+            responseBody = api.oneshotUpload(accessToken, file.getFolderId(), file.getFileName(), file.getFileMIMEType(), is);
+        }
         return responseBody.optString("id");
     }
 
@@ -445,9 +472,8 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
      * @param userId the user identifier
      * @param entities The {@link JSONArray} with the entities
      * @return A {@link List} with the {@link OneDriveFolder}s
-     * @throws OXException if an error is occurred
      */
-    private List<OneDriveFolder> parseEntities(int userId, String accessToken, JSONArray entities) throws OXException {
+    private List<OneDriveFolder> parseEntities(int userId, String accessToken, JSONArray entities) {
         if (entities == null || entities.isEmpty()) {
             return Collections.emptyList();
         }

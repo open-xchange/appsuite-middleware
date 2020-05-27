@@ -141,13 +141,15 @@ public class CalDAVImport {
                 /*
                  * check against min-/max-date-time, if configured
                  */
-                if (false == CalendarUtils.isInRange(importedEvent, resource.getParent().getMinDateTime(), null, TimeZones.UTC) && (
-                    null == importedEvent.getRecurrenceRule() || false == resource.getFactory().requireService(RecurrenceService.class).iterateEventOccurrences(
-                        importedEvent, resource.getParent().getMinDateTime(), null).hasNext())) {
-                    throw new PreconditionException(DAVProtocol.CAL_NS.getURI(), "min-date-time", url, HttpServletResponse.SC_FORBIDDEN);
-                }
-                if (false == CalendarUtils.isInRange(importedEvent, null, resource.getParent().getMaxDateTime(), TimeZones.UTC)) {
-                    throw new PreconditionException(DAVProtocol.CAL_NS.getURI(), "max-date-time", url, HttpServletResponse.SC_FORBIDDEN);
+                if (Boolean.valueOf(resource.getFactory().getConfigValue("com.openexchange.caldav.interval.strict", "false"))) {
+                    if (false == CalendarUtils.isInRange(importedEvent, resource.getParent().getMinDateTime(), null, TimeZones.UTC) && (
+                        null == importedEvent.getRecurrenceRule() || false == resource.getFactory().requireService(RecurrenceService.class).iterateEventOccurrences(
+                            importedEvent, resource.getParent().getMinDateTime(), null).hasNext())) {
+                        throw new PreconditionException(DAVProtocol.CAL_NS.getURI(), "min-date-time", url, HttpServletResponse.SC_FORBIDDEN);
+                    }
+                    if (false == CalendarUtils.isInRange(importedEvent, null, resource.getParent().getMaxDateTime(), TimeZones.UTC)) {
+                        throw new PreconditionException(DAVProtocol.CAL_NS.getURI(), "max-date-time", url, HttpServletResponse.SC_FORBIDDEN);
+                    }
                 }
                 if (null == uid) {
                     uid = importedEvent.getUid();
@@ -170,7 +172,7 @@ public class CalDAVImport {
         this.changeExceptions = changeExceptions;
         this.uid = uid;
     }
-
+    
     /**
      * Initializes a new {@link CalDAVImport}.
      *

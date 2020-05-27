@@ -85,54 +85,6 @@ public class JsonMessageHandlerTest {
     }
 
     /**
-     * Ensure that alternative text/xml attachment that is part of multipart/alternative gets ignored
-     */
-    @Test
-    public void testBug32692() {
-        try {
-            final byte[] bytes = ("Content-Type: multipart/alternative; boundary=\"----=_Part_8_228463983.1398448328908\"\n" + "Date: Fri, 15 Nov 2013 04:55:25 -0800 (PST)\n" + "From: \"email1@mytrial.co.uk\" <email1@mytrial.co.uk>\n" + "To: ho hum <email53@mytrial.co.uk>\n" + "Message-ID: <11574183.303149.1384520125498.chat@gmail.com>\n" + "Subject: Chat with email1@mytrial.co.uk\n" + "MIME-Version: 1.0\n" + "\n" + "------=_Part_8_228463983.1398448328908\n" + "Content-Type: text/xml; charset=utf-8\n" + "Content-Transfer-Encoding: 7bit\n" + "\n" + "<con:conversation xmlns:con=\"google:archive:conversation\">\n" + "<cli:message to=\"email53@mytrial.co.uk\" iconset=\"classic\" from=\"email1@mytrial.co.uk\" int:cid=\"278391101870075059\" int:sequence-no=\"1\" int:time-stamp=\"1384520125480\" xmlns:cli=\"jabber:client\" xmlns:int=\"google:internal\">\n" + "<cli:body>hi</cli:body><met:google-mail-signature xmlns:met=\"google:metadata\">2jLeBillxquvrnTPZKm8uZNifgY</met:google-mail-signature>\n" + "<x stamp=\"20131115T12:55:25\" xmlns=\"jabber:x:delay\"/><time ms=\"1384520125498\" xmlns=\"google:timestamp\"/>\n" + "</cli:message></con:conversation>\n" + "\n" + "------=_Part_8_228463983.1398448328908\n" + "Content-Type: text/html; charset=utf-8\n" + "Content-Transfer-Encoding: 7bit\n" + "\n" + "hi\n" + "\n" + "------=_Part_8_228463983.1398448328908--").getBytes();
-
-            // Ensure that duplicate text/calendar attachment that is part of multipart/alternative gets ignored
-
-            final MailMessage mail = MimeMessageConverter.convertMessage(bytes);
-
-            // Preps
-
-            ServerServiceRegistry.getInstance().addService(HtmlService.class, new SimHtmlService());
-
-            UserSettingMail usm = new UserSettingMail(1, 1);
-            usm.parseBits(627479);
-
-            ServerSession session = new SimServerSession(new SimContext(1), new SimUser(1), null);
-
-            JsonMessageHandler handler = new JsonMessageHandler(0, "INBOX/1", DisplayMode.DISPLAY, true, true, session, usm, false, 0);
-
-            // Test
-
-            MailMessageParser parser = new MailMessageParser();
-            parser.parseMailMessage(mail, handler);
-
-            JSONObject jMail = handler.getJSONObject();
-            assertNotNull(jMail);
-
-            JSONArray jAttachments = jMail.getJSONArray("attachments");
-            assertNotNull(jAttachments);
-            assertEquals("Unexpected number of attachments", 1, jAttachments.length());
-
-            final JSONObject jAttachment1 = jAttachments.getJSONObject(0);
-            assertNotNull(jAttachment1);
-
-            assertTrue("Unexpected content", jAttachment1.getString("content_type").startsWith("text/html"));
-
-            // System.out.println(jAttachment1.toString(2));
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail(e.getMessage());
-        }
-    }
-
-    /**
      * Ensure that duplicate text/calendar attachment that is part of multipart/alternative gets ignored
      */
     @Test

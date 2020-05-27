@@ -173,7 +173,7 @@ public class RdbAdministrativeFileStorageAccountStorage implements Administrativ
     }
 
     @Override
-    public void deleteAccount(int contextId, int userId, int accountId) throws OXException {
+    public boolean deleteAccount(int contextId, int userId, int accountId) throws OXException {
         DatabaseService databaseService = getDatabaseService();
         Connection connection = databaseService.getWritable(contextId);
         int rollback = 0;
@@ -181,10 +181,11 @@ public class RdbAdministrativeFileStorageAccountStorage implements Administrativ
             connection.setAutoCommit(false);
             rollback = 1;
 
-            deleteAccount(contextId, userId, accountId, connection);
+            boolean deleted = deleteAccount(contextId, userId, accountId, connection);
 
             connection.commit();
             rollback = 2;
+            return deleted;
         } catch (SQLException e) {
             throw FileStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -199,21 +200,22 @@ public class RdbAdministrativeFileStorageAccountStorage implements Administrativ
     }
 
     @Override
-    public void deleteAccount(int contextId, int userId, int accountId, Connection connection) throws OXException {
+    public boolean deleteAccount(int contextId, int userId, int accountId, Connection connection) throws OXException {
         PreparedStatement statement = null;
         try {
             AdministrativeFileStorageAccount account = getAccount(contextId, userId, accountId, connection);
             if (account == null) {
-                return;
+                return false;
             }
 
             statement = connection.prepareStatement(DELETE_ACCOUNT);
             statement.setInt(1, contextId);
             statement.setInt(2, userId);
             statement.setInt(3, accountId);
-            statement.executeUpdate();
+            boolean deleted = statement.executeUpdate() > 0;
 
             invalidate(account);
+            return deleted;
         } catch (SQLException e) {
             throw FileStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {

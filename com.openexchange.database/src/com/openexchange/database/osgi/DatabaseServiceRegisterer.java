@@ -64,6 +64,7 @@ import com.openexchange.database.internal.AssignmentFactoryImpl;
 import com.openexchange.database.internal.Configuration;
 import com.openexchange.database.internal.DatabaseServiceImpl;
 import com.openexchange.database.internal.Initialization;
+import com.openexchange.database.internal.JdbcPropertiesImpl;
 import com.openexchange.database.internal.ConnectionReloaderImpl;
 import com.openexchange.database.migration.DBMigrationExecutorService;
 import com.openexchange.osgi.ServiceListing;
@@ -84,7 +85,7 @@ public class DatabaseServiceRegisterer implements ServiceTrackerCustomizer<Objec
     private ConfigViewFactory configViewFactory;
     private DBMigrationExecutorService migrationService;
 
-    private ServiceRegistration<DatabaseService> serviceRegistration;
+    private ServiceRegistration<DatabaseService> databaseServiceRegistration;
 
     /**
      * Initializes a new {@link DatabaseServiceRegisterer}.
@@ -118,12 +119,13 @@ public class DatabaseServiceRegisterer implements ServiceTrackerCustomizer<Objec
                 // Parse configuration
                 Configuration configuration = new Configuration();
                 configuration.readConfiguration(configService);
-                JdbcProperties.getInstance().setJdbcProperties(configuration.getJdbcProps());
+                JdbcPropertiesImpl.getInstance().setJdbcProperties(configuration.getJdbcProps());
                 ConnectionReloaderImpl reloader = new ConnectionReloaderImpl(configuration);
                 context.registerService(Reloadable.class, reloader, null);
+                context.registerService(JdbcProperties.class, JdbcPropertiesImpl.getInstance(), null);
                 databaseService = Initialization.getInstance().start(configService, configViewFactory, migrationService, connectionListeners, configuration, reloader);
                 LOG.info("Publishing DatabaseService.");
-                serviceRegistration = context.registerService(DatabaseService.class, databaseService, null);
+                databaseServiceRegistration = context.registerService(DatabaseService.class, databaseService, null);
             } catch (Exception e) {
                 LOG.error("Publishing the DatabaseService failed.", e);
             }
@@ -150,11 +152,11 @@ public class DatabaseServiceRegisterer implements ServiceTrackerCustomizer<Objec
 
     @Override
     public synchronized void removedService(final ServiceReference<Object> reference, final Object service) {
-        ServiceRegistration<DatabaseService> serviceRegistration = this.serviceRegistration;
-        if (null != serviceRegistration) {
+        ServiceRegistration<DatabaseService> databaseServiceRegistration = this.databaseServiceRegistration;
+        if (null != databaseServiceRegistration) {
             LOG.info("Unpublishing DatabaseService.");
-            this.serviceRegistration = null;
-            serviceRegistration.unregister();
+            this.databaseServiceRegistration = null;
+            databaseServiceRegistration.unregister();
             Initialization.getInstance().stop();
             Initialization.setConfigurationService(null);
         }

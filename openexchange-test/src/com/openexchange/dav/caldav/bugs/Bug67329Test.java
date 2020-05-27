@@ -49,11 +49,15 @@
 
 package com.openexchange.dav.caldav.bugs;
 
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import java.rmi.Naming;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
+import java.util.Map;
 import java.util.TimeZone;
 import org.apache.jackrabbit.webdav.DavConstants;
 import org.apache.jackrabbit.webdav.MultiStatusResponse;
@@ -61,6 +65,10 @@ import org.apache.jackrabbit.webdav.client.methods.PropFindMethod;
 import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
 import org.junit.Before;
 import org.junit.Test;
+import com.openexchange.admin.rmi.OXUserInterface;
+import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.configuration.AJAXConfig;
+import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.dav.Config;
 import com.openexchange.dav.PropertyNames;
 import com.openexchange.dav.StatusCodes;
@@ -110,6 +118,30 @@ public class Bug67329Test extends CalDAVTest {
             dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
             configuredMaxDateTime = dateFormat.parse(maxDateTime);
         }
+        /*
+         * ensure timerange checks are in "strict" mode
+         */
+        setUserAttributes(Collections.singletonMap("com.openexchange.caldav.interval.strict", "true"));
+    }
+
+    @Override
+    public void tearDown() throws Exception {
+        /*
+         * reset timerange check strictness to defaults
+         */
+        setUserAttributes(Collections.singletonMap("com.openexchange.caldav.interval.strict", null));
+        super.tearDown();
+    }
+
+    private void setUserAttributes(Map<String, String> attributes) throws Exception {
+        com.openexchange.admin.rmi.dataobjects.Context context = new com.openexchange.admin.rmi.dataobjects.Context(I(getClient().getValues().getContextId()));
+        com.openexchange.admin.rmi.dataobjects.User user = new com.openexchange.admin.rmi.dataobjects.User(getClient().getValues().getUserId());
+        for (String property : attributes.keySet()) {
+            user.setUserAttribute("config", property, attributes.get(property));
+        }
+        Credentials credentials = new Credentials(admin.getUser(), admin.getPassword());
+        OXUserInterface iface = (OXUserInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXUserInterface.RMI_NAME);
+        iface.change(context, user, credentials);
     }
 
     @Test
