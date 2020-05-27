@@ -94,7 +94,7 @@ public class MultifactorManagementServiceImpl implements MultifactorManagementSe
      */
     private MultifactorRequest getMultifactorRequest(int contextId, int userId) {
         final String host = null;
-        return new MultifactorRequest(contextId, userId, host, Locale.getDefault());
+        return new MultifactorRequest(contextId, userId, null, host, Locale.getDefault());
     }
 
     @Override
