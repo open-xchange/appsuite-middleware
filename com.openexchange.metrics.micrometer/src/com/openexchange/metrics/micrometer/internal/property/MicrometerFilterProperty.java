@@ -84,10 +84,10 @@ public enum MicrometerFilterProperty implements Property {
      */
     PERCENTILES("distribution.", ""),
     /**
-     * SLA to publish concrete value buckets.
+     * SLO to publish concrete value buckets.
      * Comma-separated-list with time values (e.g. 50ms, 100ms, etc.)
      */
-    SLA("distribution.", ""),
+    SLO("distribution.", ""),
     /**
      * Defines queries for metrics
      */

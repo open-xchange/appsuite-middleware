@@ -190,7 +190,7 @@ For all monitoring metrics, developers make conscious decisions whether they sha
 
 All metrics can be individually enabled/disabled. By default a comprehensive set of metrics is exposed.
 
-Timing metrics like latencies are configurable in terms of their exposed format (rate only vs. summary vs. histogram). For histograms it is possible to specify the concrete latency buckets or add certain ones to a generated default set of buckets (called `sla`s). For percentile summaries, the pre-calculated quantiles can be set or overridden using configuration.
+Timing metrics like latencies are configurable in terms of their exposed format (rate only vs. summary vs. histogram). For histograms it is possible to specify the concrete latency buckets or add certain ones to a generated default set of buckets (called `slo`s). For percentile summaries, the pre-calculated quantiles can be set or overridden using configuration.
 
 
 ## Configuration guidelines
@@ -302,9 +302,9 @@ appsuite_sessions_total_count{client="all",} 0.0
 
 ## Distribution Statistics
 
-The distribution statistics for metrics of type `Timer` and `DistributionSummary` is also configurable. This entails configuration for enabling/disabling the percentiles histogram, the minimum and maximum values of the histogram, the publishing of concrete percentiles (e.g. 0.5, 0.75, etc.) and the publishing of SLA concrete values (e.g. 50ms, 100ms, etc.). Whether a certain metric is of type `Timer` or `DistributionSummary` and therefore latency buckets or quantiles can be enabled can usually be determined by the sole presence of according `<metric_name>_seconds_count` `<metric_name>_seconds_sum` counters.
+The distribution statistics for metrics of type `Timer` and `DistributionSummary` is also configurable. This entails configuration for enabling/disabling the percentiles histogram, the minimum and maximum values of the histogram, the publishing of concrete percentiles (e.g. 0.5, 0.75, etc.) and the publishing of SLO concrete values (e.g. 50ms, 100ms, etc.). Whether a certain metric is of type `Timer` or `DistributionSummary` and therefore latency buckets or quantiles can be enabled can usually be determined by the sole presence of according `<metric_name>_seconds_count` `<metric_name>_seconds_sum` counters.
 
-Usually any timing metrics are pre-configured with SLAs only to reduce the number of exposed time series. For not so critical timing metrics the histogram is usually disabled, leading to only max, sum and count metrics being published. This pre-configuration happens in-code and can be overridden using the configuration possibilities described in the following sections.
+Usually any timing metrics are pre-configured with SLOs only to reduce the number of exposed time series. For not so critical timing metrics the histogram is usually disabled, leading to only max, sum and count metrics being published. This pre-configuration happens in-code and can be overridden using the configuration possibilities described in the following sections.
 
 
 ### Override Histogram Buckets
@@ -337,13 +337,13 @@ appsuite_httpapi_requests_seconds_bucket{action="login",module="login",status="O
 appsuite_httpapi_requests_seconds_bucket{action="login",module="login",status="OK",le="+Inf",} 1.0
 ```
 
-The metric has histogram buckets exposed, but with a limited set of fix values, which are pre-defined using "SLAs" alone. The in-code configuration is equivalent to `com.openexchange.metrics.micrometer.distribution.sla.appsuite.httpapi.requests=50ms, 100ms, 150ms, 200ms, 250ms, 300ms, 400ms, 500ms, 750ms, 1s, 2s, 5s, 10s, 30s, 1m`. It is now for example possible to enable more fine-grained latency buckets within certain boundaries. The following configuration leads to a set of purely calculated buckets between 100ms and 30s:
+The metric has histogram buckets exposed, but with a limited set of fix values, which are pre-defined using "SLOs" alone. The in-code configuration is equivalent to `com.openexchange.metrics.micrometer.distribution.slo.appsuite.httpapi.requests=50ms, 100ms, 150ms, 200ms, 250ms, 300ms, 400ms, 500ms, 750ms, 1s, 2s, 5s, 10s, 30s, 1m`. It is now for example possible to enable more fine-grained latency buckets within certain boundaries. The following configuration leads to a set of purely calculated buckets between 100ms and 30s:
 
 ```bash
 # enable calculated histogram buckets
 com.openexchange.metrics.micrometer.distribution.histogram.appsuite.httpapi.requests = true
 # disable pre-defined histogram buckets by nulling the value
-com.openexchange.metrics.micrometer.distribution.sla.appsuite.httpapi.requests =
+com.openexchange.metrics.micrometer.distribution.slo.appsuite.httpapi.requests =
 # set lower bucket boundary
 com.openexchange.metrics.micrometer.distribution.minimum.appsuite.httpapi.requests = 100ms
 # set upper bucket boundary
@@ -403,15 +403,15 @@ appsuite_httpapi_requests_seconds_bucket{action="login",module="login",status="O
 appsuite_httpapi_requests_seconds_bucket{action="login",module="login",status="OK",le="+Inf",} 0.0
 ```
 
-Please note that minimum and maximum boundaries only take effect, when `distribution.histogram.[metric] = true`. Most `Timer`s come instead with SLAs only per default to limit the number of exposed bucket time series. 
+Please note that minimum and maximum boundaries only take effect, when `distribution.histogram.[metric] = true`. Most `Timer`s come instead with SLOs only per default to limit the number of exposed bucket time series. 
 
-Now to expose certain latencies in addition (usually to monitor a SLA conformity), you could change the configuration as follows to include concrete buckets for e.g. 500ms, 1s and 2s:
+Now to expose certain latencies in addition (usually to monitor a SLO conformity), you could change the configuration as follows to include concrete buckets for e.g. 500ms, 1s and 2s:
 
 ```bash
 # enable calculated histogram buckets
 com.openexchange.metrics.micrometer.distribution.histogram.appsuite.httpapi.requests = true
-# monitor certain latency SLAs
-com.openexchange.metrics.micrometer.distribution.sla.appsuite.httpapi.requests = 500ms, 1s, 2s
+# monitor certain latency SLOs
+com.openexchange.metrics.micrometer.distribution.slo.appsuite.httpapi.requests = 500ms, 1s, 2s
 # set lower bucket boundary
 com.openexchange.metrics.micrometer.distribution.minimum.appsuite.httpapi.requests = 100ms
 # set upper bucket boundary
@@ -475,7 +475,7 @@ appsuite_httpapi_requests_seconds_bucket{action="login",module="login",status="O
 
 Note the additional buckets `le="0.5"`, `le="1.0"` and `le="2.0"`.
 
-The accepted timespan abbreviations for `minimum`, `maximum` and `sla` are:
+The accepted timespan abbreviations for `minimum`, `maximum` and `slo` are:
 
   * `ms`: Milliseconds
   * `s`: Seconds
@@ -490,8 +490,8 @@ The accepted timespan abbreviations for `minimum`, `maximum` and `sla` are:
 It is also possible to have quantiles pre-calculated in-app and exposed instead of raw histogram buckets. For this, the property `distribution.percentiles` comes into play. It accepts a comma-separated list of double values where each value should be between zero (0) and one (1) (both values exclusive). Again, using the HTTP API `Timer` as an example, we could do the following:
 
 ```bash
-# Disable SLAs
-com.openexchange.metrics.micrometer.distribution.sla.appsuite.httpapi.requests =
+# Disable SLOs
+com.openexchange.metrics.micrometer.distribution.slo.appsuite.httpapi.requests =
 # Set certain percentiles
 com.openexchange.metrics.micrometer.distribution.percentiles.appsuite.httpapi.requests = 0.5, 0.75, 0.95, 0.99, 0.999
 ```
@@ -526,7 +526,7 @@ Note the `some_name` suffix of the property. This will be used as a pseudo name 
 ```bash
 com.openexchange.metrics.micrometer.enable.some_name=true
 com.openexchange.metrics.micrometer.distribution.histogram.some_name=false
-com.openexchange.metrics.micrometer.distribution.sla.some_name=50ms,100ms,150ms
+com.openexchange.metrics.micrometer.distribution.slo.some_name=50ms,100ms,150ms
 ```
 
 The `filter` expression supports exact positive and negative matching through the `=` and `!=` operators as well as positive and negative regex matching through the `=~` and `!~` operators. For example:
@@ -567,7 +567,7 @@ To sum up, the following properties can be used to further configure the Microme
   * `enable.all`: Enables/Disables all metrics.
   * `distribution.histogram.<METRIC_NAME>`: Enables/Disables the percentiles histogram of that specific metric.
   * `distribution.percentiles.<METRIC_NAME>`: Defines the percentiles to publish for that specific metric.
-  * `distribution.sla.<METRIC_NAME>`: Defines the SLAs to publish for that specific metric.
+  * `distribution.slo.<METRIC_NAME>`: Defines the SLOs to publish for that specific metric.
   * `distribution.minimum.<METRIC_NAME>`: Defines the lower bound of percentile histogram buckets to publish for that specific metric.
   * `distribution.maximum.<METRIC_NAME>`: Defines the upper bound of percentile histogram buckets to publish for that specific metric.
   * `filter.<FILTER_NAME>`: Defines a filter which can further narrow down all metrics by tags. The `<FILTER_NAME>` is then used to access all `enable` and `distribution.*` properties (it replaces the `<METRIC_NAME>`).

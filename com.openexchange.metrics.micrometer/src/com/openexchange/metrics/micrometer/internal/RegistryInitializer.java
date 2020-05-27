@@ -61,11 +61,10 @@ import com.openexchange.metrics.micrometer.internal.filter.DistributionHistogram
 import com.openexchange.metrics.micrometer.internal.filter.DistributionMaximumMicrometerFilterPerformer;
 import com.openexchange.metrics.micrometer.internal.filter.DistributionMinimumMicrometerFilterPerformer;
 import com.openexchange.metrics.micrometer.internal.filter.DistributionPercentilesMicrometerFilterPerformer;
-import com.openexchange.metrics.micrometer.internal.filter.DistributionSLAMicrometerFilterPerformer;
+import com.openexchange.metrics.micrometer.internal.filter.DistributionSLOMicrometerFilterPerformer;
 import com.openexchange.metrics.micrometer.internal.filter.FilterMetricMicrometerFilterPerformer;
 import com.openexchange.metrics.micrometer.internal.filter.MicrometerFilterPerformer;
 import com.openexchange.metrics.micrometer.internal.filter.RenameCacheMetricsFilter;
-import com.openexchange.metrics.micrometer.internal.filter.RenameExecutorMetricsFilter;
 import com.openexchange.metrics.micrometer.internal.property.MicrometerFilterProperty;
 import io.micrometer.core.instrument.binder.jvm.ClassLoaderMetrics;
 import io.micrometer.core.instrument.binder.jvm.JvmMemoryMetrics;
@@ -122,10 +121,6 @@ public class RegistryInitializer {
 
         PrometheusMeterRegistry prometheusRegistry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
 
-        // rename built-in io.micrometer.core.instrument.binder.jvm.ExecutorServiceMetrics for the
-        // ThreadPoolService executor to carry the "appsuite." prefix
-        prometheusRegistry.config().meterFilter(new RenameExecutorMetricsFilter());
-
         // rename built-in io.micrometer.core.instrument.binder.cache metrics  to carry the "appsuite." prefix
         prometheusRegistry.config().meterFilter(new RenameCacheMetricsFilter());
 
@@ -173,7 +168,7 @@ public class RegistryInitializer {
         filterPerformers.add(new DistributionMinimumMicrometerFilterPerformer());
         filterPerformers.add(new DistributionMaximumMicrometerFilterPerformer());
         filterPerformers.add(new DistributionPercentilesMicrometerFilterPerformer());
-        filterPerformers.add(new DistributionSLAMicrometerFilterPerformer());
+        filterPerformers.add(new DistributionSLOMicrometerFilterPerformer());
     }
 
     /**

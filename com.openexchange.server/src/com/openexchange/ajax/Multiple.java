@@ -230,7 +230,7 @@ public class Multiple extends SessionServlet {
             Timer timer = Timer.builder("appsuite.httpapi.requests")
                 .tags("action", "multiple", "module", "multiple", "status", status)
                 .description("HTTP API request times")
-                .sla(
+                .serviceLevelObjectives(
                     Duration.ofMillis(50),
                     Duration.ofMillis(100),
                     Duration.ofMillis(150),

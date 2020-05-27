@@ -92,6 +92,6 @@ public class DistributionMaximumMicrometerFilterPerformer extends AbstractMicrom
         }
 
         long nanos = TimeUnit.MILLISECONDS.toNanos(TimeSpanParser.parseTimespanToPrimitive(value));
-        return DistributionStatisticConfig.builder().maximumExpectedValue(Long.valueOf(nanos)).build().merge(config);
+        return DistributionStatisticConfig.builder().maximumExpectedValue(Double.valueOf(nanos)).build().merge(config);
     }
 }

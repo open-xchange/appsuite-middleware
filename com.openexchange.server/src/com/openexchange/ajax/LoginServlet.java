@@ -858,7 +858,7 @@ public class LoginServlet extends AJAXServlet {
             Timer timer = Timer.builder("appsuite.httpapi.requests")
                 .tags("module", "login", "action", action, "status", status)
                 .description("HTTP API request times")
-                .sla(
+                .serviceLevelObjectives(
                     Duration.ofMillis(50),
                     Duration.ofMillis(100),
                     Duration.ofMillis(150),

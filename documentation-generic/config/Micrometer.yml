@@ -68,9 +68,9 @@ properties:
       file: micrometer.properties
       packageName: open-xchange-core
       tags: ["Micrometer", "Metrics"]
-    - key: com.openexchange.metrics.micrometer.distribution.sla.[METRIC_NAME]
+    - key: com.openexchange.metrics.micrometer.distribution.slo.[METRIC_NAME]
       description: |
-        Publishes specific SLAs of the specified metric.
+        Publishes specific service level objectives (SLOs) of the specified metric.
         
         Units are
         

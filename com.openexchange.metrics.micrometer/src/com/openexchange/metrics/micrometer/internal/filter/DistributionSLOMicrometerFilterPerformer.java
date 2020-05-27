@@ -49,24 +49,60 @@
 
 package com.openexchange.metrics.micrometer.internal.filter;
 
+import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.java.Strings;
+import com.openexchange.metrics.micrometer.internal.property.MicrometerFilterProperty;
+import com.openexchange.tools.strings.TimeSpanParser;
 import io.micrometer.core.instrument.Meter.Id;
-import io.micrometer.core.instrument.config.MeterFilter;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.distribution.DistributionStatisticConfig;
 
 /**
- * {@link RenameExecutorMetricsFilter} - Renames "executor.[...]"
- * metrics to "appsuite.executor.[...]"
+ * {@link DistributionSLOMicrometerFilterPerformer} - Applies metric filters for
+ * properties <code>com.openexchange.metrics.micrometer.distribution.slo.*</code>
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.4
  */
-public class RenameExecutorMetricsFilter implements MeterFilter {
+public class DistributionSLOMicrometerFilterPerformer extends AbstractMicrometerFilterPerformer {
+
+    private static final Logger LOG = LoggerFactory.getLogger(DistributionSLOMicrometerFilterPerformer.class);
+
+    /**
+     * Initializes a new {@link DistributionSLOMicrometerFilterPerformer}.
+     */
+    public DistributionSLOMicrometerFilterPerformer() {
+        super(MicrometerFilterProperty.SLO);
+    }
 
     @Override
-    public Id map(Id id) {
-        final String name = id.getName();
-        if (name.startsWith("executor.") && "main".equals(id.getTag("name"))) {
-            return id.withName("appsuite." + name);
+    public void applyFilter(MeterRegistry meterRegistry, ConfigurationService configurationService) {
+        applyFilterFor(configurationService, (entry) -> configure(meterRegistry, entry));
+    }
+
+    @Override
+    DistributionStatisticConfig applyConfig(Id id, Entry<String, String> entry, String metricId, DistributionStatisticConfig config) {
+        if (!id.getName().startsWith(metricId)) {
+            return config;
         }
-        return id;
+        if (Strings.isEmpty(entry.getValue())) {
+            return DistributionStatisticConfig.builder().serviceLevelObjectives(new double[0]).build().merge(config);
+        }
+        String[] p = Strings.splitByComma(entry.getValue());
+        double[] slo = new double[p.length];
+        int index = 0;
+        for (String s : p) {
+            try {
+                slo[index++] = TimeUnit.MILLISECONDS.toNanos(TimeSpanParser.parseTimespanToPrimitive(s));
+            } catch (IllegalArgumentException e) {
+                LOG.error("Cannot parse {} as long. Ignoring SLAs configuration for '{}'.", s, metricId, e);
+                return config;
+            }
+        }
+        return DistributionStatisticConfig.builder().serviceLevelObjectives(slo).build().merge(config);
     }
 }
