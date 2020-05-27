@@ -53,6 +53,7 @@ import static com.openexchange.chronos.common.CalendarUtils.initCalendar;
 import static com.openexchange.chronos.common.CalendarUtils.initRecurrenceRule;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
+import static org.slf4j.LoggerFactory.getLogger;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -277,14 +278,23 @@ public class Recurrence {
 
     private static String monthly(SeriesPattern pattern, boolean fulltime, TimeZone timeZone) throws InvalidRecurrenceRuleException {
         RecurrenceRule recur = getRecurBuilder(Freq.MONTHLY, pattern, fulltime, timeZone);
-        if (SeriesPattern.MONTHLY_2 == pattern.getType()) {
+        Integer type = pattern.getType();
+        int dayOfMonth = null != pattern.getDayOfMonth() ? pattern.getDayOfMonth().intValue() : 0;
+        if (SeriesPattern.MONTHLY_2.equals(type) && 5 < dayOfMonth && 32 > dayOfMonth) {
+            getLogger(Recurrence.class).warn("Unexpected day of month {} for type {} in pattern \"{}\", assuming type {} implicitly.",
+                pattern.getDayOfMonth(), pattern.getType(), pattern, SeriesPattern.MONTHLY_1);
+            type = SeriesPattern.MONTHLY_1;
+        }
+        if (SeriesPattern.MONTHLY_2.equals(type)) {
             recur.setByDayPart(getByDayPart(pattern.getDaysOfWeek()));
-            int weekNo = pattern.getDayOfMonth().intValue();
+            int weekNo = dayOfMonth;
             if (5 == weekNo) {
                 weekNo = -1;
+            } else if (0 == weekNo) {
+                weekNo = 1;
             }
             recur.setByPart(Part.BYSETPOS, I(weekNo));
-        } else if (SeriesPattern.MONTHLY_1.equals(pattern.getType())) {
+        } else if (SeriesPattern.MONTHLY_1.equals(type)) {
             recur.setByPart(Part.BYMONTHDAY, pattern.getDayOfMonth());
         } else {
             return null;
@@ -294,15 +304,24 @@ public class Recurrence {
 
     private static String yearly(SeriesPattern pattern, boolean fulltime, TimeZone timeZone) throws InvalidRecurrenceRuleException {
         RecurrenceRule recur = getRecurBuilder(Freq.YEARLY, pattern, fulltime, timeZone);
-        if (SeriesPattern.YEARLY_2 == pattern.getType()) {
+        Integer type = pattern.getType();
+        int dayOfMonth = null != pattern.getDayOfMonth() ? pattern.getDayOfMonth().intValue() : 0;
+        if (SeriesPattern.YEARLY_2.equals(type) && 5 < dayOfMonth && 32 > dayOfMonth) {
+            getLogger(Recurrence.class).warn("Unexpected day of month {} for type {} in pattern \"{}\", assuming type {} implicitly.",
+                pattern.getDayOfMonth(), pattern.getType(), pattern, SeriesPattern.YEARLY_1);
+            type = SeriesPattern.YEARLY_1;
+        }
+        if (SeriesPattern.YEARLY_2.equals(type)) {
             recur.setByDayPart(getByDayPart(pattern.getDaysOfWeek()));
             recur.setByPart(Part.BYMONTH, pattern.getMonth());
-            int weekNo = pattern.getDayOfMonth().intValue();
+            int weekNo = dayOfMonth;
             if (5 == weekNo) {
                 weekNo = -1;
+            } else if (0 == weekNo) {
+                weekNo = 1;
             }
             recur.setByPart(Part.BYSETPOS, I(weekNo));
-        } else if (SeriesPattern.YEARLY_1.equals(pattern.getType())) {
+        } else if (SeriesPattern.YEARLY_1.equals(type)) {
             recur.setByPart(Part.BYMONTH, pattern.getMonth());
             recur.setByPart(Part.BYMONTHDAY, pattern.getDayOfMonth());
         } else {
