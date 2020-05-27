@@ -1100,7 +1100,7 @@ public class ConsistencyServiceImpl implements ConsistencyService {
     private void recalculateUsage(FileStorage storage, Set<String> filesToIgnore) {
         try {
             if (storage instanceof QuotaFileStorage) {
-                ConsistencyUtil.output("Recalculating usage...");
+                LOG.info("Recalculating usage...");
                 ((QuotaFileStorage) storage).recalculateUsage(filesToIgnore);
             }
         } catch (OXException e) {
