@@ -50,6 +50,7 @@
 package com.openexchange.consistency.internal;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.threadpool.ThreadPools.submitElseExecute;
 import static com.openexchange.tools.sql.DBUtils.getStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -65,6 +66,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -107,6 +110,7 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.ObfuscatorService;
 import com.openexchange.snippet.QuotaAwareSnippetService;
+import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.user.User;
 
@@ -646,7 +650,7 @@ public class ConsistencyServiceImpl implements ConsistencyService {
      * @return a {@link SortedSet} with all snippet file store locations for the specified {@link Context}
      * @throws OXException if the snippet file store locations cannot be returned
      */
-    private SortedSet<String> getSnippetFileStoreLocationsPerContext(Context ctx) throws OXException {
+    SortedSet<String> getSnippetFileStoreLocationsPerContext(Context ctx) throws OXException {
         SortedSet<String> retval = new TreeSet<String>();
         Connection con = null;
         PreparedStatement stmt = null;
@@ -683,7 +687,7 @@ public class ConsistencyServiceImpl implements ConsistencyService {
      * @return a {@link SortedSet} with all snippet file store locations for the specified {@link Context}
      * @throws OXException if the snippet file store locations cannot be returned
      */
-    private SortedSet<String> getSnippetFileStoreLocationsPerUser(Context ctx, User user) throws OXException {
+    SortedSet<String> getSnippetFileStoreLocationsPerUser(Context ctx, User user) throws OXException {
         SortedSet<String> retval = new TreeSet<String>();
         Connection con = null;
         PreparedStatement stmt = null;
@@ -720,7 +724,7 @@ public class ConsistencyServiceImpl implements ConsistencyService {
      * @return a {@link SortedSet} with all vcard file store locations for the specified {@link Context}
      * @throws OXException if the vcard file store locations cannot be returned
      */
-    private SortedSet<String> getVCardFileStoreLocationsPerContext(Context ctx) throws OXException {
+    SortedSet<String> getVCardFileStoreLocationsPerContext(Context ctx) throws OXException {
         VCardStorageMetadataStore vCardStorageMetadataStore = services.getOptionalService(VCardStorageMetadataStore.class);
         if (vCardStorageMetadataStore == null) {
             return new TreeSet<String>();
@@ -737,7 +741,7 @@ public class ConsistencyServiceImpl implements ConsistencyService {
      * @return a {@link SortedSet} with all vcard file store locations for the specified {@link Context}
      * @throws OXException if the vcard file store locations cannot be returned
      */
-    private SortedSet<String> getVCardFileStoreLocationsPerUser(Context ctx, User user) throws OXException {
+    SortedSet<String> getVCardFileStoreLocationsPerUser(Context ctx, User user) throws OXException {
         VCardStorageMetadataStore vCardStorageMetadataStore = services.getOptionalService(VCardStorageMetadataStore.class);
         if (vCardStorageMetadataStore == null) {
             return new TreeSet<String>();
@@ -753,7 +757,7 @@ public class ConsistencyServiceImpl implements ConsistencyService {
      * @return a {@link SortedSet} with all snippet file store locations for the specified {@link Context}
      * @throws OXException if the preview cache file store locations cannot be returned
      */
-    private SortedSet<String> getPreviewCacheFileStoreLocationsPerContext(Context ctx) throws OXException {
+    SortedSet<String> getPreviewCacheFileStoreLocationsPerContext(Context ctx) throws OXException {
         ResourceCacheMetadataStore metadataStore = ResourceCacheMetadataStore.getInstance();
         Set<String> refIds = metadataStore.loadRefIds(ctx.getContextId());
         return new TreeSet<String>(refIds);
@@ -767,7 +771,7 @@ public class ConsistencyServiceImpl implements ConsistencyService {
      * @return a {@link SortedSet} with all snippet file store locations for the specified {@link Context}
      * @throws OXException if the preview cache file store locations cannot be returned
      */
-    private SortedSet<String> getPreviewCacheFileStoreLocationsPerUser(Context ctx, User user) throws OXException {
+    SortedSet<String> getPreviewCacheFileStoreLocationsPerUser(Context ctx, User user) throws OXException {
         ResourceCacheMetadataStore metadataStore = ResourceCacheMetadataStore.getInstance();
         Set<String> refIds = metadataStore.loadRefIds(ctx.getContextId(), user.getId());
         return new TreeSet<String>(refIds);
@@ -781,7 +785,7 @@ public class ConsistencyServiceImpl implements ConsistencyService {
      * @return a {@link SortedSet} with all composition space referenced file store locations
      * @throws OXException if the composition space referenced file store locations cannot be returned
      */
-    private SortedSet<String> getCompostionSpaceReferencedFileStoreLocationsPerContext(Context ctx) throws OXException {
+    SortedSet<String> getCompostionSpaceReferencedFileStoreLocationsPerContext(Context ctx) throws OXException {
         final SortedSet<String> retval = new TreeSet<String>();
         Connection con = null;
         PreparedStatement stmt = null;
@@ -830,7 +834,7 @@ public class ConsistencyServiceImpl implements ConsistencyService {
      * @return a {@link SortedSet} with all composition space referenced file store locations
      * @throws OXException if the composition space referenced file store locations cannot be returned
      */
-    private SortedSet<String> getCompostionSpaceReferencedFileStoreLocationsPerUser(Context ctx, User user) throws OXException {
+    SortedSet<String> getCompostionSpaceReferencedFileStoreLocationsPerUser(Context ctx, User user) throws OXException {
         final SortedSet<String> retval = new TreeSet<String>();
         Connection con = null;
         PreparedStatement stmt = null;
@@ -972,56 +976,131 @@ public class ConsistencyServiceImpl implements ConsistencyService {
         }
 
         // Get files residing in file storages
-        LOG.info("Listing all files in filestores");
+        LOG.info("Listing all files in filestores...");
         SortedSet<String> filestoreset = fileStorage.getFileList();
         LOG.info("Found {} files in the filestore for this entity {}", I(filestoreset.size()), entity);
 
         try {
-            LOG.info("Loading all infostore filestore locations");
+            LOG.info("Loading all filestore locations from database...");
             SortedSet<String> dbfileset;
-
-            SortedSet<String> attachmentset;
-            SortedSet<String> snippetset;
-            SortedSet<String> previewset;
-            SortedSet<String> vcardset;
-            SortedSet<String> compositionspacereferencesset;
+            Future<SortedSet<String>> attachmentsetFuture;
+            Future<SortedSet<String>> snippetsetFuture;
+            Future<SortedSet<String>> previewsetFuture;
+            Future<SortedSet<String>> vcardsetFuture;
+            Future<SortedSet<String>> compositionspacesetFuture;
             switch (entity.getType()) {
                 case Context:
-                    dbfileset = database.getDocumentFileStoreLocationsPerContext(entity.getContext());
+                    // Attachments ---------------------------------------------------------------------------------------------------------
+                    attachmentsetFuture = submitElseExecute(new AbstractTask<SortedSet<String>>() {
 
-                    attachmentset = attach.getAttachmentFileStoreLocationsperContext(entity.getContext());
-                    snippetset = getSnippetFileStoreLocationsPerContext(entity.getContext());
-                    previewset = getPreviewCacheFileStoreLocationsPerContext(entity.getContext());
-                    vcardset = getVCardFileStoreLocationsPerContext(entity.getContext());
-                    compositionspacereferencesset = getCompostionSpaceReferencedFileStoreLocationsPerContext(entity.getContext());
+                        @Override
+                        public SortedSet<String> call() throws OXException {
+                            return attach.getAttachmentFileStoreLocationsperContext(entity.getContext());
+                        }
+                    });
+                    // Snippets ------------------------------------------------------------------------------------------------------------
+                    snippetsetFuture = submitElseExecute(new AbstractTask<SortedSet<String>>() {
+
+                        @Override
+                        public SortedSet<String> call() throws OXException {
+                            return getSnippetFileStoreLocationsPerContext(entity.getContext());
+                        }
+                    });
+                    // Preview cache -------------------------------------------------------------------------------------------------------
+                    previewsetFuture = submitElseExecute(new AbstractTask<SortedSet<String>>() {
+
+                        @Override
+                        public SortedSet<String> call() throws OXException {
+                            return getPreviewCacheFileStoreLocationsPerContext(entity.getContext());
+                        }
+                    });
+                    // vCards --------------------------------------------------------------------------------------------------------------
+                    vcardsetFuture = submitElseExecute(new AbstractTask<SortedSet<String>>() {
+
+                        @Override
+                        public SortedSet<String> call() throws OXException {
+                            return getVCardFileStoreLocationsPerContext(entity.getContext());
+                        }
+                    });
+                    // Composition space resources -----------------------------------------------------------------------------------------
+                    compositionspacesetFuture = submitElseExecute(new AbstractTask<SortedSet<String>>() {
+
+                        @Override
+                        public SortedSet<String> call() throws OXException {
+                            return getCompostionSpaceReferencedFileStoreLocationsPerContext(entity.getContext());
+                        }
+                    });
+                    // Documents/Files with running thread ---------------------------------------------------------------------------------
+                    dbfileset = database.getDocumentFileStoreLocationsPerContext(entity.getContext());
                     break;
                 case User:
-                    dbfileset = database.getDocumentFileStoreLocationsPerUser(entity.getContext(), entity.getUser());
+                    // Attachments ---------------------------------------------------------------------------------------------------------
+                    attachmentsetFuture = submitElseExecute(new AbstractTask<SortedSet<String>>() {
 
-                    attachmentset = attach.getAttachmentFileStoreLocationsPerUser(entity.getContext(), entity.getUser());
-                    snippetset = getSnippetFileStoreLocationsPerUser(entity.getContext(), entity.getUser());
-                    previewset = getPreviewCacheFileStoreLocationsPerUser(entity.getContext(), entity.getUser());
-                    vcardset = getVCardFileStoreLocationsPerUser(entity.getContext(), entity.getUser());
-                    compositionspacereferencesset = getCompostionSpaceReferencedFileStoreLocationsPerUser(entity.getContext(), entity.getUser());
+                        @Override
+                        public SortedSet<String> call() throws OXException {
+                            return attach.getAttachmentFileStoreLocationsPerUser(entity.getContext(), entity.getUser());
+                        }
+                    });
+                    // Snippets ------------------------------------------------------------------------------------------------------------
+                    snippetsetFuture = submitElseExecute(new AbstractTask<SortedSet<String>>() {
+
+                        @Override
+                        public SortedSet<String> call() throws OXException {
+                            return getSnippetFileStoreLocationsPerUser(entity.getContext(), entity.getUser());
+                        }
+                    });
+                    // Preview cache -------------------------------------------------------------------------------------------------------
+                    previewsetFuture = submitElseExecute(new AbstractTask<SortedSet<String>>() {
+
+                        @Override
+                        public SortedSet<String> call() throws OXException {
+                            return getPreviewCacheFileStoreLocationsPerUser(entity.getContext(), entity.getUser());
+                        }
+                    });
+                    // vCards --------------------------------------------------------------------------------------------------------------
+                    vcardsetFuture = submitElseExecute(new AbstractTask<SortedSet<String>>() {
+
+                        @Override
+                        public SortedSet<String> call() throws OXException {
+                            return getVCardFileStoreLocationsPerUser(entity.getContext(), entity.getUser());
+                        }
+                    });
+                    // Composition space resources -----------------------------------------------------------------------------------------
+                    compositionspacesetFuture = submitElseExecute(new AbstractTask<SortedSet<String>>() {
+
+                        @Override
+                        public SortedSet<String> call() throws OXException {
+                            return getCompostionSpaceReferencedFileStoreLocationsPerUser(entity.getContext(), entity.getUser());
+                        }
+                    });
+                    // Documents/Files with running thread ---------------------------------------------------------------------------------
+                    dbfileset = database.getDocumentFileStoreLocationsPerUser(entity.getContext(), entity.getUser());
                     break;
                 default:
                     throw new IllegalArgumentException("Unknown entity type '" + entity.getType() + "'");
-
             }
-            LOG.info("Found {} infostore filepaths", I(dbfileset.size()));
 
+            // Await results from submitted tasks
+            SortedSet<String> attachmentset = getResultFrom(entity, attachmentsetFuture);
+            SortedSet<String> snippetset = getResultFrom(entity, snippetsetFuture);
+            SortedSet<String> previewset = getResultFrom(entity, previewsetFuture);
+            SortedSet<String> vcardset = getResultFrom(entity, vcardsetFuture);
+            SortedSet<String> compositionspaceset = getResultFrom(entity, compositionspacesetFuture);
+
+            LOG.info("Found {} infostore filepaths", I(dbfileset.size()));
             LOG.info("Found {} attachments", I(attachmentset.size()));
             LOG.info("Found {} snippets", I(snippetset.size()));
             LOG.info("Found {} previews", I(previewset.size()));
             LOG.info("Found {} vCards", I(vcardset.size()));
-            LOG.info("Found {} composition space references", I(compositionspacereferencesset.size()));
+            LOG.info("Found {} composition space references", I(compositionspaceset.size()));
 
             SortedSet<String> joineddbfileset = new TreeSet<String>(dbfileset);
             joineddbfileset.addAll(attachmentset);
             joineddbfileset.addAll(snippetset);
             joineddbfileset.addAll(previewset);
             joineddbfileset.addAll(vcardset);
-            joineddbfileset.addAll(compositionspacereferencesset);
+            joineddbfileset.addAll(compositionspaceset);
 
             LOG.info("Found {} filestore ids in total. There are {} files in the filespool. A difference of {}", I(joineddbfileset.size()), I(filestoreset.size()), I(Math.abs(joineddbfileset.size() - filestoreset.size())));
 
@@ -1056,8 +1135,8 @@ public class ConsistencyServiceImpl implements ConsistencyService {
                 args.getvCardSolver().solve(entity, vcardset);
             }
 
-            if (ConsistencyUtil.diffSet(compositionspacereferencesset, filestoreset, "database list of composition space referenced files", "filestore list")) {
-                args.getCompositionSpaceReferencesSolver().solve(entity, compositionspacereferencesset);
+            if (ConsistencyUtil.diffSet(compositionspaceset, filestoreset, "database list of composition space referenced files", "filestore list")) {
+                args.getCompositionSpaceReferencesSolver().solve(entity, compositionspaceset);
             }
 
             // Build the difference set of the filestore set, so that the final
@@ -1069,6 +1148,24 @@ public class ConsistencyServiceImpl implements ConsistencyService {
             }
         } catch (OXException e) {
             LOG.error("", e);
+        }
+    }
+
+    private static SortedSet<String> getResultFrom(Entity entity, Future<SortedSet<String>> dbfilesetFuture) throws OXException, Error {
+        try {
+            return dbfilesetFuture.get();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw OXException.general("Consistency check for entity \"" + entity + "\" has been interrupted", e);
+        } catch (ExecutionException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof OXException) {
+                throw (OXException) cause;
+            }
+            if (cause instanceof Error) {
+                throw (Error) cause;
+            }
+            throw OXException.general("Consistency check for entity \"" + entity + "\" failed", cause);
         }
     }
 
