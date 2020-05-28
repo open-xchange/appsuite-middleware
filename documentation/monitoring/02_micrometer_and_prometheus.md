@@ -603,3 +603,164 @@ You just have to make sure that you follow the naming convention. The name of th
 
 In case dynamic tags are used you don't have to worry about checking the registry for an already existing meter, because if the meter is already registered, the register command returns the previously registered meter.
 It is nevertheless recommended to create metrics statically wherever possible.
+
+# Visualization
+
+## Grafana - Dashboards as Code
+
+With App Suite 7.10.4 we are offering Grafana Dashboards as Code for `App Suite` and the `Java Virtual Machine`.
+
+### Requirements
+
+- `Jsonnet` is a data templating language &rightarrow; [https://github.com/google/jsonnet](https://github.com/google/jsonnet)
+- `Grafonnet` is a `Jsonnet` library for generating Grafana dashboards &rightarrow; [https://github.com/grafana/grafonnet-lib](https://github.com/grafana/grafonnet-lib)
+- The dashboard source files &rightarrow; [https://github.com/open-xchange/appsuite-middleware/tree/master/monitoring/grafana](https://github.com/open-xchange/appsuite-middleware/tree/master/monitoring/grafana)
+
+Please refer to the `README.md` files in the corresponding repositories for detailed informations, on how to install `Jsonnet` and `Grafonnet`.
+
+### Build and import dashboards
+
+There are couple of ways to build and generate Grafana dashboards from `jsonnet` source files. The following example will show _how_ to build them locally. To generate for example the `JSON` for the `App Suite` dashboard, just follow the step mentioned below:
+
+```bash
+jsonnet -J /path/to/grafonnet-lib /path/to/dashboards/appsuite_mw.jsonnet -o ./appsuite_mw.json
+```
+
+or without the `-o` parameter to print the `JSON` to `STDOUT`:
+
+```bash
+jsonnet -J /path/to/grafonnet-lib /path/to/dashboards/appsuite_mw.jsonnet
+```
+
+The generated `JSON` can be imported or provisioned to Grafana and should look like:
+
+![app_suite_grafana_dashboard](02_micrometer_and_prometheus/app_suite_grafana_dashboard.png 'app_suite_grafana_dashboard')
+
+### Add Prometheus datasource
+
+The _default_ datasource should be named `Prometheus` so it is automatically picked up by the graphs:
+
+![prometheus_ds_settings](02_micrometer_and_prometheus/prometheus_ds_settings.png 'prometheus_ds_settings')
+
+### Prometheus configuration
+
+The dashboards rely on the `service` label to distinguish the different App Suite services. So please make sure that, in the Prometheus configuration, each of the targets has the `service` label defined. Let's say you want to monitor an App Suite with IP `10.20.30.40` then the excerpt of the config should look like this:
+
+```yaml
+scrape_configs:
+  - job_name: appsuite
+    static_configs:
+      - targets: ['10.20.30.40:8009']
+        labels:
+          env: dev
+          job: appsuite
+          service: mw
+```
+
+## Zabbix - Prometheus Integration
+
+### Requirements
+
+- The [Zabbix](https://www.zabbix.com) - [Prometheus](https://prometheus.io) integration is available in _version 4.2_ and higher.
+- The new metrics for App Suite are available in _version 7.10.4_ and higher.
+
+### Host configuration
+
+- Go to **Configuration** > **Hosts**.
+- Click on **Create host** to open the host configuration page.
+- Enter a hostname `Prometheus` and select at least one host group.
+
+### Simple items
+
+First create an `HTTP agent master item` to do any Prometheus monitoring:
+
+- Go to **Configuration** > **Hosts**.
+- Click on the `Prometheus` host > **Items**.
+- Click on **Create item**.
+- Enter or change item parameters:
+  - Name: **`Get App Suite Metrics`**
+  - Type: **`HTTP agent`**
+  - Key: **`appsuite_metrics.get`**
+  - URL: **`http://<APPSUITE_HOST>:<APPSUITE_PORT>/metrics`**
+  - Type of information: **`Text`**
+  - Update interval: **`10s`**
+  - History storage period: **`Do not keep history`**
+- Click on **Add** to save item.
+
+Here is an example on how to extract the amount of active App Suite sessions based on the output of the _master_ item.
+
+- Create another item for the `Prometheus` host.
+- Enter or change item parameters:
+  - Name: **`Active session`**
+  - Type: **`Dependent item`**
+  - Key: **`appsuite.sessions.active.total`**
+  - Master item: Select the master item from above **`Get App Suite Metrics`**
+  - Type of information: **`Numeric (unsigned)`**
+- Now click on the **`Preprocessing`** tab:
+  - Add a preprocessing step: `Prometheus pattern`
+  - Pattern: **`appsuite_sessions_active_total{client=~".*"}`**
+- And save item.
+
+### Low-level discovery
+
+There is another way to automatically create items called `low-level discovery`. The next example shows how to create a discovery rule and automatically create items for the `App Suite DB Pools`.
+
+- Go to **Configuration** > **Host** and select the **Prometheus** host > **Discovery rules**
+- Click on **Create discovery rule**
+- Enter or change item parameters:
+  - Name: **`DB Pool connections LLD`**
+  - Type: **`Dependent item`**
+  - Key: **`appsuite.dbpool.discovery`**
+  - Master item: Select the master item **`Get App Suite Metrics`**
+- Click on the **`Preprocessing`** tab:
+  - Add a preprocessing step: `Prometheus to JSON`
+  - Parameters: `{__name__=~"^appsuite_mysql_connections(?:_total)?$"}`
+- Click on the **`LLD macros`** tab:
+  - Add the following `LLD macros`
+
+| LLD macro    | JSONPath         |
+| :----------- | :--------------- |
+| `{#DBCLASS}` | `$.labels.class` |
+| `{#DBPOOL}`  | `$.labels.pool`  |
+| `{#DBTYPE}`  | `$.labels.type`  |
+| `{#HELP}`    | `$.help`         |
+| `{#METRIC}`  | `$.name`         |
+
+- Save discovery rule.
+
+Now create an item prototype for that discovery rule.
+
+- Click on **Create item prototype**
+- Enter or change item prototype parameters:
+  - Name: **`appsuite_mysql_connections_active: "{#DBCLASS}", Pool "{#DBPOOL}", Type "{#DBTYPE}"`**
+  - Type: **`Dependent item`**
+  - Key: **`appsuite.mysql.connections.active["{#DBCLASS}","{#DBPOOL}","{#DBTYPE}"]`**
+  - Master item: Select the master item **`Get App Suite Metrics`**
+  - Description: **`{#HELP}`**
+- Click on the **`Preprocessing`** tab:
+  - Add a preprocessing step: `Prometheus pattern`
+  - Pattern: **`appsuite_mysql_connections_active{type="{#DBTYPE}",class="{#DBCLASS}",pool="{#DBPOOL}"}`**
+- Save item prototype.
+
+### Template
+
+There is an example template which contains the items and the low-level discovery rule from this walkthrough. To import the template go to
+
+- **Configuration** > **Templates**
+- Click on **Import**
+- Import file **`template_ox_appsuite_prom.xml`**
+
+To apply now this template e.g. to host `10.20.30.40`
+
+- Go to **Configuration** > **Hosts**
+- Click on **Create host** to open the host configuration page.
+- Enter a hostname `appsuite-node1` and select at least one host group.
+- Click on **Templates** tab
+- Link new template **`Template OX App Suite`**
+- Click on **Macros** tab and select **Inherited and host macros**
+- Change macro **`{$APPSUITE.CONN}`** value from `127.0.0.1` to `10.20.30.40`
+- Click on **Add** to save host
+
+Switch to **Monitoring** > **Latest data** to check whether the template is applied properly or not. If everything is fine, then there should be some values displayed e.g.
+
+![latest_data](02_micrometer_and_prometheus/zabbix_latest_data.png 'latest_data')
