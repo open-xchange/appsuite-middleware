@@ -424,7 +424,7 @@ properties:
       description: |
         The max. number of concurrent HTTP connections that may be established. If you have specified more
         than one hosts, this setting should be configured so that  
-        maxConnectionsPerHost < maxConnections <= n * maxConnectionsPerHost.
+        connectionsPerRoute < totalConnections <= n * connectionsPerRoute.
       defaultValue: 100
       version: 7.10.4
       reloadable: true
