@@ -50,6 +50,7 @@
 package com.openexchange.authentication.oauth.http;
 
 import java.util.Optional;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.rest.client.httpclient.DefaultHttpClientConfigProvider;
 import com.openexchange.rest.client.httpclient.HttpBasicConfig;
 import com.openexchange.server.ServiceLookup;
@@ -85,6 +86,8 @@ public class OAuthAuthenticationHttpClientConfig extends DefaultHttpClientConfig
         return CLIENT_ID_OAUTH_AUTHENTICATION;
     }
 
+    private final ServiceLookup services;
+
     /**
      * Initializes a new {@link OAuthAuthenticationHttpClientConfig}.
      *
@@ -92,15 +95,25 @@ public class OAuthAuthenticationHttpClientConfig extends DefaultHttpClientConfig
      */
     public OAuthAuthenticationHttpClientConfig(ServiceLookup services) {
         super(CLIENT_ID_OAUTH_AUTHENTICATION, "Open-Xchange OAuth Authentication HTTP Client v", Optional.ofNullable(services.getOptionalService(VersionService.class)));
+        this.services = services;
     }
 
     @Override
     public HttpBasicConfig configureHttpBasicConfig(HttpBasicConfig config) {
-        config.setSocketReadTimeout(DEFAULT_READ_TIMEOUT);
-        config.setMaxConnectionsPerRoute(DEFAULT_MAX_CONNECTIONS);
-        config.setMaxConnectionsPerRoute(DEFAULT_MAX_CONNECTIONS_PER_HOST);
-        config.setConnectTimeout(DEFAULT_CONNECT_TIMEOUT);
-        config.setConnectionRequestTimeout(DEFAULT_POOL_TIMEOUT);
+        ConfigurationService configService = services.getOptionalService(ConfigurationService.class);
+        if (configService == null) {
+            config.setSocketReadTimeout(DEFAULT_READ_TIMEOUT);
+            config.setMaxTotalConnections(DEFAULT_MAX_CONNECTIONS);
+            config.setMaxConnectionsPerRoute(DEFAULT_MAX_CONNECTIONS_PER_HOST);
+            config.setConnectTimeout(DEFAULT_CONNECT_TIMEOUT);
+            config.setConnectionRequestTimeout(DEFAULT_POOL_TIMEOUT);
+        } else {
+            config.setSocketReadTimeout(configService.getIntProperty("com.openenexchange.httpclient.oauth-authentication.readTimeout", DEFAULT_READ_TIMEOUT));
+            config.setMaxTotalConnections(configService.getIntProperty("com.openenexchange.httpclient.oauth-authentication.totalConnections", DEFAULT_MAX_CONNECTIONS));
+            config.setMaxConnectionsPerRoute(configService.getIntProperty("com.openenexchange.httpclient.oauth-authentication.connectionsPerRoute", DEFAULT_MAX_CONNECTIONS_PER_HOST));
+            config.setConnectTimeout(configService.getIntProperty("com.openenexchange.httpclient.oauth-authentication.connectTimeout", DEFAULT_CONNECT_TIMEOUT));
+            config.setConnectionRequestTimeout(configService.getIntProperty("com.openenexchange.httpclient.oauth-authentication.connectionRequestTimeout", DEFAULT_POOL_TIMEOUT));
+        }
         return config;
     }
 
