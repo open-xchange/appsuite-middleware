@@ -69,7 +69,7 @@ public class ServerProperty implements BasicProperty {
 
     /**
      * Initializes a new {@link ServerProperty}.
-     * 
+     *
      * @param value The property's value
      * @param metadata The optional metadata of the property
      */
@@ -77,6 +77,15 @@ public class ServerProperty implements BasicProperty {
         super();
         this.value = value;
         this.metadata = metadata;
+    }
+
+    /**
+     * Gets the metadata reference.
+     *
+     * @return The metadata reference
+     */
+    Map<String, String> getMetadata() {
+        return metadata;
     }
 
     @Override
