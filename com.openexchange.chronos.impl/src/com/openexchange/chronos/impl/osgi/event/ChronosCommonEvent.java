@@ -49,20 +49,10 @@
 
 package com.openexchange.chronos.impl.osgi.event;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.impl.Utils;
-import com.openexchange.chronos.service.CalendarEvent;
-import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.event.CommonEvent;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.session.Session;
 
@@ -74,46 +64,11 @@ import com.openexchange.session.Session;
  */
 public class ChronosCommonEvent implements CommonEvent {
 
-    /** The logger of this class */
-    private final static Logger LOGGER = LoggerFactory.getLogger(ChronosCommonEvent.class);
-
     private final Session session;
     private final int actionID;
     private final Event actionEvent;
     private final Event oldEvent;
     private final Map<Integer, Set<Integer>> affectedUsersWithFolders;
-
-    /**
-     *
-     * Initializes a new {@link ChronosCommonEvent}.
-     *
-     * @param session The associated session
-     * @param entityResolver The entity resolver, or <code>null</code> if not available
-     * @param actionID The actionID propagate by this event
-     * @param actionEvent The new or updated {@link Event}
-     */
-    public ChronosCommonEvent(Session session, EntityResolver entityResolver, int actionID, Event actionEvent) {
-        this(session, entityResolver, actionID, actionEvent, null);
-    }
-
-    /**
-     *
-     * Initializes a new {@link ChronosCommonEvent}.
-     *
-     * @param session The associated session
-     * @param entityResolver The entity resolver, or <code>null</code> if not available
-     * @param actionID The actionID propagate by this event
-     * @param actionEvent The new or updated {@link Event}
-     * @param oldEvent The old {@link Event} if an update was made, else <code>null</code>
-     */
-    public ChronosCommonEvent(Session session, EntityResolver entityResolver, int actionID, Event actionEvent, Event oldEvent) {
-        super();
-        this.session = session;
-        this.actionID = actionID;
-        this.actionEvent = actionEvent;
-        this.oldEvent = oldEvent;
-        this.affectedUsersWithFolders = getAffectedFoldersPerUser(session.getContextId(), entityResolver, actionEvent, oldEvent);
-    }
 
     /**
      * Initializes a new {@link ChronosCommonEvent}.
@@ -190,55 +145,6 @@ public class ChronosCommonEvent implements CommonEvent {
     @Override
     public Map<Integer, Set<Integer>> getAffectedUsersWithFolder() {
         return affectedUsersWithFolders;
-    }
-
-    private static Map<Integer, Set<Integer>> getAffectedFoldersPerUser(int contextId, EntityResolver entityResolver, Event actionEvent, Event oldEvent) {
-        Set<String> folderIds = new HashSet<String>();
-        if (null != actionEvent) {
-            folderIds.addAll(Utils.getPersonalFolderIds(actionEvent.getAttendees()));
-            if (null != actionEvent.getFolderId()) {
-                folderIds.add(actionEvent.getFolderId());
-            }
-        }
-        if (null != oldEvent) {
-            folderIds.addAll(Utils.getPersonalFolderIds(oldEvent.getAttendees()));
-            if (null != oldEvent.getFolderId()) {
-                folderIds.add(oldEvent.getFolderId());
-            }
-        }
-        try {
-            return getAffected(Utils.getAffectedFoldersPerUser(contextId, entityResolver, folderIds));
-        } catch (OXException e) {
-            LOGGER.error("Error deriving affected folders per user", e);
-            return Collections.emptyMap();
-        }
-    }
-
-    /**
-     * Converts the output from {@link CalendarEvent#getAffectedFoldersPerUser()} to a map that can be used for {@link CommonEvent#getAffectedUsersWithFolder()}
-     *
-     * @param affectedUsersWithFolders Output from {@link CalendarEvent#getAffectedFoldersPerUser()}
-     * @return A {@link Map} with converted value to a {@link Set} of {@link Integer}s
-     */
-    private static Map<Integer, Set<Integer>> getAffected(Map<Integer, List<String>> affectedUsersWithFolders) {
-        Map<Integer, Set<Integer>> retval = new LinkedHashMap<Integer, Set<Integer>>(affectedUsersWithFolders.size());
-        for (Map.Entry<Integer, List<String>> entry : affectedUsersWithFolders.entrySet()) {
-            // Convert for each user
-            List<String> folderIds = entry.getValue();
-            Set<Integer> folders = new HashSet<>(folderIds.size());
-            for (String folderId : folderIds) {
-                try {
-                    // Multiple folder get silently dropped
-                    folders.add(Integer.valueOf(folderId));
-                } catch (NumberFormatException e) {
-                    LOGGER.error("Can't parse folder with ID {}. The folder won't be part of the OSGi event to be propagated.", folderId, e);
-                }
-            }
-            // Add the user-folder-pair
-            Integer user = entry.getKey();
-            retval.put(user, folders);
-        }
-        return retval;
     }
 
 }
