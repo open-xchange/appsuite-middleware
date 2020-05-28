@@ -5,7 +5,8 @@ Bundle-SymbolicName: com.openexchange.appsuite.history
 Bundle-Version: 7.10.4
 Automatic-Module-Name: test
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: com.openexchange.apps.manifests,
+Import-Package: com.openexchange.annotation,
+ com.openexchange.apps.manifests,
  com.openexchange.appsuite,
  com.openexchange.config,
  com.openexchange.config.lean,
