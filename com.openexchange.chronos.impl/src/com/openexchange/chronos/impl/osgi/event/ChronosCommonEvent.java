@@ -115,6 +115,24 @@ public class ChronosCommonEvent implements CommonEvent {
         this.affectedUsersWithFolders = getAffectedFoldersPerUser(session.getContextId(), entityResolver, actionEvent, oldEvent);
     }
 
+    /**
+     * Initializes a new {@link ChronosCommonEvent}.
+     *
+     * @param session The associated session
+     * @param actionID The common event action identifier to take over
+     * @param actionEvent The new, updated or deleted event
+     * @param oldEvent The original event in case of updates
+     * @param affectedUsersWithFolders A map containing the affected user identifiers associated with the corresponding folder identifiers
+     */
+    public ChronosCommonEvent(Session session, int actionID, Event actionEvent, Event oldEvent, Map<Integer, Set<Integer>> affectedUsersWithFolders) {
+        super();
+        this.session = session;
+        this.actionID = actionID;
+        this.actionEvent = actionEvent;
+        this.oldEvent = oldEvent;
+        this.affectedUsersWithFolders = affectedUsersWithFolders;
+    }
+
     @Override
     public int getContextId() {
         return session.getContextId();
