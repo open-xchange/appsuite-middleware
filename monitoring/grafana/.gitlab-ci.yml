@@ -1,8 +1,0 @@
-generate-dashboards:
-  stage: build
-  image: andrewfarley/jsonnet-bundler-grafonnet-lib:latest
-  script:
-    - mkdir dashboards
-    - for file in ./*.*sonnet; do name=$(basename $file); jsonnet $file > dashboards/${name%.jsonnet}.json; done
-  artifacts:
-    paths: ['dashboards']

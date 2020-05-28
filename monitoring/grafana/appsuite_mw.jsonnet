@@ -7,6 +7,7 @@ local row = grafana.row;
 local prometheus = grafana.prometheus;
 local table = grafana.tablePanel;
 local template = grafana.template;
+local link = grafana.link;
 
 local dbPoolName = 'dbpool';
 local davInterfaceName = 'davinterface';
@@ -747,6 +748,16 @@ local userDBTimes = graphPanel.new(
 
 grafana.newDashboard(
   title='App Suite', tags=['Java', 'AppSuite'], metric='jvm_info',
+).addLink(
+  link.dashboards(
+    title='Documentation',
+    tags=[],
+    url='https://documentation.open-xchange.com/latest/middleware/monitoring/02_micrometer_and_prometheus.html#visualization',
+    targetBlank=true,
+    icon='info',
+    type='link',
+    asDropdown=false,
+  )
 ).addTemplates(
   [
     template.new(
