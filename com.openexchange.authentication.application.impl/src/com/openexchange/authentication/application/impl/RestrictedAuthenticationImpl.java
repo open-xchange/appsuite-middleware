@@ -49,6 +49,8 @@
 
 package com.openexchange.authentication.application.impl;
 
+import static com.openexchange.authentication.application.impl.AppPasswordSessionStorageParameterNamesProvider.PARAM_APP_PASSWORD_ID;
+import static com.openexchange.authentication.application.impl.AppPasswordSessionStorageParameterNamesProvider.PARAM_RESTRICTED;
 import com.openexchange.authentication.SessionEnhancement;
 import com.openexchange.authentication.application.AppPasswordMailOauthService;
 import com.openexchange.authentication.application.RestrictedAuthentication;
@@ -61,7 +63,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link RestrictedAuthenticationImpl}
- * 
+ *
  * Authentication from application specific authentication.
  * Contains session enhancement as well as the users main password
  *
@@ -75,7 +77,7 @@ public class RestrictedAuthenticationImpl implements RestrictedAuthentication {
 
     /**
      * Initializes a new {@link RestrictedAuthenticationImpl}.
-     * 
+     *
      * @param services A service lookup reference
      * @param appPassword The authenticated application password
      * @param scopes The available scopes for the session
@@ -89,7 +91,8 @@ public class RestrictedAuthenticationImpl implements RestrictedAuthentication {
 
             @Override
             public void enhanceSession(Session session) {
-                session.setParameter(Session.PARAM_RESTRICTED, scopes);
+                session.setParameter(PARAM_APP_PASSWORD_ID, appPassword.getApplicationPassword().getGUID());
+                session.setParameter(PARAM_RESTRICTED, scopes);
                 try {
                     AuthType mailAuthType = MailConfig.getConfiguredAuthType(true, session);
                     if (AuthType.isOAuthType(mailAuthType)) {

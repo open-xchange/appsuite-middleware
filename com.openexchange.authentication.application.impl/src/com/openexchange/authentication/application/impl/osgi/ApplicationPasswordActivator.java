@@ -82,6 +82,7 @@ import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.osgi.ServiceSet;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessionstorage.SessionStorageParameterNamesProvider;
 
 /**
@@ -106,7 +107,7 @@ public class ApplicationPasswordActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getOptionalServices() {
-        return new Class[] { GeoLocationService.class };
+        return new Class[] { GeoLocationService.class, SessiondService.class };
     }
 
     @Override
