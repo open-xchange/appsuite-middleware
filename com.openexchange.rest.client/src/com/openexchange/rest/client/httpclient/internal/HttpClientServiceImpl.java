@@ -95,6 +95,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.cache.RemovalListener;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.config.ConfigurationService;
@@ -128,6 +130,20 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
 
     static final Logger LOGGER = LoggerFactory.getLogger(HttpClientServiceImpl.class);
 
+    /** Dummy noop wild-card provider */
+    static final WildcardHttpClientConfigProvider NOOP = new WildcardHttpClientConfigProvider() {
+
+        @Override
+        public void modify(HttpClientBuilder builder) {
+            // Nothing
+        }
+
+        @Override
+        public String getClientIdPattern() {
+            return "noop";
+        }
+    };
+
     /** A boolean value that indicates whether the service is shutting down or not */
     private final AtomicBoolean isShutdown;
 
@@ -138,6 +154,7 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
     final Cache<String, ManagedHttpClientImpl> httpClients;
     final ConcurrentMap<String, SpecificHttpClientConfigProvider> specificProviders = new ConcurrentHashMap<>(30, 0.9f); // Core knows about 18
     final ConcurrentMap<String, PatternEnhancedWildcardHttpClientConfigProvider> wildcardProviders = new ConcurrentHashMap<>(16, 0.9F, 1);
+    private final LoadingCache<String, WildcardHttpClientConfigProvider> wildcardProvidersCache;
 
     /**
      * Initializes a new {@link HttpClientServiceImpl}.
@@ -160,6 +177,19 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
                     close(notification.getKey(), notification.getValue());
                 }})
             .build();
+        //@formatter:on
+        //@formatter:off
+        wildcardProvidersCache = CacheBuilder.newBuilder()
+            .initialCapacity(10)
+            .expireAfterAccess(30, TimeUnit.MINUTES)
+            .build(new CacheLoader<String, WildcardHttpClientConfigProvider>() {
+
+                @Override
+                public WildcardHttpClientConfigProvider load(String clientId) throws Exception {
+                    WildcardHttpClientConfigProvider wildcardProvider = doGetWildcardProvider(clientId);
+                    return wildcardProvider == null ? NOOP : wildcardProvider;
+                }
+            });
         //@formatter:on
     }
 
@@ -227,6 +257,7 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
             if (wildcardProviders.putIfAbsent(clientIdPattern, new PatternEnhancedWildcardHttpClientConfigProvider(provider)) == null) {
                 LOGGER.trace("Added provider for pattern {}", clientIdPattern);
                 reloadClientsForWildcardProvider(wildcardProviders.get(clientIdPattern));
+                wildcardProvidersCache.invalidateAll();
                 return provider;
             }
 
@@ -258,17 +289,18 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
             WildcardHttpClientConfigProvider provider = (WildcardHttpClientConfigProvider) service;
             PatternEnhancedWildcardHttpClientConfigProvider removed = wildcardProviders.remove(provider.getClientIdPattern());
             if (null == removed) {
-                LOGGER.warn("Unable to find provider for {} in cache. Won't remove any HTTP client for provided pattern.", provider.getClientIdPattern());
-                return;
-            }
+                LOGGER.warn("Unable to find provider for {}. Won't remove any HTTP client for provided pattern.", provider.getClientIdPattern());
+            } else {
+                wildcardProvidersCache.invalidateAll();
 
-            /*
-             * Remove HTTP clients, which matches the regex and are not provided by a SpecificHttpClientConfigProvider
-             */
-            Pattern pattern = removed.getRegularExpressionPattern();
-            for (Map.Entry<String, ManagedHttpClientImpl> entry : httpClients.asMap().entrySet()) {
-                if (false == specificProviders.containsKey(entry.getKey()) && pattern.matcher(entry.getKey()).matches()) {
-                    close(entry.getKey(), entry.getValue());
+                /*
+                 * Remove HTTP clients, which matches the regex and are not provided by a SpecificHttpClientConfigProvider
+                 */
+                Pattern pattern = removed.getRegularExpressionPattern();
+                for (Map.Entry<String, ManagedHttpClientImpl> entry : httpClients.asMap().entrySet()) {
+                    if (false == specificProviders.containsKey(entry.getKey()) && pattern.matcher(entry.getKey()).matches()) {
+                        close(entry.getKey(), entry.getValue());
+                    }
                 }
             }
         }
@@ -559,6 +591,8 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
             PatternEnhancedWildcardHttpClientConfigProvider wildcardProvider = entry.getValue();
             reloadClientsForWildcardProvider(wildcardProvider, configService);
         }
+
+        wildcardProvidersCache.invalidateAll();
     }
 
     /**
@@ -716,11 +750,18 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
     }
 
     WildcardHttpClientConfigProvider getWildcardProvider(String clientId) {
+        WildcardHttpClientConfigProvider wildcardProvider = wildcardProvidersCache.getUnchecked(clientId);
+        return NOOP == wildcardProvider ? null : wildcardProvider;
+    }
+
+    WildcardHttpClientConfigProvider doGetWildcardProvider(String clientId) { // Invoked from CacheLoader
         for (PatternEnhancedWildcardHttpClientConfigProvider provider : wildcardProviders.values()) {
             if (provider.getRegularExpressionPattern().matcher(clientId).matches()) {
+                wildcardProvidersCache.put(clientId, provider);
                 return provider;
             }
         }
         return null;
     }
+
 }
