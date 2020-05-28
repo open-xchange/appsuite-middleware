@@ -49,10 +49,11 @@
 
 package com.openexchange.consistency.internal;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.SortedSet;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.openexchange.java.Strings;
 
 /**
  * {@link ConsistencyUtil}
@@ -62,28 +63,25 @@ import org.slf4j.LoggerFactory;
  */
 final class ConsistencyUtil {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ConsistencyUtil.class);
-    
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConsistencyUtil.class);
+
     /**
-     * Makes the difference set between two set, the first one is changed
+     * Builds the asymmetric set difference of the two sets, the first one is changed.
+     *
+     * @param first The first set, which is effectively modified
+     * @param second The second set
+     * @param name1 The name for the first set to use for logging purpose
+     * @param name2 The name for the second set to use for logging purpose
+     * @return
      */
-    static boolean diffSet(SortedSet<String> first, SortedSet<String> second, String name, String name2) {
+    static boolean diffSet(SortedSet<String> first, SortedSet<String> second, String name1, String name2) {
         first.removeAll(second);
         if (first.isEmpty()) {
             return false;
         }
-        output("Inconsistencies found in " + name + ", the following files aren't in " + name2 + ':');
+        LOG.info("Inconsistencies found in {}, the following files aren''t in {}:{}", name1, name2, Strings.getLineSeparator());
         outputSet(first);
         return true;
-    }
-
-    /**
-     * Logs a message with log level INFO
-     *
-     * @param text the message to log
-     */
-    static void output(String text) {
-        LOG.info(text);
     }
 
     /**
@@ -91,12 +89,13 @@ final class ConsistencyUtil {
      *
      * @param set the set to log
      */
-    static void outputSet(SortedSet<String> set) {
-        Iterator<String> itstr = set.iterator();
+    private static void outputSet(SortedSet<String> set) {
         StringBuilder sb = new StringBuilder();
-        while (itstr.hasNext()) {
-            sb.append(itstr.next()).append('\n');
+        List<Object> args = new ArrayList<>(set.size());
+        for (Iterator<String> itstr = set.iterator(); itstr.hasNext();) {
+            sb.append(itstr.next()).append("{}");
+            args.add(Strings.getLineSeparator());
         }
-        output(sb.toString());
+        LOG.info(sb.toString(), args.toArray(new Object[args.size()]));
     }
 }

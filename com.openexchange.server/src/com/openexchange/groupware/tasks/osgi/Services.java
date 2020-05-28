@@ -47,52 +47,71 @@
  *
  */
 
-package com.openexchange.authentication.ucs.common;
+package com.openexchange.groupware.tasks.osgi;
 
-import com.openexchange.authentication.Authenticated;
-import com.openexchange.authentication.LoginInfo;
-import com.openexchange.exception.OXException;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * 
- * {@link UCSLookup}
+ * {@link Services}
  *
- * @author <a href="mailto:felix.marx@open-xchange.com">Felix Marx</a>
- * @since v7.10.1
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @since v7.10.4
  */
-public interface UCSLookup {
+public class Services {
 
     /**
-     * Authentication Plugin for the UCS Server Product.
-     * This Class implements the needed Authentication against an UCS LDAP Server:
-     * 1. User enters following information on Loginscreen: username and password (NO CONTEXT, will be resolved by the LDAP Attribute)
-     * 1a. Search for given "username" (NOT with context) given by OX Loginmask with configured pattern and with configured LDAP BASE.
-     * 2. If user is found, bind to LDAP Server with the found DN
-     * 3. If BIND successful, fetch the configured "context" Attribute and parse out the context name.
-     * 4. Return context name and username to OX API!
-     * 5. User is logged in!
-     *
-     * @param loginInfo The loginInfo containing username and password
-     * @return An Authenticated if the user is logged in
-     * @throws OXException If the login fails at any step
+     * Initializes a new {@link Services}.
      */
-    public Authenticated handleLoginInfo(LoginInfo loginInfo) throws OXException;
+    private Services() {
+        super();
+    }
+
+    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<>();
 
     /**
-     * Authentication Plugin for the UCS Server Product.
-     * This Class implements the needed Authentication against an UCS LDAP Server:
-     * 1. User is redirected to a SAML endpoint and comes back to the OX server with a username (NO CONTEXT, will be resolved by the LDAP Attribute)
-     * 1a. Search for given "username" (NOT with context) given by OX Loginmask with configured pattern and with configured LDAP BASE.
-     * 2. If user is found, fetch the configured "context" Attribute and parse out the context name.
-     * 3. Return context name and username to OX API!
-     * 4. User is logged in!
-     * <br>
-     * DO NOT use this method for the normal AuthenticationService it ignores the user password
+     * Sets the service lookup.
      *
-     * @param loginInfo The loginInfo containing username and password
-     * @return An Authenticated if the user is logged in
-     * @throws OXException If the login fails at any step
+     * @param serviceLookup The service lookup or <code>null</code>
      */
-    public Authenticated handleLoginInfo(String loginInfo) throws OXException;
+    public static void setServiceLookup(final ServiceLookup serviceLookup) {
+        REF.set(serviceLookup);
+    }
+
+    /**
+     * Gets the service lookup.
+     *
+     * @return The service lookup or <code>null</code>
+     */
+    public static ServiceLookup getServiceLookup() {
+        return REF.get();
+    }
+
+    /**
+     * Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service
+     * @throws IllegalStateException If an error occurs while returning the demanded service
+     */
+    public static <S extends Object> S getService(final Class<? extends S> clazz) {
+        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.server\" not started?");
+        }
+        return serviceLookup.getService(clazz);
+    }
+
+    /**
+     * (Optionally) Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
+     */
+    public static <S extends Object> S optService(final Class<? extends S> clazz) {
+        ServiceLookup serviceLookup = REF.get();
+        return null == serviceLookup ? null : serviceLookup.getOptionalService(clazz);
+    }
 
 }

@@ -56,6 +56,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.database.CreateTableService;
@@ -87,7 +88,7 @@ public class TaskActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[0];
+        return new Class<?>[] { RecurrenceService.class };
     }
 
     @Override
@@ -128,5 +129,15 @@ public class TaskActivator extends AJAXModuleActivator {
         track(quotaProviderRegisterer.getFilter(), quotaProviderRegisterer);
         trackService(ContactCollectorService.class);
         openTrackers();
+        Services.setServiceLookup(this);
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        try {
+            Services.setServiceLookup(null);
+        } finally {
+            super.stopBundle();
+        }
     }
 }

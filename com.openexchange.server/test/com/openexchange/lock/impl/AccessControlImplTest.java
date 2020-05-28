@@ -189,10 +189,10 @@ public class AccessControlImplTest {
         CountDownLatch latch = new CountDownLatch(2);
 
         // start other
-        Thread other1 = new Thread(new LockHolder(accessControl, TimeUnit.MILLISECONDS.toNanos(100), latch));
+        Thread other1 = new Thread(new LockHolder(accessControl, TimeUnit.MILLISECONDS.toNanos(120), latch));
         other1.start();
 
-        Thread other2 = new Thread(new LockHolder(accessControl, TimeUnit.MILLISECONDS.toNanos(60), latch));
+        Thread other2 = new Thread(new LockHolder(accessControl, TimeUnit.MILLISECONDS.toNanos(100), latch));
         other2.start();
 
         boolean acquired = false;
@@ -202,7 +202,7 @@ public class AccessControlImplTest {
                 acquired = true;
             }
 
-            Assert.assertFalse("Lock was granted", acquired);
+            Assert.assertFalse("Lock was granted but it shouldn't.", acquired);
         } finally {
             accessControl.release(acquired);
             other1.join(100L);
@@ -216,7 +216,7 @@ public class AccessControlImplTest {
         private final long holdNanos;
         private final CountDownLatch latch;
 
-        private LockHolder(AccessControl accessControl, long holdNanos, CountDownLatch latch) {
+        LockHolder(AccessControl accessControl, long holdNanos, CountDownLatch latch) {
             this.accessControl = accessControl;
             this.holdNanos = holdNanos;
             this.latch = latch;

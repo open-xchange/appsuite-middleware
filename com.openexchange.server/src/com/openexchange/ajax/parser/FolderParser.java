@@ -141,7 +141,12 @@ public class FolderParser {
         if (jsonObj.has(FolderChildFields.FOLDER_ID)) {
             Object folderId = jsonObj.get(FolderChildFields.FOLDER_ID);
             if (folderId instanceof String) {
-                fo.setFullName((String) folderId);
+                try {
+                    fo.setParentFolderID(Integer.parseInt((String) folderId));
+                } catch (NumberFormatException e) {
+                    // folder id is not a number
+                    fo.setFullName((String) folderId);
+                }
             } else {
                 fo.setParentFolderID(jsonObj.getInt(FolderChildFields.FOLDER_ID));
             }

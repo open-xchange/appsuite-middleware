@@ -193,7 +193,7 @@ public class WebDAVTest extends AbstractConfigAwareAPIClientSession {
         testFileAccount = new FileAccountData();
         testFileAccount.setFilestorageService(getFileStorageService());
         testFileAccount.setDisplayName(getFileStorageServiceDisplayName());
-        testFileAccount.setConfiguration(new WebDAVFileAccountConfiguration(WEB_DAV_URL, testUser.getUser(), testUser.getPassword()));
+        testFileAccount.setConfiguration(new WebDAVFileAccountConfiguration(WEB_DAV_URL, testUser.getUser() + "@" + testUser.getContext(), testUser.getPassword()));
         FileAccountCreationResponse response = filestorageApi.createFileAccount(getSessionId(), testFileAccount);
         String newAccountId = checkResponse(response.getError(), response.getErrorDesc(), response.getData());
         testFileAccount.setId(newAccountId);

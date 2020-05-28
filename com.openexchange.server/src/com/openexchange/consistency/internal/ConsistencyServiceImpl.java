@@ -50,6 +50,7 @@
 package com.openexchange.consistency.internal;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.threadpool.ThreadPools.submitElseExecute;
 import static com.openexchange.tools.sql.DBUtils.getStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -65,6 +66,9 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.requesthandler.cache.ResourceCacheMetadataStore;
@@ -78,7 +82,6 @@ import com.openexchange.consistency.RepairAction;
 import com.openexchange.consistency.RepairPolicy;
 import com.openexchange.consistency.internal.solver.DoNothingSolver;
 import com.openexchange.consistency.internal.solver.PolicyResolver;
-import com.openexchange.consistency.internal.solver.ProblemSolver;
 import com.openexchange.consistency.internal.solver.RecordSolver;
 import com.openexchange.consistency.osgi.ConsistencyServiceLookup;
 import com.openexchange.contact.vcard.storage.VCardStorageMetadataStore;
@@ -107,6 +110,7 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.ObfuscatorService;
 import com.openexchange.snippet.QuotaAwareSnippetService;
+import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.user.User;
 
@@ -120,7 +124,7 @@ public class ConsistencyServiceImpl implements ConsistencyService {
 
     private static final Logger LOG = LoggerFactory.getLogger(ConsistencyServiceImpl.class);
 
-    private DatabaseImpl database;
+    private final AtomicReference<DatabaseImpl> databaseReference;
     private final ServiceLookup services;
 
     /**
@@ -129,6 +133,7 @@ public class ConsistencyServiceImpl implements ConsistencyService {
     public ConsistencyServiceImpl(ServiceLookup services) {
         super();
         this.services = services;
+        databaseReference = new AtomicReference<>(null);
     }
 
     @Override
@@ -239,7 +244,18 @@ public class ConsistencyServiceImpl implements ConsistencyService {
         DoNothingSolver doNothing = new DoNothingSolver();
         RecordSolver recorder = new RecordSolver();
         Context ctx = getContext(contextId);
-        checkOneEntity(new EntityImpl(ctx), recorder, recorder, recorder, recorder, doNothing, recorder, recorder, getDatabase(), getAttachments(), getFileStorage(ctx));
+
+        ProblemSolversToUse solvers = ProblemSolversToUse.builder()
+                .withDatabaseSolver(recorder)
+                .withAttachmentSolver(recorder)
+                .withSnippetSolver(recorder)
+                .withPreviewSolver(recorder)
+                .withFileSolver(doNothing)
+                .withVCardSolver(recorder)
+                .withCompositionSpaceReferencesSolver(recorder)
+                .build();
+        checkOneEntity(new EntityImpl(ctx), solvers, getFileStorage(ctx));
+
         return recorder.getProblems();
     }
 
@@ -267,7 +283,18 @@ public class ConsistencyServiceImpl implements ConsistencyService {
         DoNothingSolver doNothing = new DoNothingSolver();
         RecordSolver recorder = new RecordSolver();
         Context ctx = getContext(contextId);
-        checkOneEntity(new EntityImpl(ctx), doNothing, doNothing, doNothing, doNothing, recorder, doNothing, doNothing, getDatabase(), getAttachments(), getFileStorage(ctx));
+
+        ProblemSolversToUse solvers = ProblemSolversToUse.builder()
+            .withDatabaseSolver(doNothing)
+            .withAttachmentSolver(doNothing)
+            .withSnippetSolver(doNothing)
+            .withPreviewSolver(doNothing)
+            .withFileSolver(recorder)
+            .withVCardSolver(doNothing)
+            .withCompositionSpaceReferencesSolver(doNothing)
+            .build();
+        checkOneEntity(new EntityImpl(ctx), solvers, getFileStorage(ctx));
+
         return recorder.getProblems();
     }
 
@@ -335,8 +362,15 @@ public class ConsistencyServiceImpl implements ConsistencyService {
      * @return the DatabaseImpl
      */
     private DatabaseImpl getDatabase() {
+        DatabaseImpl database = databaseReference.get();
         if (database == null) {
-            database = new DatabaseImpl(new DBPoolProvider());
+            synchronized (this) {
+                database = databaseReference.get();
+                if (database == null) {
+                    database = new DatabaseImpl(new DBPoolProvider());
+                    databaseReference.set(database);
+                }
+            }
         }
         return database;
     }
@@ -616,7 +650,7 @@ public class ConsistencyServiceImpl implements ConsistencyService {
      * @return a {@link SortedSet} with all snippet file store locations for the specified {@link Context}
      * @throws OXException if the snippet file store locations cannot be returned
      */
-    private SortedSet<String> getSnippetFileStoreLocationsPerContext(Context ctx) throws OXException {
+    SortedSet<String> getSnippetFileStoreLocationsPerContext(Context ctx) throws OXException {
         SortedSet<String> retval = new TreeSet<String>();
         Connection con = null;
         PreparedStatement stmt = null;
@@ -653,7 +687,7 @@ public class ConsistencyServiceImpl implements ConsistencyService {
      * @return a {@link SortedSet} with all snippet file store locations for the specified {@link Context}
      * @throws OXException if the snippet file store locations cannot be returned
      */
-    private SortedSet<String> getSnippetFileStoreLocationsPerUser(Context ctx, User user) throws OXException {
+    SortedSet<String> getSnippetFileStoreLocationsPerUser(Context ctx, User user) throws OXException {
         SortedSet<String> retval = new TreeSet<String>();
         Connection con = null;
         PreparedStatement stmt = null;
@@ -690,7 +724,7 @@ public class ConsistencyServiceImpl implements ConsistencyService {
      * @return a {@link SortedSet} with all vcard file store locations for the specified {@link Context}
      * @throws OXException if the vcard file store locations cannot be returned
      */
-    private SortedSet<String> getVCardFileStoreLocationsPerContext(Context ctx) throws OXException {
+    SortedSet<String> getVCardFileStoreLocationsPerContext(Context ctx) throws OXException {
         VCardStorageMetadataStore vCardStorageMetadataStore = services.getOptionalService(VCardStorageMetadataStore.class);
         if (vCardStorageMetadataStore == null) {
             return new TreeSet<String>();
@@ -707,7 +741,7 @@ public class ConsistencyServiceImpl implements ConsistencyService {
      * @return a {@link SortedSet} with all vcard file store locations for the specified {@link Context}
      * @throws OXException if the vcard file store locations cannot be returned
      */
-    private SortedSet<String> getVCardFileStoreLocationsPerUser(Context ctx, User user) throws OXException {
+    SortedSet<String> getVCardFileStoreLocationsPerUser(Context ctx, User user) throws OXException {
         VCardStorageMetadataStore vCardStorageMetadataStore = services.getOptionalService(VCardStorageMetadataStore.class);
         if (vCardStorageMetadataStore == null) {
             return new TreeSet<String>();
@@ -723,7 +757,7 @@ public class ConsistencyServiceImpl implements ConsistencyService {
      * @return a {@link SortedSet} with all snippet file store locations for the specified {@link Context}
      * @throws OXException if the preview cache file store locations cannot be returned
      */
-    private SortedSet<String> getPreviewCacheFileStoreLocationsPerContext(Context ctx) throws OXException {
+    SortedSet<String> getPreviewCacheFileStoreLocationsPerContext(Context ctx) throws OXException {
         ResourceCacheMetadataStore metadataStore = ResourceCacheMetadataStore.getInstance();
         Set<String> refIds = metadataStore.loadRefIds(ctx.getContextId());
         return new TreeSet<String>(refIds);
@@ -737,7 +771,7 @@ public class ConsistencyServiceImpl implements ConsistencyService {
      * @return a {@link SortedSet} with all snippet file store locations for the specified {@link Context}
      * @throws OXException if the preview cache file store locations cannot be returned
      */
-    private SortedSet<String> getPreviewCacheFileStoreLocationsPerUser(Context ctx, User user) throws OXException {
+    SortedSet<String> getPreviewCacheFileStoreLocationsPerUser(Context ctx, User user) throws OXException {
         ResourceCacheMetadataStore metadataStore = ResourceCacheMetadataStore.getInstance();
         Set<String> refIds = metadataStore.loadRefIds(ctx.getContextId(), user.getId());
         return new TreeSet<String>(refIds);
@@ -751,7 +785,7 @@ public class ConsistencyServiceImpl implements ConsistencyService {
      * @return a {@link SortedSet} with all composition space referenced file store locations
      * @throws OXException if the composition space referenced file store locations cannot be returned
      */
-    private SortedSet<String> getCompostionSpaceReferencedFileStoreLocationsPerContext(Context ctx) throws OXException {
+    SortedSet<String> getCompostionSpaceReferencedFileStoreLocationsPerContext(Context ctx) throws OXException {
         final SortedSet<String> retval = new TreeSet<String>();
         Connection con = null;
         PreparedStatement stmt = null;
@@ -800,7 +834,7 @@ public class ConsistencyServiceImpl implements ConsistencyService {
      * @return a {@link SortedSet} with all composition space referenced file store locations
      * @throws OXException if the composition space referenced file store locations cannot be returned
      */
-    private SortedSet<String> getCompostionSpaceReferencedFileStoreLocationsPerUser(Context ctx, User user) throws OXException {
+    SortedSet<String> getCompostionSpaceReferencedFileStoreLocationsPerUser(Context ctx, User user) throws OXException {
         final SortedSet<String> retval = new TreeSet<String>();
         Connection con = null;
         PreparedStatement stmt = null;
@@ -921,11 +955,13 @@ public class ConsistencyServiceImpl implements ConsistencyService {
      * @param fileStorage The file storage for that entity
      * @throws OXException if an error is occurred
      */
-    private void checkOneEntity(Entity entity, ProblemSolver dbSolver, ProblemSolver attachmentSolver, ProblemSolver snippetSolver, ProblemSolver previewSolver, ProblemSolver fileSolver, ProblemSolver vCardSolver, ProblemSolver compositionSpaceReferencesSolver, DatabaseImpl database, AttachmentBase attach, FileStorage fileStorage) throws OXException {
+    private void checkOneEntity(Entity entity, ProblemSolversToUse args, FileStorage fileStorage) throws OXException {
+        DatabaseImpl database = getDatabase();
+        AttachmentBase attach = getAttachments();
+        LOG.info("Checking entity {}. Using solvers db: {} attachments: {} snippets: {} files: {} vcards: {} previews: {}", entity, args.getDatabaseSolver().description(), args.getAttachmentSolver().description(), args.getSnippetSolver().description(), args.getFileSolver().description(), args.getvCardSolver().description(), args.getPreviewSolver().description());
+
         // We believe in the worst case, so lets check the storage first, so
         // that the state file is recreated
-        LOG.info("Checking entity {}. Using solvers db: {} attachments: {} snippets: {} files: {} vcards: {} previews: {}", entity, dbSolver.description(), attachmentSolver.description(), snippetSolver.description(), fileSolver.description(), vCardSolver.description(), previewSolver.description());
-
         try {
             fileStorage.recreateStateFile();
         } catch (OXException e) {
@@ -940,56 +976,131 @@ public class ConsistencyServiceImpl implements ConsistencyService {
         }
 
         // Get files residing in file storages
-        LOG.info("Listing all files in filestores");
+        LOG.info("Listing all files in filestores...");
         SortedSet<String> filestoreset = fileStorage.getFileList();
         LOG.info("Found {} files in the filestore for this entity {}", I(filestoreset.size()), entity);
 
         try {
-            LOG.info("Loading all infostore filestore locations");
+            LOG.info("Loading all filestore locations from database...");
             SortedSet<String> dbfileset;
-
-            SortedSet<String> attachmentset;
-            SortedSet<String> snippetset;
-            SortedSet<String> previewset;
-            SortedSet<String> vcardset;
-            SortedSet<String> compositionspacereferencesset;
+            Future<SortedSet<String>> attachmentsetFuture;
+            Future<SortedSet<String>> snippetsetFuture;
+            Future<SortedSet<String>> previewsetFuture;
+            Future<SortedSet<String>> vcardsetFuture;
+            Future<SortedSet<String>> compositionspacesetFuture;
             switch (entity.getType()) {
                 case Context:
-                    dbfileset = database.getDocumentFileStoreLocationsPerContext(entity.getContext());
+                    // Attachments ---------------------------------------------------------------------------------------------------------
+                    attachmentsetFuture = submitElseExecute(new AbstractTask<SortedSet<String>>() {
 
-                    attachmentset = attach.getAttachmentFileStoreLocationsperContext(entity.getContext());
-                    snippetset = getSnippetFileStoreLocationsPerContext(entity.getContext());
-                    previewset = getPreviewCacheFileStoreLocationsPerContext(entity.getContext());
-                    vcardset = getVCardFileStoreLocationsPerContext(entity.getContext());
-                    compositionspacereferencesset = getCompostionSpaceReferencedFileStoreLocationsPerContext(entity.getContext());
+                        @Override
+                        public SortedSet<String> call() throws OXException {
+                            return attach.getAttachmentFileStoreLocationsperContext(entity.getContext());
+                        }
+                    });
+                    // Snippets ------------------------------------------------------------------------------------------------------------
+                    snippetsetFuture = submitElseExecute(new AbstractTask<SortedSet<String>>() {
+
+                        @Override
+                        public SortedSet<String> call() throws OXException {
+                            return getSnippetFileStoreLocationsPerContext(entity.getContext());
+                        }
+                    });
+                    // Preview cache -------------------------------------------------------------------------------------------------------
+                    previewsetFuture = submitElseExecute(new AbstractTask<SortedSet<String>>() {
+
+                        @Override
+                        public SortedSet<String> call() throws OXException {
+                            return getPreviewCacheFileStoreLocationsPerContext(entity.getContext());
+                        }
+                    });
+                    // vCards --------------------------------------------------------------------------------------------------------------
+                    vcardsetFuture = submitElseExecute(new AbstractTask<SortedSet<String>>() {
+
+                        @Override
+                        public SortedSet<String> call() throws OXException {
+                            return getVCardFileStoreLocationsPerContext(entity.getContext());
+                        }
+                    });
+                    // Composition space resources -----------------------------------------------------------------------------------------
+                    compositionspacesetFuture = submitElseExecute(new AbstractTask<SortedSet<String>>() {
+
+                        @Override
+                        public SortedSet<String> call() throws OXException {
+                            return getCompostionSpaceReferencedFileStoreLocationsPerContext(entity.getContext());
+                        }
+                    });
+                    // Documents/Files with running thread ---------------------------------------------------------------------------------
+                    dbfileset = database.getDocumentFileStoreLocationsPerContext(entity.getContext());
                     break;
                 case User:
-                    dbfileset = database.getDocumentFileStoreLocationsPerUser(entity.getContext(), entity.getUser());
+                    // Attachments ---------------------------------------------------------------------------------------------------------
+                    attachmentsetFuture = submitElseExecute(new AbstractTask<SortedSet<String>>() {
 
-                    attachmentset = attach.getAttachmentFileStoreLocationsPerUser(entity.getContext(), entity.getUser());
-                    snippetset = getSnippetFileStoreLocationsPerUser(entity.getContext(), entity.getUser());
-                    previewset = getPreviewCacheFileStoreLocationsPerUser(entity.getContext(), entity.getUser());
-                    vcardset = getVCardFileStoreLocationsPerUser(entity.getContext(), entity.getUser());
-                    compositionspacereferencesset = getCompostionSpaceReferencedFileStoreLocationsPerUser(entity.getContext(), entity.getUser());
+                        @Override
+                        public SortedSet<String> call() throws OXException {
+                            return attach.getAttachmentFileStoreLocationsPerUser(entity.getContext(), entity.getUser());
+                        }
+                    });
+                    // Snippets ------------------------------------------------------------------------------------------------------------
+                    snippetsetFuture = submitElseExecute(new AbstractTask<SortedSet<String>>() {
+
+                        @Override
+                        public SortedSet<String> call() throws OXException {
+                            return getSnippetFileStoreLocationsPerUser(entity.getContext(), entity.getUser());
+                        }
+                    });
+                    // Preview cache -------------------------------------------------------------------------------------------------------
+                    previewsetFuture = submitElseExecute(new AbstractTask<SortedSet<String>>() {
+
+                        @Override
+                        public SortedSet<String> call() throws OXException {
+                            return getPreviewCacheFileStoreLocationsPerUser(entity.getContext(), entity.getUser());
+                        }
+                    });
+                    // vCards --------------------------------------------------------------------------------------------------------------
+                    vcardsetFuture = submitElseExecute(new AbstractTask<SortedSet<String>>() {
+
+                        @Override
+                        public SortedSet<String> call() throws OXException {
+                            return getVCardFileStoreLocationsPerUser(entity.getContext(), entity.getUser());
+                        }
+                    });
+                    // Composition space resources -----------------------------------------------------------------------------------------
+                    compositionspacesetFuture = submitElseExecute(new AbstractTask<SortedSet<String>>() {
+
+                        @Override
+                        public SortedSet<String> call() throws OXException {
+                            return getCompostionSpaceReferencedFileStoreLocationsPerUser(entity.getContext(), entity.getUser());
+                        }
+                    });
+                    // Documents/Files with running thread ---------------------------------------------------------------------------------
+                    dbfileset = database.getDocumentFileStoreLocationsPerUser(entity.getContext(), entity.getUser());
                     break;
                 default:
                     throw new IllegalArgumentException("Unknown entity type '" + entity.getType() + "'");
-
             }
-            LOG.info("Found {} infostore filepaths", I(dbfileset.size()));
 
+            // Await results from submitted tasks
+            SortedSet<String> attachmentset = getResultFrom(entity, attachmentsetFuture);
+            SortedSet<String> snippetset = getResultFrom(entity, snippetsetFuture);
+            SortedSet<String> previewset = getResultFrom(entity, previewsetFuture);
+            SortedSet<String> vcardset = getResultFrom(entity, vcardsetFuture);
+            SortedSet<String> compositionspaceset = getResultFrom(entity, compositionspacesetFuture);
+
+            LOG.info("Found {} infostore filepaths", I(dbfileset.size()));
             LOG.info("Found {} attachments", I(attachmentset.size()));
             LOG.info("Found {} snippets", I(snippetset.size()));
             LOG.info("Found {} previews", I(previewset.size()));
             LOG.info("Found {} vCards", I(vcardset.size()));
-            LOG.info("Found {} composition space references", I(compositionspacereferencesset.size()));
+            LOG.info("Found {} composition space references", I(compositionspaceset.size()));
 
             SortedSet<String> joineddbfileset = new TreeSet<String>(dbfileset);
             joineddbfileset.addAll(attachmentset);
             joineddbfileset.addAll(snippetset);
             joineddbfileset.addAll(previewset);
             joineddbfileset.addAll(vcardset);
-            joineddbfileset.addAll(compositionspacereferencesset);
+            joineddbfileset.addAll(compositionspaceset);
 
             LOG.info("Found {} filestore ids in total. There are {} files in the filespool. A difference of {}", I(joineddbfileset.size()), I(filestoreset.size()), I(Math.abs(joineddbfileset.size() - filestoreset.size())));
 
@@ -997,7 +1108,7 @@ public class ConsistencyServiceImpl implements ConsistencyService {
             // dbfileset contains all the members that aren't in the filestoreset
             if (ConsistencyUtil.diffSet(dbfileset, filestoreset, "database list", "filestore list")) {
                 // implement the solver for dbfiles here
-                dbSolver.solve(entity, dbfileset);
+                args.getDatabaseSolver().solve(entity, dbfileset);
             }
 
             // Build the difference set of the attachment database set, so that the
@@ -1005,7 +1116,7 @@ public class ConsistencyServiceImpl implements ConsistencyService {
             // filestoreset
             if (ConsistencyUtil.diffSet(attachmentset, filestoreset, "database list of attachment files", "filestore list")) {
                 // implement the solver for deleted dbfiles here
-                attachmentSolver.solve(entity, attachmentset);
+                args.getAttachmentSolver().solve(entity, attachmentset);
             }
 
             // Build the difference set of the attachment database set, so that the
@@ -1013,19 +1124,19 @@ public class ConsistencyServiceImpl implements ConsistencyService {
             // filestoreset
             if (ConsistencyUtil.diffSet(snippetset, filestoreset, "database list of snippet files", "filestore list")) {
                 // implement the solver for deleted dbfiles here
-                snippetSolver.solve(entity, snippetset);
+                args.getSnippetSolver().solve(entity, snippetset);
             }
 
             if (ConsistencyUtil.diffSet(previewset, filestoreset, "database list of cached previews", "filestore list")) {
-                previewSolver.solve(entity, previewset);
+                args.getPreviewSolver().solve(entity, previewset);
             }
 
             if (ConsistencyUtil.diffSet(vcardset, filestoreset, "database list of VCard files", "filestore list")) {
-                vCardSolver.solve(entity, vcardset);
+                args.getvCardSolver().solve(entity, vcardset);
             }
 
-            if (ConsistencyUtil.diffSet(compositionspacereferencesset, filestoreset, "database list of composition space referenced files", "filestore list")) {
-                compositionSpaceReferencesSolver.solve(entity, compositionspacereferencesset);
+            if (ConsistencyUtil.diffSet(compositionspaceset, filestoreset, "database list of composition space referenced files", "filestore list")) {
+                args.getCompositionSpaceReferencesSolver().solve(entity, compositionspaceset);
             }
 
             // Build the difference set of the filestore set, so that the final
@@ -1033,10 +1144,28 @@ public class ConsistencyServiceImpl implements ConsistencyService {
             // the dbdelfileset
             if (ConsistencyUtil.diffSet(filestoreset, joineddbfileset, "filestore list", "one of the databases")) {
                 // implement the solver for the filestore here
-                fileSolver.solve(entity, filestoreset);
+                args.getFileSolver().solve(entity, filestoreset);
             }
         } catch (OXException e) {
             LOG.error("", e);
+        }
+    }
+
+    private static SortedSet<String> getResultFrom(Entity entity, Future<SortedSet<String>> dbfilesetFuture) throws OXException, Error {
+        try {
+            return dbfilesetFuture.get();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw OXException.general("Consistency check for entity \"" + entity + "\" has been interrupted", e);
+        } catch (ExecutionException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof OXException) {
+                throw (OXException) cause;
+            }
+            if (cause instanceof Error) {
+                throw (Error) cause;
+            }
+            throw OXException.general("Consistency check for entity \"" + entity + "\" failed", cause);
         }
     }
 
@@ -1054,7 +1183,16 @@ public class ConsistencyServiceImpl implements ConsistencyService {
             FileStorage storage = getFileStorage(entity);
 
             PolicyResolver resolvers = PolicyResolver.build(repairPolicy, repairAction, database, attachments, storage, getAdmin(entity.getContext()));
-            checkOneEntity(entity, resolvers.getDbSolver(), resolvers.getAttachmentSolver(), resolvers.getSnippetSolver(), resolvers.getPreviewSolver(), resolvers.getFileSolver(), resolvers.getvCardSolver(), resolvers.getCompositionSpaceReferencesSolver(), database, attachments, storage);
+            ProblemSolversToUse solvers = ProblemSolversToUse.builder()
+                .withDatabaseSolver(resolvers.getDbSolver())
+                .withAttachmentSolver(resolvers.getAttachmentSolver())
+                .withSnippetSolver(resolvers.getSnippetSolver())
+                .withPreviewSolver(resolvers.getPreviewSolver())
+                .withFileSolver(resolvers.getFileSolver())
+                .withVCardSolver(resolvers.getvCardSolver())
+                .withCompositionSpaceReferencesSolver(resolvers.getCompositionSpaceReferencesSolver())
+                .build();
+            checkOneEntity(entity, solvers, storage);
 
             /*
              * The ResourceCache might store resources in the filestorage. Depending on its configuration (preview.properties)
@@ -1100,7 +1238,7 @@ public class ConsistencyServiceImpl implements ConsistencyService {
     private void recalculateUsage(FileStorage storage, Set<String> filesToIgnore) {
         try {
             if (storage instanceof QuotaFileStorage) {
-                ConsistencyUtil.output("Recalculating usage...");
+                LOG.info("Recalculating usage...");
                 ((QuotaFileStorage) storage).recalculateUsage(filesToIgnore);
             }
         } catch (OXException e) {
@@ -1120,7 +1258,18 @@ public class ConsistencyServiceImpl implements ConsistencyService {
         DoNothingSolver doNothing = new DoNothingSolver();
         for (Entity entity : entities) {
             RecordSolver recorder = new RecordSolver();
-            checkOneEntity(entity, recorder, recorder, recorder, recorder, doNothing, recorder, recorder, getDatabase(), getAttachments(), getFileStorage(entity));
+
+            ProblemSolversToUse solvers = ProblemSolversToUse.builder()
+                .withDatabaseSolver(recorder)
+                .withAttachmentSolver(recorder)
+                .withSnippetSolver(recorder)
+                .withPreviewSolver(recorder)
+                .withFileSolver(doNothing)
+                .withVCardSolver(recorder)
+                .withCompositionSpaceReferencesSolver(recorder)
+                .build();
+            checkOneEntity(entity, solvers, getFileStorage(entity));
+
             retval.put(entity, recorder.getProblems());
         }
         return retval;
@@ -1138,7 +1287,18 @@ public class ConsistencyServiceImpl implements ConsistencyService {
         DoNothingSolver doNothing = new DoNothingSolver();
         for (Entity entity : entities) {
             RecordSolver recorder = new RecordSolver();
-            checkOneEntity(entity, doNothing, doNothing, doNothing, doNothing, recorder, doNothing, doNothing, getDatabase(), getAttachments(), getFileStorage(entity));
+
+            ProblemSolversToUse solvers = ProblemSolversToUse.builder()
+                .withDatabaseSolver(doNothing)
+                .withAttachmentSolver(doNothing)
+                .withSnippetSolver(doNothing)
+                .withPreviewSolver(doNothing)
+                .withFileSolver(recorder)
+                .withVCardSolver(doNothing)
+                .withCompositionSpaceReferencesSolver(doNothing)
+                .build();
+            checkOneEntity(entity, solvers, getFileStorage(entity));
+
             retval.put(entity, recorder.getProblems());
         }
         return retval;
@@ -1173,4 +1333,5 @@ public class ConsistencyServiceImpl implements ConsistencyService {
         }
         return obfuscatorService.unobfuscate(s);
     }
+
 }
