@@ -200,7 +200,7 @@ public class TokenLoginV2Test extends AbstractAJAXSession {
 
     @Test
     public void testRedirect() throws Exception {
-        final String REDIRECT = getClient().getHostname() + "/tokenRedirectTest";
+        final String REDIRECT = getClient().getProtocol() + "://somewhereelse.com/tokenRedirectTest";
         AcquireTokenRequest request = new AcquireTokenRequest();
         AcquireTokenResponse response = getClient().execute(request);
         String token = response.getToken();
