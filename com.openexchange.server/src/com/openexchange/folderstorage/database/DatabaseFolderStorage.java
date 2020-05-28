@@ -2207,7 +2207,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
     }
 
     private boolean isInPublicTree(Folder folder, StorageParameters storageParameters) throws OXException {
-        if (null == folder) {
+        if (null == folder || Strings.isEmpty(folder.getParentID())) {
             return false;
         }
         String parentId = folder.getParentID();
@@ -2237,7 +2237,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
     }
 
     private boolean checkFolder(int type, Folder folder, StorageParameters storageParameters, boolean checkCreatedBy) throws OXException {
-        if (null == folder) {
+        if (null == folder || Strings.isEmpty(folder.getParentID())) {
             return false;
         }
         String parentId = folder.getParentID();

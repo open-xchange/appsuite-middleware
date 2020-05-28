@@ -584,15 +584,19 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
      * @param original The original folder
      */
     private void addjustPermissionType(Folder updated, Folder original) {
-
-        Arrays.asList(original.getPermissions()).stream()
-                                                .filter((p) -> FolderPermissionType.LEGATOR.equals(p.getType()) || FolderPermissionType.INHERITED.equals(p.getType()))
-                                                .forEach((origPerm) -> {
-                                                    Arrays.asList(updated.getPermissions())
-                                                    .parallelStream()
-                                                    .filter((updatedPerm) -> updatedPerm.getEntity() == origPerm.getEntity() && updatedPerm.isGroup() == origPerm.isGroup() && updatedPerm.getSystem() == origPerm.getSystem())
-                                                    .forEach((updatedPerm) -> updatedPerm.setType(origPerm.getType()));
-                                                });
+        for(Permission origPerm : original.getPermissions()) {
+            if (FolderPermissionType.LEGATOR.equals(origPerm.getType())) {
+                // Adjust type of existing permission
+                for(Permission updatedPerm: updated.getPermissions()) {
+                    if (updatedPerm.getEntity() == origPerm.getEntity() && updatedPerm.isGroup() == origPerm.isGroup() && updatedPerm.getSystem() == origPerm.getSystem()) {
+                        if (!FolderPermissionType.LEGATOR.equals(updatedPerm.getType())) {
+                            updatedPerm.setType(FolderPermissionType.LEGATOR);
+                        }
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     /**
