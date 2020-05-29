@@ -55,6 +55,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.metrics.micrometer.binders.JvmInfoMetrics;
 import com.openexchange.metrics.micrometer.binders.SimpleJvmGcMetrics;
 import com.openexchange.metrics.micrometer.internal.filter.ActivateMetricMicrometerFilterPerformer;
 import com.openexchange.metrics.micrometer.internal.filter.DistributionHistogramMicrometerFilterPerformer;
@@ -137,6 +138,7 @@ public class RegistryInitializer {
         new UptimeMetrics().bindTo(prometheusRegistry);
         new FileDescriptorMetrics().bindTo(prometheusRegistry);
         new SimpleJvmGcMetrics().bindTo(prometheusRegistry);
+        new JvmInfoMetrics().bindTo(prometheusRegistry);
 
         this.prometheusRegistry = prometheusRegistry;
         return prometheusRegistry;
