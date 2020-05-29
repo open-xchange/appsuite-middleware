@@ -54,6 +54,7 @@ import java.rmi.Remote;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.Optional;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.event.EventConstants;
@@ -276,10 +277,13 @@ public class CompositionSpaceActivator extends HousekeepingActivator {
         registerService(CompositionSpaceService.class, cryptoServiceImpl);
 
         {
-            CompositionSpaceCleanUpRegistry cleanUpRegistry = CompositionSpaceCleanUpRegistry.initInstance(cryptoServiceImpl, this);
-            Dictionary<String, Object> serviceProperties = new Hashtable<>(1);
-            serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.TOPIC_LAST_SESSION);
-            registerService(EventHandler.class, cleanUpRegistry, serviceProperties);
+            Optional<CompositionSpaceCleanUpRegistry> optionalCleanUpRegistry = CompositionSpaceCleanUpRegistry.initInstance(cryptoServiceImpl, this);
+            if (optionalCleanUpRegistry.isPresent()) {
+                CompositionSpaceCleanUpRegistry cleanUpRegistry = optionalCleanUpRegistry.get();
+                Dictionary<String, Object> serviceProperties = new Hashtable<>(1);
+                serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.TOPIC_LAST_SESSION);
+                registerService(EventHandler.class, cleanUpRegistry, serviceProperties);
+            }
         }
 
         {
