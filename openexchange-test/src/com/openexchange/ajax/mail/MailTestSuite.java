@@ -109,7 +109,7 @@ import com.openexchange.test.concurrent.ParallelSuite;
     TestEstimateLength.class,
 
     MaxMailSizeTest.class,
-    MSISDNAddressTest.class,
+//    MSISDNAddressTest.class, msisdn not supported by mail infrastructure
     ExamineTest.class,
 
 })
