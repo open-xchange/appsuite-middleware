@@ -53,6 +53,7 @@ import static com.openexchange.java.Autoboxing.I;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
@@ -100,20 +101,33 @@ public class CompositionSpaceCleanUpRegistry implements EventHandler {
      *
      * @param compositionSpaceService The service to use
      * @param services The service look-up to use
-     * @return The freshly initialized instance
+     * @return The freshly initialized instance or empty if already initialized before
      * @throws OXException If initialization fails
      */
-    public static CompositionSpaceCleanUpRegistry initInstance(CompositionSpaceService compositionSpaceService, ServiceLookup services) throws OXException {
+    public static synchronized Optional<CompositionSpaceCleanUpRegistry> initInstance(CompositionSpaceService compositionSpaceService, ServiceLookup services) throws OXException {
+        if (INSTANCE_REFERENCE.get() != null) {
+            // Already initialized
+            return Optional.empty();
+        }
+
         CompositionSpaceCleanUpRegistry instance = new CompositionSpaceCleanUpRegistry(compositionSpaceService, services);
         INSTANCE_REFERENCE.set(instance);
-        return instance;
+        return Optional.of(instance);
     }
 
     /**
      * Releases the instance
      */
-    public static void releaseInstance() {
-        INSTANCE_REFERENCE.set(null);
+    public static synchronized void releaseInstance() {
+        CompositionSpaceCleanUpRegistry instance = INSTANCE_REFERENCE.getAndSet(null);
+        if (instance != null) {
+            instance.checkerTask.cancel();
+
+            TimerService timerService = instance.services.getOptionalService(TimerService.class);
+            if (timerService != null) {
+                timerService.purge();
+            }
+        }
     }
 
     /**
@@ -129,6 +143,7 @@ public class CompositionSpaceCleanUpRegistry implements EventHandler {
 
     private final ConcurrentMap<UserAndContext, CleanUpTask> tasks;
     private final CompositionSpaceService compositionSpaceService;
+    private final ScheduledTimerTask checkerTask;
     private final ServiceLookup services;
 
 
@@ -187,7 +202,7 @@ public class CompositionSpaceCleanUpRegistry implements EventHandler {
             }
 
         };
-        timerService.scheduleWithFixedDelay(r, 1, 1, TimeUnit.DAYS);
+        checkerTask = timerService.scheduleWithFixedDelay(r, 1, 1, TimeUnit.DAYS);
     }
 
     /**
