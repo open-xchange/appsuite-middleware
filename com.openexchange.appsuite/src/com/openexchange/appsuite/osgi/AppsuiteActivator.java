@@ -50,6 +50,9 @@
 package com.openexchange.appsuite.osgi;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import org.osgi.framework.BundleException;
 import org.osgi.service.http.HttpService;
 import com.openexchange.ajax.requesthandler.Dispatcher;
@@ -72,6 +75,7 @@ public class AppsuiteActivator extends HousekeepingActivator implements ForcedRe
 
     private AppsLoadServlet appsLoadServlet;
     private String alias;
+    private final boolean isWindows = Optional.ofNullable(System.getProperty("os.name")).orElse("").toLowerCase().startsWith("windows");
 
     /**
      * Initializes a new {@link AppsuiteActivator}.
@@ -149,12 +153,24 @@ public class AppsuiteActivator extends HousekeepingActivator implements ForcedRe
         }
 
         String[] paths = property.split(":");
-        File[] apps = new File[paths.length];
+        List<File> apps = new ArrayList<File>(paths.length);
+        Optional<String> winPrefix = Optional.empty();
         for (int i = 0; i < paths.length; i++) {
-            apps[i] = new File(new File(paths[i]), "apps");
+            String path = paths[i];
+            if(winPrefix.isPresent()) {
+                path = winPrefix.get() + ":" + path;
+                winPrefix = Optional.empty();
+            }
+            File parent = new File(path);
+            if(parent.exists() == false && isWindows && path.length() == 1) {
+                // probably the drive name (e.g. the c of c:/folder/
+                winPrefix = Optional.of(path);
+                continue;
+            }
+            apps.add(path.endsWith("apps") ? parent : new File(parent, "apps"));
         }
 
-        return apps;
+        return apps.toArray(new File[apps.size()]);
     }
 
     // ----------------------------------------------------------------------------------------------------------------------
