@@ -56,6 +56,8 @@ import java.util.Hashtable;
 import java.util.Map;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
@@ -63,11 +65,8 @@ import com.hazelcast.config.Config;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.capabilities.CapabilityService;
-import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.config.cascade.ConfigViews;
 import com.openexchange.context.ContextService;
 import com.openexchange.conversion.DataSource;
 import com.openexchange.crypto.CryptoService;
@@ -75,7 +74,6 @@ import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.provider.DatabaseServiceDBProvider;
 import com.openexchange.exception.OXException;
-import com.openexchange.filestore.FileStorageService;
 import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.filestore.FileLocationHandler;
@@ -97,6 +95,7 @@ import com.openexchange.mail.compose.impl.attachment.filestore.ContextAssociated
 import com.openexchange.mail.compose.impl.attachment.filestore.DedicatedFileStorageAttachmentStorage;
 import com.openexchange.mail.compose.impl.attachment.filestore.FileStrorageAttachmentFileLocationHandler;
 import com.openexchange.mail.compose.impl.attachment.rdb.RdbAttachmentStorage;
+import com.openexchange.mail.compose.impl.cleanup.CompositionSpaceCleanUpRegistry;
 import com.openexchange.mail.compose.impl.groupware.CompositionSpaceAddContentEncryptedFlag;
 import com.openexchange.mail.compose.impl.groupware.CompositionSpaceAddCustomHeaders;
 import com.openexchange.mail.compose.impl.groupware.CompositionSpaceAddFileStorageIdentifier;
@@ -121,6 +120,10 @@ import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.session.ObfuscatorService;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondEventConstants;
+import com.openexchange.sessiond.SessiondService;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.timer.TimerService;
 import com.openexchange.user.UserService;
 
 /**
@@ -147,9 +150,10 @@ public class CompositionSpaceActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class, QuotaFileStorageService.class, FileStorageService.class, CapabilityService.class,
-            HtmlService.class, ConfigurationService.class, ContextService.class, UserService.class, ComposeHandlerRegistry.class,
-            ObfuscatorService.class, ConfigViewFactory.class, CryptoService.class, MailAccountStorageService.class };
+        return new Class<?>[] { DatabaseService.class, QuotaFileStorageService.class, CapabilityService.class, HtmlService.class,
+            ConfigurationService.class, ContextService.class, UserService.class, ComposeHandlerRegistry.class, ObfuscatorService.class,
+            ConfigViewFactory.class, CryptoService.class, MailAccountStorageService.class, ThreadPoolService.class, TimerService.class,
+            SessiondService.class };
     }
 
     @Override
@@ -271,19 +275,14 @@ public class CompositionSpaceActivator extends HousekeepingActivator {
         registerService(CompositionSpaceService.class, cryptoServiceImpl);
 
         {
+            CompositionSpaceCleanUpRegistry cleanUpRegistry = CompositionSpaceCleanUpRegistry.initInstance(cryptoServiceImpl, this);
+            Dictionary<String, Object> serviceProperties = new Hashtable<>(1);
+            serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.TOPIC_LAST_SESSION);
+            registerService(EventHandler.class, cleanUpRegistry, serviceProperties);
+        }
+
+        {
             LoginHandlerService loginHandler = new LoginHandlerService() {
-
-                private long getMaxIdleTimeMillis(Session session) throws OXException {
-                    String defaultValue = "1W";
-
-                    ConfigViewFactory viewFactory = CompositionSpaceActivator.this.getOptionalService(ConfigViewFactory.class);
-                    if (null == viewFactory) {
-                        return ConfigTools.parseTimespan(defaultValue);
-                    }
-
-                    ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
-                    return ConfigTools.parseTimespan(ConfigViews.getDefinedStringPropertyFrom("com.openexchange.mail.compose.maxIdleTimeMillis", defaultValue, view));
-                }
 
                 @Override
                 public void handleLogout(LoginResult logout) throws OXException {
@@ -294,9 +293,9 @@ public class CompositionSpaceActivator extends HousekeepingActivator {
                 public void handleLogin(LoginResult login) throws OXException {
                     Session session = login.getSession();
                     if (null != session) {
-                        long maxIdleTimeMillis = getMaxIdleTimeMillis(session);
-                        if (maxIdleTimeMillis > 0) {
-                            cryptoServiceImpl.closeExpiredCompositionSpaces(maxIdleTimeMillis, session);
+                        CompositionSpaceCleanUpRegistry cleanUpRegistry = CompositionSpaceCleanUpRegistry.getInstance();
+                        if (cleanUpRegistry != null) {
+                            cleanUpRegistry.scheduleCleanUpFor(session);
                         }
                     }
                 }
@@ -347,6 +346,7 @@ public class CompositionSpaceActivator extends HousekeepingActivator {
             inmemoryStorage.close();
         }
         FileStorageCompositionSpaceKeyStorage.unsetInstance();
+        CompositionSpaceCleanUpRegistry.releaseInstance();
         super.stopBundle();
     }
 

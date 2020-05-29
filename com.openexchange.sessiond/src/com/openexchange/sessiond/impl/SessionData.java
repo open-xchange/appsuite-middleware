@@ -51,6 +51,7 @@ package com.openexchange.sessiond.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -426,13 +427,19 @@ final class SessionData {
      */
     List<SessionControl> getUserActiveSessions(int userId, int contextId) {
         // A read-only access to session list
-        List<SessionControl> retval = new LinkedList<SessionControl>();
+        List<SessionControl> retval = null;
 
         // Short term ones
         for (SessionContainer container : sessionList) {
-            retval.addAll(container.getSessionsByUser(userId, contextId));
+            List<SessionControl> sessionsByUser = container.getSessionsByUser(userId, contextId);
+            if (!sessionsByUser.isEmpty()) {
+                if (retval == null) {
+                    retval = new ArrayList<>();
+                }
+                retval.addAll(sessionsByUser);
+            }
         }
-        return retval;
+        return retval == null ? Collections.emptyList() : retval;
     }
 
     /**
