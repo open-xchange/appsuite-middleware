@@ -1909,15 +1909,18 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
                     }
                     Optional<List<OCLPermission>> optNewPermissions = processInheritedPermissions(parent, Optional.of(oclPermissions), Optional.empty());
                     updateMe.setPermissions(optNewPermissions.orElse(oclPermissions));
+                    changedFolder = changedFolder || false == updateMe.getPermissions().equals(originalFolder.getPermissions());
             } else {
                 MoveFolderPermissionMode mode = getMoveFolderPermissionMode(folder, storageParameters);
 
                 switch (mode) {
                     case INHERIT:
                         inheritFolderPermissions(updateMe, parent, context, con, storageParameters, folderManager, millis, false);
+                        changedFolder = changedFolder || false == updateMe.getPermissions().equals(originalFolder.getPermissions());
                         break;
                     case MERGE:
                         inheritFolderPermissions(updateMe, parent, context, con, storageParameters, folderManager, millis, true);
+                        changedFolder = changedFolder || false == updateMe.getPermissions().equals(originalFolder.getPermissions());
                         break;
                     case KEEP:
                     default:
@@ -1927,7 +1930,9 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
             }
 
             // Perform update of folder in storage if actually changed
-            folderManager.updateFolder(updateMe, true, StorageParametersUtility.isHandDownPermissions(storageParameters), millis.getTime());
+            if (changedFolder) {
+                folderManager.updateFolder(updateMe, true, StorageParametersUtility.isHandDownPermissions(storageParameters), millis.getTime());
+            }
 
             // Store updated user properties for folder as needed
             storeUserProperties(Optional.ofNullable(con), session, originalFolder, folder);
