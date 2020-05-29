@@ -58,6 +58,57 @@ msgid ""
 "error. Please try again later."
 msgstr ""
 
+#. The display name in context of the maximum allowed number of app-specific passwords a user may create.
+#: com.openexchange.authentication.application.impl/src/com/openexchange/authentication/application/impl/AppPasswordStrings.java:63
+msgid "App-specific passwords"
+msgstr ""
+
+#. The display name used for a Drive Sync App / id "drive"
+#: com.openexchange.authentication.application.impl/src/com/openexchange/authentication/application/impl/AppPasswordStrings.java:66
+msgid "Drive Sync App"
+msgstr ""
+
+#. The display name used for a Calendar Client (CalDAV) / id "caldav"
+#: com.openexchange.authentication.application.impl/src/com/openexchange/authentication/application/impl/AppPasswordStrings.java:69
+msgid "Calendar Client (CalDAV)"
+msgstr ""
+
+#. The display name used for a Addressbook Client (CardDAV) / id "carddav"
+#: com.openexchange.authentication.application.impl/src/com/openexchange/authentication/application/impl/AppPasswordStrings.java:72
+msgid "Addressbook Client (CardDAV)"
+msgstr ""
+
+#. The display name used for a WebDAV Client / id "webdav"
+#: com.openexchange.authentication.application.impl/src/com/openexchange/authentication/application/impl/AppPasswordStrings.java:75
+msgid "WebDAV Client"
+msgstr ""
+
+#. The account is not authorized to perform this action.  Displayed when a login without full permission tries to perform action requiring full priv
+#: com.openexchange.authentication.application/src/com/openexchange/authentication/application/exceptions/AppPasswordExceptionMessages.java:63
+msgid "This account isn't authorized to perform this action."
+msgstr ""
+
+#. The type of application isn't recognized
+#: com.openexchange.authentication.application/src/com/openexchange/authentication/application/exceptions/AppPasswordExceptionMessages.java:65
+msgid "Unknown application type $1%s"
+msgstr ""
+
+#. Unable to update application passwords during a password change action.
+#: com.openexchange.authentication.application/src/com/openexchange/authentication/application/exceptions/AppPasswordExceptionMessages.java:67
+msgid ""
+"Unable to update application passwords during password change. You may need "
+"to remove then recreate the application passwords."
+msgstr ""
+
+#: com.openexchange.authentication.application/src/com/openexchange/authentication/application/exceptions/AppPasswordExceptionMessages.java:69
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:92
+msgid "The operation could not be completed due to missing capabilities."
+msgstr ""
+
+#: com.openexchange.authentication.application/src/com/openexchange/authentication/application/exceptions/AppPasswordExceptionMessages.java:71
+msgid "This client cannot be used with an application-specific password."
+msgstr ""
+
 #. The client send a ticket within the browser request and the verification of this ticket failed.
 #: com.openexchange.authentication.kerberos/src/com/openexchange/kerberos/KerberosExceptionMessages.java:62
 msgid "Verification of client ticket failed."
@@ -1338,10 +1389,6 @@ msgstr ""
 
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:90
 msgid "All appointments of a series must contain the same organizer."
-msgstr ""
-
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:92
-msgid "The operation could not be completed due to missing capabilities."
 msgstr ""
 
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:94
@@ -2644,6 +2691,10 @@ msgstr ""
 msgid "Push via long polling is disabled for user \"%1$s\" in context \"%1$s\""
 msgstr ""
 
+#: com.openexchange.external.account/src/com/openexchange/external/account/ExternalAccountExceptionMessages.java:62
+msgid "No external account provider found for module '%1$s'."
+msgstr ""
+
 #: com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/FormStrings.java:61
 #: com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/FormStrings.java:61
 #: com.openexchange.file.storage.oauth/src/com/openexchange/file/storage/oauth/FormStrings.java:61
@@ -2780,6 +2831,7 @@ msgstr ""
 #. The folder you requested does not exist.
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:65
 #: com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:77
+#: com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:143
 msgid "The folder you requested does not exist."
 msgstr ""
 
@@ -6278,6 +6330,11 @@ msgstr ""
 msgid "Folder name contains illegal characters: \"%1$s\""
 msgstr ""
 
+#. User selected one or more permissions that cannot be applied to target folder; e.g. selected guest permission for a mail folder.
+#: com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:110
+msgid "The chosen permission(s) cannot be set"
+msgstr ""
+
 #. No group given.
 #: com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:69
 msgid "No group given."
@@ -8060,6 +8117,13 @@ msgstr ""
 #. Your search took too long in order to be accomplished.
 #: com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:140
 msgid "Your search took too long in order to be accomplished."
+msgstr ""
+
+#. The file contains too many permissions. Please reduce the number or use groups instead.
+#: com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:146
+msgid ""
+"The file contains too many permissions. Please reduce the number of "
+"permissions or use group permissions instead."
 msgstr ""
 
 #. A document's version comment
@@ -9907,6 +9971,13 @@ msgstr ""
 
 #: com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:135
 msgid "There is already a folder named \"%1$s\". Please choose another name."
+msgstr ""
+
+#. The folder contains too many permissions. Please reduce the number or use groups instead.
+#: com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:138
+msgid ""
+"The folder contains too many permissions. Please reduce the number of "
+"permissions or use group permissions instead."
 msgstr ""
 
 #: com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:62
