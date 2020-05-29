@@ -119,6 +119,7 @@ import com.openexchange.chronos.service.EventConflict;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.EventUpdate;
 import com.openexchange.chronos.service.EventUpdates;
+import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.service.RecurrenceIterator;
 import com.openexchange.chronos.service.RecurrenceService;
@@ -260,7 +261,7 @@ public class CalendarUtils {
     /**
      * Gets a value indicating whether the value of one recurrence identifier matches another one, based on
      * {@link RecurrenceId#matches(RecurrenceId)}.
-     * 
+     *
      * @param recurrenceId1 The first recurrence identifier to match, or <code>null</code>
      * @param recurrenceId2 The second recurrence identifier to match, or <code>null</code>
      * @return <code>true</code> if both recurrence identifiers are <code>null</code> or their values matches, <code>false</code>, otherwise
@@ -2420,6 +2421,54 @@ public class CalendarUtils {
             events.add(eventUpdate.getUpdate());
         }
         return new DefaultCalendarObjectResource(events);
+    }
+
+    /**
+     * Gets a value indicating whether the supplied event update denotes <i>significant</i> changes from the perspective of a certain
+     * user, i.e. changes that would directly be visible in his client. This aids deciding whether a change would justify a push
+     * notification to the client or not.
+     * <p/>
+     * An update is considered as <i>significant</i>,
+     * <ul>
+     * <li>whenever the event's sequence number is bumped,</li>
+     * <li>if attendee privileges were updated,</li>
+     * <li>if user's own attendee was modified,</li>
+     * <li>or if an attendee was modified whose folder view is visible to the user</li>
+     * </ul>
+     *
+     * @param update The event update to check
+     * @param userId The user to determine the relevance of the update for
+     * @param visibleFolderIds The affected folder identifiers visible to this calendar user
+     * @return <code>true</code> if there are significant changes, <code>false</code>, otherwise
+     */
+    public static boolean isSignificantChange(EventUpdate update, int userId, Collection<String> visibleFolderIds) {
+        if (update.getUpdatedFields().contains(EventField.SEQUENCE)) {
+            /*
+             * sequence number has changed, so assume a "significant" change implicitly
+             */
+            return true;
+        }
+        if (update.getUpdatedFields().contains(EventField.ATTENDEE_PRIVILEGES) || update.getUpdatedFields().contains(EventField.CLASSIFICATION)) {
+            /*
+             * permission-related update, assume "significant" change
+             */
+            return true;
+        }
+        for (ItemUpdate<Attendee, AttendeeField> attendeeUpdate : update.getAttendeeUpdates().getUpdatedItems()) {
+            if (attendeeUpdate.getOriginal().getEntity() == userId) {
+                /*
+                 * user's own attendee modified, assume "significant" change
+                 */
+                return true;
+            }
+            if (visibleFolderIds.contains(attendeeUpdate.getOriginal().getFolderId()) || visibleFolderIds.contains(attendeeUpdate.getUpdate().getFolderId())) {
+                /*
+                 * attendee modified whose folder view is visible to user, assume "significant" change
+                 */
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

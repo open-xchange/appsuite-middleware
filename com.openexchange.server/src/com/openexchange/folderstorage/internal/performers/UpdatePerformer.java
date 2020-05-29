@@ -51,7 +51,6 @@ package com.openexchange.folderstorage.internal.performers;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -299,6 +298,13 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                 }
             }
 
+            /*
+             * restore inherited/legator permission type from original folder's permissions as needed
+             */
+            if ((storageFolder.getContentType().getModule() == FolderObject.INFOSTORE && folder.getContentType() == null) || (folder.getContentType() != null && folder.getContentType().getModule() == FolderObject.INFOSTORE)) {
+                restorePermissionType(folder, storageFolder);
+            }
+
             ComparedFolderPermissions comparedPermissions = new ComparedFolderPermissions(session, folder, storageFolder);
             boolean addedDecorator = false;
             FolderServiceDecorator decorator = storageParameters.getDecorator();
@@ -477,13 +483,6 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
         }
 
         /*
-         * Properly inherit permissions
-         */
-        if ((storageFolder.getContentType().getModule() == FolderObject.INFOSTORE && folder.getContentType() == null) || (folder.getContentType() != null && folder.getContentType().getModule() == FolderObject.INFOSTORE)) {
-            addjustPermissionType(folder, storageFolder);
-        }
-
-        /*
          * Check permissions of anonymous guest users
          */
         checkGuestPermissions(storageFolder, comparedPermissions);
@@ -503,43 +502,41 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
         /*
          * Change permissions either in real or in virtual storage
          */
-        if (comparedPermissions.hasChanges()) {
-            if (FolderStorage.REAL_TREE_ID.equals(folder.getTreeID())) {
+        if (FolderStorage.REAL_TREE_ID.equals(folder.getTreeID())) {
+            storage.updateFolder(folder, storageParameters);
+        } else {
+            final FolderStorage realStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, folder.getID());
+            if (null == realStorage) {
+                throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, folder.getID());
+            }
+
+            if (storage.equals(realStorage)) {
                 storage.updateFolder(folder, storageParameters);
             } else {
-                final FolderStorage realStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, folder.getID());
-                if (null == realStorage) {
-                    throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, folder.getID());
-                }
+                checkOpenedStorage(realStorage, openedStorages);
+                realStorage.updateFolder(folder, storageParameters);
+                storage.updateFolder(folder, storageParameters);
 
-                if (storage.equals(realStorage)) {
-                    storage.updateFolder(folder, storageParameters);
-                } else {
-                    checkOpenedStorage(realStorage, openedStorages);
-                    realStorage.updateFolder(folder, storageParameters);
-                    storage.updateFolder(folder, storageParameters);
-
-                    if (comparedPermissions.hasRemovedUsers() || comparedPermissions.hasModifiedUsers()) {
-                        if (realStorage instanceof LockCleaningFolderStorage) {
-                            List<Permission> removedPermissions = comparedPermissions.getRemovedUserPermissions();
-                            int[] userIdRemoved = new int[removedPermissions.size()];
-                            int x = 0;
-                            for(Permission perm: removedPermissions){
-                                userIdRemoved[x++] = perm.getEntity();
-                            }
-
-                            List<Permission> modifiedPermissions = comparedPermissions.getModifiedUserPermissions();
-                            int[] userIdModified = new int[modifiedPermissions.size()];
-                            x = 0;
-                            for (Permission perm : modifiedPermissions) {
-                                if (perm.getWritePermission() == Permission.NO_PERMISSIONS || perm.getWritePermission() == Permission.WRITE_OWN_OBJECTS) {
-                                    userIdModified[x++] = perm.getEntity();
-                                }
-                            }
-
-                            int[] merged = com.openexchange.tools.arrays.Arrays.concatenate(userIdRemoved, userIdModified);
-                            ((LockCleaningFolderStorage) realStorage).cleanLocksFor(folder, merged, storageParameters);
+                if (comparedPermissions.hasRemovedUsers() || comparedPermissions.hasModifiedUsers()) {
+                    if (realStorage instanceof LockCleaningFolderStorage) {
+                        List<Permission> removedPermissions = comparedPermissions.getRemovedUserPermissions();
+                        int[] userIdRemoved = new int[removedPermissions.size()];
+                        int x = 0;
+                        for (Permission perm : removedPermissions) {
+                            userIdRemoved[x++] = perm.getEntity();
                         }
+
+                        List<Permission> modifiedPermissions = comparedPermissions.getModifiedUserPermissions();
+                        int[] userIdModified = new int[modifiedPermissions.size()];
+                        x = 0;
+                        for (Permission perm : modifiedPermissions) {
+                            if (perm.getWritePermission() == Permission.NO_PERMISSIONS || perm.getWritePermission() == Permission.WRITE_OWN_OBJECTS) {
+                                userIdModified[x++] = perm.getEntity();
+                            }
+                        }
+
+                        int[] merged = com.openexchange.tools.arrays.Arrays.concatenate(userIdRemoved, userIdModified);
+                        ((LockCleaningFolderStorage) realStorage).cleanLocksFor(folder, merged, storageParameters);
                     }
                 }
             }
@@ -583,16 +580,20 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
      * @param updated The updated folder
      * @param original The original folder
      */
-    private void addjustPermissionType(Folder updated, Folder original) {
-
-        Arrays.asList(original.getPermissions()).stream()
-                                                .filter((p) -> FolderPermissionType.LEGATOR.equals(p.getType()) || FolderPermissionType.INHERITED.equals(p.getType()))
-                                                .forEach((origPerm) -> {
-                                                    Arrays.asList(updated.getPermissions())
-                                                    .parallelStream()
-                                                    .filter((updatedPerm) -> updatedPerm.getEntity() == origPerm.getEntity() && updatedPerm.isGroup() == origPerm.isGroup() && updatedPerm.getSystem() == origPerm.getSystem())
-                                                    .forEach((updatedPerm) -> updatedPerm.setType(origPerm.getType()));
-                                                });
+    private void restorePermissionType(Folder updated, Folder original) {
+        for(Permission origPerm : original.getPermissions()) {
+            if (FolderPermissionType.LEGATOR.equals(origPerm.getType())) {
+                // Adjust type of existing permission
+                for(Permission updatedPerm: updated.getPermissions()) {
+                    if (updatedPerm.getEntity() == origPerm.getEntity() && updatedPerm.isGroup() == origPerm.isGroup() && updatedPerm.getSystem() == origPerm.getSystem()) {
+                        if (!FolderPermissionType.LEGATOR.equals(updatedPerm.getType())) {
+                            updatedPerm.setType(FolderPermissionType.LEGATOR);
+                        }
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     /**

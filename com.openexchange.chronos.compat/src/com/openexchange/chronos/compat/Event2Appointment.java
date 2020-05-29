@@ -52,7 +52,9 @@ package com.openexchange.chronos.compat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmAction;
@@ -388,6 +390,24 @@ public class Event2Appointment {
      */
     public static Integer asInteger(String id) {
         return null != id ? Integer.valueOf(id) : null;
+    }
+
+    /**
+     * Parses the supplied identifiers to their numerical integer values.
+     *
+     * @param ids The identifiers to get the integer values for
+     * @return The integer values of the supplied identifiers
+     * @throws NumberFormatException
+     */
+    public static Set<Integer> asInteger(Set<String> ids) {
+        if (null == ids) {
+            return null;
+        }
+        Set<Integer> numericalIds = new HashSet<Integer>(ids.size());
+        for (String id : ids) {
+            numericalIds.add(asInteger(id));
+        }
+        return numericalIds;
     }
 
     /**

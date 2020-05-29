@@ -55,6 +55,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -227,7 +228,22 @@ public class ConfigProviderServiceImpl implements ReinitializableConfigProviderS
                 if (value == null) {
                     value = config.getProperty(propertyName);
                 }
-                properties.put(propertyName, new ServerProperty(value, propertyMetadata));
+
+                ServerProperty existent = properties.putIfAbsent(propertyName, new ServerProperty(value, propertyMetadata));
+                if (existent != null) {
+                    // There is already such a property
+                    boolean grabExistent = false;
+                    ServerProperty newServerProperty;
+                    do {
+                        if (grabExistent) {
+                            existent = properties.get(propertyName);
+                        }
+                        Map<String, String> newPropertyMetadata = new LinkedHashMap<>(existent.getMetadata());
+                        newPropertyMetadata.putAll(propertyMetadata);
+                        newServerProperty = new ServerProperty(value, newPropertyMetadata);
+                        grabExistent = true;
+                    } while (!properties.replace(propertyName, existent, newServerProperty));
+                }
             }
         }
     }

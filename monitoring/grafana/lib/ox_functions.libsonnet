@@ -4,10 +4,10 @@ local template = grafana.template;
 local annotation = grafana.annotation;
 
 {
-  default::  
-  {
-    datasource: 'Prometheus',
-  },
+  default::
+    {
+      datasource: 'Prometheus',
+    },
   newDashboard(title, metric, tags=[]):: dashboard.new(
     title=title,
     tags=tags,

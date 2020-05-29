@@ -105,8 +105,6 @@ public class GetLinkInheritanceTest extends AbstractAPIClientSession {
         C = folderManager.createFolder(B, "C_" + UUID.randomUUID(), MODULE);
         D = folderManager.createFolder(infostoreRoot, "D_" + UUID.randomUUID(), MODULE);
         E = folderManager.createFolder(D, "E_" + UUID.randomUUID(), MODULE);
-
-        System.out.println("test");
     }
 
     @Override

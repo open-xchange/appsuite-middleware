@@ -49,8 +49,9 @@
 
 package com.openexchange.authentication.application.impl;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
+import com.google.common.collect.ImmutableList;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.sessionstorage.SessionStorageParameterNamesProvider;
@@ -63,18 +64,28 @@ import com.openexchange.sessionstorage.SessionStorageParameterNamesProvider;
  */
 public class AppPasswordSessionStorageParameterNamesProvider implements SessionStorageParameterNamesProvider {
 
-    private static final List<String> PARAMETER_NAMES = Collections.singletonList(Session.PARAM_RESTRICTED);
+    static final String PARAM_RESTRICTED = Session.PARAM_RESTRICTED;
+
+    /** Holds the identifier of the app-specific password that was used for authentication */
+    static final String PARAM_APP_PASSWORD_ID = "com.openexchange.authentication.application.passwordId";
+
+
+    private final List<String> parameterNames;
 
     /**
      * Initializes a new {@link AppPasswordSessionStorageParameterNamesProvider}.
      */
     public AppPasswordSessionStorageParameterNamesProvider() {
         super();
+        List<String> parameterNames = new ArrayList<String>(2);
+        parameterNames.add(PARAM_RESTRICTED);
+        parameterNames.add(PARAM_APP_PASSWORD_ID);
+        this.parameterNames = ImmutableList.copyOf(parameterNames);
     }
 
     @Override
     public List<String> getParameterNames(int userId, int contextId) throws OXException {
-        return PARAMETER_NAMES;
+        return parameterNames;
     }
 
 }

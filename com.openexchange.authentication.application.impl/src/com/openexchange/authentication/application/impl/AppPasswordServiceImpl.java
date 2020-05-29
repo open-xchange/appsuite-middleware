@@ -87,6 +87,8 @@ import com.openexchange.osgi.ServiceSet;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessionFilter;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
@@ -218,6 +220,7 @@ public class AppPasswordServiceImpl implements AppPasswordService, AppAuthentica
             if (storage.removePassword(session, passwordId)) {
                 deleteLastLogin(storage, session, passwordId);
                 notifierRegistry.notifyRemovePassword(passwordId);
+                removeSessions(session.getContextId(), session.getUserId(), passwordId);
             }
         }
     }
@@ -286,6 +289,26 @@ public class AppPasswordServiceImpl implements AppPasswordService, AppAuthentica
             applicationsById.put(appType, application);
         }
         return applicationsById;
+    }
+
+    private Collection<String> removeSessions(int contextId, int userId, String passwordId) {
+        SessiondService sessiondService = services.getOptionalService(SessiondService.class);
+        if (null == sessiondService) {
+            LOG.info("Unable to access SessionD service, unable to remove sessions for app-password {}.", passwordId);
+            return Collections.emptyList();
+        }
+        String filterString = new StringBuilder("(&")
+            .append('(').append(SessionFilter.CONTEXT_ID).append('=').append(contextId).append(')')
+            .append('(').append(SessionFilter.USER_ID).append('=').append(userId).append(')')
+            .append('(').append(AppPasswordSessionStorageParameterNamesProvider.PARAM_APP_PASSWORD_ID).append('=').append(passwordId).append(')')
+            .append(')')
+        .toString();
+        try {
+            return sessiondService.removeSessionsGlobally(SessionFilter.create(filterString));
+        } catch (OXException e) {
+            LOG.warn("Error removing sessions for app-password {}", passwordId, e);
+            return Collections.emptyList();
+        }
     }
 
     private boolean deleteLastLogin(AppPasswordStorage storage, Session session, String passwordId) {
