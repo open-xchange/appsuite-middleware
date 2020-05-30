@@ -59,7 +59,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
@@ -123,7 +122,7 @@ public class CompositionSpaceCleanUpRegistry implements EventHandler {
     public static synchronized void releaseInstance() {
         CompositionSpaceCleanUpRegistry instance = INSTANCE_REFERENCE.getAndSet(null);
         if (instance != null) {
-            instance.checkerTask.cancel();
+            instance.checkerTask.cancel(true);
 
             TimerService timerService = instance.services.getOptionalService(TimerService.class);
             if (timerService != null) {
@@ -180,7 +179,8 @@ public class CompositionSpaceCleanUpRegistry implements EventHandler {
                 if (sessiondService instanceof SessiondServiceExtended) {
                     SessiondServiceExtended sessiondServiceExtended = (SessiondServiceExtended) sessiondService;
 
-                    for (Iterator<Entry<UserAndContext, CleanUpTask>> it = tasks.entrySet().iterator(); it.hasNext();) {
+                    Thread currentThread = Thread.currentThread();
+                    for (Iterator<Entry<UserAndContext, CleanUpTask>> it = tasks.entrySet().iterator(); !currentThread.isInterrupted() && it.hasNext();) {
                         checkEntry(it.next(), it, sessiondServiceExtended, services);
                     }
                 }
@@ -188,12 +188,15 @@ public class CompositionSpaceCleanUpRegistry implements EventHandler {
 
             private void checkEntry(Map.Entry<UserAndContext, CleanUpTask> entry, Iterator<Entry<UserAndContext, CleanUpTask>> it, SessiondServiceExtended sessiondServiceExtended, ServiceLookup services) {
                 UserAndContext key = entry.getKey();
+                CleanUpTask cleanUpTask = entry.getValue();
+
                 if (sessiondServiceExtended.getActiveSessions(key.getUserId(), key.getContextId()).isEmpty()) {
+                    // Apparently no active user-associated session available
                     it.remove();
 
-                    ScheduledTimerTask timerTask = entry.getValue().timerTaskReference.getAndSet(null);
-                    if (timerTask != null) {
-                        timerTask.cancel();
+                    Optional<ScheduledTimerTask> optionalTimerTask = cleanUpTask.getAndDropTimerTask();
+                    if (optionalTimerTask.isPresent()) {
+                        optionalTimerTask.get().cancel();
 
                         TimerService timerService = services.getOptionalService(TimerService.class);
                         if (timerService != null) {
@@ -232,16 +235,16 @@ public class CompositionSpaceCleanUpRegistry implements EventHandler {
                 // This current thread put task into concurrent map
                 TimerService timerService = services.getOptionalService(TimerService.class);
                 if (timerService == null) {
-                    task.obsolete.set(true);
+                    task.markObsolete();
                     tasks.remove(key);
                     throw ServiceExceptionCode.absentService(TimerService.class);
                 }
 
                 try {
-                    ScheduledTimerTask timerTask = timerService.scheduleWithFixedDelay(task, 5000L, 1800000L);
-                    task.timerTaskReference.set(timerTask);
+                    ScheduledTimerTask timerTask = timerService.scheduleWithFixedDelay(task, 5000L, 3600000L); // Every 60 minutes
+                    task.setTimerTask(timerTask);
                 } catch (Throwable t) {
-                    task.obsolete.set(true);
+                    task.markObsolete();
                     tasks.remove(key);
                     if (t instanceof Error) {
                         throw (Error) t;
@@ -250,7 +253,7 @@ public class CompositionSpaceCleanUpRegistry implements EventHandler {
                 }
             } else {
                 // Check if obsolete
-                if (task.obsolete.get()) {
+                if (task.isObsolete()) {
                     return scheduleCleanUpFor(session);
                 }
                 task.addSessionId(session.getSessionID());
@@ -310,9 +313,9 @@ public class CompositionSpaceCleanUpRegistry implements EventHandler {
     public void removeCleanUpTaskFor(int userId, int contextId) {
         CleanUpTask removed = tasks.remove(UserAndContext.newInstance(userId, contextId));
         if (removed != null) {
-            ScheduledTimerTask timerTask = removed.timerTaskReference.getAndSet(null);
-            if (timerTask != null) {
-                timerTask.cancel();
+            Optional<ScheduledTimerTask> optionalTimerTask = removed.getAndDropTimerTask();
+            if (optionalTimerTask.isPresent()) {
+                optionalTimerTask.get().cancel();
 
                 TimerService timerService = services.getOptionalService(TimerService.class);
                 if (timerService != null) {
@@ -332,9 +335,17 @@ public class CompositionSpaceCleanUpRegistry implements EventHandler {
         private final CompositionSpaceService compositionSpaceService;
         private final CompositionSpaceCleanUpRegistry cleanUpRegistry;
         private final ServiceLookup services;
-        final AtomicBoolean obsolete;
-        final AtomicReference<ScheduledTimerTask> timerTaskReference;
+        private boolean obsolete; // Guarded by synchronized
+        private final AtomicReference<ScheduledTimerTask> timerTaskReference;
 
+        /**
+         * Initializes a new {@link CleanUpTask}.
+         *
+         * @param initiatingSession The initial session for which this task is started
+         * @param compositionSpaceService The service used to drop expired composition spaces
+         * @param cleanUpRegistry The clean-up registry reference
+         * @param services The service look-up to obtain needed services
+         */
         CleanUpTask(Session initiatingSession, CompositionSpaceService compositionSpaceService, CompositionSpaceCleanUpRegistry cleanUpRegistry, ServiceLookup services) {
             super();
             this.cleanUpRegistry = cleanUpRegistry;
@@ -344,10 +355,49 @@ public class CompositionSpaceCleanUpRegistry implements EventHandler {
             contextId = initiatingSession.getContextId();
             this.compositionSpaceService = compositionSpaceService;
             this.services = services;
-            obsolete = new AtomicBoolean(false);
+            obsolete = false;
             timerTaskReference = new AtomicReference<>(null);
         }
 
+        /**
+         * Sets the timer task that cares about periodic execution of this clean-up task.
+         *
+         * @param timerTask The timer task to set
+         */
+        void setTimerTask(ScheduledTimerTask timerTask) {
+            timerTaskReference.set(timerTask);
+        }
+
+        /**
+         * Gets the currently active timer task (if any) that cares about periodic execution of this clean-up task.
+         *
+         * @return The timer task or <code>null</code>
+         */
+        Optional<ScheduledTimerTask> getAndDropTimerTask() {
+            return Optional.ofNullable(timerTaskReference.getAndSet(null));
+        }
+
+        /**
+         * Marks this task as obsolete
+         */
+        void markObsolete() {
+            obsolete = true;
+        }
+
+        /**
+         * Checks if this task became obsolete
+         *
+         * @return <code>true</code> if obsolete; otherwise <code>false</code> if still active
+         */
+        boolean isObsolete() {
+            return obsolete;
+        }
+
+        /**
+         * Adds given session identifier to collection of known user-associated sessions.
+         *
+         * @param sessionId The session identifier to add
+         */
         void addSessionId(String sessionId) {
             this.sessionIds.add(sessionId);
         }
@@ -358,8 +408,7 @@ public class CompositionSpaceCleanUpRegistry implements EventHandler {
                 SessiondServiceExtended sessiondService = (SessiondServiceExtended) services.getServiceSafe(SessiondService.class);
                 Session session = null;
                 for (Iterator<String> it = sessionIds.iterator(); session == null && it.hasNext();) {
-                    String sessionId = it.next();
-                    session = sessiondService.peekSession(sessionId, false);
+                    session = sessiondService.peekSession(it.next(), false);
                     if (session == null) {
                         // No such session
                         it.remove();
@@ -392,6 +441,6 @@ public class CompositionSpaceCleanUpRegistry implements EventHandler {
             ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
             return ConfigTools.parseTimespan(ConfigViews.getDefinedStringPropertyFrom("com.openexchange.mail.compose.maxIdleTimeMillis", defaultValue, view));
         }
-    }
+    } // End of class CleanUpTask
 
 }
