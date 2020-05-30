@@ -376,8 +376,8 @@ public class CompositionSpaceCleanUpRegistry implements EventHandler {
                 if (maxIdleTimeMillis > 0) {
                     compositionSpaceService.closeExpiredCompositionSpaces(maxIdleTimeMillis, session);
                 }
-            } catch (OXException e) {
-                LoggerHolder.LOG.error("Failed to clean-up expired composition spaces for user {} in context {}", I(userId), I(contextId));
+            } catch (Exception e) {
+                LoggerHolder.LOG.error("Failed to clean-up expired composition spaces for user {} in context {}", I(userId), I(contextId), e);
             }
         }
 
