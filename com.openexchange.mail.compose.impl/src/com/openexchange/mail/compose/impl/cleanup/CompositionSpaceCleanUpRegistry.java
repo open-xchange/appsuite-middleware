@@ -51,11 +51,13 @@ package com.openexchange.mail.compose.impl.cleanup;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -217,7 +219,7 @@ public class CompositionSpaceCleanUpRegistry implements EventHandler {
         UserAndContext key = UserAndContext.newInstance(session);
         CleanUpTask task = tasks.get(key);
         if (task == null) {
-            CleanUpTask newTask = new CleanUpTask(session, compositionSpaceService, services);
+            CleanUpTask newTask = new CleanUpTask(session, compositionSpaceService, this, services);
             task = tasks.putIfAbsent(key, newTask);
             if (task == null) {
                 scheduleTask = true;
@@ -251,6 +253,7 @@ public class CompositionSpaceCleanUpRegistry implements EventHandler {
                 if (task.obsolete.get()) {
                     return scheduleCleanUpFor(session);
                 }
+                task.addSessionId(session.getSessionID());
             }
         }
 
@@ -323,30 +326,58 @@ public class CompositionSpaceCleanUpRegistry implements EventHandler {
 
     private static class CleanUpTask implements Runnable {
 
-        private final Session session;
+        private final List<String> sessionIds;
+        private final int userId;
+        private final int contextId;
         private final CompositionSpaceService compositionSpaceService;
+        private final CompositionSpaceCleanUpRegistry cleanUpRegistry;
         private final ServiceLookup services;
         final AtomicBoolean obsolete;
         final AtomicReference<ScheduledTimerTask> timerTaskReference;
 
-        CleanUpTask(Session session, CompositionSpaceService compositionSpaceService, ServiceLookup services) {
+        CleanUpTask(Session initiatingSession, CompositionSpaceService compositionSpaceService, CompositionSpaceCleanUpRegistry cleanUpRegistry, ServiceLookup services) {
             super();
-            this.session = session;
+            this.cleanUpRegistry = cleanUpRegistry;
+            this.sessionIds = new CopyOnWriteArrayList<>();
+            this.sessionIds.add(initiatingSession.getSessionID());
+            userId = initiatingSession.getUserId();
+            contextId = initiatingSession.getContextId();
             this.compositionSpaceService = compositionSpaceService;
             this.services = services;
             obsolete = new AtomicBoolean(false);
             timerTaskReference = new AtomicReference<>(null);
         }
 
+        void addSessionId(String sessionId) {
+            this.sessionIds.add(sessionId);
+        }
+
         @Override
         public void run() {
             try {
+                SessiondServiceExtended sessiondService = (SessiondServiceExtended) services.getServiceSafe(SessiondService.class);
+                Session session = null;
+                for (Iterator<String> it = sessionIds.iterator(); session == null && it.hasNext();) {
+                    String sessionId = it.next();
+                    session = sessiondService.peekSession(sessionId, false);
+                    if (session == null) {
+                        // No such session
+                        it.remove();
+                    }
+                }
+
+                if (session == null) {
+                    // No suitable session available (anymore)
+                    cleanUpRegistry.removeCleanUpTaskFor(userId, contextId);
+                    return;
+                }
+
                 long maxIdleTimeMillis = getMaxIdleTimeMillis(session);
                 if (maxIdleTimeMillis > 0) {
                     compositionSpaceService.closeExpiredCompositionSpaces(maxIdleTimeMillis, session);
                 }
             } catch (OXException e) {
-                LoggerHolder.LOG.error("Failed to clean-up expired composition spaces for user {} in context {}", I(session.getUserId()), I(session.getContextId()));
+                LoggerHolder.LOG.error("Failed to clean-up expired composition spaces for user {} in context {}", I(userId), I(contextId));
             }
         }
 
