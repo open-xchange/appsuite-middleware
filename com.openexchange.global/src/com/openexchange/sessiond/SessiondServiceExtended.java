@@ -118,7 +118,7 @@ public interface SessiondServiceExtended extends SessiondService {
      * @return Returns the session or <code>null</code> if no session exists for the given identifier or if the session is expired
      * @see SessiondServiceExtended#getSession(String, boolean)
      */
-    Session peekSession(String sessionId,  boolean considerSessionStorage);
+    Session peekSession(String sessionId, boolean considerSessionStorage);
 
     /**
      * Gets the sessions associated with specified user in given context.
