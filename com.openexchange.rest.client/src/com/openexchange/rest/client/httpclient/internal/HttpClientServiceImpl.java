@@ -452,21 +452,20 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
     HttpBasicConfig adjustConfig(String clientId, HttpBasicConfig httpBasicConfig) {
         ConfigurationService configService = serviceLookup.getOptionalService(ConfigurationService.class);
         if (null != configService) {
+            Map<String, String> optionals = Collections.singletonMap(HttpClientProperty.SERVICE_IDENTIFIER, clientId);
             for (HttpClientProperty property : HttpClientProperty.values()) {
-                adjustConfig(configService, clientId, property, httpBasicConfig);
+                adjustConfig(property, httpBasicConfig, optionals, configService);
             }
         }
         return httpBasicConfig;
     }
 
-    private void adjustConfig(ConfigurationService configService, String clientId, HttpClientProperty property, HttpBasicConfig httpBasicConfig) {
-        Map<String, String> map = Collections.singletonMap(HttpClientProperty.SERVICE_IDENTIFIER, clientId);
-        String propertyName = property.getFQPropertyName(map);
+    private static void adjustConfig(HttpClientProperty property, HttpBasicConfig httpBasicConfig, Map<String, String> optionals, ConfigurationService configService) {
+        String propertyName = property.getFQPropertyName(optionals);
         String value = configService.getProperty(propertyName);
-
         if (Strings.isNotEmpty(value)) {
             try {
-                property.setInConfig(httpBasicConfig, Integer.valueOf(value));
+                property.setInConfig(httpBasicConfig, Integer.valueOf(value.trim()));
             } catch (NumberFormatException e) {
                 LOGGER.info("Unable to parse value {} for property {}", value, propertyName, e);
             }

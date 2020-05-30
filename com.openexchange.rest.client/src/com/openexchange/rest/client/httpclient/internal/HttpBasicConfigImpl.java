@@ -68,7 +68,7 @@ import com.openexchange.rest.client.httpclient.HttpClientProperty;
 public class HttpBasicConfigImpl implements HttpBasicConfig {
 
     private int socketReadTimeout;
-    private int connectionTimeout;
+    private int connectTimeout;
     private int connectionRequestTimeout;
     private int maxTotalConnections;
     private int maxConnectionsPerRoute;
@@ -105,7 +105,7 @@ public class HttpBasicConfigImpl implements HttpBasicConfig {
 
     @Override
     public HttpBasicConfig setConnectTimeout(int connectTimeout) {
-        this.connectionTimeout = connectTimeout;
+        this.connectTimeout = connectTimeout;
         return this;
     }
 
@@ -152,7 +152,7 @@ public class HttpBasicConfigImpl implements HttpBasicConfig {
 
     @Override
     public int getConnectTimeout() {
-        return connectionTimeout;
+        return connectTimeout;
     }
 
     @Override
@@ -190,7 +190,7 @@ public class HttpBasicConfigImpl implements HttpBasicConfig {
         final int prime = 131;
         int result = 1;
         result = prime * result + connectionRequestTimeout;
-        result = prime * result + connectionTimeout;
+        result = prime * result + connectTimeout;
         result = prime * result + keepAliveDuration;
         result = prime * result + keepAliveMonitorInterval;
         result = prime * result + maxConnectionsPerRoute;
@@ -212,7 +212,7 @@ public class HttpBasicConfigImpl implements HttpBasicConfig {
         if (connectionRequestTimeout != other.connectionRequestTimeout) {
             return false;
         }
-        if (connectionTimeout != other.connectionTimeout) {
+        if (connectTimeout != other.connectTimeout) {
             return false;
         }
         if (keepAliveDuration != other.keepAliveDuration) {
@@ -239,7 +239,7 @@ public class HttpBasicConfigImpl implements HttpBasicConfig {
     @Override
     public String toString() {
         //@formatter:off
-        return "HttpBasicConfig [socketReadTimeout=" + socketReadTimeout + ", connectionTimeout=" + connectionTimeout + ", connectionRequestTimeout=" + connectionRequestTimeout
+        return "HttpBasicConfig [socketReadTimeout=" + socketReadTimeout + ", connectTimeout=" + connectTimeout + ", connectionRequestTimeout=" + connectionRequestTimeout
             + ", maxTotalConnections=" + maxTotalConnections + ", maxConnectionsPerRoute=" + maxConnectionsPerRoute + ", keepAliveDuration=" + keepAliveDuration
             + ", keepAliveMonitorInterval=" + keepAliveMonitorInterval + ", socketBufferSize=" + socketBufferSize + "]";
         //@formatter:on
