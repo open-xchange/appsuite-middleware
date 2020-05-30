@@ -813,7 +813,7 @@ public final class SessionHandler {
             LOG.warn("\tSessionData instance is null.");
             return false;
         }
-        SessionControl sessionControl = sessionData.getSession(sessionId);
+        SessionControl sessionControl = sessionData.getSession(sessionId, false);
         if (null == sessionControl) {
             return false;
         }
@@ -1217,7 +1217,7 @@ public final class SessionHandler {
             return;
         }
         LOG.debug("changeSessionPassword <{}>", sessionid);
-        SessionControl sessionControl = sessionData.getSession(sessionid);
+        SessionControl sessionControl = sessionData.getSession(sessionid, true);
         if (null == sessionControl) {
             throw SessionExceptionCodes.PASSWORD_UPDATE_FAILED.create();
         }
@@ -1433,7 +1433,7 @@ public final class SessionHandler {
             return optSessionFromSessionStorage(sessionId, peek, sessionData);
         }
 
-        SessionControl sessionControl = sessionData.getSession(sessionId);
+        SessionControl sessionControl = sessionData.getSession(sessionId, peek);
         if (considerSessionStorage && null == sessionControl) {
             sessionControl = optSessionFromSessionStorage(sessionId, peek, sessionData);
         }

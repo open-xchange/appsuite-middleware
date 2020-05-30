@@ -97,13 +97,28 @@ public interface SessiondServiceExtended extends SessiondService {
     /**
      * Get the session object related to the given session identifier.
      * <p>
-     * If session has been fetched from session storage, that session will not be added to local SessionD.
+     * If session has been fetched from session storage, that session will not be added to local SessionD. Moreover, session will not be
+     * moved to first session container.
      *
      * @param sessionId The session identifier
      * @return Returns the session or <code>null</code> if no session exists for the given identifier or if the session is expired
      * @see SessiondServiceExtended#getSession(String, boolean)
      */
     Session peekSession(String sessionId);
+
+    /**
+     * Get the session object related to the given session identifier.
+     * <p>
+     * If session has been fetched from session storage, that session will not be added to local SessionD.. Moreover, session will not be
+     * moved to first session container.
+     *
+     * @param sessionId The session identifier
+     * @param considerSessionStorage <code>true</code> to consider session storage for possible distributed session; otherwise
+     *            <code>false</code>
+     * @return Returns the session or <code>null</code> if no session exists for the given identifier or if the session is expired
+     * @see SessiondServiceExtended#getSession(String, boolean)
+     */
+    Session peekSession(String sessionId,  boolean considerSessionStorage);
 
     /**
      * Gets the sessions associated with specified user in given context.
