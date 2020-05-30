@@ -101,18 +101,17 @@ public class DefaultHttpClientConfigProvider extends AbstractHttpClientModifer i
     }
 
     private static String getUserAgent(String userAgent, Optional<VersionService> optionalVersionService) {
-        StringBuilder sb = new StringBuilder();
+        if (!optionalVersionService.isPresent()) {
+            return null == userAgent ? DEFAULT_UA : userAgent;
+        }
+
+        StringBuilder sb = new StringBuilder(64);
         if (null == userAgent) {
-            sb.append(DEFAULT_UA);
-            if (optionalVersionService.isPresent()) {
-                sb.append('/');
-            }
+            sb.append(DEFAULT_UA).append('/');
         } else {
             sb.append(userAgent);
         }
-        if (optionalVersionService.isPresent()) {
-            sb.append(optionalVersionService.get().getVersionString());
-        }
+        sb.append(optionalVersionService.get().getVersionString());
         return sb.toString();
     }
 

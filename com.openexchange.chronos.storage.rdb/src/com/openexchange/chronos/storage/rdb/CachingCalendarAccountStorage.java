@@ -85,15 +85,6 @@ public class CachingCalendarAccountStorage implements CalendarAccountStorage {
     private final Cache cache;
 
     /**
-     * Gets the cache region name.
-     *
-     * @return The cache region name
-     */
-    public static String getRegionName() {
-        return REGION_NAME;
-    }
-
-    /**
      * Initializes a new {@link CachingCalendarAccountStorage}.
      *
      * @param contextId The context identifier
@@ -263,6 +254,16 @@ public class CachingCalendarAccountStorage implements CalendarAccountStorage {
     public CalendarAccount loadAccount(int userId, String providerId) throws OXException {
         //TODO: from cache / put result in cache?
         return delegate.loadAccount(userId, providerId);
+    }
+
+    @Override
+    public List<CalendarAccount> loadAccounts(int userId, String... providerIds) throws OXException {
+        return delegate.loadAccounts(userId, providerIds);
+    }
+
+    @Override
+    public List<CalendarAccount> loadAccounts(String... providerIds) throws OXException {
+        return delegate.loadAccounts(providerIds);
     }
 
     @Override

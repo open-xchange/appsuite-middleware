@@ -111,20 +111,19 @@ public class HistoryUtil {
         LOG.info("Current files missing or have been rotated. Copying installed files to history folder ({})", destFolder.getAbsolutePath());
         if (destFolder.exists()) {
             LOG.debug("Current files already present. Starting to delete them before copying installed files ({}).", destFolder.getAbsolutePath());
-            if (destFolder.delete()) {
-                LOG.debug("Current files deleted successfully ({}).", destFolder.getAbsolutePath());
-            } else {
-                LOG.debug("Could not delete file ({}).", destFolder.getAbsolutePath());
-            }
+            FileUtils.deleteDirectory(destFolder);
         }
         boolean failed = !destFolder.mkdirs();
         if (failed) {
             LOG.error("Unable to create current folder in folder {}", history.getAbsolutePath());
             throw new IOException("Unable to create current folder");
         }
+        destFolder.setWritable(true);
         LOG.debug("Starting to copy installed files to current (targte: {}).", destFolder.getAbsolutePath());
-        FileUtils.copyDirectory(installed, destFolder);
-        LOG.debug("Files copied successfully (target: {}).", destFolder.getAbsolutePath());
+        @SuppressWarnings("null") CopyFileVisitor visitor = new CopyFileVisitor(installed.toPath(), destFolder.toPath());
+        Files.walkFileTree(installed.toPath(), visitor);
+
+        LOG.info("Files copied successfully (target: {}).", destFolder.getAbsolutePath());
     }
 
     /**
@@ -138,13 +137,15 @@ public class HistoryUtil {
         File to = new File(history, "previous");
         LOG.info("Rotating current files to previous. Moving current files to history folder ({})", to.getAbsolutePath());
         if (to.exists()) {
-            LOG.debug("Previous files already present. Starting to delete them before moving current files (target: {}).", to.getAbsolutePath());
+            LOG.info("Previous files already present. Starting to delete them before moving current files (target: {}).", to.getAbsolutePath());
             FileUtils.deleteDirectory(to);
-            LOG.debug("Previous files deleted successfully (target: {}).", to.getAbsolutePath());
+            LOG.info("Previous files deleted successfully (target: {}).", to.getAbsolutePath());
         }
         LOG.debug("Starting to move current files to previous (targte: {}).", to.getAbsolutePath());
-        FileUtils.moveDirectory(from, to);
-        LOG.debug("Files moved successfully (target: {}).", to.getAbsolutePath());
+        @SuppressWarnings("null") CopyFileVisitor visitor = new CopyFileVisitor(from.toPath(), to.toPath());
+        Files.walkFileTree(from.toPath(), visitor);
+        from.delete();
+        LOG.info("Files moved successfully (target: {}).", to.getAbsolutePath());
     }
 
 }

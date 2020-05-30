@@ -167,13 +167,13 @@ public class HistoryActivator extends HousekeepingActivator implements ForcedRel
                 return;
         }
         if (Strings.isEmpty(path) || Strings.isEmpty(installed)) {
-            LOG.debug("The path of either the installed or the history folder is not configured for history {}", history.name());
+            LOG.info("The path of either the installed or the history folder is not configured for history {}", history.name());
             return;
         }
         File historyFolder = new File(path);
         File installedFolder = getInstalledPath(installed, history);
         if (historyFolder.exists() == false || (installedFolder != null && installedFolder.exists() == false)) {
-            LOG.debug("Either history folder or installed folder doesn't exist for history {}", history.name());
+            LOG.info("Either history folder or installed folder doesn't exist for history {}", history.name());
             // History is deactivated
             return;
         }
@@ -201,7 +201,7 @@ public class HistoryActivator extends HousekeepingActivator implements ForcedRel
                 }
             } else {
                 // History is deactivated
-                LOG.debug("Can't find installation folder for history {}", history.name());
+                LOG.info("Can't find installation folder for history {}", history.name());
                 return;
             }
         } catch (IOException e) {

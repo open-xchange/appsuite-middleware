@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,72 +47,71 @@
  *
  */
 
-package com.openexchange.ajax.mail;
+package com.openexchange.appsuite.history.impl;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import com.openexchange.test.concurrent.ParallelSuite;
+import com.openexchange.annotation.NonNull;
+import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Objects;
 
 /**
- * {@link MailTestSuite}
+ * {@link CopyFileVisitor} copies all files and folders from one folder to another
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.4
  */
-@RunWith(ParallelSuite.class)
-@Suite.SuiteClasses({
-    AllTest.class,
-    AttachmentTest.class,
-    ClearTest.class,
-    CopyMailTest.class,
-    CountMailTest.class,
-    ForwardMailTest.class,
-    GetTest.class,
-    ListTest.class,
-    MailSearchTest.class,
-    MoveMailTest.class,
-    NewMailTest.class,
-    MultipleAttachmentTest.class,
-    ReplyAllTest.class,
-    ReplyTest.class,
-    SearchTest.class,
-    SendTest.class,
-    Send2Test.class,
-    UpdateMailTest.class,
-    ViewTest.class,
-    AllAliasTest.class,
-    ListAliasTest.class,
-    GetStructureTest.class,
-    Base64Test.class,
-    AllSeenMailTest.class,
+public class CopyFileVisitor extends SimpleFileVisitor<Path> {
 
-    /* AlwaysTest.class, */
+    final Path source;
+    final Path target;
 
-    Bug12409Test.class,
-    Bug14234Test.class,
-    Bug15608Test.class,
-    Bug15777Test.class,
-    Bug15901Test.class,
-    Bug16087Test.class,
-    Bug16141Test.class,
-    Bug29865Test.class,
-    Bug19696Test.class,
-    Bug30903Test.class,
-    Bug31855Test.class,
-    Bug32355Test.class,
-//    Bug27708Test.class,
-    Bug28913Test.class,
-    Bug29437Test.class,
-    Bug34254Test.class,
-    Bug36333Test.class,
-    Bug37247Test.class,
+    /**
+     * Initializes a new {@link CopyFileVisitor}.
+     *
+     * @param source The source folder
+     * @param target The target folder
+     */
+    public CopyFileVisitor(@NonNull Path source, @NonNull Path target) {
+        Objects.nonNull(source);
+        Objects.nonNull(target);
+        this.source = source;
+        this.target = target;
+    }
 
-    TestEstimateLength.class,
+    @Override
+    public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+        Path newDirectory = target.resolve(source.relativize(dir));
+        copy(dir, newDirectory);
+        return FileVisitResult.CONTINUE;
+    }
 
-    MaxMailSizeTest.class,
-//    MSISDNAddressTest.class, msisdn not supported by mail infrastructure
-    ExamineTest.class,
+    /**
+     * Copies the given path to the target path with attributes and it replaces an existing file/folder if it exists
+     *
+     * @param from The source {@link Path}
+     * @param to The destination {@link Path}
+     * @throws IOException in case of errors
+     */
+    private void copy(Path from, Path to) throws IOException {
+        Files.copy(from, to, StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING);
+    }
 
-})
-public final class MailTestSuite  {
+
+    @Override
+    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+        Path newFile = target.resolve(source.relativize(file));
+        copy(file, newFile);
+        return FileVisitResult.CONTINUE;
+    }
+
+    @Override
+    public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+        return FileVisitResult.CONTINUE;
+    }
 
 }

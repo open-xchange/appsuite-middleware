@@ -139,7 +139,7 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
         }
 
         @Override
-        public String getClientIdPattern() {
+        public @NonNull String getClientIdPattern() {
             return "noop";
         }
     };
