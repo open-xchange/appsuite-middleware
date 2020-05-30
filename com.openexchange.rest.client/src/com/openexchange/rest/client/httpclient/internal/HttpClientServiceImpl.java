@@ -130,8 +130,8 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
 
     static final Logger LOGGER = LoggerFactory.getLogger(HttpClientServiceImpl.class);
 
-    /** Dummy noop wild-card provider */
-    static final WildcardHttpClientConfigProvider NOOP = new WildcardHttpClientConfigProvider() {
+    /** Dummy wild-card provider to signal absent provider */
+    static final WildcardHttpClientConfigProvider ABSENT = new WildcardHttpClientConfigProvider() {
 
         @Override
         public void modify(HttpClientBuilder builder) {
@@ -187,7 +187,7 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
                 @Override
                 public WildcardHttpClientConfigProvider load(String clientId) throws Exception {
                     WildcardHttpClientConfigProvider wildcardProvider = doGetWildcardProvider(clientId);
-                    return wildcardProvider == null ? NOOP : wildcardProvider;
+                    return wildcardProvider == null ? ABSENT : wildcardProvider;
                 }
             });
         //@formatter:on
@@ -722,20 +722,23 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
 
         @Override
         public ManagedHttpClientImpl call() throws OXException {
+            String httpClientId = this.httpClientId;
+
             final HttpBasicConfig config;
             final HttpClientConfigProvider provider;
-
-            SpecificHttpClientConfigProvider specificProvider = specificProviders.get(httpClientId);
-            if (specificProvider != null) {
-                provider = specificProvider;
-                config = adjustConfig(httpClientId, specificProvider.configureHttpBasicConfig(createNewDefaultConfig()));
-            } else {
-                WildcardHttpClientConfigProvider wildcardProvider = getWildcardProvider(httpClientId);
-                if (wildcardProvider == null) {
-                    wildcardProvider = leftoverProvider;
+            {
+                SpecificHttpClientConfigProvider specificProvider = specificProviders.get(httpClientId);
+                if (specificProvider != null) {
+                    provider = specificProvider;
+                    config = adjustConfig(httpClientId, specificProvider.configureHttpBasicConfig(createNewDefaultConfig()));
+                } else {
+                    WildcardHttpClientConfigProvider wildcardProvider = getWildcardProvider(httpClientId);
+                    if (wildcardProvider == null) {
+                        wildcardProvider = leftoverProvider;
+                    }
+                    provider = wildcardProvider;
+                    config = adjustConfig(httpClientId, wildcardProvider.configureHttpBasicConfig(httpClientId, createNewDefaultConfig()));
                 }
-                provider = wildcardProvider;
-                config = adjustConfig(httpClientId, wildcardProvider.configureHttpBasicConfig(httpClientId, createNewDefaultConfig()));
             }
 
             ClientConnectionManager ccm = initializeClientConnectionManager(httpClientId, config);
@@ -750,7 +753,7 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
 
     WildcardHttpClientConfigProvider getWildcardProvider(String clientId) {
         WildcardHttpClientConfigProvider wildcardProvider = wildcardProvidersCache.getUnchecked(clientId);
-        return NOOP == wildcardProvider ? null : wildcardProvider;
+        return ABSENT == wildcardProvider ? null : wildcardProvider;
     }
 
     WildcardHttpClientConfigProvider doGetWildcardProvider(String clientId) { // Invoked from CacheLoader
