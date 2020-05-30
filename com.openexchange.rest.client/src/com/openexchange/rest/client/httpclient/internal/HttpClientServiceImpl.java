@@ -361,7 +361,7 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
             .build();
         //@formatter:on
 
-        ClientConnectionManager ccm = new ClientConnectionManager(clientId, config.getKeepAliveMonitorInterval(), socketFactoryRegistry);
+        ClientConnectionManager ccm = new ClientConnectionManager(clientId, config.getConnectTimeout(), config.getKeepAliveMonitorInterval(), socketFactoryRegistry);
         ccm.setDefaultMaxPerRoute(config.getMaxConnectionsPerRoute());
         ccm.setMaxTotal(config.getMaxTotalConnections());
         ccm.setIdleConnectionCloser(new IdleConnectionCloser(ccm, config.getKeepAliveDuration()));
