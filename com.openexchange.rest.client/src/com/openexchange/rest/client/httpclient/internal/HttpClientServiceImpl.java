@@ -713,7 +713,7 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
 
     private class ManagedHttpClientImplLoader implements Callable<ManagedHttpClientImpl> {
 
-        protected final String httpClientId;
+        private final String httpClientId;
 
         ManagedHttpClientImplLoader(String httpClientId) {
             super();
