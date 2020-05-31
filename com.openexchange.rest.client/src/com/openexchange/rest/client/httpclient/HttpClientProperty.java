@@ -25,7 +25,7 @@ public enum HttpClientProperty implements Property {
     DEFAULT_SOCKET_BUFFER_SIZE("socketBufferSize", I(8192), (config, in) -> config.setSocketBufferSize(i(in)));
 
     /** The wild-card name for the properties */
-    public final static String SERVICE_IDENTIFIER = "serviceIdentifer";
+    public final static String SERVICE_IDENTIFIER = "serviceIdentifier";
 
     /** The property name prefix */
     public final static String PREFIX = "com.openenexchange.httpclient.";

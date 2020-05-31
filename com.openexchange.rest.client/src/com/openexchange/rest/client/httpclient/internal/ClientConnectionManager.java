@@ -71,7 +71,7 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.protocol.HttpContext;
 
 /**
- * 
+ *
  * {@link ClientConnectionManager} - Wraps the {@link PoolingHttpClientConnectionManager} and adds monitoring functionality to it
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
@@ -84,19 +84,22 @@ public class ClientConnectionManager extends PoolingHttpClientConnectionManager 
     private final int keepAliveMonitorInterval;
     private final AtomicBoolean shuttingDown;
     private final AtomicBoolean metricsInitialized;
+    private final int defaultConnectTimeout;
     private volatile IdleConnectionCloser idleConnectionCloser;
 
     /**
      * Initializes a new {@link ClientConnectionManager}.
-     * 
+     *
      * @param clientName A unique client name
+     * @param defaultConnectTimeout The default connect timeout to apply or <code>0</code> (zero) to have no connect timeout
      * @param keepAliveMonitorInterval The amount of time to periodically run the {@link IdleConnectionCloser}
      * @param socketFactoryRegistry For super class
      */
-    public ClientConnectionManager(String clientName, int keepAliveMonitorInterval, Registry<ConnectionSocketFactory> socketFactoryRegistry) {
+    public ClientConnectionManager(String clientName, int defaultConnectTimeout, int keepAliveMonitorInterval, Registry<ConnectionSocketFactory> socketFactoryRegistry) {
         super(socketFactoryRegistry);
         this.clientName = clientName;
         this.keepAliveMonitorInterval = keepAliveMonitorInterval;
+        this.defaultConnectTimeout = defaultConnectTimeout;
         shuttingDown = new AtomicBoolean(false);
         metricsInitialized = new AtomicBoolean(false);
     }
@@ -175,7 +178,7 @@ public class ClientConnectionManager extends PoolingHttpClientConnectionManager 
     @Override
     public void connect(HttpClientConnection managedConn, HttpRoute route, int connectTimeout, HttpContext context) throws IOException {
         try {
-            super.connect(managedConn, route, connectTimeout, context);
+            super.connect(managedConn, route, connectTimeout > 0 ? connectTimeout : defaultConnectTimeout, context);
         } catch (ConnectTimeoutException e) {
             getConnectTimeoutCounter(clientName).increment();
             throw e;

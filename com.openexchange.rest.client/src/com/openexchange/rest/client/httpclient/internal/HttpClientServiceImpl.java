@@ -130,8 +130,8 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
 
     static final Logger LOGGER = LoggerFactory.getLogger(HttpClientServiceImpl.class);
 
-    /** Dummy noop wild-card provider */
-    static final WildcardHttpClientConfigProvider NOOP = new WildcardHttpClientConfigProvider() {
+    /** Dummy wild-card provider to signal absent provider */
+    static final WildcardHttpClientConfigProvider ABSENT = new WildcardHttpClientConfigProvider() {
 
         @Override
         public void modify(HttpClientBuilder builder) {
@@ -187,7 +187,7 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
                 @Override
                 public WildcardHttpClientConfigProvider load(String clientId) throws Exception {
                     WildcardHttpClientConfigProvider wildcardProvider = doGetWildcardProvider(clientId);
-                    return wildcardProvider == null ? NOOP : wildcardProvider;
+                    return wildcardProvider == null ? ABSENT : wildcardProvider;
                 }
             });
         //@formatter:on
@@ -361,7 +361,7 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
             .build();
         //@formatter:on
 
-        ClientConnectionManager ccm = new ClientConnectionManager(clientId, config.getKeepAliveMonitorInterval(), socketFactoryRegistry);
+        ClientConnectionManager ccm = new ClientConnectionManager(clientId, config.getConnectTimeout(), config.getKeepAliveMonitorInterval(), socketFactoryRegistry);
         ccm.setDefaultMaxPerRoute(config.getMaxConnectionsPerRoute());
         ccm.setMaxTotal(config.getMaxTotalConnections());
         ccm.setIdleConnectionCloser(new IdleConnectionCloser(ccm, config.getKeepAliveDuration()));
@@ -452,21 +452,20 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
     HttpBasicConfig adjustConfig(String clientId, HttpBasicConfig httpBasicConfig) {
         ConfigurationService configService = serviceLookup.getOptionalService(ConfigurationService.class);
         if (null != configService) {
+            Map<String, String> optionals = Collections.singletonMap(HttpClientProperty.SERVICE_IDENTIFIER, clientId);
             for (HttpClientProperty property : HttpClientProperty.values()) {
-                adjustConfig(configService, clientId, property, httpBasicConfig);
+                adjustConfig(property, httpBasicConfig, optionals, configService);
             }
         }
         return httpBasicConfig;
     }
 
-    private void adjustConfig(ConfigurationService configService, String clientId, HttpClientProperty property, HttpBasicConfig httpBasicConfig) {
-        Map<String, String> map = Collections.singletonMap(HttpClientProperty.SERVICE_IDENTIFIER, clientId);
-        String propertyName = property.getFQPropertyName(map);
+    private static void adjustConfig(HttpClientProperty property, HttpBasicConfig httpBasicConfig, Map<String, String> optionals, ConfigurationService configService) {
+        String propertyName = property.getFQPropertyName(optionals);
         String value = configService.getProperty(propertyName);
-
         if (Strings.isNotEmpty(value)) {
             try {
-                property.setInConfig(httpBasicConfig, Integer.valueOf(value));
+                property.setInConfig(httpBasicConfig, Integer.valueOf(value.trim()));
             } catch (NumberFormatException e) {
                 LOGGER.info("Unable to parse value {} for property {}", value, propertyName, e);
             }
@@ -714,7 +713,7 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
 
     private class ManagedHttpClientImplLoader implements Callable<ManagedHttpClientImpl> {
 
-        protected final String httpClientId;
+        private final String httpClientId;
 
         ManagedHttpClientImplLoader(String httpClientId) {
             super();
@@ -723,20 +722,23 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
 
         @Override
         public ManagedHttpClientImpl call() throws OXException {
+            String httpClientId = this.httpClientId;
+
             final HttpBasicConfig config;
             final HttpClientConfigProvider provider;
-
-            SpecificHttpClientConfigProvider specificProvider = specificProviders.get(httpClientId);
-            if (specificProvider != null) {
-                provider = specificProvider;
-                config = adjustConfig(httpClientId, specificProvider.configureHttpBasicConfig(createNewDefaultConfig()));
-            } else {
-                WildcardHttpClientConfigProvider wildcardProvider = getWildcardProvider(httpClientId);
-                if (wildcardProvider == null) {
-                    wildcardProvider = leftoverProvider;
+            {
+                SpecificHttpClientConfigProvider specificProvider = specificProviders.get(httpClientId);
+                if (specificProvider != null) {
+                    provider = specificProvider;
+                    config = adjustConfig(httpClientId, specificProvider.configureHttpBasicConfig(createNewDefaultConfig()));
+                } else {
+                    WildcardHttpClientConfigProvider wildcardProvider = getWildcardProvider(httpClientId);
+                    if (wildcardProvider == null) {
+                        wildcardProvider = leftoverProvider;
+                    }
+                    provider = wildcardProvider;
+                    config = adjustConfig(httpClientId, wildcardProvider.configureHttpBasicConfig(httpClientId, createNewDefaultConfig()));
                 }
-                provider = wildcardProvider;
-                config = adjustConfig(httpClientId, wildcardProvider.configureHttpBasicConfig(httpClientId, createNewDefaultConfig()));
             }
 
             ClientConnectionManager ccm = initializeClientConnectionManager(httpClientId, config);
@@ -751,7 +753,7 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
 
     WildcardHttpClientConfigProvider getWildcardProvider(String clientId) {
         WildcardHttpClientConfigProvider wildcardProvider = wildcardProvidersCache.getUnchecked(clientId);
-        return NOOP == wildcardProvider ? null : wildcardProvider;
+        return ABSENT == wildcardProvider ? null : wildcardProvider;
     }
 
     WildcardHttpClientConfigProvider doGetWildcardProvider(String clientId) { // Invoked from CacheLoader

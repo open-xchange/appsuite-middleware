@@ -80,7 +80,12 @@ public interface Property {
      */
     default String getFQPropertyName(Map<String, String> optionals) {
         String fqn = getFQPropertyName();
-        if (null == optionals || (fqn.indexOf('[') < 0) || optionals.isEmpty()) {
+        if (null == optionals) {
+            // No need to change anything
+            return fqn;
+        }
+        int bracketStart = fqn.indexOf('[');
+        if (bracketStart < 0 || optionals.isEmpty()) {
             // No need to change anything
             return fqn;
         }
@@ -88,7 +93,7 @@ public interface Property {
         // Contains optional parameters
         int length = fqn.length();
         StringBuilder builder = null;
-        for (int i = 0; i < length; i++) {
+        for (int i = bracketStart; i < length; i++) {
             char c = fqn.charAt(i);
             if (c == '[') {
                 // Find associated closing bracket
@@ -153,7 +158,7 @@ public interface Property {
         if (null == defaultValue) {
             return null;
         }
-        
+
         /*
          * Check this order to be able to cast to sub-classes, too
          */
