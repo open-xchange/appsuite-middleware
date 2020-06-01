@@ -52,7 +52,7 @@ package com.openexchange.config.lean;
 import java.util.Map;
 
 /**
- * {@link Property} - Describes a lean property with a fully qualified name and a default value
+ * {@link Property} - Describes a lean property with a fully qualified name and a default value.
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
@@ -60,33 +60,34 @@ import java.util.Map;
 public interface Property {
 
     /**
-     * Gets the fully qualified name of the {@link Property}
+     * Gets the fully qualified property name as-is.
      *
-     * @return the fully qualified name of the {@link Property}
+     * @return The fully qualified property name
      */
     String getFQPropertyName();
 
     /**
-     * Gets the fully qualified name of the {@link Property}
+     * Gets the fully qualified property name optionally replacing place-holders in brackets with values from given map (if any given).
+     * <p>
+     * <b>Example</b>:<br>
+     * The fully qualified property name <code>"com.openexchange.test.[replaceMe]"</code> is returned as
+     * <code>"com.openexchange.test.success"</code> if the map contains a key called <code>"replaceMe"</code> with the value
+     * <code>"success"</code>. If the map does not contain such a key, <code>"com.openexchange.test.[replaceMe]"</code> is returned.
      *
-     * @param optionals A {@link Map} containing values for optional parts in the fully
-     *            qualified name. E.g. <code>com.openexchange.test.[replaceMe]</code>
-     *            is returned as <code>com.openexchange.test.success</code> if the Map
-     *            contains a key called <code>replaceMe</code> with the value
-     *            <code>success</code>. If the Map does not contain the key
-     *            <code>com.openexchange.test.[replaceMe]</code> is returned.
-     *
-     * @return the fully qualified name of the {@link Property}
+     * @param optionals A map containing values for optional parts in the fully qualified name
+     * @return The fully qualified property name with place-holders replaced
      */
     default String getFQPropertyName(Map<String, String> optionals) {
-        String fqn = getFQPropertyName();
-        if (null == optionals) {
+        if (null == optionals || optionals.isEmpty()) {
             // No need to change anything
-            return fqn;
+            return getFQPropertyName();
         }
+
+        // Check for presence of opening bracket '['
+        String fqn = getFQPropertyName();
         int bracketStart = fqn.indexOf('[');
-        if (bracketStart < 0 || optionals.isEmpty()) {
-            // No need to change anything
+        if (bracketStart < 0) {
+            // Does not contain an opening bracket '['
             return fqn;
         }
 
@@ -134,37 +135,36 @@ public interface Property {
     }
 
     /**
-     * Returns the default value of the {@link Property}
+     * Gets the default value.
      *
-     * @return The default value of the {@link Property}
+     * @return The default value
      */
     Object getDefaultValue();
 
     /**
-     * Returns the default value of the {@link Property}
+     * Gets the default value.
      *
-     * @param clazz The class of the {@link Property} which it will be casted to.
-     * @return the default value of the {@link Property}
+     * @param clazz The type of the property's value to which it will be casted
+     * @return The default value
      * @throws IllegalArgumentException If specified type does not match the one of the default value
      */
     default <T extends Object> T getDefaultValue(Class<T> clazz) throws IllegalArgumentException {
-        /*
-         * Check data
-         */
+        // Check type
         if (null == clazz) {
-            return null;
+            throw new IllegalArgumentException("Type must not be null");
         }
+
+        // Grab default value
         Object defaultValue = getDefaultValue();
         if (null == defaultValue) {
             return null;
         }
 
-        /*
-         * Check this order to be able to cast to sub-classes, too
-         */
-        if (clazz.isAssignableFrom(defaultValue.getClass())) {
+        // Check this order to be able to cast to sub-classes, too
+        try {
             return clazz.cast(defaultValue);
+        } catch (ClassCastException e) {
+            throw new IllegalArgumentException("The object cannot be converted to the specified type: " + clazz.getCanonicalName(), e);
         }
-        throw new IllegalArgumentException("The object cannot be converted to the specified type '" + clazz.getCanonicalName() + "'");
     }
 }
